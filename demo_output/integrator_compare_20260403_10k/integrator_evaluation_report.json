@@ -1,0 +1,20 @@
+{
+  "case": "c:\\Users\\user\\Desktop\\particle_simulation\\examples\\comsol_from_data_2d_10k",
+  "integrators": [
+    "drag_relaxation",
+    "etd",
+    "etd2"
+  ],
+  "repeats_per_integrator": 3,
+  "production_dt_s": 0.01,
+  "reference": {
+    "integrator": "etd2",
+    "dt_s": 0.0025,
+    "elapsed_s": 44.35059649999948,
+    "stuck_count": 1500,
+    "active_count": 8500
+  },
+  "summary_file": "c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_compare_20260403_10k\\integrator_compare_summary.csv",
+  "raw_file": "c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_compare_20260403_10k\\integrator_compare_raw.csv",
+  "accuracy_file": "c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_compare_20260403_10k\\integrator_accuracy_vs_reference.csv"
+}

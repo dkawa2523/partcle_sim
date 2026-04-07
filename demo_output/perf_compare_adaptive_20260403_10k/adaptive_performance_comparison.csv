@@ -1,0 +1,3 @@
+run,adaptive_substep_enabled,elapsed_s,integrator,particle_count,stuck_count,escaped_count,absorbed_count,active_count,primary_hit_count,edge_hit_count,bisection_fallback_count,unresolved_crossing_count,max_hits_reached_count,collision_reintegrated_segments_count,adaptive_substep_segments_count,adaptive_substep_trigger_count
+adaptive_off,0,20.604222400000253,drag_relaxation,10000,1811,0,0,8189,15551,15551,17,0,2067,11570,0,0
+adaptive_on,1,22.296753999999964,drag_relaxation,10000,1549,0,0,8451,13533,13533,21,0,1761,10072,8943216,558951

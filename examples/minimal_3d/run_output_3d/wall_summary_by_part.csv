@@ -1,0 +1,7 @@
+part_id,outcome,wall_mode,count
+10,reflected_specular,specular,380
+20,reflected_specular,specular,380
+20,reflected_specular,mixed_specular_diffuse,258
+20,reflected_diffuse,mixed_specular_diffuse,92
+10,reflected_specular,mixed_specular_diffuse,35
+10,reflected_diffuse,mixed_specular_diffuse,10

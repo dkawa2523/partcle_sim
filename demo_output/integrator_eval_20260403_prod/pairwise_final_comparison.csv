@@ -1,0 +1,4 @@
+﻿"method_a","method_b","particle_pairs","class_match_ratio","mean_position_delta_m","mean_velocity_delta_mps"
+"drag_relaxation","etd","10000","0.9969","1.797E-06","0.000174936"
+"drag_relaxation","etd2","10000","0.9513","0.000268243","0.000887414"
+"etd","etd2","10000","0.9506","0.000268102","0.000896126"

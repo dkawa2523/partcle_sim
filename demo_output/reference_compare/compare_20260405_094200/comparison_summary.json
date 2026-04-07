@@ -1,0 +1,37 @@
+{
+  "timestamp": "20260405_094200",
+  "reference": {
+    "run": "reference",
+    "config": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\comsol_from_data_2d_10k\\run_config_eval_ref_etd2.yaml",
+    "runtime_s": 82.46471729999757,
+    "particle_count": 10000,
+    "released_count": 10000,
+    "stuck_count": 1506,
+    "absorbed_count": 0,
+    "escaped_count": 0,
+    "integrator": "etd2",
+    "unresolved_crossing_count": 0,
+    "max_hits_reached_count": 1675,
+    "primary_hit_count": 12776,
+    "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\reference_compare\\compare_20260405_094200\\reference"
+  },
+  "runs": [
+    {
+      "runtime_s": 47.88169160002144,
+      "particle_count": 10000,
+      "released_count": 10000,
+      "stuck_count": 1427,
+      "absorbed_count": 0,
+      "escaped_count": 0,
+      "integrator": "etd2",
+      "unresolved_crossing_count": 0,
+      "max_hits_reached_count": 262,
+      "primary_hit_count": 11900,
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\reference_compare\\compare_20260405_094200\\etd2_stable",
+      "run": "etd2_stable",
+      "config": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\comsol_from_data_2d_10k\\run_config_prod_etd2_stable.yaml",
+      "class_match_ratio_vs_reference": 0.9855,
+      "compared_particles_vs_reference": 10000
+    }
+  ]
+}

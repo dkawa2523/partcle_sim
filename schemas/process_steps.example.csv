@@ -1,0 +1,4 @@
+step_id,step_name,start_s,end_s,step_kind,recipe_name,physics_flow_scale,physics_drag_tau_scale,wall_mode,wall_diffuse_fraction,source_law_override,source_speed_scale,source_event_gain_scale,output_segment_name,output_save_every_override,output_save_positions,output_write_wall_events,output_write_diagnostics
+1,etch,0.0,0.8,plasma_on,demo_recipe,1.1,1.0,mixed_specular_diffuse,0.15,flake_burst_material,1.15,1.20,etch,1,1,1,1
+2,purge,0.8,2.0,purge,demo_recipe,0.8,1.2,specular,0.0,resuspension_shear_material,0.85,0.90,purge,2,1,0,1
+3,afterglow,2.0,3.0,plasma_off,demo_recipe,0.3,1.0,stick,0.0,thermal_reemission_source_material,0.60,0.80,afterglow,1,0,0,1

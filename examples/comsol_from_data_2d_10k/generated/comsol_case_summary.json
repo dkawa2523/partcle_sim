@@ -1,0 +1,54 @@
+{
+  "source_mphtxt": "C:\\Users\\user\\Desktop\\particle_simulation\\data\\argon_gec_ccp_base2.mphtxt",
+  "sdim": 2,
+  "vertex_count": 1520,
+  "edge_count": 188,
+  "quad_count": 1425,
+  "derived_boundary_edge_count": 188,
+  "boundary_part_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "bounds": {
+    "xmin": 0.0,
+    "xmax": 0.10160000000000001,
+    "ymin": -0.0381,
+    "ymax": 0.0635
+  },
+  "generated_files": {
+    "geometry_npz": "generated\\comsol_geometry_2d.npz",
+    "run_config": "run_config.yaml",
+    "field_npz": "generated\\comsol_field_2d.npz",
+    "field_mesh_npz": "generated\\comsol_field_mesh_2d.npz"
+  },
+  "grid_axes": {
+    "x_count": 205,
+    "y_count": 205
+  },
+  "geometry_mode": "boundary_edges_plus_diagnostic_sdf",
+  "field_mode": "validated_export_bundle",
+  "field_summary": {
+    "mode": "validated_export_bundle",
+    "bundle_path": "C:\\Users\\user\\Desktop\\particle_simulation\\data\\regridded_repo_field_bundle_argon_gec_ccp_base2_2d.npz",
+    "quantities": [
+      "mu",
+      "tauw",
+      "u_tau",
+      "ux",
+      "uy"
+    ],
+    "mesh_field_path": "generated\\comsol_field_mesh_2d.npz"
+  },
+  "diagnostic_grid_spacing_m": 0.0005,
+  "note": "COMSOL geometry is extracted from mphtxt edges/quads. Field data must come from a validated export bundle."
+}

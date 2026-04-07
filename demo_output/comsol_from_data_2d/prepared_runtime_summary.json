@@ -1,0 +1,116 @@
+{
+  "spatial_dim": 2,
+  "coordinate_system": "cartesian_xy",
+  "particles": 24,
+  "has_geometry_provider": true,
+  "has_field_provider": true,
+  "has_materials": true,
+  "has_walls": true,
+  "has_source_events": true,
+  "has_compiled_source_events": true,
+  "time_interpolation": "linear",
+  "gas": {
+    "temperature_K": 320.0,
+    "dynamic_viscosity_Pas": 1.8e-05,
+    "density_kgm3": 1.2
+  },
+  "process_steps": {
+    "has_process_steps": true,
+    "step_count": 2,
+    "step_names": [
+      "ignite",
+      "sustain"
+    ],
+    "segments": [
+      "ignite",
+      "sustain"
+    ],
+    "wall_modes": {
+      "ignite": "inherit",
+      "sustain": "mixed_specular_diffuse"
+    },
+    "source_law_overrides": {
+      "ignite": "",
+      "sustain": ""
+    },
+    "source_speed_scales": {
+      "ignite": 1.0,
+      "sustain": 1.0
+    },
+    "physics_flow_scales": {
+      "ignite": 1.0,
+      "sustain": 0.8
+    },
+    "physics_drag_tau_scales": {
+      "ignite": 1.0,
+      "sustain": 1.1
+    },
+    "wall_vcrit_scales": {
+      "ignite": 1.0,
+      "sustain": 1.0
+    },
+    "output_save_every_overrides": {
+      "ignite": 0,
+      "sustain": 1
+    },
+    "output_save_positions": {
+      "ignite": 1,
+      "sustain": 1
+    },
+    "output_write_wall_events": {
+      "ignite": 1,
+      "sustain": 1
+    },
+    "output_write_diagnostics": {
+      "ignite": 1,
+      "sustain": 1
+    }
+  },
+  "wall_catalog": {
+    "has_wall_catalog": true,
+    "wall_part_count": 12,
+    "default_law": "specular",
+    "part_laws": {
+      "1": "specular",
+      "2": "mixed_specular_diffuse",
+      "3": "specular",
+      "4": "mixed_specular_diffuse",
+      "5": "specular",
+      "6": "mixed_specular_diffuse",
+      "7": "specular",
+      "8": "mixed_specular_diffuse",
+      "9": "specular",
+      "10": "mixed_specular_diffuse",
+      "11": "specular",
+      "12": "mixed_specular_diffuse"
+    }
+  },
+  "physics_catalog": {
+    "has_physics_catalog": true,
+    "integrator": "drag_relaxation",
+    "base_flow_scale": 1.0,
+    "base_drag_tau_scale": 1.0,
+    "base_body_accel_scale": 1.0,
+    "body_acceleration": [
+      0.0,
+      0.0
+    ],
+    "min_tau_p_s": 1e-05
+  },
+  "source_model_summary": {
+    "law_usage": {
+      "explicit_csv": 24
+    },
+    "mean_initial_speed_mps": 0.0,
+    "mean_source_delta_speed_mps": 0.0,
+    "particle_count": 24,
+    "suppressed_particle_count": 0,
+    "step_usage": {}
+  },
+  "event_summary": {
+    "matched_event_counts": {
+      "ignite_boost": 24
+    },
+    "total_matches": 24
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "spatial_dim": 2,
+  "coordinate_system": "cartesian_xy",
+  "particles": 10000,
+  "has_geometry_provider": true,
+  "has_field_provider": true,
+  "has_materials": true,
+  "has_walls": true,
+  "has_source_events": true,
+  "has_compiled_source_events": true,
+  "time_interpolation": "linear",
+  "gas": {
+    "temperature_K": 320.0,
+    "dynamic_viscosity_Pas": 1.8e-05,
+    "density_kgm3": 1.2
+  },
+  "process_steps": {
+    "has_process_steps": true,
+    "step_count": 1,
+    "step_names": [
+      "run"
+    ],
+    "segments": [
+      "run"
+    ],
+    "wall_modes": {
+      "run": "inherit"
+    },
+    "source_law_overrides": {
+      "run": ""
+    },
+    "source_speed_scales": {
+      "run": 1.0
+    },
+    "physics_flow_scales": {
+      "run": 1.0
+    },
+    "physics_drag_tau_scales": {
+      "run": 1.0
+    },
+    "wall_vcrit_scales": {
+      "run": 1.0
+    },
+    "output_save_every_overrides": {
+      "run": 0
+    },
+    "output_save_positions": {
+      "run": 1
+    },
+    "output_write_wall_events": {
+      "run": 1
+    },
+    "output_write_diagnostics": {
+      "run": 1
+    }
+  },
+  "wall_catalog": {
+    "has_wall_catalog": true,
+    "wall_part_count": 12,
+    "default_law": "specular",
+    "part_laws": {
+      "1": "mixed_specular_diffuse",
+      "2": "mixed_specular_diffuse",
+      "3": "mixed_specular_diffuse",
+      "4": "mixed_specular_diffuse",
+      "5": "mixed_specular_diffuse",
+      "6": "mixed_specular_diffuse",
+      "7": "mixed_specular_diffuse",
+      "8": "mixed_specular_diffuse",
+      "9": "mixed_specular_diffuse",
+      "10": "mixed_specular_diffuse",
+      "11": "mixed_specular_diffuse",
+      "12": "mixed_specular_diffuse"
+    }
+  },
+  "physics_catalog": {
+    "has_physics_catalog": true,
+    "integrator": "etd2",
+    "base_flow_scale": 1.0,
+    "base_drag_tau_scale": 1.0,
+    "base_body_accel_scale": 1.0,
+    "body_acceleration": [
+      0.0,
+      0.0
+    ],
+    "min_tau_p_s": 1e-05
+  },
+  "source_model_summary": {
+    "law_usage": {
+      "explicit_csv": 10000
+    },
+    "mean_initial_speed_mps": 0.0,
+    "mean_source_delta_speed_mps": 0.0,
+    "particle_count": 10000,
+    "suppressed_particle_count": 0,
+    "step_usage": {}
+  },
+  "event_summary": {
+    "matched_event_counts": {
+      "start_boost": 10000
+    },
+    "total_matches": 10000
+  }
+}

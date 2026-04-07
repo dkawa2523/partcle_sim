@@ -1,0 +1,15 @@
+{
+  "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\comsol_from_data_2d_10k",
+  "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\comsol_from_data_2d_10k_prod_20260402_planfix",
+  "visuals_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\comsol_from_data_2d_10k_prod_20260402_planfix\\visuals",
+  "n_particles": 10000,
+  "sample_trajectories": 600,
+  "domain_region_map_status": "not_implemented",
+  "files": [
+    "mechanics_distribution_on_geometry.csv",
+    "geometry_layout_part_ids.png",
+    "mechanics_maps_with_geometry.png",
+    "trajectories_geometry_flow_overlay.png",
+    "final_states_over_geometry.png"
+  ]
+}

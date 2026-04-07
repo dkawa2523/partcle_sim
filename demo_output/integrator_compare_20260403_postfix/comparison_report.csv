@@ -1,0 +1,8 @@
+integrator,released,stuck,absorbed,escaped,active,primary_hit_count,bisection_fallback_count,unresolved_crossing_count,etd2_polyline_checks_count,etd2_midpoint_outside_count,etd2_polyline_hit_count,etd2_polyline_fallback_count,class_match_ratio_vs_ref,position_error_mean_m,position_error_p95_m,position_error_max_m,primary_hit_count_ratio_vs_ref,stuck_count_rel_error_vs_ref,absorbed_count_rel_error_vs_ref
+drag_relaxation,10000.0,1811.0,0.0,0.0,8189.0,15551.0,17.0,0.0,0.0,0.0,0.0,0.0,,,,,,,
+etd,10000.0,1816.0,0.0,0.0,8184.0,15316.0,53.0,0.0,0.0,0.0,0.0,0.0,,,,,,,
+etd2,10000.0,1358.0,0.0,0.0,8642.0,10811.0,15.0,0.0,11130.0,2215.0,10811.0,15.0,,,,,,,
+etd2_ref_dt0025,10000.0,1498.0,0.0,0.0,8502.0,12501.0,68.0,0.0,12657.0,2553.0,12501.0,68.0,,,,,,,
+drag_relaxation_vs_ref,,,,,,,,,,,,,0.9639,0.00030625682495185827,0.000549753978363402,0.01893835537242857,1.243980481561475,0.2089452603471295,0.0
+etd_vs_ref,,,,,,,,,,,,,0.964,0.00030557821364758273,0.0005489362629990043,0.018938722024711932,1.2251819854411647,0.21228304405874499,0.0
+etd2_vs_ref,,,,,,,,,,,,,0.9812,0.00010069070888967533,0.00034384116905545166,0.003226910413135882,0.8648108151347892,0.09345794392523364,0.0

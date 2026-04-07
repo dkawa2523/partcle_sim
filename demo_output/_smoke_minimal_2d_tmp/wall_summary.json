@@ -1,0 +1,14 @@
+{
+  "total_wall_interactions": 170,
+  "by_part": {
+    "10": {
+      "reflected_specular": 170
+    }
+  },
+  "by_outcome": {
+    "reflected_specular": 170
+  },
+  "by_wall_mode": {
+    "specular": 170
+  }
+}

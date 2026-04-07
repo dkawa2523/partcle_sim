@@ -1,0 +1,2 @@
+[console_scripts]
+particle-tracer-run = run_from_yaml:main

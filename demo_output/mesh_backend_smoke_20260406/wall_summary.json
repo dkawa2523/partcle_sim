@@ -1,0 +1,43 @@
+{
+  "total_wall_interactions": 1921,
+  "by_part": {
+    "11": {
+      "reflected_specular": 51,
+      "reflected_diffuse": 23,
+      "stuck": 18
+    },
+    "3": {
+      "reflected_specular": 288,
+      "reflected_diffuse": 84,
+      "stuck": 104
+    },
+    "6": {
+      "reflected_diffuse": 185,
+      "reflected_specular": 385,
+      "stuck": 40
+    },
+    "12": {
+      "reflected_specular": 102,
+      "reflected_diffuse": 44,
+      "stuck": 8
+    },
+    "1": {
+      "reflected_specular": 350,
+      "reflected_diffuse": 105,
+      "stuck": 121
+    },
+    "7": {
+      "stuck": 5,
+      "reflected_specular": 7,
+      "reflected_diffuse": 1
+    }
+  },
+  "by_outcome": {
+    "reflected_specular": 1183,
+    "reflected_diffuse": 442,
+    "stuck": 296
+  },
+  "by_wall_mode": {
+    "mixed_specular_diffuse": 1921
+  }
+}

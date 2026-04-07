@@ -1,0 +1,121 @@
+{
+  "runs": {
+    "drag_relaxation": {
+      "counts": {
+        "released": 10000,
+        "stuck": 1811,
+        "absorbed": 0,
+        "escaped": 0,
+        "active": 8189
+      },
+      "diag_subset": {
+        "primary_hit_count": 15551,
+        "edge_hit_count": 15551,
+        "triangle_hit_count": 0,
+        "bisection_fallback_count": 17,
+        "unresolved_crossing_count": 0,
+        "collision_reintegrated_segments_count": 11570,
+        "adaptive_substep_segments_count": 0,
+        "etd2_polyline_checks_count": 0,
+        "etd2_midpoint_outside_count": 0,
+        "etd2_polyline_hit_count": 0,
+        "etd2_polyline_fallback_count": 0
+      }
+    },
+    "etd": {
+      "counts": {
+        "released": 10000,
+        "stuck": 1816,
+        "absorbed": 0,
+        "escaped": 0,
+        "active": 8184
+      },
+      "diag_subset": {
+        "primary_hit_count": 15316,
+        "edge_hit_count": 15316,
+        "triangle_hit_count": 0,
+        "bisection_fallback_count": 53,
+        "unresolved_crossing_count": 0,
+        "collision_reintegrated_segments_count": 11423,
+        "adaptive_substep_segments_count": 0,
+        "etd2_polyline_checks_count": 0,
+        "etd2_midpoint_outside_count": 0,
+        "etd2_polyline_hit_count": 0,
+        "etd2_polyline_fallback_count": 0
+      }
+    },
+    "etd2": {
+      "counts": {
+        "released": 10000,
+        "stuck": 1358,
+        "absorbed": 0,
+        "escaped": 0,
+        "active": 8642
+      },
+      "diag_subset": {
+        "primary_hit_count": 10811,
+        "edge_hit_count": 10811,
+        "triangle_hit_count": 0,
+        "bisection_fallback_count": 15,
+        "unresolved_crossing_count": 0,
+        "collision_reintegrated_segments_count": 7985,
+        "adaptive_substep_segments_count": 0,
+        "etd2_polyline_checks_count": 11130,
+        "etd2_midpoint_outside_count": 2215,
+        "etd2_polyline_hit_count": 10811,
+        "etd2_polyline_fallback_count": 15
+      }
+    },
+    "etd2_ref_dt0025": {
+      "counts": {
+        "released": 10000,
+        "stuck": 1498,
+        "absorbed": 0,
+        "escaped": 0,
+        "active": 8502
+      },
+      "diag_subset": {
+        "primary_hit_count": 12501,
+        "edge_hit_count": 12501,
+        "triangle_hit_count": 0,
+        "bisection_fallback_count": 68,
+        "unresolved_crossing_count": 0,
+        "collision_reintegrated_segments_count": 9286,
+        "adaptive_substep_segments_count": 0,
+        "etd2_polyline_checks_count": 12657,
+        "etd2_midpoint_outside_count": 2553,
+        "etd2_polyline_hit_count": 12501,
+        "etd2_polyline_fallback_count": 68
+      }
+    }
+  },
+  "comparison_vs_ref": {
+    "drag_relaxation": {
+      "class_match_ratio_vs_ref": 0.9639,
+      "position_error_mean_m": 0.00030625682495185827,
+      "position_error_p95_m": 0.000549753978363402,
+      "position_error_max_m": 0.01893835537242857,
+      "primary_hit_count_ratio_vs_ref": 1.243980481561475,
+      "stuck_count_rel_error_vs_ref": 0.2089452603471295,
+      "absorbed_count_rel_error_vs_ref": 0.0
+    },
+    "etd": {
+      "class_match_ratio_vs_ref": 0.964,
+      "position_error_mean_m": 0.00030557821364758273,
+      "position_error_p95_m": 0.0005489362629990043,
+      "position_error_max_m": 0.018938722024711932,
+      "primary_hit_count_ratio_vs_ref": 1.2251819854411647,
+      "stuck_count_rel_error_vs_ref": 0.21228304405874499,
+      "absorbed_count_rel_error_vs_ref": 0.0
+    },
+    "etd2": {
+      "class_match_ratio_vs_ref": 0.9812,
+      "position_error_mean_m": 0.00010069070888967533,
+      "position_error_p95_m": 0.00034384116905545166,
+      "position_error_max_m": 0.003226910413135882,
+      "primary_hit_count_ratio_vs_ref": 0.8648108151347892,
+      "stuck_count_rel_error_vs_ref": 0.09345794392523364,
+      "absorbed_count_rel_error_vs_ref": 0.0
+    }
+  }
+}

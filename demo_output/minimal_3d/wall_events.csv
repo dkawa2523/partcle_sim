@@ -1,0 +1,3 @@
+time_s,particle_id,part_id,step_name,segment_name,outcome,wall_mode,alpha_hit,material_id,material_name
+0.1,1,1,etch,etch,reflected_specular,mixed_specular_diffuse,0.9999999998835845,0,
+1.32,2,1,etch,etch,reflected_specular,mixed_specular_diffuse,0.9999999998835895,0,

@@ -1,0 +1,2 @@
+time_s,particle_id,part_id,step_name,segment_name,outcome,wall_mode,alpha_hit,material_id,material_name
+0.34,1,1,run,run,reflected_specular,specular,0.9999999998835931,0,

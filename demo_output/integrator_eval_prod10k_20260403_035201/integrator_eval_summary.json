@@ -1,0 +1,141 @@
+{
+  "case": "examples/comsol_from_data_2d_10k/run_config.yaml",
+  "timestamp": "20260403_035201",
+  "runs": [
+    {
+      "integrator": "drag_relaxation",
+      "output_dir": "c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_prod10k_20260403_035201\\out_drag_relaxation",
+      "elapsed_s": 18.451450299999976,
+      "solver_report": {
+        "released_count": 10000,
+        "stuck_count": 1811,
+        "absorbed_count": 0,
+        "escaped_count": 0,
+        "save_frame_count": 81
+      },
+      "collision_diagnostics": {
+        "primary_hit_count": 15551,
+        "edge_hit_count": 15551,
+        "triangle_hit_count": 0,
+        "bisection_fallback_count": 17,
+        "nearest_projection_fallback_count": 0,
+        "unresolved_crossing_count": 0,
+        "multi_hit_events_count": 3492,
+        "max_hits_reached_count": 2067,
+        "collision_reintegrated_segments_count": 11570,
+        "adaptive_substep_segments_count": 0,
+        "etd2_polyline_checks_count": 0,
+        "etd2_midpoint_outside_count": 0,
+        "etd2_polyline_hit_count": 0,
+        "etd2_polyline_fallback_count": 0
+      },
+      "wall_summary": {
+        "total_wall_interactions": 15568,
+        "by_outcome": {
+          "reflected_specular": 9765,
+          "reflected_diffuse": 3992,
+          "stuck": 1811
+        },
+        "by_wall_mode": {
+          "mixed_specular_diffuse": 15568
+        }
+      },
+      "final_particles": {
+        "active": 8189,
+        "stuck": 1811,
+        "absorbed": 0,
+        "escaped": 0
+      }
+    },
+    {
+      "integrator": "etd",
+      "output_dir": "c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_prod10k_20260403_035201\\out_etd",
+      "elapsed_s": 18.45011149999999,
+      "solver_report": {
+        "released_count": 10000,
+        "stuck_count": 1816,
+        "absorbed_count": 0,
+        "escaped_count": 0,
+        "save_frame_count": 81
+      },
+      "collision_diagnostics": {
+        "primary_hit_count": 15316,
+        "edge_hit_count": 15316,
+        "triangle_hit_count": 0,
+        "bisection_fallback_count": 53,
+        "nearest_projection_fallback_count": 0,
+        "unresolved_crossing_count": 0,
+        "multi_hit_events_count": 3450,
+        "max_hits_reached_count": 2014,
+        "collision_reintegrated_segments_count": 11423,
+        "adaptive_substep_segments_count": 0,
+        "etd2_polyline_checks_count": 0,
+        "etd2_midpoint_outside_count": 0,
+        "etd2_polyline_hit_count": 0,
+        "etd2_polyline_fallback_count": 0
+      },
+      "wall_summary": {
+        "total_wall_interactions": 15369,
+        "by_outcome": {
+          "reflected_specular": 9611,
+          "reflected_diffuse": 3942,
+          "stuck": 1816
+        },
+        "by_wall_mode": {
+          "mixed_specular_diffuse": 15369
+        }
+      },
+      "final_particles": {
+        "active": 8184,
+        "stuck": 1816,
+        "absorbed": 0,
+        "escaped": 0
+      }
+    },
+    {
+      "integrator": "etd2",
+      "output_dir": "c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_prod10k_20260403_035201\\out_etd2",
+      "elapsed_s": 23.35430600000001,
+      "solver_report": {
+        "released_count": 10000,
+        "stuck_count": 1358,
+        "absorbed_count": 0,
+        "escaped_count": 0,
+        "save_frame_count": 81
+      },
+      "collision_diagnostics": {
+        "primary_hit_count": 10811,
+        "edge_hit_count": 10811,
+        "triangle_hit_count": 0,
+        "bisection_fallback_count": 15,
+        "nearest_projection_fallback_count": 0,
+        "unresolved_crossing_count": 0,
+        "multi_hit_events_count": 2410,
+        "max_hits_reached_count": 1395,
+        "collision_reintegrated_segments_count": 7985,
+        "adaptive_substep_segments_count": 0,
+        "etd2_polyline_checks_count": 11130,
+        "etd2_midpoint_outside_count": 2215,
+        "etd2_polyline_hit_count": 10811,
+        "etd2_polyline_fallback_count": 15
+      },
+      "wall_summary": {
+        "total_wall_interactions": 10826,
+        "by_outcome": {
+          "reflected_specular": 6731,
+          "reflected_diffuse": 2737,
+          "stuck": 1358
+        },
+        "by_wall_mode": {
+          "mixed_specular_diffuse": 10826
+        }
+      },
+      "final_particles": {
+        "active": 8642,
+        "stuck": 1358,
+        "absorbed": 0,
+        "escaped": 0
+      }
+    }
+  ]
+}

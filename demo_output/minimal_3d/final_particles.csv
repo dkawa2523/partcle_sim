@@ -1,0 +1,4 @@
+particle_id,release_time,released,active,stuck,absorbed,escaped,final_step_name,final_segment_name,source_part_id,material_id,x,v_x,y,v_y,z,v_z
+1,0.0,1,0,0,0,1,purge,purge,10,1,-1.0249989999947615,2.0249999999999995,-0.3,0.0,0.0,0.0
+2,0.2,1,0,0,0,1,purge,purge,20,2,1.0099989999965089,-1.3500000000000003,0.2,0.0,0.2,0.0
+3,0.4,1,1,0,0,0,purge,purge,10,1,-0.6,0.0,0.0,0.0,-0.2,0.0

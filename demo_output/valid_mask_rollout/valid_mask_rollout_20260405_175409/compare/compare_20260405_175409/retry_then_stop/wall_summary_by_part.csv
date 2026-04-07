@@ -1,0 +1,16 @@
+part_id,outcome,wall_mode,count
+1,reflected_specular,mixed_specular_diffuse,1905
+1,stuck,mixed_specular_diffuse,683
+1,reflected_diffuse,mixed_specular_diffuse,645
+6,reflected_specular,mixed_specular_diffuse,625
+6,reflected_diffuse,mixed_specular_diffuse,269
+6,stuck,mixed_specular_diffuse,82
+12,reflected_specular,mixed_specular_diffuse,49
+12,reflected_diffuse,mixed_specular_diffuse,28
+11,reflected_specular,mixed_specular_diffuse,23
+12,stuck,mixed_specular_diffuse,12
+11,stuck,mixed_specular_diffuse,10
+11,reflected_diffuse,mixed_specular_diffuse,4
+3,reflected_diffuse,mixed_specular_diffuse,1
+3,reflected_specular,mixed_specular_diffuse,1
+3,stuck,mixed_specular_diffuse,1

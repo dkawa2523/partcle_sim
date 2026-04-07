@@ -1,0 +1,4 @@
+integrator,class_match_ratio_vs_ref,stuck_count,stuck_rel_error_vs_ref,primary_hit_count,primary_hit_ratio_vs_ref,bisection_fallback_count,unresolved_crossing_count,etd2_polyline_checks_count,etd2_midpoint_outside_count,etd2_polyline_hit_count,etd2_polyline_fallback_count
+drag_relaxation,0.9639,1811,0.2089452603471295,15551,1.243980481561475,17,0,0,0,0,0
+etd,0.964,1816,0.21228304405874499,15316,1.2251819854411647,53,0,0,0,0,0
+etd2,0.9812,1358,0.09345794392523364,10811,0.8648108151347892,15,0,11130,2215,10811,15

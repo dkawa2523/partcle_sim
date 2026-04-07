@@ -1,0 +1,185 @@
+{
+  "baseline_planfix": {
+    "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\comsol_from_data_2d_10k_prod_20260402_planfix",
+    "exists": true,
+    "particles": 10000,
+    "states": {
+      "active": 8309,
+      "stuck": 1689,
+      "absorbed": 0,
+      "escaped": 2
+    },
+    "wall_events": 14351,
+    "alpha_eq_1_count": 46,
+    "alpha_eq_1_ratio": 0.0032053515434464497,
+    "alpha_lt_1e_6": 16,
+    "outcome_counts": {
+      "reflected_specular": 8982,
+      "reflected_diffuse": 3680,
+      "stuck": 1689
+    },
+    "max_hits_per_time_particle": 1,
+    "groups_hits_ge_3": 0,
+    "save_frames": 41,
+    "t_end_saved": 0.8,
+    "solver_report": {
+      "particle_count": 10000,
+      "released_count": 10000,
+      "stuck_count": 1689,
+      "absorbed_count": 0,
+      "escaped_count": 2,
+      "save_frame_count": 41,
+      "positions_file": "positions_2d.npy",
+      "integrator": "drag_relaxation",
+      "wall_law_counts": {
+        "mixed_specular_diffuse": 14351
+      },
+      "wall_summary_file": "wall_summary.json",
+      "wall_summary_by_part_file": "wall_summary_by_part.csv",
+      "runtime_step_summary_file": "runtime_step_summary.csv",
+      "kernel_backend": "numba_2d_freeflight"
+    },
+    "gif_all_exists": true,
+    "gif_trails_exists": true,
+    "gif_all_size_bytes": 2690524,
+    "gif_trails_size_bytes": 2088196
+  },
+  "multihitfix_prev_default3": {
+    "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\comsol_from_data_2d_10k_prod_20260402_multihitfix",
+    "exists": true,
+    "particles": 10000,
+    "states": {
+      "active": 8342,
+      "stuck": 1658,
+      "absorbed": 0,
+      "escaped": 0
+    },
+    "wall_events": 13855,
+    "alpha_eq_1_count": 0,
+    "alpha_eq_1_ratio": 0.0,
+    "alpha_lt_1e_6": 14,
+    "outcome_counts": {
+      "reflected_specular": 8639,
+      "reflected_diffuse": 3558,
+      "stuck": 1658
+    },
+    "max_hits_per_time_particle": 3,
+    "groups_hits_ge_3": 2,
+    "save_frames": 41,
+    "t_end_saved": 0.8,
+    "solver_report": {
+      "particle_count": 10000,
+      "released_count": 10000,
+      "stuck_count": 1658,
+      "absorbed_count": 0,
+      "escaped_count": 0,
+      "save_frame_count": 41,
+      "positions_file": "positions_2d.npy",
+      "integrator": "drag_relaxation",
+      "wall_law_counts": {
+        "mixed_specular_diffuse": 13855
+      },
+      "wall_summary_file": "wall_summary.json",
+      "wall_summary_by_part_file": "wall_summary_by_part.csv",
+      "collision_diagnostics_file": "collision_diagnostics.json",
+      "runtime_step_summary_file": "runtime_step_summary.csv",
+      "kernel_backend": "numba_2d_freeflight"
+    },
+    "collision_diagnostics": {
+      "edge_hit_count": 13835,
+      "bisection_fallback_count": 20,
+      "on_boundary_promoted_inside_count": 21878,
+      "unresolved_crossing_count": 0,
+      "multi_hit_events_count": 23,
+      "max_hits_reached_count": 2,
+      "max_wall_hits_per_step": 3,
+      "min_remaining_dt_ratio": 0.05,
+      "on_boundary_tol_m": 2e-06,
+      "epsilon_offset_m": 1e-06
+    },
+    "gif_all_exists": true,
+    "gif_trails_exists": true,
+    "gif_all_size_bytes": 13161468,
+    "gif_trails_size_bytes": 8822503
+  },
+  "multihitfix_new_default5": {
+    "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\comsol_from_data_2d_10k_prod_20260402_hits5default",
+    "exists": true,
+    "particles": 10000,
+    "states": {
+      "active": 8349,
+      "stuck": 1651,
+      "absorbed": 0,
+      "escaped": 0
+    },
+    "wall_events": 13641,
+    "alpha_eq_1_count": 0,
+    "alpha_eq_1_ratio": 0.0,
+    "alpha_lt_1e_6": 14,
+    "outcome_counts": {
+      "reflected_specular": 8476,
+      "reflected_diffuse": 3514,
+      "stuck": 1651
+    },
+    "max_hits_per_time_particle": 3,
+    "groups_hits_ge_3": 1,
+    "save_frames": 41,
+    "t_end_saved": 0.8,
+    "solver_report": {
+      "particle_count": 10000,
+      "released_count": 10000,
+      "stuck_count": 1651,
+      "absorbed_count": 0,
+      "escaped_count": 0,
+      "save_frame_count": 41,
+      "positions_file": "positions_2d.npy",
+      "integrator": "drag_relaxation",
+      "wall_law_counts": {
+        "mixed_specular_diffuse": 13641
+      },
+      "wall_summary_file": "wall_summary.json",
+      "wall_summary_by_part_file": "wall_summary_by_part.csv",
+      "max_hit_events_file": "max_hit_events.csv",
+      "collision_diagnostics_file": "collision_diagnostics.json",
+      "runtime_step_summary_file": "runtime_step_summary.csv",
+      "kernel_backend": "numba_2d_freeflight"
+    },
+    "collision_diagnostics": {
+      "edge_hit_count": 13631,
+      "bisection_fallback_count": 10,
+      "on_boundary_promoted_inside_count": 21921,
+      "unresolved_crossing_count": 0,
+      "multi_hit_events_count": 16,
+      "max_hits_reached_count": 0,
+      "max_wall_hits_per_step": 5,
+      "min_remaining_dt_ratio": 0.05,
+      "on_boundary_tol_m": 2e-06,
+      "epsilon_offset_m": 1e-06
+    },
+    "max_hit_events_rows": 0,
+    "gif_all_exists": true,
+    "gif_trails_exists": true,
+    "gif_all_size_bytes": 13191053,
+    "gif_trails_size_bytes": 9997732
+  },
+  "overlay_coverage_new": {
+    "sample_particle_count": 600,
+    "sampled_wall_events": 821,
+    "total_wall_events": 13641,
+    "coverage_ratio": 0.06018620335752511
+  },
+  "delta_vs_baseline_planfix": {
+    "states_delta": {
+      "active": 40,
+      "stuck": -38,
+      "absorbed": 0,
+      "escaped": -2
+    },
+    "wall_events_delta": -710,
+    "alpha_eq_1_ratio_old": 0.0032053515434464497,
+    "alpha_eq_1_ratio_new": 0.0,
+    "alpha_eq_1_ratio_change": -0.0032053515434464497,
+    "max_hits_reached_old": null,
+    "max_hits_reached_new": 0
+  }
+}

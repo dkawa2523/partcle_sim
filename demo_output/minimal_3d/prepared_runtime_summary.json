@@ -1,0 +1,107 @@
+{
+  "spatial_dim": 3,
+  "coordinate_system": "cartesian_xyz",
+  "particles": 3,
+  "has_geometry_provider": true,
+  "has_field_provider": true,
+  "has_materials": true,
+  "has_walls": true,
+  "has_source_events": true,
+  "has_compiled_source_events": true,
+  "time_interpolation": "linear",
+  "gas": {
+    "temperature_K": 320.0,
+    "dynamic_viscosity_Pas": 1.8e-05,
+    "density_kgm3": 1.2
+  },
+  "process_steps": {
+    "has_process_steps": true,
+    "step_count": 2,
+    "step_names": [
+      "etch",
+      "purge"
+    ],
+    "segments": [
+      "etch",
+      "purge"
+    ],
+    "wall_modes": {
+      "etch": "mixed_specular_diffuse",
+      "purge": "specular"
+    },
+    "source_law_overrides": {
+      "etch": "",
+      "purge": ""
+    },
+    "source_speed_scales": {
+      "etch": 1.0,
+      "purge": 1.0
+    },
+    "physics_flow_scales": {
+      "etch": 1.25,
+      "purge": 0.7
+    },
+    "physics_drag_tau_scales": {
+      "etch": 1.0,
+      "purge": 1.4
+    },
+    "wall_vcrit_scales": {
+      "etch": 1.0,
+      "purge": 1.0
+    },
+    "output_save_every_overrides": {
+      "etch": 0,
+      "purge": 1
+    },
+    "output_save_positions": {
+      "etch": 1,
+      "purge": 1
+    },
+    "output_write_wall_events": {
+      "etch": 1,
+      "purge": 1
+    },
+    "output_write_diagnostics": {
+      "etch": 1,
+      "purge": 1
+    }
+  },
+  "wall_catalog": {
+    "has_wall_catalog": true,
+    "wall_part_count": 2,
+    "default_law": "specular",
+    "part_laws": {
+      "10": "specular",
+      "20": "mixed_specular_diffuse"
+    }
+  },
+  "physics_catalog": {
+    "has_physics_catalog": true,
+    "integrator": "drag_relaxation",
+    "base_flow_scale": 1.0,
+    "base_drag_tau_scale": 1.0,
+    "base_body_accel_scale": 1.0,
+    "body_acceleration": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "min_tau_p_s": 0.0001
+  },
+  "source_model_summary": {
+    "law_usage": {
+      "explicit_csv": 3
+    },
+    "mean_initial_speed_mps": 0.13333333333333333,
+    "mean_source_delta_speed_mps": 0.0,
+    "particle_count": 3,
+    "suppressed_particle_count": 0,
+    "step_usage": {}
+  },
+  "event_summary": {
+    "matched_event_counts": {
+      "etch_burst": 3
+    },
+    "total_matches": 3
+  }
+}

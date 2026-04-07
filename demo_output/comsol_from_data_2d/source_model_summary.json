@@ -1,0 +1,16 @@
+{
+  "law_usage": {
+    "explicit_csv": 24
+  },
+  "mean_initial_speed_mps": 0.0,
+  "mean_source_delta_speed_mps": 0.0,
+  "particle_count": 24,
+  "suppressed_particle_count": 0,
+  "step_usage": {},
+  "event_summary": {
+    "matched_event_counts": {
+      "ignite_boost": 24
+    },
+    "total_matches": 24
+  }
+}

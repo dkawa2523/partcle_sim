@@ -1,0 +1,33 @@
+{
+  "source_mphtxt": "C:\\Users\\user\\Desktop\\particle_simulation\\data\\argon_gec_ccp_base2.mphtxt",
+  "sdim": 2,
+  "vertex_count": 1520,
+  "edge_count": 188,
+  "quad_count": 1425,
+  "derived_boundary_edge_count": 109,
+  "boundary_part_ids": [
+    1,
+    2,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "bounds": {
+    "xmin": 0.0,
+    "xmax": 0.10160000000000001,
+    "ymin": -0.0381,
+    "ymax": 0.0635
+  },
+  "generated_files": {
+    "geometry_npz": "generated\\comsol_geometry_2d.npz",
+    "field_npz": "generated\\comsol_field_2d.npz",
+    "run_config": "run_config.yaml"
+  },
+  "grid_axes": {
+    "x_count": 675,
+    "y_count": 407
+  },
+  "note": "COMSOL mesh is used directly; field quantities are a smooth synthetic distribution defined on the extracted mesh grid."
+}

@@ -1,0 +1,5 @@
+integrator,runtime_s,released_count,stuck_count,absorbed_count,escaped_count,primary_hit_count,edge_hit_count,triangle_hit_count,bisection_fallback_count,unresolved_crossing_count,multi_hit_events_count,max_hits_reached_count,collision_reintegrated_segments_count,adaptive_substep_segments_count,adaptive_substep_trigger_count,etd2_polyline_checks_count,etd2_midpoint_outside_count,etd2_polyline_hit_count,etd2_polyline_fallback_count
+drag_relaxation,18.138295,10000,1811,0,0,15551,15551,0,17,0,3492,2067,11570,0,0,0,0,0,0
+etd,17.750245,10000,1816,0,0,15316,15316,0,53,0,3450,2014,11423,0,0,0,0,0,0
+etd2,24.324778,10000,1358,0,0,10811,10811,0,15,0,2410,1395,7985,0,0,11130,2215,10811,15
+etd2_ref_dt0025,68.35826159999999,10000,1498,0,0,12501,12501,0,68,0,2796,1651,9286,0,0,12657,2553,12501,68

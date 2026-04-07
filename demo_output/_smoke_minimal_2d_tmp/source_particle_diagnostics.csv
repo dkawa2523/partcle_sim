@@ -1,0 +1,4 @@
+particle_id,source_part_id,resolved_material_id,law_name,event_tag,matched_events,event_factor,release_enabled,original_release_time_s,step_name,step_source_law_override,step_source_speed_scale,step_source_event_gain_scale,step_source_enabled,offset_m,source_delta_speed_mps,final_speed_mps,resolved_release_time_s
+1,10,1,explicit_csv,,,1.0,1,0.0,,,1.0,1.0,1,0.0,0.0,0.2,0.0
+2,20,2,explicit_csv,,,1.0,1,0.2,,,1.0,1.0,1,0.0,0.0,0.1,0.2
+3,10,1,explicit_csv,,,1.0,1,0.4,,,1.0,1.0,1,0.0,0.0,0.0,0.4

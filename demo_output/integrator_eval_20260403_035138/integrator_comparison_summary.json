@@ -1,0 +1,20 @@
+[
+  {
+    "integrator":"drag_relaxation",
+    "status":"failed",
+    "runtime_s":1.2376582,
+    "error_log":"c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_20260403_035138\\run_drag_relaxation_stderr.log"
+  },
+  {
+    "integrator":"etd",
+    "status":"failed",
+    "runtime_s":1.3485467,
+    "error_log":"c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_20260403_035138\\run_etd_stderr.log"
+  },
+  {
+    "integrator":"etd2",
+    "status":"failed",
+    "runtime_s":1.3323572,
+    "error_log":"c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_20260403_035138\\run_etd2_stderr.log"
+  }
+]

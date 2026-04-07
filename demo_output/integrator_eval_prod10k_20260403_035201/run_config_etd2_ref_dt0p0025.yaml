@@ -1,0 +1,43 @@
+run:
+  spatial_dim: 2
+  coordinate_system: cartesian_xy
+  time_interpolation: linear
+paths:
+  particles_csv: C:\Users\user\Desktop\particle_simulation\examples\comsol_from_data_2d_10k\particles.csv
+  materials_csv: C:\Users\user\Desktop\particle_simulation\examples\comsol_from_data_2d_10k\materials.csv
+  part_walls_csv: C:\Users\user\Desktop\particle_simulation\examples\comsol_from_data_2d_10k\part_walls.csv
+  source_events_csv: C:\Users\user\Desktop\particle_simulation\examples\comsol_from_data_2d_10k\source_events.csv
+  process_steps_csv: C:\Users\user\Desktop\particle_simulation\examples\comsol_from_data_2d_10k\process_steps.csv
+providers:
+  geometry:
+    kind: precomputed_npz
+    npz_path: C:\Users\user\Desktop\particle_simulation\examples\comsol_from_data_2d_10k\generated\comsol_geometry_2d.npz
+  field:
+    kind: precomputed_npz
+    npz_path: C:\Users\user\Desktop\particle_simulation\examples\comsol_from_data_2d_10k\generated\comsol_field_2d.npz
+gas:
+  temperature_K: 320.0
+  dynamic_viscosity_Pas: 1.8e-05
+  density_kgm3: 1.2
+source:
+  preprocess:
+    enabled: true
+    seed: 24680
+  default_law: explicit_csv
+  source_speed_scale: 1.0
+  source_position_offset_m: 0.0
+  direct_wall_shear:
+    probe_distance_m: 0.001
+process:
+  step_defaults:
+    output:
+      segment_name: run
+      save_every_override: 0
+solver:
+  dt: 0.0025
+  t_end: 0.8
+  save_every: 4
+  integrator: etd2
+  min_tau_p_s: 1.0e-05
+  plot_particle_limit: 80
+  seed: 12345

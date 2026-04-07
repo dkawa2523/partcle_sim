@@ -1,0 +1,64 @@
+recipe_name: demo_recipe
+steps:
+  - step_id: 1
+    step_name: etch
+    start_s: 0.0
+    end_s: 0.8
+    step_kind: plasma_on
+    physics:
+      flow_scale: 1.15
+      drag_tau_scale: 1.0
+    wall:
+      mode: mixed_specular_diffuse
+      diffuse_fraction: 0.20
+    source:
+      law_override: flake_burst_material
+      speed_scale: 1.10
+      event_gain_scale: 1.15
+    output:
+      segment_name: etch
+      save_every_override: 1
+      save_positions: 1
+      write_wall_events: 1
+      write_diagnostics: 1
+  - step_id: 2
+    step_name: purge
+    start_s: 0.8
+    end_s: 2.0
+    step_kind: purge
+    physics:
+      flow_scale: 0.75
+      drag_tau_scale: 1.25
+    wall:
+      mode: specular
+      restitution: 0.9
+    source:
+      law_override: resuspension_shear_material
+      speed_scale: 0.90
+      event_gain_scale: 0.95
+    output:
+      segment_name: purge
+      save_every_override: 2
+      save_positions: 1
+      write_wall_events: 0
+      write_diagnostics: 1
+  - step_id: 3
+    step_name: afterglow
+    start_s: 2.0
+    end_s: 3.0
+    step_kind: plasma_off
+    physics:
+      flow_scale: 0.25
+    wall:
+      mode: stick
+      stick_probability_scale: 1.2
+    source:
+      law_override: thermal_reemission_source_material
+      speed_scale: 0.65
+      event_gain_scale: 0.75
+    output:
+      segment_name: afterglow
+      save_every_override: 1
+      save_positions: 0
+      write_wall_events: 0
+      write_diagnostics: 1

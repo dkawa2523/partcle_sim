@@ -1,0 +1,20 @@
+{
+  "reference_output_dir": "c:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_compare_20260403_post_etd2polyline_10k\\run_reference_etd2_dt0025",
+  "reference_runtime_s": 68.35826159999999,
+  "reference_primary_hit_count": 12501,
+  "reference_stuck_count": 1498,
+  "class_match_rows": [
+    {
+      "integrator": "drag_relaxation",
+      "class_match_ratio_vs_etd2_ref_dt0025": 0.9639
+    },
+    {
+      "integrator": "etd",
+      "class_match_ratio_vs_etd2_ref_dt0025": 0.964
+    },
+    {
+      "integrator": "etd2",
+      "class_match_ratio_vs_etd2_ref_dt0025": 0.9812
+    }
+  ]
+}

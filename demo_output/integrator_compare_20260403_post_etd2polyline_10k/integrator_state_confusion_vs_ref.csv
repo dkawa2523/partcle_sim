@@ -1,0 +1,13 @@
+integrator,class_ref,class_cmp,count
+drag_relaxation,active,active,8165
+drag_relaxation,active,stuck,337
+drag_relaxation,stuck,active,24
+drag_relaxation,stuck,stuck,1474
+etd,active,active,8163
+etd,active,stuck,339
+etd,stuck,active,21
+etd,stuck,stuck,1477
+etd2,active,active,8478
+etd2,active,stuck,24
+etd2,stuck,active,164
+etd2,stuck,stuck,1334

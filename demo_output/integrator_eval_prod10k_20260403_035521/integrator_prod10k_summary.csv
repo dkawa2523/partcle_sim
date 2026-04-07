@@ -1,0 +1,4 @@
+﻿"integrator","elapsed_s","released_count","stuck_count","absorbed_count","escaped_count","total_wall_interactions","primary_hit_count","unresolved_crossing_count","max_hits_reached_count","etd2_polyline_checks_count","etd2_midpoint_outside_count","etd2_polyline_hit_count","etd2_polyline_fallback_count"
+"drag_relaxation","17.312","10000","1811","0","0","15568","15551","0","2067","0","0","0","0"
+"etd","19.372","10000","1816","0","0","15369","15316","0","2014","0","0","0","0"
+"etd2","23.108","10000","1358","0","0","10826","10811","0","1395","11130","2215","10811","15"

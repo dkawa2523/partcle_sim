@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "particle-tracer-unified"
+version = "29.0.0"
+description = "Runnable stabilization release for step-aware particle trajectory simulation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "PyYAML>=6.0",
+  "matplotlib>=3.7",
+  "numba>=0.58",
+  "scipy>=1.10"
+]
+
+[project.scripts]
+particle-tracer-run = "run_from_yaml:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["particle_tracer_unified*"]

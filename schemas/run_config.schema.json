@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["run", "paths", "providers", "gas", "source", "solver"],
+  "properties": {
+    "run": {"type": "object"},
+    "paths": {"type": "object"},
+    "providers": {"type": "object"},
+    "gas": {"type": "object"},
+    "source": {"type": "object"},
+    "process": {"type": "object"},
+    "solver": {"type": "object"}
+  },
+  "additionalProperties": true
+}
