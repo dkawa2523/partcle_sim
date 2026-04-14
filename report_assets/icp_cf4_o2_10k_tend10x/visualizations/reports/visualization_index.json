@@ -1,0 +1,109 @@
+{
+  "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x",
+  "visualizations_root": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations",
+  "clean": true,
+  "health_summary": {
+    "particle_count": 10000,
+    "released_count": 10000,
+    "invalid_mask_stopped_count": 0,
+    "numerical_boundary_stopped_count": 0,
+    "stuck_count": 325,
+    "max_hits_reached_count": 0,
+    "unresolved_crossing_count": 0,
+    "nearest_projection_fallback_count": 0,
+    "boundary_event_failure_count": 0,
+    "boundary_event_contract_passed": 1,
+    "contact_sliding_particle_count": 0,
+    "contact_endpoint_stopped_count": 0,
+    "contact_tangent_step_count": 0,
+    "active_outside_geometry_count": 0,
+    "contact_sliding_outside_geometry_count": 0,
+    "nonfinite_position_count": 0,
+    "nonfinite_velocity_count": 0,
+    "solver_core_s": 7611.656753099989,
+    "estimated_numpy_bytes": 11745526,
+    "final_state_counts": {
+      "active_free_flight": 9672,
+      "contact_sliding": 0,
+      "contact_endpoint_stopped": 0,
+      "invalid_mask_stopped": 0,
+      "numerical_boundary_stopped": 0,
+      "stuck": 325,
+      "absorbed": 3,
+      "escaped": 0,
+      "inactive": 0
+    },
+    "status": "pass"
+  },
+  "modules": {
+    "graphs": {
+      "dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations\\graphs",
+      "files": [
+        "01_state_counts_time_series.png",
+        "01_wall_event_cumulative_counts.csv",
+        "02_final_state_bar_and_pie.png",
+        "02_final_state_counts.csv",
+        "03_final_state_scatter_geometry.png",
+        "04_trajectory_density_heatmap.png",
+        "05_speed_distribution_by_state.png",
+        "06_sampled_trajectories_overlay.png",
+        "08_wall_law_counts.png",
+        "09_wall_interactions_by_part_outcome.png",
+        "10_stuck_counts_by_boundary_part.csv",
+        "10_stuck_counts_by_boundary_part.png",
+        "11_device_parts_geometry.png",
+        "12_device_parts_with_ids.png",
+        "13_signed_distance_field_sdf.png",
+        "14_geometry_field_support_mask.png",
+        "15_mechanics_field_totals.png",
+        "16_flow_components_ux_uy.png",
+        "17_acceleration_components_ax_ay.png",
+        "18_electric_field_components_ex_ey.png",
+        "19_scalar_physics_fields.png",
+        "20_wall_event_locations_by_outcome.png",
+        "21_trajectories_by_final_state.png",
+        "22_domain_part_medium_summary.csv",
+        "22_domain_parts_medium_support.png",
+        "23_comsol_style_field_and_trajectories.png",
+        "24_comsol_style_particle_density_and_events.png",
+        "graph_summary.json"
+      ]
+    },
+    "animations": {
+      "dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations\\animations",
+      "files": [
+        "animation_report.json",
+        "trajectories_all_particles.gif",
+        "trajectories_sampled_trails.gif"
+      ]
+    },
+    "mechanics": {
+      "dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations\\mechanics",
+      "files": [
+        "domain_part_medium_summary.csv",
+        "final_state_by_nearest_boundary_part.csv",
+        "final_states_over_geometry.png",
+        "geometry_layout_part_ids.png",
+        "mechanics_component_maps_with_geometry.png",
+        "mechanics_distribution_on_geometry.csv",
+        "mechanics_maps_with_geometry.png",
+        "trajectories_geometry_flow_overlay.png",
+        "visualization_report.json"
+      ]
+    },
+    "boundary": {
+      "dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations\\boundary_diagnostics",
+      "files": [
+        "01_recognized_boundary_geometry.png",
+        "02_recognized_domain_mask.png",
+        "03_signed_distance_field.png",
+        "04_boundary_normals_near_wall.png",
+        "05_flow_speed_vectors_over_geometry.png",
+        "06_mixed_stencil_hotspots.png",
+        "07_hard_invalid_stop_hotspots.png",
+        "boundary_diagnostics_report.json"
+      ]
+    }
+  },
+  "run_summary_md": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations\\reports\\run_summary.md"
+}

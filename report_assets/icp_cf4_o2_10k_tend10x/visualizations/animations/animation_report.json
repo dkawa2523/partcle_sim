@@ -1,0 +1,14 @@
+{
+  "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x",
+  "animations_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations\\animations",
+  "spatial_dim": 2,
+  "overlay_wall_events": true,
+  "interpolate_wall_event_positions": true,
+  "interpolate_factor": 1,
+  "fps": 5,
+  "sample_count": 600,
+  "files": [
+    "trajectories_all_particles.gif",
+    "trajectories_sampled_trails.gif"
+  ]
+}

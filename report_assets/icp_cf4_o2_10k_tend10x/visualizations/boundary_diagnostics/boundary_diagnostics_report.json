@@ -1,0 +1,33 @@
+{
+  "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\icp_rf_bias_cf4_o2_si_etching_2d_source_part11_sio2_20nm_charged_tend10x",
+  "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x",
+  "boundary_edge_count": 468,
+  "boundary_part_ids": [
+    3,
+    4,
+    6,
+    8,
+    11,
+    32,
+    36,
+    42,
+    43
+  ],
+  "domain_grid_shape": [
+    267,
+    237
+  ],
+  "mixed_stencil_grid_count": 383,
+  "hard_invalid_grid_count": 34707,
+  "invalid_mask_stopped_point_count": 0,
+  "files": [
+    "01_recognized_boundary_geometry.png",
+    "02_recognized_domain_mask.png",
+    "03_signed_distance_field.png",
+    "04_boundary_normals_near_wall.png",
+    "05_flow_speed_vectors_over_geometry.png",
+    "06_mixed_stencil_hotspots.png",
+    "07_hard_invalid_stop_hotspots.png",
+    "domain_part_medium_summary.csv"
+  ]
+}

@@ -1,0 +1,10 @@
+state,count
+active_free_flight,9672
+contact_sliding,0
+contact_endpoint_stopped,0
+invalid_mask_stopped,0
+numerical_boundary_stopped,0
+stuck,325
+absorbed,3
+escaped,0
+inactive,0

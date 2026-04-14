@@ -1,0 +1,115 @@
+{
+  "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\icp_rf_bias_cf4_o2_si_etching_2d_source_part11_sio2_20nm_charged_tend10x",
+  "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x",
+  "mechanics_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_cf4_o2_v20_10k_source_part11_sio2_20nm_charged_tend10x\\visualizations\\mechanics",
+  "n_particles": 10000,
+  "sample_trajectories": 650,
+  "boundary_region_summary_status": "computed_from_nearest_boundary_part_id_map",
+  "final_state_by_nearest_boundary_part": [
+    {
+      "nearest_boundary_part_id": 42,
+      "state": "active_free_flight",
+      "count": 123
+    },
+    {
+      "nearest_boundary_part_id": 1004,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 1096,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 2487,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 2883,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 5302,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 5905,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 6342,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 6802,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 6816,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 7431,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 8266,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 8444,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 8603,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 8680,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 8778,
+      "state": "active_free_flight",
+      "count": 1
+    },
+    {
+      "nearest_boundary_part_id": 9001,
+      "state": "absorbed",
+      "count": 3
+    },
+    {
+      "nearest_boundary_part_id": 9001,
+      "state": "active_free_flight",
+      "count": 9534
+    },
+    {
+      "nearest_boundary_part_id": 9001,
+      "state": "stuck",
+      "count": 325
+    }
+  ],
+  "files": [
+    "domain_part_medium_summary.csv",
+    "mechanics_distribution_on_geometry.csv",
+    "final_state_by_nearest_boundary_part.csv",
+    "geometry_layout_part_ids.png",
+    "mechanics_maps_with_geometry.png",
+    "mechanics_component_maps_with_geometry.png",
+    "trajectories_geometry_flow_overlay.png",
+    "final_states_over_geometry.png"
+  ]
+}
