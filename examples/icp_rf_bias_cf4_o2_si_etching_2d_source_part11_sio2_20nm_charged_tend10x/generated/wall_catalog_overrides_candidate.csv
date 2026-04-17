@@ -1,0 +1,26 @@
+part_id,part_name,material_id,material_name,wall_law,wall_restitution,wall_diffuse_fraction,wall_stick_probability,review_status,active_in_solver_boundary,comsol_material_name,adjacent_domain_ids,x_min_m,x_max_m,y_min_m,y_max_m
+2,axis_symmetry_2,10,axis_symmetry,specular,1.0,0.0,0.0,keep_axis_symmetry,False,not_exported_from_mphtxt,2,0.0,0.0,0.0,0.02
+3,wafer_3,20,wafer,specular,0.95,0.0,0.5,unknown_material_keep_current,False,not_exported_from_mphtxt,2,0.0,0.1519999999999999,0.0,0.0
+4,axis_symmetry_4,10,axis_symmetry,specular,1.0,0.0,0.0,keep_axis_symmetry,False,Air,3,0.0,0.0,0.02,0.022
+6,axis_symmetry_6,10,axis_symmetry,specular,1.0,0.0,0.0,keep_axis_symmetry,True,Glass (quartz),4,0.0,0.0,0.022,0.13
+7,glass_quartz_wall_7,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Air|Glass (quartz),3;4,0.0,0.15,0.0205,0.022
+8,axis_symmetry_8,10,axis_symmetry,specular,1.0,0.0,0.0,keep_axis_symmetry,False,Air,5,0.0,0.0,0.13,0.15
+9,glass_quartz_wall_9,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz)|Air,4;5,0.0,0.24,0.13,0.13
+10,axis_symmetry_10,10,axis_symmetry,specular,1.0,0.0,0.0,keep_axis_symmetry,False,Copper,6,0.0,0.0,0.15,0.22
+11,copper_wall_11,70,copper,specular,0.95,0.0,0.5,candidate_from_comsol_material,False,Air|Copper,5;6,0.0,0.25,0.15,0.15
+12,copper_wall_12,70,copper,specular,0.95,0.0,0.5,candidate_from_comsol_material,False,Copper,6,0.0,0.25,0.2199999999999999,0.22
+32,chamber_wall_32,40,chamber_wall,specular,0.95,0.0,0.5,unknown_material_keep_current,False,not_exported_from_mphtxt,11,0.1519999999999999,0.182,0.0,0.0
+34,glass_quartz_wall_34,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;11,0.1534999999999999,0.179,0.022,0.022
+35,glass_quartz_wall_35,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;11,0.1819999999999999,0.182,0.0,0.0189999999999999
+36,glass_quartz_wall_36,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4,0.182,0.25,0.0,0.0
+37,glass_quartz_wall_37,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;12,0.24,0.24,0.103,0.108
+38,glass_quartz_wall_38,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;12,0.2399999999999999,0.24,0.108,0.123
+39,glass_quartz_wall_39,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;12,0.24,0.24,0.123,0.13
+41,glass_quartz_wall_41,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;12,0.243,0.25,0.1,0.1
+42,glass_quartz_wall_42,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4,0.25,0.25,0.0,0.1
+43,sidewall_43,50,sidewall,specular,0.95,0.0,0.5,unknown_material_keep_current,False,not_exported_from_mphtxt,12,0.25,0.25,0.1,0.13
+44,sidewall_44,50,sidewall,specular,0.95,0.0,0.5,air_adjacent_boundary_needs_review,False,Air,5,0.25,0.25,0.13,0.15
+45,copper_wall_45,70,copper,specular,0.95,0.0,0.5,candidate_from_comsol_material,False,Copper,6,0.25,0.25,0.15,0.22
+46,glass_quartz_wall_46,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;11,0.1519999999999999,0.1534999999999999,0.0204999999999999,0.022
+47,glass_quartz_wall_47,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;11,0.179,0.1819999999999999,0.0189999999999999,0.022
+48,glass_quartz_wall_48,60,glass_quartz,specular,0.95,0.0,0.5,candidate_from_comsol_material,True,Glass (quartz),4;12,0.24,0.243,0.1,0.103

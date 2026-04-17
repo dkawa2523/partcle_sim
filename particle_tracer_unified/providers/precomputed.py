@@ -35,8 +35,61 @@ def _read_axes(payload: Mapping[str, np.ndarray], spatial_dim: int) -> Tuple[np.
         ax = np.asarray(payload[key], dtype=np.float64)
         if ax.ndim != 1 or ax.size < 2:
             raise ValueError(f'Axis {key} must be 1D with at least 2 entries')
+        if not np.all(np.isfinite(ax)):
+            raise ValueError(f'Axis {key} must contain only finite values')
+        if not np.all(np.diff(ax) > 0.0):
+            raise ValueError(f'Axis {key} must be strictly increasing')
         axes.append(ax)
     return tuple(axes)
+
+
+def _read_times(payload: Mapping[str, np.ndarray]) -> np.ndarray:
+    times = np.asarray(payload['times'], dtype=np.float64) if 'times' in payload else np.asarray([0.0], dtype=np.float64)
+    if times.ndim != 1 or times.size == 0:
+        raise ValueError('Field times must be a non-empty 1D array')
+    if not np.all(np.isfinite(times)):
+        raise ValueError('Field times must contain only finite values')
+    if times.size > 1 and not np.all(np.diff(times) > 0.0):
+        raise ValueError('Field times must be strictly increasing')
+    return times
+
+
+def _validate_regular_quantity_values(name: str, data: np.ndarray, valid_mask: np.ndarray, spatial_dim: int) -> None:
+    support = np.asarray(valid_mask, dtype=bool)
+    arr = np.asarray(data, dtype=np.float64)
+    if arr.ndim == int(spatial_dim):
+        values = arr[support]
+    else:
+        values = arr[:, support]
+    if values.size and not np.all(np.isfinite(values)):
+        raise ValueError(f'Quantity {name} contains non-finite values inside field valid_mask support')
+
+
+def _validate_triangle_mesh(mesh_vertices: np.ndarray, mesh_triangles: np.ndarray) -> None:
+    if mesh_vertices.ndim != 2 or mesh_vertices.shape[1] != 2:
+        raise ValueError('mesh_vertices must have shape (n, 2)')
+    if mesh_triangles.ndim != 2 or mesh_triangles.shape[1] != 3:
+        raise ValueError('mesh_triangles must have shape (m, 3)')
+    if mesh_vertices.shape[0] < 3:
+        raise ValueError('mesh_vertices must contain at least three vertices')
+    if mesh_triangles.shape[0] == 0:
+        raise ValueError('mesh_triangles must contain at least one triangle')
+    if not np.all(np.isfinite(mesh_vertices)):
+        raise ValueError('mesh_vertices must contain only finite values')
+    if int(np.min(mesh_triangles)) < 0 or int(np.max(mesh_triangles)) >= int(mesh_vertices.shape[0]):
+        raise ValueError('mesh_triangles contains vertex indices outside mesh_vertices')
+    tri_pts = mesh_vertices[mesh_triangles]
+    area2 = np.abs(
+        (tri_pts[:, 1, 0] - tri_pts[:, 0, 0]) * (tri_pts[:, 2, 1] - tri_pts[:, 0, 1])
+        - (tri_pts[:, 1, 1] - tri_pts[:, 0, 1]) * (tri_pts[:, 2, 0] - tri_pts[:, 0, 0])
+    )
+    if np.any(area2 <= 1.0e-30):
+        raise ValueError('mesh_triangles contains degenerate triangles')
+
+
+def _validate_mesh_quantity_values(name: str, data: np.ndarray) -> None:
+    if data.size and not np.all(np.isfinite(data)):
+        raise ValueError(f'Mesh quantity {name} contains non-finite values')
 
 
 def _infer_unit(name: str) -> str:
@@ -63,9 +116,9 @@ def _read_metadata(payload: Mapping[str, np.ndarray]) -> Dict[str, Any]:
     try:
         text = raw.decode('utf-8') if isinstance(raw, (bytes, bytearray)) else str(raw)
         data = json.loads(text)
-        return data if isinstance(data, dict) else {}
-    except Exception:
+    except (UnicodeDecodeError, json.JSONDecodeError):
         return {}
+    return data if isinstance(data, dict) else {}
 
 
 def build_precomputed_geometry(cfg: Mapping[str, Any], spatial_dim: int, coordinate_system: str) -> GeometryProviderND:
@@ -76,7 +129,11 @@ def build_precomputed_geometry(cfg: Mapping[str, Any], spatial_dim: int, coordin
         expected_shape = tuple(len(ax) for ax in axes)
         if sdf.shape != expected_shape:
             raise ValueError(f'Geometry sdf shape mismatch: expected {expected_shape}, got {sdf.shape}')
+        if not np.all(np.isfinite(sdf)):
+            raise ValueError('Geometry sdf must contain only finite values')
         valid_mask = np.asarray(payload['valid_mask'], dtype=bool) if 'valid_mask' in payload else np.ones(expected_shape, dtype=bool)
+        if valid_mask.shape != expected_shape:
+            raise ValueError(f'Geometry valid_mask shape mismatch: expected {expected_shape}, got {valid_mask.shape}')
         if 'nearest_boundary_part_id_map' in payload:
             part_id_map = np.asarray(payload['nearest_boundary_part_id_map'], dtype=np.int32)
         elif 'part_id_map' in payload:
@@ -150,10 +207,17 @@ def build_precomputed_field(
             raise ValueError(f'Field axes must exactly match geometry axes in {npz_path}')
         expected_shape = tuple(len(ax) for ax in field_axes)
         valid_mask = np.asarray(payload['valid_mask'], dtype=bool) if 'valid_mask' in payload else np.ones(expected_shape, dtype=bool)
-        times = np.asarray(payload['times'], dtype=np.float64) if 'times' in payload else np.asarray([0.0], dtype=np.float64)
+        if valid_mask.shape != expected_shape:
+            raise ValueError(f'Field valid_mask shape mismatch: expected {expected_shape}, got {valid_mask.shape}')
+        support_phi = None
+        if 'support_phi' in payload:
+            support_phi = np.asarray(payload['support_phi'], dtype=np.float64)
+            if support_phi.shape != expected_shape:
+                raise ValueError(f'Field support_phi shape mismatch: expected {expected_shape}, got {support_phi.shape}')
+        times = _read_times(payload)
         metadata = _read_metadata(payload)
         reserved = {
-            'axis_0', 'axis_1', 'axis_2', 'times', 'valid_mask', 'metadata_json',
+            'axis_0', 'axis_1', 'axis_2', 'times', 'valid_mask', 'support_phi', 'metadata_json',
             'sdf', 'part_id_map', 'nearest_boundary_part_id_map', 'normal_0', 'normal_1', 'normal_2',
             'boundary_edges', 'boundary_edge_part_ids', 'boundary_triangles', 'boundary_triangle_part_ids',
             'boundary_loops_2d_flat', 'boundary_loops_2d_offsets',
@@ -171,6 +235,7 @@ def build_precomputed_field(
                 arr = data
             else:
                 continue
+            _validate_regular_quantity_values(key, arr, valid_mask, spatial_dim)
             quantities[key] = QuantitySeriesND(name=key, unit=_infer_unit(key), times=times, data=arr, metadata={})
     if not quantities:
         raise ValueError(f'No field quantities found in {npz_path}')
@@ -182,8 +247,15 @@ def build_precomputed_field(
         axes=field_axes,
         quantities=quantities,
         valid_mask=valid_mask,
+        support_phi=support_phi,
         time_mode='transient' if any_transient else 'steady',
-        metadata={'npz_path': str(npz_path), 'provider_kind': 'precomputed_npz', 'gas_density_kgm3': float(gas_density_kgm3), **metadata},
+        metadata={
+            'npz_path': str(npz_path),
+            'provider_kind': 'precomputed_npz',
+            'gas_density_kgm3': float(gas_density_kgm3),
+            'field_support_phi_kind': str(metadata.get('field_support_phi_kind', 'provider_support_phi' if support_phi is not None else '')),
+            **metadata,
+        },
     )
     return FieldProviderND(field=field, kind=str(metadata.get('provider_kind', 'precomputed_npz')))
 
@@ -201,14 +273,14 @@ def build_precomputed_triangle_mesh_field(
         if 'mesh_vertices' not in payload or 'mesh_triangles' not in payload:
             raise ValueError(f'Mesh field npz must include mesh_vertices and mesh_triangles: {npz_path}')
         mesh_vertices = np.asarray(payload['mesh_vertices'], dtype=np.float64)
-        mesh_triangles = np.asarray(payload['mesh_triangles'], dtype=np.int32)
-        if mesh_vertices.ndim != 2 or mesh_vertices.shape[1] != 2:
-            raise ValueError('mesh_vertices must have shape (n, 2)')
-        if mesh_triangles.ndim != 2 or mesh_triangles.shape[1] != 3:
-            raise ValueError('mesh_triangles must have shape (m, 3)')
-        times = np.asarray(payload['times'], dtype=np.float64) if 'times' in payload else np.asarray([0.0], dtype=np.float64)
+        triangles_raw = np.asarray(payload['mesh_triangles'])
+        if not np.issubdtype(triangles_raw.dtype, np.integer):
+            raise ValueError('mesh_triangles must use integer vertex indices')
+        mesh_triangles = triangles_raw.astype(np.int32, copy=False)
+        _validate_triangle_mesh(mesh_vertices, mesh_triangles)
+        times = _read_times(payload)
         metadata = _read_metadata(payload)
-        reserved = {'mesh_vertices', 'mesh_triangles', 'times', 'metadata_json'}
+        reserved = {'mesh_vertices', 'mesh_triangles', 'times', 'support_phi', 'metadata_json'}
         quantities: Dict[str, QuantitySeriesND] = {}
         expected_vertex_count = int(mesh_vertices.shape[0])
         for key in payload.files:
@@ -227,6 +299,7 @@ def build_precomputed_triangle_mesh_field(
                 arr = data
             else:
                 continue
+            _validate_mesh_quantity_values(key, arr)
             quantities[key] = QuantitySeriesND(name=key, unit=_infer_unit(key), times=times, data=arr, metadata={})
     if not quantities:
         raise ValueError(f'No mesh field quantities found in {npz_path}')

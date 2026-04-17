@@ -1,0 +1,58 @@
+[
+  {
+    "diameter_nm": 10,
+    "case_dir": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_10nm",
+    "config": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_10nm\\run_config.yaml",
+    "particle_count": 10000,
+    "density_kgm3": 2200.0,
+    "mass_kg": 1.1519173063162573e-21,
+    "charge_C": -4.787225491314775e-18,
+    "charge_e": -29.87951134553105,
+    "q_over_m_Ckg": -4155.876003481493,
+    "initial_speed_p50_mps": 388.0223782414248,
+    "initial_speed_p90_mps": 583.4374945667554,
+    "initial_speed_max_mps": 864.9032781916535
+  },
+  {
+    "diameter_nm": 20,
+    "case_dir": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_20nm",
+    "config": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_20nm\\run_config.yaml",
+    "particle_count": 10000,
+    "density_kgm3": 2200.0,
+    "mass_kg": 9.215338450530059e-21,
+    "charge_C": -9.57445098262955e-18,
+    "charge_e": -59.7590226910621,
+    "q_over_m_Ckg": -1038.9690008703733,
+    "initial_speed_p50_mps": 194.0111891207124,
+    "initial_speed_p90_mps": 291.7187472833777,
+    "initial_speed_max_mps": 432.45163909582675
+  },
+  {
+    "diameter_nm": 50,
+    "case_dir": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_50nm",
+    "config": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_50nm\\run_config.yaml",
+    "particle_count": 10000,
+    "density_kgm3": 2200.0,
+    "mass_kg": 1.439896632895322e-19,
+    "charge_C": -2.3936127456573874e-17,
+    "charge_e": -149.39755672765526,
+    "q_over_m_Ckg": -166.2350401392597,
+    "initial_speed_p50_mps": 77.60447564828495,
+    "initial_speed_p90_mps": 116.68749891335105,
+    "initial_speed_max_mps": 172.9806556383307
+  },
+  {
+    "diameter_nm": 100,
+    "case_dir": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_100nm",
+    "config": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_diameter_sweep\\sio2_100nm\\run_config.yaml",
+    "particle_count": 10000,
+    "density_kgm3": 2200.0,
+    "mass_kg": 1.1519173063162576e-18,
+    "charge_C": -4.787225491314775e-17,
+    "charge_e": -298.7951134553105,
+    "q_over_m_Ckg": -41.558760034814924,
+    "initial_speed_p50_mps": 38.80223782414247,
+    "initial_speed_p90_mps": 58.343749456675525,
+    "initial_speed_max_mps": 86.49032781916534
+  }
+]

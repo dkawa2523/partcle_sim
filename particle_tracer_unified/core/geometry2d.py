@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict, Tuple
 
 import numpy as np
+from numba import njit
 
 
 def _boundary_edge_graph_2d(
@@ -155,6 +156,109 @@ def points_inside_boundary_loops_2d_with_boundary(
         interior ^= (np.sum(crossings, axis=1) % 2 == 1)
     inside = interior | on_boundary
     return inside, on_boundary
+
+
+@njit(cache=True)
+def _points_inside_boundary_edges_2d_with_boundary_kernel(
+    points: np.ndarray,
+    edges: np.ndarray,
+    on_edge_tol: float,
+) -> Tuple[np.ndarray, np.ndarray]:
+    n_points = points.shape[0]
+    n_edges = edges.shape[0]
+    inside = np.zeros(n_points, dtype=np.bool_)
+    on_boundary = np.zeros(n_points, dtype=np.bool_)
+    tol = on_edge_tol if np.isfinite(on_edge_tol) and on_edge_tol > 0.0 else 0.0
+    tol2 = tol * tol
+    for i in range(n_points):
+        x = points[i, 0]
+        y = points[i, 1]
+        interior = False
+        boundary = False
+        for edge_idx in range(n_edges):
+            x0 = edges[edge_idx, 0, 0]
+            y0 = edges[edge_idx, 0, 1]
+            x1 = edges[edge_idx, 1, 0]
+            y1 = edges[edge_idx, 1, 1]
+            dx = x1 - x0
+            dy = y1 - y0
+            edge_len2 = dx * dx + dy * dy
+            if edge_len2 <= 1.0e-30:
+                continue
+            if tol > 0.0:
+                t = ((x - x0) * dx + (y - y0) * dy) / edge_len2
+                if t < 0.0:
+                    t = 0.0
+                elif t > 1.0:
+                    t = 1.0
+                proj_x = x0 + t * dx
+                proj_y = y0 + t * dy
+                dist2 = (x - proj_x) * (x - proj_x) + (y - proj_y) * (y - proj_y)
+                if dist2 <= tol2:
+                    boundary = True
+            crosses = (y0 > y) != (y1 > y)
+            if crosses:
+                denom = y1 - y0
+                if abs(denom) > 1.0e-30:
+                    x_cross = x0 + (y - y0) * dx / denom
+                    if x_cross > x:
+                        interior = not interior
+        inside[i] = interior or boundary
+        on_boundary[i] = boundary
+    return inside, on_boundary
+
+
+def points_inside_boundary_edges_2d_with_boundary(
+    points: np.ndarray,
+    boundary_edges: np.ndarray,
+    on_edge_tol: float = 1.0e-9,
+) -> Tuple[np.ndarray, np.ndarray]:
+    pts = np.asarray(points, dtype=np.float64)
+    edges = np.asarray(boundary_edges, dtype=np.float64)
+    if pts.ndim != 2 or pts.shape[1] != 2 or edges.ndim != 3 or edges.shape[1:] != (2, 2) or edges.shape[0] == 0:
+        empty = np.zeros(pts.shape[0], dtype=bool)
+        return empty, empty.copy()
+    return _points_inside_boundary_edges_2d_with_boundary_kernel(pts, edges, float(on_edge_tol))
+
+
+def point_inside_boundary_edges_2d_with_boundary(
+    point: np.ndarray,
+    boundary_edges: np.ndarray,
+    on_edge_tol: float = 1.0e-9,
+) -> Tuple[bool, bool]:
+    p = np.asarray(point, dtype=np.float64)
+    edges = np.asarray(boundary_edges, dtype=np.float64)
+    if p.ndim != 1 or p.size != 2 or edges.ndim != 3 or edges.shape[1:] != (2, 2) or edges.shape[0] == 0:
+        return False, False
+    tol = float(on_edge_tol) if np.isfinite(on_edge_tol) else 0.0
+    tol = max(0.0, tol)
+    x = float(p[0])
+    y = float(p[1])
+    x0 = edges[:, 0, 0]
+    y0 = edges[:, 0, 1]
+    x1 = edges[:, 1, 0]
+    y1 = edges[:, 1, 1]
+    dx = x1 - x0
+    dy = y1 - y0
+    edge_len2 = dx * dx + dy * dy
+    valid_edge = edge_len2 > 1.0e-30
+
+    on_boundary = False
+    if tol > 0.0 and np.any(valid_edge):
+        t = np.zeros(edges.shape[0], dtype=np.float64)
+        t[valid_edge] = ((x - x0[valid_edge]) * dx[valid_edge] + (y - y0[valid_edge]) * dy[valid_edge]) / edge_len2[valid_edge]
+        t = np.clip(t, 0.0, 1.0)
+        proj_x = x0 + t * dx
+        proj_y = y0 + t * dy
+        dist2 = (x - proj_x) ** 2 + (y - proj_y) ** 2
+        on_boundary = bool(np.any(valid_edge & (dist2 <= tol * tol)))
+
+    denom = y1 - y0
+    denom_safe = np.where(np.abs(denom) <= 1.0e-30, 1.0, denom)
+    cond = (y0 > y) != (y1 > y)
+    x_cross = x0 + (y - y0) * dx / denom_safe
+    interior = bool((int(np.count_nonzero(cond & (x_cross > x))) % 2) == 1)
+    return bool(interior or on_boundary), bool(on_boundary)
 
 
 def points_inside_boundary_loops_2d(

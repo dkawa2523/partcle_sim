@@ -1,4 +1,0 @@
-particle_id,release_time,source_part_id,material_id,source_event_tag,x,vx,y,vy
-1,0.0,10,1,,-0.8,0.2,-0.2,0.0
-2,0.2,20,2,,-0.7,0.1,0.2,0.0
-3,0.4,10,1,,-0.6,0.0,0.0,0.0

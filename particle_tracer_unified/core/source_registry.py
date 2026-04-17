@@ -35,7 +35,7 @@ SOURCE_LAWS: Dict[str, SourceLawDef] = {
     'flake_burst_material': SourceLawDef(
         'flake_burst_material',
         5,
-        'Normal escape source with burst envelope in time, suitable for recipe transitions or crack-flake ejection bursts.',
+        'Normal escape source with a time burst envelope for crack-flake ejection bursts.',
         FLAKE_BURST_SOURCE_PARAMETERS,
     ),
     'resuspension_shear_material': SourceLawDef(

@@ -45,6 +45,8 @@ def midpoint_local_dt(elapsed, dt_sub, target_dt):
 
 @njit(cache=True)
 def mask_bilinear_status(mask2d, xs, ys, x, y):
+    if x < xs[0] or x > xs[xs.size - 1] or y < ys[0] or y > ys[ys.size - 1]:
+        return VALID_MASK_STATUS_HARD_INVALID
     ix0, ix1, ax = locate_axis(xs, x)
     iy0, iy1, ay = locate_axis(ys, y)
     c00 = mask2d[ix0, iy0]
@@ -68,6 +70,8 @@ def mask_bilinear_status(mask2d, xs, ys, x, y):
 
 @njit(cache=True)
 def mask_bilinear_point_valid(mask2d, xs, ys, x, y):
+    if x < xs[0] or x > xs[xs.size - 1] or y < ys[0] or y > ys[ys.size - 1]:
+        return False
     ix0, ix1, ax = locate_axis(xs, x)
     iy0, iy1, ay = locate_axis(ys, y)
     v00 = 1.0 if mask2d[ix0, iy0] else 0.0
@@ -86,6 +90,15 @@ def mask_bilinear_has_invalid(mask2d, xs, ys, x, y):
 
 @njit(cache=True)
 def mask_trilinear_status(mask3d, xs, ys, zs, x, y, z):
+    if (
+        x < xs[0]
+        or x > xs[xs.size - 1]
+        or y < ys[0]
+        or y > ys[ys.size - 1]
+        or z < zs[0]
+        or z > zs[zs.size - 1]
+    ):
+        return VALID_MASK_STATUS_HARD_INVALID
     ix0, ix1, ax = locate_axis(xs, x)
     iy0, iy1, ay = locate_axis(ys, y)
     iz0, iz1, az = locate_axis(zs, z)
@@ -131,6 +144,15 @@ def mask_trilinear_status(mask3d, xs, ys, zs, x, y, z):
 
 @njit(cache=True)
 def mask_trilinear_point_valid(mask3d, xs, ys, zs, x, y, z):
+    if (
+        x < xs[0]
+        or x > xs[xs.size - 1]
+        or y < ys[0]
+        or y > ys[ys.size - 1]
+        or z < zs[0]
+        or z > zs[zs.size - 1]
+    ):
+        return False
     ix0, ix1, ax = locate_axis(xs, x)
     iy0, iy1, ay = locate_axis(ys, y)
     iz0, iz1, az = locate_axis(zs, z)

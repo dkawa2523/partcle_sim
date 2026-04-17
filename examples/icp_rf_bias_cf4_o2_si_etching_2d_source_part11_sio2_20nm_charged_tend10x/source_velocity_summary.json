@@ -1,0 +1,52 @@
+{
+  "mode": "reflect_inward_normal_component",
+  "particle_count": 10000,
+  "position_columns": [
+    "x",
+    "y"
+  ],
+  "source_columns": [
+    "source_x",
+    "source_y"
+  ],
+  "velocity_columns": [
+    "vx",
+    "vy"
+  ],
+  "corrected_particle_count": 4092,
+  "inward_count_before": 4092,
+  "inward_count_after": 0,
+  "normal_speed_before_mps": {
+    "count": 10000,
+    "min": -260.0,
+    "p50": 37.49557192375916,
+    "p90": 193.03793402092145,
+    "max": 427.4557636631238,
+    "mean": 30.596752756293256
+  },
+  "normal_speed_after_mps": {
+    "count": 10000,
+    "min": 0.0124477000323094,
+    "p50": 103.53665876115164,
+    "p90": 213.4567912110917,
+    "max": 427.4557636631238,
+    "mean": 111.82545297450055
+  },
+  "speed_before_mps": {
+    "count": 10000,
+    "min": 49.754807902869956,
+    "p50": 193.65802086683155,
+    "p90": 291.1710758140146,
+    "max": 461.97863140421236,
+    "mean": 203.06075029206636
+  },
+  "speed_after_mps": {
+    "count": 10000,
+    "min": 49.754807902869956,
+    "p50": 193.65802086683155,
+    "p90": 291.1710758140146,
+    "max": 461.97863140421236,
+    "mean": 203.06075029206636
+  },
+  "note": "The source normal is inferred from release_position - source_position. Only inward normal components are reflected; speed magnitude is preserved."
+}

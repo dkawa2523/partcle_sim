@@ -1,3 +1,0 @@
-material_id,material_name,source_law,source_speed_scale,wall_law,wall_restitution,wall_diffuse_fraction,wall_stick_probability
-1,steel_sticky,explicit_csv,1.0,mixed_specular_diffuse,0.92,0.25,0.22
-2,ceramic_reflective,explicit_csv,1.0,mixed_specular_diffuse,0.95,0.3,0.08

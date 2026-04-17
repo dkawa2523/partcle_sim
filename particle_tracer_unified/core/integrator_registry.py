@@ -76,7 +76,7 @@ def get_integrator_spec(value: object, *, default: str = DEFAULT_INTEGRATOR) -> 
 def integrator_spec_from_mode(mode: object, *, default: str = DEFAULT_INTEGRATOR) -> IntegratorSpec:
     try:
         numeric_mode = int(mode)
-    except Exception:
+    except (TypeError, ValueError):
         return get_integrator_spec(default, default=default)
     return INTEGRATOR_MODE_TO_SPEC.get(numeric_mode, get_integrator_spec(default, default=default))
 

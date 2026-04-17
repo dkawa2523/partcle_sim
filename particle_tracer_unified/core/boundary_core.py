@@ -5,9 +5,14 @@ from typing import Callable, Optional, Tuple
 
 import numpy as np
 
-from .geometry2d import points_inside_boundary_loops_2d_with_boundary
+from .geometry2d import (
+    point_inside_boundary_edges_2d_with_boundary,
+    points_inside_boundary_edges_2d_with_boundary,
+    points_inside_boundary_loops_2d_with_boundary,
+)
 from .geometry3d import TriangleSurface3D, point_inside_surface
 from .grid_sampling import sample_grid_scalar as _sample_grid_scalar
+from .grid_sampling import sample_grid_scalar_points_2d as _sample_grid_scalar_points_2d
 
 
 @dataclass(frozen=True)
@@ -16,6 +21,16 @@ class BoundaryHit:
     normal: np.ndarray
     part_id: int
     alpha_hint: float = 0.0
+    primitive_id: int = -1
+    primitive_kind: str = 'unknown'
+    is_ambiguous: bool = False
+
+    def local_signed_distance(self, position: np.ndarray) -> float:
+        normal = np.asarray(self.normal, dtype=np.float64)
+        normal_mag = float(np.linalg.norm(normal))
+        if normal_mag <= 1.0e-30:
+            return float('nan')
+        return float(np.dot(np.asarray(position, dtype=np.float64) - np.asarray(self.position, dtype=np.float64), normal / normal_mag))
 
 
 @dataclass(frozen=True)
@@ -63,6 +78,21 @@ def sample_geometry_sdf(runtime, position: np.ndarray) -> float:
     )
 
 
+def sample_geometry_sdf_points_2d(runtime, positions: np.ndarray) -> np.ndarray:
+    pts = np.asarray(positions, dtype=np.float64)
+    if pts.ndim != 2 or pts.shape[1] != 2:
+        raise ValueError('2D SDF sampling requires shape (n, 2)')
+    if runtime.geometry_provider is None:
+        return np.full(pts.shape[0], np.nan, dtype=np.float64)
+    geom = runtime.geometry_provider.geometry
+    if int(geom.spatial_dim) != 2:
+        return np.full(pts.shape[0], np.nan, dtype=np.float64)
+    try:
+        return _sample_grid_scalar_points_2d(np.asarray(geom.sdf, dtype=np.float64), geom.axes, pts)
+    except Exception:
+        return np.full(pts.shape[0], np.nan, dtype=np.float64)
+
+
 def sample_geometry_part_id(runtime, position: np.ndarray) -> int:
     if runtime.geometry_provider is None:
         return 0
@@ -72,6 +102,8 @@ def sample_geometry_part_id(runtime, position: np.ndarray) -> int:
         geom.axes,
         np.asarray(position, dtype=np.float64),
     )
+    if not np.isfinite(value):
+        return 0
     return int(max(0, round(value)))
 
 
@@ -122,6 +154,16 @@ def points_inside_geometry_2d(
     inside = np.zeros(pts.shape[0], dtype=bool)
     on_boundary = np.zeros(pts.shape[0], dtype=bool)
     geometry_provider = runtime.geometry_provider
+    if geometry_provider is not None and geometry_provider.geometry.boundary_edges is not None:
+        if np.any(bbox):
+            inside_bbox, on_boundary_bbox = points_inside_boundary_edges_2d_with_boundary(
+                pts[bbox],
+                geometry_provider.geometry.boundary_edges,
+                on_edge_tol=float(on_boundary_tol_m),
+            )
+            inside[bbox] = inside_bbox
+            on_boundary[bbox] = on_boundary_bbox
+        return (inside, on_boundary) if return_on_boundary else inside
     if geometry_provider is not None and geometry_provider.geometry.boundary_loops_2d:
         if np.any(bbox):
             inside_bbox, on_boundary_bbox = points_inside_boundary_loops_2d_with_boundary(
@@ -150,6 +192,12 @@ def inside_geometry_with_boundary(
         return False, False
     geometry_provider = runtime.geometry_provider
     if geometry_provider is not None and int(geometry_provider.geometry.spatial_dim) == 2 and geometry_provider.geometry.boundary_loops_2d:
+        if geometry_provider.geometry.boundary_edges is not None:
+            return point_inside_boundary_edges_2d_with_boundary(
+                pos,
+                geometry_provider.geometry.boundary_edges,
+                on_edge_tol=float(on_boundary_tol_m),
+            )
         inside, on_boundary = points_inside_geometry_2d(
             runtime,
             pos[None, :],
@@ -193,4 +241,5 @@ __all__ = (
     'sample_geometry_normal',
     'sample_geometry_part_id',
     'sample_geometry_sdf',
+    'sample_geometry_sdf_points_2d',
 )

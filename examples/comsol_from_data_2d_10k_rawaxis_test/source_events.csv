@@ -1,2 +1,0 @@
-event_id,event_name,event_kind,enabled,center_s,sigma_s,amplitude,bind_step_name,time_anchor
-1,start_boost,gaussian_burst,1,0.04,0.02,0.2,run,step_start

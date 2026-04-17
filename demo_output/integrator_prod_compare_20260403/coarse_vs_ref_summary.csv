@@ -1,4 +1,0 @@
-integrator,coarse_wall_seconds,ref_wall_seconds,runtime_ratio_coarse_vs_ref,coarse_primary_hit_count,ref_primary_hit_count,primary_hit_ratio_coarse_over_ref,coarse_stuck_count,ref_stuck_count,stuck_rel_error_vs_ref,class_match_ratio_vs_ref,coarse_unresolved_crossing_count,ref_unresolved_crossing_count
-drag_relaxation,16.373,39.664,0.4127924566357402,15551,14900,1.0436912751677851,1811,1764,0.026643990929705215,0.9905,0,0
-etd,16.855,41.199,0.4091118716473701,15316,15057,1.0172013017201302,1816,1764,0.02947845804988662,0.9908,0,0
-etd2,24.502,64.627,0.37912946601265723,10811,12501,0.8648108151347892,1358,1498,0.09345794392523364,0.9812,0,0

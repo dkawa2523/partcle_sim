@@ -8,24 +8,46 @@ from typing import Iterable, Mapping
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.collections import PolyCollection
+from matplotlib.collections import LineCollection, PolyCollection
+from matplotlib.patches import Patch
 
-from tools.state_contract import STATE_ORDER, classify_particle_states, final_state_counts as _final_state_counts
+from tools.state_contract import (
+    STATE_ORDER,
+    classify_particle_states,
+    final_state_counts as _final_state_counts,
+)
 
 STATE_COLORS = {
-    "active": "#1f77b4",
+    "active_total": "#1f77b4",
+    "active_free_flight": "#1f77b4",
+    "contact_sliding": "#17becf",
+    "contact_endpoint_stopped": "#bcbd22",
     "invalid_mask_stopped": "#8c564b",
+    "numerical_boundary_stopped": "#9467bd",
     "stuck": "#d62728",
     "escaped": "#ff7f0e",
     "absorbed": "#2ca02c",
+    "inactive": "#7f7f7f",
 }
 
 _STEP_STATE_COUNT_COLUMNS = {
-    "active": "active_count",
+    "active_total": "active_count",
+    "numerical_boundary_stopped": "numerical_boundary_stopped_count",
     "stuck": "stuck_count",
     "absorbed": "absorbed_count",
     "escaped": "escaped_count",
 }
+
+STEP_STATE_ORDER = (
+    "active_total",
+    "invalid_mask_stopped",
+    "numerical_boundary_stopped",
+    "stuck",
+    "absorbed",
+    "escaped",
+)
+
+SYNTHETIC_BOUNDARY_PART_ID_MIN = 9000
 
 
 def ensure_visualization_dirs(output_dir: Path, clean: bool = False) -> dict[str, Path]:
@@ -35,6 +57,9 @@ def ensure_visualization_dirs(output_dir: Path, clean: bool = False) -> dict[str
             legacy_dir = base / legacy
             if legacy_dir.exists() and legacy_dir.is_dir():
                 shutil.rmtree(legacy_dir)
+        existing_root = base / "visualizations"
+        if existing_root.exists() and existing_root.is_dir():
+            shutil.rmtree(existing_root)
     root = base / "visualizations"
     dirs = {
         "root": root,
@@ -44,8 +69,8 @@ def ensure_visualization_dirs(output_dir: Path, clean: bool = False) -> dict[str
         "boundary_diagnostics": root / "boundary_diagnostics",
         "reports": root / "reports",
     }
-    for path in dirs.values():
-        path.mkdir(parents=True, exist_ok=True)
+    dirs["root"].mkdir(parents=True, exist_ok=True)
+    dirs["reports"].mkdir(parents=True, exist_ok=True)
     return dirs
 
 
@@ -54,6 +79,160 @@ def write_visualization_index(output_dir: Path, payload: Mapping[str, object]) -
     index_path = dirs["reports"] / "visualization_index.json"
     index_path.write_text(json.dumps(dict(payload), indent=2), encoding="utf-8")
     return index_path
+
+
+def _read_json_if_exists(path: Path) -> dict[str, object]:
+    if not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else {}
+
+
+def _int_from_reports(key: str, *reports: Mapping[str, object], default: int = 0) -> int:
+    for report in reports:
+        if key in report:
+            try:
+                return int(report[key])
+            except (TypeError, ValueError):
+                return int(default)
+    return int(default)
+
+
+def _optional_float_from_reports(key: str, *reports: Mapping[str, object]) -> float | None:
+    for report in reports:
+        if key in report:
+            try:
+                return float(report[key])
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def _format_optional_seconds(value: object) -> str:
+    try:
+        if value is None:
+            return "not_recorded"
+        return f"{float(value):.3f}"
+    except (TypeError, ValueError):
+        return "not_recorded"
+
+
+def build_run_health_summary(output_dir: Path) -> dict[str, object]:
+    base = Path(output_dir)
+    report = _read_json_if_exists(base / "solver_report.json")
+    diagnostics = _read_json_if_exists(base / "collision_diagnostics.json")
+    timing_raw = report.get("timing_s", report.get("timing", {}))
+    timing = timing_raw if isinstance(timing_raw, Mapping) else {}
+    raw_memory = report.get("memory_estimate_bytes", report.get("memory", {}))
+    memory = raw_memory if isinstance(raw_memory, Mapping) else {}
+    final_csv = base / "final_particles.csv"
+    state_counts: dict[str, int] = {}
+    if final_csv.exists():
+        try:
+            state_counts = final_state_counts(pd.read_csv(final_csv))
+        except (OSError, ValueError, pd.errors.ParserError):
+            state_counts = {}
+    health = {
+        "particle_count": _int_from_reports("particle_count", report, diagnostics, default=sum(state_counts.values())),
+        "released_count": _int_from_reports("released_count", report, diagnostics),
+        "invalid_mask_stopped_count": _int_from_reports("invalid_mask_stopped_count", report, diagnostics),
+        "numerical_boundary_stopped_count": _int_from_reports("numerical_boundary_stopped_count", report, diagnostics),
+        "stuck_count": _int_from_reports("stuck_count", report, diagnostics),
+        "absorbed_count": _int_from_reports("absorbed_count", report, diagnostics),
+        "field_support_exit_count": _int_from_reports("field_support_exit_count", report, diagnostics),
+        "physical_absorbed_count": _int_from_reports("physical_absorbed_count", report, diagnostics),
+        "max_hits_reached_count": _int_from_reports("max_hits_reached_count", report, diagnostics),
+        "unresolved_crossing_count": _int_from_reports("unresolved_crossing_count", report, diagnostics),
+        "nearest_projection_fallback_count": _int_from_reports("nearest_projection_fallback_count", report, diagnostics),
+        "boundary_event_failure_count": _int_from_reports("boundary_event_failure_count", report, diagnostics),
+        "boundary_event_contract_passed": _int_from_reports("boundary_event_contract_passed", report, diagnostics),
+        "contact_sliding_particle_count": int(
+            state_counts.get(
+                "contact_sliding",
+                _int_from_reports("contact_sliding_particle_count", report, diagnostics),
+            )
+        ),
+        "contact_endpoint_stopped_count": int(
+            state_counts.get(
+                "contact_endpoint_stopped",
+                _int_from_reports("contact_endpoint_stopped_count", report, diagnostics),
+            )
+        ),
+        "contact_tangent_step_count": _int_from_reports("contact_tangent_step_count", report, diagnostics),
+        "active_outside_geometry_count": _int_from_reports("active_outside_geometry_count", report, diagnostics),
+        "contact_sliding_outside_geometry_count": _int_from_reports("contact_sliding_outside_geometry_count", report, diagnostics),
+        "nonfinite_position_count": _int_from_reports("nonfinite_position_count", report, diagnostics),
+        "nonfinite_velocity_count": _int_from_reports("nonfinite_velocity_count", report, diagnostics),
+        "solver_core_s": _optional_float_from_reports("solver_core_s", timing, report, diagnostics),
+        "estimated_numpy_bytes": _int_from_reports("estimated_numpy_bytes", memory),
+        "final_state_counts": state_counts,
+    }
+    failure_keys = (
+        "invalid_mask_stopped_count",
+        "numerical_boundary_stopped_count",
+        "max_hits_reached_count",
+        "unresolved_crossing_count",
+        "nearest_projection_fallback_count",
+        "boundary_event_failure_count",
+        "active_outside_geometry_count",
+        "contact_sliding_outside_geometry_count",
+        "nonfinite_position_count",
+        "nonfinite_velocity_count",
+    )
+    failed = any(int(health.get(key, 0)) > 0 for key in failure_keys)
+    if int(health.get("boundary_event_contract_passed", 1)) == 0:
+        failed = True
+    health["status"] = "pass" if not failed else "review"
+    return health
+
+
+def write_run_summary(output_dir: Path, payload: Mapping[str, object]) -> Path:
+    dirs = ensure_visualization_dirs(output_dir, clean=False)
+    health = dict(payload.get("health_summary", {})) if isinstance(payload.get("health_summary", {}), Mapping) else {}
+    modules = payload.get("modules", {})
+    module_names = sorted(modules.keys()) if isinstance(modules, Mapping) else []
+    lines = [
+        "# Run Summary",
+        "",
+        f"- status: {health.get('status', 'unknown')}",
+        f"- output_dir: {Path(output_dir).resolve()}",
+        f"- particles: {health.get('particle_count', 0)}",
+        f"- released: {health.get('released_count', 0)}",
+        f"- solver_core_s: {_format_optional_seconds(health.get('solver_core_s'))}",
+        f"- estimated_numpy_bytes: {health.get('estimated_numpy_bytes', 0)}",
+        "",
+        "## Solver Health",
+        "",
+    ]
+    for key in (
+        "invalid_mask_stopped_count",
+        "numerical_boundary_stopped_count",
+        "max_hits_reached_count",
+        "unresolved_crossing_count",
+        "nearest_projection_fallback_count",
+        "boundary_event_failure_count",
+        "contact_sliding_particle_count",
+        "contact_endpoint_stopped_count",
+        "active_outside_geometry_count",
+        "contact_sliding_outside_geometry_count",
+        "nonfinite_position_count",
+        "nonfinite_velocity_count",
+    ):
+        lines.append(f"- {key}: {health.get(key, 0)}")
+    state_counts = health.get("final_state_counts", {})
+    if isinstance(state_counts, Mapping) and state_counts:
+        lines.extend(["", "## Final States", ""])
+        for name, count in state_counts.items():
+            lines.append(f"- {name}: {count}")
+    lines.extend(["", "## Visualization Modules", ""])
+    if module_names:
+        for name in module_names:
+            lines.append(f"- {name}")
+    else:
+        lines.append("- none")
+    summary_path = dirs["reports"] / "run_summary.md"
+    summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return summary_path
 
 
 def resolve_positions_path(output_dir: Path) -> tuple[Path, int]:
@@ -82,7 +261,27 @@ def load_boundary_geometry(case_dir: Path | None) -> tuple[np.ndarray | None, np
         return None, None
     if part_ids is not None and part_ids.shape[0] != edges.shape[0]:
         part_ids = None
-    return edges, part_ids
+    return filter_display_boundary_geometry(edges, part_ids)
+
+
+def filter_display_boundary_geometry(
+    boundary_edges: np.ndarray | None,
+    boundary_part_ids: np.ndarray | None,
+    *,
+    synthetic_part_id_min: int = SYNTHETIC_BOUNDARY_PART_ID_MIN,
+) -> tuple[np.ndarray | None, np.ndarray | None]:
+    if boundary_edges is None:
+        return None, None
+    edges = np.asarray(boundary_edges, dtype=np.float64)
+    if edges.ndim != 3 or edges.shape[1:] != (2, 2) or edges.shape[0] == 0:
+        return None, None
+    if boundary_part_ids is None:
+        return edges, None
+    part_ids = np.asarray(boundary_part_ids, dtype=np.int32)
+    if part_ids.shape[0] != edges.shape[0]:
+        return edges, None
+    keep = part_ids < int(synthetic_part_id_min)
+    return edges[keep], part_ids[keep]
 
 
 def load_boundary_edges(case_dir: Path | None) -> np.ndarray | None:
@@ -286,6 +485,8 @@ def draw_boundary_edges(
     *,
     linewidth: float = 1.0,
     alpha: float = 0.9,
+    label_part_ids: bool = False,
+    label_fontsize: float = 8.0,
 ) -> None:
     if boundary_edges is None:
         return
@@ -302,11 +503,383 @@ def draw_boundary_edges(
             ax.plot(seg[:, 0], seg[:, 1], color="k", linewidth=linewidth, alpha=alpha)
         return
     unique = np.unique(pids)
-    cmap = plt.get_cmap("tab20")
-    denom = max(1, len(unique) - 1)
-    color_map = {int(pid): cmap(i / denom) for i, pid in enumerate(unique)}
-    for seg, pid in zip(segs, pids):
-        ax.plot(seg[:, 0], seg[:, 1], color=color_map.get(int(pid), "k"), linewidth=linewidth, alpha=alpha)
+    for seg in segs:
+        ax.plot(seg[:, 0], seg[:, 1], color="k", linewidth=linewidth, alpha=alpha)
+    if label_part_ids:
+        for pid in unique:
+            mask = pids == pid
+            if not np.any(mask):
+                continue
+            center = segs[mask].mean(axis=(0, 1))
+            ax.text(
+                float(center[0]),
+                float(center[1]),
+                str(int(pid)),
+                fontsize=label_fontsize,
+                ha="center",
+                va="center",
+                color="black",
+                bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "edgecolor": "none", "alpha": 0.72},
+                zorder=5,
+            )
+
+
+def _domain_part_polygons(
+    mesh_vertices: np.ndarray | None,
+    mesh_triangles: np.ndarray | None = None,
+    mesh_triangle_part_ids: np.ndarray | None = None,
+    mesh_quads: np.ndarray | None = None,
+    mesh_quad_part_ids: np.ndarray | None = None,
+) -> tuple[list[np.ndarray], np.ndarray]:
+    if mesh_vertices is None:
+        return [], np.zeros(0, dtype=np.int32)
+    verts = np.asarray(mesh_vertices, dtype=np.float64)
+    polygons: list[np.ndarray] = []
+    part_ids: list[int] = []
+
+    if mesh_triangles is not None:
+        tri = np.asarray(mesh_triangles, dtype=np.int32)
+        tri_ids = np.asarray(mesh_triangle_part_ids, dtype=np.int32) if mesh_triangle_part_ids is not None else None
+        if tri.ndim == 2 and tri.shape[1] == 3 and tri.size:
+            polygons.extend([verts[t] for t in tri])
+            if tri_ids is not None and tri_ids.shape[0] == tri.shape[0]:
+                part_ids.extend(int(pid) for pid in tri_ids)
+            else:
+                part_ids.extend([0] * tri.shape[0])
+
+    if mesh_quads is not None:
+        quads = np.asarray(mesh_quads, dtype=np.int32)
+        quad_ids = np.asarray(mesh_quad_part_ids, dtype=np.int32) if mesh_quad_part_ids is not None else None
+        if quads.ndim == 2 and quads.shape[1] == 4 and quads.size:
+            polygons.extend([verts[q] for q in quads])
+            if quad_ids is not None and quad_ids.shape[0] == quads.shape[0]:
+                part_ids.extend(int(pid) for pid in quad_ids)
+            else:
+                part_ids.extend([0] * quads.shape[0])
+
+    return polygons, np.asarray(part_ids, dtype=np.int32)
+
+
+def _domain_summary_status(support_fraction: float) -> str:
+    if support_fraction >= 0.50:
+        return "solver_medium_region"
+    if support_fraction > 0.0:
+        return "device_part_touching_solver_field"
+    return "device_part_no_solver_field"
+
+
+def domain_part_medium_summary(
+    mesh_vertices: np.ndarray | None,
+    mesh_triangles: np.ndarray | None,
+    mesh_triangle_part_ids: np.ndarray | None,
+    mesh_quads: np.ndarray | None,
+    mesh_quad_part_ids: np.ndarray | None,
+    axis_0: np.ndarray | None,
+    axis_1: np.ndarray | None,
+    valid_mask: np.ndarray | None,
+) -> pd.DataFrame:
+    """Classify COMSOL domain part IDs by overlap with solver field support.
+
+    COMSOL geometry can contain device parts that touch the solver medium.
+    Those are still parts, not "partial medium"; the support fraction is only
+    a diagnostic of how the field grid overlaps each COMSOL domain ID.
+    """
+    polygons, pids = _domain_part_polygons(
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+    )
+    columns = [
+        "part_id",
+        "element_count",
+        "field_supported_element_count",
+        "support_fraction",
+        "medium_status",
+        "x_min_m",
+        "x_max_m",
+        "y_min_m",
+        "y_max_m",
+    ]
+    if not polygons:
+        return pd.DataFrame(columns=columns)
+    axes_ok = axis_0 is not None and axis_1 is not None and valid_mask is not None
+    if axes_ok:
+        xs = np.asarray(axis_0, dtype=np.float64)
+        ys = np.asarray(axis_1, dtype=np.float64)
+        mask = np.asarray(valid_mask, dtype=bool)
+        axes_ok = xs.ndim == 1 and ys.ndim == 1 and mask.shape == (xs.size, ys.size) and xs.size > 1 and ys.size > 1
+    supported = np.zeros(len(polygons), dtype=bool)
+    if axes_ok:
+        centroids = np.asarray([poly.mean(axis=0) for poly in polygons], dtype=np.float64)
+        ix = np.searchsorted(xs, centroids[:, 0], side="left")
+        iy = np.searchsorted(ys, centroids[:, 1], side="left")
+        ix = np.clip(ix, 0, xs.size - 1)
+        iy = np.clip(iy, 0, ys.size - 1)
+        prev_ix = np.clip(ix - 1, 0, xs.size - 1)
+        prev_iy = np.clip(iy - 1, 0, ys.size - 1)
+        ix = np.where(np.abs(xs[prev_ix] - centroids[:, 0]) < np.abs(xs[ix] - centroids[:, 0]), prev_ix, ix)
+        iy = np.where(np.abs(ys[prev_iy] - centroids[:, 1]) < np.abs(ys[iy] - centroids[:, 1]), prev_iy, iy)
+        supported = mask[ix, iy]
+
+    rows: list[dict[str, object]] = []
+    for pid in np.unique(pids):
+        elem_idx = np.flatnonzero(pids == pid)
+        pts = np.vstack([polygons[int(i)] for i in elem_idx])
+        count = int(elem_idx.size)
+        supported_count = int(np.count_nonzero(supported[elem_idx])) if axes_ok else 0
+        fraction = float(supported_count / count) if count else 0.0
+        rows.append(
+            {
+                "part_id": int(pid),
+                "element_count": count,
+                "field_supported_element_count": supported_count,
+                "support_fraction": fraction,
+                "medium_status": _domain_summary_status(fraction),
+                "x_min_m": float(np.nanmin(pts[:, 0])),
+                "x_max_m": float(np.nanmax(pts[:, 0])),
+                "y_min_m": float(np.nanmin(pts[:, 1])),
+                "y_max_m": float(np.nanmax(pts[:, 1])),
+            }
+        )
+    return pd.DataFrame(rows, columns=columns).sort_values("part_id").reset_index(drop=True)
+
+
+def medium_status_by_part(summary: pd.DataFrame | None) -> dict[int, str]:
+    if summary is None or summary.empty or not {"part_id", "medium_status"}.issubset(summary.columns):
+        return {}
+    aliases = {
+        "active_medium": "solver_medium_region",
+        "partial_field_support": "device_part_touching_solver_field",
+        "no_medium_or_no_field": "device_part_no_solver_field",
+    }
+    return {int(row["part_id"]): aliases.get(str(row["medium_status"]), str(row["medium_status"])) for _, row in summary.iterrows()}
+
+
+def _domain_outline_segments(polygons: list[np.ndarray], part_ids: np.ndarray) -> dict[int, list[np.ndarray]]:
+    out: dict[int, list[np.ndarray]] = {}
+    if not polygons:
+        return out
+    for pid in np.unique(part_ids):
+        counts: dict[tuple[tuple[float, float], tuple[float, float]], int] = {}
+        segments: dict[tuple[tuple[float, float], tuple[float, float]], np.ndarray] = {}
+        for poly in [polygons[int(i)] for i in np.flatnonzero(part_ids == pid)]:
+            n = int(poly.shape[0])
+            for i in range(n):
+                a = tuple(np.round(poly[i], 12).tolist())
+                b = tuple(np.round(poly[(i + 1) % n], 12).tolist())
+                key = (a, b) if a <= b else (b, a)
+                counts[key] = counts.get(key, 0) + 1
+                segments[key] = np.asarray([poly[i], poly[(i + 1) % n]], dtype=np.float64)
+        out[int(pid)] = [segments[key] for key, count in counts.items() if count == 1]
+    return out
+
+
+def draw_domain_part_outlines(
+    ax: plt.Axes,
+    mesh_vertices: np.ndarray | None,
+    mesh_triangles: np.ndarray | None = None,
+    mesh_triangle_part_ids: np.ndarray | None = None,
+    mesh_quads: np.ndarray | None = None,
+    mesh_quad_part_ids: np.ndarray | None = None,
+    *,
+    color: str = "#222222",
+    linewidth: float = 0.65,
+    alpha: float = 0.95,
+    label_part_ids: bool = False,
+    label_fontsize: float = 8.0,
+) -> None:
+    polygons, pids = _domain_part_polygons(
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+    )
+    if not polygons:
+        return
+    outlines = _domain_outline_segments(polygons, pids)
+    for segments in outlines.values():
+        if segments:
+            ax.add_collection(LineCollection(segments, colors=color, linewidths=linewidth, alpha=alpha, zorder=4))
+    if label_part_ids:
+        for pid in np.unique(pids):
+            mask = pids == pid
+            if not np.any(mask):
+                continue
+            pts = np.vstack([polygons[i] for i in np.flatnonzero(mask)])
+            center = pts.mean(axis=0)
+            ax.text(
+                float(center[0]),
+                float(center[1]),
+                str(int(pid)),
+                fontsize=label_fontsize,
+                ha="center",
+                va="center",
+                color="black",
+                bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "edgecolor": "#777777", "alpha": 0.84},
+                zorder=6,
+            )
+
+
+def draw_domain_parts(
+    ax: plt.Axes,
+    mesh_vertices: np.ndarray | None,
+    mesh_triangles: np.ndarray | None = None,
+    mesh_triangle_part_ids: np.ndarray | None = None,
+    mesh_quads: np.ndarray | None = None,
+    mesh_quad_part_ids: np.ndarray | None = None,
+    *,
+    alpha: float = 0.24,
+    linewidth: float = 0.08,
+    edgecolor: str = "#ffffff",
+    label_part_ids: bool = False,
+    label_fontsize: float = 8.0,
+) -> None:
+    polygons, pids = _domain_part_polygons(
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+    )
+    if not polygons:
+        return
+    unique = np.unique(pids)
+    facecolors = ["#e6e6e6" for _ in pids]
+    coll = PolyCollection(
+        polygons,
+        facecolors=facecolors,
+        edgecolors=edgecolor,
+        linewidths=linewidth,
+        alpha=alpha,
+        zorder=0,
+    )
+    ax.add_collection(coll)
+    draw_domain_part_outlines(
+        ax,
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+        color="#333333",
+        linewidth=max(0.40, linewidth * 5.0),
+        alpha=0.80,
+        label_part_ids=False,
+    )
+
+    if label_part_ids:
+        for pid in unique:
+            mask = pids == pid
+            if not np.any(mask):
+                continue
+            pts = np.vstack([polygons[i] for i in np.flatnonzero(mask)])
+            center = pts.mean(axis=0)
+            ax.text(
+                float(center[0]),
+                float(center[1]),
+                str(int(pid)),
+                fontsize=label_fontsize,
+                ha="center",
+                va="center",
+                color="black",
+                bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "edgecolor": "none", "alpha": 0.78},
+                zorder=5,
+            )
+
+
+def draw_domain_parts_by_medium(
+    ax: plt.Axes,
+    mesh_vertices: np.ndarray | None,
+    mesh_triangles: np.ndarray | None = None,
+    mesh_triangle_part_ids: np.ndarray | None = None,
+    mesh_quads: np.ndarray | None = None,
+    mesh_quad_part_ids: np.ndarray | None = None,
+    *,
+    medium_summary: pd.DataFrame | None = None,
+    alpha: float = 0.36,
+    linewidth: float = 0.06,
+    edgecolor: str = "#ffffff",
+    label_part_ids: bool = False,
+    label_fontsize: float = 8.0,
+    show_legend: bool = False,
+) -> None:
+    polygons, pids = _domain_part_polygons(
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+    )
+    if not polygons:
+        return
+    status_map = medium_status_by_part(medium_summary)
+    unique = np.unique(pids)
+    status_colors = {
+        "solver_medium_region": "#f7f7f7",
+        "device_part_touching_solver_field": "#eeeeee",
+        "device_part_no_solver_field": "#d9d9d9",
+    }
+    facecolors = []
+    for pid in pids:
+        status = status_map.get(int(pid), "solver_medium_region")
+        facecolors.append(status_colors.get(status, status_colors["device_part_no_solver_field"]))
+    coll = PolyCollection(
+        polygons,
+        facecolors=facecolors,
+        edgecolors="none",
+        linewidths=0.0,
+        alpha=alpha,
+        zorder=0,
+    )
+    ax.add_collection(coll)
+    outlines = _domain_outline_segments(polygons, pids)
+    outline_specs = {
+        "solver_medium_region": ("#222222", "dashed", 0.55),
+        "device_part_touching_solver_field": ("#222222", "solid", 0.78),
+        "device_part_no_solver_field": ("#222222", "solid", 0.78),
+    }
+    for pid in unique:
+        status = status_map.get(int(pid), "solver_medium_region")
+        color, linestyle, width = outline_specs.get(status, outline_specs["device_part_no_solver_field"])
+        segments = outlines.get(int(pid), [])
+        if segments:
+            ax.add_collection(LineCollection(segments, colors=color, linewidths=width, linestyles=linestyle, alpha=0.96, zorder=4))
+
+    if label_part_ids:
+        for pid in unique:
+            mask = pids == pid
+            if not np.any(mask):
+                continue
+            pts = np.vstack([polygons[i] for i in np.flatnonzero(mask)])
+            center = pts.mean(axis=0)
+            status = status_map.get(int(pid), "unknown")
+            ax.text(
+                float(center[0]),
+                float(center[1]),
+                str(int(pid)),
+                fontsize=label_fontsize,
+                ha="center",
+                va="center",
+                color="black",
+                bbox={
+                    "boxstyle": "round,pad=0.18",
+                    "facecolor": "white",
+                    "edgecolor": "#777777" if status != "solver_medium_region" else "none",
+                    "alpha": 0.82,
+                },
+                zorder=6,
+            )
+
+    if show_legend:
+        handles = [
+            Patch(facecolor=status_colors["solver_medium_region"], edgecolor="#222222", linestyle="--", alpha=alpha, label="solver medium region"),
+            Patch(facecolor=status_colors["device_part_touching_solver_field"], edgecolor="#222222", alpha=alpha, label="device part touching solver field"),
+            Patch(facecolor=status_colors["device_part_no_solver_field"], edgecolor="#222222", alpha=alpha, label="device part without solver field"),
+        ]
+        ax.legend(handles=handles, loc="upper right", fontsize=8, framealpha=0.86)
 
 
 def sample_grid_points(arr: np.ndarray, x: np.ndarray, y: np.ndarray, points: np.ndarray) -> np.ndarray:

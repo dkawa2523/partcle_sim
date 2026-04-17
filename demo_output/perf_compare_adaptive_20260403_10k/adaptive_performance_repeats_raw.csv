@@ -1,7 +1,0 @@
-adaptive_substep_enabled,rep,elapsed_s,integrator,stuck_count,active_count,primary_hit_count,max_hits_reached_count,collision_reintegrated_segments_count,adaptive_substep_segments_count,adaptive_substep_trigger_count
-0,1,21.564446600000338,drag_relaxation,1811,8189,15551,2067,11570,0,0
-0,2,22.111400700000104,drag_relaxation,1811,8189,15551,2067,11570,0,0
-0,3,22.328985300000113,drag_relaxation,1811,8189,15551,2067,11570,0,0
-1,1,22.8000234000001,drag_relaxation,1549,8451,13533,1761,10072,8943216,558951
-1,2,22.125475700000152,drag_relaxation,1549,8451,13533,1761,10072,8943216,558951
-1,3,22.910710599999675,drag_relaxation,1549,8451,13533,1761,10072,8943216,558951

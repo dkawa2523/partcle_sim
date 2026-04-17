@@ -1,0 +1,25 @@
+{
+  "source_kind": "comsol_material_inventory",
+  "status": "ok",
+  "entity_id_base": "comsol_selection_entities_as_reported",
+  "materials": [
+    {
+      "tag": "mat1",
+      "label": "Air",
+      "name": "Air",
+      "selection_entities": [3, 5]
+    },
+    {
+      "tag": "mat2",
+      "label": "Glass (quartz)",
+      "name": "Glass (quartz)",
+      "selection_entities": [4, 10]
+    },
+    {
+      "tag": "mat3",
+      "label": "Copper",
+      "name": "Copper",
+      "selection_entities": [6, 7, 8, 9]
+    }
+  ]
+}

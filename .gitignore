@@ -1,8 +1,22 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+*.egg-info/
 
-demo_output/_tmp*/
-demo_output/_out*/
+_tmp_*/
+_tmp_*
+_out_*/
+_out_*
+_external_exports/
+demo_output/
+examples/**/run_output*/
+examples/**/generated/
+!examples/icp_rf_bias_cf4_o2_si_etching_2d*/generated/
+!examples/icp_rf_bias_cf4_o2_si_etching_2d*/generated/**
 tests/_tmp_*/
 tests/_out_*/
+*.class
+*.status
+*.log
+/*.mph
+hs_err_pid*.log

@@ -1,15 +1,14 @@
-# particle_tracer_unified v29
+# particle_tracer_unified
 
-A self-contained, runnable stabilization release for step-aware particle trajectory simulation.
-
-This release fixes the missing example/input problem in the prior packaging by **including a complete minimal 2D and 3D dataset** and by verifying the canonical CLI path with smoke tests.
+A runnable particle trajectory package for supplied 2D/3D fields and explicit boundary truth.
 
 ## What this package currently does
 
 - reads `run_config.yaml`
 - builds a `PreparedRuntime`
 - preprocesses particles with material-aware source laws
-- binds source events to process steps or recipe transitions
+- supports optional source events and lightweight process-step time labels
+- samples supplied steady or time-dependent velocity, electric-field, and gas-property fields
 - runs 2D or 3D synthetic-box examples through a practical high-fidelity solver
 - uses Numba free-flight kernels and geometry-aware wall-shear sampling
 - ships a fully runnable `examples/minimal_2d` and `examples/minimal_3d`
@@ -26,106 +25,121 @@ pip install -e .
 python run_from_yaml.py examples/minimal_2d/run_config.yaml --output-dir out_2d
 ```
 
+After `pip install -e .`, the same entry point is available as:
+
+```bash
+particle-tracer-run examples/minimal_2d/run_config.yaml --output-dir out_2d
+```
+
 ## Run a 3D example
 
 ```bash
 python run_from_yaml.py examples/minimal_3d/run_config.yaml --output-dir out_3d
 ```
 
-## Build and run COMSOL-derived 2D case
+## Build and check COMSOL-derived 2D data
 
-The repository includes `data/argon_gec_ccp_base2.mphtxt`.  
-Run the builder to extract COMSOL geometry plus both field backends:
+The repository includes `data/argon_gec_ccp_base2.mphtxt`.
+Run the builder to extract COMSOL geometry and the rectilinear compatibility field package:
 
 ```bash
-py -3 tools/build_comsol_case.py
+py -3 tools/build_comsol_case.py \
+  --field-bundle data/regridded_repo_field_bundle_argon_gec_ccp_base2_2d.npz
 ```
 
-Then run trajectories using the generated rectilinear compatibility path:
+Then check the generated provider/input contracts:
 
 ```bash
-python run_from_yaml.py examples/comsol_from_data_2d/run_config.yaml --output-dir out_comsol_2d
-```
-
-Or try the 2D triangle-mesh backend directly:
-
-```bash
-python run_from_yaml.py examples/comsol_from_data_2d/run_config_mesh.yaml --output-dir out_comsol_2d_mesh
+python run_from_yaml.py examples/comsol_from_data_2d/run_config.yaml --check-input --output-dir out_comsol_2d_check
 ```
 
 Notes:
 - geometry is extracted from COMSOL mesh (`edg`/`quad`) into `generated/comsol_geometry_2d.npz`
 - rectilinear compatibility field support is written to `generated/comsol_field_2d.npz`
-- 2D triangle-mesh field support is written to `generated/comsol_field_mesh_2d.npz`
+- the bundled rectilinear COMSOL field bundle is exported with finite field support plus ghost cells
+- do not run production trajectories until both provider and input contracts pass
 
-## ETD2 stabilization profile (opt-in)
+## Provider And Input Contracts
 
-For the 10k COMSOL-derived 2D production case, an ETD2 stability-focused profile is included:
+For supplied field data, the field provider must first cover the explicit boundary support domain. A physically valid wall is not enough if the field cannot be sampled cleanly just inside that wall. For rectilinear data this means the boundary-adjacent interpolation stencil must be valid.
+
+Particles must also start inside the **clean field sample domain**. Being physically inside the geometry is not enough for a rectilinear field: bilinear/trilinear interpolation also needs a fully valid stencil.
+
+The field support mask is owned by the field provider and is not clipped to the geometry mask at runtime. This allows a valid export bundle to include ghost/support nodes needed for interpolation near walls while geometry still controls boundary detection.
+The COMSOL builder derives the exported field support mask from finite field quantities, not from the geometry domain mask. It also adds a finite ghost-cell band by edge extrapolation, defaulting to 8 cells, so boundary handling is not limited by a grid that ends exactly at the wall.
+Precomputed providers validate axes, times, active-support values, and mesh triangle topology before the solver runs.
+
+Check a case before solving:
 
 ```bash
-python run_from_yaml.py examples/comsol_from_data_2d_10k/run_config_prod_etd2_stable.yaml --output-dir out_comsol_2d_etd2_stable
+python run_from_yaml.py <case>/run_config.yaml --check-input --output-dir <out_check>
 ```
 
-This profile keeps backward-compatible defaults in code and opts in via config:
-- `solver.integrator: etd2`
-- `solver.max_hits_retry_splits: 2`
-- `solver.max_hits_retry_local_adaptive_enabled: 1`
-- `solver.adaptive_substep_enabled: 0` (global OFF, retry-local adaptive ON)
-- `solver.min_remaining_dt_ratio: 0.0`
+This writes:
+- `provider_contract_report.json`
+- `provider_boundary_summary.csv` with per-part failure counts and boundary/offset bounding boxes
+- `provider_boundary_violations.csv` with every sampled non-clean boundary support point and numeric coordinate columns
+- `input_contract_report.json`
+- `input_particle_violations.csv` when non-clean initial particles exist
 
-Check `collision_diagnostics.json` for ETD2 stability behavior:
-- `max_hits_retry_count`
-- `max_hits_retry_exhausted_count`
-- `dropped_remaining_dt_total_s`
-- `max_hits_reached_count`
+With `provider_contract.boundary_field_support: strict`, normal solver runs stop before time integration if the field/boundary provider pair is not compatible. This is intentional: boundary-adjacent field gaps should be fixed in the export bundle or by using a mesh-native field provider, not hidden by trajectory rescue logic.
+
+With `input_contract.initial_particle_field_support: strict`, normal solver runs stop before time integration if any initial particle is `mixed_stencil` or `hard_invalid`. This is intentional: invalid release-domain data should be fixed at input generation time, not hidden by trajectory rescue logic. If the provider check fails, fix the field/boundary export first. If only the input check fails, regenerate or correct `particles.csv` before running production comparisons.
+
+## COMSOL Case Production Check
+
+For a COMSOL-derived 2D case whose provider and input contracts pass, a conservative trajectory profile is:
+
+- `input_contract.initial_particle_field_support: strict`
+- `provider_contract.boundary_field_support: strict`
+- `solver.integrator: etd2`
+- `solver.adaptive_substep_enabled: 0`
+- `solver.min_remaining_dt_ratio: 0.0`
+- `solver.valid_mask_policy: retry_then_stop`
+- `output.artifact_mode: minimal` with `output.write_collision_diagnostics: 1`
+
+Run:
+
+```bash
+python run_from_yaml.py <case>/run_config.yaml --output-dir <out_run>
+```
+
+Check `solver_report.json` and `collision_diagnostics.json` for residual numerical behavior:
+- `numerical_boundary_stopped_count`
 - `unresolved_crossing_count`
+- `nearest_projection_fallback_count`
+- `boundary_event_contract_passed`
 - `valid_mask_violation_count`
 - `valid_mask_violation_particle_count`
 
-You can run a manual stability/performance gate:
+`boundary_event_contract_passed` must be `1` for production runs. `max_hits_reached_count` and `nearest_projection_fallback_count` are not accuracy tuning targets. If either appears in production, check the provider/boundary contract and boundary-event handling.
 
-```bash
-python tools/check_stability_profile.py \
-  --base-config examples/comsol_from_data_2d_10k/run_config_prod_etd2_base.yaml \
-  --candidate-config examples/comsol_from_data_2d_10k/run_config_prod_etd2_stable.yaml \
-  --max-runtime-increase-ratio 0.20 \
-  --min-max-hits-reduction-ratio 0.30
-```
-
-The canonical reference-vs-candidate comparison tool is:
+The daily reference-vs-candidate gate should be run as a lightweight check after provider contracts pass. Generated override configs are written under the output directory:
 
 ```bash
 python tools/compare_against_reference.py \
-  --reference-config examples/comsol_from_data_2d_10k/run_config_eval_ref_etd2.yaml \
-  --run etd2_base=examples/comsol_from_data_2d_10k/run_config_prod_etd2_base.yaml \
-  --run etd2_stable=examples/comsol_from_data_2d_10k/run_config_prod_etd2_stable.yaml \
-  --output-root demo_output/reference_compare
+  --reference-config <reference_case>/run_config.yaml \
+  --run candidate=<candidate_case>/run_config.yaml \
+  --output-root <out_compare> \
+  --override-t-end <short_physics_window_s> \
+  --artifact-mode minimal \
+  --per-run-timeout-s 300
 ```
 
 This tool writes one timestamped summary containing:
 - `class_match_ratio_vs_reference`
+- `class_transition_summary_vs_reference`
+- `geometry_feature_delta_vs_reference`: SDF, nearest-boundary-distance, final-position, speed, and nearest-part transition deltas on the reference geometry
+- `numerical_boundary_stopped_count`
 - `unresolved_crossing_count`
+- `nearest_projection_fallback_count`
+- `boundary_event_failure_count`
 - `runtime_s`
+- `solver_core_s`, `solver_step_loop_s`, and estimated NumPy buffer bytes
 - `field_backend_kind`
 - pairwise deltas when exactly two candidate runs are provided
 
-For `valid_mask` rollout decisions, the canonical policy gate is:
-
-```bash
-python tools/evaluate_valid_mask_rollout.py \
-  --config examples/comsol_from_data_2d_10k/run_config_prod_etd2_stable.yaml \
-  --reference-config examples/comsol_from_data_2d_10k/run_config_eval_ref_etd2.yaml \
-  --output-root demo_output/valid_mask_rollout \
-  --max-runtime-increase-ratio 0.10 \
-  --min-class-match-ratio 0.9845
-```
-
-This writes a timestamped rollout summary with:
-- `diagnostic` vs `retry_then_stop`
-- `runtime_increase_ratio`
-- `class_match_ratio_vs_reference`
-- `invalid_mask_stopped_count_delta`
-- a simple `rollout_recommendation`
+For manual full-reference checks, run the same command without `--override-t-end` and with `--artifact-mode full` or no artifact override. That path is intentionally heavier than the daily gate.
 
 ## Run the smoke test
 
@@ -135,17 +149,19 @@ python -m pytest -q tests/smoke_test.py
 
 ## Main concepts
 
-- `PreparedRuntime`: the canonical solver input.
-- `process_steps.csv` or `recipe_manifest.yaml`: time segmentation and step-aware control.
-- `source_events.csv`: burst / gate / gain events tied to steps or transitions.
-- `materials.csv`, `part_walls.csv`, `particles.csv`: source/material definitions and particle inputs.
-- `IntegratorSpec`: the internal contract for `drag_relaxation`, `etd`, and `etd2`.
-- `BoundaryService`: the internal contract for geometry truth queries and boundary hits.
-- `solver.valid_mask_policy`: `diagnostic` by default, or opt-in `retry_then_stop` for authoritative stopping on invalid field regions.
-- `providers.field.kind`: rectilinear compatibility (`precomputed_npz`) or 2D triangle-mesh field support (`precomputed_triangle_mesh_npz`).
-- `high_fidelity_common.py`: a thin compatibility hub that re-exports the shared solver entry.
-- `high_fidelity_freeflight.py`, `high_fidelity_collision.py`, `high_fidelity_runtime.py`: internal solver modules split by responsibility.
-- `solver2d.py` / `solver3d.py`: compatibility wrappers over shared `solver_entrypoints.py`.
+- `PreparedRuntime`: the canonical solver input built from `run_config.yaml`.
+- Required case files: `materials.csv`, `part_walls.csv`, `particles.csv`, plus the configured geometry and field provider data.
+- Contract reports: `provider_contract_report.json` and `input_contract_report.json` separate bad exported data from solver failures before time integration.
+- Production diagnostics: `solver_report.json`, `collision_diagnostics.json`, `final_particles.csv`, and `coating_summary_by_part.csv`.
+- Field extension point: add or improve providers behind the same `FieldProviderND` and `GeometryProviderND` data contracts.
+- Solver extension point: keep new integration or boundary behavior behind the existing prepared-runtime entry point instead of adding case-specific rescue paths.
+- Optional Brownian/Langevin motion is disabled by default and can be enabled with `solver.stochastic_motion.enabled: true`.
+- Optional 2D charge evolution is disabled by default and can be enabled with `solver.charge_model.enabled: true`.
+  - `mode: te_relaxation` (`v1`) relaxes charge from local electron temperature.
+  - `mode: density_temperature_flux_relaxation` (`v2`) uses local density/temperature flux balance.
+  - Both modes use scalar background distributions plus `E_x/E_y`; COMSOL flux vectors are not required.
+- For `solver.drag_model: epstein`, rectilinear COMSOL field quantities `rho_g` and `T` are sampled for low-pressure drag when present. The scalar `gas.*` values remain fallbacks, field `mu` can be reported, and `p` is kept diagnostic rather than used directly by drag.
+- Optional overlays: `process_steps.csv` is only a time-label overlay, and `source_events.csv` is only for explicit source timing/gain events.
 
 ## Numerics contract
 
@@ -155,10 +171,16 @@ The current continuous-model and discrete-integrator contract is summarized in:
 docs/numerics_contract.md
 ```
 
-The current numerics cleanup backlog and deferred behavior changes are tracked in:
+The active implementation guide for the current boundary-performance work is:
 
 ```text
-docs/numerics_remaining_tasks_20260405.md
+plans/boundary_performance_plan.md
+```
+
+The COMSOL case onboarding checklist for future model imports is:
+
+```text
+plans/comsol_case_onboarding_workflow.md
 ```
 
 ## Included examples
@@ -170,12 +192,11 @@ Each example includes all files needed to run directly.
 
 ## Scratch outputs
 
-- `_tmp_*` and `_out_*` directories are treated as scratch outputs.
-- Timestamped comparison folders under `demo_output/reference_compare` are the durable benchmark artifacts.
+- `_tmp_*`, `_out_*`, `demo_output/`, and example `run_output*` directories are treated as local scratch outputs and are not source-controlled.
+- Timestamped comparison folders under `demo_output/reference_compare` are local benchmark artifacts.
 - `solver_report.json` and `runtime_step_summary.csv` include `valid_mask` diagnostics plus `field_backend_kind`, and opt-in runs can also report `invalid_mask_stopped` particles.
-- `tools/evaluate_valid_mask_rollout.py` is the standard way to compare `diagnostic` and `retry_then_stop` before considering default-on rollout.
+- `tools/compare_against_reference.py --override-t-end ... --artifact-mode minimal` is the standard lightweight benchmark gate.
 
 ## Current scope
 
-This v29 line is intentionally focused on a **distributable, runnable package**.
-It keeps the synthetic provider path as the stable packaged base. The next recommended step is to reconnect COMSOL field / geometry providers to this stable base and keep the same `PreparedRuntime` entry point.
+This package is focused on supplied 2D/3D fields and explicit boundary truth. Higher-level process recipes are outside the current solver scope; the process CSV is only a time-label overlay. The core extension path is provider-backed field data plus focused solver modules behind the same `PreparedRuntime` entry point.

@@ -4,7 +4,13 @@ import numpy as np
 from numba import njit
 
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN
-from .integrator_common import INTEGRATOR_ETD2, advance_state_3d, advance_state_3d_etd, compute_substep_count
+from .integrator_common import (
+    INTEGRATOR_ETD2,
+    advance_state_3d,
+    advance_state_3d_etd,
+    compute_substep_count,
+    effective_tau_from_slip_speed,
+)
 from .kernel_shared_numba import (
     locate_axis,
     mask_trilinear_point_valid,
@@ -56,11 +62,27 @@ def _sample_time_trilinear(arr, times, xs, ys, zs, t, x, y, z):
 
 
 @njit(cache=True)
+def _sample_electric_accel_3d(electric_x, electric_y, electric_z, times, xs, ys, zs, t, x, y, z, q_over_m, electric_enabled):
+    ax = 0.0
+    ay = 0.0
+    az = 0.0
+    if electric_enabled != 0:
+        ex = _sample_time_trilinear(electric_x, times, xs, ys, zs, t, x, y, z)
+        ey = _sample_time_trilinear(electric_y, times, xs, ys, zs, t, x, y, z)
+        ez = _sample_time_trilinear(electric_z, times, xs, ys, zs, t, x, y, z)
+        ax = q_over_m * ex
+        ay = q_over_m * ey
+        az = q_over_m * ez
+    return ax, ay, az
+
+
+@njit(cache=True)
 def advance_particles_3d_inplace(
     x,
     v,
     active,
     tau_p,
+    particle_diameter,
     flow_scale_particle,
     drag_tau_scale_particle,
     body_accel_scale_particle,
@@ -73,6 +95,9 @@ def advance_particles_3d_inplace(
     body_ay,
     body_az,
     min_tau_p_s,
+    gas_density_kgm3,
+    gas_mu_pas,
+    drag_model_mode,
     integrator_mode,
     adaptive_substep_enabled,
     adaptive_substep_tau_ratio,
@@ -84,6 +109,11 @@ def advance_particles_3d_inplace(
     ux,
     uy,
     uz,
+    electric_q_over_m_particle,
+    electric_x,
+    electric_y,
+    electric_z,
+    dynamic_electric_enabled,
     valid_mask,
     core_valid_mask,
     x_trial,
@@ -91,7 +121,6 @@ def advance_particles_3d_inplace(
     x_mid_trial,
     substep_counts,
     mask_status_flags,
-    extension_band_sample_flags,
 ):
     for i in range(x.shape[0]):
         if not active[i]:
@@ -101,17 +130,20 @@ def advance_particles_3d_inplace(
                 x_mid_trial[i, j] = x[i, j]
             substep_counts[i] = 1
             mask_status_flags[i] = VALID_MASK_STATUS_CLEAN
-            extension_band_sample_flags[i] = False
             continue
-        tau_eff = tau_p[i] * global_drag_tau_scale * max(drag_tau_scale_particle[i], 1e-6)
-        if tau_eff < min_tau_p_s:
-            tau_eff = min_tau_p_s
-        bax = body_ax * global_body_accel_scale * body_accel_scale_particle[i]
-        bay = body_ay * global_body_accel_scale * body_accel_scale_particle[i]
-        baz = body_az * global_body_accel_scale * body_accel_scale_particle[i]
+        tau_stokes = tau_p[i] * global_drag_tau_scale * max(drag_tau_scale_particle[i], 1e-6)
+        if tau_stokes < min_tau_p_s:
+            tau_stokes = min_tau_p_s
+        body_scale = global_body_accel_scale * body_accel_scale_particle[i]
+        q_over_m_i = 0.0
+        if dynamic_electric_enabled != 0:
+            q_over_m_i = electric_q_over_m_particle[i]
+        bax_base = body_ax * body_scale
+        bay_base = body_ay * body_scale
+        baz_base = body_az * body_scale
         n_substeps = compute_substep_count(
             dt,
-            tau_eff,
+            tau_stokes,
             adaptive_substep_enabled,
             adaptive_substep_tau_ratio,
             adaptive_substep_max_splits,
@@ -126,7 +158,6 @@ def advance_particles_3d_inplace(
         vyn = v[i, 1]
         vzn = v[i, 2]
         mask_status = VALID_MASK_STATUS_CLEAN
-        extension_band_sampled = False
         if integrator_mode == INTEGRATOR_ETD2:
             half_dt = 0.5 * dt
             elapsed = 0.0
@@ -145,14 +176,33 @@ def advance_particles_3d_inplace(
                 status = mask_trilinear_status(valid_mask, xs, ys, zs, xn, yn, zn)
                 if status > mask_status:
                     mask_status = status
-                if mask_trilinear_point_valid(valid_mask, xs, ys, zs, xn, yn, zn) and (not mask_trilinear_point_valid(core_valid_mask, xs, ys, zs, xn, yn, zn)):
-                    extension_band_sampled = True
                 flowx0 = _sample_time_trilinear(ux, times, xs, ys, zs, t_sub_start, xn, yn, zn)
                 flowy0 = _sample_time_trilinear(uy, times, xs, ys, zs, t_sub_start, xn, yn, zn)
                 flowz0 = _sample_time_trilinear(uz, times, xs, ys, zs, t_sub_start, xn, yn, zn)
+                accx0, accy0, accz0 = _sample_electric_accel_3d(
+                    electric_x, electric_y, electric_z, times, xs, ys, zs,
+                    t_sub_start, xn, yn, zn, q_over_m_i, dynamic_electric_enabled,
+                )
+                bax0 = bax_base + body_scale * accx0
+                bay0 = bay_base + body_scale * accy0
+                baz0 = baz_base + body_scale * accz0
                 targetx0 = global_flow_scale * flow_scale_particle[i] * flowx0
                 targety0 = global_flow_scale * flow_scale_particle[i] * flowy0
                 targetz0 = global_flow_scale * flow_scale_particle[i] * flowz0
+                slip0 = np.sqrt(
+                    (vxn - targetx0) * (vxn - targetx0)
+                    + (vyn - targety0) * (vyn - targety0)
+                    + (vzn - targetz0) * (vzn - targetz0)
+                )
+                tau_eff0 = effective_tau_from_slip_speed(
+                    tau_stokes,
+                    slip0,
+                    particle_diameter[i],
+                    gas_density_kgm3,
+                    gas_mu_pas,
+                    drag_model_mode,
+                    min_tau_p_s,
+                )
                 xh, yh, zh, _vxh, _vyh, _vzh = advance_state_3d_etd(
                     xn,
                     yn,
@@ -163,24 +213,43 @@ def advance_particles_3d_inplace(
                     targetx0,
                     targety0,
                     targetz0,
-                    bax,
-                    bay,
-                    baz,
-                    tau_eff,
+                    bax0,
+                    bay0,
+                    baz0,
+                    tau_eff0,
                     0.5 * dt_sub,
                 )
                 t_mid = t_sub_start + 0.5 * dt_sub
                 status = mask_trilinear_status(valid_mask, xs, ys, zs, xh, yh, zh)
                 if status > mask_status:
                     mask_status = status
-                if mask_trilinear_point_valid(valid_mask, xs, ys, zs, xh, yh, zh) and (not mask_trilinear_point_valid(core_valid_mask, xs, ys, zs, xh, yh, zh)):
-                    extension_band_sampled = True
                 flowx_mid = _sample_time_trilinear(ux, times, xs, ys, zs, t_mid, xh, yh, zh)
                 flowy_mid = _sample_time_trilinear(uy, times, xs, ys, zs, t_mid, xh, yh, zh)
                 flowz_mid = _sample_time_trilinear(uz, times, xs, ys, zs, t_mid, xh, yh, zh)
+                accx_mid, accy_mid, accz_mid = _sample_electric_accel_3d(
+                    electric_x, electric_y, electric_z, times, xs, ys, zs,
+                    t_mid, xh, yh, zh, q_over_m_i, dynamic_electric_enabled,
+                )
+                bax_mid = bax_base + body_scale * accx_mid
+                bay_mid = bay_base + body_scale * accy_mid
+                baz_mid = baz_base + body_scale * accz_mid
                 targetx_mid = global_flow_scale * flow_scale_particle[i] * flowx_mid
                 targety_mid = global_flow_scale * flow_scale_particle[i] * flowy_mid
                 targetz_mid = global_flow_scale * flow_scale_particle[i] * flowz_mid
+                slip_mid = np.sqrt(
+                    (_vxh - targetx_mid) * (_vxh - targetx_mid)
+                    + (_vyh - targety_mid) * (_vyh - targety_mid)
+                    + (_vzh - targetz_mid) * (_vzh - targetz_mid)
+                )
+                tau_eff_mid = effective_tau_from_slip_speed(
+                    tau_stokes,
+                    slip_mid,
+                    particle_diameter[i],
+                    gas_density_kgm3,
+                    gas_mu_pas,
+                    drag_model_mode,
+                    min_tau_p_s,
+                )
                 xn, yn, zn, vxn, vyn, vzn = advance_state_3d_etd(
                     xn,
                     yn,
@@ -191,10 +260,10 @@ def advance_particles_3d_inplace(
                     targetx_mid,
                     targety_mid,
                     targetz_mid,
-                    bax,
-                    bay,
-                    baz,
-                    tau_eff,
+                    bax_mid,
+                    bay_mid,
+                    baz_mid,
+                    tau_eff_mid,
                     dt_sub,
                 )
                 if not has_mid:
@@ -213,9 +282,30 @@ def advance_particles_3d_inplace(
                             flowx0_mid = _sample_time_trilinear(ux, times, xs, ys, zs, t_sub_start, x0, y0, z0)
                             flowy0_mid = _sample_time_trilinear(uy, times, xs, ys, zs, t_sub_start, x0, y0, z0)
                             flowz0_mid = _sample_time_trilinear(uz, times, xs, ys, zs, t_sub_start, x0, y0, z0)
+                            accx0_mid, accy0_mid, accz0_mid = _sample_electric_accel_3d(
+                                electric_x, electric_y, electric_z, times, xs, ys, zs,
+                                t_sub_start, x0, y0, z0, q_over_m_i, dynamic_electric_enabled,
+                            )
+                            bax0_mid = bax_base + body_scale * accx0_mid
+                            bay0_mid = bay_base + body_scale * accy0_mid
+                            baz0_mid = baz_base + body_scale * accz0_mid
                             targetx0_mid = global_flow_scale * flow_scale_particle[i] * flowx0_mid
                             targety0_mid = global_flow_scale * flow_scale_particle[i] * flowy0_mid
                             targetz0_mid = global_flow_scale * flow_scale_particle[i] * flowz0_mid
+                            slip0_mid = np.sqrt(
+                                (vx0 - targetx0_mid) * (vx0 - targetx0_mid)
+                                + (vy0 - targety0_mid) * (vy0 - targety0_mid)
+                                + (vz0 - targetz0_mid) * (vz0 - targetz0_mid)
+                            )
+                            tau_eff0_mid = effective_tau_from_slip_speed(
+                                tau_stokes,
+                                slip0_mid,
+                                particle_diameter[i],
+                                gas_density_kgm3,
+                                gas_mu_pas,
+                                drag_model_mode,
+                                min_tau_p_s,
+                            )
                             xh_mid, yh_mid, zh_mid, _vxh_mid, _vyh_mid, _vzh_mid = advance_state_3d_etd(
                                 x0,
                                 y0,
@@ -226,24 +316,43 @@ def advance_particles_3d_inplace(
                                 targetx0_mid,
                                 targety0_mid,
                                 targetz0_mid,
-                                bax,
-                                bay,
-                                baz,
-                                tau_eff,
+                                bax0_mid,
+                                bay0_mid,
+                                baz0_mid,
+                                tau_eff0_mid,
                                 0.5 * dt_mid,
                             )
                             t_mid_eval = t_sub_start + 0.5 * dt_mid
                             status = mask_trilinear_status(valid_mask, xs, ys, zs, xh_mid, yh_mid, zh_mid)
                             if status > mask_status:
                                 mask_status = status
-                            if mask_trilinear_point_valid(valid_mask, xs, ys, zs, xh_mid, yh_mid, zh_mid) and (not mask_trilinear_point_valid(core_valid_mask, xs, ys, zs, xh_mid, yh_mid, zh_mid)):
-                                extension_band_sampled = True
                             flowx_mid2 = _sample_time_trilinear(ux, times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid)
                             flowy_mid2 = _sample_time_trilinear(uy, times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid)
                             flowz_mid2 = _sample_time_trilinear(uz, times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid)
+                            accx_mid2, accy_mid2, accz_mid2 = _sample_electric_accel_3d(
+                                electric_x, electric_y, electric_z, times, xs, ys, zs,
+                                t_mid_eval, xh_mid, yh_mid, zh_mid, q_over_m_i, dynamic_electric_enabled,
+                            )
+                            bax_mid2 = bax_base + body_scale * accx_mid2
+                            bay_mid2 = bay_base + body_scale * accy_mid2
+                            baz_mid2 = baz_base + body_scale * accz_mid2
                             targetx_mid2 = global_flow_scale * flow_scale_particle[i] * flowx_mid2
                             targety_mid2 = global_flow_scale * flow_scale_particle[i] * flowy_mid2
                             targetz_mid2 = global_flow_scale * flow_scale_particle[i] * flowz_mid2
+                            slip_mid2 = np.sqrt(
+                                (_vxh_mid - targetx_mid2) * (_vxh_mid - targetx_mid2)
+                                + (_vyh_mid - targety_mid2) * (_vyh_mid - targety_mid2)
+                                + (_vzh_mid - targetz_mid2) * (_vzh_mid - targetz_mid2)
+                            )
+                            tau_eff_mid2 = effective_tau_from_slip_speed(
+                                tau_stokes,
+                                slip_mid2,
+                                particle_diameter[i],
+                                gas_density_kgm3,
+                                gas_mu_pas,
+                                drag_model_mode,
+                                min_tau_p_s,
+                            )
                             xmid, ymid, zmid, _vxmid, _vymid, _vzmid = advance_state_3d_etd(
                                 x0,
                                 y0,
@@ -254,10 +363,10 @@ def advance_particles_3d_inplace(
                                 targetx_mid2,
                                 targety_mid2,
                                 targetz_mid2,
-                                bax,
-                                bay,
-                                baz,
-                                tau_eff,
+                                bax_mid2,
+                                bay_mid2,
+                                baz_mid2,
+                                tau_eff_mid2,
                                 dt_mid,
                             )
                         has_mid = True
@@ -275,14 +384,33 @@ def advance_particles_3d_inplace(
                 status = mask_trilinear_status(valid_mask, xs, ys, zs, xn, yn, zn)
                 if status > mask_status:
                     mask_status = status
-                if mask_trilinear_point_valid(valid_mask, xs, ys, zs, xn, yn, zn) and (not mask_trilinear_point_valid(core_valid_mask, xs, ys, zs, xn, yn, zn)):
-                    extension_band_sampled = True
                 flowx = _sample_time_trilinear(ux, times, xs, ys, zs, t_eval, xn, yn, zn)
                 flowy = _sample_time_trilinear(uy, times, xs, ys, zs, t_eval, xn, yn, zn)
                 flowz = _sample_time_trilinear(uz, times, xs, ys, zs, t_eval, xn, yn, zn)
+                accx, accy, accz = _sample_electric_accel_3d(
+                    electric_x, electric_y, electric_z, times, xs, ys, zs,
+                    t_eval, xn, yn, zn, q_over_m_i, dynamic_electric_enabled,
+                )
+                bax = bax_base + body_scale * accx
+                bay = bay_base + body_scale * accy
+                baz = baz_base + body_scale * accz
                 targetx = global_flow_scale * flow_scale_particle[i] * flowx
                 targety = global_flow_scale * flow_scale_particle[i] * flowy
                 targetz = global_flow_scale * flow_scale_particle[i] * flowz
+                slip = np.sqrt(
+                    (vxn - targetx) * (vxn - targetx)
+                    + (vyn - targety) * (vyn - targety)
+                    + (vzn - targetz) * (vzn - targetz)
+                )
+                tau_eff = effective_tau_from_slip_speed(
+                    tau_stokes,
+                    slip,
+                    particle_diameter[i],
+                    gas_density_kgm3,
+                    gas_mu_pas,
+                    drag_model_mode,
+                    min_tau_p_s,
+                )
                 xn, yn, zn, vxn, vyn, vzn = advance_state_3d(
                     xn,
                     yn,
@@ -310,4 +438,3 @@ def advance_particles_3d_inplace(
         v_trial[i, 1] = vyn
         v_trial[i, 2] = vzn
         mask_status_flags[i] = mask_status
-        extension_band_sample_flags[i] = extension_band_sampled

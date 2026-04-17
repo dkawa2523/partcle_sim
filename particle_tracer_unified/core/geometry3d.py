@@ -346,7 +346,7 @@ def nearest_surface_point(
     point: np.ndarray,
     *,
     inside_reference: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray, int]:
+) -> Tuple[np.ndarray, np.ndarray, int, int]:
     p = np.asarray(point, dtype=np.float64)
     r = max(float(np.max(surface.grid.cell_size)), 1.0e-12)
     seg0 = p - np.array([r, r, r], dtype=np.float64)
@@ -374,7 +374,7 @@ def nearest_surface_point(
             normal = -normal
     normal = _normalize(normal)
     part_id = int(surface.part_ids[best_idx]) if best_idx < surface.part_ids.size else 0
-    return np.asarray(best_point, dtype=np.float64), normal, max(0, part_id)
+    return np.asarray(best_point, dtype=np.float64), normal, max(0, part_id), int(best_idx)
 
 
 def point_inside_surface(
@@ -387,7 +387,7 @@ def point_inside_surface(
     if np.any(p < surface.bbox_min - 1.0e-12) or np.any(p > surface.bbox_max + 1.0e-12):
         return False, False
 
-    nearest_point, _, _ = nearest_surface_point(surface, p)
+    nearest_point, _, _, _ = nearest_surface_point(surface, p)
     if float(np.linalg.norm(nearest_point - p)) <= float(max(on_boundary_tol, 0.0)):
         return True, True
 

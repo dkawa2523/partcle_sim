@@ -1,0 +1,49 @@
+{
+  "case": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_source_part11_neutral_redeposit",
+  "particle_count": 10000,
+  "particle_model": "neutral_100nm_low_pressure_redeposit",
+  "diameter_m": 1e-07,
+  "density_kgm3": 1200.0,
+  "mass_kg": 6.283185307179586e-19,
+  "charge_C": 0.0,
+  "source_part_id": 11,
+  "source_x_range_m": [
+    0.1535026927300772,
+    0.17899898752056934
+  ],
+  "source_y_m": 0.022,
+  "release_y_m": 0.024,
+  "initial_speed_mps": {
+    "min": 150.0,
+    "p50": 516.2330242718474,
+    "p90": 814.6868532499813,
+    "max": 1200.0,
+    "mean": 549.0185066542696
+  },
+  "vx_mps": {
+    "min": -1199.9973253671733,
+    "p50": -513.3411938329182,
+    "max": -143.59759514950304,
+    "mean": -545.6997483428895
+  },
+  "vy_mps": {
+    "min": -260.0,
+    "p50": -30.59293949893554,
+    "max": 171.16451957006822,
+    "mean": -36.210791240628204
+  },
+  "target_x_range_m": [
+    0.020016218794524736,
+    0.14999347473020486
+  ],
+  "target_y_mean_m": 0.021996333777697503,
+  "solver_min_tau_p_s": 0.00037,
+  "low_pressure_drag_model_note": "Neutral redeposition particles use zero charge, so the electric field does not add force; min_tau_p_s is set to the slip-corrected order of the 100 nm Stokes response time.",
+  "wafer_boundary_remap": {
+    "from_part_id": 9001,
+    "to_part_id": 3,
+    "remapped_boundary_edge_count": 150,
+    "remapped_nearest_map_node_count": 888,
+    "selection": "synthetic support edges around wafer part 3 top surface, x=0.003..0.151, y=0.021..0.023"
+  }
+}

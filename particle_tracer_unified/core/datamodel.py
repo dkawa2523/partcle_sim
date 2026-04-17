@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Any, Dict, Iterable, Mapping, Optional, Tuple
+from typing import Any, Dict, Mapping, Optional, Tuple
 
 import numpy as np
 
@@ -24,8 +24,8 @@ class RegularFieldND:
     axes: Tuple[np.ndarray, ...]
     quantities: Dict[str, QuantitySeriesND]
     valid_mask: np.ndarray
+    support_phi: Optional[np.ndarray] = None
     core_valid_mask: Optional[np.ndarray] = None
-    extension_band_mask: Optional[np.ndarray] = None
     time_mode: str = 'steady'
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -76,6 +76,7 @@ class FieldProviderND:
             'coordinate_system': field_obj.coordinate_system,
             'axis_names': list(field_obj.axis_names),
             'grid_shape': list(field_obj.valid_mask.shape),
+            'has_support_phi': field_obj.support_phi is not None,
             'quantities': sorted(field_obj.quantities.keys()),
             'time_mode': field_obj.time_mode,
             'manifest_path': str(self.manifest_path) if self.manifest_path else '',
@@ -296,26 +297,7 @@ class ProcessStepRow:
     step_name: str
     start_s: float
     end_s: float
-    step_kind: str = ''
-    recipe_name: str = ''
-    physics_flow_scale: float = 1.0
-    physics_drag_tau_scale: float = 1.0
-    physics_body_accel_scale: float = 1.0
-    wall_mode: str = 'inherit'
-    wall_restitution: float = 1.0
-    wall_diffuse_fraction: float = 0.0
-    wall_stick_probability_scale: float = 1.0
-    wall_vcrit_scale: float = 1.0
-    source_law_override: str = ''
-    source_speed_scale: float = 1.0
-    source_release_time_shift_s: float = 0.0
-    source_event_gain_scale: float = 1.0
-    source_enabled: int = 1
     output_segment_name: str = ''
-    output_save_every_override: int = 0
-    output_save_positions: int = 1
-    output_write_wall_events: int = 1
-    output_write_diagnostics: int = 1
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -323,7 +305,7 @@ class ProcessStepRow:
         return float(self.end_s - self.start_s)
 
     def contains_time(self, t: float) -> bool:
-        return float(self.start_s) <= float(t) < float(self.end_s) if float(self.end_s) > float(self.start_s) else abs(float(t) - float(self.start_s)) < 1e-15
+        return float(self.start_s) <= float(t) < float(self.end_s)
 
 
 @dataclass(frozen=True)
@@ -339,46 +321,7 @@ class ProcessStepTable:
         for row in self.rows:
             if row.contains_time(tt):
                 return row
-        if self.rows:
-            if tt < float(self.rows[0].start_s):
-                return self.rows[0]
-            if tt >= float(self.rows[-1].end_s):
-                return self.rows[-1]
         return None
-
-
-def _normalize_process_step_explicit_fields(values: object) -> Tuple[str, ...]:
-    if values is None:
-        return ()
-    if isinstance(values, str):
-        text = str(values).strip()
-        return (text,) if text else ()
-    try:
-        normalized = []
-        for value in values:  # type: ignore[assignment]
-            text = str(value).strip()
-            if text:
-                normalized.append(text)
-        return tuple(sorted(set(normalized)))
-    except TypeError:
-        text = str(values).strip()
-        return (text,) if text else ()
-
-
-def with_process_step_explicit_fields(metadata: Mapping[str, Any], explicit_fields: Iterable[str]) -> Dict[str, Any]:
-    meta = dict(metadata)
-    meta['explicit_fields'] = _normalize_process_step_explicit_fields(tuple(explicit_fields))
-    return meta
-
-
-def process_step_explicit_fields(row: Optional[ProcessStepRow]) -> Tuple[str, ...]:
-    if row is None:
-        return ()
-    return _normalize_process_step_explicit_fields(getattr(row, 'metadata', {}).get('explicit_fields', ()))
-
-
-def process_step_has_explicit_field(row: Optional[ProcessStepRow], field_name: str) -> bool:
-    return str(field_name).strip() in process_step_explicit_fields(row)
 
 
 @dataclass(frozen=True)
@@ -404,8 +347,6 @@ class SourceEventRow:
     min_factor: float = np.nan
     max_factor: float = np.nan
     bind_step_name: str = ''
-    bind_transition_from: str = ''
-    bind_transition_to: str = ''
     time_anchor: str = 'absolute'
     time_offset_s: float = np.nan
     duration_s: float = np.nan
@@ -488,6 +429,7 @@ class GasProperties:
     temperature: float = 300.0
     dynamic_viscosity_Pas: float = 1.8e-5
     density_kgm3: float = 1.0
+    molecular_mass_amu: float = 60.0
 
 
 @dataclass(frozen=True)
@@ -511,9 +453,16 @@ class WallCatalog:
     default_model: WallPartModel
     part_models: Tuple[WallPartModel, ...]
     metadata: Dict[str, Any] = field(default_factory=dict)
+    _part_lookup: Dict[int, WallPartModel] = field(init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, '_part_lookup', {int(r.part_id): r for r in self.part_models})
 
     def as_lookup(self) -> Dict[int, WallPartModel]:
-        return {int(r.part_id): r for r in self.part_models}
+        return dict(self._part_lookup)
+
+    def model_for_part(self, part_id: int) -> WallPartModel:
+        return self._part_lookup.get(int(part_id), self.default_model)
 
 
 @dataclass(frozen=True)

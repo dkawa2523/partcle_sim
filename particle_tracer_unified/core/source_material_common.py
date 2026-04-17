@@ -11,10 +11,13 @@ KB = 1.380649e-23
 
 
 def is_finite(value: object) -> bool:
-    try:
-        return bool(np.isfinite(float(value)))
-    except Exception:
+    if value is None:
         return False
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return False
+    return bool(np.isfinite(numeric))
 
 
 def pick_str(*values: object, default: str = '') -> str:

@@ -1,0 +1,43 @@
+{
+  "case_kind": "icp_cf4_o2_comsol_external_export",
+  "raw_export_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_cf4_o2_v20_refresh",
+  "out_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\icp_rf_bias_cf4_o2_si_etching_2d",
+  "particle_count": 1000,
+  "particle_source_part_ids": [],
+  "q_ref_c": 1.602176634e-19,
+  "m_ref_kg": 6.64215627e-26,
+  "particle_diameter_m": 1e-06,
+  "particle_density_kgm3": 1200.0,
+  "raw_coordinate_model_unit": "cm",
+  "geometry_scale_m_per_model_unit": 0.01,
+  "diagnostic_grid_spacing_m": 0.0010000000000000009,
+  "field_ghost_cells": 8,
+  "material_inventory": {
+    "available": true,
+    "applied": true,
+    "material_domain_count": 8,
+    "selection_entity_offset": 0,
+    "updated_files": [
+      "comsol_domain_entity_mapping.csv",
+      "comsol_boundary_entity_mapping.csv"
+    ]
+  },
+  "wall_overrides": {
+    "available": false,
+    "applied": false,
+    "reason": "wall overrides not requested"
+  },
+  "wall_catalog_review": {
+    "written": true,
+    "path": "wall_catalog_review.csv",
+    "row_count": 24,
+    "active_boundary_row_count": 14
+  },
+  "solver_defaults": {
+    "integrator": "etd2",
+    "dt": 2e-08,
+    "t_end": 2e-06,
+    "save_every": 10,
+    "valid_mask_policy": "retry_then_stop"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "base_case": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\icp_rf_bias_cf4_o2_si_etching_2d",
+  "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\icp_rf_bias_cf4_o2_si_etching_2d_source_part11_x015_018_z0021",
+  "particle_count": 10000,
+  "source_domain_part_id": 11,
+  "requested_x_range_m": [
+    0.15,
+    0.18
+  ],
+  "requested_z_near_m": 0.021,
+  "actual_surface_y_m": 0.022,
+  "release_offset_m": 0.002,
+  "release_y_m": 0.024,
+  "release_x_range_m": [
+    0.15350028169260563,
+    0.1789990675471278
+  ],
+  "selected_surface_segment_count": 20,
+  "source_material_id": 40,
+  "note": "2D solver uses y for COMSOL z. Part 11 top surface in this geometry is y=0.022 m, close to requested z=0.021 m.",
+  "part11_wall_mapping_applied": true,
+  "remapped_boundary_edge_count": 30,
+  "remapped_from_part_id": 9001,
+  "remapped_to_part_id": 11,
+  "part11_wall_law": {
+    "wall_law": "specular",
+    "wall_restitution": 0.95,
+    "wall_stick_probability": 0.5
+  }
+}

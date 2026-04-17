@@ -1,0 +1,41 @@
+{
+  "overrides": {
+    "available": true,
+    "applied": true,
+    "override_path": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_source_part11_sio2_20nm_charged_tend10x\\generated\\wall_catalog_overrides_candidate.csv",
+    "changed_part_ids": [
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      32,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+    ],
+    "added_part_ids": []
+  },
+  "review": {
+    "written": true,
+    "path": "wall_catalog_review.csv",
+    "row_count": 25,
+    "active_boundary_row_count": 14
+  }
+}

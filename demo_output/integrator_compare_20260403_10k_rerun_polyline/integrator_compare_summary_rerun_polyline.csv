@@ -1,5 +1,0 @@
-integrator,runtime_seconds,released_count,stuck_count,absorbed_count,escaped_count,total_wall_interactions,primary_hit_count,primary_hit_ratio_vs_ref,class_match_ratio_vs_ref,stuck_rel_error_vs_ref,position_rmse_vs_ref_m,position_p95_error_vs_ref_m,bisection_fallback_count,unresolved_crossing_count,max_hits_reached_count,etd2_polyline_checks_count,etd2_midpoint_outside_count,etd2_polyline_hit_count,etd2_polyline_fallback_count
-drag_relaxation,16.5178223,10000,1811,0,0,15568,15551,1.243980481561475,0.9639,0.2089452603471295,0.0007115047391841701,0.000549753978363402,17,0,2067,0,0,0,0
-etd,18.3598898,10000,1816,0,0,15369,15316,1.2251819854411647,0.964,0.21228304405874499,0.0007069661182128694,0.0005489362629990043,53,0,2014,0,0,0,0
-etd2,24.1145746,10000,1358,0,0,10826,10811,0.8648108151347892,0.9812,0.09345794392523364,0.00018573513298716408,0.00034384116905545166,15,0,1395,11130,2215,10811,15
-reference_etd2_dt0025,66.7910304,10000,1498,0,0,12569,12501,1.0,1.0,0.0,0.0,0.0,68,0,1651,12657,2553,12501,68

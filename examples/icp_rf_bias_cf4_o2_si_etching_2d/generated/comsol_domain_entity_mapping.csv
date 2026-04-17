@@ -1,0 +1,12 @@
+comsol_domain_entity_id,raw_comsol_domain_entity_index,element_count,mesh_element_types,x_min_m,x_max_m,y_min_m,y_max_m,comsol_material_name
+2,1,447,tri,0.0,0.152,0.0,0.02,not_exported_from_mphtxt
+3,2,122,tri,0.0,0.15,0.02,0.022,Air
+4,3,2953,quad;tri,0.0,0.25,0.0,0.13,Glass (quartz)
+5,4,614,tri,0.0,0.25,0.13,0.15,Air
+6,5,6708,tri,0.0,0.25,0.15,0.22,Copper
+7,6,400,quad,0.02,0.032,0.157,0.1659999999999999,Copper
+8,7,400,quad,0.055,0.067,0.1569999999999999,0.1659999999999999,Copper
+9,8,400,quad,0.09,0.102,0.1569999999999999,0.1659999999999999,Copper
+10,9,400,quad,0.125,0.137,0.1569999999999999,0.1659999999999999,Glass (quartz)
+11,10,300,tri,0.1519999999999999,0.182,0.0,0.022,not_exported_from_mphtxt
+12,11,163,tri,0.2399999999999999,0.25,0.1,0.13,not_exported_from_mphtxt

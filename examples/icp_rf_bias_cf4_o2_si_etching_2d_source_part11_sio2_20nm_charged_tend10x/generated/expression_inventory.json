@@ -1,0 +1,19 @@
+{
+  "dataset": "dset3",
+  "required": ["ux", "uy", "mu", "E_x", "E_y"],
+  "selected": {
+    "ux": {"expression": "withsol('sol2',u,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "uy": {"expression": "withsol('sol2',w,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "mu": {"expression": "withsol('sol2',spf.mu,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "T": {"expression": "withsol('sol2',T,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "p": {"expression": "withsol('sol2',p,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "rho_g": {"expression": "withsol('sol2',spf.rho,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "phi": {"expression": "withsol('sol2',ptp.Vav,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "E_x": {"expression": "withsol('sol2',-d(ptp.Vav,r),setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "E_y": {"expression": "withsol('sol2',-d(ptp.Vav,z),setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "ne": {"expression": "withsol('sol2',ptp.neav,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "Te": {"expression": "withsol('sol2',ptp.Teav,setind(Vrf,17))", "dataset": "dset3", "available": true},
+    "ion_flux_cf3p": {"expression": "", "dataset": "", "available": false},
+    "etch_rate": {"expression": "", "dataset": "", "available": false}
+  }
+}

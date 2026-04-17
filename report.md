@@ -106,7 +106,6 @@ COMSOLから外部exportした場を `precomputed_npz` として読み込む。s
 | `ux`, `uy` | ガス流速成分 |
 | `mu` | 動粘性ではなく動的粘度 Pa s |
 | `E_x`, `E_y` | 電場成分 |
-| `ax`, `ay` | 粒子電荷と質量を反映した外力加速度 |
 | `T` | 温度 |
 | `p` | 圧力診断量 |
 | `rho_g` | ガス密度 |
@@ -118,10 +117,25 @@ COMSOLから外部exportした場を `precomputed_npz` として読み込む。s
 
 今回の場は steady 扱いで、時間軸は `times = [0.0]` である。将来、時間変化場では同じ形式で `times` を複数持たせ、時間方向に線形補間する。
 
+### 3.1.1 drag に使うガス物性
+
+本ケースの `solver.drag_model` は `epstein` である。Epstein drag では、COMSOL field に `rho_g` と `T` が存在する場合、それらを粒子位置で補間して使う。
+`gas.density_kgm3` と `gas.temperature_K` は、field が存在しない、または局所値が非有限値になった場合の fallback / 代表値として残す。
+`p` は drag には直接使わず、`rho_g` と `T` の妥当性を確認する診断量として扱う。`mu` は field として保持・可視化するが、Epstein drag の式には入らない。
+
+今回の軽量確認では、drag gas source は次の通りである。
+
+| gas property | source | dragで使用 | fallback |
+|---|---|---:|---:|
+| `rho_g` | `field:rho_g` | 1 | `gas.density_kgm3 = 2.0e-05 kg/m3` |
+| `T` | `field:T` | 1 | `gas.temperature_K = 320 K` |
+| `mu` | `field:mu` | 0 | `gas.dynamic_viscosity_Pas = 1.8e-05 Pa s` |
+| `p` | `diagnostic_only_not_used_by_drag` | 0 | - |
+
 ### 3.2 運動方程式
 
-粒子位置を $\mathbf{x}$、速度を $\mathbf{v}$、ガス流速を $\mathbf{u}(\mathbf{x},t)$、粒子外力加速度を $\mathbf{a}_{ext}(\mathbf{x},t)$ とする。
-本solverの基本形は次である。
+粒子位置を $\mathbf{x}$、速度を $\mathbf{v}$、ガス流速を $\mathbf{u}(\mathbf{x},t)$、電場を $\mathbf{E}(\mathbf{x},t)$、粒子電荷を $q(t)$、粒子質量を $m$ とする。
+本 solver の基本形は次である。
 
 $$
 \frac{d\mathbf{x}}{dt} = \mathbf{v}
@@ -130,55 +144,46 @@ $$
 $$
 \frac{d\mathbf{v}}{dt}
 = \frac{\mathbf{u}(\mathbf{x},t)-\mathbf{v}}{\tau_{eff}}
-+ \mathbf{a}_{ext}(\mathbf{x},t)
++ \mathbf{a}_{body}
++ \frac{q(t)}{m}\mathbf{E}(\mathbf{x},t)
 $$
 
-ここで、$\tau_{eff}$ は有限Reynolds数補正後の粒子応答時間である。
+ここで、$\tau_{eff}$ は選択した drag model で評価される有効緩和時間である。
+電場力は固定の参照電荷・参照質量で事前生成せず、現在の粒子状態から毎回評価する。
 
 ### 3.3 力場種ごとの力
 
 #### 流体抗力
 
-Stokes応答時間は次で与える。
+低圧ICP条件では、連続体のStokes抗力よりも自由分子流に近いEpstein dragを標準にする。
+ガス分子の平均熱速度を次で置く。
 
 $$
-\tau_{Stokes}
-= \frac{\rho_p d_p^2}{18\mu}
+\bar{c}
+= \sqrt{\frac{8 k_B T}{\pi m_g}}
 $$
 
-粒子Reynolds数は次である。
+Epstein応答時間は次で与える。
 
 $$
-Re_p
-= \frac{\rho_g d_p \|\mathbf{v}-\mathbf{u}\|}{\mu}
+\tau_{Epstein}
+= \frac{\rho_p d_p}{2 \rho_g \bar{c}}
 $$
 
-Schiller-Naumann補正は次で与える。
-
-$$
-f_{SN}(Re_p)
-=
-\begin{cases}
-1 + 0.15 Re_p^{0.687}, & 0 < Re_p < 1000 \\
-0.01875 Re_p, & Re_p \ge 1000 \\
-1, & Re_p \approx 0
-\end{cases}
-$$
-
-有効応答時間は次である。
+有効応答時間と抗力加速度は次になる。
 
 $$
 \tau_{eff}
-= \max\left(\tau_{min}, \frac{\tau_{Stokes}}{f_{SN}}\right)
+= \max\left(\tau_{min}, \tau_{Epstein}\right)
 $$
-
-抗力加速度は次になる。
 
 $$
 \mathbf{a}_{drag}
 = \frac{\mathbf{u}-\mathbf{v}}{\tau_{eff}}
 $$
 
+ここで、$\rho_g$ と $T$ は COMSOL field の `rho_g`, `T` から粒子位置で補間した値を使う。
+`p` は理想気体式などによる整合性確認には使えるが、drag 式には直接入れない。
 本ケースでは `min_tau_p_s = 3.0e-4 s` を使い、20 nm粒子に対する過度に小さい緩和時間で時間刻みが支配されすぎないようにしている。
 
 #### 電場力
@@ -194,19 +199,18 @@ $$
 = \frac{q_p}{m_p}\mathbf{E}
 $$
 
-今回の入力では、export側で $\mathbf{a}_E$ を `ax`, `ay` として事前計算している。solver hot pathでは電場そのものではなく、加速度場として利用する。
+電場力は field bundle 内の事前計算済み加速度としてではなく、solver 内で現在の粒子電荷と質量から評価する。
 
 #### その他の外力
 
 solverの一般形では、重力やユーザー指定の体積力を足せる。
 
 $$
-\mathbf{a}_{ext}
-= \mathbf{a}_E + \mathbf{a}_{body}
+\mathbf{a}
+= \mathbf{a}_{body} + \frac{q(t)}{m}\mathbf{E}
 $$
 
-今回の主外力は電場由来の `ax`, `ay` である。
-
+主外力は電場と粒子電荷状態から決まる。
 ### 3.4 場の補間
 
 rectilinear grid上の場は、2Dでは双線形補間、時間変化場では時間方向の線形補間を行う。
@@ -606,12 +610,11 @@ part_id,field_supported_element_count,support_fraction,medium_status
 `ux`, `uy` の空間分布である。
 流速の範囲は概ね `ux = -2.58 to 0.34 m/s`、`uy = -0.99 to 0.51 m/s` であり、初速100 m/s級の粒子に対しては、初期運動よりも長時間の緩和過程で効いてくる。
 
-### 7.3 外力加速度成分
+### 7.3 電場力の扱い
 
-![Acceleration components](report_assets/icp_cf4_o2_10k_tend10x/visualizations/graphs/17_acceleration_components_ax_ay.png)
-
-`ax`, `ay` は粒子電荷と電場から作った加速度場である。
-有効support内での範囲は、`ax = -4.58e6 to 2.20e7 m/s2`、`ay = -9.88e6 to 5.80e7 m/s2` であり、粒子の長時間軌道に対して非常に強い影響を持つ。
+電場力は、固定の参照電荷・参照質量から作った加速度データとして扱わない。
+粒子ごとの現在電荷 `q(t)` と質量 `m` を使い、運動方程式内で `(q(t)/m)E(x,t)` として評価する。
+これにより、charge model による電荷更新と電場力の向き・大きさが分離せず、設定や実装の解釈も単純になる。
 
 ### 7.4 電場成分
 

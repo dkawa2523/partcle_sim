@@ -18,7 +18,6 @@ from .source_material_common import (
     sample_positive_normal,
     sample_thermal_velocity,
 )
-from .source_registry import get_source_law
 from ..providers.source_adapters import (
     ConstantScalarSampler,
     SourceFlowSampler,
@@ -92,14 +91,6 @@ def apply_source_models(
                 event_counter[str(row.event_name)] = event_counter.get(str(row.event_name), 0) + 1
 
         step = process_steps.active_at(rel_eff) if process_steps is not None else None
-        if step is not None:
-            rel_eff += float(step.source_release_time_shift_s)
-            event_factor *= float(step.source_event_gain_scale)
-            speed_scale *= float(step.source_speed_scale)
-            if str(step.source_law_override).strip():
-                law = get_source_law(str(step.source_law_override).strip()).name
-            if int(step.source_enabled) == 0:
-                gate_ok = False
 
         diag = {
             'particle_id': pid,
@@ -112,10 +103,6 @@ def apply_source_models(
             'release_enabled': 1,
             'original_release_time_s': float(particles.release_time[i]),
             'step_name': step.step_name if step is not None else '',
-            'step_source_law_override': step.source_law_override if step is not None else '',
-            'step_source_speed_scale': float(step.source_speed_scale) if step is not None else 1.0,
-            'step_source_event_gain_scale': float(step.source_event_gain_scale) if step is not None else 1.0,
-            'step_source_enabled': int(step.source_enabled) if step is not None else 1,
         }
 
         if not gate_ok:
@@ -125,7 +112,7 @@ def apply_source_models(
             diag.update(
                 {
                     'release_enabled': 0,
-                    'suppression_reason': 'event_gate_or_step_disable',
+                    'suppression_reason': 'event_gate',
                     'offset_m': 0.0,
                     'source_delta_speed_mps': 0.0,
                     'final_speed_mps': float(np.linalg.norm(base_v)),

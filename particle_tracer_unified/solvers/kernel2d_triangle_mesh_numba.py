@@ -4,7 +4,13 @@ import numpy as np
 from numba import njit
 
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN, VALID_MASK_STATUS_HARD_INVALID
-from .integrator_common import INTEGRATOR_ETD2, advance_state_2d, advance_state_2d_etd, compute_substep_count
+from .integrator_common import (
+    INTEGRATOR_ETD2,
+    advance_state_2d,
+    advance_state_2d_etd,
+    compute_substep_count,
+    effective_tau_from_slip_speed,
+)
 from .kernel_shared_numba import midpoint_local_dt, should_capture_midpoint
 
 
@@ -149,6 +155,7 @@ def advance_particles_2d_triangle_mesh_inplace(
     v,
     active,
     tau_p,
+    particle_diameter,
     flow_scale_particle,
     drag_tau_scale_particle,
     body_accel_scale_particle,
@@ -160,6 +167,9 @@ def advance_particles_2d_triangle_mesh_inplace(
     body_ax,
     body_ay,
     min_tau_p_s,
+    gas_density_kgm3,
+    gas_mu_pas,
+    drag_model_mode,
     integrator_mode,
     adaptive_substep_enabled,
     adaptive_substep_tau_ratio,
@@ -181,7 +191,6 @@ def advance_particles_2d_triangle_mesh_inplace(
     x_mid_trial,
     substep_counts,
     mask_status_flags,
-    extension_band_sample_flags,
 ):
     for i in range(x.shape[0]):
         if not active[i]:
@@ -193,16 +202,16 @@ def advance_particles_2d_triangle_mesh_inplace(
             x_mid_trial[i, 1] = x[i, 1]
             substep_counts[i] = 1
             mask_status_flags[i] = VALID_MASK_STATUS_CLEAN
-            extension_band_sample_flags[i] = False
             continue
-        tau_eff = tau_p[i] * global_drag_tau_scale * max(drag_tau_scale_particle[i], 1.0e-6)
-        if tau_eff < min_tau_p_s:
-            tau_eff = min_tau_p_s
-        bax = body_ax * global_body_accel_scale * body_accel_scale_particle[i]
-        bay = body_ay * global_body_accel_scale * body_accel_scale_particle[i]
+        tau_stokes = tau_p[i] * global_drag_tau_scale * max(drag_tau_scale_particle[i], 1.0e-6)
+        if tau_stokes < min_tau_p_s:
+            tau_stokes = min_tau_p_s
+        body_scale = global_body_accel_scale * body_accel_scale_particle[i]
+        bax_base = body_ax * body_scale
+        bay_base = body_ay * body_scale
         n_substeps = compute_substep_count(
             dt,
-            tau_eff,
+            tau_stokes,
             adaptive_substep_enabled,
             adaptive_substep_tau_ratio,
             adaptive_substep_max_splits,
@@ -229,26 +238,52 @@ def advance_particles_2d_triangle_mesh_inplace(
                 vy0 = vyn
                 flowx0, flowy0, status = _sample_triangle_mesh_flow(
                     vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                    accel_cell_offsets, accel_triangle_indices, support_tolerance, times, ux, uy, t_sub_start, xn, yn
+                    accel_cell_offsets, accel_triangle_indices, support_tolerance,
+                    times, ux, uy, t_sub_start, xn, yn
                 )
                 if status > mask_status:
                     mask_status = status
+                bax0 = bax_base
+                bay0 = bay_base
                 targetx0 = global_flow_scale * flow_scale_particle[i] * flowx0
                 targety0 = global_flow_scale * flow_scale_particle[i] * flowy0
+                slip0 = np.sqrt((vxn - targetx0) * (vxn - targetx0) + (vyn - targety0) * (vyn - targety0))
+                tau_eff0 = effective_tau_from_slip_speed(
+                    tau_stokes,
+                    slip0,
+                    particle_diameter[i],
+                    gas_density_kgm3,
+                    gas_mu_pas,
+                    drag_model_mode,
+                    min_tau_p_s,
+                )
                 xh, yh, _vxh, _vyh = advance_state_2d_etd(
-                    xn, yn, vxn, vyn, targetx0, targety0, bax, bay, tau_eff, 0.5 * dt_sub
+                    xn, yn, vxn, vyn, targetx0, targety0, bax0, bay0, tau_eff0, 0.5 * dt_sub
                 )
                 t_mid = t_sub_start + 0.5 * dt_sub
                 flowx_mid, flowy_mid, status = _sample_triangle_mesh_flow(
                     vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                    accel_cell_offsets, accel_triangle_indices, support_tolerance, times, ux, uy, t_mid, xh, yh
+                    accel_cell_offsets, accel_triangle_indices, support_tolerance,
+                    times, ux, uy, t_mid, xh, yh
                 )
                 if status > mask_status:
                     mask_status = status
+                bax_mid = bax_base
+                bay_mid = bay_base
                 targetx_mid = global_flow_scale * flow_scale_particle[i] * flowx_mid
                 targety_mid = global_flow_scale * flow_scale_particle[i] * flowy_mid
+                slip_mid = np.sqrt((_vxh - targetx_mid) * (_vxh - targetx_mid) + (_vyh - targety_mid) * (_vyh - targety_mid))
+                tau_eff_mid = effective_tau_from_slip_speed(
+                    tau_stokes,
+                    slip_mid,
+                    particle_diameter[i],
+                    gas_density_kgm3,
+                    gas_mu_pas,
+                    drag_model_mode,
+                    min_tau_p_s,
+                )
                 xn, yn, vxn, vyn = advance_state_2d_etd(
-                    xn, yn, vxn, vyn, targetx_mid, targety_mid, bax, bay, tau_eff, dt_sub
+                    xn, yn, vxn, vyn, targetx_mid, targety_mid, bax_mid, bay_mid, tau_eff_mid, dt_sub
                 )
                 if not has_mid:
                     elapsed_next = elapsed + dt_sub
@@ -263,26 +298,52 @@ def advance_particles_2d_triangle_mesh_inplace(
                         else:
                             flowx0_mid, flowy0_mid, status = _sample_triangle_mesh_flow(
                                 vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                                accel_cell_offsets, accel_triangle_indices, support_tolerance, times, ux, uy, t_sub_start, x0, y0
+                                accel_cell_offsets, accel_triangle_indices, support_tolerance,
+                                times, ux, uy, t_sub_start, x0, y0
                             )
                             if status > mask_status:
                                 mask_status = status
+                            bax0_mid = bax_base
+                            bay0_mid = bay_base
                             targetx0_mid = global_flow_scale * flow_scale_particle[i] * flowx0_mid
                             targety0_mid = global_flow_scale * flow_scale_particle[i] * flowy0_mid
+                            slip0_mid = np.sqrt((vx0 - targetx0_mid) * (vx0 - targetx0_mid) + (vy0 - targety0_mid) * (vy0 - targety0_mid))
+                            tau_eff0_mid = effective_tau_from_slip_speed(
+                                tau_stokes,
+                                slip0_mid,
+                                particle_diameter[i],
+                                gas_density_kgm3,
+                                gas_mu_pas,
+                                drag_model_mode,
+                                min_tau_p_s,
+                            )
                             xh_mid, yh_mid, _vxh_mid, _vyh_mid = advance_state_2d_etd(
-                                x0, y0, vx0, vy0, targetx0_mid, targety0_mid, bax, bay, tau_eff, 0.5 * dt_mid
+                                x0, y0, vx0, vy0, targetx0_mid, targety0_mid, bax0_mid, bay0_mid, tau_eff0_mid, 0.5 * dt_mid
                             )
                             t_mid_eval = t_sub_start + 0.5 * dt_mid
                             flowx_mid2, flowy_mid2, status = _sample_triangle_mesh_flow(
                                 vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                                accel_cell_offsets, accel_triangle_indices, support_tolerance, times, ux, uy, t_mid_eval, xh_mid, yh_mid
+                                accel_cell_offsets, accel_triangle_indices, support_tolerance,
+                                times, ux, uy, t_mid_eval, xh_mid, yh_mid
                             )
                             if status > mask_status:
                                 mask_status = status
+                            bax_mid2 = bax_base
+                            bay_mid2 = bay_base
                             targetx_mid2 = global_flow_scale * flow_scale_particle[i] * flowx_mid2
                             targety_mid2 = global_flow_scale * flow_scale_particle[i] * flowy_mid2
+                            slip_mid2 = np.sqrt((_vxh_mid - targetx_mid2) * (_vxh_mid - targetx_mid2) + (_vyh_mid - targety_mid2) * (_vyh_mid - targety_mid2))
+                            tau_eff_mid2 = effective_tau_from_slip_speed(
+                                tau_stokes,
+                                slip_mid2,
+                                particle_diameter[i],
+                                gas_density_kgm3,
+                                gas_mu_pas,
+                                drag_model_mode,
+                                min_tau_p_s,
+                            )
                             xmid, ymid, _vxmid, _vymid = advance_state_2d_etd(
-                                x0, y0, vx0, vy0, targetx_mid2, targety_mid2, bax, bay, tau_eff, dt_mid
+                                x0, y0, vx0, vy0, targetx_mid2, targety_mid2, bax_mid2, bay_mid2, tau_eff_mid2, dt_mid
                             )
                         has_mid = True
                     elapsed = elapsed_next
@@ -296,12 +357,25 @@ def advance_particles_2d_triangle_mesh_inplace(
                 t_eval = t_start + (float(sub_idx) + 1.0) * dt_sub
                 flowx, flowy, status = _sample_triangle_mesh_flow(
                     vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                    accel_cell_offsets, accel_triangle_indices, support_tolerance, times, ux, uy, t_eval, xn, yn
+                    accel_cell_offsets, accel_triangle_indices, support_tolerance,
+                    times, ux, uy, t_eval, xn, yn
                 )
                 if status > mask_status:
                     mask_status = status
+                bax = bax_base
+                bay = bay_base
                 targetx = global_flow_scale * flow_scale_particle[i] * flowx
                 targety = global_flow_scale * flow_scale_particle[i] * flowy
+                slip = np.sqrt((vxn - targetx) * (vxn - targetx) + (vyn - targety) * (vyn - targety))
+                tau_eff = effective_tau_from_slip_speed(
+                    tau_stokes,
+                    slip,
+                    particle_diameter[i],
+                    gas_density_kgm3,
+                    gas_mu_pas,
+                    drag_model_mode,
+                    min_tau_p_s,
+                )
                 xn, yn, vxn, vyn = advance_state_2d(
                     xn, yn, vxn, vyn, targetx, targety, bax, bay, tau_eff, dt_sub, integrator_mode
                 )
@@ -312,4 +386,3 @@ def advance_particles_2d_triangle_mesh_inplace(
         v_trial[i, 0] = vxn
         v_trial[i, 1] = vyn
         mask_status_flags[i] = mask_status
-        extension_band_sample_flags[i] = False

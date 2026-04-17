@@ -9,19 +9,18 @@ matplotlib.use("Agg", force=True)
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.collections import PolyCollection
 from particle_tracer_unified.core.field_sampling import (
     VALID_MASK_STATUS_HARD_INVALID,
     VALID_MASK_STATUS_MIXED_STENCIL,
     sample_valid_mask_status,
 )
 from tools.visualization_common import (
-    add_mesh_fill,
+    domain_part_medium_summary,
     draw_boundary_edges,
+    draw_domain_parts_by_medium,
     ensure_visualization_dirs,
-    mesh_polygons,
+    filter_display_boundary_geometry,
     require_2d_quantity,
-    sample_grid_points,
 )
 
 
@@ -58,15 +57,19 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
         boundary_edges = np.asarray(g["boundary_edges"], dtype=np.float64)
         boundary_part_ids = np.asarray(g["boundary_edge_part_ids"], dtype=np.int32)
         mesh_vertices = np.asarray(g["mesh_vertices"], dtype=np.float64)
+        mesh_triangles = np.asarray(g["mesh_triangles"], dtype=np.int32) if "mesh_triangles" in g else None
+        mesh_triangle_part_ids = np.asarray(g["mesh_triangle_part_ids"], dtype=np.int32) if "mesh_triangle_part_ids" in g else None
         mesh_quads = np.asarray(g["mesh_quads"], dtype=np.int32)
+        mesh_quad_part_ids = np.asarray(g["mesh_quad_part_ids"], dtype=np.int32) if "mesh_quad_part_ids" in g else None
+    boundary_edges, boundary_part_ids = filter_display_boundary_geometry(boundary_edges, boundary_part_ids)
+    if boundary_edges is None or boundary_part_ids is None:
+        raise ValueError("boundary diagnostics require displayable boundary edges with part IDs")
 
     with np.load(field_npz) as f:
         ux = require_2d_quantity(f, "ux", "boundary diagnostics")
         uy = require_2d_quantity(f, "uy", "boundary diagnostics")
         field_valid_mask = np.asarray(f["valid_mask"], dtype=bool) if "valid_mask" in f else None
 
-    polygons = mesh_polygons(mesh_vertices, mesh_quads)
-    centroids = mesh_vertices[mesh_quads].mean(axis=1)
     part_centers = []
     for pid in np.unique(boundary_part_ids):
         mask = boundary_part_ids == pid
@@ -80,6 +83,43 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
     hard_invalid_mask = valid_mask_status == int(VALID_MASK_STATUS_HARD_INVALID)
     speed = np.where(valid_mask, np.sqrt(ux * ux + uy * uy), np.nan)
     out = ensure_visualization_dirs(output_dir)["boundary_diagnostics"]
+    out.mkdir(parents=True, exist_ok=True)
+    medium_summary = domain_part_medium_summary(
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+        x,
+        y,
+        valid_mask,
+    )
+    if not medium_summary.empty:
+        medium_summary.to_csv(out / "domain_part_medium_summary.csv", index=False)
+
+    def draw_parts(
+        ax: plt.Axes,
+        *,
+        alpha: float,
+        linewidth: float,
+        edgecolor: str = "#ffffff",
+        label_part_ids: bool = False,
+        show_legend: bool = False,
+    ) -> None:
+        draw_domain_parts_by_medium(
+            ax,
+            mesh_vertices,
+            mesh_triangles,
+            mesh_triangle_part_ids,
+            mesh_quads,
+            mesh_quad_part_ids,
+            medium_summary=medium_summary,
+            alpha=alpha,
+            linewidth=linewidth,
+            edgecolor=edgecolor,
+            label_part_ids=label_part_ids,
+            show_legend=show_legend,
+        )
     final_csv = output_dir / "final_particles.csv"
     invalid_stop_points = np.zeros((0, 2), dtype=np.float64)
     if final_csv.exists():
@@ -92,8 +132,8 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
             ].to_numpy(dtype=np.float64)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    add_mesh_fill(ax, polygons, facecolor="#eef7ff", alpha=1.0)
-    draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.35, alpha=0.95)
+    draw_parts(ax, alpha=0.50, linewidth=0.04, label_part_ids=True, show_legend=True)
+    draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.35, alpha=0.95, label_part_ids=True)
     for pid, center in part_centers:
         ax.text(float(center[0]), float(center[1]), str(pid), fontsize=8, ha="center", va="center", color="black")
     ax.set_title("Recognized Boundary Geometry (edge parts)")
@@ -107,7 +147,8 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    pcm = ax.pcolormesh(xx, yy, valid_mask.astype(float), shading="nearest", cmap="Blues", vmin=0.0, vmax=1.0)
+    draw_parts(ax, alpha=0.24, linewidth=0.02)
+    pcm = ax.pcolormesh(xx, yy, valid_mask.astype(float), shading="nearest", cmap="Blues", vmin=0.0, vmax=1.0, alpha=0.82)
     draw_boundary_edges(ax, boundary_edges, None, linewidth=1.0, alpha=0.95)
     ax.set_title("Recognized Domain Mask (inside/outside)")
     ax.set_xlabel("x [m]")
@@ -122,8 +163,10 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
+    draw_parts(ax, alpha=0.24, linewidth=0.02)
     lim = max(abs(float(np.nanmin(sdf))), abs(float(np.nanmax(sdf))))
-    pcm = ax.pcolormesh(xx, yy, sdf, shading="nearest", cmap="coolwarm", vmin=-lim, vmax=lim)
+    pcm = ax.pcolormesh(xx, yy, sdf, shading="nearest", cmap="coolwarm", vmin=-lim, vmax=lim, alpha=0.86)
+    draw_parts(ax, alpha=0.10, linewidth=0.04, edgecolor="#222222")
     ax.contour(xx, yy, sdf, levels=[0.0], colors="black", linewidths=1.1)
     draw_boundary_edges(ax, boundary_edges, None, linewidth=0.8, alpha=0.85)
     ax.set_title("Diagnostic Signed Distance Field")
@@ -139,7 +182,7 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    add_mesh_fill(ax, polygons, facecolor="#f7fbff", alpha=1.0)
+    draw_parts(ax, alpha=0.30, linewidth=0.02)
     draw_boundary_edges(ax, boundary_edges, None, linewidth=1.0, alpha=0.95)
     band = valid_mask & (np.abs(sdf) <= float(normal_band_m))
     bx = xx[band]
@@ -171,9 +214,8 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    values = sample_grid_points(speed, x, y, centroids)
-    coll = PolyCollection(polygons, array=np.asarray(values, dtype=np.float64), cmap="viridis", edgecolors="none")
-    ax.add_collection(coll)
+    draw_parts(ax, alpha=0.20, linewidth=0.02)
+    pcm = ax.pcolormesh(xx, yy, np.ma.masked_invalid(speed), shading="nearest", cmap="viridis", alpha=0.86)
     draw_boundary_edges(ax, boundary_edges, None, linewidth=0.9, alpha=0.9)
     sx = slice(None, None, max(1, int(quiver_stride)))
     sy = slice(None, None, max(1, int(quiver_stride)))
@@ -196,13 +238,15 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
     ax.set_aspect("equal", adjustable="box")
     ax.set_xlim(float(x.min()), float(x.max()))
     ax.set_ylim(float(y.min()), float(y.max()))
-    fig.colorbar(coll, ax=ax, fraction=0.046, pad=0.02, label="speed [m/s]")
+    fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02, label="speed [m/s]")
     fig.tight_layout()
     fig.savefig(out / "05_flow_speed_vectors_over_geometry.png", dpi=170)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    pcm = ax.pcolormesh(xx, yy, mixed_stencil_mask.astype(float), shading="nearest", cmap="OrRd", vmin=0.0, vmax=1.0)
+    draw_parts(ax, alpha=0.24, linewidth=0.02)
+    pcm = ax.pcolormesh(xx, yy, mixed_stencil_mask.astype(float), shading="nearest", cmap="OrRd", vmin=0.0, vmax=1.0, alpha=0.82)
+    draw_parts(ax, alpha=0.10, linewidth=0.04, edgecolor="#222222")
     draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.0, alpha=0.9)
     ax.contour(xx, yy, sdf, levels=[0.0], colors="black", linewidths=0.85)
     ax.set_title("Mixed-Stencil Hotspots (point valid, stencil mixed)")
@@ -218,7 +262,9 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    pcm = ax.pcolormesh(xx, yy, hard_invalid_mask.astype(float), shading="nearest", cmap="Reds", vmin=0.0, vmax=1.0)
+    draw_parts(ax, alpha=0.24, linewidth=0.02)
+    pcm = ax.pcolormesh(xx, yy, hard_invalid_mask.astype(float), shading="nearest", cmap="Reds", vmin=0.0, vmax=1.0, alpha=0.82)
+    draw_parts(ax, alpha=0.10, linewidth=0.04, edgecolor="#222222")
     draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.0, alpha=0.9)
     if invalid_stop_points.size:
         ax.scatter(
@@ -251,7 +297,7 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
         "mixed_stencil_grid_count": int(np.count_nonzero(mixed_stencil_mask)),
         "hard_invalid_grid_count": int(np.count_nonzero(hard_invalid_mask)),
         "invalid_mask_stopped_point_count": int(invalid_stop_points.shape[0]),
-        "files": sorted(p.name for p in out.glob("*.png")),
+        "files": sorted(p.name for p in out.glob("*.png")) + sorted(p.name for p in out.glob("*.csv")),
     }
     (out / "boundary_diagnostics_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     return out

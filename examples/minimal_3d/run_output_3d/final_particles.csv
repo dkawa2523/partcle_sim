@@ -1,4 +1,0 @@
-particle_id,release_time,released,active,stuck,absorbed,escaped,invalid_mask_stopped,final_step_name,final_segment_name,source_part_id,material_id,x,v_x,y,v_y,z,v_z
-1,0.0,1,1,0,0,0,0,purge,purge,10,1,-0.999999,0.0551306083870476,-0.30000947343798123,-1.507681343981714e-17,-1.2989295916643329e-06,-4.275668950223466e-17
-2,0.2,1,1,0,0,0,0,purge,purge,20,2,0.999999,-0.0010810343122167555,0.20001044470047047,1.3830290278111125e-19,0.20000384531966908,-7.601664248266052e-20
-3,0.4,1,1,0,0,0,0,purge,purge,10,1,-0.6,0.0,0.0,0.0,-0.2,0.0

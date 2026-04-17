@@ -11,6 +11,22 @@ VALID_MASK_STATUS_MIXED_STENCIL = 1
 VALID_MASK_STATUS_HARD_INVALID = 2
 
 
+def point_within_axes(axes: Tuple[np.ndarray, ...], position: np.ndarray, *, tol: float = 0.0) -> bool:
+    point = np.asarray(position, dtype=np.float64)
+    if point.size < len(axes):
+        return False
+    for axis_index, axis in enumerate(axes):
+        arr = np.asarray(axis, dtype=np.float64)
+        if arr.ndim != 1 or arr.size < 2:
+            raise ValueError('Axis must be 1D with at least 2 entries')
+        value = float(point[axis_index])
+        if not np.isfinite(value):
+            return False
+        if value < float(arr[0]) - float(tol) or value > float(arr[-1]) + float(tol):
+            return False
+    return True
+
+
 def choose_velocity_quantity_names(field, spatial_dim: int) -> Tuple[str, ...]:
     if field is None:
         return tuple()
@@ -20,6 +36,38 @@ def choose_velocity_quantity_names(field, spatial_dim: int) -> Tuple[str, ...]:
         candidates = (('ux', 'uy'), ('vx', 'vy'))
     else:
         candidates = (('ux', 'uy', 'uz'), ('vx', 'vy', 'vz'))
+    for names in candidates:
+        if all(name in field.quantities for name in names):
+            return tuple(names)
+    return tuple()
+
+
+def choose_electric_field_quantity_names(field, spatial_dim: int) -> Tuple[str, ...]:
+    if field is None:
+        return tuple()
+    if int(spatial_dim) == 2 and getattr(field, 'coordinate_system', '') == 'axisymmetric_rz':
+        candidates = (
+            ('E_r', 'E_z'),
+            ('Er', 'Ez'),
+            ('electric_r', 'electric_z'),
+            ('electric_field_r', 'electric_field_z'),
+            ('E_x', 'E_y'),
+            ('Ex', 'Ey'),
+        )
+    elif int(spatial_dim) == 2:
+        candidates = (
+            ('E_x', 'E_y'),
+            ('Ex', 'Ey'),
+            ('electric_x', 'electric_y'),
+            ('electric_field_x', 'electric_field_y'),
+        )
+    else:
+        candidates = (
+            ('E_x', 'E_y', 'E_z'),
+            ('Ex', 'Ey', 'Ez'),
+            ('electric_x', 'electric_y', 'electric_z'),
+            ('electric_field_x', 'electric_field_y', 'electric_field_z'),
+        )
     for names in candidates:
         if all(name in field.quantities for name in names):
             return tuple(names)
@@ -80,12 +128,17 @@ def sample_quantity_series(series, axes: Tuple[np.ndarray, ...], position: np.nd
 
 
 def sample_valid_mask(mask: np.ndarray, axes: Tuple[np.ndarray, ...], position: np.ndarray, *, threshold: float = 0.5) -> bool:
-    return bool(sample_grid_scalar(np.asarray(mask, dtype=np.float64), axes, np.asarray(position, dtype=np.float64)) >= float(threshold))
+    point = np.asarray(position, dtype=np.float64)
+    if not point_within_axes(axes, point):
+        return False
+    return bool(sample_grid_scalar(np.asarray(mask, dtype=np.float64), axes, point) >= float(threshold))
 
 
 def _valid_mask_stencil_has_invalid(mask: np.ndarray, axes: Tuple[np.ndarray, ...], position: np.ndarray) -> bool:
     grid = np.asarray(mask, dtype=bool)
     point = np.asarray(position, dtype=np.float64)
+    if not point_within_axes(axes, point):
+        return True
     dim = len(axes)
     if dim == 2:
         ix0, ix1, _ = locate_axis_interval(axes[0], float(point[0]))

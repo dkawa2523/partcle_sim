@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 import numpy as np
 
@@ -23,6 +23,8 @@ def resolve_valid_mask_retry_then_stop(
     adaptive_substep_tau_ratio: float,
     adaptive_substep_max_splits: int,
     tau_p_i: float,
+    particle_diameter_i: float,
+    particle_density_i: float,
     flow_scale_particle_i: float,
     drag_scale_particle_i: float,
     body_scale_particle_i: float,
@@ -31,6 +33,12 @@ def resolve_valid_mask_retry_then_stop(
     global_body_accel_scale: float,
     body_accel: np.ndarray,
     min_tau_p_s: float,
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    gas_temperature_K: float,
+    gas_molecular_mass_kg: float,
+    drag_model_mode: int,
+    electric_q_over_m_i: Optional[float] = None,
 ) -> ValidMaskPrefixResolution:
     resolution = resolve_prefix(
         x0=x0,
@@ -44,6 +52,8 @@ def resolve_valid_mask_retry_then_stop(
         adaptive_substep_tau_ratio=float(adaptive_substep_tau_ratio),
         adaptive_substep_max_splits=int(adaptive_substep_max_splits),
         tau_p_i=float(tau_p_i),
+        particle_diameter_i=float(particle_diameter_i),
+        particle_density_i=float(particle_density_i),
         flow_scale_particle_i=float(flow_scale_particle_i),
         drag_scale_particle_i=float(drag_scale_particle_i),
         body_scale_particle_i=float(body_scale_particle_i),
@@ -52,6 +62,12 @@ def resolve_valid_mask_retry_then_stop(
         global_body_accel_scale=float(global_body_accel_scale),
         body_accel=body_accel,
         min_tau_p_s=float(min_tau_p_s),
+        gas_density_kgm3=float(gas_density_kgm3),
+        gas_mu_pas=float(gas_mu_pas),
+        gas_temperature_K=float(gas_temperature_K),
+        gas_molecular_mass_kg=float(gas_molecular_mass_kg),
+        drag_model_mode=int(drag_model_mode),
+        electric_q_over_m_i=electric_q_over_m_i,
         max_halving_count=int(adaptive_substep_max_splits),
     )
     collision_diagnostics['invalid_mask_retry_count'] += int(resolution.retry_count)

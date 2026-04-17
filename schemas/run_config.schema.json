@@ -3,13 +3,196 @@
   "type": "object",
   "required": ["run", "paths", "providers", "gas", "source", "solver"],
   "properties": {
-    "run": {"type": "object"},
-    "paths": {"type": "object"},
-    "providers": {"type": "object"},
-    "gas": {"type": "object"},
-    "source": {"type": "object"},
-    "process": {"type": "object"},
-    "solver": {"type": "object"}
+    "run": {
+      "type": "object",
+      "required": ["spatial_dim"],
+      "properties": {
+        "spatial_dim": {"type": "integer", "enum": [2, 3]},
+        "coordinate_system": {
+          "type": "string",
+          "enum": ["cartesian_xy", "axisymmetric_rz", "cartesian_xyz"],
+          "description": "Coordinate interpretation for input positions and field components. Use axisymmetric_rz for 2D r-z COMSOL sections; particle statistics remain raw marker counts."
+        }
+      },
+      "additionalProperties": true
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "providers": {
+      "type": "object",
+      "properties": {
+        "geometry": {
+          "type": "object",
+          "properties": {
+            "kind": {"type": "string", "minLength": 1},
+            "npz_path": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": true
+        },
+        "field": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["linear_shear", "synthetic", "precomputed_npz", "precomputed_triangle_mesh_npz"]
+            },
+            "npz_path": {"type": "string", "minLength": 1},
+            "time_mode": {"type": "string", "enum": ["steady", "transient"]},
+            "times": {
+              "type": "array",
+              "items": {"type": "number"},
+              "minItems": 1
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "gas": {
+      "type": "object",
+      "properties": {
+        "temperature": {"type": "number", "exclusiveMinimum": 0},
+        "dynamic_viscosity_Pas": {"type": "number", "exclusiveMinimum": 0},
+        "density_kgm3": {"type": "number", "minimum": 0},
+        "molecular_mass_amu": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "count": {"type": "integer", "minimum": 0},
+        "seed": {"type": "integer"},
+        "law": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "input_contract": {
+      "type": "object",
+      "properties": {
+        "initial_particle_field_support": {"type": "string", "enum": ["strict", "warn", "off"]}
+      },
+      "additionalProperties": true
+    },
+    "provider_contract": {
+      "type": "object",
+      "properties": {
+        "boundary_field_support": {"type": "string", "enum": ["strict", "warn", "off"]},
+        "boundary_offset_cells": {"type": "number", "exclusiveMinimum": 0},
+        "max_boundary_samples": {"type": "integer", "minimum": 1},
+        "max_time_samples": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": true
+    },
+    "wall": {
+      "type": "object",
+      "properties": {
+        "epsilon_offset_m": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "solver": {
+      "type": "object",
+      "required": ["dt", "t_end"],
+      "properties": {
+        "dt": {"type": "number", "exclusiveMinimum": 0},
+        "t_end": {"type": "number", "minimum": 0},
+        "save_every": {"type": "integer", "minimum": 1},
+        "integrator": {"type": "string", "enum": ["drag_relaxation", "etd", "etd2"]},
+        "drag_model": {"type": "string", "enum": ["stokes", "schiller_naumann", "epstein"]},
+        "stochastic_motion": {
+          "oneOf": [
+            {"type": "boolean"},
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {"type": ["boolean", "integer", "string"]},
+                "model": {"type": "string", "enum": ["underdamped_langevin"]},
+                "stride": {"type": "integer", "minimum": 1},
+                "seed": {"type": "integer"},
+                "temperature_source": {"type": "string", "enum": ["field_T_then_gas", "gas"]}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "charge_model": {
+          "oneOf": [
+            {"type": "boolean"},
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {"type": ["boolean", "integer", "string"]},
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "v1",
+                    "v2",
+                    "te_relaxation",
+                    "density_temperature_flux_relaxation",
+                    "flux_relaxation",
+                    "density_temperature_flux"
+                  ]
+                },
+                "update_stride": {"type": "integer", "minimum": 1},
+                "electron_temperature_quantity": {"type": "string"},
+                "electron_temperature_unit": {"type": "string", "enum": ["eV", "K", "ev", "k"]},
+                "electron_density_quantity": {"type": "string"},
+                "ion_density_quantity": {"type": "string"},
+                "ion_temperature_quantity": {"type": "string"},
+                "ion_temperature_eV": {"type": "number", "exclusiveMinimum": 0},
+                "ion_mass_amu": {"type": "number", "exclusiveMinimum": 0},
+                "ion_charge_number": {"type": "number", "exclusiveMinimum": 0},
+                "electron_sticking": {"type": "number", "minimum": 0},
+                "ion_sticking": {"type": "number", "minimum": 0},
+                "bohm_velocity_factor": {"type": "number", "minimum": 0},
+                "te_relaxation_alpha": {"type": "number", "exclusiveMinimum": 0},
+                "relaxation_time_s": {"type": "number", "exclusiveMinimum": 0},
+                "max_abs_potential_V": {"type": "number", "exclusiveMinimum": 0},
+                "newton_iterations": {"type": "integer", "minimum": 1}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "valid_mask_policy": {"type": "string", "enum": ["diagnostic", "retry_then_stop"]},
+        "adaptive_substep_enabled": {"type": ["boolean", "integer"]},
+        "adaptive_substep_tau_ratio": {"type": "number", "exclusiveMinimum": 0},
+        "adaptive_substep_max_splits": {"type": "integer", "minimum": 0},
+        "max_wall_hits_per_step": {"type": "integer", "minimum": 1},
+        "min_remaining_dt_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "min_tau_p_s": {"type": "number", "exclusiveMinimum": 0},
+        "on_boundary_tol_m": {"type": "number", "minimum": 0},
+        "plot_particle_limit": {"type": "integer", "minimum": 0},
+        "seed": {"type": "integer"}
+      },
+      "additionalProperties": true
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "artifact_mode": {"type": "string", "enum": ["full", "minimal"]},
+        "write_positions": {"type": ["boolean", "integer"]},
+        "write_segmented_positions": {"type": ["boolean", "integer"]},
+        "write_source_diagnostics": {"type": ["boolean", "integer"]},
+        "write_wall_events": {"type": ["boolean", "integer"]},
+        "write_max_hit_events": {"type": ["boolean", "integer"]},
+        "write_runtime_step_summary": {"type": ["boolean", "integer"]},
+        "write_prepared_summary": {"type": ["boolean", "integer"]},
+        "write_wall_summary": {"type": ["boolean", "integer"]},
+        "write_coating_summary": {"type": ["boolean", "integer"]},
+        "write_trajectory_plot": {"type": ["boolean", "integer"]},
+        "write_collision_diagnostics": {"type": ["boolean", "integer"]}
+      },
+      "additionalProperties": true
+    }
   },
   "additionalProperties": true
 }

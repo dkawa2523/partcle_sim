@@ -197,6 +197,10 @@ def _wall_vector_component_candidates(field) -> Sequence[Tuple[str, ...]]:
             ('tau_wall_r', 'tau_wall_z'),
             ('traction_r', 'traction_z'),
             ('surface_traction_r', 'surface_traction_z'),
+            ('tauw_x', 'tauw_y'),
+            ('tau_wall_x', 'tau_wall_y'),
+            ('traction_x', 'traction_y'),
+            ('surface_traction_x', 'surface_traction_y'),
         ]
     if field.spatial_dim == 2:
         return [

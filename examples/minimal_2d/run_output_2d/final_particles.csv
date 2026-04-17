@@ -1,4 +1,0 @@
-particle_id,release_time,released,active,stuck,absorbed,escaped,invalid_mask_stopped,final_step_name,final_segment_name,source_part_id,material_id,x,v_x,y,v_y
-1,0.0,1,1,0,0,0,0,run,run,10,1,-0.999999,0.21484965010855475,-0.19999999999999996,0.0
-2,0.2,1,1,0,0,0,0,run,run,20,2,-0.20799999999999985,0.6000000000000001,0.2,0.0
-3,0.4,1,1,0,0,0,0,run,run,10,1,-0.6,0.0,0.0,0.0

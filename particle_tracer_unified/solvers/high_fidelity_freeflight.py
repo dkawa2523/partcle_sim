@@ -16,8 +16,9 @@ from .compiled_field_backend import (
     TriangleMesh2DCompiledBackend,
     coerce_compiled_backend as _coerce_compiled_backend,
     compile_runtime_backend as _compile_runtime_arrays,
-    sample_compiled_extension_band_active as _sample_extension_band_active,
+    sample_compiled_acceleration_vector as _sample_acceleration_vector_at,
     sample_compiled_flow_vector as _sample_flow_vector_at,
+    sample_compiled_gas_properties as _sample_gas_properties_at,
     sample_compiled_valid_mask_status as _sample_valid_mask_status,
 )
 from .integrator_common import (
@@ -27,6 +28,7 @@ from .integrator_common import (
     advance_state_3d,
     advance_state_3d_etd,
     compute_substep_count,
+    effective_tau_from_slip_speed,
 )
 from .kernel2d_numba import advance_particles_2d_inplace
 from .kernel2d_triangle_mesh_numba import advance_particles_2d_triangle_mesh_inplace
@@ -65,26 +67,99 @@ def _advance_etd2_substep(
     flow_scale_particle_i: float,
     global_flow_scale: float,
     body: np.ndarray,
-    tau_eff: float,
+    body_field_scale: float,
+    tau_stokes: float,
+    particle_diameter_m: float,
+    particle_density_kgm3: float,
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    gas_temperature_K: float,
+    gas_molecular_mass_kg: float,
+    drag_model_mode: int,
+    min_tau_p_s: float,
+    electric_q_over_m_i: Optional[float] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     flow_start = _sample_flow_vector_at(compiled, spatial_dim, float(t_sub_start), x0)
+    accel_start = _sample_acceleration_vector_at(
+        compiled,
+        spatial_dim,
+        float(t_sub_start),
+        x0,
+        electric_q_over_m=electric_q_over_m_i,
+    )
+    body_start = body + float(body_field_scale) * accel_start[:spatial_dim]
     target_start = float(global_flow_scale) * float(flow_scale_particle_i) * flow_start
+    slip_start = float(np.linalg.norm(np.asarray(v0, dtype=np.float64)[:spatial_dim] - target_start[:spatial_dim]))
+    rho_start, mu_start, temp_start = _sample_gas_properties_at(
+        compiled,
+        float(t_sub_start),
+        x0,
+        fallback_density_kgm3=float(gas_density_kgm3),
+        fallback_mu_pas=float(gas_mu_pas),
+        fallback_temperature_K=float(gas_temperature_K),
+    )
+    tau_start = float(
+        effective_tau_from_slip_speed(
+            float(tau_stokes),
+            float(slip_start),
+            float(particle_diameter_m),
+            float(rho_start),
+            float(mu_start),
+            int(drag_model_mode),
+            float(min_tau_p_s),
+            float(particle_density_kgm3),
+            float(temp_start),
+            float(gas_molecular_mass_kg),
+        )
+    )
     if spatial_dim == 2:
-        xh, yh, _vxh, _vyh = advance_state_2d_etd(
+        xh, yh, vxh, vyh = advance_state_2d_etd(
             float(x0[0]),
             float(x0[1]),
             float(v0[0]),
             float(v0[1]),
             float(target_start[0]),
             float(target_start[1]),
-            float(body[0]),
-            float(body[1]),
-            float(tau_eff),
+            float(body_start[0]),
+            float(body_start[1]),
+            float(tau_start),
             0.5 * float(dt_sub),
         )
         t_mid = float(t_sub_start) + 0.5 * float(dt_sub)
-        flow_mid = _sample_flow_vector_at(compiled, spatial_dim, t_mid, np.asarray([xh, yh], dtype=np.float64))
+        x_half = np.asarray([xh, yh], dtype=np.float64)
+        flow_mid = _sample_flow_vector_at(compiled, spatial_dim, t_mid, x_half)
+        accel_mid = _sample_acceleration_vector_at(
+            compiled,
+            spatial_dim,
+            t_mid,
+            x_half,
+            electric_q_over_m=electric_q_over_m_i,
+        )
+        body_mid = body + float(body_field_scale) * accel_mid[:spatial_dim]
         target_mid = float(global_flow_scale) * float(flow_scale_particle_i) * flow_mid
+        slip_mid = float(np.linalg.norm(np.asarray([vxh, vyh], dtype=np.float64) - target_mid[:2]))
+        rho_mid, mu_mid, temp_mid = _sample_gas_properties_at(
+            compiled,
+            float(t_mid),
+            x_half,
+            fallback_density_kgm3=float(gas_density_kgm3),
+            fallback_mu_pas=float(gas_mu_pas),
+            fallback_temperature_K=float(gas_temperature_K),
+        )
+        tau_mid = float(
+            effective_tau_from_slip_speed(
+                float(tau_stokes),
+                float(slip_mid),
+                float(particle_diameter_m),
+                float(rho_mid),
+                float(mu_mid),
+                int(drag_model_mode),
+                float(min_tau_p_s),
+                float(particle_density_kgm3),
+                float(temp_mid),
+                float(gas_molecular_mass_kg),
+            )
+        )
         xn, yn, vxn, vyn = advance_state_2d_etd(
             float(x0[0]),
             float(x0[1]),
@@ -92,9 +167,9 @@ def _advance_etd2_substep(
             float(v0[1]),
             float(target_mid[0]),
             float(target_mid[1]),
-            float(body[0]),
-            float(body[1]),
-            float(tau_eff),
+            float(body_mid[0]),
+            float(body_mid[1]),
+            float(tau_mid),
             float(dt_sub),
         )
         return (
@@ -102,7 +177,7 @@ def _advance_etd2_substep(
             np.asarray([vxn, vyn], dtype=np.float64),
             np.asarray([xh, yh], dtype=np.float64),
         )
-    xh, yh, zh, _vxh, _vyh, _vzh = advance_state_3d_etd(
+    xh, yh, zh, vxh, vyh, vzh = advance_state_3d_etd(
         float(x0[0]),
         float(x0[1]),
         float(x0[2]),
@@ -112,15 +187,47 @@ def _advance_etd2_substep(
         float(target_start[0]),
         float(target_start[1]),
         float(target_start[2]),
-        float(body[0]),
-        float(body[1]),
-        float(body[2]),
-        float(tau_eff),
+        float(body_start[0]),
+        float(body_start[1]),
+        float(body_start[2]),
+        float(tau_start),
         0.5 * float(dt_sub),
     )
     t_mid = float(t_sub_start) + 0.5 * float(dt_sub)
-    flow_mid = _sample_flow_vector_at(compiled, spatial_dim, t_mid, np.asarray([xh, yh, zh], dtype=np.float64))
+    x_half = np.asarray([xh, yh, zh], dtype=np.float64)
+    flow_mid = _sample_flow_vector_at(compiled, spatial_dim, t_mid, x_half)
+    accel_mid = _sample_acceleration_vector_at(
+        compiled,
+        spatial_dim,
+        t_mid,
+        x_half,
+        electric_q_over_m=electric_q_over_m_i,
+    )
+    body_mid = body + float(body_field_scale) * accel_mid[:spatial_dim]
     target_mid = float(global_flow_scale) * float(flow_scale_particle_i) * flow_mid
+    slip_mid = float(np.linalg.norm(np.asarray([vxh, vyh, vzh], dtype=np.float64) - target_mid[:3]))
+    rho_mid, mu_mid, temp_mid = _sample_gas_properties_at(
+        compiled,
+        float(t_mid),
+        x_half,
+        fallback_density_kgm3=float(gas_density_kgm3),
+        fallback_mu_pas=float(gas_mu_pas),
+        fallback_temperature_K=float(gas_temperature_K),
+    )
+    tau_mid = float(
+        effective_tau_from_slip_speed(
+            float(tau_stokes),
+            float(slip_mid),
+            float(particle_diameter_m),
+            float(rho_mid),
+            float(mu_mid),
+            int(drag_model_mode),
+            float(min_tau_p_s),
+            float(particle_density_kgm3),
+            float(temp_mid),
+            float(gas_molecular_mass_kg),
+        )
+    )
     xn, yn, zn, vxn, vyn, vzn = advance_state_3d_etd(
         float(x0[0]),
         float(x0[1]),
@@ -131,10 +238,10 @@ def _advance_etd2_substep(
         float(target_mid[0]),
         float(target_mid[1]),
         float(target_mid[2]),
-        float(body[0]),
-        float(body[1]),
-        float(body[2]),
-        float(tau_eff),
+        float(body_mid[0]),
+        float(body_mid[1]),
+        float(body_mid[2]),
+        float(tau_mid),
         float(dt_sub),
     )
     return (
@@ -170,6 +277,8 @@ def advance_freeflight_segment(
     adaptive_substep_tau_ratio: float,
     adaptive_substep_max_splits: int,
     tau_p_i: float,
+    particle_diameter_i: float,
+    particle_density_i: float,
     flow_scale_particle_i: float,
     drag_scale_particle_i: float,
     body_scale_particle_i: float,
@@ -178,19 +287,25 @@ def advance_freeflight_segment(
     global_body_accel_scale: float,
     body_accel: np.ndarray,
     min_tau_p_s: float,
-) -> Tuple[np.ndarray, np.ndarray, int, np.ndarray, int, bool]:
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    gas_temperature_K: float,
+    gas_molecular_mass_kg: float,
+    drag_model_mode: int,
+    electric_q_over_m_i: Optional[float] = None,
+) -> Tuple[np.ndarray, np.ndarray, int, np.ndarray, int]:
     backend = _coerce_compiled_backend(compiled)
     dt_seg = float(max(dt_segment, 0.0))
     x_curr = np.asarray(x0, dtype=np.float64).copy()
     v_curr = np.asarray(v0, dtype=np.float64).copy()
     if dt_seg <= 0.0:
-        return x_curr, v_curr, 1, x_curr.reshape(1, x_curr.size).copy(), int(VALID_MASK_STATUS_CLEAN), False
-    tau_eff = float(tau_p_i) * float(global_drag_tau_scale) * max(float(drag_scale_particle_i), 1e-6)
-    tau_eff = max(float(min_tau_p_s), tau_eff)
+        return x_curr, v_curr, 1, x_curr.reshape(1, x_curr.size).copy(), int(VALID_MASK_STATUS_CLEAN)
+    tau_stokes = float(tau_p_i) * float(global_drag_tau_scale) * max(float(drag_scale_particle_i), 1e-6)
+    tau_stokes = max(float(min_tau_p_s), tau_stokes)
     n_substeps = int(
         compute_substep_count(
             dt_seg,
-            tau_eff,
+            tau_stokes,
             int(adaptive_substep_enabled),
             float(adaptive_substep_tau_ratio),
             int(adaptive_substep_max_splits),
@@ -198,14 +313,14 @@ def advance_freeflight_segment(
     )
     dt_sub = dt_seg / float(max(1, n_substeps))
     t_start = float(t_end_segment) - dt_seg
-    body = np.asarray(body_accel, dtype=np.float64)[:spatial_dim] * float(global_body_accel_scale) * float(body_scale_particle_i)
+    body_field_scale = float(global_body_accel_scale) * float(body_scale_particle_i)
+    body = np.asarray(body_accel, dtype=np.float64)[:spatial_dim] * body_field_scale
     is_etd2 = int(integrator_mode) == INTEGRATOR_ETD2
     stage_mid = x_curr.copy()
     stage_mid_captured = False
     mid_target = 0.5 * dt_seg
     elapsed = 0.0
     valid_mask_status = int(VALID_MASK_STATUS_CLEAN)
-    extension_band_sampled = False
     for sub_idx in range(n_substeps):
         t_sub_start = t_start + float(sub_idx) * dt_sub
         x_prev = x_curr.copy()
@@ -214,8 +329,6 @@ def advance_freeflight_segment(
             sample_status = _sample_valid_mask_status(backend, x_prev)
             if sample_status > valid_mask_status:
                 valid_mask_status = int(sample_status)
-            if _sample_extension_band_active(backend, x_prev):
-                extension_band_sampled = True
             x_curr, v_curr, x_half = _advance_etd2_substep(
                 x0=x_prev,
                 v0=v_prev,
@@ -226,22 +339,59 @@ def advance_freeflight_segment(
                 flow_scale_particle_i=float(flow_scale_particle_i),
                 global_flow_scale=float(global_flow_scale),
                 body=body,
-                tau_eff=float(tau_eff),
+                body_field_scale=float(body_field_scale),
+                tau_stokes=float(tau_stokes),
+                particle_diameter_m=float(particle_diameter_i),
+                particle_density_kgm3=float(particle_density_i),
+                gas_density_kgm3=float(gas_density_kgm3),
+                gas_mu_pas=float(gas_mu_pas),
+                gas_temperature_K=float(gas_temperature_K),
+                gas_molecular_mass_kg=float(gas_molecular_mass_kg),
+                drag_model_mode=int(drag_model_mode),
+                min_tau_p_s=float(min_tau_p_s),
+                electric_q_over_m_i=electric_q_over_m_i,
             )
             sample_status = _sample_valid_mask_status(backend, x_half)
             if sample_status > valid_mask_status:
                 valid_mask_status = int(sample_status)
-            if _sample_extension_band_active(backend, x_half):
-                extension_band_sampled = True
         else:
             t_eval = t_start + (float(sub_idx) + 1.0) * dt_sub
             sample_status = _sample_valid_mask_status(backend, x_curr)
             if sample_status > valid_mask_status:
                 valid_mask_status = int(sample_status)
-            if _sample_extension_band_active(backend, x_curr):
-                extension_band_sampled = True
             flow = _sample_flow_vector_at(backend, spatial_dim, t_eval, x_curr)
+            accel = _sample_acceleration_vector_at(
+                backend,
+                spatial_dim,
+                t_eval,
+                x_curr,
+                electric_q_over_m=electric_q_over_m_i,
+            )
+            body_eff = body + float(body_field_scale) * accel[:spatial_dim]
             target = float(global_flow_scale) * float(flow_scale_particle_i) * flow
+            slip = float(np.linalg.norm(v_curr[:spatial_dim] - target[:spatial_dim]))
+            rho_local, mu_local, temp_local = _sample_gas_properties_at(
+                backend,
+                float(t_eval),
+                x_curr,
+                fallback_density_kgm3=float(gas_density_kgm3),
+                fallback_mu_pas=float(gas_mu_pas),
+                fallback_temperature_K=float(gas_temperature_K),
+            )
+            tau_eff = float(
+                effective_tau_from_slip_speed(
+                    float(tau_stokes),
+                    float(slip),
+                    float(particle_diameter_i),
+                    float(rho_local),
+                    float(mu_local),
+                    int(drag_model_mode),
+                    float(min_tau_p_s),
+                    float(particle_density_i),
+                    float(temp_local),
+                    float(gas_molecular_mass_kg),
+                )
+            )
             if spatial_dim == 2:
                 x0n, y0n, vxn, vyn = advance_state_2d(
                     float(x_curr[0]),
@@ -250,8 +400,8 @@ def advance_freeflight_segment(
                     float(v_curr[1]),
                     float(target[0]),
                     float(target[1]),
-                    float(body[0]),
-                    float(body[1]),
+                    float(body_eff[0]),
+                    float(body_eff[1]),
                     tau_eff,
                     dt_sub,
                     int(integrator_mode),
@@ -269,9 +419,9 @@ def advance_freeflight_segment(
                     float(target[0]),
                     float(target[1]),
                     float(target[2]),
-                    float(body[0]),
-                    float(body[1]),
-                    float(body[2]),
+                    float(body_eff[0]),
+                    float(body_eff[1]),
+                    float(body_eff[2]),
                     tau_eff,
                     dt_sub,
                     int(integrator_mode),
@@ -297,13 +447,21 @@ def advance_freeflight_segment(
                         flow_scale_particle_i=float(flow_scale_particle_i),
                         global_flow_scale=float(global_flow_scale),
                         body=body,
-                        tau_eff=float(tau_eff),
+                        body_field_scale=float(body_field_scale),
+                        tau_stokes=float(tau_stokes),
+                        particle_diameter_m=float(particle_diameter_i),
+                        particle_density_kgm3=float(particle_density_i),
+                        gas_density_kgm3=float(gas_density_kgm3),
+                        gas_mu_pas=float(gas_mu_pas),
+                        gas_temperature_K=float(gas_temperature_K),
+                        gas_molecular_mass_kg=float(gas_molecular_mass_kg),
+                        drag_model_mode=int(drag_model_mode),
+                        min_tau_p_s=float(min_tau_p_s),
+                        electric_q_over_m_i=electric_q_over_m_i,
                     )
                     sample_status = _sample_valid_mask_status(backend, x_mid)
                     if sample_status > valid_mask_status:
                         valid_mask_status = int(sample_status)
-                    if _sample_extension_band_active(backend, x_mid):
-                        extension_band_sampled = True
                     stage_mid = x_mid
                 stage_mid_captured = True
             elapsed = elapsed_next
@@ -313,7 +471,7 @@ def advance_freeflight_segment(
         stage_points = np.stack((stage_mid, x_curr.copy()), axis=0)
     else:
         stage_points = x_curr.reshape(1, x_curr.size).copy()
-    return x_curr, v_curr, int(max(1, n_substeps)), stage_points, int(valid_mask_status), bool(extension_band_sampled)
+    return x_curr, v_curr, int(max(1, n_substeps)), stage_points, int(valid_mask_status)
 
 
 def advance_freeflight_partial(
@@ -330,6 +488,8 @@ def advance_freeflight_partial(
     adaptive_substep_tau_ratio: float,
     adaptive_substep_max_splits: int,
     tau_p_i: float,
+    particle_diameter_i: float,
+    particle_density_i: float,
     flow_scale_particle_i: float,
     drag_scale_particle_i: float,
     body_scale_particle_i: float,
@@ -338,13 +498,19 @@ def advance_freeflight_partial(
     global_body_accel_scale: float,
     body_accel: np.ndarray,
     min_tau_p_s: float,
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    gas_temperature_K: float,
+    gas_molecular_mass_kg: float,
+    drag_model_mode: int,
+    electric_q_over_m_i: Optional[float] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     dt_seg = max(float(segment_dt), 0.0)
     dt_eval = float(np.clip(dt_partial, 0.0, dt_seg))
     if dt_eval <= 0.0:
         return np.asarray(x0, dtype=np.float64).copy(), np.asarray(v0, dtype=np.float64).copy()
     partial_t_end = float(t_end_segment) - dt_seg + dt_eval
-    x_out, v_out, _n_substeps, _stage_points, _valid_mask_status, _extension_band_sampled = advance_freeflight_segment(
+    x_out, v_out, _n_substeps, _stage_points, _valid_mask_status = advance_freeflight_segment(
         x0=x0,
         v0=v0,
         dt_segment=float(dt_eval),
@@ -356,6 +522,8 @@ def advance_freeflight_partial(
         adaptive_substep_tau_ratio=float(adaptive_substep_tau_ratio),
         adaptive_substep_max_splits=int(adaptive_substep_max_splits),
         tau_p_i=float(tau_p_i),
+        particle_diameter_i=float(particle_diameter_i),
+        particle_density_i=float(particle_density_i),
         flow_scale_particle_i=float(flow_scale_particle_i),
         drag_scale_particle_i=float(drag_scale_particle_i),
         body_scale_particle_i=float(body_scale_particle_i),
@@ -364,6 +532,12 @@ def advance_freeflight_partial(
         global_body_accel_scale=float(global_body_accel_scale),
         body_accel=body_accel,
         min_tau_p_s=float(min_tau_p_s),
+        gas_density_kgm3=float(gas_density_kgm3),
+        gas_mu_pas=float(gas_mu_pas),
+        gas_temperature_K=float(gas_temperature_K),
+        gas_molecular_mass_kg=float(gas_molecular_mass_kg),
+        drag_model_mode=int(drag_model_mode),
+        electric_q_over_m_i=electric_q_over_m_i,
     )
     return x_out, v_out
 
@@ -381,6 +555,8 @@ def resolve_valid_mask_prefix(
     adaptive_substep_tau_ratio: float,
     adaptive_substep_max_splits: int,
     tau_p_i: float,
+    particle_diameter_i: float,
+    particle_density_i: float,
     flow_scale_particle_i: float,
     drag_scale_particle_i: float,
     body_scale_particle_i: float,
@@ -389,7 +565,13 @@ def resolve_valid_mask_prefix(
     global_body_accel_scale: float,
     body_accel: np.ndarray,
     min_tau_p_s: float,
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    gas_temperature_K: float,
+    gas_molecular_mass_kg: float,
+    drag_model_mode: int,
     max_halving_count: int,
+    electric_q_over_m_i: Optional[float] = None,
 ) -> ValidMaskPrefixResolution:
     x_start = np.asarray(x0, dtype=np.float64).copy()
     v_start = np.asarray(v0, dtype=np.float64).copy()
@@ -409,7 +591,7 @@ def resolve_valid_mask_prefix(
         retry_count += 1
         prefix_dt = float(dt_seg) * (0.5 ** int(split_idx))
         prefix_t_end = float(t_end_segment) - float(dt_seg) + float(prefix_dt)
-        x_retry, v_retry, _substeps, _stage_points, retry_status, _retry_extension_band_sampled = advance_freeflight_segment(
+        x_retry, v_retry, _substeps, _stage_points, retry_status = advance_freeflight_segment(
             x0=x_start,
             v0=v_start,
             dt_segment=float(prefix_dt),
@@ -421,6 +603,8 @@ def resolve_valid_mask_prefix(
             adaptive_substep_tau_ratio=float(adaptive_substep_tau_ratio),
             adaptive_substep_max_splits=int(adaptive_substep_max_splits),
             tau_p_i=float(tau_p_i),
+            particle_diameter_i=float(particle_diameter_i),
+            particle_density_i=float(particle_density_i),
             flow_scale_particle_i=float(flow_scale_particle_i),
             drag_scale_particle_i=float(drag_scale_particle_i),
             body_scale_particle_i=float(body_scale_particle_i),
@@ -429,6 +613,12 @@ def resolve_valid_mask_prefix(
             global_body_accel_scale=float(global_body_accel_scale),
             body_accel=body_accel,
             min_tau_p_s=float(min_tau_p_s),
+            gas_density_kgm3=float(gas_density_kgm3),
+            gas_mu_pas=float(gas_mu_pas),
+            gas_temperature_K=float(gas_temperature_K),
+            gas_molecular_mass_kg=float(gas_molecular_mass_kg),
+            drag_model_mode=int(drag_model_mode),
+            electric_q_over_m_i=electric_q_over_m_i,
         )
         if not bool(valid_mask_status_requires_stop(int(retry_status))):
             return ValidMaskPrefixResolution(
@@ -456,6 +646,8 @@ def _advance_trial_particles(
     v: np.ndarray,
     active: np.ndarray,
     tau_p: np.ndarray,
+    particle_diameter: np.ndarray,
+    particle_density: np.ndarray | None = None,
     flow_scale_particle: np.ndarray,
     drag_scale_particle: np.ndarray,
     body_scale_particle: np.ndarray,
@@ -463,6 +655,9 @@ def _advance_trial_particles(
     dt_step: float,
     phys: Mapping[str, object],
     body_accel: np.ndarray,
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    drag_model_mode: int,
     integrator_mode: int,
     adaptive_substep_enabled: int,
     adaptive_substep_tau_ratio: float,
@@ -472,17 +667,22 @@ def _advance_trial_particles(
     x_mid_trial: np.ndarray,
     substep_counts: np.ndarray,
     valid_mask_status_flags: np.ndarray,
-    extension_band_sample_flags: np.ndarray,
+    electric_q_over_m_particle: Optional[np.ndarray] = None,
 ) -> None:
     backend = _coerce_compiled_backend(compiled)
+    if particle_density is None:
+        particle_density_arr = np.ones_like(tau_p, dtype=np.float64) * 1000.0
+    else:
+        particle_density_arr = np.asarray(particle_density, dtype=np.float64)
     if isinstance(backend, TriangleMesh2DCompiledBackend):
         if int(spatial_dim) != 2:
             raise ValueError('triangle_mesh_2d backend currently supports only spatial_dim=2')
         accel_shape = np.asarray(backend.accel_shape, dtype=np.int32)
         advance_particles_2d_triangle_mesh_inplace(
-            x, v, active, tau_p, flow_scale_particle, drag_scale_particle, body_scale_particle,
+            x, v, active, tau_p, particle_diameter, flow_scale_particle, drag_scale_particle, body_scale_particle,
             float(t), float(dt_step), float(phys['flow_scale']), float(phys['drag_tau_scale']), float(phys['body_accel_scale']),
             float(body_accel[0]), float(body_accel[1]), float(phys['min_tau_p_s']),
+            float(gas_density_kgm3), float(gas_mu_pas), int(drag_model_mode),
             int(integrator_mode),
             int(adaptive_substep_enabled),
             float(adaptive_substep_tau_ratio),
@@ -499,41 +699,88 @@ def _advance_trial_particles(
             np.asarray(backend.times, dtype=np.float64),
             np.asarray(backend.ux, dtype=np.float64),
             np.asarray(backend.uy, dtype=np.float64),
-            x_trial, v_trial, x_mid_trial, substep_counts, valid_mask_status_flags, extension_band_sample_flags,
+            x_trial, v_trial, x_mid_trial, substep_counts, valid_mask_status_flags,
         )
         return
     valid_mask = np.asarray(backend.valid_mask, dtype=bool)
     core_valid_mask = np.asarray(backend.core_valid_mask, dtype=bool)
     if int(spatial_dim) == 2:
         xs, ys = backend.axes
+        qom_particle = (
+            np.zeros(x.shape[0], dtype=np.float64)
+            if electric_q_over_m_particle is None
+            else np.asarray(electric_q_over_m_particle, dtype=np.float64)
+        )
+        electric_x = (
+            np.zeros_like(backend.ux, dtype=np.float64)
+            if backend.electric_x is None
+            else np.asarray(backend.electric_x, dtype=np.float64)
+        )
+        electric_y = (
+            np.zeros_like(backend.uy, dtype=np.float64)
+            if backend.electric_y is None
+            else np.asarray(backend.electric_y, dtype=np.float64)
+        )
+        dynamic_electric_enabled = int(electric_q_over_m_particle is not None and backend.electric_x is not None and backend.electric_y is not None)
         advance_particles_2d_inplace(
-            x, v, active, tau_p, flow_scale_particle, drag_scale_particle, body_scale_particle,
+            x, v, active, tau_p, particle_diameter, particle_density_arr, flow_scale_particle, drag_scale_particle, body_scale_particle,
             float(t), float(dt_step), float(phys['flow_scale']), float(phys['drag_tau_scale']), float(phys['body_accel_scale']),
             float(body_accel[0]), float(body_accel[1]), float(phys['min_tau_p_s']),
+            float(gas_density_kgm3), float(gas_mu_pas), float(phys.get('gas_temperature_K', 300.0)), float(phys.get('gas_molecular_mass_kg', 60.0 * 1.66053906660e-27)), int(drag_model_mode),
             int(integrator_mode),
             int(adaptive_substep_enabled),
             float(adaptive_substep_tau_ratio),
             int(adaptive_substep_max_splits),
             xs, ys, backend.times, backend.ux, backend.uy,
+            qom_particle, electric_x, electric_y, int(dynamic_electric_enabled),
+            backend.gas_density, backend.gas_mu, backend.gas_temperature,
             valid_mask,
             core_valid_mask,
-            x_trial, v_trial, x_mid_trial, substep_counts, valid_mask_status_flags, extension_band_sample_flags,
+            x_trial, v_trial, x_mid_trial, substep_counts, valid_mask_status_flags,
         )
         return
     xs, ys, zs = backend.axes
     uz = backend.uz if backend.uz is not None else np.zeros((1,) + valid_mask.shape, dtype=np.float64)
+    qom_particle = (
+        np.zeros(x.shape[0], dtype=np.float64)
+        if electric_q_over_m_particle is None
+        else np.asarray(electric_q_over_m_particle, dtype=np.float64)
+    )
+    electric_x = (
+        np.zeros_like(backend.ux, dtype=np.float64)
+        if backend.electric_x is None
+        else np.asarray(backend.electric_x, dtype=np.float64)
+    )
+    electric_y = (
+        np.zeros_like(backend.uy, dtype=np.float64)
+        if backend.electric_y is None
+        else np.asarray(backend.electric_y, dtype=np.float64)
+    )
+    electric_z = (
+        np.zeros_like(uz, dtype=np.float64)
+        if backend.electric_z is None
+        else np.asarray(backend.electric_z, dtype=np.float64)
+    )
+    dynamic_electric_enabled = int(
+        electric_q_over_m_particle is not None
+        and backend.electric_x is not None
+        and backend.electric_y is not None
+        and backend.electric_z is not None
+    )
     advance_particles_3d_inplace(
-        x, v, active, tau_p, flow_scale_particle, drag_scale_particle, body_scale_particle,
+        x, v, active, tau_p, particle_diameter, flow_scale_particle, drag_scale_particle, body_scale_particle,
         float(t), float(dt_step), float(phys['flow_scale']), float(phys['drag_tau_scale']), float(phys['body_accel_scale']),
         float(body_accel[0]), float(body_accel[1]), float(body_accel[2]), float(phys['min_tau_p_s']),
+        float(gas_density_kgm3), float(gas_mu_pas), int(drag_model_mode),
         int(integrator_mode),
         int(adaptive_substep_enabled),
         float(adaptive_substep_tau_ratio),
         int(adaptive_substep_max_splits),
         xs, ys, zs, backend.times, backend.ux, backend.uy, uz,
+        qom_particle, electric_x, electric_y, electric_z, int(dynamic_electric_enabled),
         valid_mask,
         core_valid_mask,
-        x_trial, v_trial, x_mid_trial, substep_counts, valid_mask_status_flags, extension_band_sample_flags,
+        x_trial, v_trial, x_mid_trial, substep_counts, valid_mask_status_flags,
     )
 
 

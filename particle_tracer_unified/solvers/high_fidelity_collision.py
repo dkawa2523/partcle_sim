@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import time
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
@@ -12,10 +13,12 @@ from ..core.boundary_service import (
     inside_geometry as _boundary_inside_geometry,
     inside_geometry_with_boundary as _boundary_inside_geometry_with_boundary,
     points_inside_geometry_2d as _boundary_points_inside_geometry_2d,
+    polyline_hits_from_boundary_edges_batch,
 )
+from ..core.boundary_core import sample_geometry_sdf_points_2d
 from ..core.catalogs import resolve_step_wall_model
 from ..core.datamodel import ProcessStepRow, WallPartModel
-from ..core.field_sampling import valid_mask_status_requires_stop
+from ..core.field_sampling import VALID_MASK_STATUS_CLEAN, valid_mask_status_requires_stop
 from ..core.geometry3d import TriangleSurface3D
 from .compiled_field_backend import CompiledRuntimeBackendLike
 from .high_fidelity_freeflight import (
@@ -27,6 +30,8 @@ from .high_fidelity_freeflight import (
 )
 from .integrator_common import INTEGRATOR_ETD2
 from .valid_mask_retry import resolve_valid_mask_retry_then_stop
+
+_CONTACT_REFLECTED_OUTCOMES = frozenset({'reflected_specular', 'reflected_diffuse'})
 
 
 def _step_segment_name(step: ProcessStepRow) -> str:
@@ -95,6 +100,8 @@ def _wall_interaction(
     vn_mag = abs(vn_signed)
     if mode in {'stick', 'sticking'}:
         return 'stuck', np.zeros_like(v)
+    if mode in {'open', 'outflow', 'exhaust', 'escape', 'field_support_exit'}:
+        return 'escaped', np.zeros_like(v)
     if mode in {'absorb', 'disappear'}:
         return 'absorbed', np.zeros_like(v)
     if mode in {'critical_sticking_velocity'} and vn_mag <= max(0.0, float(wall_model.critical_sticking_velocity_mps)):
@@ -136,6 +143,97 @@ def _append_max_hit_event(
     )
 
 
+def _wall_event_row(
+    *,
+    t_step_end: float,
+    segment_dt: float,
+    hit_dt: float,
+    particle_id: int,
+    particle_mass_kg: float,
+    particle_diameter_m: float,
+    hit: np.ndarray,
+    normal: np.ndarray,
+    v_hit: np.ndarray,
+    part_id: int,
+    step: ProcessStepRow,
+    outcome: str,
+    wall_model: WallPartModel,
+    alpha_hit: float,
+    primitive_id: int = -1,
+    primitive_kind: str = 'unknown',
+    is_ambiguous: bool = False,
+) -> Dict[str, object]:
+    hit_arr = np.asarray(hit, dtype=np.float64)
+    normal_arr = np.asarray(normal, dtype=np.float64)
+    velocity_arr = np.asarray(v_hit, dtype=np.float64)
+    speed = float(np.linalg.norm(velocity_arr))
+    normal_speed = 0.0
+    tangential_speed = 0.0
+    incidence_angle_deg = 0.0
+    if normal_arr.size == velocity_arr.size and float(np.linalg.norm(normal_arr)) > 1.0e-30:
+        n_unit = normal_arr / max(float(np.linalg.norm(normal_arr)), 1.0e-30)
+        vn_signed = float(np.dot(velocity_arr, n_unit))
+        normal_speed = abs(vn_signed)
+        tangential = velocity_arr - vn_signed * n_unit
+        tangential_speed = float(np.linalg.norm(tangential))
+        incidence_angle_deg = math.degrees(math.atan2(tangential_speed, max(normal_speed, 1.0e-30)))
+    hit_time_s = float(t_step_end) - max(0.0, float(segment_dt)) + float(np.clip(hit_dt, 0.0, max(0.0, float(segment_dt))))
+    row: Dict[str, object] = {
+        'time_s': float(t_step_end),
+        'hit_time_s': float(hit_time_s),
+        'particle_id': int(particle_id),
+        'part_id': int(part_id),
+        'boundary_primitive_id': int(primitive_id),
+        'boundary_primitive_kind': str(primitive_kind),
+        'boundary_hit_ambiguous': int(bool(is_ambiguous)),
+        'step_name': step.step_name,
+        'segment_name': _step_segment_name(step),
+        'outcome': outcome,
+        'wall_mode': wall_model.law_name,
+        'alpha_hit': float(alpha_hit),
+        'material_id': int(wall_model.material_id),
+        'material_name': wall_model.material_name,
+        'particle_mass_kg': float(particle_mass_kg),
+        'particle_diameter_m': float(particle_diameter_m),
+        'impact_speed_mps': float(speed),
+        'impact_normal_speed_mps': float(normal_speed),
+        'impact_tangential_speed_mps': float(tangential_speed),
+        'impact_angle_deg_from_normal': float(incidence_angle_deg),
+    }
+    for axis_idx, axis_name in enumerate(('x', 'y', 'z')):
+        row[f'hit_{axis_name}_m'] = float(hit_arr[axis_idx]) if axis_idx < hit_arr.size else float('nan')
+        row[f'normal_{axis_name}'] = float(normal_arr[axis_idx]) if axis_idx < normal_arr.size else float('nan')
+        row[f'v_hit_{axis_name}_mps'] = float(velocity_arr[axis_idx]) if axis_idx < velocity_arr.size else float('nan')
+    return row
+
+
+def _particle_scalar_or_nan(particles, name: str, particle_index: int) -> float:
+    values = getattr(particles, name, None)
+    if values is None:
+        return float('nan')
+    arr = np.asarray(values, dtype=np.float64)
+    if int(particle_index) >= arr.size:
+        return float('nan')
+    return float(arr[int(particle_index)])
+
+
+def _increment_collision_diagnostic(collision_diagnostics: Dict[str, object], key: str, value: int = 1) -> None:
+    collision_diagnostics[key] = int(collision_diagnostics.get(key, 0)) + int(value)
+
+
+class WallHitStepResult(NamedTuple):
+    position: np.ndarray
+    velocity: np.ndarray
+    remaining_dt: float
+    hit_count: int
+    total_hit_count: int
+    should_break: bool
+    entered_contact: bool = False
+    contact_part_id: int = 0
+    contact_normal: Optional[np.ndarray] = None
+    contact_primitive_id: int = -1
+
+
 def _apply_wall_hit_step(
     *,
     runtime,
@@ -147,6 +245,9 @@ def _apply_wall_hit_step(
     n_out: np.ndarray,
     hit_dt: float,
     part_id: int,
+    primitive_id: int = -1,
+    primitive_kind: str = 'unknown',
+    is_ambiguous: bool = False,
     v_hit: np.ndarray,
     remaining_dt: float,
     segment_dt: float,
@@ -154,23 +255,25 @@ def _apply_wall_hit_step(
     total_hit_count: int,
     hit_part_ids: List[int],
     hit_outcomes: List[str],
-    retry_splits_used: int,
     collision_diagnostics: Dict[str, object],
     max_hit_rows: List[Dict[str, object]],
     wall_rows: List[Dict[str, object]],
+    coating_summary_rows: object,
     wall_law_counts: Dict[str, int],
     wall_summary_counts: Dict[Tuple[int, str, str], int],
     stuck: np.ndarray,
     absorbed: np.ndarray,
+    escaped: Optional[np.ndarray] = None,
     active: np.ndarray,
     max_wall_hits_per_step: int,
-    max_hits_retry_splits: int,
     min_remaining_dt: float,
     epsilon_offset_m: float,
     on_boundary_tol_m: float,
     t: float,
     triangle_surface_3d: Optional[TriangleSurface3D],
-) -> Tuple[np.ndarray, np.ndarray, float, int, int, int, bool]:
+) -> WallHitStepResult:
+    if escaped is None:
+        escaped = np.zeros_like(active, dtype=bool)
     hit_arr = np.asarray(hit, dtype=np.float64)
     n_wall = np.asarray(n_out, dtype=np.float64)
     n_wall_mag = float(np.linalg.norm(n_wall))
@@ -195,12 +298,12 @@ def _apply_wall_hit_step(
         if _candidate_inside(x_minus, 0.0) or _candidate_inside(x_minus, float(on_boundary_tol_m)):
             x_wall = x_minus
         elif _candidate_inside(x_plus, 0.0) or _candidate_inside(x_plus, float(on_boundary_tol_m)):
-            n_wall = -n_wall
             x_wall = x_plus
+            n_wall = -n_wall
         elif _candidate_inside(hit_arr, float(on_boundary_tol_m)):
             x_wall = hit_arr.copy()
         else:
-            x_wall = x_minus
+            x_wall = hit_arr - push * n_wall
 
     wall_model = resolve_step_wall_model(runtime.wall_catalog, part_id, step)
     wall_law_counts[wall_model.law_name] = wall_law_counts.get(wall_model.law_name, 0) + 1
@@ -217,21 +320,33 @@ def _apply_wall_hit_step(
     consumed_dt = min(consumed_dt, segment_dt_pos)
     alpha_eff = 0.0 if segment_dt_pos <= 1.0e-30 else float(np.clip(consumed_dt / segment_dt_pos, 0.0, 1.0))
 
-    if int(step.output_write_wall_events) != 0:
-        wall_rows.append(
-            {
-                'time_s': float(t),
-                'particle_id': int(particles.particle_id[particle_index]),
-                'part_id': int(part_id),
-                'step_name': step.step_name,
-                'segment_name': _step_segment_name(step),
-                'outcome': outcome,
-                'wall_mode': wall_model.law_name,
-                'alpha_hit': float(alpha_eff),
-                'material_id': int(wall_model.material_id),
-                'material_name': wall_model.material_name,
-            }
+    capture_wall_row = not bool(getattr(wall_rows, 'discarding', False))
+    capture_coating_row = not bool(getattr(coating_summary_rows, 'discarding', False))
+    event_row: Optional[Dict[str, object]] = None
+    if bool(capture_wall_row) or bool(capture_coating_row):
+        event_row = _wall_event_row(
+            t_step_end=float(t),
+            segment_dt=float(segment_dt),
+            hit_dt=float(hit_dt_clamped),
+            particle_id=int(particles.particle_id[particle_index]),
+            particle_mass_kg=_particle_scalar_or_nan(particles, 'mass', particle_index),
+            particle_diameter_m=_particle_scalar_or_nan(particles, 'diameter', particle_index),
+            hit=hit_arr,
+            normal=n_wall,
+            v_hit=np.asarray(v_hit, dtype=np.float64),
+            part_id=int(part_id),
+            step=step,
+            outcome=outcome,
+            wall_model=wall_model,
+            alpha_hit=float(alpha_eff),
+            primitive_id=int(primitive_id),
+            primitive_kind=str(primitive_kind),
+            is_ambiguous=bool(is_ambiguous),
         )
+        if bool(capture_wall_row):
+            wall_rows.append(event_row)
+        if bool(capture_coating_row):
+            coating_summary_rows.append(event_row)
 
     hit_count += 1
     total_hit_count += 1
@@ -244,30 +359,53 @@ def _apply_wall_hit_step(
         stuck[particle_index] = True
         active[particle_index] = False
         v_zero = np.zeros_like(v_hit)
-        return x_wall, v_zero, remaining_dt, hit_count, total_hit_count, retry_splits_used, True
+        return WallHitStepResult(x_wall, v_zero, remaining_dt, hit_count, total_hit_count, True)
     if outcome == 'absorbed':
         absorbed[particle_index] = True
         active[particle_index] = False
         v_zero = np.zeros_like(v_hit)
-        return x_wall, v_zero, remaining_dt, hit_count, total_hit_count, retry_splits_used, True
+        return WallHitStepResult(x_wall, v_zero, remaining_dt, hit_count, total_hit_count, True)
+    if outcome == 'escaped':
+        escaped[particle_index] = True
+        active[particle_index] = False
+        v_zero = np.zeros_like(v_hit)
+        return WallHitStepResult(x_wall, v_zero, remaining_dt, hit_count, total_hit_count, True)
 
     x_curr_next = x_wall
     v_curr_next = np.asarray(v_ref, dtype=np.float64)
 
     if hit_count >= int(max_wall_hits_per_step):
         if remaining_dt > float(min_remaining_dt):
-            if int(retry_splits_used) < int(max_hits_retry_splits):
-                remaining_dt *= 0.5
-                retry_splits_used += 1
-                collision_diagnostics['max_hits_retry_count'] += 1
-                hit_count = 0
-                hit_part_ids.clear()
-                hit_outcomes.clear()
-                return x_curr_next, v_curr_next, remaining_dt, hit_count, total_hit_count, retry_splits_used, False
+            contact_state = _same_wall_contact_sliding_state(
+                x_wall=x_curr_next,
+                v_ref=v_curr_next,
+                n_wall=n_wall,
+                remaining_dt=float(remaining_dt),
+                hit_part_ids=hit_part_ids,
+                hit_outcomes=hit_outcomes,
+                collision_diagnostics=collision_diagnostics,
+            )
+            if contact_state is not None:
+                x_contact, v_contact, n_contact = contact_state
+                return WallHitStepResult(
+                    x_contact,
+                    v_contact,
+                    0.0,
+                    hit_count,
+                    total_hit_count,
+                    True,
+                    True,
+                    int(part_id),
+                    np.asarray(n_contact, dtype=np.float64),
+                    int(primitive_id),
+                )
             collision_diagnostics['max_hits_reached_count'] += 1
-            if int(max_hits_retry_splits) > 0:
-                collision_diagnostics['max_hits_retry_exhausted_count'] += 1
-                collision_diagnostics['dropped_remaining_dt_total_s'] += float(remaining_dt)
+            _record_max_hit_diagnostics(
+                collision_diagnostics=collision_diagnostics,
+                hit_part_ids=hit_part_ids,
+                hit_outcomes=hit_outcomes,
+                remaining_dt=float(remaining_dt),
+            )
             _append_max_hit_event(
                 max_hit_rows=max_hit_rows,
                 t=float(t),
@@ -278,9 +416,9 @@ def _apply_wall_hit_step(
                 hit_part_ids=hit_part_ids,
                 hit_outcomes=hit_outcomes,
             )
-        return x_curr_next, v_curr_next, remaining_dt, hit_count, total_hit_count, retry_splits_used, True
+        return WallHitStepResult(x_curr_next, v_curr_next, remaining_dt, hit_count, total_hit_count, True)
 
-    return x_curr_next, v_curr_next, remaining_dt, hit_count, total_hit_count, retry_splits_used, False
+    return WallHitStepResult(x_curr_next, v_curr_next, remaining_dt, hit_count, total_hit_count, False)
 
 
 def _physical_hit_search_times(
@@ -295,19 +433,142 @@ def _physical_hit_search_times(
     if primary_hit_time is not None and np.isfinite(primary_hit_time):
         t_hit = float(np.clip(primary_hit_time, 0.0, dt_seg))
         if t_hit > 0.0:
-            candidates.extend(
-                [
-                    t_hit,
-                    0.5 * t_hit,
-                    0.5 * (t_hit + dt_seg),
-                    max(0.0, t_hit - 0.25 * dt_seg),
-                    min(dt_seg, t_hit + 0.25 * dt_seg),
-                ]
-            )
+            candidates.append(0.5 * t_hit)
+            candidates.append(t_hit)
+            remaining = max(0.0, dt_seg - t_hit)
+            if remaining > 1.0e-15:
+                candidates.append(min(dt_seg, t_hit + max(1.0e-9 * dt_seg, 0.05 * remaining)))
+                candidates.append(0.5 * (t_hit + dt_seg))
+            candidates.append(dt_seg)
+            unique = sorted({float(np.clip(v, 0.0, dt_seg)) for v in candidates if v > 0.0})
+            return np.asarray(unique, dtype=np.float64)
     for frac in (0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0):
         candidates.append(float(frac * dt_seg))
     unique = sorted({float(np.clip(v, 0.0, dt_seg)) for v in candidates if v > 0.0})
     return np.asarray(unique, dtype=np.float64)
+
+
+def _locate_primary_hit_by_local_plane(
+    *,
+    x0: np.ndarray,
+    v0: np.ndarray,
+    segment_dt: float,
+    t_end_segment: float,
+    primary_hit: BoundaryHit,
+    primary_hit_time: float,
+    inputs: CollisionIntegratorInputs,
+    adaptive_substep_enabled: int,
+    on_boundary_tol_m: float,
+    max_iters: int,
+) -> Optional[Tuple[BoundaryHit, np.ndarray, float]]:
+    dt_seg = max(float(segment_dt), 0.0)
+    if dt_seg <= 0.0:
+        return None
+    hit_position = np.asarray(primary_hit.position, dtype=np.float64)
+    normal = np.asarray(primary_hit.normal, dtype=np.float64)
+    normal_mag = float(np.linalg.norm(normal))
+    if hit_position.ndim != 1 or normal.ndim != 1 or hit_position.size != normal.size or normal_mag <= 1.0e-30:
+        return None
+    n_unit = normal / normal_mag
+    x_start = np.asarray(x0, dtype=np.float64)
+    v_start = np.asarray(v0, dtype=np.float64)
+    s_start = float(np.dot(x_start - hit_position, n_unit))
+    if not np.isfinite(s_start) or abs(s_start) <= max(float(on_boundary_tol_m), 1.0e-14):
+        return None
+
+    def _state_at(t_partial: float) -> Tuple[float, np.ndarray, np.ndarray]:
+        x_t, v_t = _advance_partial_with_inputs(
+            inputs=inputs,
+            x0=x_start,
+            v0=v_start,
+            dt_partial=float(t_partial),
+            segment_dt=float(dt_seg),
+            t_end_segment=float(t_end_segment),
+            adaptive_substep_enabled=int(adaptive_substep_enabled),
+        )
+        signed = float(np.dot(np.asarray(x_t, dtype=np.float64) - hit_position, n_unit))
+        return signed, np.asarray(x_t, dtype=np.float64), np.asarray(v_t, dtype=np.float64)
+
+    t_guess = float(np.clip(primary_hit_time, 0.0, dt_seg))
+    candidates = [t_guess, dt_seg]
+    if t_guess > 0.0:
+        candidates.extend((0.5 * t_guess, min(dt_seg, t_guess + 0.1 * max(0.0, dt_seg - t_guess))))
+    candidates = sorted({float(np.clip(v, 0.0, dt_seg)) for v in candidates if v > 1.0e-15})
+
+    t_lo = 0.0
+    s_lo = s_start
+    x_lo = x_start
+    v_lo = v_start
+    t_hi: Optional[float] = None
+    s_hi: Optional[float] = None
+    x_hi: Optional[np.ndarray] = None
+    v_hi: Optional[np.ndarray] = None
+    for t_candidate in candidates:
+        s_candidate, x_candidate, v_candidate = _state_at(float(t_candidate))
+        if not np.isfinite(s_candidate):
+            continue
+        if s_lo == 0.0 or s_lo * s_candidate <= 0.0:
+            t_hi = float(t_candidate)
+            s_hi = float(s_candidate)
+            x_hi = x_candidate
+            v_hi = v_candidate
+            break
+        t_lo = float(t_candidate)
+        s_lo = float(s_candidate)
+        x_lo = x_candidate
+        v_lo = v_candidate
+    if t_hi is None or s_hi is None or x_hi is None or v_hi is None:
+        return None
+
+    stop_time_tol = max(1.0e-12, 1.0e-7 * dt_seg)
+    stop_signed_tol = max(float(on_boundary_tol_m), 1.0e-12)
+    for _ in range(int(max(1, max_iters))):
+        if float(t_hi - t_lo) <= stop_time_tol or min(abs(float(s_lo)), abs(float(s_hi))) <= stop_signed_tol:
+            break
+        t_mid = 0.5 * (float(t_lo) + float(t_hi))
+        s_mid, x_mid, v_mid = _state_at(float(t_mid))
+        if not np.isfinite(s_mid):
+            break
+        if s_lo == 0.0 or s_lo * s_mid <= 0.0:
+            t_hi = float(t_mid)
+            s_hi = float(s_mid)
+            x_hi = x_mid
+            v_hi = v_mid
+        else:
+            t_lo = float(t_mid)
+            s_lo = float(s_mid)
+            x_lo = x_mid
+            v_lo = v_mid
+
+    if abs(float(s_lo)) <= abs(float(s_hi)):
+        t_hit = float(t_lo)
+        x_hit_state = np.asarray(x_lo, dtype=np.float64)
+        v_hit = np.asarray(v_lo, dtype=np.float64)
+        signed_hit = float(s_lo)
+    else:
+        t_hit = float(t_hi)
+        x_hit_state = np.asarray(x_hi, dtype=np.float64)
+        v_hit = np.asarray(v_hi, dtype=np.float64)
+        signed_hit = float(s_hi)
+    # Keep the reported hit point on the finite primitive returned by the
+    # primary intersection. The plane refinement improves hit time/velocity,
+    # but its normal projection lies on an infinite tangent plane and can drift
+    # a few microns beyond short edge endpoints.
+    x_projected = np.asarray(primary_hit.position, dtype=np.float64)
+    hit_alpha = 0.0 if dt_seg <= 1.0e-30 else float(np.clip(t_hit / dt_seg, 0.0, 1.0))
+    return (
+        BoundaryHit(
+            position=np.asarray(x_projected, dtype=np.float64),
+            normal=np.asarray(primary_hit.normal, dtype=np.float64),
+            part_id=int(primary_hit.part_id),
+            alpha_hint=float(hit_alpha),
+            primitive_id=int(primary_hit.primitive_id),
+            primitive_kind=str(primary_hit.primitive_kind),
+            is_ambiguous=bool(primary_hit.is_ambiguous),
+        ),
+        np.asarray(v_hit, dtype=np.float64),
+        float(t_hit),
+    )
 
 
 def locate_physical_hit_state(
@@ -333,6 +594,21 @@ def locate_physical_hit_state(
     primary_hit_time = None
     if primary_hit is not None:
         primary_hit_time = float(np.clip(float(primary_hit.alpha_hint) * dt_seg, 0.0, dt_seg))
+        if primary_hit_time > 1.0e-15:
+            primary_event = _locate_primary_hit_by_local_plane(
+                x0=x0,
+                v0=v0,
+                segment_dt=dt_seg,
+                t_end_segment=float(t_end_segment),
+                primary_hit=primary_hit,
+                primary_hit_time=float(primary_hit_time),
+                inputs=inputs,
+                adaptive_substep_enabled=int(adaptive_substep_enabled),
+                on_boundary_tol_m=float(on_boundary_tol_m),
+                max_iters=min(int(max_iters), 18),
+            )
+            if primary_event is not None:
+                return primary_event
     search_times = _physical_hit_search_times(dt_seg, stage_times, primary_hit_time)
 
     x_lo = np.asarray(x0, dtype=np.float64).copy()
@@ -415,6 +691,9 @@ def locate_physical_hit_state(
             normal=np.asarray(nearest.normal, dtype=np.float64),
             part_id=int(nearest.part_id),
             alpha_hint=float(hit_alpha),
+            primitive_id=int(nearest.primitive_id),
+            primitive_kind=str(nearest.primitive_kind),
+            is_ambiguous=bool(nearest.is_ambiguous),
         ),
         np.asarray(v_hit, dtype=np.float64),
         float(t_hit),
@@ -426,8 +705,14 @@ class CollidingParticleAdvanceResult(NamedTuple):
     velocity: np.ndarray
     total_hits: int
     valid_mask_status: int
-    extension_band_sampled: bool
     invalid_mask_stopped: bool
+    invalid_stop_reason: str = ''
+    numerical_boundary_stopped: bool = False
+    numerical_boundary_stop_reason: str = ''
+    contact_sliding: bool = False
+    contact_part_id: int = 0
+    contact_normal: Optional[np.ndarray] = None
+    contact_primitive_id: int = -1
 
 
 @dataclass(frozen=True)
@@ -439,7 +724,6 @@ class CollisionSegmentTrial:
     primary_hit: Optional[BoundaryHit]
     primary_hit_counted: bool
     particle_valid_mask_status: int
-    particle_extension_band_sampled: bool
     invalid_stop_result: Optional[CollidingParticleAdvanceResult] = None
 
 
@@ -462,6 +746,8 @@ class CollisionIntegratorInputs:
     adaptive_substep_tau_ratio: float
     adaptive_substep_max_splits: int
     tau_p_i: float
+    particle_diameter_i: float
+    particle_density_i: float
     flow_scale_particle_i: float
     drag_scale_particle_i: float
     body_scale_particle_i: float
@@ -470,6 +756,12 @@ class CollisionIntegratorInputs:
     global_body_accel_scale: float
     body_accel: np.ndarray
     min_tau_p_s: float
+    gas_density_kgm3: float
+    gas_mu_pas: float
+    gas_temperature_K: float
+    gas_molecular_mass_kg: float
+    drag_model_mode: int
+    electric_q_over_m_i: Optional[float] = None
 
 
 def _advance_segment_with_inputs(
@@ -493,6 +785,8 @@ def _advance_segment_with_inputs(
         adaptive_substep_tau_ratio=float(inputs.adaptive_substep_tau_ratio),
         adaptive_substep_max_splits=int(inputs.adaptive_substep_max_splits),
         tau_p_i=float(inputs.tau_p_i),
+        particle_diameter_i=float(inputs.particle_diameter_i),
+        particle_density_i=float(inputs.particle_density_i),
         flow_scale_particle_i=float(inputs.flow_scale_particle_i),
         drag_scale_particle_i=float(inputs.drag_scale_particle_i),
         body_scale_particle_i=float(inputs.body_scale_particle_i),
@@ -501,6 +795,12 @@ def _advance_segment_with_inputs(
         global_body_accel_scale=float(inputs.global_body_accel_scale),
         body_accel=np.asarray(inputs.body_accel, dtype=np.float64),
         min_tau_p_s=float(inputs.min_tau_p_s),
+        gas_density_kgm3=float(inputs.gas_density_kgm3),
+        gas_mu_pas=float(inputs.gas_mu_pas),
+        gas_temperature_K=float(inputs.gas_temperature_K),
+        gas_molecular_mass_kg=float(inputs.gas_molecular_mass_kg),
+        drag_model_mode=int(inputs.drag_model_mode),
+        electric_q_over_m_i=inputs.electric_q_over_m_i,
     )
 
 
@@ -527,6 +827,8 @@ def _advance_partial_with_inputs(
         adaptive_substep_tau_ratio=float(inputs.adaptive_substep_tau_ratio),
         adaptive_substep_max_splits=int(inputs.adaptive_substep_max_splits),
         tau_p_i=float(inputs.tau_p_i),
+        particle_diameter_i=float(inputs.particle_diameter_i),
+        particle_density_i=float(inputs.particle_density_i),
         flow_scale_particle_i=float(inputs.flow_scale_particle_i),
         drag_scale_particle_i=float(inputs.drag_scale_particle_i),
         body_scale_particle_i=float(inputs.body_scale_particle_i),
@@ -535,6 +837,12 @@ def _advance_partial_with_inputs(
         global_body_accel_scale=float(inputs.global_body_accel_scale),
         body_accel=np.asarray(inputs.body_accel, dtype=np.float64),
         min_tau_p_s=float(inputs.min_tau_p_s),
+        gas_density_kgm3=float(inputs.gas_density_kgm3),
+        gas_mu_pas=float(inputs.gas_mu_pas),
+        gas_temperature_K=float(inputs.gas_temperature_K),
+        gas_molecular_mass_kg=float(inputs.gas_molecular_mass_kg),
+        drag_model_mode=int(inputs.drag_model_mode),
+        electric_q_over_m_i=inputs.electric_q_over_m_i,
     )
 
 
@@ -562,6 +870,8 @@ def _resolve_valid_mask_retry_with_inputs(
         adaptive_substep_tau_ratio=float(inputs.adaptive_substep_tau_ratio),
         adaptive_substep_max_splits=int(inputs.adaptive_substep_max_splits),
         tau_p_i=float(inputs.tau_p_i),
+        particle_diameter_i=float(inputs.particle_diameter_i),
+        particle_density_i=float(inputs.particle_density_i),
         flow_scale_particle_i=float(inputs.flow_scale_particle_i),
         drag_scale_particle_i=float(inputs.drag_scale_particle_i),
         body_scale_particle_i=float(inputs.body_scale_particle_i),
@@ -570,7 +880,109 @@ def _resolve_valid_mask_retry_with_inputs(
         global_body_accel_scale=float(inputs.global_body_accel_scale),
         body_accel=np.asarray(inputs.body_accel, dtype=np.float64),
         min_tau_p_s=float(inputs.min_tau_p_s),
+        gas_density_kgm3=float(inputs.gas_density_kgm3),
+        gas_mu_pas=float(inputs.gas_mu_pas),
+        gas_temperature_K=float(inputs.gas_temperature_K),
+        gas_molecular_mass_kg=float(inputs.gas_molecular_mass_kg),
+        drag_model_mode=int(inputs.drag_model_mode),
+        electric_q_over_m_i=inputs.electric_q_over_m_i,
     )
+
+
+def _increment_named_count(collision_diagnostics: Dict[str, object], key: str, name: str) -> None:
+    label = str(name).strip() or 'unknown'
+    counts = collision_diagnostics.setdefault(key, {})
+    if not isinstance(counts, dict):
+        counts = {}
+        collision_diagnostics[key] = counts
+    counts[label] = int(counts.get(label, 0)) + 1
+
+
+def _same_wall_contact_sliding_state(
+    *,
+    x_wall: np.ndarray,
+    v_ref: np.ndarray,
+    n_wall: np.ndarray,
+    remaining_dt: float,
+    hit_part_ids: List[int],
+    hit_outcomes: List[str],
+    collision_diagnostics: Dict[str, object],
+) -> Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    if len(hit_part_ids) < 2:
+        return None
+    if len({int(pid) for pid in hit_part_ids}) != 1:
+        return None
+    if any(str(outcome) not in _CONTACT_REFLECTED_OUTCOMES for outcome in hit_outcomes):
+        return None
+    n = np.asarray(n_wall, dtype=np.float64)
+    n_mag = float(np.linalg.norm(n))
+    if n_mag <= 1.0e-30:
+        return None
+    n = n / n_mag
+    v = np.asarray(v_ref, dtype=np.float64)
+    if v.size != n.size:
+        return None
+    v_tangent = v - float(np.dot(v, n)) * n
+    if float(np.linalg.norm(v_tangent)) <= 1.0e-14:
+        v_tangent = np.zeros_like(v)
+    _increment_collision_diagnostic(collision_diagnostics, 'contact_sliding_count')
+    _increment_collision_diagnostic(collision_diagnostics, 'contact_sliding_same_wall_count')
+    collision_diagnostics['contact_sliding_time_total_s'] = float(
+        collision_diagnostics.get('contact_sliding_time_total_s', 0.0)
+    ) + float(max(0.0, remaining_dt))
+    collision_diagnostics['contact_sliding_remaining_dt_max_s'] = max(
+        float(collision_diagnostics.get('contact_sliding_remaining_dt_max_s', 0.0)),
+        float(max(0.0, remaining_dt)),
+    )
+    _increment_named_count(collision_diagnostics, 'contact_sliding_part_counts', f'part={int(hit_part_ids[-1])}')
+    if hit_outcomes:
+        _increment_named_count(collision_diagnostics, 'contact_sliding_outcome_counts', str(hit_outcomes[-1]))
+    return np.asarray(x_wall, dtype=np.float64), v_tangent, n
+
+
+def _record_max_hit_diagnostics(
+    *,
+    collision_diagnostics: Dict[str, object],
+    hit_part_ids: List[int],
+    hit_outcomes: List[str],
+    remaining_dt: float,
+) -> None:
+    if not hit_part_ids:
+        return
+    unique_parts = {int(pid) for pid in hit_part_ids}
+    if len(unique_parts) <= 1:
+        _increment_collision_diagnostic(collision_diagnostics, 'max_hit_same_wall_count')
+    else:
+        _increment_collision_diagnostic(collision_diagnostics, 'max_hit_multi_wall_count')
+    _increment_named_count(collision_diagnostics, 'max_hit_last_part_counts', f'part={int(hit_part_ids[-1])}')
+    if hit_outcomes:
+        _increment_named_count(collision_diagnostics, 'max_hit_last_outcome_counts', str(hit_outcomes[-1]))
+    collision_diagnostics['max_hit_remaining_dt_total_s'] = float(
+        collision_diagnostics.get('max_hit_remaining_dt_total_s', 0.0)
+    ) + float(max(0.0, remaining_dt))
+    collision_diagnostics['max_hit_remaining_dt_max_s'] = max(
+        float(collision_diagnostics.get('max_hit_remaining_dt_max_s', 0.0)),
+        float(max(0.0, remaining_dt)),
+    )
+
+
+def _post_wall_acceptance_reason(
+    *,
+    runtime,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    inside_fn: Callable[[np.ndarray], bool],
+) -> str:
+    pos = np.asarray(position, dtype=np.float64)
+    vel = np.asarray(velocity, dtype=np.float64)
+    if not np.all(np.isfinite(pos)) or not np.all(np.isfinite(vel)):
+        return 'post_wall_nonfinite_state'
+    try:
+        if not bool(inside_fn(pos)):
+            return 'post_wall_outside_geometry'
+    except Exception:
+        return 'post_wall_geometry_check_failed'
+    return ''
 
 
 def _prepare_collision_segment_trial(
@@ -582,89 +994,98 @@ def _prepare_collision_segment_trial(
     segment_dt: float,
     inputs: CollisionIntegratorInputs,
     base_adaptive_substep_enabled: int,
-    segment_adaptive_enabled_for_retry: Callable[[int], int],
-    retry_splits_used: int,
     valid_mask_retry_then_stop_enabled: bool,
     initial_x_next: np.ndarray,
     initial_v_next: np.ndarray,
     initial_stage_points: np.ndarray,
     initial_valid_mask_status: int,
-    initial_extension_band_sampled: bool,
     initial_primary_hit: Optional[BoundaryHit],
     initial_primary_hit_counted: bool,
+    primary_hit_fn: Callable[[np.ndarray, np.ndarray], Optional[BoundaryHit]],
     collision_diagnostics: Dict[str, object],
 ) -> CollisionSegmentTrial:
     particle_valid_mask_status = int(initial_valid_mask_status)
-    particle_extension_band_sampled = bool(initial_extension_band_sampled)
-    if bool(use_precomputed_trial):
-        return CollisionSegmentTrial(
-            segment_adaptive_enabled=int(base_adaptive_substep_enabled),
-            x_next=np.asarray(initial_x_next, dtype=np.float64),
-            v_next=np.asarray(initial_v_next, dtype=np.float64),
-            stage_points=np.asarray(initial_stage_points, dtype=np.float64),
-            primary_hit=initial_primary_hit,
-            primary_hit_counted=bool(initial_primary_hit_counted),
-            particle_valid_mask_status=int(particle_valid_mask_status),
-            particle_extension_band_sampled=bool(particle_extension_band_sampled),
-        )
-
     segment_start_x = np.asarray(x_curr, dtype=np.float64).copy()
     segment_start_v = np.asarray(v_curr, dtype=np.float64).copy()
-    segment_adaptive_enabled = int(segment_adaptive_enabled_for_retry(int(retry_splits_used)))
-    x_next, v_next, n_substeps, stage_points, segment_mask_status, segment_extension_band_sampled = _advance_segment_with_inputs(
-        inputs=inputs,
-        x0=x_curr,
-        v0=v_curr,
-        dt_segment=float(segment_dt),
-        t_end_segment=float(t),
-        adaptive_substep_enabled=int(segment_adaptive_enabled),
-    )
-    if int(segment_mask_status) > int(particle_valid_mask_status):
-        particle_valid_mask_status = int(segment_mask_status)
-    if bool(segment_extension_band_sampled):
-        particle_extension_band_sampled = True
-    collision_diagnostics['collision_reintegrated_segments_count'] += 1
-    if int(segment_adaptive_enabled) != 0:
-        collision_diagnostics['adaptive_substep_segments_count'] += int(n_substeps)
-        if int(n_substeps) > 1:
-            collision_diagnostics['adaptive_substep_trigger_count'] += 1
-    if bool(valid_mask_retry_then_stop_enabled) and bool(valid_mask_status_requires_stop(int(segment_mask_status))):
-        resolution = _resolve_valid_mask_retry_with_inputs(
+    if bool(use_precomputed_trial):
+        segment_adaptive_enabled = int(base_adaptive_substep_enabled)
+        x_next = np.asarray(initial_x_next, dtype=np.float64)
+        v_next = np.asarray(initial_v_next, dtype=np.float64)
+        stage_points = np.asarray(initial_stage_points, dtype=np.float64)
+        segment_mask_status = int(initial_valid_mask_status)
+        ordering_primary_hit = initial_primary_hit
+        ordering_primary_hit_counted = bool(initial_primary_hit_counted)
+    else:
+        segment_adaptive_enabled = int(base_adaptive_substep_enabled)
+        x_next, v_next, n_substeps, stage_points, segment_mask_status = _advance_segment_with_inputs(
             inputs=inputs,
-            collision_diagnostics=collision_diagnostics,
-            x0=segment_start_x,
-            v0=segment_start_v,
+            x0=x_curr,
+            v0=v_curr,
             dt_segment=float(segment_dt),
             t_end_segment=float(t),
             adaptive_substep_enabled=int(segment_adaptive_enabled),
         )
-        return CollisionSegmentTrial(
-            segment_adaptive_enabled=int(segment_adaptive_enabled),
-            x_next=np.asarray(x_next, dtype=np.float64),
-            v_next=np.asarray(v_next, dtype=np.float64),
-            stage_points=np.asarray(stage_points, dtype=np.float64),
-            primary_hit=None,
-            primary_hit_counted=False,
-            particle_valid_mask_status=int(particle_valid_mask_status),
-            particle_extension_band_sampled=bool(particle_extension_band_sampled),
-            invalid_stop_result=CollidingParticleAdvanceResult(
-                position=resolution.position,
-                velocity=resolution.velocity,
-                total_hits=0,
-                valid_mask_status=int(particle_valid_mask_status),
-                extension_band_sampled=bool(particle_extension_band_sampled),
-                invalid_mask_stopped=True,
-            ),
-        )
+        if int(segment_mask_status) > int(particle_valid_mask_status):
+            particle_valid_mask_status = int(segment_mask_status)
+        collision_diagnostics['collision_reintegrated_segments_count'] += 1
+        if int(segment_adaptive_enabled) != 0:
+            collision_diagnostics['adaptive_substep_segments_count'] += int(n_substeps)
+            if int(n_substeps) > 1:
+                collision_diagnostics['adaptive_substep_trigger_count'] += 1
+        ordering_primary_hit = None
+        ordering_primary_hit_counted = False
+    if bool(valid_mask_retry_then_stop_enabled) and bool(valid_mask_status_requires_stop(int(segment_mask_status))):
+        # For colliding particles, a hard-invalid trial endpoint can simply be
+        # the state beyond a physical wall. Resolve that wall hit first; only
+        # stop on valid_mask when no boundary crossing is found for the segment.
+        valid_mask_primary_hit = ordering_primary_hit
+        if valid_mask_primary_hit is None:
+            try:
+                valid_mask_primary_hit = primary_hit_fn(segment_start_x, np.asarray(stage_points, dtype=np.float64))
+            except Exception:
+                valid_mask_primary_hit = None
+        if valid_mask_primary_hit is not None:
+            ordering_primary_hit = valid_mask_primary_hit
+            ordering_primary_hit_counted = False
+        else:
+            resolution = _resolve_valid_mask_retry_with_inputs(
+                inputs=inputs,
+                collision_diagnostics=collision_diagnostics,
+                x0=segment_start_x,
+                v0=segment_start_v,
+                dt_segment=float(segment_dt),
+                t_end_segment=float(t),
+                adaptive_substep_enabled=int(segment_adaptive_enabled),
+            )
+            return CollisionSegmentTrial(
+                segment_adaptive_enabled=int(segment_adaptive_enabled),
+                x_next=np.asarray(x_next, dtype=np.float64),
+                v_next=np.asarray(v_next, dtype=np.float64),
+                stage_points=np.asarray(stage_points, dtype=np.float64),
+                primary_hit=None,
+                primary_hit_counted=False,
+                particle_valid_mask_status=int(particle_valid_mask_status),
+                invalid_stop_result=CollidingParticleAdvanceResult(
+                    position=resolution.position,
+                    velocity=resolution.velocity,
+                    total_hits=0,
+                    valid_mask_status=int(particle_valid_mask_status),
+                    invalid_mask_stopped=True,
+                    invalid_stop_reason=(
+                        'collision_valid_mask_hard_invalid_prefix_clipped'
+                        if bool(resolution.found_valid_prefix)
+                        else 'collision_valid_mask_hard_invalid_retry_exhausted'
+                    ),
+                ),
+            )
     return CollisionSegmentTrial(
         segment_adaptive_enabled=int(segment_adaptive_enabled),
         x_next=np.asarray(x_next, dtype=np.float64),
         v_next=np.asarray(v_next, dtype=np.float64),
         stage_points=np.asarray(stage_points, dtype=np.float64),
-        primary_hit=None,
-        primary_hit_counted=False,
+        primary_hit=ordering_primary_hit,
+        primary_hit_counted=bool(ordering_primary_hit_counted),
         particle_valid_mask_status=int(particle_valid_mask_status),
-        particle_extension_band_sampled=bool(particle_extension_band_sampled),
     )
 
 
@@ -691,7 +1112,6 @@ def _resolve_collision_segment(
 ) -> CollisionSegmentResolution:
     stage_points_arr = np.asarray(stage_points, dtype=np.float64)
     use_polyline = int(stage_points_arr.shape[0]) >= 2
-    stage_inside = np.asarray([bool(inside_fn(pt)) for pt in stage_points_arr], dtype=bool)
 
     resolved_primary_hit = primary_hit
     resolved_primary_hit_counted = bool(primary_hit_counted)
@@ -714,13 +1134,15 @@ def _resolve_collision_segment(
         collision_diagnostics['primary_hit_count'] += 1
         resolved_primary_hit_counted = True
 
-    if resolved_primary_hit is None and bool(np.all(stage_inside)):
-        return CollisionSegmentResolution(
-            advance_without_hit=True,
-            should_break=False,
-            x_next=np.asarray(x_next, dtype=np.float64),
-            v_next=np.asarray(v_next, dtype=np.float64),
-        )
+    if resolved_primary_hit is None:
+        stage_inside = np.asarray([bool(inside_fn(pt)) for pt in stage_points_arr], dtype=bool)
+        if bool(np.all(stage_inside)):
+            return CollisionSegmentResolution(
+                advance_without_hit=True,
+                should_break=False,
+                x_next=np.asarray(x_next, dtype=np.float64),
+                v_next=np.asarray(v_next, dtype=np.float64),
+            )
 
     hit_state = locate_physical_hit_state(
         x0=x_curr,
@@ -748,6 +1170,40 @@ def _resolve_collision_segment(
             v_hit=np.asarray(v_hit, dtype=np.float64),
             hit_dt=float(hit_dt),
         )
+
+    if resolved_primary_hit is not None:
+        fallback_dt = float(np.clip(float(resolved_primary_hit.alpha_hint), 0.0, 1.0) * float(segment_dt))
+        if fallback_dt > 1.0e-15:
+            _x_at_hit, v_at_hit = _advance_partial_with_inputs(
+                inputs=inputs,
+                x0=x_curr,
+                v0=v_curr,
+                dt_partial=float(fallback_dt),
+                segment_dt=float(segment_dt),
+                t_end_segment=float(t),
+                adaptive_substep_enabled=int(adaptive_substep_enabled),
+            )
+            if np.all(np.isfinite(v_at_hit)):
+                collision_diagnostics['primary_hit_direct_resolution_count'] = int(
+                    collision_diagnostics.get('primary_hit_direct_resolution_count', 0)
+                ) + 1
+                return CollisionSegmentResolution(
+                    advance_without_hit=False,
+                    should_break=False,
+                    x_next=np.asarray(x_next, dtype=np.float64),
+                    v_next=np.asarray(v_next, dtype=np.float64),
+                    hit_event=BoundaryHit(
+                        position=np.asarray(resolved_primary_hit.position, dtype=np.float64),
+                        normal=np.asarray(resolved_primary_hit.normal, dtype=np.float64),
+                        part_id=int(resolved_primary_hit.part_id),
+                        alpha_hint=float(np.clip(fallback_dt / max(float(segment_dt), 1.0e-30), 0.0, 1.0)),
+                        primitive_id=int(resolved_primary_hit.primitive_id),
+                        primitive_kind=str(resolved_primary_hit.primitive_kind),
+                        is_ambiguous=bool(resolved_primary_hit.is_ambiguous),
+                    ),
+                    v_hit=np.asarray(v_at_hit, dtype=np.float64),
+                    hit_dt=float(fallback_dt),
+                )
 
     collision_diagnostics['unresolved_crossing_count'] += 1
     fallback_dt = float(segment_dt)
@@ -802,8 +1258,8 @@ def _advance_colliding_particle(
     adaptive_substep_tau_ratio: float,
     adaptive_substep_max_splits: int,
     min_remaining_dt_ratio: float,
-    segment_adaptive_enabled_for_retry: Callable[[int], int],
     tau_p_i: float,
+    particle_diameter_i: float,
     flow_scale_particle_i: float,
     drag_scale_particle_i: float,
     body_scale_particle_i: float,
@@ -812,12 +1268,14 @@ def _advance_colliding_particle(
     global_body_accel_scale: float,
     body_accel: np.ndarray,
     min_tau_p_s: float,
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    drag_model_mode: int,
     valid_mask_retry_then_stop_enabled: bool,
     initial_x_next: np.ndarray,
     initial_v_next: np.ndarray,
     initial_stage_points: np.ndarray,
     initial_valid_mask_status: int,
-    initial_extension_band_sampled: bool,
     initial_primary_hit: Optional[BoundaryHit],
     initial_primary_hit_counted: bool,
     inside_fn: Callable[[np.ndarray], bool],
@@ -828,29 +1286,40 @@ def _advance_colliding_particle(
     collision_diagnostics: Dict[str, object],
     max_hit_rows: List[Dict[str, object]],
     wall_rows: List[Dict[str, object]],
+    coating_summary_rows: object,
     wall_law_counts: Dict[str, int],
     wall_summary_counts: Dict[Tuple[int, str, str], int],
     stuck: np.ndarray,
     absorbed: np.ndarray,
+    escaped: Optional[np.ndarray] = None,
     active: np.ndarray,
     max_wall_hits_per_step: int,
-    max_hits_retry_splits: int,
     epsilon_offset_m: float,
     on_boundary_tol_m: float,
     triangle_surface_3d: Optional[TriangleSurface3D],
+    electric_q_over_m_i: Optional[float] = None,
+    particle_density_i: float = 1000.0,
+    gas_temperature_K: float = 300.0,
+    gas_molecular_mass_kg: float = 60.0 * 1.66053906660e-27,
 ) -> CollidingParticleAdvanceResult:
+    if escaped is None:
+        escaped = np.zeros_like(active, dtype=bool)
     remaining_dt = float(dt_step)
     min_remaining_dt = float(dt_step * min_remaining_dt_ratio)
     x_curr = np.asarray(x_start, dtype=np.float64).copy()
     v_curr = np.asarray(v_start, dtype=np.float64).copy()
     hit_count = 0
     total_hit_count = 0
-    retry_splits_used = 0
     hit_part_ids: List[int] = []
     hit_outcomes: List[str] = []
     use_precomputed_trial = True
+    numerical_boundary_stopped = False
+    numerical_boundary_stop_reason = ''
+    contact_sliding = False
+    contact_part_id = 0
+    contact_normal: Optional[np.ndarray] = None
+    contact_primitive_id = -1
     particle_valid_mask_status = int(initial_valid_mask_status)
-    particle_extension_band_sampled = bool(initial_extension_band_sampled)
     integrator_inputs = CollisionIntegratorInputs(
         spatial_dim=int(spatial_dim),
         compiled=compiled,
@@ -858,6 +1327,8 @@ def _advance_colliding_particle(
         adaptive_substep_tau_ratio=float(adaptive_substep_tau_ratio),
         adaptive_substep_max_splits=int(adaptive_substep_max_splits),
         tau_p_i=float(tau_p_i),
+        particle_diameter_i=float(particle_diameter_i),
+        particle_density_i=float(particle_density_i),
         flow_scale_particle_i=float(flow_scale_particle_i),
         drag_scale_particle_i=float(drag_scale_particle_i),
         body_scale_particle_i=float(body_scale_particle_i),
@@ -866,6 +1337,12 @@ def _advance_colliding_particle(
         global_body_accel_scale=float(global_body_accel_scale),
         body_accel=np.asarray(body_accel, dtype=np.float64),
         min_tau_p_s=float(min_tau_p_s),
+        gas_density_kgm3=float(gas_density_kgm3),
+        gas_mu_pas=float(gas_mu_pas),
+        gas_temperature_K=float(gas_temperature_K),
+        gas_molecular_mass_kg=float(gas_molecular_mass_kg),
+        drag_model_mode=int(drag_model_mode),
+        electric_q_over_m_i=electric_q_over_m_i,
     )
 
     while active[particle_index] and remaining_dt > min_remaining_dt:
@@ -878,28 +1355,25 @@ def _advance_colliding_particle(
             segment_dt=float(segment_dt),
             inputs=integrator_inputs,
             base_adaptive_substep_enabled=int(base_adaptive_substep_enabled),
-            segment_adaptive_enabled_for_retry=segment_adaptive_enabled_for_retry,
-            retry_splits_used=int(retry_splits_used),
             valid_mask_retry_then_stop_enabled=bool(valid_mask_retry_then_stop_enabled),
             initial_x_next=initial_x_next,
             initial_v_next=initial_v_next,
             initial_stage_points=initial_stage_points,
             initial_valid_mask_status=int(particle_valid_mask_status),
-            initial_extension_band_sampled=bool(particle_extension_band_sampled),
             initial_primary_hit=initial_primary_hit,
             initial_primary_hit_counted=bool(initial_primary_hit_counted),
+            primary_hit_fn=primary_hit_fn,
             collision_diagnostics=collision_diagnostics,
         )
         particle_valid_mask_status = int(segment_trial.particle_valid_mask_status)
-        particle_extension_band_sampled = bool(segment_trial.particle_extension_band_sampled)
         if segment_trial.invalid_stop_result is not None:
             return CollidingParticleAdvanceResult(
                 position=np.asarray(segment_trial.invalid_stop_result.position, dtype=np.float64),
                 velocity=np.asarray(segment_trial.invalid_stop_result.velocity, dtype=np.float64),
                 total_hits=int(total_hit_count),
                 valid_mask_status=int(segment_trial.invalid_stop_result.valid_mask_status),
-                extension_band_sampled=bool(segment_trial.invalid_stop_result.extension_band_sampled),
                 invalid_mask_stopped=True,
+                invalid_stop_reason=str(segment_trial.invalid_stop_result.invalid_stop_reason),
             )
 
         segment_resolution = _resolve_collision_segment(
@@ -932,8 +1406,11 @@ def _advance_colliding_particle(
         hit = np.asarray(segment_resolution.hit_event.position, dtype=np.float64)
         n_out = np.asarray(segment_resolution.hit_event.normal, dtype=np.float64)
         part_id = int(segment_resolution.hit_event.part_id)
+        primitive_id = int(segment_resolution.hit_event.primitive_id)
+        primitive_kind = str(segment_resolution.hit_event.primitive_kind)
+        is_ambiguous = bool(segment_resolution.hit_event.is_ambiguous)
 
-        x_curr, v_curr, remaining_dt, hit_count, total_hit_count, retry_splits_used, should_break = _apply_wall_hit_step(
+        wall_result = _apply_wall_hit_step(
             runtime=runtime,
             step=step,
             particles=particles,
@@ -943,6 +1420,9 @@ def _advance_colliding_particle(
             n_out=n_out,
             hit_dt=float(segment_resolution.hit_dt),
             part_id=int(part_id),
+            primitive_id=int(primitive_id),
+            primitive_kind=str(primitive_kind),
+            is_ambiguous=bool(is_ambiguous),
             v_hit=np.asarray(segment_resolution.v_hit, dtype=np.float64),
             remaining_dt=float(remaining_dt),
             segment_dt=float(segment_dt),
@@ -950,23 +1430,65 @@ def _advance_colliding_particle(
             total_hit_count=int(total_hit_count),
             hit_part_ids=hit_part_ids,
             hit_outcomes=hit_outcomes,
-            retry_splits_used=int(retry_splits_used),
             collision_diagnostics=collision_diagnostics,
             max_hit_rows=max_hit_rows,
             wall_rows=wall_rows,
+            coating_summary_rows=coating_summary_rows,
             wall_law_counts=wall_law_counts,
             wall_summary_counts=wall_summary_counts,
             stuck=stuck,
             absorbed=absorbed,
+            escaped=escaped,
             active=active,
             max_wall_hits_per_step=int(max_wall_hits_per_step),
-            max_hits_retry_splits=int(max_hits_retry_splits),
             min_remaining_dt=float(min_remaining_dt),
             epsilon_offset_m=float(epsilon_offset_m),
             on_boundary_tol_m=float(on_boundary_tol_m),
             t=float(t),
             triangle_surface_3d=triangle_surface_3d,
         )
+        x_curr = np.asarray(wall_result.position, dtype=np.float64)
+        v_curr = np.asarray(wall_result.velocity, dtype=np.float64)
+        remaining_dt = float(wall_result.remaining_dt)
+        hit_count = int(wall_result.hit_count)
+        total_hit_count = int(wall_result.total_hit_count)
+        should_break = bool(wall_result.should_break)
+        if bool(wall_result.entered_contact):
+            contact_sliding = True
+            contact_part_id = int(wall_result.contact_part_id)
+            contact_normal = (
+                None
+                if wall_result.contact_normal is None
+                else np.asarray(wall_result.contact_normal, dtype=np.float64)
+            )
+            contact_primitive_id = int(wall_result.contact_primitive_id)
+        if (
+            bool(active[particle_index])
+            and not bool(stuck[particle_index])
+            and not bool(absorbed[particle_index])
+            and not bool(escaped[particle_index])
+        ):
+            acceptance_reason = _post_wall_acceptance_reason(
+                runtime=runtime,
+                position=x_curr,
+                velocity=v_curr,
+                inside_fn=inside_fn,
+            )
+            if acceptance_reason:
+                numerical_boundary_stopped = True
+                numerical_boundary_stop_reason = str(acceptance_reason)
+                break
+        if (
+            bool(should_break)
+            and bool(active[particle_index])
+            and not bool(stuck[particle_index])
+            and not bool(absorbed[particle_index])
+            and not bool(escaped[particle_index])
+            and int(hit_count) >= int(max_wall_hits_per_step)
+            and float(remaining_dt) > float(min_remaining_dt)
+        ):
+            numerical_boundary_stopped = True
+            numerical_boundary_stop_reason = 'max_hits_reached'
         if should_break:
             break
         use_precomputed_trial = False
@@ -978,8 +1500,14 @@ def _advance_colliding_particle(
         velocity=v_curr,
         total_hits=int(total_hit_count),
         valid_mask_status=int(particle_valid_mask_status),
-        extension_band_sampled=bool(particle_extension_band_sampled),
         invalid_mask_stopped=False,
+        invalid_stop_reason='',
+        numerical_boundary_stopped=bool(numerical_boundary_stopped),
+        numerical_boundary_stop_reason=str(numerical_boundary_stop_reason),
+        contact_sliding=bool(contact_sliding),
+        contact_part_id=int(contact_part_id),
+        contact_normal=contact_normal,
+        contact_primitive_id=int(contact_primitive_id),
     )
 
 
@@ -990,50 +1518,205 @@ class TrialCollisionBatch:
     prefetched_hits: Dict[int, BoundaryHit]
 
 
+def _add_timing(timing_accumulator: Optional[Dict[str, float]], key: str, elapsed_s: float) -> None:
+    if timing_accumulator is None:
+        return
+    timing_accumulator[key] = float(timing_accumulator.get(key, 0.0)) + float(max(0.0, elapsed_s))
+
+
+def _min_geometry_grid_spacing_2d(runtime) -> float:
+    geometry_provider = getattr(runtime, 'geometry_provider', None)
+    if geometry_provider is None:
+        return 0.0
+    geom = geometry_provider.geometry
+    if int(getattr(geom, 'spatial_dim', 0)) != 2 or len(getattr(geom, 'axes', ())) != 2:
+        return 0.0
+    spacings = []
+    for axis in geom.axes:
+        arr = np.asarray(axis, dtype=np.float64)
+        diffs = np.diff(arr)
+        diffs = diffs[np.isfinite(diffs) & (diffs > 0.0)]
+        if diffs.size:
+            spacings.append(float(np.min(diffs)))
+    return float(min(spacings)) if spacings else 0.0
+
+
+def _far_from_wall_mask_2d(
+    runtime,
+    indices: np.ndarray,
+    x_start: np.ndarray,
+    x_mid: np.ndarray,
+    x_end: np.ndarray,
+    *,
+    on_boundary_tol_m: float,
+) -> np.ndarray:
+    idx = np.asarray(indices, dtype=np.int64)
+    if idx.size == 0:
+        return np.zeros(0, dtype=bool)
+    geometry_provider = getattr(runtime, 'geometry_provider', None)
+    if geometry_provider is None or int(geometry_provider.geometry.spatial_dim) != 2:
+        return np.zeros(idx.size, dtype=bool)
+    grid_spacing = _min_geometry_grid_spacing_2d(runtime)
+    if not np.isfinite(grid_spacing) or grid_spacing <= 0.0:
+        return np.zeros(idx.size, dtype=bool)
+    start = np.asarray(x_start[idx], dtype=np.float64)
+    mid = np.asarray(x_mid[idx], dtype=np.float64)
+    end = np.asarray(x_end[idx], dtype=np.float64)
+    sdf_start = sample_geometry_sdf_points_2d(runtime, start)
+    sdf_mid = sample_geometry_sdf_points_2d(runtime, mid)
+    sdf_end = sample_geometry_sdf_points_2d(runtime, end)
+    sweep_radius = np.maximum(
+        np.linalg.norm(mid - start, axis=1),
+        np.linalg.norm(end - start, axis=1),
+    )
+    margin = float(max(float(on_boundary_tol_m), 2.0 * grid_spacing)) + 0.25 * sweep_radius
+    finite = np.isfinite(sdf_start) & np.isfinite(sdf_mid) & np.isfinite(sdf_end) & np.isfinite(sweep_radius)
+    return finite & (sdf_start < -(sweep_radius + margin)) & (sdf_mid < -margin) & (sdf_end < -margin)
+
+
+def _sdf_strict_inside_mask_2d(
+    runtime,
+    positions: np.ndarray,
+    *,
+    on_boundary_tol_m: float,
+) -> np.ndarray:
+    pts = np.asarray(positions, dtype=np.float64)
+    if pts.ndim != 2 or pts.shape[1] != 2 or pts.shape[0] == 0:
+        return np.zeros(pts.shape[0], dtype=bool)
+    grid_spacing = _min_geometry_grid_spacing_2d(runtime)
+    if not np.isfinite(grid_spacing) or grid_spacing <= 0.0:
+        return np.zeros(pts.shape[0], dtype=bool)
+    sdf = sample_geometry_sdf_points_2d(runtime, pts)
+    margin = float(max(float(on_boundary_tol_m), 0.5 * grid_spacing))
+    return np.isfinite(sdf) & (sdf < -margin)
+
+
 def _classify_trial_collisions_2d(
     runtime,
     *,
     n_particles: int,
     active: np.ndarray,
+    x: np.ndarray,
     x_trial: np.ndarray,
     x_mid_trial: np.ndarray,
     integrator_mode: int,
+    boundary_service: BoundaryService,
     on_boundary_tol_m: float,
     collision_diagnostics: Dict[str, object],
+    timing_accumulator: Optional[Dict[str, float]] = None,
+    valid_mask_status_flags: Optional[np.ndarray] = None,
 ) -> TrialCollisionBatch:
     active_idx = np.flatnonzero(active)
     loop_inside = np.zeros(n_particles, dtype=bool)
     loop_mid_inside = np.ones(n_particles, dtype=bool)
     is_etd2 = int(integrator_mode) == INTEGRATOR_ETD2
+    far_from_wall = np.zeros(n_particles, dtype=bool)
     if active_idx.size:
-        inside_active, on_boundary_active = _boundary_points_inside_geometry_2d(
+        t_prefilter = time.perf_counter()
+        far_active = _far_from_wall_mask_2d(
             runtime,
-            x_trial[active_idx],
-            on_boundary_tol_m=on_boundary_tol_m,
-            return_on_boundary=True,
+            active_idx,
+            x,
+            x_mid_trial if is_etd2 else x_trial,
+            x_trial,
+            on_boundary_tol_m=float(on_boundary_tol_m),
         )
-        loop_inside[active_idx] = inside_active
-        collision_diagnostics['on_boundary_promoted_inside_count'] += int(np.count_nonzero(on_boundary_active))
-        if is_etd2:
-            inside_mid_active, on_boundary_mid_active = _boundary_points_inside_geometry_2d(
-                runtime,
-                x_mid_trial[active_idx],
-                on_boundary_tol_m=on_boundary_tol_m,
-                return_on_boundary=True,
+        if valid_mask_status_flags is not None:
+            far_active &= (
+                np.asarray(valid_mask_status_flags[active_idx], dtype=np.uint8)
+                == np.uint8(VALID_MASK_STATUS_CLEAN)
             )
-            loop_mid_inside[active_idx] = inside_mid_active
-            collision_diagnostics['on_boundary_promoted_inside_count'] += int(np.count_nonzero(on_boundary_mid_active))
-            collision_diagnostics['etd2_midpoint_outside_count'] += int(np.count_nonzero(~inside_mid_active))
-    if is_etd2:
-        colliders = np.flatnonzero(active & ((~loop_inside) | (~loop_mid_inside)))
-        safe = np.flatnonzero(active & loop_inside & loop_mid_inside)
-    else:
-        colliders = np.flatnonzero(active & (~loop_inside))
-        safe = np.flatnonzero(active & loop_inside)
+        _add_timing(timing_accumulator, 'boundary_sdf_prefilter_s', time.perf_counter() - t_prefilter)
+        if far_active.size:
+            far_from_wall[active_idx] = far_active
+            loop_inside[active_idx[far_active]] = True
+            loop_mid_inside[active_idx[far_active]] = True
+            collision_diagnostics['boundary_far_skip_count'] = int(
+                collision_diagnostics.get('boundary_far_skip_count', 0)
+            ) + int(np.count_nonzero(far_active))
+            collision_diagnostics['boundary_near_check_count'] = int(
+                collision_diagnostics.get('boundary_near_check_count', 0)
+            ) + int(active_idx.size - int(np.count_nonzero(far_active)))
+        near_idx = active_idx[~far_active]
+        if near_idx.size:
+            t_sdf_inside = time.perf_counter()
+            end_sdf_inside = _sdf_strict_inside_mask_2d(
+                runtime,
+                x_trial[near_idx],
+                on_boundary_tol_m=float(on_boundary_tol_m),
+            )
+            loop_inside[near_idx[end_sdf_inside]] = True
+            _add_timing(timing_accumulator, 'inside_sdf_prefilter_s', time.perf_counter() - t_sdf_inside)
+            end_exact_idx = near_idx[~end_sdf_inside]
+            if end_exact_idx.size:
+                t_inside = time.perf_counter()
+                inside_active, on_boundary_active = _boundary_points_inside_geometry_2d(
+                    runtime,
+                    x_trial[end_exact_idx],
+                    on_boundary_tol_m=on_boundary_tol_m,
+                    return_on_boundary=True,
+                )
+                loop_inside[end_exact_idx] = inside_active
+                collision_diagnostics['on_boundary_promoted_inside_count'] += int(np.count_nonzero(on_boundary_active))
+                _add_timing(timing_accumulator, 'inside_check_s', time.perf_counter() - t_inside)
+            if is_etd2:
+                t_sdf_inside = time.perf_counter()
+                mid_sdf_inside = _sdf_strict_inside_mask_2d(
+                    runtime,
+                    x_mid_trial[near_idx],
+                    on_boundary_tol_m=float(on_boundary_tol_m),
+                )
+                loop_mid_inside[near_idx[mid_sdf_inside]] = True
+                _add_timing(timing_accumulator, 'inside_sdf_prefilter_s', time.perf_counter() - t_sdf_inside)
+                mid_exact_idx = near_idx[~mid_sdf_inside]
+                if mid_exact_idx.size:
+                    t_inside = time.perf_counter()
+                    inside_mid_active, on_boundary_mid_active = _boundary_points_inside_geometry_2d(
+                        runtime,
+                        x_mid_trial[mid_exact_idx],
+                        on_boundary_tol_m=on_boundary_tol_m,
+                        return_on_boundary=True,
+                    )
+                    loop_mid_inside[mid_exact_idx] = inside_mid_active
+                    collision_diagnostics['on_boundary_promoted_inside_count'] += int(np.count_nonzero(on_boundary_mid_active))
+                    collision_diagnostics['etd2_midpoint_outside_count'] += int(np.count_nonzero(~inside_mid_active))
+                    _add_timing(timing_accumulator, 'inside_check_s', time.perf_counter() - t_inside)
+    collider_mask = active & ((~loop_inside) | (~loop_mid_inside)) if is_etd2 else active & (~loop_inside)
+    safe_mask = active & loop_inside & loop_mid_inside if is_etd2 else active & loop_inside
+    prefetched_hits: Dict[int, BoundaryHit] = {}
+    safe_idx = np.flatnonzero(safe_mask & (~far_from_wall))
+    if safe_idx.size:
+        if is_etd2:
+            stage_points_batch = np.stack((x_mid_trial[safe_idx], x_trial[safe_idx]), axis=1)
+        else:
+            stage_points_batch = x_trial[safe_idx][:, None, :]
+        t_prefetch = time.perf_counter()
+        batch_hits = polyline_hits_from_boundary_edges_batch(
+            runtime,
+            x[safe_idx],
+            stage_points_batch,
+            particle_indices=safe_idx,
+        )
+        _add_timing(timing_accumulator, 'edge_prefetch_s', time.perf_counter() - t_prefetch)
+        collision_diagnostics['edge_prefetch_batch_candidate_count'] = int(
+            collision_diagnostics.get('edge_prefetch_batch_candidate_count', 0)
+        ) + int(safe_idx.size)
+        for particle_index, hit in batch_hits.items():
+            if float(hit.alpha_hint) <= 1.0e-12:
+                continue
+            i = int(particle_index)
+            prefetched_hits[i] = hit
+            collider_mask[i] = True
+            safe_mask[i] = False
+        collision_diagnostics['edge_prefetch_batch_hit_count'] = int(
+            collision_diagnostics.get('edge_prefetch_batch_hit_count', 0)
+        ) + int(len(prefetched_hits))
+    colliders = np.flatnonzero(collider_mask)
+    safe = np.flatnonzero(safe_mask)
     return TrialCollisionBatch(
         colliders=np.asarray(colliders, dtype=np.int64),
         safe=np.asarray(safe, dtype=np.int64),
-        prefetched_hits={},
+        prefetched_hits=prefetched_hits,
     )
 
 
@@ -1048,6 +1731,8 @@ def _classify_trial_collisions_3d(
     boundary_service: BoundaryService,
     on_boundary_tol_m: float,
     collision_diagnostics: Dict[str, object],
+    timing_accumulator: Optional[Dict[str, float]] = None,
+    valid_mask_status_flags: Optional[np.ndarray] = None,
 ) -> TrialCollisionBatch:
     colliders_list: List[int] = []
     safe_list: List[int] = []
@@ -1120,17 +1805,23 @@ def _classify_trial_collisions(
     boundary_service: BoundaryService,
     on_boundary_tol_m: float,
     collision_diagnostics: Dict[str, object],
+    timing_accumulator: Optional[Dict[str, float]] = None,
+    valid_mask_status_flags: Optional[np.ndarray] = None,
 ) -> TrialCollisionBatch:
     if int(spatial_dim) == 2:
         return _classify_trial_collisions_2d(
             runtime,
             n_particles=int(n_particles),
             active=active,
+            x=x,
             x_trial=x_trial,
             x_mid_trial=x_mid_trial,
             integrator_mode=int(integrator_mode),
+            boundary_service=boundary_service,
             on_boundary_tol_m=float(on_boundary_tol_m),
             collision_diagnostics=collision_diagnostics,
+            timing_accumulator=timing_accumulator,
+            valid_mask_status_flags=valid_mask_status_flags,
         )
     return _classify_trial_collisions_3d(
         runtime,
@@ -1142,6 +1833,8 @@ def _classify_trial_collisions(
         boundary_service=boundary_service,
         on_boundary_tol_m=float(on_boundary_tol_m),
         collision_diagnostics=collision_diagnostics,
+        timing_accumulator=timing_accumulator,
+        valid_mask_status_flags=valid_mask_status_flags,
     )
 
 

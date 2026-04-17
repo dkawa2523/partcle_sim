@@ -8,10 +8,17 @@ from tools.export_boundary_diagnostics_visuals import export_boundary_diagnostic
 from tools.export_mechanics_visuals import export_mechanics_visuals
 from tools.export_result_graphs import export_result_graphs
 from tools.export_trajectory_animation import export_trajectory_animations
-from tools.visualization_common import ensure_visualization_dirs, list_files, write_visualization_index
+from tools.visualization_common import (
+    build_run_health_summary,
+    ensure_visualization_dirs,
+    list_files,
+    write_run_summary,
+    write_visualization_index,
+)
 
 
 _ALLOWED_MODULES = ("graphs", "animations", "mechanics", "boundary")
+_DEFAULT_MODULES = ("graphs",)
 
 
 def _parse_modules(raw: str | Iterable[str]) -> list[str]:
@@ -19,8 +26,8 @@ def _parse_modules(raw: str | Iterable[str]) -> list[str]:
         parts = [p.strip().lower() for p in raw.split(",") if p.strip()]
     else:
         parts = [str(p).strip().lower() for p in raw if str(p).strip()]
-    if not parts:
-        return list(_ALLOWED_MODULES)
+    if not parts or "standard" in parts or "default" in parts:
+        return list(_DEFAULT_MODULES)
     if "all" in parts:
         return list(_ALLOWED_MODULES)
     out: list[str] = []
@@ -36,7 +43,7 @@ def export_visualizations(
     output_dir: Path,
     *,
     case_dir: Path | None = None,
-    modules: Iterable[str] = _ALLOWED_MODULES,
+    modules: Iterable[str] = _DEFAULT_MODULES,
     clean: bool = False,
     sample_trajectories: int = 300,
     animation_fps: int = 6,
@@ -104,8 +111,11 @@ def export_visualizations(
         "output_dir": str(output_dir),
         "visualizations_root": str(dirs["root"].resolve()),
         "clean": bool(clean),
+        "health_summary": build_run_health_summary(output_dir),
         "modules": module_records,
     }
+    summary_path = write_run_summary(output_dir, payload)
+    payload["run_summary_md"] = str(summary_path.resolve())
     return write_visualization_index(output_dir, payload)
 
 
@@ -115,8 +125,8 @@ def main() -> int:
     parser.add_argument("--case-dir", default="", help="Case directory for geometry-based modules")
     parser.add_argument(
         "--modules",
-        default="all",
-        help="Comma-separated module list: graphs,animations,mechanics,boundary (or all)",
+        default="standard",
+        help="Comma-separated module list: graphs,animations,mechanics,boundary; standard writes graphs only, all includes GIFs",
     )
     parser.add_argument("--clean", action="store_true", help="Remove legacy output dirs (graphs/animations/visuals) under output-dir")
     parser.add_argument("--sample-trajectories", type=int, default=300, help="Sample trajectories for graphs")

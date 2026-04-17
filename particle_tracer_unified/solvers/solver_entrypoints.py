@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Mapping, Optional, Tuple, Union
 
 from ..core.datamodel import PreparedRuntime
+from ..core.input_contract import enforce_initial_particle_field_support
+from ..core.provider_contract import enforce_boundary_field_support
 from ..io.runtime_builder import build_prepared_runtime_from_yaml
 from .high_fidelity_runtime import run_prepared_runtime
 
@@ -32,7 +34,10 @@ def build_prepared_runtime_for_dim(config_or_prepared: Union[str, Path, Prepared
 
 def run_solver_for_dim(prepared: PreparedRuntime, output_dir: Path, spatial_dim: int) -> Mapping[str, object]:
     prepared = build_prepared_runtime_for_dim(prepared, spatial_dim=spatial_dim)
-    return run_prepared_runtime(prepared, Path(output_dir), spatial_dim=int(spatial_dim))
+    out = Path(output_dir)
+    enforce_boundary_field_support(prepared, out)
+    enforce_initial_particle_field_support(prepared, out)
+    return run_prepared_runtime(prepared, out, spatial_dim=int(spatial_dim))
 
 
 def run_solver_from_yaml_for_dim(
@@ -43,6 +48,8 @@ def run_solver_from_yaml_for_dim(
 ) -> Tuple[Mapping[str, object], PreparedRuntime]:
     prepared = build_prepared_runtime_for_dim(config_path, spatial_dim=spatial_dim)
     out = Path(output_dir) if output_dir is not None else (Path(config_path).resolve().parent / f'run_output_{int(spatial_dim)}d')
+    enforce_boundary_field_support(prepared, out)
+    enforce_initial_particle_field_support(prepared, out)
     report = run_prepared_runtime(prepared, out, spatial_dim=int(spatial_dim))
     return report, prepared
 

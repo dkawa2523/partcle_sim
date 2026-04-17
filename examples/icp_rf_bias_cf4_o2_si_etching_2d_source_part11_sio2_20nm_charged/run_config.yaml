@@ -1,0 +1,42 @@
+run:
+  spatial_dim: 2
+  coordinate_system: axisymmetric_rz
+  time_interpolation: linear
+paths:
+  particles_csv: particles.csv
+  materials_csv: materials.csv
+  part_walls_csv: part_walls.csv
+providers:
+  geometry:
+    kind: precomputed_npz
+    npz_path: generated/comsol_geometry_2d.npz
+  field:
+    kind: precomputed_npz
+    npz_path: generated/comsol_field_2d.npz
+gas:
+  temperature_K: 320.0
+  dynamic_viscosity_Pas: 1.8e-05
+  density_kgm3: 1.2
+source:
+  preprocess:
+    enabled: false
+    seed: 24680
+  default_law: explicit_csv
+  source_speed_scale: 1.0
+  source_position_offset_m: 0.0
+input_contract:
+  initial_particle_field_support: strict
+provider_contract:
+  boundary_field_support: strict
+  boundary_offset_cells: 1.0
+solver:
+  dt: 1.0e-07
+  t_end: 5.0e-05
+  save_every: 10
+  integrator: etd2
+  drag_model: schiller_naumann
+  min_tau_p_s: 3.0e-04
+  valid_mask_policy: retry_then_stop
+  plot_particle_limit: 24
+  seed: 12345
+  max_hits_retry_splits: 2

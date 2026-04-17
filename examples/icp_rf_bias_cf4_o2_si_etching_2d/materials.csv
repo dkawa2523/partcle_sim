@@ -1,0 +1,6 @@
+material_id,material_name,source_law,source_speed_scale,wall_law,wall_restitution,wall_diffuse_fraction,wall_stick_probability
+10,axis_symmetry,explicit_csv,1.0,specular,1.0,0.0,0.0
+20,wafer,explicit_csv,1.0,specular,0.95,0.0,0.5
+99,comsol_wall,explicit_csv,1.0,specular,0.95,0.0,0.5
+40,chamber_wall,explicit_csv,1.0,specular,0.95,0.0,0.5
+50,sidewall,explicit_csv,1.0,specular,0.95,0.0,0.5

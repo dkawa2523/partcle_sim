@@ -1,0 +1,16 @@
+part_id,part_name,material_id,material_name,wall_law,wall_restitution,wall_diffuse_fraction,wall_stick_probability
+2,axis_symmetry_2,10,axis_symmetry,specular,1.0,0.0,0.0
+3,wafer_3,20,wafer,specular,0.95,0.0,0.5
+4,axis_symmetry_4,10,axis_symmetry,specular,1.0,0.0,0.0
+6,axis_symmetry_6,10,axis_symmetry,specular,1.0,0.0,0.0
+8,axis_symmetry_8,10,axis_symmetry,specular,1.0,0.0,0.0
+10,axis_symmetry_10,10,axis_symmetry,specular,1.0,0.0,0.0
+11,part11_source_surface,40,chamber_wall,specular,0.95,0.0,0.5
+12,chamber_wall_12,40,chamber_wall,specular,0.95,0.0,0.5
+32,chamber_wall_32,40,chamber_wall,specular,0.95,0.0,0.5
+36,chamber_wall_36,40,chamber_wall,specular,0.95,0.0,0.5
+42,sidewall_42,50,sidewall,specular,0.95,0.0,0.5
+43,sidewall_43,50,sidewall,specular,0.95,0.0,0.5
+44,sidewall_44,50,sidewall,specular,0.95,0.0,0.5
+45,sidewall_45,50,sidewall,specular,0.95,0.0,0.5
+9001,field_support_boundary,90,field_support_boundary,specular,0.95,0.0,0.5

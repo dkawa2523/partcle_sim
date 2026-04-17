@@ -27,29 +27,104 @@ def field_backend_kind(field_provider: FieldProviderND | None) -> str:
     return str(getattr(field, 'metadata', {}).get('field_backend_kind', FIELD_BACKEND_RECTILINEAR))
 
 
+def _regular_field_support_report(field) -> Dict[str, Any]:
+    valid_mask = np.asarray(field.valid_mask, dtype=bool)
+    node_count = int(valid_mask.size)
+    valid_count = int(np.count_nonzero(valid_mask))
+    axes = []
+    for axis in field.axes:
+        arr = np.asarray(axis, dtype=np.float64)
+        axes.append(
+            {
+                'count': int(arr.size),
+                'min': float(np.nanmin(arr)) if arr.size else float('nan'),
+                'max': float(np.nanmax(arr)) if arr.size else float('nan'),
+            }
+        )
+    support_phi = getattr(field, 'support_phi', None)
+    support_phi_summary: Dict[str, Any] = {'available': False}
+    if support_phi is not None:
+        phi = np.asarray(support_phi, dtype=np.float64)
+        finite = phi[np.isfinite(phi)]
+        support_phi_summary = {
+            'available': True,
+            'finite_count': int(finite.size),
+            'min': float(np.min(finite)) if finite.size else float('nan'),
+            'max': float(np.max(finite)) if finite.size else float('nan'),
+        }
+    return {
+        'grid_shape': [int(v) for v in valid_mask.shape],
+        'grid_node_count': node_count,
+        'valid_node_count': valid_count,
+        'invalid_node_count': int(node_count - valid_count),
+        'valid_fraction': float(valid_count / node_count) if node_count else 0.0,
+        'axes': axes,
+        'support_phi': support_phi_summary,
+    }
+
+
+def _triangle_mesh_field_support_report(field: TriangleMeshField2D) -> Dict[str, Any]:
+    return {
+        'mesh_vertex_count': int(field.mesh_vertices.shape[0]),
+        'mesh_triangle_count': int(field.mesh_triangles.shape[0]),
+        'accel_grid_shape': [int(v) for v in field.accel_shape],
+    }
+
+
+def _field_time_axis_report(field) -> Dict[str, Any]:
+    quantities = getattr(field, 'quantities', {})
+    reference_name = ''
+    reference_times: np.ndarray | None = None
+    mismatches = []
+    for name in sorted(quantities.keys()):
+        series = quantities[name]
+        times = np.asarray(getattr(series, 'times', np.asarray([0.0], dtype=np.float64)), dtype=np.float64)
+        if reference_times is None:
+            reference_name = str(name)
+            reference_times = times
+            continue
+        if times.shape != reference_times.shape or not np.allclose(times, reference_times, rtol=0.0, atol=0.0):
+            mismatches.append(str(name))
+
+    times = reference_times if reference_times is not None else np.asarray([0.0], dtype=np.float64)
+    finite = times[np.isfinite(times)]
+    return {
+        'time_mode': str(getattr(field, 'time_mode', 'steady')),
+        'time_count': int(times.size),
+        'time_min_s': float(np.min(finite)) if finite.size else float('nan'),
+        'time_max_s': float(np.max(finite)) if finite.size else float('nan'),
+        'quantity_time_axis_reference': reference_name,
+        'quantity_time_axis_mismatch_count': int(len(mismatches)),
+        'quantity_time_axis_mismatches': mismatches[:20],
+        'quantity_time_axis_mismatches_truncated': bool(len(mismatches) > 20),
+    }
+
+
 def field_backend_report(field_provider: FieldProviderND | None) -> Dict[str, Any]:
     if field_provider is None:
         return {
             'field_backend_kind': '',
-            'field_regularization_mode': '',
-            'field_regularization_band_distance_m': 0.0,
-            'field_regularization_added_node_count': 0,
-            'field_regularization_probe_success_count': 0,
-            'field_regularization_probe_fallback_count': 0,
+            'field_has_support_phi': 0,
+            'field_support_phi_kind': '',
         }
     field = field_provider.field
     metadata = getattr(field, 'metadata', {})
-    return {
+    report: Dict[str, Any] = {
         'field_backend_kind': str(field_backend_kind(field_provider)),
-        'field_regularization_mode': str(metadata.get('field_regularization_mode', '')),
-        'field_regularization_band_distance_m': float(metadata.get('field_regularization_band_distance_m', 0.0)),
-        'field_regularization_added_node_count': int(metadata.get('field_regularization_added_node_count', 0)),
-        'field_regularization_probe_success_count': int(metadata.get('field_regularization_probe_success_count', 0)),
-        'field_regularization_probe_fallback_count': int(metadata.get('field_regularization_probe_fallback_count', 0)),
+        'field_has_support_phi': int(getattr(field, 'support_phi', None) is not None),
+        'field_support_phi_kind': str(metadata.get('field_support_phi_kind', '')),
+        'quantity_count': int(len(getattr(field, 'quantities', {}))),
+        'time_axis': _field_time_axis_report(field),
     }
+    if isinstance(field, TriangleMeshField2D):
+        report.update(_triangle_mesh_field_support_report(field))
+    else:
+        report.update(_regular_field_support_report(field))
+    return report
 
 
-def sample_field_valid_status(field_provider: FieldProviderND, position: np.ndarray) -> int:
+def sample_field_valid_status(field_provider: FieldProviderND, position: np.ndarray, t_eval: float | None = None) -> int:
+    del t_eval
     field = field_provider.field
     pos = np.asarray(position, dtype=np.float64)
     if isinstance(field, TriangleMeshField2D):

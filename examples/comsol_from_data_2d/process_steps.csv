@@ -1,3 +1,0 @@
-step_id,step_name,start_s,end_s,physics_flow_scale,physics_drag_tau_scale,physics_body_accel_scale,wall_mode,wall_restitution,wall_diffuse_fraction,wall_stick_probability_scale,source_law_override,source_speed_scale,source_event_gain_scale,output_segment_name,output_save_every_override,output_save_positions,output_write_wall_events,output_write_diagnostics
-1,ignite,0.0,0.6,1.0,1.0,1.0,inherit,1.0,0.0,1.0,,1.0,1.2,ignite,0,1,1,1
-2,sustain,0.6,1.2,0.8,1.1,1.0,mixed_specular_diffuse,0.9,0.2,1.0,,1.0,0.9,sustain,1,1,1,1

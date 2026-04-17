@@ -1,8 +1,0 @@
-﻿{
-    "case":  "C:\\Users\\user\\Desktop\\particle_simulation\\examples\\comsol_from_data_2d_10k",
-    "eval_dir":  "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_prod10k_20260403_035521",
-    "summary_csv":  "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_prod10k_20260403_035521\\integrator_prod10k_summary.csv",
-    "reference_output":  "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_prod10k_20260403_035521\\run_reference_etd2_dt0025",
-    "reference_elapsed_s":  60.75,
-    "accuracy_csv":  "C:\\Users\\user\\Desktop\\particle_simulation\\demo_output\\integrator_eval_prod10k_20260403_035521\\integrator_accuracy_vs_reference.csv"
-}

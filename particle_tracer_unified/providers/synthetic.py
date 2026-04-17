@@ -133,10 +133,20 @@ def build_synthetic_geometry(cfg: Mapping[str, Any], spatial_dim: int, coordinat
 
 def build_synthetic_field(cfg: Mapping[str, Any], spatial_dim: int, coordinate_system: str, axes: Tuple[np.ndarray, ...], gas_density_kgm3: float = 1.0) -> FieldProviderND:
     kind = str(cfg.get('kind', 'linear_shear')).strip()
-    time_mode = str(cfg.get('time_mode', 'steady')).strip()
+    time_mode = str(cfg.get('time_mode', 'steady')).strip().lower()
+    if time_mode not in {'steady', 'transient'}:
+        raise ValueError('providers.field.time_mode must be steady or transient')
     times = np.asarray(cfg.get('times', [0.0]), dtype=np.float64)
-    if times.size == 0:
-        times = np.asarray([0.0], dtype=np.float64)
+    if times.ndim != 1 or times.size == 0:
+        raise ValueError('providers.field.times must be a non-empty 1D array')
+    if not np.all(np.isfinite(times)):
+        raise ValueError('providers.field.times must contain only finite values')
+    if times.size > 1 and not np.all(np.diff(times) > 0.0):
+        raise ValueError('providers.field.times must be strictly increasing')
+    if time_mode == 'steady' and times.size != 1:
+        raise ValueError('providers.field.time_mode steady requires exactly one time value')
+    if time_mode == 'transient' and times.size < 2:
+        raise ValueError('providers.field.time_mode transient requires at least two time values')
     grids = np.meshgrid(*axes, indexing='ij')
     quantities = {}
     if spatial_dim == 2:

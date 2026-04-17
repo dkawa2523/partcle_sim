@@ -1,0 +1,210 @@
+{
+  "mode": "strict",
+  "passed": true,
+  "applicable": true,
+  "reason": "",
+  "field_backend_kind": "regular_rectilinear",
+  "field_support": {
+    "field_backend_kind": "regular_rectilinear",
+    "field_has_support_phi": 0,
+    "field_support_phi_kind": "",
+    "quantity_count": 13,
+    "time_axis": {
+      "time_mode": "steady",
+      "time_count": 1,
+      "time_min_s": 0.0,
+      "time_max_s": 0.0,
+      "quantity_time_axis_reference": "E_x",
+      "quantity_time_axis_mismatch_count": 0,
+      "quantity_time_axis_mismatches": [],
+      "quantity_time_axis_mismatches_truncated": false
+    },
+    "grid_shape": [
+      267,
+      237
+    ],
+    "grid_node_count": 63279,
+    "valid_node_count": 28572,
+    "invalid_node_count": 34707,
+    "valid_fraction": 0.4515242023420092,
+    "axes": [
+      {
+        "count": 267,
+        "min": -0.008000000000000007,
+        "max": 0.258
+      },
+      {
+        "count": 237,
+        "min": -0.008000000000000007,
+        "max": 0.228
+      }
+    ],
+    "support_phi": {
+      "available": false
+    }
+  },
+  "geometry_boundary": {
+    "available": true,
+    "spatial_dim": 2,
+    "boundary_edge_count": 764,
+    "boundary_loop_count": 1,
+    "boundary_edge_topology": {
+      "edge_count": 764,
+      "vertex_count": 764,
+      "branch_vertex_count": 0,
+      "dangling_vertex_count": 0
+    }
+  },
+  "time_axis_mismatch_count": 0,
+  "spatial_dim": 2,
+  "boundary_offset_cells": 1.0,
+  "boundary_offset_m": 0.001414213562373057,
+  "checked_times_s": [
+    0.0
+  ],
+  "checked_time_count": 1,
+  "boundary_point_sample_count": 764,
+  "boundary_sample_kind_counts": {
+    "edge_midspan": 764
+  },
+  "sample_count": 764,
+  "status_counts": {
+    "clean": 764,
+    "mixed_stencil": 0,
+    "hard_invalid": 0,
+    "non_clean": 0,
+    "no_interior_offset": 0
+  },
+  "per_part": [
+    {
+      "part_id": 6,
+      "sample_count": 108,
+      "clean": 108,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 7,
+      "sample_count": 154,
+      "clean": 154,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 9,
+      "sample_count": 240,
+      "clean": 240,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 34,
+      "sample_count": 26,
+      "clean": 26,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 35,
+      "sample_count": 19,
+      "clean": 19,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 36,
+      "sample_count": 68,
+      "clean": 68,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 37,
+      "sample_count": 5,
+      "clean": 5,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 38,
+      "sample_count": 15,
+      "clean": 15,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 39,
+      "sample_count": 7,
+      "clean": 7,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 41,
+      "sample_count": 7,
+      "clean": 7,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 42,
+      "sample_count": 100,
+      "clean": 100,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 46,
+      "sample_count": 3,
+      "clean": 3,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 47,
+      "sample_count": 6,
+      "clean": 6,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    },
+    {
+      "part_id": 48,
+      "sample_count": 6,
+      "clean": 6,
+      "mixed_stencil": 0,
+      "hard_invalid": 0,
+      "non_clean": 0,
+      "no_interior_offset": 0
+    }
+  ],
+  "violation_summary_by_part": [],
+  "violation_count": 0,
+  "violations_truncated": false,
+  "violations": []
+}

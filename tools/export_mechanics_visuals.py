@@ -12,15 +12,31 @@ import pandas as pd
 from tools.visualization_common import (
     STATE_COLORS,
     STATE_ORDER,
-    add_mesh_fill,
-    add_mesh_scalar,
+    domain_part_medium_summary,
     draw_boundary_edges,
+    draw_domain_parts_by_medium,
     ensure_visualization_dirs,
-    mesh_polygons,
-    require_2d_quantity,
+    filter_display_boundary_geometry,
     sample_grid_points,
     state_labels,
 )
+
+
+def _as_2d_quantity(payload: np.lib.npyio.NpzFile, name: str) -> np.ndarray | None:
+    if name not in payload:
+        return None
+    arr = np.asarray(payload[name], dtype=np.float64)
+    if arr.ndim == 2:
+        return arr
+    if arr.ndim == 3:
+        return arr[0]
+    return None
+
+
+def _masked(arr: np.ndarray | None, inside: np.ndarray) -> np.ndarray:
+    if arr is None:
+        return np.full(inside.shape, np.nan, dtype=np.float64)
+    return np.where(inside & np.isfinite(arr), arr, np.nan)
 
 
 def export_mechanics_visuals(
@@ -59,30 +75,54 @@ def export_mechanics_visuals(
         boundary_part_ids = np.asarray(g['boundary_edge_part_ids'], dtype=np.int32) if 'boundary_edge_part_ids' in g else None
         geom_valid_mask = np.asarray(g['valid_mask'], dtype=bool) if 'valid_mask' in g else None
         mesh_vertices = np.asarray(g['mesh_vertices'], dtype=np.float64) if 'mesh_vertices' in g else None
+        mesh_triangles = np.asarray(g['mesh_triangles'], dtype=np.int32) if 'mesh_triangles' in g else None
+        mesh_triangle_part_ids = np.asarray(g['mesh_triangle_part_ids'], dtype=np.int32) if 'mesh_triangle_part_ids' in g else None
         mesh_quads = np.asarray(g['mesh_quads'], dtype=np.int32) if 'mesh_quads' in g else None
+        mesh_quad_part_ids = np.asarray(g['mesh_quad_part_ids'], dtype=np.int32) if 'mesh_quad_part_ids' in g else None
+    boundary_edges, boundary_part_ids = filter_display_boundary_geometry(boundary_edges, boundary_part_ids)
 
     with np.load(field_npz) as f:
-        ux = require_2d_quantity(f, 'ux', 'mechanics visuals')
-        uy = require_2d_quantity(f, 'uy', 'mechanics visuals')
-        mu = require_2d_quantity(f, 'mu', 'mechanics visuals')
-        tauw = require_2d_quantity(f, 'tauw', 'mechanics visuals')
-        utau = require_2d_quantity(f, 'u_tau', 'mechanics visuals')
+        ux = _as_2d_quantity(f, 'ux')
+        uy = _as_2d_quantity(f, 'uy')
+        mu = _as_2d_quantity(f, 'mu')
+        ex = _as_2d_quantity(f, 'E_x')
+        ey = _as_2d_quantity(f, 'E_y')
+        scalar_fields = {
+            name: _as_2d_quantity(f, name)
+            for name in ('T', 'p', 'rho_g', 'phi', 'ne', 'Te')
+            if _as_2d_quantity(f, name) is not None
+        }
         field_valid_mask = np.asarray(f['valid_mask'], dtype=bool) if 'valid_mask' in f else None
+    if ux is None or uy is None:
+        raise ValueError('mechanics visuals require ux and uy in the field bundle')
 
     geom_mask = geom_valid_mask if geom_valid_mask is not None and geom_valid_mask.shape == sdf.shape else (sdf <= 0.0)
     field_mask = field_valid_mask if field_valid_mask is not None and field_valid_mask.shape == sdf.shape else np.ones_like(geom_mask, dtype=bool)
     inside = geom_mask & field_mask
     speed = np.sqrt(ux * ux + uy * uy)
+    e_mag = np.sqrt(ex * ex + ey * ey) if ex is not None and ey is not None else None
     xx, yy = np.meshgrid(x, y, indexing='ij')
-    polygons = mesh_polygons(mesh_vertices, mesh_quads) if mesh_vertices is not None and mesh_quads is not None else None
-    centroids = mesh_vertices[mesh_quads].mean(axis=1) if mesh_vertices is not None and mesh_quads is not None else None
     speed_masked = np.where(inside, speed, np.nan)
-    tauw_masked = np.where(inside, tauw, np.nan)
-    utau_masked = np.where(inside, utau, np.nan)
-    mu_masked = np.where(inside, mu, np.nan)
+    e_mag_masked = _masked(e_mag, inside)
+    mu_masked = _masked(mu, inside)
+    ex_masked = _masked(ex, inside)
+    ey_masked = _masked(ey, inside)
     nearest_boundary_part_id_masked = np.where(inside, nearest_boundary_part_id, 0)
 
     out = ensure_visualization_dirs(output_dir)['mechanics']
+    out.mkdir(parents=True, exist_ok=True)
+    medium_summary = domain_part_medium_summary(
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+        x,
+        y,
+        field_mask,
+    )
+    if not medium_summary.empty:
+        medium_summary.to_csv(out / 'domain_part_medium_summary.csv', index=False)
 
     # Export per-grid distribution table for post analysis
     flat = pd.DataFrame(
@@ -99,30 +139,31 @@ def export_mechanics_visuals(
             'uy_mps': np.where(inside, uy, np.nan).ravel(),
             'speed_mps': speed_masked.ravel(),
             'mu_Pas': mu_masked.ravel(),
-            'tauw_Pa': tauw_masked.ravel(),
-            'u_tau_mps': utau_masked.ravel(),
+            'electric_field_Vpm': e_mag_masked.ravel(),
         }
     )
     flat = flat[flat['inside'] == 1].reset_index(drop=True)
     flat.to_csv(out / 'mechanics_distribution_on_geometry.csv', index=False)
 
     fig, ax = plt.subplots(figsize=(8, 5.8))
-    if polygons is not None:
-        add_mesh_fill(ax, polygons, facecolor='#e8f4ff', alpha=1.0)
-    else:
-        ax.contourf(xx, yy, inside.astype(float), levels=[-0.5, 0.5, 1.5], colors=['#f2f2f2', '#e8f4ff'])
+    draw_domain_parts_by_medium(
+        ax,
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+        medium_summary=medium_summary,
+        alpha=0.48,
+        linewidth=0.04,
+        label_part_ids=True,
+        show_legend=True,
+    )
     if boundary_edges is not None and boundary_part_ids is not None:
-        draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.35, alpha=0.95)
-        unique_pids = np.unique(boundary_part_ids)
-        cmap = plt.get_cmap('tab20')
-        norm = plt.Normalize(vmin=float(unique_pids.min()), vmax=float(unique_pids.max()))
-        sm = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
-        sm.set_array([])
-        cb = fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.02)
-        cb.set_label('Boundary Part ID')
+        draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.35, alpha=0.95, label_part_ids=True)
     else:
         masked_part = np.ma.masked_where(~inside, nearest_boundary_part_id.astype(float))
-        c = ax.pcolormesh(xx, yy, masked_part, shading='nearest', cmap='tab20', alpha=0.75)
+        c = ax.pcolormesh(xx, yy, masked_part, shading='nearest', cmap='Greys', alpha=0.75)
         cb = fig.colorbar(c, ax=ax, fraction=0.046, pad=0.02)
         cb.set_label('Nearest Boundary Part ID')
         ax.contour(xx, yy, sdf, levels=[0.0], colors='k', linewidths=1.1)
@@ -136,22 +177,43 @@ def export_mechanics_visuals(
     fig.savefig(out / 'geometry_layout_part_ids.png', dpi=170)
     plt.close(fig)
 
-    fig, axes = plt.subplots(2, 2, figsize=(10.5, 8.2), constrained_layout=True)
-    fields = [
-        ('Speed |u| [m/s]', speed_masked),
-        ('Wall Shear tauw [Pa]', tauw_masked),
-        ('Friction Velocity u_tau [m/s]', utau_masked),
-        ('Dynamic Viscosity mu [Pa*s]', mu_masked),
-    ]
+    fields = [('Speed |u| [m/s]', speed_masked)]
+    if e_mag is not None:
+        fields.append(('Electric Field |E| [V/m]', e_mag_masked))
+    if mu is not None:
+        fields.append(('Dynamic Viscosity mu [Pa*s]', mu_masked))
+    fields.extend((f'{name}', _masked(arr, inside)) for name, arr in scalar_fields.items())
+    cols = min(3, max(1, len(fields)))
+    rows = int(np.ceil(len(fields) / cols))
+    fig, axes = plt.subplots(rows, cols, figsize=(5.8 * cols, 4.9 * rows), constrained_layout=True, squeeze=False)
     for ax, (title, arr) in zip(axes.ravel(), fields):
-        if polygons is not None and centroids is not None:
-            values = sample_grid_points(arr, x, y, centroids)
-            add_mesh_scalar(fig, ax, polygons, values, title, cmap='viridis')
-        else:
-            m = np.ma.masked_where(~inside, arr)
-            pcm = ax.pcolormesh(xx, yy, m, shading='nearest', cmap='viridis')
-            ax.set_title(title)
-            fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02)
+        draw_domain_parts_by_medium(
+            ax,
+            mesh_vertices,
+            mesh_triangles,
+            mesh_triangle_part_ids,
+            mesh_quads,
+            mesh_quad_part_ids,
+            medium_summary=medium_summary,
+            alpha=0.22,
+            linewidth=0.02,
+        )
+        m = np.ma.masked_where(~inside, arr)
+        pcm = ax.pcolormesh(xx, yy, m, shading='nearest', cmap='viridis', alpha=0.86)
+        ax.set_title(title)
+        fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02)
+        draw_domain_parts_by_medium(
+            ax,
+            mesh_vertices,
+            mesh_triangles,
+            mesh_triangle_part_ids,
+            mesh_quads,
+            mesh_quad_part_ids,
+            medium_summary=medium_summary,
+            alpha=0.10,
+            linewidth=0.04,
+            edgecolor="#222222",
+        )
         if boundary_edges is not None:
             draw_boundary_edges(ax, boundary_edges, None, linewidth=0.85, alpha=0.9)
         else:
@@ -161,8 +223,59 @@ def export_mechanics_visuals(
         ax.set_aspect('equal', adjustable='box')
         ax.set_xlim(float(x.min()), float(x.max()))
         ax.set_ylim(float(y.min()), float(y.max()))
+    for ax in axes.ravel()[len(fields):]:
+        ax.axis('off')
     fig.savefig(out / 'mechanics_maps_with_geometry.png', dpi=170)
     plt.close(fig)
+
+    component_specs = [
+        ('ux [m/s]', np.where(inside, ux, np.nan)),
+        ('uy [m/s]', np.where(inside, uy, np.nan)),
+        ('E_x [V/m]', ex_masked),
+        ('E_y [V/m]', ey_masked),
+    ]
+    component_specs = [(title, arr) for title, arr in component_specs if np.isfinite(arr).any()]
+    if component_specs:
+        cols = min(3, len(component_specs))
+        rows = int(np.ceil(len(component_specs) / cols))
+        fig, axes = plt.subplots(rows, cols, figsize=(5.8 * cols, 4.9 * rows), constrained_layout=True, squeeze=False)
+        for ax, (title, arr) in zip(axes.ravel(), component_specs):
+            draw_domain_parts_by_medium(
+                ax,
+                mesh_vertices,
+                mesh_triangles,
+                mesh_triangle_part_ids,
+                mesh_quads,
+                mesh_quad_part_ids,
+                medium_summary=medium_summary,
+                alpha=0.22,
+                linewidth=0.02,
+            )
+            pcm = ax.pcolormesh(xx, yy, np.ma.masked_invalid(arr), shading='nearest', cmap='coolwarm', alpha=0.86)
+            draw_domain_parts_by_medium(
+                ax,
+                mesh_vertices,
+                mesh_triangles,
+                mesh_triangle_part_ids,
+                mesh_quads,
+                mesh_quad_part_ids,
+                medium_summary=medium_summary,
+                alpha=0.10,
+                linewidth=0.04,
+                edgecolor="#222222",
+            )
+            draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=0.75, alpha=0.9)
+            ax.set_title(title)
+            ax.set_xlabel('x [m]')
+            ax.set_ylabel('y [m]')
+            ax.set_aspect('equal', adjustable='box')
+            ax.set_xlim(float(x.min()), float(x.max()))
+            ax.set_ylim(float(y.min()), float(y.max()))
+            fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02)
+        for ax in axes.ravel()[len(component_specs):]:
+            ax.axis('off')
+        fig.savefig(out / 'mechanics_component_maps_with_geometry.png', dpi=170)
+        plt.close(fig)
 
     positions = np.load(positions_npy)
     _, npart, _ = positions.shape
@@ -170,10 +283,17 @@ def export_mechanics_visuals(
     pick = rng.choice(npart, size=min(sample_trajectories, npart), replace=False)
 
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    if polygons is not None:
-        add_mesh_fill(ax, polygons, facecolor='#eef7ff', alpha=1.0)
-    else:
-        ax.contourf(xx, yy, inside.astype(float), levels=[-0.5, 0.5, 1.5], colors=['#f8f8f8', '#eef7ff'])
+    draw_domain_parts_by_medium(
+        ax,
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+        medium_summary=medium_summary,
+        alpha=0.32,
+        linewidth=0.03,
+    )
     if boundary_edges is not None:
         draw_boundary_edges(ax, boundary_edges, None, linewidth=1.0, alpha=0.95)
     else:
@@ -208,7 +328,43 @@ def export_mechanics_visuals(
 
     final_df = pd.read_csv(final_csv)
     final_labels = state_labels(final_df)
+    final_state_part_summary_rows: list[dict[str, object]] = []
+    if {'x', 'y'}.issubset(final_df.columns):
+        final_points = final_df.loc[:, ['x', 'y']].to_numpy(dtype=np.float64)
+        nearest_final_part_id = np.rint(sample_grid_points(nearest_boundary_part_id, x, y, final_points)).astype(np.int32)
+        final_state_part_summary = (
+            pd.DataFrame(
+                {
+                    'nearest_boundary_part_id': nearest_final_part_id,
+                    'state': final_labels,
+                }
+            )
+            .groupby(['nearest_boundary_part_id', 'state'], as_index=False)
+            .size()
+            .rename(columns={'size': 'count'})
+            .sort_values(['nearest_boundary_part_id', 'state'])
+        )
+        final_state_part_summary.to_csv(out / 'final_state_by_nearest_boundary_part.csv', index=False)
+        final_state_part_summary_rows = [
+            {
+                'nearest_boundary_part_id': int(row['nearest_boundary_part_id']),
+                'state': str(row['state']),
+                'count': int(row['count']),
+            }
+            for _, row in final_state_part_summary.iterrows()
+        ]
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
+    draw_domain_parts_by_medium(
+        ax,
+        mesh_vertices,
+        mesh_triangles,
+        mesh_triangle_part_ids,
+        mesh_quads,
+        mesh_quad_part_ids,
+        medium_summary=medium_summary,
+        alpha=0.30,
+        linewidth=0.03,
+    )
     if boundary_edges is not None:
         draw_boundary_edges(ax, boundary_edges, None, linewidth=1.0, alpha=0.95)
     else:
@@ -234,11 +390,15 @@ def export_mechanics_visuals(
         'mechanics_dir': str(out.resolve()),
         'n_particles': int(npart),
         'sample_trajectories': int(len(pick)),
-        'domain_region_map_status': 'not_implemented',
+        'boundary_region_summary_status': 'computed_from_nearest_boundary_part_id_map',
+        'final_state_by_nearest_boundary_part': final_state_part_summary_rows,
         'files': [
+            'domain_part_medium_summary.csv',
             'mechanics_distribution_on_geometry.csv',
+            'final_state_by_nearest_boundary_part.csv',
             'geometry_layout_part_ids.png',
             'mechanics_maps_with_geometry.png',
+            'mechanics_component_maps_with_geometry.png',
             'trajectories_geometry_flow_overlay.png',
             'final_states_over_geometry.png',
         ],

@@ -1,0 +1,56 @@
+run:
+  spatial_dim: 2
+  coordinate_system: axisymmetric_rz
+  time_interpolation: linear
+paths:
+  particles_csv: particles.csv
+  materials_csv: materials.csv
+  part_walls_csv: part_walls.csv
+providers:
+  geometry:
+    kind: precomputed_npz
+    npz_path: generated/comsol_geometry_2d.npz
+  field:
+    kind: precomputed_npz
+    npz_path: generated/comsol_field_2d.npz
+gas:
+  temperature_K: 320.0
+  dynamic_viscosity_Pas: 1.8e-05
+  density_kgm3: 2.0e-05
+  molecular_mass_amu: 60.0
+source:
+  preprocess:
+    enabled: false
+    seed: 24680
+  default_law: explicit_csv
+  source_speed_scale: 1.0
+  source_position_offset_m: 0.0
+input_contract:
+  initial_particle_field_support: strict
+provider_contract:
+  boundary_field_support: strict
+  boundary_offset_cells: 1.0
+solver:
+  dt: 1.0e-07
+  t_end: 5.0e-03
+  save_every: 100
+  integrator: etd2
+  drag_model: epstein
+  min_tau_p_s: 1.0e-08
+  valid_mask_policy: retry_then_stop
+  plot_particle_limit: 24
+  seed: 12345
+  stochastic_motion:
+    enabled: true
+    model: underdamped_langevin
+    stride: 10
+    seed: 20260416
+    temperature_source: field_T_then_gas
+  charge_model:
+    enabled: true
+    mode: te_relaxation
+    update_stride: 10
+    electron_temperature_quantity: Te
+    electron_temperature_unit: eV
+    te_relaxation_alpha: 2.5
+    relaxation_time_s: 1.0e-06

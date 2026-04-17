@@ -1,0 +1,60 @@
+{
+  "case": "examples\\icp_rf_bias_cf4_o2_si_etching_2d_source_part11_sio2_20nm_charged",
+  "particle_count": 10000,
+  "particle_model": "charged_sio2_20nm_sheath_edge_ejection",
+  "diameter_m": 2e-08,
+  "radius_m": 1e-08,
+  "density_kgm3": 2200.0,
+  "mass_kg": 9.215338450530062e-21,
+  "charge_model": "q = 4*pi*eps0*a*(-2.5*Te_eV); ni assumed equal to ne because ion density is not exported",
+  "source_Te_median_eV": 3.442034963553957,
+  "source_charge_C": -9.57445098262955e-18,
+  "source_charge_number_e": -59.7590226910621,
+  "source_q_over_m_Ckg": -1038.969000870373,
+  "charge_number_e_valid_field": {
+    "min": -255.62969033341454,
+    "p50": -63.79253018486102,
+    "max": -41.2400717252797
+  },
+  "q_over_m_Ckg_valid_field": {
+    "min": -4444.371945832272,
+    "p50": -1109.0954698472865,
+    "max": -716.998943201339
+  },
+  "accel_mps2_valid_field": {
+    "ax_min": -4577938.843042694,
+    "ax_p50": -16289.24510247115,
+    "ax_max": 21973245.624856833,
+    "ay_min": -9880278.013688004,
+    "ay_p50": 5287.010437260528,
+    "ay_max": 58021913.697767116
+  },
+  "initial_speed_mps": {
+    "min": 49.754807902869956,
+    "p50": 193.65802086683158,
+    "p90": 293.6560090407317,
+    "max": 461.97863140421236,
+    "mean": 203.4805701435806
+  },
+  "vx_mps": {
+    "min": -456.4904157707311,
+    "p50": -137.79881472513262,
+    "max": 394.2688707537098,
+    "mean": -125.14793470650103
+  },
+  "vy_mps": {
+    "min": -260.0,
+    "p50": 37.49557192375916,
+    "max": 427.4557636631238,
+    "mean": 30.596752756293256
+  },
+  "source_part_id": 11,
+  "source_x_range_m": [
+    0.1535022936215309,
+    0.1789971567563053
+  ],
+  "source_y_m": 0.022,
+  "release_y_m": 0.024,
+  "solver_min_tau_p_s": 0.0003,
+  "wafer_boundary_remap_inherited": true
+}

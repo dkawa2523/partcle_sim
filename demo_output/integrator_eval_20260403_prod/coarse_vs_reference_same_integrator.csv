@@ -1,4 +1,0 @@
-﻿"integrator","class_match_ratio_vs_ref","mean_position_delta_m_vs_ref","coarse_stuck_count","ref_stuck_count","stuck_rel_error","coarse_primary_hits","ref_primary_hits","primary_hit_ratio_coarse_over_ref"
-"drag_relaxation","0.9905","0.000238083","1811","1764","0.026644","15551","14900","1.043691"
-"etd","0.9908","0.000237357","1816","1764","0.029478","15316","15057","1.017201"
-"etd2","0.9812","0.000100691","1358","1498","0.093458","10811","12501","0.864811"

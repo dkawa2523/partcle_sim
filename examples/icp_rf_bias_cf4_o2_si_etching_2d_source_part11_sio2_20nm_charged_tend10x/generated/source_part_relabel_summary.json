@@ -1,0 +1,12 @@
+{
+  "particle_count": 10000,
+  "changed_source_part_count": 10000,
+  "max_source_to_boundary_distance_m": 9.71445146547012e-17,
+  "mean_source_to_boundary_distance_m": 9.71445146547012e-17,
+  "old_source_part_counts": {
+    "11": 10000
+  },
+  "new_source_part_counts": {
+    "34": 10000
+  }
+}

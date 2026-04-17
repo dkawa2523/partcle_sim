@@ -5,6 +5,7 @@ from typing import Any, Dict, Mapping
 import yaml
 
 from ..core.catalogs import build_physics_catalog, build_wall_catalog, physics_catalog_summary, wall_catalog_summary
+from ..core.coordinate_systems import normalize_coordinate_system
 from ..core.datamodel import GasProperties, PreparedRuntime, RuntimeLike, replace_runtime_particles
 from ..core.process_steps import process_step_control_summary
 from ..providers.source_adapters import (
@@ -31,10 +32,9 @@ def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> Ru
     providers_cfg = dict(config.get('providers', {}))
     source_cfg = dict(config.get('source', {}))
     gas_cfg = dict(config.get('gas', {}))
-    process_cfg = dict(config.get('process', {}))
 
     spatial_dim = int(run.get('spatial_dim', 2))
-    coordinate_system = str(run.get('coordinate_system', 'cartesian_xy' if spatial_dim == 2 else 'cartesian_xyz'))
+    coordinate_system = normalize_coordinate_system(run.get('coordinate_system'), spatial_dim)
     time_interpolation = str(run.get('time_interpolation', 'linear'))
 
     resolved_paths = resolve_runtime_input_paths(config_dir, paths)
@@ -42,13 +42,13 @@ def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> Ru
         paths=resolved_paths,
         spatial_dim=spatial_dim,
         coordinate_system=coordinate_system,
-        process_cfg=process_cfg,
     )
 
     gas = GasProperties(
         temperature=float(gas_cfg.get('temperature_K', gas_cfg.get('temperature', 300.0))),
         dynamic_viscosity_Pas=float(gas_cfg.get('dynamic_viscosity_Pas', 1.8e-5)),
         density_kgm3=float(gas_cfg.get('density_kgm3', gas_cfg.get('density', 1.0))),
+        molecular_mass_amu=float(gas_cfg.get('molecular_mass_amu', gas_cfg.get('molecular_mass', 60.0))),
     )
 
     providers = build_runtime_providers(
@@ -137,6 +137,7 @@ def prepared_runtime_summary(prepared: PreparedRuntime) -> Dict[str, Any]:
             'temperature_K': float(runtime.gas.temperature),
             'dynamic_viscosity_Pas': float(runtime.gas.dynamic_viscosity_Pas),
             'density_kgm3': float(runtime.gas.density_kgm3),
+            'molecular_mass_amu': float(runtime.gas.molecular_mass_amu),
         },
         'process_steps': process_step_control_summary(runtime.process_steps),
         'wall_catalog': wall_catalog_summary(runtime.wall_catalog),
@@ -145,4 +146,8 @@ def prepared_runtime_summary(prepared: PreparedRuntime) -> Dict[str, Any]:
     if prepared.source_preprocess is not None:
         summary['source_model_summary'] = dict(prepared.source_preprocess.source_model_summary)
         summary['event_summary'] = dict(prepared.source_preprocess.event_summary)
+    if runtime.geometry_provider is not None:
+        summary['geometry_provider'] = runtime.geometry_provider.summary()
+    if runtime.field_provider is not None:
+        summary['field_provider'] = runtime.field_provider.summary()
     return summary

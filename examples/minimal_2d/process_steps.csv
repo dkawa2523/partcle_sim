@@ -1,2 +1,0 @@
-step_id,step_name,start_s,end_s,physics_flow_scale,physics_drag_tau_scale,physics_body_accel_scale,wall_mode,wall_restitution,wall_diffuse_fraction,wall_stick_probability_scale,output_segment_name,output_save_every_override
-1,run,0.0,1.0,1.0,1.0,1.0,inherit,1.0,0.0,1.0,run,0

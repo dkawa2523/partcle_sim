@@ -9,10 +9,13 @@ from .datamodel import ProcessStepRow, ProcessStepTable, SourceEventRow, SourceE
 
 
 def _is_finite(v) -> bool:
-    try:
-        return bool(np.isfinite(float(v)))
-    except Exception:
+    if v is None:
         return False
+    try:
+        value = float(v)
+    except (TypeError, ValueError):
+        return False
+    return bool(np.isfinite(value))
 
 
 def _step_lookup(process_steps: Optional[ProcessStepTable]) -> Dict[str, ProcessStepRow]:
@@ -21,28 +24,10 @@ def _step_lookup(process_steps: Optional[ProcessStepTable]) -> Dict[str, Process
     return process_steps.as_name_lookup()
 
 
-def _transition_time(process_steps: Optional[ProcessStepTable], from_name: str, to_name: str) -> Optional[float]:
-    if process_steps is None:
-        return None
-    rows = list(process_steps.rows)
-    if from_name and to_name:
-        for i in range(len(rows) - 1):
-            if rows[i].step_name == from_name and rows[i + 1].step_name == to_name:
-                return float(rows[i].end_s)
-    lookup = process_steps.as_name_lookup()
-    if from_name and from_name in lookup:
-        return float(lookup[from_name].end_s)
-    if to_name and to_name in lookup:
-        return float(lookup[to_name].start_s)
-    return None
-
-
 def _anchor_time(row: SourceEventRow, process_steps: Optional[ProcessStepTable]) -> Tuple[Optional[float], Dict[str, object]]:
     meta = {
         'binding': 'absolute',
         'bind_step_name': row.bind_step_name,
-        'bind_transition_from': row.bind_transition_from,
-        'bind_transition_to': row.bind_transition_to,
         'time_anchor': row.time_anchor,
     }
     step_map = _step_lookup(process_steps)
@@ -59,11 +44,6 @@ def _anchor_time(row: SourceEventRow, process_steps: Optional[ProcessStepTable])
         if anchor == 'absolute':
             return 0.0, meta
         return float(step.start_s), meta
-    if row.bind_transition_from or row.bind_transition_to:
-        t = _transition_time(process_steps, row.bind_transition_from, row.bind_transition_to)
-        if t is not None:
-            meta['binding'] = 'transition'
-            return float(t), meta
     if anchor == 'absolute':
         return 0.0, meta
     return None, meta
@@ -120,10 +100,9 @@ def compile_source_events(events: Optional[SourceEventTable], process_steps: Opt
 
 def process_step_summary(process_steps: Optional[ProcessStepTable]) -> Dict[str, object]:
     if process_steps is None:
-        return {'has_process_steps': False, 'process_step_count': 0, 'recipe_name': ''}
+        return {'has_process_steps': False, 'process_step_count': 0}
     return {
         'has_process_steps': True,
         'process_step_count': len(process_steps.rows),
-        'recipe_name': str(process_steps.metadata.get('recipe_name', '')),
         'step_names': [r.step_name for r in process_steps.rows],
     }

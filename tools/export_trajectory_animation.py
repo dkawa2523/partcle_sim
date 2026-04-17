@@ -12,10 +12,13 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 from tools.visualization_common import (
     STATE_COLORS,
     axis_limits,
-    draw_edges,
+    domain_part_medium_summary,
+    draw_boundary_edges,
+    draw_domain_part_outlines,
+    draw_domain_parts_by_medium,
     ensure_visualization_dirs,
     interpolate_frames,
-    load_boundary_edges,
+    load_boundary_geometry,
     load_wall_events,
     prepare_event_overlay,
     resolve_positions_path,
@@ -26,24 +29,106 @@ _interpolate_frames = interpolate_frames
 _prepare_event_overlay = prepare_event_overlay
 
 
+def _load_geometry_payload(case_dir: Path | None) -> dict[str, np.ndarray]:
+    if case_dir is None:
+        return {}
+    geom_path = Path(case_dir) / "generated" / "comsol_geometry_2d.npz"
+    if not geom_path.exists():
+        return {}
+    with np.load(geom_path, allow_pickle=True) as data:
+        return {key: np.asarray(data[key]) for key in data.files}
+
+
+def _load_field_payload(case_dir: Path | None) -> dict[str, np.ndarray]:
+    if case_dir is None:
+        return {}
+    field_path = Path(case_dir) / "generated" / "comsol_field_2d.npz"
+    if not field_path.exists():
+        return {}
+    with np.load(field_path, allow_pickle=True) as data:
+        return {key: np.asarray(data[key]) for key in data.files}
+
+
+def _as_2d_mask(value: np.ndarray | None) -> np.ndarray | None:
+    if value is None:
+        return None
+    arr = np.asarray(value, dtype=bool)
+    if arr.ndim == 2:
+        return arr
+    if arr.ndim == 3:
+        return arr[0]
+    return None
+
+
+def _medium_summary(geom: dict[str, np.ndarray], field: dict[str, np.ndarray]) -> pd.DataFrame:
+    if not geom:
+        return pd.DataFrame()
+    return domain_part_medium_summary(
+        geom.get("mesh_vertices"),
+        geom.get("mesh_triangles"),
+        geom.get("mesh_triangle_part_ids"),
+        geom.get("mesh_quads"),
+        geom.get("mesh_quad_part_ids"),
+        field.get("axis_0", geom.get("axis_0")),
+        field.get("axis_1", geom.get("axis_1")),
+        _as_2d_mask(field.get("valid_mask", geom.get("valid_mask"))),
+    )
+
+
+def _draw_geometry_context(
+    ax: plt.Axes,
+    geom: dict[str, np.ndarray],
+    edges: np.ndarray | None,
+    edge_part_ids: np.ndarray | None,
+    medium_summary: pd.DataFrame | None,
+) -> None:
+    if medium_summary is not None and not medium_summary.empty:
+        draw_domain_parts_by_medium(
+            ax,
+            geom.get("mesh_vertices"),
+            geom.get("mesh_triangles"),
+            geom.get("mesh_triangle_part_ids"),
+            geom.get("mesh_quads"),
+            geom.get("mesh_quad_part_ids"),
+            medium_summary=medium_summary,
+            alpha=0.25,
+            linewidth=0.04,
+            label_part_ids=False,
+        )
+    else:
+        draw_domain_part_outlines(
+            ax,
+            geom.get("mesh_vertices"),
+            geom.get("mesh_triangles"),
+            geom.get("mesh_triangle_part_ids"),
+            geom.get("mesh_quads"),
+            geom.get("mesh_quad_part_ids"),
+            linewidth=0.65,
+        )
+    draw_boundary_edges(ax, edges, edge_part_ids, linewidth=0.8, alpha=0.95)
+
+
 def _save_points_animation(
     positions: np.ndarray,
     times: np.ndarray,
     labels: np.ndarray,
     edges: np.ndarray | None,
+    edge_part_ids: np.ndarray | None,
+    geom: dict[str, np.ndarray],
+    medium_summary: pd.DataFrame | None,
     out_path: Path,
     fps: int,
 ) -> None:
     fig, ax = plt.subplots(figsize=(8, 5), dpi=130)
     (x_lim, y_lim) = axis_limits(positions, edges)
-    draw_edges(ax, edges, linewidth=0.8, alpha=0.9, color="#666666")
+    _draw_geometry_context(ax, geom, edges, edge_part_ids, medium_summary)
     ax.set_xlim(*x_lim)
     ax.set_ylim(*y_lim)
     ax.set_aspect("equal", adjustable="box")
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
 
-    colors = np.full(labels.shape[0], STATE_COLORS["active"], dtype=object)
+    colors = np.full(labels.shape[0], STATE_COLORS["active_free_flight"], dtype=object)
     for name, color in STATE_COLORS.items():
         colors[labels == name] = color
     scat = ax.scatter(positions[0, :, 0], positions[0, :, 1], s=3.0, c=colors, alpha=0.4, linewidths=0, zorder=2)
@@ -65,6 +150,9 @@ def _save_trails_animation(
     positions: np.ndarray,
     times: np.ndarray,
     edges: np.ndarray | None,
+    edge_part_ids: np.ndarray | None,
+    geom: dict[str, np.ndarray],
+    medium_summary: pd.DataFrame | None,
     out_path: Path,
     fps: int,
     sample_count: int,
@@ -93,7 +181,7 @@ def _save_trails_animation(
 
     fig, ax = plt.subplots(figsize=(8, 5), dpi=130)
     (x_lim, y_lim) = axis_limits(positions, edges)
-    draw_edges(ax, edges, linewidth=0.8, alpha=0.9, color="#666666")
+    _draw_geometry_context(ax, geom, edges, edge_part_ids, medium_summary)
     ax.set_xlim(*x_lim)
     ax.set_ylim(*y_lim)
     ax.set_aspect("equal", adjustable="box")
@@ -169,19 +257,36 @@ def export_trajectory_animations(
     factor = max(1, int(interpolate_factor))
     positions_anim, times_anim = _interpolate_frames(positions, times, factor=factor)
 
-    edges = load_boundary_edges(case_dir) if spatial_dim == 2 else None
+    edges, edge_part_ids = load_boundary_geometry(case_dir) if spatial_dim == 2 else (None, None)
+    geom = _load_geometry_payload(case_dir) if spatial_dim == 2 else {}
+    field = _load_field_payload(case_dir) if spatial_dim == 2 else {}
+    medium_summary = _medium_summary(geom, field) if spatial_dim == 2 else pd.DataFrame()
     wall_events = load_wall_events(output_dir) if bool(overlay_wall_events) else pd.DataFrame(columns=["time_s", "particle_id"])
     anim_dir = ensure_visualization_dirs(output_dir)["animations"]
+    anim_dir.mkdir(parents=True, exist_ok=True)
 
     saved_paths: list[Path] = []
     if spatial_dim == 2:
         points_path = anim_dir / "trajectories_all_particles.gif"
         trails_path = anim_dir / "trajectories_sampled_trails.gif"
-        _save_points_animation(positions=positions_anim, times=times_anim, labels=labels, edges=edges, out_path=points_path, fps=fps)
+        _save_points_animation(
+            positions=positions_anim,
+            times=times_anim,
+            labels=labels,
+            edges=edges,
+            edge_part_ids=edge_part_ids,
+            geom=geom,
+            medium_summary=medium_summary,
+            out_path=points_path,
+            fps=fps,
+        )
         _save_trails_animation(
             positions=positions_anim,
             times=times_anim,
             edges=edges,
+            edge_part_ids=edge_part_ids,
+            geom=geom,
+            medium_summary=medium_summary,
             out_path=trails_path,
             fps=fps,
             sample_count=sample_count,
@@ -197,11 +302,24 @@ def export_trajectory_animations(
             pos_proj = positions_anim[:, :, [a, b]]
             points_path = anim_dir / f"trajectories_all_particles_{name}.gif"
             trails_path = anim_dir / f"trajectories_sampled_trails_{name}.gif"
-            _save_points_animation(positions=pos_proj, times=times_anim, labels=labels, edges=None, out_path=points_path, fps=fps)
+            _save_points_animation(
+                positions=pos_proj,
+                times=times_anim,
+                labels=labels,
+                edges=None,
+                edge_part_ids=None,
+                geom={},
+                medium_summary=None,
+                out_path=points_path,
+                fps=fps,
+            )
             _save_trails_animation(
                 positions=pos_proj,
                 times=times_anim,
                 edges=None,
+                edge_part_ids=None,
+                geom={},
+                medium_summary=None,
                 out_path=trails_path,
                 fps=fps,
                 sample_count=sample_count,

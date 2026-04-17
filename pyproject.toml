@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "particle-tracer-unified"
-version = "29.0.0"
-description = "Runnable stabilization release for step-aware particle trajectory simulation"
+version = "0.1.0"
+description = "Particle trajectory solver for supplied 2D/3D fields and explicit boundary data"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-particle-tracer-run = "run_from_yaml:main"
+particle-tracer-run = "particle_tracer_unified.cli:main"
 
 [tool.setuptools]
 include-package-data = true
