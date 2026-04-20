@@ -19,6 +19,28 @@ from .source_material_common import pick_float, pick_str
 
 
 def _body_acceleration_from_solver(solver_cfg: Mapping[str, Any], spatial_dim: int) -> Tuple[float, ...]:
+    forces_cfg = solver_cfg.get('forces', {}) if isinstance(solver_cfg.get('forces', {}), Mapping) else {}
+    gravity_raw = forces_cfg.get('gravity', {}) if isinstance(forces_cfg, Mapping) else {}
+    if isinstance(gravity_raw, str) and gravity_raw.strip().lower() in {'0', 'false', 'no', 'off'}:
+        return tuple([0.0] * spatial_dim)
+    if isinstance(gravity_raw, (bool, int)) and not bool(gravity_raw):
+        return tuple([0.0] * spatial_dim)
+    gravity_cfg = gravity_raw if isinstance(gravity_raw, Mapping) else {}
+    if gravity_cfg:
+        enabled_raw = gravity_cfg.get('enabled', 'auto')
+        if isinstance(enabled_raw, str) and enabled_raw.strip().lower() in {'0', 'false', 'no', 'off'}:
+            return tuple([0.0] * spatial_dim)
+        if isinstance(enabled_raw, (bool, int)) and not bool(enabled_raw):
+            return tuple([0.0] * spatial_dim)
+        if 'acceleration_mps2' in gravity_cfg and isinstance(gravity_cfg['acceleration_mps2'], (list, tuple)):
+            vals = [float(v) for v in gravity_cfg['acceleration_mps2']]
+            if len(vals) >= spatial_dim:
+                return tuple(vals[:spatial_dim])
+        if 'gravity_mps2' in gravity_cfg:
+            g = float(gravity_cfg.get('gravity_mps2', 9.81))
+            arr = [0.0] * spatial_dim
+            arr[-1] = -g
+            return tuple(arr)
     if 'body_acceleration' in solver_cfg and isinstance(solver_cfg['body_acceleration'], (list, tuple)):
         vals = [float(v) for v in solver_cfg['body_acceleration']]
         if len(vals) >= spatial_dim:

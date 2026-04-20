@@ -18,6 +18,7 @@ from ..core.boundary_service import (
     sample_geometry_sdf,
 )
 from ..core.source_materials import write_source_summary
+from .wall_catalog_alignment import build_wall_catalog_alignment, write_wall_catalog_alignment_csv
 from ..io.runtime_builder import prepared_runtime_summary
 
 INVALID_STOP_REASON_NAMES = {
@@ -56,6 +57,61 @@ def _summary_float_or_nan(value: object) -> float:
         except ValueError:
             return float('nan')
     return float('nan')
+
+
+def _summary_unit_for_key(key: str) -> str:
+    name = str(key)
+    suffix_units = (
+        ('_m3', '1/m^3'),
+        ('_kgm3', 'kg/m^3'),
+        ('_m2Vs', 'm^2/(V s)'),
+        ('_rad_s', 'rad/s'),
+        ('_mps', 'm/s'),
+        ('_eV', 'eV'),
+        ('_Pa', 'Pa'),
+        ('_K', 'K'),
+        ('_amu', 'amu'),
+        ('_kg', 'kg'),
+        ('_Sm', 'S/m'),
+        ('_s', 's'),
+        ('_m2', 'm^2'),
+        ('_m', 'm'),
+        ('_C', 'C'),
+        ('_e', 'e'),
+    )
+    for suffix, unit in suffix_units:
+        if name.endswith(suffix):
+            return unit
+    return ''
+
+
+def _build_scalar_summary_rows(values: Mapping[str, object]) -> List[Dict[str, object]]:
+    rows: List[Dict[str, object]] = []
+    for key, value in values.items():
+        if isinstance(value, Mapping) or isinstance(value, (list, tuple, set)):
+            continue
+        if isinstance(value, np.ndarray):
+            if value.ndim != 0:
+                continue
+            value = value.item()
+        rows.append(
+            {
+                'quantity': str(key),
+                'value': value,
+                'unit': _summary_unit_for_key(str(key)),
+            }
+        )
+    return rows
+
+
+def _write_scalar_summary_csv(path: Path, values: Mapping[str, object]) -> bool:
+    import pandas as pd
+
+    rows = _build_scalar_summary_rows(values)
+    if not rows:
+        return False
+    pd.DataFrame(rows, columns=['quantity', 'value', 'unit']).to_csv(path, index=False)
+    return True
 
 
 @dataclass(frozen=True)
@@ -385,6 +441,22 @@ def _field_support_exit_part_ids(payload: RuntimeOutputPayload) -> List[int]:
             }:
                 ids.add(int(part_id))
     return sorted(ids)
+
+
+def _generated_dir_from_payload(payload: RuntimeOutputPayload) -> Path | None:
+    runtime = payload.prepared.runtime
+    for provider_name in ('geometry_provider', 'field_provider'):
+        provider = getattr(runtime, provider_name, None)
+        obj = getattr(provider, 'geometry', None) if provider_name == 'geometry_provider' else getattr(provider, 'field', None)
+        metadata = getattr(obj, 'metadata', {}) if obj is not None else {}
+        if isinstance(metadata, Mapping):
+            raw = metadata.get('npz_path', '')
+            if raw:
+                path = Path(str(raw))
+                parent = path.parent
+                if parent.exists():
+                    return parent
+    return None
 
 
 def _build_field_support_exit_summary(payload: RuntimeOutputPayload) -> Dict[str, object]:
@@ -928,7 +1000,11 @@ def _build_collision_diag_report(
         'valid_mask_policy': str(payload.valid_mask_policy),
         'drag_model': str(payload.drag_model),
         'drag_gas_properties': dict(payload.collision_diagnostics.get('drag_gas_properties', {})),
+        'force_catalog': dict(payload.collision_diagnostics.get('force_catalog', {})),
+        'force_runtime': dict(payload.collision_diagnostics.get('force_runtime', {})),
+        'wall_catalog_alignment': dict(payload.collision_diagnostics.get('wall_catalog_alignment', {})),
         'stochastic_motion': dict(payload.collision_diagnostics.get('stochastic_motion', {})),
+        'plasma_background': dict(payload.collision_diagnostics.get('plasma_background', {})),
         'charge_model': dict(payload.collision_diagnostics.get('charge_model', {})),
         'acceleration_source': str(payload.collision_diagnostics.get('acceleration_source', 'none')),
         'acceleration_quantity_names': list(payload.collision_diagnostics.get('acceleration_quantity_names', [])),
@@ -1034,7 +1110,11 @@ def build_runtime_report(
         'valid_mask_policy': str(payload.valid_mask_policy),
         'drag_model': str(payload.drag_model),
         'drag_gas_properties': dict(payload.collision_diagnostics.get('drag_gas_properties', {})),
+        'force_catalog': dict(payload.collision_diagnostics.get('force_catalog', {})),
+        'force_runtime': dict(payload.collision_diagnostics.get('force_runtime', {})),
+        'wall_catalog_alignment': dict(payload.collision_diagnostics.get('wall_catalog_alignment', {})),
         'stochastic_motion': dict(payload.collision_diagnostics.get('stochastic_motion', {})),
+        'plasma_background': dict(payload.collision_diagnostics.get('plasma_background', {})),
         'charge_model': dict(payload.collision_diagnostics.get('charge_model', {})),
         'acceleration_source': str(payload.collision_diagnostics.get('acceleration_source', 'none')),
         'acceleration_quantity_names': list(payload.collision_diagnostics.get('acceleration_quantity_names', [])),
@@ -1085,6 +1165,18 @@ def build_runtime_report(
         'coating_summary_file': (
             'coating_summary_by_part.csv'
             if bool(outputs_written) and int(output_options.write_coating_summary) != 0
+            else ''
+        ),
+        'plasma_background_summary_file': (
+            'plasma_background_summary.csv'
+            if bool(outputs_written)
+            and int(dict(payload.collision_diagnostics.get('plasma_background', {})).get('enabled', 0)) != 0
+            else ''
+        ),
+        'charge_model_summary_file': (
+            'charge_model_summary.csv'
+            if bool(outputs_written)
+            and int(dict(payload.collision_diagnostics.get('charge_model', {})).get('enabled', 0)) != 0
             else ''
         ),
         'collision_diagnostics_file': (
@@ -1281,6 +1373,15 @@ def write_runtime_outputs(payload: RuntimeOutputPayload, output_dir: Path) -> Di
             encoding='utf-8',
         )
 
+    wall_alignment_summary, wall_alignment_rows = build_wall_catalog_alignment(
+        generated_dir=_generated_dir_from_payload(payload),
+        wall_catalog=payload.prepared.runtime.wall_catalog,
+    )
+    if wall_alignment_rows:
+        write_wall_catalog_alignment_csv(output_dir / 'wall_catalog_alignment.csv', wall_alignment_rows)
+        wall_alignment_summary['wall_catalog_alignment_file'] = 'wall_catalog_alignment.csv'
+    payload.collision_diagnostics['wall_catalog_alignment'] = wall_alignment_summary
+
     invalid_stop_geometry_summary = _build_invalid_stop_geometry_summary(payload)
     state_geometry_summary = _build_state_geometry_summary(payload)
     source_initial_geometry_summary = _build_source_initial_geometry_summary(payload)
@@ -1301,6 +1402,12 @@ def write_runtime_outputs(payload: RuntimeOutputPayload, output_dir: Path) -> Di
         source_initial_geometry_summary=source_initial_geometry_summary,
     )
     (output_dir / 'solver_report.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    plasma_summary = dict(report.get('plasma_background', {}))
+    if int(plasma_summary.get('enabled', 0)) != 0:
+        _write_scalar_summary_csv(output_dir / 'plasma_background_summary.csv', plasma_summary)
+    charge_summary = dict(report.get('charge_model', {}))
+    if int(charge_summary.get('enabled', 0)) != 0:
+        _write_scalar_summary_csv(output_dir / 'charge_model_summary.csv', charge_summary)
 
     if int(output_options.write_trajectory_plot) != 0:
         _write_trajectory_plot(output_dir, payload.positions, payload.spatial_dim, payload.plot_limit)

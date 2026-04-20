@@ -224,6 +224,11 @@ def write_run_summary(output_dir: Path, payload: Mapping[str, object]) -> Path:
         lines.extend(["", "## Final States", ""])
         for name, count in state_counts.items():
             lines.append(f"- {name}: {count}")
+    summary_files = payload.get("summary_files", {})
+    if isinstance(summary_files, Mapping) and summary_files:
+        lines.extend(["", "## Compact Summary Files", ""])
+        for name, path in sorted(summary_files.items()):
+            lines.append(f"- {name}: {path}")
     lines.extend(["", "## Visualization Modules", ""])
     if module_names:
         for name in module_names:

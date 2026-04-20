@@ -157,9 +157,14 @@ python -m pytest -q tests/smoke_test.py
 - Solver extension point: keep new integration or boundary behavior behind the existing prepared-runtime entry point instead of adding case-specific rescue paths.
 - Optional Brownian/Langevin motion is disabled by default and can be enabled with `solver.stochastic_motion.enabled: true`.
 - Optional 2D charge evolution is disabled by default and can be enabled with `solver.charge_model.enabled: true`.
-  - `mode: te_relaxation` (`v1`) relaxes charge from local electron temperature.
-  - `mode: density_temperature_flux_relaxation` (`v2`) uses local density/temperature flux balance.
-  - Both modes use scalar background distributions plus `E_x/E_y`; COMSOL flux vectors are not required.
+  - `mode: te_relaxation` is a sensitivity model that relaxes charge from electron temperature.
+  - `mode: density_temperature_flux_relaxation` is a field-backed density/temperature flux-balance model.
+  - `mode: finite_rate_flux_balance` with `background_source: plasma_background` uses a scalar SAAS-style plasma background when COMSOL did not solve a plasma module.
+  - Electric force is always evaluated as `(q(t)/m)E`; precomputed fixed-charge acceleration fields are not used.
+  - COMSOL flux vectors are not consumed by the charge model; use density and temperature fields or the explicit scalar background.
+  - SAAS-derived neutral density, collision frequencies, mobility, conductivity, Debye length, and plasma frequencies are reported as diagnostics and do not silently alter trajectory forces.
+  - Enabled plasma/charge runs also write compact `plasma_background_summary.csv` and `charge_model_summary.csv` files for quick review.
+  - Use `python tools/collect_run_summaries.py <output_dir>... --output-csv <csv>` to compare multiple run summaries without rerunning visualization.
 - For `solver.drag_model: epstein`, rectilinear COMSOL field quantities `rho_g` and `T` are sampled for low-pressure drag when present. The scalar `gas.*` values remain fallbacks, field `mu` can be reported, and `p` is kept diagnostic rather than used directly by drag.
 - Optional overlays: `process_steps.csv` is only a time-label overlay, and `source_events.csv` is only for explicit source timing/gain events.
 
@@ -181,6 +186,12 @@ The COMSOL case onboarding checklist for future model imports is:
 
 ```text
 plans/comsol_case_onboarding_workflow.md
+```
+
+For handing a new `.mph` file to another Copilot or another environment, use:
+
+```text
+COMSOL_COPILOT_HANDOFF.md
 ```
 
 ## Included examples

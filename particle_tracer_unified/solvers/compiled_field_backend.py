@@ -17,6 +17,7 @@ from ..core.field_sampling import (
     sample_valid_mask_status,
 )
 from ..core.triangle_mesh_sampling_2d import sample_triangle_mesh_series, sample_triangle_mesh_status
+from .forces import ForceRuntimeParameters
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,6 +43,15 @@ class RegularRectilinearCompiledBackend:
     gas_density_source: str = 'scalar_fallback'
     gas_mu_source: str = 'scalar_fallback'
     gas_temperature_source: str = 'scalar_fallback'
+    grad_T_x: Optional[np.ndarray] = None
+    grad_T_y: Optional[np.ndarray] = None
+    grad_T_z: Optional[np.ndarray] = None
+    grad_E2_x: Optional[np.ndarray] = None
+    grad_E2_y: Optional[np.ndarray] = None
+    grad_E2_z: Optional[np.ndarray] = None
+    vorticity_x: Optional[np.ndarray] = None
+    vorticity_y: Optional[np.ndarray] = None
+    vorticity_z: Optional[np.ndarray] = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +89,45 @@ def _backend_time_grid(data: np.ndarray, spatial_dim: int, times: np.ndarray) ->
     if grid.shape[0] == 1 and time_count > 1:
         return np.repeat(grid, time_count, axis=0)
     return grid
+
+
+def _zero_like_grid(reference: np.ndarray) -> np.ndarray:
+    return np.zeros_like(np.asarray(reference, dtype=np.float64), dtype=np.float64)
+
+
+def _gradient_time_grid(data: np.ndarray, axes: Tuple[np.ndarray, ...]) -> Tuple[np.ndarray, ...]:
+    arr = np.asarray(data, dtype=np.float64)
+    if arr.ndim != len(axes) + 1:
+        raise ValueError('gradient source must be a time grid with shape (nt, ...spatial axes)')
+    spatial_axes = tuple(np.asarray(axis, dtype=np.float64) for axis in axes)
+    if any(axis.size < 2 for axis in spatial_axes):
+        return tuple(_zero_like_grid(arr) for _ in spatial_axes)
+    edge_order = 2 if all(axis.size >= 3 for axis in spatial_axes) else 1
+    grads = np.gradient(arr, *spatial_axes, axis=tuple(range(1, arr.ndim)), edge_order=edge_order)
+    return tuple(np.asarray(grad, dtype=np.float64) for grad in grads)
+
+
+def _curl_from_velocity_grids(
+    ux: np.ndarray,
+    uy: np.ndarray,
+    uz: Optional[np.ndarray],
+    axes: Tuple[np.ndarray, ...],
+) -> Tuple[Optional[np.ndarray], Optional[np.ndarray], Optional[np.ndarray]]:
+    if len(axes) == 2:
+        dux_dx, dux_dy = _gradient_time_grid(ux, axes)
+        duy_dx, _duy_dy = _gradient_time_grid(uy, axes)
+        return None, None, np.asarray(duy_dx - dux_dy, dtype=np.float64)
+    if uz is None:
+        return None, None, None
+    dux_dx, dux_dy, dux_dz = _gradient_time_grid(ux, axes)
+    duy_dx, duy_dy, duy_dz = _gradient_time_grid(uy, axes)
+    duz_dx, duz_dy, duz_dz = _gradient_time_grid(uz, axes)
+    _ = (dux_dx, duy_dy, duz_dz)
+    return (
+        np.asarray(duz_dy - duy_dz, dtype=np.float64),
+        np.asarray(dux_dz - duz_dx, dtype=np.float64),
+        np.asarray(duy_dx - dux_dy, dtype=np.float64),
+    )
 
 
 def _common_quantity_times(field, quantity_names: Tuple[str, ...]) -> np.ndarray:
@@ -253,6 +302,9 @@ def coerce_compiled_backend(compiled: CompiledRuntimeBackendLike) -> CompiledRun
     electric_x = None if ex_raw is None else np.asarray(ex_raw, dtype=np.float64)
     electric_y = None if ey_raw is None else np.asarray(ey_raw, dtype=np.float64)
     electric_z = None if ez_raw is None else np.asarray(ez_raw, dtype=np.float64)
+    def optional_array(name: str) -> Optional[np.ndarray]:
+        raw = compiled.get(name)
+        return None if raw is None else np.asarray(raw, dtype=np.float64)
     return RegularRectilinearCompiledBackend(
         axes=axes,
         times=np.asarray(compiled.get('times', np.asarray([0.0], dtype=np.float64)), dtype=np.float64),
@@ -274,10 +326,27 @@ def coerce_compiled_backend(compiled: CompiledRuntimeBackendLike) -> CompiledRun
         gas_density_source=str(compiled.get('gas_density_source', 'scalar_fallback')),
         gas_mu_source=str(compiled.get('gas_mu_source', 'scalar_fallback')),
         gas_temperature_source=str(compiled.get('gas_temperature_source', 'scalar_fallback')),
+        grad_T_x=optional_array('grad_T_x'),
+        grad_T_y=optional_array('grad_T_y'),
+        grad_T_z=optional_array('grad_T_z'),
+        grad_E2_x=optional_array('grad_E2_x'),
+        grad_E2_y=optional_array('grad_E2_y'),
+        grad_E2_z=optional_array('grad_E2_z'),
+        vorticity_x=optional_array('vorticity_x'),
+        vorticity_y=optional_array('vorticity_y'),
+        vorticity_z=optional_array('vorticity_z'),
     )
 
 
-def compile_runtime_backend(runtime, spatial_dim: int, particles=None, *, dynamic_electric: bool = False) -> CompiledRuntimeBackend:
+def compile_runtime_backend(
+    runtime,
+    spatial_dim: int,
+    particles=None,
+    *,
+    dynamic_electric: bool = False,
+    enable_electric: bool = True,
+    force_runtime: ForceRuntimeParameters | None = None,
+) -> CompiledRuntimeBackend:
     if runtime.geometry_provider is None:
         raise ValueError('High-fidelity solver requires geometry_provider')
     geom = runtime.geometry_provider.geometry
@@ -307,10 +376,22 @@ def compile_runtime_backend(runtime, spatial_dim: int, particles=None, *, dynami
     acceleration_quantity_names: Tuple[str, ...] = ()
     electric_field_names: Tuple[str, ...] = ()
     electric_q_over_m = 0.0
+    force_params = force_runtime or ForceRuntimeParameters()
+    grad_T_x = grad_T_y = grad_T_z = None
+    grad_E2_x = grad_E2_y = grad_E2_z = None
+    vorticity_x = vorticity_y = vorticity_z = None
     if runtime.field_provider is not None:
         field = runtime.field_provider.field
-        electric_names = choose_electric_field_quantity_names(field, spatial_dim)
+        need_electric_field = bool(enable_electric) or bool(force_params.dielectrophoresis_enabled)
+        electric_names = choose_electric_field_quantity_names(field, spatial_dim) if bool(need_electric_field) else ()
         if isinstance(field, TriangleMeshField2D):
+            if (
+                bool(force_params.thermophoresis_enabled)
+                or bool(force_params.dielectrophoresis_enabled)
+                or bool(force_params.lift_enabled)
+                or bool(force_params.gravity_buoyancy_enabled)
+            ):
+                raise ValueError('solver.forces thermophoresis/dielectrophoresis/lift/buoyancy require the regular rectilinear field backend')
             names = choose_velocity_quantity_names(field, spatial_dim)
             time_quantity_names = tuple(names)
             if time_quantity_names:
@@ -399,6 +480,25 @@ def compile_runtime_backend(runtime, spatial_dim: int, particles=None, *, dynami
             elif target == 'gas_temperature':
                 gas_temperature = values
                 gas_temperature_source = f'field:{name}'
+        if bool(force_params.thermophoresis_enabled):
+            grad_T = _gradient_time_grid(gas_temperature, axes)
+            grad_T_x = grad_T[0]
+            grad_T_y = grad_T[1]
+            grad_T_z = grad_T[2] if int(spatial_dim) == 3 else None
+        if bool(force_params.dielectrophoresis_enabled):
+            if not electric_names or electric_x is None or electric_y is None:
+                raise ValueError('solver.forces.dielectrophoresis requires electric field quantities')
+            e2 = electric_x * electric_x + electric_y * electric_y
+            if int(spatial_dim) == 3:
+                if electric_z is None:
+                    raise ValueError('solver.forces.dielectrophoresis requires 3D electric field quantities')
+                e2 = e2 + electric_z * electric_z
+            grad_E2 = _gradient_time_grid(e2, axes)
+            grad_E2_x = grad_E2[0]
+            grad_E2_y = grad_E2[1]
+            grad_E2_z = grad_E2[2] if int(spatial_dim) == 3 else None
+        if bool(force_params.lift_enabled):
+            vorticity_x, vorticity_y, vorticity_z = _curl_from_velocity_grids(ux, uy, uz, axes)
     return RegularRectilinearCompiledBackend(
         axes=axes,
         times=times,
@@ -420,6 +520,15 @@ def compile_runtime_backend(runtime, spatial_dim: int, particles=None, *, dynami
         gas_density_source=str(gas_density_source),
         gas_mu_source=str(gas_mu_source),
         gas_temperature_source=str(gas_temperature_source),
+        grad_T_x=grad_T_x,
+        grad_T_y=grad_T_y,
+        grad_T_z=grad_T_z,
+        grad_E2_x=grad_E2_x,
+        grad_E2_y=grad_E2_y,
+        grad_E2_z=grad_E2_z,
+        vorticity_x=vorticity_x,
+        vorticity_y=vorticity_y,
+        vorticity_z=vorticity_z,
     )
 
 
@@ -540,6 +649,136 @@ def sample_compiled_flow_vectors(
     )
 
 
+_EPS0_F_M = 8.8541878128e-12
+_K_BOLTZMANN = 1.380649e-23
+_AMU_KG = 1.66053906660e-27
+
+
+def _particle_mass_from_inputs(diameter: float, density: float, mass: Optional[float]) -> float:
+    if mass is not None and np.isfinite(float(mass)) and float(mass) > 0.0:
+        return float(mass)
+    d = max(float(diameter), 0.0)
+    rho = max(float(density), 0.0)
+    if d <= 0.0 or rho <= 0.0:
+        return 0.0
+    return float(rho * np.pi * d * d * d / 6.0)
+
+
+def _cm_factor_real(
+    particle_rel_permittivity: float,
+    medium_rel_permittivity: float,
+    particle_conductivity_Sm: float,
+    medium_conductivity_Sm: float,
+    frequency_Hz: float,
+) -> float:
+    eps_p = float(particle_rel_permittivity)
+    eps_m = float(medium_rel_permittivity)
+    if not np.isfinite(eps_p) or eps_p <= 0.0:
+        eps_p = 2.0
+    if not np.isfinite(eps_m) or eps_m <= 0.0:
+        eps_m = 1.0006
+    freq = max(float(frequency_Hz), 0.0)
+    if freq <= 0.0:
+        return float((eps_p - eps_m) / (eps_p + 2.0 * eps_m))
+    omega = 2.0 * np.pi * freq
+    rel_p = complex(eps_p, -float(particle_conductivity_Sm) / max(omega * _EPS0_F_M, 1.0e-300))
+    rel_m = complex(eps_m, -float(medium_conductivity_Sm) / max(omega * _EPS0_F_M, 1.0e-300))
+    value = (rel_p - rel_m) / (rel_p + 2.0 * rel_m)
+    return float(value.real)
+
+
+def _extra_force_acceleration_from_samples(
+    *,
+    force_runtime: ForceRuntimeParameters,
+    diameter: float,
+    density: float,
+    mass: Optional[float],
+    dep_particle_rel_permittivity: float,
+    thermophoretic_coeff: float,
+    velocity: np.ndarray,
+    flow_velocity: np.ndarray,
+    grad_T: np.ndarray,
+    grad_E2: np.ndarray,
+    vorticity: np.ndarray,
+    gas_density_kgm3: float,
+    gas_mu_pas: float,
+    gas_temperature_K: float,
+    gas_molecular_mass_kg: float,
+) -> np.ndarray:
+    dim = int(np.asarray(velocity, dtype=np.float64).size)
+    out = np.zeros(dim, dtype=np.float64)
+    d = max(float(diameter), 0.0)
+    radius = 0.5 * d
+    m = _particle_mass_from_inputs(d, float(density), mass)
+    if d <= 0.0 or radius <= 0.0 or m <= 0.0:
+        return out
+    rho_g = max(float(gas_density_kgm3), 0.0)
+    mu = max(float(gas_mu_pas), 0.0)
+    temp = max(float(gas_temperature_K), 1.0)
+    if bool(force_runtime.thermophoresis_enabled) and rho_g > 0.0 and mu > 0.0:
+        mol_mass = max(float(gas_molecular_mass_kg), 1.0e-30)
+        mean_free_path = (mu / rho_g) * np.sqrt(np.pi * mol_mass / (2.0 * _K_BOLTZMANN * temp))
+        kn = max(float(mean_free_path / radius), 0.0)
+        if str(force_runtime.thermophoresis_model).lower() == "continuum":
+            kn = 0.0
+        kg = max(float(force_runtime.gas_thermal_conductivity_W_mK), 1.0e-30)
+        kp = max(float(force_runtime.particle_thermal_conductivity_W_mK), 1.0e-30)
+        ratio = kg / kp
+        factor = (
+            float(force_runtime.thermophoresis_Cs)
+            * (ratio + float(force_runtime.thermophoresis_Ct) * kn)
+            / max(
+                (1.0 + 3.0 * float(force_runtime.thermophoresis_Cm) * kn)
+                * (1.0 + 2.0 * ratio + 2.0 * float(force_runtime.thermophoresis_Ct) * kn),
+                1.0e-30,
+            )
+        )
+        multiplier = float(thermophoretic_coeff)
+        if not np.isfinite(multiplier) or multiplier <= 0.0:
+            multiplier = 1.0
+        drift = -multiplier * factor * mu / max(rho_g * temp, 1.0e-30) * np.asarray(grad_T, dtype=np.float64)
+        tau_stokes = max(m / max(3.0 * np.pi * mu * d, 1.0e-300), 1.0e-30)
+        out += drift[:dim] / tau_stokes
+    if bool(force_runtime.dielectrophoresis_enabled):
+        epsp = float(dep_particle_rel_permittivity)
+        if not np.isfinite(epsp) or epsp <= 0.0:
+            epsp = float(force_runtime.dep_particle_rel_permittivity)
+        cm_real = _cm_factor_real(
+            epsp,
+            float(force_runtime.dep_medium_rel_permittivity),
+            float(force_runtime.dep_particle_conductivity_Sm),
+            float(force_runtime.dep_medium_conductivity_Sm),
+            float(force_runtime.dep_frequency_Hz),
+        )
+        dep_coeff = 2.0 * np.pi * _EPS0_F_M * float(force_runtime.dep_medium_rel_permittivity) * radius**3 * cm_real
+        out += dep_coeff * np.asarray(grad_E2, dtype=np.float64)[:dim] / m
+    if bool(force_runtime.lift_enabled) and rho_g > 0.0 and mu > 0.0:
+        vel = np.asarray(velocity, dtype=np.float64)
+        flow = np.asarray(flow_velocity, dtype=np.float64)
+        slip = vel[:dim] - flow[:dim]
+        nu = mu / max(rho_g, 1.0e-30)
+        if dim == 2:
+            omega_z = float(np.asarray(vorticity, dtype=np.float64)[-1])
+            omega_mag = abs(omega_z)
+            if omega_mag > 1.0e-30:
+                cross = np.asarray([slip[1] * omega_z, -slip[0] * omega_z], dtype=np.float64)
+                out += float(force_runtime.lift_coefficient) * mu * radius * radius * cross / np.sqrt(nu * omega_mag) / m
+        elif dim == 3:
+            omega = np.asarray(vorticity, dtype=np.float64)[:3]
+            omega_mag = float(np.linalg.norm(omega))
+            if omega_mag > 1.0e-30:
+                out += (
+                    float(force_runtime.lift_coefficient)
+                    * mu
+                    * radius
+                    * radius
+                    * np.cross(slip[:3], omega)
+                    / np.sqrt(nu * omega_mag)
+                    / m
+                )
+    return out
+
+
 def sample_compiled_acceleration_vector(
     compiled: CompiledRuntimeBackendLike,
     spatial_dim: int,
@@ -547,6 +786,18 @@ def sample_compiled_acceleration_vector(
     position: np.ndarray,
     *,
     electric_q_over_m: Optional[float] = None,
+    force_runtime: ForceRuntimeParameters | None = None,
+    particle_diameter: float = 0.0,
+    particle_density: float = 0.0,
+    particle_mass: Optional[float] = None,
+    dep_particle_rel_permittivity: float = float("nan"),
+    thermophoretic_coeff: float = float("nan"),
+    velocity: Optional[np.ndarray] = None,
+    flow_velocity: Optional[np.ndarray] = None,
+    gas_density_kgm3: float = 1.0,
+    gas_mu_pas: float = 1.8e-5,
+    gas_temperature_K: float = 300.0,
+    gas_molecular_mass_kg: float = 60.0 * _AMU_KG,
 ) -> np.ndarray:
     backend = coerce_compiled_backend(compiled)
     if isinstance(backend, TriangleMesh2DCompiledBackend):
@@ -559,6 +810,60 @@ def sample_compiled_acceleration_vector(
     if electric_q_over_m is not None and np.isfinite(float(electric_q_over_m)) and backend.electric_x is not None and backend.electric_y is not None:
         ax += float(electric_q_over_m) * float(sample_time_grid_scalar(backend.electric_x, axes, times, t_eval, pos))
         ay += float(electric_q_over_m) * float(sample_time_grid_scalar(backend.electric_y, axes, times, t_eval, pos))
+    params = force_runtime or ForceRuntimeParameters()
+    if (
+        bool(params.thermophoresis_enabled)
+        or bool(params.dielectrophoresis_enabled)
+        or bool(params.lift_enabled)
+    ):
+        grad_T = np.zeros(int(spatial_dim), dtype=np.float64)
+        grad_E2 = np.zeros(int(spatial_dim), dtype=np.float64)
+        vorticity = np.zeros(3, dtype=np.float64)
+        if backend.grad_T_x is not None and backend.grad_T_y is not None:
+            grad_T[0] = float(sample_time_grid_scalar(backend.grad_T_x, axes, times, t_eval, pos))
+            grad_T[1] = float(sample_time_grid_scalar(backend.grad_T_y, axes, times, t_eval, pos))
+            if int(spatial_dim) == 3 and backend.grad_T_z is not None:
+                grad_T[2] = float(sample_time_grid_scalar(backend.grad_T_z, axes, times, t_eval, pos))
+        if backend.grad_E2_x is not None and backend.grad_E2_y is not None:
+            grad_E2[0] = float(sample_time_grid_scalar(backend.grad_E2_x, axes, times, t_eval, pos))
+            grad_E2[1] = float(sample_time_grid_scalar(backend.grad_E2_y, axes, times, t_eval, pos))
+            if int(spatial_dim) == 3 and backend.grad_E2_z is not None:
+                grad_E2[2] = float(sample_time_grid_scalar(backend.grad_E2_z, axes, times, t_eval, pos))
+        if int(spatial_dim) == 2:
+            if backend.vorticity_z is not None:
+                vorticity[2] = float(sample_time_grid_scalar(backend.vorticity_z, axes, times, t_eval, pos))
+        else:
+            if backend.vorticity_x is not None:
+                vorticity[0] = float(sample_time_grid_scalar(backend.vorticity_x, axes, times, t_eval, pos))
+            if backend.vorticity_y is not None:
+                vorticity[1] = float(sample_time_grid_scalar(backend.vorticity_y, axes, times, t_eval, pos))
+            if backend.vorticity_z is not None:
+                vorticity[2] = float(sample_time_grid_scalar(backend.vorticity_z, axes, times, t_eval, pos))
+        flow = (
+            np.asarray(flow_velocity, dtype=np.float64)
+            if flow_velocity is not None
+            else sample_compiled_flow_vector(backend, int(spatial_dim), float(t_eval), pos)
+        )
+        vel = np.zeros(int(spatial_dim), dtype=np.float64) if velocity is None else np.asarray(velocity, dtype=np.float64)
+        extra = _extra_force_acceleration_from_samples(
+            force_runtime=params,
+            diameter=float(particle_diameter),
+            density=float(particle_density),
+            mass=particle_mass,
+            dep_particle_rel_permittivity=float(dep_particle_rel_permittivity),
+            thermophoretic_coeff=float(thermophoretic_coeff),
+            velocity=vel[: int(spatial_dim)],
+            flow_velocity=flow[: int(spatial_dim)],
+            grad_T=grad_T,
+            grad_E2=grad_E2,
+            vorticity=vorticity,
+            gas_density_kgm3=float(gas_density_kgm3),
+            gas_mu_pas=float(gas_mu_pas),
+            gas_temperature_K=float(gas_temperature_K),
+            gas_molecular_mass_kg=float(gas_molecular_mass_kg),
+        )
+        ax += float(extra[0])
+        ay += float(extra[1])
     if not np.isfinite(ax):
         ax = 0.0
     if not np.isfinite(ay):
@@ -568,6 +873,15 @@ def sample_compiled_acceleration_vector(
     az = 0.0
     if electric_q_over_m is not None and np.isfinite(float(electric_q_over_m)) and backend.electric_z is not None:
         az += float(electric_q_over_m) * float(sample_time_grid_scalar(backend.electric_z, axes, times, t_eval, pos))
+    if (
+        int(spatial_dim) == 3
+        and (
+            bool(params.thermophoresis_enabled)
+            or bool(params.dielectrophoresis_enabled)
+            or bool(params.lift_enabled)
+        )
+    ):
+        az += float(extra[2])
     if not np.isfinite(az):
         az = 0.0
     return np.asarray([ax, ay, az], dtype=np.float64)
@@ -657,6 +971,17 @@ def sample_compiled_acceleration_vectors(
     positions: np.ndarray,
     *,
     electric_q_over_m: Optional[np.ndarray] = None,
+    force_runtime: ForceRuntimeParameters | None = None,
+    particle_diameter: Optional[np.ndarray] = None,
+    particle_density: Optional[np.ndarray] = None,
+    particle_mass: Optional[np.ndarray] = None,
+    dep_particle_rel_permittivity: Optional[np.ndarray] = None,
+    thermophoretic_coeff: Optional[np.ndarray] = None,
+    velocity: Optional[np.ndarray] = None,
+    gas_density_kgm3: float = 1.0,
+    gas_mu_pas: float = 1.8e-5,
+    gas_temperature_K: float = 300.0,
+    gas_molecular_mass_kg: float = 60.0 * _AMU_KG,
 ) -> np.ndarray:
     backend = coerce_compiled_backend(compiled)
     pts = np.asarray(positions, dtype=np.float64)
@@ -677,6 +1002,126 @@ def sample_compiled_acceleration_vectors(
             ey = _sample_regular_time_grid_points_2d(backend.electric_y, axes, times, float(t_eval), pts)
             ax = ax + qom * ex
             ay = ay + qom * ey
+        params = force_runtime or ForceRuntimeParameters()
+        if bool(params.thermophoresis_enabled) or bool(params.dielectrophoresis_enabled) or bool(params.lift_enabled):
+            n = int(pts.shape[0])
+            d = (
+                np.asarray(particle_diameter, dtype=np.float64).reshape(-1)
+                if particle_diameter is not None
+                else np.zeros(n, dtype=np.float64)
+            )
+            rho_p = (
+                np.asarray(particle_density, dtype=np.float64).reshape(-1)
+                if particle_density is not None
+                else np.zeros(n, dtype=np.float64)
+            )
+            mass = (
+                np.asarray(particle_mass, dtype=np.float64).reshape(-1)
+                if particle_mass is not None
+                else rho_p * np.pi * d * d * d / 6.0
+            )
+            epsp_arr = (
+                np.asarray(dep_particle_rel_permittivity, dtype=np.float64).reshape(-1)
+                if dep_particle_rel_permittivity is not None
+                else np.full(n, float(params.dep_particle_rel_permittivity), dtype=np.float64)
+            )
+            thermo_arr = (
+                np.asarray(thermophoretic_coeff, dtype=np.float64).reshape(-1)
+                if thermophoretic_coeff is not None
+                else np.ones(n, dtype=np.float64)
+            )
+            vel = (
+                np.asarray(velocity, dtype=np.float64)
+                if velocity is not None
+                else np.zeros((n, 2), dtype=np.float64)
+            )
+            rho_g, mu_g, temp_g = sample_compiled_gas_properties_vectors(
+                backend,
+                2,
+                float(t_eval),
+                pts,
+                fallback_density_kgm3=float(gas_density_kgm3),
+                fallback_mu_pas=float(gas_mu_pas),
+                fallback_temperature_K=float(gas_temperature_K),
+            )
+            finite_mass = np.isfinite(mass) & (mass > 0.0)
+            radius = 0.5 * np.maximum(d, 0.0)
+            if bool(params.thermophoresis_enabled) and backend.grad_T_x is not None and backend.grad_T_y is not None:
+                grad_tx = _sample_regular_time_grid_points_2d(backend.grad_T_x, axes, times, float(t_eval), pts)
+                grad_ty = _sample_regular_time_grid_points_2d(backend.grad_T_y, axes, times, float(t_eval), pts)
+                mol_mass = max(float(gas_molecular_mass_kg), 1.0e-30)
+                mean_free_path = (mu_g / np.maximum(rho_g, 1.0e-30)) * np.sqrt(
+                    np.pi * mol_mass / (2.0 * _K_BOLTZMANN * np.maximum(temp_g, 1.0))
+                )
+                kn = mean_free_path / np.maximum(radius, 1.0e-30)
+                if str(params.thermophoresis_model).lower() == "continuum":
+                    kn = np.zeros_like(kn)
+                ratio = max(float(params.gas_thermal_conductivity_W_mK), 1.0e-30) / max(
+                    float(params.particle_thermal_conductivity_W_mK),
+                    1.0e-30,
+                )
+                factor = (
+                    float(params.thermophoresis_Cs)
+                    * (ratio + float(params.thermophoresis_Ct) * kn)
+                    / np.maximum(
+                        (1.0 + 3.0 * float(params.thermophoresis_Cm) * kn)
+                        * (1.0 + 2.0 * ratio + 2.0 * float(params.thermophoresis_Ct) * kn),
+                        1.0e-30,
+                    )
+                )
+                multiplier = np.where(np.isfinite(thermo_arr) & (thermo_arr > 0.0), thermo_arr, 1.0)
+                tau_stokes = mass / np.maximum(3.0 * np.pi * mu_g * np.maximum(d, 1.0e-30), 1.0e-300)
+                scale = -multiplier * factor * mu_g / np.maximum(rho_g * temp_g * tau_stokes, 1.0e-300)
+                valid = finite_mass & np.isfinite(scale)
+                ax = ax + np.where(valid, scale * grad_tx, 0.0)
+                ay = ay + np.where(valid, scale * grad_ty, 0.0)
+            if bool(params.dielectrophoresis_enabled) and backend.grad_E2_x is not None and backend.grad_E2_y is not None:
+                grad_e2x = _sample_regular_time_grid_points_2d(backend.grad_E2_x, axes, times, float(t_eval), pts)
+                grad_e2y = _sample_regular_time_grid_points_2d(backend.grad_E2_y, axes, times, float(t_eval), pts)
+                epsp = np.where(
+                    np.isfinite(epsp_arr) & (epsp_arr > 0.0),
+                    epsp_arr,
+                    float(params.dep_particle_rel_permittivity),
+                )
+                epsp = np.where(np.isfinite(epsp) & (epsp > 0.0), epsp, 2.0)
+                epsm = max(float(params.dep_medium_rel_permittivity), 1.0e-30)
+                if float(params.dep_frequency_Hz) <= 0.0:
+                    cm_real = (epsp - epsm) / (epsp + 2.0 * epsm)
+                else:
+                    cm_real = np.asarray(
+                        [
+                            _cm_factor_real(
+                                float(value),
+                                epsm,
+                                float(params.dep_particle_conductivity_Sm),
+                                float(params.dep_medium_conductivity_Sm),
+                                float(params.dep_frequency_Hz),
+                            )
+                            for value in epsp
+                        ],
+                        dtype=np.float64,
+                    )
+                coeff = 2.0 * np.pi * _EPS0_F_M * epsm * radius**3 * cm_real / np.maximum(mass, 1.0e-300)
+                valid = finite_mass & np.isfinite(coeff)
+                ax = ax + np.where(valid, coeff * grad_e2x, 0.0)
+                ay = ay + np.where(valid, coeff * grad_e2y, 0.0)
+            if bool(params.lift_enabled) and backend.vorticity_z is not None:
+                flow = sample_compiled_flow_vectors(backend, 2, float(t_eval), pts)
+                omega = _sample_regular_time_grid_points_2d(backend.vorticity_z, axes, times, float(t_eval), pts)
+                omega_abs = np.abs(omega)
+                slip = vel[:, :2] - flow[:, :2]
+                nu = mu_g / np.maximum(rho_g, 1.0e-30)
+                scale = (
+                    float(params.lift_coefficient)
+                    * mu_g
+                    * radius
+                    * radius
+                    / np.maximum(np.sqrt(nu * omega_abs), 1.0e-300)
+                    / np.maximum(mass, 1.0e-300)
+                )
+                valid = finite_mass & np.isfinite(scale) & (omega_abs > 1.0e-30)
+                ax = ax + np.where(valid, scale * slip[:, 1] * omega, 0.0)
+                ay = ay + np.where(valid, -scale * slip[:, 0] * omega, 0.0)
         return np.column_stack((ax, ay)).astype(np.float64, copy=False)
     return np.asarray(
         [
@@ -690,6 +1135,31 @@ def sample_compiled_acceleration_vectors(
                     if electric_q_over_m is None
                     else float(np.asarray(electric_q_over_m, dtype=np.float64).reshape(-1)[idx])
                 ),
+                force_runtime=force_runtime,
+                particle_diameter=(
+                    0.0 if particle_diameter is None else float(np.asarray(particle_diameter, dtype=np.float64).reshape(-1)[idx])
+                ),
+                particle_density=(
+                    0.0 if particle_density is None else float(np.asarray(particle_density, dtype=np.float64).reshape(-1)[idx])
+                ),
+                particle_mass=(
+                    None if particle_mass is None else float(np.asarray(particle_mass, dtype=np.float64).reshape(-1)[idx])
+                ),
+                dep_particle_rel_permittivity=(
+                    float("nan")
+                    if dep_particle_rel_permittivity is None
+                    else float(np.asarray(dep_particle_rel_permittivity, dtype=np.float64).reshape(-1)[idx])
+                ),
+                thermophoretic_coeff=(
+                    float("nan")
+                    if thermophoretic_coeff is None
+                    else float(np.asarray(thermophoretic_coeff, dtype=np.float64).reshape(-1)[idx])
+                ),
+                velocity=(None if velocity is None else np.asarray(velocity, dtype=np.float64)[idx]),
+                gas_density_kgm3=float(gas_density_kgm3),
+                gas_mu_pas=float(gas_mu_pas),
+                gas_temperature_K=float(gas_temperature_K),
+                gas_molecular_mass_kg=float(gas_molecular_mass_kg),
             )
             for idx, point in enumerate(pts)
         ],

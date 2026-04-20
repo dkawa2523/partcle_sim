@@ -28,6 +28,7 @@ from .high_fidelity_freeflight import (
     advance_freeflight_segment,
     resolve_valid_mask_prefix,
 )
+from .forces import ForceRuntimeParameters
 from .integrator_common import INTEGRATOR_ETD2
 from .valid_mask_retry import resolve_valid_mask_retry_then_stop
 
@@ -748,6 +749,9 @@ class CollisionIntegratorInputs:
     tau_p_i: float
     particle_diameter_i: float
     particle_density_i: float
+    particle_mass_i: float
+    dep_particle_rel_permittivity_i: float
+    thermophoretic_coeff_i: float
     flow_scale_particle_i: float
     drag_scale_particle_i: float
     body_scale_particle_i: float
@@ -762,6 +766,7 @@ class CollisionIntegratorInputs:
     gas_molecular_mass_kg: float
     drag_model_mode: int
     electric_q_over_m_i: Optional[float] = None
+    force_runtime: Optional[ForceRuntimeParameters] = None
 
 
 def _advance_segment_with_inputs(
@@ -787,6 +792,9 @@ def _advance_segment_with_inputs(
         tau_p_i=float(inputs.tau_p_i),
         particle_diameter_i=float(inputs.particle_diameter_i),
         particle_density_i=float(inputs.particle_density_i),
+        particle_mass_i=float(inputs.particle_mass_i),
+        dep_particle_rel_permittivity_i=float(inputs.dep_particle_rel_permittivity_i),
+        thermophoretic_coeff_i=float(inputs.thermophoretic_coeff_i),
         flow_scale_particle_i=float(inputs.flow_scale_particle_i),
         drag_scale_particle_i=float(inputs.drag_scale_particle_i),
         body_scale_particle_i=float(inputs.body_scale_particle_i),
@@ -801,6 +809,7 @@ def _advance_segment_with_inputs(
         gas_molecular_mass_kg=float(inputs.gas_molecular_mass_kg),
         drag_model_mode=int(inputs.drag_model_mode),
         electric_q_over_m_i=inputs.electric_q_over_m_i,
+        force_runtime=inputs.force_runtime,
     )
 
 
@@ -829,6 +838,9 @@ def _advance_partial_with_inputs(
         tau_p_i=float(inputs.tau_p_i),
         particle_diameter_i=float(inputs.particle_diameter_i),
         particle_density_i=float(inputs.particle_density_i),
+        particle_mass_i=float(inputs.particle_mass_i),
+        dep_particle_rel_permittivity_i=float(inputs.dep_particle_rel_permittivity_i),
+        thermophoretic_coeff_i=float(inputs.thermophoretic_coeff_i),
         flow_scale_particle_i=float(inputs.flow_scale_particle_i),
         drag_scale_particle_i=float(inputs.drag_scale_particle_i),
         body_scale_particle_i=float(inputs.body_scale_particle_i),
@@ -843,6 +855,7 @@ def _advance_partial_with_inputs(
         gas_molecular_mass_kg=float(inputs.gas_molecular_mass_kg),
         drag_model_mode=int(inputs.drag_model_mode),
         electric_q_over_m_i=inputs.electric_q_over_m_i,
+        force_runtime=inputs.force_runtime,
     )
 
 
@@ -872,6 +885,9 @@ def _resolve_valid_mask_retry_with_inputs(
         tau_p_i=float(inputs.tau_p_i),
         particle_diameter_i=float(inputs.particle_diameter_i),
         particle_density_i=float(inputs.particle_density_i),
+        particle_mass_i=float(inputs.particle_mass_i),
+        dep_particle_rel_permittivity_i=float(inputs.dep_particle_rel_permittivity_i),
+        thermophoretic_coeff_i=float(inputs.thermophoretic_coeff_i),
         flow_scale_particle_i=float(inputs.flow_scale_particle_i),
         drag_scale_particle_i=float(inputs.drag_scale_particle_i),
         body_scale_particle_i=float(inputs.body_scale_particle_i),
@@ -886,6 +902,7 @@ def _resolve_valid_mask_retry_with_inputs(
         gas_molecular_mass_kg=float(inputs.gas_molecular_mass_kg),
         drag_model_mode=int(inputs.drag_model_mode),
         electric_q_over_m_i=inputs.electric_q_over_m_i,
+        force_runtime=inputs.force_runtime,
     )
 
 
@@ -1299,6 +1316,10 @@ def _advance_colliding_particle(
     triangle_surface_3d: Optional[TriangleSurface3D],
     electric_q_over_m_i: Optional[float] = None,
     particle_density_i: float = 1000.0,
+    particle_mass_i: float = 0.0,
+    dep_particle_rel_permittivity_i: float = float("nan"),
+    thermophoretic_coeff_i: float = float("nan"),
+    force_runtime: Optional[ForceRuntimeParameters] = None,
     gas_temperature_K: float = 300.0,
     gas_molecular_mass_kg: float = 60.0 * 1.66053906660e-27,
 ) -> CollidingParticleAdvanceResult:
@@ -1329,6 +1350,9 @@ def _advance_colliding_particle(
         tau_p_i=float(tau_p_i),
         particle_diameter_i=float(particle_diameter_i),
         particle_density_i=float(particle_density_i),
+        particle_mass_i=float(particle_mass_i),
+        dep_particle_rel_permittivity_i=float(dep_particle_rel_permittivity_i),
+        thermophoretic_coeff_i=float(thermophoretic_coeff_i),
         flow_scale_particle_i=float(flow_scale_particle_i),
         drag_scale_particle_i=float(drag_scale_particle_i),
         body_scale_particle_i=float(body_scale_particle_i),
@@ -1343,6 +1367,7 @@ def _advance_colliding_particle(
         gas_molecular_mass_kg=float(gas_molecular_mass_kg),
         drag_model_mode=int(drag_model_mode),
         electric_q_over_m_i=electric_q_over_m_i,
+        force_runtime=force_runtime,
     )
 
     while active[particle_index] and remaining_dt > min_remaining_dt:

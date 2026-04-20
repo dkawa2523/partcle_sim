@@ -22,6 +22,10 @@ from particle_tracer_unified.solvers.charge_model import (
     ChargeModelConfig,
     apply_charge_model_update,
 )
+from particle_tracer_unified.solvers.plasma_background import (
+    parse_plasma_background_config,
+    prepare_plasma_background,
+)
 from particle_tracer_unified.solvers.compiled_field_backend import (
     compile_runtime_backend,
     sample_compiled_acceleration_vectors,
@@ -187,6 +191,65 @@ def test_density_temperature_flux_charge_model_produces_finite_negative_charge()
     assert abs(charge[0] / E_CHARGE_C) > 1.0
 
 
+def test_saas_constant_plasma_background_flux_charge_model() -> None:
+    background = prepare_plasma_background(
+        parse_plasma_background_config(
+            {
+                "plasma_background": {
+                    "source": "saas_constant",
+                    "electron_density_m3": 1.0e16,
+                    "ion_density_m3": 1.0e16,
+                    "electron_temperature_eV": 3.0,
+                    "ion_temperature_eV": 0.03,
+                    "ion_mass_amu": 69.0,
+                    "ion_charge_number": 1.0,
+                    "pressure_Pa": 1.0,
+                    "gas_temperature_K": 320.0,
+                    "neutral_molecular_mass_amu": 60.0,
+                    "electron_neutral_cross_section_m2": 3.0e-20,
+                    "ion_neutral_cross_section_m2": 1.0e-18,
+                }
+            }
+        )
+    )
+    assert background is not None
+    assert background.debye_length_m > 0.0
+    assert background.neutral_density_m3 > 0.0
+    assert background.electron_collision_frequency_s > 0.0
+    assert background.ion_collision_frequency_s > 0.0
+    assert background.conductivity_Sm > 0.0
+    charge = np.asarray([0.0], dtype=np.float64)
+    config = ChargeModelConfig(
+        enabled=True,
+        mode="finite_rate_flux_balance",
+        background_source="plasma_background",
+        ion_velocity_model="bohm",
+        relaxation_time_s=1.0e-6,
+        max_abs_potential_V=100.0,
+    )
+
+    result = apply_charge_model_update(
+        config=config,
+        runtime=SimpleNamespace(field_provider=None),
+        spatial_dim=2,
+        t_eval=0.0,
+        delta_t_s=1.0e-3,
+        active_mask=np.asarray([True]),
+        x=np.asarray([[0.5, 0.5]], dtype=np.float64),
+        charge=charge,
+        particle_diameter=np.asarray([20.0e-9], dtype=np.float64),
+        plasma_background=background,
+    )
+
+    assert result["applied"] is True
+    assert result["background_source"] == "plasma_background"
+    assert result["mean_ne_m3"] == pytest.approx(1.0e16)
+    assert result["mean_debye_length_m"] == pytest.approx(background.debye_length_m)
+    assert result["charge_response_regime"] == "quasi_equilibrium"
+    assert np.isfinite(charge[0])
+    assert charge[0] < 0.0
+
+
 def test_dynamic_charge_electric_backend_ignores_stale_exported_acceleration() -> None:
     field = _regular_charge_field()
     stale = np.ones((1, 2, 2), dtype=np.float64) * 1.0e9
@@ -256,3 +319,68 @@ def test_runtime_charge_model_updates_report_without_enabling_by_default() -> No
     assert charge_report["enabled"] == 1
     assert charge_report["update_event_count"] == 1
     assert charge_report["final_mean_charge_C"] < 0.0
+
+
+def test_runtime_saas_plasma_background_charge_model_reports_scalar_source(tmp_path) -> None:
+    field = _regular_charge_field()
+    particles = _particle_table(charge=0.0, mass=1.0e-18)
+    runtime = RuntimeLike(
+        spatial_dim=2,
+        coordinate_system="cartesian_xy",
+        particles=particles,
+        walls=None,
+        materials=None,
+        source_events=None,
+        process_steps=None,
+        compiled_source_events=None,
+        geometry_provider=_geometry_provider_for_field(field),
+        field_provider=FieldProviderND(field=field, kind="precomputed_npz"),
+        gas=GasProperties(temperature=300.0, dynamic_viscosity_Pas=1.8e-5, density_kgm3=1.0),
+        config_payload={
+            "solver": {
+                "dt": 1.0e-6,
+                "t_end": 1.0e-6,
+                "plasma_background": {
+                    "source": "saas_constant",
+                    "electron_density_m3": 1.0e16,
+                    "ion_density_m3": 1.0e16,
+                    "electron_temperature_eV": 3.0,
+                    "ion_temperature_eV": 0.03,
+                    "ion_mass_amu": 69.0,
+                    "ion_charge_number": 1.0,
+                    "pressure_Pa": 1.0,
+                    "gas_temperature_K": 320.0,
+                    "neutral_molecular_mass_amu": 60.0,
+                    "electron_neutral_cross_section_m2": 3.0e-20,
+                    "ion_neutral_cross_section_m2": 1.0e-18,
+                },
+                "charge_model": {
+                    "enabled": True,
+                    "mode": "finite_rate_flux_balance",
+                    "background_source": "plasma_background",
+                    "ion_velocity_model": "bohm",
+                    "relaxation_time_s": 1.0e-6,
+                },
+            },
+            "output": {"artifact_mode": "minimal"},
+        },
+    )
+
+    report = run_prepared_runtime(PreparedRuntime(runtime=runtime), output_dir=tmp_path, spatial_dim=2)
+
+    assert report["plasma_background"]["source"] == "saas_constant"
+    assert report["plasma_background"]["neutral_density_m3"] > 0.0
+    assert report["plasma_background"]["conductivity_Sm"] > 0.0
+    assert report["charge_model"]["background_source"] == "plasma_background"
+    assert report["charge_model"]["last_mean_ne_m3"] == pytest.approx(1.0e16)
+    assert report["charge_model"]["last_charge_response_regime"] in {
+        "partially_relaxed",
+        "quasi_equilibrium",
+    }
+    assert report["charge_model"]["final_mean_charge_C"] < 0.0
+    assert report["plasma_background_summary_file"] == "plasma_background_summary.csv"
+    assert report["charge_model_summary_file"] == "charge_model_summary.csv"
+    assert (tmp_path / "plasma_background_summary.csv").exists()
+    assert (tmp_path / "charge_model_summary.csv").exists()
+    assert "neutral_density_m3" in (tmp_path / "plasma_background_summary.csv").read_text(encoding="utf-8")
+    assert "last_charge_response_regime" in (tmp_path / "charge_model_summary.csv").read_text(encoding="utf-8")

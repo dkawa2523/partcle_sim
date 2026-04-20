@@ -19,6 +19,10 @@ from tools.visualization_common import (
 
 _ALLOWED_MODULES = ("graphs", "animations", "mechanics", "boundary")
 _DEFAULT_MODULES = ("graphs",)
+_COMPACT_SUMMARY_FILES = (
+    "plasma_background_summary.csv",
+    "charge_model_summary.csv",
+)
 
 
 def _parse_modules(raw: str | Iterable[str]) -> list[str]:
@@ -107,11 +111,17 @@ def export_visualizations(
             "files": list_files(boundary_dir, (".png", ".json")),
         }
 
+    summary_files = {
+        name: str((output_dir / name).resolve())
+        for name in _COMPACT_SUMMARY_FILES
+        if (output_dir / name).exists()
+    }
     payload = {
         "output_dir": str(output_dir),
         "visualizations_root": str(dirs["root"].resolve()),
         "clean": bool(clean),
         "health_summary": build_run_health_summary(output_dir),
+        "summary_files": summary_files,
         "modules": module_records,
     }
     summary_path = write_run_summary(output_dir, payload)

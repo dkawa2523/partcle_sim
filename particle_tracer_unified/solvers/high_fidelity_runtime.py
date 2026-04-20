@@ -43,6 +43,12 @@ from .charge_model import (
     parse_charge_model_config,
     validate_charge_model_support,
 )
+from .plasma_background import (
+    PreparedPlasmaBackground,
+    parse_plasma_background_config,
+    plasma_background_report,
+    prepare_plasma_background,
+)
 from .high_fidelity_collision import _advance_colliding_particle, _classify_trial_collisions, _step_segment_name
 from .high_fidelity_freeflight import (
     _advance_trial_particles,
@@ -54,6 +60,14 @@ from .integrator_common import (
     drag_model_mode_from_name,
     drag_model_name_from_mode,
     effective_tau_from_slip_speed,
+)
+from .forces import (
+    ForceCatalog,
+    ForceRuntimeParameters,
+    force_catalog_summary,
+    force_runtime_parameters_from_catalog,
+    force_runtime_parameters_summary,
+    solver_cfg_with_force_overrides,
 )
 from .runtime_outputs import (
     CoatingSummaryAccumulator,
@@ -170,6 +184,9 @@ class SolverRuntimeOptions:
     contact_tangent_motion_enabled: bool
     stochastic_motion: StochasticMotionConfig = field(default_factory=StochasticMotionConfig)
     charge_model: ChargeModelConfig = field(default_factory=ChargeModelConfig)
+    plasma_background: PreparedPlasmaBackground | None = None
+    force_catalog: ForceCatalog | None = None
+    force_runtime: ForceRuntimeParameters = field(default_factory=ForceRuntimeParameters)
 
 
 @dataclass
@@ -542,9 +559,13 @@ def _resolve_output_options(output_cfg: Mapping[str, object]) -> RuntimeOutputOp
     )
 
 
-def _resolve_solver_runtime_options(config_payload: Mapping[str, object]) -> SolverRuntimeOptions:
+def _resolve_solver_runtime_options(
+    config_payload: Mapping[str, object],
+    force_catalog: ForceCatalog | None = None,
+) -> SolverRuntimeOptions:
     config = config_payload if isinstance(config_payload, Mapping) else {}
-    solver_cfg = config.get('solver', {}) if isinstance(config.get('solver', {}), Mapping) else {}
+    raw_solver_cfg = config.get('solver', {}) if isinstance(config.get('solver', {}), Mapping) else {}
+    solver_cfg = solver_cfg_with_force_overrides(raw_solver_cfg, force_catalog)
     output_cfg = config.get('output', {}) if isinstance(config.get('output', {}), Mapping) else {}
     wall_cfg = config.get('wall', {}) if isinstance(config.get('wall', {}), Mapping) else {}
 
@@ -589,7 +610,9 @@ def _resolve_solver_runtime_options(config_payload: Mapping[str, object]) -> Sol
         solver_cfg,
         default_seed=int(solver_cfg.get('seed', 12345)),
     )
+    plasma_background = prepare_plasma_background(parse_plasma_background_config(solver_cfg))
     charge_model = parse_charge_model_config(solver_cfg)
+    force_runtime = force_runtime_parameters_from_catalog(force_catalog)
     write_collision_diagnostics = _config_bool_flag(
         output_cfg,
         'write_collision_diagnostics',
@@ -616,6 +639,9 @@ def _resolve_solver_runtime_options(config_payload: Mapping[str, object]) -> Sol
         drag_model_name=str(drag_model_name),
         stochastic_motion=stochastic_motion,
         charge_model=charge_model,
+        plasma_background=plasma_background,
+        force_catalog=force_catalog,
+        force_runtime=force_runtime,
         contact_tangent_motion_enabled=True,
     )
 
@@ -634,10 +660,14 @@ def _apply_valid_mask_retry_then_stop(
     tau_p: np.ndarray,
     particle_diameter: np.ndarray,
     particle_density: Optional[np.ndarray] = None,
+    particle_mass: Optional[np.ndarray] = None,
+    dep_particle_rel_permittivity: Optional[np.ndarray] = None,
+    thermophoretic_coeff: Optional[np.ndarray] = None,
     flow_scale_particle: np.ndarray,
     drag_scale_particle: np.ndarray,
     body_scale_particle: np.ndarray,
     electric_q_over_m_particle: Optional[np.ndarray] = None,
+    force_runtime: ForceRuntimeParameters | None = None,
     particle_indices: Optional[np.ndarray] = None,
 ) -> int:
     if str(options.valid_mask_policy) != VALID_MASK_POLICY_RETRY_THEN_STOP:
@@ -665,6 +695,15 @@ def _apply_valid_mask_retry_then_stop(
         particle_density_i = 1000.0
         if particle_density is not None:
             particle_density_i = float(np.asarray(particle_density, dtype=np.float64)[particle_index])
+        particle_mass_i = 0.0
+        if particle_mass is not None:
+            particle_mass_i = float(np.asarray(particle_mass, dtype=np.float64)[particle_index])
+        dep_particle_rel_permittivity_i = float('nan')
+        if dep_particle_rel_permittivity is not None:
+            dep_particle_rel_permittivity_i = float(np.asarray(dep_particle_rel_permittivity, dtype=np.float64)[particle_index])
+        thermophoretic_coeff_i = float('nan')
+        if thermophoretic_coeff is not None:
+            thermophoretic_coeff_i = float(np.asarray(thermophoretic_coeff, dtype=np.float64)[particle_index])
         electric_q_over_m_i = None
         if electric_q_over_m_particle is not None:
             electric_q_over_m_i = float(np.asarray(electric_q_over_m_particle, dtype=np.float64)[particle_index])
@@ -684,6 +723,9 @@ def _apply_valid_mask_retry_then_stop(
             tau_p_i=float(tau_p[particle_index]),
             particle_diameter_i=float(particle_diameter[particle_index]),
             particle_density_i=float(particle_density_i),
+            particle_mass_i=float(particle_mass_i),
+            dep_particle_rel_permittivity_i=float(dep_particle_rel_permittivity_i),
+            thermophoretic_coeff_i=float(thermophoretic_coeff_i),
             flow_scale_particle_i=float(flow_scale_particle[particle_index]),
             drag_scale_particle_i=float(drag_scale_particle[particle_index]),
             body_scale_particle_i=float(body_scale_particle[particle_index]),
@@ -698,6 +740,7 @@ def _apply_valid_mask_retry_then_stop(
             gas_molecular_mass_kg=float(phys.get('gas_molecular_mass_kg', 60.0 * 1.66053906660e-27)),
             drag_model_mode=int(options.drag_model_mode),
             electric_q_over_m_i=electric_q_over_m_i,
+            force_runtime=force_runtime,
         )
 
         _mark_invalid_mask_stopped(
@@ -1413,6 +1456,7 @@ def _advance_runtime_step(
                 x=state.x,
                 charge=state.charge,
                 particle_diameter=particle_diameter,
+                plasma_background=options.plasma_background,
             )
             merge_charge_model_diagnostics(
                 state.collision_diagnostics,
@@ -1474,7 +1518,10 @@ def _advance_runtime_step(
         active=mobile_active,
         tau_p=tau_p,
         particle_diameter=particle_diameter,
+        particle_mass=particle_mass,
         particle_density=particles.density,
+        dep_particle_rel_permittivity=particles.dep_particle_rel_permittivity,
+        thermophoretic_coeff=particles.thermophoretic_coeff,
         flow_scale_particle=flow_scale_particle,
         drag_scale_particle=drag_scale_particle,
         body_scale_particle=body_scale_particle,
@@ -1495,6 +1542,7 @@ def _advance_runtime_step(
         substep_counts=state.substep_counts,
         valid_mask_status_flags=state.valid_mask_status_flags,
         electric_q_over_m_particle=electric_q_over_m_particle,
+        force_runtime=options.force_runtime,
     )
     _add_timing(state.timing_accumulator, 'freeflight_s', time.perf_counter() - t_section)
 
@@ -1539,10 +1587,14 @@ def _advance_runtime_step(
         tau_p=tau_p,
         particle_diameter=particle_diameter,
         particle_density=particles.density,
+        particle_mass=particle_mass,
+        dep_particle_rel_permittivity=particles.dep_particle_rel_permittivity,
+        thermophoretic_coeff=particles.thermophoretic_coeff,
         flow_scale_particle=flow_scale_particle,
         drag_scale_particle=drag_scale_particle,
         body_scale_particle=body_scale_particle,
         electric_q_over_m_particle=electric_q_over_m_particle,
+        force_runtime=options.force_runtime,
         particle_indices=safe,
     )
     _add_timing(state.timing_accumulator, 'valid_mask_retry_s', time.perf_counter() - t_section)
@@ -1583,6 +1635,9 @@ def _advance_runtime_step(
             tau_p_i=float(tau_p[particle_index]),
             particle_diameter_i=float(particle_diameter[particle_index]),
             particle_density_i=float(particles.density[particle_index]),
+            particle_mass_i=float(particle_mass[particle_index]),
+            dep_particle_rel_permittivity_i=float(particles.dep_particle_rel_permittivity[particle_index]),
+            thermophoretic_coeff_i=float(particles.thermophoretic_coeff[particle_index]),
             flow_scale_particle_i=float(flow_scale_particle[particle_index]),
             drag_scale_particle_i=float(drag_scale_particle[particle_index]),
             body_scale_particle_i=float(body_scale_particle[particle_index]),
@@ -1601,6 +1656,7 @@ def _advance_runtime_step(
                 if electric_q_over_m_particle is None
                 else float(electric_q_over_m_particle[particle_index])
             ),
+            force_runtime=options.force_runtime,
             valid_mask_retry_then_stop_enabled=bool(
                 str(options.valid_mask_policy) == VALID_MASK_POLICY_RETRY_THEN_STOP
             ),
@@ -1783,7 +1839,7 @@ def _build_runtime_output_payload(
     setup_t0 = time.perf_counter()
     resolved = prepared.source_preprocess.resolved if prepared.source_preprocess is not None else None
     config_payload = runtime.config_payload if isinstance(runtime.config_payload, Mapping) else {}
-    options = _resolve_solver_runtime_options(config_payload)
+    options = _resolve_solver_runtime_options(config_payload, runtime.force_catalog)
 
     n_particles = int(particles.count)
     mins, maxs = runtime_bounds(runtime)
@@ -1792,8 +1848,16 @@ def _build_runtime_output_payload(
         spatial_dim,
         particles=particles,
         dynamic_electric=bool(options.charge_model.enabled),
+        enable_electric=bool(options.force_catalog.enabled('electric')) if options.force_catalog is not None else True,
+        force_runtime=options.force_runtime,
     )
-    validate_charge_model_support(options.charge_model, runtime, compiled, int(spatial_dim))
+    validate_charge_model_support(
+        options.charge_model,
+        runtime,
+        compiled,
+        int(spatial_dim),
+        options.plasma_background,
+    )
     gas_mu = float(runtime.gas.dynamic_viscosity_Pas)
     triangle_surface_3d = _prepare_triangle_surface(runtime, spatial_dim)
     release_time = np.asarray(particles.release_time, dtype=np.float64)
@@ -1875,8 +1939,14 @@ def _build_runtime_output_payload(
             drag_model_name=str(options.drag_model_name),
         )
     )
+    state.collision_diagnostics['force_catalog'] = force_catalog_summary(options.force_catalog)
+    state.collision_diagnostics['force_runtime'] = force_runtime_parameters_summary(options.force_runtime)
     state.collision_diagnostics['stochastic_motion'] = stochastic_motion_report(options.stochastic_motion)
-    state.collision_diagnostics['charge_model'] = charge_model_report(options.charge_model)
+    state.collision_diagnostics['plasma_background'] = plasma_background_report(options.plasma_background)
+    state.collision_diagnostics['charge_model'] = charge_model_report(
+        options.charge_model,
+        options.plasma_background,
+    )
     init_step = _current_step(runtime, 0.0, options.t_end)
     if bool(capture_snapshots):
         _append_snapshot(state.save_positions, state.save_meta, save_index=0, t=0.0, step=init_step, position=state.x)

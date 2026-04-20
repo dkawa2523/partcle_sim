@@ -19,4 +19,6 @@ tests/_out_*/
 *.status
 *.log
 /*.mph
+data/*.mph
+*.mph.lock
 hs_err_pid*.log

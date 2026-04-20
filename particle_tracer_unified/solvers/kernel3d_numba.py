@@ -83,6 +83,7 @@ def advance_particles_3d_inplace(
     active,
     tau_p,
     particle_diameter,
+    particle_density,
     flow_scale_particle,
     drag_tau_scale_particle,
     body_accel_scale_particle,
@@ -114,6 +115,10 @@ def advance_particles_3d_inplace(
     electric_y,
     electric_z,
     dynamic_electric_enabled,
+    extra_accel_x_particle,
+    extra_accel_y_particle,
+    extra_accel_z_particle,
+    gravity_buoyancy_enabled,
     valid_mask,
     core_valid_mask,
     x_trial,
@@ -138,9 +143,15 @@ def advance_particles_3d_inplace(
         q_over_m_i = 0.0
         if dynamic_electric_enabled != 0:
             q_over_m_i = electric_q_over_m_particle[i]
-        bax_base = body_ax * body_scale
-        bay_base = body_ay * body_scale
-        baz_base = body_az * body_scale
+        body_x_scaled = body_ax * body_scale
+        body_y_scaled = body_ay * body_scale
+        body_z_scaled = body_az * body_scale
+        gravity_factor = 1.0
+        if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+            gravity_factor = 1.0 - gas_density_kgm3 / particle_density[i]
+        bax_base = body_x_scaled * gravity_factor + extra_accel_x_particle[i]
+        bay_base = body_y_scaled * gravity_factor + extra_accel_y_particle[i]
+        baz_base = body_z_scaled * gravity_factor + extra_accel_z_particle[i]
         n_substeps = compute_substep_count(
             dt,
             tau_stokes,

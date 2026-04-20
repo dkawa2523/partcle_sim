@@ -494,6 +494,7 @@ class RuntimeLike:
     source_preprocess: Optional[SourcePreprocessResult] = None
     wall_catalog: Optional[WallCatalog] = None
     physics_catalog: Optional[PhysicsCatalog] = None
+    force_catalog: Optional[Any] = None
 
 
 @dataclass(frozen=True)

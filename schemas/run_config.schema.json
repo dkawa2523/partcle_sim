@@ -107,6 +107,138 @@
         "save_every": {"type": "integer", "minimum": 1},
         "integrator": {"type": "string", "enum": ["drag_relaxation", "etd", "etd2"]},
         "drag_model": {"type": "string", "enum": ["stokes", "schiller_naumann", "epstein"]},
+        "body_acceleration": {
+          "type": "array",
+          "items": {"type": "number"}
+        },
+        "gravity_mps2": {"type": "number"},
+        "forces": {
+          "type": "object",
+          "description": "Optional force catalog. Existing legacy keys still work; this block makes enabled forces explicit.",
+          "properties": {
+            "drag": {
+              "oneOf": [
+                {"type": "boolean"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {"type": ["boolean", "integer", "string"]},
+                    "model": {"type": "string", "enum": ["stokes", "schiller_naumann", "epstein"]}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "electric": {
+              "oneOf": [
+                {"type": "boolean"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {"type": ["boolean", "integer", "string"]},
+                    "model": {"type": "string"}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "gravity": {
+              "oneOf": [
+                {"type": "boolean"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {"type": ["boolean", "integer", "string"]},
+                    "buoyancy": {"type": ["boolean", "integer", "string"]},
+                    "include_buoyancy": {"type": ["boolean", "integer", "string"]},
+                    "acceleration_mps2": {
+                      "type": "array",
+                      "items": {"type": "number"}
+                    },
+                    "gravity_mps2": {"type": "number"}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "brownian": {
+              "oneOf": [
+                {"type": "boolean"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {"type": ["boolean", "integer", "string"]},
+                    "model": {"type": "string", "enum": ["underdamped_langevin"]},
+                    "stride": {"type": "integer", "minimum": 1},
+                    "seed": {"type": "integer"},
+                    "temperature_source": {"type": "string", "enum": ["field_T_then_gas", "gas"]}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "thermophoresis": {
+              "oneOf": [
+                {"type": "boolean"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {"type": ["boolean", "integer", "string"]},
+                    "model": {"type": "string", "enum": ["talbot", "continuum"]},
+                    "gas_thermal_conductivity_W_mK": {"type": "number", "exclusiveMinimum": 0},
+                    "fluid_thermal_conductivity_W_mK": {"type": "number", "exclusiveMinimum": 0},
+                    "particle_thermal_conductivity_W_mK": {"type": "number", "exclusiveMinimum": 0},
+                    "Cs": {"type": "number"},
+                    "C_s": {"type": "number"},
+                    "Cm": {"type": "number"},
+                    "C_m": {"type": "number"},
+                    "Ct": {"type": "number"},
+                    "C_t": {"type": "number"}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "dielectrophoresis": {
+              "oneOf": [
+                {"type": "boolean"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {"type": ["boolean", "integer", "string"]},
+                    "model": {"type": "string", "enum": ["dc", "rms_ac", "ac"]},
+                    "medium_rel_permittivity": {"type": "number", "exclusiveMinimum": 0},
+                    "fluid_rel_permittivity": {"type": "number", "exclusiveMinimum": 0},
+                    "epsilon_r_medium": {"type": "number", "exclusiveMinimum": 0},
+                    "particle_rel_permittivity": {"type": "number", "exclusiveMinimum": 0},
+                    "epsilon_r_particle": {"type": "number", "exclusiveMinimum": 0},
+                    "medium_conductivity_Sm": {"type": "number", "minimum": 0},
+                    "fluid_conductivity_Sm": {"type": "number", "minimum": 0},
+                    "particle_conductivity_Sm": {"type": "number", "minimum": 0},
+                    "frequency_Hz": {"type": "number", "minimum": 0}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "lift": {
+              "oneOf": [
+                {"type": "boolean"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {"type": ["boolean", "integer", "string"]},
+                    "model": {"type": "string", "enum": ["saffman"]},
+                    "coefficient": {"type": "number"},
+                    "saffman_coefficient": {"type": "number"}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
         "stochastic_motion": {
           "oneOf": [
             {"type": "boolean"},
@@ -123,6 +255,36 @@
             }
           ]
         },
+        "plasma_background": {
+          "type": "object",
+          "properties": {
+            "source": {"type": "string", "enum": ["none", "saas_constant", "saas", "constant", "scalar"]},
+            "electron_density_m3": {"type": "number", "exclusiveMinimum": 0},
+            "ion_density_m3": {"type": "number", "exclusiveMinimum": 0},
+            "electron_temperature_eV": {"type": "number", "exclusiveMinimum": 0},
+            "ion_temperature_eV": {"type": "number", "exclusiveMinimum": 0},
+            "ion_mass_amu": {"type": "number", "exclusiveMinimum": 0},
+            "ion_charge_number": {"type": "number", "exclusiveMinimum": 0},
+            "pressure_Pa": {"type": "number", "minimum": 0},
+            "gas_pressure_Pa": {"type": "number", "minimum": 0},
+            "gas_temperature_K": {"type": "number", "minimum": 0},
+            "neutral_temperature_K": {"type": "number", "minimum": 0},
+            "neutral_molecular_mass_amu": {"type": "number", "minimum": 0},
+            "gas_molecular_mass_amu": {"type": "number", "minimum": 0},
+            "electron_neutral_cross_section_m2": {"type": "number", "minimum": 0},
+            "ion_neutral_cross_section_m2": {"type": "number", "minimum": 0},
+            "electron_collision_frequency_s": {"type": "number", "minimum": 0},
+            "ion_collision_frequency_s": {"type": "number", "minimum": 0},
+            "electron_ion_collision_frequency_s": {"type": "number", "minimum": 0},
+            "conductivity_Sm": {"type": "number", "minimum": 0},
+            "conductivity_S_m": {"type": "number", "minimum": 0},
+            "ne_m3": {"type": "number", "exclusiveMinimum": 0},
+            "ni_m3": {"type": "number", "exclusiveMinimum": 0},
+            "Te_eV": {"type": "number", "exclusiveMinimum": 0},
+            "Ti_eV": {"type": "number", "exclusiveMinimum": 0}
+          },
+          "additionalProperties": false
+        },
         "charge_model": {
           "oneOf": [
             {"type": "boolean"},
@@ -137,10 +299,15 @@
                     "v2",
                     "te_relaxation",
                     "density_temperature_flux_relaxation",
+                    "finite_rate_flux_balance",
                     "flux_relaxation",
-                    "density_temperature_flux"
+                    "density_temperature_flux",
+                    "flux_balance",
+                    "saas_constant_flux_balance",
+                    "saas_flux_balance"
                   ]
                 },
+                "background_source": {"type": "string", "enum": ["field", "regular_field", "plasma_background", "plasma", "saas", "saas_constant", "scalar"]},
                 "update_stride": {"type": "integer", "minimum": 1},
                 "electron_temperature_quantity": {"type": "string"},
                 "electron_temperature_unit": {"type": "string", "enum": ["eV", "K", "ev", "k"]},
@@ -152,6 +319,7 @@
                 "ion_charge_number": {"type": "number", "exclusiveMinimum": 0},
                 "electron_sticking": {"type": "number", "minimum": 0},
                 "ion_sticking": {"type": "number", "minimum": 0},
+                "ion_velocity_model": {"type": "string", "enum": ["bohm", "thermal", "max_thermal_bohm"]},
                 "bohm_velocity_factor": {"type": "number", "minimum": 0},
                 "te_relaxation_alpha": {"type": "number", "exclusiveMinimum": 0},
                 "relaxation_time_s": {"type": "number", "exclusiveMinimum": 0},

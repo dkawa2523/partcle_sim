@@ -24,12 +24,23 @@ The default solver path is deterministic. The core solver does not infer missing
 - `schiller_naumann` applies a finite-Re drag correction from the local slip speed and gas properties, reducing the effective relaxation time as particle Reynolds number rises.
 - `epstein` uses low-pressure free-molecular relaxation. Rectilinear field bundles may provide `rho_g` and `T`; these are sampled at the same trajectory stage points as the flow field. `gas.density_kgm3` and `gas.temperature_K` remain scalar fallbacks when a field quantity is missing or invalid. Pressure `p` is diagnostic only and is not used directly by drag. Field `mu` can also be carried and reported, but it is not part of the Epstein relaxation formula.
 
-`solver.charge_model` is disabled by default. In 2D regular rectilinear fields it supports:
+`solver.charge_model` is disabled by default. In 2D regular rectilinear fields it currently supports:
 
-- `te_relaxation` (`v1`): relaxes particle charge toward `q_eq = -4 pi eps0 r_p alpha Te`, where `Te` is in eV and is numerically the floating-potential scale in volts.
-- `density_temperature_flux_relaxation` (`v2`): computes a local floating potential from electron/ion density and temperature using density-temperature flux balance, then relaxes `q` toward `4 pi eps0 r_p phi_f`.
+- `te_relaxation`: sensitivity model that relaxes particle charge toward `q_eq = -4 pi eps0 r_p alpha Te`, where `Te` is in eV and is numerically the floating-potential scale in volts.
+- `density_temperature_flux_relaxation`: field-backed model that computes a local floating potential from electron/ion density and temperature using density-temperature flux balance, then relaxes `q` toward `4 pi eps0 r_p phi_f`.
+- `finite_rate_flux_balance` with `background_source: plasma_background`: the same finite-rate flux balance, but using explicit scalar `solver.plasma_background` values from an assumed SAAS-style plasma state.
 
-Both modes sample only local scalar background distributions such as `Te`, `ne`, `ni`, and `Ti`. They do not consume COMSOL flux vectors. The acceleration term is then evaluated as `(q/m)E`, so time-dependent background distributions are handled through the normal field time axis. 3D dynamic charge coupling is intentionally left for a separate implementation.
+Field-backed modes sample only local scalar background distributions such as `Te`, `ne`, `ni`, and `Ti`. The SAAS scalar-background mode samples no plasma field; it reports the scalar `ne`, `ni`, `Te`, `Ti`, Debye length, optional neutral density, collision-frequency diagnostics, mobility, conductivity, and plasma-frequency diagnostics separately. Neither path consumes COMSOL flux vectors. These derived plasma quantities are diagnostics unless the charge law explicitly uses them. The acceleration term is then evaluated as `(q/m)E`, so time-dependent field-backed background distributions are handled through the normal field time axis. 3D dynamic charge coupling is intentionally left for a separate implementation.
+
+When enabled runs write output files, `plasma_background_summary.csv` and
+`charge_model_summary.csv` mirror the scalar diagnostics in a flat
+`quantity,value,unit` format for review and downstream analysis.
+
+For COMSOL cases that do not solve a plasma module, do not pretend that missing
+`ne(x,t)` or `Te(x,t)` fields exist. Use `solver.plasma_background.source:
+saas_constant` and set `solver.charge_model.background_source:
+plasma_background`. Legacy aliases such as `v1` and `v2` may remain accepted for
+compatibility, but new configs should use descriptive mode names.
 
 ## Field Backend Contract
 

@@ -16,6 +16,7 @@ from ..providers.source_adapters import (
     build_wall_shear_sampler,
 )
 from .runtime_builder_support import build_runtime_providers, load_runtime_inputs, resolve_runtime_input_paths
+from ..solvers.forces import build_force_catalog, force_catalog_summary
 from ..solvers.source_preprocess import preprocess_particles_for_solver
 
 
@@ -61,6 +62,11 @@ def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> Ru
 
     wall_catalog = build_wall_catalog(runtime_inputs.walls, runtime_inputs.materials, config)
     physics_catalog = build_physics_catalog(config, spatial_dim)
+    force_catalog = build_force_catalog(
+        config,
+        field_provider=providers.field_provider,
+        spatial_dim=spatial_dim,
+    )
 
     return RuntimeLike(
         spatial_dim=spatial_dim,
@@ -78,6 +84,7 @@ def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> Ru
         config_payload=config,
         wall_catalog=wall_catalog,
         physics_catalog=physics_catalog,
+        force_catalog=force_catalog,
     )
 
 
@@ -142,6 +149,7 @@ def prepared_runtime_summary(prepared: PreparedRuntime) -> Dict[str, Any]:
         'process_steps': process_step_control_summary(runtime.process_steps),
         'wall_catalog': wall_catalog_summary(runtime.wall_catalog),
         'physics_catalog': physics_catalog_summary(runtime.physics_catalog),
+        'force_catalog': force_catalog_summary(runtime.force_catalog),
     }
     if prepared.source_preprocess is not None:
         summary['source_model_summary'] = dict(prepared.source_preprocess.source_model_summary)

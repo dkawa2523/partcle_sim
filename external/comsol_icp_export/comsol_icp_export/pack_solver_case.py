@@ -87,7 +87,13 @@ def _run(cmd: list[str], *, cwd: Path) -> None:
 
 
 def _copy_raw_manifests(raw_export_dir: Path, generated_dir: Path) -> None:
-    for name in ("export_manifest.json", "expression_inventory.json", "material_inventory.json"):
+    for name in (
+        "export_manifest.json",
+        "expression_inventory.json",
+        "material_inventory.json",
+        "physics_feature_inventory.json",
+        "particle_release_inventory.json",
+    ):
         src = raw_export_dir / name
         if src.exists():
             shutil.copy2(src, generated_dir / name)

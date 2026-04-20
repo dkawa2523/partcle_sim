@@ -102,13 +102,82 @@ Required solver-facing field quantities are:
 - velocity: `ux`, `uy` or `ux`, `uy`, `uz`
 - dynamic viscosity: `mu`
 - electric field: `E_x`, `E_y` or `E_x`, `E_y`, `E_z`
+- temperature `T` when thermophoresis, Brownian motion, or field-backed gas
+  properties are enabled
+- gas density `rho_g` when low-pressure Epstein drag, buoyancy, lift, or
+  thermophoresis should use a field value
 - `valid_mask`
 - axes and, when applicable, `times`
+
+Thermophoresis, dielectrophoresis, and lift do not require COMSOL to export
+spatial gradients. The solver computes `grad(T)`, `grad(|E|^2)`, and velocity
+curl from the exported rectilinear fields. Export explicit COMSOL gradients
+only when reproducing a COMSOL force node requires a nonstandard expression.
 
 COMSOL-only diagnostics such as electric potential, electron
 density, ion density, temperature, pressure, or ion flux should be exported for
 review, but they must not be required by the solver hot path unless a new
 provider contract is intentionally designed.
+
+## COMSOL Particle Tracing Reproducibility
+
+The solver does not need to mimic COMSOL for every production study, but new
+COMSOL-derived cases should export enough information to reproduce COMSOL
+Particle Tracing results when that is the validation target.
+
+Required COMSOL-side data for reproducibility:
+
+- particle release selections, release timing, initial position distribution,
+  initial velocity distribution, and particle count
+- particle material, density, diameter or diameter distribution, mass, charge,
+  and charge-law parameters
+- all force fields used by COMSOL Particle Tracing, with units and expressions:
+  flow drag inputs, electric field, magnetic field if enabled, gravity/body
+  acceleration, Brownian/Langevin temperature and gas properties, and any
+  thermophoretic or dielectrophoretic inputs
+- Particle Tracing force-node settings:
+  - thermophoresis: temperature expression, gas and particle thermal
+    conductivity, Talbot constants if customized, and gas-property source
+  - dielectrophoresis: electric-field or potential expression, medium and
+    particle permittivity, conductivity, and AC frequency when applicable
+  - lift: flow velocity expression, gas density and viscosity source, and the
+    selected lift coefficient/model
+  - gravity: gravity vector and whether buoyancy is included
+- wall/boundary selections with COMSOL entity IDs, material names, and the
+  exact interaction law: freeze, stick, disappear, bounce/specular, diffuse,
+  mixed reflection, secondary release, or user-defined probability
+- solver time range, output times, time stepping policy, tolerances, and any
+  event or wall-hit settings that affect trajectory termination
+- particle result tables from COMSOL: final state, hit boundary/entity, hit
+  time, hit position, final position, final velocity, and particle charge when
+  dynamic charge is enabled
+
+Solver-side settings that must be explicit rather than inferred:
+
+- coordinate system: planar, axisymmetric r-z, or 3D
+- particle release surface and normal convention
+- field component names and sign convention
+- drag model and gas-property source
+- charge model: fixed, field-backed density/temperature, or scalar plasma
+  background
+- wall law per physical material or boundary class
+- stochastic motion model and random seed when Brownian/Langevin motion is used
+- output cadence used for comparison with COMSOL
+
+Comparison metrics should remain compact:
+
+- final-state counts by state and boundary part
+- first-hit boundary/entity agreement
+- hit-time distribution by boundary class
+- final position and velocity error for matched particle IDs
+- deposition/sticking distribution by physical part
+- charge distribution over time or at final state
+- trajectory envelopes or representative matched trajectories
+- runtime and memory for the selected particle count
+
+Do not add solver-side rescue logic to match COMSOL. If these metrics disagree,
+classify the cause as export data, coordinate/sign convention, particle source,
+force model, wall law, or numerical time stepping before changing runtime code.
 
 ## Solver Case Packing
 

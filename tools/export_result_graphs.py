@@ -418,6 +418,45 @@ def _save_geometry_maps(
     return saved
 
 
+def _save_boundary_entity_role_review(out_dir: Path, output_dir: Path) -> list[str]:
+    path = Path(output_dir) / "wall_catalog_alignment.csv"
+    if not path.exists():
+        return []
+    try:
+        df = pd.read_csv(path)
+    except (OSError, ValueError, pd.errors.ParserError):
+        return []
+    if df.empty or "solver_entity_role" not in df.columns:
+        return []
+    saved: list[str] = []
+    review_path = out_dir / "23_boundary_entity_roles.csv"
+    df.to_csv(review_path, index=False)
+    saved.append(review_path.name)
+
+    role_counts = (
+        df.groupby("solver_entity_role", as_index=False)
+        .size()
+        .rename(columns={"size": "entity_count"})
+        .sort_values(["solver_entity_role"])
+    )
+    role_counts.to_csv(out_dir / "23_boundary_entity_role_counts.csv", index=False)
+    saved.append("23_boundary_entity_role_counts.csv")
+
+    fig, ax = plt.subplots(figsize=(8.6, 4.8))
+    ax.bar(role_counts["solver_entity_role"].astype(str), role_counts["entity_count"], color="#777777")
+    ax.set_title("COMSOL Boundary Entities by Solver Role")
+    ax.set_xlabel("solver entity role")
+    ax.set_ylabel("entity count")
+    ax.tick_params(axis="x", rotation=25)
+    for idx, value in enumerate(role_counts["entity_count"].tolist()):
+        ax.text(idx, value, str(int(value)), ha="center", va="bottom", fontsize=8)
+    fig.tight_layout()
+    fig.savefig(out_dir / "23_boundary_entity_role_counts.png", dpi=170)
+    plt.close(fig)
+    saved.append("23_boundary_entity_role_counts.png")
+    return saved
+
+
 def _save_field_maps(
     out_dir: Path,
     field: dict[str, np.ndarray],
@@ -1343,6 +1382,7 @@ def export_result_graphs(output_dir: Path, case_dir: Path | None = None, sample_
     extra_graph_files: list[str] = []
     if spatial_dim == 2:
         extra_graph_files.extend(_save_geometry_maps(out_dir, geometry_payload, edges, edge_part_ids, medium_summary))
+        extra_graph_files.extend(_save_boundary_entity_role_review(out_dir, output_dir))
         extra_graph_files.extend(_save_field_maps(out_dir, field_payload, geometry_payload, edges, edge_part_ids, medium_summary))
         extra_graph_files.extend(
             _save_drag_gas_property_maps(

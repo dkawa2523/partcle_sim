@@ -101,6 +101,9 @@ def advance_particles_2d_inplace(
     electric_x,
     electric_y,
     dynamic_electric_enabled,
+    extra_accel_x_particle,
+    extra_accel_y_particle,
+    gravity_buoyancy_enabled,
     gas_density_grid,
     gas_mu_grid,
     gas_temperature_grid,
@@ -130,8 +133,12 @@ def advance_particles_2d_inplace(
         q_over_m_i = 0.0
         if dynamic_electric_enabled != 0:
             q_over_m_i = electric_q_over_m_particle[i]
-        bax_base = body_ax * body_scale
-        bay_base = body_ay * body_scale
+        body_x_scaled = body_ax * body_scale
+        body_y_scaled = body_ay * body_scale
+        extra_ax_i = extra_accel_x_particle[i]
+        extra_ay_i = extra_accel_y_particle[i]
+        bax_base = body_x_scaled + extra_ax_i
+        bay_base = body_y_scaled + extra_ay_i
         n_substeps = compute_substep_count(
             dt,
             tau_stokes,
@@ -177,8 +184,11 @@ def advance_particles_2d_inplace(
                     mu_g0 = gas_mu_pas
                 if not np.isfinite(temp_g0) or temp_g0 <= 0.0:
                     temp_g0 = gas_temperature_K
-                bax0 = bax_base + body_scale * accx0
-                bay0 = bay_base + body_scale * accy0
+                gravity_factor0 = 1.0
+                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                    gravity_factor0 = 1.0 - rho_g0 / particle_density[i]
+                bax0 = bax_base + (gravity_factor0 - 1.0) * body_x_scaled + body_scale * accx0
+                bay0 = bay_base + (gravity_factor0 - 1.0) * body_y_scaled + body_scale * accy0
                 targetx0 = global_flow_scale * flow_scale_particle[i] * flowx0
                 targety0 = global_flow_scale * flow_scale_particle[i] * flowy0
                 slip0 = np.sqrt((vxn - targetx0) * (vxn - targetx0) + (vyn - targety0) * (vyn - targety0))
@@ -225,8 +235,11 @@ def advance_particles_2d_inplace(
                     mu_g_mid = gas_mu_pas
                 if not np.isfinite(temp_g_mid) or temp_g_mid <= 0.0:
                     temp_g_mid = gas_temperature_K
-                bax_mid = bax_base + body_scale * accx_mid
-                bay_mid = bay_base + body_scale * accy_mid
+                gravity_factor_mid = 1.0
+                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                    gravity_factor_mid = 1.0 - rho_g_mid / particle_density[i]
+                bax_mid = bax_base + (gravity_factor_mid - 1.0) * body_x_scaled + body_scale * accx_mid
+                bay_mid = bay_base + (gravity_factor_mid - 1.0) * body_y_scaled + body_scale * accy_mid
                 targetx_mid = global_flow_scale * flow_scale_particle[i] * flowx_mid
                 targety_mid = global_flow_scale * flow_scale_particle[i] * flowy_mid
                 slip_mid = np.sqrt((_vxh - targetx_mid) * (_vxh - targetx_mid) + (_vyh - targety_mid) * (_vyh - targety_mid))
@@ -280,8 +293,11 @@ def advance_particles_2d_inplace(
                                 mu_g0_mid = gas_mu_pas
                             if not np.isfinite(temp_g0_mid) or temp_g0_mid <= 0.0:
                                 temp_g0_mid = gas_temperature_K
-                            bax0_mid = bax_base + body_scale * accx0_mid
-                            bay0_mid = bay_base + body_scale * accy0_mid
+                            gravity_factor0_mid = 1.0
+                            if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                                gravity_factor0_mid = 1.0 - rho_g0_mid / particle_density[i]
+                            bax0_mid = bax_base + (gravity_factor0_mid - 1.0) * body_x_scaled + body_scale * accx0_mid
+                            bay0_mid = bay_base + (gravity_factor0_mid - 1.0) * body_y_scaled + body_scale * accy0_mid
                             targetx0_mid = global_flow_scale * flow_scale_particle[i] * flowx0_mid
                             targety0_mid = global_flow_scale * flow_scale_particle[i] * flowy0_mid
                             slip0_mid = np.sqrt((vx0 - targetx0_mid) * (vx0 - targetx0_mid) + (vy0 - targety0_mid) * (vy0 - targety0_mid))
@@ -328,8 +344,11 @@ def advance_particles_2d_inplace(
                                 mu_g_mid2 = gas_mu_pas
                             if not np.isfinite(temp_g_mid2) or temp_g_mid2 <= 0.0:
                                 temp_g_mid2 = gas_temperature_K
-                            bax_mid2 = bax_base + body_scale * accx_mid2
-                            bay_mid2 = bay_base + body_scale * accy_mid2
+                            gravity_factor_mid2 = 1.0
+                            if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                                gravity_factor_mid2 = 1.0 - rho_g_mid2 / particle_density[i]
+                            bax_mid2 = bax_base + (gravity_factor_mid2 - 1.0) * body_x_scaled + body_scale * accx_mid2
+                            bay_mid2 = bay_base + (gravity_factor_mid2 - 1.0) * body_y_scaled + body_scale * accy_mid2
                             targetx_mid2 = global_flow_scale * flow_scale_particle[i] * flowx_mid2
                             targety_mid2 = global_flow_scale * flow_scale_particle[i] * flowy_mid2
                             slip_mid2 = np.sqrt((_vxh_mid - targetx_mid2) * (_vxh_mid - targetx_mid2) + (_vyh_mid - targety_mid2) * (_vyh_mid - targety_mid2))
@@ -385,8 +404,11 @@ def advance_particles_2d_inplace(
                     mu_g = gas_mu_pas
                 if not np.isfinite(temp_g) or temp_g <= 0.0:
                     temp_g = gas_temperature_K
-                bax = bax_base + body_scale * accx
-                bay = bay_base + body_scale * accy
+                gravity_factor = 1.0
+                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                    gravity_factor = 1.0 - rho_g / particle_density[i]
+                bax = bax_base + (gravity_factor - 1.0) * body_x_scaled + body_scale * accx
+                bay = bay_base + (gravity_factor - 1.0) * body_y_scaled + body_scale * accy
                 targetx = global_flow_scale * flow_scale_particle[i] * flowx
                 targety = global_flow_scale * flow_scale_particle[i] * flowy
                 slip = np.sqrt((vxn - targetx) * (vxn - targetx) + (vyn - targety) * (vyn - targety))

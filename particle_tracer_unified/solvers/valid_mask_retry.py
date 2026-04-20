@@ -25,6 +25,9 @@ def resolve_valid_mask_retry_then_stop(
     tau_p_i: float,
     particle_diameter_i: float,
     particle_density_i: float,
+    particle_mass_i: float,
+    dep_particle_rel_permittivity_i: float,
+    thermophoretic_coeff_i: float,
     flow_scale_particle_i: float,
     drag_scale_particle_i: float,
     body_scale_particle_i: float,
@@ -39,6 +42,7 @@ def resolve_valid_mask_retry_then_stop(
     gas_molecular_mass_kg: float,
     drag_model_mode: int,
     electric_q_over_m_i: Optional[float] = None,
+    force_runtime: object | None = None,
 ) -> ValidMaskPrefixResolution:
     resolution = resolve_prefix(
         x0=x0,
@@ -54,6 +58,9 @@ def resolve_valid_mask_retry_then_stop(
         tau_p_i=float(tau_p_i),
         particle_diameter_i=float(particle_diameter_i),
         particle_density_i=float(particle_density_i),
+        particle_mass_i=float(particle_mass_i),
+        dep_particle_rel_permittivity_i=float(dep_particle_rel_permittivity_i),
+        thermophoretic_coeff_i=float(thermophoretic_coeff_i),
         flow_scale_particle_i=float(flow_scale_particle_i),
         drag_scale_particle_i=float(drag_scale_particle_i),
         body_scale_particle_i=float(body_scale_particle_i),
@@ -68,6 +75,7 @@ def resolve_valid_mask_retry_then_stop(
         gas_molecular_mass_kg=float(gas_molecular_mass_kg),
         drag_model_mode=int(drag_model_mode),
         electric_q_over_m_i=electric_q_over_m_i,
+        force_runtime=force_runtime,
         max_halving_count=int(adaptive_substep_max_splits),
     )
     collision_diagnostics['invalid_mask_retry_count'] += int(resolution.retry_count)
