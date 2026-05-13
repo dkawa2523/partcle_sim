@@ -1,0 +1,41 @@
+schema_version: 1
+model:
+  name: example_model
+  study: particle_tracing
+  dataset: dset1
+  solution: sol1
+  time: 0.0
+coordinates:
+  coordinate_system: axisymmetric_rz
+  coordinate_scale_m_per_model_unit: 1.0
+fields:
+  - name: u
+    physical_quantity: velocity
+    unit: m/s
+    mesh: native_triangle
+    interpolation: linear
+    components:
+      r: ur
+      z: uz
+  - name: E
+    physical_quantity: electric_field
+    unit: V/m
+    mesh: native_triangle
+    interpolation: linear
+    components:
+      r: E_r
+      z: E_z
+particles:
+  release_table: comsol_release_particles.csv
+boundaries:
+  map_file: comsol_boundary_map.csv
+  wall_law_file: comsol_wall_laws.csv
+forces:
+  - solver_force: drag
+    enabled: true
+    law: stokes_cunningham
+    physical_quantity: force
+  - solver_force: electric
+    enabled: true
+    law: particle_charge
+    physical_quantity: acceleration

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Dict, Iterable, Mapping, Sequence
 
 import numpy as np
@@ -7,15 +8,52 @@ import numpy as np
 from .datamodel import FieldProviderND, TriangleMeshField2D
 from .field_sampling import (
     VALID_MASK_STATUS_CLEAN,
+    VALID_MASK_STATUS_HARD_INVALID,
+    VALID_MASK_STATUS_MIXED_STENCIL,
+    choose_electric_field_quantity_names,
+    choose_velocity_quantity_names,
+    point_within_axes,
     sample_quantity_series,
     sample_valid_mask,
     sample_valid_mask_status,
 )
-from .triangle_mesh_sampling_2d import sample_triangle_mesh_series, sample_triangle_mesh_status
+from .grid_sampling import locate_axis_interval
+from .triangle_mesh_sampling_2d import (
+    locate_triangle_containing_point,
+    sample_triangle_mesh_series,
+    sample_triangle_mesh_status,
+)
 
 
 FIELD_BACKEND_RECTILINEAR = 'regular_rectilinear'
 FIELD_BACKEND_TRIANGLE_MESH_2D = 'triangle_mesh_2d'
+
+FIELD_SAMPLE_STATUS_REASON = {
+    int(VALID_MASK_STATUS_CLEAN): 'clean',
+    int(VALID_MASK_STATUS_MIXED_STENCIL): 'mixed_stencil',
+    int(VALID_MASK_STATUS_HARD_INVALID): 'hard_invalid',
+}
+
+TRIANGLE_DERIVED_QUANTITY_ALIASES = {
+    'grad_T_x': ('grad_T_x', 'dT_dx', 'temperature_gradient_x', 'grad_temperature_x'),
+    'grad_T_y': ('grad_T_y', 'dT_dy', 'temperature_gradient_y', 'grad_temperature_y'),
+    'grad_E2_x': ('grad_E2_x', 'dE2_dx', 'grad_E_squared_x', 'grad_esq_x'),
+    'grad_E2_y': ('grad_E2_y', 'dE2_dy', 'grad_E_squared_y', 'grad_esq_y'),
+    'fluid_accel_x': ('fluid_accel_x', 'fluid_acceleration_x', 'material_accel_x', 'a_fluid_x'),
+    'fluid_accel_y': ('fluid_accel_y', 'fluid_acceleration_y', 'material_accel_y', 'a_fluid_y'),
+    'vorticity_z': ('vorticity_z', 'omega_z', 'curl_u_z'),
+}
+
+
+@dataclass(frozen=True)
+class FieldSample:
+    quantity_name: str
+    value: Any
+    valid: bool
+    status: int
+    reason: str
+    provider_kind: str
+    cell_id: int
 
 
 def field_backend_kind(field_provider: FieldProviderND | None) -> str:
@@ -25,6 +63,51 @@ def field_backend_kind(field_provider: FieldProviderND | None) -> str:
     if isinstance(field, TriangleMeshField2D):
         return FIELD_BACKEND_TRIANGLE_MESH_2D
     return str(getattr(field, 'metadata', {}).get('field_backend_kind', FIELD_BACKEND_RECTILINEAR))
+
+
+def _status_reason(status: int) -> str:
+    return str(FIELD_SAMPLE_STATUS_REASON.get(int(status), 'unknown'))
+
+
+def _regular_cell_id(field, position: np.ndarray) -> int:
+    axes = tuple(getattr(field, 'axes', ()))
+    if not point_within_axes(axes, np.asarray(position, dtype=np.float64)):
+        return -1
+    lows = []
+    shape = []
+    for axis_index, axis in enumerate(axes):
+        lo, _hi, _alpha = locate_axis_interval(np.asarray(axis, dtype=np.float64), float(position[axis_index]))
+        lows.append(int(lo))
+        shape.append(max(int(np.asarray(axis).size) - 1, 1))
+    cell_id = 0
+    stride = 1
+    for lo, count in reversed(list(zip(lows, shape))):
+        cell_id += int(lo) * stride
+        stride *= int(count)
+    return int(cell_id)
+
+
+def _triangle_cell_id(field: TriangleMeshField2D, position: np.ndarray) -> int:
+    tri_idx, _bary = locate_triangle_containing_point(
+        vertices=field.mesh_vertices,
+        triangles=field.mesh_triangles,
+        accel_origin=field.accel_origin,
+        accel_cell_size=field.accel_cell_size,
+        accel_shape=field.accel_shape,
+        accel_cell_offsets=field.accel_cell_offsets,
+        accel_triangle_indices=field.accel_triangle_indices,
+        position=np.asarray(position, dtype=np.float64),
+        eps=float(getattr(field, 'metadata', {}).get('support_tolerance_m', 2.0e-6)),
+    )
+    return int(tri_idx)
+
+
+def sample_field_cell_id(field_provider: FieldProviderND, position: np.ndarray) -> int:
+    field = field_provider.field
+    pos = np.asarray(position, dtype=np.float64)
+    if isinstance(field, TriangleMeshField2D):
+        return _triangle_cell_id(field, pos)
+    return _regular_cell_id(field, pos)
 
 
 def _regular_field_support_report(field) -> Dict[str, Any]:
@@ -63,11 +146,50 @@ def _regular_field_support_report(field) -> Dict[str, Any]:
     }
 
 
+def triangle_derived_quantity_names(field: TriangleMeshField2D) -> Dict[str, str]:
+    quantities = getattr(field, 'quantities', {})
+    selected: Dict[str, str] = {}
+    for target, aliases in TRIANGLE_DERIVED_QUANTITY_ALIASES.items():
+        for name in aliases:
+            if name in quantities:
+                selected[str(target)] = str(name)
+                break
+    return selected
+
+
+def triangle_mesh_gradient_source_report(field: TriangleMeshField2D) -> Dict[str, str]:
+    quantities = getattr(field, 'quantities', {})
+    quantity_names = set(quantities)
+    names = triangle_derived_quantity_names(field)
+    gas_names = {'T', 'temperature', 'temperature_K', 'gas_temperature'}
+    electric_names = choose_electric_field_quantity_names(field, 2)
+    has_velocity = len(choose_velocity_quantity_names(field, 2)) >= 2
+    return {
+        'grad_T': (
+            'exported_quantity'
+            if {'grad_T_x', 'grad_T_y'} <= set(names)
+            else ('triangle_p1_fallback' if quantity_names.intersection(gas_names) else 'unavailable')
+        ),
+        'grad_E2': (
+            'exported_quantity'
+            if {'grad_E2_x', 'grad_E2_y'} <= set(names)
+            else ('triangle_p1_fallback' if len(electric_names) >= 2 else 'unavailable')
+        ),
+        'fluid_acceleration': (
+            'exported_quantity'
+            if {'fluid_accel_x', 'fluid_accel_y'} <= set(names)
+            else ('triangle_p1_fallback' if has_velocity else 'unavailable')
+        ),
+        'vorticity_z': 'exported_quantity' if 'vorticity_z' in names else ('triangle_p1_fallback' if has_velocity else 'unavailable'),
+    }
+
+
 def _triangle_mesh_field_support_report(field: TriangleMeshField2D) -> Dict[str, Any]:
     return {
         'mesh_vertex_count': int(field.mesh_vertices.shape[0]),
         'mesh_triangle_count': int(field.mesh_triangles.shape[0]),
         'accel_grid_shape': [int(v) for v in field.accel_shape],
+        'triangle_gradient_sources': triangle_mesh_gradient_source_report(field),
     }
 
 
@@ -162,6 +284,54 @@ def sample_field_quantity(
     return float(sample_quantity_series(series, field.axes, pos, float(t_eval), mode=mode))
 
 
+def sample_field_quantity_with_status(
+    field_provider: FieldProviderND,
+    quantity_name: str,
+    position: np.ndarray,
+    t_eval: float,
+    *,
+    mode: str = 'linear',
+    default: float = np.nan,
+) -> FieldSample:
+    field = field_provider.field
+    name = str(quantity_name)
+    pos = np.asarray(position, dtype=np.float64)
+    status = int(sample_field_valid_status(field_provider, pos, float(t_eval)))
+    cell_id = int(sample_field_cell_id(field_provider, pos))
+    provider_kind = str(field_backend_kind(field_provider))
+    if name not in getattr(field, 'quantities', {}):
+        return FieldSample(
+            quantity_name=name,
+            value=float(default),
+            valid=False,
+            status=int(status),
+            reason='missing_quantity',
+            provider_kind=provider_kind,
+            cell_id=cell_id,
+        )
+    value = float(default)
+    if status != int(VALID_MASK_STATUS_HARD_INVALID):
+        value = float(
+            sample_field_quantity(
+                field_provider,
+                name,
+                pos,
+                float(t_eval),
+                mode=mode,
+                default=default,
+            )
+        )
+    return FieldSample(
+        quantity_name=name,
+        value=value,
+        valid=bool(status == int(VALID_MASK_STATUS_CLEAN) and np.isfinite(value)),
+        status=int(status),
+        reason=_status_reason(status),
+        provider_kind=provider_kind,
+        cell_id=cell_id,
+    )
+
+
 def sample_field_vector(
     field_provider: FieldProviderND,
     component_names: Sequence[str],
@@ -185,3 +355,62 @@ def sample_field_vector(
         ],
         dtype=np.float64,
     )
+
+
+def sample_field_vector_with_status(
+    field_provider: FieldProviderND,
+    component_names: Sequence[str],
+    position: np.ndarray,
+    t_eval: float,
+    *,
+    mode: str = 'linear',
+    default: float = np.nan,
+) -> FieldSample:
+    field = field_provider.field
+    names = tuple(str(name) for name in component_names)
+    pos = np.asarray(position, dtype=np.float64)
+    status = int(sample_field_valid_status(field_provider, pos, float(t_eval)))
+    cell_id = int(sample_field_cell_id(field_provider, pos))
+    provider_kind = str(field_backend_kind(field_provider))
+    missing = [name for name in names if name not in getattr(field, 'quantities', {})]
+    if missing:
+        return FieldSample(
+            quantity_name=','.join(names),
+            value=np.full(len(names), float(default), dtype=np.float64),
+            valid=False,
+            status=int(status),
+            reason='missing_quantity:' + ','.join(missing),
+            provider_kind=provider_kind,
+            cell_id=cell_id,
+        )
+    values = np.full(len(names), float(default), dtype=np.float64)
+    if status != int(VALID_MASK_STATUS_HARD_INVALID):
+        values = sample_field_vector(field_provider, names, pos, float(t_eval), mode=mode, default=default)
+    return FieldSample(
+        quantity_name=','.join(names),
+        value=np.asarray(values, dtype=np.float64),
+        valid=bool(status == int(VALID_MASK_STATUS_CLEAN) and np.all(np.isfinite(values))),
+        status=int(status),
+        reason=_status_reason(status),
+        provider_kind=provider_kind,
+        cell_id=cell_id,
+    )
+
+
+__all__ = (
+    'FIELD_BACKEND_RECTILINEAR',
+    'FIELD_BACKEND_TRIANGLE_MESH_2D',
+    'FIELD_SAMPLE_STATUS_REASON',
+    'FieldSample',
+    'field_backend_kind',
+    'field_backend_report',
+    'sample_field_cell_id',
+    'sample_field_quantity',
+    'sample_field_quantity_with_status',
+    'sample_field_valid',
+    'sample_field_valid_status',
+    'sample_field_vector',
+    'sample_field_vector_with_status',
+    'triangle_derived_quantity_names',
+    'triangle_mesh_gradient_source_report',
+)

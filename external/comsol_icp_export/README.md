@@ -22,7 +22,7 @@ at runtime. COMSOL is used only to create export artifacts.
 
 py -3 external\comsol_icp_export\pack_solver_case.py `
   --raw-export-dir "_external_exports\icp_cf4_o2_v20" `
-  --out-dir "examples\icp_rf_bias_cf4_o2_si_etching_2d" `
+  --out-dir "_external_exports\icp_rf_bias_cf4_o2_si_etching_2d_solver_case" `
   --particle-count 1000
 ```
 
@@ -32,7 +32,7 @@ laws can be applied with an optional override CSV:
 ```powershell
 py -3 external\comsol_icp_export\pack_solver_case.py `
   --raw-export-dir "_external_exports\icp_cf4_o2_v20" `
-  --out-dir "examples\icp_rf_bias_cf4_o2_si_etching_2d" `
+  --out-dir "_external_exports\icp_rf_bias_cf4_o2_si_etching_2d_solver_case" `
   --particle-count 1000 `
   --wall-overrides-csv "path\to\wall_catalog_overrides.csv"
 ```

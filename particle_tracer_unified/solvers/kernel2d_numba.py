@@ -5,6 +5,7 @@ from numba import njit
 
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN
 from .integrator_common import (
+    DRAG_MODEL_STOKES,
     INTEGRATOR_ETD2,
     advance_state_2d,
     advance_state_2d_etd,
@@ -139,20 +140,50 @@ def advance_particles_2d_inplace(
         extra_ay_i = extra_accel_y_particle[i]
         bax_base = body_x_scaled + extra_ax_i
         bay_base = body_y_scaled + extra_ay_i
+        t_start = t - dt
+        xn = x[i, 0]
+        yn = x[i, 1]
+        vxn = v[i, 0]
+        vyn = v[i, 1]
+        substep_tau = tau_stokes
+        if int(drag_model_mode) != int(DRAG_MODEL_STOKES):
+            flowx_start = _sample_time_bilinear(ux, times, xs, ys, t_start, xn, yn)
+            flowy_start = _sample_time_bilinear(uy, times, xs, ys, t_start, xn, yn)
+            rho_g_start = _sample_time_bilinear(gas_density_grid, times, xs, ys, t_start, xn, yn)
+            mu_g_start = _sample_time_bilinear(gas_mu_grid, times, xs, ys, t_start, xn, yn)
+            temp_g_start = _sample_time_bilinear(gas_temperature_grid, times, xs, ys, t_start, xn, yn)
+            if not np.isfinite(rho_g_start) or rho_g_start <= 0.0:
+                rho_g_start = gas_density_kgm3
+            if not np.isfinite(mu_g_start) or mu_g_start <= 0.0:
+                mu_g_start = gas_mu_pas
+            if not np.isfinite(temp_g_start) or temp_g_start <= 0.0:
+                temp_g_start = gas_temperature_K
+            targetx_start = global_flow_scale * flow_scale_particle[i] * flowx_start
+            targety_start = global_flow_scale * flow_scale_particle[i] * flowy_start
+            slip_start = np.sqrt((vxn - targetx_start) * (vxn - targetx_start) + (vyn - targety_start) * (vyn - targety_start))
+            tau_eff_start = effective_tau_from_slip_speed(
+                tau_stokes,
+                slip_start,
+                particle_diameter[i],
+                rho_g_start,
+                mu_g_start,
+                drag_model_mode,
+                min_tau_p_s,
+                particle_density[i],
+                temp_g_start,
+                gas_molecular_mass_kg,
+            )
+            if np.isfinite(tau_eff_start) and tau_eff_start > 0.0 and tau_eff_start < substep_tau:
+                substep_tau = tau_eff_start
         n_substeps = compute_substep_count(
             dt,
-            tau_stokes,
+            substep_tau,
             adaptive_substep_enabled,
             adaptive_substep_tau_ratio,
             adaptive_substep_max_splits,
         )
         substep_counts[i] = n_substeps
         dt_sub = dt / float(n_substeps)
-        t_start = t - dt
-        xn = x[i, 0]
-        yn = x[i, 1]
-        vxn = v[i, 0]
-        vyn = v[i, 1]
         mask_status = VALID_MASK_STATUS_CLEAN
         if integrator_mode == INTEGRATOR_ETD2:
             half_dt = 0.5 * dt
@@ -187,8 +218,8 @@ def advance_particles_2d_inplace(
                 gravity_factor0 = 1.0
                 if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
                     gravity_factor0 = 1.0 - rho_g0 / particle_density[i]
-                bax0 = bax_base + (gravity_factor0 - 1.0) * body_x_scaled + body_scale * accx0
-                bay0 = bay_base + (gravity_factor0 - 1.0) * body_y_scaled + body_scale * accy0
+                bax0 = bax_base + (gravity_factor0 - 1.0) * body_x_scaled + accx0
+                bay0 = bay_base + (gravity_factor0 - 1.0) * body_y_scaled + accy0
                 targetx0 = global_flow_scale * flow_scale_particle[i] * flowx0
                 targety0 = global_flow_scale * flow_scale_particle[i] * flowy0
                 slip0 = np.sqrt((vxn - targetx0) * (vxn - targetx0) + (vyn - targety0) * (vyn - targety0))
@@ -238,8 +269,8 @@ def advance_particles_2d_inplace(
                 gravity_factor_mid = 1.0
                 if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
                     gravity_factor_mid = 1.0 - rho_g_mid / particle_density[i]
-                bax_mid = bax_base + (gravity_factor_mid - 1.0) * body_x_scaled + body_scale * accx_mid
-                bay_mid = bay_base + (gravity_factor_mid - 1.0) * body_y_scaled + body_scale * accy_mid
+                bax_mid = bax_base + (gravity_factor_mid - 1.0) * body_x_scaled + accx_mid
+                bay_mid = bay_base + (gravity_factor_mid - 1.0) * body_y_scaled + accy_mid
                 targetx_mid = global_flow_scale * flow_scale_particle[i] * flowx_mid
                 targety_mid = global_flow_scale * flow_scale_particle[i] * flowy_mid
                 slip_mid = np.sqrt((_vxh - targetx_mid) * (_vxh - targetx_mid) + (_vyh - targety_mid) * (_vyh - targety_mid))
@@ -296,8 +327,8 @@ def advance_particles_2d_inplace(
                             gravity_factor0_mid = 1.0
                             if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
                                 gravity_factor0_mid = 1.0 - rho_g0_mid / particle_density[i]
-                            bax0_mid = bax_base + (gravity_factor0_mid - 1.0) * body_x_scaled + body_scale * accx0_mid
-                            bay0_mid = bay_base + (gravity_factor0_mid - 1.0) * body_y_scaled + body_scale * accy0_mid
+                            bax0_mid = bax_base + (gravity_factor0_mid - 1.0) * body_x_scaled + accx0_mid
+                            bay0_mid = bay_base + (gravity_factor0_mid - 1.0) * body_y_scaled + accy0_mid
                             targetx0_mid = global_flow_scale * flow_scale_particle[i] * flowx0_mid
                             targety0_mid = global_flow_scale * flow_scale_particle[i] * flowy0_mid
                             slip0_mid = np.sqrt((vx0 - targetx0_mid) * (vx0 - targetx0_mid) + (vy0 - targety0_mid) * (vy0 - targety0_mid))
@@ -347,8 +378,8 @@ def advance_particles_2d_inplace(
                             gravity_factor_mid2 = 1.0
                             if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
                                 gravity_factor_mid2 = 1.0 - rho_g_mid2 / particle_density[i]
-                            bax_mid2 = bax_base + (gravity_factor_mid2 - 1.0) * body_x_scaled + body_scale * accx_mid2
-                            bay_mid2 = bay_base + (gravity_factor_mid2 - 1.0) * body_y_scaled + body_scale * accy_mid2
+                            bax_mid2 = bax_base + (gravity_factor_mid2 - 1.0) * body_x_scaled + accx_mid2
+                            bay_mid2 = bay_base + (gravity_factor_mid2 - 1.0) * body_y_scaled + accy_mid2
                             targetx_mid2 = global_flow_scale * flow_scale_particle[i] * flowx_mid2
                             targety_mid2 = global_flow_scale * flow_scale_particle[i] * flowy_mid2
                             slip_mid2 = np.sqrt((_vxh_mid - targetx_mid2) * (_vxh_mid - targetx_mid2) + (_vyh_mid - targety_mid2) * (_vyh_mid - targety_mid2))
@@ -407,8 +438,8 @@ def advance_particles_2d_inplace(
                 gravity_factor = 1.0
                 if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
                     gravity_factor = 1.0 - rho_g / particle_density[i]
-                bax = bax_base + (gravity_factor - 1.0) * body_x_scaled + body_scale * accx
-                bay = bay_base + (gravity_factor - 1.0) * body_y_scaled + body_scale * accy
+                bax = bax_base + (gravity_factor - 1.0) * body_x_scaled + accx
+                bay = bay_base + (gravity_factor - 1.0) * body_y_scaled + accy
                 targetx = global_flow_scale * flow_scale_particle[i] * flowx
                 targety = global_flow_scale * flow_scale_particle[i] * flowy
                 slip = np.sqrt((vxn - targetx) * (vxn - targetx) + (vyn - targety) * (vyn - targety))

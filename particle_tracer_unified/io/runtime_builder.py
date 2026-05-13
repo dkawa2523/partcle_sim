@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import copy
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, Optional
 import yaml
 
 from ..core.catalogs import build_physics_catalog, build_wall_catalog, physics_catalog_summary, wall_catalog_summary
@@ -16,6 +17,13 @@ from ..providers.source_adapters import (
     build_wall_shear_sampler,
 )
 from .runtime_builder_support import build_runtime_providers, load_runtime_inputs, resolve_runtime_input_paths
+from .comsol import (
+    enforce_comsol_faithful_config,
+    finalize_comsol_runtime_config,
+    is_comsol_faithful_config,
+    load_comsol_manifest_for_config,
+    load_comsol_runtime_inputs,
+)
 from ..solvers.forces import build_force_catalog, force_catalog_summary
 from ..solvers.source_preprocess import preprocess_particles_for_solver
 
@@ -27,23 +35,39 @@ def _read_yaml(path: Path) -> Dict[str, Any]:
         raise ValueError('YAML root must be a mapping')
     return data
 
+
 def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> RuntimeLike:
-    run = dict(config.get('run', {}))
-    paths = dict(config.get('paths', {}))
-    providers_cfg = dict(config.get('providers', {}))
-    source_cfg = dict(config.get('source', {}))
-    gas_cfg = dict(config.get('gas', {}))
+    config_payload = copy.deepcopy(dict(config))
+    manifest = load_comsol_manifest_for_config(config_payload, config_dir)
+    if manifest is not None:
+        enforce_comsol_faithful_config(config_payload, manifest)
+
+    run = dict(config_payload.get('run', {}))
+    paths = dict(config_payload.get('paths', {}))
+    providers_cfg = dict(config_payload.get('providers', {}))
+    gas_cfg = dict(config_payload.get('gas', {}))
 
     spatial_dim = int(run.get('spatial_dim', 2))
-    coordinate_system = normalize_coordinate_system(run.get('coordinate_system'), spatial_dim)
+    coordinate_source = run.get('coordinate_system')
+    if manifest is not None:
+        coordinate_source = coordinate_source or manifest.coordinate_system
+    coordinate_system = normalize_coordinate_system(coordinate_source, spatial_dim)
     time_interpolation = str(run.get('time_interpolation', 'linear'))
 
-    resolved_paths = resolve_runtime_input_paths(config_dir, paths)
-    runtime_inputs = load_runtime_inputs(
-        paths=resolved_paths,
-        spatial_dim=spatial_dim,
-        coordinate_system=coordinate_system,
-    )
+    if manifest is None:
+        resolved_paths = resolve_runtime_input_paths(config_dir, paths)
+        runtime_inputs = load_runtime_inputs(
+            paths=resolved_paths,
+            spatial_dim=spatial_dim,
+            coordinate_system=coordinate_system,
+        )
+    else:
+        runtime_inputs = load_comsol_runtime_inputs(
+            config=config_payload,
+            config_dir=config_dir,
+            manifest=manifest,
+            spatial_dim=spatial_dim,
+        )
 
     gas = GasProperties(
         temperature=float(gas_cfg.get('temperature_K', gas_cfg.get('temperature', 300.0))),
@@ -60,13 +84,15 @@ def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> Ru
         gas_density_kgm3=float(gas.density_kgm3),
     )
 
-    wall_catalog = build_wall_catalog(runtime_inputs.walls, runtime_inputs.materials, config)
-    physics_catalog = build_physics_catalog(config, spatial_dim)
+    wall_catalog = build_wall_catalog(runtime_inputs.walls, runtime_inputs.materials, config_payload)
+    physics_catalog = build_physics_catalog(config_payload, spatial_dim)
     force_catalog = build_force_catalog(
-        config,
+        config_payload,
         field_provider=providers.field_provider,
         spatial_dim=spatial_dim,
     )
+    if manifest is not None:
+        finalize_comsol_runtime_config(config_payload, manifest, providers.field_provider)
 
     return RuntimeLike(
         spatial_dim=spatial_dim,
@@ -81,23 +107,30 @@ def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> Ru
         field_provider=providers.field_provider,
         gas=gas,
         time_interpolation=time_interpolation,
-        config_payload=config,
+        config_payload=config_payload,
         wall_catalog=wall_catalog,
         physics_catalog=physics_catalog,
         force_catalog=force_catalog,
     )
 
-
-
 def prepare_runtime(runtime: RuntimeLike, seed: Optional[int] = None) -> PreparedRuntime:
     source_cfg = runtime.config_payload.get('source', {}) if isinstance(runtime.config_payload, Mapping) else {}
     preprocess_cfg = source_cfg.get('preprocess', {}) if isinstance(source_cfg.get('preprocess', {}), Mapping) else {}
+    if is_comsol_faithful_config(runtime.config_payload if isinstance(runtime.config_payload, Mapping) else {}):
+        if bool(preprocess_cfg.get('enabled', False)):
+            raise ValueError('source.preprocess.enabled must be false in COMSOL faithful mode')
+        return PreparedRuntime(runtime=runtime, source_preprocess=None)
     if not bool(preprocess_cfg.get('enabled', True)):
         return PreparedRuntime(runtime=runtime, source_preprocess=None)
     normal_sampler = build_normal_sampler(runtime)
     flow_sampler = build_flow_sampler(runtime)
     viscosity_sampler = build_viscosity_sampler(runtime)
-    wall_shear_sampler = build_wall_shear_sampler(runtime, normal_sampler=normal_sampler, flow_sampler=flow_sampler, viscosity_sampler=viscosity_sampler)
+    wall_shear_sampler = build_wall_shear_sampler(
+        runtime,
+        normal_sampler=normal_sampler,
+        flow_sampler=flow_sampler,
+        viscosity_sampler=viscosity_sampler,
+    )
     friction_velocity_sampler = build_friction_velocity_sampler(runtime, wall_shear_sampler=wall_shear_sampler)
     result = preprocess_particles_for_solver(
         particles=runtime.particles,
@@ -116,7 +149,12 @@ def prepare_runtime(runtime: RuntimeLike, seed: Optional[int] = None) -> Prepare
         viscosity_sampler=viscosity_sampler,
         seed=int(seed if seed is not None else preprocess_cfg.get('seed', 12345)),
     )
-    prepared_runtime = replace_runtime_particles(runtime, result.particles, source_preprocess=result, compiled_source_events=runtime.compiled_source_events)
+    prepared_runtime = replace_runtime_particles(
+        runtime,
+        result.particles,
+        source_preprocess=result,
+        compiled_source_events=runtime.compiled_source_events,
+    )
     return PreparedRuntime(runtime=prepared_runtime, source_preprocess=result)
 
 

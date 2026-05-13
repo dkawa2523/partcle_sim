@@ -1,0 +1,19 @@
+{
+  "case_name": "micromixer_particle_tracing",
+  "mode": "inventory",
+  "export_mesh": false,
+  "export_fields": false,
+  "dataset": "dset1",
+  "mesh_tag": "mesh1",
+  "spatial_dim": 2,
+  "axis_names": ["x", "y"],
+  "coordinate_model_unit": "mm",
+  "coordinate_scale_m_per_model_unit": 0.001,
+  "export_data_table": true,
+  "export_data_table_required": false,
+  "data_export_dataset": "part1",
+  "data_export_filename": "comsol_particle_xy_probe.csv",
+  "data_export_innerinput": "all",
+  "data_export_expr": ["x", "y"],
+  "required": []
+}

@@ -19,17 +19,11 @@ from particle_tracer_unified.core.geometry2d import (
 )
 from particle_tracer_unified.core.grid_sampling import sample_grid_scalar
 
-DEFAULT_FIELD_GHOST_CELLS = 8
+DEFAULT_FIELD_GHOST_CELLS = 0
 FIELD_SUPPORT_BOUNDARY_PART_ID = 9001
-PHYSICAL_WALL_STICK_PROBABILITY = 0.5
+PHYSICAL_WALL_STICK_PROBABILITY = 0.0
 
-AXIS_SYMMETRY_PART_IDS = frozenset({2, 4, 6, 8, 10})
-WAFER_PART_IDS = frozenset({3})
-CHAMBER_WALL_PART_IDS = frozenset({12, 32, 36})
-SIDEWALL_PART_IDS = frozenset({42, 43, 44, 45})
-KNOWN_COMSOL_WALL_PART_IDS = (
-    AXIS_SYMMETRY_PART_IDS | WAFER_PART_IDS | CHAMBER_WALL_PART_IDS | SIDEWALL_PART_IDS
-)
+KNOWN_COMSOL_WALL_PART_IDS = frozenset()
 
 
 @dataclass(frozen=True)
@@ -386,44 +380,22 @@ def _support_boundary_part_ids_from_reference(
 
 def _wall_role_for_part_id(part_id: int) -> Dict[str, Any]:
     pid = int(part_id)
-    if pid in AXIS_SYMMETRY_PART_IDS:
-        return {
-            'part_name': f'axis_symmetry_{pid}',
-            'material_id': 10,
-            'material_name': 'axis_symmetry',
-            'wall_law': 'specular',
-            'wall_restitution': 1.0,
-            'wall_diffuse_fraction': 0.0,
-            'wall_stick_probability': 0.0,
-        }
     if pid == FIELD_SUPPORT_BOUNDARY_PART_ID:
         return {
             'part_name': 'field_support_boundary',
             'material_id': 90,
             'material_name': 'field_support_boundary',
             'wall_law': 'specular',
-            'wall_restitution': 0.95,
+            'wall_restitution': 1.0,
             'wall_diffuse_fraction': 0.0,
-            'wall_stick_probability': PHYSICAL_WALL_STICK_PROBABILITY,
+            'wall_stick_probability': 0.0,
         }
-    if pid in WAFER_PART_IDS:
-        role_name = 'wafer'
-        material_id = 20
-    elif pid in SIDEWALL_PART_IDS:
-        role_name = 'sidewall'
-        material_id = 50
-    elif pid in CHAMBER_WALL_PART_IDS:
-        role_name = 'chamber_wall'
-        material_id = 40
-    else:
-        role_name = 'comsol_wall'
-        material_id = 99
     return {
-        'part_name': f'{role_name}_{pid}',
-        'material_id': material_id,
-        'material_name': role_name,
+        'part_name': f'comsol_boundary_{pid}',
+        'material_id': 1,
+        'material_name': 'comsol_boundary',
         'wall_law': 'specular',
-        'wall_restitution': 0.95,
+        'wall_restitution': 1.0,
         'wall_diffuse_fraction': 0.0,
         'wall_stick_probability': PHYSICAL_WALL_STICK_PROBABILITY,
     }
@@ -512,6 +484,7 @@ def _comsol_boundary_entity_rows(mesh: ParsedMesh, active_part_ids: Optional[Lis
                 'solver_part_id': pid,
                 'comsol_edge_entity_id': pid,
                 'raw_comsol_edge_entity_index': pid - 1,
+                'comsol_api_selection_entity_id': pid - 1,
                 'segment_count': 0,
                 'x_min': float('inf'),
                 'x_max': float('-inf'),
@@ -537,6 +510,7 @@ def _comsol_boundary_entity_rows(mesh: ParsedMesh, active_part_ids: Optional[Lis
                 'solver_part_id': int(pid),
                 'comsol_edge_entity_id': int(row['comsol_edge_entity_id']),
                 'raw_comsol_edge_entity_index': int(row['raw_comsol_edge_entity_index']),
+                'comsol_api_selection_entity_id': int(row['comsol_api_selection_entity_id']),
                 'active_in_solver_boundary': bool((not active) or (pid in active)),
                 'segment_count': int(row['segment_count']),
                 'x_min_m': float(row['x_min']),
@@ -570,6 +544,7 @@ def _comsol_domain_entity_rows(mesh: ParsedMesh) -> List[Dict[str, Any]]:
                 {
                     'comsol_domain_entity_id': did,
                     'raw_comsol_domain_entity_index': did - 1,
+                    'comsol_api_selection_entity_id': did - 1,
                     'element_count': 0,
                     'mesh_element_types': set(),
                     'x_min': float('inf'),
@@ -592,6 +567,7 @@ def _comsol_domain_entity_rows(mesh: ParsedMesh) -> List[Dict[str, Any]]:
             {
                 'comsol_domain_entity_id': int(did),
                 'raw_comsol_domain_entity_index': int(row['raw_comsol_domain_entity_index']),
+                'comsol_api_selection_entity_id': int(row['comsol_api_selection_entity_id']),
                 'element_count': int(row['element_count']),
                 'mesh_element_types': ';'.join(sorted(str(v) for v in row['mesh_element_types'])),
                 'x_min_m': float(row['x_min']),
@@ -1464,8 +1440,16 @@ def write_case_files(
     geometry_only: bool = False,
     diagnostic_grid_spacing_m: float = 5e-4,
     field_ghost_cells: int = DEFAULT_FIELD_GHOST_CELLS,
+    allow_field_ghost_cells: bool = False,
     coordinate_scale_m_per_model_unit: float = 1.0,
     coordinate_system: str = 'cartesian_xy',
+    gas_temperature_K: float = 320.0,
+    gas_dynamic_viscosity_Pas: float = 1.8e-5,
+    gas_density_kgm3: float = 1.2,
+    solver_dt_s: float = 2.0e-8,
+    solver_t_end_s: float = 2.0e-6,
+    solver_save_every: int = 10,
+    solver_min_tau_p_s: float = 1e-5,
 ) -> None:
     if field_bundle_path is None and not geometry_only:
         raise ValueError('COMSOL case generation requires --field-bundle; use --geometry-only to build geometry only')
@@ -1478,6 +1462,10 @@ def write_case_files(
     mesh = _scale_mesh_coordinates(parse_comsol_mphtxt(mphtxt_path), coordinate_scale)
     base_arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=float(diagnostic_grid_spacing_m))
     ghost_cells = int(max(0, field_ghost_cells if field_bundle_path is not None else 0))
+    if ghost_cells > 0 and not bool(allow_field_ghost_cells):
+        raise ValueError(
+            'field ghost cells are disabled by default; pass --allow-field-ghost-cells for smoke/regression cases'
+        )
     arrays = (
         build_precomputed_arrays(
             mesh,
@@ -1716,8 +1704,18 @@ def write_case_files(
         'wall_policy': {
             'physical_wall_law': 'specular',
             'physical_wall_stick_probability': PHYSICAL_WALL_STICK_PROBABILITY,
-            'axis_symmetry_law': 'specular',
             'field_support_boundary_law': 'specular',
+        },
+        'gas_properties': {
+            'temperature_K': float(gas_temperature_K),
+            'dynamic_viscosity_Pas': float(gas_dynamic_viscosity_Pas),
+            'density_kgm3': float(gas_density_kgm3),
+        },
+        'solver_defaults': {
+            'dt_s': float(solver_dt_s),
+            't_end_s': float(solver_t_end_s),
+            'save_every': int(solver_save_every),
+            'min_tau_p_s': float(solver_min_tau_p_s),
         },
         'note': 'COMSOL exterior geometry is scaled to SI metres, then field-support geometry is used when field data are present.',
     }
@@ -1744,9 +1742,9 @@ def write_case_files(
                 },
             },
             'gas': {
-                'temperature_K': 320.0,
-                'dynamic_viscosity_Pas': 1.8e-5,
-                'density_kgm3': 1.2,
+                'temperature_K': float(gas_temperature_K),
+                'dynamic_viscosity_Pas': float(gas_dynamic_viscosity_Pas),
+                'density_kgm3': float(gas_density_kgm3),
             },
             'source': {
                 'preprocess': {
@@ -1765,11 +1763,11 @@ def write_case_files(
                 'boundary_offset_cells': 1.0,
             },
             'solver': {
-                'dt': 2.0e-8,
-                't_end': 2.0e-6,
-                'save_every': 10,
+                'dt': float(solver_dt_s),
+                't_end': float(solver_t_end_s),
+                'save_every': int(solver_save_every),
                 'integrator': 'etd2',
-                'min_tau_p_s': 1e-5,
+                'min_tau_p_s': float(solver_min_tau_p_s),
                 'valid_mask_policy': 'retry_then_stop',
                 'plot_particle_limit': 24,
                 'seed': 12345,
@@ -1806,7 +1804,15 @@ def main() -> int:
     ap.add_argument('--source-part-ids', type=str, default=None, help='Comma-separated boundary part IDs to use as particle release sources.')
     ap.add_argument('--diagnostic-grid-spacing-m', type=float, default=5e-4)
     ap.add_argument('--field-ghost-cells', type=int, default=DEFAULT_FIELD_GHOST_CELLS)
+    ap.add_argument('--allow-field-ghost-cells', action='store_true', help='Enable ghost cells for smoke/regression cases.')
     ap.add_argument('--coordinate-scale-m-per-model-unit', type=float, default=1.0)
+    ap.add_argument('--gas-temperature-K', type=float, default=320.0)
+    ap.add_argument('--gas-dynamic-viscosity-Pas', type=float, default=1.8e-5)
+    ap.add_argument('--gas-density-kgm3', type=float, default=1.2)
+    ap.add_argument('--solver-dt-s', type=float, default=2.0e-8)
+    ap.add_argument('--solver-t-end-s', type=float, default=2.0e-6)
+    ap.add_argument('--solver-save-every', type=int, default=10)
+    ap.add_argument('--solver-min-tau-p-s', type=float, default=1e-5)
     ap.add_argument(
         '--coordinate-system',
         default='cartesian_xy',
@@ -1834,8 +1840,16 @@ def main() -> int:
         geometry_only=bool(args.geometry_only),
         diagnostic_grid_spacing_m=float(args.diagnostic_grid_spacing_m),
         field_ghost_cells=int(args.field_ghost_cells),
+        allow_field_ghost_cells=bool(args.allow_field_ghost_cells),
         coordinate_scale_m_per_model_unit=float(args.coordinate_scale_m_per_model_unit),
         coordinate_system=str(args.coordinate_system),
+        gas_temperature_K=float(args.gas_temperature_K),
+        gas_dynamic_viscosity_Pas=float(args.gas_dynamic_viscosity_Pas),
+        gas_density_kgm3=float(args.gas_density_kgm3),
+        solver_dt_s=float(args.solver_dt_s),
+        solver_t_end_s=float(args.solver_t_end_s),
+        solver_save_every=int(args.solver_save_every),
+        solver_min_tau_p_s=float(args.solver_min_tau_p_s),
     )
     print(f'Wrote COMSOL-derived case to: {args.out_dir.resolve()}')
     return 0

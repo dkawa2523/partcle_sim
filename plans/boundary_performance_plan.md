@@ -19,7 +19,7 @@ boundary_edges = 764
 ```
 
 This is not primarily a visualization or output-size problem. Most particles
-are far from walls for most steps, but the old path still paid for exact
+are far from walls for most steps, but the previous path still paid for exact
 geometry and edge checks too often.
 
 ## Implemented Direction

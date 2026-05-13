@@ -31,6 +31,7 @@ from .compiled_field_backend import (
     sample_compiled_acceleration_vectors as _sample_acceleration_vectors_at,
     sample_compiled_flow_vector as _sample_flow_vector_at,
     sample_compiled_flow_vectors as _sample_flow_vectors_at,
+    sample_compiled_gas_properties_vectors as _sample_gas_properties_vectors_at,
     sample_compiled_valid_mask_status as _sample_valid_mask_status,
     sample_compiled_valid_mask_statuses as _sample_valid_mask_statuses,
 )
@@ -69,11 +70,18 @@ from .forces import (
     force_runtime_parameters_summary,
     solver_cfg_with_force_overrides,
 )
+from .diagnostics import (
+    increment_named_count,
+    initial_collision_diagnostics,
+    invalid_stop_reason_code,
+    invalid_stop_reason_name,
+)
 from .runtime_outputs import (
     CoatingSummaryAccumulator,
     RuntimeOutputOptions,
     RuntimeOutputPayload,
     build_runtime_report,
+    config_bool_flag,
     write_runtime_outputs,
 )
 from .stochastic_motion import (
@@ -87,17 +95,7 @@ from .valid_mask_retry import resolve_valid_mask_retry_then_stop
 
 VALID_MASK_POLICY_DIAGNOSTIC = 'diagnostic'
 VALID_MASK_POLICY_RETRY_THEN_STOP = 'retry_then_stop'
-
-INVALID_STOP_REASON_NAMES = {
-    0: '',
-    1: 'freeflight_valid_mask_hard_invalid_prefix_clipped',
-    2: 'freeflight_valid_mask_hard_invalid_retry_exhausted',
-    3: 'collision_valid_mask_hard_invalid_prefix_clipped',
-    4: 'collision_valid_mask_hard_invalid_retry_exhausted',
-    255: 'unknown',
-}
-INVALID_STOP_REASON_CODES = {name: code for code, name in INVALID_STOP_REASON_NAMES.items() if name}
-
+VALID_MASK_POLICY_STRICT_CLEAN = 'strict_clean'
 
 _COMPILED_MEMORY_ATTRS = (
     'axes',
@@ -138,6 +136,27 @@ def _array_nbytes_once(value: object, seen: set[int]) -> int:
 def _compiled_backend_array_bytes(compiled: CompiledRuntimeBackendLike) -> int:
     seen: set[int] = set()
     return int(sum(_array_nbytes_once(getattr(compiled, name, None), seen) for name in _COMPILED_MEMORY_ATTRS))
+
+
+def _virtual_mass_factor_array(
+    force_runtime: ForceRuntimeParameters | None,
+    rho_g: np.ndarray,
+    rho_p: np.ndarray,
+) -> np.ndarray:
+    gas_density = np.asarray(rho_g, dtype=np.float64)
+    particle_density = np.asarray(rho_p, dtype=np.float64)
+    factor = np.ones_like(particle_density, dtype=np.float64)
+    if force_runtime is None or not bool(force_runtime.virtual_mass_enabled):
+        return factor
+    coeff = max(float(force_runtime.virtual_mass_coefficient), 0.0)
+    valid = (
+        np.isfinite(gas_density)
+        & np.isfinite(particle_density)
+        & (gas_density > 0.0)
+        & (particle_density > 0.0)
+    )
+    factor = np.where(valid, 1.0 + coeff * gas_density / np.maximum(particle_density, 1.0e-300), 1.0)
+    return np.where(np.isfinite(factor) & (factor > 0.0), factor, 1.0)
 
 
 def _add_timing(timing_accumulator: Dict[str, float], key: str, elapsed_s: float) -> None:
@@ -248,76 +267,6 @@ def _particle_tau_p(p_diameter: float, p_density: float, gas_mu: float, min_tau:
     diameter = max(float(p_diameter), 1e-12)
     density = max(float(p_density), 1e-9)
     return max(float(min_tau), density * diameter * diameter / (18.0 * mu))
-
-
-def _initial_collision_diagnostics() -> Dict[str, object]:
-    return {
-        'primary_hit_count': 0,
-        'edge_hit_count': 0,
-        'triangle_hit_count': 0,
-        'bisection_fallback_count': 0,
-        'nearest_projection_fallback_count': 0,
-        'on_boundary_promoted_inside_count': 0,
-        'unresolved_crossing_count': 0,
-        'multi_hit_events_count': 0,
-        'max_hits_reached_count': 0,
-        'collision_reintegrated_segments_count': 0,
-        'adaptive_substep_segments_count': 0,
-        'adaptive_substep_trigger_count': 0,
-        'max_hit_same_wall_count': 0,
-        'max_hit_multi_wall_count': 0,
-        'max_hit_remaining_dt_total_s': 0.0,
-        'max_hit_remaining_dt_max_s': 0.0,
-        'max_hit_last_part_counts': {},
-        'max_hit_last_outcome_counts': {},
-        'contact_sliding_count': 0,
-        'contact_sliding_same_wall_count': 0,
-        'contact_sliding_time_total_s': 0.0,
-        'contact_sliding_remaining_dt_max_s': 0.0,
-        'contact_sliding_part_counts': {},
-        'contact_sliding_outcome_counts': {},
-        'contact_tangent_step_count': 0,
-        'contact_tangent_time_total_s': 0.0,
-        'contact_release_count': 0,
-        'contact_release_probe_reject_count': 0,
-        'contact_endpoint_stop_count': 0,
-        'contact_endpoint_hold_count': 0,
-        'contact_frame_fail_count': 0,
-        'contact_valid_mask_reject_count': 0,
-        'etd2_polyline_checks_count': 0,
-        'etd2_midpoint_outside_count': 0,
-        'etd2_polyline_hit_count': 0,
-        'etd2_polyline_fallback_count': 0,
-        'edge_prefetch_batch_candidate_count': 0,
-        'edge_prefetch_batch_hit_count': 0,
-        'boundary_far_skip_count': 0,
-        'boundary_near_check_count': 0,
-        'valid_mask_violation_count': 0,
-        'valid_mask_violation_particle_count': 0,
-        'valid_mask_mixed_stencil_count': 0,
-        'valid_mask_mixed_stencil_particle_count': 0,
-        'valid_mask_hard_invalid_count': 0,
-        'valid_mask_hard_invalid_particle_count': 0,
-        'invalid_mask_retry_count': 0,
-        'invalid_mask_retry_exhausted_count': 0,
-        'invalid_mask_stopped_count': 0,
-        'invalid_mask_stop_reason_counts': {},
-        'numerical_boundary_stop_count': 0,
-        'numerical_boundary_stop_reason_counts': {},
-    }
-
-
-def _increment_invalid_stop_reason(collision_diagnostics: Dict[str, object], reason: str) -> None:
-    reason_name = str(reason).strip() or 'unknown'
-    counts = collision_diagnostics.setdefault('invalid_mask_stop_reason_counts', {})
-    if not isinstance(counts, dict):
-        counts = {}
-        collision_diagnostics['invalid_mask_stop_reason_counts'] = counts
-    counts[reason_name] = int(counts.get(reason_name, 0)) + 1
-
-
-def _invalid_stop_reason_code(reason: str) -> int:
-    return int(INVALID_STOP_REASON_CODES.get(str(reason).strip(), 255))
 
 
 def _append_snapshot(
@@ -501,30 +450,6 @@ def _resolve_step_loop_context(
     )
 
 
-def _config_bool_flag(cfg: Mapping[str, object], name: str, default: int) -> int:
-    raw = cfg.get(name, default)
-    if isinstance(raw, str):
-        value = raw.strip().lower()
-        if value in {'0', 'false', 'no', 'off'}:
-            return 0
-        if value in {'1', 'true', 'yes', 'on'}:
-            return 1
-    return int(bool(raw))
-
-
-def _int_or_default(value: object, default: int) -> int:
-    if isinstance(value, (bool, int, np.integer)):
-        return int(value)
-    if isinstance(value, (float, np.floating)) and np.isfinite(float(value)):
-        return int(value)
-    if isinstance(value, str):
-        text = value.strip()
-        signless = text[1:] if text[:1] in {'+', '-'} else text
-        if signless.isdigit():
-            return int(text)
-    return int(default)
-
-
 def _float_or_nan(value: object) -> float:
     if isinstance(value, (bool, int, float, np.integer, np.floating)):
         return float(value)
@@ -537,26 +462,6 @@ def _float_or_nan(value: object) -> float:
         except (TypeError, ValueError):
             return float('nan')
     return float('nan')
-
-
-def _resolve_output_options(output_cfg: Mapping[str, object]) -> RuntimeOutputOptions:
-    mode = str(output_cfg.get('artifact_mode', 'full')).strip().lower()
-    if mode not in {'full', 'minimal'}:
-        raise ValueError("output.artifact_mode must be either 'full' or 'minimal'")
-    default_optional = 0 if mode == 'minimal' else 1
-    write_positions = _config_bool_flag(output_cfg, 'write_positions', default_optional)
-    return RuntimeOutputOptions(
-        write_positions=int(write_positions),
-        write_segmented_positions=int(_config_bool_flag(output_cfg, 'write_segmented_positions', write_positions)),
-        write_source_diagnostics=int(_config_bool_flag(output_cfg, 'write_source_diagnostics', default_optional)),
-        write_wall_events=int(_config_bool_flag(output_cfg, 'write_wall_events', default_optional)),
-        write_max_hit_events=int(_config_bool_flag(output_cfg, 'write_max_hit_events', default_optional)),
-        write_runtime_step_summary=int(_config_bool_flag(output_cfg, 'write_runtime_step_summary', default_optional)),
-        write_prepared_summary=int(_config_bool_flag(output_cfg, 'write_prepared_summary', default_optional)),
-        write_wall_summary=int(_config_bool_flag(output_cfg, 'write_wall_summary', 1)),
-        write_coating_summary=int(_config_bool_flag(output_cfg, 'write_coating_summary', 1)),
-        write_trajectory_plot=int(_config_bool_flag(output_cfg, 'write_trajectory_plot', default_optional)),
-    )
 
 
 def _resolve_solver_runtime_options(
@@ -593,17 +498,17 @@ def _resolve_solver_runtime_options(
     else:
         on_boundary_tol_m = max(2.0 * epsilon_offset_m, 5.0e-7)
     valid_mask_policy = str(solver_cfg.get('valid_mask_policy', VALID_MASK_POLICY_RETRY_THEN_STOP)).strip().lower()
-    if valid_mask_policy not in {VALID_MASK_POLICY_DIAGNOSTIC, VALID_MASK_POLICY_RETRY_THEN_STOP}:
+    if valid_mask_policy not in {VALID_MASK_POLICY_DIAGNOSTIC, VALID_MASK_POLICY_RETRY_THEN_STOP, VALID_MASK_POLICY_STRICT_CLEAN}:
         raise ValueError(
             'solver.valid_mask_policy must be one of '
-            f"'{VALID_MASK_POLICY_DIAGNOSTIC}' or '{VALID_MASK_POLICY_RETRY_THEN_STOP}'"
+            f"'{VALID_MASK_POLICY_DIAGNOSTIC}', '{VALID_MASK_POLICY_RETRY_THEN_STOP}', or '{VALID_MASK_POLICY_STRICT_CLEAN}'"
         )
     if 'contact_tangent_motion' in solver_cfg:
         raise ValueError(
             'solver.contact_tangent_motion is obsolete; implement contact behavior through '
             'the BoundaryEvent/ContactState solver contract'
         )
-    output_options = _resolve_output_options(output_cfg)
+    output_options = RuntimeOutputOptions.from_config(output_cfg)
     drag_model_mode = drag_model_mode_from_name(solver_cfg.get('drag_model', 'stokes'))
     drag_model_name = drag_model_name_from_mode(int(drag_model_mode))
     stochastic_motion = parse_stochastic_motion_config(
@@ -613,7 +518,7 @@ def _resolve_solver_runtime_options(
     plasma_background = prepare_plasma_background(parse_plasma_background_config(solver_cfg))
     charge_model = parse_charge_model_config(solver_cfg)
     force_runtime = force_runtime_parameters_from_catalog(force_catalog)
-    write_collision_diagnostics = _config_bool_flag(
+    write_collision_diagnostics = config_bool_flag(
         output_cfg,
         'write_collision_diagnostics',
         1 if str(output_cfg.get('artifact_mode', 'full')).strip().lower() != 'minimal' else 0,
@@ -670,7 +575,7 @@ def _apply_valid_mask_retry_then_stop(
     force_runtime: ForceRuntimeParameters | None = None,
     particle_indices: Optional[np.ndarray] = None,
 ) -> int:
-    if str(options.valid_mask_policy) != VALID_MASK_POLICY_RETRY_THEN_STOP:
+    if str(options.valid_mask_policy) not in {VALID_MASK_POLICY_RETRY_THEN_STOP, VALID_MASK_POLICY_STRICT_CLEAN}:
         return 0
     if particle_indices is None:
         candidate_indices = np.flatnonzero(state.active)
@@ -681,9 +586,14 @@ def _apply_valid_mask_retry_then_stop(
             & (candidate_indices < int(state.active.size))
             & state.active[candidate_indices]
         ]
-    violating = candidate_indices[
-        state.valid_mask_status_flags[candidate_indices] == int(VALID_MASK_STATUS_HARD_INVALID)
-    ]
+    if str(options.valid_mask_policy) == VALID_MASK_POLICY_STRICT_CLEAN:
+        violating = candidate_indices[
+            state.valid_mask_status_flags[candidate_indices] != int(VALID_MASK_STATUS_CLEAN)
+        ]
+    else:
+        violating = candidate_indices[
+            state.valid_mask_status_flags[candidate_indices] == int(VALID_MASK_STATUS_HARD_INVALID)
+        ]
     if violating.size == 0:
         return 0
 
@@ -741,6 +651,7 @@ def _apply_valid_mask_retry_then_stop(
             drag_model_mode=int(options.drag_model_mode),
             electric_q_over_m_i=electric_q_over_m_i,
             force_runtime=force_runtime,
+            require_clean_prefix=str(options.valid_mask_policy) == VALID_MASK_POLICY_STRICT_CLEAN,
         )
 
         _mark_invalid_mask_stopped(
@@ -769,42 +680,30 @@ def _mark_invalid_mask_stopped(
     reason: str,
 ) -> None:
     index = int(particle_index)
-    pos = np.asarray(position, dtype=np.float64)
-    vel = np.asarray(velocity, dtype=np.float64)
-    state.x[index] = pos
-    state.v[index] = vel
-    if bool(update_trial_buffers):
-        state.x_trial[index] = pos
-        state.v_trial[index] = vel
-        state.x_mid_trial[index] = pos
-    state.active[index] = False
-    state.stuck[index] = False
-    state.absorbed[index] = False
-    state.contact_sliding[index] = False
-    state.contact_endpoint_stopped[index] = False
-    state.contact_edge_index[index] = -1
-    state.contact_part_id[index] = 0
-    state.contact_normal[index] = 0.0
-    state.escaped[index] = False
-    if hasattr(state, 'numerical_boundary_stopped'):
-        state.numerical_boundary_stopped[index] = False
+    _stop_particle_motion(
+        state=state,
+        particle_index=index,
+        position=position,
+        velocity=velocity,
+        update_trial_buffers=update_trial_buffers,
+    )
+    state.numerical_boundary_stopped[index] = False
     if not bool(state.invalid_mask_stopped[index]):
         state.invalid_mask_stopped[index] = True
-        reason_code = _invalid_stop_reason_code(str(reason))
+        reason_code = invalid_stop_reason_code(str(reason))
         state.invalid_stop_reason_code[index] = np.uint8(reason_code)
-        reason_name = INVALID_STOP_REASON_NAMES.get(int(reason_code), 'unknown') or 'unknown'
+        reason_name = invalid_stop_reason_name(int(reason_code))
         state.collision_diagnostics['invalid_mask_stopped_count'] += 1
-        _increment_invalid_stop_reason(state.collision_diagnostics, reason_name)
+        increment_named_count(state.collision_diagnostics, 'invalid_mask_stop_reason_counts', reason_name)
 
 
-def _mark_numerical_boundary_stopped(
+def _stop_particle_motion(
     *,
     state: RuntimeState,
     particle_index: int,
     position: np.ndarray,
     velocity: np.ndarray,
     update_trial_buffers: bool,
-    reason: str,
 ) -> None:
     index = int(particle_index)
     pos = np.asarray(position, dtype=np.float64)
@@ -824,18 +723,32 @@ def _mark_numerical_boundary_stopped(
     state.contact_part_id[index] = 0
     state.contact_normal[index] = 0.0
     state.escaped[index] = False
+
+
+def _mark_numerical_boundary_stopped(
+    *,
+    state: RuntimeState,
+    particle_index: int,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    update_trial_buffers: bool,
+    reason: str,
+) -> None:
+    index = int(particle_index)
+    _stop_particle_motion(
+        state=state,
+        particle_index=index,
+        position=position,
+        velocity=velocity,
+        update_trial_buffers=update_trial_buffers,
+    )
     state.invalid_mask_stopped[index] = False
     if not bool(state.numerical_boundary_stopped[index]):
         state.numerical_boundary_stopped[index] = True
         state.collision_diagnostics['numerical_boundary_stop_count'] = int(
             state.collision_diagnostics.get('numerical_boundary_stop_count', 0)
         ) + 1
-        counts = state.collision_diagnostics.setdefault('numerical_boundary_stop_reason_counts', {})
-        if not isinstance(counts, dict):
-            counts = {}
-            state.collision_diagnostics['numerical_boundary_stop_reason_counts'] = counts
-        reason_name = str(reason).strip() or 'unknown'
-        counts[reason_name] = int(counts.get(reason_name, 0)) + 1
+        increment_named_count(state.collision_diagnostics, 'numerical_boundary_stop_reason_counts', reason)
 
 
 def _boundary_edge_arrays_2d(runtime) -> Tuple[Optional[np.ndarray], np.ndarray]:
@@ -929,6 +842,10 @@ def _advance_contact_sliding_particles_2d(
     boundary_service: BoundaryService,
     tau_p: np.ndarray,
     particle_diameter: np.ndarray,
+    particle_density: np.ndarray,
+    particle_mass: np.ndarray,
+    dep_particle_rel_permittivity: np.ndarray,
+    thermophoretic_coeff: np.ndarray,
     flow_scale_particle: np.ndarray,
     drag_scale_particle: np.ndarray,
     body_scale_particle: np.ndarray,
@@ -1020,10 +937,45 @@ def _advance_contact_sliding_particles_2d(
         float(t_next),
         x_contact,
         electric_q_over_m=electric_qom,
+        force_runtime=options.force_runtime,
+        particle_diameter=np.asarray(particle_diameter, dtype=np.float64)[indices],
+        particle_density=np.asarray(particle_density, dtype=np.float64)[indices],
+        particle_mass=np.asarray(particle_mass, dtype=np.float64)[indices],
+        dep_particle_rel_permittivity=np.asarray(dep_particle_rel_permittivity, dtype=np.float64)[indices],
+        thermophoretic_coeff=np.asarray(thermophoretic_coeff, dtype=np.float64)[indices],
+        velocity=v_old[:, :2],
+        gas_density_kgm3=float(phys['gas_density_kgm3']),
+        gas_mu_pas=float(phys['gas_mu_pas']),
+        gas_temperature_K=float(phys['gas_temperature_K']),
+        gas_molecular_mass_kg=float(phys['gas_molecular_mass_kg']),
     )
+    force_runtime = options.force_runtime
+    density_local = np.asarray(particle_density, dtype=np.float64)[indices]
+    needs_local_gas = (
+        int(options.drag_model_mode) != int(DRAG_MODEL_STOKES)
+        or bool(force_runtime.gravity_buoyancy_enabled)
+        or bool(force_runtime.virtual_mass_enabled)
+    )
+    rho_g = np.full(indices.size, float(phys['gas_density_kgm3']), dtype=np.float64)
+    mu_g = np.full(indices.size, float(phys['gas_mu_pas']), dtype=np.float64)
+    temp_g = np.full(indices.size, float(phys['gas_temperature_K']), dtype=np.float64)
+    if bool(needs_local_gas):
+        rho_g, mu_g, temp_g = _sample_gas_properties_vectors_at(
+            compiled,
+            2,
+            float(t_next),
+            x_contact,
+            fallback_density_kgm3=float(phys['gas_density_kgm3']),
+            fallback_mu_pas=float(phys['gas_mu_pas']),
+            fallback_temperature_K=float(phys['gas_temperature_K']),
+        )
     body_field_scale = float(phys['body_accel_scale']) * np.asarray(body_scale_particle[indices], dtype=np.float64)
-    body_eff = np.asarray(body_accel, dtype=np.float64)[:2][None, :] * body_field_scale[:, None]
-    body_eff = body_eff + accel[:, :2] * body_field_scale[:, None]
+    body_base = np.asarray(body_accel, dtype=np.float64)[:2][None, :] * body_field_scale[:, None]
+    gravity_factor = np.ones(indices.size, dtype=np.float64)
+    if bool(force_runtime.gravity_buoyancy_enabled):
+        gravity_factor = 1.0 - rho_g / np.maximum(density_local, 1.0e-300)
+    mass_factor = _virtual_mass_factor_array(force_runtime, rho_g, density_local)
+    body_eff = (gravity_factor[:, None] * body_base + accel[:, :2]) / mass_factor[:, None]
     target = float(phys['flow_scale']) * np.asarray(flow_scale_particle[indices], dtype=np.float64)[:, None] * flow[:, :2]
 
     tau_stokes = np.asarray(tau_p[indices], dtype=np.float64) * float(phys['drag_tau_scale'])
@@ -1039,15 +991,27 @@ def _advance_contact_sliding_particles_2d(
                     float(tau_i),
                     float(slip_i),
                     float(diameter_i),
-                    float(phys['gas_density_kgm3']),
-                    float(phys['gas_mu_pas']),
+                    float(rho_i),
+                    float(mu_i),
                     int(options.drag_model_mode),
                     float(phys['min_tau_p_s']),
+                    float(density_i),
+                    float(temp_i),
+                    float(phys['gas_molecular_mass_kg']),
                 )
-                for tau_i, slip_i, diameter_i in zip(tau_stokes, slip, particle_diameter[indices])
+                for tau_i, slip_i, diameter_i, density_i, rho_i, mu_i, temp_i in zip(
+                    tau_stokes,
+                    slip,
+                    particle_diameter[indices],
+                    density_local,
+                    rho_g,
+                    mu_g,
+                    temp_g,
+                )
             ],
             dtype=np.float64,
         )
+    tau_eff = tau_eff * mass_factor
 
     target_normal = np.einsum('ij,ij->i', target, normal)
     body_normal = np.einsum('ij,ij->i', body_eff, normal)
@@ -1171,6 +1135,10 @@ def _advance_contact_sliding_particles_3d(
     boundary_service: BoundaryService,
     tau_p: np.ndarray,
     particle_diameter: np.ndarray,
+    particle_density: np.ndarray,
+    particle_mass: np.ndarray,
+    dep_particle_rel_permittivity: np.ndarray,
+    thermophoretic_coeff: np.ndarray,
     flow_scale_particle: np.ndarray,
     drag_scale_particle: np.ndarray,
     body_scale_particle: np.ndarray,
@@ -1178,6 +1146,7 @@ def _advance_contact_sliding_particles_3d(
     body_accel: np.ndarray,
     dt_step: float,
     t_next: float,
+    electric_q_over_m_particle: Optional[np.ndarray] = None,
 ) -> None:
     surface = boundary_service.triangle_surface_3d
     contact_mask = state.active & state.contact_sliding
@@ -1241,10 +1210,56 @@ def _advance_contact_sliding_particles_3d(
     v_tangent = v_old[:, :3] - v_normal[:, None] * normal
 
     flow = _sample_flow_vectors_at(compiled, 3, float(t_next), x_contact)
-    accel = _sample_acceleration_vectors_at(compiled, 3, float(t_next), x_contact)
+    electric_qom = (
+        None
+        if electric_q_over_m_particle is None
+        else np.asarray(electric_q_over_m_particle, dtype=np.float64)[indices]
+    )
+    accel = _sample_acceleration_vectors_at(
+        compiled,
+        3,
+        float(t_next),
+        x_contact,
+        electric_q_over_m=electric_qom,
+        force_runtime=options.force_runtime,
+        particle_diameter=np.asarray(particle_diameter, dtype=np.float64)[indices],
+        particle_density=np.asarray(particle_density, dtype=np.float64)[indices],
+        particle_mass=np.asarray(particle_mass, dtype=np.float64)[indices],
+        dep_particle_rel_permittivity=np.asarray(dep_particle_rel_permittivity, dtype=np.float64)[indices],
+        thermophoretic_coeff=np.asarray(thermophoretic_coeff, dtype=np.float64)[indices],
+        velocity=v_old[:, :3],
+        gas_density_kgm3=float(phys['gas_density_kgm3']),
+        gas_mu_pas=float(phys['gas_mu_pas']),
+        gas_temperature_K=float(phys['gas_temperature_K']),
+        gas_molecular_mass_kg=float(phys['gas_molecular_mass_kg']),
+    )
+    force_runtime = options.force_runtime
+    density_local = np.asarray(particle_density, dtype=np.float64)[indices]
+    needs_local_gas = (
+        int(options.drag_model_mode) != int(DRAG_MODEL_STOKES)
+        or bool(force_runtime.gravity_buoyancy_enabled)
+        or bool(force_runtime.virtual_mass_enabled)
+    )
+    rho_g = np.full(indices.size, float(phys['gas_density_kgm3']), dtype=np.float64)
+    mu_g = np.full(indices.size, float(phys['gas_mu_pas']), dtype=np.float64)
+    temp_g = np.full(indices.size, float(phys['gas_temperature_K']), dtype=np.float64)
+    if bool(needs_local_gas):
+        rho_g, mu_g, temp_g = _sample_gas_properties_vectors_at(
+            compiled,
+            3,
+            float(t_next),
+            x_contact,
+            fallback_density_kgm3=float(phys['gas_density_kgm3']),
+            fallback_mu_pas=float(phys['gas_mu_pas']),
+            fallback_temperature_K=float(phys['gas_temperature_K']),
+        )
     body_field_scale = float(phys['body_accel_scale']) * np.asarray(body_scale_particle[indices], dtype=np.float64)
-    body_eff = np.asarray(body_accel, dtype=np.float64)[:3][None, :] * body_field_scale[:, None]
-    body_eff = body_eff + accel[:, :3] * body_field_scale[:, None]
+    body_base = np.asarray(body_accel, dtype=np.float64)[:3][None, :] * body_field_scale[:, None]
+    gravity_factor = np.ones(indices.size, dtype=np.float64)
+    if bool(force_runtime.gravity_buoyancy_enabled):
+        gravity_factor = 1.0 - rho_g / np.maximum(density_local, 1.0e-300)
+    mass_factor = _virtual_mass_factor_array(force_runtime, rho_g, density_local)
+    body_eff = (gravity_factor[:, None] * body_base + accel[:, :3]) / mass_factor[:, None]
     target = float(phys['flow_scale']) * np.asarray(flow_scale_particle[indices], dtype=np.float64)[:, None] * flow[:, :3]
 
     tau_stokes = np.asarray(tau_p[indices], dtype=np.float64) * float(phys['drag_tau_scale'])
@@ -1260,15 +1275,27 @@ def _advance_contact_sliding_particles_3d(
                     float(tau_i),
                     float(slip_i),
                     float(diameter_i),
-                    float(phys['gas_density_kgm3']),
-                    float(phys['gas_mu_pas']),
+                    float(rho_i),
+                    float(mu_i),
                     int(options.drag_model_mode),
                     float(phys['min_tau_p_s']),
+                    float(density_i),
+                    float(temp_i),
+                    float(phys['gas_molecular_mass_kg']),
                 )
-                for tau_i, slip_i, diameter_i in zip(tau_stokes, slip, particle_diameter[indices])
+                for tau_i, slip_i, diameter_i, density_i, rho_i, mu_i, temp_i in zip(
+                    tau_stokes,
+                    slip,
+                    particle_diameter[indices],
+                    density_local,
+                    rho_g,
+                    mu_g,
+                    temp_g,
+                )
             ],
             dtype=np.float64,
         )
+    tau_eff = tau_eff * mass_factor
 
     target_normal = np.einsum('ij,ij->i', target, normal)
     body_normal = np.einsum('ij,ij->i', body_eff, normal)
@@ -1480,6 +1507,10 @@ def _advance_runtime_step(
                 boundary_service=boundary_service,
                 tau_p=tau_p,
                 particle_diameter=particle_diameter,
+                particle_density=particles.density,
+                particle_mass=particle_mass,
+                dep_particle_rel_permittivity=particles.dep_particle_rel_permittivity,
+                thermophoretic_coeff=particles.thermophoretic_coeff,
                 flow_scale_particle=flow_scale_particle,
                 drag_scale_particle=drag_scale_particle,
                 body_scale_particle=body_scale_particle,
@@ -1498,6 +1529,10 @@ def _advance_runtime_step(
                 boundary_service=boundary_service,
                 tau_p=tau_p,
                 particle_diameter=particle_diameter,
+                particle_density=particles.density,
+                particle_mass=particle_mass,
+                dep_particle_rel_permittivity=particles.dep_particle_rel_permittivity,
+                thermophoretic_coeff=particles.thermophoretic_coeff,
                 flow_scale_particle=flow_scale_particle,
                 drag_scale_particle=drag_scale_particle,
                 body_scale_particle=body_scale_particle,
@@ -1505,6 +1540,7 @@ def _advance_runtime_step(
                 body_accel=body_accel,
                 dt_step=float(dt_step),
                 t_next=float(t_next),
+                electric_q_over_m_particle=electric_q_over_m_particle,
             )
     mobile_active = state.active & ~state.contact_sliding
     state.valid_mask_status_flags.fill(int(VALID_MASK_STATUS_CLEAN))
@@ -1658,7 +1694,7 @@ def _advance_runtime_step(
             ),
             force_runtime=options.force_runtime,
             valid_mask_retry_then_stop_enabled=bool(
-                str(options.valid_mask_policy) == VALID_MASK_POLICY_RETRY_THEN_STOP
+                str(options.valid_mask_policy) in {VALID_MASK_POLICY_RETRY_THEN_STOP, VALID_MASK_POLICY_STRICT_CLEAN}
             ),
             initial_x_next=state.x_trial[particle_index],
             initial_v_next=state.v_trial[particle_index],
@@ -1908,7 +1944,7 @@ def _build_runtime_output_payload(
         step_rows=step_rows,
         wall_law_counts={},
         wall_summary_counts={},
-        collision_diagnostics=_initial_collision_diagnostics(),
+        collision_diagnostics=initial_collision_diagnostics(),
         timing_accumulator={},
         rng=np.random.default_rng(int(options.rng_seed)),
         stochastic_rng=np.random.default_rng(int(options.stochastic_motion.seed)),
@@ -1938,6 +1974,17 @@ def _build_runtime_output_payload(
             fallback_temperature_K=float(base_phys.get('gas_temperature_K', runtime.gas.temperature)),
             drag_model_name=str(options.drag_model_name),
         )
+    )
+    state.collision_diagnostics['field_backend_diagnostics'] = {
+        'backend_kind': str(getattr(compiled, 'backend_kind', '')),
+        'gas_density_source': str(getattr(compiled, 'gas_density_source', 'scalar_fallback')),
+        'gas_mu_source': str(getattr(compiled, 'gas_mu_source', 'scalar_fallback')),
+        'gas_temperature_source': str(getattr(compiled, 'gas_temperature_source', 'scalar_fallback')),
+        'triangle_gradient_sources': dict(getattr(compiled, 'triangle_gradient_sources', {})),
+    }
+    state.collision_diagnostics['collision_boundary_geometry'] = 'linear_segment_or_triangle_boundary'
+    state.collision_diagnostics['contact_tangent_model'] = (
+        'custom_relaxation_contact_sliding' if bool(options.contact_tangent_motion_enabled) else ''
     )
     state.collision_diagnostics['force_catalog'] = force_catalog_summary(options.force_catalog)
     state.collision_diagnostics['force_runtime'] = force_runtime_parameters_summary(options.force_runtime)

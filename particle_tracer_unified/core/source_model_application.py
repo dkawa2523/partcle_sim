@@ -27,6 +27,41 @@ from ..providers.source_adapters import (
 )
 
 
+def _canonical_normal_velocity_policy(policy: str) -> str:
+    text = str(policy or 'keep').strip().lower()
+    aliases = {
+        'none': 'keep',
+        'as_is': 'keep',
+        'preserve': 'keep',
+        'outward_only': 'reflect_inward',
+        'reflect': 'reflect_inward',
+        'zero_inward': 'remove_inward_normal',
+        'clip_inward': 'remove_inward_normal',
+    }
+    text = aliases.get(text, text)
+    if text not in {'keep', 'reflect_inward', 'remove_inward_normal'}:
+        raise ValueError(
+            'source.preprocess.normal_velocity_policy must be keep, reflect_inward, or remove_inward_normal'
+        )
+    return text
+
+
+def _normal_velocity_adjusted(
+    velocity: np.ndarray,
+    normal: np.ndarray,
+    policy: str,
+) -> tuple[np.ndarray, float, float]:
+    out = np.asarray(velocity, dtype=np.float64).copy()
+    n = np.asarray(normal, dtype=np.float64)[: out.size]
+    vn_before = float(np.dot(out, n))
+    if vn_before < 0.0:
+        if policy == 'reflect_inward':
+            out = out - 2.0 * vn_before * n
+        elif policy == 'remove_inward_normal':
+            out = out - vn_before * n
+    return out, vn_before, float(np.dot(out, n))
+
+
 def apply_source_models(
     particles: ParticleTable,
     resolved: SourceResolutionParameters,
@@ -39,6 +74,7 @@ def apply_source_models(
     process_steps: Optional[ProcessStepTable] = None,
     gas_density_kgm3: float = 1.0,
     seed: int = 12345,
+    normal_velocity_policy: str = 'keep',
 ) -> SourcePreprocessResult:
     flow_sampler = flow_sampler or ZeroFlowSampler(particles.spatial_dim)
     wall_shear_sampler = wall_shear_sampler or ConstantScalarSampler(np.nan)
@@ -52,6 +88,7 @@ def apply_source_models(
     release_enabled = np.ones(particles.count, dtype=bool)
     active_events = events.active_rows() if events is not None else tuple()
     event_counter: Dict[str, int] = {}
+    normal_policy = _canonical_normal_velocity_policy(normal_velocity_policy)
 
     for i in range(particles.count):
         pid = int(particles.particle_id[i])
@@ -279,10 +316,22 @@ def apply_source_models(
         if apply_offset:
             offset = float(resolved.source_position_offset_m[i])
             pos[i, : particles.spatial_dim] += offset * n[: particles.spatial_dim]
-        vel[i, : particles.spatial_dim] = base_v + source_delta
+        final_v = base_v + source_delta
+        normal_before = float(np.dot(final_v, n[: particles.spatial_dim]))
+        normal_after = normal_before
+        if bool(release_enabled[i]) and normal_policy != 'keep':
+            final_v, normal_before, normal_after = _normal_velocity_adjusted(
+                final_v,
+                n[: particles.spatial_dim],
+                normal_policy,
+            )
+        vel[i, : particles.spatial_dim] = final_v
         rel[i] = rel_eff if np.isfinite(rel_eff) else rel[i]
         diag['offset_m'] = offset
         diag['source_delta_speed_mps'] = float(np.linalg.norm(source_delta))
+        diag['normal_velocity_policy'] = normal_policy
+        diag['normal_velocity_before_mps'] = normal_before
+        diag['normal_velocity_after_mps'] = normal_after
         diag['final_speed_mps'] = float(np.linalg.norm(vel[i, : particles.spatial_dim]))
         diag['resolved_release_time_s'] = float(rel[i]) if np.isfinite(rel[i]) else float('inf')
         diagnostics.append(diag)

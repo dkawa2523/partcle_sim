@@ -4,7 +4,7 @@ from collections import Counter
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Dict, List, Mapping, Tuple
+from typing import Any, Dict, List, Mapping, Tuple
 
 import numpy as np
 
@@ -20,15 +20,11 @@ from ..core.boundary_service import (
 from ..core.source_materials import write_source_summary
 from .wall_catalog_alignment import build_wall_catalog_alignment, write_wall_catalog_alignment_csv
 from ..io.runtime_builder import prepared_runtime_summary
-
-INVALID_STOP_REASON_NAMES = {
-    0: '',
-    1: 'freeflight_valid_mask_hard_invalid_prefix_clipped',
-    2: 'freeflight_valid_mask_hard_invalid_retry_exhausted',
-    3: 'collision_valid_mask_hard_invalid_prefix_clipped',
-    4: 'collision_valid_mask_hard_invalid_retry_exhausted',
-    255: 'unknown',
-}
+from .diagnostics import invalid_stop_reason_names
+from .runtime_reports import (
+    build_scalar_summary_rows as _build_scalar_summary_rows,
+    summary_float_or_nan as _summary_float_or_nan,
+)
 
 FINAL_STATE_ORDER = (
     'active_free_flight',
@@ -42,76 +38,287 @@ FINAL_STATE_ORDER = (
     'inactive',
 )
 
+GEOMETRY_STATE_ORDER = (
+    'active',
+    'contact_sliding',
+    'invalid_mask_stopped',
+    'numerical_boundary_stopped',
+    'stuck',
+    'absorbed',
+    'escaped',
+    'inactive',
+)
 
-def _summary_float_or_nan(value: object) -> float:
-    if value is None:
-        return float('nan')
-    if isinstance(value, (bool, int, float, np.integer, np.floating)):
-        return float(value)
-    if isinstance(value, str):
-        text = value.strip()
-        if not text:
-            return float('nan')
-        try:
-            return float(text)
-        except ValueError:
-            return float('nan')
-    return float('nan')
+EMPTY_FINITE_SUMMARY = {'count': 0}
+
+WALL_LAW_SEMANTICS = {
+    'pass_through': 'non_colliding_boundary',
+    'passthrough': 'non_colliding_boundary',
+    'transparent': 'non_colliding_boundary',
+    'inactive': 'non_colliding_boundary',
+    'continuity': 'non_colliding_boundary',
+    'pair_continuity': 'non_colliding_boundary',
+    'interior': 'non_colliding_boundary',
+    'internal': 'non_colliding_boundary',
+    'open': 'particle_exit',
+    'outflow': 'particle_exit',
+    'exhaust': 'particle_exit',
+    'escape': 'particle_exit',
+    'field_support_exit': 'particle_exit',
+    'absorb': 'particle_absorbed',
+    'disappear': 'particle_absorbed',
+    'stick': 'particle_stuck',
+    'sticking': 'particle_stuck',
+    'critical_sticking_velocity': 'particle_stuck_below_threshold',
+    'diffuse': 'diffuse_reflection',
+    'mixed_specular_diffuse': 'mixed_reflection',
+    'specular': 'specular_reflection',
+}
+
+FORCE_CONTRIBUTION_COLUMNS = [
+    'name',
+    'enabled',
+    'model',
+    'status',
+    'physical_quantity',
+    'required_fields',
+    'optional_fields',
+    'field_sources',
+    'config',
+]
+
+ACCELERATION_CONTRIBUTION_FORCES = {
+    'gravity',
+    'electric',
+    'thermophoresis',
+    'dielectrophoresis',
+    'lift',
+    'pressure_gradient',
+    'virtual_mass',
+}
+
+WALL_EVENT_COLUMNS = [
+    'time_s',
+    'hit_time_s',
+    'particle_id',
+    'part_id',
+    'boundary_primitive_id',
+    'boundary_primitive_kind',
+    'boundary_hit_ambiguous',
+    'step_name',
+    'segment_name',
+    'outcome',
+    'wall_mode',
+    'alpha_hit',
+    'material_id',
+    'material_name',
+    'particle_mass_kg',
+    'particle_diameter_m',
+    'impact_speed_mps',
+    'impact_normal_speed_mps',
+    'impact_tangential_speed_mps',
+    'impact_angle_deg_from_normal',
+    'hit_x_m',
+    'hit_y_m',
+    'hit_z_m',
+    'normal_x',
+    'normal_y',
+    'normal_z',
+    'v_hit_x_mps',
+    'v_hit_y_mps',
+    'v_hit_z_mps',
+]
+
+WALL_SUMMARY_COLUMNS = ['part_id', 'outcome', 'wall_mode', 'count']
+SEGMENT_SUMMARY_COLUMNS = ['segment_name', 'save_count', 't_start', 't_end']
+
+MAX_HIT_EVENT_COLUMNS = [
+    'time_s',
+    'particle_id',
+    'step_name',
+    'segment_name',
+    'hits_in_step',
+    'remaining_dt_s',
+    'last_part_id',
+    'part_id_sequence',
+    'outcome_sequence',
+]
+
+RUNTIME_STEP_COLUMNS = [
+    'time_s',
+    'step_name',
+    'segment_name',
+    'released_count',
+    'active_count',
+    'stuck_count',
+    'absorbed_count',
+    'contact_sliding_count',
+    'escaped_count',
+    'save_positions_enabled',
+    'write_wall_events_enabled',
+    'write_diagnostics_enabled',
+    'valid_mask_violation_count_step',
+    'valid_mask_mixed_stencil_count_step',
+    'valid_mask_hard_invalid_count_step',
+    'invalid_mask_stopped_count_step',
+]
+
+COATING_SUMMARY_COLUMNS = [
+    'part_id',
+    'material_id',
+    'material_name',
+    'impact_count',
+    'stuck_count',
+    'absorbed_count',
+    'deposited_mass_kg',
+    'mean_impact_speed_mps',
+    'mean_impact_angle_deg_from_normal',
+]
+
+VALID_MASK_DIAGNOSTIC_FIELDS = (
+    'valid_mask_violation_count',
+    'valid_mask_violation_particle_count',
+    'valid_mask_mixed_stencil_count',
+    'valid_mask_mixed_stencil_particle_count',
+    'valid_mask_hard_invalid_count',
+    'valid_mask_hard_invalid_particle_count',
+)
+
+CONTACT_DIAGNOSTIC_FIELDS = (
+    'contact_sliding_count',
+    'contact_tangent_step_count',
+    'contact_release_count',
+    'contact_release_probe_reject_count',
+    'contact_endpoint_stop_count',
+    'contact_endpoint_hold_count',
+    'invalid_mask_retry_count',
+    'invalid_mask_retry_exhausted_count',
+)
 
 
-def _summary_unit_for_key(key: str) -> str:
-    name = str(key)
-    suffix_units = (
-        ('_m3', '1/m^3'),
-        ('_kgm3', 'kg/m^3'),
-        ('_m2Vs', 'm^2/(V s)'),
-        ('_rad_s', 'rad/s'),
-        ('_mps', 'm/s'),
-        ('_eV', 'eV'),
-        ('_Pa', 'Pa'),
-        ('_K', 'K'),
-        ('_amu', 'amu'),
-        ('_kg', 'kg'),
-        ('_Sm', 'S/m'),
-        ('_s', 's'),
-        ('_m2', 'm^2'),
-        ('_m', 'm'),
-        ('_C', 'C'),
-        ('_e', 'e'),
-    )
-    for suffix, unit in suffix_units:
-        if name.endswith(suffix):
-            return unit
-    return ''
-
-
-def _build_scalar_summary_rows(values: Mapping[str, object]) -> List[Dict[str, object]]:
-    rows: List[Dict[str, object]] = []
-    for key, value in values.items():
-        if isinstance(value, Mapping) or isinstance(value, (list, tuple, set)):
+def _comsol_boundary_map(payload: 'RuntimeOutputPayload') -> Dict[int, Mapping[str, Any]]:
+    runtime = payload.prepared.runtime
+    walls = getattr(runtime, 'walls', None)
+    metadata = getattr(walls, 'metadata', {}) if walls is not None else {}
+    rows = metadata.get('comsol_boundary_map', []) if isinstance(metadata, Mapping) else []
+    out: Dict[int, Mapping[str, Any]] = {}
+    if not isinstance(rows, list):
+        return out
+    for row in rows:
+        if not isinstance(row, Mapping):
             continue
-        if isinstance(value, np.ndarray):
-            if value.ndim != 0:
-                continue
-            value = value.item()
+        try:
+            part_id = int(row.get('solver_part_id', row.get('part_id', 0)))
+        except (TypeError, ValueError):
+            continue
+        if part_id:
+            out[part_id] = row
+    return out
+
+
+def _attach_comsol_boundary_columns(df, payload: 'RuntimeOutputPayload'):
+    boundary_map = _comsol_boundary_map(payload)
+    if not boundary_map or 'part_id' not in df.columns:
+        return df
+    out = df.copy()
+    out['comsol_geom_entity_id'] = [
+        boundary_map.get(int(part_id), {}).get('comsol_geom_entity_id', '')
+        for part_id in out['part_id'].fillna(0).astype(int)
+    ]
+    out['comsol_selection_name'] = [
+        boundary_map.get(int(part_id), {}).get('selection_name', '')
+        for part_id in out['part_id'].fillna(0).astype(int)
+    ]
+    out['comsol_boundary_type'] = [
+        boundary_map.get(int(part_id), {}).get('boundary_type', '')
+        for part_id in out['part_id'].fillna(0).astype(int)
+    ]
+    out['comsol_wall_node'] = [
+        boundary_map.get(int(part_id), {}).get('wall_node', '')
+        for part_id in out['part_id'].fillna(0).astype(int)
+    ]
+    return out
+
+
+def _build_force_contribution_rows(payload: 'RuntimeOutputPayload') -> List[Dict[str, object]]:
+    catalog = payload.prepared.runtime.force_catalog
+    if catalog is None:
+        return []
+    rows: List[Dict[str, object]] = []
+    for spec in catalog.specs:
+        physical_quantity = str(spec.config.get('physical_quantity', '')).strip()
+        if not physical_quantity:
+            physical_quantity = (
+                'acceleration'
+                if str(spec.name) in ACCELERATION_CONTRIBUTION_FORCES
+                else 'force'
+            )
         rows.append(
             {
-                'quantity': str(key),
-                'value': value,
-                'unit': _summary_unit_for_key(str(key)),
+                'name': str(spec.name),
+                'enabled': int(bool(spec.enabled)),
+                'model': str(spec.model),
+                'status': str(spec.status),
+                'physical_quantity': physical_quantity,
+                'required_fields': ';'.join(str(name) for name in spec.required_fields),
+                'optional_fields': ';'.join(str(name) for name in spec.optional_fields),
+                'field_sources': json.dumps(dict(spec.field_sources), sort_keys=True),
+                'config': json.dumps(dict(spec.config), sort_keys=True, default=str),
             }
         )
     return rows
 
 
 def _write_scalar_summary_csv(path: Path, values: Mapping[str, object]) -> bool:
-    import pandas as pd
-
     rows = _build_scalar_summary_rows(values)
     if not rows:
         return False
-    pd.DataFrame(rows, columns=['quantity', 'value', 'unit']).to_csv(path, index=False)
+    _write_rows_csv(path, rows, ['quantity', 'value', 'unit'])
     return True
+
+
+def _write_json(path: Path, values: Mapping[str, object]) -> None:
+    Path(path).write_text(json.dumps(dict(values), indent=2), encoding='utf-8')
+
+
+def _rows_frame(rows: List[Mapping[str, object]], columns: List[str]):
+    import pandas as pd
+
+    return pd.DataFrame(rows, columns=columns)
+
+
+def _write_rows_csv(path: Path, rows: List[Mapping[str, object]], columns: List[str]) -> None:
+    _rows_frame(rows, columns).to_csv(path, index=False)
+
+
+def _diagnostic_int_fields(diagnostics: Mapping[str, object], names: Tuple[str, ...]) -> Dict[str, int]:
+    return {name: int(diagnostics.get(name, 0)) for name in names}
+
+
+def _diagnostic_float_field(diagnostics: Mapping[str, object], name: str) -> float:
+    return float(diagnostics.get(name, 0.0))
+
+
+def _diagnostic_section_enabled(diagnostics: Mapping[str, object], name: str) -> bool:
+    section = diagnostics.get(name, {})
+    if not isinstance(section, Mapping):
+        return False
+    return int(section.get('enabled', 0)) != 0
+
+
+def _artifact_filename(outputs_written: bool, enabled: bool, filename: str) -> str:
+    return str(filename) if bool(outputs_written) and bool(enabled) else ''
+
+
+def config_bool_flag(cfg: Mapping[str, object], name: str, default: int) -> int:
+    raw = cfg.get(name, default)
+    if isinstance(raw, str):
+        value = raw.strip().lower()
+        if value in {'0', 'false', 'no', 'off'}:
+            return 0
+        if value in {'1', 'true', 'yes', 'on'}:
+            return 1
+    return int(bool(raw))
 
 
 @dataclass(frozen=True)
@@ -126,6 +333,26 @@ class RuntimeOutputOptions:
     write_wall_summary: int = 1
     write_coating_summary: int = 1
     write_trajectory_plot: int = 1
+
+    @classmethod
+    def from_config(cls, output_cfg: Mapping[str, object]) -> 'RuntimeOutputOptions':
+        mode = str(output_cfg.get('artifact_mode', 'full')).strip().lower()
+        if mode not in {'full', 'minimal'}:
+            raise ValueError("output.artifact_mode must be either 'full' or 'minimal'")
+        default_optional = 0 if mode == 'minimal' else 1
+        write_positions = config_bool_flag(output_cfg, 'write_positions', default_optional)
+        return cls(
+            write_positions=int(write_positions),
+            write_segmented_positions=int(config_bool_flag(output_cfg, 'write_segmented_positions', write_positions)),
+            write_source_diagnostics=int(config_bool_flag(output_cfg, 'write_source_diagnostics', default_optional)),
+            write_wall_events=int(config_bool_flag(output_cfg, 'write_wall_events', default_optional)),
+            write_max_hit_events=int(config_bool_flag(output_cfg, 'write_max_hit_events', default_optional)),
+            write_runtime_step_summary=int(config_bool_flag(output_cfg, 'write_runtime_step_summary', default_optional)),
+            write_prepared_summary=int(config_bool_flag(output_cfg, 'write_prepared_summary', default_optional)),
+            write_wall_summary=int(config_bool_flag(output_cfg, 'write_wall_summary', 1)),
+            write_coating_summary=int(config_bool_flag(output_cfg, 'write_coating_summary', 1)),
+            write_trajectory_plot=int(config_bool_flag(output_cfg, 'write_trajectory_plot', default_optional)),
+        )
 
     def capture_positions(self) -> bool:
         return bool(
@@ -257,6 +484,15 @@ class RuntimeOutputPayload:
     memory_estimate_bytes: Dict[str, int]
 
 
+@dataclass(frozen=True)
+class RuntimeReportContext:
+    event_counts: Dict[str, int]
+    boundary_event_contract: Dict[str, object]
+    max_hit_summary: Dict[str, object]
+    max_hit_diag_summary: Dict[str, object]
+    summary_bundle: Dict[str, object]
+
+
 def _runtime_coordinate_system(payload: RuntimeOutputPayload) -> str:
     return str(payload.prepared.runtime.coordinate_system)
 
@@ -302,7 +538,14 @@ def _segment_frame(save_meta: List[Dict[str, object]]):
     rows = []
     for segment_name, sub in df.groupby('segment_name', dropna=False):
         safe = _safe_segment_filename(segment_name)
-        rows.append({'segment_name': safe, 'save_count': int(len(sub)), 't_start': float(sub['time_s'].min()), 't_end': float(sub['time_s'].max())})
+        rows.append(
+            {
+                'segment_name': safe,
+                'save_count': int(len(sub)),
+                't_start': float(sub['time_s'].min()),
+                't_end': float(sub['time_s'].max()),
+            }
+        )
     return df, rows
 
 
@@ -314,13 +557,11 @@ def _save_segmented_positions(
     *,
     skip_single_segment_arrays: bool,
 ) -> None:
-    import pandas as pd
-
     if positions.size == 0 or not save_meta:
         return
     df, rows = _segment_frame(save_meta)
     df.to_csv(output_dir / 'save_frames.csv', index=False)
-    pd.DataFrame(rows).to_csv(output_dir / 'segment_summary.csv', index=False)
+    _write_rows_csv(output_dir / 'segment_summary.csv', rows, SEGMENT_SUMMARY_COLUMNS)
     if bool(skip_single_segment_arrays) and len(rows) <= 1:
         return
     segments_dir = output_dir / 'segments'
@@ -333,22 +574,17 @@ def _save_segmented_positions(
 
 
 def _write_save_frame_metadata(output_dir: Path, save_meta: List[Dict[str, object]]) -> None:
-    import pandas as pd
-
     if not save_meta:
         return
     df, rows = _segment_frame(save_meta)
     df.to_csv(output_dir / 'save_frames.csv', index=False)
-    pd.DataFrame(rows).to_csv(output_dir / 'segment_summary.csv', index=False)
+    _write_rows_csv(output_dir / 'segment_summary.csv', rows, SEGMENT_SUMMARY_COLUMNS)
 
 
 def _build_final_particles_frame(payload: RuntimeOutputPayload) -> pd.DataFrame:
     import pandas as pd
     reason_codes = np.asarray(payload.invalid_stop_reason_code, dtype=np.uint8)
-    reason_names = np.asarray(
-        [INVALID_STOP_REASON_NAMES.get(int(code), 'unknown') for code in reason_codes],
-        dtype=object,
-    )
+    reason_names = np.asarray(invalid_stop_reason_names(reason_codes), dtype=object)
 
     final_df = pd.DataFrame(
         {
@@ -599,6 +835,89 @@ def _build_boundary_event_contract_summary(
     }
 
 
+def _boundary_event_counts(payload: RuntimeOutputPayload) -> Dict[str, int]:
+    diagnostics = payload.collision_diagnostics
+    return {
+        'numerical_boundary_stopped_count': int(payload.numerical_boundary_stopped.sum()),
+        'unresolved_crossing_count': int(diagnostics.get('unresolved_crossing_count', 0)),
+        'max_hits_reached_count': int(diagnostics.get('max_hits_reached_count', 0)),
+        'bisection_fallback_count': int(diagnostics.get('bisection_fallback_count', 0)),
+        'nearest_projection_fallback_count': int(diagnostics.get('nearest_projection_fallback_count', 0)),
+    }
+
+
+def _boundary_event_contract_from_counts(counts: Mapping[str, int]) -> Dict[str, object]:
+    return _build_boundary_event_contract_summary(
+        numerical_boundary_stopped_count=int(counts.get('numerical_boundary_stopped_count', 0)),
+        unresolved_crossing_count=int(counts.get('unresolved_crossing_count', 0)),
+        max_hits_reached_count=int(counts.get('max_hits_reached_count', 0)),
+        nearest_projection_fallback_count=int(counts.get('nearest_projection_fallback_count', 0)),
+    )
+
+
+def _boundary_diagnostics(payload: RuntimeOutputPayload) -> Dict[str, object]:
+    diagnostics = payload.collision_diagnostics
+    return {
+        'wall_law_semantics': dict(WALL_LAW_SEMANTICS),
+        'non_colliding_wall_laws': [
+            law for law, meaning in WALL_LAW_SEMANTICS.items() if meaning == 'non_colliding_boundary'
+        ],
+        'particle_exit_wall_laws': [
+            law for law, meaning in WALL_LAW_SEMANTICS.items() if meaning == 'particle_exit'
+        ],
+        'contact_tangent_model': str(diagnostics.get('contact_tangent_model', '')),
+        'contact_tangent_model_scope': (
+            'custom_non_comsol_standard_contact_sliding'
+            if str(diagnostics.get('contact_tangent_model', ''))
+            else ''
+        ),
+        'collision_boundary_geometry': str(
+            diagnostics.get('collision_boundary_geometry', 'linear_segment_or_triangle_boundary')
+        ),
+        'ambiguous_hit_count': int(diagnostics.get('boundary_ambiguous_hit_count', 0)),
+        'ambiguous_hit_part_counts': dict(diagnostics.get('boundary_ambiguous_part_counts', {})),
+        'ambiguous_hit_wall_law_counts': dict(diagnostics.get('boundary_ambiguous_wall_law_counts', {})),
+        'ambiguous_hit_primitive_kind_counts': dict(
+            diagnostics.get('boundary_ambiguous_primitive_kind_counts', {})
+        ),
+    }
+
+
+def _diagnostic_metadata(payload: RuntimeOutputPayload) -> Dict[str, object]:
+    diagnostics = payload.collision_diagnostics
+    return {
+        'drag_gas_properties': dict(diagnostics.get('drag_gas_properties', {})),
+        'field_backend_diagnostics': dict(diagnostics.get('field_backend_diagnostics', {})),
+        'force_catalog': dict(diagnostics.get('force_catalog', {})),
+        'force_runtime': dict(diagnostics.get('force_runtime', {})),
+        'wall_catalog_alignment': dict(diagnostics.get('wall_catalog_alignment', {})),
+        'stochastic_motion': dict(diagnostics.get('stochastic_motion', {})),
+        'plasma_background': dict(diagnostics.get('plasma_background', {})),
+        'charge_model': dict(diagnostics.get('charge_model', {})),
+        'acceleration_source': str(diagnostics.get('acceleration_source', 'none')),
+        'acceleration_quantity_names': list(diagnostics.get('acceleration_quantity_names', [])),
+        'electric_field_names': list(diagnostics.get('electric_field_names', [])),
+        'electric_q_over_m_Ckg': float(diagnostics.get('electric_q_over_m_Ckg', 0.0)),
+        'contact_tangent_motion_enabled': int(bool(payload.contact_tangent_motion_enabled)),
+        'contact_tangent_model': str(diagnostics.get('contact_tangent_model', '')),
+        'boundary_diagnostics': _boundary_diagnostics(payload),
+    }
+
+
+def _shared_report_fields(payload: RuntimeOutputPayload) -> Dict[str, object]:
+    return {
+        'coordinate_system': _runtime_coordinate_system(payload),
+        'final_state_counts': _final_state_count_dict(payload),
+        'timing_s': {str(k): float(v) for k, v in payload.timing_s.items()},
+        'memory_estimate_bytes': {str(k): int(v) for k, v in payload.memory_estimate_bytes.items()},
+        'integrator': str(payload.base_integrator_name),
+        'valid_mask_policy': str(payload.valid_mask_policy),
+        'drag_model': str(payload.drag_model),
+        **_diagnostic_metadata(payload),
+        **field_backend_report(payload.prepared.runtime.field_provider),
+    }
+
+
 def _finite_summary(values: np.ndarray) -> Dict[str, object]:
     arr = np.asarray(values, dtype=np.float64)
     finite = arr[np.isfinite(arr)]
@@ -618,11 +937,6 @@ def _finite_summary(values: np.ndarray) -> Dict[str, object]:
     }
 
 
-def _invalid_stop_reason_names(reason_codes: np.ndarray) -> List[str]:
-    codes = np.asarray(reason_codes, dtype=np.uint8)
-    return [INVALID_STOP_REASON_NAMES.get(int(code), 'unknown') or 'unknown' for code in codes]
-
-
 def _top_part_reason_counts(part_ids: np.ndarray, reasons: List[str], *, limit: int = 12) -> List[Dict[str, object]]:
     counts = Counter((int(part_id), str(reason)) for part_id, reason in zip(part_ids, reasons))
     return [
@@ -633,15 +947,11 @@ def _top_part_reason_counts(part_ids: np.ndarray, reasons: List[str], *, limit: 
 
 def _particle_state_labels(payload: RuntimeOutputPayload) -> np.ndarray:
     labels = np.full(int(payload.particles.count), 'inactive', dtype=object)
-    for name, mask in (
-        ('active', payload.active),
-        ('contact_sliding', payload.contact_sliding),
-        ('invalid_mask_stopped', payload.invalid_mask_stopped),
-        ('numerical_boundary_stopped', payload.numerical_boundary_stopped),
-        ('stuck', payload.stuck),
-        ('absorbed', payload.absorbed),
-        ('escaped', payload.escaped),
-    ):
+    state_masks = _payload_state_masks(payload)
+    for name in GEOMETRY_STATE_ORDER:
+        if name == 'inactive':
+            continue
+        mask = state_masks[name]
         labels[np.asarray(mask, dtype=bool)] = name
     return labels
 
@@ -660,6 +970,15 @@ def _near_boundary_threshold_m(payload: RuntimeOutputPayload) -> float:
     return float(min(spacings)) if spacings else 0.0
 
 
+def _sample_geometry_features(runtime, positions: np.ndarray) -> Dict[str, np.ndarray]:
+    pos = np.asarray(positions, dtype=np.float64)
+    return {
+        'sdf_m': np.asarray([sample_geometry_sdf(runtime, p) for p in pos], dtype=np.float64),
+        'inside_geometry': np.asarray([inside_geometry(runtime, p, on_boundary_tol_m=0.0) for p in pos], dtype=bool),
+        'nearest_part_id': np.asarray([sample_geometry_part_id(runtime, p) for p in pos], dtype=np.int32),
+    }
+
+
 def _geometry_features_for_positions(
     payload: RuntimeOutputPayload,
     positions: np.ndarray,
@@ -667,12 +986,9 @@ def _geometry_features_for_positions(
 ) -> Dict[str, np.ndarray]:
     runtime = payload.prepared.runtime
     pos = np.asarray(positions, dtype=np.float64)
-    count = int(pos.shape[0])
-    sdf_values = np.asarray([sample_geometry_sdf(runtime, p) for p in pos], dtype=np.float64)
-    inside_values = np.asarray([inside_geometry(runtime, p, on_boundary_tol_m=0.0) for p in pos], dtype=bool)
-    grid_part_ids = np.asarray([sample_geometry_part_id(runtime, p) for p in pos], dtype=np.int32)
-    nearest_part_ids = grid_part_ids
-    nearest_distances = np.abs(sdf_values)
+    features = _sample_geometry_features(runtime, pos)
+    nearest_part_ids = np.asarray(features['nearest_part_id'], dtype=np.int32)
+    nearest_distances = np.abs(np.asarray(features['sdf_m'], dtype=np.float64))
     geometry_provider = getattr(runtime, 'geometry_provider', None)
     if (
         int(payload.spatial_dim) == 2
@@ -691,8 +1007,8 @@ def _geometry_features_for_positions(
     )
     speed = np.linalg.norm(velocity_values[:, : int(payload.spatial_dim)], axis=1)
     return {
-        'sdf_m': sdf_values,
-        'inside_geometry': inside_values,
+        'sdf_m': np.asarray(features['sdf_m'], dtype=np.float64),
+        'inside_geometry': np.asarray(features['inside_geometry'], dtype=bool),
         'nearest_part_id': nearest_part_ids,
         'nearest_boundary_distance_m': nearest_distances,
         'speed_mps': speed,
@@ -702,10 +1018,10 @@ def _geometry_features_for_positions(
 def _empty_geometry_summary() -> Dict[str, object]:
     return {
         'count': 0,
-        'sdf_m': {'count': 0},
-        'abs_sdf_m': {'count': 0},
-        'nearest_boundary_distance_m': {'count': 0},
-        'speed_mps': {'count': 0},
+        'sdf_m': dict(EMPTY_FINITE_SUMMARY),
+        'abs_sdf_m': dict(EMPTY_FINITE_SUMMARY),
+        'nearest_boundary_distance_m': dict(EMPTY_FINITE_SUMMARY),
+        'speed_mps': dict(EMPTY_FINITE_SUMMARY),
         'outside_geometry_count': 0,
         'near_boundary_count': 0,
         'nearest_part_counts': [],
@@ -756,16 +1072,7 @@ def _build_state_geometry_summary(payload: RuntimeOutputPayload) -> Dict[str, ob
     )
     threshold = _near_boundary_threshold_m(payload)
     by_state: Dict[str, object] = {}
-    for state_name in (
-        'active',
-        'contact_sliding',
-        'invalid_mask_stopped',
-        'numerical_boundary_stopped',
-        'stuck',
-        'absorbed',
-        'escaped',
-        'inactive',
-    ):
+    for state_name in GEOMETRY_STATE_ORDER:
         by_state[state_name] = _summarize_geometry_subset(
             mask=labels == state_name,
             features=features,
@@ -824,16 +1131,16 @@ def _build_invalid_stop_geometry_summary(payload: RuntimeOutputPayload) -> Dict[
     if count == 0:
         return {
             'count': 0,
-            'sdf_m': {'count': 0},
-            'abs_sdf_m': {'count': 0},
-            'nearest_boundary_distance_m': {'count': 0},
+            'sdf_m': dict(EMPTY_FINITE_SUMMARY),
+            'abs_sdf_m': dict(EMPTY_FINITE_SUMMARY),
+            'nearest_boundary_distance_m': dict(EMPTY_FINITE_SUMMARY),
             'nearest_part_counts': [],
             'nearest_part_reason_counts': [],
         }
 
     positions = np.asarray(payload.final_position, dtype=np.float64)[stopped_mask]
     velocities = np.asarray(payload.final_velocity, dtype=np.float64)[stopped_mask]
-    reasons = _invalid_stop_reason_names(np.asarray(payload.invalid_stop_reason_code, dtype=np.uint8)[stopped_mask])
+    reasons = invalid_stop_reason_names(np.asarray(payload.invalid_stop_reason_code, dtype=np.uint8)[stopped_mask])
     features = _geometry_features_for_positions(payload, positions, velocities)
     sdf_values = np.asarray(features['sdf_m'], dtype=np.float64)
     nearest_part_ids = np.asarray(features['nearest_part_id'], dtype=np.int32)
@@ -848,44 +1155,62 @@ def _build_invalid_stop_geometry_summary(payload: RuntimeOutputPayload) -> Dict[
     }
 
 
+def _payload_state_masks(payload: RuntimeOutputPayload) -> Dict[str, np.ndarray]:
+    return {
+        'active': np.asarray(payload.active, dtype=bool),
+        'invalid_mask_stopped': np.asarray(payload.invalid_mask_stopped, dtype=bool),
+        'numerical_boundary_stopped': np.asarray(payload.numerical_boundary_stopped, dtype=bool),
+        'stuck': np.asarray(payload.stuck, dtype=bool),
+        'absorbed': np.asarray(payload.absorbed, dtype=bool),
+        'escaped': np.asarray(payload.escaped, dtype=bool),
+        'contact_sliding': np.asarray(payload.contact_sliding, dtype=bool),
+        'contact_endpoint_stopped': np.asarray(payload.contact_endpoint_stopped, dtype=bool),
+    }
+
+
+def _state_summary(state_summary: Mapping[str, object], name: str) -> Dict[str, object]:
+    by_state = state_summary.get('by_state', {})
+    if not isinstance(by_state, Mapping):
+        return {}
+    value = by_state.get(name, {})
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _nonfinite_row_count(values: np.ndarray) -> int:
+    arr = np.asarray(values)
+    return int(np.count_nonzero(~np.all(np.isfinite(arr), axis=1)))
+
+
 def _build_final_state_consistency_summary(
     payload: RuntimeOutputPayload,
     state_summary: Mapping[str, object],
 ) -> Dict[str, object]:
-    active = np.asarray(payload.active, dtype=bool)
-    invalid = np.asarray(payload.invalid_mask_stopped, dtype=bool)
-    numerical = np.asarray(payload.numerical_boundary_stopped, dtype=bool)
-    stuck = np.asarray(payload.stuck, dtype=bool)
-    absorbed = np.asarray(payload.absorbed, dtype=bool)
-    contact_sliding = np.asarray(payload.contact_sliding, dtype=bool)
-    contact_endpoint_stopped = np.asarray(payload.contact_endpoint_stopped, dtype=bool)
-    escaped = np.asarray(payload.escaped, dtype=bool)
-    state_matrix = np.vstack([active, invalid, numerical, stuck, absorbed, escaped])
-    active_summary = (
-        dict(state_summary.get('by_state', {}).get('active', {}))
-        if isinstance(state_summary.get('by_state', {}), Mapping)
-        else {}
+    masks = _payload_state_masks(payload)
+    terminal_state_matrix = np.vstack(
+        [
+            masks['active'],
+            masks['invalid_mask_stopped'],
+            masks['numerical_boundary_stopped'],
+            masks['stuck'],
+            masks['absorbed'],
+            masks['escaped'],
+        ]
     )
-    contact_summary = (
-        dict(state_summary.get('by_state', {}).get('contact_sliding', {}))
-        if isinstance(state_summary.get('by_state', {}), Mapping)
-        else {}
-    )
+    active_summary = _state_summary(state_summary, 'active')
+    contact_summary = _state_summary(state_summary, 'contact_sliding')
     active_outside = int(active_summary.get('outside_geometry_count', 0))
     contact_outside = int(contact_summary.get('outside_geometry_count', 0))
-    active_hard_invalid = _count_hard_invalid_final_positions(payload, active)
-    nonfinite_position = int(np.count_nonzero(~np.all(np.isfinite(np.asarray(payload.final_position)), axis=1)))
-    nonfinite_velocity = int(np.count_nonzero(~np.all(np.isfinite(np.asarray(payload.final_velocity)), axis=1)))
+    active_hard_invalid = _count_hard_invalid_final_positions(payload, masks['active'])
     return {
         'active_outside_geometry_count': int(active_outside),
         'contact_sliding_outside_geometry_count': int(contact_outside),
         'active_hard_invalid_count': int(active_hard_invalid),
-        'multiple_terminal_state_count': int(np.count_nonzero(np.sum(state_matrix, axis=0) > 1)),
-        'nonfinite_position_count': int(nonfinite_position),
-        'nonfinite_velocity_count': int(nonfinite_velocity),
-        'contact_sliding_particle_count': int(np.count_nonzero(contact_sliding)),
-        'contact_endpoint_stopped_count': int(np.count_nonzero(contact_endpoint_stopped)),
-        'numerical_boundary_stopped_count': int(np.count_nonzero(numerical)),
+        'multiple_terminal_state_count': int(np.count_nonzero(np.sum(terminal_state_matrix, axis=0) > 1)),
+        'nonfinite_position_count': _nonfinite_row_count(payload.final_position),
+        'nonfinite_velocity_count': _nonfinite_row_count(payload.final_velocity),
+        'contact_sliding_particle_count': int(np.count_nonzero(masks['contact_sliding'])),
+        'contact_endpoint_stopped_count': int(np.count_nonzero(masks['contact_endpoint_stopped'])),
+        'numerical_boundary_stopped_count': int(np.count_nonzero(masks['numerical_boundary_stopped'])),
     }
 
 
@@ -929,7 +1254,11 @@ def _build_max_hit_event_summary(max_hit_rows: List[Dict[str, object]]) -> Dict[
         t = _summary_float_or_nan(row.get('time_s'))
         if np.isfinite(t):
             time_bins.append(round(float(t), 1))
-    outcome_sequences = [str(row.get('outcome_sequence', '')) for row in max_hit_rows if str(row.get('outcome_sequence', '')).strip()]
+    outcome_sequences = [
+        str(row.get('outcome_sequence', ''))
+        for row in max_hit_rows
+        if str(row.get('outcome_sequence', '')).strip()
+    ]
     return {
         'event_count': int(len(max_hit_rows)),
         'unique_particle_count': int(len(set(particle_ids))),
@@ -942,26 +1271,13 @@ def _build_max_hit_event_summary(max_hit_rows: List[Dict[str, object]]) -> Dict[
     }
 
 
-def _build_collision_diag_report(
+def _geometry_summary_bundle(
     payload: RuntimeOutputPayload,
     *,
     invalid_stop_geometry_summary: Mapping[str, object] | None = None,
     state_geometry_summary: Mapping[str, object] | None = None,
     source_initial_geometry_summary: Mapping[str, object] | None = None,
 ) -> Dict[str, object]:
-    backend_report = field_backend_report(payload.prepared.runtime.field_provider)
-    max_hit_summary = _build_max_hit_event_summary(payload.max_hit_rows)
-    max_hit_diag_summary = _build_max_hit_diagnostic_summary(payload.collision_diagnostics)
-    numerical_boundary_stopped_count = int(payload.numerical_boundary_stopped.sum())
-    unresolved_crossing_count = int(payload.collision_diagnostics.get('unresolved_crossing_count', 0))
-    max_hits_reached_count = int(payload.collision_diagnostics.get('max_hits_reached_count', 0))
-    nearest_projection_fallback_count = int(payload.collision_diagnostics.get('nearest_projection_fallback_count', 0))
-    boundary_event_contract = _build_boundary_event_contract_summary(
-        numerical_boundary_stopped_count=numerical_boundary_stopped_count,
-        unresolved_crossing_count=unresolved_crossing_count,
-        max_hits_reached_count=max_hits_reached_count,
-        nearest_projection_fallback_count=nearest_projection_fallback_count,
-    )
     invalid_stop_summary = (
         dict(invalid_stop_geometry_summary)
         if invalid_stop_geometry_summary is not None
@@ -977,41 +1293,68 @@ def _build_collision_diag_report(
         if source_initial_geometry_summary is not None
         else _build_source_initial_geometry_summary(payload)
     )
-    consistency_summary = _build_final_state_consistency_summary(payload, state_summary)
-    support_exit_summary = _build_field_support_exit_summary(payload)
+    return {
+        'invalid_stop_geometry_summary': invalid_stop_summary,
+        'state_geometry_summary': state_summary,
+        'final_state_consistency_summary': _build_final_state_consistency_summary(payload, state_summary),
+        'source_initial_geometry_summary': source_summary,
+        'field_support_exit_summary': _build_field_support_exit_summary(payload),
+    }
+
+
+def _build_runtime_report_context(
+    payload: RuntimeOutputPayload,
+    *,
+    invalid_stop_geometry_summary: Mapping[str, object] | None = None,
+    state_geometry_summary: Mapping[str, object] | None = None,
+    source_initial_geometry_summary: Mapping[str, object] | None = None,
+) -> RuntimeReportContext:
+    event_counts = _boundary_event_counts(payload)
+    boundary_event_contract = _boundary_event_contract_from_counts(event_counts)
+    return RuntimeReportContext(
+        event_counts=event_counts,
+        boundary_event_contract=boundary_event_contract,
+        max_hit_summary=_build_max_hit_event_summary(payload.max_hit_rows),
+        max_hit_diag_summary=_build_max_hit_diagnostic_summary(payload.collision_diagnostics),
+        summary_bundle=_geometry_summary_bundle(
+            payload,
+            invalid_stop_geometry_summary=invalid_stop_geometry_summary,
+            state_geometry_summary=state_geometry_summary,
+            source_initial_geometry_summary=source_initial_geometry_summary,
+        ),
+    )
+
+
+def _build_collision_diag_report(
+    payload: RuntimeOutputPayload,
+    *,
+    context: RuntimeReportContext | None = None,
+    invalid_stop_geometry_summary: Mapping[str, object] | None = None,
+    state_geometry_summary: Mapping[str, object] | None = None,
+    source_initial_geometry_summary: Mapping[str, object] | None = None,
+) -> Dict[str, object]:
+    comsol_boundary_map = _comsol_boundary_map(payload)
+    report_context = context or _build_runtime_report_context(
+        payload,
+        invalid_stop_geometry_summary=invalid_stop_geometry_summary,
+        state_geometry_summary=state_geometry_summary,
+        source_initial_geometry_summary=source_initial_geometry_summary,
+    )
+    event_counts = report_context.event_counts
+    boundary_event_contract = report_context.boundary_event_contract
     return {
         **payload.collision_diagnostics,
-        'coordinate_system': _runtime_coordinate_system(payload),
-        'final_state_counts': _final_state_count_dict(payload),
-        'numerical_boundary_stopped_count': int(numerical_boundary_stopped_count),
+        **_shared_report_fields(payload),
+        'comsol_boundary_map': {
+            str(int(part_id)): dict(row) for part_id, row in sorted(comsol_boundary_map.items(), key=lambda item: int(item[0]))
+        },
+        'numerical_boundary_stopped_count': int(event_counts['numerical_boundary_stopped_count']),
         'boundary_event_contract': boundary_event_contract,
         'boundary_event_contract_passed': int(boundary_event_contract['passed']),
         'boundary_event_failure_count': int(boundary_event_contract['failure_count']),
-        'max_hit_event_summary': max_hit_summary,
-        'max_hit_diagnostic_summary': max_hit_diag_summary,
-        'invalid_stop_geometry_summary': invalid_stop_summary,
-        'state_geometry_summary': state_summary,
-        'final_state_consistency_summary': consistency_summary,
-        'source_initial_geometry_summary': source_summary,
-        'field_support_exit_summary': support_exit_summary,
-        'timing_s': {str(k): float(v) for k, v in payload.timing_s.items()},
-        'memory_estimate_bytes': {str(k): int(v) for k, v in payload.memory_estimate_bytes.items()},
-        'integrator': str(payload.base_integrator_name),
-        'valid_mask_policy': str(payload.valid_mask_policy),
-        'drag_model': str(payload.drag_model),
-        'drag_gas_properties': dict(payload.collision_diagnostics.get('drag_gas_properties', {})),
-        'force_catalog': dict(payload.collision_diagnostics.get('force_catalog', {})),
-        'force_runtime': dict(payload.collision_diagnostics.get('force_runtime', {})),
-        'wall_catalog_alignment': dict(payload.collision_diagnostics.get('wall_catalog_alignment', {})),
-        'stochastic_motion': dict(payload.collision_diagnostics.get('stochastic_motion', {})),
-        'plasma_background': dict(payload.collision_diagnostics.get('plasma_background', {})),
-        'charge_model': dict(payload.collision_diagnostics.get('charge_model', {})),
-        'acceleration_source': str(payload.collision_diagnostics.get('acceleration_source', 'none')),
-        'acceleration_quantity_names': list(payload.collision_diagnostics.get('acceleration_quantity_names', [])),
-        'electric_field_names': list(payload.collision_diagnostics.get('electric_field_names', [])),
-        'electric_q_over_m_Ckg': float(payload.collision_diagnostics.get('electric_q_over_m_Ckg', 0.0)),
-        'contact_tangent_motion_enabled': int(bool(payload.contact_tangent_motion_enabled)),
-        **backend_report,
+        'max_hit_event_summary': report_context.max_hit_summary,
+        'max_hit_diagnostic_summary': report_context.max_hit_diag_summary,
+        **report_context.summary_bundle,
         'max_wall_hits_per_step': int(payload.max_wall_hits_per_step),
         'min_remaining_dt_ratio': float(payload.min_remaining_dt_ratio),
         'on_boundary_tol_m': float(payload.on_boundary_tol_m),
@@ -1022,66 +1365,125 @@ def _build_collision_diag_report(
     }
 
 
+def _runtime_output_filenames(payload: RuntimeOutputPayload, outputs_written: bool) -> Dict[str, str]:
+    options = payload.output_options
+    diagnostics = payload.collision_diagnostics
+    return {
+        'positions_file': _artifact_filename(
+            outputs_written,
+            int(options.write_positions) != 0,
+            f'positions_{payload.spatial_dim}d.npy',
+        ),
+        'wall_summary_file': _artifact_filename(
+            outputs_written,
+            int(options.write_wall_summary) != 0,
+            'wall_summary.json',
+        ),
+        'wall_summary_by_part_file': _artifact_filename(
+            outputs_written,
+            int(options.write_wall_summary) != 0,
+            'wall_summary_by_part.csv',
+        ),
+        'max_hit_events_file': _artifact_filename(
+            outputs_written,
+            int(options.write_max_hit_events) != 0,
+            'max_hit_events.csv',
+        ),
+        'coating_summary_file': _artifact_filename(
+            outputs_written,
+            int(options.write_coating_summary) != 0,
+            'coating_summary_by_part.csv',
+        ),
+        'plasma_background_summary_file': _artifact_filename(
+            outputs_written,
+            _diagnostic_section_enabled(diagnostics, 'plasma_background'),
+            'plasma_background_summary.csv',
+        ),
+        'charge_model_summary_file': _artifact_filename(
+            outputs_written,
+            _diagnostic_section_enabled(diagnostics, 'charge_model'),
+            'charge_model_summary.csv',
+        ),
+        'collision_diagnostics_file': _artifact_filename(
+            outputs_written,
+            int(payload.write_collision_diagnostics) != 0,
+            'collision_diagnostics.json',
+        ),
+        'force_contributions_file': _artifact_filename(outputs_written, True, 'force_contributions.csv'),
+        'runtime_step_summary_file': _artifact_filename(
+            outputs_written,
+            int(options.write_runtime_step_summary) != 0,
+            'runtime_step_summary.csv',
+        ),
+    }
+
+
+def _runtime_output_row_counts(payload: RuntimeOutputPayload) -> Dict[str, int]:
+    return {
+        'wall_events': int(len(payload.wall_rows)),
+        'max_hit_events': int(len(payload.max_hit_rows)),
+        'runtime_steps': int(len(payload.step_rows)),
+        'coating_summary': int(len(payload.coating_summary_rows)),
+        'force_contributions': int(len(_build_force_contribution_rows(payload))),
+    }
+
+
+def _boundary_report_fields(
+    event_counts: Mapping[str, int],
+    boundary_event_contract: Mapping[str, object],
+) -> Dict[str, object]:
+    return {
+        'unresolved_crossing_count': int(event_counts['unresolved_crossing_count']),
+        'max_hits_reached_count': int(event_counts['max_hits_reached_count']),
+        'bisection_fallback_count': int(event_counts['bisection_fallback_count']),
+        'nearest_projection_fallback_count': int(event_counts['nearest_projection_fallback_count']),
+        'boundary_event_contract': boundary_event_contract,
+        'boundary_event_contract_passed': int(boundary_event_contract['passed']),
+        'boundary_event_failure_count': int(boundary_event_contract['failure_count']),
+    }
+
+
+def _stop_reason_report_fields(collision_diagnostics: Mapping[str, object]) -> Dict[str, object]:
+    return {
+        'invalid_mask_stop_reason_counts': dict(
+            collision_diagnostics.get('invalid_mask_stop_reason_counts', {})
+        ),
+        'numerical_boundary_stop_reason_counts': dict(
+            collision_diagnostics.get('numerical_boundary_stop_reason_counts', {})
+        ),
+    }
+
+
 def build_runtime_report(
     payload: RuntimeOutputPayload,
     *,
     outputs_written: bool,
+    context: RuntimeReportContext | None = None,
     invalid_stop_geometry_summary: Mapping[str, object] | None = None,
     state_geometry_summary: Mapping[str, object] | None = None,
     source_initial_geometry_summary: Mapping[str, object] | None = None,
 ) -> Dict[str, object]:
-    backend_report = field_backend_report(payload.prepared.runtime.field_provider)
-    valid_mask_violation_count = int(payload.collision_diagnostics.get('valid_mask_violation_count', 0))
-    valid_mask_violation_particle_count = int(payload.collision_diagnostics.get('valid_mask_violation_particle_count', 0))
-    valid_mask_mixed_stencil_count = int(payload.collision_diagnostics.get('valid_mask_mixed_stencil_count', 0))
-    valid_mask_mixed_stencil_particle_count = int(payload.collision_diagnostics.get('valid_mask_mixed_stencil_particle_count', 0))
-    valid_mask_hard_invalid_count = int(payload.collision_diagnostics.get('valid_mask_hard_invalid_count', 0))
-    valid_mask_hard_invalid_particle_count = int(payload.collision_diagnostics.get('valid_mask_hard_invalid_particle_count', 0))
     invalid_mask_stopped_count = int(payload.invalid_mask_stopped.sum())
-    numerical_boundary_stopped_count = int(payload.numerical_boundary_stopped.sum())
-    unresolved_crossing_count = int(payload.collision_diagnostics.get('unresolved_crossing_count', 0))
-    max_hits_reached_count = int(payload.collision_diagnostics.get('max_hits_reached_count', 0))
-    bisection_fallback_count = int(payload.collision_diagnostics.get('bisection_fallback_count', 0))
-    nearest_projection_fallback_count = int(payload.collision_diagnostics.get('nearest_projection_fallback_count', 0))
-    boundary_event_contract = _build_boundary_event_contract_summary(
-        numerical_boundary_stopped_count=numerical_boundary_stopped_count,
-        unresolved_crossing_count=unresolved_crossing_count,
-        max_hits_reached_count=max_hits_reached_count,
-        nearest_projection_fallback_count=nearest_projection_fallback_count,
+    report_context = context or _build_runtime_report_context(
+        payload,
+        invalid_stop_geometry_summary=invalid_stop_geometry_summary,
+        state_geometry_summary=state_geometry_summary,
+        source_initial_geometry_summary=source_initial_geometry_summary,
     )
-    contact_sliding_count = int(payload.collision_diagnostics.get('contact_sliding_count', 0))
-    contact_sliding_time_total_s = float(payload.collision_diagnostics.get('contact_sliding_time_total_s', 0.0))
-    contact_tangent_step_count = int(payload.collision_diagnostics.get('contact_tangent_step_count', 0))
-    contact_release_count = int(payload.collision_diagnostics.get('contact_release_count', 0))
-    contact_release_probe_reject_count = int(payload.collision_diagnostics.get('contact_release_probe_reject_count', 0))
-    contact_endpoint_stop_count = int(payload.collision_diagnostics.get('contact_endpoint_stop_count', 0))
-    contact_endpoint_hold_count = int(payload.collision_diagnostics.get('contact_endpoint_hold_count', 0))
-    invalid_mask_retry_count = int(payload.collision_diagnostics.get('invalid_mask_retry_count', 0))
-    invalid_mask_retry_exhausted_count = int(payload.collision_diagnostics.get('invalid_mask_retry_exhausted_count', 0))
-    max_hit_summary = _build_max_hit_event_summary(payload.max_hit_rows)
-    max_hit_diag_summary = _build_max_hit_diagnostic_summary(payload.collision_diagnostics)
-    invalid_stop_summary = (
-        dict(invalid_stop_geometry_summary)
-        if invalid_stop_geometry_summary is not None
-        else _build_invalid_stop_geometry_summary(payload)
+    event_counts = report_context.event_counts
+    boundary_event_contract = report_context.boundary_event_contract
+    diagnostic_counts = _diagnostic_int_fields(
+        payload.collision_diagnostics,
+        VALID_MASK_DIAGNOSTIC_FIELDS + CONTACT_DIAGNOSTIC_FIELDS,
     )
-    state_summary = (
-        dict(state_geometry_summary)
-        if state_geometry_summary is not None
-        else _build_state_geometry_summary(payload)
+    contact_sliding_time_total_s = _diagnostic_float_field(
+        payload.collision_diagnostics,
+        'contact_sliding_time_total_s',
     )
-    source_summary = (
-        dict(source_initial_geometry_summary)
-        if source_initial_geometry_summary is not None
-        else _build_source_initial_geometry_summary(payload)
-    )
-    consistency_summary = _build_final_state_consistency_summary(payload, state_summary)
-    output_options = payload.output_options
-    support_exit_summary = _build_field_support_exit_summary(payload)
+    support_exit_summary = dict(report_context.summary_bundle['field_support_exit_summary'])
     return {
         'particle_count': int(payload.particles.count),
-        'coordinate_system': _runtime_coordinate_system(payload),
-        'final_state_counts': _final_state_count_dict(payload),
+        **_shared_report_fields(payload),
         'released_count': int(payload.released.sum()),
         'stuck_count': int(payload.stuck.sum()),
         'absorbed_count': int(payload.absorbed.sum()),
@@ -1090,113 +1492,24 @@ def build_runtime_report(
         'contact_sliding_particle_count': int(payload.contact_sliding.sum()),
         'escaped_count': int(payload.escaped.sum()),
         'invalid_mask_stopped_count': int(invalid_mask_stopped_count),
-        'numerical_boundary_stopped_count': int(numerical_boundary_stopped_count),
+        'numerical_boundary_stopped_count': int(event_counts['numerical_boundary_stopped_count']),
         'save_frame_count': int(len(payload.save_meta)),
         'outputs_written': int(bool(outputs_written)),
-        'positions_file': (
-            f'positions_{payload.spatial_dim}d.npy'
-            if bool(outputs_written) and int(output_options.write_positions) != 0
-            else ''
-        ),
-        'timing_s': {str(k): float(v) for k, v in payload.timing_s.items()},
-        'memory_estimate_bytes': {str(k): int(v) for k, v in payload.memory_estimate_bytes.items()},
-        'output_row_counts': {
-            'wall_events': int(len(payload.wall_rows)),
-            'max_hit_events': int(len(payload.max_hit_rows)),
-            'runtime_steps': int(len(payload.step_rows)),
-            'coating_summary': int(len(payload.coating_summary_rows)),
-        },
-        'integrator': str(payload.base_integrator_name),
-        'valid_mask_policy': str(payload.valid_mask_policy),
-        'drag_model': str(payload.drag_model),
-        'drag_gas_properties': dict(payload.collision_diagnostics.get('drag_gas_properties', {})),
-        'force_catalog': dict(payload.collision_diagnostics.get('force_catalog', {})),
-        'force_runtime': dict(payload.collision_diagnostics.get('force_runtime', {})),
-        'wall_catalog_alignment': dict(payload.collision_diagnostics.get('wall_catalog_alignment', {})),
-        'stochastic_motion': dict(payload.collision_diagnostics.get('stochastic_motion', {})),
-        'plasma_background': dict(payload.collision_diagnostics.get('plasma_background', {})),
-        'charge_model': dict(payload.collision_diagnostics.get('charge_model', {})),
-        'acceleration_source': str(payload.collision_diagnostics.get('acceleration_source', 'none')),
-        'acceleration_quantity_names': list(payload.collision_diagnostics.get('acceleration_quantity_names', [])),
-        'electric_field_names': list(payload.collision_diagnostics.get('electric_field_names', [])),
-        'electric_q_over_m_Ckg': float(payload.collision_diagnostics.get('electric_q_over_m_Ckg', 0.0)),
-        'contact_tangent_motion_enabled': int(bool(payload.contact_tangent_motion_enabled)),
-        'unresolved_crossing_count': int(unresolved_crossing_count),
-        'max_hits_reached_count': int(max_hits_reached_count),
-        'bisection_fallback_count': int(bisection_fallback_count),
-        'nearest_projection_fallback_count': int(nearest_projection_fallback_count),
-        'boundary_event_contract': boundary_event_contract,
-        'boundary_event_contract_passed': int(boundary_event_contract['passed']),
-        'boundary_event_failure_count': int(boundary_event_contract['failure_count']),
-        'max_hit_unique_particle_count': int(max_hit_summary['unique_particle_count']),
-        'max_hit_remaining_dt_total_s': float(max_hit_diag_summary['remaining_dt_total_s']),
-        'max_hit_remaining_dt_max_s': float(max_hit_diag_summary['remaining_dt_max_s']),
-        'max_hit_diagnostic_summary': max_hit_diag_summary,
-        'contact_sliding_count': int(contact_sliding_count),
+        **_runtime_output_filenames(payload, outputs_written),
+        'output_row_counts': _runtime_output_row_counts(payload),
+        **_boundary_report_fields(event_counts, boundary_event_contract),
+        'max_hit_unique_particle_count': int(report_context.max_hit_summary['unique_particle_count']),
+        'max_hit_remaining_dt_total_s': float(report_context.max_hit_diag_summary['remaining_dt_total_s']),
+        'max_hit_remaining_dt_max_s': float(report_context.max_hit_diag_summary['remaining_dt_max_s']),
+        'max_hit_diagnostic_summary': report_context.max_hit_diag_summary,
+        'contact_sliding_count': int(diagnostic_counts['contact_sliding_count']),
         'contact_sliding_time_total_s': float(contact_sliding_time_total_s),
-        'contact_tangent_step_count': int(contact_tangent_step_count),
-        'contact_release_count': int(contact_release_count),
-        'contact_release_probe_reject_count': int(contact_release_probe_reject_count),
-        'contact_endpoint_stop_count': int(contact_endpoint_stop_count),
-        'contact_endpoint_hold_count': int(contact_endpoint_hold_count),
-        'invalid_mask_retry_count': int(invalid_mask_retry_count),
-        'invalid_mask_retry_exhausted_count': int(invalid_mask_retry_exhausted_count),
-        'invalid_mask_stop_reason_counts': dict(
-            payload.collision_diagnostics.get('invalid_mask_stop_reason_counts', {})
-        ),
-        'numerical_boundary_stop_reason_counts': dict(
-            payload.collision_diagnostics.get('numerical_boundary_stop_reason_counts', {})
-        ),
-        'invalid_stop_geometry_summary': invalid_stop_summary,
-        'state_geometry_summary': state_summary,
-        'final_state_consistency_summary': consistency_summary,
-        'source_initial_geometry_summary': source_summary,
-        'field_support_exit_summary': support_exit_summary,
+        **{name: int(diagnostic_counts[name]) for name in CONTACT_DIAGNOSTIC_FIELDS if name != 'contact_sliding_count'},
+        **_stop_reason_report_fields(payload.collision_diagnostics),
+        **report_context.summary_bundle,
         'wall_law_counts': payload.wall_law_counts,
-        'wall_summary_file': (
-            'wall_summary.json' if bool(outputs_written) and int(output_options.write_wall_summary) != 0 else ''
-        ),
-        'wall_summary_by_part_file': (
-            'wall_summary_by_part.csv' if bool(outputs_written) and int(output_options.write_wall_summary) != 0 else ''
-        ),
-        'max_hit_events_file': (
-            'max_hit_events.csv' if bool(outputs_written) and int(output_options.write_max_hit_events) != 0 else ''
-        ),
-        'coating_summary_file': (
-            'coating_summary_by_part.csv'
-            if bool(outputs_written) and int(output_options.write_coating_summary) != 0
-            else ''
-        ),
-        'plasma_background_summary_file': (
-            'plasma_background_summary.csv'
-            if bool(outputs_written)
-            and int(dict(payload.collision_diagnostics.get('plasma_background', {})).get('enabled', 0)) != 0
-            else ''
-        ),
-        'charge_model_summary_file': (
-            'charge_model_summary.csv'
-            if bool(outputs_written)
-            and int(dict(payload.collision_diagnostics.get('charge_model', {})).get('enabled', 0)) != 0
-            else ''
-        ),
-        'collision_diagnostics_file': (
-            'collision_diagnostics.json'
-            if bool(outputs_written) and int(payload.write_collision_diagnostics) != 0
-            else ''
-        ),
-        'runtime_step_summary_file': (
-            'runtime_step_summary.csv'
-            if bool(outputs_written) and int(output_options.write_runtime_step_summary) != 0
-            else ''
-        ),
         'kernel_backend': f'numba_{payload.spatial_dim}d_freeflight',
-        'valid_mask_violation_count': int(valid_mask_violation_count),
-        'valid_mask_violation_particle_count': int(valid_mask_violation_particle_count),
-        'valid_mask_mixed_stencil_count': int(valid_mask_mixed_stencil_count),
-        'valid_mask_mixed_stencil_particle_count': int(valid_mask_mixed_stencil_particle_count),
-        'valid_mask_hard_invalid_count': int(valid_mask_hard_invalid_count),
-        'valid_mask_hard_invalid_particle_count': int(valid_mask_hard_invalid_particle_count),
-        **backend_report,
+        **{name: int(diagnostic_counts[name]) for name in VALID_MASK_DIAGNOSTIC_FIELDS},
     }
 
 
@@ -1232,9 +1545,57 @@ def _write_trajectory_plot(output_dir: Path, positions: np.ndarray, spatial_dim:
     plt.close(fig)
 
 
-def write_runtime_outputs(payload: RuntimeOutputPayload, output_dir: Path) -> Dict[str, object]:
-    import pandas as pd
+def _write_force_contributions(payload: RuntimeOutputPayload, output_dir: Path) -> None:
+    _write_rows_csv(
+        output_dir / 'force_contributions.csv',
+        _build_force_contribution_rows(payload),
+        FORCE_CONTRIBUTION_COLUMNS,
+    )
 
+
+def _wall_summary_rows(payload: RuntimeOutputPayload) -> List[Dict[str, object]]:
+    return [
+        {
+            'part_id': int(part_id),
+            'outcome': str(outcome),
+            'wall_mode': str(wall_mode),
+            'count': int(count),
+        }
+        for (part_id, outcome, wall_mode), count in sorted(
+            payload.wall_summary_counts.items(),
+            key=lambda item: (-int(item[1]), int(item[0][0]), str(item[0][1]), str(item[0][2])),
+        )
+    ]
+
+
+def _write_wall_tables(payload: RuntimeOutputPayload, output_dir: Path) -> None:
+    output_options = payload.output_options
+    if int(output_options.write_wall_events) != 0:
+        wall_df = _attach_comsol_boundary_columns(_rows_frame(payload.wall_rows, WALL_EVENT_COLUMNS), payload)
+        wall_df.to_csv(output_dir / 'wall_events.csv', index=False)
+    if int(output_options.write_wall_summary) != 0:
+        wall_summary_df = _attach_comsol_boundary_columns(
+            _rows_frame(_wall_summary_rows(payload), WALL_SUMMARY_COLUMNS),
+            payload,
+        )
+        wall_summary_df.to_csv(output_dir / 'wall_summary_by_part.csv', index=False)
+
+
+def _write_optional_event_tables(payload: RuntimeOutputPayload, output_dir: Path) -> None:
+    output_options = payload.output_options
+    if int(output_options.write_max_hit_events) != 0:
+        _write_rows_csv(output_dir / 'max_hit_events.csv', payload.max_hit_rows, MAX_HIT_EVENT_COLUMNS)
+    if int(output_options.write_runtime_step_summary) != 0:
+        _write_rows_csv(output_dir / 'runtime_step_summary.csv', payload.step_rows, RUNTIME_STEP_COLUMNS)
+
+
+def _write_coating_outputs(payload: RuntimeOutputPayload, output_dir: Path) -> None:
+    coating_rows = _build_coating_summary_rows(payload)
+    _write_rows_csv(output_dir / 'coating_summary_by_part.csv', coating_rows, COATING_SUMMARY_COLUMNS)
+    _write_json(output_dir / 'coating_summary.json', _build_coating_summary_report(coating_rows))
+
+
+def write_runtime_outputs(payload: RuntimeOutputPayload, output_dir: Path) -> Dict[str, object]:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     output_options = payload.output_options
@@ -1253,125 +1614,22 @@ def write_runtime_outputs(payload: RuntimeOutputPayload, output_dir: Path) -> Di
 
     final_df = _build_final_particles_frame(payload)
     final_df.to_csv(output_dir / 'final_particles.csv', index=False)
-
-    wall_cols = [
-        'time_s',
-        'hit_time_s',
-        'particle_id',
-        'part_id',
-        'boundary_primitive_id',
-        'boundary_primitive_kind',
-        'boundary_hit_ambiguous',
-        'step_name',
-        'segment_name',
-        'outcome',
-        'wall_mode',
-        'alpha_hit',
-        'material_id',
-        'material_name',
-        'particle_mass_kg',
-        'particle_diameter_m',
-        'impact_speed_mps',
-        'impact_normal_speed_mps',
-        'impact_tangential_speed_mps',
-        'impact_angle_deg_from_normal',
-        'hit_x_m',
-        'hit_y_m',
-        'hit_z_m',
-        'normal_x',
-        'normal_y',
-        'normal_z',
-        'v_hit_x_mps',
-        'v_hit_y_mps',
-        'v_hit_z_mps',
-    ]
-    if int(output_options.write_wall_events) != 0:
-        pd.DataFrame(payload.wall_rows, columns=wall_cols).to_csv(output_dir / 'wall_events.csv', index=False)
-
-    wall_summary_rows = [
-        {
-            'part_id': int(part_id),
-            'outcome': str(outcome),
-            'wall_mode': str(wall_mode),
-            'count': int(count),
-        }
-        for (part_id, outcome, wall_mode), count in sorted(
-            payload.wall_summary_counts.items(),
-            key=lambda item: (-int(item[1]), int(item[0][0]), str(item[0][1]), str(item[0][2])),
-        )
-    ]
-    if int(output_options.write_wall_summary) != 0:
-        pd.DataFrame(wall_summary_rows, columns=['part_id', 'outcome', 'wall_mode', 'count']).to_csv(
-            output_dir / 'wall_summary_by_part.csv',
-            index=False,
-        )
-
-    max_hit_cols = [
-        'time_s',
-        'particle_id',
-        'step_name',
-        'segment_name',
-        'hits_in_step',
-        'remaining_dt_s',
-        'last_part_id',
-        'part_id_sequence',
-        'outcome_sequence',
-    ]
-    if int(output_options.write_max_hit_events) != 0:
-        pd.DataFrame(payload.max_hit_rows, columns=max_hit_cols).to_csv(output_dir / 'max_hit_events.csv', index=False)
-
-    step_cols = [
-        'time_s',
-        'step_name',
-        'segment_name',
-        'released_count',
-        'active_count',
-        'stuck_count',
-        'absorbed_count',
-        'contact_sliding_count',
-        'escaped_count',
-        'save_positions_enabled',
-        'write_wall_events_enabled',
-        'write_diagnostics_enabled',
-        'valid_mask_violation_count_step',
-        'valid_mask_mixed_stencil_count_step',
-        'valid_mask_hard_invalid_count_step',
-        'invalid_mask_stopped_count_step',
-    ]
-    if int(output_options.write_runtime_step_summary) != 0:
-        pd.DataFrame(payload.step_rows, columns=step_cols).to_csv(output_dir / 'runtime_step_summary.csv', index=False)
+    _write_force_contributions(payload, output_dir)
+    _write_wall_tables(payload, output_dir)
+    _write_optional_event_tables(payload, output_dir)
 
     if int(output_options.write_prepared_summary) != 0:
-        (output_dir / 'prepared_runtime_summary.json').write_text(
-            json.dumps(prepared_runtime_summary(payload.prepared), indent=2),
-            encoding='utf-8',
-        )
+        _write_json(output_dir / 'prepared_runtime_summary.json', prepared_runtime_summary(payload.prepared))
     if int(output_options.write_source_diagnostics) != 0:
         _write_resolved_particles(payload, output_dir)
 
     wall_summary_report = _build_wall_summary_report(payload.wall_summary_counts)
     wall_summary_report['field_support_exit_summary'] = _build_field_support_exit_summary(payload)
     if int(output_options.write_wall_summary) != 0:
-        (output_dir / 'wall_summary.json').write_text(json.dumps(wall_summary_report, indent=2), encoding='utf-8')
+        _write_json(output_dir / 'wall_summary.json', wall_summary_report)
 
     if int(output_options.write_coating_summary) != 0:
-        coating_rows = _build_coating_summary_rows(payload)
-        coating_cols = [
-            'part_id',
-            'material_id',
-            'material_name',
-            'impact_count',
-            'stuck_count',
-            'absorbed_count',
-            'deposited_mass_kg',
-            'mean_impact_speed_mps',
-            'mean_impact_angle_deg_from_normal',
-        ]
-        pd.DataFrame(coating_rows, columns=coating_cols).to_csv(output_dir / 'coating_summary_by_part.csv', index=False)
-        (output_dir / 'coating_summary.json').write_text(
-            json.dumps(_build_coating_summary_report(coating_rows), indent=2),
-            encoding='utf-8',
-        )
+        _write_coating_outputs(payload, output_dir)
 
     wall_alignment_summary, wall_alignment_rows = build_wall_catalog_alignment(
         generated_dir=_generated_dir_from_payload(payload),
@@ -1385,23 +1643,31 @@ def write_runtime_outputs(payload: RuntimeOutputPayload, output_dir: Path) -> Di
     invalid_stop_geometry_summary = _build_invalid_stop_geometry_summary(payload)
     state_geometry_summary = _build_state_geometry_summary(payload)
     source_initial_geometry_summary = _build_source_initial_geometry_summary(payload)
+    report_context = _build_runtime_report_context(
+        payload,
+        invalid_stop_geometry_summary=invalid_stop_geometry_summary,
+        state_geometry_summary=state_geometry_summary,
+        source_initial_geometry_summary=source_initial_geometry_summary,
+    )
     collision_diag_report = _build_collision_diag_report(
         payload,
+        context=report_context,
         invalid_stop_geometry_summary=invalid_stop_geometry_summary,
         state_geometry_summary=state_geometry_summary,
         source_initial_geometry_summary=source_initial_geometry_summary,
     )
     if int(payload.write_collision_diagnostics) != 0:
-        (output_dir / 'collision_diagnostics.json').write_text(json.dumps(collision_diag_report, indent=2), encoding='utf-8')
+        _write_json(output_dir / 'collision_diagnostics.json', collision_diag_report)
 
     report = build_runtime_report(
         payload,
         outputs_written=True,
+        context=report_context,
         invalid_stop_geometry_summary=invalid_stop_geometry_summary,
         state_geometry_summary=state_geometry_summary,
         source_initial_geometry_summary=source_initial_geometry_summary,
     )
-    (output_dir / 'solver_report.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    _write_json(output_dir / 'solver_report.json', report)
     plasma_summary = dict(report.get('plasma_background', {}))
     if int(plasma_summary.get('enabled', 0)) != 0:
         _write_scalar_summary_csv(output_dir / 'plasma_background_summary.csv', plasma_summary)

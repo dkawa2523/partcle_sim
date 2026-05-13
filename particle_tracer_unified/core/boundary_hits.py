@@ -16,6 +16,18 @@ from .geometry3d import TriangleSurface3D, nearest_surface_point, segment_hit_fr
 
 _EDGE_ENDPOINT_TOL = 1.0e-9
 _TRIANGLE_EDGE_TOL = 1.0e-8
+_PASS_THROUGH_WALL_LAWS = frozenset(
+    {
+        'pass_through',
+        'passthrough',
+        'transparent',
+        'inactive',
+        'continuity',
+        'pair_continuity',
+        'interior',
+        'internal',
+    }
+)
 
 
 def _cross2d(a: np.ndarray, b: np.ndarray) -> float:
@@ -69,20 +81,37 @@ class BoundaryEdgeFrame2D(NamedTuple):
     distance: float
 
 
+def _is_pass_through_part(runtime, part_id: int) -> bool:
+    wall_catalog = getattr(runtime, 'wall_catalog', None)
+    if wall_catalog is None:
+        return False
+    try:
+        model = wall_catalog.model_for_part(int(part_id))
+    except Exception:
+        return False
+    law = str(getattr(model, 'law_name', '')).strip().lower()
+    return law in _PASS_THROUGH_WALL_LAWS
+
+
+def _active_collision_edge_mask(runtime, part_ids: np.ndarray) -> np.ndarray:
+    ids = np.asarray(part_ids, dtype=np.int32)
+    if ids.size == 0:
+        return np.zeros(0, dtype=bool)
+    wall_catalog = getattr(runtime, 'wall_catalog', None)
+    if wall_catalog is None:
+        return np.ones(ids.shape, dtype=bool)
+    keep = np.ones(ids.shape, dtype=bool)
+    for i, part_id in enumerate(ids):
+        if _is_pass_through_part(runtime, int(part_id)):
+            keep[i] = False
+    return keep
+
+
 def segment_hit_from_boundary_edges(runtime, p0: np.ndarray, p1: np.ndarray) -> Optional[BoundaryHit]:
     geometry_provider = runtime.geometry_provider
-    if geometry_provider is None:
+    segments, part_ids = _boundary_edges_2d(runtime)
+    if geometry_provider is None or segments is None:
         return None
-    geom = geometry_provider.geometry
-    if int(geom.spatial_dim) != 2 or geom.boundary_edges is None:
-        return None
-    segments = np.asarray(geom.boundary_edges, dtype=np.float64)
-    if segments.ndim != 3 or segments.shape[1:] != (2, 2) or segments.shape[0] == 0:
-        return None
-    part_ids = np.asarray(
-        geom.boundary_edge_part_ids if geom.boundary_edge_part_ids is not None else np.zeros(segments.shape[0], dtype=np.int32),
-        dtype=np.int32,
-    )
     a = np.asarray(p0, dtype=np.float64)
     b = np.asarray(p1, dtype=np.float64)
     r = b - a
@@ -155,6 +184,12 @@ def _boundary_edges_2d(runtime) -> Tuple[Optional[np.ndarray], np.ndarray]:
         part_ids = np.pad(part_ids, (0, int(segments.shape[0] - part_ids.size)), constant_values=0)
     elif part_ids.size > segments.shape[0]:
         part_ids = part_ids[: segments.shape[0]]
+    keep = _active_collision_edge_mask(runtime, part_ids)
+    if not np.all(keep):
+        segments = segments[keep]
+        part_ids = part_ids[keep]
+    if segments.shape[0] == 0:
+        return None, np.zeros(0, dtype=np.int32)
     return segments, part_ids
 
 
@@ -459,18 +494,9 @@ def contact_frame_on_boundary_edge_2d(
 
 def nearest_hit_on_boundary_edges(runtime, point: np.ndarray, inside_reference: np.ndarray) -> Optional[BoundaryHit]:
     geometry_provider = runtime.geometry_provider
-    if geometry_provider is None:
+    segments, part_ids = _boundary_edges_2d(runtime)
+    if geometry_provider is None or segments is None:
         return None
-    geom = geometry_provider.geometry
-    if int(geom.spatial_dim) != 2 or geom.boundary_edges is None:
-        return None
-    segments = np.asarray(geom.boundary_edges, dtype=np.float64)
-    if segments.ndim != 3 or segments.shape[1:] != (2, 2) or segments.shape[0] == 0:
-        return None
-    part_ids = np.asarray(
-        geom.boundary_edge_part_ids if geom.boundary_edge_part_ids is not None else np.zeros(segments.shape[0], dtype=np.int32),
-        dtype=np.int32,
-    )
     point_arr = np.asarray(point, dtype=np.float64)
     ref = np.asarray(inside_reference, dtype=np.float64)
     best_dist = np.inf

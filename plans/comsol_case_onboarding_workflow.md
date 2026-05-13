@@ -26,10 +26,10 @@ package consumes only solver-ready `run_config.yaml`, CSV, and `.npz` inputs.
 - Keep source `.mph` files under `data/`.
 - Keep COMSOL API code under `external/<exporter_name>/`.
 - Keep raw export outputs under `_external_exports/<case_name>/`.
-- Keep solver-ready cases under `examples/<case_name>/`.
+- Keep small committed fixtures under `examples/<case_name>/`; keep large generated solver cases under `_external_exports/<case_name>_solver_case/`.
 - Keep run outputs under `_out_<case_name>/`.
-- Keep report figures under `report_assets/<case_name>/` only when they are
-  meant to be shared in a report.
+- Keep report figures in local `_external_exports/<case_name>_figures/`
+  bundles when they are meant to be shared.
 - Do not commit crash logs, local cache folders, or root-level duplicate `.mph`
   files.
 
@@ -234,7 +234,7 @@ user explicitly accepts a known experimental case.
 
 ## Physical Time-Scale Selection
 
-Choose `dt` and `t_end` from case physics, not from old benchmark defaults.
+Choose `dt` and `t_end` from case physics, not from previous benchmark defaults.
 
 Useful scales:
 
@@ -281,7 +281,7 @@ Visualization/report run:
 
 - reuse the same physical settings when possible
 - enable full artifacts only when needed
-- copy selected graphs into `report_assets/<case_name>/`
+- copy selected graphs into a local `_external_exports/<case_name>_figures/` bundle
 
 ## Visualization Checklist
 
@@ -337,12 +337,12 @@ If these fail, classify the failure before changing code:
 
 ## What To Avoid Reintroducing
 
-- old fixed 10k COMSOL configs as universal gates
+- fixed 10k COMSOL configs as universal gates
 - mesh production paths unless true mesh field data is available
 - solver-side field regularization or clipping
 - particle push-off or release-position rescue in runtime code
 - long debug-output directories committed as source
-- tests that only preserve old implementation detail and do not protect a
+- tests that only preserve obsolete implementation detail and do not protect a
   numerical or user-facing contract
 
 ## Codex Working Loop

@@ -31,6 +31,10 @@ def preprocess_particles_for_solver(
     process_steps: Optional[ProcessStepTable] = None,
     seed: int = 12345,
 ) -> SourcePreprocessResult:
+    preprocess_cfg = source_cfg.get('preprocess', {}) if isinstance(source_cfg.get('preprocess', {}), Mapping) else {}
+    normal_velocity_policy = str(
+        preprocess_cfg.get('normal_velocity_policy', source_cfg.get('normal_velocity_policy', 'keep'))
+    )
     resolved = resolve_source_parameters(
         particles=particles,
         walls=walls,
@@ -51,4 +55,5 @@ def preprocess_particles_for_solver(
         process_steps=process_steps,
         gas_density_kgm3=float(gas_density_kgm3),
         seed=seed,
+        normal_velocity_policy=normal_velocity_policy,
     )

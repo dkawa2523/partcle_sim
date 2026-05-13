@@ -9,10 +9,9 @@ _out_*/
 _out_*
 _external_exports/
 demo_output/
+report_assets/
 examples/**/run_output*/
 examples/**/generated/
-!examples/icp_rf_bias_cf4_o2_si_etching_2d*/generated/
-!examples/icp_rf_bias_cf4_o2_si_etching_2d*/generated/**
 tests/_tmp_*/
 tests/_out_*/
 *.class

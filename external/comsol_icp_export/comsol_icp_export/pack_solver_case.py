@@ -449,25 +449,25 @@ def pack_solver_case(
 
     root = _repo_root()
     build_script = root / "tools" / "build_comsol_case.py"
-    _run(
-        [
-            sys.executable,
-            str(build_script),
-            "--mphtxt",
-            str(mphtxt),
-            "--out-dir",
-            str(out_dir),
-            "--field-bundle",
-            str(bundle_path),
-            "--diagnostic-grid-spacing-m",
-            f"{spacing:.17g}",
-            "--field-ghost-cells",
-            str(int(field_ghost_cells)),
-            "--coordinate-scale-m-per-model-unit",
-            f"{coordinate_scale:.17g}",
-        ],
-        cwd=root,
-    )
+    build_cmd = [
+        sys.executable,
+        str(build_script),
+        "--mphtxt",
+        str(mphtxt),
+        "--out-dir",
+        str(out_dir),
+        "--field-bundle",
+        str(bundle_path),
+        "--diagnostic-grid-spacing-m",
+        f"{spacing:.17g}",
+        "--field-ghost-cells",
+        str(int(field_ghost_cells)),
+        "--coordinate-scale-m-per-model-unit",
+        f"{coordinate_scale:.17g}",
+    ]
+    if int(field_ghost_cells) > 0:
+        build_cmd.append("--allow-field-ghost-cells")
+    _run(build_cmd, cwd=root)
     particles_cmd = [
         sys.executable,
         str(build_script),
@@ -539,7 +539,11 @@ def pack_solver_case(
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Pack an external ICP COMSOL export into a solver case.")
     ap.add_argument("--raw-export-dir", type=Path, required=True)
-    ap.add_argument("--out-dir", type=Path, default=Path("examples/icp_rf_bias_cf4_o2_si_etching_2d"))
+    ap.add_argument(
+        "--out-dir",
+        type=Path,
+        default=Path("_external_exports/icp_rf_bias_cf4_o2_si_etching_2d_solver_case"),
+    )
     ap.add_argument("--particle-count", type=int, default=1000)
     ap.add_argument("--q-ref-c", type=float, default=None)
     ap.add_argument("--m-ref-kg", type=float, default=None)

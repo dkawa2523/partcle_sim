@@ -21,6 +21,7 @@ from ..core.datamodel import ProcessStepRow, WallPartModel
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN, valid_mask_status_requires_stop
 from ..core.geometry3d import TriangleSurface3D
 from .compiled_field_backend import CompiledRuntimeBackendLike
+from .diagnostics import increment_count, increment_named_count
 from .high_fidelity_freeflight import (
     _stage_points_from_trial,
     _stage_sample_times,
@@ -63,7 +64,7 @@ def _sample_diffuse_reflection(rng: np.random.Generator, normal: np.ndarray, spe
     if dim == 2:
         t = np.array([-n[1], n[0]], dtype=np.float64)
         t /= max(np.linalg.norm(t), 1e-30)
-        theta = rng.uniform(-0.5 * math.pi, 0.5 * math.pi)
+        theta = math.asin(2.0 * rng.uniform(0.0, 1.0) - 1.0)
         d = -math.cos(theta) * n + math.sin(theta) * t
         return speed * d / max(np.linalg.norm(d), 1e-30)
     t1, t2 = _orthonormal_tangent_basis(n)
@@ -218,10 +219,6 @@ def _particle_scalar_or_nan(particles, name: str, particle_index: int) -> float:
     return float(arr[int(particle_index)])
 
 
-def _increment_collision_diagnostic(collision_diagnostics: Dict[str, object], key: str, value: int = 1) -> None:
-    collision_diagnostics[key] = int(collision_diagnostics.get(key, 0)) + int(value)
-
-
 class WallHitStepResult(NamedTuple):
     position: np.ndarray
     velocity: np.ndarray
@@ -308,6 +305,11 @@ def _apply_wall_hit_step(
 
     wall_model = resolve_step_wall_model(runtime.wall_catalog, part_id, step)
     wall_law_counts[wall_model.law_name] = wall_law_counts.get(wall_model.law_name, 0) + 1
+    if bool(is_ambiguous):
+        increment_count(collision_diagnostics, 'boundary_ambiguous_hit_count')
+        increment_named_count(collision_diagnostics, 'boundary_ambiguous_part_counts', f'part={int(part_id)}')
+        increment_named_count(collision_diagnostics, 'boundary_ambiguous_wall_law_counts', str(wall_model.law_name))
+        increment_named_count(collision_diagnostics, 'boundary_ambiguous_primitive_kind_counts', str(primitive_kind))
     outcome, v_ref = _wall_interaction(rng, v_hit, n_wall, float(particles.stick_probability[particle_index]), wall_model)
     summary_key = (int(part_id), str(outcome), str(wall_model.law_name))
     wall_summary_counts[summary_key] = wall_summary_counts.get(summary_key, 0) + 1
@@ -906,15 +908,6 @@ def _resolve_valid_mask_retry_with_inputs(
     )
 
 
-def _increment_named_count(collision_diagnostics: Dict[str, object], key: str, name: str) -> None:
-    label = str(name).strip() or 'unknown'
-    counts = collision_diagnostics.setdefault(key, {})
-    if not isinstance(counts, dict):
-        counts = {}
-        collision_diagnostics[key] = counts
-    counts[label] = int(counts.get(label, 0)) + 1
-
-
 def _same_wall_contact_sliding_state(
     *,
     x_wall: np.ndarray,
@@ -942,8 +935,8 @@ def _same_wall_contact_sliding_state(
     v_tangent = v - float(np.dot(v, n)) * n
     if float(np.linalg.norm(v_tangent)) <= 1.0e-14:
         v_tangent = np.zeros_like(v)
-    _increment_collision_diagnostic(collision_diagnostics, 'contact_sliding_count')
-    _increment_collision_diagnostic(collision_diagnostics, 'contact_sliding_same_wall_count')
+    increment_count(collision_diagnostics, 'contact_sliding_count')
+    increment_count(collision_diagnostics, 'contact_sliding_same_wall_count')
     collision_diagnostics['contact_sliding_time_total_s'] = float(
         collision_diagnostics.get('contact_sliding_time_total_s', 0.0)
     ) + float(max(0.0, remaining_dt))
@@ -951,9 +944,9 @@ def _same_wall_contact_sliding_state(
         float(collision_diagnostics.get('contact_sliding_remaining_dt_max_s', 0.0)),
         float(max(0.0, remaining_dt)),
     )
-    _increment_named_count(collision_diagnostics, 'contact_sliding_part_counts', f'part={int(hit_part_ids[-1])}')
+    increment_named_count(collision_diagnostics, 'contact_sliding_part_counts', f'part={int(hit_part_ids[-1])}')
     if hit_outcomes:
-        _increment_named_count(collision_diagnostics, 'contact_sliding_outcome_counts', str(hit_outcomes[-1]))
+        increment_named_count(collision_diagnostics, 'contact_sliding_outcome_counts', str(hit_outcomes[-1]))
     return np.asarray(x_wall, dtype=np.float64), v_tangent, n
 
 
@@ -968,12 +961,12 @@ def _record_max_hit_diagnostics(
         return
     unique_parts = {int(pid) for pid in hit_part_ids}
     if len(unique_parts) <= 1:
-        _increment_collision_diagnostic(collision_diagnostics, 'max_hit_same_wall_count')
+        increment_count(collision_diagnostics, 'max_hit_same_wall_count')
     else:
-        _increment_collision_diagnostic(collision_diagnostics, 'max_hit_multi_wall_count')
-    _increment_named_count(collision_diagnostics, 'max_hit_last_part_counts', f'part={int(hit_part_ids[-1])}')
+        increment_count(collision_diagnostics, 'max_hit_multi_wall_count')
+    increment_named_count(collision_diagnostics, 'max_hit_last_part_counts', f'part={int(hit_part_ids[-1])}')
     if hit_outcomes:
-        _increment_named_count(collision_diagnostics, 'max_hit_last_outcome_counts', str(hit_outcomes[-1]))
+        increment_named_count(collision_diagnostics, 'max_hit_last_outcome_counts', str(hit_outcomes[-1]))
     collision_diagnostics['max_hit_remaining_dt_total_s'] = float(
         collision_diagnostics.get('max_hit_remaining_dt_total_s', 0.0)
     ) + float(max(0.0, remaining_dt))

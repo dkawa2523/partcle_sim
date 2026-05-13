@@ -114,11 +114,22 @@ def locate_triangle_containing_point(
         beta = (v2[0] * v1[1] - v2[1] * v1[0]) / den
         gamma = (v0[0] * v2[1] - v0[1] * v2[0]) / den
         alpha = 1.0 - beta - gamma
-        margin = min(alpha, beta, gamma)
-        if margin < -float(eps):
+        edge_bc = float(np.linalg.norm(c - b))
+        edge_ca = float(np.linalg.norm(a - c))
+        edge_ab = float(np.linalg.norm(b - a))
+        area2 = abs(den)
+        h_alpha = area2 / max(edge_bc, 1.0e-30)
+        h_beta = area2 / max(edge_ca, 1.0e-30)
+        h_gamma = area2 / max(edge_ab, 1.0e-30)
+        if (
+            alpha < -float(eps) / max(h_alpha, 1.0e-30)
+            or beta < -float(eps) / max(h_beta, 1.0e-30)
+            or gamma < -float(eps) / max(h_gamma, 1.0e-30)
+        ):
             continue
-        if margin > best_margin:
-            best_margin = margin
+        distance_margin = min(alpha * h_alpha, beta * h_beta, gamma * h_gamma)
+        if distance_margin > best_margin:
+            best_margin = distance_margin
             best_idx = tri_idx
             best_bary[0] = alpha
             best_bary[1] = beta

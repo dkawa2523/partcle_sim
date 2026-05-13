@@ -19,6 +19,10 @@ dependencies = [
 
 [project.scripts]
 particle-tracer-run = "particle_tracer_unified.cli:main"
+particle-tracer-field-compare = "particle_tracer_unified.compare.field_compare:main"
+particle-tracer-acceleration-compare = "particle_tracer_unified.compare.acceleration_compare:main"
+particle-tracer-trajectory-compare = "particle_tracer_unified.compare.trajectory_compare:main"
+particle-tracer-boundary-compare = "particle_tracer_unified.compare.boundary_compare:main"
 
 [tool.setuptools]
 include-package-data = true

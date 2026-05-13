@@ -57,6 +57,20 @@ def _truthy(value: object) -> bool:
     return str(value).strip().lower() in {"true", "1", "yes"}
 
 
+def _is_non_colliding_model(model: WallPartModel) -> bool:
+    law = str(model.law_name).strip().lower().replace("-", "_").replace(" ", "_")
+    names = " ".join((str(model.part_name), str(model.material_name))).lower()
+    return law in {
+        "pass_through",
+        "passthrough",
+        "transparent",
+        "inactive",
+        "continuity",
+        "pair_continuity",
+        "internal",
+    } or "pair_continuity" in names
+
+
 def _adjacent_domain_count(value: object) -> int:
     text = str(value).strip()
     if not text:
@@ -85,6 +99,8 @@ def _classify_entity_role(
     ).lower()
     if int(part_id) >= 9000 or "field_support" in names:
         return "support_only", "synthetic field-support or open-boundary entity"
+    if _is_non_colliding_model(model):
+        return "pass_through", "explicit non-colliding wall law"
     if "axis_symmetry" in names:
         return ("active_axis" if active else "axis"), "axis-symmetry boundary"
     if active:
@@ -151,6 +167,7 @@ def build_wall_catalog_alignment(
     unknown_comsol_material_count = 0
     active_unknown_comsol_material_count = 0
     inactive_unknown_comsol_material_count = 0
+    boundary_mapping_active_count = 0
     active_count = 0
     comsol_known_count = 0
     role_counts: dict[str, int] = {}
@@ -166,7 +183,11 @@ def build_wall_catalog_alignment(
             mismatch_count += 1
         if not explicit:
             default_count += 1
-        active = _truthy(boundary.get("active_in_solver_boundary", review.get("active_in_solver_boundary", "")))
+        raw_active = _truthy(boundary.get("active_in_solver_boundary", review.get("active_in_solver_boundary", "")))
+        if raw_active:
+            boundary_mapping_active_count += 1
+        non_colliding = _is_non_colliding_model(model)
+        active = bool(raw_active and not non_colliding)
         if active:
             active_count += 1
         role, role_reason = _classify_entity_role(
@@ -210,6 +231,7 @@ def build_wall_catalog_alignment(
             "mismatch_fields": "|".join(mismatch_fields),
             "comsol_edge_entity_id": boundary.get("comsol_edge_entity_id", review.get("comsol_edge_entity_id", "")),
             "active_in_solver_boundary": boundary.get("active_in_solver_boundary", review.get("active_in_solver_boundary", "")),
+            "active_collision_in_solver": int(active),
             "adjacent_domain_ids": boundary.get("adjacent_domain_ids", review.get("adjacent_domain_ids", "")),
             "comsol_material_name": comsol_material,
             "mapping_solver_part_name": boundary.get("solver_part_name", ""),
@@ -257,6 +279,7 @@ def build_wall_catalog_alignment(
         "wall_catalog_review_part_count": int(len(review_rows)),
         "current_explicit_wall_catalog_part_count": int(len(explicit_models)),
         "alignment_row_count": int(len(rows)),
+        "boundary_mapping_active_part_count": int(boundary_mapping_active_count),
         "active_solver_boundary_count": int(active_count),
         "solver_entity_role_counts": {str(key): int(value) for key, value in sorted(role_counts.items())},
         "comsol_material_known_part_count": int(comsol_known_count),
@@ -281,6 +304,7 @@ WALL_CATALOG_ALIGNMENT_COLUMNS = (
     "mismatch_fields",
     "comsol_edge_entity_id",
     "active_in_solver_boundary",
+    "active_collision_in_solver",
     "adjacent_domain_ids",
     "comsol_material_name",
     "mapping_solver_part_name",

@@ -12,6 +12,7 @@ INTEGRATOR_ETD2 = int(get_integrator_spec('etd2').mode)
 DRAG_MODEL_STOKES = 0
 DRAG_MODEL_SCHILLER_NAUMANN = 1
 DRAG_MODEL_EPSTEIN = 2
+DRAG_MODEL_STOKES_CUNNINGHAM = 3
 
 _K_BOLTZMANN = 1.380649e-23
 _AMU_KG = 1.66053906660e-27
@@ -21,11 +22,13 @@ def drag_model_mode_from_name(name: object) -> int:
     value = str(name if name is not None else 'stokes').strip().lower()
     if value in {'', 'stokes', 'linear_stokes'}:
         return int(DRAG_MODEL_STOKES)
+    if value in {'stokes_cunningham', 'cunningham', 'cunningham_millikan_davies', 'cmd'}:
+        return int(DRAG_MODEL_STOKES_CUNNINGHAM)
     if value in {'schiller_naumann', 'schiller-naumann', 'finite_re', 're_dependent'}:
         return int(DRAG_MODEL_SCHILLER_NAUMANN)
     if value in {'epstein', 'epstein_low_pressure', 'low_pressure_epstein', 'free_molecular'}:
         return int(DRAG_MODEL_EPSTEIN)
-    raise ValueError("solver.drag_model must be 'stokes', 'schiller_naumann', or 'epstein'")
+    raise ValueError("solver.drag_model must be 'stokes', 'stokes_cunningham', 'schiller_naumann', or 'epstein'")
 
 
 def drag_model_name_from_mode(mode: int) -> str:
@@ -33,6 +36,8 @@ def drag_model_name_from_mode(mode: int) -> str:
         return 'schiller_naumann'
     if int(mode) == int(DRAG_MODEL_EPSTEIN):
         return 'epstein'
+    if int(mode) == int(DRAG_MODEL_STOKES_CUNNINGHAM):
+        return 'stokes_cunningham'
     return 'stokes'
 
 
@@ -44,6 +49,14 @@ def schiller_naumann_drag_correction(reynolds):
     if re < 1000.0:
         return 1.0 + 0.15 * re ** 0.687
     return 0.01875 * re
+
+
+@njit(cache=True)
+def cunningham_slip_correction(knudsen_number):
+    kn = max(float(knudsen_number), 0.0)
+    if kn <= 0.0:
+        return 1.0
+    return 1.0 + kn * (2.514 + 0.8 * np.exp(-0.55 / max(kn, 1.0e-300)))
 
 
 @njit(cache=True)
@@ -62,6 +75,15 @@ def effective_tau_from_slip_speed(
     tau = max(float(min_tau_p_s), float(tau_stokes))
     if int(drag_model_mode) == DRAG_MODEL_STOKES:
         return tau
+    if int(drag_model_mode) == DRAG_MODEL_STOKES_CUNNINGHAM:
+        diameter = max(float(particle_diameter_m), 1.0e-30)
+        rho_g = max(float(gas_density_kgm3), 1.0e-30)
+        mu = max(float(gas_mu_pas), 1.0e-30)
+        temp = max(float(gas_temperature_K), 1.0)
+        mol_mass = max(float(gas_molecular_mass_kg), 1.0e-30)
+        mean_free_path = (mu / rho_g) * np.sqrt(np.pi * mol_mass / (2.0 * _K_BOLTZMANN * temp))
+        cc = cunningham_slip_correction(mean_free_path / diameter)
+        return max(float(min_tau_p_s), tau * cc)
     if int(drag_model_mode) == DRAG_MODEL_EPSTEIN:
         rho_p = max(float(particle_density_kgm3), 0.0)
         diameter = max(float(particle_diameter_m), 0.0)
