@@ -67,7 +67,17 @@
       "properties": {
         "count": {"type": "integer", "minimum": 0},
         "seed": {"type": "integer"},
-        "law": {"type": "string"}
+        "law": {"type": "string"},
+        "preprocess": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": ["boolean", "integer"]},
+            "seed": {"type": "integer"},
+            "normal_velocity_policy": {"type": "string", "enum": ["keep", "reflect_inward", "remove_inward_normal", "outward_only", "reflect", "zero_inward", "clip_inward"]},
+            "boundary_release": {"type": ["boolean", "integer"]}
+          },
+          "additionalProperties": true
+        }
       },
       "additionalProperties": true
     },

@@ -41,6 +41,7 @@ source:
     enabled: true
     seed: 24680
     normal_velocity_policy: keep  # keep | reflect_inward | remove_inward_normal
+    boundary_release: false        # true offsets boundary source particles into the domain
   default_law: explicit_csv
   source_speed_scale: 1.0
   source_position_offset_m: 0.0

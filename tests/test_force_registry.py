@@ -173,6 +173,33 @@ def test_known_comsol_force_contribution_gaps_are_reported_when_disabled() -> No
     assert "pressure_gradient" in summary["disabled_forces"]
 
 
+def test_force_catalog_summary_reports_enabled_reasons() -> None:
+    catalog = build_force_catalog(
+        {
+            "solver": {
+                "gravity_mps2": 9.81,
+                "stochastic_motion": {"enabled": True},
+                "forces": {
+                    "electric": {"enabled": False},
+                    "thermophoresis": {"enabled": True},
+                },
+            }
+        },
+        field_provider=_field_provider(),
+        spatial_dim=2,
+    )
+
+    summary = force_catalog_summary(catalog)
+    reasons = summary["force_enabled_reason"]
+
+    assert reasons["drag"] == "required_solver"
+    assert reasons["electric"] == "explicit_config"
+    assert reasons["gravity"] == "legacy_solver_config"
+    assert reasons["brownian"] == "stochastic_motion_default"
+    assert reasons["thermophoresis"] == "explicit_config"
+    assert reasons["virtual_mass"] == "default_false"
+
+
 def test_virtual_mass_force_can_be_enabled_when_velocity_is_available() -> None:
     catalog = build_force_catalog(
         {"solver": {"forces": {"virtual_mass": {"enabled": True, "coefficient": 0.5}}}},

@@ -85,6 +85,46 @@ def _particle_defaults_report(particles, policy: str) -> Dict[str, Any]:
     }
 
 
+def _source_preprocess_result(prepared: PreparedRuntime):
+    result = getattr(prepared, 'source_preprocess', None)
+    if result is not None:
+        return result
+    runtime = getattr(prepared, 'runtime', None)
+    return getattr(runtime, 'source_preprocess', None)
+
+
+def _boundary_release_offset_failure_rows(prepared: PreparedRuntime) -> List[Dict[str, Any]]:
+    result = _source_preprocess_result(prepared)
+    if result is None:
+        return []
+    rows: List[Dict[str, Any]] = []
+    for raw in getattr(result, 'diagnostics_rows', ()):
+        row = raw if isinstance(raw, Mapping) else {}
+        if int(row.get('boundary_release_applied', 0)) == 0:
+            continue
+        if int(row.get('boundary_release_inside_after_offset', 0)) != 0:
+            continue
+        item: Dict[str, Any] = {
+            'particle_id': int(row.get('particle_id', 0)),
+            'source_part_id': int(row.get('source_part_id', 0)),
+            'boundary_release_part_id': int(row.get('boundary_release_part_id', 0)),
+            'boundary_release_primitive_id': int(row.get('boundary_release_primitive_id', -1)),
+            'boundary_release_distance_m': float(row.get('boundary_release_distance_m', np.nan)),
+            'boundary_release_total_offset_m': float(row.get('boundary_release_total_offset_m', np.nan)),
+            'boundary_release_solver_offset_m': float(row.get('boundary_release_solver_offset_m', np.nan)),
+            'source_position_offset_m': float(row.get('source_position_offset_m', np.nan)),
+        }
+        for axis in ('x', 'y', 'z'):
+            original_key = f'original_{axis}'
+            release_key = f'release_{axis}'
+            if original_key in row:
+                item[original_key] = float(row.get(original_key, np.nan))
+            if release_key in row:
+                item[release_key] = float(row.get(release_key, np.nan))
+        rows.append(item)
+    return rows
+
+
 def _axis_spacing_summary(axes: Tuple[np.ndarray, ...]) -> Dict[str, float]:
     min_steps: List[float] = []
     max_steps: List[float] = []
@@ -162,15 +202,19 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
         defaults_policy != PARTICLE_DEFAULT_POLICY_ERROR
         or int(particle_defaults.get('physics_defaulted_count', 0)) == 0
     )
+    boundary_release_failures = _boundary_release_offset_failure_rows(prepared)
+    boundary_release_passed = int(len(boundary_release_failures)) == 0
     if field_provider is None:
         return {
             'mode': mode,
             'particle_defaults_policy': str(defaults_policy),
             'particle_defaults': particle_defaults,
-            'passed': bool(defaults_passed),
+            'passed': bool(defaults_passed and boundary_release_passed),
             'particle_count': int(particles.count),
             'field_backend_kind': '',
             'status_counts': {'clean': int(particles.count), 'mixed_stencil': 0, 'hard_invalid': 0, 'non_clean': 0},
+            'boundary_release_failed_offset_count': int(len(boundary_release_failures)),
+            'boundary_release_offset_failures': boundary_release_failures,
             'violations': [],
             'notes': ['No field provider is configured; initial field-support check is not applicable.'],
         }
@@ -219,7 +263,7 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
         'mode': mode,
         'particle_defaults_policy': str(defaults_policy),
         'particle_defaults': particle_defaults,
-        'passed': bool(defaults_passed and (non_clean == 0 or mode in {'warn', 'off'})),
+        'passed': bool(defaults_passed and boundary_release_passed and (non_clean == 0 or mode in {'warn', 'off'})),
         'particle_count': int(particles.count),
         'field_backend_kind': str(field_backend_kind(field_provider)),
         'time_mode': str(getattr(field, 'time_mode', 'steady')),
@@ -236,6 +280,8 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
         'non_clean_geometry_inside_count': int(
             np.count_nonzero((statuses != int(VALID_MASK_STATUS_CLEAN)) & np.asarray(geometry_features['inside_geometry'], dtype=bool))
         ),
+        'boundary_release_failed_offset_count': int(len(boundary_release_failures)),
+        'boundary_release_offset_failures': boundary_release_failures,
         'violations': violations,
     }
 
@@ -260,8 +306,12 @@ def enforce_initial_particle_field_support(prepared: PreparedRuntime, output_dir
     mode = _initial_support_mode(config_payload)
     defaults_policy = _particle_defaults_policy(config_payload)
     if mode == 'off' and defaults_policy == PARTICLE_DEFAULT_POLICY_ALLOW:
-        return build_initial_particle_field_support_report(prepared)
-    report = write_input_contract_report(prepared, output_dir)
+        report = build_initial_particle_field_support_report(prepared)
+        if int(report.get('boundary_release_failed_offset_count', 0)) <= 0:
+            return report
+        report = write_input_contract_report(prepared, output_dir)
+    else:
+        report = write_input_contract_report(prepared, output_dir)
     defaults_report = report.get('particle_defaults', {})
     physics_defaulted_count = int(defaults_report.get('physics_defaulted_count', 0)) if isinstance(defaults_report, Mapping) else 0
     if defaults_policy == PARTICLE_DEFAULT_POLICY_ERROR and physics_defaulted_count > 0:
@@ -270,6 +320,20 @@ def enforce_initial_particle_field_support(prepared: PreparedRuntime, output_dir
             'Particle defaults are not allowed by input_contract.particle_defaults_policy=error; '
             f'defaulted physics columns: {columns}. '
             f'See {Path(output_dir) / "input_contract_report.json"}'
+        )
+    boundary_release_failed = int(report.get('boundary_release_failed_offset_count', 0))
+    if boundary_release_failed > 0:
+        from .source_materials import write_source_summary
+
+        result = _source_preprocess_result(prepared)
+        if result is not None:
+            write_source_summary(result, Path(output_dir))
+        raise ValueError(
+            'source.preprocess.boundary_release offset produced positions outside the simulated domain '
+            f'for {boundary_release_failed} particle(s); this is an initial-condition preflight error '
+            'even when input_contract.initial_particle_field_support is warn or off. '
+            f'See {Path(output_dir) / "input_contract_report.json"} and '
+            f'{Path(output_dir) / "source_particle_diagnostics.csv"}'
         )
     non_clean = int(report.get('status_counts', {}).get('non_clean', 0))
     if mode == 'strict' and non_clean > 0:

@@ -833,6 +833,27 @@ def _electric_q_over_m_particle(
     return qom
 
 
+def _finite_q_over_m_summary(charge: np.ndarray, particle_mass: np.ndarray) -> dict:
+    charge_arr = np.asarray(charge, dtype=np.float64)
+    mass_arr = np.asarray(particle_mass, dtype=np.float64)
+    qom = np.full_like(charge_arr, np.nan, dtype=np.float64)
+    valid = np.isfinite(charge_arr) & np.isfinite(mass_arr) & (mass_arr > 0.0)
+    np.divide(charge_arr, mass_arr, out=qom, where=valid)
+    finite = qom[np.isfinite(qom)]
+    charged = finite[np.abs(finite) > 0.0]
+    if finite.size == 0:
+        return {'count': 0, 'charged_count': 0}
+    quantiles = np.quantile(finite, [0.0, 0.5, 0.9, 1.0])
+    return {
+        'count': int(finite.size),
+        'charged_count': int(charged.size),
+        'min': float(quantiles[0]),
+        'median': float(quantiles[1]),
+        'p90': float(quantiles[2]),
+        'max': float(quantiles[3]),
+    }
+
+
 def _advance_contact_sliding_particles_2d(
     *,
     runtime,
@@ -2085,6 +2106,10 @@ def _build_runtime_output_payload(
         state.collision_diagnostics,
         options.charge_model,
         state.charge,
+    )
+    state.collision_diagnostics['electric_q_over_m_particle_stats'] = _finite_q_over_m_summary(
+        state.charge,
+        np.asarray(particles.mass, dtype=np.float64),
     )
     timing_s = {
         'setup_s': float(loop_t0 - setup_t0),

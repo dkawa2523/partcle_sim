@@ -687,11 +687,11 @@ def _root_cause_ranking(
             {
                 "category": "diagnostic_release",
                 "status": "not_truth",
-                "finding": "The inward-clean release remains useful only for solver support diagnostics.",
+                "finding": "The legacy pre-shifted release remains useful only for solver support diagnostics.",
                 "evidence": {
                     "release_position_error_m": release_clean.get("release_position_error_m", {}),
                 },
-                "next_action": "Never use inward-clean particles as COMSOL exact release truth.",
+                "next_action": "Never use pre-shifted particles as COMSOL exact release truth.",
             }
         )
     for rank, row in enumerate(rows, start=1):

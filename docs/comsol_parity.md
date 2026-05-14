@@ -53,6 +53,9 @@ Faithful mode rejects:
 
 The default field policy is strict clean support. `mixed_stencil` and
 `hard_invalid` samples are diagnostics failures, not soft warnings.
+Normal production runs can use `source.preprocess.boundary_release` for
+wall-origin particles, but that preprocessing remains outside faithful mode so
+COMSOL release coordinates stay machine-comparable.
 
 ## Field Backend Mode
 

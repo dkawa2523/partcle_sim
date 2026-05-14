@@ -55,6 +55,21 @@ Valid-mask states:
 Boundary-adjacent field gaps should be fixed in exported inputs or providers,
 not hidden by solver rescue logic.
 
+Surface release preprocessing is the exception for wall-origin particles. When
+`source.preprocess.boundary_release` is enabled, particles that start on or very
+near a boundary are classified against the explicit boundary primitives and are
+offset a small distance into the simulated domain before the input preflight.
+This keeps part-origin flake/resuspension cases from treating a valid wall
+release as an invalid field point. `hard_invalid` remains terminal; COMSOL
+faithful mode keeps strict clean support.
+
+| Setting | Role |
+| --- | --- |
+| `source.preprocess.boundary_release` | Normalize boundary source particles into the domain. |
+| `input_contract.initial_particle_field_support` | Schema key for the initial field-support preflight after preprocessing. Use `warn` for boundary release studies. |
+| `solver.valid_mask_policy` | Runtime response to field support loss. Use `retry_then_stop` for production trajectories. |
+| `field_support.mixed_stencil_policy` | COMSOL faithful export gate; keep `error` for strict parity. |
+
 ## Boundaries
 
 Wall events should come from provider-backed boundary primitives plus a physical
@@ -84,8 +99,25 @@ modeled as repeated reflection.
 Stochastic motion and charge evolution are opt-in model behavior. They must not
 act as corrections for missing fields or boundary failures.
 
-2D dynamic charge currently supports field-backed or scalar plasma-background
-inputs. COMSOL flux vectors are not consumed directly by the charge model.
+Dynamic charge currently supports 2D regular-rectilinear field inputs or scalar
+plasma-background inputs. 3D and triangle-mesh charge updates are outside the
+current runtime update path. COMSOL flux vectors are not consumed directly by
+the charge model.
+
+Near-wall drag or lift corrections are not automatically applied. If sheath,
+ion-drag, near-wall lift, or other chamber-specific effects are required, supply
+them through fields, existing force inputs, or explicit source/wall data rather
+than expecting the solver to infer them.
+
+## Surface-Origin Scope
+
+| Solver handles | User supplies |
+| --- | --- |
+| Trajectories of particles already released into supplied fields. | Whether a part fractures, flakes, or sheds deposits. |
+| Boundary release normalization from explicit boundary primitives. | Release population, particle sizes, initial speeds, and release timing. |
+| Stokes, Schiller-Naumann, Cunningham, or Epstein drag. | Gas state and rarefaction-relevant inputs such as `rho_g`, `T`, and gas molecular mass. |
+| Optional Brownian/stochastic motion, charge evolution, `qE/m`, thermophoresis, DEP, lift, pressure-gradient, and virtual-mass terms. | Flow, plasma, electric field, gradients/derived fields, wall law, and material data. |
+| Wall hit-time and configured wall laws using particle-center geometry. | Sheath physics, ion-drag effects, near-wall corrections, or detachment probabilities unless represented by fields, forces, or source inputs. |
 
 ## Process Steps
 

@@ -75,6 +75,97 @@ def test_boundary_service_2d_matches_loop_truth_and_edge_hit_contract():
     assert hit.part_id == 20
     assert hit.alpha_hint == pytest.approx(0.75)
 
+def test_boundary_service_release_point_uses_source_part_hint_at_corner():
+    runtime = _square_boundary_service_runtime(part_ids=(1, 2, 3, 4))
+    service = build_boundary_service(runtime, spatial_dim=2, on_boundary_tol_m=1.0e-9, triangle_surface_3d=None)
+
+    bottom = service.release_point(
+        np.asarray([0.0, 0.0], dtype=np.float64),
+        1,
+        1.0e-3,
+        1.0e-6,
+    )
+    left = service.release_point(
+        np.asarray([0.0, 0.0], dtype=np.float64),
+        4,
+        1.0e-3,
+        1.0e-6,
+    )
+
+    assert bool(bottom.is_on_boundary) is True
+    assert int(bottom.nearest_part_id) == 1
+    assert bottom.normal == pytest.approx([0.0, 1.0])
+    assert bottom.offset_position == pytest.approx([0.0, 1.0e-3])
+    assert bool(bottom.inside_after_offset) is True
+
+    assert bool(left.is_on_boundary) is True
+    assert int(left.nearest_part_id) == 4
+    assert left.normal == pytest.approx([1.0, 0.0])
+    assert left.offset_position == pytest.approx([1.0e-3, 0.0])
+    assert bool(left.inside_after_offset) is True
+
+def test_boundary_service_release_point_orients_3d_triangle_normal_inside():
+    triangles = _cube_triangles_oriented()
+    part_ids = np.ones(triangles.shape[0], dtype=np.int32)
+    geometry = SimpleNamespace(
+        spatial_dim=3,
+        axes=tuple(np.asarray([-1.0, 0.0, 1.0], dtype=np.float64) for _ in range(3)),
+        boundary_edges=None,
+        boundary_loops_2d=(),
+        boundary_triangles=triangles,
+        boundary_triangle_part_ids=part_ids,
+    )
+    runtime = SimpleNamespace(geometry_provider=SimpleNamespace(geometry=geometry))
+    surface = build_triangle_surface(triangles, part_ids, validate_closed=True)
+    service = build_boundary_service(runtime, spatial_dim=3, on_boundary_tol_m=1.0e-7, triangle_surface_3d=surface)
+
+    release = service.release_point(
+        np.asarray([1.0, 0.0, 0.0], dtype=np.float64),
+        1,
+        1.0e-3,
+        1.0e-6,
+    )
+
+    assert bool(release.is_on_boundary) is True
+    assert release.normal == pytest.approx([-1.0, 0.0, 0.0])
+    assert release.offset_position == pytest.approx([0.999, 0.0, 0.0])
+    assert bool(release.inside_after_offset) is True
+
+
+def test_boundary_service_release_point_marks_3d_edge_and_vertex_ambiguous():
+    triangles = _cube_triangles_oriented()
+    part_ids = np.ones(triangles.shape[0], dtype=np.int32)
+    geometry = SimpleNamespace(
+        spatial_dim=3,
+        axes=tuple(np.asarray([-1.0, 0.0, 1.0], dtype=np.float64) for _ in range(3)),
+        boundary_edges=None,
+        boundary_loops_2d=(),
+        boundary_triangles=triangles,
+        boundary_triangle_part_ids=part_ids,
+    )
+    runtime = SimpleNamespace(geometry_provider=SimpleNamespace(geometry=geometry))
+    surface = build_triangle_surface(triangles, part_ids, validate_closed=True)
+    service = build_boundary_service(runtime, spatial_dim=3, on_boundary_tol_m=1.0e-7, triangle_surface_3d=surface)
+
+    edge_release = service.release_point(
+        np.asarray([1.0, 1.0, 0.0], dtype=np.float64),
+        1,
+        1.0e-3,
+        1.0e-6,
+    )
+    vertex_release = service.release_point(
+        np.asarray([1.0, 1.0, 1.0], dtype=np.float64),
+        1,
+        1.0e-3,
+        1.0e-6,
+    )
+
+    assert bool(edge_release.is_on_boundary) is True
+    assert bool(edge_release.ambiguous) is True
+    assert bool(vertex_release.is_on_boundary) is True
+    assert bool(vertex_release.ambiguous) is True
+
+
 @pytest.mark.parametrize(
     ('spatial_dim', 'bounds', 'grid_shape'),
     [

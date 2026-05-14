@@ -273,7 +273,7 @@ recorded in the release promotion report.
 For faithful micromixer debugging, keep these roles separate:
 
 - exact COMSOL release: truth input
-- inward-clean release: solver support diagnostic only
+- legacy pre-shifted release: solver support diagnostic only
 - mesh-native field bundle: primary field replay truth
 - regular-grid field bundle and ghost cells: diagnostic only
 - solver `_out_micromixer_*` directories: reference runs, not COMSOL truth

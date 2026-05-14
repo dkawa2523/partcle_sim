@@ -1,0 +1,9 @@
+case,title,role,forces,drag,charge_e,q_over_m_Ckg,source_speed_mean_mps,source_offset_um,boundary_offset_um,net_med_mm,net_p90_mm,path_med_mm,final_speed_med_mps,wall_events,stuck,absorbed,invalid,hard_invalid,mixed_stencil
+C0,Boundary-only neutral release,representative,drag,epstein,0.0,0.0,2.0,0.0,2.0,0.0974031064520097,0.1206312629844034,0.0974031086766926,1.8612971640725249,0,0,0,0,0,0
+C1,Initial-velocity neutral release,representative,drag,epstein,0.0,0.0,20.0,0.0,2.0,0.972411705402542,1.2044581632568898,0.9724117055513636,18.59871692929965,1,0,0,0,0,1
+C2,Positive charge with electric field,sign_force_validation,"drag,electric",epstein,20.0,2781.7563382629205,20.0,0.0,2.0,0.0815550665100056,1.2608848177464842,0.5073767146955599,17.841260627912746,4102,0,0,0,0,1977
+C3,Negative charge with electric field,representative_negative,"drag,electric",epstein,-20.0,-2781.7563382629205,20.0,0.0,2.0,11.757931368362996,27.632095533874004,11.763283078137247,311.99616875543325,1,0,0,0,0,1
+C4,Positive charge electric-off control,control,drag,epstein,20.0,2781.7563382629205,20.0,0.0,2.0,0.972411705402542,1.2044581632568898,0.9724117055513636,18.59871692929965,1,0,0,0,0,1
+C5,Drag sensitivity: negative charge with Stokes-Cunningham,drag_validation,"drag,electric",stokes_cunningham,-20.0,-2781.7563382629205,20.0,0.0,2.0,11.629078619805068,27.484707588643893,11.634454074579264,307.282611222576,1,0,0,0,0,1
+C5b,Drag control: neutral Stokes-Cunningham,drag_control,drag,stokes_cunningham,0.0,0.0,20.0,0.0,2.0,0.955408427206211,1.1863550697753398,0.9554084272522534,17.99799822077927,1,0,0,0,0,1
+C6,Wall-law sensitivity: stick,boundary_wall_validation,"drag,electric",epstein,20.0,2781.7563382629205,20.0,0.0,2.0,0.0040999611005205,0.952021696251382,0.0298550637384075,0.0,267,267,0,0,0,126

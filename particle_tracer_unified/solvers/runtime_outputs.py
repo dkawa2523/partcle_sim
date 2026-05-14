@@ -898,6 +898,7 @@ def _diagnostic_metadata(payload: RuntimeOutputPayload) -> Dict[str, object]:
         'acceleration_quantity_names': list(diagnostics.get('acceleration_quantity_names', [])),
         'electric_field_names': list(diagnostics.get('electric_field_names', [])),
         'electric_q_over_m_Ckg': float(diagnostics.get('electric_q_over_m_Ckg', 0.0)),
+        'electric_q_over_m_particle_stats': dict(diagnostics.get('electric_q_over_m_particle_stats', {})),
         'contact_tangent_motion_enabled': int(bool(payload.contact_tangent_motion_enabled)),
         'contact_tangent_model': str(diagnostics.get('contact_tangent_model', '')),
         'boundary_diagnostics': _boundary_diagnostics(payload),

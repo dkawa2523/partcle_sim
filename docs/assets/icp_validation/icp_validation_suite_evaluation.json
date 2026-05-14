@@ -1,0 +1,906 @@
+{
+  "suite": "icp_validation_surface_release_physics_suite",
+  "summary": "ICP surface-origin validation suite for initial conditions, boundary processing, force fields, drag model, and wall laws.",
+  "cases": [
+    {
+      "case_id": "C0",
+      "slug": "boundary_only_neutral_2mps",
+      "title": "Boundary-only neutral release",
+      "role": "representative",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C0_boundary_only_neutral_2mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C0_boundary_only_neutral_2mps",
+      "forces": [
+        "drag"
+      ],
+      "drag_model": "epstein",
+      "diameter_nm": 10.0,
+      "charge_e": 0.0,
+      "q_over_m_Ckg": 0.0,
+      "source_normal_speed_mean_mps": 2.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 300,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 0,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 0.9013787388071808,
+        "median": 2.0341498572967267,
+        "p90": 2.5177848393612887,
+        "max": 3.3945959016408094
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 4.314798560838784e-05,
+        "median": 9.740310645200975e-05,
+        "p90": 0.00012063126298440349,
+        "max": 0.0001639635886820007
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 4.314798695856627e-05,
+        "median": 9.74031086766926e-05,
+        "p90": 0.00012063130326717676,
+        "max": 0.0001639635893071471
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 0.825636513904931,
+        "median": 1.8612971640725249,
+        "p90": 2.3110154099156213,
+        "max": 3.1665978503441465
+      },
+      "wall_events": 0,
+      "wall_by_part": {},
+      "wall_by_outcome": {},
+      "wall_impact_speed_mps": {
+        "count": 0
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 0,
+      "on_boundary_promoted_inside_count": 0,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 0,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C0_boundary_only_neutral_2mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C0_boundary_only_neutral_2mps\\visualizations\\animations\\trajectories_all_particles.gif",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C0_boundary_only_neutral_2mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    },
+    {
+      "case_id": "C1",
+      "slug": "initial_velocity_neutral_20mps",
+      "title": "Initial-velocity neutral release",
+      "role": "representative",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C1_initial_velocity_neutral_20mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C1_initial_velocity_neutral_20mps",
+      "forces": [
+        "drag"
+      ],
+      "drag_model": "epstein",
+      "diameter_nm": 10.0,
+      "charge_e": 0.0,
+      "q_over_m_Ckg": 0.0,
+      "source_normal_speed_mean_mps": 20.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 300,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 0,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 8.946009564396933,
+        "median": 20.30491738876602,
+        "p90": 25.133109236857443,
+        "max": 33.8744252497555
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 0.00042834732062624385,
+        "median": 0.0009724117054025421,
+        "p90": 0.0012044581632568898,
+        "max": 0.001636236988872243
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 0.0004283473208464401,
+        "median": 0.0009724117055513635,
+        "p90": 0.0012044581633429076,
+        "max": 0.0016362369889354547
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 8.198824608667053,
+        "median": 18.59871692929965,
+        "p90": 23.059942184928545,
+        "max": 31.602087152963822
+      },
+      "wall_events": 1,
+      "wall_by_part": {
+        "7": 1
+      },
+      "wall_by_outcome": {
+        "reflected_specular": 1
+      },
+      "wall_impact_speed_mps": {
+        "count": 1,
+        "min": 29.13657914649948,
+        "median": 29.13657914649948,
+        "p90": 29.13657914649948,
+        "max": 29.13657914649948
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 1,
+      "on_boundary_promoted_inside_count": 88,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 0,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C1_initial_velocity_neutral_20mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C1_initial_velocity_neutral_20mps\\visualizations\\animations\\trajectories_all_particles.gif",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C1_initial_velocity_neutral_20mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    },
+    {
+      "case_id": "C2",
+      "slug": "positive_electric_20mps",
+      "title": "Positive charge with electric field",
+      "role": "sign_force_validation",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C2_positive_electric_20mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C2_positive_electric_20mps",
+      "forces": [
+        "drag",
+        "electric"
+      ],
+      "drag_model": "epstein",
+      "diameter_nm": 10.0,
+      "charge_e": 20.0,
+      "q_over_m_Ckg": 2781.7563382629205,
+      "source_normal_speed_mean_mps": 20.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 300,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 0,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 8.946009564396933,
+        "median": 20.30491738876602,
+        "p90": 25.133109236857443,
+        "max": 33.8744252497555
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 7.396671158583297e-06,
+        "median": 8.155506651000563e-05,
+        "p90": 0.0012608848177464841,
+        "max": 0.009452918441524493
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 0.0002908979924901608,
+        "median": 0.0005073767146955599,
+        "p90": 0.0017975467139157203,
+        "max": 0.013957497720692226
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 0.47815103959900196,
+        "median": 17.841260627912746,
+        "p90": 49.84291885889066,
+        "max": 642.0784927649878
+      },
+      "wall_events": 4102,
+      "wall_by_part": {
+        "7": 1614,
+        "9": 1613,
+        "34": 220,
+        "35": 47,
+        "36": 161,
+        "37": 37,
+        "38": 30,
+        "39": 6,
+        "41": 7,
+        "42": 355,
+        "46": 7,
+        "47": 5
+      },
+      "wall_by_outcome": {
+        "reflected_specular": 4102
+      },
+      "wall_impact_speed_mps": {
+        "count": 4102,
+        "min": 12.910625524180864,
+        "median": 30.352535173739003,
+        "p90": 48.96278495652892,
+        "max": 655.7131152595255
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 1977,
+      "on_boundary_promoted_inside_count": 43963,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 300,
+        "min": 2781.7563382629205,
+        "median": 2781.7563382629205,
+        "p90": 2781.7563382629205,
+        "max": 2781.7563382629205
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C2_positive_electric_20mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C2_positive_electric_20mps\\visualizations\\animations\\trajectories_all_particles.gif",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C2_positive_electric_20mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    },
+    {
+      "case_id": "C3",
+      "slug": "negative_electric_20mps",
+      "title": "Negative charge with electric field",
+      "role": "representative_negative",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C3_negative_electric_20mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C3_negative_electric_20mps",
+      "forces": [
+        "drag",
+        "electric"
+      ],
+      "drag_model": "epstein",
+      "diameter_nm": 10.0,
+      "charge_e": -20.0,
+      "q_over_m_Ckg": -2781.7563382629205,
+      "source_normal_speed_mean_mps": 20.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 300,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 0,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 8.946009564396933,
+        "median": 20.30491738876602,
+        "p90": 25.133109236857443,
+        "max": 33.8744252497555
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 0.0007574391154094517,
+        "median": 0.011757931368362996,
+        "p90": 0.027632095533874003,
+        "max": 0.027890230564180676
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 0.0007605539794071876,
+        "median": 0.011763283078137248,
+        "p90": 0.027632116153170246,
+        "max": 0.02789026287131823
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 15.799062709284287,
+        "median": 311.99616875543325,
+        "p90": 669.004320868425,
+        "max": 671.1955305980263
+      },
+      "wall_events": 1,
+      "wall_by_part": {
+        "46": 1
+      },
+      "wall_by_outcome": {
+        "reflected_specular": 1
+      },
+      "wall_impact_speed_mps": {
+        "count": 1,
+        "min": 101.53304521128936,
+        "median": 101.53304521128936,
+        "p90": 101.53304521128936,
+        "max": 101.53304521128936
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 1,
+      "on_boundary_promoted_inside_count": 30,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 300,
+        "min": -2781.7563382629205,
+        "median": -2781.7563382629205,
+        "p90": -2781.7563382629205,
+        "max": -2781.7563382629205
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C3_negative_electric_20mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C3_negative_electric_20mps\\visualizations\\animations\\trajectories_all_particles.gif",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C3_negative_electric_20mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    },
+    {
+      "case_id": "C4",
+      "slug": "positive_electric_off_20mps",
+      "title": "Positive charge electric-off control",
+      "role": "control",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C4_positive_electric_off_20mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C4_positive_electric_off_20mps",
+      "forces": [
+        "drag"
+      ],
+      "drag_model": "epstein",
+      "diameter_nm": 10.0,
+      "charge_e": 20.0,
+      "q_over_m_Ckg": 2781.7563382629205,
+      "source_normal_speed_mean_mps": 20.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 300,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 0,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 8.946009564396933,
+        "median": 20.30491738876602,
+        "p90": 25.133109236857443,
+        "max": 33.8744252497555
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 0.00042834732062624385,
+        "median": 0.0009724117054025421,
+        "p90": 0.0012044581632568898,
+        "max": 0.001636236988872243
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 0.0004283473208464401,
+        "median": 0.0009724117055513635,
+        "p90": 0.0012044581633429076,
+        "max": 0.0016362369889354547
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 8.198824608667053,
+        "median": 18.59871692929965,
+        "p90": 23.059942184928545,
+        "max": 31.602087152963822
+      },
+      "wall_events": 1,
+      "wall_by_part": {
+        "7": 1
+      },
+      "wall_by_outcome": {
+        "reflected_specular": 1
+      },
+      "wall_impact_speed_mps": {
+        "count": 1,
+        "min": 29.13657914649948,
+        "median": 29.13657914649948,
+        "p90": 29.13657914649948,
+        "max": 29.13657914649948
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 1,
+      "on_boundary_promoted_inside_count": 88,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 300,
+        "min": 2781.7563382629205,
+        "median": 2781.7563382629205,
+        "p90": 2781.7563382629205,
+        "max": 2781.7563382629205
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C4_positive_electric_off_20mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C4_positive_electric_off_20mps\\visualizations\\animations\\trajectories_all_particles.gif",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C4_positive_electric_off_20mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    },
+    {
+      "case_id": "C5",
+      "slug": "negative_stokes_cunningham_20mps",
+      "title": "Drag sensitivity: negative charge with Stokes-Cunningham",
+      "role": "drag_validation",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C5_negative_stokes_cunningham_20mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C5_negative_stokes_cunningham_20mps",
+      "forces": [
+        "drag",
+        "electric"
+      ],
+      "drag_model": "stokes_cunningham",
+      "diameter_nm": 10.0,
+      "charge_e": -20.0,
+      "q_over_m_Ckg": -2781.7563382629205,
+      "source_normal_speed_mean_mps": 20.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 300,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 0,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 8.946009564396933,
+        "median": 20.30491738876602,
+        "p90": 25.133109236857443,
+        "max": 33.8744252497555
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 0.000760110575505807,
+        "median": 0.011629078619805068,
+        "p90": 0.027484707588643895,
+        "max": 0.02775935665431788
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 0.0007632134986580214,
+        "median": 0.011634454074579265,
+        "p90": 0.02748483559990625,
+        "max": 0.027759388967888196
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 15.904378553244271,
+        "median": 307.282611222576,
+        "p90": 665.0629668618424,
+        "max": 667.8456768171231
+      },
+      "wall_events": 1,
+      "wall_by_part": {
+        "46": 1
+      },
+      "wall_by_outcome": {
+        "reflected_specular": 1
+      },
+      "wall_impact_speed_mps": {
+        "count": 1,
+        "min": 101.38087379910722,
+        "median": 101.38087379910722,
+        "p90": 101.38087379910722,
+        "max": 101.38087379910722
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 1,
+      "on_boundary_promoted_inside_count": 30,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 300,
+        "min": -2781.7563382629205,
+        "median": -2781.7563382629205,
+        "p90": -2781.7563382629205,
+        "max": -2781.7563382629205
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C5_negative_stokes_cunningham_20mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C5_negative_stokes_cunningham_20mps\\visualizations\\animations\\trajectories_all_particles.gif",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C5_negative_stokes_cunningham_20mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    },
+    {
+      "case_id": "C5b",
+      "slug": "drag_control_neutral_stokes_cunningham_20mps",
+      "title": "Drag control: neutral Stokes-Cunningham",
+      "role": "drag_control",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C5b_drag_control_neutral_stokes_cunningham_20mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C5b_drag_control_neutral_stokes_cunningham_20mps",
+      "forces": [
+        "drag"
+      ],
+      "drag_model": "stokes_cunningham",
+      "diameter_nm": 10.0,
+      "charge_e": 0.0,
+      "q_over_m_Ckg": 0.0,
+      "source_normal_speed_mean_mps": 20.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 300,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 0,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 8.946009564396933,
+        "median": 20.30491738876602,
+        "p90": 25.133109236857443,
+        "max": 33.8744252497555
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 0.00042078557084826944,
+        "median": 0.000955408427206211,
+        "p90": 0.0011863550697753399,
+        "max": 0.0016352844624139592
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 0.0004207855712952081,
+        "median": 0.0009554084272522534,
+        "p90": 0.0011863550697898489,
+        "max": 0.0016352844624793078
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 7.907214655347627,
+        "median": 17.99799822077927,
+        "p90": 22.39216206559759,
+        "max": 31.565968278351832
+      },
+      "wall_events": 1,
+      "wall_by_part": {
+        "7": 1
+      },
+      "wall_by_outcome": {
+        "reflected_specular": 1
+      },
+      "wall_impact_speed_mps": {
+        "count": 1,
+        "min": 28.540876695043355,
+        "median": 28.540876695043355,
+        "p90": 28.540876695043355,
+        "max": 28.540876695043355
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 1,
+      "on_boundary_promoted_inside_count": 90,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 0,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C5b_drag_control_neutral_stokes_cunningham_20mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C5b_drag_control_neutral_stokes_cunningham_20mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    },
+    {
+      "case_id": "C6",
+      "slug": "positive_stick_wall_20mps",
+      "title": "Wall-law sensitivity: stick",
+      "role": "boundary_wall_validation",
+      "case_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_external_exports\\icp_validation_C6_positive_stick_wall_20mps",
+      "output_dir": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C6_positive_stick_wall_20mps",
+      "forces": [
+        "drag",
+        "electric"
+      ],
+      "drag_model": "epstein",
+      "diameter_nm": 10.0,
+      "charge_e": 20.0,
+      "q_over_m_Ckg": 2781.7563382629205,
+      "source_normal_speed_mean_mps": 20.0,
+      "source_position_offset_m": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 0.0,
+        "max": 0.0
+      },
+      "boundary_release_solver_offset_m": {
+        "count": 300,
+        "min": 2e-06,
+        "median": 2e-06,
+        "p90": 2e-06,
+        "max": 2e-06
+      },
+      "boundary_release_applied_count": 300,
+      "boundary_release_failed_offset_count": 0,
+      "preflight_passed": true,
+      "preflight_status_counts": {
+        "clean": 300,
+        "mixed_stencil": 0,
+        "hard_invalid": 0,
+        "non_clean": 0
+      },
+      "final_state_counts": {
+        "active_free_flight": 33,
+        "contact_sliding": 0,
+        "contact_endpoint_stopped": 0,
+        "invalid_mask_stopped": 0,
+        "numerical_boundary_stopped": 0,
+        "stuck": 267,
+        "absorbed": 0,
+        "escaped": 0,
+        "inactive": 0
+      },
+      "initial_speed_mps": {
+        "count": 300,
+        "min": 8.946009564396933,
+        "median": 20.30491738876602,
+        "p90": 25.133109236857443,
+        "max": 33.8744252497555
+      },
+      "net_displacement_m": {
+        "count": 300,
+        "min": 1.0000003143885368e-06,
+        "median": 4.099961100520581e-06,
+        "p90": 0.0009520216962513819,
+        "max": 0.009452918441524493
+      },
+      "path_length_m": {
+        "count": 300,
+        "min": 1.0000003143885368e-06,
+        "median": 2.9855063738407592e-05,
+        "p90": 0.0009991981460341394,
+        "max": 0.00955344379886283
+      },
+      "final_speed_mps": {
+        "count": 300,
+        "min": 0.0,
+        "median": 0.0,
+        "p90": 16.60700398492305,
+        "max": 642.0784927649878
+      },
+      "wall_events": 267,
+      "wall_by_part": {
+        "7": 69,
+        "9": 103,
+        "34": 13,
+        "35": 5,
+        "36": 24,
+        "37": 3,
+        "38": 4,
+        "39": 2,
+        "41": 1,
+        "42": 41,
+        "46": 1,
+        "47": 1
+      },
+      "wall_by_outcome": {
+        "stuck": 267
+      },
+      "wall_impact_speed_mps": {
+        "count": 267,
+        "min": 12.910625524180864,
+        "median": 22.33905737405152,
+        "p90": 28.34587224530182,
+        "max": 655.7131152595255
+      },
+      "invalid_mask_stopped": 0,
+      "hard_invalid": 0,
+      "unresolved_crossing_count": 0,
+      "mixed_stencil_count": 126,
+      "on_boundary_promoted_inside_count": 2920,
+      "electric_q_over_m_particle_stats": {
+        "count": 300,
+        "charged_count": 300,
+        "min": 2781.7563382629205,
+        "median": 2781.7563382629205,
+        "p90": 2781.7563382629205,
+        "max": 2781.7563382629205
+      },
+      "visualization_index": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C6_positive_stick_wall_20mps\\visualizations\\reports\\visualization_index.json",
+      "gif_all_particles": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C6_positive_stick_wall_20mps\\visualizations\\animations\\trajectories_all_particles.gif",
+      "main_graph": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_C6_positive_stick_wall_20mps\\visualizations\\graphs\\23_comsol_style_field_and_trajectories.png"
+    }
+  ],
+  "criteria": {
+    "all_boundary_release_applied": true,
+    "all_boundary_release_failed_zero": true,
+    "C0_C5_no_invalid_hard_unresolved": true,
+    "C2_vs_C4_electric_changes_wall_events": true,
+    "C2_vs_C3_charge_sign_changes_trajectory": true,
+    "C3_vs_C5_drag_difference_measured": true,
+    "C1_vs_C5b_drag_control_difference_measured": true,
+    "C6_wall_law_terminal_state": true,
+    "all_pass": true
+  },
+  "figures": [
+    "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_suite\\visualizations\\graphs\\01_suite_motion_boundary_summary.png",
+    "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_suite\\visualizations\\graphs\\02_force_sign_control_summary.png",
+    "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_suite\\visualizations\\graphs\\03_drag_model_sensitivity.png",
+    "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_suite\\visualizations\\graphs\\04_wall_law_final_state_summary.png"
+  ],
+  "metrics_csv": "C:\\Users\\user\\Desktop\\particle_simulation\\_out_icp_validation_suite\\icp_validation_suite_metrics.csv"
+}

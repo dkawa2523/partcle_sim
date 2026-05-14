@@ -79,8 +79,8 @@ def test_comsol_builder_does_not_write_triangle_mesh_field_by_default(tmp_path: 
     assert not (out_dir / 'generated' / 'comsol_field_mesh_2d.npz').exists()
     assert not (out_dir / 'run_config_mesh.yaml').exists()
 
-def test_comsol_builder_particles_only_generates_clean_release_domain(tmp_path: Path):
-    out_dir = tmp_path / 'comsol_case_clean_particles'
+def test_comsol_builder_particles_only_generates_boundary_release_sources(tmp_path: Path):
+    out_dir = tmp_path / 'comsol_case_boundary_release_particles'
     write_case_files(
         ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
         out_dir,
@@ -93,14 +93,22 @@ def test_comsol_builder_particles_only_generates_clean_release_domain(tmp_path: 
         particle_count=128,
         release_span_s=0.4,
         seed=123,
-        min_release_offset_cells=2.0,
     )
     particles = pd.read_csv(out_dir / 'particles.csv')
     assert len(particles) == 128
     assert particles['release_time'].iloc[0] == pytest.approx(0.0)
     assert particles['release_time'].iloc[-1] == pytest.approx(0.4)
-    assert particles['release_offset_m'].min() > 0.0
+    assert float(particles['release_offset_m'].max()) == pytest.approx(0.0)
+    assert np.allclose(particles['x'].to_numpy(dtype=float), particles['source_x'].to_numpy(dtype=float))
+    assert np.allclose(particles['y'].to_numpy(dtype=float), particles['source_y'].to_numpy(dtype=float))
+    cfg = yaml.safe_load((out_dir / 'run_config.yaml').read_text(encoding='utf-8'))
+    assert cfg['source']['source_position_offset_m'] == pytest.approx(0.0)
+    assert cfg['source']['preprocess']['enabled'] is True
+    assert cfg['source']['preprocess']['boundary_release'] is True
     prepared = build_prepared_runtime_from_yaml(out_dir / 'run_config.yaml')
+    assert prepared.source_preprocess is not None
+    assert prepared.source_preprocess.source_model_summary['boundary_release_applied_count'] == 128
+    assert prepared.source_preprocess.source_model_summary['boundary_release_failed_offset_count'] == 0
     report = build_initial_particle_field_support_report(prepared)
     assert report['status_counts']['non_clean'] == 0
     assert particles['source_part_id'].nunique() > 1

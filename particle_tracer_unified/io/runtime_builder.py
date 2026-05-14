@@ -15,6 +15,7 @@ from ..providers.source_adapters import (
     build_normal_sampler,
     build_viscosity_sampler,
     build_wall_shear_sampler,
+    ConstantScalarSampler,
 )
 from .runtime_builder_support import build_runtime_providers, load_runtime_inputs, resolve_runtime_input_paths
 from .comsol import (
@@ -25,7 +26,15 @@ from .comsol import (
     load_comsol_runtime_inputs,
 )
 from ..solvers.forces import build_force_catalog, force_catalog_summary
-from ..solvers.source_preprocess import preprocess_particles_for_solver
+from ..solvers.charge_model import parse_charge_model_config
+from ..solvers.plasma_background import parse_plasma_background_config
+from ..solvers.source_preprocess import (
+    boundary_release_config,
+    boundary_service_for_source_preprocess,
+    preprocess_particles_for_solver,
+)
+from ..solvers.stochastic_motion import parse_stochastic_motion_config
+from ..core.source_resolution import resolve_source_parameters
 
 
 def _read_yaml(path: Path) -> Dict[str, Any]:
@@ -34,6 +43,45 @@ def _read_yaml(path: Path) -> Dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError('YAML root must be a mapping')
     return data
+
+
+def _summary_mapping(value: object) -> Mapping[str, Any]:
+    return value if isinstance(value, Mapping) else {}
+
+
+def _model_input_summary(
+    runtime: RuntimeLike,
+    force_summary: Mapping[str, Any],
+    source_summary: Mapping[str, Any],
+) -> Dict[str, Any]:
+    config = _summary_mapping(runtime.config_payload)
+    solver_cfg = _summary_mapping(config.get('solver', {}))
+    force_models = _summary_mapping(force_summary.get('force_models', {}))
+    stochastic_cfg = parse_stochastic_motion_config(
+        solver_cfg,
+        default_seed=int(solver_cfg.get('seed', 12345)),
+    )
+    charge_cfg = parse_charge_model_config(solver_cfg)
+    plasma_cfg = parse_plasma_background_config(solver_cfg)
+
+    return {
+        'drag_model': str(force_models.get('drag', solver_cfg.get('drag_model', 'stokes'))),
+        'enabled_forces': list(force_summary.get('enabled_forces', [])),
+        'force_enabled_reason': dict(_summary_mapping(force_summary.get('force_enabled_reason', {}))),
+        'stochastic_motion_enabled': int(bool(stochastic_cfg.enabled)),
+        'stochastic_motion_model': str(stochastic_cfg.model),
+        'stochastic_motion_temperature_source': str(stochastic_cfg.temperature_source),
+        'charge_model_enabled': int(bool(charge_cfg.enabled)),
+        'charge_model_mode': str(charge_cfg.mode),
+        'charge_background_source': str(charge_cfg.background_source),
+        'charge_model_support_scope': '2d_regular_rectilinear_field_or_scalar_plasma_background',
+        'plasma_background_enabled': int(str(plasma_cfg.source) != 'none'),
+        'plasma_background_source': str(plasma_cfg.source),
+        'near_wall_force_correction_applied': 0,
+        'particle_coupling': 'one_way',
+        'particle_wall_contact_geometry': 'center_position',
+        'source_law_usage': dict(_summary_mapping(source_summary.get('law_usage', {}))),
+    }
 
 
 def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> RuntimeLike:
@@ -122,32 +170,53 @@ def prepare_runtime(runtime: RuntimeLike, seed: Optional[int] = None) -> Prepare
         return PreparedRuntime(runtime=runtime, source_preprocess=None)
     if not bool(preprocess_cfg.get('enabled', True)):
         return PreparedRuntime(runtime=runtime, source_preprocess=None)
+    boundary_release = boundary_release_config(runtime, source_cfg)
+    boundary_service = (
+        boundary_service_for_source_preprocess(runtime, float(boundary_release['on_boundary_tol_m']))
+        if bool(boundary_release['enabled'])
+        else None
+    )
     normal_sampler = build_normal_sampler(runtime)
     flow_sampler = build_flow_sampler(runtime)
-    viscosity_sampler = build_viscosity_sampler(runtime)
-    wall_shear_sampler = build_wall_shear_sampler(
-        runtime,
-        normal_sampler=normal_sampler,
-        flow_sampler=flow_sampler,
-        viscosity_sampler=viscosity_sampler,
-    )
-    friction_velocity_sampler = build_friction_velocity_sampler(runtime, wall_shear_sampler=wall_shear_sampler)
-    result = preprocess_particles_for_solver(
+    source_resolution = resolve_source_parameters(
         particles=runtime.particles,
         walls=runtime.walls,
         materials=runtime.materials,
-        source_events=runtime.compiled_source_events,
-        process_steps=runtime.process_steps,
         source_cfg=source_cfg,
         gas_temperature=float(runtime.gas.temperature),
         gas_viscosity=float(runtime.gas.dynamic_viscosity_Pas),
+    )
+    needs_shear_source = any(str(name) == 'resuspension_shear_material' for name in source_resolution.resolved_law_name)
+    if needs_shear_source:
+        viscosity_sampler = build_viscosity_sampler(runtime)
+        wall_shear_sampler = build_wall_shear_sampler(
+            runtime,
+            normal_sampler=normal_sampler,
+            flow_sampler=flow_sampler,
+            viscosity_sampler=viscosity_sampler,
+        )
+        friction_velocity_sampler = build_friction_velocity_sampler(runtime, wall_shear_sampler=wall_shear_sampler)
+    else:
+        viscosity_sampler = ConstantScalarSampler(float(runtime.gas.dynamic_viscosity_Pas))
+        wall_shear_sampler = ConstantScalarSampler(float('nan'))
+        friction_velocity_sampler = ConstantScalarSampler(float('nan'))
+    result = preprocess_particles_for_solver(
+        particles=runtime.particles,
+        source_events=runtime.compiled_source_events,
+        process_steps=runtime.process_steps,
+        source_cfg=source_cfg,
         gas_density_kgm3=float(runtime.gas.density_kgm3),
+        resolved=source_resolution,
         normal_sampler=normal_sampler,
         flow_sampler=flow_sampler,
         wall_shear_sampler=wall_shear_sampler,
         friction_velocity_sampler=friction_velocity_sampler,
         viscosity_sampler=viscosity_sampler,
         seed=int(seed if seed is not None else preprocess_cfg.get('seed', 12345)),
+        release_point_classifier=(boundary_service.release_point if boundary_service is not None else None),
+        use_boundary_release=bool(boundary_release['enabled']),
+        boundary_classifier_tolerance_m=float(boundary_release['tolerance_m']),
+        boundary_solver_offset_m=float(boundary_release['release_offset_m']),
     )
     prepared_runtime = replace_runtime_particles(
         runtime,
@@ -167,6 +236,12 @@ def build_prepared_runtime_from_yaml(config_path: Path) -> PreparedRuntime:
 
 def prepared_runtime_summary(prepared: PreparedRuntime) -> Dict[str, Any]:
     runtime = prepared.runtime
+    force_summary = force_catalog_summary(runtime.force_catalog)
+    source_model_summary: Dict[str, Any] = {}
+    event_summary: Dict[str, Any] = {}
+    if prepared.source_preprocess is not None:
+        source_model_summary = dict(prepared.source_preprocess.source_model_summary)
+        event_summary = dict(prepared.source_preprocess.event_summary)
     summary = {
         'spatial_dim': int(runtime.spatial_dim),
         'coordinate_system': runtime.coordinate_system,
@@ -187,11 +262,12 @@ def prepared_runtime_summary(prepared: PreparedRuntime) -> Dict[str, Any]:
         'process_steps': process_step_control_summary(runtime.process_steps),
         'wall_catalog': wall_catalog_summary(runtime.wall_catalog),
         'physics_catalog': physics_catalog_summary(runtime.physics_catalog),
-        'force_catalog': force_catalog_summary(runtime.force_catalog),
+        'force_catalog': force_summary,
+        'model_input_summary': _model_input_summary(runtime, force_summary, source_model_summary),
     }
     if prepared.source_preprocess is not None:
-        summary['source_model_summary'] = dict(prepared.source_preprocess.source_model_summary)
-        summary['event_summary'] = dict(prepared.source_preprocess.event_summary)
+        summary['source_model_summary'] = source_model_summary
+        summary['event_summary'] = event_summary
     if runtime.geometry_provider is not None:
         summary['geometry_provider'] = runtime.geometry_provider.summary()
     if runtime.field_provider is not None:

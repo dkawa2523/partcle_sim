@@ -17,8 +17,6 @@ from particle_tracer_unified.core.geometry2d import (
     encode_boundary_loops_2d,
     points_inside_boundary_loops_2d,
 )
-from particle_tracer_unified.core.grid_sampling import sample_grid_scalar
-
 DEFAULT_FIELD_GHOST_CELLS = 0
 FIELD_SUPPORT_BOUNDARY_PART_ID = 9001
 PHYSICAL_WALL_STICK_PROBABILITY = 0.0
@@ -988,22 +986,6 @@ def _support_phi_quality_summary(support_phi: np.ndarray, valid_mask: np.ndarray
     return summary
 
 
-def _max_cell_diagonal(axes_x: np.ndarray, axes_y: np.ndarray) -> float:
-    dx = float(np.max(np.diff(np.asarray(axes_x, dtype=np.float64))))
-    dy = float(np.max(np.diff(np.asarray(axes_y, dtype=np.float64))))
-    return float(np.sqrt(dx * dx + dy * dy))
-
-
-def _sample_grid_normal(normal_x: np.ndarray, normal_y: np.ndarray, axes_x: np.ndarray, axes_y: np.ndarray, position: np.ndarray) -> np.ndarray:
-    px = float(sample_grid_scalar(np.asarray(normal_x, dtype=np.float64), (axes_x, axes_y), np.asarray(position, dtype=np.float64)))
-    py = float(sample_grid_scalar(np.asarray(normal_y, dtype=np.float64), (axes_x, axes_y), np.asarray(position, dtype=np.float64)))
-    normal = np.asarray([px, py], dtype=np.float64)
-    mag = float(np.linalg.norm(normal))
-    if mag <= 1.0e-30:
-        return np.asarray([0.0, 1.0], dtype=np.float64)
-    return normal / mag
-
-
 def _sample_points_in_quads(vertices: np.ndarray, quads: np.ndarray, count: int, seed: int = 12345) -> np.ndarray:
     v = np.asarray(vertices, dtype=np.float64)
     q = _order_quad_vertices(v, quads)
@@ -1036,48 +1018,10 @@ def _sample_points_in_quads(vertices: np.ndarray, quads: np.ndarray, count: int,
     return out
 
 
-def _sample_clean_field_points_in_quads(
-    vertices: np.ndarray,
-    quads: np.ndarray,
-    axes_x: np.ndarray,
-    axes_y: np.ndarray,
-    valid_mask: np.ndarray,
-    count: int,
-    seed: int = 12345,
-) -> np.ndarray:
-    n = int(max(0, count))
-    if n == 0:
-        return np.zeros((0, 2), dtype=np.float64)
-    accepted: List[np.ndarray] = []
-    batch = int(max(128, 4 * n))
-    mask = np.asarray(valid_mask, dtype=bool)
-    axes = (np.asarray(axes_x, dtype=np.float64), np.asarray(axes_y, dtype=np.float64))
-    for attempt in range(50):
-        candidates = _sample_points_in_quads(vertices, quads, batch, seed=int(seed) + attempt)
-        clean = [
-            p
-            for p in candidates
-            if int(sample_valid_mask_status(mask, axes, np.asarray(p, dtype=np.float64))) == int(VALID_MASK_STATUS_CLEAN)
-        ]
-        if clean:
-            accepted.append(np.asarray(clean, dtype=np.float64))
-        accepted_count = int(sum(arr.shape[0] for arr in accepted))
-        if accepted_count >= n:
-            return np.vstack(accepted)[:n].copy()
-    raise ValueError(
-        'Could not sample enough particles inside the clean field sample domain; '
-        'check field.valid_mask coverage or reduce the requested particle count'
-    )
-
-
-def _sample_clean_boundary_release_points(
+def _sample_boundary_release_source_points(
     arrays: Mapping[str, Any],
-    axes_x: np.ndarray,
-    axes_y: np.ndarray,
-    valid_mask: np.ndarray,
     count: int,
     seed: int = 24680,
-    min_release_offset_cells: float = 1.0,
     source_part_ids: Optional[List[int]] = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     n = int(max(0, count))
@@ -1095,53 +1039,24 @@ def _sample_clean_boundary_release_points(
     if valid_edges.size == 0:
         raise ValueError('boundary release generation requires non-degenerate boundary edges for the selected source parts')
     weights = lengths[valid_edges] / float(np.sum(lengths[valid_edges]))
-    cell_diag = _max_cell_diagonal(axes_x, axes_y)
-    base_multipliers = np.asarray([0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0], dtype=np.float64)
-    min_multiplier = float(max(0.0, min_release_offset_cells))
-    multipliers = base_multipliers[base_multipliers >= min_multiplier]
-    if multipliers.size == 0:
-        multipliers = np.asarray([min_multiplier], dtype=np.float64)
-    elif min_multiplier > 0.0 and not np.any(np.isclose(multipliers, min_multiplier, rtol=0.0, atol=1.0e-12)):
-        multipliers = np.unique(np.concatenate([np.asarray([min_multiplier], dtype=np.float64), multipliers]))
-    probe_distances = cell_diag * multipliers
-    mask = np.asarray(valid_mask, dtype=bool)
-    axes = (np.asarray(axes_x, dtype=np.float64), np.asarray(axes_y, dtype=np.float64))
     rng = np.random.default_rng(int(seed))
     release_points: List[np.ndarray] = []
     source_points: List[np.ndarray] = []
     offsets: List[float] = []
     source_parts: List[int] = []
-    max_attempts = int(max(1000, 30 * n))
-    for _attempt in range(max_attempts):
+    for _attempt in range(n):
         edge_idx = int(rng.choice(valid_edges, p=weights))
         alpha = float(rng.random())
         source = edges[edge_idx, 0, :] + alpha * edge_vec[edge_idx]
-        normal = _sample_grid_normal(arrays['normal_x'], arrays['normal_y'], axes_x, axes_y, source)
-        placed = False
-        for distance in probe_distances:
-            for direction in (-normal, normal):
-                candidate = source + direction * float(distance)
-                status = int(sample_valid_mask_status(mask, axes, candidate))
-                if status != int(VALID_MASK_STATUS_CLEAN):
-                    continue
-                release_points.append(candidate.astype(np.float64))
-                source_points.append(source.astype(np.float64))
-                offsets.append(float(np.linalg.norm(candidate - source)))
-                source_parts.append(int(part_ids[edge_idx]))
-                placed = True
-                break
-            if placed:
-                break
-        if len(release_points) >= n:
-            return (
-                np.vstack(release_points[:n]).astype(np.float64),
-                np.vstack(source_points[:n]).astype(np.float64),
-                np.asarray(offsets[:n], dtype=np.float64),
-                np.asarray(source_parts[:n], dtype=np.int32),
-            )
-    raise ValueError(
-        'Could not place enough boundary-release particles inside the clean field sample domain; '
-        'the rectilinear field support may be too far from the requested source boundary'
+        release_points.append(source.astype(np.float64))
+        source_points.append(source.astype(np.float64))
+        offsets.append(0.0)
+        source_parts.append(int(part_ids[edge_idx]))
+    return (
+        np.vstack(release_points).astype(np.float64),
+        np.vstack(source_points).astype(np.float64),
+        np.asarray(offsets, dtype=np.float64),
+        np.asarray(source_parts, dtype=np.int32),
     )
 
 
@@ -1237,6 +1152,28 @@ def _particle_rows_from_points(
     return rows
 
 
+def _enable_boundary_release_preprocess(config_path: Path) -> None:
+    path = Path(config_path)
+    if not path.exists():
+        return
+    config = yaml.safe_load(path.read_text(encoding='utf-8'))
+    if not isinstance(config, dict):
+        raise ValueError(f'invalid run_config.yaml: {path}')
+    source = config.setdefault('source', {})
+    if not isinstance(source, dict):
+        source = {}
+        config['source'] = source
+    preprocess = source.setdefault('preprocess', {})
+    if not isinstance(preprocess, dict):
+        preprocess = {}
+        source['preprocess'] = preprocess
+    preprocess['enabled'] = True
+    preprocess['boundary_release'] = True
+    source['source_position_offset_m'] = 0.0
+    config.setdefault('input_contract', {})['initial_particle_field_support'] = 'strict'
+    path.write_text(yaml.safe_dump(config, sort_keys=False), encoding='utf-8')
+
+
 def write_particles_for_case(
     mphtxt_path: Path,
     out_dir: Path,
@@ -1244,7 +1181,6 @@ def write_particles_for_case(
     particle_count: int,
     release_span_s: Optional[float] = None,
     seed: int = 24680,
-    min_release_offset_cells: float = 1.0,
     diagnostic_grid_spacing_m: float = 5e-4,
     coordinate_scale_m_per_model_unit: float = 1.0,
     source_part_ids: Optional[List[int]] = None,
@@ -1253,7 +1189,7 @@ def write_particles_for_case(
     base_arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=float(diagnostic_grid_spacing_m))
     field_npz = Path(out_dir) / 'generated' / 'comsol_field_2d.npz'
     if not field_npz.exists():
-        raise FileNotFoundError(f'clean particle generation requires existing field bundle output: {field_npz}')
+        raise FileNotFoundError(f'boundary release particle generation requires existing field bundle output: {field_npz}')
     with np.load(field_npz) as payload:
         axes_x = np.asarray(payload['axis_0'], dtype=np.float64)
         axes_y = np.asarray(payload['axis_1'], dtype=np.float64)
@@ -1286,14 +1222,10 @@ def write_particles_for_case(
     support_arrays['triangle_part_ids'] = arrays['triangle_part_ids']
     arrays = {**arrays, **support_arrays}
 
-    points, source_points, offsets, source_part_ids = _sample_clean_boundary_release_points(
+    points, source_points, offsets, source_part_ids = _sample_boundary_release_source_points(
         arrays,
-        axes_x,
-        axes_y,
-        valid_mask,
         count=int(particle_count),
         seed=int(seed),
-        min_release_offset_cells=float(min_release_offset_cells),
         source_part_ids=source_part_ids,
     )
     boundary_parts = np.unique(arrays['boundary_part_ids']).astype(int).tolist()
@@ -1308,6 +1240,7 @@ def write_particles_for_case(
         release_offsets_m=offsets,
     )
     pd.DataFrame(rows).to_csv(Path(out_dir) / 'particles.csv', index=False)
+    _enable_boundary_release_preprocess(Path(out_dir) / 'run_config.yaml')
 
 
 def build_precomputed_arrays(mesh: ParsedMesh, diagnostic_grid_spacing_m: float = 5e-4, grid_padding_cells: int = 0):
@@ -1796,11 +1729,10 @@ def main() -> int:
     ap.add_argument('--out-dir', type=Path, default=Path('examples/comsol_from_data_2d'))
     ap.add_argument('--field-bundle', type=Path, default=None)
     ap.add_argument('--geometry-only', action='store_true')
-    ap.add_argument('--particles-only', action='store_true', help='Rewrite only particles.csv from the clean field sample domain.')
+    ap.add_argument('--particles-only', action='store_true', help='Rewrite only particles.csv from boundary release source points.')
     ap.add_argument('--particle-count', type=int, default=24)
     ap.add_argument('--particle-release-span-s', type=float, default=None)
     ap.add_argument('--particle-seed', type=int, default=24680)
-    ap.add_argument('--particle-min-release-offset-cells', type=float, default=1.0)
     ap.add_argument('--source-part-ids', type=str, default=None, help='Comma-separated boundary part IDs to use as particle release sources.')
     ap.add_argument('--diagnostic-grid-spacing-m', type=float, default=5e-4)
     ap.add_argument('--field-ghost-cells', type=int, default=DEFAULT_FIELD_GHOST_CELLS)
@@ -1827,7 +1759,6 @@ def main() -> int:
             particle_count=int(args.particle_count),
             release_span_s=args.particle_release_span_s,
             seed=int(args.particle_seed),
-            min_release_offset_cells=float(args.particle_min_release_offset_cells),
             diagnostic_grid_spacing_m=float(args.diagnostic_grid_spacing_m),
             coordinate_scale_m_per_model_unit=float(args.coordinate_scale_m_per_model_unit),
             source_part_ids=_parse_part_id_list(args.source_part_ids),
