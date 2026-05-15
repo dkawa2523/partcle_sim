@@ -437,8 +437,8 @@ COMSOLの説明でも、粒子が小さい場合にはBrownian motionが重要�
 | gravity/body force | $\mathbf{a}_g=\mathbf{g}$ または $(1-\rho_g/\rho_p)\mathbf{g}$ | body acceleration, $\rho_g,\rho_p$ | 定数加速度。buoyancyは任意 |
 | Brownian/stochastic | $\langle \Delta x_i\Delta x_j\rangle=2D\Delta t\,\delta_{ij}$ | $T,\mu,d_p$, random seed | 小粒子の拡散的揺らぎ。今回OFF |
 | thermophoresis | $\mathbf{a}_{th}\propto -\nabla T$ | $T,\nabla T,\mu,\rho_g,k_g,k_p$ | Talbot型係数またはcontinuum近似 |
-| dielectrophoresis | $\mathbf{F}_{DEP}=2\pi\epsilon_m a^3\mathrm{Re}(K)\nabla|\mathbf{E}|^2$ | $\mathbf{E}$, $\nabla|\mathbf{E}|^2$, 誘電率 | DC/AC Clausius-Mossotti |
-| lift | Saffman型 $\mathbf{F}_L\propto \mu a^2(\mathbf{v}-\mathbf{u})\times\boldsymbol{\omega}/\sqrt{\nu|\omega|}$ | 流速、vorticity、$\mu,\rho_g$ | せん断流中の横力 |
+| dielectrophoresis | $\mathbf{F}_{DEP}=2\pi\epsilon_m a^3\mathrm{Re}(K)\nabla\lvert\mathbf{E}\rvert^2$ | $\mathbf{E}$, $\nabla\lvert\mathbf{E}\rvert^2$, 誘電率 | DC/AC Clausius-Mossotti |
+| lift | Saffman型 $\mathbf{F}_L\propto \mu a^2(\mathbf{v}-\mathbf{u})\times\boldsymbol{\omega}/\sqrt{\nu\lvert\omega\rvert}$ | 流速、vorticity、$\mu,\rho_g$ | せん断流中の横力 |
 | pressure-gradient | $\mathbf{a}_{pg}=(\rho_g/\rho_p)D\mathbf{u}/Dt$ | 流体加速度または速度場 | COMSOL parity対象 |
 | virtual mass | $\mathbf{a}_{vm}=C_{vm}(\rho_g/\rho_p)(D\mathbf{u}/Dt \text{ along particle})$ | 速度勾配、時間微分、$\rho_g,\rho_p$ | added mass近似 |
 
@@ -502,7 +502,7 @@ $$
 \mathbf{F}_{DEP}
 = 2\pi\epsilon_0\epsilon_m a_p^3
 \mathrm{Re}\left[K(\omega)\right]
-\nabla |\mathbf{E}|^2
+\nabla \lvert\mathbf{E}\rvert^2
 $$
 
 である。Clausius-Mossotti因子は、DC近似では
@@ -525,7 +525,7 @@ K(\omega)
 = \frac{\epsilon_p^*-\epsilon_m^*}{\epsilon_p^*+2\epsilon_m^*}
 $$
 
-の実部を使う。本コードでは、$\nabla|\mathbf{E}|^2$ と粒子・媒質の誘電率、導電率、周波数を入力として加速度へ変換する。
+の実部を使う。本コードでは、$\nabla\lvert\mathbf{E}\rvert^2$ と粒子・媒質の誘電率、導電率、周波数を入力として加速度へ変換する。
 
 #### 4.4.5 Lift
 
@@ -536,7 +536,7 @@ $$
 \propto
 \mu a_p^2
 \frac{(\mathbf{v}-\mathbf{u})\times\boldsymbol{\omega}}
-\sqrt{\nu|\boldsymbol{\omega}|}}
+\sqrt{\nu\lvert\boldsymbol{\omega}\rvert}}
 $$
 
 である。ここで $\nu=\mu/\rho_g$、$\boldsymbol{\omega}=\nabla\times\mathbf{u}$ である。本コードでは、速度場からvorticityを得て、slip速度と組み合わせて横加速度として加える。
