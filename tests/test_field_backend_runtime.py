@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import regression_test as _regression_helpers
+import regression_helpers as _regression_helpers
 
 globals().update({
     name: value

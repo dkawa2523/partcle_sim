@@ -33,6 +33,18 @@ def _bool_config(value: Any, *, default: bool = False) -> bool:
     raise ValueError('source.preprocess.boundary_release must be true or false')
 
 
+def _nonnegative_float_config(value: Any, *, key: str, default: float) -> float:
+    if value is None:
+        return float(default)
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f'source.preprocess.{key} must be a finite non-negative value') from exc
+    if not np.isfinite(parsed) or parsed < 0.0:
+        raise ValueError(f'source.preprocess.{key} must be a finite non-negative value')
+    return float(parsed)
+
+
 def boundary_release_config(runtime: RuntimeLike, source_cfg: Mapping[str, Any]) -> Dict[str, float | bool]:
     preprocess_cfg = source_cfg.get('preprocess', {}) if isinstance(source_cfg.get('preprocess', {}), Mapping) else {}
     legacy_keys = [f'boundary_release_{suffix}' for suffix in ('enabled', 'tolerance_m', 'offset_m') if f'boundary_release_{suffix}' in preprocess_cfg]
@@ -55,12 +67,23 @@ def boundary_release_config(runtime: RuntimeLike, source_cfg: Mapping[str, Any])
     except (TypeError, ValueError):
         on_boundary_value = float('nan')
     on_boundary_tol_m = on_boundary_value if np.isfinite(on_boundary_value) else max(2.0 * epsilon_offset_m, 5.0e-7)
-    release_offset_m = max(float(on_boundary_tol_m), float(epsilon_offset_m))
+    capture_tolerance_m = _nonnegative_float_config(
+        preprocess_cfg.get('boundary_capture_tolerance_m'),
+        key='boundary_capture_tolerance_m',
+        default=float(on_boundary_tol_m),
+    )
+    inward_offset_m = _nonnegative_float_config(
+        preprocess_cfg.get('boundary_inward_offset_m'),
+        key='boundary_inward_offset_m',
+        default=max(float(capture_tolerance_m), float(epsilon_offset_m)),
+    )
     return {
         'enabled': bool(enabled),
-        'release_offset_m': float(release_offset_m),
-        'tolerance_m': float(on_boundary_tol_m),
-        'on_boundary_tol_m': float(on_boundary_tol_m),
+        'release_offset_m': float(inward_offset_m),
+        'tolerance_m': float(capture_tolerance_m),
+        'on_boundary_tol_m': float(capture_tolerance_m),
+        'capture_tolerance_m': float(capture_tolerance_m),
+        'inward_offset_m': float(inward_offset_m),
     }
 
 

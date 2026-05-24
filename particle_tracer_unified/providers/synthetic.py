@@ -4,6 +4,7 @@ from typing import Any, Mapping, Sequence, Tuple
 
 import numpy as np
 
+from ..core.coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_geometry_report
 from ..core.datamodel import FieldProviderND, GeometryND, GeometryProviderND, QuantitySeriesND, RegularFieldND
 from ..core.geometry2d import build_boundary_loops_2d, validate_boundary_edges_2d
 from ..core.geometry3d import validate_closed_surface_triangles
@@ -69,6 +70,20 @@ def build_synthetic_geometry(cfg: Mapping[str, Any], spatial_dim: int, coordinat
         ], dtype=np.float64)
         boundary_edge_part_ids = np.asarray(cfg.get('boundary_part_ids', [1, 1, 1, 1]), dtype=np.int32)
         part_id_map = np.ones(grid_shape, dtype=np.int32)
+        metadata = {
+            'bounds': list(map(float, bounds)),
+            'boundary_edge_topology': validate_boundary_edges_2d(boundary_edges),
+            'boundary_loop_count_2d': 1,
+        }
+        axisymmetric_report = axisymmetric_rz_geometry_report(
+            coordinate_system=coordinate_system,
+            spatial_dim=spatial_dim,
+            axes=axes,
+            boundary_edges=boundary_edges,
+            boundary_edge_part_ids=boundary_edge_part_ids,
+        )
+        if axisymmetric_report:
+            metadata['axisymmetric_rz'] = axisymmetric_report
         geometry = GeometryND(
             spatial_dim=2,
             coordinate_system=coordinate_system,
@@ -78,11 +93,7 @@ def build_synthetic_geometry(cfg: Mapping[str, Any], spatial_dim: int, coordinat
             normal_components=normals,
             nearest_boundary_part_id_map=part_id_map,
             source_kind='synthetic_box',
-            metadata={
-                'bounds': list(map(float, bounds)),
-                'boundary_edge_topology': validate_boundary_edges_2d(boundary_edges),
-                'boundary_loop_count_2d': 1,
-            },
+            metadata=metadata,
             boundary_edges=boundary_edges,
             boundary_edge_part_ids=boundary_edge_part_ids,
             boundary_loops_2d=build_boundary_loops_2d(boundary_edges),
@@ -190,7 +201,7 @@ def build_synthetic_field(cfg: Mapping[str, Any], spatial_dim: int, coordinate_s
     field = RegularFieldND(
         spatial_dim=spatial_dim,
         coordinate_system=coordinate_system,
-        axis_names=tuple('xyz'[:spatial_dim]),
+        axis_names=axis_names_for_coordinate_system(coordinate_system, spatial_dim),
         axes=axes,
         quantities=quantities,
         valid_mask=valid_mask,

@@ -183,8 +183,9 @@ def _align_field_provider_to_geometry(
     field_kind = str(getattr(field_provider, 'kind', '')).strip().lower()
     if field_kind == 'precomputed_triangle_mesh_npz':
         return field_provider
-    if any(a.shape != b.shape or not np.allclose(a, b, atol=1e-12, rtol=0.0) for a, b in zip(field.axes, geom.axes)):
-        raise ValueError('Field axes must exactly match geometry axes')
+    for axis_index, (field_axis, geometry_axis) in enumerate(zip(field.axes, geom.axes)):
+        if field_axis.shape != geometry_axis.shape or not np.allclose(field_axis, geometry_axis, atol=1e-12, rtol=0.0):
+            raise ValueError(f'Field axis_{axis_index} must exactly match geometry axis_{axis_index}')
     field_valid_mask = np.asarray(field.valid_mask, dtype=bool)
     geometry_valid_mask = np.asarray(geom.valid_mask, dtype=bool)
     core_valid_mask = field_valid_mask & geometry_valid_mask

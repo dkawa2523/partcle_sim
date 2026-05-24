@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-import regression_test as _regression_helpers
+import regression_helpers as _regression_helpers
+
+from particle_tracer_unified.solvers.output_buffers import RuntimeBuffers
+from particle_tracer_unified.solvers.runtime_plan import OUTPUT_MODE_MINIMAL, OutputPlan
 
 globals().update({
     name: value
@@ -32,6 +35,21 @@ def test_visualization_state_helpers_include_invalid_mask_stopped():
     assert labels.tolist() == ['active_free_flight', 'invalid_mask_stopped', 'stuck']
     assert counts['invalid_mask_stopped'] == 1
     assert step_state_count_series(step_df, 'invalid_mask_stopped').tolist() == pytest.approx([0.0, 1.0, 1.0])
+
+def test_minimal_runtime_buffers_do_not_allocate_step_summary_by_default():
+    buffers = RuntimeBuffers(OutputPlan(mode=OUTPUT_MODE_MINIMAL, write_step_summary=False))
+
+    assert buffers.step_summary is None
+    assert buffers.summary() == {
+        'output_mode': OUTPUT_MODE_MINIMAL,
+        'output_minimal_enabled': 1,
+        'output_debug_enabled': 0,
+        'step_summary_buffer_enabled': 0,
+    }
+
+    explicit = RuntimeBuffers(OutputPlan(mode=OUTPUT_MODE_MINIMAL, write_step_summary=True))
+    assert explicit.step_summary is not None
+    assert explicit.summary()['step_summary_count'] == 0
 
 def test_visualization_state_helpers_split_contact_from_free_flight():
     final_df = pd.DataFrame(
@@ -79,6 +97,7 @@ def test_export_result_graphs_summary_includes_invalid_mask_stopped(tmp_path: Pa
             'adaptive_substep_max_splits': 4,
             'valid_mask_policy': 'retry_then_stop',
         },
+        output_updates={'mode': 'debug'},
         provider_contract={'boundary_field_support': 'off'},
     )
 

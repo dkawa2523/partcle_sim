@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, Mapping, Sequence
 
 import numpy as np
 
+from .coordinate_systems import axis_names_for_coordinate_system
 from .datamodel import FieldProviderND, TriangleMeshField2D
 from .field_sampling import (
     VALID_MASK_STATUS_CLEAN,
@@ -231,8 +232,19 @@ def field_backend_report(field_provider: FieldProviderND | None) -> Dict[str, An
         }
     field = field_provider.field
     metadata = getattr(field, 'metadata', {})
+    spatial_dim = int(getattr(field, 'spatial_dim', 0))
+    coordinate_system = str(getattr(field, 'coordinate_system', ''))
+    raw_axis_names = getattr(field, 'axis_names', None)
+    axis_names = (
+        tuple(str(v) for v in raw_axis_names)
+        if raw_axis_names is not None
+        else axis_names_for_coordinate_system(coordinate_system, spatial_dim)
+    )
     report: Dict[str, Any] = {
         'field_backend_kind': str(field_backend_kind(field_provider)),
+        'spatial_dim': spatial_dim,
+        'coordinate_system': coordinate_system,
+        'axis_names': list(axis_names),
         'field_has_support_phi': int(getattr(field, 'support_phi', None) is not None),
         'field_support_phi_kind': str(metadata.get('field_support_phi_kind', '')),
         'quantity_count': int(len(getattr(field, 'quantities', {}))),

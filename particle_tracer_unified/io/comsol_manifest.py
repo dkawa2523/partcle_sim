@@ -20,6 +20,9 @@ ALLOWED_FIELD_PHYSICAL_QUANTITIES = {
     "pressure",
     "scalar",
 }
+MODE_COMSOL_FAITHFUL = "comsol_faithful"
+MODE_SURFACE_RELEASE_PRODUCTION = "surface_release_production"
+SUPPORTED_RUN_MODES = {MODE_COMSOL_FAITHFUL, MODE_SURFACE_RELEASE_PRODUCTION}
 
 
 @dataclass(frozen=True)
@@ -168,9 +171,25 @@ class ComsolCaseManifest:
         return errors
 
 
+def configured_run_mode(config: Mapping[str, Any]) -> str:
+    raw = config.get("mode", "")
+    if raw is None:
+        return ""
+    mode = str(raw).strip().lower()
+    if not mode:
+        return ""
+    if mode not in SUPPORTED_RUN_MODES:
+        expected = ", ".join(sorted(SUPPORTED_RUN_MODES))
+        raise ValueError(f"Unsupported run mode {mode!r}; expected {expected}, or omit mode for the default mode")
+    return mode
+
+
 def is_comsol_faithful_config(config: Mapping[str, Any]) -> bool:
-    if str(config.get("mode", "")).strip().lower() == "comsol_faithful":
+    mode = configured_run_mode(config)
+    if mode == MODE_COMSOL_FAITHFUL:
         return True
+    if mode == MODE_SURFACE_RELEASE_PRODUCTION:
+        return False
     comsol = config.get("comsol", {})
     return isinstance(comsol, Mapping) and bool(str(comsol.get("manifest", "")).strip())
 
@@ -180,5 +199,9 @@ __all__ = (
     "ALLOWED_FIELD_PHYSICAL_QUANTITIES",
     "ComsolCaseManifest",
     "ComsolFieldSpec",
+    "MODE_COMSOL_FAITHFUL",
+    "MODE_SURFACE_RELEASE_PRODUCTION",
+    "SUPPORTED_RUN_MODES",
+    "configured_run_mode",
     "is_comsol_faithful_config",
 )

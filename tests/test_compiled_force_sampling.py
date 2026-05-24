@@ -10,6 +10,7 @@ from particle_tracer_unified.core.field_backend import field_backend_report
 from particle_tracer_unified.core.triangle_mesh_sampling_2d import build_triangle_candidate_grid
 from particle_tracer_unified.solvers.compiled_field_backend import (
     compile_runtime_backend,
+    sample_compiled_acceleration_vector,
     sample_compiled_acceleration_vectors,
 )
 from particle_tracer_unified.solvers.forces import (
@@ -559,3 +560,55 @@ def test_comsol_style_forces_add_expected_acceleration_directions() -> None:
     assert accel.shape == (1, 2)
     assert accel[0, 0] < 0.0
     assert accel[0, 1] > 0.0
+
+
+def test_scalar_regular_grid_extra_forces_match_batch_pipeline() -> None:
+    provider = _varying_field_provider()
+    force_runtime = ForceRuntimeParameters(
+        thermophoresis_enabled=True,
+        dielectrophoresis_enabled=True,
+        lift_enabled=True,
+        dep_particle_rel_permittivity=3.9,
+        dep_medium_rel_permittivity=1.0,
+    )
+    backend = compile_runtime_backend(_runtime(provider), 2, force_runtime=force_runtime)
+    position = np.asarray([0.5, 0.5], dtype=np.float64)
+    velocity = np.asarray([1.5, 0.0], dtype=np.float64)
+    diameter = 1.0e-6
+    density = 2200.0
+    mass = density * np.pi * diameter**3 / 6.0
+
+    scalar = sample_compiled_acceleration_vector(
+        backend,
+        2,
+        0.0,
+        position,
+        force_runtime=force_runtime,
+        particle_diameter=diameter,
+        particle_density=density,
+        particle_mass=mass,
+        dep_particle_rel_permittivity=3.9,
+        thermophoretic_coeff=1.0,
+        velocity=velocity,
+        gas_density_kgm3=1.0,
+        gas_mu_pas=1.8e-5,
+        gas_temperature_K=300.0,
+    )
+    batch = sample_compiled_acceleration_vectors(
+        backend,
+        2,
+        0.0,
+        position.reshape(1, 2),
+        force_runtime=force_runtime,
+        particle_diameter=np.asarray([diameter], dtype=np.float64),
+        particle_density=np.asarray([density], dtype=np.float64),
+        particle_mass=np.asarray([mass], dtype=np.float64),
+        dep_particle_rel_permittivity=np.asarray([3.9], dtype=np.float64),
+        thermophoretic_coeff=np.asarray([1.0], dtype=np.float64),
+        velocity=velocity.reshape(1, 2),
+        gas_density_kgm3=1.0,
+        gas_mu_pas=1.8e-5,
+        gas_temperature_K=300.0,
+    )
+
+    assert scalar.tolist() == pytest.approx(batch[0].tolist())

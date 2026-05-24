@@ -6,7 +6,11 @@ from typing import Any, Dict, Mapping, Optional
 import yaml
 
 from ..core.catalogs import build_physics_catalog, build_wall_catalog, physics_catalog_summary, wall_catalog_summary
-from ..core.coordinate_systems import normalize_coordinate_system
+from ..core.coordinate_systems import (
+    axis_names_for_coordinate_system,
+    axisymmetric_rz_report_from_metadata,
+    normalize_coordinate_system,
+)
 from ..core.datamodel import GasProperties, PreparedRuntime, RuntimeLike, replace_runtime_particles
 from ..core.process_steps import process_step_control_summary
 from ..providers.source_adapters import (
@@ -98,8 +102,21 @@ def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> Ru
     spatial_dim = int(run.get('spatial_dim', 2))
     coordinate_source = run.get('coordinate_system')
     if manifest is not None:
-        coordinate_source = coordinate_source or manifest.coordinate_system
+        manifest_coordinate_system = normalize_coordinate_system(manifest.coordinate_system, spatial_dim)
+        if coordinate_source is not None and str(coordinate_source).strip():
+            run_coordinate_system = normalize_coordinate_system(coordinate_source, spatial_dim)
+            if run_coordinate_system != manifest_coordinate_system:
+                raise ValueError(
+                    'run.coordinate_system must match COMSOL manifest coordinates.coordinate_system: '
+                    f'{run_coordinate_system!r} != {manifest_coordinate_system!r}'
+                )
+            coordinate_source = run_coordinate_system
+        else:
+            coordinate_source = manifest_coordinate_system
     coordinate_system = normalize_coordinate_system(coordinate_source, spatial_dim)
+    run['spatial_dim'] = spatial_dim
+    run['coordinate_system'] = coordinate_system
+    config_payload['run'] = run
     time_interpolation = str(run.get('time_interpolation', 'linear'))
 
     if manifest is None:
@@ -245,6 +262,7 @@ def prepared_runtime_summary(prepared: PreparedRuntime) -> Dict[str, Any]:
     summary = {
         'spatial_dim': int(runtime.spatial_dim),
         'coordinate_system': runtime.coordinate_system,
+        'axis_names': list(axis_names_for_coordinate_system(runtime.coordinate_system, runtime.spatial_dim)),
         'particles': int(runtime.particles.count if runtime.particles is not None else 0),
         'has_geometry_provider': runtime.geometry_provider is not None,
         'has_field_provider': runtime.field_provider is not None,
@@ -270,6 +288,9 @@ def prepared_runtime_summary(prepared: PreparedRuntime) -> Dict[str, Any]:
         summary['event_summary'] = event_summary
     if runtime.geometry_provider is not None:
         summary['geometry_provider'] = runtime.geometry_provider.summary()
+        axisymmetric_report = axisymmetric_rz_report_from_metadata(runtime.geometry_provider.geometry.metadata)
+        if axisymmetric_report:
+            summary['axisymmetric_rz'] = axisymmetric_report
     if runtime.field_provider is not None:
         summary['field_provider'] = runtime.field_provider.summary()
     return summary

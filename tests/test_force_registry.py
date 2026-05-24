@@ -17,6 +17,13 @@ from particle_tracer_unified.solvers.forces import (
     force_runtime_parameters_from_catalog,
     solver_cfg_with_force_overrides,
 )
+from particle_tracer_unified.solvers.force_runtime import (
+    ForceBatchSamples,
+    ForceBatchState,
+    ForceBatchStatic,
+    ForcePipeline,
+    evaluate_force_pipeline,
+)
 
 
 def _series(name: str, values: np.ndarray) -> QuantitySeriesND:
@@ -160,6 +167,35 @@ def test_unknown_force_name_is_rejected() -> None:
             {"solver": {"forces": {"magic_force": {"enabled": True}}}},
             field_provider=_field_provider(),
             spatial_dim=2,
+        )
+
+def test_force_pipeline_rejects_unknown_evaluator_name() -> None:
+    out = np.zeros((1, 2), dtype=np.float64)
+    static = ForceBatchStatic(
+        particle_diameter=np.ones(1, dtype=np.float64),
+        particle_density=np.ones(1, dtype=np.float64),
+        particle_mass=np.ones(1, dtype=np.float64),
+        dep_particle_rel_permittivity=np.ones(1, dtype=np.float64),
+        thermophoretic_coeff=np.ones(1, dtype=np.float64),
+    )
+    state = ForceBatchState(
+        velocity=np.zeros((1, 2), dtype=np.float64),
+    )
+    pipeline = ForcePipeline(
+        evaluator_names=("not_a_force",),
+        params=ForceRuntimeParameters(),
+        need_gas_properties=False,
+    )
+
+    with pytest.raises(ValueError, match="unknown force evaluator"):
+        evaluate_force_pipeline(
+            out,
+            static=static,
+            state=state,
+            active_idx=None,
+            samples=ForceBatchSamples(),
+            plan=pipeline,
+            t=0.0,
         )
 
 

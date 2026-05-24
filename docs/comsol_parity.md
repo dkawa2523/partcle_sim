@@ -97,3 +97,21 @@ Expected diagnostics include `run_summary.json`, `field_validation_error.csv`,
 `boundary_hit_comparison.csv`, `collision_diagnostics.json`,
 `force_contributions.csv`, and `provider_boundary_violations.csv` when the
 corresponding validation path is executed.
+
+Plan/state/output-buffer refactors must keep faithful mode debug-equivalent for
+comparison artifacts. Production-oriented `output.mode: minimal` and any future
+boundary broad-phase pruning are not allowed to silently drop or alter faithful
+comparison outputs; broad-phase pruning stays disabled in faithful mode until
+the boundary comparison workflow proves parity with it enabled.
+
+## Onboarding Checklist
+
+When importing a new COMSOL case, collect the COMSOL version, study/dataset,
+coordinate system and scale, release feature, release table, force inventory,
+wall law mapping, and particle result CSV before judging solver differences.
+Export/API code stays outside `particle_tracer_unified`; the solver consumes
+only explicit YAML, CSV, and NPZ artifacts.
+
+Triage failures at the earliest bad artifact: export metadata, coordinate
+scale, field support, release setup, force inventory, wall law, then numerical
+settings. Do not add solver-side rescue logic to compensate for bad exports.

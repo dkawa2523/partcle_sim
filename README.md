@@ -7,7 +7,6 @@ tables.
 
 - `docs/architecture.md`: package layout and extension rules
 - `docs/comsol_parity.md`: COMSOL faithful comparison design
-- `COMSOL_COPILOT_HANDOFF.md`: operational checklist for importing a new COMSOL model
 - `docs/numerics_contract.md`: continuous model and integrator notes
 
 ## Install
@@ -28,6 +27,13 @@ After installation, the console script is also available:
 ```powershell
 particle-tracer-run examples/minimal_2d/run_config.yaml --output-dir _out_minimal_2d
 ```
+
+Default non-faithful runs use compact `output.mode: standard`: final particles,
+solver report, wall/coating summaries, and compact prepare reports. Use
+`output.mode: debug` or explicit `output.write_*` flags when a comparison needs
+deep artifacts such as trajectories, `wall_events.csv`,
+`runtime_step_summary.csv`, `collision_diagnostics.json`, or
+`force_contributions.csv`. Legacy `output.artifact_mode: full` maps to debug.
 
 ## Inputs
 

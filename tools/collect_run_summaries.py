@@ -73,6 +73,13 @@ OUTPUT_COLUMNS = (
     "charge_last_radius_over_debye",
 )
 
+SHARD_COMPACT_ARTIFACTS = (
+    "solver_report.json",
+    "source_particle_diagnostics.csv",
+    "comparison_summary.json",
+    "compare_summary.json",
+)
+
 
 def _read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -278,12 +285,131 @@ def collect_run_summaries(output_dirs: list[Path], output_csv: Path) -> Path:
     return output_csv
 
 
+def _read_source_particle_diagnostics(output_dir: Path) -> tuple[list[str], list[dict[str, str]]]:
+    path = output_dir / "source_particle_diagnostics.csv"
+    if not path.exists():
+        return [], []
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        fieldnames = list(reader.fieldnames or [])
+        rows = []
+        for row in reader:
+            item = {str(key): str(value) for key, value in row.items()}
+            item["shard_name"] = output_dir.name
+            item["shard_output_dir"] = str(output_dir.resolve())
+            rows.append(item)
+    return fieldnames, rows
+
+
+def _write_root_source_particle_diagnostics(output_dirs: list[Path], root_artifacts_dir: Path) -> tuple[Path | None, int]:
+    rows: list[dict[str, str]] = []
+    source_fields: list[str] = []
+    seen_fields = {"shard_name", "shard_output_dir"}
+    for output_dir in output_dirs:
+        fieldnames, shard_rows = _read_source_particle_diagnostics(output_dir.resolve())
+        for field in fieldnames:
+            if field not in seen_fields:
+                seen_fields.add(field)
+                source_fields.append(field)
+        rows.extend(shard_rows)
+    if not rows:
+        return None, 0
+
+    output_path = root_artifacts_dir / "source_particle_diagnostics.csv"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = ["shard_name", "shard_output_dir", *source_fields]
+    with output_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+    return output_path, len(rows)
+
+
+def _shard_artifact_manifest(output_dirs: list[Path]) -> list[dict[str, Any]]:
+    shards: list[dict[str, Any]] = []
+    for output_dir in output_dirs:
+        base = output_dir.resolve()
+        artifacts: dict[str, Any] = {}
+        for filename in SHARD_COMPACT_ARTIFACTS:
+            path = base / filename
+            artifacts[filename] = {
+                "exists": bool(path.exists()),
+                "path": str(path) if path.exists() else "",
+            }
+        shards.append(
+            {
+                "shard_name": base.name,
+                "output_dir": str(base),
+                "artifacts": artifacts,
+            }
+        )
+    return shards
+
+
+def collect_shard_root_artifacts(
+    output_dirs: list[Path],
+    root_artifacts_dir: Path,
+    *,
+    output_csv: Path | None = None,
+) -> tuple[Path, Path]:
+    root_artifacts_dir = root_artifacts_dir.resolve()
+    root_artifacts_dir.mkdir(parents=True, exist_ok=True)
+    summary_csv = collect_run_summaries(output_dirs, output_csv or (root_artifacts_dir / "run_summary_compare.csv"))
+    source_diag_path, source_diag_rows = _write_root_source_particle_diagnostics(output_dirs, root_artifacts_dir)
+    shards = _shard_artifact_manifest(output_dirs)
+    comparison_summary_paths = [
+        artifact["path"]
+        for shard in shards
+        for artifact in (shard.get("artifacts", {}) or {}).values()
+        if isinstance(artifact, Mapping)
+        and bool(artifact.get("exists"))
+        and str(artifact.get("path", "")).endswith(("comparison_summary.json", "compare_summary.json"))
+    ]
+    generated_artifacts: dict[str, Any] = {
+        "run_summary_compare.csv": str(summary_csv.resolve()),
+    }
+    if source_diag_path is not None:
+        generated_artifacts["source_particle_diagnostics.csv"] = str(source_diag_path.resolve())
+
+    manifest = {
+        "schema_version": 1,
+        "root_artifacts_dir": str(root_artifacts_dir),
+        "shard_count": len(output_dirs),
+        "source_particle_diagnostics_rows": int(source_diag_rows),
+        "generated_artifacts": generated_artifacts,
+        "comparison_summary_paths": comparison_summary_paths,
+        "shards": shards,
+        "notes": [
+            "Per-shard comparison summaries are listed, not merged.",
+            "Write ensemble comparison_summary.json at the root with a compare tool.",
+        ],
+    }
+    manifest_path = root_artifacts_dir / "shard_artifacts_manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    return summary_csv, manifest_path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Collect compact CSV summaries from one or more solver output directories.")
     parser.add_argument("output_dirs", nargs="+", type=Path, help="Solver output directories containing solver_report.json.")
-    parser.add_argument("--output-csv", type=Path, default=Path("run_summary_compare.csv"))
+    parser.add_argument("--output-csv", type=Path, default=None)
+    parser.add_argument(
+        "--root-artifacts-dir",
+        type=Path,
+        default=None,
+        help="Optional root directory for sharded-run comparison artifacts.",
+    )
     args = parser.parse_args()
-    out = collect_run_summaries(args.output_dirs, args.output_csv)
+    if args.root_artifacts_dir is not None:
+        summary_csv, manifest_path = collect_shard_root_artifacts(
+            args.output_dirs,
+            args.root_artifacts_dir,
+            output_csv=args.output_csv,
+        )
+        print(f"wrote {summary_csv.resolve()}")
+        print(f"wrote {manifest_path.resolve()}")
+        return 0
+    out = collect_run_summaries(args.output_dirs, args.output_csv or Path("run_summary_compare.csv"))
     print(f"wrote {out.resolve()}")
     return 0
 

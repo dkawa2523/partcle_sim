@@ -1,0 +1,3 @@
+path,category,recommendation,reason,risk,phase,owner_notes
+outputs/_tmp_*,generated_output,do_not_commit,temporary probe outputs are not product baselines,low,0,quarantine/delete from product flow
+particle_tracer_unified/...,source,needs_review,fill during Phase 0 audit,unknown,0,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import regression_test as _regression_helpers
+import regression_helpers as _regression_helpers
+from particle_tracer_unified.core.coordinate_systems import ring_area_weight
 from particle_tracer_unified.core.datamodel import (
     FieldProviderND,
     GasProperties,
@@ -13,6 +14,7 @@ from particle_tracer_unified.core.datamodel import (
 )
 from particle_tracer_unified.core.input_contract import enforce_initial_particle_field_support
 from particle_tracer_unified.io.runtime_builder import prepare_runtime, prepared_runtime_summary
+from particle_tracer_unified.solvers.runtime_plan import build_solver_plan
 from particle_tracer_unified.solvers.source_preprocess import boundary_service_for_source_preprocess
 
 globals().update({
@@ -73,6 +75,98 @@ def test_runtime_builder_preserves_provider_field_support_mask(tmp_path: Path):
     assert int(field.metadata['field_valid_node_count']) == int(np.count_nonzero(field_valid_mask))
     assert int(field.metadata['geometry_valid_node_count']) == int(np.count_nonzero(geometry_valid_mask))
     assert int(field.metadata['core_valid_node_count']) == int(np.count_nonzero(expected_core_mask))
+
+def test_axisymmetric_rz_runtime_reports_coordinate_and_axis_names():
+    config_dir = ROOT / 'examples' / 'minimal_2d'
+    cfg = yaml.safe_load((config_dir / 'run_config.yaml').read_text(encoding='utf-8'))
+    cfg['run']['coordinate_system'] = 'axisymmetric_rz'
+    cfg['providers']['geometry']['bounds'] = [0.0, 1.0, -1.0, 1.0]
+    _absolutize_paths(cfg, config_dir)
+
+    runtime = build_runtime_from_config(cfg, config_dir)
+    prepared = prepare_runtime(runtime, seed=1)
+    summary = prepared_runtime_summary(prepared)
+    input_report = build_initial_particle_field_support_report(prepared)
+    provider_report = build_boundary_field_support_report(prepared)
+
+    assert runtime.coordinate_system == 'axisymmetric_rz'
+    assert runtime.config_payload['run']['coordinate_system'] == 'axisymmetric_rz'
+    assert summary['coordinate_system'] == 'axisymmetric_rz'
+    assert summary['axis_names'] == ['r', 'z']
+    assert summary['axisymmetric_rz']['r0_axis_boundary_edge_count'] == 1
+    assert summary['field_provider']['axis_names'] == ['r', 'z']
+    assert summary['geometry_provider']['axis_names'] == ['r', 'z']
+    assert summary['geometry_provider']['axisymmetric_rz']['r0_on_grid'] == 1
+    assert summary['geometry_provider']['axisymmetric_rz']['r0_axis_boundary_edge_count'] == 1
+    assert summary['geometry_provider']['axisymmetric_rz']['axis_boundary_policy'] == 'report_only_collision_unchanged'
+    assert input_report['coordinate_system'] == 'axisymmetric_rz'
+    assert input_report['axis_names'] == ['r', 'z']
+    assert input_report['axisymmetric_rz']['r0_axis_boundary_edge_count'] == 1
+    assert provider_report['coordinate_system'] == 'axisymmetric_rz'
+    assert provider_report['axis_names'] == ['r', 'z']
+    assert provider_report['axisymmetric_rz']['r0_axis_boundary_edge_count'] == 1
+    assert provider_report['geometry_boundary']['axisymmetric_rz']['r0_axis_boundary_edge_count'] == 1
+    assert provider_report['field_support']['axis_names'] == ['r', 'z']
+
+def test_axisymmetric_ring_area_weight_known_inputs():
+    weights = ring_area_weight(np.asarray([0.0, 0.5, 1.0], dtype=np.float64))
+    np.testing.assert_allclose(weights, np.asarray([0.0, np.pi, 2.0 * np.pi], dtype=np.float64))
+    assert ring_area_weight(0.25) == pytest.approx(0.5 * np.pi)
+
+    with pytest.raises(ValueError, match='non-negative'):
+        ring_area_weight(np.asarray([-1.0], dtype=np.float64))
+    with pytest.raises(ValueError, match='finite'):
+        ring_area_weight(np.asarray([np.nan], dtype=np.float64))
+
+def test_axisymmetric_rz_runtime_rejects_negative_radial_axis():
+    config_dir = ROOT / 'examples' / 'minimal_2d'
+    cfg = yaml.safe_load((config_dir / 'run_config.yaml').read_text(encoding='utf-8'))
+    cfg['run']['coordinate_system'] = 'axisymmetric_rz'
+    cfg['providers']['geometry']['bounds'] = [-1.0, 1.0, -1.0, 1.0]
+    _absolutize_paths(cfg, config_dir)
+
+    with pytest.raises(ValueError, match='axisymmetric_rz radial axis_0 must be non-negative'):
+        build_runtime_from_config(cfg, config_dir)
+
+def test_cartesian_xy_runtime_axis_names_remain_unchanged():
+    config_dir = ROOT / 'examples' / 'minimal_2d'
+    cfg = yaml.safe_load((config_dir / 'run_config.yaml').read_text(encoding='utf-8'))
+    _absolutize_paths(cfg, config_dir)
+
+    runtime = build_runtime_from_config(cfg, config_dir)
+    prepared = prepare_runtime(runtime, seed=1)
+    summary = prepared_runtime_summary(prepared)
+
+    assert runtime.coordinate_system == 'cartesian_xy'
+    assert summary['axis_names'] == ['x', 'y']
+    assert summary['field_provider']['axis_names'] == ['x', 'y']
+    assert 'axisymmetric_rz' not in summary
+
+def test_precomputed_field_axis_mismatch_names_axis(tmp_path: Path):
+    axes = np.asarray([0.0, 1.0, 2.0], dtype=np.float64)
+    geom_path = _write_precomputed_geometry_npz(
+        tmp_path / 'geom_axis_mismatch.npz',
+        axes,
+        axes,
+        valid_mask=np.ones((3, 3), dtype=bool),
+    )
+    field_path = tmp_path / 'field_axis_mismatch.npz'
+    np.savez_compressed(
+        field_path,
+        axis_0=axes,
+        axis_1=axes + 0.1,
+        times=np.asarray([0.0], dtype=np.float64),
+        valid_mask=np.ones((3, 3), dtype=bool),
+        ux=np.zeros((3, 3), dtype=np.float64),
+        uy=np.zeros((3, 3), dtype=np.float64),
+    )
+    cfg = yaml.safe_load((ROOT / 'examples' / 'minimal_2d' / 'run_config.yaml').read_text(encoding='utf-8'))
+    cfg['providers']['geometry'] = {'kind': 'precomputed_npz', 'npz_path': str(geom_path.resolve())}
+    cfg['providers']['field'] = {'kind': 'precomputed_npz', 'npz_path': str(field_path.resolve())}
+    _absolutize_paths(cfg, ROOT / 'examples' / 'minimal_2d')
+
+    with pytest.raises(ValueError, match='axis_1'):
+        build_runtime_from_config(cfg, ROOT / 'examples' / 'minimal_2d')
 
 def test_runtime_builder_rejects_recipe_manifest_path(tmp_path: Path):
     config_path = _write_minimal_2d_config(
@@ -141,6 +235,146 @@ def test_runtime_builder_rejects_zero_duration_process_steps(tmp_path: Path):
     )
     with pytest.raises(ValueError, match='must have end_s > start_s'):
         build_prepared_runtime_from_yaml(config_path)
+
+@pytest.mark.parametrize(
+    ('solver_updates', 'message'),
+    [
+        ({'dt': float('nan')}, 'solver.dt must be finite and > 0'),
+        ({'dt': float('inf')}, 'solver.dt must be finite and > 0'),
+        ({'t_end': float('nan')}, 'solver.t_end must be finite and >= 0'),
+        ({'t_end': float('inf')}, 'solver.t_end must be finite and >= 0'),
+    ],
+)
+def test_solver_rejects_nonfinite_time_controls(
+    tmp_path: Path,
+    solver_updates: Mapping[str, float],
+    message: str,
+):
+    config_path = _write_minimal_2d_config(
+        tmp_path / f"cfg_{next(iter(solver_updates)).replace('_', '')}",
+        solver_updates=solver_updates,
+        output_updates={'write_positions': 0},
+    )
+    with pytest.raises(ValueError, match=message):
+        run_solver_2d_from_yaml(config_path, output_dir=tmp_path / 'out_nonfinite_time')
+
+def test_step_loop_rejects_non_advancing_step(monkeypatch: pytest.MonkeyPatch):
+    from particle_tracer_unified.solvers import high_fidelity_runtime as hfr
+
+    def _no_progress_step(**kwargs):
+        return float(kwargs['t'])
+
+    monkeypatch.setattr(hfr, '_advance_runtime_step', _no_progress_step)
+
+    zero = np.zeros(0, dtype=np.float64)
+    state = SimpleNamespace(
+        solver_plan=SimpleNamespace(
+            t_end=1.0e-3,
+            dt=1.0e-3,
+        )
+    )
+    with pytest.raises(RuntimeError, match='did not advance time'):
+        hfr._run_runtime_step_loop(
+            runtime=None,
+            particles=None,
+            state=state,
+            options=None,
+            compiled=None,
+            boundary_service=None,
+            spatial_dim=2,
+            n_particles=0,
+            mins=np.zeros(2, dtype=np.float64),
+            maxs=np.ones(2, dtype=np.float64),
+            tau_p=zero,
+            particle_mass=zero,
+            particle_diameter=zero,
+            particle_density=zero,
+            particle_id=np.zeros(0, dtype=np.int64),
+            source_part_id=np.zeros(0, dtype=np.int32),
+            release_time=zero,
+            particle_stick_probability=zero,
+            dep_particle_rel_permittivity=zero,
+            thermophoretic_coeff=zero,
+            flow_scale_particle=zero,
+            drag_scale_particle=zero,
+            body_scale_particle=zero,
+        )
+
+def test_solver_plan_rejects_unknown_valid_mask_policy(tmp_path: Path):
+    config_path = _write_minimal_2d_config(
+        tmp_path / 'cfg_bad_valid_mask_policy',
+        solver_updates={'valid_mask_policy': 'warn_and_continue'},
+    )
+    prepared = build_prepared_runtime_from_yaml(config_path)
+
+    with pytest.raises(ValueError, match='solver.valid_mask_policy'):
+        build_solver_plan(prepared, spatial_dim=2)
+
+
+def test_solver_plan_release_grace_defaults_off_and_validates_enabled(tmp_path: Path):
+    default_cfg = _write_minimal_2d_config(tmp_path / 'cfg_release_grace_default')
+    default_plan = build_solver_plan(build_prepared_runtime_from_yaml(default_cfg), spatial_dim=2)
+
+    assert bool(default_plan.release_grace.enabled) is False
+    assert default_plan.release_grace.grace_time_s == pytest.approx(0.0)
+    assert default_plan.release_grace.clearance_m == pytest.approx(
+        max(default_plan.on_boundary_tol_m, default_plan.epsilon_offset_m)
+    )
+
+    enabled_cfg = _write_minimal_2d_config(
+        tmp_path / 'cfg_release_grace_enabled',
+        solver_updates={
+            'release_grace': {
+                'enabled': True,
+                'grace_time_s': 2.0e-6,
+                'clearance_m': 3.0e-6,
+                'min_outward_normal_speed_mps': 0.1,
+            }
+        },
+    )
+    enabled_plan = build_solver_plan(build_prepared_runtime_from_yaml(enabled_cfg), spatial_dim=2)
+    assert bool(enabled_plan.release_grace.enabled) is True
+    assert enabled_plan.release_grace.grace_time_s == pytest.approx(2.0e-6)
+    assert enabled_plan.release_grace.clearance_m == pytest.approx(3.0e-6)
+    assert enabled_plan.release_grace.min_outward_normal_speed_mps == pytest.approx(0.1)
+
+    bad_cfg = _write_minimal_2d_config(
+        tmp_path / 'cfg_release_grace_bad',
+        solver_updates={'release_grace': {'enabled': True, 'grace_time_s': 0.0}},
+    )
+    with pytest.raises(ValueError, match='solver.release_grace.grace_time_s'):
+        build_solver_plan(build_prepared_runtime_from_yaml(bad_cfg), spatial_dim=2)
+
+
+def test_solver_plan_parses_string_boolean_flags(tmp_path: Path):
+    false_cfg = _write_minimal_2d_config(
+        tmp_path / 'cfg_false_flags',
+        solver_updates={
+            'adaptive_substep_enabled': 'false',
+            'boundary_broad_phase_enabled': 'false',
+            'electric_enabled': 'false',
+            'forces': {'electric': {'enabled': False}},
+        },
+    )
+    true_cfg = _write_minimal_2d_config(
+        tmp_path / 'cfg_true_flags',
+        solver_updates={
+            'adaptive_substep_enabled': 'true',
+            'boundary_broad_phase_enabled': 'true',
+            'electric_enabled': 'true',
+            'forces': {'electric': {'enabled': False}},
+        },
+    )
+
+    false_plan = build_solver_plan(build_prepared_runtime_from_yaml(false_cfg), spatial_dim=2)
+    true_plan = build_solver_plan(build_prepared_runtime_from_yaml(true_cfg), spatial_dim=2)
+
+    assert int(false_plan.adaptive_substep_enabled) == 0
+    assert bool(false_plan.boundary_broad_phase_enabled) is False
+    assert bool(false_plan.field_sample.need_electric) is False
+    assert int(true_plan.adaptive_substep_enabled) == 1
+    assert bool(true_plan.boundary_broad_phase_enabled) is True
+    assert bool(true_plan.field_sample.need_electric) is True
 
 def test_runtime_builder_rejects_unresolved_source_event_bindings(tmp_path: Path):
     events_path = _write_rows_csv(
@@ -499,6 +733,7 @@ def test_surface_release_preprocess_offsets_boundary_particle_and_reflects_veloc
         field_path=field_path,
         particles_path=particles_path,
         solver_updates={'dt': 0.005, 't_end': 0.01, 'save_every': 1, 'valid_mask_policy': 'retry_then_stop'},
+        output_updates={'write_collision_diagnostics': 1, 'write_source_diagnostics': 1},
         input_mode='warn',
         provider_contract={'boundary_field_support': 'off'},
         source_preprocess_enabled=True,
@@ -525,10 +760,24 @@ def test_surface_release_preprocess_offsets_boundary_particle_and_reflects_veloc
     assert particles.velocity[0, 1] == pytest.approx(0.0)
     assert source_row['source_position_offset_m'] == pytest.approx(0.1)
     assert 0.0 < float(source_row['boundary_release_solver_offset_m']) < 1.0e-5
+    assert source_row['boundary_release_capture_tolerance_m'] == pytest.approx(source_row['capture_tolerance_m'])
+    assert source_row['boundary_release_inward_offset_m'] == pytest.approx(
+        source_row['boundary_release_solver_offset_m']
+    )
+    assert source_row['projection_distance_m'] == pytest.approx(source_row['boundary_release_distance_m'])
+    assert int(source_row['projected_part_id']) == int(source_row['boundary_release_part_id'])
+    assert int(source_row['projected_boundary_id']) == int(source_row['boundary_release_primitive_id'])
+    assert source_row['release_preprocess_mode'] == 'projected_inward_offset'
+    assert source_row['raw_x'] == pytest.approx(-1.0)
+    assert source_row['projected_x'] == pytest.approx(-1.0)
+    assert source_row['initial_after_preprocess_x'] == pytest.approx(expected_release_x)
     assert source_row['boundary_release_total_offset_m'] == pytest.approx(
         float(source_row['source_position_offset_m']) + float(source_row['boundary_release_solver_offset_m'])
     )
-    assert prepared.source_preprocess.source_model_summary['boundary_release_applied_count'] == 1
+    summary = prepared.source_preprocess.source_model_summary
+    assert summary['boundary_release_applied_count'] == 1
+    assert summary['boundary_release_projection_distance_count'] == 1
+    assert summary['boundary_release_projection_distance_max_m'] == pytest.approx(0.0)
 
     input_report = build_initial_particle_field_support_report(prepared)
     assert int(input_report['status_counts']['hard_invalid']) == 0
@@ -539,8 +788,97 @@ def test_surface_release_preprocess_offsets_boundary_particle_and_reflects_veloc
     assert int(diagnostics['invalid_mask_stopped_count']) == 0
     source_diag = _read_table(out_dir / 'source_particle_diagnostics.csv')
     assert source_diag.loc[0, 'original_x'] == pytest.approx(-1.0)
+    assert source_diag.loc[0, 'raw_x'] == pytest.approx(-1.0)
     assert source_diag.loc[0, 'release_x'] == pytest.approx(expected_release_x)
+    assert source_diag.loc[0, 'initial_after_preprocess_x'] == pytest.approx(expected_release_x)
+    assert source_diag.loc[0, 'projection_distance_m'] == pytest.approx(0.0)
     assert int(source_diag.loc[0, 'boundary_release_applied']) == 1
+
+
+def test_surface_release_capture_tolerance_and_inward_offset_are_independent(tmp_path: Path):
+    field_path = _write_invalid_left_field_bundle(
+        tmp_path / 'field_surface_release_independent.npz',
+        invalid_until_x=-0.95,
+    )
+    particles_path = _write_particle_row(
+        tmp_path / 'surface_release_independent_particles.csv',
+        _one_particle_row(spatial_dim=2, x=-1.0002, y=0.0, vx=0.0, vy=0.0),
+    )
+    cfg_path = _write_precomputed_field_config(
+        tmp_path / 'cfg_surface_release_independent',
+        field_path=field_path,
+        particles_path=particles_path,
+        input_mode='warn',
+        provider_contract={'boundary_field_support': 'off'},
+        source_preprocess_enabled=True,
+    )
+    cfg = yaml.safe_load(cfg_path.read_text(encoding='utf-8'))
+    cfg.setdefault('source', {})['source_position_offset_m'] = 0.0
+    cfg.setdefault('source', {}).setdefault('preprocess', {}).update(
+        {
+            'boundary_release': True,
+            'boundary_capture_tolerance_m': 5.0e-4,
+            'boundary_inward_offset_m': 2.0e-2,
+        }
+    )
+    cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding='utf-8')
+
+    prepared = build_prepared_runtime_from_yaml(cfg_path)
+
+    assert prepared.source_preprocess is not None
+    row = prepared.source_preprocess.diagnostics_rows[0]
+    summary = prepared.source_preprocess.source_model_summary
+    assert int(row['boundary_release_applied']) == 1
+    assert row['capture_tolerance_m'] == pytest.approx(5.0e-4)
+    assert row['inward_offset_m'] == pytest.approx(2.0e-2)
+    assert row['projection_distance_m'] == pytest.approx(2.0e-4)
+    assert row['projected_x'] == pytest.approx(-1.0)
+    assert row['initial_after_preprocess_x'] == pytest.approx(-0.98)
+    assert prepared.runtime.particles.position[0, 0] == pytest.approx(-0.98)
+    assert int(row['projected_part_id']) == 10
+    assert int(row['projected_boundary_id']) >= 0
+    assert summary['boundary_release_capture_tolerance_m'] == pytest.approx(5.0e-4)
+    assert summary['boundary_release_inward_offset_m'] == pytest.approx(2.0e-2)
+    assert summary['boundary_release_projection_distance_max_m'] == pytest.approx(2.0e-4)
+
+
+def test_surface_release_capture_tolerance_controls_classification_before_offset(tmp_path: Path):
+    field_path = _write_invalid_left_field_bundle(
+        tmp_path / 'field_surface_release_capture_gate.npz',
+        invalid_until_x=-0.95,
+    )
+    particles_path = _write_particle_row(
+        tmp_path / 'surface_release_capture_gate_particles.csv',
+        _one_particle_row(spatial_dim=2, x=-1.0002, y=0.0, vx=0.0, vy=0.0),
+    )
+    cfg_path = _write_precomputed_field_config(
+        tmp_path / 'cfg_surface_release_capture_gate',
+        field_path=field_path,
+        particles_path=particles_path,
+        input_mode='warn',
+        provider_contract={'boundary_field_support': 'off'},
+        source_preprocess_enabled=True,
+    )
+    cfg = yaml.safe_load(cfg_path.read_text(encoding='utf-8'))
+    cfg.setdefault('source', {})['source_position_offset_m'] = 0.0
+    cfg.setdefault('source', {}).setdefault('preprocess', {}).update(
+        {
+            'boundary_release': True,
+            'boundary_capture_tolerance_m': 1.0e-5,
+            'boundary_inward_offset_m': 2.0e-2,
+        }
+    )
+    cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding='utf-8')
+
+    prepared = build_prepared_runtime_from_yaml(cfg_path)
+
+    assert prepared.source_preprocess is not None
+    row = prepared.source_preprocess.diagnostics_rows[0]
+    assert int(row['boundary_release_applied']) == 0
+    assert row['capture_tolerance_m'] == pytest.approx(1.0e-5)
+    assert row['inward_offset_m'] == pytest.approx(2.0e-2)
+    assert row['release_preprocess_mode'] == 'raw'
+    assert prepared.runtime.particles.position[0, 0] == pytest.approx(-1.0002)
 
 def test_surface_release_requires_explicit_boundary_primitives() -> None:
     runtime = SimpleNamespace(
@@ -735,12 +1073,22 @@ def test_compare_against_reference_cli_writes_summary(tmp_path: Path):
             f"same={ROOT / 'examples' / 'minimal_2d' / 'run_config.yaml'}",
             '--output-root',
             str(output_root),
+            '--reference-scope',
+            'sampled',
         ]
     )
     assert rc == 0
     summary_files = sorted(output_root.glob('compare_*/comparison_summary.json'))
     assert summary_files
+    stable_summary = output_root / 'comparison_summary.json'
+    assert stable_summary.exists()
     summary = json.loads(summary_files[-1].read_text(encoding='utf-8'))
+    stable = json.loads(stable_summary.read_text(encoding='utf-8'))
+    assert stable['comparison_dir'] == summary['comparison_dir']
+    assert summary['summary_schema_version'] == 1
+    assert summary['reference_scope'] == 'sampled'
+    assert summary['reference']['coordinate_system'] == 'cartesian_xy'
+    assert summary['runs'][0]['coordinate_system'] == 'cartesian_xy'
     assert summary['runs'][0]['run'] == 'same'
     assert summary['runs'][0]['class_match_ratio_vs_reference'] == pytest.approx(1.0)
     assert summary['runs'][0]['class_mismatch_count_vs_reference'] == 0

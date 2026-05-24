@@ -66,6 +66,8 @@ def enforce_comsol_faithful_config(config: dict[str, Any], manifest: ComsolCaseM
     preprocess_cfg = source_cfg.get('preprocess', {}) if isinstance(source_cfg.get('preprocess', {}), Mapping) else {}
     if _bool_config(preprocess_cfg.get('enabled', False), default=False):
         raise ValueError('source.preprocess.enabled must be false in COMSOL faithful mode')
+    if _bool_config(preprocess_cfg.get('boundary_release', False), default=False):
+        raise ValueError('source.preprocess.boundary_release must be false in COMSOL faithful mode')
 
     field_support = config.setdefault('field_support', {})
     if not isinstance(field_support, dict):

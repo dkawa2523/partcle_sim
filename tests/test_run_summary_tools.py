@@ -4,7 +4,7 @@ import csv
 import json
 from pathlib import Path
 
-from tools.collect_run_summaries import collect_run_summaries, collect_run_summary
+from tools.collect_run_summaries import collect_run_summaries, collect_run_summary, collect_shard_root_artifacts
 from tools.visualization_common import write_run_summary
 
 
@@ -129,3 +129,54 @@ def test_run_summary_lists_optional_compact_summary_files(tmp_path: Path) -> Non
     assert "## Compact Summary Files" in text
     assert "charge_model_summary.csv" in text
     assert "plasma_background_summary.csv" in text
+
+
+def test_collect_shard_root_artifacts_writes_root_outputs(tmp_path: Path) -> None:
+    shard_a = tmp_path / "shard_a"
+    shard_b = tmp_path / "shard_b"
+    root = tmp_path / "root"
+    for shard, particle_count in ((shard_a, 2), (shard_b, 3)):
+        shard.mkdir()
+        (shard / "solver_report.json").write_text(
+            json.dumps(
+                {
+                    "particle_count": particle_count,
+                    "released_count": particle_count,
+                    "coordinate_system": "cartesian_xy",
+                    "final_state_counts": {"active_free_flight": particle_count, "invalid_mask_stopped": 0},
+                    "boundary_event_contract_passed": 1,
+                    "unresolved_crossing_count": 0,
+                    "max_hits_reached_count": 0,
+                }
+            ),
+            encoding="utf-8",
+        )
+        with (shard / "source_particle_diagnostics.csv").open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=["particle_id", "projection_distance_m"])
+            writer.writeheader()
+            writer.writerow({"particle_id": particle_count, "projection_distance_m": "0.0"})
+    (shard_a / "comparison_summary.json").write_text(json.dumps({"ok": True}), encoding="utf-8")
+
+    summary_csv, manifest_path = collect_shard_root_artifacts([shard_a, shard_b], root)
+
+    assert summary_csv == root.resolve() / "run_summary_compare.csv"
+    assert manifest_path == root.resolve() / "shard_artifacts_manifest.json"
+    assert summary_csv.exists()
+    assert (root / "source_particle_diagnostics.csv").exists()
+
+    with summary_csv.open("r", encoding="utf-8", newline="") as handle:
+        summary_rows = list(csv.DictReader(handle))
+    assert [row["run_name"] for row in summary_rows] == ["shard_a", "shard_b"]
+
+    with (root / "source_particle_diagnostics.csv").open("r", encoding="utf-8", newline="") as handle:
+        source_rows = list(csv.DictReader(handle))
+    assert [row["shard_name"] for row in source_rows] == ["shard_a", "shard_b"]
+    assert {row["particle_id"] for row in source_rows} == {"2", "3"}
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == 1
+    assert manifest["shard_count"] == 2
+    assert manifest["source_particle_diagnostics_rows"] == 2
+    assert manifest["generated_artifacts"]["run_summary_compare.csv"] == str(summary_csv)
+    assert str((shard_a / "comparison_summary.json").resolve()) in manifest["comparison_summary_paths"]
+    assert manifest["shards"][0]["artifacts"]["source_particle_diagnostics.csv"]["exists"]

@@ -19,7 +19,7 @@ from ..core.boundary_core import sample_geometry_sdf_points_2d
 from ..core.catalogs import resolve_step_wall_model
 from ..core.datamodel import ProcessStepRow, WallPartModel
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN, valid_mask_status_requires_stop
-from ..core.geometry3d import TriangleSurface3D
+from ..core.geometry3d import TriangleSurface3D, query_triangle_candidates
 from .compiled_field_backend import CompiledRuntimeBackendLike
 from .diagnostics import increment_count, increment_named_count
 from .high_fidelity_freeflight import (
@@ -232,12 +232,159 @@ class WallHitStepResult(NamedTuple):
     contact_primitive_id: int = -1
 
 
+class OrientedWallHitState(NamedTuple):
+    hit: np.ndarray
+    normal: np.ndarray
+    wall_position: np.ndarray
+
+
+class ReleaseGraceDecision(NamedTuple):
+    same_source: bool
+    skip: bool
+    blocked_reason: str
+    hit_time_s: float
+    clearance_distance_m: float
+    outward_normal_speed_mps: float
+
+
+def _oriented_wall_hit_state(
+    *,
+    runtime,
+    hit: np.ndarray,
+    n_out: np.ndarray,
+    epsilon_offset_m: float,
+    on_boundary_tol_m: float,
+    triangle_surface_3d: Optional[TriangleSurface3D],
+) -> OrientedWallHitState:
+    hit_arr = np.asarray(hit, dtype=np.float64)
+    n_wall = np.asarray(n_out, dtype=np.float64)
+    n_wall_mag = float(np.linalg.norm(n_wall))
+    if n_wall_mag > 1e-30:
+        n_wall = n_wall / n_wall_mag
+    push = max(float(epsilon_offset_m), 1.0e-12)
+
+    def _candidate_inside(candidate: np.ndarray, tol: float) -> bool:
+        return bool(
+            _boundary_inside_geometry(
+                runtime,
+                np.asarray(candidate, dtype=np.float64),
+                on_boundary_tol_m=float(tol),
+                triangle_surface_3d=triangle_surface_3d,
+            )
+        )
+
+    x_wall = hit_arr.copy()
+    if n_wall_mag > 1e-30:
+        x_minus = hit_arr - push * n_wall
+        x_plus = hit_arr + push * n_wall
+        if _candidate_inside(x_minus, 0.0) or _candidate_inside(x_minus, float(on_boundary_tol_m)):
+            x_wall = x_minus
+        elif _candidate_inside(x_plus, 0.0) or _candidate_inside(x_plus, float(on_boundary_tol_m)):
+            x_wall = x_plus
+            n_wall = -n_wall
+        elif _candidate_inside(hit_arr, float(on_boundary_tol_m)):
+            x_wall = hit_arr.copy()
+        else:
+            x_wall = hit_arr - push * n_wall
+    return OrientedWallHitState(hit=hit_arr, normal=n_wall, wall_position=x_wall)
+
+
+def _release_grace_decision(
+    *,
+    release_grace,
+    source_part_id: int,
+    release_time_s: float,
+    hit: np.ndarray,
+    oriented_normal: np.ndarray,
+    v_hit: np.ndarray,
+    segment_start_position: np.ndarray,
+    t_step_end: float,
+    segment_dt: float,
+    hit_dt: float,
+    part_id: int,
+    prior_hit_count: int = 0,
+) -> ReleaseGraceDecision:
+    if release_grace is None or not bool(getattr(release_grace, 'enabled', False)):
+        return ReleaseGraceDecision(False, False, 'disabled', float('nan'), float('nan'), float('nan'))
+    if int(source_part_id) <= 0:
+        return ReleaseGraceDecision(False, False, 'unknown_source', float('nan'), float('nan'), float('nan'))
+    if int(part_id) != int(source_part_id):
+        return ReleaseGraceDecision(False, False, 'unrelated_part', float('nan'), float('nan'), float('nan'))
+    if int(prior_hit_count) > 0:
+        return ReleaseGraceDecision(True, False, 'after_wall_event', float('nan'), float('nan'), float('nan'))
+
+    segment_dt_pos = max(0.0, float(segment_dt))
+    hit_dt_clamped = float(np.clip(float(hit_dt), 0.0, segment_dt_pos))
+    hit_time_s = float(t_step_end) - segment_dt_pos + hit_dt_clamped
+    hit_arr = np.asarray(hit, dtype=np.float64)
+    start_arr = np.asarray(segment_start_position, dtype=np.float64)
+    clearance_distance_m = float(np.linalg.norm(hit_arr - start_arr))
+    normal = np.asarray(oriented_normal, dtype=np.float64)
+    normal_mag = float(np.linalg.norm(normal))
+    if normal_mag <= 1.0e-30:
+        return ReleaseGraceDecision(True, False, 'invalid_normal', hit_time_s, clearance_distance_m, float('nan'))
+    outward_normal_speed_mps = float(np.dot(np.asarray(v_hit, dtype=np.float64), normal / normal_mag))
+
+    rel_time = float(release_time_s)
+    if not np.isfinite(rel_time):
+        return ReleaseGraceDecision(
+            True,
+            False,
+            'missing_release_time',
+            hit_time_s,
+            clearance_distance_m,
+            outward_normal_speed_mps,
+        )
+    grace_time_s = float(getattr(release_grace, 'grace_time_s', 0.0))
+    if hit_time_s > rel_time + grace_time_s + 1.0e-15:
+        return ReleaseGraceDecision(
+            True,
+            False,
+            'outside_grace_time',
+            hit_time_s,
+            clearance_distance_m,
+            outward_normal_speed_mps,
+        )
+    clearance_m = float(getattr(release_grace, 'clearance_m', 0.0))
+    if clearance_distance_m > clearance_m + 1.0e-15:
+        return ReleaseGraceDecision(
+            True,
+            False,
+            'outside_clearance',
+            hit_time_s,
+            clearance_distance_m,
+            outward_normal_speed_mps,
+        )
+    min_outward_speed = float(getattr(release_grace, 'min_outward_normal_speed_mps', 0.0))
+    if outward_normal_speed_mps <= min_outward_speed:
+        return ReleaseGraceDecision(
+            True,
+            False,
+            'not_outward',
+            hit_time_s,
+            clearance_distance_m,
+            outward_normal_speed_mps,
+        )
+    return ReleaseGraceDecision(
+        True,
+        True,
+        '',
+        hit_time_s,
+        clearance_distance_m,
+        outward_normal_speed_mps,
+    )
+
+
 def _apply_wall_hit_step(
     *,
     runtime,
     step: ProcessStepRow,
     particles,
     particle_index: int,
+    particle_id: Optional[int] = None,
+    particle_stick_probability: Optional[float] = None,
+    particle_mass_kg: Optional[float] = None,
+    particle_diameter_m: Optional[float] = None,
     rng: np.random.Generator,
     hit: np.ndarray,
     n_out: np.ndarray,
@@ -272,36 +419,17 @@ def _apply_wall_hit_step(
 ) -> WallHitStepResult:
     if escaped is None:
         escaped = np.zeros_like(active, dtype=bool)
-    hit_arr = np.asarray(hit, dtype=np.float64)
-    n_wall = np.asarray(n_out, dtype=np.float64)
-    n_wall_mag = float(np.linalg.norm(n_wall))
-    if n_wall_mag > 1e-30:
-        n_wall = n_wall / n_wall_mag
-    push = max(float(epsilon_offset_m), 1.0e-12)
-
-    def _candidate_inside(candidate: np.ndarray, tol: float) -> bool:
-        return bool(
-            _boundary_inside_geometry(
-                runtime,
-                np.asarray(candidate, dtype=np.float64),
-                on_boundary_tol_m=float(tol),
-                triangle_surface_3d=triangle_surface_3d,
-            )
-        )
-
-    x_wall = hit_arr.copy()
-    if n_wall_mag > 1e-30:
-        x_minus = hit_arr - push * n_wall
-        x_plus = hit_arr + push * n_wall
-        if _candidate_inside(x_minus, 0.0) or _candidate_inside(x_minus, float(on_boundary_tol_m)):
-            x_wall = x_minus
-        elif _candidate_inside(x_plus, 0.0) or _candidate_inside(x_plus, float(on_boundary_tol_m)):
-            x_wall = x_plus
-            n_wall = -n_wall
-        elif _candidate_inside(hit_arr, float(on_boundary_tol_m)):
-            x_wall = hit_arr.copy()
-        else:
-            x_wall = hit_arr - push * n_wall
+    oriented = _oriented_wall_hit_state(
+        runtime=runtime,
+        hit=hit,
+        n_out=n_out,
+        epsilon_offset_m=float(epsilon_offset_m),
+        on_boundary_tol_m=float(on_boundary_tol_m),
+        triangle_surface_3d=triangle_surface_3d,
+    )
+    hit_arr = np.asarray(oriented.hit, dtype=np.float64)
+    n_wall = np.asarray(oriented.normal, dtype=np.float64)
+    x_wall = np.asarray(oriented.wall_position, dtype=np.float64)
 
     wall_model = resolve_step_wall_model(runtime.wall_catalog, part_id, step)
     wall_law_counts[wall_model.law_name] = wall_law_counts.get(wall_model.law_name, 0) + 1
@@ -310,7 +438,25 @@ def _apply_wall_hit_step(
         increment_named_count(collision_diagnostics, 'boundary_ambiguous_part_counts', f'part={int(part_id)}')
         increment_named_count(collision_diagnostics, 'boundary_ambiguous_wall_law_counts', str(wall_model.law_name))
         increment_named_count(collision_diagnostics, 'boundary_ambiguous_primitive_kind_counts', str(primitive_kind))
-    outcome, v_ref = _wall_interaction(rng, v_hit, n_wall, float(particles.stick_probability[particle_index]), wall_model)
+    particle_id_value = int(
+        particles.particle_id[particle_index] if particle_id is None else int(particle_id)
+    )
+    stick_probability_value = float(
+        particles.stick_probability[particle_index]
+        if particle_stick_probability is None
+        else float(particle_stick_probability)
+    )
+    particle_mass_value = (
+        _particle_scalar_or_nan(particles, 'mass', particle_index)
+        if particle_mass_kg is None
+        else float(particle_mass_kg)
+    )
+    particle_diameter_value = (
+        _particle_scalar_or_nan(particles, 'diameter', particle_index)
+        if particle_diameter_m is None
+        else float(particle_diameter_m)
+    )
+    outcome, v_ref = _wall_interaction(rng, v_hit, n_wall, stick_probability_value, wall_model)
     summary_key = (int(part_id), str(outcome), str(wall_model.law_name))
     wall_summary_counts[summary_key] = wall_summary_counts.get(summary_key, 0) + 1
 
@@ -331,9 +477,9 @@ def _apply_wall_hit_step(
             t_step_end=float(t),
             segment_dt=float(segment_dt),
             hit_dt=float(hit_dt_clamped),
-            particle_id=int(particles.particle_id[particle_index]),
-            particle_mass_kg=_particle_scalar_or_nan(particles, 'mass', particle_index),
-            particle_diameter_m=_particle_scalar_or_nan(particles, 'diameter', particle_index),
+            particle_id=int(particle_id_value),
+            particle_mass_kg=float(particle_mass_value),
+            particle_diameter_m=float(particle_diameter_value),
             hit=hit_arr,
             normal=n_wall,
             v_hit=np.asarray(v_hit, dtype=np.float64),
@@ -412,7 +558,7 @@ def _apply_wall_hit_step(
             _append_max_hit_event(
                 max_hit_rows=max_hit_rows,
                 t=float(t),
-                particle_id=int(particles.particle_id[particle_index]),
+                particle_id=int(particle_id_value),
                 step=step,
                 hit_count=int(hit_count),
                 remaining_dt=float(remaining_dt),
@@ -1310,11 +1456,16 @@ def _advance_colliding_particle(
     electric_q_over_m_i: Optional[float] = None,
     particle_density_i: float = 1000.0,
     particle_mass_i: float = 0.0,
+    particle_id_i: Optional[int] = None,
+    particle_stick_probability_i: Optional[float] = None,
     dep_particle_rel_permittivity_i: float = float("nan"),
     thermophoretic_coeff_i: float = float("nan"),
     force_runtime: Optional[ForceRuntimeParameters] = None,
     gas_temperature_K: float = 300.0,
     gas_molecular_mass_kg: float = 60.0 * 1.66053906660e-27,
+    source_part_id_i: int = 0,
+    release_time_i: float = float('nan'),
+    release_grace=None,
 ) -> CollidingParticleAdvanceResult:
     if escaped is None:
         escaped = np.zeros_like(active, dtype=bool)
@@ -1427,12 +1578,52 @@ def _advance_colliding_particle(
         primitive_id = int(segment_resolution.hit_event.primitive_id)
         primitive_kind = str(segment_resolution.hit_event.primitive_kind)
         is_ambiguous = bool(segment_resolution.hit_event.is_ambiguous)
+        if release_grace is not None and bool(getattr(release_grace, 'enabled', False)):
+            oriented_hit = _oriented_wall_hit_state(
+                runtime=runtime,
+                hit=hit,
+                n_out=n_out,
+                epsilon_offset_m=float(epsilon_offset_m),
+                on_boundary_tol_m=float(on_boundary_tol_m),
+                triangle_surface_3d=triangle_surface_3d,
+            )
+            grace_decision = _release_grace_decision(
+                release_grace=release_grace,
+                source_part_id=int(source_part_id_i),
+                release_time_s=float(release_time_i),
+                hit=np.asarray(oriented_hit.hit, dtype=np.float64),
+                oriented_normal=np.asarray(oriented_hit.normal, dtype=np.float64),
+                v_hit=np.asarray(segment_resolution.v_hit, dtype=np.float64),
+                segment_start_position=x_curr,
+                t_step_end=float(t),
+                segment_dt=float(segment_dt),
+                hit_dt=float(segment_resolution.hit_dt),
+                part_id=int(part_id),
+                prior_hit_count=int(total_hit_count),
+            )
+            if bool(grace_decision.same_source):
+                if bool(grace_decision.skip):
+                    increment_count(collision_diagnostics, 'source_surface_release_skip_count')
+                    x_curr = np.asarray(segment_resolution.x_next, dtype=np.float64)
+                    v_curr = np.asarray(segment_resolution.v_next, dtype=np.float64)
+                    remaining_dt = 0.0
+                    break
+                increment_count(collision_diagnostics, 'source_surface_release_skip_blocked_count')
+                increment_named_count(
+                    collision_diagnostics,
+                    'source_surface_release_skip_blocked_reasons',
+                    str(grace_decision.blocked_reason or 'unknown'),
+                )
 
         wall_result = _apply_wall_hit_step(
             runtime=runtime,
             step=step,
             particles=particles,
             particle_index=int(particle_index),
+            particle_id=particle_id_i,
+            particle_stick_probability=particle_stick_probability_i,
+            particle_mass_kg=float(particle_mass_i),
+            particle_diameter_m=float(particle_diameter_i),
             rng=rng,
             hit=hit,
             n_out=n_out,
@@ -1609,6 +1800,174 @@ def _sdf_strict_inside_mask_2d(
     return np.isfinite(sdf) & (sdf < -margin)
 
 
+def _boundary_edge_aabb_arrays_2d(runtime) -> tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+    geometry_provider = getattr(runtime, 'geometry_provider', None)
+    if geometry_provider is None:
+        return None, None
+    geom = getattr(geometry_provider, 'geometry', None)
+    if int(getattr(geom, 'spatial_dim', 0)) != 2 or getattr(geom, 'boundary_edges', None) is None:
+        return None, None
+    edges = np.asarray(geom.boundary_edges, dtype=np.float64)
+    if edges.ndim != 3 or edges.shape[1:] != (2, 2) or edges.shape[0] == 0:
+        return None, None
+    return np.min(edges, axis=1), np.max(edges, axis=1)
+
+
+def _polyline_stage_points_for_particle(
+    *,
+    index: int,
+    x_trial: np.ndarray,
+    x_mid_trial: np.ndarray,
+    integrator_mode: int,
+) -> np.ndarray:
+    if int(integrator_mode) == INTEGRATOR_ETD2:
+        return np.asarray((x_mid_trial[int(index)], x_trial[int(index)]), dtype=np.float64)
+    return np.asarray((x_trial[int(index)],), dtype=np.float64)
+
+
+def _edge_aabb_candidate_mask_2d(
+    runtime,
+    indices: np.ndarray,
+    x: np.ndarray,
+    x_trial: np.ndarray,
+    x_mid_trial: np.ndarray,
+    *,
+    integrator_mode: int,
+    on_boundary_tol_m: float,
+) -> tuple[np.ndarray, int]:
+    idx = np.asarray(indices, dtype=np.int64)
+    candidate = np.ones(idx.size, dtype=bool)
+    edge_min, edge_max = _boundary_edge_aabb_arrays_2d(runtime)
+    if idx.size == 0:
+        return candidate, 0
+    if edge_min is None or edge_max is None:
+        return candidate, int(idx.size)
+    pad = max(float(on_boundary_tol_m), 1.0e-12)
+    edge_min = np.asarray(edge_min, dtype=np.float64) - pad
+    edge_max = np.asarray(edge_max, dtype=np.float64) + pad
+    unknown = 0
+    for row, raw_index in enumerate(idx):
+        i = int(raw_index)
+        start = np.asarray(x[i], dtype=np.float64)
+        stages = _polyline_stage_points_for_particle(
+            index=i,
+            x_trial=x_trial,
+            x_mid_trial=x_mid_trial,
+            integrator_mode=int(integrator_mode),
+        )
+        points = np.vstack((start[None, :], stages))
+        if points.ndim != 2 or points.shape[1] != 2 or not np.all(np.isfinite(points)):
+            candidate[row] = True
+            unknown += 1
+            continue
+        hit_candidate = False
+        for segment_index in range(points.shape[0] - 1):
+            seg_min = np.minimum(points[segment_index], points[segment_index + 1]) - pad
+            seg_max = np.maximum(points[segment_index], points[segment_index + 1]) + pad
+            overlap = np.all((seg_max[None, :] >= edge_min) & (edge_max >= seg_min[None, :]), axis=1)
+            if bool(np.any(overlap)):
+                hit_candidate = True
+                break
+        candidate[row] = bool(hit_candidate)
+    return candidate, int(unknown)
+
+
+def _triangle_aabb_candidate_mask_3d(
+    surface: Optional[TriangleSurface3D],
+    indices: np.ndarray,
+    x: np.ndarray,
+    x_trial: np.ndarray,
+    x_mid_trial: np.ndarray,
+    *,
+    integrator_mode: int,
+    on_boundary_tol_m: float,
+) -> tuple[np.ndarray, int]:
+    idx = np.asarray(indices, dtype=np.int64)
+    candidate = np.ones(idx.size, dtype=bool)
+    if idx.size == 0:
+        return candidate, 0
+    if surface is None:
+        return candidate, int(idx.size)
+    tri_min = np.asarray(surface.grid.triangle_mins, dtype=np.float64)
+    tri_max = np.asarray(surface.grid.triangle_maxs, dtype=np.float64)
+    pad = max(float(on_boundary_tol_m), 1.0e-12)
+    unknown = 0
+    for row, raw_index in enumerate(idx):
+        i = int(raw_index)
+        start = np.asarray(x[i], dtype=np.float64)
+        stages = _polyline_stage_points_for_particle(
+            index=i,
+            x_trial=x_trial,
+            x_mid_trial=x_mid_trial,
+            integrator_mode=int(integrator_mode),
+        )
+        points = np.vstack((start[None, :], stages))
+        if points.ndim != 2 or points.shape[1] != 3 or not np.all(np.isfinite(points)):
+            candidate[row] = True
+            unknown += 1
+            continue
+        hit_candidate = False
+        for segment_index in range(points.shape[0] - 1):
+            p0 = points[segment_index]
+            p1 = points[segment_index + 1]
+            segment_candidates = query_triangle_candidates(surface.grid, p0, p1)
+            if segment_candidates.size == 0:
+                candidate[row] = True
+                unknown += 1
+                hit_candidate = True
+                break
+            seg_min = np.minimum(p0, p1) - pad
+            seg_max = np.maximum(p0, p1) + pad
+            ids = np.asarray(segment_candidates, dtype=np.int64)
+            overlap = np.all((seg_max[None, :] >= tri_min[ids]) & (tri_max[ids] >= seg_min[None, :]), axis=1)
+            if bool(np.any(overlap)):
+                hit_candidate = True
+                break
+        candidate[row] = bool(hit_candidate)
+    return candidate, int(unknown)
+
+
+def _record_boundary_broad_phase_diagnostics(
+    collision_diagnostics: Dict[str, object],
+    *,
+    checked_count: int,
+    candidate_count: int,
+    unknown_count: int,
+    exact_solve_count: Optional[int] = None,
+    missed_hit_count: int = 0,
+) -> None:
+    checked = int(max(0, checked_count))
+    candidates = int(max(0, candidate_count))
+    unknown = int(max(0, unknown_count))
+    pruned = int(max(0, checked - candidates))
+    missed_hits = int(max(0, missed_hit_count))
+    exact_count = candidates if exact_solve_count is None else int(max(0, exact_solve_count))
+    collision_diagnostics['boundary_exact_solve_count'] = int(
+        collision_diagnostics.get('boundary_exact_solve_count', 0)
+    ) + exact_count
+    collision_diagnostics['boundary_broad_phase_checked_count'] = int(
+        collision_diagnostics.get('boundary_broad_phase_checked_count', 0)
+    ) + checked
+    collision_diagnostics['boundary_broad_phase_candidate_count'] = int(
+        collision_diagnostics.get('boundary_broad_phase_candidate_count', 0)
+    ) + candidates
+    collision_diagnostics['boundary_broad_phase_pruned_count'] = int(
+        collision_diagnostics.get('boundary_broad_phase_pruned_count', 0)
+    ) + pruned
+    collision_diagnostics['boundary_broad_phase_missed_hit_count'] = int(
+        collision_diagnostics.get('boundary_broad_phase_missed_hit_count', 0)
+    ) + missed_hits
+    collision_diagnostics['boundary_broad_phase_unknown_count'] = int(
+        collision_diagnostics.get('boundary_broad_phase_unknown_count', 0)
+    ) + unknown
+    total_checked = int(collision_diagnostics.get('boundary_broad_phase_checked_count', 0))
+    total_candidates = int(collision_diagnostics.get('boundary_broad_phase_candidate_count', 0))
+    if total_checked > 0:
+        collision_diagnostics['boundary_broad_phase_candidate_ratio'] = float(total_candidates) / float(total_checked)
+    else:
+        collision_diagnostics['boundary_broad_phase_candidate_ratio'] = 0.0
+
+
 def _classify_trial_collisions_2d(
     runtime,
     *,
@@ -1623,6 +1982,8 @@ def _classify_trial_collisions_2d(
     collision_diagnostics: Dict[str, object],
     timing_accumulator: Optional[Dict[str, float]] = None,
     valid_mask_status_flags: Optional[np.ndarray] = None,
+    boundary_broad_phase_enabled: bool = False,
+    boundary_broad_phase_debug_check: bool = False,
 ) -> TrialCollisionBatch:
     active_idx = np.flatnonzero(active)
     loop_inside = np.zeros(n_particles, dtype=bool)
@@ -1704,21 +2065,55 @@ def _classify_trial_collisions_2d(
     prefetched_hits: Dict[int, BoundaryHit] = {}
     safe_idx = np.flatnonzero(safe_mask & (~far_from_wall))
     if safe_idx.size:
-        if is_etd2:
-            stage_points_batch = np.stack((x_mid_trial[safe_idx], x_trial[safe_idx]), axis=1)
-        else:
-            stage_points_batch = x_trial[safe_idx][:, None, :]
-        t_prefetch = time.perf_counter()
-        batch_hits = polyline_hits_from_boundary_edges_batch(
+        broad_safe_candidates, broad_safe_unknown = _edge_aabb_candidate_mask_2d(
             runtime,
-            x[safe_idx],
-            stage_points_batch,
-            particle_indices=safe_idx,
+            safe_idx,
+            x,
+            x_trial,
+            x_mid_trial,
+            integrator_mode=int(integrator_mode),
+            on_boundary_tol_m=float(on_boundary_tol_m),
+        )
+        prefetch_idx = safe_idx[broad_safe_candidates] if bool(boundary_broad_phase_enabled) else safe_idx
+        missed_hit_count = 0
+        if bool(boundary_broad_phase_enabled) and bool(boundary_broad_phase_debug_check):
+            pruned_idx = safe_idx[~broad_safe_candidates]
+            for raw_index in pruned_idx:
+                i = int(raw_index)
+                stage_points = _polyline_stage_points_for_particle(
+                    index=i,
+                    x_trial=x_trial,
+                    x_mid_trial=x_mid_trial,
+                    integrator_mode=int(integrator_mode),
+                )
+                debug_hit = boundary_service.polyline_hit(x[i], stage_points)
+                if debug_hit is None:
+                    continue
+                missed_hit_count += 1
+                prefetched_hits[i] = debug_hit
+                collider_mask[i] = True
+                safe_mask[i] = False
+                prefetch_idx = np.append(prefetch_idx, i)
+        prefetch_idx = np.unique(np.asarray(prefetch_idx, dtype=np.int64))
+        t_prefetch = time.perf_counter()
+        if is_etd2:
+            stage_points_batch = np.stack((x_mid_trial[prefetch_idx], x_trial[prefetch_idx]), axis=1)
+        else:
+            stage_points_batch = x_trial[prefetch_idx][:, None, :]
+        batch_hits = (
+            polyline_hits_from_boundary_edges_batch(
+                runtime,
+                x[prefetch_idx],
+                stage_points_batch,
+                particle_indices=prefetch_idx,
+            )
+            if prefetch_idx.size
+            else {}
         )
         _add_timing(timing_accumulator, 'edge_prefetch_s', time.perf_counter() - t_prefetch)
         collision_diagnostics['edge_prefetch_batch_candidate_count'] = int(
             collision_diagnostics.get('edge_prefetch_batch_candidate_count', 0)
-        ) + int(safe_idx.size)
+        ) + int(prefetch_idx.size)
         for particle_index, hit in batch_hits.items():
             if float(hit.alpha_hint) <= 1.0e-12:
                 continue
@@ -1729,8 +2124,32 @@ def _classify_trial_collisions_2d(
         collision_diagnostics['edge_prefetch_batch_hit_count'] = int(
             collision_diagnostics.get('edge_prefetch_batch_hit_count', 0)
         ) + int(len(prefetched_hits))
+        _record_boundary_broad_phase_diagnostics(
+            collision_diagnostics,
+            checked_count=int(safe_idx.size),
+            candidate_count=int(prefetch_idx.size if bool(boundary_broad_phase_enabled) else safe_idx.size),
+            unknown_count=int(broad_safe_unknown),
+            exact_solve_count=int(prefetch_idx.size),
+            missed_hit_count=int(missed_hit_count),
+        )
     colliders = np.flatnonzero(collider_mask)
     safe = np.flatnonzero(safe_mask)
+    _broad_candidates, broad_unknown = _edge_aabb_candidate_mask_2d(
+        runtime,
+        colliders,
+        x,
+        x_trial,
+        x_mid_trial,
+        integrator_mode=int(integrator_mode),
+        on_boundary_tol_m=float(on_boundary_tol_m),
+    )
+    _record_boundary_broad_phase_diagnostics(
+        collision_diagnostics,
+        checked_count=int(colliders.size),
+        candidate_count=int(colliders.size),
+        unknown_count=int(broad_unknown),
+        exact_solve_count=int(colliders.size),
+    )
     return TrialCollisionBatch(
         colliders=np.asarray(colliders, dtype=np.int64),
         safe=np.asarray(safe, dtype=np.int64),
@@ -1751,6 +2170,8 @@ def _classify_trial_collisions_3d(
     collision_diagnostics: Dict[str, object],
     timing_accumulator: Optional[Dict[str, float]] = None,
     valid_mask_status_flags: Optional[np.ndarray] = None,
+    boundary_broad_phase_enabled: bool = False,
+    boundary_broad_phase_debug_check: bool = False,
 ) -> TrialCollisionBatch:
     colliders_list: List[int] = []
     safe_list: List[int] = []
@@ -1758,7 +2179,68 @@ def _classify_trial_collisions_3d(
     active_idx = np.flatnonzero(active)
     is_etd2 = int(integrator_mode) == INTEGRATOR_ETD2
     triangle_surface_3d = boundary_service.triangle_surface_3d
-    for idx in active_idx:
+    broad_candidates, broad_unknown = _triangle_aabb_candidate_mask_3d(
+        triangle_surface_3d,
+        active_idx,
+        x,
+        x_trial,
+        x_mid_trial,
+        integrator_mode=int(integrator_mode),
+        on_boundary_tol_m=float(on_boundary_tol_m),
+    )
+    exact_idx = active_idx[broad_candidates] if bool(boundary_broad_phase_enabled) else active_idx
+    missed_hit_count = 0
+    if bool(boundary_broad_phase_enabled) and bool(boundary_broad_phase_debug_check):
+        promoted: List[int] = []
+        for raw_index in active_idx[~broad_candidates]:
+            i = int(raw_index)
+            if is_etd2:
+                stage_points = _stage_points_from_trial(
+                    x_trial[i],
+                    integrator_mode=int(integrator_mode),
+                    x_mid=x_mid_trial[i],
+                )
+                if boundary_service.polyline_hit(x[i], stage_points) is not None:
+                    promoted.append(i)
+                    continue
+                inside_mid, _on_boundary_mid = _boundary_inside_geometry_with_boundary(
+                    runtime,
+                    x_mid_trial[i],
+                    on_boundary_tol_m=on_boundary_tol_m,
+                    triangle_surface_3d=triangle_surface_3d,
+                )
+                inside_end, _on_boundary_end = _boundary_inside_geometry_with_boundary(
+                    runtime,
+                    x_trial[i],
+                    on_boundary_tol_m=on_boundary_tol_m,
+                    triangle_surface_3d=triangle_surface_3d,
+                )
+                if not bool(inside_mid) or not bool(inside_end):
+                    promoted.append(i)
+                continue
+            if boundary_service.segment_hit(x[i], x_trial[i]) is not None:
+                promoted.append(i)
+                continue
+            if triangle_surface_3d is not None and (
+                np.any(x_trial[i] < triangle_surface_3d.bbox_min - 1e-12)
+                or np.any(x_trial[i] > triangle_surface_3d.bbox_max + 1e-12)
+            ):
+                promoted.append(i)
+        if promoted:
+            missed_hit_count = int(len(promoted))
+            exact_idx = np.unique(np.concatenate((np.asarray(exact_idx, dtype=np.int64), np.asarray(promoted, dtype=np.int64))))
+    exact_set = {int(value) for value in np.asarray(exact_idx, dtype=np.int64)}
+    if bool(boundary_broad_phase_enabled):
+        safe_list.extend(int(value) for value in active_idx if int(value) not in exact_set)
+    _record_boundary_broad_phase_diagnostics(
+        collision_diagnostics,
+        checked_count=int(active_idx.size),
+        candidate_count=int(exact_idx.size if bool(boundary_broad_phase_enabled) else active_idx.size),
+        unknown_count=int(broad_unknown),
+        exact_solve_count=int(exact_idx.size),
+        missed_hit_count=int(missed_hit_count),
+    )
+    for idx in np.asarray(exact_idx, dtype=np.int64):
         i = int(idx)
         if is_etd2:
             stage_points = _stage_points_from_trial(
@@ -1803,8 +2285,9 @@ def _classify_trial_collisions_3d(
             colliders_list.append(i)
         else:
             safe_list.append(i)
+    colliders = np.asarray(colliders_list, dtype=np.int64)
     return TrialCollisionBatch(
-        colliders=np.asarray(colliders_list, dtype=np.int64),
+        colliders=colliders,
         safe=np.asarray(safe_list, dtype=np.int64),
         prefetched_hits=prefetched_hits,
     )
@@ -1825,6 +2308,8 @@ def _classify_trial_collisions(
     collision_diagnostics: Dict[str, object],
     timing_accumulator: Optional[Dict[str, float]] = None,
     valid_mask_status_flags: Optional[np.ndarray] = None,
+    boundary_broad_phase_enabled: bool = False,
+    boundary_broad_phase_debug_check: bool = False,
 ) -> TrialCollisionBatch:
     if int(spatial_dim) == 2:
         return _classify_trial_collisions_2d(
@@ -1840,6 +2325,8 @@ def _classify_trial_collisions(
             collision_diagnostics=collision_diagnostics,
             timing_accumulator=timing_accumulator,
             valid_mask_status_flags=valid_mask_status_flags,
+            boundary_broad_phase_enabled=bool(boundary_broad_phase_enabled),
+            boundary_broad_phase_debug_check=bool(boundary_broad_phase_debug_check),
         )
     return _classify_trial_collisions_3d(
         runtime,
@@ -1853,6 +2340,8 @@ def _classify_trial_collisions(
         collision_diagnostics=collision_diagnostics,
         timing_accumulator=timing_accumulator,
         valid_mask_status_flags=valid_mask_status_flags,
+        boundary_broad_phase_enabled=bool(boundary_broad_phase_enabled),
+        boundary_broad_phase_debug_check=bool(boundary_broad_phase_debug_check),
     )
 
 

@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Mapping, Tuple
 import numpy as np
 
 from .boundary_service import inside_geometry, nearest_boundary_edge_features_2d, sample_geometry_part_id, sample_geometry_sdf
+from .coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_report_from_metadata
 from .datamodel import PreparedRuntime
 from .field_backend import field_backend_kind, sample_field_valid_status
 from .field_sampling import (
@@ -85,6 +86,23 @@ def _particle_defaults_report(particles, policy: str) -> Dict[str, Any]:
     }
 
 
+def _runtime_coordinate_report(runtime) -> Dict[str, Any]:
+    spatial_dim = int(getattr(runtime, 'spatial_dim', 0))
+    coordinate_system = str(getattr(runtime, 'coordinate_system', ''))
+    axis_names = axis_names_for_coordinate_system(coordinate_system, spatial_dim) if spatial_dim in {2, 3} else ()
+    report: Dict[str, Any] = {
+        'spatial_dim': spatial_dim,
+        'coordinate_system': coordinate_system,
+        'axis_names': list(axis_names),
+    }
+    geometry_provider = getattr(runtime, 'geometry_provider', None)
+    geometry = getattr(geometry_provider, 'geometry', None) if geometry_provider is not None else None
+    axisymmetric_report = axisymmetric_rz_report_from_metadata(getattr(geometry, 'metadata', None))
+    if axisymmetric_report:
+        report['axisymmetric_rz'] = axisymmetric_report
+    return report
+
+
 def _source_preprocess_result(prepared: PreparedRuntime):
     result = getattr(prepared, 'source_preprocess', None)
     if result is not None:
@@ -112,6 +130,11 @@ def _boundary_release_offset_failure_rows(prepared: PreparedRuntime) -> List[Dic
             'boundary_release_distance_m': float(row.get('boundary_release_distance_m', np.nan)),
             'boundary_release_total_offset_m': float(row.get('boundary_release_total_offset_m', np.nan)),
             'boundary_release_solver_offset_m': float(row.get('boundary_release_solver_offset_m', np.nan)),
+            'boundary_release_capture_tolerance_m': float(row.get('boundary_release_capture_tolerance_m', np.nan)),
+            'boundary_release_inward_offset_m': float(row.get('boundary_release_inward_offset_m', np.nan)),
+            'projection_distance_m': float(row.get('projection_distance_m', np.nan)),
+            'projected_part_id': int(row.get('projected_part_id', 0)),
+            'projected_boundary_id': int(row.get('projected_boundary_id', -1)),
             'source_position_offset_m': float(row.get('source_position_offset_m', np.nan)),
         }
         for axis in ('x', 'y', 'z'):
@@ -204,8 +227,10 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
     )
     boundary_release_failures = _boundary_release_offset_failure_rows(prepared)
     boundary_release_passed = int(len(boundary_release_failures)) == 0
+    coordinate_report = _runtime_coordinate_report(runtime)
     if field_provider is None:
         return {
+            **coordinate_report,
             'mode': mode,
             'particle_defaults_policy': str(defaults_policy),
             'particle_defaults': particle_defaults,
@@ -239,6 +264,7 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
     nearest_distance = np.asarray(geometry_features['nearest_boundary_distance_m'], dtype=np.float64)
     near_boundary = np.isfinite(nearest_distance) & (nearest_distance <= near_threshold) if near_threshold > 0.0 else np.zeros(particles.count, dtype=bool)
 
+    axis_names = tuple(str(v) for v in coordinate_report.get('axis_names', ('x', 'y', 'z')[: int(runtime.spatial_dim)]))
     violations: List[Dict[str, Any]] = []
     for idx in np.flatnonzero(statuses != int(VALID_MASK_STATUS_CLEAN)):
         row: Dict[str, Any] = {
@@ -255,11 +281,12 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
             'nearest_boundary_part_id': int(geometry_features['nearest_part_id'][int(idx)]),
             'near_boundary_by_cell_diagonal': int(bool(near_boundary[int(idx)])),
         }
-        for dim, name in enumerate(('x', 'y', 'z')[: int(runtime.spatial_dim)]):
+        for dim, name in enumerate(axis_names[: int(runtime.spatial_dim)]):
             row[name] = float(positions[int(idx), dim])
         violations.append(row)
 
     return {
+        **coordinate_report,
         'mode': mode,
         'particle_defaults_policy': str(defaults_policy),
         'particle_defaults': particle_defaults,

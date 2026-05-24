@@ -13,6 +13,11 @@ This project is easiest to read from the runtime boundary inward.
 `runtime_builder.py` should stay a small coordinator. Format-specific loading
 belongs in focused `io/` modules.
 
+The high-fidelity runtime resolves a `SolverPlan`, initializes `SolverArrays`,
+then runs the step loop against provider-backed fields and explicit boundary
+services. `SolverPlan` owns fixed execution choices, `ParticleState` owns
+mutable particle arrays, and `runtime_outputs.py` remains the writer layer.
+
 ## Package Map
 
 - `particle_tracer_unified/io/`: CSV/NPZ/YAML loading and runtime construction

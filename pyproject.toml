@@ -23,6 +23,7 @@ particle-tracer-field-compare = "particle_tracer_unified.compare.field_compare:m
 particle-tracer-acceleration-compare = "particle_tracer_unified.compare.acceleration_compare:main"
 particle-tracer-trajectory-compare = "particle_tracer_unified.compare.trajectory_compare:main"
 particle-tracer-boundary-compare = "particle_tracer_unified.compare.boundary_compare:main"
+particle-tracer-first-step-compare = "particle_tracer_unified.compare.first_step_compare:main"
 
 [tool.setuptools]
 include-package-data = true

@@ -8,6 +8,7 @@ import pytest
 import yaml
 
 from particle_tracer_unified.io.runtime_builder import build_runtime_from_config, prepare_runtime
+from particle_tracer_unified.solvers.runtime_plan import build_solver_plan
 
 
 def _write_runtime_npz(root: Path, *, field_ghost_cells: int = 0) -> None:
@@ -106,6 +107,12 @@ def _config() -> dict[str, object]:
     }
 
 
+def _minimal_2d_example_config() -> tuple[Path, dict[str, object]]:
+    config_dir = Path(__file__).resolve().parents[1] / "examples" / "minimal_2d"
+    config = yaml.safe_load((config_dir / "run_config.yaml").read_text(encoding="utf-8"))
+    return config_dir, config
+
+
 def test_comsol_faithful_runtime_loads_manifest_release_and_wall_tables(tmp_path: Path) -> None:
     _write_runtime_npz(tmp_path)
     _write_comsol_tables(tmp_path)
@@ -122,7 +129,39 @@ def test_comsol_faithful_runtime_loads_manifest_release_and_wall_tables(tmp_path
     assert runtime.config_payload["solver"]["valid_mask_policy"] == "strict_clean"
     assert runtime.config_payload["solver"]["drag_model"] == "stokes_cunningham"
     assert runtime.force_catalog.model("drag") == "stokes_cunningham"
+
+
+def test_comsol_faithful_forces_debug_output_plan(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+
+    runtime = build_runtime_from_config(_config(), tmp_path)
+    prepared = prepare_runtime(runtime)
+    plan = build_solver_plan(prepared, spatial_dim=2)
+
+    assert plan.output.mode == "debug"
+    assert bool(plan.output.save_trajectory) is True
+    assert bool(plan.output.write_wall_events) is True
+    assert bool(plan.output.write_step_summary) is True
+    assert bool(plan.output.write_force_contributions) is True
+    assert bool(plan.output.write_collision_diagnostics) is True
     assert runtime.walls.metadata["comsol_boundary_map"][0]["comsol_geom_entity_id"] == 10
+
+
+def test_comsol_faithful_runtime_preserves_near_boundary_release_without_snap(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    (tmp_path / "release.csv").write_text(
+        "particle_id,release_time,x,y,vx,vy,mass,diameter,density,charge,source_entity_id,material_id\n"
+        "1,0,0.00000001,0.5,0,0,1e-18,1e-6,1000,0,1,1\n",
+        encoding="utf-8",
+    )
+
+    runtime = build_runtime_from_config(_config(), tmp_path)
+    prepared = prepare_runtime(runtime)
+
+    assert prepared.source_preprocess is None
+    assert runtime.particles.position[0].tolist() == pytest.approx([1.0e-8, 0.5])
 
 
 def test_comsol_faithful_runtime_manifest_disables_unlisted_electric_force(tmp_path: Path) -> None:
@@ -148,6 +187,71 @@ def test_comsol_faithful_runtime_rejects_source_preprocess(tmp_path: Path) -> No
 
     with pytest.raises(ValueError, match="source.preprocess.enabled"):
         build_runtime_from_config(config, tmp_path)
+
+
+def test_comsol_faithful_runtime_rejects_boundary_release(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    config = _config()
+    config["source"] = {"preprocess": {"enabled": False, "boundary_release": True}}
+
+    with pytest.raises(ValueError, match="source.preprocess.boundary_release"):
+        build_runtime_from_config(config, tmp_path)
+
+
+def test_surface_release_production_allows_explicit_boundary_release() -> None:
+    config_dir, config = _minimal_2d_example_config()
+    config["mode"] = "surface_release_production"
+    config.setdefault("source", {}).setdefault("preprocess", {})["boundary_release"] = True
+
+    runtime = build_runtime_from_config(config, config_dir)
+    prepared = prepare_runtime(runtime)
+
+    assert runtime.config_payload["mode"] == "surface_release_production"
+    assert prepared.source_preprocess is not None
+    assert "boundary_release_applied_count" in prepared.source_preprocess.source_model_summary
+
+
+def test_runtime_builder_rejects_unknown_mode() -> None:
+    config_dir, config = _minimal_2d_example_config()
+    config["mode"] = "mystery_mode"
+
+    with pytest.raises(ValueError, match="Unsupported run mode"):
+        build_runtime_from_config(config, config_dir)
+
+
+def test_comsol_faithful_runtime_rejects_config_manifest_coordinate_mismatch(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    config = _config()
+    config["run"] = {**config["run"], "coordinate_system": "axisymmetric_rz"}
+
+    with pytest.raises(ValueError, match="run.coordinate_system"):
+        build_runtime_from_config(config, tmp_path)
+
+
+def test_comsol_faithful_runtime_rejects_manifest_missing_coordinate_scale(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    manifest_path = tmp_path / "manifest.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    del manifest["coordinates"]["coordinate_scale_m_per_model_unit"]
+    manifest_path.write_text(yaml.safe_dump(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="coordinate_scale_m_per_model_unit"):
+        build_runtime_from_config(_config(), tmp_path)
+
+
+def test_comsol_faithful_runtime_rejects_manifest_missing_force_inventory(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    manifest_path = tmp_path / "manifest.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    manifest["forces"] = []
+    manifest_path.write_text(yaml.safe_dump(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="forces must list"):
+        build_runtime_from_config(_config(), tmp_path)
 
 
 def test_comsol_faithful_runtime_rejects_mixed_policy_warning(tmp_path: Path) -> None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import regression_test as _regression_helpers
+import regression_helpers as _regression_helpers
 
 globals().update({
     name: value
@@ -406,6 +406,168 @@ def test_apply_wall_hit_step_converts_repeated_same_wall_hit_to_contact_sliding_
     assert result.contact_normal == pytest.approx([-1.0, 0.0, 0.0], abs=1e-15)
     assert np.dot(result.velocity, np.asarray([-1.0, 0.0, 0.0], dtype=np.float64)) == pytest.approx(0.0, abs=1e-15)
 
+
+def _release_grace_square_runtime() -> SimpleNamespace:
+    axes = (np.asarray([0.0, 0.5, 1.0], dtype=np.float64),) * 2
+    valid_mask = np.ones((3, 3), dtype=bool)
+    edges = _square_boundary_edges()
+    geometry = GeometryND(
+        spatial_dim=2,
+        coordinate_system='cartesian_xy',
+        axes=axes,
+        valid_mask=valid_mask,
+        sdf=-np.ones((3, 3), dtype=np.float64),
+        normal_components=(np.zeros((3, 3), dtype=np.float64), np.ones((3, 3), dtype=np.float64)),
+        nearest_boundary_part_id_map=np.ones((3, 3), dtype=np.int32),
+        boundary_edges=edges,
+        boundary_edge_part_ids=np.asarray([1, 2, 3, 4], dtype=np.int32),
+        boundary_loops_2d=build_boundary_loops_2d(edges),
+    )
+    return SimpleNamespace(
+        geometry_provider=GeometryProviderND(geometry=geometry, kind='test'),
+        field_provider=None,
+        wall_catalog=None,
+        gas=SimpleNamespace(density_kgm3=1.0, dynamic_viscosity_Pas=1.0e-5, temperature=300.0),
+    )
+
+
+def _run_release_grace_collision(
+    *,
+    x_start: tuple[float, float] = (0.95, 0.5),
+    v_start: tuple[float, float] = (1.0, 0.0),
+    source_part_id: int = 2,
+    release_time_s: float = 0.0,
+    grace_time_s: float = 0.06,
+    clearance_m: float = 0.06,
+) -> tuple[object, dict[str, object], list[dict[str, object]]]:
+    runtime = _release_grace_square_runtime()
+    service = build_boundary_service(runtime, spatial_dim=2, on_boundary_tol_m=1.0e-9, triangle_surface_3d=None)
+    compiled = _compile_runtime_arrays(runtime, spatial_dim=2)
+    diagnostics = initial_collision_diagnostics()
+    wall_rows: list[dict[str, object]] = []
+    x0 = np.asarray(x_start, dtype=np.float64)
+    v0 = np.asarray(v_start, dtype=np.float64)
+    dt = 0.1
+    x1 = x0 + dt * v0
+    step = ProcessStepRow(step_id=1, step_name='run', start_s=0.0, end_s=1.0)
+    result = _advance_colliding_particle(
+        runtime=runtime,
+        step=step,
+        particles=None,
+        particle_index=0,
+        rng=np.random.default_rng(123),
+        t=dt,
+        x_start=x0,
+        v_start=v0,
+        dt_step=dt,
+        spatial_dim=2,
+        compiled=compiled,
+        integrator_mode=int(get_integrator_spec('drag_relaxation').mode),
+        base_adaptive_substep_enabled=0,
+        adaptive_substep_tau_ratio=1.0,
+        adaptive_substep_max_splits=0,
+        min_remaining_dt_ratio=0.0,
+        tau_p_i=1.0e9,
+        particle_diameter_i=1.0e-6,
+        particle_density_i=1000.0,
+        particle_mass_i=1.0e-15,
+        particle_id_i=1,
+        source_part_id_i=int(source_part_id),
+        release_time_i=float(release_time_s),
+        release_grace=ReleaseGracePlan(
+            enabled=True,
+            grace_time_s=float(grace_time_s),
+            clearance_m=float(clearance_m),
+            min_outward_normal_speed_mps=0.0,
+        ),
+        particle_stick_probability_i=0.0,
+        flow_scale_particle_i=1.0,
+        drag_scale_particle_i=1.0,
+        body_scale_particle_i=1.0,
+        global_flow_scale=1.0,
+        global_drag_tau_scale=1.0,
+        global_body_accel_scale=1.0,
+        body_accel=np.zeros(2, dtype=np.float64),
+        min_tau_p_s=1.0e-12,
+        gas_density_kgm3=1.0,
+        gas_mu_pas=1.0e-5,
+        gas_temperature_K=300.0,
+        gas_molecular_mass_kg=60.0 * 1.66053906660e-27,
+        drag_model_mode=int(DRAG_MODEL_STOKES),
+        valid_mask_retry_then_stop_enabled=False,
+        initial_x_next=x1,
+        initial_v_next=v0,
+        initial_stage_points=np.asarray([x1], dtype=np.float64),
+        initial_valid_mask_status=int(VALID_MASK_STATUS_CLEAN),
+        initial_primary_hit=None,
+        initial_primary_hit_counted=False,
+        inside_fn=service.inside,
+        strict_inside_fn=service.inside_strict,
+        primary_hit_fn=service.polyline_hit,
+        nearest_projection_fn=service.nearest_projection,
+        primary_hit_counter_key=service.primary_hit_counter_key,
+        collision_diagnostics=diagnostics,
+        max_hit_rows=[],
+        wall_rows=wall_rows,
+        coating_summary_rows=[],
+        wall_law_counts={},
+        wall_summary_counts={},
+        stuck=np.asarray([False], dtype=bool),
+        absorbed=np.asarray([False], dtype=bool),
+        escaped=np.asarray([False], dtype=bool),
+        active=np.asarray([True], dtype=bool),
+        max_wall_hits_per_step=5,
+        epsilon_offset_m=1.0e-6,
+        on_boundary_tol_m=1.0e-9,
+        triangle_surface_3d=None,
+    )
+    return result, diagnostics, wall_rows
+
+
+def test_release_grace_skips_outward_same_source_inside_grace():
+    result, diagnostics, wall_rows = _run_release_grace_collision()
+
+    assert result.total_hits == 0
+    assert result.position[0] > 1.0
+    assert int(diagnostics['source_surface_release_skip_count']) == 1
+    assert int(diagnostics['source_surface_release_skip_blocked_count']) == 0
+    assert wall_rows == []
+
+
+def test_release_grace_blocks_outward_same_source_outside_grace():
+    result, diagnostics, wall_rows = _run_release_grace_collision(grace_time_s=0.01)
+
+    assert result.total_hits == 1
+    assert int(diagnostics['source_surface_release_skip_count']) == 0
+    assert int(diagnostics['source_surface_release_skip_blocked_count']) == 1
+    assert diagnostics['source_surface_release_skip_blocked_reasons'] == {'outside_grace_time': 1}
+    assert len(wall_rows) == 1
+
+
+def test_release_grace_handles_inward_same_source_reimpact_as_wall_event():
+    result, diagnostics, wall_rows = _run_release_grace_collision(
+        x_start=(1.05, 0.5),
+        v_start=(-1.0, 0.0),
+        grace_time_s=0.2,
+    )
+
+    assert result.total_hits >= 1
+    assert int(diagnostics['source_surface_release_skip_count']) == 0
+    assert int(diagnostics['source_surface_release_skip_blocked_count']) >= 1
+    assert diagnostics['source_surface_release_skip_blocked_reasons']['not_outward'] == 1
+    assert len(wall_rows) >= 1
+
+
+def test_release_grace_leaves_unrelated_wall_hit_unchanged():
+    result, diagnostics, wall_rows = _run_release_grace_collision(source_part_id=1)
+
+    assert result.total_hits == 1
+    assert int(diagnostics['source_surface_release_skip_count']) == 0
+    assert int(diagnostics['source_surface_release_skip_blocked_count']) == 0
+    assert diagnostics['source_surface_release_skip_blocked_reasons'] == {}
+    assert len(wall_rows) == 1
+
+
 def test_transient_endpoint_contact_releases_when_force_points_inside():
     axes = (
         np.asarray([0.0, 0.5, 1.0], dtype=np.float64),
@@ -685,6 +847,7 @@ def test_final_snapshot_matches_t_end_when_not_divisible(tmp_path: Path):
     config_path = _write_minimal_2d_config(
         tmp_path,
         solver_updates={'dt': 0.3, 't_end': 1.0, 'save_every': 1, 'plot_particle_limit': 3},
+        output_updates={'mode': 'debug'},
     )
     run_solver_2d_from_yaml(config_path, output_dir=out_dir)
     save_frames = _read_table(out_dir / 'save_frames.csv')
@@ -695,13 +858,18 @@ def test_plot_particle_limit_zero_skips_trajectory_plot(tmp_path: Path):
     config_path = _write_minimal_2d_config(
         tmp_path,
         solver_updates={'plot_particle_limit': 0},
+        output_updates={'mode': 'debug'},
     )
     run_solver_2d_from_yaml(config_path, output_dir=out_dir)
     assert not (out_dir / 'trajectories.png').exists()
 
 def test_3d_wall_events_use_boundary_part_ids(tmp_path: Path):
     out_dir = tmp_path / 'out_3d'
-    config_path = _write_config(tmp_path, ROOT / 'examples' / 'minimal_3d' / 'run_config.yaml')
+    config_path = _write_config(
+        tmp_path,
+        ROOT / 'examples' / 'minimal_3d' / 'run_config.yaml',
+        mutate=lambda cfg: cfg.setdefault('output', {}).update({'mode': 'debug'}),
+    )
     run_solver_3d_from_yaml(config_path, output_dir=out_dir)
     wall_events = _read_table(out_dir / 'wall_events.csv')
     assert not wall_events.empty
@@ -947,11 +1115,79 @@ def test_output_artifact_mode_minimal_skips_bulk_outputs(tmp_path: Path):
     assert str(report['runtime_step_summary_file']) == ''
     assert str(report['coating_summary_file']) == 'coating_summary_by_part.csv'
 
+
+def test_default_standard_output_suppresses_deep_artifacts(tmp_path: Path):
+    out_dir = tmp_path / 'out_2d_standard_default'
+    config_path = _write_minimal_2d_config(tmp_path / 'cfg_standard_default')
+
+    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
+    report = _solver_report(out_dir)
+
+    assert report['output_mode'] == 'standard'
+    assert int(report['output_debug_enabled']) == 0
+    assert int(report['output_minimal_enabled']) == 0
+    assert (out_dir / 'final_particles.csv').exists()
+    assert (out_dir / 'solver_report.json').exists()
+    assert (out_dir / 'prepared_runtime_summary.json').exists()
+    assert (out_dir / 'wall_summary.json').exists()
+    assert (out_dir / 'coating_summary_by_part.csv').exists()
+    assert not (out_dir / 'positions_2d.npy').exists()
+    assert not (out_dir / 'save_frames.csv').exists()
+    assert not (out_dir / 'wall_events.csv').exists()
+    assert not (out_dir / 'runtime_step_summary.csv').exists()
+    assert not (out_dir / 'source_particle_diagnostics.csv').exists()
+    assert not (out_dir / 'collision_diagnostics.json').exists()
+    assert not (out_dir / 'force_contributions.csv').exists()
+
+
+def test_artifact_mode_full_keeps_debug_artifacts(tmp_path: Path):
+    out_dir = tmp_path / 'out_2d_full_alias'
+    config_path = _write_minimal_2d_config(
+        tmp_path / 'cfg_full_alias',
+        output_updates={'artifact_mode': 'full'},
+    )
+
+    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
+    report = _solver_report(out_dir)
+
+    assert report['output_mode'] == 'debug'
+    assert int(report['output_debug_enabled']) == 1
+    assert (out_dir / 'positions_2d.npy').exists()
+    assert (out_dir / 'save_frames.csv').exists()
+    assert (out_dir / 'wall_events.csv').exists()
+    assert (out_dir / 'runtime_step_summary.csv').exists()
+    assert (out_dir / 'source_particle_diagnostics.csv').exists()
+    assert (out_dir / 'collision_diagnostics.json').exists()
+    assert (out_dir / 'force_contributions.csv').exists()
+
+
+def test_release_grace_minimal_output_keeps_wall_trace_suppressed(tmp_path: Path):
+    out_dir = tmp_path / 'out_release_grace_minimal'
+    config_path = _write_minimal_2d_config(
+        tmp_path / 'cfg_release_grace_minimal',
+        solver_updates={
+            'release_grace': {
+                'enabled': True,
+                'grace_time_s': 1.0e-4,
+            },
+        },
+        output_updates={'artifact_mode': 'minimal'},
+    )
+
+    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
+    report = _solver_report(out_dir)
+
+    assert int(report['source_surface_release_grace_enabled']) == 1
+    assert not (out_dir / 'wall_events.csv').exists()
+    assert not (out_dir / 'source_surface_release_events.csv').exists()
+
+
 def test_solver_reports_schiller_naumann_drag_model(tmp_path: Path):
     out_dir = tmp_path / 'out_2d_schiller_naumann'
     config_path = _write_minimal_2d_config(
         tmp_path,
         solver_updates={'drag_model': 'schiller_naumann', 't_end': 0.05, 'save_every': 1, 'plot_particle_limit': 0},
+        output_updates={'write_collision_diagnostics': 1},
     )
 
     report, _prepared = run_solver_2d_from_yaml(config_path, output_dir=out_dir)
@@ -979,6 +1215,7 @@ def test_segment_output_filenames_are_sanitized(tmp_path: Path):
     config_path = _write_minimal_2d_config(
         tmp_path,
         path_updates={'process_steps_csv': str(steps_path.resolve())},
+        output_updates={'mode': 'debug'},
     )
 
     run_solver_2d_from_yaml(config_path, output_dir=out_dir)
@@ -990,6 +1227,7 @@ def test_single_run_segment_does_not_duplicate_positions_output(tmp_path: Path):
     config_path = _write_minimal_2d_config(
         tmp_path,
         solver_updates={'t_end': 0.02, 'save_every': 1, 'plot_particle_limit': 0},
+        output_updates={'mode': 'debug'},
     )
 
     run_solver_2d_from_yaml(config_path, output_dir=out_dir)
@@ -1018,6 +1256,7 @@ def test_3d_collision_diagnostics_and_max_hits_limit_are_applied(tmp_path: Path)
             }
         )
         cfg.setdefault('output', {}).update({'write_collision_diagnostics': 1})
+        cfg.setdefault('output', {}).update({'write_max_hit_events': 1})
 
     config_path = _write_config(
         tmp_path,

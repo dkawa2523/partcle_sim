@@ -87,7 +87,9 @@ def _boundary_release_diagnostics(
     *,
     solver_offset_m: float,
     source_offset_m: float,
-) -> Dict[str, float | int]:
+    capture_tolerance_m: float,
+    inward_offset_m: float,
+) -> Dict[str, float | int | str]:
     total_offset_m = float(solver_offset_m + source_offset_m) if boundary_release is not None else 0.0
     if boundary_release is None:
         return {
@@ -100,6 +102,14 @@ def _boundary_release_diagnostics(
             'boundary_release_primitive_id': -1,
             'boundary_release_ambiguous': 0,
             'boundary_release_inside_after_offset': 0,
+            'boundary_release_capture_tolerance_m': float(capture_tolerance_m),
+            'boundary_release_inward_offset_m': float(inward_offset_m),
+            'capture_tolerance_m': float(capture_tolerance_m),
+            'inward_offset_m': float(inward_offset_m),
+            'projection_distance_m': float('nan'),
+            'projected_part_id': 0,
+            'projected_boundary_id': -1,
+            'release_preprocess_mode': 'raw',
         }
     return {
         'source_position_offset_m': float(source_offset_m),
@@ -111,6 +121,25 @@ def _boundary_release_diagnostics(
         'boundary_release_primitive_id': int(boundary_release.primitive_id),
         'boundary_release_ambiguous': int(bool(boundary_release.ambiguous)),
         'boundary_release_inside_after_offset': int(bool(boundary_release.inside_after_offset)),
+        'boundary_release_capture_tolerance_m': float(capture_tolerance_m),
+        'boundary_release_inward_offset_m': float(inward_offset_m),
+        'capture_tolerance_m': float(capture_tolerance_m),
+        'inward_offset_m': float(inward_offset_m),
+        'projection_distance_m': float(boundary_release.distance_m),
+        'projected_part_id': int(boundary_release.nearest_part_id),
+        'projected_boundary_id': int(boundary_release.primitive_id),
+        'release_preprocess_mode': 'projected_inward_offset',
+    }
+
+
+def _position_fields(prefix: str, value: Any | None, spatial_dim: int) -> Dict[str, float]:
+    axes = ('x', 'y', 'z')[: int(spatial_dim)]
+    if value is None:
+        return {f'{prefix}_{axis}': float('nan') for axis in axes}
+    arr = np.asarray(value, dtype=np.float64)
+    return {
+        f'{prefix}_{axis}': float(arr[dim]) if dim < arr.size else float('nan')
+        for dim, axis in enumerate(axes)
     }
 
 
@@ -219,6 +248,7 @@ def apply_source_models(
         }
         for dim, axis in enumerate(('x', 'y', 'z')[: particles.spatial_dim]):
             diag[f'original_{axis}'] = float(original_position[dim])
+            diag[f'raw_{axis}'] = float(original_position[dim])
 
         if not gate_ok:
             release_enabled[i] = False
@@ -423,12 +453,16 @@ def apply_source_models(
                 boundary_release,
                 solver_offset_m=boundary_solver_offset,
                 source_offset_m=source_position_offset,
+                capture_tolerance_m=float(boundary_classifier_tolerance_m),
+                inward_offset_m=boundary_solver_offset,
             )
         )
+        diag.update(_position_fields('projected', getattr(boundary_release, 'boundary_position', None), particles.spatial_dim))
         diag['final_speed_mps'] = float(np.linalg.norm(vel[i, : particles.spatial_dim]))
         diag['resolved_release_time_s'] = float(rel[i]) if np.isfinite(rel[i]) else float('inf')
         for dim, axis in enumerate(('x', 'y', 'z')[: particles.spatial_dim]):
             diag[f'release_{axis}'] = float(pos[i, dim])
+            diag[f'initial_after_preprocess_{axis}'] = float(pos[i, dim])
         diagnostics.append(diag)
 
     particles_out = ParticleTable(
@@ -455,18 +489,33 @@ def apply_source_models(
     law_counts: Dict[str, int] = {}
     boundary_release_applied_count = 0
     boundary_release_failed_offset_count = 0
+    projection_distances = []
     for row in diagnostics:
         law_counts[str(row.get('law_name', ''))] = law_counts.get(str(row.get('law_name', '')), 0) + 1
         if int(row.get('boundary_release_applied', 0)) != 0:
             boundary_release_applied_count += 1
+            distance = float(row.get('projection_distance_m', np.nan))
+            if np.isfinite(distance):
+                projection_distances.append(distance)
             if int(row.get('boundary_release_inside_after_offset', 0)) == 0:
                 boundary_release_failed_offset_count += 1
+    projection_array = np.asarray(projection_distances, dtype=np.float64)
     summary = {
         'law_usage': law_counts,
         'particle_count': int(particles.count),
         'suppressed_particle_count': int((~release_enabled).sum()),
+        'boundary_release_enabled': int(bool(use_boundary_release)),
+        'boundary_release_capture_tolerance_m': float(max(float(boundary_classifier_tolerance_m), 0.0)),
+        'boundary_release_inward_offset_m': float(max(float(boundary_solver_offset_m), 0.0)),
         'boundary_release_applied_count': int(boundary_release_applied_count),
         'boundary_release_failed_offset_count': int(boundary_release_failed_offset_count),
+        'boundary_release_projection_distance_count': int(projection_array.size),
+        'boundary_release_projection_distance_max_m': (
+            float(np.max(projection_array)) if projection_array.size else None
+        ),
+        'boundary_release_projection_distance_mean_m': (
+            float(np.mean(projection_array)) if projection_array.size else None
+        ),
     }
     event_summary = {'matched_event_counts': event_counter, 'total_matches': int(sum(event_counter.values()))}
     return SourcePreprocessResult(

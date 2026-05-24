@@ -7,11 +7,16 @@ _tmp_*/
 _tmp_*
 _out_*/
 _out_*
+_case_focus_ring_plasma_assumption_*/
 _external_exports/
 demo_output/
 report_assets/
 examples/**/run_output*/
 examples/**/generated/
+/docs/assets/icp_validation/
+/report.md
+/particle_tracer_all_figures.zip
+/particle_tracer_decision_deck_with_figures_v4_complete.pptx
 tests/_tmp_*/
 tests/_out_*/
 *.class

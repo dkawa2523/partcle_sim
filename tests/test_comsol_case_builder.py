@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import regression_test as _regression_helpers
+import regression_helpers as _regression_helpers
 
 globals().update({
     name: value
@@ -78,6 +78,63 @@ def test_comsol_builder_does_not_write_triangle_mesh_field_by_default(tmp_path: 
     assert int(summary['field_summary']['field_ghost_cells']) == 0
     assert not (out_dir / 'generated' / 'comsol_field_mesh_2d.npz').exists()
     assert not (out_dir / 'run_config_mesh.yaml').exists()
+
+def test_comsol_builder_axisymmetric_summary_preserves_coordinate_system(tmp_path: Path):
+    out_dir = tmp_path / 'comsol_case_axisymmetric'
+    write_case_files(
+        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
+        out_dir,
+        field_bundle_path=ROOT / 'data' / 'regridded_repo_field_bundle_argon_gec_ccp_base2_2d.npz',
+        diagnostic_grid_spacing_m=5.0e-4,
+        coordinate_system='axisymmetric_rz',
+    )
+
+    cfg = yaml.safe_load((out_dir / 'run_config.yaml').read_text(encoding='utf-8'))
+    summary = _read_json(out_dir / 'generated' / 'comsol_case_summary.json')
+
+    assert cfg['run']['coordinate_system'] == 'axisymmetric_rz'
+    assert summary['coordinate_system'] == 'axisymmetric_rz'
+    assert summary['axis_names'] == ['r', 'z']
+    assert summary['axisymmetric_rz']['r0_on_grid'] == 1
+    assert summary['axisymmetric_rz']['r0_axis_boundary_edge_count'] >= 1
+    assert summary['axisymmetric_rz']['axis_boundary_policy'] == 'report_only_collision_unchanged'
+    assert summary['axisymmetric_rz']['radial_ring_area_weight']['max'] > 0.0
+    assert 'exact_match' in summary['field_axis_alignment']
+
+def test_comsol_builder_reports_field_axis_canonicalization(tmp_path: Path):
+    mesh = parse_comsol_mphtxt(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt')
+    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=1.0e-3)
+    bundle_axis_0 = np.asarray(arrays['axes_x'], dtype=np.float64).copy()
+    bundle_axis_1 = np.asarray(arrays['axes_y'], dtype=np.float64).copy()
+    if bundle_axis_0.size > 2:
+        step = float(np.min(np.diff(bundle_axis_0)))
+        bundle_axis_0[1] += 0.25 * step
+    shape = (bundle_axis_0.size, bundle_axis_1.size)
+    bundle_path = tmp_path / 'resampled_bundle.npz'
+    np.savez_compressed(
+        bundle_path,
+        axis_0=bundle_axis_0,
+        axis_1=bundle_axis_1,
+        times=np.asarray([0.0], dtype=np.float64),
+        valid_mask=np.ones(shape, dtype=bool),
+        ux=np.zeros(shape, dtype=np.float64),
+        uy=np.zeros(shape, dtype=np.float64),
+    )
+
+    out_dir = tmp_path / 'comsol_case_resampled_axes'
+    write_case_files(
+        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
+        out_dir,
+        field_bundle_path=bundle_path,
+        diagnostic_grid_spacing_m=1.0e-3,
+    )
+    summary = _read_json(out_dir / 'generated' / 'comsol_case_summary.json')
+    alignment = summary['field_axis_alignment']
+
+    assert alignment['axis_0_exact_match'] is False
+    assert alignment['axis_1_exact_match'] is True
+    assert alignment['resampled_to_geometry_axes'] is True
+    assert alignment['source_axes']['axis_0']['count'] == alignment['geometry_axes']['axis_0']['count']
 
 def test_comsol_builder_particles_only_generates_boundary_release_sources(tmp_path: Path):
     out_dir = tmp_path / 'comsol_case_boundary_release_particles'

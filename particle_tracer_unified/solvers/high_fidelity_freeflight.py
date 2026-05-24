@@ -21,6 +21,7 @@ from .compiled_field_backend import (
     sample_compiled_gas_properties as _sample_gas_properties_at,
     sample_compiled_valid_mask_status as _sample_valid_mask_status,
 )
+from .field_runtime import sample_scalar_fields_for_stage
 from .forces import ForceRuntimeParameters
 from .integrator_common import (
     DRAG_MODEL_STOKES,
@@ -93,17 +94,43 @@ def _initial_substep_tau(
 ) -> float:
     if int(drag_model_mode) == int(DRAG_MODEL_STOKES):
         return float(tau_stokes)
-    flow = _sample_flow_vector_at(compiled, int(spatial_dim), float(t_start), np.asarray(x0, dtype=np.float64))
-    target = float(global_flow_scale) * float(flow_scale_particle_i) * flow[: int(spatial_dim)]
-    slip = float(np.linalg.norm(np.asarray(v0, dtype=np.float64)[: int(spatial_dim)] - target))
-    rho_local, mu_local, temp_local = _sample_gas_properties_at(
+    sampled_stage = sample_scalar_fields_for_stage(
         compiled,
-        float(t_start),
+        None,
         np.asarray(x0, dtype=np.float64),
+        float(t_start),
+        spatial_dim=int(spatial_dim),
+        need_flow=True,
+        need_gas_properties=True,
+        need_valid_mask=False,
         fallback_density_kgm3=float(gas_density_kgm3),
         fallback_mu_pas=float(gas_mu_pas),
         fallback_temperature_K=float(gas_temperature_K),
     )
+    flow = (
+        sampled_stage.flow[0]
+        if sampled_stage.flow is not None
+        else _sample_flow_vector_at(compiled, int(spatial_dim), float(t_start), np.asarray(x0, dtype=np.float64))
+    )
+    target = float(global_flow_scale) * float(flow_scale_particle_i) * flow[: int(spatial_dim)]
+    slip = float(np.linalg.norm(np.asarray(v0, dtype=np.float64)[: int(spatial_dim)] - target))
+    if sampled_stage.gas_density is not None:
+        rho_local = float(sampled_stage.gas_density[0])
+        mu_local = float(sampled_stage.gas_mu[0]) if sampled_stage.gas_mu is not None else float(gas_mu_pas)
+        temp_local = (
+            float(sampled_stage.gas_temperature[0])
+            if sampled_stage.gas_temperature is not None
+            else float(gas_temperature_K)
+        )
+    else:
+        rho_local, mu_local, temp_local = _sample_gas_properties_at(
+            compiled,
+            float(t_start),
+            np.asarray(x0, dtype=np.float64),
+            fallback_density_kgm3=float(gas_density_kgm3),
+            fallback_mu_pas=float(gas_mu_pas),
+            fallback_temperature_K=float(gas_temperature_K),
+        )
     tau_eff = float(
         effective_tau_from_slip_speed(
             float(tau_stokes),
@@ -149,7 +176,24 @@ def _advance_etd2_substep(
     electric_q_over_m_i: Optional[float] = None,
     force_runtime: ForceRuntimeParameters | None = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    flow_start = _sample_flow_vector_at(compiled, spatial_dim, float(t_sub_start), x0)
+    sampled_start = sample_scalar_fields_for_stage(
+        compiled,
+        None,
+        x0,
+        float(t_sub_start),
+        spatial_dim=int(spatial_dim),
+        need_flow=True,
+        need_gas_properties=True,
+        need_valid_mask=False,
+        fallback_density_kgm3=float(gas_density_kgm3),
+        fallback_mu_pas=float(gas_mu_pas),
+        fallback_temperature_K=float(gas_temperature_K),
+    )
+    flow_start = (
+        sampled_start.flow[0]
+        if sampled_start.flow is not None
+        else _sample_flow_vector_at(compiled, spatial_dim, float(t_sub_start), x0)
+    )
     accel_start = _sample_acceleration_vector_at(
         compiled,
         spatial_dim,
@@ -171,14 +215,23 @@ def _advance_etd2_substep(
     )
     target_start = float(global_flow_scale) * float(flow_scale_particle_i) * flow_start
     slip_start = float(np.linalg.norm(np.asarray(v0, dtype=np.float64)[:spatial_dim] - target_start[:spatial_dim]))
-    rho_start, mu_start, temp_start = _sample_gas_properties_at(
-        compiled,
-        float(t_sub_start),
-        x0,
-        fallback_density_kgm3=float(gas_density_kgm3),
-        fallback_mu_pas=float(gas_mu_pas),
-        fallback_temperature_K=float(gas_temperature_K),
-    )
+    if sampled_start.gas_density is not None:
+        rho_start = float(sampled_start.gas_density[0])
+        mu_start = float(sampled_start.gas_mu[0]) if sampled_start.gas_mu is not None else float(gas_mu_pas)
+        temp_start = (
+            float(sampled_start.gas_temperature[0])
+            if sampled_start.gas_temperature is not None
+            else float(gas_temperature_K)
+        )
+    else:
+        rho_start, mu_start, temp_start = _sample_gas_properties_at(
+            compiled,
+            float(t_sub_start),
+            x0,
+            fallback_density_kgm3=float(gas_density_kgm3),
+            fallback_mu_pas=float(gas_mu_pas),
+            fallback_temperature_K=float(gas_temperature_K),
+        )
     gravity_factor_start = 1.0
     if force_runtime is not None and bool(force_runtime.gravity_buoyancy_enabled) and float(particle_density_kgm3) > 0.0:
         gravity_factor_start = 1.0 - float(rho_start) / float(particle_density_kgm3)
@@ -213,7 +266,24 @@ def _advance_etd2_substep(
         )
         t_mid = float(t_sub_start) + 0.5 * float(dt_sub)
         x_half = np.asarray([xh, yh], dtype=np.float64)
-        flow_mid = _sample_flow_vector_at(compiled, spatial_dim, t_mid, x_half)
+        sampled_mid = sample_scalar_fields_for_stage(
+            compiled,
+            None,
+            x_half,
+            float(t_mid),
+            spatial_dim=int(spatial_dim),
+            need_flow=True,
+            need_gas_properties=True,
+            need_valid_mask=False,
+            fallback_density_kgm3=float(gas_density_kgm3),
+            fallback_mu_pas=float(gas_mu_pas),
+            fallback_temperature_K=float(gas_temperature_K),
+        )
+        flow_mid = (
+            sampled_mid.flow[0]
+            if sampled_mid.flow is not None
+            else _sample_flow_vector_at(compiled, spatial_dim, t_mid, x_half)
+        )
         accel_mid = _sample_acceleration_vector_at(
             compiled,
             spatial_dim,
@@ -235,14 +305,23 @@ def _advance_etd2_substep(
         )
         target_mid = float(global_flow_scale) * float(flow_scale_particle_i) * flow_mid
         slip_mid = float(np.linalg.norm(np.asarray([vxh, vyh], dtype=np.float64) - target_mid[:2]))
-        rho_mid, mu_mid, temp_mid = _sample_gas_properties_at(
-            compiled,
-            float(t_mid),
-            x_half,
-            fallback_density_kgm3=float(gas_density_kgm3),
-            fallback_mu_pas=float(gas_mu_pas),
-            fallback_temperature_K=float(gas_temperature_K),
-        )
+        if sampled_mid.gas_density is not None:
+            rho_mid = float(sampled_mid.gas_density[0])
+            mu_mid = float(sampled_mid.gas_mu[0]) if sampled_mid.gas_mu is not None else float(gas_mu_pas)
+            temp_mid = (
+                float(sampled_mid.gas_temperature[0])
+                if sampled_mid.gas_temperature is not None
+                else float(gas_temperature_K)
+            )
+        else:
+            rho_mid, mu_mid, temp_mid = _sample_gas_properties_at(
+                compiled,
+                float(t_mid),
+                x_half,
+                fallback_density_kgm3=float(gas_density_kgm3),
+                fallback_mu_pas=float(gas_mu_pas),
+                fallback_temperature_K=float(gas_temperature_K),
+            )
         gravity_factor_mid = 1.0
         if force_runtime is not None and bool(force_runtime.gravity_buoyancy_enabled) and float(particle_density_kgm3) > 0.0:
             gravity_factor_mid = 1.0 - float(rho_mid) / float(particle_density_kgm3)
@@ -297,7 +376,24 @@ def _advance_etd2_substep(
     )
     t_mid = float(t_sub_start) + 0.5 * float(dt_sub)
     x_half = np.asarray([xh, yh, zh], dtype=np.float64)
-    flow_mid = _sample_flow_vector_at(compiled, spatial_dim, t_mid, x_half)
+    sampled_mid = sample_scalar_fields_for_stage(
+        compiled,
+        None,
+        x_half,
+        float(t_mid),
+        spatial_dim=int(spatial_dim),
+        need_flow=True,
+        need_gas_properties=True,
+        need_valid_mask=False,
+        fallback_density_kgm3=float(gas_density_kgm3),
+        fallback_mu_pas=float(gas_mu_pas),
+        fallback_temperature_K=float(gas_temperature_K),
+    )
+    flow_mid = (
+        sampled_mid.flow[0]
+        if sampled_mid.flow is not None
+        else _sample_flow_vector_at(compiled, spatial_dim, t_mid, x_half)
+    )
     accel_mid = _sample_acceleration_vector_at(
         compiled,
         spatial_dim,
@@ -319,14 +415,23 @@ def _advance_etd2_substep(
     )
     target_mid = float(global_flow_scale) * float(flow_scale_particle_i) * flow_mid
     slip_mid = float(np.linalg.norm(np.asarray([vxh, vyh, vzh], dtype=np.float64) - target_mid[:3]))
-    rho_mid, mu_mid, temp_mid = _sample_gas_properties_at(
-        compiled,
-        float(t_mid),
-        x_half,
-        fallback_density_kgm3=float(gas_density_kgm3),
-        fallback_mu_pas=float(gas_mu_pas),
-        fallback_temperature_K=float(gas_temperature_K),
-    )
+    if sampled_mid.gas_density is not None:
+        rho_mid = float(sampled_mid.gas_density[0])
+        mu_mid = float(sampled_mid.gas_mu[0]) if sampled_mid.gas_mu is not None else float(gas_mu_pas)
+        temp_mid = (
+            float(sampled_mid.gas_temperature[0])
+            if sampled_mid.gas_temperature is not None
+            else float(gas_temperature_K)
+        )
+    else:
+        rho_mid, mu_mid, temp_mid = _sample_gas_properties_at(
+            compiled,
+            float(t_mid),
+            x_half,
+            fallback_density_kgm3=float(gas_density_kgm3),
+            fallback_mu_pas=float(gas_mu_pas),
+            fallback_temperature_K=float(gas_temperature_K),
+        )
     gravity_factor_mid = 1.0
     if force_runtime is not None and bool(force_runtime.gravity_buoyancy_enabled) and float(particle_density_kgm3) > 0.0:
         gravity_factor_mid = 1.0 - float(rho_mid) / float(particle_density_kgm3)
@@ -499,10 +604,31 @@ def advance_freeflight_segment(
                 valid_mask_status = int(sample_status)
         else:
             t_eval = t_start + (float(sub_idx) + 1.0) * dt_sub
-            sample_status = _sample_valid_mask_status(backend, x_curr)
+            sampled_stage = sample_scalar_fields_for_stage(
+                backend,
+                None,
+                x_curr,
+                float(t_eval),
+                spatial_dim=int(spatial_dim),
+                need_flow=True,
+                need_gas_properties=True,
+                need_valid_mask=True,
+                fallback_density_kgm3=float(gas_density_kgm3),
+                fallback_mu_pas=float(gas_mu_pas),
+                fallback_temperature_K=float(gas_temperature_K),
+            )
+            sample_status = (
+                int(sampled_stage.valid_mask_status[0])
+                if sampled_stage.valid_mask_status is not None
+                else int(_sample_valid_mask_status(backend, x_curr))
+            )
             if sample_status > valid_mask_status:
                 valid_mask_status = int(sample_status)
-            flow = _sample_flow_vector_at(backend, spatial_dim, t_eval, x_curr)
+            flow = (
+                sampled_stage.flow[0]
+                if sampled_stage.flow is not None
+                else _sample_flow_vector_at(backend, spatial_dim, t_eval, x_curr)
+            )
             accel = _sample_acceleration_vector_at(
                 backend,
                 spatial_dim,
@@ -524,14 +650,23 @@ def advance_freeflight_segment(
             )
             target = float(global_flow_scale) * float(flow_scale_particle_i) * flow
             slip = float(np.linalg.norm(v_curr[:spatial_dim] - target[:spatial_dim]))
-            rho_local, mu_local, temp_local = _sample_gas_properties_at(
-                backend,
-                float(t_eval),
-                x_curr,
-                fallback_density_kgm3=float(gas_density_kgm3),
-                fallback_mu_pas=float(gas_mu_pas),
-                fallback_temperature_K=float(gas_temperature_K),
-            )
+            if sampled_stage.gas_density is not None:
+                rho_local = float(sampled_stage.gas_density[0])
+                mu_local = float(sampled_stage.gas_mu[0]) if sampled_stage.gas_mu is not None else float(gas_mu_pas)
+                temp_local = (
+                    float(sampled_stage.gas_temperature[0])
+                    if sampled_stage.gas_temperature is not None
+                    else float(gas_temperature_K)
+                )
+            else:
+                rho_local, mu_local, temp_local = _sample_gas_properties_at(
+                    backend,
+                    float(t_eval),
+                    x_curr,
+                    fallback_density_kgm3=float(gas_density_kgm3),
+                    fallback_mu_pas=float(gas_mu_pas),
+                    fallback_temperature_K=float(gas_temperature_K),
+                )
             gravity_factor = 1.0
             if force_runtime is not None and bool(force_runtime.gravity_buoyancy_enabled) and float(particle_density_i) > 0.0:
                 gravity_factor = 1.0 - float(rho_local) / float(particle_density_i)

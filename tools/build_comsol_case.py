@@ -10,7 +10,11 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from particle_tracer_unified.core.coordinate_systems import normalize_coordinate_system
+from particle_tracer_unified.core.coordinate_systems import (
+    axis_names_for_coordinate_system,
+    axisymmetric_rz_geometry_report,
+    normalize_coordinate_system,
+)
 from particle_tracer_unified.core.field_sampling import VALID_MASK_STATUS_CLEAN, sample_valid_mask_status
 from particle_tracer_unified.core.geometry2d import (
     build_boundary_loops_2d,
@@ -866,6 +870,61 @@ def _same_axis_extent(source: np.ndarray, target: np.ndarray) -> bool:
     )
 
 
+def _axis_summary(axis: Optional[np.ndarray]) -> Dict[str, Any]:
+    if axis is None:
+        return {'count': 0, 'min': None, 'max': None}
+    arr = np.asarray(axis, dtype=np.float64)
+    finite = arr[np.isfinite(arr)]
+    return {
+        'count': int(arr.size),
+        'min': float(np.min(finite)) if finite.size else None,
+        'max': float(np.max(finite)) if finite.size else None,
+    }
+
+
+def _case_axisymmetric_report(
+    coordinate_system: str,
+    axes_x: np.ndarray,
+    axes_y: np.ndarray,
+    arrays: Mapping[str, Any],
+) -> Dict[str, Any]:
+    return axisymmetric_rz_geometry_report(
+        coordinate_system=coordinate_system,
+        spatial_dim=2,
+        axes=(np.asarray(axes_x, dtype=np.float64), np.asarray(axes_y, dtype=np.float64)),
+        boundary_edges=arrays.get('boundary_edges'),
+        boundary_edge_part_ids=arrays.get('boundary_part_ids'),
+    )
+
+
+def _field_axis_alignment_summary(
+    payload: Mapping[str, np.ndarray],
+    axes_x: np.ndarray,
+    axes_y: np.ndarray,
+) -> Dict[str, Any]:
+    bundle_axes_x = np.asarray(payload['axis_0'], dtype=np.float64) if 'axis_0' in payload else None
+    bundle_axes_y = np.asarray(payload['axis_1'], dtype=np.float64) if 'axis_1' in payload else None
+    geometry_axes_x = np.asarray(axes_x, dtype=np.float64)
+    geometry_axes_y = np.asarray(axes_y, dtype=np.float64)
+    axis_0_exact = _axes_match(bundle_axes_x, geometry_axes_x)
+    axis_1_exact = _axes_match(bundle_axes_y, geometry_axes_y)
+    exact_match = bool(axis_0_exact and axis_1_exact)
+    return {
+        'source_axes': {
+            'axis_0': _axis_summary(bundle_axes_x),
+            'axis_1': _axis_summary(bundle_axes_y),
+        },
+        'geometry_axes': {
+            'axis_0': _axis_summary(geometry_axes_x),
+            'axis_1': _axis_summary(geometry_axes_y),
+        },
+        'axis_0_exact_match': bool(axis_0_exact),
+        'axis_1_exact_match': bool(axis_1_exact),
+        'exact_match': exact_match,
+        'resampled_to_geometry_axes': not exact_match,
+    }
+
+
 def _validate_field_bundle_payload(payload: Mapping[str, np.ndarray], axes_x: np.ndarray, axes_y: np.ndarray) -> Dict[str, np.ndarray]:
     if 'ux' not in payload or 'uy' not in payload:
         raise ValueError('field bundle must include ux and uy')
@@ -1423,6 +1482,10 @@ def write_case_files(
         'coordinate_unit': 'm',
         'coordinate_scale_m_per_model_unit': float(coordinate_scale),
     }
+    axis_names = axis_names_for_coordinate_system(coordinate_system, 2)
+    axisymmetric_report = _case_axisymmetric_report(coordinate_system, axes_x, axes_y, arrays)
+    if axisymmetric_report:
+        geom_metadata['axisymmetric_rz'] = axisymmetric_report
 
     geom_npz = generated / 'comsol_geometry_2d.npz'
     _write_geometry_npz(geom_npz, axes_x=axes_x, axes_y=axes_y, arrays=arrays, mesh=mesh, metadata=geom_metadata)
@@ -1431,8 +1494,14 @@ def write_case_files(
     field_summary: Dict[str, Any] = {'mode': 'geometry_only'}
     particle_field_valid_mask: Optional[np.ndarray] = None
     if field_bundle_path is not None:
+        source_bundle_payload = _load_npz_payload(field_bundle_path)
+        axis_alignment = _field_axis_alignment_summary(
+            source_bundle_payload,
+            np.asarray(base_arrays['axes_x'], dtype=np.float64),
+            np.asarray(base_arrays['axes_y'], dtype=np.float64),
+        )
         bundle_payload = _validate_field_bundle_payload(
-            _load_npz_payload(field_bundle_path),
+            source_bundle_payload,
             np.asarray(base_arrays['axes_x'], dtype=np.float64),
             np.asarray(base_arrays['axes_y'], dtype=np.float64),
         )
@@ -1468,6 +1537,7 @@ def write_case_files(
             ),
             'field_support_phi_kind': 'provider_support_phi' if has_bundle_support_phi else '',
             'bundle_path': str(field_bundle_path.resolve()),
+            'axis_alignment': axis_alignment,
             'has_domain_region_map': False,
         }
         geometry_support_phi = -np.asarray(arrays['sdf'], dtype=np.float64)
@@ -1492,6 +1562,7 @@ def write_case_files(
         field_summary = {
             'mode': 'validated_export_bundle',
             'bundle_path': str(field_bundle_path.resolve()),
+            'axis_alignment': axis_alignment,
             'geometry_mask_applied': False,
             'field_ghost_cells': int(ghost_cells),
             'field_valid_mask_source': field_valid_mask_source,
@@ -1547,6 +1618,9 @@ def write_case_files(
             'field_support_fallback_boundary_edge_count': field_support_fallback_boundary_edge_count,
             'field_support_wall_part_ids': sorted(np.unique(arrays['boundary_part_ids']).astype(int).tolist()),
         }
+        axisymmetric_report = _case_axisymmetric_report(coordinate_system, axes_x, axes_y, arrays)
+        if axisymmetric_report:
+            geom_metadata['axisymmetric_rz'] = axisymmetric_report
         _write_geometry_npz(geom_npz, axes_x=axes_x, axes_y=axes_y, arrays=arrays, mesh=mesh, metadata=geom_metadata)
         field_summary.update(
             {
@@ -1629,11 +1703,13 @@ def write_case_files(
         'geometry_mode': str(geom_metadata.get('source_kind', 'surface_element_boundary_edges_plus_diagnostic_sdf')),
         'field_mode': field_summary['mode'],
         'field_summary': field_summary,
+        'field_axis_alignment': dict(field_summary.get('axis_alignment', {})),
         'diagnostic_grid_spacing_m': float(diagnostic_grid_spacing_m),
         'field_ghost_cells': int(ghost_cells),
         'coordinate_unit': 'm',
         'coordinate_scale_m_per_model_unit': float(coordinate_scale),
         'coordinate_system': coordinate_system,
+        'axis_names': list(axis_names),
         'wall_policy': {
             'physical_wall_law': 'specular',
             'physical_wall_stick_probability': PHYSICAL_WALL_STICK_PROBABILITY,
@@ -1652,6 +1728,8 @@ def write_case_files(
         },
         'note': 'COMSOL exterior geometry is scaled to SI metres, then field-support geometry is used when field data are present.',
     }
+    if axisymmetric_report:
+        summary['axisymmetric_rz'] = dict(axisymmetric_report)
     if field_bundle_path is not None:
         config = {
             'run': {

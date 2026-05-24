@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import regression_test as _regression_helpers
+import regression_helpers as _regression_helpers
 
 globals().update({
     name: value
@@ -226,6 +226,7 @@ def test_etd_integrator_runs_in_2d(tmp_path: Path):
     config_path = _write_minimal_2d_config(
         tmp_path,
         solver_updates={'integrator': 'etd', 't_end': 0.1, 'save_every': 1},
+        output_updates={'write_collision_diagnostics': 1},
     )
     run_solver_2d_from_yaml(config_path, output_dir=out_dir)
     report = _solver_report(out_dir)
@@ -239,6 +240,7 @@ def test_etd2_integrator_runs_in_2d_and_3d(tmp_path: Path):
         tmp_path / 'cfg_2d_etd2',
         spatial_dim=2,
         solver_updates={'integrator': 'etd2', 't_end': 0.1, 'save_every': 1},
+        output_updates={'write_collision_diagnostics': 1},
     )
     run_solver_2d_from_yaml(cfg_2d, output_dir=out_2d)
     report_2d = _solver_report(out_2d)
@@ -268,6 +270,7 @@ def test_etd2_integrator_runs_in_2d_and_3d(tmp_path: Path):
         tmp_path / 'cfg_3d_etd2',
         spatial_dim=3,
         solver_updates={'integrator': 'etd2', 't_end': 0.1, 'save_every': 1},
+        output_updates={'write_collision_diagnostics': 1},
     )
     run_solver_3d_from_yaml(cfg_3d, output_dir=out_3d)
     report_3d = _solver_report(out_3d)
@@ -352,6 +355,7 @@ def test_valid_mask_diagnostics_do_not_change_solver_outputs(tmp_path: Path):
                 },
             },
             solver_updates={'integrator': 'etd2', 't_end': 0.12, 'save_every': 1, 'valid_mask_policy': 'diagnostic'},
+            output_updates={'write_runtime_step_summary': 1},
             input_contract_updates={'initial_particle_field_support': 'warn'},
             provider_contract_updates={'boundary_field_support': 'off'},
         )
@@ -410,14 +414,15 @@ def test_valid_mask_retry_then_stop_does_not_stop_on_mixed_stencil_only():
         absorbed=np.asarray([False], dtype=bool),
         escaped=np.asarray([False], dtype=bool),
         collision_diagnostics=initial_collision_diagnostics(),
+        solver_plan=SimpleNamespace(
+            valid_mask_policy='retry_then_stop',
+            adaptive_substep_enabled=0,
+            adaptive_substep_tau_ratio=0.5,
+            adaptive_substep_max_splits=4,
+            drag_model_mode=0,
+        ),
     )
-    options = SimpleNamespace(
-        valid_mask_policy='retry_then_stop',
-        adaptive_substep_enabled=0,
-        adaptive_substep_tau_ratio=0.5,
-        adaptive_substep_max_splits=4,
-        drag_model_mode=0,
-    )
+    options = SimpleNamespace()
 
     stopped_count = _apply_valid_mask_retry_then_stop(
         state=state,
@@ -469,6 +474,7 @@ def test_valid_mask_retry_then_stop_stops_particle_at_last_valid_prefix(tmp_path
         field_path=field_path,
         particles_path=particles_path,
         solver_updates={'t_end': 0.2, 'dt': 0.2, 'save_every': 1, 'integrator': 'etd2', 'adaptive_substep_max_splits': 4},
+        output_updates={'write_collision_diagnostics': 1, 'write_runtime_step_summary': 1, 'write_wall_events': 1},
         provider_contract={'boundary_field_support': 'off'},
     )
 
@@ -534,6 +540,7 @@ def test_valid_mask_retry_then_stop_keeps_particle_at_pre_step_when_no_valid_pre
             'valid_mask_policy': 'retry_then_stop',
         },
         input_mode='warn',
+        output_updates={'write_collision_diagnostics': 1},
         provider_contract={'boundary_field_support': 'off'},
     )
 

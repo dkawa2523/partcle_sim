@@ -40,6 +40,11 @@ collision replay and normal free flight stay consistent.
 Provider support is authoritative. Runtime assembly does not fill missing field
 values, clamp outside-axis points, or silently expand valid masks.
 
+Internal field-sampling helpers may bundle multiple requested quantities at a
+stage point, but they must call the same provider/backend sampling paths and
+preserve the provider-authored status. A bundled sample is a cache/organization
+device, not permission to extrapolate, repair, or reinterpret field support.
+
 Valid-mask states:
 
 - `clean`: point and interpolation stencil are valid
@@ -70,11 +75,27 @@ faithful mode keeps strict clean support.
 | `solver.valid_mask_policy` | Runtime response to field support loss. Use `retry_then_stop` for production trajectories. |
 | `field_support.mixed_stencil_policy` | COMSOL faithful export gate; keep `error` for strict parity. |
 
+## Calibration Inputs
+
+Treat these settings as case calibration, not numerical rescue knobs:
+
+- `solver.epsilon_offset_m` and `solver.on_boundary_tol_m` control boundary
+  release/contact tolerance and should be scaled to geometry resolution.
+- Wall law probabilities, restitution, and diffuse/stick choices should come
+  from material or chamber assumptions, not from trajectory cleanup.
+- `solver.drag_model` selects the drag law. Scalar gas fallbacks are used only
+  where the existing model already permits them; they do not fill field gaps.
+
 ## Boundaries
 
 Wall events should come from provider-backed boundary primitives plus a physical
 hit-time solve on the particle trajectory. Wall reflection uses the hit-time
 state `(x_hit, v_hit)`, not the segment endpoint.
+
+Boundary broad-phase pruning is allowed only as a conservative candidate filter
+in front of the existing exact hit-time solve. Candidate misses must remain zero
+in debug diagnostics, and COMSOL faithful mode keeps broad-phase pruning disabled
+by default until boundary comparison parity has been demonstrated.
 
 `max_wall_hits_per_step` is a diagnostic guard. Production runs should have:
 

@@ -4,11 +4,12 @@ import csv
 import json
 import math
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Mapping, Tuple
 
 import numpy as np
 
 from .boundary_core import inside_geometry
+from .coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_report_from_metadata
 from .datamodel import PreparedRuntime
 from .field_backend import field_backend_kind, field_backend_report, sample_field_valid_status
 from .field_sampling import (
@@ -23,6 +24,23 @@ _STATUS_NAMES = {
     int(VALID_MASK_STATUS_MIXED_STENCIL): 'mixed_stencil',
     int(VALID_MASK_STATUS_HARD_INVALID): 'hard_invalid',
 }
+
+
+def _runtime_coordinate_report(runtime) -> Dict[str, Any]:
+    spatial_dim = int(getattr(runtime, 'spatial_dim', 0))
+    coordinate_system = str(getattr(runtime, 'coordinate_system', ''))
+    axis_names = axis_names_for_coordinate_system(coordinate_system, spatial_dim) if spatial_dim in {2, 3} else ()
+    report: Dict[str, Any] = {
+        'spatial_dim': spatial_dim,
+        'coordinate_system': coordinate_system,
+        'axis_names': list(axis_names),
+    }
+    geometry_provider = getattr(runtime, 'geometry_provider', None)
+    geometry = getattr(geometry_provider, 'geometry', None) if geometry_provider is not None else None
+    axisymmetric_report = axisymmetric_rz_report_from_metadata(getattr(geometry, 'metadata', None))
+    if axisymmetric_report:
+        report['axisymmetric_rz'] = axisymmetric_report
+    return report
 
 
 def _new_violation_part_summary(part_id: int, spatial_dim: int) -> Dict[str, Any]:
@@ -77,7 +95,7 @@ def _finish_violation_part_summary(summary: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _violation_csv_row(row: Dict[str, Any], spatial_dim: int) -> Dict[str, Any]:
+def _violation_csv_row(row: Dict[str, Any], spatial_dim: int, axis_names: Tuple[str, ...]) -> Dict[str, Any]:
     out = {
         'sample_index': int(row.get('sample_index', 0)),
         'part_id': int(row.get('part_id', 0)),
@@ -88,13 +106,13 @@ def _violation_csv_row(row: Dict[str, Any], spatial_dim: int) -> Dict[str, Any]:
     }
     boundary = list(row.get('boundary_position', []))
     offset = list(row.get('offset_position', []))
-    for dim, axis in enumerate(('x', 'y', 'z')[: int(spatial_dim)]):
+    for dim, axis in enumerate(axis_names[: int(spatial_dim)]):
         out[f'boundary_{axis}'] = boundary[dim] if dim < len(boundary) else ''
         out[f'offset_{axis}'] = offset[dim] if dim < len(offset) else ''
     return out
 
 
-def _summary_csv_row(row: Dict[str, Any], spatial_dim: int) -> Dict[str, Any]:
+def _summary_csv_row(row: Dict[str, Any], spatial_dim: int, axis_names: Tuple[str, ...]) -> Dict[str, Any]:
     out = {
         'part_id': int(row.get('part_id', 0)),
         'violation_count': int(row.get('violation_count', 0)),
@@ -108,7 +126,7 @@ def _summary_csv_row(row: Dict[str, Any], spatial_dim: int) -> Dict[str, Any]:
         ('offset_min', list(row.get('offset_min', []))),
         ('offset_max', list(row.get('offset_max', []))),
     ):
-        for dim, axis in enumerate(('x', 'y', 'z')[: int(spatial_dim)]):
+        for dim, axis in enumerate(axis_names[: int(spatial_dim)]):
             value = values[dim] if dim < len(values) else None
             out[f'{prefix}_{axis}'] = '' if value is None else value
     return out
@@ -160,13 +178,17 @@ def _geometry_boundary_report(runtime) -> Dict[str, Any]:
     metadata = getattr(geom, 'metadata', {})
     if int(geom.spatial_dim) == 2:
         edges = geom.boundary_edges
-        return {
+        report = {
             'available': edges is not None,
             'spatial_dim': 2,
             'boundary_edge_count': int(edges.shape[0]) if edges is not None else 0,
             'boundary_loop_count': int(metadata.get('boundary_loop_count_2d', len(getattr(geom, 'boundary_loops_2d', ())))),
             'boundary_edge_topology': metadata.get('boundary_edge_topology', {}),
         }
+        axisymmetric_report = axisymmetric_rz_report_from_metadata(metadata)
+        if axisymmetric_report:
+            report['axisymmetric_rz'] = axisymmetric_report
+        return report
     triangles = geom.boundary_triangles
     validation = metadata.get('boundary_surface_validation', {})
     return {
@@ -290,8 +312,10 @@ def _inside_offset_point(runtime, point: np.ndarray, normals: Tuple[np.ndarray, 
     return None
 
 
-def _empty_report(mode: str, reason: str, field_kind: str = '') -> Dict[str, Any]:
+def _empty_report(mode: str, reason: str, field_kind: str = '', runtime=None) -> Dict[str, Any]:
+    coordinate_report = _runtime_coordinate_report(runtime) if runtime is not None else {}
     return {
+        **coordinate_report,
         'mode': mode,
         'passed': True,
         'applicable': False,
@@ -319,18 +343,18 @@ def build_boundary_field_support_report(prepared: PreparedRuntime) -> Dict[str, 
     runtime = prepared.runtime
     mode, offset_cells, max_samples, max_time_samples = _contract_config(prepared)
     if mode == 'off':
-        return _empty_report(mode, 'provider contract disabled')
+        return _empty_report(mode, 'provider contract disabled', runtime=runtime)
     if runtime.geometry_provider is None:
-        return _empty_report(mode, 'no geometry provider')
+        return _empty_report(mode, 'no geometry provider', runtime=runtime)
     if runtime.field_provider is None:
-        return _empty_report(mode, 'no field provider')
+        return _empty_report(mode, 'no field provider', runtime=runtime)
     geom = runtime.geometry_provider.geometry
     field_kind = str(field_backend_kind(runtime.field_provider))
     has_boundary = (int(geom.spatial_dim) == 2 and geom.boundary_edges is not None) or (
         int(geom.spatial_dim) == 3 and geom.boundary_triangles is not None
     )
     if not has_boundary:
-        return _empty_report(mode, 'geometry provider has no explicit boundary surface', field_kind)
+        return _empty_report(mode, 'geometry provider has no explicit boundary surface', field_kind, runtime=runtime)
     offset_m = _cell_diagonal(tuple(np.asarray(ax, dtype=np.float64) for ax in geom.axes)) * float(offset_cells)
     if not np.isfinite(offset_m) or offset_m <= 0.0:
         raise ValueError('Could not compute a positive provider boundary offset from geometry axes')
@@ -397,6 +421,7 @@ def build_boundary_field_support_report(prepared: PreparedRuntime) -> Dict[str, 
     time_axis = backend_report.get('time_axis', {}) if isinstance(backend_report, dict) else {}
     time_axis_mismatch_count = int(time_axis.get('quantity_time_axis_mismatch_count', 0)) if isinstance(time_axis, dict) else 0
     return {
+        **_runtime_coordinate_report(runtime),
         'mode': mode,
         'passed': int(status_counts['non_clean']) == 0 and time_axis_mismatch_count == 0,
         'applicable': True,
@@ -436,7 +461,8 @@ def write_provider_contract_report(prepared: PreparedRuntime, output_dir: Path) 
     summary_path = out / 'provider_boundary_summary.csv'
     if violations:
         spatial_dim = int(report.get('spatial_dim', 0))
-        axis_names = ('x', 'y', 'z')[:spatial_dim]
+        raw_axis_names = report.get('axis_names', ('x', 'y', 'z')[:spatial_dim])
+        axis_names = tuple(str(v) for v in raw_axis_names) if isinstance(raw_axis_names, (list, tuple)) else ('x', 'y', 'z')[:spatial_dim]
         fieldnames = ['sample_index', 'part_id', 'boundary_index', 'sample_kind', 'checked_time_s', 'status']
         fieldnames.extend([f'boundary_{axis}' for axis in axis_names])
         fieldnames.extend([f'offset_{axis}' for axis in axis_names])
@@ -444,12 +470,13 @@ def write_provider_contract_report(prepared: PreparedRuntime, output_dir: Path) 
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             for row in violations:
-                writer.writerow(_violation_csv_row(row, spatial_dim))
+                writer.writerow(_violation_csv_row(row, spatial_dim, axis_names))
     elif violations_path.exists():
         violations_path.unlink()
     if summaries:
         spatial_dim = int(report.get('spatial_dim', 0))
-        axis_names = ('x', 'y', 'z')[:spatial_dim]
+        raw_axis_names = report.get('axis_names', ('x', 'y', 'z')[:spatial_dim])
+        axis_names = tuple(str(v) for v in raw_axis_names) if isinstance(raw_axis_names, (list, tuple)) else ('x', 'y', 'z')[:spatial_dim]
         fieldnames = ['part_id', 'violation_count', 'mixed_stencil', 'hard_invalid', 'no_interior_offset']
         for prefix in ('boundary_min', 'boundary_max', 'offset_min', 'offset_max'):
             fieldnames.extend([f'{prefix}_{axis}' for axis in axis_names])
@@ -457,7 +484,7 @@ def write_provider_contract_report(prepared: PreparedRuntime, output_dir: Path) 
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             for row in summaries:
-                writer.writerow(_summary_csv_row(row, spatial_dim))
+                writer.writerow(_summary_csv_row(row, spatial_dim, axis_names))
     elif summary_path.exists():
         summary_path.unlink()
     return report
