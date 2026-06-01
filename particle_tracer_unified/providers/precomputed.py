@@ -14,6 +14,7 @@ from ..core.datamodel import (
     RegularFieldND,
     TriangleMeshField2D,
 )
+from ..core.coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_geometry_report
 from ..core.geometry2d import build_boundary_loops_2d, decode_boundary_loops_2d, validate_boundary_edges_2d
 from ..core.geometry3d import validate_closed_surface_triangles
 from ..core.triangle_mesh_sampling_2d import build_triangle_candidate_grid
@@ -164,6 +165,15 @@ def build_precomputed_geometry(cfg: Mapping[str, Any], spatial_dim: int, coordin
             'boundary_edge_topology': validate_boundary_edges_2d(boundary_edges),
             'boundary_loop_count_2d': int(len(boundary_loops_2d)),
         }
+    axisymmetric_report = axisymmetric_rz_geometry_report(
+        coordinate_system=coordinate_system,
+        spatial_dim=spatial_dim,
+        axes=axes,
+        boundary_edges=boundary_edges,
+        boundary_edge_part_ids=boundary_edge_part_ids,
+    )
+    if axisymmetric_report:
+        metadata = {**metadata, 'axisymmetric_rz': axisymmetric_report}
     if spatial_dim == 3 and boundary_triangles is not None:
         if boundary_triangle_part_ids is not None and boundary_triangle_part_ids.shape[0] != boundary_triangles.shape[0]:
             raise ValueError(
@@ -203,8 +213,13 @@ def build_precomputed_field(
     npz_path = _resolve_path(cfg)
     with np.load(npz_path) as payload:
         field_axes = _read_axes(payload, spatial_dim) if f'axis_{spatial_dim - 1}' in payload else tuple(np.asarray(ax, dtype=np.float64) for ax in axes)
-        if len(field_axes) != len(axes) or any(a.shape != b.shape or not np.allclose(a, b, atol=1e-12, rtol=0.0) for a, b in zip(field_axes, axes)):
+        if len(field_axes) != len(axes):
             raise ValueError(f'Field axes must exactly match geometry axes in {npz_path}')
+        for axis_index, (field_axis, geometry_axis) in enumerate(zip(field_axes, axes)):
+            if field_axis.shape != geometry_axis.shape or not np.allclose(field_axis, geometry_axis, atol=1e-12, rtol=0.0):
+                raise ValueError(
+                    f'Field axis_{axis_index} must exactly match geometry axis_{axis_index} in {npz_path}'
+                )
         expected_shape = tuple(len(ax) for ax in field_axes)
         valid_mask = np.asarray(payload['valid_mask'], dtype=bool) if 'valid_mask' in payload else np.ones(expected_shape, dtype=bool)
         if valid_mask.shape != expected_shape:
@@ -243,7 +258,7 @@ def build_precomputed_field(
     field = RegularFieldND(
         spatial_dim=int(spatial_dim),
         coordinate_system=str(coordinate_system),
-        axis_names=tuple('xyz'[:spatial_dim]),
+        axis_names=axis_names_for_coordinate_system(coordinate_system, spatial_dim),
         axes=field_axes,
         quantities=quantities,
         valid_mask=valid_mask,

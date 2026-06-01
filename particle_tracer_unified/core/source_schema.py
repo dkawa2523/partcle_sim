@@ -136,6 +136,20 @@ RESUSPENSION_SOURCE_PARAMETERS = (
     'source_resuspension_normal_speed_mean_mps',
     'source_resuspension_normal_speed_std_mps',
     'source_tangent_speed_std_mps',
+    'source_resuspension_speed_threshold_mps',
+    'source_resuspension_tau_threshold_Pa',
+    'source_resuspension_utau_threshold_mps',
+    'source_resuspension_shear_length_m',
+    'source_dynamic_viscosity_Pas',
+    'source_roughness_rms',
+    'source_roughness_corr_length_m',
+    'source_roughness_slope_rms',
+    'source_adhesion_energy_Jm2',
+    'source_resuspension_roughness_scale',
+    'source_resuspension_adhesion_scale',
+    'source_resuspension_tau_roughness_scale',
+    'source_resuspension_tau_adhesion_scale',
+    'source_resuspension_tau_slope_scale',
 )
 
 THERMAL_REEMISSION_SOURCE_PARAMETERS = (
@@ -144,4 +158,3 @@ THERMAL_REEMISSION_SOURCE_PARAMETERS = (
     'source_temperature_K',
     'source_thermal_accommodation',
 )
-

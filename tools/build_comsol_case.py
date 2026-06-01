@@ -10,26 +10,22 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from particle_tracer_unified.core.coordinate_systems import normalize_coordinate_system
+from particle_tracer_unified.core.coordinate_systems import (
+    axis_names_for_coordinate_system,
+    axisymmetric_rz_geometry_report,
+    normalize_coordinate_system,
+)
 from particle_tracer_unified.core.field_sampling import VALID_MASK_STATUS_CLEAN, sample_valid_mask_status
 from particle_tracer_unified.core.geometry2d import (
     build_boundary_loops_2d,
     encode_boundary_loops_2d,
     points_inside_boundary_loops_2d,
 )
-from particle_tracer_unified.core.grid_sampling import sample_grid_scalar
-
-DEFAULT_FIELD_GHOST_CELLS = 8
+DEFAULT_FIELD_GHOST_CELLS = 0
 FIELD_SUPPORT_BOUNDARY_PART_ID = 9001
-PHYSICAL_WALL_STICK_PROBABILITY = 0.5
+PHYSICAL_WALL_STICK_PROBABILITY = 0.0
 
-AXIS_SYMMETRY_PART_IDS = frozenset({2, 4, 6, 8, 10})
-WAFER_PART_IDS = frozenset({3})
-CHAMBER_WALL_PART_IDS = frozenset({12, 32, 36})
-SIDEWALL_PART_IDS = frozenset({42, 43, 44, 45})
-KNOWN_COMSOL_WALL_PART_IDS = (
-    AXIS_SYMMETRY_PART_IDS | WAFER_PART_IDS | CHAMBER_WALL_PART_IDS | SIDEWALL_PART_IDS
-)
+KNOWN_COMSOL_WALL_PART_IDS = frozenset()
 
 
 @dataclass(frozen=True)
@@ -386,44 +382,22 @@ def _support_boundary_part_ids_from_reference(
 
 def _wall_role_for_part_id(part_id: int) -> Dict[str, Any]:
     pid = int(part_id)
-    if pid in AXIS_SYMMETRY_PART_IDS:
-        return {
-            'part_name': f'axis_symmetry_{pid}',
-            'material_id': 10,
-            'material_name': 'axis_symmetry',
-            'wall_law': 'specular',
-            'wall_restitution': 1.0,
-            'wall_diffuse_fraction': 0.0,
-            'wall_stick_probability': 0.0,
-        }
     if pid == FIELD_SUPPORT_BOUNDARY_PART_ID:
         return {
             'part_name': 'field_support_boundary',
             'material_id': 90,
             'material_name': 'field_support_boundary',
             'wall_law': 'specular',
-            'wall_restitution': 0.95,
+            'wall_restitution': 1.0,
             'wall_diffuse_fraction': 0.0,
-            'wall_stick_probability': PHYSICAL_WALL_STICK_PROBABILITY,
+            'wall_stick_probability': 0.0,
         }
-    if pid in WAFER_PART_IDS:
-        role_name = 'wafer'
-        material_id = 20
-    elif pid in SIDEWALL_PART_IDS:
-        role_name = 'sidewall'
-        material_id = 50
-    elif pid in CHAMBER_WALL_PART_IDS:
-        role_name = 'chamber_wall'
-        material_id = 40
-    else:
-        role_name = 'comsol_wall'
-        material_id = 99
     return {
-        'part_name': f'{role_name}_{pid}',
-        'material_id': material_id,
-        'material_name': role_name,
+        'part_name': f'comsol_boundary_{pid}',
+        'material_id': 1,
+        'material_name': 'comsol_boundary',
         'wall_law': 'specular',
-        'wall_restitution': 0.95,
+        'wall_restitution': 1.0,
         'wall_diffuse_fraction': 0.0,
         'wall_stick_probability': PHYSICAL_WALL_STICK_PROBABILITY,
     }
@@ -512,6 +486,7 @@ def _comsol_boundary_entity_rows(mesh: ParsedMesh, active_part_ids: Optional[Lis
                 'solver_part_id': pid,
                 'comsol_edge_entity_id': pid,
                 'raw_comsol_edge_entity_index': pid - 1,
+                'comsol_api_selection_entity_id': pid - 1,
                 'segment_count': 0,
                 'x_min': float('inf'),
                 'x_max': float('-inf'),
@@ -537,6 +512,7 @@ def _comsol_boundary_entity_rows(mesh: ParsedMesh, active_part_ids: Optional[Lis
                 'solver_part_id': int(pid),
                 'comsol_edge_entity_id': int(row['comsol_edge_entity_id']),
                 'raw_comsol_edge_entity_index': int(row['raw_comsol_edge_entity_index']),
+                'comsol_api_selection_entity_id': int(row['comsol_api_selection_entity_id']),
                 'active_in_solver_boundary': bool((not active) or (pid in active)),
                 'segment_count': int(row['segment_count']),
                 'x_min_m': float(row['x_min']),
@@ -570,6 +546,7 @@ def _comsol_domain_entity_rows(mesh: ParsedMesh) -> List[Dict[str, Any]]:
                 {
                     'comsol_domain_entity_id': did,
                     'raw_comsol_domain_entity_index': did - 1,
+                    'comsol_api_selection_entity_id': did - 1,
                     'element_count': 0,
                     'mesh_element_types': set(),
                     'x_min': float('inf'),
@@ -592,6 +569,7 @@ def _comsol_domain_entity_rows(mesh: ParsedMesh) -> List[Dict[str, Any]]:
             {
                 'comsol_domain_entity_id': int(did),
                 'raw_comsol_domain_entity_index': int(row['raw_comsol_domain_entity_index']),
+                'comsol_api_selection_entity_id': int(row['comsol_api_selection_entity_id']),
                 'element_count': int(row['element_count']),
                 'mesh_element_types': ';'.join(sorted(str(v) for v in row['mesh_element_types'])),
                 'x_min_m': float(row['x_min']),
@@ -892,6 +870,61 @@ def _same_axis_extent(source: np.ndarray, target: np.ndarray) -> bool:
     )
 
 
+def _axis_summary(axis: Optional[np.ndarray]) -> Dict[str, Any]:
+    if axis is None:
+        return {'count': 0, 'min': None, 'max': None}
+    arr = np.asarray(axis, dtype=np.float64)
+    finite = arr[np.isfinite(arr)]
+    return {
+        'count': int(arr.size),
+        'min': float(np.min(finite)) if finite.size else None,
+        'max': float(np.max(finite)) if finite.size else None,
+    }
+
+
+def _case_axisymmetric_report(
+    coordinate_system: str,
+    axes_x: np.ndarray,
+    axes_y: np.ndarray,
+    arrays: Mapping[str, Any],
+) -> Dict[str, Any]:
+    return axisymmetric_rz_geometry_report(
+        coordinate_system=coordinate_system,
+        spatial_dim=2,
+        axes=(np.asarray(axes_x, dtype=np.float64), np.asarray(axes_y, dtype=np.float64)),
+        boundary_edges=arrays.get('boundary_edges'),
+        boundary_edge_part_ids=arrays.get('boundary_part_ids'),
+    )
+
+
+def _field_axis_alignment_summary(
+    payload: Mapping[str, np.ndarray],
+    axes_x: np.ndarray,
+    axes_y: np.ndarray,
+) -> Dict[str, Any]:
+    bundle_axes_x = np.asarray(payload['axis_0'], dtype=np.float64) if 'axis_0' in payload else None
+    bundle_axes_y = np.asarray(payload['axis_1'], dtype=np.float64) if 'axis_1' in payload else None
+    geometry_axes_x = np.asarray(axes_x, dtype=np.float64)
+    geometry_axes_y = np.asarray(axes_y, dtype=np.float64)
+    axis_0_exact = _axes_match(bundle_axes_x, geometry_axes_x)
+    axis_1_exact = _axes_match(bundle_axes_y, geometry_axes_y)
+    exact_match = bool(axis_0_exact and axis_1_exact)
+    return {
+        'source_axes': {
+            'axis_0': _axis_summary(bundle_axes_x),
+            'axis_1': _axis_summary(bundle_axes_y),
+        },
+        'geometry_axes': {
+            'axis_0': _axis_summary(geometry_axes_x),
+            'axis_1': _axis_summary(geometry_axes_y),
+        },
+        'axis_0_exact_match': bool(axis_0_exact),
+        'axis_1_exact_match': bool(axis_1_exact),
+        'exact_match': exact_match,
+        'resampled_to_geometry_axes': not exact_match,
+    }
+
+
 def _validate_field_bundle_payload(payload: Mapping[str, np.ndarray], axes_x: np.ndarray, axes_y: np.ndarray) -> Dict[str, np.ndarray]:
     if 'ux' not in payload or 'uy' not in payload:
         raise ValueError('field bundle must include ux and uy')
@@ -1012,22 +1045,6 @@ def _support_phi_quality_summary(support_phi: np.ndarray, valid_mask: np.ndarray
     return summary
 
 
-def _max_cell_diagonal(axes_x: np.ndarray, axes_y: np.ndarray) -> float:
-    dx = float(np.max(np.diff(np.asarray(axes_x, dtype=np.float64))))
-    dy = float(np.max(np.diff(np.asarray(axes_y, dtype=np.float64))))
-    return float(np.sqrt(dx * dx + dy * dy))
-
-
-def _sample_grid_normal(normal_x: np.ndarray, normal_y: np.ndarray, axes_x: np.ndarray, axes_y: np.ndarray, position: np.ndarray) -> np.ndarray:
-    px = float(sample_grid_scalar(np.asarray(normal_x, dtype=np.float64), (axes_x, axes_y), np.asarray(position, dtype=np.float64)))
-    py = float(sample_grid_scalar(np.asarray(normal_y, dtype=np.float64), (axes_x, axes_y), np.asarray(position, dtype=np.float64)))
-    normal = np.asarray([px, py], dtype=np.float64)
-    mag = float(np.linalg.norm(normal))
-    if mag <= 1.0e-30:
-        return np.asarray([0.0, 1.0], dtype=np.float64)
-    return normal / mag
-
-
 def _sample_points_in_quads(vertices: np.ndarray, quads: np.ndarray, count: int, seed: int = 12345) -> np.ndarray:
     v = np.asarray(vertices, dtype=np.float64)
     q = _order_quad_vertices(v, quads)
@@ -1060,48 +1077,10 @@ def _sample_points_in_quads(vertices: np.ndarray, quads: np.ndarray, count: int,
     return out
 
 
-def _sample_clean_field_points_in_quads(
-    vertices: np.ndarray,
-    quads: np.ndarray,
-    axes_x: np.ndarray,
-    axes_y: np.ndarray,
-    valid_mask: np.ndarray,
-    count: int,
-    seed: int = 12345,
-) -> np.ndarray:
-    n = int(max(0, count))
-    if n == 0:
-        return np.zeros((0, 2), dtype=np.float64)
-    accepted: List[np.ndarray] = []
-    batch = int(max(128, 4 * n))
-    mask = np.asarray(valid_mask, dtype=bool)
-    axes = (np.asarray(axes_x, dtype=np.float64), np.asarray(axes_y, dtype=np.float64))
-    for attempt in range(50):
-        candidates = _sample_points_in_quads(vertices, quads, batch, seed=int(seed) + attempt)
-        clean = [
-            p
-            for p in candidates
-            if int(sample_valid_mask_status(mask, axes, np.asarray(p, dtype=np.float64))) == int(VALID_MASK_STATUS_CLEAN)
-        ]
-        if clean:
-            accepted.append(np.asarray(clean, dtype=np.float64))
-        accepted_count = int(sum(arr.shape[0] for arr in accepted))
-        if accepted_count >= n:
-            return np.vstack(accepted)[:n].copy()
-    raise ValueError(
-        'Could not sample enough particles inside the clean field sample domain; '
-        'check field.valid_mask coverage or reduce the requested particle count'
-    )
-
-
-def _sample_clean_boundary_release_points(
+def _sample_boundary_release_source_points(
     arrays: Mapping[str, Any],
-    axes_x: np.ndarray,
-    axes_y: np.ndarray,
-    valid_mask: np.ndarray,
     count: int,
     seed: int = 24680,
-    min_release_offset_cells: float = 1.0,
     source_part_ids: Optional[List[int]] = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     n = int(max(0, count))
@@ -1119,53 +1098,24 @@ def _sample_clean_boundary_release_points(
     if valid_edges.size == 0:
         raise ValueError('boundary release generation requires non-degenerate boundary edges for the selected source parts')
     weights = lengths[valid_edges] / float(np.sum(lengths[valid_edges]))
-    cell_diag = _max_cell_diagonal(axes_x, axes_y)
-    base_multipliers = np.asarray([0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0], dtype=np.float64)
-    min_multiplier = float(max(0.0, min_release_offset_cells))
-    multipliers = base_multipliers[base_multipliers >= min_multiplier]
-    if multipliers.size == 0:
-        multipliers = np.asarray([min_multiplier], dtype=np.float64)
-    elif min_multiplier > 0.0 and not np.any(np.isclose(multipliers, min_multiplier, rtol=0.0, atol=1.0e-12)):
-        multipliers = np.unique(np.concatenate([np.asarray([min_multiplier], dtype=np.float64), multipliers]))
-    probe_distances = cell_diag * multipliers
-    mask = np.asarray(valid_mask, dtype=bool)
-    axes = (np.asarray(axes_x, dtype=np.float64), np.asarray(axes_y, dtype=np.float64))
     rng = np.random.default_rng(int(seed))
     release_points: List[np.ndarray] = []
     source_points: List[np.ndarray] = []
     offsets: List[float] = []
     source_parts: List[int] = []
-    max_attempts = int(max(1000, 30 * n))
-    for _attempt in range(max_attempts):
+    for _attempt in range(n):
         edge_idx = int(rng.choice(valid_edges, p=weights))
         alpha = float(rng.random())
         source = edges[edge_idx, 0, :] + alpha * edge_vec[edge_idx]
-        normal = _sample_grid_normal(arrays['normal_x'], arrays['normal_y'], axes_x, axes_y, source)
-        placed = False
-        for distance in probe_distances:
-            for direction in (-normal, normal):
-                candidate = source + direction * float(distance)
-                status = int(sample_valid_mask_status(mask, axes, candidate))
-                if status != int(VALID_MASK_STATUS_CLEAN):
-                    continue
-                release_points.append(candidate.astype(np.float64))
-                source_points.append(source.astype(np.float64))
-                offsets.append(float(np.linalg.norm(candidate - source)))
-                source_parts.append(int(part_ids[edge_idx]))
-                placed = True
-                break
-            if placed:
-                break
-        if len(release_points) >= n:
-            return (
-                np.vstack(release_points[:n]).astype(np.float64),
-                np.vstack(source_points[:n]).astype(np.float64),
-                np.asarray(offsets[:n], dtype=np.float64),
-                np.asarray(source_parts[:n], dtype=np.int32),
-            )
-    raise ValueError(
-        'Could not place enough boundary-release particles inside the clean field sample domain; '
-        'the rectilinear field support may be too far from the requested source boundary'
+        release_points.append(source.astype(np.float64))
+        source_points.append(source.astype(np.float64))
+        offsets.append(0.0)
+        source_parts.append(int(part_ids[edge_idx]))
+    return (
+        np.vstack(release_points).astype(np.float64),
+        np.vstack(source_points).astype(np.float64),
+        np.asarray(offsets, dtype=np.float64),
+        np.asarray(source_parts, dtype=np.int32),
     )
 
 
@@ -1261,6 +1211,28 @@ def _particle_rows_from_points(
     return rows
 
 
+def _enable_boundary_release_preprocess(config_path: Path) -> None:
+    path = Path(config_path)
+    if not path.exists():
+        return
+    config = yaml.safe_load(path.read_text(encoding='utf-8'))
+    if not isinstance(config, dict):
+        raise ValueError(f'invalid run_config.yaml: {path}')
+    source = config.setdefault('source', {})
+    if not isinstance(source, dict):
+        source = {}
+        config['source'] = source
+    preprocess = source.setdefault('preprocess', {})
+    if not isinstance(preprocess, dict):
+        preprocess = {}
+        source['preprocess'] = preprocess
+    preprocess['enabled'] = True
+    preprocess['boundary_release'] = True
+    source['source_position_offset_m'] = 0.0
+    config.setdefault('input_contract', {})['initial_particle_field_support'] = 'strict'
+    path.write_text(yaml.safe_dump(config, sort_keys=False), encoding='utf-8')
+
+
 def write_particles_for_case(
     mphtxt_path: Path,
     out_dir: Path,
@@ -1268,7 +1240,6 @@ def write_particles_for_case(
     particle_count: int,
     release_span_s: Optional[float] = None,
     seed: int = 24680,
-    min_release_offset_cells: float = 1.0,
     diagnostic_grid_spacing_m: float = 5e-4,
     coordinate_scale_m_per_model_unit: float = 1.0,
     source_part_ids: Optional[List[int]] = None,
@@ -1277,7 +1248,7 @@ def write_particles_for_case(
     base_arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=float(diagnostic_grid_spacing_m))
     field_npz = Path(out_dir) / 'generated' / 'comsol_field_2d.npz'
     if not field_npz.exists():
-        raise FileNotFoundError(f'clean particle generation requires existing field bundle output: {field_npz}')
+        raise FileNotFoundError(f'boundary release particle generation requires existing field bundle output: {field_npz}')
     with np.load(field_npz) as payload:
         axes_x = np.asarray(payload['axis_0'], dtype=np.float64)
         axes_y = np.asarray(payload['axis_1'], dtype=np.float64)
@@ -1310,14 +1281,10 @@ def write_particles_for_case(
     support_arrays['triangle_part_ids'] = arrays['triangle_part_ids']
     arrays = {**arrays, **support_arrays}
 
-    points, source_points, offsets, source_part_ids = _sample_clean_boundary_release_points(
+    points, source_points, offsets, source_part_ids = _sample_boundary_release_source_points(
         arrays,
-        axes_x,
-        axes_y,
-        valid_mask,
         count=int(particle_count),
         seed=int(seed),
-        min_release_offset_cells=float(min_release_offset_cells),
         source_part_ids=source_part_ids,
     )
     boundary_parts = np.unique(arrays['boundary_part_ids']).astype(int).tolist()
@@ -1332,6 +1299,7 @@ def write_particles_for_case(
         release_offsets_m=offsets,
     )
     pd.DataFrame(rows).to_csv(Path(out_dir) / 'particles.csv', index=False)
+    _enable_boundary_release_preprocess(Path(out_dir) / 'run_config.yaml')
 
 
 def build_precomputed_arrays(mesh: ParsedMesh, diagnostic_grid_spacing_m: float = 5e-4, grid_padding_cells: int = 0):
@@ -1464,8 +1432,16 @@ def write_case_files(
     geometry_only: bool = False,
     diagnostic_grid_spacing_m: float = 5e-4,
     field_ghost_cells: int = DEFAULT_FIELD_GHOST_CELLS,
+    allow_field_ghost_cells: bool = False,
     coordinate_scale_m_per_model_unit: float = 1.0,
     coordinate_system: str = 'cartesian_xy',
+    gas_temperature_K: float = 320.0,
+    gas_dynamic_viscosity_Pas: float = 1.8e-5,
+    gas_density_kgm3: float = 1.2,
+    solver_dt_s: float = 2.0e-8,
+    solver_t_end_s: float = 2.0e-6,
+    solver_save_every: int = 10,
+    solver_min_tau_p_s: float = 1e-5,
 ) -> None:
     if field_bundle_path is None and not geometry_only:
         raise ValueError('COMSOL case generation requires --field-bundle; use --geometry-only to build geometry only')
@@ -1478,6 +1454,10 @@ def write_case_files(
     mesh = _scale_mesh_coordinates(parse_comsol_mphtxt(mphtxt_path), coordinate_scale)
     base_arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=float(diagnostic_grid_spacing_m))
     ghost_cells = int(max(0, field_ghost_cells if field_bundle_path is not None else 0))
+    if ghost_cells > 0 and not bool(allow_field_ghost_cells):
+        raise ValueError(
+            'field ghost cells are disabled by default; pass --allow-field-ghost-cells for smoke/regression cases'
+        )
     arrays = (
         build_precomputed_arrays(
             mesh,
@@ -1502,6 +1482,10 @@ def write_case_files(
         'coordinate_unit': 'm',
         'coordinate_scale_m_per_model_unit': float(coordinate_scale),
     }
+    axis_names = axis_names_for_coordinate_system(coordinate_system, 2)
+    axisymmetric_report = _case_axisymmetric_report(coordinate_system, axes_x, axes_y, arrays)
+    if axisymmetric_report:
+        geom_metadata['axisymmetric_rz'] = axisymmetric_report
 
     geom_npz = generated / 'comsol_geometry_2d.npz'
     _write_geometry_npz(geom_npz, axes_x=axes_x, axes_y=axes_y, arrays=arrays, mesh=mesh, metadata=geom_metadata)
@@ -1510,8 +1494,14 @@ def write_case_files(
     field_summary: Dict[str, Any] = {'mode': 'geometry_only'}
     particle_field_valid_mask: Optional[np.ndarray] = None
     if field_bundle_path is not None:
+        source_bundle_payload = _load_npz_payload(field_bundle_path)
+        axis_alignment = _field_axis_alignment_summary(
+            source_bundle_payload,
+            np.asarray(base_arrays['axes_x'], dtype=np.float64),
+            np.asarray(base_arrays['axes_y'], dtype=np.float64),
+        )
         bundle_payload = _validate_field_bundle_payload(
-            _load_npz_payload(field_bundle_path),
+            source_bundle_payload,
             np.asarray(base_arrays['axes_x'], dtype=np.float64),
             np.asarray(base_arrays['axes_y'], dtype=np.float64),
         )
@@ -1547,6 +1537,7 @@ def write_case_files(
             ),
             'field_support_phi_kind': 'provider_support_phi' if has_bundle_support_phi else '',
             'bundle_path': str(field_bundle_path.resolve()),
+            'axis_alignment': axis_alignment,
             'has_domain_region_map': False,
         }
         geometry_support_phi = -np.asarray(arrays['sdf'], dtype=np.float64)
@@ -1571,6 +1562,7 @@ def write_case_files(
         field_summary = {
             'mode': 'validated_export_bundle',
             'bundle_path': str(field_bundle_path.resolve()),
+            'axis_alignment': axis_alignment,
             'geometry_mask_applied': False,
             'field_ghost_cells': int(ghost_cells),
             'field_valid_mask_source': field_valid_mask_source,
@@ -1626,6 +1618,9 @@ def write_case_files(
             'field_support_fallback_boundary_edge_count': field_support_fallback_boundary_edge_count,
             'field_support_wall_part_ids': sorted(np.unique(arrays['boundary_part_ids']).astype(int).tolist()),
         }
+        axisymmetric_report = _case_axisymmetric_report(coordinate_system, axes_x, axes_y, arrays)
+        if axisymmetric_report:
+            geom_metadata['axisymmetric_rz'] = axisymmetric_report
         _write_geometry_npz(geom_npz, axes_x=axes_x, axes_y=axes_y, arrays=arrays, mesh=mesh, metadata=geom_metadata)
         field_summary.update(
             {
@@ -1708,19 +1703,33 @@ def write_case_files(
         'geometry_mode': str(geom_metadata.get('source_kind', 'surface_element_boundary_edges_plus_diagnostic_sdf')),
         'field_mode': field_summary['mode'],
         'field_summary': field_summary,
+        'field_axis_alignment': dict(field_summary.get('axis_alignment', {})),
         'diagnostic_grid_spacing_m': float(diagnostic_grid_spacing_m),
         'field_ghost_cells': int(ghost_cells),
         'coordinate_unit': 'm',
         'coordinate_scale_m_per_model_unit': float(coordinate_scale),
         'coordinate_system': coordinate_system,
+        'axis_names': list(axis_names),
         'wall_policy': {
             'physical_wall_law': 'specular',
             'physical_wall_stick_probability': PHYSICAL_WALL_STICK_PROBABILITY,
-            'axis_symmetry_law': 'specular',
             'field_support_boundary_law': 'specular',
+        },
+        'gas_properties': {
+            'temperature_K': float(gas_temperature_K),
+            'dynamic_viscosity_Pas': float(gas_dynamic_viscosity_Pas),
+            'density_kgm3': float(gas_density_kgm3),
+        },
+        'solver_defaults': {
+            'dt_s': float(solver_dt_s),
+            't_end_s': float(solver_t_end_s),
+            'save_every': int(solver_save_every),
+            'min_tau_p_s': float(solver_min_tau_p_s),
         },
         'note': 'COMSOL exterior geometry is scaled to SI metres, then field-support geometry is used when field data are present.',
     }
+    if axisymmetric_report:
+        summary['axisymmetric_rz'] = dict(axisymmetric_report)
     if field_bundle_path is not None:
         config = {
             'run': {
@@ -1744,9 +1753,9 @@ def write_case_files(
                 },
             },
             'gas': {
-                'temperature_K': 320.0,
-                'dynamic_viscosity_Pas': 1.8e-5,
-                'density_kgm3': 1.2,
+                'temperature_K': float(gas_temperature_K),
+                'dynamic_viscosity_Pas': float(gas_dynamic_viscosity_Pas),
+                'density_kgm3': float(gas_density_kgm3),
             },
             'source': {
                 'preprocess': {
@@ -1765,11 +1774,11 @@ def write_case_files(
                 'boundary_offset_cells': 1.0,
             },
             'solver': {
-                'dt': 2.0e-8,
-                't_end': 2.0e-6,
-                'save_every': 10,
+                'dt': float(solver_dt_s),
+                't_end': float(solver_t_end_s),
+                'save_every': int(solver_save_every),
                 'integrator': 'etd2',
-                'min_tau_p_s': 1e-5,
+                'min_tau_p_s': float(solver_min_tau_p_s),
                 'valid_mask_policy': 'retry_then_stop',
                 'plot_particle_limit': 24,
                 'seed': 12345,
@@ -1798,15 +1807,22 @@ def main() -> int:
     ap.add_argument('--out-dir', type=Path, default=Path('examples/comsol_from_data_2d'))
     ap.add_argument('--field-bundle', type=Path, default=None)
     ap.add_argument('--geometry-only', action='store_true')
-    ap.add_argument('--particles-only', action='store_true', help='Rewrite only particles.csv from the clean field sample domain.')
+    ap.add_argument('--particles-only', action='store_true', help='Rewrite only particles.csv from boundary release source points.')
     ap.add_argument('--particle-count', type=int, default=24)
     ap.add_argument('--particle-release-span-s', type=float, default=None)
     ap.add_argument('--particle-seed', type=int, default=24680)
-    ap.add_argument('--particle-min-release-offset-cells', type=float, default=1.0)
     ap.add_argument('--source-part-ids', type=str, default=None, help='Comma-separated boundary part IDs to use as particle release sources.')
     ap.add_argument('--diagnostic-grid-spacing-m', type=float, default=5e-4)
     ap.add_argument('--field-ghost-cells', type=int, default=DEFAULT_FIELD_GHOST_CELLS)
+    ap.add_argument('--allow-field-ghost-cells', action='store_true', help='Enable ghost cells for smoke/regression cases.')
     ap.add_argument('--coordinate-scale-m-per-model-unit', type=float, default=1.0)
+    ap.add_argument('--gas-temperature-K', type=float, default=320.0)
+    ap.add_argument('--gas-dynamic-viscosity-Pas', type=float, default=1.8e-5)
+    ap.add_argument('--gas-density-kgm3', type=float, default=1.2)
+    ap.add_argument('--solver-dt-s', type=float, default=2.0e-8)
+    ap.add_argument('--solver-t-end-s', type=float, default=2.0e-6)
+    ap.add_argument('--solver-save-every', type=int, default=10)
+    ap.add_argument('--solver-min-tau-p-s', type=float, default=1e-5)
     ap.add_argument(
         '--coordinate-system',
         default='cartesian_xy',
@@ -1821,7 +1837,6 @@ def main() -> int:
             particle_count=int(args.particle_count),
             release_span_s=args.particle_release_span_s,
             seed=int(args.particle_seed),
-            min_release_offset_cells=float(args.particle_min_release_offset_cells),
             diagnostic_grid_spacing_m=float(args.diagnostic_grid_spacing_m),
             coordinate_scale_m_per_model_unit=float(args.coordinate_scale_m_per_model_unit),
             source_part_ids=_parse_part_id_list(args.source_part_ids),
@@ -1834,8 +1849,16 @@ def main() -> int:
         geometry_only=bool(args.geometry_only),
         diagnostic_grid_spacing_m=float(args.diagnostic_grid_spacing_m),
         field_ghost_cells=int(args.field_ghost_cells),
+        allow_field_ghost_cells=bool(args.allow_field_ghost_cells),
         coordinate_scale_m_per_model_unit=float(args.coordinate_scale_m_per_model_unit),
         coordinate_system=str(args.coordinate_system),
+        gas_temperature_K=float(args.gas_temperature_K),
+        gas_dynamic_viscosity_Pas=float(args.gas_dynamic_viscosity_Pas),
+        gas_density_kgm3=float(args.gas_density_kgm3),
+        solver_dt_s=float(args.solver_dt_s),
+        solver_t_end_s=float(args.solver_t_end_s),
+        solver_save_every=int(args.solver_save_every),
+        solver_min_tau_p_s=float(args.solver_min_tau_p_s),
     )
     print(f'Wrote COMSOL-derived case to: {args.out_dir.resolve()}')
     return 0

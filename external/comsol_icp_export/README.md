@@ -22,7 +22,7 @@ at runtime. COMSOL is used only to create export artifacts.
 
 py -3 external\comsol_icp_export\pack_solver_case.py `
   --raw-export-dir "_external_exports\icp_cf4_o2_v20" `
-  --out-dir "examples\icp_rf_bias_cf4_o2_si_etching_2d" `
+  --out-dir "_external_exports\icp_rf_bias_cf4_o2_si_etching_2d_solver_case" `
   --particle-count 1000
 ```
 
@@ -32,7 +32,7 @@ laws can be applied with an optional override CSV:
 ```powershell
 py -3 external\comsol_icp_export\pack_solver_case.py `
   --raw-export-dir "_external_exports\icp_cf4_o2_v20" `
-  --out-dir "examples\icp_rf_bias_cf4_o2_si_etching_2d" `
+  --out-dir "_external_exports\icp_rf_bias_cf4_o2_si_etching_2d_solver_case" `
   --particle-count 1000 `
   --wall-overrides-csv "path\to\wall_catalog_overrides.csv"
 ```
@@ -108,6 +108,10 @@ The generated case uses the existing `precomputed_npz` provider schema:
 
 `provider_contract.boundary_field_support: strict` and
 `input_contract.initial_particle_field_support: strict` are enabled by default.
+Generated particles are written at the reviewed boundary source coordinates.
+The run config enables `source.preprocess.boundary_release`, so the solver
+normalizes those boundary points into the domain during prepare/preflight
+instead of baking a grid-sized position shift into `particles.csv`.
 
 The entity mapping CSVs keep the COMSOL mesh entity IDs used by the solver
 boundary catalog. COMSOL `mesh.mphtxt` contains geometric entity IDs but not

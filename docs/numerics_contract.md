@@ -1,172 +1,187 @@
-# Numerics Contract
+# Numerics Notes
 
-## Continuous Model
+This file is a short implementation guide, not a second specification. Keep the
+solver behavior discoverable from the code and tests.
 
-The solver advances particles in supplied geometry, flow fields, electric fields, and gas-property fields under a relaxation model
+## Model
 
-`dx/dt = v`
+Particles advance in supplied geometry and provider-backed fields:
 
-`dv/dt = (u(x, t) - v) / tau_eff + a_body + (q(t) / m) E(x, t)`
+```text
+dx/dt = v
+dv/dt = (u(x,t) - v) / tau_eff + a_body + (q(t) / m) E(x,t)
+```
 
-with:
+Drag is selected with `solver.drag_model`:
 
-- particle relaxation time `tau_eff` from the selected drag model
-- rectilinear precomputed, 2D triangle-mesh precomputed, or synthetic flow field sampling
-- steady or time-dependent flow sampling through the field time axis
-- optional provider-backed electric fields sampled as `E_x/E_y` or `E_r/E_z`; charged particles use the sampled electric field directly as `(q(t)/m)E`
-- constant body acceleration, with optional lightweight step-wise scaling retained for compatibility
+- `stokes`: linear Stokes relaxation
+- `schiller_naumann`: finite-Re drag correction from local slip speed
+- `epstein`: low-pressure free-molecular relaxation using field `rho_g` and
+  `T` when present, otherwise scalar `gas.*` fallbacks
 
-The default solver path is deterministic. The core solver does not infer missing fields, train surrogate models, or learn trajectory corrections. Analysis and optimization tooling must stay outside the trajectory hot path. Stochastic physics and charge evolution are explicit opt-in model behavior and must not act as field or boundary rescue logic.
+Electric force is always evaluated in the solver as `(q(t)/m)E`. Field bundles
+should provide electric fields, not fixed-charge acceleration.
 
-`solver.drag_model` controls how the relaxation time is interpreted:
+## Integrators
 
-- `stokes` keeps the original linear Stokes relaxation model.
-- `schiller_naumann` applies a finite-Re drag correction from the local slip speed and gas properties, reducing the effective relaxation time as particle Reynolds number rises.
-- `epstein` uses low-pressure free-molecular relaxation. Rectilinear field bundles may provide `rho_g` and `T`; these are sampled at the same trajectory stage points as the flow field. `gas.density_kgm3` and `gas.temperature_K` remain scalar fallbacks when a field quantity is missing or invalid. Pressure `p` is diagnostic only and is not used directly by drag. Field `mu` can also be carried and reported, but it is not part of the Epstein relaxation formula.
-
-`solver.charge_model` is disabled by default. In 2D regular rectilinear fields it currently supports:
-
-- `te_relaxation`: sensitivity model that relaxes particle charge toward `q_eq = -4 pi eps0 r_p alpha Te`, where `Te` is in eV and is numerically the floating-potential scale in volts.
-- `density_temperature_flux_relaxation`: field-backed model that computes a local floating potential from electron/ion density and temperature using density-temperature flux balance, then relaxes `q` toward `4 pi eps0 r_p phi_f`.
-- `finite_rate_flux_balance` with `background_source: plasma_background`: the same finite-rate flux balance, but using explicit scalar `solver.plasma_background` values from an assumed SAAS-style plasma state.
-
-Field-backed modes sample only local scalar background distributions such as `Te`, `ne`, `ni`, and `Ti`. The SAAS scalar-background mode samples no plasma field; it reports the scalar `ne`, `ni`, `Te`, `Ti`, Debye length, optional neutral density, collision-frequency diagnostics, mobility, conductivity, and plasma-frequency diagnostics separately. Neither path consumes COMSOL flux vectors. These derived plasma quantities are diagnostics unless the charge law explicitly uses them. The acceleration term is then evaluated as `(q/m)E`, so time-dependent field-backed background distributions are handled through the normal field time axis. 3D dynamic charge coupling is intentionally left for a separate implementation.
-
-When enabled runs write output files, `plasma_background_summary.csv` and
-`charge_model_summary.csv` mirror the scalar diagnostics in a flat
-`quantity,value,unit` format for review and downstream analysis.
-
-For COMSOL cases that do not solve a plasma module, do not pretend that missing
-`ne(x,t)` or `Te(x,t)` fields exist. Use `solver.plasma_background.source:
-saas_constant` and set `solver.charge_model.background_source:
-plasma_background`. Legacy aliases such as `v1` and `v2` may remain accepted for
-compatibility, but new configs should use descriptive mode names.
-
-## Field Backend Contract
-
-- `precomputed_npz` remains the rectilinear compatibility path.
-- `precomputed_triangle_mesh_npz` is a 2D triangle-mesh backend for true mesh field data; the COMSOL builder does not synthesize mesh fields from rectilinear bundles.
-- `provider_contract.boundary_field_support` checks whether explicit boundary samples can be offset just inside the geometry and sampled cleanly by the field provider.
-- Strict provider-contract failure stops before time integration and writes `provider_contract_report.json`, `provider_boundary_summary.csv`, and `provider_boundary_violations.csv`.
-- `provider_contract_report.json` includes the field support summary, per-part violation bounding boxes, and every sampled non-clean boundary support point, so the report is diagnostic rather than a solver-side rescue path.
-- `provider_contract_report.json` also includes `geometry_boundary` so users can confirm the explicit 2D loop or 3D triangle-surface truth used by the boundary check.
-- `provider_boundary_summary.csv` gives the same per-part failure counts and boundary/offset bounding boxes in a compact table for export-bundle triage.
-- `provider_boundary_violations.csv` uses numeric `boundary_*`, `offset_*`, and `checked_time_s` columns for direct plotting and export-bundle debugging.
-- Transient provider checks evaluate representative field times through `provider_contract.max_time_samples`.
-- `field_support.time_axis` reports the common field time axis and flags quantity-level time-axis mismatches. A strict provider contract treats such mismatches as an export/provider problem, not as a solver interpolation feature.
-- Field support is provider-native. It is not clipped to the geometry mask during runtime assembly; the geometry/field intersection is kept only as a diagnostic `core_valid_mask`.
-- The COMSOL builder exports rectilinear field support from finite field quantities and adds an edge-extrapolated ghost-cell band, defaulting to 8 cells. It does not reuse a geometry/domain mask as field support, because wall-adjacent interpolation may need finite ghost/support nodes outside the physical domain.
-- Precomputed providers validate monotone finite axes/times, finite values on active support, and non-degenerate in-range mesh triangles before solver execution.
-- Provider field bundles should not precompute electric acceleration from a fixed reference charge/mass.
-- Electric acceleration is evaluated in the solver from the current particle state as `(q(t)/m)E`, so charge evolution and electric force cannot diverge.
-- The mesh backend uses:
-  - triangle containment as field support
-  - barycentric interpolation on per-vertex quantities
-  - a uniform candidate grid for triangle lookup acceleration
-- The runtime loop and collision loop do not branch on field backend directly; backend differences are resolved in provider loading, shared sampling, and free-flight compile/kernels.
-
-## Public Integrators
-
-The public `solver.integrator` values remain:
+Public `solver.integrator` values:
 
 - `drag_relaxation`
 - `etd`
 - `etd2`
 
-Internal semantics are defined by `IntegratorSpec` in `particle_tracer_unified/core/integrator_registry.py`.
+The implementation details live in
+`particle_tracer_unified/core/integrator_registry.py` and the free-flight
+kernels. Partial replay must use the same segment logic over a shorter `dt` so
+collision replay and normal free flight stay consistent.
 
-## Discrete Update Meaning
+## Field Support
 
-`drag_relaxation`
+Provider support is authoritative. Runtime assembly does not fill missing field
+values, clamp outside-axis points, or silently expand valid masks.
 
-- first-order position update
-- backward-compatible legacy mode
-- one stage point per segment
+Internal field-sampling helpers may bundle multiple requested quantities at a
+stage point, but they must call the same provider/backend sampling paths and
+preserve the provider-authored status. A bundled sample is a cache/organization
+device, not permission to extrapolate, repair, or reinterpret field support.
 
-`etd`
+Valid-mask states:
 
-- exponential velocity update with frozen target flow over each substep
-- one stage point per segment
-- partial replay is supported by rerunning the same segment logic over a shorter `dt`
+- `clean`: point and interpolation stencil are valid
+- `mixed_stencil`: point is valid but interpolation touches invalid nodes
+- `hard_invalid`: point is outside valid field support
 
-`etd2`
+`solver.valid_mask_policy`:
 
-- midpoint-sampled exponential update
-- midpoint is used for stage bookkeeping and collision broad-phase
-- stage points are `[midpoint, endpoint]`
-- partial replay reuses the same midpoint construction on the shorter segment
+- `retry_then_stop`: stop hard-invalid trial segments at the best valid prefix
+- `strict_clean`: also treats mixed stencils as terminal
+- `diagnostic`: record diagnostics only
 
-## Collision / Partial Replay Contract
+Boundary-adjacent field gaps should be fixed in exported inputs or providers,
+not hidden by solver rescue logic.
 
-- Free-flight integration for collision-aware replay goes through `advance_freeflight_segment(...)`.
-- Dense partial replay for hit-time localization goes through `advance_freeflight_partial(...)`.
-- Wall reflection is evaluated from the hit-time state `(x_hit, v_hit)`, not from the segment endpoint state.
-- ETD2 midpoint data is used for broad-phase geometry checks only; post-hit continuation is always recomputed from the physical hit state.
+Surface release preprocessing is the exception for wall-origin particles. When
+`source.preprocess.boundary_release` is enabled, particles that start on or very
+near a boundary are classified against the explicit boundary primitives and are
+offset a small distance into the simulated domain before the input preflight.
+This keeps part-origin flake/resuspension cases from treating a valid wall
+release as an invalid field point. `hard_invalid` remains terminal; COMSOL
+faithful mode keeps strict clean support.
 
-## `valid_mask` Contract In This Tranche
+| Setting | Role |
+| --- | --- |
+| `source.preprocess.boundary_release` | Normalize boundary source particles into the domain. |
+| `input_contract.initial_particle_field_support` | Schema key for the initial field-support preflight after preprocessing. Use `warn` for boundary release studies. |
+| `solver.valid_mask_policy` | Runtime response to field support loss. Use `retry_then_stop` for production trajectories. |
+| `field_support.mixed_stencil_policy` | COMSOL faithful export gate; keep `error` for strict parity. |
 
-- `valid_mask` is authoritative in source preprocessing samplers.
-- For precomputed rectilinear fields, `field.valid_mask` remains provider-native. The geometry intersection is retained as diagnostic `core_valid_mask`, not as the field provider's sampling support.
-- The loader does not synthesize additional valid nodes or fill missing field values near boundaries. Export/build tools may add finite ghost/support nodes before the provider is loaded.
-- Boundary-adjacent field support is a provider responsibility, not a solver rescue responsibility.
-- Initial particles must be inside the clean field sample domain when `input_contract.initial_particle_field_support` is `strict`:
-  - `clean`: the sampled point and interpolation stencil are valid
-  - `mixed_stencil`: the point is valid, but interpolation touches invalid nodes
-  - `hard_invalid`: the point itself is outside valid field support
-- Strict input-contract failure stops before time integration and writes `input_contract_report.json` plus `input_particle_violations.csv`.
-- Points outside the field axes are `hard_invalid`; they are not clamped to the nearest grid boundary for validity decisions.
-- The solver hot path supports two policies:
-  - `retry_then_stop` (default): hard-invalid trial segments are stopped before they can contaminate deposition/coating results
-  - `diagnostic` (explicit investigation mode): diagnostics only
-- Under `retry_then_stop`, hard-invalid trial segments are resolved by a halving-based valid-prefix retry. The stopped particle remains classified as `invalid_mask_stopped`; the solver does not convert this condition to deposition, sticking, or wall contact.
-- Provider `support_phi` and geometry SDF may be reported as diagnostic field/geometry features, but they are not used as an active stop-location or collision-rule override in the solver path.
-- Kernel and replay paths classify `valid_mask` samples into:
-  - `clean`
-  - `mixed_stencil`: sampled point is still valid, but the interpolation stencil touches invalid cells
-  - `hard_invalid`: the sampled point itself is invalid
-- Under `retry_then_stop`, the same valid-prefix behavior is used for both:
-  - the initial per-step free-flight trial
-  - collision-replay segments after a wall hit
-- Under `retry_then_stop`, only `hard_invalid` segments trigger valid-prefix stop behavior.
-- `mixed_stencil` remains diagnostic-only so near-wall mixed cells do not become terminal stops by themselves.
-- If collision replay enters a `hard_invalid` region, the particle stops at the best valid prefix on that local segment.
-- If no valid prefix is found within the configured halving budget, the particle stays at the segment-start state for that replay segment.
-- Aggregate diagnostics remain backward-compatible:
-  - `valid_mask_violation_count = mixed_stencil + hard_invalid`
-  - split counts are reported separately for mixed and hard-invalid cases
-- `retry_then_stop` is the default solver behavior so hard-invalid field samples are stopped before they can affect deposition or coating summaries.
+## Calibration Inputs
 
-## Boundary Event Direction
+Treat these settings as case calibration, not numerical rescue knobs:
 
-`max_wall_hits_per_step` is a legacy diagnostic guard. It is not an accuracy strategy.
+- `wall.epsilon_offset_m` and `solver.on_boundary_tol_m` control small
+  release/contact offsets and should be scaled to geometry resolution.
+- `source.preprocess.boundary_capture_tolerance_m` controls only
+  near-boundary release classification. `source.preprocess.boundary_inward_offset_m`
+  controls only the inward displacement after classification; when omitted, it
+  defaults from the small epsilon/on-boundary tolerance and does not grow with an
+  explicit capture tolerance.
+- Wall law probabilities, restitution, and diffuse/stick choices should come
+  from material or chamber assumptions, not from trajectory cleanup. Unknown
+  wall law names fail during wall catalog construction; current support is
+  documented in `docs/wall_law_catalog.md`.
+- `solver.drag_model` selects the drag law. Scalar gas fallbacks are used only
+  where the existing model already permits them; they do not fill field gaps.
 
-- Production acceptance requires `boundary_event_contract_passed == 1`, which means `numerical_boundary_stopped_count == 0`, `unresolved_crossing_count == 0`, `max_hits_reached_count == 0`, and `nearest_projection_fallback_count == 0`.
-- `nearest_projection_fallback_count > 0` is diagnostic debt. It should not be treated as a production success path.
-- Boundary hits should be resolved from provider-backed primitive events plus a physical-time root solve on the particle trajectory.
-- The provider tells the solver which primitive was hit; the solver computes when the trajectory hits it.
-- `stuck` is a physical wall-model result, not a numerical fallback.
-- Persistent wall contact must be represented as an explicit contact state, not as repeated reflection or max-hit retry.
-- ContactState is part of the solver contract for 2D and 3D. It is not controlled by the obsolete `solver.contact_tangent_motion` option.
-- Contact particles advance tangentially on the same boundary primitive, release only after a clean inside probe, and stop explicitly at endpoints, edges, or corners.
-- Endpoint, edge, and corner ambiguity must be explicit in boundary-event diagnostics; it must not be hidden by projection fallback.
-- The active implementation guide for current performance work is
-  `plans/boundary_performance_plan.md`.
+## Source Provenance
 
-## Process-Step Scope
+`source_part_id > 0` means the release has known source boundary/part
+provenance. `source_part_id <= 0` means the source is unknown or absent; the
+solver preserves that value and does not turn it into the nearest wall part.
+Unknown-source particles are not eligible for same-source release grace.
 
-Process steps are retained as lightweight optional time labels for existing examples and source-event binding. They are not the core accuracy model for this package.
+Production surface-release preprocessing may project a near-boundary point only
+when `source.preprocess.boundary_release` is explicitly enabled. That
+preprocessing can report a projected boundary/part for diagnostics, but it does
+not rewrite unknown input provenance into a known `source_part_id`. COMSOL
+faithful mode keeps release coordinates and source provenance from the manifest
+release table, or fails clearly, rather than repairing them.
 
-- Step rows must have finite times and positive duration (`end_s > start_s`).
-- Zero-duration marker steps are intentionally unsupported.
-- Gap-free, full-coverage process definitions are not required by the solver core.
-- Missing process-step coverage falls back to the normal run step, keeping the primary contract centered on field sampling and boundary handling.
+## Axisymmetric RZ
 
-## Current Geometry Truth Contract
+`axisymmetric_rz` is a 2D meridional coordinate mode with axes reported as
+`r` and `z`. Runtime summaries, provider/preflight reports, and comparison
+artifacts must preserve that coordinate system and must not relabel it as
+`cartesian_xy`.
 
-- 2D truth source is `boundary_loops_2d` when available, otherwise SDF fallback.
-- 3D truth source is a validated closed triangle surface when available, otherwise SDF fallback.
-- `BoundaryService` is the current internal contract for `inside`, `inside_strict`, `segment_hit`, `polyline_hit`, and diagnostic projection.
-- `BoundaryHit` carries primitive identity, primitive kind, endpoint/corner ambiguity, and local signed-distance evaluation for provider-backed boundary events.
-- 2D loop truth uses even-odd parity across disjoint loops, so nested-hole cases covered by regression tests are supported.
-- 2D boundary-edge inputs are required to form disjoint degree-2 loops; shared-vertex branching or dangling topologies are rejected early instead of being silently reconstructed.
-- 3D provider boundary checks sample representative triangle face, edge, and vertex neighborhoods before solving.
+The radial axis is validated as non-negative. When the grid or boundary
+primitives include `r = 0`, summaries report it as the special axis boundary
+(`r0_on_grid`, `r0_axis_boundary_*`). The current solver still advances only
+the two stored components, `v_r` and `v_z`; full azimuthal `v_theta` dynamics
+and cylindrical 3D motion are out of scope.
+
+`ring_area_weight(r) = 2*pi*r` is available for explicit reporting or external
+post-processing. Source preprocessing does not apply ring-area weighting
+implicitly; optional ring-area source reporting is diagnostics-only and must be
+enabled explicitly with
+`source.preprocess.ring_area_weighted_source_reporting: true`.
+
+## Boundaries
+
+Wall events should come from provider-backed boundary primitives plus a physical
+hit-time solve on the particle trajectory. Wall reflection uses the hit-time
+state `(x_hit, v_hit)`, not the segment endpoint.
+
+Boundary broad-phase pruning is allowed only as a conservative candidate filter
+in front of the existing exact hit-time solve. Candidate misses must remain zero
+in debug diagnostics, and COMSOL faithful mode keeps broad-phase pruning disabled
+by default until boundary comparison parity has been demonstrated.
+
+`max_wall_hits_per_step` is a diagnostic guard. Production runs should have:
+
+- `numerical_boundary_stopped_count == 0`
+- `unresolved_crossing_count == 0`
+- `max_hits_reached_count == 0`
+- `nearest_projection_fallback_count == 0`
+
+Persistent contact is represented explicitly as contact state. It should not be
+modeled as repeated reflection.
+
+## Geometry Truth
+
+- 2D uses boundary loops when available, otherwise SDF fallback.
+- 3D uses validated closed triangle surfaces when available, otherwise SDF
+  fallback.
+- `BoundaryService` is the shared internal entry point for inside checks,
+  segment hits, polyline hits, and diagnostic projection.
+
+## Optional Physics
+
+Stochastic motion and charge evolution are opt-in model behavior. They must not
+act as corrections for missing fields or boundary failures.
+
+Dynamic charge currently supports 2D regular-rectilinear field inputs or scalar
+plasma-background inputs. 3D and triangle-mesh charge updates are outside the
+current runtime update path. COMSOL flux vectors are not consumed directly by
+the charge model.
+
+Near-wall drag or lift corrections are not automatically applied. If sheath,
+ion-drag, near-wall lift, or other chamber-specific effects are required, supply
+them through fields, existing force inputs, or explicit source/wall data rather
+than expecting the solver to infer them.
+
+## Surface-Origin Scope
+
+| Solver handles | User supplies |
+| --- | --- |
+| Trajectories of particles already released into supplied fields. | Whether a part fractures, flakes, or sheds deposits. |
+| Boundary release normalization from explicit boundary primitives. | Release population, particle sizes, initial speeds, and release timing. |
+| Stokes, Schiller-Naumann, Cunningham, or Epstein drag. | Gas state and rarefaction-relevant inputs such as `rho_g`, `T`, and gas molecular mass. |
+| Optional Brownian/stochastic motion, charge evolution, `qE/m`, thermophoresis, DEP, lift, pressure-gradient, and virtual-mass terms. | Flow, plasma, electric field, gradients/derived fields, wall law, and material data. |
+| Wall hit-time and configured wall laws using particle-center geometry. | Sheath physics, ion-drag effects, near-wall corrections, or detachment probabilities unless represented by fields, forces, or source inputs. |
+
+## Process Steps
+
+`process_steps.csv` is a lightweight time-label overlay. Rows must have finite
+times and positive duration. Missing coverage falls back to the normal `run`
+step.

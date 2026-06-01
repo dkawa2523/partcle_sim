@@ -43,6 +43,7 @@ def resolve_valid_mask_retry_then_stop(
     drag_model_mode: int,
     electric_q_over_m_i: Optional[float] = None,
     force_runtime: object | None = None,
+    require_clean_prefix: bool = False,
 ) -> ValidMaskPrefixResolution:
     resolution = resolve_prefix(
         x0=x0,
@@ -76,6 +77,7 @@ def resolve_valid_mask_retry_then_stop(
         drag_model_mode=int(drag_model_mode),
         electric_q_over_m_i=electric_q_over_m_i,
         force_runtime=force_runtime,
+        require_clean_prefix=bool(require_clean_prefix),
         max_halving_count=int(adaptive_substep_max_splits),
     )
     collision_diagnostics['invalid_mask_retry_count'] += int(resolution.retry_count)

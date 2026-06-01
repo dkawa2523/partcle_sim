@@ -17,6 +17,7 @@ providers:
     boundary_part_ids: [10, 10, 20, 20, 20, 20, 10, 10, 20, 20, 20, 20]
   field:
     kind: linear_shear
+    backend_mode: auto  # auto | regular_grid | triangle_mesh
     shear_rate: 6.0
     dynamic_viscosity_Pas: 1.8e-5
     provide_tauw: true
@@ -39,6 +40,8 @@ source:
   preprocess:
     enabled: true
     seed: 24680
+    normal_velocity_policy: keep  # keep | reflect_inward | remove_inward_normal
+    boundary_release: false        # true offsets boundary source particles into the domain
   default_law: explicit_csv
   source_speed_scale: 1.0
   source_position_offset_m: 0.0
@@ -51,6 +54,7 @@ source:
 
 input_contract:
   initial_particle_field_support: strict  # strict | warn | off
+  particle_defaults_policy: allow  # allow | warn | error
 
 provider_contract:
   boundary_field_support: strict  # strict | warn | off
@@ -62,6 +66,7 @@ solver:
   t_end: 3.0
   save_every: 2
   integrator: drag_relaxation  # drag_relaxation | etd | etd2
+  field_backend_mode: auto  # auto | regular_grid | triangle_mesh
   drag_model: stokes  # stokes | schiller_naumann | epstein
   forces:
     drag:
@@ -86,6 +91,13 @@ solver:
     lift:
       enabled: false
       # model: saffman
+    pressure_gradient:
+      enabled: false
+      # uses rho_g/rho_p times the fluid material acceleration Du/Dt from the velocity field
+    virtual_mass:
+      enabled: false
+      # coefficient: 0.5
+      # uses effective mass plus particle-path material acceleration of the fluid velocity
   stochastic_motion:
     enabled: false
     # enabled: true

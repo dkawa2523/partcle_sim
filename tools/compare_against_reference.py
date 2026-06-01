@@ -370,6 +370,9 @@ def _summarize_run(output_dir: Path, runtime_s: float) -> Dict[str, Any]:
         'estimated_numpy_bytes': int(memory.get('estimated_numpy_bytes', 0)) if isinstance(memory, Mapping) else 0,
         'positions_array_bytes': int(memory.get('positions_array_bytes', 0)) if isinstance(memory, Mapping) else 0,
         'particle_count': int(report.get('particle_count', len(final_df))),
+        'coordinate_system': str(report.get('coordinate_system', '')),
+        'axis_names': list(report.get('axis_names', [])) if isinstance(report.get('axis_names', []), list) else [],
+        'axisymmetric_rz': dict(report.get('axisymmetric_rz', {})) if isinstance(report.get('axisymmetric_rz', {}), Mapping) else {},
         'released_count': int(report.get('released_count', int(final_df.get('released', pd.Series(dtype=int)).sum()))),
         'stuck_count': int(report.get('stuck_count', int(final_df.get('stuck', pd.Series(dtype=int)).sum()))),
         'absorbed_count': int(report.get('absorbed_count', int(final_df.get('absorbed', pd.Series(dtype=int)).sum()))),
@@ -516,6 +519,12 @@ def main(argv: Iterable[str] | None = None) -> int:
         default=None,
         help='Write generated run configs under the comparison output and set output.artifact_mode.',
     )
+    parser.add_argument(
+        '--reference-scope',
+        choices=('sampled', 'full', 'unspecified'),
+        default='unspecified',
+        help='Record whether the supplied reference is sampled, full, or unspecified.',
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -585,7 +594,10 @@ def main(argv: Iterable[str] | None = None) -> int:
         runs.append(_strip_internal_fields(run_summary))
 
     summary: Dict[str, Any] = {
+        'summary_schema_version': 1,
         'timestamp': timestamp,
+        'comparison_dir': str(comparison_dir),
+        'reference_scope': str(args.reference_scope),
         'overrides': {
             't_end': None if args.override_t_end is None else float(args.override_t_end),
             'artifact_mode': args.artifact_mode,
@@ -616,6 +628,10 @@ def main(argv: Iterable[str] | None = None) -> int:
         summary['boundary_event_failures'] = boundary_event_failures
 
     summary_path.write_text(json.dumps(summary, indent=2), encoding='utf-8')
+    if args.summary_json is None:
+        stable_summary_path = output_root / 'comparison_summary.json'
+        stable_summary_path.parent.mkdir(parents=True, exist_ok=True)
+        stable_summary_path.write_text(json.dumps(summary, indent=2), encoding='utf-8')
     print(json.dumps(summary, indent=2))
     return 1 if diagnostic_failures or boundary_event_failures else 0
 

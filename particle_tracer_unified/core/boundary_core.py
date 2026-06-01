@@ -34,12 +34,26 @@ class BoundaryHit:
 
 
 @dataclass(frozen=True)
+class ReleasePointClassification:
+    is_on_boundary: bool
+    inside_after_offset: bool
+    nearest_part_id: int
+    normal: np.ndarray
+    distance_m: float
+    primitive_id: int = -1
+    ambiguous: bool = False
+    boundary_position: Optional[np.ndarray] = None
+    offset_position: Optional[np.ndarray] = None
+
+
+@dataclass(frozen=True)
 class BoundaryService:
     inside: Callable[[np.ndarray], bool]
     inside_strict: Callable[[np.ndarray], bool]
     segment_hit: Callable[[np.ndarray, np.ndarray], Optional[BoundaryHit]]
     polyline_hit: Callable[[np.ndarray, np.ndarray], Optional[BoundaryHit]]
     nearest_projection: Callable[[np.ndarray, np.ndarray], Optional[BoundaryHit]]
+    release_point: Callable[[np.ndarray, int, float, float], ReleasePointClassification]
     primary_hit_counter_key: str
     triangle_surface_3d: Optional[TriangleSurface3D] = None
 
@@ -233,6 +247,7 @@ def inside_geometry(
 
 __all__ = (
     'BoundaryHit',
+    'ReleasePointClassification',
     'BoundaryService',
     'inside_geometry',
     'inside_geometry_with_boundary',

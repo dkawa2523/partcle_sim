@@ -1,0 +1,3 @@
+solver_part_id,comsol_geom_entity_id,selection_name,boundary_type,wall_node,material,notes
+11,101,inlet,pass_through,pt.wall1,gas,release/open boundary
+12,102,wafer,wall,pt.wall2,sio2,physical deposition wall

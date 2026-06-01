@@ -1,0 +1,10 @@
+canonical_name,comsol_variable,unit,component_axis,required_for,notes
+ux,,m/s,x,drag,
+uy,,m/s,y_or_z,drag,
+uz,,m/s,z,drag,
+Ex,,V/m,x,electric,
+Ey,,V/m,y_or_z,electric,
+Ez,,V/m,z,electric,
+T,,K,scalar,thermophoresis_brownian,
+rho_g,,kg/m^3,scalar,drag,
+mu_g,,Pa*s,scalar,drag,

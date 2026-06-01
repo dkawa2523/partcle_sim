@@ -20,12 +20,42 @@ from ..core.datamodel import (
 from ..core.source_schema import SOURCE_CATALOG_FLOAT_ALIASES, SOURCE_CATALOG_TEXT_ALIASES
 
 
-def _get_col(df: pd.DataFrame, candidates, default=None):
+def _metadata_default_value(default: Any) -> Any:
+    if isinstance(default, np.ndarray):
+        return 'generated'
+    if isinstance(default, np.generic):
+        return default.item()
+    if isinstance(default, float) and not np.isfinite(default):
+        return str(default)
+    return default
+
+
+def _get_col(
+    df: pd.DataFrame,
+    candidates,
+    default=None,
+    *,
+    label: str | None = None,
+    defaulted_columns: list[str] | None = None,
+    defaulted_column_details: dict[str, Any] | None = None,
+):
     for c in candidates:
         if c in df.columns:
             return df[c].to_numpy()
     if default is None:
         raise ValueError(f'Missing required columns; expected one of {candidates}')
+    if label is not None and defaulted_columns is not None:
+        defaulted_columns.append(str(label))
+    if label is not None and defaulted_column_details is not None:
+        defaulted_column_details[str(label)] = {
+            'aliases': [str(c) for c in candidates],
+            'default': _metadata_default_value(default),
+        }
+    if isinstance(default, np.ndarray):
+        arr = np.asarray(default)
+        if arr.shape[0] != len(df):
+            raise ValueError(f'Default array for {candidates} has length {arr.shape[0]}, expected {len(df)}')
+        return arr.copy()
     return np.full(len(df), default)
 
 
@@ -46,26 +76,43 @@ def _str_or_empty(row, *names):
 def load_particles_csv(path: Path, spatial_dim: int, coordinate_system: str) -> ParticleTable:
     df = pd.read_csv(path)
     n = len(df)
-    pid = _get_col(df, ['particle_id', 'id'], default=np.arange(n, dtype=np.int64)).astype(np.int64)
+    defaulted_columns: list[str] = []
+    defaulted_column_details: dict[str, Any] = {}
+
+    def col(candidates, default=None, label: str | None = None):
+        return _get_col(
+            df,
+            candidates,
+            default=default,
+            label=label,
+            defaulted_columns=defaulted_columns,
+            defaulted_column_details=defaulted_column_details,
+        )
+
+    pid = col(['particle_id', 'id'], default=np.arange(n, dtype=np.int64), label='particle_id').astype(np.int64)
     x = _get_col(df, ['x', 'r'])
     y = _get_col(df, ['y', 'z'] if coordinate_system == 'axisymmetric_rz' else ['y'])
-    z = _get_col(df, ['z'], default=0.0) if spatial_dim == 3 else None
-    vx = _get_col(df, ['vx', 'vr'], default=0.0)
-    vy = _get_col(df, ['vy', 'vz'] if coordinate_system == 'axisymmetric_rz' else ['vy'], default=0.0)
-    vz = _get_col(df, ['vz'], default=0.0) if spatial_dim == 3 else None
-    release_time = _get_col(df, ['release_time', 't0'], default=0.0)
-    mass = _get_col(df, ['mass'], default=1e-15)
-    diameter = _get_col(df, ['diameter', 'd', 'd_eq'], default=1e-6)
-    density = _get_col(df, ['density', 'rho_p'], default=1000.0)
-    charge = _get_col(df, ['charge', 'q'], default=0.0)
-    source_part_id = _get_col(df, ['source_part_id', 'part_id_source', 'origin_part_id'], default=0).astype(np.int64)
-    material_id = _get_col(df, ['material_id', 'particle_material_id'], default=0).astype(np.int64)
-    source_event_tag = _get_col(df, ['source_event_tag', 'event_tag'], default='').astype(object)
-    source_law_override = _get_col(df, ['source_law_override'], default='').astype(object)
-    source_speed_scale_override = _get_col(df, ['source_speed_scale_override'], default=np.nan).astype(np.float64)
-    stick_probability = _get_col(df, ['stick_probability', 'p_stick'], default=0.0)
-    dep_rel = _get_col(df, ['dep_particle_rel_permittivity', 'epsr_particle'], default=2.0)
-    thermo = _get_col(df, ['thermophoretic_coeff', 'thermo_coeff'], default=0.0)
+    z = col(['z'], default=0.0, label='z') if spatial_dim == 3 else None
+    vx = col(['vx', 'vr'], default=0.0, label='vx')
+    vy = col(['vy', 'vz'] if coordinate_system == 'axisymmetric_rz' else ['vy'], default=0.0, label='vy')
+    vz = col(['vz'], default=0.0, label='vz') if spatial_dim == 3 else None
+    release_time = col(['release_time', 't0'], default=0.0, label='release_time')
+    mass = col(['mass'], default=1e-15, label='mass')
+    diameter = col(['diameter', 'd', 'd_eq'], default=1e-6, label='diameter')
+    density = col(['density', 'rho_p'], default=1000.0, label='density')
+    charge = col(['charge', 'q'], default=0.0, label='charge')
+    source_part_id = col(['source_part_id', 'part_id_source', 'origin_part_id'], default=0, label='source_part_id').astype(np.int64)
+    material_id = col(['material_id', 'particle_material_id'], default=0, label='material_id').astype(np.int64)
+    source_event_tag = col(['source_event_tag', 'event_tag'], default='', label='source_event_tag').astype(object)
+    source_law_override = col(['source_law_override'], default='', label='source_law_override').astype(object)
+    source_speed_scale_override = col(
+        ['source_speed_scale_override'],
+        default=np.nan,
+        label='source_speed_scale_override',
+    ).astype(np.float64)
+    stick_probability = col(['stick_probability', 'p_stick'], default=0.0, label='stick_probability')
+    dep_rel = col(['dep_particle_rel_permittivity', 'epsr_particle'], default=2.0, label='dep_particle_rel_permittivity')
+    thermo = col(['thermophoretic_coeff', 'thermo_coeff'], default=0.0, label='thermophoretic_coeff')
     if spatial_dim == 2:
         position = np.stack([x, y], axis=1).astype(np.float64)
         velocity = np.stack([vx, vy], axis=1).astype(np.float64)
@@ -90,7 +137,11 @@ def load_particles_csv(path: Path, spatial_dim: int, coordinate_system: str) -> 
         stick_probability=np.asarray(stick_probability, dtype=np.float64),
         dep_particle_rel_permittivity=np.asarray(dep_rel, dtype=np.float64),
         thermophoretic_coeff=np.asarray(thermo, dtype=np.float64),
-        metadata={'path': str(Path(path).resolve())},
+        metadata={
+            'path': str(Path(path).resolve()),
+            'defaulted_columns': list(dict.fromkeys(defaulted_columns)),
+            'defaulted_column_details': dict(defaulted_column_details),
+        },
     )
 
 

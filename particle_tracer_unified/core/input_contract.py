@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Mapping, Tuple
 import numpy as np
 
 from .boundary_service import inside_geometry, nearest_boundary_edge_features_2d, sample_geometry_part_id, sample_geometry_sdf
+from .coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_report_from_metadata
 from .datamodel import PreparedRuntime
 from .field_backend import field_backend_kind, sample_field_valid_status
 from .field_sampling import (
@@ -23,6 +24,23 @@ STATUS_NAMES = {
     int(VALID_MASK_STATUS_HARD_INVALID): 'hard_invalid',
 }
 
+PARTICLE_DEFAULT_POLICY_ALLOW = 'allow'
+PARTICLE_DEFAULT_POLICY_WARN = 'warn'
+PARTICLE_DEFAULT_POLICY_ERROR = 'error'
+PHYSICS_DEFAULTED_COLUMNS = frozenset(
+    {
+        'z',
+        'vx',
+        'vy',
+        'vz',
+        'release_time',
+        'mass',
+        'diameter',
+        'density',
+        'charge',
+    }
+)
+
 
 def _initial_support_mode(config_payload: Mapping[str, Any]) -> str:
     cfg = config_payload.get('input_contract', {}) if isinstance(config_payload, Mapping) else {}
@@ -36,6 +54,98 @@ def _initial_support_mode(config_payload: Mapping[str, Any]) -> str:
     if mode not in {'strict', 'warn', 'off'}:
         raise ValueError('input_contract.initial_particle_field_support must be strict, warn, or off')
     return mode
+
+
+def _particle_defaults_policy(config_payload: Mapping[str, Any]) -> str:
+    cfg = config_payload.get('input_contract', {}) if isinstance(config_payload, Mapping) else {}
+    if not isinstance(cfg, Mapping):
+        return PARTICLE_DEFAULT_POLICY_ALLOW
+    policy = str(cfg.get('particle_defaults_policy', PARTICLE_DEFAULT_POLICY_ALLOW)).strip().lower()
+    if policy in {'', 'true', '1'}:
+        return PARTICLE_DEFAULT_POLICY_ALLOW
+    if policy in {'false', '0', 'disabled'}:
+        return PARTICLE_DEFAULT_POLICY_ERROR
+    if policy not in {PARTICLE_DEFAULT_POLICY_ALLOW, PARTICLE_DEFAULT_POLICY_WARN, PARTICLE_DEFAULT_POLICY_ERROR}:
+        raise ValueError('input_contract.particle_defaults_policy must be allow, warn, or error')
+    return policy
+
+
+def _particle_defaults_report(particles, policy: str) -> Dict[str, Any]:
+    metadata = getattr(particles, 'metadata', {}) if particles is not None else {}
+    raw_defaulted = metadata.get('defaulted_columns', []) if isinstance(metadata, Mapping) else []
+    defaulted = [str(item) for item in raw_defaulted] if isinstance(raw_defaulted, (list, tuple)) else []
+    physics_defaulted = [name for name in defaulted if name in PHYSICS_DEFAULTED_COLUMNS]
+    details = metadata.get('defaulted_column_details', {}) if isinstance(metadata, Mapping) else {}
+    return {
+        'policy': str(policy),
+        'defaulted_columns': defaulted,
+        'defaulted_count': int(len(defaulted)),
+        'physics_defaulted_columns': physics_defaulted,
+        'physics_defaulted_count': int(len(physics_defaulted)),
+        'defaulted_column_details': dict(details) if isinstance(details, Mapping) else {},
+    }
+
+
+def _runtime_coordinate_report(runtime) -> Dict[str, Any]:
+    spatial_dim = int(getattr(runtime, 'spatial_dim', 0))
+    coordinate_system = str(getattr(runtime, 'coordinate_system', ''))
+    axis_names = axis_names_for_coordinate_system(coordinate_system, spatial_dim) if spatial_dim in {2, 3} else ()
+    report: Dict[str, Any] = {
+        'spatial_dim': spatial_dim,
+        'coordinate_system': coordinate_system,
+        'axis_names': list(axis_names),
+    }
+    geometry_provider = getattr(runtime, 'geometry_provider', None)
+    geometry = getattr(geometry_provider, 'geometry', None) if geometry_provider is not None else None
+    axisymmetric_report = axisymmetric_rz_report_from_metadata(getattr(geometry, 'metadata', None))
+    if axisymmetric_report:
+        report['axisymmetric_rz'] = axisymmetric_report
+    return report
+
+
+def _source_preprocess_result(prepared: PreparedRuntime):
+    result = getattr(prepared, 'source_preprocess', None)
+    if result is not None:
+        return result
+    runtime = getattr(prepared, 'runtime', None)
+    return getattr(runtime, 'source_preprocess', None)
+
+
+def _boundary_release_offset_failure_rows(prepared: PreparedRuntime) -> List[Dict[str, Any]]:
+    result = _source_preprocess_result(prepared)
+    if result is None:
+        return []
+    rows: List[Dict[str, Any]] = []
+    for raw in getattr(result, 'diagnostics_rows', ()):
+        row = raw if isinstance(raw, Mapping) else {}
+        if int(row.get('boundary_release_applied', 0)) == 0:
+            continue
+        if int(row.get('boundary_release_inside_after_offset', 0)) != 0:
+            continue
+        item: Dict[str, Any] = {
+            'particle_id': int(row.get('particle_id', 0)),
+            'source_part_id': int(row.get('source_part_id', 0)),
+            'boundary_release_part_id': int(row.get('boundary_release_part_id', 0)),
+            'boundary_release_primitive_id': int(row.get('boundary_release_primitive_id', -1)),
+            'boundary_release_distance_m': float(row.get('boundary_release_distance_m', np.nan)),
+            'boundary_release_total_offset_m': float(row.get('boundary_release_total_offset_m', np.nan)),
+            'boundary_release_solver_offset_m': float(row.get('boundary_release_solver_offset_m', np.nan)),
+            'boundary_release_capture_tolerance_m': float(row.get('boundary_release_capture_tolerance_m', np.nan)),
+            'boundary_release_inward_offset_m': float(row.get('boundary_release_inward_offset_m', np.nan)),
+            'projection_distance_m': float(row.get('projection_distance_m', np.nan)),
+            'projected_part_id': int(row.get('projected_part_id', 0)),
+            'projected_boundary_id': int(row.get('projected_boundary_id', -1)),
+            'source_position_offset_m': float(row.get('source_position_offset_m', np.nan)),
+        }
+        for axis in ('x', 'y', 'z'):
+            original_key = f'original_{axis}'
+            release_key = f'release_{axis}'
+            if original_key in row:
+                item[original_key] = float(row.get(original_key, np.nan))
+            if release_key in row:
+                item[release_key] = float(row.get(release_key, np.nan))
+        rows.append(item)
+    return rows
 
 
 def _axis_spacing_summary(axes: Tuple[np.ndarray, ...]) -> Dict[str, float]:
@@ -105,16 +215,31 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
     runtime = prepared.runtime
     particles = runtime.particles
     field_provider = runtime.field_provider
-    mode = _initial_support_mode(runtime.config_payload if isinstance(runtime.config_payload, Mapping) else {})
+    config_payload = runtime.config_payload if isinstance(runtime.config_payload, Mapping) else {}
+    mode = _initial_support_mode(config_payload)
+    defaults_policy = _particle_defaults_policy(config_payload)
     if particles is None:
         raise ValueError('Simulation requires particles')
+    particle_defaults = _particle_defaults_report(particles, defaults_policy)
+    defaults_passed = bool(
+        defaults_policy != PARTICLE_DEFAULT_POLICY_ERROR
+        or int(particle_defaults.get('physics_defaulted_count', 0)) == 0
+    )
+    boundary_release_failures = _boundary_release_offset_failure_rows(prepared)
+    boundary_release_passed = int(len(boundary_release_failures)) == 0
+    coordinate_report = _runtime_coordinate_report(runtime)
     if field_provider is None:
         return {
+            **coordinate_report,
             'mode': mode,
-            'passed': True,
+            'particle_defaults_policy': str(defaults_policy),
+            'particle_defaults': particle_defaults,
+            'passed': bool(defaults_passed and boundary_release_passed),
             'particle_count': int(particles.count),
             'field_backend_kind': '',
             'status_counts': {'clean': int(particles.count), 'mixed_stencil': 0, 'hard_invalid': 0, 'non_clean': 0},
+            'boundary_release_failed_offset_count': int(len(boundary_release_failures)),
+            'boundary_release_offset_failures': boundary_release_failures,
             'violations': [],
             'notes': ['No field provider is configured; initial field-support check is not applicable.'],
         }
@@ -139,6 +264,7 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
     nearest_distance = np.asarray(geometry_features['nearest_boundary_distance_m'], dtype=np.float64)
     near_boundary = np.isfinite(nearest_distance) & (nearest_distance <= near_threshold) if near_threshold > 0.0 else np.zeros(particles.count, dtype=bool)
 
+    axis_names = tuple(str(v) for v in coordinate_report.get('axis_names', ('x', 'y', 'z')[: int(runtime.spatial_dim)]))
     violations: List[Dict[str, Any]] = []
     for idx in np.flatnonzero(statuses != int(VALID_MASK_STATUS_CLEAN)):
         row: Dict[str, Any] = {
@@ -155,13 +281,16 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
             'nearest_boundary_part_id': int(geometry_features['nearest_part_id'][int(idx)]),
             'near_boundary_by_cell_diagonal': int(bool(near_boundary[int(idx)])),
         }
-        for dim, name in enumerate(('x', 'y', 'z')[: int(runtime.spatial_dim)]):
+        for dim, name in enumerate(axis_names[: int(runtime.spatial_dim)]):
             row[name] = float(positions[int(idx), dim])
         violations.append(row)
 
     return {
+        **coordinate_report,
         'mode': mode,
-        'passed': bool(non_clean == 0 or mode in {'warn', 'off'}),
+        'particle_defaults_policy': str(defaults_policy),
+        'particle_defaults': particle_defaults,
+        'passed': bool(defaults_passed and boundary_release_passed and (non_clean == 0 or mode in {'warn', 'off'})),
         'particle_count': int(particles.count),
         'field_backend_kind': str(field_backend_kind(field_provider)),
         'time_mode': str(getattr(field, 'time_mode', 'steady')),
@@ -178,6 +307,8 @@ def build_initial_particle_field_support_report(prepared: PreparedRuntime) -> Di
         'non_clean_geometry_inside_count': int(
             np.count_nonzero((statuses != int(VALID_MASK_STATUS_CLEAN)) & np.asarray(geometry_features['inside_geometry'], dtype=bool))
         ),
+        'boundary_release_failed_offset_count': int(len(boundary_release_failures)),
+        'boundary_release_offset_failures': boundary_release_failures,
         'violations': violations,
     }
 
@@ -198,10 +329,39 @@ def write_input_contract_report(prepared: PreparedRuntime, output_dir: Path) -> 
 
 
 def enforce_initial_particle_field_support(prepared: PreparedRuntime, output_dir: Path) -> Dict[str, Any]:
-    mode = _initial_support_mode(prepared.runtime.config_payload if isinstance(prepared.runtime.config_payload, Mapping) else {})
-    if mode == 'off':
-        return build_initial_particle_field_support_report(prepared)
-    report = write_input_contract_report(prepared, output_dir)
+    config_payload = prepared.runtime.config_payload if isinstance(prepared.runtime.config_payload, Mapping) else {}
+    mode = _initial_support_mode(config_payload)
+    defaults_policy = _particle_defaults_policy(config_payload)
+    if mode == 'off' and defaults_policy == PARTICLE_DEFAULT_POLICY_ALLOW:
+        report = build_initial_particle_field_support_report(prepared)
+        if int(report.get('boundary_release_failed_offset_count', 0)) <= 0:
+            return report
+        report = write_input_contract_report(prepared, output_dir)
+    else:
+        report = write_input_contract_report(prepared, output_dir)
+    defaults_report = report.get('particle_defaults', {})
+    physics_defaulted_count = int(defaults_report.get('physics_defaulted_count', 0)) if isinstance(defaults_report, Mapping) else 0
+    if defaults_policy == PARTICLE_DEFAULT_POLICY_ERROR and physics_defaulted_count > 0:
+        columns = defaults_report.get('physics_defaulted_columns', []) if isinstance(defaults_report, Mapping) else []
+        raise ValueError(
+            'Particle defaults are not allowed by input_contract.particle_defaults_policy=error; '
+            f'defaulted physics columns: {columns}. '
+            f'See {Path(output_dir) / "input_contract_report.json"}'
+        )
+    boundary_release_failed = int(report.get('boundary_release_failed_offset_count', 0))
+    if boundary_release_failed > 0:
+        from .source_materials import write_source_summary
+
+        result = _source_preprocess_result(prepared)
+        if result is not None:
+            write_source_summary(result, Path(output_dir))
+        raise ValueError(
+            'source.preprocess.boundary_release offset produced positions outside the simulated domain '
+            f'for {boundary_release_failed} particle(s); this is an initial-condition preflight error '
+            'even when input_contract.initial_particle_field_support is warn or off. '
+            f'See {Path(output_dir) / "input_contract_report.json"} and '
+            f'{Path(output_dir) / "source_particle_diagnostics.csv"}'
+        )
     non_clean = int(report.get('status_counts', {}).get('non_clean', 0))
     if mode == 'strict' and non_clean > 0:
         raise ValueError(

@@ -102,3 +102,49 @@ def test_wall_catalog_alignment_compares_current_catalog_with_comsol_mapping(tmp
     assert by_part[7]["mismatch_fields"] == "wall_stick_probability"
     assert by_part[11]["alignment_status"] == "classified_inactive_default"
     assert by_part[11]["solver_entity_role"] == "internal_interface"
+
+
+def test_wall_catalog_alignment_treats_pass_through_as_non_colliding(tmp_path: Path) -> None:
+    generated = tmp_path / "generated"
+    generated.mkdir()
+    _write_rows(
+        generated / "comsol_boundary_entity_mapping.csv",
+        [
+            {
+                "solver_part_id": 16,
+                "comsol_edge_entity_id": 15,
+                "active_in_solver_boundary": "True",
+                "adjacent_domain_ids": "2",
+                "solver_part_name": "comsol_pair_continuity_16",
+                "solver_material_name": "comsol_pair_continuity",
+                "comsol_material_name": "not_exported_from_mphtxt",
+            }
+        ],
+    )
+    wall_catalog = WallCatalog(
+        default_model=None,
+        part_models=(
+            WallPartModel(
+                part_id=16,
+                part_name="comsol_pair_continuity_16",
+                material_id=3,
+                material_name="comsol_pair_continuity",
+                law_name="pass_through",
+                stick_probability=0.0,
+                restitution=1.0,
+                diffuse_fraction=0.0,
+                critical_sticking_velocity_mps=0.0,
+                reflectivity=0.0,
+                roughness_rms=0.0,
+            ),
+        ),
+    )
+
+    summary, rows = build_wall_catalog_alignment(generated_dir=generated, wall_catalog=wall_catalog)
+
+    assert summary["boundary_mapping_active_part_count"] == 1
+    assert summary["active_solver_boundary_count"] == 0
+    assert summary["solver_entity_role_counts"] == {"pass_through": 1}
+    assert summary["review_flags"] == []
+    assert rows[0]["active_in_solver_boundary"] == "True"
+    assert rows[0]["active_collision_in_solver"] == 0

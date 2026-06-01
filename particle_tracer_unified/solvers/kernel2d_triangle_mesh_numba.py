@@ -5,6 +5,7 @@ from numba import njit
 
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN, VALID_MASK_STATUS_HARD_INVALID
 from .integrator_common import (
+    DRAG_MODEL_STOKES,
     INTEGRATOR_ETD2,
     advance_state_2d,
     advance_state_2d_etd,
@@ -76,11 +77,28 @@ def _find_triangle_and_barycentric(
         beta = (v2x * v1y - v2y * v1x) / den
         gamma = (v0x * v2y - v0y * v2x) / den
         alpha = 1.0 - beta - gamma
-        margin = min(alpha, beta, gamma)
-        if margin < -eps:
+        edge_bcx = cx - bx
+        edge_bcy = cy - by
+        edge_cax = ax - cx
+        edge_cay = ay - cy
+        edge_abx = bx - ax
+        edge_aby = by - ay
+        edge_bc = np.sqrt(edge_bcx * edge_bcx + edge_bcy * edge_bcy)
+        edge_ca = np.sqrt(edge_cax * edge_cax + edge_cay * edge_cay)
+        edge_ab = np.sqrt(edge_abx * edge_abx + edge_aby * edge_aby)
+        area2 = abs(den)
+        h_alpha = area2 / max(edge_bc, 1.0e-30)
+        h_beta = area2 / max(edge_ca, 1.0e-30)
+        h_gamma = area2 / max(edge_ab, 1.0e-30)
+        if alpha < -eps / max(h_alpha, 1.0e-30):
             continue
-        if margin > best_margin:
-            best_margin = margin
+        if beta < -eps / max(h_beta, 1.0e-30):
+            continue
+        if gamma < -eps / max(h_gamma, 1.0e-30):
+            continue
+        distance_margin = min(alpha * h_alpha, beta * h_beta, gamma * h_gamma)
+        if distance_margin > best_margin:
+            best_margin = distance_margin
             best_idx = tri_idx
             best_alpha = alpha
             best_beta = beta
@@ -125,6 +143,9 @@ def _sample_triangle_mesh_flow(
     times,
     ux,
     uy,
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
     t,
     x,
     y,
@@ -143,10 +164,13 @@ def _sample_triangle_mesh_flow(
         y,
     )
     if tri_idx < 0:
-        return 0.0, 0.0, VALID_MASK_STATUS_HARD_INVALID
+        return 0.0, 0.0, 1.0, 1.8e-5, 300.0, VALID_MASK_STATUS_HARD_INVALID
     flowx = _sample_triangle_vertex_series(ux, times, triangles, tri_idx, alpha, beta, gamma, t)
     flowy = _sample_triangle_vertex_series(uy, times, triangles, tri_idx, alpha, beta, gamma, t)
-    return flowx, flowy, VALID_MASK_STATUS_CLEAN
+    rho_g = _sample_triangle_vertex_series(gas_density_grid, times, triangles, tri_idx, alpha, beta, gamma, t)
+    mu_g = _sample_triangle_vertex_series(gas_mu_grid, times, triangles, tri_idx, alpha, beta, gamma, t)
+    temp_g = _sample_triangle_vertex_series(gas_temperature_grid, times, triangles, tri_idx, alpha, beta, gamma, t)
+    return flowx, flowy, rho_g, mu_g, temp_g, VALID_MASK_STATUS_CLEAN
 
 
 @njit(cache=True)
@@ -156,6 +180,7 @@ def advance_particles_2d_triangle_mesh_inplace(
     active,
     tau_p,
     particle_diameter,
+    particle_density,
     flow_scale_particle,
     drag_tau_scale_particle,
     body_accel_scale_particle,
@@ -167,8 +192,7 @@ def advance_particles_2d_triangle_mesh_inplace(
     body_ax,
     body_ay,
     min_tau_p_s,
-    gas_density_kgm3,
-    gas_mu_pas,
+    gas_molecular_mass_kg,
     drag_model_mode,
     integrator_mode,
     adaptive_substep_enabled,
@@ -186,6 +210,11 @@ def advance_particles_2d_triangle_mesh_inplace(
     times,
     ux,
     uy,
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
+    extra_accel_x_particle,
+    extra_accel_y_particle,
     x_trial,
     v_trial,
     x_mid_trial,
@@ -207,22 +236,46 @@ def advance_particles_2d_triangle_mesh_inplace(
         if tau_stokes < min_tau_p_s:
             tau_stokes = min_tau_p_s
         body_scale = global_body_accel_scale * body_accel_scale_particle[i]
-        bax_base = body_ax * body_scale
-        bay_base = body_ay * body_scale
+        bax_base = body_ax * body_scale + extra_accel_x_particle[i]
+        bay_base = body_ay * body_scale + extra_accel_y_particle[i]
+        t_start = t - dt
+        xn = x[i, 0]
+        yn = x[i, 1]
+        vxn = v[i, 0]
+        vyn = v[i, 1]
+        substep_tau = tau_stokes
+        if int(drag_model_mode) != int(DRAG_MODEL_STOKES):
+            flowx_start, flowy_start, rho_g_start, mu_g_start, temp_g_start, _status_start = _sample_triangle_mesh_flow(
+                vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
+                accel_cell_offsets, accel_triangle_indices, support_tolerance,
+                times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_start, xn, yn
+            )
+            targetx_start = global_flow_scale * flow_scale_particle[i] * flowx_start
+            targety_start = global_flow_scale * flow_scale_particle[i] * flowy_start
+            slip_start = np.sqrt((vxn - targetx_start) * (vxn - targetx_start) + (vyn - targety_start) * (vyn - targety_start))
+            tau_eff_start = effective_tau_from_slip_speed(
+                tau_stokes,
+                slip_start,
+                particle_diameter[i],
+                rho_g_start,
+                mu_g_start,
+                drag_model_mode,
+                min_tau_p_s,
+                particle_density[i],
+                temp_g_start,
+                gas_molecular_mass_kg,
+            )
+            if np.isfinite(tau_eff_start) and tau_eff_start > 0.0 and tau_eff_start < substep_tau:
+                substep_tau = tau_eff_start
         n_substeps = compute_substep_count(
             dt,
-            tau_stokes,
+            substep_tau,
             adaptive_substep_enabled,
             adaptive_substep_tau_ratio,
             adaptive_substep_max_splits,
         )
         substep_counts[i] = n_substeps
         dt_sub = dt / float(n_substeps)
-        t_start = t - dt
-        xn = x[i, 0]
-        yn = x[i, 1]
-        vxn = v[i, 0]
-        vyn = v[i, 1]
         mask_status = VALID_MASK_STATUS_CLEAN
         if integrator_mode == INTEGRATOR_ETD2:
             half_dt = 0.5 * dt
@@ -236,10 +289,10 @@ def advance_particles_2d_triangle_mesh_inplace(
                 y0 = yn
                 vx0 = vxn
                 vy0 = vyn
-                flowx0, flowy0, status = _sample_triangle_mesh_flow(
+                flowx0, flowy0, rho_g0, mu_g0, temp_g0, status = _sample_triangle_mesh_flow(
                     vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
                     accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                    times, ux, uy, t_sub_start, xn, yn
+                    times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_sub_start, xn, yn
                 )
                 if status > mask_status:
                     mask_status = status
@@ -252,19 +305,22 @@ def advance_particles_2d_triangle_mesh_inplace(
                     tau_stokes,
                     slip0,
                     particle_diameter[i],
-                    gas_density_kgm3,
-                    gas_mu_pas,
+                    rho_g0,
+                    mu_g0,
                     drag_model_mode,
                     min_tau_p_s,
+                    particle_density[i],
+                    temp_g0,
+                    gas_molecular_mass_kg,
                 )
                 xh, yh, _vxh, _vyh = advance_state_2d_etd(
                     xn, yn, vxn, vyn, targetx0, targety0, bax0, bay0, tau_eff0, 0.5 * dt_sub
                 )
                 t_mid = t_sub_start + 0.5 * dt_sub
-                flowx_mid, flowy_mid, status = _sample_triangle_mesh_flow(
+                flowx_mid, flowy_mid, rho_g_mid, mu_g_mid, temp_g_mid, status = _sample_triangle_mesh_flow(
                     vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
                     accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                    times, ux, uy, t_mid, xh, yh
+                    times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_mid, xh, yh
                 )
                 if status > mask_status:
                     mask_status = status
@@ -277,10 +333,13 @@ def advance_particles_2d_triangle_mesh_inplace(
                     tau_stokes,
                     slip_mid,
                     particle_diameter[i],
-                    gas_density_kgm3,
-                    gas_mu_pas,
+                    rho_g_mid,
+                    mu_g_mid,
                     drag_model_mode,
                     min_tau_p_s,
+                    particle_density[i],
+                    temp_g_mid,
+                    gas_molecular_mass_kg,
                 )
                 xn, yn, vxn, vyn = advance_state_2d_etd(
                     xn, yn, vxn, vyn, targetx_mid, targety_mid, bax_mid, bay_mid, tau_eff_mid, dt_sub
@@ -296,10 +355,10 @@ def advance_particles_2d_triangle_mesh_inplace(
                             xmid = xn
                             ymid = yn
                         else:
-                            flowx0_mid, flowy0_mid, status = _sample_triangle_mesh_flow(
+                            flowx0_mid, flowy0_mid, rho_g0_mid, mu_g0_mid, temp_g0_mid, status = _sample_triangle_mesh_flow(
                                 vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
                                 accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                                times, ux, uy, t_sub_start, x0, y0
+                                times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_sub_start, x0, y0
                             )
                             if status > mask_status:
                                 mask_status = status
@@ -312,19 +371,22 @@ def advance_particles_2d_triangle_mesh_inplace(
                                 tau_stokes,
                                 slip0_mid,
                                 particle_diameter[i],
-                                gas_density_kgm3,
-                                gas_mu_pas,
+                                rho_g0_mid,
+                                mu_g0_mid,
                                 drag_model_mode,
                                 min_tau_p_s,
+                                particle_density[i],
+                                temp_g0_mid,
+                                gas_molecular_mass_kg,
                             )
                             xh_mid, yh_mid, _vxh_mid, _vyh_mid = advance_state_2d_etd(
                                 x0, y0, vx0, vy0, targetx0_mid, targety0_mid, bax0_mid, bay0_mid, tau_eff0_mid, 0.5 * dt_mid
                             )
                             t_mid_eval = t_sub_start + 0.5 * dt_mid
-                            flowx_mid2, flowy_mid2, status = _sample_triangle_mesh_flow(
+                            flowx_mid2, flowy_mid2, rho_g_mid2, mu_g_mid2, temp_g_mid2, status = _sample_triangle_mesh_flow(
                                 vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
                                 accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                                times, ux, uy, t_mid_eval, xh_mid, yh_mid
+                                times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_mid_eval, xh_mid, yh_mid
                             )
                             if status > mask_status:
                                 mask_status = status
@@ -337,10 +399,13 @@ def advance_particles_2d_triangle_mesh_inplace(
                                 tau_stokes,
                                 slip_mid2,
                                 particle_diameter[i],
-                                gas_density_kgm3,
-                                gas_mu_pas,
+                                rho_g_mid2,
+                                mu_g_mid2,
                                 drag_model_mode,
                                 min_tau_p_s,
+                                particle_density[i],
+                                temp_g_mid2,
+                                gas_molecular_mass_kg,
                             )
                             xmid, ymid, _vxmid, _vymid = advance_state_2d_etd(
                                 x0, y0, vx0, vy0, targetx_mid2, targety_mid2, bax_mid2, bay_mid2, tau_eff_mid2, dt_mid
@@ -355,10 +420,10 @@ def advance_particles_2d_triangle_mesh_inplace(
         else:
             for sub_idx in range(n_substeps):
                 t_eval = t_start + (float(sub_idx) + 1.0) * dt_sub
-                flowx, flowy, status = _sample_triangle_mesh_flow(
+                flowx, flowy, rho_g, mu_g, temp_g, status = _sample_triangle_mesh_flow(
                     vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
                     accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                    times, ux, uy, t_eval, xn, yn
+                    times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_eval, xn, yn
                 )
                 if status > mask_status:
                     mask_status = status
@@ -371,10 +436,13 @@ def advance_particles_2d_triangle_mesh_inplace(
                     tau_stokes,
                     slip,
                     particle_diameter[i],
-                    gas_density_kgm3,
-                    gas_mu_pas,
+                    rho_g,
+                    mu_g,
                     drag_model_mode,
                     min_tau_p_s,
+                    particle_density[i],
+                    temp_g,
+                    gas_molecular_mass_kg,
                 )
                 xn, yn, vxn, vyn = advance_state_2d(
                     xn, yn, vxn, vyn, targetx, targety, bax, bay, tau_eff, dt_sub, integrator_mode

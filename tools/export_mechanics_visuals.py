@@ -409,8 +409,8 @@ def export_mechanics_visuals(
 
 def main() -> int:
     ap = argparse.ArgumentParser(description='Export mechanics-distribution and geometry-aware trajectory visuals.')
-    ap.add_argument('--case-dir', type=Path, default=Path('examples/comsol_from_data_2d_10k'))
-    ap.add_argument('--output-dir', type=Path, default=Path('demo_output/comsol_from_data_2d_10k'))
+    ap.add_argument('--case-dir', type=Path, default=Path('examples/comsol_from_data_2d'))
+    ap.add_argument('--output-dir', type=Path, default=Path('demo_output/comsol_from_data_2d'))
     ap.add_argument('--sample-trajectories', type=int, default=500)
     ap.add_argument('--quiver-stride', type=int, default=12)
     args = ap.parse_args()

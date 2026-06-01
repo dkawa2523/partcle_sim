@@ -137,13 +137,10 @@ def load_runtime_inputs(
     particles = load_particles_csv(paths.particles_path, spatial_dim=spatial_dim, coordinate_system=coordinate_system)
     materials = load_materials_csv(paths.materials_path) if paths.materials_path else None
     walls = load_part_walls_csv(paths.walls_path) if paths.walls_path else None
-    source_events = load_source_events_csv(paths.events_path) if paths.events_path else None
-    process_steps = None
-    if paths.process_steps_path is not None:
-        process_steps = load_process_steps_csv(paths.process_steps_path)
-    _validate_process_steps(process_steps)
-    compiled_source_events = compile_source_events(source_events, process_steps)
-    _validate_compiled_source_events(source_events, compiled_source_events)
+    source_events, process_steps, compiled_source_events = load_optional_source_timing(
+        events_path=paths.events_path,
+        process_steps_path=paths.process_steps_path,
+    )
     return LoadedRuntimeInputs(
         particles=particles,
         materials=materials,
@@ -152,6 +149,19 @@ def load_runtime_inputs(
         process_steps=process_steps,
         compiled_source_events=compiled_source_events,
     )
+
+
+def load_optional_source_timing(
+    *,
+    events_path: Optional[Path],
+    process_steps_path: Optional[Path],
+) -> tuple[Optional[SourceEventTable], Optional[ProcessStepTable], Optional[SourceEventTable]]:
+    source_events = load_source_events_csv(events_path) if events_path else None
+    process_steps = load_process_steps_csv(process_steps_path) if process_steps_path else None
+    _validate_process_steps(process_steps)
+    compiled_source_events = compile_source_events(source_events, process_steps)
+    _validate_compiled_source_events(source_events, compiled_source_events)
+    return source_events, process_steps, compiled_source_events
 
 
 def _resolved_provider_cfg(config_dir: Path, provider_cfg: Mapping[str, Any]) -> dict[str, Any]:
@@ -173,8 +183,9 @@ def _align_field_provider_to_geometry(
     field_kind = str(getattr(field_provider, 'kind', '')).strip().lower()
     if field_kind == 'precomputed_triangle_mesh_npz':
         return field_provider
-    if any(a.shape != b.shape or not np.allclose(a, b, atol=1e-12, rtol=0.0) for a, b in zip(field.axes, geom.axes)):
-        raise ValueError('Field axes must exactly match geometry axes')
+    for axis_index, (field_axis, geometry_axis) in enumerate(zip(field.axes, geom.axes)):
+        if field_axis.shape != geometry_axis.shape or not np.allclose(field_axis, geometry_axis, atol=1e-12, rtol=0.0):
+            raise ValueError(f'Field axis_{axis_index} must exactly match geometry axis_{axis_index}')
     field_valid_mask = np.asarray(field.valid_mask, dtype=bool)
     geometry_valid_mask = np.asarray(geom.valid_mask, dtype=bool)
     core_valid_mask = field_valid_mask & geometry_valid_mask

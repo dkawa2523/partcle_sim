@@ -1,0 +1,2 @@
+particle_id,release_time,x,y,z,vx,vy,vz,mass,diameter,density,charge,source_entity_dim,source_entity_id,source_selection,material_id
+1,0.0,0.015,0.020,0.0,0.0,0.0,0.0,1.0e-18,1.0e-6,1200.0,0.0,1,11,inlet,1

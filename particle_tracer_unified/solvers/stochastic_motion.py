@@ -5,11 +5,8 @@ from typing import Dict, Mapping
 
 import numpy as np
 
-from .compiled_field_backend import (
-    CompiledRuntimeBackendLike,
-    sample_compiled_flow_vectors,
-    sample_compiled_gas_properties_vectors,
-)
+from .compiled_field_backend import CompiledRuntimeBackendLike
+from .field_runtime import timed_sample_fields_for_stage
 from .integrator_common import (
     DRAG_MODEL_EPSTEIN,
     DRAG_MODEL_SCHILLER_NAUMANN,
@@ -180,19 +177,42 @@ def apply_langevin_velocity_kick(
 
     positions = np.asarray(x[indices, : int(spatial_dim)], dtype=np.float64)
     velocities = np.asarray(v[indices, : int(spatial_dim)], dtype=np.float64)
-    flow = sample_compiled_flow_vectors(compiled, int(spatial_dim), float(t_eval), positions)
+    sampled_stage = timed_sample_fields_for_stage(
+        compiled,
+        None,
+        positions,
+        float(t_eval),
+        spatial_dim=int(spatial_dim),
+        need_flow=True,
+        need_gas_properties=True,
+        need_valid_mask=False,
+        fallback_density_kgm3=float(gas_density_kgm3),
+        fallback_mu_pas=float(gas_mu_pas),
+        fallback_temperature_K=float(gas_temperature_K),
+    )
+    flow = (
+        sampled_stage.samples.flow
+        if sampled_stage.samples.flow is not None
+        else np.zeros((indices.size, int(spatial_dim)), dtype=np.float64)
+    )
     flow_scale = float(global_flow_scale) * np.asarray(flow_scale_particle[indices], dtype=np.float64)
     target_flow = flow * flow_scale[:, None]
     slip_speed = np.linalg.norm(velocities - target_flow, axis=1)
 
-    rho_g, mu_g, temp_g = sample_compiled_gas_properties_vectors(
-        compiled,
-        int(spatial_dim),
-        float(t_eval),
-        positions,
-        fallback_density_kgm3=float(gas_density_kgm3),
-        fallback_mu_pas=float(gas_mu_pas),
-        fallback_temperature_K=float(gas_temperature_K),
+    rho_g = (
+        sampled_stage.samples.gas_density
+        if sampled_stage.samples.gas_density is not None
+        else np.full(indices.size, float(gas_density_kgm3), dtype=np.float64)
+    )
+    mu_g = (
+        sampled_stage.samples.gas_mu
+        if sampled_stage.samples.gas_mu is not None
+        else np.full(indices.size, float(gas_mu_pas), dtype=np.float64)
+    )
+    temp_g = (
+        sampled_stage.samples.gas_temperature
+        if sampled_stage.samples.gas_temperature is not None
+        else np.full(indices.size, float(gas_temperature_K), dtype=np.float64)
     )
     if str(config.temperature_source) == 'gas':
         temp_g = np.full(indices.size, float(gas_temperature_K), dtype=np.float64)
@@ -236,6 +256,9 @@ def apply_langevin_velocity_kick(
         'max_sigma_v_mps': float(np.max(sigma_v)) if sigma_v.size else 0.0,
         'mean_temperature_K': float(np.mean(temp_g)) if temp_g.size else 0.0,
         'mean_tau_eff_s': float(np.mean(tau_eff)) if tau_eff.size else 0.0,
+        'field_sampling_s': float(sampled_stage.elapsed_s),
+        'field_sample_point_count': int(sampled_stage.samples.point_count),
+        'field_sample_call_count': int(sampled_stage.samples.call_count),
     }
 
 
@@ -274,3 +297,12 @@ def merge_stochastic_motion_diagnostics(
     summary['last_max_sigma_v_mps'] = float(result.get('max_sigma_v_mps', 0.0))
     summary['last_mean_temperature_K'] = float(result.get('mean_temperature_K', 0.0))
     summary['last_mean_tau_eff_s'] = float(result.get('mean_tau_eff_s', 0.0))
+    diagnostics['field_sampling_s'] = float(diagnostics.get('field_sampling_s', 0.0)) + float(
+        result.get('field_sampling_s', 0.0)
+    )
+    diagnostics['field_sample_point_count'] = int(diagnostics.get('field_sample_point_count', 0)) + int(
+        result.get('field_sample_point_count', 0)
+    )
+    diagnostics['field_sample_call_count'] = int(diagnostics.get('field_sample_call_count', 0)) + int(
+        result.get('field_sample_call_count', 0)
+    )

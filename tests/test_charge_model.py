@@ -321,6 +321,37 @@ def test_runtime_charge_model_updates_report_without_enabling_by_default() -> No
     assert charge_report["final_mean_charge_C"] < 0.0
 
 
+def test_runtime_charge_model_report_shows_disabled_state() -> None:
+    field = _regular_charge_field()
+    particles = _particle_table(charge=0.0, mass=1.0e-18)
+    runtime = RuntimeLike(
+        spatial_dim=2,
+        coordinate_system="cartesian_xy",
+        particles=particles,
+        walls=None,
+        materials=None,
+        source_events=None,
+        process_steps=None,
+        compiled_source_events=None,
+        geometry_provider=_geometry_provider_for_field(field),
+        field_provider=FieldProviderND(field=field, kind="precomputed_npz"),
+        gas=GasProperties(temperature=300.0, dynamic_viscosity_Pas=1.8e-5, density_kgm3=1.0),
+        config_payload={
+            "solver": {
+                "dt": 1.0e-6,
+                "t_end": 1.0e-6,
+            },
+            "output": {"artifact_mode": "minimal"},
+        },
+    )
+
+    report = run_prepared_runtime(PreparedRuntime(runtime=runtime), output_dir=None, spatial_dim=2)
+
+    assert report["charge_model"]["enabled"] == 0
+    assert report["charge_model"]["background_source"] == "field"
+    assert report["plasma_background"]["source"] == "none"
+
+
 def test_runtime_saas_plasma_background_charge_model_reports_scalar_source(tmp_path) -> None:
     field = _regular_charge_field()
     particles = _particle_table(charge=0.0, mass=1.0e-18)

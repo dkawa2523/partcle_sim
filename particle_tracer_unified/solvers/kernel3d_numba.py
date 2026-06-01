@@ -5,6 +5,7 @@ from numba import njit
 
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN
 from .integrator_common import (
+    DRAG_MODEL_STOKES,
     INTEGRATOR_ETD2,
     advance_state_3d,
     advance_state_3d_etd,
@@ -77,6 +78,35 @@ def _sample_electric_accel_3d(electric_x, electric_y, electric_z, times, xs, ys,
 
 
 @njit(cache=True)
+def _sample_gas_properties_3d(
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
+    times,
+    xs,
+    ys,
+    zs,
+    t,
+    x,
+    y,
+    z,
+    fallback_density_kgm3,
+    fallback_mu_pas,
+    fallback_temperature_K,
+):
+    rho_g = _sample_time_trilinear(gas_density_grid, times, xs, ys, zs, t, x, y, z)
+    mu_g = _sample_time_trilinear(gas_mu_grid, times, xs, ys, zs, t, x, y, z)
+    temp_g = _sample_time_trilinear(gas_temperature_grid, times, xs, ys, zs, t, x, y, z)
+    if not np.isfinite(rho_g) or rho_g <= 0.0:
+        rho_g = fallback_density_kgm3
+    if not np.isfinite(mu_g) or mu_g <= 0.0:
+        mu_g = fallback_mu_pas
+    if not np.isfinite(temp_g) or temp_g <= 0.0:
+        temp_g = fallback_temperature_K
+    return rho_g, mu_g, temp_g
+
+
+@njit(cache=True)
 def advance_particles_3d_inplace(
     x,
     v,
@@ -98,6 +128,8 @@ def advance_particles_3d_inplace(
     min_tau_p_s,
     gas_density_kgm3,
     gas_mu_pas,
+    gas_temperature_K,
+    gas_molecular_mass_kg,
     drag_model_mode,
     integrator_mode,
     adaptive_substep_enabled,
@@ -119,6 +151,9 @@ def advance_particles_3d_inplace(
     extra_accel_y_particle,
     extra_accel_z_particle,
     gravity_buoyancy_enabled,
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
     valid_mask,
     core_valid_mask,
     x_trial,
@@ -146,21 +181,12 @@ def advance_particles_3d_inplace(
         body_x_scaled = body_ax * body_scale
         body_y_scaled = body_ay * body_scale
         body_z_scaled = body_az * body_scale
-        gravity_factor = 1.0
-        if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
-            gravity_factor = 1.0 - gas_density_kgm3 / particle_density[i]
-        bax_base = body_x_scaled * gravity_factor + extra_accel_x_particle[i]
-        bay_base = body_y_scaled * gravity_factor + extra_accel_y_particle[i]
-        baz_base = body_z_scaled * gravity_factor + extra_accel_z_particle[i]
-        n_substeps = compute_substep_count(
-            dt,
-            tau_stokes,
-            adaptive_substep_enabled,
-            adaptive_substep_tau_ratio,
-            adaptive_substep_max_splits,
-        )
-        substep_counts[i] = n_substeps
-        dt_sub = dt / float(n_substeps)
+        extra_ax_i = extra_accel_x_particle[i]
+        extra_ay_i = extra_accel_y_particle[i]
+        extra_az_i = extra_accel_z_particle[i]
+        bax_base = body_x_scaled + extra_ax_i
+        bay_base = body_y_scaled + extra_ay_i
+        baz_base = body_z_scaled + extra_az_i
         t_start = t - dt
         xn = x[i, 0]
         yn = x[i, 1]
@@ -168,6 +194,47 @@ def advance_particles_3d_inplace(
         vxn = v[i, 0]
         vyn = v[i, 1]
         vzn = v[i, 2]
+        substep_tau = tau_stokes
+        if int(drag_model_mode) != int(DRAG_MODEL_STOKES):
+            flowx_start = _sample_time_trilinear(ux, times, xs, ys, zs, t_start, xn, yn, zn)
+            flowy_start = _sample_time_trilinear(uy, times, xs, ys, zs, t_start, xn, yn, zn)
+            flowz_start = _sample_time_trilinear(uz, times, xs, ys, zs, t_start, xn, yn, zn)
+            rho_g_start, mu_g_start, temp_g_start = _sample_gas_properties_3d(
+                gas_density_grid, gas_mu_grid, gas_temperature_grid,
+                times, xs, ys, zs, t_start, xn, yn, zn,
+                gas_density_kgm3, gas_mu_pas, gas_temperature_K,
+            )
+            targetx_start = global_flow_scale * flow_scale_particle[i] * flowx_start
+            targety_start = global_flow_scale * flow_scale_particle[i] * flowy_start
+            targetz_start = global_flow_scale * flow_scale_particle[i] * flowz_start
+            slip_start = np.sqrt(
+                (vxn - targetx_start) * (vxn - targetx_start)
+                + (vyn - targety_start) * (vyn - targety_start)
+                + (vzn - targetz_start) * (vzn - targetz_start)
+            )
+            tau_eff_start = effective_tau_from_slip_speed(
+                tau_stokes,
+                slip_start,
+                particle_diameter[i],
+                rho_g_start,
+                mu_g_start,
+                drag_model_mode,
+                min_tau_p_s,
+                particle_density[i],
+                temp_g_start,
+                gas_molecular_mass_kg,
+            )
+            if np.isfinite(tau_eff_start) and tau_eff_start > 0.0 and tau_eff_start < substep_tau:
+                substep_tau = tau_eff_start
+        n_substeps = compute_substep_count(
+            dt,
+            substep_tau,
+            adaptive_substep_enabled,
+            adaptive_substep_tau_ratio,
+            adaptive_substep_max_splits,
+        )
+        substep_counts[i] = n_substeps
+        dt_sub = dt / float(n_substeps)
         mask_status = VALID_MASK_STATUS_CLEAN
         if integrator_mode == INTEGRATOR_ETD2:
             half_dt = 0.5 * dt
@@ -194,9 +261,17 @@ def advance_particles_3d_inplace(
                     electric_x, electric_y, electric_z, times, xs, ys, zs,
                     t_sub_start, xn, yn, zn, q_over_m_i, dynamic_electric_enabled,
                 )
-                bax0 = bax_base + body_scale * accx0
-                bay0 = bay_base + body_scale * accy0
-                baz0 = baz_base + body_scale * accz0
+                rho_g0, mu_g0, temp_g0 = _sample_gas_properties_3d(
+                    gas_density_grid, gas_mu_grid, gas_temperature_grid,
+                    times, xs, ys, zs, t_sub_start, xn, yn, zn,
+                    gas_density_kgm3, gas_mu_pas, gas_temperature_K,
+                )
+                gravity_factor0 = 1.0
+                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                    gravity_factor0 = 1.0 - rho_g0 / particle_density[i]
+                bax0 = bax_base + (gravity_factor0 - 1.0) * body_x_scaled + accx0
+                bay0 = bay_base + (gravity_factor0 - 1.0) * body_y_scaled + accy0
+                baz0 = baz_base + (gravity_factor0 - 1.0) * body_z_scaled + accz0
                 targetx0 = global_flow_scale * flow_scale_particle[i] * flowx0
                 targety0 = global_flow_scale * flow_scale_particle[i] * flowy0
                 targetz0 = global_flow_scale * flow_scale_particle[i] * flowz0
@@ -209,10 +284,13 @@ def advance_particles_3d_inplace(
                     tau_stokes,
                     slip0,
                     particle_diameter[i],
-                    gas_density_kgm3,
-                    gas_mu_pas,
+                    rho_g0,
+                    mu_g0,
                     drag_model_mode,
                     min_tau_p_s,
+                    particle_density[i],
+                    temp_g0,
+                    gas_molecular_mass_kg,
                 )
                 xh, yh, zh, _vxh, _vyh, _vzh = advance_state_3d_etd(
                     xn,
@@ -241,9 +319,17 @@ def advance_particles_3d_inplace(
                     electric_x, electric_y, electric_z, times, xs, ys, zs,
                     t_mid, xh, yh, zh, q_over_m_i, dynamic_electric_enabled,
                 )
-                bax_mid = bax_base + body_scale * accx_mid
-                bay_mid = bay_base + body_scale * accy_mid
-                baz_mid = baz_base + body_scale * accz_mid
+                rho_g_mid, mu_g_mid, temp_g_mid = _sample_gas_properties_3d(
+                    gas_density_grid, gas_mu_grid, gas_temperature_grid,
+                    times, xs, ys, zs, t_mid, xh, yh, zh,
+                    gas_density_kgm3, gas_mu_pas, gas_temperature_K,
+                )
+                gravity_factor_mid = 1.0
+                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                    gravity_factor_mid = 1.0 - rho_g_mid / particle_density[i]
+                bax_mid = bax_base + (gravity_factor_mid - 1.0) * body_x_scaled + accx_mid
+                bay_mid = bay_base + (gravity_factor_mid - 1.0) * body_y_scaled + accy_mid
+                baz_mid = baz_base + (gravity_factor_mid - 1.0) * body_z_scaled + accz_mid
                 targetx_mid = global_flow_scale * flow_scale_particle[i] * flowx_mid
                 targety_mid = global_flow_scale * flow_scale_particle[i] * flowy_mid
                 targetz_mid = global_flow_scale * flow_scale_particle[i] * flowz_mid
@@ -256,10 +342,13 @@ def advance_particles_3d_inplace(
                     tau_stokes,
                     slip_mid,
                     particle_diameter[i],
-                    gas_density_kgm3,
-                    gas_mu_pas,
+                    rho_g_mid,
+                    mu_g_mid,
                     drag_model_mode,
                     min_tau_p_s,
+                    particle_density[i],
+                    temp_g_mid,
+                    gas_molecular_mass_kg,
                 )
                 xn, yn, zn, vxn, vyn, vzn = advance_state_3d_etd(
                     xn,
@@ -297,9 +386,17 @@ def advance_particles_3d_inplace(
                                 electric_x, electric_y, electric_z, times, xs, ys, zs,
                                 t_sub_start, x0, y0, z0, q_over_m_i, dynamic_electric_enabled,
                             )
-                            bax0_mid = bax_base + body_scale * accx0_mid
-                            bay0_mid = bay_base + body_scale * accy0_mid
-                            baz0_mid = baz_base + body_scale * accz0_mid
+                            rho_g0_mid, mu_g0_mid, temp_g0_mid = _sample_gas_properties_3d(
+                                gas_density_grid, gas_mu_grid, gas_temperature_grid,
+                                times, xs, ys, zs, t_sub_start, x0, y0, z0,
+                                gas_density_kgm3, gas_mu_pas, gas_temperature_K,
+                            )
+                            gravity_factor0_mid = 1.0
+                            if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                                gravity_factor0_mid = 1.0 - rho_g0_mid / particle_density[i]
+                            bax0_mid = bax_base + (gravity_factor0_mid - 1.0) * body_x_scaled + accx0_mid
+                            bay0_mid = bay_base + (gravity_factor0_mid - 1.0) * body_y_scaled + accy0_mid
+                            baz0_mid = baz_base + (gravity_factor0_mid - 1.0) * body_z_scaled + accz0_mid
                             targetx0_mid = global_flow_scale * flow_scale_particle[i] * flowx0_mid
                             targety0_mid = global_flow_scale * flow_scale_particle[i] * flowy0_mid
                             targetz0_mid = global_flow_scale * flow_scale_particle[i] * flowz0_mid
@@ -312,10 +409,13 @@ def advance_particles_3d_inplace(
                                 tau_stokes,
                                 slip0_mid,
                                 particle_diameter[i],
-                                gas_density_kgm3,
-                                gas_mu_pas,
+                                rho_g0_mid,
+                                mu_g0_mid,
                                 drag_model_mode,
                                 min_tau_p_s,
+                                particle_density[i],
+                                temp_g0_mid,
+                                gas_molecular_mass_kg,
                             )
                             xh_mid, yh_mid, zh_mid, _vxh_mid, _vyh_mid, _vzh_mid = advance_state_3d_etd(
                                 x0,
@@ -344,9 +444,17 @@ def advance_particles_3d_inplace(
                                 electric_x, electric_y, electric_z, times, xs, ys, zs,
                                 t_mid_eval, xh_mid, yh_mid, zh_mid, q_over_m_i, dynamic_electric_enabled,
                             )
-                            bax_mid2 = bax_base + body_scale * accx_mid2
-                            bay_mid2 = bay_base + body_scale * accy_mid2
-                            baz_mid2 = baz_base + body_scale * accz_mid2
+                            rho_g_mid2, mu_g_mid2, temp_g_mid2 = _sample_gas_properties_3d(
+                                gas_density_grid, gas_mu_grid, gas_temperature_grid,
+                                times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid,
+                                gas_density_kgm3, gas_mu_pas, gas_temperature_K,
+                            )
+                            gravity_factor_mid2 = 1.0
+                            if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                                gravity_factor_mid2 = 1.0 - rho_g_mid2 / particle_density[i]
+                            bax_mid2 = bax_base + (gravity_factor_mid2 - 1.0) * body_x_scaled + accx_mid2
+                            bay_mid2 = bay_base + (gravity_factor_mid2 - 1.0) * body_y_scaled + accy_mid2
+                            baz_mid2 = baz_base + (gravity_factor_mid2 - 1.0) * body_z_scaled + accz_mid2
                             targetx_mid2 = global_flow_scale * flow_scale_particle[i] * flowx_mid2
                             targety_mid2 = global_flow_scale * flow_scale_particle[i] * flowy_mid2
                             targetz_mid2 = global_flow_scale * flow_scale_particle[i] * flowz_mid2
@@ -359,10 +467,13 @@ def advance_particles_3d_inplace(
                                 tau_stokes,
                                 slip_mid2,
                                 particle_diameter[i],
-                                gas_density_kgm3,
-                                gas_mu_pas,
+                                rho_g_mid2,
+                                mu_g_mid2,
                                 drag_model_mode,
                                 min_tau_p_s,
+                                particle_density[i],
+                                temp_g_mid2,
+                                gas_molecular_mass_kg,
                             )
                             xmid, ymid, zmid, _vxmid, _vymid, _vzmid = advance_state_3d_etd(
                                 x0,
@@ -402,9 +513,17 @@ def advance_particles_3d_inplace(
                     electric_x, electric_y, electric_z, times, xs, ys, zs,
                     t_eval, xn, yn, zn, q_over_m_i, dynamic_electric_enabled,
                 )
-                bax = bax_base + body_scale * accx
-                bay = bay_base + body_scale * accy
-                baz = baz_base + body_scale * accz
+                rho_g, mu_g, temp_g = _sample_gas_properties_3d(
+                    gas_density_grid, gas_mu_grid, gas_temperature_grid,
+                    times, xs, ys, zs, t_eval, xn, yn, zn,
+                    gas_density_kgm3, gas_mu_pas, gas_temperature_K,
+                )
+                gravity_factor = 1.0
+                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
+                    gravity_factor = 1.0 - rho_g / particle_density[i]
+                bax = bax_base + (gravity_factor - 1.0) * body_x_scaled + accx
+                bay = bay_base + (gravity_factor - 1.0) * body_y_scaled + accy
+                baz = baz_base + (gravity_factor - 1.0) * body_z_scaled + accz
                 targetx = global_flow_scale * flow_scale_particle[i] * flowx
                 targety = global_flow_scale * flow_scale_particle[i] * flowy
                 targetz = global_flow_scale * flow_scale_particle[i] * flowz
@@ -417,10 +536,13 @@ def advance_particles_3d_inplace(
                     tau_stokes,
                     slip,
                     particle_diameter[i],
-                    gas_density_kgm3,
-                    gas_mu_pas,
+                    rho_g,
+                    mu_g,
                     drag_model_mode,
                     min_tau_p_s,
+                    particle_density[i],
+                    temp_g,
+                    gas_molecular_mass_kg,
                 )
                 xn, yn, zn, vxn, vyn, vzn = advance_state_3d(
                     xn,

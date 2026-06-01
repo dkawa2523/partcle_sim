@@ -11,6 +11,7 @@ from .datamodel import (
     PartWallTable,
     ParticleTable,
     SourceResolutionParameters,
+    source_provenance_group,
 )
 from .source_schema import (
     DEFAULT_SOURCE_EVENT_TAG,
@@ -68,10 +69,13 @@ def resolve_source_parameters(
     }
     law_usage: Dict[str, int] = {}
     material_usage: Dict[str, int] = {}
+    source_provenance_counts: Dict[str, int] = {}
     unresolved = 0
 
     for i in range(n):
         src_pid = int(particles.source_part_id[i])
+        provenance = source_provenance_group(src_pid)
+        source_provenance_counts[provenance] = source_provenance_counts.get(provenance, 0) + 1
         wall_row: Optional[PartWallRow] = wall_lookup.get(src_pid) if src_pid > 0 else None
         input_mid = int(particles.material_id[i])
         source_mid = int(wall_row.material_id) if wall_row is not None else 0
@@ -133,6 +137,7 @@ def resolve_source_parameters(
             'source.default_law',
         ],
         'unresolved_particle_count': int(unresolved),
+        'source_provenance_counts': source_provenance_counts,
         'global_defaults': defaults,
     }
     return SourceResolutionParameters(

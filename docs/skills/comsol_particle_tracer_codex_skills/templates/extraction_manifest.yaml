@@ -1,0 +1,25 @@
+case_name: TBD
+created_by: codex
+created_at: TBD
+source_assets:
+  mph_file: null
+  exported_mesh: null
+  exported_fields: []
+  exported_release_table: null
+  exported_particle_long: null
+  exported_boundary_map: null
+  notes: []
+comsol_environment:
+  comsol_available: unknown
+  matlab_livelink_available: unknown
+  extraction_route: unknown   # existing_exports | gui_export | comsol_batch | matlab_livelink | unavailable
+model_scope:
+  comsol_version: unknown
+  component: unknown
+  geometry_dimension: unknown # 2d | axisymmetric_rz | 3d
+  study: unknown
+  dataset: unknown
+  solution_index: unknown
+comparison_mode: unknown      # comsol_faithful | surface_release_production | field_only
+missing_required_items: []
+stop_conditions: []

@@ -181,18 +181,18 @@ def test_incomplete_tensor_grid_is_rejected() -> None:
         build_field_bundle_from_table(table, q_ref_c=1.0, m_ref_kg=2.0, require_nonuniform=False)
 
 
-def test_icp_wall_catalog_uses_half_sticking_for_physical_walls() -> None:
+def test_generic_comsol_wall_catalog_does_not_guess_icp_roles() -> None:
     _materials, walls, _fallback = _material_and_wall_rows([42, FIELD_SUPPORT_BOUNDARY_PART_ID])
     by_part = {int(row["part_id"]): row for row in walls}
 
-    assert by_part[3]["part_name"] == "wafer_3"
-    assert by_part[3]["wall_law"] == "specular"
-    assert by_part[3]["wall_stick_probability"] == pytest.approx(0.5)
-    assert by_part[42]["part_name"] == "sidewall_42"
-    assert by_part[42]["wall_stick_probability"] == pytest.approx(0.5)
+    assert 3 not in by_part
+    assert by_part[42]["part_name"] == "comsol_boundary_42"
+    assert by_part[42]["material_name"] == "comsol_boundary"
+    assert by_part[42]["wall_law"] == "specular"
+    assert by_part[42]["wall_stick_probability"] == pytest.approx(0.0)
     assert by_part[FIELD_SUPPORT_BOUNDARY_PART_ID]["part_name"] == "field_support_boundary"
     assert by_part[FIELD_SUPPORT_BOUNDARY_PART_ID]["wall_law"] == "specular"
-    assert by_part[FIELD_SUPPORT_BOUNDARY_PART_ID]["wall_stick_probability"] == pytest.approx(0.5)
+    assert by_part[FIELD_SUPPORT_BOUNDARY_PART_ID]["wall_stick_probability"] == pytest.approx(0.0)
 
 
 def test_comsol_edge_entities_are_used_as_field_support_reference() -> None:

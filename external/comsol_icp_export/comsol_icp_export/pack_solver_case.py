@@ -368,7 +368,11 @@ def _patch_run_config(config_path: Path, *, t_end: float, dt: float, save_every:
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     if not isinstance(config, dict):
         raise ValueError(f"invalid run_config.yaml: {config_path}")
-    config.setdefault("source", {}).setdefault("preprocess", {})["enabled"] = False
+    source = config.setdefault("source", {})
+    source["source_position_offset_m"] = 0.0
+    preprocess = source.setdefault("preprocess", {})
+    preprocess["enabled"] = True
+    preprocess["boundary_release"] = True
     config.setdefault("input_contract", {})["initial_particle_field_support"] = "strict"
     provider_contract = config.setdefault("provider_contract", {})
     provider_contract["boundary_field_support"] = "strict"
@@ -401,7 +405,6 @@ def pack_solver_case(
     particle_density_kgm3: float = 1200.0,
     particle_seed: int = 24680,
     particle_release_span_s: float | None = 0.0,
-    particle_min_release_offset_cells: float = 1.0,
     diagnostic_grid_spacing_m: float | None = None,
     field_ghost_cells: int = 8,
     t_end: float = 2.0e-6,
@@ -449,25 +452,25 @@ def pack_solver_case(
 
     root = _repo_root()
     build_script = root / "tools" / "build_comsol_case.py"
-    _run(
-        [
-            sys.executable,
-            str(build_script),
-            "--mphtxt",
-            str(mphtxt),
-            "--out-dir",
-            str(out_dir),
-            "--field-bundle",
-            str(bundle_path),
-            "--diagnostic-grid-spacing-m",
-            f"{spacing:.17g}",
-            "--field-ghost-cells",
-            str(int(field_ghost_cells)),
-            "--coordinate-scale-m-per-model-unit",
-            f"{coordinate_scale:.17g}",
-        ],
-        cwd=root,
-    )
+    build_cmd = [
+        sys.executable,
+        str(build_script),
+        "--mphtxt",
+        str(mphtxt),
+        "--out-dir",
+        str(out_dir),
+        "--field-bundle",
+        str(bundle_path),
+        "--diagnostic-grid-spacing-m",
+        f"{spacing:.17g}",
+        "--field-ghost-cells",
+        str(int(field_ghost_cells)),
+        "--coordinate-scale-m-per-model-unit",
+        f"{coordinate_scale:.17g}",
+    ]
+    if int(field_ghost_cells) > 0:
+        build_cmd.append("--allow-field-ghost-cells")
+    _run(build_cmd, cwd=root)
     particles_cmd = [
         sys.executable,
         str(build_script),
@@ -480,8 +483,6 @@ def pack_solver_case(
         str(int(particle_count)),
         "--particle-seed",
         str(int(particle_seed)),
-        "--particle-min-release-offset-cells",
-        f"{float(particle_min_release_offset_cells):.17g}",
         "--diagnostic-grid-spacing-m",
         f"{spacing:.17g}",
         "--coordinate-scale-m-per-model-unit",
@@ -513,6 +514,7 @@ def pack_solver_case(
         "out_dir": str(out_dir),
         "particle_count": int(particle_count),
         "particle_source_part_ids": [int(pid) for pid in source_part_ids] if source_part_ids else [],
+        "particle_generation": "boundary_release_source_points",
         "q_ref_c": selected_q,
         "m_ref_kg": selected_m,
         "particle_diameter_m": float(particle_diameter_m),
@@ -539,7 +541,11 @@ def pack_solver_case(
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Pack an external ICP COMSOL export into a solver case.")
     ap.add_argument("--raw-export-dir", type=Path, required=True)
-    ap.add_argument("--out-dir", type=Path, default=Path("examples/icp_rf_bias_cf4_o2_si_etching_2d"))
+    ap.add_argument(
+        "--out-dir",
+        type=Path,
+        default=Path("_external_exports/icp_rf_bias_cf4_o2_si_etching_2d_solver_case"),
+    )
     ap.add_argument("--particle-count", type=int, default=1000)
     ap.add_argument("--q-ref-c", type=float, default=None)
     ap.add_argument("--m-ref-kg", type=float, default=None)
@@ -547,7 +553,6 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--particle-density-kgm3", type=float, default=1200.0)
     ap.add_argument("--particle-seed", type=int, default=24680)
     ap.add_argument("--particle-release-span-s", type=float, default=0.0)
-    ap.add_argument("--particle-min-release-offset-cells", type=float, default=1.0)
     ap.add_argument("--diagnostic-grid-spacing-m", type=float, default=None)
     ap.add_argument("--field-ghost-cells", type=int, default=8)
     ap.add_argument("--t-end", type=float, default=2.0e-6)
@@ -568,7 +573,6 @@ def main(argv: list[str] | None = None) -> int:
         particle_density_kgm3=float(args.particle_density_kgm3),
         particle_seed=int(args.particle_seed),
         particle_release_span_s=args.particle_release_span_s,
-        particle_min_release_offset_cells=float(args.particle_min_release_offset_cells),
         diagnostic_grid_spacing_m=args.diagnostic_grid_spacing_m,
         field_ghost_cells=int(args.field_ghost_cells),
         t_end=float(args.t_end),

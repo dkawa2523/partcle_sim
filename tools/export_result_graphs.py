@@ -94,6 +94,156 @@ def _case_field_payload(case_dir: Path | None) -> dict[str, np.ndarray]:
     return _load_npz_arrays(Path(case_dir) / "generated" / "comsol_field_2d.npz")
 
 
+def _final_position_columns(final_df: pd.DataFrame) -> tuple[list[str], list[str]]:
+    if {"x", "y", "z"}.issubset(final_df.columns):
+        return ["x", "y", "z"], ["x", "y", "z"]
+    if {"x", "y"}.issubset(final_df.columns):
+        return ["x", "y"], ["x", "y"]
+    if {"r", "z"}.issubset(final_df.columns):
+        return ["r", "z"], ["r", "z"]
+    return [], []
+
+
+def _limits_from_points(points: np.ndarray, edges: np.ndarray | None = None) -> tuple[tuple[float, float], tuple[float, float]]:
+    pts = np.asarray(points, dtype=np.float64)
+    chunks = []
+    if pts.ndim == 2 and pts.shape[1] >= 2 and pts.size:
+        chunks.append(pts[:, :2])
+    if edges is not None:
+        edge_pts = np.asarray(edges, dtype=np.float64).reshape(-1, 2)
+        if edge_pts.size:
+            chunks.append(edge_pts)
+    if not chunks:
+        return (-1.0, 1.0), (-1.0, 1.0)
+    merged = np.vstack(chunks)
+    finite = merged[np.all(np.isfinite(merged), axis=1)]
+    if finite.size == 0:
+        return (-1.0, 1.0), (-1.0, 1.0)
+    lo = np.nanmin(finite, axis=0)
+    hi = np.nanmax(finite, axis=0)
+    span = np.maximum(hi - lo, 1.0e-12)
+    pad = np.maximum(span * 0.04, 1.0e-12)
+    return (float(lo[0] - pad[0]), float(hi[0] + pad[0])), (float(lo[1] - pad[1]), float(hi[1] + pad[1]))
+
+
+def _write_final_state_count_graphs(out_dir: Path, state_counts: dict[str, int]) -> None:
+    pd.DataFrame(
+        [{"state": name, "count": int(state_counts.get(name, 0))} for name in STATE_ORDER]
+    ).to_csv(out_dir / "02_final_state_counts.csv", index=False)
+    fig, axes = plt.subplots(1, 2, figsize=(9.6, 4.8))
+    names = list(STATE_ORDER)
+    vals = [int(state_counts.get(name, 0)) for name in names]
+    colors = [STATE_COLORS[name] for name in names]
+    axes[0].bar(names, vals, color=colors)
+    axes[0].set_title("Final State Counts")
+    axes[0].set_ylabel("count")
+    for idx, value in enumerate(vals):
+        axes[0].text(idx, value, str(value), ha="center", va="bottom", fontsize=9)
+    pie_vals = [v for v in vals if v > 0]
+    pie_labels = [n for n, v in zip(names, vals) if v > 0]
+    pie_colors = [STATE_COLORS[n] for n in pie_labels]
+    if pie_vals:
+        axes[1].pie(pie_vals, labels=pie_labels, colors=pie_colors, autopct="%1.1f%%", startangle=90)
+    axes[1].set_title("Final State Share")
+    fig.tight_layout()
+    fig.savefig(out_dir / "02_final_state_bar_and_pie.png", dpi=170)
+    plt.close(fig)
+
+
+def _export_compact_result_graphs(
+    *,
+    output_dir: Path,
+    case_dir: Path | None,
+    final_df: pd.DataFrame,
+    missing_trajectory_artifacts: list[str],
+) -> Path:
+    coords, axis_names = _final_position_columns(final_df)
+    spatial_dim = len(coords) if coords else 0
+    edges, edge_part_ids = load_boundary_geometry(case_dir) if spatial_dim == 2 else (None, None)
+    geometry_payload = _case_geometry_payload(case_dir) if spatial_dim == 2 else {}
+    field_payload = _case_field_payload(case_dir) if spatial_dim == 2 else {}
+    medium_summary = _domain_medium_summary(geometry_payload, field_payload) if spatial_dim == 2 else pd.DataFrame()
+    out_dir = ensure_visualization_dirs(output_dir)["graphs"]
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    final_labels = state_labels(final_df)
+    state_counts = final_state_counts(final_df)
+    _write_final_state_count_graphs(out_dir, state_counts)
+
+    if spatial_dim >= 2:
+        fig, ax = plt.subplots(figsize=(8.2, 5.9))
+        if spatial_dim == 2:
+            _draw_device_structure(
+                ax,
+                geometry_payload,
+                edges,
+                edge_part_ids,
+                domain_alpha=0.28,
+                boundary_linewidth=0.9,
+                medium_summary=medium_summary,
+            )
+        for name in STATE_ORDER:
+            mask = final_labels == name
+            if not np.any(mask):
+                continue
+            sub = final_df.loc[mask]
+            ax.scatter(
+                sub[coords[0]],
+                sub[coords[1]],
+                s=5,
+                color=STATE_COLORS[name],
+                alpha=0.7,
+                label=f"{name} ({int(mask.sum())})",
+                zorder=2,
+            )
+        points = final_df[coords[:2]].to_numpy(dtype=np.float64)
+        x_lim, y_lim = _limits_from_points(points, edges if spatial_dim == 2 else None)
+        ax.set_title("Final Particle States")
+        ax.set_xlabel(f"{axis_names[0]} [m]")
+        ax.set_ylabel(f"{axis_names[1]} [m]")
+        ax.set_xlim(*x_lim)
+        ax.set_ylim(*y_lim)
+        ax.set_aspect("equal", adjustable="box")
+        ax.legend(loc="best", fontsize=8)
+        fig.tight_layout()
+        fig.savefig(out_dir / "03_final_state_scatter_geometry.png", dpi=170)
+        plt.close(fig)
+
+    report_json = output_dir / "solver_report.json"
+    report = json.loads(report_json.read_text(encoding="utf-8")) if report_json.exists() else {}
+    summary = {
+        "plot_dir": str(out_dir.resolve()),
+        "output_dir": str(output_dir.resolve()),
+        "case_dir": str(case_dir.resolve()) if case_dir is not None else "",
+        "graph_mode": "compact_final_state",
+        "trajectory_artifacts_available": False,
+        "missing_trajectory_artifacts": list(missing_trajectory_artifacts),
+        "spatial_dim": int(spatial_dim),
+        "axis_names": axis_names,
+        "files": list_files(out_dir, (".png", ".csv", ".json")),
+        "save_frame_count": 0,
+        "particle_count": int(len(final_df)),
+        "final_state_counts": state_counts,
+        "contact_state_counts_by_part": [],
+        "used_wall_part_summary": False,
+        "extra_graph_files": [],
+        "domain_medium_status_counts": (
+            medium_summary["medium_status"].value_counts().astype(int).to_dict()
+            if not medium_summary.empty and "medium_status" in medium_summary.columns
+            else {}
+        ),
+        "recommended_for_reports": [
+            "02_final_state_bar_and_pie.png",
+            "02_final_state_counts.csv",
+            "03_final_state_scatter_geometry.png" if spatial_dim >= 2 else "",
+        ],
+        "solver_report_coordinate_system": report.get("coordinate_system", ""),
+    }
+    summary["recommended_for_reports"] = [name for name in summary["recommended_for_reports"] if name]
+    (out_dir / "graph_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    return out_dir
+
+
 def _as_2d_mask(value: np.ndarray) -> np.ndarray:
     arr = np.asarray(value, dtype=bool)
     if arr.ndim == 2:
@@ -956,18 +1106,27 @@ def export_result_graphs(output_dir: Path, case_dir: Path | None = None, sample_
     report_json = output_dir / "solver_report.json"
     if not final_csv.exists():
         raise FileNotFoundError(f"final_particles.csv not found: {final_csv}")
+    final_df = pd.read_csv(final_csv)
+    missing_trajectory_artifacts: list[str] = []
     if not frames_csv.exists():
-        raise FileNotFoundError(f"save_frames.csv not found: {frames_csv}")
+        missing_trajectory_artifacts.append("save_frames.csv")
     if not steps_csv.exists():
-        raise FileNotFoundError(f"runtime_step_summary.csv not found: {steps_csv}")
+        missing_trajectory_artifacts.append("runtime_step_summary.csv")
     if positions_2d_npy.exists():
         positions_npy = positions_2d_npy
     elif positions_3d_npy.exists():
         positions_npy = positions_3d_npy
     else:
-        raise FileNotFoundError(f"positions_2d.npy or positions_3d.npy not found in: {output_dir}")
+        positions_npy = None
+        missing_trajectory_artifacts.append("positions_2d.npy|positions_3d.npy")
+    if missing_trajectory_artifacts or positions_npy is None:
+        return _export_compact_result_graphs(
+            output_dir=output_dir,
+            case_dir=case_dir,
+            final_df=final_df,
+            missing_trajectory_artifacts=missing_trajectory_artifacts,
+        )
 
-    final_df = pd.read_csv(final_csv)
     step_df = pd.read_csv(steps_csv)
     frame_df = pd.read_csv(frames_csv)
     positions = np.asarray(np.load(positions_npy), dtype=np.float64)
@@ -1034,27 +1193,7 @@ def export_result_graphs(output_dir: Path, case_dir: Path | None = None, sample_
         ).to_csv(out_dir / "01_wall_event_cumulative_counts.csv", index=False)
 
     state_counts = final_state_counts(final_df)
-    pd.DataFrame(
-        [{'state': name, 'count': int(state_counts.get(name, 0))} for name in STATE_ORDER]
-    ).to_csv(out_dir / "02_final_state_counts.csv", index=False)
-    fig, axes = plt.subplots(1, 2, figsize=(9.6, 4.8))
-    names = list(STATE_ORDER)
-    vals = [state_counts[name] for name in names]
-    colors = [STATE_COLORS[name] for name in names]
-    axes[0].bar(names, vals, color=colors)
-    axes[0].set_title("Final State Counts")
-    axes[0].set_ylabel("count")
-    for idx, value in enumerate(vals):
-        axes[0].text(idx, value, str(value), ha="center", va="bottom", fontsize=9)
-    pie_vals = [v for v in vals if v > 0]
-    pie_labels = [n for n, v in zip(names, vals) if v > 0]
-    pie_colors = [STATE_COLORS[n] for n in pie_labels]
-    if pie_vals:
-        axes[1].pie(pie_vals, labels=pie_labels, colors=pie_colors, autopct="%1.1f%%", startangle=90)
-    axes[1].set_title("Final State Share")
-    fig.tight_layout()
-    fig.savefig(out_dir / "02_final_state_bar_and_pie.png", dpi=170)
-    plt.close(fig)
+    _write_final_state_count_graphs(out_dir, state_counts)
 
     if spatial_dim == 2:
         fig, ax = plt.subplots(figsize=(8.2, 5.9))
@@ -1420,6 +1559,9 @@ def export_result_graphs(output_dir: Path, case_dir: Path | None = None, sample_
         "plot_dir": str(out_dir.resolve()),
         "output_dir": str(output_dir.resolve()),
         "case_dir": str(case_dir.resolve()) if case_dir is not None else "",
+        "graph_mode": "trajectory_full",
+        "trajectory_artifacts_available": True,
+        "missing_trajectory_artifacts": [],
         "spatial_dim": int(spatial_dim),
         "files": list_files(out_dir, (".png", ".csv", ".json")),
         "save_frame_count": int(len(frame_df)),

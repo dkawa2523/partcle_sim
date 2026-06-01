@@ -27,10 +27,31 @@ public class ComsolParticleCaseExporter {
     private static String mode = "all";
     private static boolean exportMesh = true;
     private static boolean exportFields = true;
+    private static boolean exportGridFieldSamples = true;
+    private static boolean exportMeshFieldSamples = false;
+    private static String meshFieldSamplesFilename = "mesh_field_samples.csv";
     private static String dataset = "dset1";
     private static String meshTag = "mesh1";
     private static int spatialDim = 2;
     private static int solnum = -1;
+    private static int[] solnums = new int[0];
+    private static double[] timeValues = new double[0];
+    private static boolean exportDataTable = false;
+    private static boolean exportDataTableRequired = false;
+    private static String dataExportDataset = "";
+    private static String dataExportFilename = "comsol_data_export.csv";
+    private static String dataExportInnerInput = "";
+    private static int[] dataExportSolnums = new int[0];
+    private static double[] dataExportTimeValues = new double[0];
+    private static List<String> dataExportExpressions = new ArrayList<>();
+    private static boolean enableParticleStatusData = false;
+    private static boolean enableWallExtraSteps = false;
+    private static boolean enableParticleReleaseStatistics = false;
+    private static boolean requireRuntimeOptionApplication = false;
+    private static boolean runStudy = false;
+    private static String studyTag = "std1";
+    private static String wallAccuracyOrder = "";
+    private static String maxBounce = "";
     private static String coordinateModelUnit = "m";
     private static double coordinateScaleMPerModelUnit = 1.0;
     private static String[] axisNames = new String[]{"x", "y"};
@@ -47,15 +68,26 @@ public class ComsolParticleCaseExporter {
 
         Model model = ModelUtil.load("particle_export_model", mphPath.toString());
         try {
+            List<String[]> runtimeOptions = applyRuntimeOptions(model);
+            String[] studyRun = runConfiguredStudy(model);
+            writeRuntimeOptionsReport(outDir.resolve("runtime_options_report.json"), runtimeOptions, studyRun);
             writeInventories(model);
             if (exportFields && ("all".equals(mode) || "fields".equals(mode))) {
                 Map<String, String> selected = selectExpressions(model, probeCoordinates());
                 writeExpressionInventory(outDir.resolve("expression_inventory.json"), selected);
-                writeFieldSamples(outDir.resolve("field_samples.csv"), model, selected);
+                if (exportGridFieldSamples) {
+                    writeFieldSamples(outDir.resolve("field_samples.csv"), model, selected);
+                }
+                if (exportMeshFieldSamples) {
+                    writeMeshFieldSamples(outDir.resolve(meshFieldSamplesFilename), model, selected);
+                }
                 writeManifest(outDir.resolve("export_manifest.json"), selected);
             } else {
                 writeExpressionInventory(outDir.resolve("expression_inventory.json"), new LinkedHashMap<String, String>());
                 writeManifest(outDir.resolve("export_manifest.json"), new LinkedHashMap<String, String>());
+            }
+            if (exportDataTable) {
+                writeConfiguredDataExport(model);
             }
         } finally {
             try {
@@ -83,10 +115,30 @@ public class ComsolParticleCaseExporter {
         mode = jsonString(text, "mode", mode);
         exportMesh = jsonBoolean(text, "export_mesh", exportMesh);
         exportFields = jsonBoolean(text, "export_fields", exportFields);
+        exportGridFieldSamples = jsonBoolean(text, "export_grid_field_samples", exportGridFieldSamples);
+        exportMeshFieldSamples = jsonBoolean(text, "export_mesh_field_samples", exportMeshFieldSamples);
+        meshFieldSamplesFilename = jsonString(text, "mesh_field_samples_filename", meshFieldSamplesFilename);
         dataset = jsonString(text, "dataset", dataset);
         meshTag = jsonString(text, "mesh_tag", meshTag);
         spatialDim = (int) jsonDouble(text, "spatial_dim", spatialDim);
         solnum = (int) jsonDouble(text, "solnum", solnum);
+        solnums = jsonIntArrayConfig(text, "solnums", new int[0]);
+        timeValues = jsonDoubleArray(text, "time_values", jsonDoubleArray(text, "times", new double[0]));
+        exportDataTable = jsonBoolean(text, "export_data_table", exportDataTable);
+        exportDataTableRequired = jsonBoolean(text, "export_data_table_required", exportDataTableRequired);
+        dataExportDataset = jsonString(text, "data_export_dataset", dataExportDataset);
+        dataExportFilename = jsonString(text, "data_export_filename", dataExportFilename);
+        dataExportInnerInput = jsonString(text, "data_export_innerinput", dataExportInnerInput);
+        dataExportSolnums = jsonIntArrayConfig(text, "data_export_solnums", new int[0]);
+        dataExportTimeValues = jsonDoubleArray(text, "data_export_time_values", jsonDoubleArray(text, "data_export_times", new double[0]));
+        enableParticleStatusData = jsonBoolean(text, "enable_particle_status_data", enableParticleStatusData);
+        enableWallExtraSteps = jsonBoolean(text, "enable_wall_extra_steps", enableWallExtraSteps);
+        enableParticleReleaseStatistics = jsonBoolean(text, "enable_particle_release_statistics", enableParticleReleaseStatistics);
+        requireRuntimeOptionApplication = jsonBoolean(text, "require_runtime_option_application", requireRuntimeOptionApplication);
+        runStudy = jsonBoolean(text, "run_study", runStudy);
+        studyTag = jsonString(text, "study_tag", studyTag);
+        wallAccuracyOrder = jsonString(text, "wall_accuracy_order", wallAccuracyOrder);
+        maxBounce = jsonString(text, "max_wall_interactions_per_time_step", maxBounce);
         coordinateModelUnit = jsonString(text, "coordinate_model_unit", coordinateModelUnit);
         coordinateScaleMPerModelUnit = jsonDouble(text, "coordinate_scale_m_per_model_unit", coordinateScaleMPerModelUnit);
         if (spatialDim < 1 || spatialDim > 3) {
@@ -106,6 +158,20 @@ public class ComsolParticleCaseExporter {
         }
         expressions = parseExpressionLists(text);
         expressions.remove("axis_names");
+        dataExportExpressions = firstExpressionList(
+            expressions,
+            "data_export_expr",
+            "data_export_expressions",
+            "particle_result_expressions"
+        );
+        expressions.remove("data_export_expr");
+        expressions.remove("data_export_expressions");
+        expressions.remove("particle_result_expressions");
+        expressions.remove("data_export_descriptions");
+        expressions.remove("data_export_units");
+        if (exportDataTable && dataExportExpressions.isEmpty()) {
+            dataExportExpressions.add("1");
+        }
         if (expressions.containsKey("required")) {
             required = new ArrayList<>(expressions.get("required"));
             expressions.remove("required");
@@ -116,11 +182,144 @@ public class ComsolParticleCaseExporter {
         writeModelInventory(model, outDir.resolve("model_inventory.json"));
         writeMaterialInventory(model, outDir.resolve("material_inventory.json"));
         writeSelectionInventory(model, outDir.resolve("selection_inventory.json"));
+        writeStudyInventory(model, outDir.resolve("study_inventory.json"));
+        writeDatasetInventory(model, outDir.resolve("dataset_inventory.json"));
         writePhysicsFeatureInventory(model, outDir.resolve("physics_feature_inventory.json"));
         writeParticleReleaseInventory(model, outDir.resolve("particle_release_inventory.json"));
         writeMethodList(outDir.resolve("model_methods.txt"), model);
         if (exportMesh && ("all".equals(mode) || "inventory".equals(mode) || "fields".equals(mode))) {
             exportMesh(model, outDir.resolve("mesh.mphtxt"));
+        }
+    }
+
+    private static boolean runtimeOptionsRequested() {
+        return enableParticleStatusData
+            || enableWallExtraSteps
+            || enableParticleReleaseStatistics
+            || !wallAccuracyOrder.trim().isEmpty()
+            || !maxBounce.trim().isEmpty();
+    }
+
+    private static List<String[]> applyRuntimeOptions(Model model) {
+        List<String[]> rows = new ArrayList<>();
+        if (!runtimeOptionsRequested()) {
+            return rows;
+        }
+        String[] components = listTags(safeCall(model, "component"));
+        for (String component : components) {
+            Object comp = safeCall(model, "component", component);
+            String[] physicsTags = listTags(safeCall(comp, "physics"));
+            for (String physicsTag : physicsTags) {
+                Object physics = safeCall(comp, "physics", physicsTag);
+                String physicsLabel = stringOrEmpty(safeCall(physics, "label"));
+                String physicsType = firstNonEmpty(
+                    stringOrEmpty(safeCall(physics, "getType")),
+                    stringOrEmpty(safeCall(physics, "type"))
+                );
+                if (!isParticleTracingPhysics(physicsTag, physicsLabel, physicsType)) {
+                    continue;
+                }
+                if (enableParticleStatusData) {
+                    rows.add(setRuntimeOption(physics, component, physicsTag, physicsLabel, "StoreParticleStatusData", "1"));
+                }
+                if (enableWallExtraSteps) {
+                    rows.add(setRuntimeOption(physics, component, physicsTag, physicsLabel, "StoreExtra", "1"));
+                }
+                if (enableParticleReleaseStatistics) {
+                    rows.add(setRuntimeOption(physics, component, physicsTag, physicsLabel, "StoreParticleReleaseStatistics", "1"));
+                }
+                if (!wallAccuracyOrder.trim().isEmpty()) {
+                    rows.add(setRuntimeOption(physics, component, physicsTag, physicsLabel, "WallAccuracyOrder", wallAccuracyOrder.trim()));
+                }
+                if (!maxBounce.trim().isEmpty()) {
+                    rows.add(setRuntimeOption(physics, component, physicsTag, physicsLabel, "MaxBounce", maxBounce.trim()));
+                }
+            }
+        }
+        if (requireRuntimeOptionApplication) {
+            if (rows.isEmpty()) {
+                throw new RuntimeException("No particle-tracing physics interface was found for required runtime options");
+            }
+            for (String[] row : rows) {
+                if (!Boolean.parseBoolean(row[6])) {
+                    throw new RuntimeException(
+                        "Required COMSOL runtime option could not be set: "
+                            + row[0] + "/" + row[1] + "/" + row[3] + "=" + row[4]
+                    );
+                }
+            }
+        }
+        return rows;
+    }
+
+    private static String[] setRuntimeOption(
+        Object physics,
+        String component,
+        String physicsTag,
+        String physicsLabel,
+        String propertyName,
+        String value
+    ) {
+        boolean success = setPhysicsPropertyIfPossible(physics, propertyName, value);
+        String actualValue = physicsPropertySetting(physics, propertyName);
+        return new String[]{
+            component,
+            physicsTag,
+            physicsLabel,
+            propertyName,
+            value,
+            actualValue,
+            String.valueOf(success)
+        };
+    }
+
+    private static String[] runConfiguredStudy(Model model) {
+        if (!runStudy) {
+            return new String[]{"false", studyTag, "false", "0", ""};
+        }
+        long start = System.nanoTime();
+        try {
+            Object study = call(model, "study", studyTag);
+            call(study, "run");
+            long durationMs = (System.nanoTime() - start) / 1000000L;
+            return new String[]{"true", studyTag, "true", String.valueOf(durationMs), ""};
+        } catch (Throwable t) {
+            throw new RuntimeException("COMSOL study run failed for " + studyTag + ": " + t.toString(), t);
+        }
+    }
+
+    private static void writeRuntimeOptionsReport(Path out, List<String[]> options, String[] studyRun) throws Exception {
+        try (BufferedWriter w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
+            w.write("{\n");
+            w.write("  \"source_kind\": \"external_comsol_particle_export_runtime_options\",\n");
+            w.write("  \"case_name\": " + json(caseName) + ",\n");
+            w.write("  \"runtime_options_requested\": " + runtimeOptionsRequested() + ",\n");
+            w.write("  \"require_runtime_option_application\": " + requireRuntimeOptionApplication + ",\n");
+            w.write("  \"particle_physics_option_applications\": [\n");
+            for (int i = 0; i < options.size(); i++) {
+                if (i > 0) {
+                    w.write(",\n");
+                }
+                String[] row = options.get(i);
+                w.write("    {\n");
+                w.write("      \"component_tag\": " + json(row[0]) + ",\n");
+                w.write("      \"physics_tag\": " + json(row[1]) + ",\n");
+                w.write("      \"physics_label\": " + json(row[2]) + ",\n");
+                w.write("      \"property\": " + json(row[3]) + ",\n");
+                w.write("      \"value\": " + json(row[4]) + ",\n");
+                w.write("      \"success\": " + Boolean.parseBoolean(row[6]) + ",\n");
+                w.write("      \"actual_value\": " + json(row[5]) + "\n");
+                w.write("    }");
+            }
+            w.write("\n  ],\n");
+            w.write("  \"study_run\": {\n");
+            w.write("    \"requested\": " + Boolean.parseBoolean(studyRun[0]) + ",\n");
+            w.write("    \"study_tag\": " + json(studyRun[1]) + ",\n");
+            w.write("    \"success\": " + Boolean.parseBoolean(studyRun[2]) + ",\n");
+            w.write("    \"duration_ms\": " + studyRun[3] + ",\n");
+            w.write("    \"error\": " + json(studyRun[4]) + "\n");
+            w.write("  }\n");
+            w.write("}\n");
         }
     }
 
@@ -222,8 +421,86 @@ public class ComsolParticleCaseExporter {
         }
     }
 
+    private static void writeStudyInventory(Model model, Path out) throws Exception {
+        String[] studyTags = listTags(safeCall(model, "study"));
+        List<String> rows = new ArrayList<>();
+        for (String studyTag : studyTags) {
+            Object study = safeCall(model, "study", studyTag);
+            String[] featureTags = listTags(safeCall(study, "feature"));
+            StringBuilder sb = new StringBuilder();
+            sb.append("    {\n");
+            sb.append("      \"tag\": ").append(json(studyTag)).append(",\n");
+            sb.append("      \"label\": ").append(json(stringOrEmpty(safeCall(study, "label")))).append(",\n");
+            sb.append("      \"type\": ").append(json(firstNonEmpty(stringOrEmpty(safeCall(study, "getType")), stringOrEmpty(safeCall(study, "type"))))).append(",\n");
+            sb.append("      \"property_names\": ").append(jsonArray(featurePropertyNames(study))).append(",\n");
+            sb.append("      \"property_values\": ").append(featurePropertyValuesJson(study)).append(",\n");
+            sb.append("      \"features\": [\n");
+            for (int i = 0; i < featureTags.length; i++) {
+                Object feature = safeCall(study, "feature", featureTags[i]);
+                if (i > 0) {
+                    sb.append(",\n");
+                }
+                sb.append("        {\n");
+                sb.append("          \"tag\": ").append(json(featureTags[i])).append(",\n");
+                sb.append("          \"label\": ").append(json(stringOrEmpty(safeCall(feature, "label")))).append(",\n");
+                sb.append("          \"type\": ").append(json(firstNonEmpty(stringOrEmpty(safeCall(feature, "getType")), stringOrEmpty(safeCall(feature, "type"))))).append(",\n");
+                sb.append("          \"property_names\": ").append(jsonArray(featurePropertyNames(feature))).append(",\n");
+                sb.append("          \"property_values\": ").append(featurePropertyValuesJson(feature)).append("\n");
+                sb.append("        }");
+            }
+            sb.append("\n      ]\n");
+            sb.append("    }");
+            rows.add(sb.toString());
+        }
+        try (BufferedWriter w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
+            w.write("{\n");
+            w.write("  \"source_kind\": \"external_comsol_particle_export_study_inventory\",\n");
+            w.write("  \"studies\": [\n");
+            for (int i = 0; i < rows.size(); i++) {
+                if (i > 0) {
+                    w.write(",\n");
+                }
+                w.write(rows.get(i));
+            }
+            w.write("\n  ]\n");
+            w.write("}\n");
+        }
+    }
+
+    private static void writeDatasetInventory(Model model, Path out) throws Exception {
+        Object datasets = safeCall(safeCall(model, "result"), "dataset");
+        String[] datasetTags = listTags(datasets);
+        List<String> rows = new ArrayList<>();
+        for (String datasetTag : datasetTags) {
+            Object datasetObj = safeCall(safeCall(safeCall(model, "result"), "dataset"), datasetTag);
+            StringBuilder sb = new StringBuilder();
+            sb.append("    {\n");
+            sb.append("      \"tag\": ").append(json(datasetTag)).append(",\n");
+            sb.append("      \"label\": ").append(json(stringOrEmpty(safeCall(datasetObj, "label")))).append(",\n");
+            sb.append("      \"type\": ").append(json(firstNonEmpty(stringOrEmpty(safeCall(datasetObj, "getType")), stringOrEmpty(safeCall(datasetObj, "type"))))).append(",\n");
+            sb.append("      \"property_names\": ").append(jsonArray(featurePropertyNames(datasetObj))).append(",\n");
+            sb.append("      \"property_values\": ").append(featurePropertyValuesJson(datasetObj)).append("\n");
+            sb.append("    }");
+            rows.add(sb.toString());
+        }
+        try (BufferedWriter w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
+            w.write("{\n");
+            w.write("  \"source_kind\": \"external_comsol_particle_export_dataset_inventory\",\n");
+            w.write("  \"datasets\": [\n");
+            for (int i = 0; i < rows.size(); i++) {
+                if (i > 0) {
+                    w.write(",\n");
+                }
+                w.write(rows.get(i));
+            }
+            w.write("\n  ]\n");
+            w.write("}\n");
+        }
+    }
+
     private static void writePhysicsFeatureInventory(Model model, Path out) throws Exception {
         String[] components = listTags(safeCall(model, "component"));
+        List<String> interfaceRows = new ArrayList<>();
         List<String> rows = new ArrayList<>();
         for (String component : components) {
             Object comp = safeCall(model, "component", component);
@@ -235,6 +512,16 @@ public class ComsolParticleCaseExporter {
                     stringOrEmpty(safeCall(physics, "getType")),
                     stringOrEmpty(safeCall(physics, "type"))
                 );
+                StringBuilder physicsSb = new StringBuilder();
+                physicsSb.append("    {\n");
+                physicsSb.append("      \"component_tag\": ").append(json(component)).append(",\n");
+                physicsSb.append("      \"physics_tag\": ").append(json(physicsTag)).append(",\n");
+                physicsSb.append("      \"physics_label\": ").append(json(physicsLabel)).append(",\n");
+                physicsSb.append("      \"physics_type\": ").append(json(physicsType)).append(",\n");
+                physicsSb.append("      \"property_names\": ").append(jsonArray(featurePropertyNames(physics))).append(",\n");
+                physicsSb.append("      \"property_values\": ").append(featurePropertyValuesJson(physics)).append("\n");
+                physicsSb.append("    }");
+                interfaceRows.add(physicsSb.toString());
                 String[] featureTags = listTags(safeCall(physics, "feature"));
                 for (String featureTag : featureTags) {
                     Object feature = safeCall(physics, "feature", featureTag);
@@ -255,7 +542,9 @@ public class ComsolParticleCaseExporter {
                     sb.append("      \"type\": ").append(json(type)).append(",\n");
                     sb.append("      \"force_kind\": ").append(json(forceKind)).append(",\n");
                     sb.append("      \"selection_entities\": ").append(jsonIntArray(selectionEntities(safeCall(feature, "selection")))).append(",\n");
-                    sb.append("      \"known_settings\": ").append(featureKnownSettingsJson(feature)).append("\n");
+                    sb.append("      \"property_names\": ").append(jsonArray(featurePropertyNames(feature))).append(",\n");
+                    sb.append("      \"known_settings\": ").append(featureKnownSettingsJson(feature)).append(",\n");
+                    sb.append("      \"property_values\": ").append(featurePropertyValuesJson(feature)).append("\n");
                     sb.append("    }");
                     rows.add(sb.toString());
                 }
@@ -264,6 +553,14 @@ public class ComsolParticleCaseExporter {
         try (BufferedWriter w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
             w.write("{\n");
             w.write("  \"source_kind\": \"external_comsol_particle_export_physics_feature_inventory\",\n");
+            w.write("  \"physics_interfaces\": [\n");
+            for (int i = 0; i < interfaceRows.size(); i++) {
+                if (i > 0) {
+                    w.write(",\n");
+                }
+                w.write(interfaceRows.get(i));
+            }
+            w.write("\n  ],\n");
             w.write("  \"features\": [\n");
             for (int i = 0; i < rows.size(); i++) {
                 if (i > 0) {
@@ -289,6 +586,9 @@ public class ComsolParticleCaseExporter {
                     stringOrEmpty(safeCall(physics, "getType")),
                     stringOrEmpty(safeCall(physics, "type"))
                 );
+                if (!isParticleTracingPhysics(physicsTag, physicsLabel, physicsType)) {
+                    continue;
+                }
                 String[] featureTags = listTags(safeCall(physics, "feature"));
                 for (String featureTag : featureTags) {
                     Object feature = safeCall(physics, "feature", featureTag);
@@ -313,7 +613,8 @@ public class ComsolParticleCaseExporter {
                     sb.append("      \"release_kind\": ").append(json(kind)).append(",\n");
                     sb.append("      \"selection_entities\": ").append(jsonIntArray(selectionEntities(safeCall(feature, "selection")))).append(",\n");
                     sb.append("      \"property_names\": ").append(jsonArray(featurePropertyNames(feature))).append(",\n");
-                    sb.append("      \"known_settings\": ").append(particleReleaseSettingsJson(feature)).append("\n");
+                    sb.append("      \"known_settings\": ").append(particleReleaseSettingsJson(feature)).append(",\n");
+                    sb.append("      \"property_values\": ").append(featurePropertyValuesJson(feature)).append("\n");
                     sb.append("    }");
                     rows.add(sb.toString());
                 }
@@ -332,6 +633,11 @@ public class ComsolParticleCaseExporter {
             w.write("\n  ]\n");
             w.write("}\n");
         }
+    }
+
+    private static boolean isParticleTracingPhysics(String... values) {
+        String text = String.join(" ", values).toLowerCase(Locale.ROOT);
+        return containsAny(text, "particle", "tracing", "fpt");
     }
 
     private static String classifyParticleReleaseKind(String... values) {
@@ -413,7 +719,7 @@ public class ComsolParticleCaseExporter {
     private static String particleReleaseSettingsJson(Object feature) {
         String[] keys = new String[]{
             "N", "n", "Np", "nump", "number", "nParticles", "npart",
-            "t", "t0", "t1", "tlist", "times", "release_times", "releaseTime", "trelease", "tRelease",
+            "t", "t0", "t1", "tlist", "times", "rt", "release_times", "releaseTime", "trelease", "tRelease",
             "period", "frequency", "f", "phase", "pulse", "duration", "tstart", "tend", "dt",
             "grid", "gridtype", "gridType", "Nx", "Ny", "Nz", "Nr", "Nz_grid", "n0", "n1", "n2",
             "x0", "y0", "z0", "r0", "x", "y", "z", "r", "coord", "coords",
@@ -423,6 +729,18 @@ public class ComsolParticleCaseExporter {
         };
         List<String> items = new ArrayList<>();
         for (String key : keys) {
+            String value = featureSetting(feature, key);
+            if (value == null || value.trim().isEmpty()) {
+                continue;
+            }
+            items.add(json(key) + ": " + json(value));
+        }
+        return "{" + String.join(", ", items) + "}";
+    }
+
+    private static String featurePropertyValuesJson(Object feature) {
+        List<String> items = new ArrayList<>();
+        for (String key : featurePropertyNames(feature)) {
             String value = featureSetting(feature, key);
             if (value == null || value.trim().isEmpty()) {
                 continue;
@@ -473,6 +791,24 @@ public class ComsolParticleCaseExporter {
             }
         }
         throw new RuntimeException("Could not export mesh.mphtxt. Errors: " + errors);
+    }
+
+    private static double[][] meshVertices(Model model) {
+        List<String> errors = new ArrayList<>();
+        try {
+            return normalizeVertices((double[][]) call(call(model, "mesh", meshTag), "getVertex"));
+        } catch (Throwable t) {
+            errors.add(t.toString());
+        }
+        for (String component : listTags(safeCall(model, "component"))) {
+            try {
+                Object comp = call(model, "component", component);
+                return normalizeVertices((double[][]) call(call(comp, "mesh", meshTag), "getVertex"));
+            } catch (Throwable t) {
+                errors.add(t.toString());
+            }
+        }
+        throw new RuntimeException("Could not read mesh vertices. Errors: " + errors);
     }
 
     private static void writeMphtxtFromMeshSequence(Object mesh, Path out) throws Exception {
@@ -556,6 +892,12 @@ public class ComsolParticleCaseExporter {
     }
 
     private static Object createInterp(Model model, String tag, String expr) {
+        int activeSolnum = solnums.length > 0 ? solnums[0] : solnum;
+        double activeTime = timeValues.length > 0 ? timeValues[0] : Double.NaN;
+        return createInterp(model, tag, expr, activeSolnum, activeTime);
+    }
+
+    private static Object createInterp(Model model, String tag, String expr, int activeSolnum, double activeTime) {
         Object result = call(model, "result");
         Object numerical = call(result, "numerical");
         try {
@@ -565,8 +907,25 @@ public class ComsolParticleCaseExporter {
         call(numerical, "create", tag, "Interp");
         Object interp = call(result, "numerical", tag);
         call(interp, "set", "data", dataset);
-        if (solnum > 0) {
-            call(interp, "set", "solnum", new int[]{solnum});
+        if (activeSolnum > 0) {
+            call(interp, "set", "solnum", new int[]{activeSolnum});
+        }
+        if (Double.isFinite(activeTime)) {
+            boolean applied = false;
+            for (String key : new String[]{"t", "time"}) {
+                try {
+                    call(interp, "set", key, new double[]{activeTime});
+                    applied = true;
+                    break;
+                } catch (Throwable ignored) {
+                }
+            }
+            if (!applied) {
+                try {
+                    call(interp, "set", "t", String.format(Locale.US, "%.17g", activeTime));
+                } catch (Throwable ignored) {
+                }
+            }
         }
         call(interp, "set", "expr", new String[]{expr});
         return interp;
@@ -580,16 +939,13 @@ public class ComsolParticleCaseExporter {
     }
 
     private static void writeFieldSamples(Path out, Model model, Map<String, String> selected) throws Exception {
-        Map<String, Object> features = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : selected.entrySet()) {
-            features.put(entry.getKey(), createInterp(model, "grid_" + sanitize(entry.getKey()), entry.getValue()));
-        }
         double[][] coords = gridCoordinates();
-        Map<String, double[]> valuesByKey = new LinkedHashMap<>();
-        for (String key : selected.keySet()) {
-            valuesByKey.put(key, evalMany(features.get(key), coords));
-        }
+        int contextCount = sampleContextCount();
+        boolean includeContextColumns = shouldWriteSampleContextColumns();
         try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(out, StandardCharsets.UTF_8))) {
+            if (includeContextColumns) {
+                writer.print("time_s,solnum,");
+            }
             for (int d = 0; d < spatialDim; d++) {
                 if (d > 0) {
                     writer.print(",");
@@ -602,31 +958,152 @@ public class ComsolParticleCaseExporter {
                 writer.print(key);
             }
             writer.println();
-            for (int i = 0; i < coords[0].length; i++) {
-                boolean valid = true;
+            for (int context = 0; context < contextCount; context++) {
+                int activeSolnum = sampleSolnum(context);
+                double activeTime = sampleTime(context);
+                Map<String, Object> features = new LinkedHashMap<>();
                 for (String key : selected.keySet()) {
-                    if (required.contains(key) && !Double.isFinite(valuesByKey.get(key)[i])) {
-                        valid = false;
-                    }
+                    features.put(
+                        key,
+                        createInterp(
+                            model,
+                            "grid_" + sanitize(key) + "_" + context,
+                            selected.get(key),
+                            activeSolnum,
+                            activeTime
+                        )
+                    );
                 }
-                for (int d = 0; d < spatialDim; d++) {
-                    if (d > 0) {
+                Map<String, double[]> valuesByKey = new LinkedHashMap<>();
+                for (String key : selected.keySet()) {
+                    valuesByKey.put(key, evalMany(features.get(key), coords));
+                }
+                for (int i = 0; i < coords[0].length; i++) {
+                    boolean valid = true;
+                    for (String key : selected.keySet()) {
+                        if (required.contains(key) && !Double.isFinite(valuesByKey.get(key)[i])) {
+                            valid = false;
+                        }
+                    }
+                    if (includeContextColumns) {
+                        writer.print(Double.isFinite(activeTime) ? String.format(Locale.US, "%.17g", activeTime) : "");
+                        writer.print(",");
+                        writer.print(activeSolnum > 0 ? String.valueOf(activeSolnum) : "");
                         writer.print(",");
                     }
-                    writer.print(String.format(Locale.US, "%.17g", coords[d][i]));
-                }
-                writer.print(",");
-                writer.print(valid ? "1" : "0");
-                for (String key : selected.keySet()) {
-                    double value = valuesByKey.get(key)[i];
+                    for (int d = 0; d < spatialDim; d++) {
+                        if (d > 0) {
+                            writer.print(",");
+                        }
+                        writer.print(String.format(Locale.US, "%.17g", coords[d][i]));
+                    }
                     writer.print(",");
-                    writer.print(Double.isFinite(value) ? String.format(Locale.US, "%.17g", value) : "NaN");
+                    writer.print(valid ? "1" : "0");
+                    for (String key : selected.keySet()) {
+                        double value = valuesByKey.get(key)[i];
+                        writer.print(",");
+                        writer.print(Double.isFinite(value) ? String.format(Locale.US, "%.17g", value) : "NaN");
+                    }
+                    writer.println();
                 }
-                writer.println();
+                for (String key : selected.keySet()) {
+                    removeNumerical(model, "grid_" + sanitize(key) + "_" + context);
+                }
             }
         } finally {
             for (String key : selected.keySet()) {
                 removeNumerical(model, "grid_" + sanitize(key));
+            }
+        }
+    }
+
+    private static void writeMeshFieldSamples(Path out, Model model, Map<String, String> selected) throws Exception {
+        if (spatialDim != 2) {
+            throw new RuntimeException("mesh_field_samples export currently supports spatial_dim=2 only");
+        }
+        double[][] vertices = meshVertices(model);
+        if (vertices.length == 0 || vertices[0].length < spatialDim) {
+            throw new RuntimeException("mesh vertices do not expose the configured spatial_dim");
+        }
+        double[][] coords = new double[spatialDim][vertices.length];
+        for (int i = 0; i < vertices.length; i++) {
+            for (int d = 0; d < spatialDim; d++) {
+                coords[d][i] = vertices[i][d];
+            }
+        }
+
+        int contextCount = sampleContextCount();
+        boolean includeContextColumns = shouldWriteSampleContextColumns();
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(out, StandardCharsets.UTF_8))) {
+            if (includeContextColumns) {
+                writer.print("time_s,solnum,");
+            }
+            writer.print("vertex_id");
+            for (int d = 0; d < spatialDim; d++) {
+                writer.print(",");
+                writer.print(axisNames[d]);
+            }
+            writer.print(",valid_mask");
+            for (String key : selected.keySet()) {
+                writer.print(",");
+                writer.print(key);
+            }
+            writer.println();
+
+            for (int context = 0; context < contextCount; context++) {
+                int activeSolnum = sampleSolnum(context);
+                double activeTime = sampleTime(context);
+                Map<String, Object> features = new LinkedHashMap<>();
+                for (String key : selected.keySet()) {
+                    features.put(
+                        key,
+                        createInterp(
+                            model,
+                            "mesh_" + sanitize(key) + "_" + context,
+                            selected.get(key),
+                            activeSolnum,
+                            activeTime
+                        )
+                    );
+                }
+                Map<String, double[]> valuesByKey = new LinkedHashMap<>();
+                for (String key : selected.keySet()) {
+                    valuesByKey.put(key, evalMany(features.get(key), coords));
+                }
+                for (int i = 0; i < vertices.length; i++) {
+                    boolean valid = true;
+                    for (String key : selected.keySet()) {
+                        if (required.contains(key) && !Double.isFinite(valuesByKey.get(key)[i])) {
+                            valid = false;
+                        }
+                    }
+                    if (includeContextColumns) {
+                        writer.print(Double.isFinite(activeTime) ? String.format(Locale.US, "%.17g", activeTime) : "");
+                        writer.print(",");
+                        writer.print(activeSolnum > 0 ? String.valueOf(activeSolnum) : "");
+                        writer.print(",");
+                    }
+                    writer.print(i);
+                    for (int d = 0; d < spatialDim; d++) {
+                        writer.print(",");
+                        writer.print(String.format(Locale.US, "%.17g", coords[d][i]));
+                    }
+                    writer.print(",");
+                    writer.print(valid ? "1" : "0");
+                    for (String key : selected.keySet()) {
+                        double value = valuesByKey.get(key)[i];
+                        writer.print(",");
+                        writer.print(Double.isFinite(value) ? String.format(Locale.US, "%.17g", value) : "NaN");
+                    }
+                    writer.println();
+                }
+                for (String key : selected.keySet()) {
+                    removeNumerical(model, "mesh_" + sanitize(key) + "_" + context);
+                }
+            }
+        } finally {
+            for (String key : selected.keySet()) {
+                removeNumerical(model, "mesh_" + sanitize(key));
             }
         }
     }
@@ -668,6 +1145,13 @@ public class ComsolParticleCaseExporter {
             w.write("  \"coordinate_model_unit\": " + json(coordinateModelUnit) + ",\n");
             w.write("  \"coordinate_scale_m_per_model_unit\": " + jsonNumber(coordinateScaleMPerModelUnit) + ",\n");
             w.write("  \"grid_shape\": " + jsonIntArray(Arrays.copyOf(axisCount, spatialDim)) + ",\n");
+            w.write("  \"export_grid_field_samples\": " + exportGridFieldSamples + ",\n");
+            w.write("  \"export_mesh_field_samples\": " + exportMeshFieldSamples + ",\n");
+            w.write("  \"mesh_field_samples_filename\": " + json(meshFieldSamplesFilename) + ",\n");
+            w.write("  \"solnum\": " + solnum + ",\n");
+            w.write("  \"solnums\": " + jsonIntArray(activeSolnumsForManifest()) + ",\n");
+            w.write("  \"time_values\": " + jsonNumberArray(timeValues) + ",\n");
+            w.write("  \"field_sample_context_count\": " + sampleContextCount() + ",\n");
             w.write("  \"expression_mapping\": {\n");
             int i = 0;
             for (Map.Entry<String, String> entry : selected.entrySet()) {
@@ -678,6 +1162,164 @@ public class ComsolParticleCaseExporter {
             }
             w.write("\n  }\n");
             w.write("}\n");
+        }
+    }
+
+    private static void writeConfiguredDataExport(Model model) throws Exception {
+        String targetDataset = firstNonEmpty(dataExportDataset, dataset);
+        Path target = outDir.resolve(dataExportFilename).toAbsolutePath();
+        List<String> errors = new ArrayList<>();
+        boolean success = false;
+        String exportTag = "codex_data_export";
+        try {
+            Files.deleteIfExists(target);
+        } catch (Throwable t) {
+            errors.add("delete existing output: " + t.toString());
+        }
+        try {
+            Object result = call(model, "result");
+            Object exports = call(result, "export");
+            removeExport(exports, exportTag);
+            createDataExport(exports, exportTag, targetDataset);
+            Object feature = call(result, "export", exportTag);
+            setIfPossible(feature, "data", targetDataset);
+            setIfPossible(feature, "filename", target.toString());
+            setIfPossible(feature, "expr", dataExportExpressions.toArray(new String[0]));
+            setIfPossible(feature, "fullprec", "on");
+            setIfPossible(feature, "header", "on");
+            setIfPossible(feature, "includecoords", true);
+            setIfPossible(feature, "includecoords", "on");
+            setIfPossible(feature, "includenan", true);
+            setIfPossible(feature, "includenan", "on");
+            setIfPossible(feature, "location", "fromdataset");
+            setIfPossible(feature, "struct", "spreadsheet");
+            setIfPossible(feature, "separator", ",");
+            setIfPossible(feature, "exporttype", "text");
+            applyDataExportSolutionSelection(feature);
+            call(feature, "run");
+            success = Files.exists(target);
+            if (!success) {
+                errors.add("COMSOL Data export finished but did not create " + target);
+            }
+            removeExport(exports, exportTag);
+        } catch (Throwable t) {
+            errors.add(t.toString());
+        } finally {
+            writeDataExportReport(
+                outDir.resolve("data_export_report.json"),
+                targetDataset,
+                target,
+                success,
+                errors
+            );
+        }
+        if (!success && exportDataTableRequired) {
+            throw new RuntimeException("Required COMSOL Data export failed: " + String.join("; ", errors));
+        }
+    }
+
+    private static void createDataExport(Object exports, String tag, String targetDataset) {
+        List<String> errors = new ArrayList<>();
+        try {
+            call(exports, "create", tag, targetDataset, "Data");
+            return;
+        } catch (Throwable t) {
+            errors.add("create(tag,dataset,Data): " + t.toString());
+        }
+        try {
+            call(exports, "create", tag, "Data");
+            return;
+        } catch (Throwable t) {
+            errors.add("create(tag,Data): " + t.toString());
+        }
+        throw new RuntimeException("Could not create COMSOL Data export feature: " + String.join("; ", errors));
+    }
+
+    private static void applyDataExportSolutionSelection(Object feature) {
+        if (dataExportTimeValues.length > 0) {
+            setIfPossible(feature, "innerinput", "interp");
+            setIfPossible(feature, "t", dataExportTimeValues);
+            setIfPossible(feature, "time", dataExportTimeValues);
+            return;
+        }
+        if (dataExportSolnums.length > 0) {
+            setIfPossible(feature, "innerinput", "manual");
+            setIfPossible(feature, "solnum", dataExportSolnums);
+            return;
+        }
+        if (!dataExportInnerInput.trim().isEmpty()) {
+            setIfPossible(feature, "innerinput", dataExportInnerInput);
+        }
+    }
+
+    private static void writeDataExportReport(Path out, String targetDataset, Path target, boolean success, List<String> errors) throws Exception {
+        try (BufferedWriter w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
+            w.write("{\n");
+            w.write("  \"source_kind\": \"external_comsol_particle_export_data_table\",\n");
+            w.write("  \"case_name\": " + json(caseName) + ",\n");
+            w.write("  \"success\": " + success + ",\n");
+            w.write("  \"required\": " + exportDataTableRequired + ",\n");
+            w.write("  \"dataset\": " + json(targetDataset) + ",\n");
+            w.write("  \"filename\": " + json(target.toString()) + ",\n");
+            w.write("  \"innerinput\": " + json(dataExportInnerInput) + ",\n");
+            w.write("  \"solnums\": " + jsonIntArray(dataExportSolnums) + ",\n");
+            w.write("  \"time_values\": " + jsonNumberArray(dataExportTimeValues) + ",\n");
+            w.write("  \"expressions\": " + jsonArray(dataExportExpressions.toArray(new String[0])) + ",\n");
+            w.write("  \"errors\": " + jsonArray(errors.toArray(new String[0])) + "\n");
+            w.write("}\n");
+        }
+    }
+
+    private static boolean setIfPossible(Object target, String property, Object value) {
+        try {
+            call(target, "set", property, value);
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    private static boolean setPhysicsPropertyIfPossible(Object physics, String propertyName, String value) {
+        if (setIfPossible(physics, propertyName, value)) {
+            return true;
+        }
+        Object propertyGroup = safeCall(physics, "prop", propertyName);
+        if (propertyGroup == null) {
+            return false;
+        }
+        if (setIfPossible(propertyGroup, propertyName, value)) {
+            return true;
+        }
+        if (setIfPossible(propertyGroup, "value", value)) {
+            return true;
+        }
+        return setIfPossible(propertyGroup, "active", value);
+    }
+
+    private static String physicsPropertySetting(Object physics, String propertyName) {
+        String value = featureSetting(physics, propertyName);
+        if (value != null && !value.trim().isEmpty()) {
+            return value;
+        }
+        Object propertyGroup = safeCall(physics, "prop", propertyName);
+        if (propertyGroup == null) {
+            return "";
+        }
+        value = featureSetting(propertyGroup, propertyName);
+        if (value != null && !value.trim().isEmpty()) {
+            return value;
+        }
+        value = featureSetting(propertyGroup, "value");
+        if (value != null && !value.trim().isEmpty()) {
+            return value;
+        }
+        return featureSetting(propertyGroup, "active");
+    }
+
+    private static void removeExport(Object exports, String tag) {
+        try {
+            call(exports, "remove", tag);
+        } catch (Throwable ignored) {
         }
     }
 
@@ -757,6 +1399,45 @@ public class ComsolParticleCaseExporter {
             out[i] = min + step * i;
         }
         return out;
+    }
+
+    private static int sampleContextCount() {
+        int count = 1;
+        if (solnums.length > count) {
+            count = solnums.length;
+        }
+        if (timeValues.length > count) {
+            count = timeValues.length;
+        }
+        return count;
+    }
+
+    private static boolean shouldWriteSampleContextColumns() {
+        return solnums.length > 0 || timeValues.length > 0 || sampleContextCount() > 1;
+    }
+
+    private static int sampleSolnum(int index) {
+        if (solnums.length > 0) {
+            return solnums[Math.min(index, solnums.length - 1)];
+        }
+        return solnum;
+    }
+
+    private static double sampleTime(int index) {
+        if (timeValues.length > 0) {
+            return timeValues[Math.min(index, timeValues.length - 1)];
+        }
+        return Double.NaN;
+    }
+
+    private static int[] activeSolnumsForManifest() {
+        if (solnums.length > 0) {
+            return solnums;
+        }
+        if (solnum > 0) {
+            return new int[]{solnum};
+        }
+        return new int[0];
     }
 
     private static double[] firstVector(Object data, int expected) {
@@ -943,9 +1624,59 @@ public class ComsolParticleCaseExporter {
         return out;
     }
 
+    private static List<String> firstExpressionList(Map<String, List<String>> source, String... keys) {
+        for (String key : keys) {
+            List<String> values = source.get(key);
+            if (values != null && !values.isEmpty()) {
+                return new ArrayList<>(values);
+            }
+        }
+        return new ArrayList<>();
+    }
+
     private static double jsonDouble(String text, String key, double fallback) {
         Matcher matcher = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*([-+0-9.eE]+)").matcher(text);
         return matcher.find() ? Double.parseDouble(matcher.group(1)) : fallback;
+    }
+
+    private static int[] jsonIntArrayConfig(String text, String key, int[] fallback) {
+        Matcher matcher = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*\\[(.*?)\\]", Pattern.DOTALL).matcher(text);
+        if (!matcher.find()) {
+            return fallback;
+        }
+        List<Integer> values = new ArrayList<>();
+        Matcher numbers = Pattern.compile("[-+0-9]+").matcher(matcher.group(1));
+        while (numbers.find()) {
+            values.add(Integer.parseInt(numbers.group()));
+        }
+        if (values.isEmpty()) {
+            return fallback;
+        }
+        int[] out = new int[values.size()];
+        for (int i = 0; i < values.size(); i++) {
+            out[i] = values.get(i);
+        }
+        return out;
+    }
+
+    private static double[] jsonDoubleArray(String text, String key, double[] fallback) {
+        Matcher matcher = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*\\[(.*?)\\]", Pattern.DOTALL).matcher(text);
+        if (!matcher.find()) {
+            return fallback;
+        }
+        List<Double> values = new ArrayList<>();
+        Matcher numbers = Pattern.compile("[-+0-9.eE]+").matcher(matcher.group(1));
+        while (numbers.find()) {
+            values.add(Double.parseDouble(numbers.group()));
+        }
+        if (values.isEmpty()) {
+            return fallback;
+        }
+        double[] out = new double[values.size()];
+        for (int i = 0; i < values.size(); i++) {
+            out[i] = values.get(i);
+        }
+        return out;
     }
 
     private static boolean jsonBoolean(String text, String key, boolean fallback) {
@@ -1017,6 +1748,14 @@ public class ComsolParticleCaseExporter {
         List<String> formatted = new ArrayList<>();
         for (int value : values) {
             formatted.add(String.valueOf(value));
+        }
+        return "[" + String.join(", ", formatted) + "]";
+    }
+
+    private static String jsonNumberArray(double[] values) {
+        List<String> formatted = new ArrayList<>();
+        for (double value : values) {
+            formatted.add(jsonNumber(value));
         }
         return "[" + String.join(", ", formatted) + "]";
     }

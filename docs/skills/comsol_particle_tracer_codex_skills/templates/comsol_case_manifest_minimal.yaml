@@ -1,0 +1,32 @@
+mode: comsol_faithful
+comsol:
+  version: unknown
+  model_name: unknown
+  component: unknown
+  study: unknown
+  dataset: unknown
+  solution_index: unknown
+coordinates:
+  coordinate_system: unknown        # cartesian_xy | axisymmetric_rz | cartesian_xyz
+  coordinate_scale_m_per_model_unit: null
+  axis_names: []
+geometry:
+  boundary_primitives: null
+  boundary_part_map: boundary_part_map.csv
+fields:
+  bundle: fields.npz
+  mapping: field_mapping.csv
+particles:
+  release_table: particles_release_canonical.csv
+  trajectory_long_table: comsol_particle_long.csv
+  sampled_reference: false
+  full_reference: false
+boundaries:
+  wall_law_file: wall_law_map.csv
+forces:
+  enabled: []
+  stochastic_policy: unknown        # disabled | controlled_seed | ensemble_only | unknown
+comparison_scope:
+  allowed_layers: []                # import, field, acceleration, first_step, boundary, trajectory, ensemble
+  forbidden_layers: []
+notes: []

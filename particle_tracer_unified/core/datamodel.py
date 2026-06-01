@@ -6,6 +6,19 @@ from typing import Any, Dict, Mapping, Optional, Tuple
 
 import numpy as np
 
+from .coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_report_from_metadata
+
+
+SOURCE_PROVENANCE_KNOWN = 'known_source'
+SOURCE_PROVENANCE_UNKNOWN = 'unknown_source'
+SOURCE_PROVENANCE_PRODUCTION_GENERATED = 'production_generated_source'
+
+
+def source_provenance_group(source_part_id: int, *, production_generated: bool = False) -> str:
+    if bool(production_generated):
+        return SOURCE_PROVENANCE_PRODUCTION_GENERATED
+    return SOURCE_PROVENANCE_KNOWN if int(source_part_id) > 0 else SOURCE_PROVENANCE_UNKNOWN
+
 
 @dataclass(frozen=True)
 class QuantitySeriesND:
@@ -58,11 +71,13 @@ class FieldProviderND:
     def summary(self) -> Dict[str, Any]:
         field_obj = self.field
         if isinstance(field_obj, TriangleMeshField2D):
+            axis_names = axis_names_for_coordinate_system(field_obj.coordinate_system, field_obj.spatial_dim)
             return {
                 'kind': self.kind,
                 'field_backend_kind': str(field_obj.metadata.get('field_backend_kind', 'triangle_mesh_2d')),
                 'spatial_dim': int(field_obj.spatial_dim),
                 'coordinate_system': field_obj.coordinate_system,
+                'axis_names': list(axis_names),
                 'mesh_vertex_count': int(field_obj.mesh_vertices.shape[0]),
                 'mesh_triangle_count': int(field_obj.mesh_triangles.shape[0]),
                 'quantities': sorted(field_obj.quantities.keys()),
@@ -113,10 +128,11 @@ class GeometryProviderND:
 
     def summary(self) -> Dict[str, Any]:
         g = self.geometry
-        return {
+        summary = {
             'kind': self.kind,
             'spatial_dim': int(g.spatial_dim),
             'coordinate_system': g.coordinate_system,
+            'axis_names': list(axis_names_for_coordinate_system(g.coordinate_system, g.spatial_dim)),
             'source_kind': g.source_kind,
             'grid_shape': list(g.valid_mask.shape),
             'has_boundary_edges': g.boundary_edges is not None,
@@ -125,6 +141,10 @@ class GeometryProviderND:
             'has_domain_region_map': bool(g.metadata.get('has_domain_region_map', False)),
             'mphtxt_path': str(self.mphtxt_path) if self.mphtxt_path else '',
         }
+        axisymmetric_report = axisymmetric_rz_report_from_metadata(g.metadata)
+        if axisymmetric_report:
+            summary['axisymmetric_rz'] = axisymmetric_report
+        return summary
 
 
 @dataclass(frozen=True)
