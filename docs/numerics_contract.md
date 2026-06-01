@@ -79,12 +79,52 @@ faithful mode keeps strict clean support.
 
 Treat these settings as case calibration, not numerical rescue knobs:
 
-- `solver.epsilon_offset_m` and `solver.on_boundary_tol_m` control boundary
-  release/contact tolerance and should be scaled to geometry resolution.
+- `wall.epsilon_offset_m` and `solver.on_boundary_tol_m` control small
+  release/contact offsets and should be scaled to geometry resolution.
+- `source.preprocess.boundary_capture_tolerance_m` controls only
+  near-boundary release classification. `source.preprocess.boundary_inward_offset_m`
+  controls only the inward displacement after classification; when omitted, it
+  defaults from the small epsilon/on-boundary tolerance and does not grow with an
+  explicit capture tolerance.
 - Wall law probabilities, restitution, and diffuse/stick choices should come
-  from material or chamber assumptions, not from trajectory cleanup.
+  from material or chamber assumptions, not from trajectory cleanup. Unknown
+  wall law names fail during wall catalog construction; current support is
+  documented in `docs/wall_law_catalog.md`.
 - `solver.drag_model` selects the drag law. Scalar gas fallbacks are used only
   where the existing model already permits them; they do not fill field gaps.
+
+## Source Provenance
+
+`source_part_id > 0` means the release has known source boundary/part
+provenance. `source_part_id <= 0` means the source is unknown or absent; the
+solver preserves that value and does not turn it into the nearest wall part.
+Unknown-source particles are not eligible for same-source release grace.
+
+Production surface-release preprocessing may project a near-boundary point only
+when `source.preprocess.boundary_release` is explicitly enabled. That
+preprocessing can report a projected boundary/part for diagnostics, but it does
+not rewrite unknown input provenance into a known `source_part_id`. COMSOL
+faithful mode keeps release coordinates and source provenance from the manifest
+release table, or fails clearly, rather than repairing them.
+
+## Axisymmetric RZ
+
+`axisymmetric_rz` is a 2D meridional coordinate mode with axes reported as
+`r` and `z`. Runtime summaries, provider/preflight reports, and comparison
+artifacts must preserve that coordinate system and must not relabel it as
+`cartesian_xy`.
+
+The radial axis is validated as non-negative. When the grid or boundary
+primitives include `r = 0`, summaries report it as the special axis boundary
+(`r0_on_grid`, `r0_axis_boundary_*`). The current solver still advances only
+the two stored components, `v_r` and `v_z`; full azimuthal `v_theta` dynamics
+and cylindrical 3D motion are out of scope.
+
+`ring_area_weight(r) = 2*pi*r` is available for explicit reporting or external
+post-processing. Source preprocessing does not apply ring-area weighting
+implicitly; optional ring-area source reporting is diagnostics-only and must be
+enabled explicitly with
+`source.preprocess.ring_area_weighted_source_reporting: true`.
 
 ## Boundaries
 

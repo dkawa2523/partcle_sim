@@ -131,6 +131,44 @@ def test_comsol_faithful_runtime_loads_manifest_release_and_wall_tables(tmp_path
     assert runtime.force_catalog.model("drag") == "stokes_cunningham"
 
 
+def test_comsol_faithful_runtime_preserves_axisymmetric_manifest_coordinate_system(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    manifest = yaml.safe_load((tmp_path / "manifest.yaml").read_text(encoding="utf-8"))
+    manifest["coordinates"]["coordinate_system"] = "axisymmetric_rz"
+    (tmp_path / "manifest.yaml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
+
+    runtime = build_runtime_from_config(_config(), tmp_path)
+
+    assert runtime.coordinate_system == "axisymmetric_rz"
+    assert runtime.config_payload["run"]["coordinate_system"] == "axisymmetric_rz"
+    assert runtime.field_provider.summary()["axis_names"] == ["r", "z"]
+    geometry_summary = runtime.geometry_provider.summary()
+    assert geometry_summary["axis_names"] == ["r", "z"]
+    assert geometry_summary["axisymmetric_rz"]["r0_on_grid"] == 1
+
+
+def test_comsol_faithful_runtime_preserves_release_coordinates_time_velocity_and_source(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    (tmp_path / "release.csv").write_text(
+        "particle_id,release_time,x,y,vx,vy,mass,diameter,density,charge,source_part_id,source_selection,material_id\n"
+        "42,2.5e-6,0.25,0.75,1.5,-2.0,1e-18,1e-6,1000,0,37,inlet_a,1\n",
+        encoding="utf-8",
+    )
+
+    runtime = build_runtime_from_config(_config(), tmp_path)
+    prepared = prepare_runtime(runtime)
+
+    assert prepared.source_preprocess is None
+    assert runtime.particles.particle_id.tolist() == [42]
+    assert runtime.particles.release_time[0] == pytest.approx(2.5e-6)
+    assert runtime.particles.position[0].tolist() == pytest.approx([0.25, 0.75])
+    assert runtime.particles.velocity[0].tolist() == pytest.approx([1.5, -2.0])
+    assert int(runtime.particles.source_part_id[0]) == 37
+    assert runtime.particles.source_event_tag[0] == "inlet_a"
+
+
 def test_comsol_faithful_forces_debug_output_plan(tmp_path: Path) -> None:
     _write_runtime_npz(tmp_path)
     _write_comsol_tables(tmp_path)
@@ -161,6 +199,23 @@ def test_comsol_faithful_runtime_preserves_near_boundary_release_without_snap(tm
     prepared = prepare_runtime(runtime)
 
     assert prepared.source_preprocess is None
+    assert runtime.particles.position[0].tolist() == pytest.approx([1.0e-8, 0.5])
+
+
+def test_comsol_faithful_runtime_preserves_unknown_source_without_snap(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    (tmp_path / "release.csv").write_text(
+        "particle_id,release_time,x,y,vx,vy,mass,diameter,density,charge,material_id\n"
+        "1,0,0.00000001,0.5,0,0,1e-18,1e-6,1000,0,1\n",
+        encoding="utf-8",
+    )
+
+    runtime = build_runtime_from_config(_config(), tmp_path)
+    prepared = prepare_runtime(runtime)
+
+    assert prepared.source_preprocess is None
+    assert int(runtime.particles.source_part_id[0]) == 0
     assert runtime.particles.position[0].tolist() == pytest.approx([1.0e-8, 0.5])
 
 
@@ -197,6 +252,79 @@ def test_comsol_faithful_runtime_rejects_boundary_release(tmp_path: Path) -> Non
 
     with pytest.raises(ValueError, match="source.preprocess.boundary_release"):
         build_runtime_from_config(config, tmp_path)
+
+
+@pytest.mark.parametrize("missing_column", ["release_time", "vx"])
+def test_comsol_faithful_runtime_rejects_missing_release_required_columns(
+    tmp_path: Path,
+    missing_column: str,
+) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    columns = [
+        "particle_id",
+        "release_time",
+        "x",
+        "y",
+        "vx",
+        "vy",
+        "mass",
+        "diameter",
+        "density",
+        "charge",
+        "source_entity_id",
+        "material_id",
+    ]
+    values = {
+        "particle_id": "1",
+        "release_time": "0",
+        "x": "0.5",
+        "y": "0.5",
+        "vx": "0",
+        "vy": "0",
+        "mass": "1e-18",
+        "diameter": "1e-6",
+        "density": "1000",
+        "charge": "0",
+        "source_entity_id": "1",
+        "material_id": "1",
+    }
+    kept = [name for name in columns if name != missing_column]
+    (tmp_path / "release.csv").write_text(
+        ",".join(kept) + "\n" + ",".join(values[name] for name in kept) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match=missing_column):
+        build_runtime_from_config(_config(), tmp_path)
+
+
+def test_comsol_faithful_runtime_rejects_unknown_wall_law(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    (tmp_path / "walls.csv").write_text(
+        "solver_part_id,wall_type,stick_probability,restitution_n,restitution_t,diffuse_temperature,material_id\n"
+        "1,teleport,0,1,1,,1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Unknown wall_type"):
+        build_runtime_from_config(_config(), tmp_path)
+
+
+def test_comsol_faithful_runtime_maps_supported_bounce_wall_law(tmp_path: Path) -> None:
+    _write_runtime_npz(tmp_path)
+    _write_comsol_tables(tmp_path)
+    (tmp_path / "walls.csv").write_text(
+        "solver_part_id,wall_type,stick_probability,restitution_n,restitution_t,diffuse_temperature,material_id\n"
+        "1,bounce,0,0.8,1,,1\n",
+        encoding="utf-8",
+    )
+
+    runtime = build_runtime_from_config(_config(), tmp_path)
+
+    assert runtime.wall_catalog.model_for_part(1).law_name == "specular"
+    assert runtime.wall_catalog.model_for_part(1).restitution == pytest.approx(0.8)
 
 
 def test_surface_release_production_allows_explicit_boundary_release() -> None:

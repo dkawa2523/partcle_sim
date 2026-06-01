@@ -16,7 +16,7 @@ from ..core.boundary_service import (
     polyline_hits_from_boundary_edges_batch,
 )
 from ..core.boundary_core import sample_geometry_sdf_points_2d
-from ..core.catalogs import resolve_step_wall_model
+from ..core.catalogs import normalize_wall_law_name, resolve_step_wall_model
 from ..core.datamodel import ProcessStepRow, WallPartModel
 from ..core.field_sampling import VALID_MASK_STATUS_CLEAN, valid_mask_status_requires_stop
 from ..core.geometry3d import TriangleSurface3D, query_triangle_candidates
@@ -91,7 +91,7 @@ def _wall_interaction(
     particle_stick_probability: float,
     wall_model: WallPartModel,
 ) -> Tuple[str, np.ndarray]:
-    mode = str(wall_model.law_name).strip().lower()
+    mode = normalize_wall_law_name(wall_model.law_name, context='collision wall law')
     restitution = max(0.0, float(wall_model.restitution))
     diffuse_fraction = float(np.clip(wall_model.diffuse_fraction * (1.0 - wall_model.reflectivity), 0.0, 1.0))
     p_stick = _effective_wall_stick_probability(particle_stick_probability, wall_model)
@@ -106,6 +106,8 @@ def _wall_interaction(
         return 'escaped', np.zeros_like(v)
     if mode in {'absorb', 'disappear'}:
         return 'absorbed', np.zeros_like(v)
+    if mode == 'pass_through':
+        return 'passed_through', np.asarray(v, dtype=np.float64).copy()
     if mode in {'critical_sticking_velocity'} and vn_mag <= max(0.0, float(wall_model.critical_sticking_velocity_mps)):
         return 'stuck', np.zeros_like(v)
     if rng.random() < p_stick:
@@ -519,6 +521,14 @@ def _apply_wall_hit_step(
         active[particle_index] = False
         v_zero = np.zeros_like(v_hit)
         return WallHitStepResult(x_wall, v_zero, remaining_dt, hit_count, total_hit_count, True)
+    if outcome == 'passed_through':
+        pass_velocity = np.asarray(v_ref, dtype=np.float64)
+        pass_speed = float(np.linalg.norm(pass_velocity))
+        pass_position = hit_arr.copy()
+        if pass_speed > 1.0e-30:
+            clearance = max(float(epsilon_offset_m), float(on_boundary_tol_m), 1.0e-12)
+            pass_position = hit_arr + clearance * pass_velocity / pass_speed
+        return WallHitStepResult(pass_position, pass_velocity, remaining_dt, hit_count, total_hit_count, False)
 
     x_curr_next = x_wall
     v_curr_next = np.asarray(v_ref, dtype=np.float64)

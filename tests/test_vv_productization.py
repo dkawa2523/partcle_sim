@@ -6,10 +6,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VV_DIR = ROOT / "docs" / "productization" / "sim_rev3" / "vv"
+TEMPLATE_DIR = ROOT / "docs" / "productization" / "sim_rev3" / "templates"
 
 
 def test_vv_acceptance_matrix_is_parseable_and_metric_based() -> None:
-    matrix_path = VV_DIR / "acceptance_matrix.csv"
+    matrix_path = TEMPLATE_DIR / "acceptance_matrix.csv"
     rows = list(csv.DictReader(matrix_path.open("r", encoding="utf-8", newline="")))
 
     assert rows

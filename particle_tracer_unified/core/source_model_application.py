@@ -5,7 +5,14 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 
-from .datamodel import ParticleTable, ProcessStepTable, SourceEventTable, SourcePreprocessResult, SourceResolutionParameters
+from .datamodel import (
+    ParticleTable,
+    ProcessStepTable,
+    SourceEventTable,
+    SourcePreprocessResult,
+    SourceResolutionParameters,
+    source_provenance_group,
+)
 from .source_material_common import (
     burst_factor,
     effective_resuspension_threshold_speed,
@@ -457,6 +464,10 @@ def apply_source_models(
                 inward_offset_m=boundary_solver_offset,
             )
         )
+        diag['source_provenance_group'] = source_provenance_group(
+            source_part_id,
+            production_generated=int(diag.get('boundary_release_applied', 0)) != 0,
+        )
         diag.update(_position_fields('projected', getattr(boundary_release, 'boundary_position', None), particles.spatial_dim))
         diag['final_speed_mps'] = float(np.linalg.norm(vel[i, : particles.spatial_dim]))
         diag['resolved_release_time_s'] = float(rel[i]) if np.isfinite(rel[i]) else float('inf')
@@ -487,11 +498,14 @@ def apply_source_models(
     )
 
     law_counts: Dict[str, int] = {}
+    provenance_counts: Dict[str, int] = {}
     boundary_release_applied_count = 0
     boundary_release_failed_offset_count = 0
     projection_distances = []
     for row in diagnostics:
         law_counts[str(row.get('law_name', ''))] = law_counts.get(str(row.get('law_name', '')), 0) + 1
+        provenance = str(row.get('source_provenance_group', source_provenance_group(int(row.get('source_part_id', 0)))))
+        provenance_counts[provenance] = provenance_counts.get(provenance, 0) + 1
         if int(row.get('boundary_release_applied', 0)) != 0:
             boundary_release_applied_count += 1
             distance = float(row.get('projection_distance_m', np.nan))
@@ -502,6 +516,7 @@ def apply_source_models(
     projection_array = np.asarray(projection_distances, dtype=np.float64)
     summary = {
         'law_usage': law_counts,
+        'source_provenance_counts': provenance_counts,
         'particle_count': int(particles.count),
         'suppressed_particle_count': int((~release_enabled).sum()),
         'boundary_release_enabled': int(bool(use_boundary_release)),

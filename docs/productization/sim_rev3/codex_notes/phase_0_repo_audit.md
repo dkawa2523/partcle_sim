@@ -5,6 +5,11 @@ Workspace: `c:\Users\user\Desktop\partcle_sim-sim_rev2`
 
 ## Current State
 
+Packaging note: this is the original Phase 0 snapshot. The planning docset
+identified below was later archived under
+`docs/productization/sim_rev3/archive/planning_docset_v2/`, and active
+templates now live under `docs/productization/sim_rev3/templates/`.
+
 - Current checkout reports branch `sim_rev4`.
 - Local branches `sim_rev3` and `sim_rev4` both point at commit `5c9c99b4255f948fab752faa4c98cbfb3a89ec68`.
 - The requested doc path `docs/productization/sim_rev3/` was not present before this audit file was created.

@@ -8,21 +8,11 @@ from typing import Mapping
 
 import numpy as np
 
+from ..core.catalogs import WALL_LAW_ALIASES, normalize_wall_law_name
 from ..core.datamodel import MaterialRow, MaterialTable, PartWallRow, PartWallTable
 
 
-ALLOWED_WALL_TYPES = {
-    "bounce",
-    "specular",
-    "stick",
-    "freeze",
-    "disappear",
-    "absorb",
-    "pass_through",
-    "passthrough",
-    "diffuse",
-    "mixed_specular_diffuse",
-}
+ALLOWED_WALL_TYPES = set(WALL_LAW_ALIASES)
 
 
 @dataclass(frozen=True)
@@ -124,11 +114,13 @@ def read_comsol_wall_laws(path: str | Path, *, strict: bool = True) -> list[Coms
     wall_path = Path(path)
     rows = []
     for row in _read_dicts(wall_path):
-        wall_type = _first(row, "wall_type", "wall_law", default="").lower()
-        if wall_type == "freeze":
-            wall_type = "stick"
-        if strict and wall_type not in ALLOWED_WALL_TYPES:
-            raise ValueError(f"Unknown wall_type={wall_type!r} in {wall_path}")
+        raw_wall_type = _first(row, "wall_type", "wall_law", default="")
+        try:
+            wall_type = normalize_wall_law_name(raw_wall_type, context="COMSOL wall_type")
+        except ValueError as exc:
+            if strict:
+                raise ValueError(f"Unknown wall_type={raw_wall_type!r} in {wall_path}") from exc
+            wall_type = str(raw_wall_type).strip().lower().replace("-", "_").replace(" ", "_")
         parsed = ComsolWallLawRow(
             solver_part_id=_int(row, "solver_part_id", "part_id"),
             wall_type=wall_type,

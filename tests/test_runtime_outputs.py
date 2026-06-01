@@ -51,6 +51,97 @@ def test_minimal_runtime_buffers_do_not_allocate_step_summary_by_default():
     assert explicit.step_summary is not None
     assert explicit.summary()['step_summary_count'] == 0
 
+def test_output_save_every_overrides_solver_save_every_for_saved_trajectory(tmp_path: Path):
+    out_dir = tmp_path / 'out_output_save_every'
+    config_path = _write_minimal_2d_config(
+        tmp_path / 'cfg_output_save_every',
+        solver_updates={'dt': 0.01, 't_end': 0.05, 'save_every': 1},
+        output_updates={'mode': 'standard', 'save_trajectory': True, 'save_every': 3},
+    )
+
+    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
+    report = _solver_report(out_dir)
+    frames = _read_table(out_dir / 'save_frames.csv')
+
+    assert int(report['save_frame_count']) == 3
+    assert frames['time_s'].to_numpy(dtype=float).tolist() == pytest.approx([0.0, 0.03, 0.05])
+    assert (out_dir / 'positions_2d.npy').exists()
+    assert not (out_dir / 'runtime_step_summary.csv').exists()
+    assert not (out_dir / 'wall_events.csv').exists()
+
+
+def test_solver_save_every_drives_saved_trajectory_when_output_save_every_absent(tmp_path: Path):
+    out_dir = tmp_path / 'out_solver_save_every_fallback'
+    config_path = _write_minimal_2d_config(
+        tmp_path / 'cfg_solver_save_every_fallback',
+        solver_updates={'dt': 0.01, 't_end': 0.05, 'save_every': 2},
+        output_updates={'mode': 'standard', 'save_trajectory': True},
+    )
+
+    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
+    report = _solver_report(out_dir)
+    frames = _read_table(out_dir / 'save_frames.csv')
+
+    assert int(report['save_frame_count']) == 4
+    assert frames['time_s'].to_numpy(dtype=float).tolist() == pytest.approx([0.0, 0.02, 0.04, 0.05])
+    assert (out_dir / 'positions_2d.npy').exists()
+    assert not (out_dir / 'runtime_step_summary.csv').exists()
+    assert not (out_dir / 'wall_events.csv').exists()
+
+
+def test_visualization_graphs_survive_standard_output_without_trajectory(tmp_path: Path):
+    out_dir = tmp_path / 'out_standard_visualization'
+    config_path = _write_minimal_2d_config(
+        tmp_path / 'cfg_standard_visualization',
+        solver_updates={'dt': 0.01, 't_end': 0.02},
+        output_updates={'mode': 'standard', 'save_trajectory': False},
+    )
+
+    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
+    assert not (out_dir / 'positions_2d.npy').exists()
+    assert not (out_dir / 'save_frames.csv').exists()
+
+    index_path = export_visualizations(out_dir, modules=('graphs', 'animations'), clean=True)
+    index = json.loads(index_path.read_text(encoding='utf-8'))
+    graph_summary = json.loads(
+        (out_dir / 'visualizations' / 'graphs' / 'graph_summary.json').read_text(encoding='utf-8')
+    )
+
+    assert index['modules']['graphs']['status'] == 'pass'
+    assert index['modules']['animations']['status'] == 'failed'
+    assert graph_summary['graph_mode'] == 'compact_final_state'
+    assert graph_summary['trajectory_artifacts_available'] is False
+    assert 'positions_2d.npy|positions_3d.npy' in graph_summary['missing_trajectory_artifacts']
+    assert (out_dir / 'visualizations' / 'graphs' / '02_final_state_bar_and_pie.png').exists()
+
+
+def test_animation_export_respects_frame_and_particle_limits(tmp_path: Path):
+    out_dir = tmp_path / 'out_limited_animation'
+    config_path = _write_minimal_2d_config(
+        tmp_path / 'cfg_limited_animation',
+        solver_updates={'dt': 0.01, 't_end': 0.05, 'save_every': 1},
+        output_updates={'mode': 'standard', 'save_trajectory': True},
+    )
+
+    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
+    export_visualizations(
+        out_dir,
+        modules=('animations',),
+        clean=True,
+        animation_max_frames=3,
+        animation_max_particles=1,
+        animation_write_all_particles=False,
+    )
+    report = json.loads(
+        (out_dir / 'visualizations' / 'animations' / 'animation_report.json').read_text(encoding='utf-8')
+    )
+
+    assert int(report['animation_frame_count']) <= 3
+    assert int(report['animation_particle_count']) <= 1
+    assert bool(report['write_all_particles']) is False
+    assert report['files'] == ['trajectories_sampled_trails.gif']
+
+
 def test_visualization_state_helpers_split_contact_from_free_flight():
     final_df = pd.DataFrame(
         [

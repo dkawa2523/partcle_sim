@@ -39,6 +39,35 @@ The example under `examples/comsol_faithful_2d` is a template. It becomes
 runnable only after the referenced exported CSV/NPZ files are generated or
 copied into the case.
 
+## Release Table Semantics
+
+Faithful mode imports release particles exactly from the manifest
+`particles.release_table`; it does not synthesize missing particles, snap points
+to walls, run source preprocessing, or repair source provenance. The imported
+position is scaled only by `coordinates.coordinate_scale_m_per_model_unit`, and
+the imported velocity is scaled only by
+`particles.release_velocity_scale_mps_per_input_unit` when that manifest key is
+present.
+
+Required release columns are explicit:
+
+- `particle_id`
+- `release_time`
+- position axes `x`, `y` for 2D and `x`, `y`, `z` for 3D
+- velocity axes `vx`, `vy` for 2D and `vx`, `vy`, `vz` for 3D
+- `mass`, `diameter`, `density`, `charge`
+
+Optional source provenance columns are `source_part_id`, `source_id`, or
+`source_entity_id`. If none is exported, faithful mode keeps
+`source_part_id = 0` to mean unknown source.
+
+For `coordinates.coordinate_system: axisymmetric_rz`, the runtime preserves the
+coordinate system as `axisymmetric_rz` and labels summary/compare axes as `r`
+and `z`. The faithful release CSV still uses the explicit 2D release columns
+`x`, `y`, `vx`, and `vy`; in an axisymmetric manifest these are interpreted as
+the stored meridional components `r`, `z`, `v_r`, and `v_z`. `v_theta` dynamics
+are not part of faithful comparison.
+
 ## Faithful Gates
 
 Faithful mode rejects:
@@ -109,6 +138,8 @@ the boundary comparison workflow proves parity with it enabled.
 When importing a new COMSOL case, collect the COMSOL version, study/dataset,
 coordinate system and scale, release feature, release table, force inventory,
 wall law mapping, and particle result CSV before judging solver differences.
+Current wall law coverage and fail-fast mapping rules are summarized in
+`docs/wall_law_catalog.md`.
 Export/API code stays outside `particle_tracer_unified`; the solver consumes
 only explicit YAML, CSV, and NPZ artifacts.
 

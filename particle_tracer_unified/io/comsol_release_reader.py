@@ -25,6 +25,7 @@ REQUIRED_COLUMNS = (
 
 
 _OPTIONAL_3D_COLUMNS = ("z", "vz")
+OPTIONAL_SOURCE_PART_ID_COLUMNS = ("source_part_id", "source_id", "source_entity_id")
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,7 @@ class ComsolReleaseParticle:
     charge: float
     weight: float
     source_entity_dim: int | None
+    source_part_id: int | None
     source_entity_id: int | None
     source_selection: str | None
     material_id: str | None
@@ -65,6 +67,57 @@ def _int(row: dict[str, str], key: str) -> int | None:
     return int(value)
 
 
+def _first_int(row: dict[str, str], keys: tuple[str, ...]) -> int | None:
+    for key in keys:
+        value = _int(row, key)
+        if value is not None:
+            return value
+    return None
+
+
+def required_release_columns(spatial_dim: int | None = None) -> tuple[str, ...]:
+    if spatial_dim is None or int(spatial_dim) == 2:
+        return tuple(REQUIRED_COLUMNS)
+    if int(spatial_dim) == 3:
+        return tuple(REQUIRED_COLUMNS) + tuple(_OPTIONAL_3D_COLUMNS)
+    raise ValueError("spatial_dim must be 2 or 3")
+
+
+def release_column_mapping(spatial_dim: int | None = None) -> dict[str, object]:
+    required = required_release_columns(spatial_dim)
+    position_axes = ("x", "y", "z") if "z" in required else ("x", "y")
+    velocity_axes = ("vx", "vy", "vz") if "vz" in required else ("vx", "vy")
+    return {
+        "particle_id": "particle_id",
+        "release_time": "release_time",
+        "position_axes": position_axes,
+        "velocity_axes": velocity_axes,
+        "optional_source_part_id": OPTIONAL_SOURCE_PART_ID_COLUMNS,
+    }
+
+
+def validate_comsol_release_table_header(
+    path: str | Path,
+    *,
+    spatial_dim: int | None = None,
+    strict: bool = True,
+) -> None:
+    release_path = Path(path)
+    with release_path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        columns = set(reader.fieldnames or [])
+    missing = [name for name in required_release_columns(spatial_dim) if name not in columns]
+    if strict and missing:
+        mapping = release_column_mapping(spatial_dim)
+        raise ValueError(
+            f"{release_path} is missing required columns: {missing}. "
+            "COMSOL faithful release mapping is "
+            f"particle_id={mapping['particle_id']!r}, release_time={mapping['release_time']!r}, "
+            f"position_axes={mapping['position_axes']!r}, velocity_axes={mapping['velocity_axes']!r}, "
+            f"optional_source_part_id={mapping['optional_source_part_id']!r}"
+        )
+
+
 def read_comsol_release_particles(
     path: str | Path,
     *,
@@ -80,15 +133,9 @@ def read_comsol_release_particles(
     velocity_scale = float(release_velocity_scale_mps_per_input_unit)
     if not np.isfinite(velocity_scale) or velocity_scale <= 0.0:
         raise ValueError("release_velocity_scale_mps_per_input_unit must be a positive finite value")
+    validate_comsol_release_table_header(release_path, spatial_dim=spatial_dim, strict=strict)
     with release_path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
-        columns = set(reader.fieldnames or [])
-        missing = [name for name in REQUIRED_COLUMNS if name not in columns]
-        if strict and spatial_dim is not None and int(spatial_dim) == 3:
-            missing.extend(name for name in _OPTIONAL_3D_COLUMNS if name not in columns)
-        if strict and missing:
-            raise ValueError(f"{release_path} is missing required columns: {missing}")
-
         particles: list[ComsolReleaseParticle] = []
         seen: set[int] = set()
         for line_no, row in enumerate(reader, start=2):
@@ -111,6 +158,7 @@ def read_comsol_release_particles(
                 charge=_float(row, "charge"),
                 weight=_float(row, "weight", 1.0),
                 source_entity_dim=_int(row, "source_entity_dim"),
+                source_part_id=_first_int(row, OPTIONAL_SOURCE_PART_ID_COLUMNS),
                 source_entity_id=_int(row, "source_entity_id"),
                 source_selection=row.get("source_selection") or None,
                 material_id=row.get("material_id") or None,
@@ -164,7 +212,7 @@ def comsol_release_particles_to_particle_table(
     position3 = np.asarray([[p.x, p.y, p.z] for p in particles], dtype=np.float64)
     velocity3 = np.asarray([[p.vx, p.vy, p.vz] for p in particles], dtype=np.float64)
     source_part_id = np.asarray(
-        [0 if p.source_entity_id is None else int(p.source_entity_id) for p in particles],
+        [0 if p.source_part_id is None else int(p.source_part_id) for p in particles],
         dtype=np.int64,
     )
     event_tag = np.asarray([p.source_selection or "comsol_release" for p in particles], dtype=object)
@@ -192,7 +240,11 @@ def comsol_release_particles_to_particle_table(
 
 __all__ = (
     "ComsolReleaseParticle",
+    "OPTIONAL_SOURCE_PART_ID_COLUMNS",
     "REQUIRED_COLUMNS",
     "comsol_release_particles_to_particle_table",
+    "release_column_mapping",
+    "required_release_columns",
     "read_comsol_release_particles",
+    "validate_comsol_release_table_header",
 )

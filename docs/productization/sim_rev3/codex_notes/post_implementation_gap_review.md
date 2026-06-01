@@ -6,6 +6,11 @@ Reviewed checkout: `sim_rev4` workspace after the sim_rev3 productization
 phases. This review is an audit only; it does not change solver behavior,
 tests, diagnostics, or cleanup state.
 
+Packaging note: a later release-packaging pass moved active templates to
+`docs/productization/sim_rev3/templates/` and quarantined the imported planning
+docset under `docs/productization/sim_rev3/archive/planning_docset_v2/`. The
+gap list below remains a historical snapshot of the post-implementation audit.
+
 ## Current Test State
 
 Current full suite:
@@ -226,4 +231,3 @@ It is not yet production-ready as a repository release because packaging,
 canonical docs, surface-release onboarding, large-asset policy, and two output
 policy/performance issues remain. The highest-value next move is a small
 release-hardening pass, not new physics.
-

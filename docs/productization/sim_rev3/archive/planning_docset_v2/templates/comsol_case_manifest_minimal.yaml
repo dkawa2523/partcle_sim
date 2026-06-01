@@ -1,0 +1,45 @@
+mode: comsol_faithful
+
+comsol:
+  version: "6.3"
+  model_name: "<model>"
+  study: "<study>"
+  dataset: "<dataset>"
+  solution_index: 0
+
+coordinates:
+  coordinate_system: axisymmetric_rz   # cartesian_xy | cartesian_xyz | axisymmetric_rz
+  coordinate_scale_m_per_model_unit: 1.0
+  axes:
+    r: "r"
+    z: "z"
+
+geometry:
+  boundary_table: "prep/boundaries.csv"
+  boundary_part_map: "prep/boundary_part_map.csv"
+
+fields:
+  backend: "regular_grid"
+  bundle: "prep/fields.npz"
+  mappings:
+    Ex_or_Er:
+      source: "es.Er"
+      unit: "V/m"
+    Ez:
+      source: "es.Ez"
+      unit: "V/m"
+
+particles:
+  release_table: "raw/comsol_release.csv"
+  result_table: "raw/comsol_particle_long.csv"
+
+forces:
+  enabled:
+    - drag
+    - electric
+  drag:
+    law: "stokes"
+
+walls:
+  wall_law_file: "prep/wall_laws.csv"
+  require_all_boundaries_mapped: true

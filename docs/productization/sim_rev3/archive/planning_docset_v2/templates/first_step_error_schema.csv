@@ -1,0 +1,1 @@
+particle_id,source_part_id,x0,y0_or_z0,vx0,vy0_or_vz0,x1_solver,y1_solver,vx1_solver,vy1_solver,x1_ref,y1_ref,vx1_ref,vy1_ref,position_error_m,velocity_error_mps,speed_ratio,field_status,notes

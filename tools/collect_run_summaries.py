@@ -4,7 +4,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping
 
 
 FINAL_STATE_COLUMNS = (
@@ -75,9 +75,29 @@ OUTPUT_COLUMNS = (
 
 SHARD_COMPACT_ARTIFACTS = (
     "solver_report.json",
+    "prepared_runtime_summary.json",
+    "wall_summary_by_part.csv",
+    "source_model_summary.json",
     "source_particle_diagnostics.csv",
+    "first_step_compare_summary.json",
+    "first_step_summary.json",
+    "collision_diagnostics.json",
     "comparison_summary.json",
     "compare_summary.json",
+)
+
+COUNTER_KEYS = (
+    "unresolved_crossing_count",
+    "max_hits_reached_count",
+    "nearest_projection_fallback_count",
+    "bisection_fallback_count",
+    "numerical_boundary_stopped_count",
+    "boundary_event_failure_count",
+    "invalid_mask_stopped_count",
+    "valid_mask_mixed_stencil_count",
+    "valid_mask_hard_invalid_count",
+    "source_surface_release_skip_count",
+    "source_surface_release_skip_blocked_count",
 )
 
 
@@ -154,6 +174,57 @@ def _sum_counts(counts: Mapping[str, Any]) -> int:
         except (TypeError, ValueError):
             continue
     return total
+
+
+def _as_number(value: Any) -> float | None:
+    try:
+        out = float(value)
+    except (TypeError, ValueError):
+        return None
+    return out if out == out and out not in (float("inf"), float("-inf")) else None
+
+
+def _sum_numeric_values(values: Iterable[Any]) -> int | float:
+    total = 0.0
+    has_float = False
+    for value in values:
+        number = _as_number(value)
+        if number is None:
+            continue
+        has_float = has_float or not float(number).is_integer()
+        total += number
+    return float(total) if has_float else int(total)
+
+
+def _shared_value(values: Iterable[Any]) -> Any:
+    cleaned = [value for value in values if value not in (None, "")]
+    if not cleaned:
+        return ""
+    first = cleaned[0]
+    return first if all(value == first for value in cleaned) else "mixed"
+
+
+def _shared_list(values: Iterable[Any]) -> list[Any]:
+    cleaned = [list(value) for value in values if isinstance(value, list)]
+    if not cleaned:
+        return []
+    first = cleaned[0]
+    return first if all(value == first for value in cleaned) else []
+
+
+def _sum_mapping_values(mappings: Iterable[Mapping[str, Any]], key: str) -> int | float:
+    return _sum_numeric_values(mapping.get(key, 0) for mapping in mappings)
+
+
+def _sum_named_count_maps(mappings: Iterable[Mapping[str, Any]], key: str) -> dict[str, int | float]:
+    out: dict[str, int | float] = {}
+    for mapping in mappings:
+        raw = mapping.get(key, {})
+        if not isinstance(raw, Mapping):
+            continue
+        for name, value in raw.items():
+            out[str(name)] = _sum_numeric_values((out.get(str(name), 0), value))
+    return out
 
 
 def _status(row: Mapping[str, Any]) -> str:
@@ -325,6 +396,247 @@ def _write_root_source_particle_diagnostics(output_dirs: list[Path], root_artifa
     return output_path, len(rows)
 
 
+def _write_json(path: Path, payload: Mapping[str, Any]) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return path
+
+
+def _shard_jsons(output_dirs: list[Path], filename: str) -> list[tuple[Path, dict[str, Any]]]:
+    rows: list[tuple[Path, dict[str, Any]]] = []
+    for output_dir in output_dirs:
+        path = output_dir.resolve() / filename
+        payload = _read_json(path)
+        if payload:
+            rows.append((path, payload))
+    return rows
+
+
+def _source_model_summaries(output_dirs: list[Path]) -> list[tuple[Path, dict[str, Any], str]]:
+    rows: list[tuple[Path, dict[str, Any], str]] = []
+    for output_dir in output_dirs:
+        base = output_dir.resolve()
+        source_path = base / "source_model_summary.json"
+        source_payload = _read_json(source_path)
+        if source_payload:
+            rows.append((source_path, source_payload, "file"))
+            continue
+        prepared_path = base / "prepared_runtime_summary.json"
+        prepared = _read_json(prepared_path)
+        embedded = prepared.get("source_model_summary", {}) if isinstance(prepared, Mapping) else {}
+        if isinstance(embedded, Mapping) and embedded:
+            rows.append((prepared_path, dict(embedded), "embedded"))
+    return rows
+
+
+def _aggregate_solver_reports(output_dirs: list[Path], root_artifacts_dir: Path) -> Path | None:
+    rows = _shard_jsons(output_dirs, "solver_report.json")
+    if not rows:
+        return None
+    reports = [payload for _path, payload in rows]
+    final_state_counts: dict[str, int | float] = {}
+    for key in FINAL_STATE_COLUMNS:
+        values = []
+        for report in reports:
+            counts = report.get("final_state_counts", {})
+            if isinstance(counts, Mapping) and key in counts:
+                values.append(counts.get(key, 0))
+            elif key in report:
+                values.append(report.get(key, 0))
+            elif key == "active_free_flight":
+                values.append(report.get("active_count", 0))
+        final_state_counts[key] = _sum_numeric_values(values)
+    timing_keys = sorted(
+        {
+            str(key)
+            for report in reports
+            if isinstance(report.get("timing_s", {}), Mapping)
+            for key in report.get("timing_s", {})
+        }
+    )
+    timing_s = {
+        key: _sum_numeric_values(
+            report.get("timing_s", {}).get(key, 0) if isinstance(report.get("timing_s", {}), Mapping) else 0
+            for report in reports
+        )
+        for key in timing_keys
+    }
+    payload: dict[str, Any] = {
+        "schema_version": 1,
+        "source_kind": "sharded_root_aggregate",
+        "shard_count": int(len(output_dirs)),
+        "aggregated_shard_count": int(len(rows)),
+        "shard_output_dirs": [str(path.parent) for path, _payload in rows],
+        "shard_solver_report_paths": [str(path) for path, _payload in rows],
+        "particle_count": _sum_mapping_values(reports, "particle_count"),
+        "released_count": _sum_mapping_values(reports, "released_count"),
+        "coordinate_system": _shared_value(report.get("coordinate_system", "") for report in reports),
+        "axis_names": _shared_list(report.get("axis_names", []) for report in reports),
+        "integrator": _shared_value(report.get("integrator", "") for report in reports),
+        "valid_mask_policy": _shared_value(report.get("valid_mask_policy", "") for report in reports),
+        "drag_model": _shared_value(report.get("drag_model", "") for report in reports),
+        "final_state_counts": final_state_counts,
+        "timing_s": timing_s,
+    }
+    for key in COUNTER_KEYS:
+        payload[key] = _sum_mapping_values(reports, key)
+    return _write_json(root_artifacts_dir / "solver_report.json", payload)
+
+
+def _aggregate_prepared_summaries(output_dirs: list[Path], root_artifacts_dir: Path) -> Path | None:
+    rows = _shard_jsons(output_dirs, "prepared_runtime_summary.json")
+    if not rows:
+        return None
+    summaries = [payload for _path, payload in rows]
+    payload = {
+        "schema_version": 1,
+        "source_kind": "sharded_root_aggregate",
+        "shard_count": int(len(output_dirs)),
+        "aggregated_shard_count": int(len(rows)),
+        "shard_output_dirs": [str(path.parent) for path, _payload in rows],
+        "shard_prepared_runtime_summary_paths": [str(path) for path, _payload in rows],
+        "coordinate_system": _shared_value(summary.get("coordinate_system", "") for summary in summaries),
+        "axis_names": _shared_list(summary.get("axis_names", []) for summary in summaries),
+        "spatial_dim": _shared_value(summary.get("spatial_dim", "") for summary in summaries),
+        "particles": _sum_mapping_values(summaries, "particles"),
+        "has_geometry_provider": _shared_value(summary.get("has_geometry_provider", "") for summary in summaries),
+        "has_field_provider": _shared_value(summary.get("has_field_provider", "") for summary in summaries),
+        "notes": ["This is a root aggregate wrapper; per-shard prepared summaries remain authoritative."],
+    }
+    return _write_json(root_artifacts_dir / "prepared_runtime_summary.json", payload)
+
+
+def _aggregate_wall_summary_by_part(output_dirs: list[Path], root_artifacts_dir: Path) -> Path | None:
+    grouped: dict[tuple[str, str, str], int] = {}
+    for output_dir in output_dirs:
+        path = output_dir.resolve() / "wall_summary_by_part.csv"
+        if not path.exists():
+            continue
+        with path.open("r", encoding="utf-8", newline="") as handle:
+            reader = csv.DictReader(handle)
+            for row in reader:
+                key = (
+                    str(row.get("part_id", "")).strip(),
+                    str(row.get("outcome", "")).strip(),
+                    str(row.get("wall_mode", "")).strip(),
+                )
+                try:
+                    count = int(float(row.get("count", 0) or 0))
+                except (TypeError, ValueError):
+                    count = 0
+                grouped[key] = grouped.get(key, 0) + count
+    if not grouped:
+        return None
+    output_path = root_artifacts_dir / "wall_summary_by_part.csv"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["part_id", "outcome", "wall_mode", "count"])
+        writer.writeheader()
+        for part_id, outcome, wall_mode in sorted(grouped):
+            writer.writerow(
+                {
+                    "part_id": part_id,
+                    "outcome": outcome,
+                    "wall_mode": wall_mode,
+                    "count": int(grouped[(part_id, outcome, wall_mode)]),
+                }
+            )
+    return output_path
+
+
+def _aggregate_source_model_summaries(output_dirs: list[Path], root_artifacts_dir: Path) -> Path | None:
+    rows = _source_model_summaries(output_dirs)
+    if not rows:
+        return None
+    summaries = [payload for _path, payload, _kind in rows]
+    numeric_counts: dict[str, int | float] = {}
+    for summary in summaries:
+        for key, value in summary.items():
+            if "count" not in str(key):
+                continue
+            number = _as_number(value)
+            if number is not None:
+                numeric_counts[str(key)] = _sum_numeric_values((numeric_counts.get(str(key), 0), number))
+    payload = {
+        "schema_version": 1,
+        "source_kind": "sharded_root_aggregate",
+        "shard_count": int(len(output_dirs)),
+        "aggregated_shard_count": int(len(rows)),
+        "source_model_summary_paths": [str(path) for path, _payload, _kind in rows],
+        "source_model_summary_sources": [
+            {"path": str(path), "source": kind}
+            for path, _payload, kind in rows
+        ],
+        **numeric_counts,
+        "law_usage": _sum_named_count_maps(summaries, "law_usage"),
+        "source_provenance_counts": _sum_named_count_maps(summaries, "source_provenance_counts"),
+        "notes": ["Known numeric *count* fields are summed; per-shard source summaries remain authoritative."],
+    }
+    return _write_json(root_artifacts_dir / "source_model_summary.json", payload)
+
+
+def _aggregate_first_step_summaries(output_dirs: list[Path], root_artifacts_dir: Path) -> Path | None:
+    rows = _shard_jsons(output_dirs, "first_step_compare_summary.json")
+    if not rows:
+        rows = _shard_jsons(output_dirs, "first_step_summary.json")
+    if not rows:
+        return None
+    summaries = [payload for _path, payload in rows]
+    payload = {
+        "schema_version": 1,
+        "source_kind": "sharded_root_aggregate",
+        "shard_count": int(len(output_dirs)),
+        "aggregated_shard_count": int(len(rows)),
+        "shard_first_step_summary_paths": [str(path) for path, _payload in rows],
+        "particle_count": _sum_mapping_values(summaries, "particle_count"),
+        "compared_particle_count": _sum_mapping_values(summaries, "compared_particle_count"),
+        "stochastic_policy": _shared_value(summary.get("stochastic_policy", "") for summary in summaries),
+        "notes": ["Root first-step summary lists shard summaries; error distributions are not reweighted here."],
+    }
+    return _write_json(root_artifacts_dir / "first_step_compare_summary.json", payload)
+
+
+def _aggregate_collision_diagnostics(output_dirs: list[Path], root_artifacts_dir: Path) -> Path | None:
+    rows = _shard_jsons(output_dirs, "collision_diagnostics.json")
+    if not rows:
+        return None
+    diagnostics = [payload for _path, payload in rows]
+    payload: dict[str, Any] = {
+        "schema_version": 1,
+        "source_kind": "sharded_root_aggregate",
+        "shard_count": int(len(output_dirs)),
+        "aggregated_shard_count": int(len(rows)),
+        "shard_collision_diagnostics_paths": [str(path) for path, _payload in rows],
+    }
+    for key in COUNTER_KEYS:
+        payload[key] = _sum_mapping_values(diagnostics, key)
+    for key in (
+        "invalid_mask_stop_reason_counts",
+        "numerical_boundary_stop_reason_counts",
+        "source_surface_release_skip_blocked_reasons",
+    ):
+        values = _sum_named_count_maps(diagnostics, key)
+        if values:
+            payload[key] = values
+    return _write_json(root_artifacts_dir / "collision_diagnostics.json", payload)
+
+
+def _write_root_aggregate_artifacts(output_dirs: list[Path], root_artifacts_dir: Path) -> dict[str, str]:
+    generated: dict[str, str] = {}
+    for name, writer in (
+        ("solver_report.json", _aggregate_solver_reports),
+        ("prepared_runtime_summary.json", _aggregate_prepared_summaries),
+        ("wall_summary_by_part.csv", _aggregate_wall_summary_by_part),
+        ("source_model_summary.json", _aggregate_source_model_summaries),
+        ("first_step_compare_summary.json", _aggregate_first_step_summaries),
+        ("collision_diagnostics.json", _aggregate_collision_diagnostics),
+    ):
+        path = writer(output_dirs, root_artifacts_dir)
+        if path is not None:
+            generated[name] = str(path.resolve())
+    return generated
+
+
 def _shard_artifact_manifest(output_dirs: list[Path]) -> list[dict[str, Any]]:
     shards: list[dict[str, Any]] = []
     for output_dir in output_dirs:
@@ -356,6 +668,7 @@ def collect_shard_root_artifacts(
     root_artifacts_dir.mkdir(parents=True, exist_ok=True)
     summary_csv = collect_run_summaries(output_dirs, output_csv or (root_artifacts_dir / "run_summary_compare.csv"))
     source_diag_path, source_diag_rows = _write_root_source_particle_diagnostics(output_dirs, root_artifacts_dir)
+    aggregate_artifacts = _write_root_aggregate_artifacts(output_dirs, root_artifacts_dir)
     shards = _shard_artifact_manifest(output_dirs)
     comparison_summary_paths = [
         artifact["path"]
@@ -368,6 +681,7 @@ def collect_shard_root_artifacts(
     generated_artifacts: dict[str, Any] = {
         "run_summary_compare.csv": str(summary_csv.resolve()),
     }
+    generated_artifacts.update(aggregate_artifacts)
     if source_diag_path is not None:
         generated_artifacts["source_particle_diagnostics.csv"] = str(source_diag_path.resolve())
 

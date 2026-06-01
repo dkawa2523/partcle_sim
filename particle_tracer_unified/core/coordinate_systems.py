@@ -154,6 +154,7 @@ def axisymmetric_rz_geometry_report(
     return {
         "coordinate_system": "axisymmetric_rz",
         "axis_names": ["r", "z"],
+        "semantics": "2d_meridional_rz",
         "radial_axis_name": "r",
         "axial_axis_name": "z",
         "radial_axis_min_m": float(np.min(finite)) if finite.size else None,
@@ -166,6 +167,9 @@ def axisymmetric_rz_geometry_report(
         "r0_axis_boundary_part_ids": part_ids,
         "axis_boundary_policy": "report_only_collision_unchanged",
         "collision_behavior": "unchanged",
+        "velocity_components": ["v_r", "v_z"],
+        "v_theta_dynamics": "out_of_scope",
+        "source_ring_weighting_policy": "not_applied_implicitly",
         "ring_area_weight_formula": "2*pi*r",
         "radial_ring_area_weight": _ring_weight_summary(axis_0),
     }

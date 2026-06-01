@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Mapping, Tuple
 import numpy as np
 
 from ..core.coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_report_from_metadata
-from ..core.datamodel import ParticleTable, PreparedRuntime
+from ..core.datamodel import ParticleTable, PreparedRuntime, source_provenance_group
 from ..core.field_backend import field_backend_report, sample_field_valid_status
 from ..core.field_sampling import valid_mask_status_requires_stop
 from ..core.boundary_service import (
@@ -722,6 +722,9 @@ def _build_final_particles_frame(payload: RuntimeOutputPayload) -> pd.DataFrame:
             'final_step_name': payload.final_step_name,
             'final_segment_name': payload.final_segment_name,
             'source_part_id': payload.particles.source_part_id,
+            'source_provenance_group': [
+                source_provenance_group(int(value)) for value in np.asarray(payload.particles.source_part_id)
+            ],
             'material_id': payload.particles.material_id,
             'initial_charge_C': payload.particles.charge,
             'charge_C': payload.final_charge,

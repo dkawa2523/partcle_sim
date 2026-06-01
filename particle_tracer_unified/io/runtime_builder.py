@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
+import numpy as np
 import yaml
 
 from ..core.catalogs import build_physics_catalog, build_wall_catalog, physics_catalog_summary, wall_catalog_summary
@@ -10,6 +12,7 @@ from ..core.coordinate_systems import (
     axis_names_for_coordinate_system,
     axisymmetric_rz_report_from_metadata,
     normalize_coordinate_system,
+    ring_area_weight,
 )
 from ..core.datamodel import GasProperties, PreparedRuntime, RuntimeLike, replace_runtime_particles
 from ..core.process_steps import process_step_control_summary
@@ -53,6 +56,18 @@ def _summary_mapping(value: object) -> Mapping[str, Any]:
     return value if isinstance(value, Mapping) else {}
 
 
+def _bool_config(value: object, *, default: bool = False) -> bool:
+    if value is None:
+        return bool(default)
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in {'1', 'true', 'yes', 'on'}:
+            return True
+        if text in {'0', 'false', 'no', 'off', ''}:
+            return False
+    return bool(value)
+
+
 def _model_input_summary(
     runtime: RuntimeLike,
     force_summary: Mapping[str, Any],
@@ -86,6 +101,56 @@ def _model_input_summary(
         'particle_wall_contact_geometry': 'center_position',
         'source_law_usage': dict(_summary_mapping(source_summary.get('law_usage', {}))),
     }
+
+
+def _finite_weight_summary(values) -> Dict[str, Any]:
+    arr = np.asarray(values, dtype=np.float64)
+    finite = arr[np.isfinite(arr)]
+    if finite.size == 0:
+        return {'count': 0, 'min': None, 'max': None, 'sum': 0.0}
+    return {
+        'count': int(finite.size),
+        'min': float(np.min(finite)),
+        'max': float(np.max(finite)),
+        'sum': float(np.sum(finite)),
+    }
+
+
+def _with_axisymmetric_source_ring_weight_report(
+    runtime: RuntimeLike,
+    result,
+    preprocess_cfg: Mapping[str, Any],
+):
+    enabled = _bool_config(preprocess_cfg.get('ring_area_weighted_source_reporting', False), default=False)
+    if str(runtime.coordinate_system) != 'axisymmetric_rz':
+        if enabled:
+            raise ValueError(
+                'source.preprocess.ring_area_weighted_source_reporting requires coordinate_system=axisymmetric_rz'
+            )
+        return result
+
+    summary = dict(result.source_model_summary)
+    ring_summary: Dict[str, Any] = {
+        'enabled': int(bool(enabled)),
+        'applied_to_sampling': 0,
+        'radius_axis': 'r',
+        'weight_formula': '2*pi*r',
+        'policy': 'explicit_reporting_only' if enabled else 'not_applied',
+    }
+    diagnostics_rows = tuple(dict(row) for row in result.diagnostics_rows)
+    if enabled:
+        radii = np.asarray(result.particles.position[:, 0], dtype=np.float64)
+        weights = np.asarray(ring_area_weight(radii), dtype=np.float64)
+        updated_rows = []
+        for row, radius, weight in zip(diagnostics_rows, radii, weights):
+            updated = dict(row)
+            updated['axisymmetric_radius_m'] = float(radius)
+            updated['axisymmetric_ring_area_weight'] = float(weight)
+            updated_rows.append(updated)
+        diagnostics_rows = tuple(updated_rows)
+        ring_summary.update(_finite_weight_summary(weights))
+    summary['axisymmetric_ring_area_weight'] = ring_summary
+    return replace(result, source_model_summary=summary, diagnostics_rows=diagnostics_rows)
 
 
 def build_runtime_from_config(config: Mapping[str, Any], config_dir: Path) -> RuntimeLike:
@@ -182,8 +247,10 @@ def prepare_runtime(runtime: RuntimeLike, seed: Optional[int] = None) -> Prepare
     source_cfg = runtime.config_payload.get('source', {}) if isinstance(runtime.config_payload, Mapping) else {}
     preprocess_cfg = source_cfg.get('preprocess', {}) if isinstance(source_cfg.get('preprocess', {}), Mapping) else {}
     if is_comsol_faithful_config(runtime.config_payload if isinstance(runtime.config_payload, Mapping) else {}):
-        if bool(preprocess_cfg.get('enabled', False)):
+        if _bool_config(preprocess_cfg.get('enabled', False), default=False):
             raise ValueError('source.preprocess.enabled must be false in COMSOL faithful mode')
+        if _bool_config(preprocess_cfg.get('boundary_release', False), default=False):
+            raise ValueError('source.preprocess.boundary_release must be false in COMSOL faithful mode')
         return PreparedRuntime(runtime=runtime, source_preprocess=None)
     if not bool(preprocess_cfg.get('enabled', True)):
         return PreparedRuntime(runtime=runtime, source_preprocess=None)
@@ -235,6 +302,7 @@ def prepare_runtime(runtime: RuntimeLike, seed: Optional[int] = None) -> Prepare
         boundary_classifier_tolerance_m=float(boundary_release['tolerance_m']),
         boundary_solver_offset_m=float(boundary_release['release_offset_m']),
     )
+    result = _with_axisymmetric_source_ring_weight_report(runtime, result, preprocess_cfg)
     prepared_runtime = replace_runtime_particles(
         runtime,
         result.particles,

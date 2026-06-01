@@ -7,6 +7,8 @@ from typing import Any, Mapping
 
 import yaml
 
+from .comsol_release_reader import validate_comsol_release_table_header
+
 
 ALLOWED_COORDINATE_SYSTEMS = {"cartesian_xy", "axisymmetric_rz", "cartesian_xyz"}
 ALLOWED_FIELD_PHYSICAL_QUANTITIES = {
@@ -141,6 +143,16 @@ class ComsolCaseManifest:
         release_table = self.resolve(self.particles.get("release_table"))
         if release_table is None or not release_table.exists():
             errors.append(f"particles.release_table does not exist: {release_table}")
+        else:
+            try:
+                release_spatial_dim = 3 if coord_system == "cartesian_xyz" else 2
+                validate_comsol_release_table_header(
+                    release_table,
+                    spatial_dim=release_spatial_dim,
+                    strict=strict,
+                )
+            except ValueError as exc:
+                errors.append(str(exc))
         if "release_velocity_scale_mps_per_input_unit" in self.particles:
             try:
                 velocity_scale = float(self.particles["release_velocity_scale_mps_per_input_unit"])

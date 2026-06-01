@@ -13,7 +13,7 @@ import yaml
 
 from ..core.catalogs import resolve_step_physics
 from ..core.coordinate_systems import axis_names_for_coordinate_system
-from ..core.datamodel import PreparedRuntime
+from ..core.datamodel import PreparedRuntime, source_provenance_group
 from ..core.field_sampling import (
     VALID_MASK_STATUS_CLEAN,
     VALID_MASK_STATUS_HARD_INVALID,
@@ -28,7 +28,7 @@ from ..solvers.compiled_field_backend import (
     sample_compiled_valid_mask_statuses,
 )
 from ..solvers.forces import ForceRuntimeParameters, force_catalog_summary, force_runtime_parameters_from_catalog
-from ..solvers.integrator_common import effective_tau_from_slip_speed
+from ..solvers.integrator_common import advance_state_2d, advance_state_3d, effective_tau_from_slip_speed
 from ..solvers.particle_state import static_arrays_from_particles
 from ..solvers.runtime_plan import build_solver_plan
 from ..solvers.solver_entrypoints import run_solver_for_dim
@@ -142,6 +142,33 @@ def _force_one_step_config(
         output["write_force_contributions"] = False
         output["write_collision_diagnostics"] = False
     return cfg, notes
+
+
+def _config_with_solver_dt(config: Mapping[str, Any], dt: float) -> dict[str, Any]:
+    cfg = deepcopy(dict(config))
+    solver = cfg.setdefault("solver", {})
+    if not isinstance(solver, dict):
+        raise ValueError("solver must be a mapping")
+    dt_value = float(dt)
+    if not np.isfinite(dt_value) or dt_value <= 0.0:
+        raise ValueError("dt sweep values must be finite and > 0")
+    solver["dt"] = dt_value
+    return cfg
+
+
+def _parse_dt_sweep(value: str | None) -> list[float]:
+    if value is None or not str(value).strip():
+        return []
+    values: list[float] = []
+    for item in str(value).replace(";", ",").split(","):
+        text = item.strip()
+        if not text:
+            continue
+        dt = float(text)
+        if not np.isfinite(dt) or dt <= 0.0:
+            raise ValueError("dt sweep values must be finite and > 0")
+        values.append(dt)
+    return values
 
 
 def _particle_tau_p(diameter: np.ndarray, density: np.ndarray, gas_mu: np.ndarray, min_tau: float) -> np.ndarray:
@@ -369,13 +396,20 @@ def _force_contribution_frame(prepared: PreparedRuntime) -> pd.DataFrame:
     for value in components.values():
         total += np.asarray(value, dtype=np.float64)
     components["total"] = total
+    provenance_by_id = _source_provenance_by_particle_id(prepared)
 
     rows: list[dict[str, Any]] = []
     for i in range(particles.count):
+        particle_id = int(particles.particle_id[i])
         row: dict[str, Any] = {
-            "particle_id": int(particles.particle_id[i]),
+            "particle_id": particle_id,
             "source_part_id": int(particles.source_part_id[i]),
+            "source_provenance_group": provenance_by_id.get(
+                particle_id,
+                source_provenance_group(int(particles.source_part_id[i])),
+            ),
             "time_s": time_s,
+            "drag_tau_eff_s": float(tau_eff[i]),
             "field_status": _STATUS_NAMES.get(int(status_codes[i]), str(int(status_codes[i]))),
             "notes": "brownian acceleration is stochastic and is reported as zero in deterministic first-step compare",
         }
@@ -387,6 +421,32 @@ def _force_contribution_frame(prepared: PreparedRuntime) -> pd.DataFrame:
                 row[f"{prefix}_a{axis}"] = float(values[i, axis_index])
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def _source_provenance_by_particle_id(prepared: PreparedRuntime) -> dict[int, str]:
+    result = getattr(prepared, "source_preprocess", None)
+    if result is None:
+        return {}
+    out: dict[int, str] = {}
+    for raw in getattr(result, "diagnostics_rows", ()):
+        if not isinstance(raw, Mapping):
+            continue
+        try:
+            pid = int(raw.get("particle_id", 0))
+        except (TypeError, ValueError):
+            continue
+        if pid <= 0:
+            continue
+        out[pid] = str(
+            raw.get(
+                "source_provenance_group",
+                source_provenance_group(
+                    int(raw.get("source_part_id", 0) or 0),
+                    production_generated=int(raw.get("boundary_release_applied", 0) or 0) != 0,
+                ),
+            )
+        )
+    return out
 
 
 def _first_present(row: Mapping[str, Any], names: Sequence[str]) -> float:
@@ -445,12 +505,17 @@ def _first_step_error_frame(
     axes = _runtime_axis_names(prepared)
     rows = []
     final_by_id = final_particles.set_index("particle_id", drop=False)
+    provenance_by_id = _source_provenance_by_particle_id(prepared)
     for i in range(particles.count):
         pid = int(particles.particle_id[i])
         final = final_by_id.loc[pid] if pid in final_by_id.index else {}
         row: dict[str, Any] = {
             "particle_id": pid,
             "source_part_id": int(particles.source_part_id[i]),
+            "source_provenance_group": provenance_by_id.get(
+                pid,
+                source_provenance_group(int(particles.source_part_id[i])),
+            ),
             "field_status": "",
             "notes": "",
         }
@@ -493,6 +558,122 @@ def _first_step_error_frame(
     return out
 
 
+def _with_force_total_update_consistency(
+    first_step_frame: pd.DataFrame,
+    force_frame: pd.DataFrame,
+    *,
+    axes: tuple[str, ...],
+    dt: float,
+    integrator_mode: int,
+) -> pd.DataFrame:
+    out = first_step_frame.copy()
+    if "particle_id" not in force_frame.columns:
+        raise ValueError("force contribution frame must contain particle_id")
+    force_by_id = force_frame.set_index("particle_id", drop=False)
+    velocity_residual = np.full(len(out), np.nan, dtype=np.float64)
+    position_residual = np.full(len(out), np.nan, dtype=np.float64)
+    euler_velocity_residual = np.full(len(out), np.nan, dtype=np.float64)
+    euler_position_residual = np.full(len(out), np.nan, dtype=np.float64)
+    for row_index, row in out.iterrows():
+        pid = int(row["particle_id"])
+        if pid not in force_by_id.index:
+            continue
+        force_row = force_by_id.loc[pid]
+        x0_values: list[float] = []
+        v0_values: list[float] = []
+        total_values: list[float] = []
+        drag_values: list[float] = []
+        solver_position_values: list[float] = []
+        solver_velocity_values: list[float] = []
+        for axis in axes:
+            x0_values.append(float(row.get(f"{axis}0", np.nan)))
+            v0_values.append(float(row.get(f"v{axis}0", np.nan)))
+            total_values.append(float(force_row.get(f"total_a{axis}", np.nan)))
+            drag_values.append(float(force_row.get(f"drag_a{axis}", np.nan)))
+            solver_position_values.append(float(row.get(f"{axis}1_solver", np.nan)))
+            solver_velocity_values.append(float(row.get(f"v{axis}1_solver", np.nan)))
+
+        x0_arr = np.asarray(x0_values, dtype=np.float64)
+        v0_arr = np.asarray(v0_values, dtype=np.float64)
+        total_arr = np.asarray(total_values, dtype=np.float64)
+        drag_arr = np.asarray(drag_values, dtype=np.float64)
+        solver_pos_arr = np.asarray(solver_position_values, dtype=np.float64)
+        solver_vel_arr = np.asarray(solver_velocity_values, dtype=np.float64)
+
+        euler_vel_arr = v0_arr + total_arr * float(dt)
+        euler_pos_arr = x0_arr + euler_vel_arr * float(dt)
+        tau_eff = float(force_row.get("drag_tau_eff_s", np.nan))
+        predictor_pos_arr = euler_pos_arr.copy()
+        predictor_vel_arr = euler_vel_arr.copy()
+
+        if (
+            len(axes) in (2, 3)
+            and np.all(np.isfinite(x0_arr))
+            and np.all(np.isfinite(v0_arr))
+            and np.all(np.isfinite(total_arr))
+            and np.all(np.isfinite(drag_arr))
+            and np.isfinite(tau_eff)
+            and tau_eff > 0.0
+        ):
+            target_arr = v0_arr + drag_arr * float(tau_eff)
+            body_eff_arr = total_arr - drag_arr
+            if len(axes) == 2:
+                x1, y1, vx1, vy1 = advance_state_2d(
+                    float(x0_arr[0]),
+                    float(x0_arr[1]),
+                    float(v0_arr[0]),
+                    float(v0_arr[1]),
+                    float(target_arr[0]),
+                    float(target_arr[1]),
+                    float(body_eff_arr[0]),
+                    float(body_eff_arr[1]),
+                    float(tau_eff),
+                    float(dt),
+                    int(integrator_mode),
+                )
+                predictor_pos_arr = np.asarray([x1, y1], dtype=np.float64)
+                predictor_vel_arr = np.asarray([vx1, vy1], dtype=np.float64)
+            else:
+                x1, y1, z1, vx1, vy1, vz1 = advance_state_3d(
+                    float(x0_arr[0]),
+                    float(x0_arr[1]),
+                    float(x0_arr[2]),
+                    float(v0_arr[0]),
+                    float(v0_arr[1]),
+                    float(v0_arr[2]),
+                    float(target_arr[0]),
+                    float(target_arr[1]),
+                    float(target_arr[2]),
+                    float(body_eff_arr[0]),
+                    float(body_eff_arr[1]),
+                    float(body_eff_arr[2]),
+                    float(tau_eff),
+                    float(dt),
+                    int(integrator_mode),
+                )
+                predictor_pos_arr = np.asarray([x1, y1, z1], dtype=np.float64)
+                predictor_vel_arr = np.asarray([vx1, vy1, vz1], dtype=np.float64)
+
+        for axis_index, axis in enumerate(axes):
+            out.loc[row_index, f"{axis}1_force_total"] = float(predictor_pos_arr[axis_index])
+            out.loc[row_index, f"v{axis}1_force_total"] = float(predictor_vel_arr[axis_index])
+            out.loc[row_index, f"{axis}1_force_total_euler"] = float(euler_pos_arr[axis_index])
+            out.loc[row_index, f"v{axis}1_force_total_euler"] = float(euler_vel_arr[axis_index])
+        if np.all(np.isfinite(predictor_vel_arr)) and np.all(np.isfinite(solver_vel_arr)):
+            velocity_residual[row_index] = float(np.linalg.norm(solver_vel_arr - predictor_vel_arr))
+        if np.all(np.isfinite(predictor_pos_arr)) and np.all(np.isfinite(solver_pos_arr)):
+            position_residual[row_index] = float(np.linalg.norm(solver_pos_arr - predictor_pos_arr))
+        if np.all(np.isfinite(euler_vel_arr)) and np.all(np.isfinite(solver_vel_arr)):
+            euler_velocity_residual[row_index] = float(np.linalg.norm(solver_vel_arr - euler_vel_arr))
+        if np.all(np.isfinite(euler_pos_arr)) and np.all(np.isfinite(solver_pos_arr)):
+            euler_position_residual[row_index] = float(np.linalg.norm(solver_pos_arr - euler_pos_arr))
+    out["force_total_update_velocity_residual_mps"] = velocity_residual
+    out["force_total_update_position_residual_m"] = position_residual
+    out["force_total_euler_velocity_residual_mps"] = euler_velocity_residual
+    out["force_total_euler_position_residual_m"] = euler_position_residual
+    return out
+
+
 def _finite_summary(values: Sequence[float]) -> dict[str, Any]:
     arr = np.asarray(values, dtype=np.float64)
     finite = arr[np.isfinite(arr)]
@@ -517,35 +698,26 @@ def _json_safe(value: Any) -> Any:
     return value
 
 
-def run_first_step_compare(
+def _build_summary(
     *,
+    config: Mapping[str, Any],
     config_path: Path,
     output_dir: Path,
-    reference: Path | None = None,
-    stochastic: str = "off",
-    seed: int | None = None,
+    prepared: PreparedRuntime,
+    force_frame: pd.DataFrame,
+    first_step_frame: pd.DataFrame,
+    force_path: Path,
+    first_step_path: Path,
+    solver_dir: Path,
+    reference: Path | None,
+    stochastic: str,
+    seed: int | None,
+    notes: list[str],
 ) -> dict[str, Any]:
-    config_path = Path(config_path).resolve()
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    config, notes = _force_one_step_config(_read_yaml(config_path), stochastic_policy=stochastic, seed=seed)
-    runtime = build_runtime_from_config(config, config_path.parent)
-    prepared = prepare_runtime(runtime, seed=seed)
     dim = int(prepared.runtime.spatial_dim)
-
-    force_frame = _force_contribution_frame(prepared)
-    force_path = output_dir / "force_contributions.csv"
-    write_csv(force_frame, force_path)
-
-    solver_dir = output_dir / "_solver_first_step"
-    run_solver_for_dim(prepared, solver_dir, spatial_dim=dim)
-    final_particles = pd.read_csv(solver_dir / "final_particles.csv")
-    first_step_frame = _first_step_error_frame(prepared, final_particles, reference=reference)
-    first_step_path = output_dir / "first_step_error.csv"
-    write_csv(first_step_frame, first_step_path)
-
     force_summary = force_catalog_summary(prepared.runtime.force_catalog)
-    summary = {
+    solver_cfg = _mapping(config.get("solver", {}))
+    return {
         "config": str(config_path),
         "spatial_dim": int(dim),
         "coordinate_system": str(prepared.runtime.coordinate_system),
@@ -555,13 +727,40 @@ def run_first_step_compare(
         "compared_particle_count": int(np.count_nonzero(np.isfinite(first_step_frame["position_error_m"].to_numpy(dtype=float)))),
         "stochastic_policy": str(stochastic),
         "stochastic_disabled_for_compare": int(str(stochastic) == "off"),
+        "stochastic_controlled_by_seed": int(seed is not None),
         "seed": None if seed is None else int(seed),
-        "solver_dt_s": float(_mapping(config.get("solver", {})).get("dt", 1.0e-3)),
-        "forced_t_end_s": float(_mapping(config.get("solver", {})).get("t_end", 1.0e-3)),
+        "solver_dt_s": float(solver_cfg.get("dt", 1.0e-3)),
+        "forced_t_end_s": float(solver_cfg.get("t_end", solver_cfg.get("dt", 1.0e-3))),
         "enabled_forces": list(force_summary.get("enabled_forces", [])) if isinstance(force_summary, Mapping) else [],
         "force_contribution_rows": int(len(force_frame)),
         "position_error_m": _finite_summary(first_step_frame["position_error_m"].to_numpy(dtype=float)),
         "velocity_error_mps": _finite_summary(first_step_frame["velocity_error_mps"].to_numpy(dtype=float)),
+        "force_total_update": {
+            "velocity_residual_mps": _finite_summary(
+                first_step_frame["force_total_update_velocity_residual_mps"].to_numpy(dtype=float)
+            ),
+            "position_residual_m": _finite_summary(
+                first_step_frame["force_total_update_position_residual_m"].to_numpy(dtype=float)
+            ),
+            "interpretation": (
+                "Near-zero residuals indicate that force_contributions total is compatible with the configured "
+                "local one-step integrator under deterministic start-state field sampling assumptions. Non-zero "
+                "residuals can indicate stochastic motion, changing fields, wall/contact behavior, or a force/field mismatch."
+            ),
+        },
+        "force_total_euler": {
+            "velocity_residual_mps": _finite_summary(
+                first_step_frame["force_total_euler_velocity_residual_mps"].to_numpy(dtype=float)
+            ),
+            "position_residual_m": _finite_summary(
+                first_step_frame["force_total_euler_position_residual_m"].to_numpy(dtype=float)
+            ),
+            "interpretation": (
+                "Euler residuals compare the solver step with v1 = v0 + total_acceleration * dt and "
+                "x1 = x0 + v1 * dt. Residuals that shrink with dt usually indicate expected integrator "
+                "finite-step behavior rather than a force-total mismatch."
+            ),
+        },
         "artifacts": {
             "first_step_error_csv": str(first_step_path),
             "force_contributions_csv": str(force_path),
@@ -569,9 +768,189 @@ def run_first_step_compare(
         },
         "notes": notes,
     }
-    summary_path = output_dir / "first_step_compare_summary.json"
+
+
+def _write_summary(summary: dict[str, Any], output_dir: Path) -> None:
+    summary_path = output_dir / "first_step_summary.json"
+    legacy_summary_path = output_dir / "first_step_compare_summary.json"
     summary["artifacts"]["summary_json"] = str(summary_path)
-    summary_path.write_text(json.dumps(_json_safe(summary), indent=2) + "\n", encoding="utf-8")
+    summary["artifacts"]["legacy_summary_json"] = str(legacy_summary_path)
+    payload = json.dumps(_json_safe(summary), indent=2) + "\n"
+    summary_path.write_text(payload, encoding="utf-8")
+    legacy_summary_path.write_text(payload, encoding="utf-8")
+
+
+def _run_one_step_compare(
+    *,
+    config: Mapping[str, Any],
+    config_path: Path,
+    output_dir: Path,
+    reference: Path | None,
+    stochastic: str,
+    seed: int | None,
+) -> dict[str, Any]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    config, notes = _force_one_step_config(config, stochastic_policy=stochastic, seed=seed)
+    runtime = build_runtime_from_config(config, config_path.parent)
+    prepared = prepare_runtime(runtime, seed=seed)
+    dim = int(prepared.runtime.spatial_dim)
+    axes = _runtime_axis_names(prepared)
+    plan = build_solver_plan(prepared, spatial_dim=dim)
+    solver_cfg = _mapping(config.get("solver", {}))
+    dt = float(solver_cfg.get("dt", 1.0e-3))
+
+    force_frame = _force_contribution_frame(prepared)
+    force_path = output_dir / "force_contributions.csv"
+    write_csv(force_frame, force_path)
+
+    solver_dir = output_dir / "_solver_first_step"
+    run_solver_for_dim(prepared, solver_dir, spatial_dim=dim)
+    final_particles = pd.read_csv(solver_dir / "final_particles.csv")
+    first_step_frame = _first_step_error_frame(prepared, final_particles, reference=reference)
+    first_step_frame = _with_force_total_update_consistency(
+        first_step_frame,
+        force_frame,
+        axes=axes,
+        dt=dt,
+        integrator_mode=int(plan.integrator_spec.mode),
+    )
+    first_step_path = output_dir / "first_step_error.csv"
+    write_csv(first_step_frame, first_step_path)
+
+    summary = _build_summary(
+        config=config,
+        config_path=config_path,
+        output_dir=output_dir,
+        prepared=prepared,
+        force_frame=force_frame,
+        first_step_frame=first_step_frame,
+        force_path=force_path,
+        first_step_path=first_step_path,
+        solver_dir=solver_dir,
+        reference=reference,
+        stochastic=stochastic,
+        seed=seed,
+        notes=notes,
+    )
+    summary["solver_dt_s"] = dt
+    summary["forced_t_end_s"] = float(solver_cfg.get("t_end", dt))
+    _write_summary(summary, output_dir)
+    return summary
+
+
+def _dt_sweep_row(index: int, dt: float, summary: Mapping[str, Any]) -> dict[str, Any]:
+    force_update = _mapping(summary.get("force_total_update", {}))
+    force_euler = _mapping(summary.get("force_total_euler", {}))
+    vel = _mapping(force_update.get("velocity_residual_mps", {}))
+    pos = _mapping(force_update.get("position_residual_m", {}))
+    euler_vel = _mapping(force_euler.get("velocity_residual_mps", {}))
+    euler_pos = _mapping(force_euler.get("position_residual_m", {}))
+    pos_ref = _mapping(summary.get("position_error_m", {}))
+    vel_ref = _mapping(summary.get("velocity_error_mps", {}))
+    return {
+        "index": int(index),
+        "dt_s": float(dt),
+        "output_dir": str(Path(str(summary.get("artifacts", {}).get("solver_output_dir", ""))).parent),
+        "force_update_velocity_residual_mps": vel,
+        "force_update_position_residual_m": pos,
+        "force_euler_velocity_residual_mps": euler_vel,
+        "force_euler_position_residual_m": euler_pos,
+        "reference_position_error_m": pos_ref,
+        "reference_velocity_error_mps": vel_ref,
+    }
+
+
+def _add_dt_sweep_ratios(rows: list[dict[str, Any]]) -> None:
+    previous_vel: float | None = None
+    previous_pos: float | None = None
+    previous_euler_vel: float | None = None
+    previous_euler_pos: float | None = None
+    for row in rows:
+        vel_max = _mapping(row.get("force_update_velocity_residual_mps", {})).get("max")
+        pos_max = _mapping(row.get("force_update_position_residual_m", {})).get("max")
+        euler_vel_max = _mapping(row.get("force_euler_velocity_residual_mps", {})).get("max")
+        euler_pos_max = _mapping(row.get("force_euler_position_residual_m", {})).get("max")
+        row["force_update_velocity_residual_max_ratio_vs_previous"] = (
+            float(vel_max) / float(previous_vel)
+            if previous_vel is not None and vel_max is not None and float(previous_vel) > 0.0
+            else None
+        )
+        row["force_update_position_residual_max_ratio_vs_previous"] = (
+            float(pos_max) / float(previous_pos)
+            if previous_pos is not None and pos_max is not None and float(previous_pos) > 0.0
+            else None
+        )
+        row["force_euler_velocity_residual_max_ratio_vs_previous"] = (
+            float(euler_vel_max) / float(previous_euler_vel)
+            if previous_euler_vel is not None and euler_vel_max is not None and float(previous_euler_vel) > 0.0
+            else None
+        )
+        row["force_euler_position_residual_max_ratio_vs_previous"] = (
+            float(euler_pos_max) / float(previous_euler_pos)
+            if previous_euler_pos is not None and euler_pos_max is not None and float(previous_euler_pos) > 0.0
+            else None
+        )
+        previous_vel = float(vel_max) if vel_max is not None else previous_vel
+        previous_pos = float(pos_max) if pos_max is not None else previous_pos
+        previous_euler_vel = float(euler_vel_max) if euler_vel_max is not None else previous_euler_vel
+        previous_euler_pos = float(euler_pos_max) if euler_pos_max is not None else previous_euler_pos
+
+
+def run_first_step_compare(
+    *,
+    config_path: Path,
+    output_dir: Path,
+    reference: Path | None = None,
+    stochastic: str = "off",
+    seed: int | None = None,
+    dt_sweep: Sequence[float] | None = None,
+) -> dict[str, Any]:
+    config_path = Path(config_path).resolve()
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    raw_config = _read_yaml(config_path)
+    summary = _run_one_step_compare(
+        config=raw_config,
+        config_path=config_path,
+        output_dir=output_dir,
+        reference=reference,
+        stochastic=stochastic,
+        seed=seed,
+    )
+    sweep_values = [float(value) for value in (dt_sweep or [])]
+    if sweep_values:
+        runs: list[dict[str, Any]] = []
+        sweep_root = output_dir / "dt_sweep"
+        for index, dt in enumerate(sweep_values):
+            dt_config = _config_with_solver_dt(raw_config, dt)
+            dt_summary = _run_one_step_compare(
+                config=dt_config,
+                config_path=config_path,
+                output_dir=sweep_root / f"dt_{index:03d}",
+                reference=reference,
+                stochastic=stochastic,
+                seed=seed,
+            )
+            runs.append(_dt_sweep_row(index, dt, dt_summary))
+        _add_dt_sweep_ratios(runs)
+        dt_sweep_summary = {
+            "config": str(config_path),
+            "stochastic_policy": str(stochastic),
+            "seed": None if seed is None else int(seed),
+            "dt_values_s": sweep_values,
+            "runs": runs,
+            "interpretation": (
+                "For deterministic simple cases, force_update_* residuals should remain near floating-point "
+                "roundoff when the local integrator assumptions apply. force_euler_* residuals should usually "
+                "shrink as dt shrinks for relaxation cases. If neither improves, investigate force model, "
+                "field sampling, initial velocity/release normal, or stochastic settings before tuning endpoint counts."
+            ),
+        }
+        dt_sweep_path = output_dir / "dt_sweep_summary.json"
+        dt_sweep_path.write_text(json.dumps(_json_safe(dt_sweep_summary), indent=2) + "\n", encoding="utf-8")
+        summary["artifacts"]["dt_sweep_summary_json"] = str(dt_sweep_path)
+        summary["dt_sweep"] = dt_sweep_summary
+        _write_summary(summary, output_dir)
     return summary
 
 
@@ -582,6 +961,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output-dir", type=Path, default=Path("first_step_compare"))
     parser.add_argument("--stochastic", choices=("off", "from-config"), default="off")
     parser.add_argument("--seed", type=int, default=None, help="Optional deterministic seed override")
+    parser.add_argument("--dt-sweep", default=None, help="Optional comma-separated dt values for one-step sensitivity runs")
     args = parser.parse_args(argv)
 
     run_first_step_compare(
@@ -590,6 +970,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         reference=args.reference,
         stochastic=args.stochastic,
         seed=args.seed,
+        dt_sweep=_parse_dt_sweep(args.dt_sweep),
     )
     return 0
 

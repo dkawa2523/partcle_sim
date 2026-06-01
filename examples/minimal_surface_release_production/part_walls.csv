@@ -1,0 +1,5 @@
+part_id,part_name,material_id,material_name,wall_law,wall_restitution,wall_diffuse_fraction,wall_stick_probability
+101,release_wall,1,release_surface,stick,0.0,0.0,1.0
+102,opposite_wall,2,chamber_wall,mixed_specular_diffuse,0.85,0.20,0.0
+103,lower_wall,2,chamber_wall,mixed_specular_diffuse,0.85,0.20,0.0
+104,upper_wall,2,chamber_wall,mixed_specular_diffuse,0.85,0.20,0.0

@@ -9,6 +9,17 @@ import numpy as np
 from .coordinate_systems import axis_names_for_coordinate_system, axisymmetric_rz_report_from_metadata
 
 
+SOURCE_PROVENANCE_KNOWN = 'known_source'
+SOURCE_PROVENANCE_UNKNOWN = 'unknown_source'
+SOURCE_PROVENANCE_PRODUCTION_GENERATED = 'production_generated_source'
+
+
+def source_provenance_group(source_part_id: int, *, production_generated: bool = False) -> str:
+    if bool(production_generated):
+        return SOURCE_PROVENANCE_PRODUCTION_GENERATED
+    return SOURCE_PROVENANCE_KNOWN if int(source_part_id) > 0 else SOURCE_PROVENANCE_UNKNOWN
+
+
 @dataclass(frozen=True)
 class QuantitySeriesND:
     name: str

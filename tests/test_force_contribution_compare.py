@@ -222,12 +222,20 @@ def test_first_step_compare_reports_constant_electric_acceleration(tmp_path: Pat
 
     assert rc == 0
     forces = pd.read_csv(out_dir / "force_contributions.csv")
+    assert forces.loc[0, "source_provenance_group"] == "known_source"
     np.testing.assert_allclose(forces.loc[0, "electric_ax"], 6.0)
     np.testing.assert_allclose(forces.loc[0, "electric_ay"], -8.0)
     np.testing.assert_allclose(forces.loc[0, "total_ax"], 6.0)
     np.testing.assert_allclose(forces.loc[0, "total_ay"], -8.0)
     assert (out_dir / "first_step_error.csv").exists()
+    assert (out_dir / "first_step_summary.json").exists()
     assert (out_dir / "first_step_compare_summary.json").exists()
+    first_step = pd.read_csv(out_dir / "first_step_error.csv")
+    assert first_step.loc[0, "source_provenance_group"] == "known_source"
+    assert float(first_step.loc[0, "force_total_update_velocity_residual_mps"]) < 1.0e-9
+    assert float(first_step.loc[0, "force_total_update_position_residual_m"]) < 1.0e-12
+    assert float(first_step.loc[0, "force_total_euler_velocity_residual_mps"]) < 1.0e-9
+    assert float(first_step.loc[0, "force_total_euler_position_residual_m"]) < 1.0e-12
 
 
 def test_first_step_compare_reports_drag_only_acceleration(tmp_path: Path) -> None:
@@ -246,10 +254,15 @@ def test_first_step_compare_reports_drag_only_acceleration(tmp_path: Path) -> No
     assert rc == 0
     forces = pd.read_csv(out_dir / "force_contributions.csv")
     expected_tau = 1000.0 * 0.006 * 0.006 / (18.0 * 1.0)
+    np.testing.assert_allclose(forces.loc[0, "drag_tau_eff_s"], expected_tau)
     np.testing.assert_allclose(forces.loc[0, "drag_ax"], 1.0 / expected_tau)
     np.testing.assert_allclose(forces.loc[0, "drag_ay"], 0.0)
     np.testing.assert_allclose(forces.loc[0, "electric_ax"], 0.0)
     np.testing.assert_allclose(forces.loc[0, "total_ax"], 1.0 / expected_tau)
+    first_step = pd.read_csv(out_dir / "first_step_error.csv")
+    assert float(first_step.loc[0, "force_total_update_velocity_residual_mps"]) < 1.0e-12
+    assert float(first_step.loc[0, "force_total_update_position_residual_m"]) < 1.0e-14
+    assert float(first_step.loc[0, "force_total_euler_velocity_residual_mps"]) > 0.0
 
 
 def test_first_step_compare_disables_stochastic_by_default(tmp_path: Path) -> None:
@@ -273,6 +286,72 @@ def test_first_step_compare_disables_stochastic_by_default(tmp_path: Path) -> No
     np.testing.assert_allclose(forces.loc[0, "brownian_ax"], 0.0)
     np.testing.assert_allclose(forces.loc[0, "brownian_ay"], 0.0)
     pd.testing.assert_frame_equal(first_a, first_b)
+
+
+def test_first_step_compare_controls_stochastic_from_config_with_seed(tmp_path: Path) -> None:
+    config_path = _write_first_step_case(
+        tmp_path / "stochastic_controlled",
+        flow=(0.0, 0.0),
+        stochastic_enabled=True,
+    )
+    out_a = tmp_path / "stochastic_controlled_a"
+    out_b = tmp_path / "stochastic_controlled_b"
+
+    first_step_compare_main(
+        ["--config", str(config_path), "--output-dir", str(out_a), "--stochastic", "from-config", "--seed", "7"]
+    )
+    first_step_compare_main(
+        ["--config", str(config_path), "--output-dir", str(out_b), "--stochastic", "from-config", "--seed", "7"]
+    )
+
+    summary = json.loads((out_a / "first_step_summary.json").read_text(encoding="utf-8"))
+    first_a = pd.read_csv(out_a / "first_step_error.csv")
+    first_b = pd.read_csv(out_b / "first_step_error.csv")
+    assert summary["stochastic_policy"] == "from-config"
+    assert int(summary["stochastic_disabled_for_compare"]) == 0
+    assert int(summary["stochastic_controlled_by_seed"]) == 1
+    pd.testing.assert_frame_equal(first_a, first_b)
+
+
+def test_first_step_compare_dt_sweep_reports_drag_convergence(tmp_path: Path) -> None:
+    config_path = _write_first_step_case(
+        tmp_path / "drag_dt_sweep",
+        flow=(1.0, 0.0),
+        particle_velocity=(0.0, 0.0),
+        particle_diameter=0.006,
+        particle_density=1000.0,
+        gas_mu=1.0,
+    )
+    out_dir = tmp_path / "drag_dt_sweep_compare"
+
+    rc = first_step_compare_main(
+        [
+            "--config",
+            str(config_path),
+            "--output-dir",
+            str(out_dir),
+            "--dt-sweep",
+            "4e-5,2e-5,1e-5",
+        ]
+    )
+
+    assert rc == 0
+    summary_path = out_dir / "dt_sweep_summary.json"
+    assert summary_path.exists()
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    runs = summary["runs"]
+    update_residuals = [
+        float(run["force_update_velocity_residual_mps"]["max"])
+        for run in runs
+    ]
+    euler_residuals = [
+        float(run["force_euler_velocity_residual_mps"]["max"])
+        for run in runs
+    ]
+    assert max(update_residuals) < 1.0e-12
+    assert euler_residuals[2] < euler_residuals[1] < euler_residuals[0]
+    assert runs[1]["force_euler_velocity_residual_max_ratio_vs_previous"] < 1.0
+    assert runs[2]["force_euler_velocity_residual_max_ratio_vs_previous"] < 1.0
 
 
 def test_first_step_compare_merges_reference_errors(tmp_path: Path) -> None:

@@ -555,7 +555,7 @@ def _resolve_step_loop_context(
     t: float,
     t_end: float,
     spatial_dim: int,
-    base_save_every: int,
+    save_every: int,
     prev_step_name: Optional[str],
     step_local_counter: int,
 ) -> StepLoopContext:
@@ -567,13 +567,13 @@ def _resolve_step_loop_context(
         next_step_local_counter = 0
         next_prev_step_name = step.step_name
     next_step_local_counter += 1
-    save_every = int(base_save_every)
+    resolved_save_every = int(save_every)
     return StepLoopContext(
         step=step,
         phys=phys,
         body_accel=_body_acceleration_vector(phys, spatial_dim),
         integrator_spec=get_integrator_spec(str(phys.get('integrator', 'drag_relaxation'))),
-        save_every=int(save_every),
+        save_every=int(resolved_save_every),
         step_local_counter=int(next_step_local_counter),
         prev_step_name=str(next_prev_step_name),
     )
@@ -1594,7 +1594,7 @@ def _advance_runtime_step(
     plan = _require_solver_plan(state)
     dt = float(plan.dt)
     t_end = float(plan.t_end)
-    base_save_every = int(plan.base_save_every)
+    output_save_every = int(plan.output.save_every)
     valid_mask_policy = str(plan.valid_mask_policy)
     drag_model_mode = int(plan.drag_model_mode)
     adaptive_substep_enabled = int(plan.adaptive_substep_enabled)
@@ -1622,7 +1622,7 @@ def _advance_runtime_step(
         t=float(t_next),
         t_end=float(t_end),
         spatial_dim=int(spatial_dim),
-        base_save_every=int(base_save_every),
+        save_every=int(output_save_every),
         prev_step_name=state.prev_step_name,
         step_local_counter=int(state.step_local_counter),
     )

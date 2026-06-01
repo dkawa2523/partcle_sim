@@ -3,6 +3,11 @@
 Date: 2026-05-24
 Workspace: `c:\Users\user\Desktop\partcle_sim-sim_rev2`
 
+Packaging note: after this report, the imported planning docset was moved from
+`docs/sim_rev3_productization_docset_v2/` to
+`docs/productization/sim_rev3/archive/planning_docset_v2/`. Active templates now
+live under `docs/productization/sim_rev3/templates/`.
+
 ## Scope
 
 This phase removes generated or historical material identified in the Phase 0

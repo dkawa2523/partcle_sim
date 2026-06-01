@@ -24,10 +24,18 @@ particle-tracer-acceleration-compare = "particle_tracer_unified.compare.accelera
 particle-tracer-trajectory-compare = "particle_tracer_unified.compare.trajectory_compare:main"
 particle-tracer-boundary-compare = "particle_tracer_unified.compare.boundary_compare:main"
 particle-tracer-first-step-compare = "particle_tracer_unified.compare.first_step_compare:main"
+particle-tracer-near-wall-nohit = "particle_tracer_unified.compare.near_wall_nohit:main"
+particle-tracer-comsol-full-diagnostics = "particle_tracer_unified.compare.comsol_full_diagnostics:main"
+particle-tracer-build-comsol-case = "tools.build_comsol_case:main"
+particle-tracer-compare-reference = "tools.compare_against_reference:main"
+particle-tracer-collect-summaries = "tools.collect_run_summaries:main"
+particle-tracer-validate-artifacts = "tools.validate_comparison_artifacts:main"
+particle-tracer-export-visualizations = "tools.export_visualizations:main"
+particle-tracer-residual-gap-summary = "tools.summarize_comsol_residual_gap:main"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["particle_tracer_unified*"]
+include = ["particle_tracer_unified*", "tools*"]

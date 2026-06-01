@@ -75,7 +75,7 @@ def boundary_release_config(runtime: RuntimeLike, source_cfg: Mapping[str, Any])
     inward_offset_m = _nonnegative_float_config(
         preprocess_cfg.get('boundary_inward_offset_m'),
         key='boundary_inward_offset_m',
-        default=max(float(capture_tolerance_m), float(epsilon_offset_m)),
+        default=max(float(on_boundary_tol_m), float(epsilon_offset_m)),
     )
     return {
         'enabled': bool(enabled),

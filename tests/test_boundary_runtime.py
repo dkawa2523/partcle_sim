@@ -568,6 +568,17 @@ def test_release_grace_leaves_unrelated_wall_hit_unchanged():
     assert len(wall_rows) == 1
 
 
+@pytest.mark.parametrize('source_part_id', [0, -1])
+def test_release_grace_does_not_apply_to_unknown_source_part(source_part_id: int):
+    result, diagnostics, wall_rows = _run_release_grace_collision(source_part_id=source_part_id)
+
+    assert result.total_hits == 1
+    assert int(diagnostics['source_surface_release_skip_count']) == 0
+    assert int(diagnostics['source_surface_release_skip_blocked_count']) == 0
+    assert diagnostics['source_surface_release_skip_blocked_reasons'] == {}
+    assert len(wall_rows) == 1
+
+
 def test_transient_endpoint_contact_releases_when_force_points_inside():
     axes = (
         np.asarray([0.0, 0.5, 1.0], dtype=np.float64),

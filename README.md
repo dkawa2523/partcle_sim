@@ -6,8 +6,19 @@ tables.
 ## Read First
 
 - `docs/architecture.md`: package layout and extension rules
+- `docs/canonical_input_bundle.md`: canonical adapter boundary for COMSOL and
+  non-COMSOL model sources
 - `docs/comsol_parity.md`: COMSOL faithful comparison design
+- `docs/comsol_onboarding.md`: short COMSOL export and comparison runbook
 - `docs/numerics_contract.md`: continuous model and integrator notes
+- `docs/productization/sim_rev3/vv/README.md`: V&V workflow for sampled,
+  full-reference, and sharded comparisons
+- `docs/release_packaging_policy.md`: documentation, template, and large-asset
+  policy for release candidates
+- `examples/minimal_surface_release_production/README.md`: COMSOL-free
+  production surface-release quickstart
+- `docs/visualization_workflow.md`: compact graph and optional animation
+  workflow
 
 ## Install
 
@@ -16,6 +27,15 @@ py -3 -m pip install -e .
 ```
 
 ## Run
+
+COMSOL-free production surface-release quickstart:
+
+```powershell
+py -3 run_from_yaml.py examples/minimal_surface_release_production/run_config.yaml --check-input --output-dir _out_surface_release_check
+py -3 run_from_yaml.py examples/minimal_surface_release_production/run_config.yaml --output-dir _out_surface_release
+```
+
+Small generic examples:
 
 ```powershell
 py -3 run_from_yaml.py examples/minimal_2d/run_config.yaml --output-dir _out_minimal_2d
@@ -34,6 +54,8 @@ solver report, wall/coating summaries, and compact prepare reports. Use
 deep artifacts such as trajectories, `wall_events.csv`,
 `runtime_step_summary.csv`, `collision_diagnostics.json`, or
 `force_contributions.csv`. Legacy `output.artifact_mode: full` maps to debug.
+When trajectory output is enabled, `output.save_every` controls saved snapshot
+cadence; if omitted, the legacy `solver.save_every` value is used.
 
 ## Inputs
 
@@ -86,7 +108,40 @@ particle-tracer-field-compare --help
 particle-tracer-acceleration-compare --help
 particle-tracer-trajectory-compare --help
 particle-tracer-boundary-compare --help
+particle-tracer-first-step-compare --help
+particle-tracer-comsol-full-diagnostics --help
+particle-tracer-build-comsol-case --help
+particle-tracer-compare-reference --help
+particle-tracer-collect-summaries --help
+particle-tracer-validate-artifacts --help
+particle-tracer-residual-gap-summary --help
 ```
+
+For sampled/full/sharded validation roots, check that the compact artifacts are
+present before running residual diagnostics:
+
+```powershell
+particle-tracer-validate-artifacts <root> --workflow sampled
+particle-tracer-validate-artifacts <root> --workflow sharded --require-source-diagnostics
+```
+
+Canonical productization templates live under
+`docs/productization/sim_rev3/templates/`, including the V&V acceptance matrix,
+task record template, COMSOL minimal manifest template, compare summary schema,
+and first-step/force contribution CSV schemas.
+
+## Visualization
+
+Graphs are safe from compact standard outputs:
+
+```powershell
+particle-tracer-export-visualizations --output-dir <out> --modules graphs
+```
+
+Animations are optional and should be generated only from debug or explicit
+trajectory-saving runs. Use `--animation-max-particles`,
+`--animation-max-frames`, and `--skip-all-particles-animation` for large cases.
+See `docs/visualization_workflow.md`.
 
 ## Development Checks
 

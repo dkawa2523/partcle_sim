@@ -94,6 +94,10 @@ def test_axisymmetric_rz_runtime_reports_coordinate_and_axis_names():
     assert summary['coordinate_system'] == 'axisymmetric_rz'
     assert summary['axis_names'] == ['r', 'z']
     assert summary['axisymmetric_rz']['r0_axis_boundary_edge_count'] == 1
+    assert summary['axisymmetric_rz']['semantics'] == '2d_meridional_rz'
+    assert summary['axisymmetric_rz']['velocity_components'] == ['v_r', 'v_z']
+    assert summary['axisymmetric_rz']['v_theta_dynamics'] == 'out_of_scope'
+    assert summary['axisymmetric_rz']['source_ring_weighting_policy'] == 'not_applied_implicitly'
     assert summary['field_provider']['axis_names'] == ['r', 'z']
     assert summary['geometry_provider']['axis_names'] == ['r', 'z']
     assert summary['geometry_provider']['axisymmetric_rz']['r0_on_grid'] == 1
@@ -141,6 +145,49 @@ def test_cartesian_xy_runtime_axis_names_remain_unchanged():
     assert summary['axis_names'] == ['x', 'y']
     assert summary['field_provider']['axis_names'] == ['x', 'y']
     assert 'axisymmetric_rz' not in summary
+
+def _axisymmetric_positive_r_config(tmp_path: Path) -> tuple[Path, dict[str, object]]:
+    config_dir = ROOT / 'examples' / 'minimal_2d'
+    particles_path = _write_particle_row(
+        tmp_path / 'axisymmetric_positive_r_particles.csv',
+        _one_particle_row(spatial_dim=2, x=0.25, y=0.0, vx=0.0, vy=0.0),
+    )
+    cfg = yaml.safe_load((config_dir / 'run_config.yaml').read_text(encoding='utf-8'))
+    cfg['run']['coordinate_system'] = 'axisymmetric_rz'
+    cfg['paths']['particles_csv'] = str(particles_path.resolve())
+    cfg['providers']['geometry']['bounds'] = [0.0, 1.0, -1.0, 1.0]
+    _absolutize_paths(cfg, config_dir)
+    return config_dir, cfg
+
+
+def test_axisymmetric_source_ring_weighting_is_not_implicit(tmp_path: Path):
+    config_dir, cfg = _axisymmetric_positive_r_config(tmp_path)
+
+    prepared = prepare_runtime(build_runtime_from_config(cfg, config_dir), seed=1)
+
+    assert prepared.source_preprocess is not None
+    ring_summary = prepared.source_preprocess.source_model_summary['axisymmetric_ring_area_weight']
+    assert ring_summary['enabled'] == 0
+    assert ring_summary['applied_to_sampling'] == 0
+    assert ring_summary['policy'] == 'not_applied'
+    assert 'axisymmetric_ring_area_weight' not in prepared.source_preprocess.diagnostics_rows[0]
+
+
+def test_axisymmetric_source_ring_weight_reporting_requires_explicit_config(tmp_path: Path):
+    config_dir, cfg = _axisymmetric_positive_r_config(tmp_path)
+    cfg.setdefault('source', {}).setdefault('preprocess', {})['ring_area_weighted_source_reporting'] = True
+
+    prepared = prepare_runtime(build_runtime_from_config(cfg, config_dir), seed=1)
+
+    assert prepared.source_preprocess is not None
+    row = prepared.source_preprocess.diagnostics_rows[0]
+    ring_summary = prepared.source_preprocess.source_model_summary['axisymmetric_ring_area_weight']
+    assert row['axisymmetric_radius_m'] == pytest.approx(0.25)
+    assert row['axisymmetric_ring_area_weight'] == pytest.approx(0.5 * np.pi)
+    assert ring_summary['enabled'] == 1
+    assert ring_summary['applied_to_sampling'] == 0
+    assert ring_summary['count'] == 1
+    assert ring_summary['sum'] == pytest.approx(0.5 * np.pi)
 
 def test_precomputed_field_axis_mismatch_names_axis(tmp_path: Path):
     axes = np.asarray([0.0, 1.0, 2.0], dtype=np.float64)
@@ -758,6 +805,9 @@ def test_surface_release_preprocess_offsets_boundary_particle_and_reflects_veloc
     assert particles.position[0, 1] == pytest.approx(0.0)
     assert particles.velocity[0, 0] == pytest.approx(0.2)
     assert particles.velocity[0, 1] == pytest.approx(0.0)
+    assert int(particles.source_part_id[0]) == 10
+    assert int(source_row['source_part_id']) == 10
+    assert source_row['source_provenance_group'] == 'production_generated_source'
     assert source_row['source_position_offset_m'] == pytest.approx(0.1)
     assert 0.0 < float(source_row['boundary_release_solver_offset_m']) < 1.0e-5
     assert source_row['boundary_release_capture_tolerance_m'] == pytest.approx(source_row['capture_tolerance_m'])
@@ -778,6 +828,7 @@ def test_surface_release_preprocess_offsets_boundary_particle_and_reflects_veloc
     assert summary['boundary_release_applied_count'] == 1
     assert summary['boundary_release_projection_distance_count'] == 1
     assert summary['boundary_release_projection_distance_max_m'] == pytest.approx(0.0)
+    assert summary['source_provenance_counts'] == {'production_generated_source': 1}
 
     input_report = build_initial_particle_field_support_report(prepared)
     assert int(input_report['status_counts']['hard_invalid']) == 0
@@ -793,6 +844,8 @@ def test_surface_release_preprocess_offsets_boundary_particle_and_reflects_veloc
     assert source_diag.loc[0, 'initial_after_preprocess_x'] == pytest.approx(expected_release_x)
     assert source_diag.loc[0, 'projection_distance_m'] == pytest.approx(0.0)
     assert int(source_diag.loc[0, 'boundary_release_applied']) == 1
+    assert int(source_diag.loc[0, 'source_part_id']) == 10
+    assert source_diag.loc[0, 'source_provenance_group'] == 'production_generated_source'
 
 
 def test_surface_release_capture_tolerance_and_inward_offset_are_independent(tmp_path: Path):
@@ -842,6 +895,53 @@ def test_surface_release_capture_tolerance_and_inward_offset_are_independent(tmp
     assert summary['boundary_release_projection_distance_max_m'] == pytest.approx(2.0e-4)
 
 
+def test_surface_release_large_capture_uses_small_default_inward_offset(tmp_path: Path):
+    field_path = _write_invalid_left_field_bundle(
+        tmp_path / 'field_surface_release_large_capture.npz',
+        invalid_until_x=-0.95,
+    )
+    particles_path = _write_particle_row(
+        tmp_path / 'surface_release_large_capture_particles.csv',
+        _one_particle_row(spatial_dim=2, x=-1.0002, y=0.0, vx=0.0, vy=0.0),
+    )
+    cfg_path = _write_precomputed_field_config(
+        tmp_path / 'cfg_surface_release_large_capture',
+        field_path=field_path,
+        particles_path=particles_path,
+        solver_updates={'on_boundary_tol_m': 2.0e-6},
+        input_mode='warn',
+        provider_contract={'boundary_field_support': 'off'},
+        source_preprocess_enabled=True,
+    )
+    cfg = yaml.safe_load(cfg_path.read_text(encoding='utf-8'))
+    cfg.setdefault('wall', {})['epsilon_offset_m'] = 1.0e-6
+    cfg.setdefault('source', {})['source_position_offset_m'] = 0.0
+    cfg.setdefault('source', {}).setdefault('preprocess', {}).update(
+        {
+            'boundary_release': True,
+            'boundary_capture_tolerance_m': 5.0e-4,
+        }
+    )
+    cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding='utf-8')
+
+    prepared = build_prepared_runtime_from_yaml(cfg_path)
+
+    assert prepared.source_preprocess is not None
+    row = prepared.source_preprocess.diagnostics_rows[0]
+    summary = prepared.source_preprocess.source_model_summary
+    assert int(row['boundary_release_applied']) == 1
+    assert row['capture_tolerance_m'] == pytest.approx(5.0e-4)
+    assert row['inward_offset_m'] == pytest.approx(2.0e-6)
+    assert row['boundary_release_solver_offset_m'] == pytest.approx(2.0e-6)
+    assert row['projection_distance_m'] == pytest.approx(2.0e-4)
+    assert row['projected_x'] == pytest.approx(-1.0)
+    assert row['initial_after_preprocess_x'] == pytest.approx(-1.0 + 2.0e-6)
+    assert prepared.runtime.particles.position[0, 0] == pytest.approx(-1.0 + 2.0e-6)
+    assert summary['boundary_release_capture_tolerance_m'] == pytest.approx(5.0e-4)
+    assert summary['boundary_release_inward_offset_m'] == pytest.approx(2.0e-6)
+    assert summary['boundary_release_projection_distance_max_m'] == pytest.approx(2.0e-4)
+
+
 def test_surface_release_capture_tolerance_controls_classification_before_offset(tmp_path: Path):
     field_path = _write_invalid_left_field_bundle(
         tmp_path / 'field_surface_release_capture_gate.npz',
@@ -879,6 +979,77 @@ def test_surface_release_capture_tolerance_controls_classification_before_offset
     assert row['inward_offset_m'] == pytest.approx(2.0e-2)
     assert row['release_preprocess_mode'] == 'raw'
     assert prepared.runtime.particles.position[0, 0] == pytest.approx(-1.0002)
+
+def test_unknown_source_provenance_is_not_classified_without_boundary_release(tmp_path: Path):
+    field_path = _write_invalid_left_field_bundle(
+        tmp_path / 'field_unknown_source_raw.npz',
+        invalid_until_x=-0.95,
+    )
+    particle = _one_particle_row(spatial_dim=2, x=-1.0002, y=0.0, vx=0.0, vy=0.0)
+    particle['source_part_id'] = 0
+    particles_path = _write_particle_row(tmp_path / 'unknown_source_raw_particles.csv', particle)
+    cfg_path = _write_precomputed_field_config(
+        tmp_path / 'cfg_unknown_source_raw',
+        field_path=field_path,
+        particles_path=particles_path,
+        input_mode='warn',
+        provider_contract={'boundary_field_support': 'off'},
+        source_preprocess_enabled=True,
+    )
+
+    prepared = build_prepared_runtime_from_yaml(cfg_path)
+
+    assert prepared.source_preprocess is not None
+    row = prepared.source_preprocess.diagnostics_rows[0]
+    summary = prepared.source_preprocess.source_model_summary
+    assert int(prepared.runtime.particles.source_part_id[0]) == 0
+    assert prepared.runtime.particles.position[0, 0] == pytest.approx(-1.0002)
+    assert int(row['source_part_id']) == 0
+    assert int(row['boundary_release_applied']) == 0
+    assert row['source_provenance_group'] == 'unknown_source'
+    assert summary['boundary_release_applied_count'] == 0
+    assert summary['source_provenance_counts'] == {'unknown_source': 1}
+
+
+def test_unknown_source_can_boundary_release_only_when_explicitly_enabled(tmp_path: Path):
+    field_path = _write_invalid_left_field_bundle(
+        tmp_path / 'field_unknown_source_boundary_release.npz',
+        invalid_until_x=-0.95,
+    )
+    particle = _one_particle_row(spatial_dim=2, x=-1.0002, y=0.0, vx=0.0, vy=0.0)
+    particle['source_part_id'] = 0
+    particles_path = _write_particle_row(tmp_path / 'unknown_source_boundary_release_particles.csv', particle)
+    cfg_path = _write_precomputed_field_config(
+        tmp_path / 'cfg_unknown_source_boundary_release',
+        field_path=field_path,
+        particles_path=particles_path,
+        input_mode='warn',
+        provider_contract={'boundary_field_support': 'off'},
+        source_preprocess_enabled=True,
+    )
+    cfg = yaml.safe_load(cfg_path.read_text(encoding='utf-8'))
+    cfg.setdefault('source', {})['source_position_offset_m'] = 0.0
+    cfg.setdefault('source', {}).setdefault('preprocess', {}).update(
+        {
+            'boundary_release': True,
+            'boundary_capture_tolerance_m': 5.0e-4,
+            'boundary_inward_offset_m': 2.0e-6,
+        }
+    )
+    cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding='utf-8')
+
+    prepared = build_prepared_runtime_from_yaml(cfg_path)
+
+    assert prepared.source_preprocess is not None
+    row = prepared.source_preprocess.diagnostics_rows[0]
+    summary = prepared.source_preprocess.source_model_summary
+    assert int(prepared.runtime.particles.source_part_id[0]) == 0
+    assert int(row['source_part_id']) == 0
+    assert int(row['boundary_release_applied']) == 1
+    assert int(row['boundary_release_part_id']) == 10
+    assert row['source_provenance_group'] == 'production_generated_source'
+    assert prepared.runtime.particles.position[0, 0] == pytest.approx(-1.0 + 2.0e-6)
+    assert summary['source_provenance_counts'] == {'production_generated_source': 1}
 
 def test_surface_release_requires_explicit_boundary_primitives() -> None:
     runtime = SimpleNamespace(

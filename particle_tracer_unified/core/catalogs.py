@@ -17,6 +17,57 @@ from .datamodel import (
 from .integrator_registry import validate_integrator_name
 from .source_material_common import pick_float, pick_str
 
+WALL_LAW_ALIASES: Dict[str, str] = {
+    'specular': 'specular',
+    'bounce': 'specular',
+    'specular_bounce': 'specular',
+    'specular_reflection': 'specular',
+    'stick': 'stick',
+    'sticking': 'stick',
+    'freeze': 'stick',
+    'frozen': 'stick',
+    'absorb': 'absorb',
+    'absorbed': 'absorb',
+    'disappear': 'absorb',
+    'disappearing': 'absorb',
+    'open': 'escape',
+    'outflow': 'escape',
+    'exhaust': 'escape',
+    'escape': 'escape',
+    'field_support_exit': 'field_support_exit',
+    'pass_through': 'pass_through',
+    'passthrough': 'pass_through',
+    'transparent': 'pass_through',
+    'inactive': 'pass_through',
+    'continuity': 'pass_through',
+    'pair_continuity': 'pass_through',
+    'interior': 'pass_through',
+    'internal': 'pass_through',
+    'diffuse': 'diffuse',
+    'diffuse_scattering': 'diffuse',
+    'diffuse_reflection': 'diffuse',
+    'mixed_specular_diffuse': 'mixed_specular_diffuse',
+    'mixed_diffuse_specular': 'mixed_specular_diffuse',
+    'mixed_diffuse_and_specular_reflection': 'mixed_specular_diffuse',
+    'mixed_specular_and_diffuse_reflection': 'mixed_specular_diffuse',
+    'critical_sticking_velocity': 'critical_sticking_velocity',
+}
+SUPPORTED_WALL_LAWS = frozenset(WALL_LAW_ALIASES.values())
+
+
+def _wall_law_key(value: object) -> str:
+    return str(value).strip().lower().replace('-', '_').replace(' ', '_').replace('/', '_')
+
+
+def normalize_wall_law_name(value: object, *, context: str = 'wall law') -> str:
+    key = _wall_law_key(value)
+    if not key or key in {'nan', 'none', 'null'}:
+        raise ValueError(f'{context} must be a supported wall law')
+    if key not in WALL_LAW_ALIASES:
+        expected = ', '.join(sorted(SUPPORTED_WALL_LAWS))
+        raise ValueError(f'Unsupported {context} {value!r}; expected one of {expected}')
+    return WALL_LAW_ALIASES[key]
+
 
 def _body_acceleration_from_solver(solver_cfg: Mapping[str, Any], spatial_dim: int) -> Tuple[float, ...]:
     forces_cfg = solver_cfg.get('forces', {}) if isinstance(solver_cfg.get('forces', {}), Mapping) else {}
@@ -76,12 +127,13 @@ def build_wall_catalog(walls: Optional[PartWallTable], materials: Optional[Mater
     walls_lu = walls.as_lookup() if walls is not None else {}
 
     def model_from_rows(part_id: int, part_name: str, wall_row: Optional[PartWallRow], mat_row: Optional[MaterialRow]) -> WallPartModel:
-        law_name = pick_str(
+        law_raw = pick_str(
             getattr(wall_row, 'wall_law', None) if wall_row else None,
             getattr(mat_row, 'wall_law', None) if mat_row else None,
             wall_cfg.get('default_mode', wall_cfg.get('mode', 'specular')),
             default='specular',
         )
+        law_name = normalize_wall_law_name(law_raw, context=f'wall law for part_id={int(part_id)}')
         stick_probability = pick_float(
             getattr(wall_row, 'wall_stick_probability', np.nan) if wall_row else np.nan,
             getattr(mat_row, 'wall_stick_probability', np.nan) if mat_row else np.nan,
@@ -203,3 +255,16 @@ def physics_catalog_summary(physics_catalog: Optional[PhysicsCatalog]) -> Dict[s
         'body_acceleration': list(map(float, physics_catalog.body_acceleration)),
         'min_tau_p_s': float(physics_catalog.min_tau_p_s),
     }
+
+
+__all__ = (
+    'SUPPORTED_WALL_LAWS',
+    'WALL_LAW_ALIASES',
+    'build_physics_catalog',
+    'build_wall_catalog',
+    'normalize_wall_law_name',
+    'physics_catalog_summary',
+    'resolve_step_physics',
+    'resolve_step_wall_model',
+    'wall_catalog_summary',
+)

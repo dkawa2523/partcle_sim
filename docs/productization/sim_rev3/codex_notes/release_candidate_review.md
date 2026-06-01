@@ -9,6 +9,12 @@ and `sim_rev4` pointed at the same commit at the start of productization work.
 
 Ready except listed blockers.
 
+Packaging note: a later release-packaging pass moved the active templates to
+`docs/productization/sim_rev3/templates/` and quarantined the imported planning
+docset under `docs/productization/sim_rev3/archive/planning_docset_v2/`. The
+review below is retained as the historical RC snapshot that identified those
+gaps.
+
 The solver behavior, mode gates, comparison tools, compact diagnostics, and
 focused tests are in release-candidate shape. Before calling this production
 ready, the repository still needs packaging cleanup: canonical productization
@@ -189,4 +195,3 @@ Required before production-ready:
 | Hot-path logging/performance posture | passed | No always-on trace logging was added; deep diagnostics remain opt-in. |
 | Canonical productization packaging | deferred with reason | `docs/productization/sim_rev3/templates/acceptance_matrix.csv` is missing and several release docs/files are still untracked. |
 | Production-ready declaration | deferred with reason | Behavior is RC-ready, but documentation placement, surface-release quickstart, dirty worktree, and large-asset policy must be resolved first. |
-

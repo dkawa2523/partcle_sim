@@ -53,6 +53,12 @@ def export_visualizations(
     animation_fps: int = 6,
     animation_sample_count: int = 450,
     animation_interpolate_factor: int = 1,
+    animation_max_frames: int = 240,
+    animation_max_particles: int = 2000,
+    animation_downsample_mode: str = "uniform",
+    animation_write_all_particles: bool = True,
+    animation_progress: bool = False,
+    best_effort_animations: bool = True,
     overlay_wall_events: bool = False,
     interpolate_wall_event_positions: bool = False,
     mechanics_sample_trajectories: int = 500,
@@ -71,23 +77,41 @@ def export_visualizations(
     if "graphs" in selected:
         graph_dir = export_result_graphs(output_dir=output_dir, case_dir=case_dir, sample_trajectories=int(sample_trajectories))
         module_records["graphs"] = {
+            "status": "pass",
             "dir": str(graph_dir.resolve()),
             "files": list_files(graph_dir, (".png", ".csv", ".json")),
         }
     if "animations" in selected:
-        anim_dir = export_trajectory_animations(
-            output_dir=output_dir,
-            case_dir=case_dir,
-            fps=int(animation_fps),
-            sample_count=int(animation_sample_count),
-            interpolate_factor=int(animation_interpolate_factor),
-            overlay_wall_events=bool(overlay_wall_events),
-            interpolate_wall_event_positions=bool(interpolate_wall_event_positions),
-        )
-        module_records["animations"] = {
-            "dir": str(anim_dir.resolve()),
-            "files": list_files(anim_dir, (".gif", ".json")),
-        }
+        try:
+            anim_dir = export_trajectory_animations(
+                output_dir=output_dir,
+                case_dir=case_dir,
+                fps=int(animation_fps),
+                sample_count=int(animation_sample_count),
+                interpolate_factor=int(animation_interpolate_factor),
+                max_frames=int(animation_max_frames),
+                max_particles=int(animation_max_particles),
+                downsample_mode=str(animation_downsample_mode),
+                write_all_particles=bool(animation_write_all_particles),
+                progress=bool(animation_progress),
+                overlay_wall_events=bool(overlay_wall_events),
+                interpolate_wall_event_positions=bool(interpolate_wall_event_positions),
+            )
+            module_records["animations"] = {
+                "status": "pass",
+                "dir": str(anim_dir.resolve()),
+                "files": list_files(anim_dir, (".gif", ".json")),
+            }
+        except Exception as exc:
+            if not bool(best_effort_animations):
+                raise
+            module_records["animations"] = {
+                "status": "failed",
+                "dir": str(dirs["animations"].resolve()),
+                "files": [],
+                "error": str(exc),
+                "action": "Run with debug/full output or explicit output.save_trajectory, then retry animations with downsample limits.",
+            }
     if "mechanics" in selected:
         mechanics_dir = export_mechanics_visuals(
             case_dir=Path(case_dir).resolve(),
@@ -96,6 +120,7 @@ def export_visualizations(
             quiver_stride=max(1, int(mechanics_quiver_stride)),
         )
         module_records["mechanics"] = {
+            "status": "pass",
             "dir": str(mechanics_dir.resolve()),
             "files": list_files(mechanics_dir, (".png", ".csv", ".json")),
         }
@@ -107,6 +132,7 @@ def export_visualizations(
             quiver_stride=max(1, int(boundary_quiver_stride)),
         )
         module_records["boundary"] = {
+            "status": "pass",
             "dir": str(boundary_dir.resolve()),
             "files": list_files(boundary_dir, (".png", ".json")),
         }
@@ -143,6 +169,21 @@ def main() -> int:
     parser.add_argument("--animation-fps", type=int, default=6, help="Animation FPS")
     parser.add_argument("--animation-sample-count", type=int, default=450, help="Sample particles for trail animation")
     parser.add_argument("--animation-interpolate-factor", type=int, default=1, help="Frame interpolation factor")
+    parser.add_argument("--animation-max-frames", type=int, default=240, help="Maximum GIF frames after interpolation (0 = no limit)")
+    parser.add_argument("--animation-max-particles", type=int, default=2000, help="Maximum particles drawn in GIFs (0 = no limit)")
+    parser.add_argument(
+        "--animation-downsample-mode",
+        choices=("uniform", "random"),
+        default="uniform",
+        help="Particle downsample mode used when max-particles is exceeded",
+    )
+    parser.add_argument(
+        "--skip-all-particles-animation",
+        action="store_true",
+        help="Write sampled-trails GIFs only; useful for large cases",
+    )
+    parser.add_argument("--animation-progress", action="store_true", help="Print compact animation export progress")
+    parser.add_argument("--strict-visualizations", action="store_true", help="Fail the command if optional animation export fails")
     parser.add_argument("--overlay-wall-events", action="store_true", help="Overlay wall events on sampled trail GIF")
     parser.add_argument(
         "--interpolate-wall-event-positions",
@@ -165,6 +206,12 @@ def main() -> int:
         animation_fps=int(args.animation_fps),
         animation_sample_count=int(args.animation_sample_count),
         animation_interpolate_factor=int(args.animation_interpolate_factor),
+        animation_max_frames=int(args.animation_max_frames),
+        animation_max_particles=int(args.animation_max_particles),
+        animation_downsample_mode=str(args.animation_downsample_mode),
+        animation_write_all_particles=not bool(args.skip_all_particles_animation),
+        animation_progress=bool(args.animation_progress),
+        best_effort_animations=not bool(args.strict_visualizations),
         overlay_wall_events=bool(args.overlay_wall_events),
         interpolate_wall_event_positions=bool(args.interpolate_wall_event_positions),
         mechanics_sample_trajectories=int(args.mechanics_sample_trajectories),
