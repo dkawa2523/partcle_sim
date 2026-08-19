@@ -1,0 +1,197 @@
+artifact_type: particle_tracer.physics_change_record
+schema_version: 2
+version: 0.2.0
+changes:
+  - id: release_time_segment_split
+    old_behavior: An off-grid release could be activated at a step boundary and advanced for the full global dt.
+    new_behavior: The global interval is split at each release and only post-release duration is integrated.
+    analytical_basis: A particle released at t_r has zero integration age before t_r.
+    acceptance_test: dt=1, release_time_s=0.75, velocity=2 gives displacement 0.5; release at t=1 gives zero.
+  - id: particle_mass_authority
+    old_behavior: Drag relaxation could derive inertia from density and diameter while other forces divided by explicit mass.
+    new_behavior: mass_kg is the sole inertia source and Stokes tau is mass_kg/(3*pi*mu*drag_diameter_m).
+    analytical_basis: Every acceleration contribution must use the same F/m.
+    acceptance_test: Changing density with buoyancy disabled leaves the Stokes response unchanged.
+  - id: remove_minimum_tau_floor
+    old_behavior: min_tau_p_s could lengthen the physical response time.
+    new_behavior: No relaxation-time floor is applied.
+    analytical_basis: Exponential time differencing remains finite as tau approaches zero.
+    acceptance_test: ETD2 is compared directly with constant-field drag analytical solutions.
+  - id: contact_relaxation_no_tau_floor
+    old_behavior: The wall-contact sliding helper replaced every relaxation time below 1e-12 s by 1e-12 s, and the contact-release probe used the same floor, despite the free-flight integrator having no physical tau floor.
+    new_behavior: Contact sliding uses the declared positive finite relaxation time directly with a cancellation-safe exponential solution; drag-none uses the explicit +infinity ballistic branch. Contact release uses the same exact relaxation displacement over min(dt,tau), without a minimum probe time.
+    analytical_basis: For constant target and body acceleration, exp(-dt/tau) and its stable response integral remain well-defined for every tau>0. A numerical floor changes both wall-parallel displacement and the decision to leave a wall.
+    acceptance_test: A tau=1e-15 s contact update matches the analytical position and velocity, +infinity matches constant-acceleration ballistic motion, invalid nonpositive tau fails, and collision/runtime suites pass with JIT enabled and disabled.
+  - id: etd2_only
+    old_behavior: drag_relaxation, first-order ETD, and ETD2 were runtime choices.
+    new_behavior: Only ETD2 is accepted.
+    analytical_basis: One second-order integration contract avoids method-dependent runtime branches.
+    acceptance_test: Constant forcing and smooth time-dependent convergence tests.
+  - id: correlated_langevin_motion
+    old_behavior: A velocity-only kick and a mismatched nonlinear correction could be applied after collision handling.
+    new_behavior: Each accepted segment uses correlated position/velocity Langevin increments with the deterministic effective tau.
+    analytical_basis: Underdamped Ornstein-Uhlenbeck covariance and fluctuation-dissipation consistency.
+    validation_scope: Wall crossing is the earliest crossing of the finite saved/refined path polyline; continuous-time OU first-passage between retained nodes is not claimed.
+    acceptance_test: Seed reproducibility, pre-release RNG invariance, covariance/statistical tests, and reproducible saved-path polyline crossing.
+  - id: markov_integrated_ou_bridge
+    old_behavior: Two endpoint-normal vectors were rescaled at every queried time, which gave each time the correct marginal covariance but made velocity noise perfectly correlated across time and therefore did not define an Ornstein-Uhlenbeck path.
+    new_behavior: The saved normals define the exact segment endpoint and every newly requested trace or replay time is sampled from the exact integrated-OU Markov bridge conditional on its nearest cached neighbours; cached states are immutable for the lifetime of the segment.
+    analytical_basis: The joint state (integrated position noise, velocity noise) is a linear Gaussian Markov process whose transition matrix and interval covariance determine the conditional bridge distribution exactly.
+    acceptance_test: Monte Carlo covariance at two distinct times matches the analytical OU cross-covariance, refinement preserves previously sampled states, equal seeds reproduce the path, pre-release intervals consume no RNG, and focused tests pass with Numba JIT enabled and disabled.
+  - id: accepted_leaf_piecewise_integrated_ou
+    old_behavior: One effective relaxation time and one start-sampled temperature were held over the whole global segment, while deterministic ETD2 could accept several leaves with different local drag coefficients; valid-mask retry could also discard the saved stochastic path and return a deterministic prefix.
+    new_behavior: Brownian motion is built only after deterministic trace refinement is final. Every accepted leaf uses the deterministic tau_mid_s and its local midpoint temperature, exact constant-leaf OU transitions are composed, and runtime, collision replay, and valid-mask retry all consume the same saved piecewise path.
+    analytical_basis: For state Y=(X,V), each leaf has transition F=[[1,B],[0,A]] and exact integrated-OU covariance Q. Across leaves P_next=F*P*F^T+Q, while replay after a wall uses the interval innovation Y_end-F(end,start)*Y_start so a changed deterministic wall state receives the same saved forcing rather than the pre-wall state difference.
+    validation_scope: Coefficients are piecewise constant on accepted leaves. After a wall hit within a nonlinear-drag global segment, the pre-hit leaf OU coefficients remain frozen to preserve path identity; exact reintegration of one Wiener source under a newly velocity-dependent tau is not claimed. Continuous-time wall first passage between retained bridge nodes is also not claimed.
+    acceptance_test: One- and two-leaf analytical covariance composition, constant-coefficient split invariance, quantitative small-h covariance, spatial/time-varying Epstein temperature/tau authority, seed and release invariance, stochastic valid-prefix clipping, and wall post-state F*state+innovation replay with JIT enabled and disabled.
+  - id: accepted_substep_boundary_path
+    old_behavior: Endpoint-only collision classification could miss a curved substep crossing.
+    new_behavior: Every accepted substep retains its half-stage and endpoint; traces are replayed until sagitta is resolved against geometry clearance, then the earliest polyline hit is used and nonterminal remaining time is advanced by the same segment primitive.
+    analytical_basis: The earliest resolved trace crossing defines the point-particle wall event, and a wall law changes only the post-hit initial value problem.
+    acceptance_test: Quarter-substep excursion, stochastic polyline crossing, multiple wall hits, and post-hit partial replay tests.
+  - id: nonterminal_wall_remaining_time
+    old_behavior: A nonterminal wall hit with no more than 5 percent of the global step remaining ended the particle update at the inward-offset wall position and discarded that positive physical time.
+    new_behavior: Every positive post-hit remainder is advanced by the same segment primitive; residual-time magnitude alone no longer ends replay, while terminal outcomes and explicit safety terminations retain their declared behavior.
+    analytical_basis: Specular, diffuse, mixed, critical-sticking non-sticking, and pass-through outcomes define a new initial state at the hit time, so the trajectory remains an initial-value problem through the global step end.
+    acceptance_test: A public-API ballistic particle that reflects specularly at t=0.96 s with dt=1 s advances the final 0.04 s and ends at the analytical position and velocity within the current boundary-offset tolerance.
+  - id: geometry_scaled_boundary_numerics
+    old_behavior: Runtime wall contact used a fixed 1e-6 m inward offset and 2e-6 m on-boundary tolerance, triangle field support defaulted to 2e-6 m, and several 2D/3D bbox and ray-casting paths added independent absolute metre floors.
+    new_behavior: One immutable BoundaryNumerics policy derives classification, post-contact, and RZ-axis lengths from the smallest positive geometry grid or primitive length and 64 float64 coordinate ULPs; triangle field support uses the same scale rule from mesh edge and altitude resolution, and exporter metadata cannot tune it.
+    analytical_basis: Boundary tolerances are roundoff and discretization controls rather than physical lengths, so under x'=s*x they must satisfy tolerance'=s*tolerance up to the quantized ULP bin; the inward offset must exceed classification roundoff while remain negligible relative to resolved geometry.
+    acceptance_test: Public 2D curved-wall collisions, 2D edge queries, 3D triangle inside/hit queries, triangle-field support, and RZ no-axis-contact trajectories agree after similarity scales from 1e-9 through 1e3; JIT-enabled and JIT-disabled focused suites pass, and ill-conditioned translated coordinates fail before simulation.
+  - id: scale_covariant_collision_time_tolerances
+    old_behavior: Collision replay minimum progress and hit-time bisection used absolute 1e-12 s and 1e-15 s floors, so an otherwise identical problem could change when its time scale was rescaled.
+    new_behavior: Collision time tolerances are the larger of a declared fraction of the current segment duration and 64 float64 ULPs at the current absolute time; positive representable remaining time is not discarded by an absolute seconds threshold.
+    analytical_basis: Collision time localization is a numerical resolution control, so under t'=s*t it must scale with the segment duration except for the coordinate-roundoff requirement of the floating-point time representation.
+    acceptance_test: A public specular-wall case produces the same normalized hit time, final position, and velocity for time scales 1e-18 and 1e6, with focused tests passing under JIT-enabled and JIT-disabled execution.
+  - id: field_support_trace_resolution
+    old_behavior: Clean midpoint and endpoint samples could hide an internal invalid-support island.
+    new_behavior: A valid-mask trace is refined from the smallest backend grid spacing and support is evaluated over every retained half-stage and endpoint.
+    analytical_basis: A discrete support mask cannot resolve an island below its grid spacing, so trace probe spacing must not exceed that scale within the configured refinement limit.
+    acceptance_test: Endpoint-only support exit and an invalid quarter-path island between clean midpoint and endpoint.
+  - id: clean_interpolation_stencil_required
+    old_behavior: A point with an interpolated mask value above 0.5 could continue even when one or more interpolation-stencil nodes were outside declared field support.
+    new_behavior: Motion is admissible only on a fully clean stencil; mixed and hard-invalid statuses both trigger field-support handling, with a physical wall crossing resolved first when present.
+    analytical_basis: Bilinear or trilinear interpolation over an unsupported node mixes exporter fill values into the physical field and has no declared COMSOL meaning.
+    acceptance_test: Clean, mixed-stencil, and hard-invalid mask samples are classified separately, and only the clean status is accepted for motion.
+  - id: declared_field_values_are_authoritative
+    old_behavior: A non-finite or non-positive sampled gas property could be replaced by a configured scalar even when the case explicitly declared that property as a field quantity.
+    new_behavior: Scalar gas data are used only when a field quantity is absent; an invalid value inside clean field support fails instead of changing data source locally.
+    analytical_basis: An exported field hole or invalid thermodynamic state is an input/support error, not evidence for a different constant physical field.
+    validation_scope: Brownian field_T_then_gas inspects compiled field provenance before sampling; a declared field is authoritative, while the configured gas scalar is selected only when the temperature quantity is absent. Validation occurs before any stochastic normals or bridge seeds are drawn.
+    acceptance_test: NaN, infinite, zero, and negative declared Brownian temperature samples are rejected without consuming RNG even when a positive configured fallback is available; an absent temperature quantity uses the configured scalar.
+  - id: explicit_drag_law_semantics
+    old_behavior: Cunningham slip correction could be routed through the Schiller-Naumann nonlinear-drag path, and Epstein relaxation could inherit viscosity-based quantities.
+    new_behavior: stokes, stokes_cunningham, schiller_naumann, and epstein each use a separate declared law; Epstein is derived directly from mass, diameter, gas density, temperature, and molecular mass.
+    analytical_basis: Slip-corrected Stokes changes the linear relaxation time, while Schiller-Naumann is a Reynolds-number correction and Epstein is a free-molecular drag law.
+    acceptance_test: Closed-form Stokes/Cunningham time constants and viscosity-independent Epstein response are checked independently.
+  - id: explicit_drag_regime_validation
+    old_behavior: A declared gas-drag law was evaluated without reporting particle Reynolds number, relative Knudsen number, or relative Mach number; Schiller-Naumann was silently continued beyond its published range with an unrelated constant-drag-coefficient branch.
+    new_behavior: Preflight evaluates Re_p and Kn_p at every integrated release state, evaluates relative Mach only when sound speed is explicitly exported, and reports compact ranges plus model-specific errors/warnings without changing the selected law. Schiller-Naumann now fails at every runtime evaluation with Re_p >= 800 instead of extending the correlation.
+    analytical_basis: Re_p=rho_g*d*|v-u|/mu controls inertial corrections, Kn_p=lambda/d controls rarefaction, and M_rel=|v-u|/c controls compressibility. COMSOL documents creeping-flow Stokes behavior, diameter-based relative Knudsen number for Cunningham, free-molecular Epstein behavior, and the Schiller-Naumann range Re_p < 800.
+    validation_scope: The general preflight envelope is initial_release_state only; dynamic history is not claimed. The published Schiller-Naumann upper limit is additionally enforced in the hot drag evaluation.
+    references:
+      - https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.06.html
+      - https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.36.html
+      - https://ntrs.nasa.gov/api/citations/20220007039/downloads/FAR_2022_Palmer_Particle_Drag_v3.pdf?attachment=true
+      - https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/role-of-the-mach-number/
+    acceptance_test: Exact Re_p/Kn_p/M_rel formulas, every model boundary, unavailable input rejection, summary/full report scope, missing flow-field rejection, and JIT-enabled/disabled Schiller-Naumann runtime failure are tested.
+  - id: no_implicit_gas_state
+    old_behavior: Missing gas properties could be replaced by standard-air-like runtime defaults.
+    new_behavior: Missing properties remain absent and a model that requires one fails preflight before integration.
+    analytical_basis: Gas density, viscosity, temperature, and molecular mass are case properties and cannot be inferred from the selected numerical method.
+    acceptance_test: Ballistic drag-none cases run without gas data, while each gas-dependent law rejects its missing required quantity.
+  - id: dynamic_charge_split_coupling
+    old_behavior: Charge evolution and motion could be advanced in a mode-dependent order with duplicated relaxation implementations.
+    new_behavior: Charge uses half-step relaxation, ETD2 motion, then half-step relaxation; supported modes are te_relaxation and oml_linearized_relaxation.
+    analytical_basis: Symmetric Strang splitting is second order for coupled charge and motion operators.
+    acceptance_test: Relaxation analytical solutions, release-age behavior, and dt-halving coupled convergence are checked.
+  - id: terminal_wall_charge_age
+    old_behavior: A particle absorbed, stuck, or escaped at an intermediate wall hit retained only the enclosing global charge half-step, so its final charge age was dt/2 regardless of the physical hit time.
+    new_behavior: The collision primitive returns the elapsed time and physical position of a terminal wall hit; charge is replayed from the segment-start state with half relaxation at the start and half at the hit endpoint over exactly that elapsed lifetime.
+    analytical_basis: A terminal wall event ends the particle trajectory at t_hit, so the charge operator may act only over t_hit-t_start; using symmetric endpoint half-steps preserves the declared charge/ETD2 Strang split on the truncated segment.
+    validation_scope: Terminal replay is supported when dynamic charge does not drive electric motion. A pre-endpoint terminal hit with both dynamic charge and electric force fails explicitly until event-local charge-motion iteration is implemented; debug output reports compact replay count and physical age while global operator means retain their stated evaluation scope.
+    acceptance_test: Released particles with analytical quarter-second wall-hit ages match the exact exponential relaxation result for both te_relaxation and oml_linearized_relaxation instead of the enclosing global half-step age; reflected replay followed by a terminal hit uses cumulative hit age; a nonterminal contact endpoint retains the full active duration; unresolved pre-endpoint dynamic-charge/electric terminal coupling fails explicitly while a segment-endpoint hit remains valid.
+  - id: bracketed_oml_equilibrium
+    old_behavior: OML equilibrium could accept an unconverged or branch-dependent iterative value.
+    new_behavior: The negative-potential root is bracketed and accepted only when the current residual normalized by the sum of current magnitudes is at most 1e-10; the linearized current derivative supplies tau_q without a configured cap or numerical floor.
+    analytical_basis: Current balance defines the floating potential and tau_q=-C/(e*A*dR/dphi); neither iterate convergence nor an unrelated configured timescale defines the OML response.
+    acceptance_test: Bracket failure, insufficient root iterations, normalized residual, exact current-derivative tau_q, and absence of a configured cap.
+  - id: explicit_charge_electric_separation
+    old_behavior: Electric-field presence or exported acceleration could couple force activation to charge handling implicitly.
+    new_behavior: Dynamic charge and electric force have independent enabled flags; electric acceleration always uses the current particle charge divided by mass only when the electric force is enabled.
+    analytical_basis: Charge evolution determines q(t), while the Lorentz electrostatic contribution qE/m is a separate declared force operator.
+    acceptance_test: Electric fields alone do not enable the force, fixed input charge works without dynamic charging, and dynamic charge uses particle q/m rather than stale exported acceleration.
+  - id: strict_oml_field_species
+    old_behavior: Missing ion density or a missing named ion-temperature field could be hidden by quasineutral or constant fallback.
+    new_behavior: Field-backed OML requires an ion-density quantity independent of electron density, and an explicitly named ion-temperature quantity must exist without fallback.
+    analytical_basis: OML ion current and Debye length depend independently on ni and Ti.
+    acceptance_test: Missing ni and missing explicitly named Ti quantities both fail before an OML update.
+  - id: density_is_displaced_fluid_property_only
+    old_behavior: Particle density could implicitly reconstruct inertial mass and could be consumed even when no displaced-fluid force was enabled.
+    new_behavior: density_kgm3 is optional and is required only by buoyancy, pressure-gradient, or virtual-mass contributions that explicitly use displaced volume.
+    analytical_basis: Translational inertia is mass_kg; material density is an independent property used to derive particle volume only for declared volume forces.
+    acceptance_test: Density changes do not alter drag/electric response, and displaced-fluid forces reject absent density.
+  - id: strict_enabled_force_inputs
+    old_behavior: Pressure-gradient and virtual-mass rows with invalid density or derivatives could silently contribute zero; thermophoresis, DEP, and lift used small positive denominator floors, and DEP could replace an invalid medium relative permittivity with 1.0006. Free-flight virtual mass returned an inertia factor of one for invalid inputs, while 2D/3D wall-contact virtual mass and buoyancy divided by max(particle_density,1e-300) and could also replace an invalid derived factor with one.
+    new_behavior: One force-pipeline entry check validates the exact batch shape and finite or strictly-positive domain of every quantity required by the enabled pipeline forces. Invalid particle data and field samples fail with semantic quantity and particle rows; invalid global force parameters fail by name. Force equations then use the declared values directly without physical floors, row-wise zero substitution, or medium-permittivity fallback. Wall-contact buoyancy/virtual-mass factors and scalar free-flight virtual mass share the same density/parameter validator and direct density ratio. Exactly zero vorticity is the sole explicit zero-force branch for Saffman lift.
+    analytical_basis: A numerical denominator guard changes the specified particle or medium and a zeroed row removes a declared physical contribution. Positivity is part of the domains of density, dynamic viscosity, absolute temperature, mass, diameter, thermal conductivity, and relative permittivity; zero vorticity has a well-defined zero Saffman-force limit.
+    validation_scope: NaN remains the canonical sentinel only for an unspecified thermophoretic multiplier or an unspecified per-particle DEP permittivity; the latter requires a positive force-level particle permittivity. Zero, negative, and infinite values are never sentinels.
+    acceptance_test: Direct 2D batch tests cover every enabled force, scalar/vector/tensor shapes, NaN/infinite/zero/negative rows, invalid coefficients and permittivities, DEP per-particle precedence, and exact zero-vorticity lift. Dedicated displaced-fluid tests verify that positive subnormal densities retain their exact ratio, invalid density/coefficient rows fail, and density-ratio overflow cannot fall back. Compiled regular/triangle, scalar/batch, contact, numerics, and diagnostics suites pass with JIT enabled and disabled.
+  - id: explicit_rz_support_boundary
+    old_behavior: Preflight accepted an r=0 boundary when its wall law was pass_through even though the solver had no symmetry-axis coordinate map; Cartesian stochastic/lift formulas or an implicit wall at the coordinate singularity could also be applied to an RZ case.
+    new_behavior: RZ is deterministic no-swirl (r,z,vr,vz); Brownian and Cartesian lift are rejected, r is non-negative, and every r=0 geometry boundary is rejected regardless of wall law until an axis-crossing primitive exists.
+    analytical_basis: The omitted azimuthal state and cylindrical coordinate singularity do not define Cartesian stochastic/lift dynamics or a particle-wall law. A pass-through label alone cannot implement the required r-to-minus-r and radial-velocity reflection map.
+    acceptance_test: Public load_case and validate_case tests cover deterministic RZ ballistic motion in an r>0 domain, negative-radius rejection, specular-axis rejection, pass-through-axis rejection, and geometry-scaled axis classification with JIT both enabled and disabled.
+  - id: comsol_explicit_vacuum_geometry
+    old_behavior: The COMSOL packer replaced the mesh-derived physical boundary with a grid-cell contour of field valid_mask and assigned the contour a nearest COMSOL edge part ID; all exported domains were otherwise treated as one exterior region.
+    new_behavior: One or more explicit COMSOL vacuum domain IDs select the particle region, physical walls are exact selected-domain mesh edges with exact edge-entity IDs, and valid_mask remains field support only.
+    analytical_basis: A field interpolation support boundary is not a material surface, while a vacuum-solid interface is a physical collision boundary even when it is internal to the complete multiphysics mesh.
+    acceptance_test: An internal interface of a two-domain mesh is retained, a hole in valid_mask leaves physical boundary edges unchanged, missing domain or edge selections fail before output, and raw exporter provenance/hash/unit mismatches are rejected.
+  - id: comsol_scale_invariant_edge_identity
+    old_behavior: The COMSOL builder rounded every endpoint to 12 decimal places when counting selected-domain edges and assigning edge-entity part IDs; coordinate-only 2D loop recovery repeated the same fixed rounding. Valid edges near 1e-13 m could collapse into one key, while correctness depended on SI scale rather than mphtxt topology.
+    new_behavior: The builder uses exact undirected global mesh-node ID pairs as the sole edge identity for surface incidence and COMSOL edge-entity part assignment. Coordinate-only artifact loop recovery quantizes with the shortest positive edge length and 64 float64 coordinate ULPs under the versioned boundary-numerics policy, with its resolved tolerance recorded in geometry metadata.
+    analytical_basis: All element blocks in one mphtxt mesh index one global vertex table, so shared-edge incidence and boundary entity identity are topological integer relations. A coordinate-only numerical key is a roundoff control and must scale with geometry resolution and representable coordinate spacing rather than a fixed decimal unit.
+    acceptance_test: Exact node topology and part IDs are invariant for similarity scales 1e-13, 1, and 1e3; a truly shared edge is removed, near but distinct node pairs retain separate loops and part IDs, and COMSOL/boundary suites pass.
+  - id: comsol_scale_invariant_diagnostic_grid
+    old_behavior: The COMSOL builder silently raised every requested diagnostic-grid spacing below 1e-6 m to 1e-6 m, point-in-loop tests used a fixed 1e-9 m edge tolerance, and edges with squared length at most 1e-30 m2 were treated as degenerate.
+    new_behavior: A positive finite diagnostic spacing is used exactly, excessive grid sizes fail explicitly, loop classification uses the same shortest-edge and 64-ULP tolerance policy, and only an exactly unresolvable zero-length edge is degenerate.
+    analytical_basis: The diagnostic SDF and normal grid must represent the selected physical boundary at the model scale. Fixed SI floors can turn an otherwise valid micro-geometry into a two-node grid or a collection of zero-length edges.
+    acceptance_test: Two-domain COMSOL geometry preserves normalized axis spacing, interior SDF sign, topology, and part assignment at similarity scales 1e-13, 1, and 1e3; invalid or impractically dense explicit spacing fails rather than being changed.
+  - id: comsol_single_field_semantic_authority
+    old_behavior: Each manifest field repeated its semantic identity in the mapping key, name, and physical_quantity, could repeat linear interpolation per field, and accepted an unused mesh label. Divergent duplicates required precedence rules even though all v0.2 quantities use one field artifact and one time interpolation policy.
+    new_behavior: The fields mapping key is the sole semantic identity. A field value contains artifact, components, unit, and scale_to_si only; name, physical_quantity, mesh, and field-level interpolation are unknown keys. Built-ins are exact case-sensitive names, while extra profile quantities are identifier-shaped scalar semantics with one value component. Linear interpolation is declared once under time.
+    analytical_basis: One physical quantity must have one authoritative identifier. Component mapping translates external NPZ array names at the adapter boundary, whereas mesh selection belongs to the artifact and temporal interpolation belongs to the time contract.
+    acceptance_test: Builder manifests contain no redundant field keys; velocity/electric and ICP ne mappings resolve from their semantic keys; legacy duplicate keys, built-in case variants, scalar as a name, whitespace, and digit-leading generic keys are rejected; standard COMSOL provenance and all focused COMSOL tests pass with JIT enabled and disabled.
+  - id: comsol_explicit_builder_scales
+    old_behavior: Direct COMSOL packing silently assumed coordinate_scale_m_per_model_unit=1 and diagnostic_grid_spacing_m=5e-4, while runnable cases silently selected dt=2e-8 and t_end=2e-6. A dimensionally valid export could therefore be repacked with unrelated physical and temporal scales.
+    new_behavior: Diagnostic grid spacing is explicit for every build. Direct mphtxt packing requires an explicit coordinate scale, while a verified raw export manifest is the only alternate authority. Runnable packing requires explicit dt and t_end; geometry-only packing omits those unused values. Missing, non-finite, and non-positive values fail before output creation.
+    analytical_basis: Coordinate conversion, diagnostic discretization, and solver time horizon are case-defining dimensional inputs. They cannot be inferred from a packaging command or replaced by values from an unrelated model family.
+    acceptance_test: API and CLI omission tests cover all four values and assert that no output directory is created; the reviewed ICP raw-export workflow derives only coordinate scale from export_manifest.json and records explicitly supplied dt/t_end; COMSOL focused tests pass with JIT enabled and disabled.
+  - id: terminal_accepted_age_unification
+    old_behavior: Only terminal wall hits reported an accepted physical age and position. Geometry-refinement stops retained an unconditional first charge half-step, valid-mask prefix stops lost their accepted prefix age, and an endpoint bounding-box escape could miss the second charge half-step.
+    new_behavior: Every terminal path produces one TerminalSegmentOutcome with accepted_elapsed_s, position, and reason. Dynamic charge is replayed once from the segment-start state over exactly that accepted lifetime; a zero-age fail-closed stop restores the initial charge and an endpoint terminal receives the full segment age.
+    analytical_basis: Charge may evolve only while the particle trajectory exists. The accepted motion prefix and charge lifetime therefore have the same event endpoint, independently of whether the terminal reason is a wall law, field support, unresolved geometry, or the outer bounding box.
+    validation_scope: Pre-endpoint terminal motion coupled back through dynamic charge and electric force remains fail-fast for every terminal reason until event-local charge-motion iteration is implemented.
+    acceptance_test: Public simulations cover a geometry stop at age zero, a valid-mask quarter-segment prefix, a pass-through-style bounding-box endpoint at full dt, and a non-wall early terminal with electric coupling; focused suites pass with JIT enabled and disabled.
+  - id: strict_triangle_derived_fields
+    old_behavior: Triangle flow, scalar gradients, and time derivatives used absolute det/dt thresholds and replaced degenerate, off-support, or non-finite results with zero before the strict force pipeline could inspect them.
+    new_behavior: A dedicated triangle-derived-field evaluator preserves zero only for an absent flow quantity. Declared quantities are never repaired; clean-support failures identify the semantic quantity and particle row or triangle, while off-support declared samples remain non-finite and are classified by the independent support status.
+    analytical_basis: A P1 gradient is defined only on a numerically resolvable non-degenerate element and a transient slope only across distinguishable time coordinates. The normalized edge Gram determinant and 64 float64 time ULPs express those conditions without metre- or second-specific floors.
+    validation_scope: This change makes the existing native triangle P1 fallback fail-fast and scale-invariant; it does not claim equality between a regridded P1 derivative and COMSOL's FEM analytical derivative, for which exported semantic derivative quantities remain preferred.
+    acceptance_test: Pressure-gradient fallback agrees with its analytical P1 material acceleration under common space/time scales 1e-13, 1, and 1e3; relative triangle degeneracy, one-ULP time intervals, non-finite base/exported derived quantities, explicit absent flow, and off-support behavior are covered with JIT enabled and disabled.
+  - id: float64_artifact_axis_contract
+    old_behavior: Geometry/field axes and COMSOL time support were compared in several adapters with fixed absolute tolerances such as 1e-12 or 1e-15 SI units, so distinct coordinates in a micro-scale model could be accepted as identical.
+    new_behavior: Artifact-boundary coordinate axes and declared time support share one finite float64 comparison rule of at most 64 representable ULPs at the compared magnitude. Interpolation intervals and physical equations remain strict and receive no numerical floor from this contract.
+    analytical_basis: Serialization roundoff is measured in representable floating-point spacing, not in metres or seconds. An absolute SI tolerance breaks similarity scaling and can alias physically distinct artifact grids.
+    acceptance_test: One-ULP perturbations are accepted at 1e-13 scale, a 1e-14 physical displacement is rejected despite being below the former 1e-12 absolute tolerance, and non-finite values never compare equal.
+  - id: strict_boundary_normalization
+    old_behavior: Two-dimensional nearest-edge projection treated squared edge lengths at or below 1e-30 m2 as points, while collision normal and tangent normalization divided by max(norm, 1e-30), allowing scale-dependent geometry loss or a silently non-unit invalid normal.
+    new_behavior: Every boundary primitive must have finite positive length and every collision normal or derived reflection direction must be finite and non-zero. Normalization uses the actual norm without a physical or dimensionless floor.
+    analytical_basis: A geometric primitive remains valid under similarity scaling, and a wall law is defined only relative to a unit surface normal. Replacing either length or norm changes the collision geometry rather than stabilizing its arithmetic.
+    acceptance_test: A 1e-16 m square edge retains its exact nearest projection and normal, while a zero wall normal fails before a wall law is applied.
+  - id: scale_invariant_triangle_topology_and_degeneracy
+    old_behavior: Closed 3D surfaces rounded coordinates to 12 decimal places and rejected triangle area at or below 1e-18 m2; 2D precomputed field meshes independently rejected twice-area at or below 1e-30 m2. Normal, segment, and closest-point helpers also used fixed 1e-30 length or denominator floors.
+    new_behavior: Indexed 2D field meshes retain integer vertex IDs as topology truth. Coordinate-only 3D surface topology uses the shortest positive edge and 64 float64 coordinate ULPs under the boundary-numerics policy. Both dimensions reject only a float64-unresolved normalized edge Gram determinant, and geometry normalization/division uses validated actual values without SI floors.
+    analytical_basis: Triangle incidence is topological, while degeneracy is an angle/conditioning property expressed by the edge Gram determinant. Neither changes when every coordinate is multiplied by the same positive length scale.
+    acceptance_test: Closed-surface validation, 3D inside/hit/projection, indexed 2D field loading/support, and relative-degeneracy rejection are invariant at similarity scales 1e-13, 1, and 1e3; one-ULP coordinate serialization differences preserve closed topology; focused suites pass with JIT enabled and disabled.

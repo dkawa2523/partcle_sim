@@ -1,139 +1,98 @@
-# ICP CF4/O2 COMSOL Export
+# ICP CF4/O2 COMSOL exporter
 
-External bridge for turning the COMSOL model
-`icp_rf_bias_cf4_o2_si_etching (2).mph` into solver-ready geometry,
-field, and particle inputs.
+This directory contains only the model-specific COMSOL boundary: the Java
+exporter, its profile data, and the PowerShell launcher needed on a COMSOL
+installation.  Python packing is part of the generic application tool.
 
-This directory is intentionally outside `particle_tracer_unified`.
-The solver package must not import COMSOL libraries or require COMSOL
-at runtime. COMSOL is used only to create export artifacts.
+First review `config/icp_cf4_o2_v20.json`. The exporter deliberately has no
+model defaults for provenance or physics. Set all of the following to the
+actual solved model:
 
-## Flow
+- `model_name`, `study`, `dataset`, `solution`, and `solution_number`;
+- `mesh_tag`, the parameter name/value, and the non-empty
+  `vacuum_domain_ids` occupied by particles;
+- exactly one COMSOL expression and one requested unit for every exported
+  semantic quantity.
 
-1. Run the Java exporter on a machine with COMSOL installed.
-2. Convert the exported samples into a strict field bundle.
-3. Pack the mesh, field bundle, and generated particles into a solver case.
+The checked-in `vacuum_domain_ids` list is empty because a domain ID cannot be
+inferred safely without reviewing the model. Export fails until it is filled.
+There is no expression candidate search and no fallback to a speed magnitude,
+another potential, or another solution.
+
+Then export the model:
 
 ```powershell
 .\external\comsol_icp_export\run_export.ps1 `
   -ComsolExe "C:\Program Files\COMSOL\COMSOL64\Multiphysics\bin\win64\comsolbatch.exe" `
   -Mph "data\icp_rf_bias_cf4_o2_si_etching (2).mph" `
+  -Config "external\comsol_icp_export\config\icp_cf4_o2_v20.json" `
   -OutDir "_external_exports\icp_cf4_o2_v20"
-
-py -3 external\comsol_icp_export\pack_solver_case.py `
-  --raw-export-dir "_external_exports\icp_cf4_o2_v20" `
-  --out-dir "_external_exports\icp_rf_bias_cf4_o2_si_etching_2d_solver_case" `
-  --particle-count 1000
 ```
 
-After reviewing `generated/comsol_boundary_entity_mapping.csv`, confirmed wall
-laws can be applied with an optional override CSV:
+The Java step verifies the configured dataset-to-solution and solution-to-study
+references, then checks that `solution_number` contains the configured parameter
+value. It reads the saved solution without changing model parameters or solving
+the study. The checked-in V20 profile therefore selects solution 1 of
+`std2`/`sol2` through `dset3`. It then writes `mesh.mphtxt`,
+`field_samples.csv`, and `export_manifest.json`.
+The manifest records COMSOL version, solution number, expressions, units,
+vacuum domains, and SHA-256 hashes for the model, config, mesh, and field
+samples. Create and review two explicit SI inputs before packing:
+
+- a canonical release table (`particles.csv` columns, including `r_m`, `z_m`,
+  `vr_mps`, `vz_mps`, `mass_kg`, and `drag_diameter_m`);
+- one complete `boundaries.csv` covering every exported part with its wall law
+  and material metadata.
+
+Then use the generic profile:
 
 ```powershell
-py -3 external\comsol_icp_export\pack_solver_case.py `
+particle-tracer comsol build-case --profile icp_cf4_o2 `
   --raw-export-dir "_external_exports\icp_cf4_o2_v20" `
-  --out-dir "_external_exports\icp_rf_bias_cf4_o2_si_etching_2d_solver_case" `
-  --particle-count 1000 `
-  --wall-overrides-csv "path\to\wall_catalog_overrides.csv"
+  --release-table "path\to\particles.csv" `
+  --boundaries "path\to\boundaries.csv" `
+  --out-dir "_external_exports\icp_case_v02" `
+  --diagnostic-grid-spacing-m 5e-4 `
+  --dt-s 2e-8 --t-end-s 2e-6 `
+  --drag-law stokes --force electric `
+  --gas-dynamic-viscosity-Pas 1.8e-5 `
+  --release-inward-offset-m 1e-8 `
+  --release-projection-tolerance-m 1e-10
 ```
 
-`wall_catalog_overrides.csv` is intentionally part-ID based. The packer does
-not infer wall physics from material names. Use the same columns as
-`part_walls.csv` and include only COMSOL part IDs that have been reviewed.
-For review, the packer also writes `generated/wall_catalog_review.csv`, which
-joins current wall laws, COMSOL edge IDs, adjacent domain IDs, geometry bounds,
-and exported material names when available.
+With `--raw-export-dir`, model provenance, coordinate scale, solution number,
+and vacuum domains come only from `export_manifest.json`; duplicate CLI values
+are rejected. Diagnostic grid spacing and runnable solver `dt`/`t_end` are
+case choices and must still be supplied explicitly; the packer never inserts
+physical or temporal defaults. Without `--raw-export-dir`,
+`--coordinate-scale-m-per-model-unit` is also mandatory. Geometry-only packing
+does not require unused solver time values. The profile converts the exported `(r,z)` grid to SI, preserves
+electric field as `E` (never fixed-reference acceleration), and emits a
+schema-v2 COMSOL manifest plus the strict canonical run config. Physical walls
+come from the explicitly selected vacuum-domain mesh boundary. The field
+`valid_mask` is retained solely as field support and cannot become staircase
+geometry. The workflow does not generate particles, guess wall roles, or
+provide fallback materials.
 
-The packer writes a short starter solver window:
 
-```text
-dt = 2e-8 s
-t_end = 2e-6 s
-```
+## Mesh-node samples
 
-Treat `dt`, `t_end`, particle count, and output cadence as case physics.
-Do not reuse this starter window as a production benchmark without checking
-particle response time, expected flight distance, RF/field time scales, and
-wall-event statistics for the exported model.
+The exporter writes two sample tables from one evaluation pass.
 
-## Raw Export Contract
+- `field_samples.csv` — the configured `r`/`z` grid, kept as a readable
+  reference of the same export.
+- `field_samples_nodes.csv` — every configured expression evaluated at the
+  COMSOL mesh vertex coordinates, keyed by `node_index`.  That index is the
+  row order of `mesh.mphtxt`'s vertex block, so the case builder joins node
+  values to mesh topology exactly, without coordinate rounding.
 
-The COMSOL step writes:
+`export_manifest.json` declares `field_node_samples_sha256`,
+`field_node_sample_count`, and `field_node_identity`.  `particle-tracer comsol
+build-case --raw-export-dir` builds a mesh-native case when that digest is
+present, and a resampled grid case otherwise.  Presence of the file on disk is
+never sufficient on its own.
 
-- `mesh.mphtxt`
-- `field_samples.csv`
-- `expression_inventory.json`
-- `export_manifest.json`
-- `material_inventory.json`
-
-`field_samples.csv` must contain a complete tensor grid with columns:
-
-- `r`, `z`
-- `valid_mask`
-- `ux`, `uy`, `mu`
-- `E_x`, `E_y`
-
-Optional diagnostic columns are preserved in the `.npz` bundle when present:
-`T`, `p`, `rho_g`, `phi`, `ne`, `Te`, `ion_flux_*`, `etch_rate`.
-
-The packer keeps electric field as `E_x` and `E_y`. The solver computes
-electric acceleration from the current particle state as `(q(t)/m)E`, so the
-field bundle must not precompute acceleration from a fixed reference charge/mass.
-The expression map, grid shape, and source model information are recorded in
-generated manifests.
-
-The ICP model geometry is stored in COMSOL model coordinates of centimetres.
-The raw export keeps those coordinates unchanged, and the packer converts
-geometry, field axes, and particle positions to SI metres with:
-
-```text
-geometry_scale_m_per_model_unit = 0.01
-```
-
-Exported field quantities such as velocity, viscosity, electric field, gas
-density, and temperature are kept in their COMSOL-evaluated physical units.
-
-## Solver Case Contract
-
-The generated case uses the existing `precomputed_npz` provider schema:
-
-- `generated/comsol_geometry_2d.npz`
-- `generated/comsol_field_2d.npz`
-- `generated/comsol_boundary_entity_mapping.csv`
-- `generated/comsol_domain_entity_mapping.csv`
-- `materials.csv`
-- `part_walls.csv`
-- `particles.csv`
-- `run_config.yaml`
-
-`provider_contract.boundary_field_support: strict` and
-`input_contract.initial_particle_field_support: strict` are enabled by default.
-Generated particles are written at the reviewed boundary source coordinates.
-The run config enables `source.preprocess.boundary_release`, so the solver
-normalizes those boundary points into the domain during prepare/preflight
-instead of baking a grid-sized position shift into `particles.csv`.
-
-The entity mapping CSVs keep the COMSOL mesh entity IDs used by the solver
-boundary catalog. COMSOL `mesh.mphtxt` contains geometric entity IDs but not
-material selection names. When `material_inventory.json` is available, the
-packer copies its material-to-domain selections into the boundary/domain
-mapping CSVs. When it is not available, `comsol_material_name` remains
-`not_exported_from_mphtxt` instead of guessing.
-The packer checks whether COMSOL material selection entity IDs need a simple
-`0`, `+1`, or `-1` offset to match exported mesh domain IDs, and records the
-chosen offset in `generated/icp_export_case_manifest.json`.
-
-Wall behavior is applied from `part_walls.csv`. For production cases, review
-the generated entity mapping and use `--wall-overrides-csv` for confirmed
-part-specific physics. Unspecified parts keep the conservative generated
-defaults.
-
-## Scope Notes
-
-- This external bridge currently targets the 2D axisymmetric r-z RF bias
-  `20 V` ICP case.
-- The solver case uses fluid velocity, gas properties, and electric field.
-- COMSOL expression discovery is fail-fast: if required fields are not found,
-  no field export is produced.
-- The solver hot path does not consume COMSOL-only diagnostics; they are kept
-  for review and visualization.
+Every `Interp` feature is restricted to `vacuum_domain_ids`, so a mesh vertex
+lying on a vacuum/solid interface returns its vacuum-side value instead of a
+`NaN` from a domain where the expression is undefined.  `vacuum_domain_ids`
+must therefore be non-empty in the exporter configuration.

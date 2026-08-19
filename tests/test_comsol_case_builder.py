@@ -1,613 +1,1706 @@
 from __future__ import annotations
 
-import regression_helpers as _regression_helpers
+import hashlib
+import json
+from pathlib import Path
 
-globals().update({
-    name: value
-    for name, value in vars(_regression_helpers).items()
-    if not name.startswith("__")
-})
+import numpy as np
+import pandas as pd
+import pytest
+import yaml
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-def test_comsol_precomputed_case_passes_strict_provider_contract(tmp_path: Path):
-    cfg = ROOT / 'examples' / 'comsol_from_data_2d' / 'run_config.yaml'
-    out_dir = tmp_path / 'out_comsol_provider_contract'
-    prepared = build_prepared_runtime_from_yaml(cfg)
-    report = build_boundary_field_support_report(prepared)
-    assert report['passed'] is True
-    assert report['status_counts']['non_clean'] == 0
-    run_solver_2d_from_yaml(cfg, output_dir=out_dir)
-    assert (out_dir / 'provider_contract_report.json').exists()
-    assert (out_dir / 'solver_report.json').exists()
+import particle_tracer_unified.comsol_case.builder as builder_module
+import particle_tracer_unified.comsol_case.mesh as mesh_module
+from particle_tracer_unified.comsol_case import _mesh_artifacts as mesh_artifacts
+from particle_tracer_unified.comsol_case import _mesh_parsing as mesh_parsing
+from particle_tracer_unified.comsol_case import _mesh_topology as mesh_topology
+from particle_tracer_unified.comsol_case.builder import write_case_files
+from particle_tracer_unified.comsol_case.cli import main
+from particle_tracer_unified.comsol_case.mesh import (
+    MeshTypeBlock,
+    ParsedMesh,
+    assign_part_ids_from_edge_entities,
+    build_precomputed_arrays,
+    domain_boundary_edge_vertex_ids,
+    parse_comsol_mphtxt,
+    scale_mesh_coordinates,
+    select_vacuum_domains,
+    write_geometry_npz,
+)
+from particle_tracer_unified.configuration import load_run_config
+from particle_tracer_unified.core.geometry2d import (
+    build_boundary_loops_2d,
+    validate_boundary_edges_2d,
+)
+from particle_tracer_unified.io.comsol_manifest import ComsolCaseManifest
+from particle_tracer_unified.providers.precomputed import build_precomputed_geometry
 
-def test_triangle_mesh_field_backend_runs_in_2d_solver(tmp_path: Path):
-    mesh_field_path = _write_triangle_mesh_field_npz(tmp_path / 'field_mesh.npz')
-    particles_path = _write_rows_csv(
-        tmp_path / 'particles_mesh.csv',
-        [_one_particle_row(spatial_dim=2, x=0.25, y=0.25, vx=0.0, diameter=1e-6, density=1200.0)],
+
+def _write_square_mesh(path: Path) -> Path:
+    path.write_text(
+        """2 # sdim
+4 # number of mesh vertices
+# Mesh vertex coordinates
+0 0
+1 0
+1 1
+0 1
+2 # number of element types
+3 edg # type name
+2 # number of vertices per element
+4 # number of elements
+# Elements
+0 1
+1 2
+2 3
+3 0
+4 # number of geometric entity indices
+# Geometric entity indices
+0
+1
+2
+3
+4 quad # type name
+4 # number of vertices per element
+1 # number of elements
+# Elements
+0 1 2 3
+1 # number of geometric entity indices
+# Geometric entity indices
+0
+""",
+        encoding="utf-8",
     )
-    config_path = _write_minimal_2d_config(
-        tmp_path,
-        path_updates={'particles_csv': str(particles_path.resolve())},
-        geometry_updates={'bounds': [0.0, 1.0, 0.0, 1.0], 'grid_shape': [41, 41]},
-        provider_updates={'field': {'kind': 'precomputed_triangle_mesh_npz', 'npz_path': str(mesh_field_path.resolve())}},
-        solver_updates={
-            'dt': 0.05,
-            't_end': 0.05,
-            'save_every': 1,
-            'integrator': 'etd2',
-            'field_backend_mode': 'triangle_mesh',
-            'forces': {'pressure_gradient': {'enabled': True}},
-        },
-        output_updates={'write_collision_diagnostics': 1},
+    return path
+
+
+def _write_two_domain_mesh(path: Path) -> Path:
+    path.write_text(
+        """2 # sdim
+6 # number of mesh vertices
+# Mesh vertex coordinates
+0 0
+1 0
+2 0
+0 1
+1 1
+2 1
+2 # number of element types
+3 edg # type name
+2 # number of vertices per element
+7 # number of elements
+# Elements
+0 1
+1 2
+2 5
+5 4
+4 3
+3 0
+1 4
+7 # number of geometric entity indices
+# Geometric entity indices
+0
+1
+2
+3
+4
+5
+6
+4 quad # type name
+4 # number of vertices per element
+2 # number of elements
+# Elements
+0 1 4 3
+1 2 5 4
+2 # number of geometric entity indices
+# Geometric entity indices
+0
+1
+""",
+        encoding="utf-8",
     )
-    out_dir = tmp_path / 'out_mesh_backend'
-    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
-    report = _solver_report(out_dir)
-    final_df = _final_particles(out_dir)
-    assert str(report['field_backend_kind']) == 'triangle_mesh_2d'
-    assert int(final_df['invalid_mask_stopped'].sum()) == 0
+    return path
 
-def test_comsol_builder_geometry_only_writes_geometry_without_run_config(tmp_path: Path):
-    out_dir = tmp_path / 'comsol_case_geom_only'
-    write_case_files(
-        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-        out_dir,
-        geometry_only=True,
-        diagnostic_grid_spacing_m=1.0e-3,
-    )
-    assert (out_dir / 'generated' / 'comsol_geometry_2d.npz').exists()
-    assert not (out_dir / 'generated' / 'comsol_field_2d.npz').exists()
-    assert not (out_dir / 'run_config.yaml').exists()
 
-def test_comsol_builder_does_not_write_triangle_mesh_field_by_default(tmp_path: Path):
-    out_dir = tmp_path / 'comsol_case_mesh'
-    write_case_files(
-        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-        out_dir,
-        field_bundle_path=ROOT / 'data' / 'regridded_repo_field_bundle_argon_gec_ccp_base2_2d.npz',
-        diagnostic_grid_spacing_m=5.0e-4,
-    )
-    assert (out_dir / 'run_config.yaml').exists()
-    cfg = yaml.safe_load((out_dir / 'run_config.yaml').read_text(encoding='utf-8'))
-    assert 'source_events_csv' not in cfg.get('paths', {})
-    assert cfg.get('input_contract', {}).get('initial_particle_field_support') == 'strict'
-    summary = _read_json(out_dir / 'generated' / 'comsol_case_summary.json')
-    assert summary['provider_contract']['passed'] is True
-    assert (out_dir / 'generated' / 'provider_contract_report.json').exists()
-    assert summary['field_summary']['geometry_mask_applied'] is False
-    assert int(summary['field_summary']['field_ghost_cells']) == 0
-    assert not (out_dir / 'generated' / 'comsol_field_mesh_2d.npz').exists()
-    assert not (out_dir / 'run_config_mesh.yaml').exists()
-
-def test_comsol_builder_axisymmetric_summary_preserves_coordinate_system(tmp_path: Path):
-    out_dir = tmp_path / 'comsol_case_axisymmetric'
-    write_case_files(
-        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-        out_dir,
-        field_bundle_path=ROOT / 'data' / 'regridded_repo_field_bundle_argon_gec_ccp_base2_2d.npz',
-        diagnostic_grid_spacing_m=5.0e-4,
-        coordinate_system='axisymmetric_rz',
-    )
-
-    cfg = yaml.safe_load((out_dir / 'run_config.yaml').read_text(encoding='utf-8'))
-    summary = _read_json(out_dir / 'generated' / 'comsol_case_summary.json')
-
-    assert cfg['run']['coordinate_system'] == 'axisymmetric_rz'
-    assert summary['coordinate_system'] == 'axisymmetric_rz'
-    assert summary['axis_names'] == ['r', 'z']
-    assert summary['axisymmetric_rz']['r0_on_grid'] == 1
-    assert summary['axisymmetric_rz']['r0_axis_boundary_edge_count'] >= 1
-    assert summary['axisymmetric_rz']['axis_boundary_policy'] == 'report_only_collision_unchanged'
-    assert summary['axisymmetric_rz']['radial_ring_area_weight']['max'] > 0.0
-    assert 'exact_match' in summary['field_axis_alignment']
-
-def test_comsol_builder_reports_field_axis_canonicalization(tmp_path: Path):
-    mesh = parse_comsol_mphtxt(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt')
-    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=1.0e-3)
-    bundle_axis_0 = np.asarray(arrays['axes_x'], dtype=np.float64).copy()
-    bundle_axis_1 = np.asarray(arrays['axes_y'], dtype=np.float64).copy()
-    if bundle_axis_0.size > 2:
-        step = float(np.min(np.diff(bundle_axis_0)))
-        bundle_axis_0[1] += 0.25 * step
-    shape = (bundle_axis_0.size, bundle_axis_1.size)
-    bundle_path = tmp_path / 'resampled_bundle.npz'
+def _write_field(path: Path) -> Path:
+    axis = np.asarray([0.0, 0.5, 1.0], dtype=np.float64)
+    times = np.asarray([0.0, 1.0], dtype=np.float64)
+    xx, yy = np.meshgrid(axis, axis, indexing="ij")
+    ux = np.stack([xx + yy, xx + yy + 1.0])
+    uy = np.stack([xx - yy, xx - yy + 0.5])
     np.savez_compressed(
-        bundle_path,
-        axis_0=bundle_axis_0,
-        axis_1=bundle_axis_1,
-        times=np.asarray([0.0], dtype=np.float64),
-        valid_mask=np.ones(shape, dtype=bool),
-        ux=np.zeros(shape, dtype=np.float64),
-        uy=np.zeros(shape, dtype=np.float64),
-    )
-
-    out_dir = tmp_path / 'comsol_case_resampled_axes'
-    write_case_files(
-        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-        out_dir,
-        field_bundle_path=bundle_path,
-        diagnostic_grid_spacing_m=1.0e-3,
-    )
-    summary = _read_json(out_dir / 'generated' / 'comsol_case_summary.json')
-    alignment = summary['field_axis_alignment']
-
-    assert alignment['axis_0_exact_match'] is False
-    assert alignment['axis_1_exact_match'] is True
-    assert alignment['resampled_to_geometry_axes'] is True
-    assert alignment['source_axes']['axis_0']['count'] == alignment['geometry_axes']['axis_0']['count']
-
-def test_comsol_builder_particles_only_generates_boundary_release_sources(tmp_path: Path):
-    out_dir = tmp_path / 'comsol_case_boundary_release_particles'
-    write_case_files(
-        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-        out_dir,
-        field_bundle_path=ROOT / 'data' / 'regridded_repo_field_bundle_argon_gec_ccp_base2_2d.npz',
-        diagnostic_grid_spacing_m=5.0e-4,
-    )
-    write_particles_for_case(
-        ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-        out_dir,
-        particle_count=128,
-        release_span_s=0.4,
-        seed=123,
-    )
-    particles = pd.read_csv(out_dir / 'particles.csv')
-    assert len(particles) == 128
-    assert particles['release_time'].iloc[0] == pytest.approx(0.0)
-    assert particles['release_time'].iloc[-1] == pytest.approx(0.4)
-    assert float(particles['release_offset_m'].max()) == pytest.approx(0.0)
-    assert np.allclose(particles['x'].to_numpy(dtype=float), particles['source_x'].to_numpy(dtype=float))
-    assert np.allclose(particles['y'].to_numpy(dtype=float), particles['source_y'].to_numpy(dtype=float))
-    cfg = yaml.safe_load((out_dir / 'run_config.yaml').read_text(encoding='utf-8'))
-    assert cfg['source']['source_position_offset_m'] == pytest.approx(0.0)
-    assert cfg['source']['preprocess']['enabled'] is True
-    assert cfg['source']['preprocess']['boundary_release'] is True
-    prepared = build_prepared_runtime_from_yaml(out_dir / 'run_config.yaml')
-    assert prepared.source_preprocess is not None
-    assert prepared.source_preprocess.source_model_summary['boundary_release_applied_count'] == 128
-    assert prepared.source_preprocess.source_model_summary['boundary_release_failed_offset_count'] == 0
-    report = build_initial_particle_field_support_report(prepared)
-    assert report['status_counts']['non_clean'] == 0
-    assert particles['source_part_id'].nunique() > 1
-
-def test_comsol_builder_requires_field_bundle_for_runnable_case(tmp_path: Path):
-    with pytest.raises(ValueError, match='requires --field-bundle'):
-        write_case_files(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt', tmp_path / 'missing_bundle_case')
-
-def test_comsol_builder_rejects_axis_mismatch_bundle(tmp_path: Path):
-    mesh = parse_comsol_mphtxt(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt')
-    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=1.0e-3)
-    bundle_path = _write_field_bundle(tmp_path / 'bad_bundle.npz', arrays['axes_x'], arrays['axes_y'], axis_0_shift=1.0e-4)
-    with pytest.raises(ValueError, match='axis_0'):
-        write_case_files(
-            ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-            tmp_path / 'bad_bundle_case',
-            field_bundle_path=bundle_path,
-            diagnostic_grid_spacing_m=1.0e-3,
-        )
-
-def test_comsol_builder_rejects_bundle_missing_velocity_components(tmp_path: Path):
-    mesh = parse_comsol_mphtxt(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt')
-    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=1.0e-3)
-    shape = (arrays['axes_x'].size, arrays['axes_y'].size)
-    bundle_path = tmp_path / 'missing_ux_bundle.npz'
-    np.savez_compressed(
-        bundle_path,
-        axis_0=arrays['axes_x'],
-        axis_1=arrays['axes_y'],
-        times=np.asarray([0.0], dtype=np.float64),
-        valid_mask=np.ones(shape, dtype=bool),
-        uy=np.zeros(shape, dtype=np.float64),
-        mu=np.ones(shape, dtype=np.float64) * 1.8e-5,
-    )
-    with pytest.raises(ValueError, match='ux and uy'):
-        write_case_files(
-            ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt',
-            tmp_path / 'missing_ux_case',
-            field_bundle_path=bundle_path,
-            diagnostic_grid_spacing_m=1.0e-3,
-        )
-
-def test_merge_near_duplicate_axis_collapses_fp_noise():
-    axis = np.asarray([0.0, 1e-16, 2e-16, 0.0254, 0.0254 + 5e-13, 0.1], dtype=np.float64)
-    merged = _merge_near_duplicate_axis(axis, atol=1e-12)
-    assert merged.shape == (3,)
-    assert np.min(np.diff(merged)) > 1e-12
-    assert merged[0] == pytest.approx(1e-16, abs=1e-15)
-    assert merged[1] == pytest.approx(0.0254, abs=1e-12)
-
-def test_order_quad_vertices_removes_bow_tie_ordering():
-    vertices = np.asarray(
-        [
-            [0.0, 0.0],
-            [1.0, 0.0],
-            [0.0, 1.0],
-            [1.0, 1.0],
-        ],
-        dtype=np.float64,
-    )
-    raw = np.asarray([[0, 1, 2, 3]], dtype=np.int64)
-    ordered = _order_quad_vertices(vertices, raw)
-    poly = vertices[ordered[0]]
-    area = 0.5 * abs(sum(poly[i, 0] * poly[(i + 1) % 4, 1] - poly[(i + 1) % 4, 0] * poly[i, 1] for i in range(4)))
-    assert area == pytest.approx(1.0)
-
-def test_comsol_boundary_edges_preserve_closed_mphtxt_boundary():
-    mesh = parse_comsol_mphtxt(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt')
-    arrays = build_precomputed_arrays(mesh)
-    total_edg = int(mesh.type_blocks['edg'].elements.shape[0])
-    preserved = int(arrays['boundary_edges'].shape[0])
-    assert preserved == total_edg
-    unique_parts = set(int(v) for v in np.unique(arrays['boundary_part_ids']))
-    assert all(v > 0 for v in unique_parts)
-    assert np.min(np.diff(arrays['axes_x'])) > 1e-12
-    assert np.min(np.diff(arrays['axes_y'])) > 1e-12
-    rounded_vertices = []
-    for seg in np.asarray(arrays['boundary_edges'], dtype=np.float64):
-        rounded_vertices.append(tuple(np.round(seg[0], 12)))
-        rounded_vertices.append(tuple(np.round(seg[1], 12)))
-    degree_counts = Counter(rounded_vertices)
-    assert set(degree_counts.values()) == {2}
-
-def test_boundary_loops_reconstruct_inside_outside_truth():
-    edges = np.asarray(
-        [
-            [[0.0, 0.0], [1.0, 0.0]],
-            [[1.0, 0.0], [1.0, 1.0]],
-            [[1.0, 1.0], [0.0, 1.0]],
-            [[0.0, 1.0], [0.0, 0.0]],
-        ],
-        dtype=np.float64,
-    )
-    loops = build_boundary_loops_2d(edges)
-    pts = np.asarray([[0.5, 0.5], [1.5, 0.5], [0.2, 0.8]], dtype=np.float64)
-    inside = points_inside_boundary_loops_2d(pts, loops)
-    assert [bool(v) for v in inside] == [True, False, True]
-
-def test_boundary_loops_support_nested_hole_truth():
-    edges = np.asarray(
-        [
-            [[0.0, 0.0], [4.0, 0.0]],
-            [[4.0, 0.0], [4.0, 4.0]],
-            [[4.0, 4.0], [0.0, 4.0]],
-            [[0.0, 4.0], [0.0, 0.0]],
-            [[1.0, 1.0], [3.0, 1.0]],
-            [[3.0, 1.0], [3.0, 3.0]],
-            [[3.0, 3.0], [1.0, 3.0]],
-            [[1.0, 3.0], [1.0, 1.0]],
-        ],
-        dtype=np.float64,
-    )
-    loops = build_boundary_loops_2d(edges)
-    assert len(loops) == 2
-    pts = np.asarray(
-        [
-            [0.5, 0.5],
-            [2.0, 2.0],
-            [4.5, 2.0],
-            [0.5, 3.5],
-        ],
-        dtype=np.float64,
-    )
-    inside = points_inside_boundary_loops_2d(pts, loops)
-    assert [bool(v) for v in inside] == [True, False, False, True]
-
-def test_boundary_loop_builder_rejects_branching_vertices():
-    edges = np.asarray(
-        [
-            [[0.0, 0.0], [1.0, 0.0]],
-            [[1.0, 0.0], [2.0, 0.0]],
-            [[1.0, 0.0], [1.0, 1.0]],
-        ],
-        dtype=np.float64,
-    )
-    with pytest.raises(ValueError, match='degree-2 loops'):
-        validate_boundary_edges_2d(edges)
-    with pytest.raises(ValueError, match='degree-2 loops'):
-        build_boundary_loops_2d(edges)
-
-def test_boundary_points_are_promoted_to_inside_consistently():
-    edges = np.asarray(
-        [
-            [[0.0, 0.0], [1.0, 0.0]],
-            [[1.0, 0.0], [1.0, 1.0]],
-            [[1.0, 1.0], [0.0, 1.0]],
-            [[0.0, 1.0], [0.0, 0.0]],
-        ],
-        dtype=np.float64,
-    )
-    loops = build_boundary_loops_2d(edges)
-    pts = np.asarray(
-        [
-            [0.5, 0.5],   # interior
-            [1.0, 0.5],   # edge
-            [0.0, 0.0],   # vertex
-            [1.2, 0.5],   # exterior
-        ],
-        dtype=np.float64,
-    )
-    inside, on_boundary = points_inside_boundary_loops_2d_with_boundary(pts, loops, on_edge_tol=1.0e-9)
-    assert [bool(v) for v in inside] == [True, True, True, False]
-    assert [bool(v) for v in on_boundary] == [False, True, True, False]
-
-def test_scalar_boundary_edge_inside_matches_loop_truth_for_holes_and_boundary():
-    edges = np.asarray(
-        [
-            [[0.0, 0.0], [4.0, 0.0]],
-            [[4.0, 0.0], [4.0, 4.0]],
-            [[4.0, 4.0], [0.0, 4.0]],
-            [[0.0, 4.0], [0.0, 0.0]],
-            [[1.0, 1.0], [3.0, 1.0]],
-            [[3.0, 1.0], [3.0, 3.0]],
-            [[3.0, 3.0], [1.0, 3.0]],
-            [[1.0, 3.0], [1.0, 1.0]],
-        ],
-        dtype=np.float64,
-    )
-    loops = build_boundary_loops_2d(edges)
-    pts = np.asarray(
-        [
-            [0.5, 0.5],
-            [2.0, 2.0],
-            [4.5, 2.0],
-            [0.5, 3.5],
-            [4.0, 2.0],
-            [1.0, 2.0],
-        ],
-        dtype=np.float64,
-    )
-    inside_vec, boundary_vec = points_inside_boundary_loops_2d_with_boundary(pts, loops, on_edge_tol=1.0e-9)
-    scalar = [point_inside_boundary_edges_2d_with_boundary(pt, edges, on_edge_tol=1.0e-9) for pt in pts]
-    assert [v[0] for v in scalar] == [bool(v) for v in inside_vec]
-    assert [v[1] for v in scalar] == [bool(v) for v in boundary_vec]
-
-def test_loop_bisection_fallback_returns_boundary_hit_for_crossing_segment():
-    prepared = build_prepared_runtime_from_yaml(ROOT / 'examples' / 'minimal_2d' / 'run_config.yaml')
-    runtime = prepared.runtime
-    hit = segment_hit_from_loop_bisection(
-        runtime,
-        p0=np.asarray([0.0, 0.0], dtype=np.float64),
-        p1=np.asarray([2.0, 0.0], dtype=np.float64),
-        on_boundary_tol_m=1.0e-7,
-    )
-    assert hit is not None
-    assert isinstance(hit, BoundaryHit)
-    assert 0.0 < float(hit.alpha_hint) < 1.0
-    assert np.isclose(np.linalg.norm(hit.normal), 1.0, atol=1.0e-6)
-    assert int(hit.part_id) >= 0
-
-def test_precomputed_geometry_reads_new_and_legacy_boundary_part_keys(tmp_path: Path):
-    mesh = parse_comsol_mphtxt(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt')
-    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=1.0e-3)
-    common = {
-        'axis_0': arrays['axes_x'],
-        'axis_1': arrays['axes_y'],
-        'sdf': arrays['sdf'],
-        'valid_mask': arrays['inside'].astype(bool),
-        'normal_0': arrays['normal_x'],
-        'normal_1': arrays['normal_y'],
-        'boundary_edges': arrays['boundary_edges'],
-        'boundary_edge_part_ids': arrays['boundary_part_ids'],
-        'boundary_loops_2d_flat': arrays['boundary_loops_2d_flat'],
-        'boundary_loops_2d_offsets': arrays['boundary_loops_2d_offsets'],
-    }
-    new_path = tmp_path / 'geom_new.npz'
-    old_path = tmp_path / 'geom_old.npz'
-    np.savez_compressed(new_path, nearest_boundary_part_id_map=arrays['nearest_boundary_part_id_map'], **common)
-    np.savez_compressed(old_path, part_id_map=arrays['nearest_boundary_part_id_map'], **common)
-
-    geom_new = build_precomputed_geometry({'npz_path': str(new_path)}, spatial_dim=2, coordinate_system='cartesian_xy')
-    geom_old = build_precomputed_geometry({'npz_path': str(old_path)}, spatial_dim=2, coordinate_system='cartesian_xy')
-
-    assert np.array_equal(geom_new.geometry.nearest_boundary_part_id_map, arrays['nearest_boundary_part_id_map'])
-    assert np.array_equal(geom_old.geometry.nearest_boundary_part_id_map, arrays['nearest_boundary_part_id_map'])
-    assert len(geom_new.geometry.boundary_loops_2d) >= 1
-    assert geom_new.geometry.metadata['boundary_edge_topology']['branch_vertex_count'] == 0
-    assert geom_new.geometry.metadata['boundary_edge_topology']['dangling_vertex_count'] == 0
-    assert int(geom_new.geometry.metadata['boundary_loop_count_2d']) >= 1
-
-def test_precomputed_geometry_3d_rejects_non_closed_surface(tmp_path: Path):
-    tri = _cube_triangles_oriented()[:-1]
-    axis = np.asarray([-1.0, 0.0, 1.0], dtype=np.float64)
-    shape = (axis.size, axis.size, axis.size)
-    npz_path = tmp_path / 'bad_geom_3d.npz'
-    np.savez_compressed(
-        npz_path,
+        path,
         axis_0=axis,
         axis_1=axis,
-        axis_2=axis,
-        sdf=np.zeros(shape, dtype=np.float64),
-        valid_mask=np.ones(shape, dtype=bool),
-        nearest_boundary_part_id_map=np.ones(shape, dtype=np.int32),
-        normal_0=np.zeros(shape, dtype=np.float64),
-        normal_1=np.zeros(shape, dtype=np.float64),
-        normal_2=np.ones(shape, dtype=np.float64),
-        boundary_triangles=tri,
-        boundary_triangle_part_ids=np.ones(tri.shape[0], dtype=np.int32),
+        times=times,
+        valid_mask=np.ones((3, 3), dtype=bool),
+        ux=ux,
+        uy=uy,
+        E_x=np.ones_like(ux) * 2.0,
+        E_y=np.ones_like(uy) * -3.0,
+        T=np.ones_like(ux) * 300.0,
+        mu=np.ones_like(ux) * 1.8e-5,
     )
-    with pytest.raises(ValueError, match='closed 2-manifold'):
-        build_precomputed_geometry({'npz_path': str(npz_path)}, spatial_dim=3, coordinate_system='cartesian_xyz')
+    return path
 
-def test_sample_points_in_quads_stay_inside_actual_domain():
-    mesh = parse_comsol_mphtxt(ROOT / 'data' / 'argon_gec_ccp_base2.mphtxt')
-    pts = _sample_points_in_quads(mesh.vertices, mesh.type_blocks['quad'].elements, count=256, seed=7)
-    inside = _points_inside_quads(mesh.vertices, mesh.type_blocks['quad'].elements, pts)
-    assert pts.shape == (256, 2)
-    assert bool(np.all(inside))
 
-def test_visualization_unified_clean_and_index(tmp_path: Path):
-    out_dir = tmp_path / 'out_visualization_index'
-    _run_minimal_case(2, out_dir)
+def _write_boundaries(
+    path: Path,
+    part_ids: tuple[int, ...] = (1, 2, 3, 4),
+    *,
+    comsol_entity_ids: tuple[int, ...] | None = None,
+) -> Path:
+    entity_ids = part_ids if comsol_entity_ids is None else comsol_entity_ids
+    if len(entity_ids) != len(part_ids):
+        raise ValueError("part_ids and comsol_entity_ids must have equal length")
+    rows = [
+        {
+            "part_id": part_id,
+            "part_name": f"wall_{part_id}",
+            "comsol_entity_id": entity_id,
+            "role": "wall",
+            "wall_law": "specular",
+            "wall_stick_probability": 0.0,
+            "wall_restitution": 1.0,
+            "wall_diffuse_fraction": 0.0,
+            "wall_critical_sticking_velocity_mps": 0.0,
+            "material_id": 10 + part_id,
+            "material_name": "steel",
+            "metadata_json": "{}",
+        }
+        for part_id, entity_id in zip(part_ids, entity_ids, strict=True)
+    ]
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return path
 
-    # legacy dirs to be cleaned
-    for legacy in ('graphs', 'animations', 'visuals'):
-        d = out_dir / legacy
-        d.mkdir(parents=True, exist_ok=True)
-        (d / 'legacy.txt').write_text('old', encoding='utf-8')
 
-    index_path = export_visualizations(
-        output_dir=out_dir,
-        case_dir=ROOT / 'examples' / 'minimal_2d',
-        modules=('graphs', 'animations'),
-        clean=True,
-        sample_trajectories=16,
-        animation_sample_count=16,
-        animation_fps=3,
-        animation_interpolate_factor=2,
-        overlay_wall_events=True,
+def _write_particles(path: Path, source_part_id: int = 1) -> Path:
+    pd.DataFrame(
+        [
+            {
+                "particle_id": 1,
+                "release_time_s": 0.25,
+                "x_m": 0.5,
+                "y_m": 0.5,
+                "vx_mps": 0.0,
+                "vy_mps": 0.0,
+                "mass_kg": 1.0e-15,
+                "drag_diameter_m": 1.0e-6,
+                "charge_C": -1.0e-17,
+                "source_part_id": source_part_id,
+                "density_kgm3": 1200.0,
+            }
+        ]
+    ).to_csv(path, index=False)
+    return path
+
+
+def _two_square_mesh(*, scale: float, separated: bool) -> ParsedMesh:
+    length = float(scale)
+    if separated:
+        gap = 0.02 * length
+        vertices = np.asarray(
+            [
+                [0.0, 0.0],
+                [length, 0.0],
+                [length, length],
+                [0.0, length],
+                [length + gap, 0.0],
+                [2.0 * length + gap, 0.0],
+                [2.0 * length + gap, length],
+                [length + gap, length],
+            ],
+            dtype=np.float64,
+        )
+        quads = np.asarray([[0, 1, 2, 3], [4, 5, 6, 7]], dtype=np.int64)
+        edges = np.asarray(
+            [
+                [0, 1],
+                [1, 2],
+                [2, 3],
+                [3, 0],
+                [4, 5],
+                [5, 6],
+                [6, 7],
+                [7, 4],
+            ],
+            dtype=np.int64,
+        )
+    else:
+        vertices = np.asarray(
+            [
+                [0.0, 0.0],
+                [length, 0.0],
+                [2.0 * length, 0.0],
+                [0.0, length],
+                [length, length],
+                [2.0 * length, length],
+            ],
+            dtype=np.float64,
+        )
+        quads = np.asarray([[0, 1, 4, 3], [1, 2, 5, 4]], dtype=np.int64)
+        edges = np.asarray(
+            [[0, 1], [1, 2], [2, 5], [5, 4], [4, 3], [3, 0], [1, 4]],
+            dtype=np.int64,
+        )
+    return ParsedMesh(
+        sdim=2,
+        vertices=vertices,
+        type_blocks={
+            "edg": MeshTypeBlock(
+                type_name="edg",
+                vertices_per_element=2,
+                elements=edges,
+                geometric_entity_indices=np.arange(edges.shape[0], dtype=np.int64),
+            ),
+            "quad": MeshTypeBlock(
+                type_name="quad",
+                vertices_per_element=4,
+                elements=quads,
+                geometric_entity_indices=np.zeros(quads.shape[0], dtype=np.int64),
+            ),
+        },
     )
-    assert index_path.exists()
-    for legacy in ('graphs', 'animations', 'visuals'):
-        assert not (out_dir / legacy).exists()
-    index = json.loads(index_path.read_text(encoding='utf-8'))
-    assert set(index['modules'].keys()) == {'graphs', 'animations'}
-    assert index['health_summary']['status'] in {'pass', 'review'}
-    assert (out_dir / 'visualizations' / 'reports' / 'run_summary.md').exists()
-    assert (out_dir / 'visualizations' / 'graphs' / 'graph_summary.json').exists()
-    assert (out_dir / 'visualizations' / 'animations' / 'animation_report.json').exists()
 
-def test_unified_visualizations_3d_projection_gifs(tmp_path: Path):
-    out_dir = tmp_path / 'out_visualization_3d'
-    _run_minimal_case(3, out_dir)
-    index_path = export_visualizations(
-        output_dir=out_dir,
-        modules=('animations',),
-        clean=True,
-        animation_sample_count=24,
-        animation_fps=3,
-        animation_interpolate_factor=2,
-        overlay_wall_events=True,
-    )
-    assert index_path.exists()
-    anim_dir = out_dir / 'visualizations' / 'animations'
-    assert (anim_dir / 'trajectories_all_particles_xy.gif').exists()
-    assert (anim_dir / 'trajectories_all_particles_xz.gif').exists()
-    assert (anim_dir / 'trajectories_all_particles_yz.gif').exists()
 
-def test_collision_diagnostics_are_written_and_max_hits_limit_is_applied(tmp_path: Path):
-    config_path = _write_wall_bounce_config(
-        tmp_path,
-        spatial_dim=2,
-        name='fast',
-        vx=50.0,
-        max_wall_hits_per_step=1,
-    )
-    out_dir = tmp_path / 'out_diag_hits'
-    run_solver_2d_from_yaml(config_path, output_dir=out_dir)
-
-    diag_path = out_dir / 'collision_diagnostics.json'
-    assert diag_path.exists()
-    diag = _read_json(diag_path)
-    assert int(diag['max_wall_hits_per_step']) == 1
-    assert int(diag['max_hits_reached_count']) >= 1
-    assert int(diag['multi_hit_events_count']) == 0
-    assert int(diag['max_hit_event_summary']['event_count']) == int(diag['max_hits_reached_count'])
-    assert float(diag['max_hit_event_summary']['remaining_dt_total_s']) >= 0.0
-    boundary_diag = diag['boundary_diagnostics']
-    assert boundary_diag['wall_law_semantics']['pass_through'] == 'non_colliding_boundary'
-    assert boundary_diag['wall_law_semantics']['open'] == 'particle_exit'
-    assert boundary_diag['collision_boundary_geometry'] == 'linear_segment_or_triangle_boundary'
-    assert int(boundary_diag['ambiguous_hit_count']) >= 0
-    max_hit_events = _read_table(out_dir / 'max_hit_events.csv')
-    assert not max_hit_events.empty
-    assert set(max_hit_events.columns).issuperset({'time_s', 'particle_id', 'hits_in_step', 'remaining_dt_s', 'part_id_sequence'})
-    assert int(max_hit_events['hits_in_step'].max()) >= 1
-
-@pytest.mark.parametrize(('spatial_dim', 'vx'), [(2, 50.0), (3, 80.0)])
-def test_collision_reintegration_counter_is_nonzero_for_wall_bounces(
-    tmp_path: Path,
-    spatial_dim: int,
-    vx: float,
-):
-    config_path = _write_wall_bounce_config(
-        tmp_path,
-        spatial_dim=spatial_dim,
-        name='reintegrate',
-        vx=vx,
-        max_wall_hits_per_step=3,
-    )
-    out_dir = tmp_path / f'out_diag_reintegrate_{spatial_dim}d'
-    _run_solver_for_dim(spatial_dim, config_path, out_dir)
-    diag = _collision_diagnostics(out_dir)
-    assert int(diag['collision_reintegrated_segments_count']) >= 1
-
-def test_adaptive_substep_diagnostics_toggle(tmp_path: Path):
-    particles_path = _write_particle_row(
-        tmp_path / 'adaptive_particles_2d.csv',
-        _one_particle_row(spatial_dim=2, vx=5.0, diameter=1.0e-5, density=1200.0),
+def _triangle_mesh() -> ParsedMesh:
+    return ParsedMesh(
+        sdim=2,
+        vertices=np.asarray(
+            [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]],
+            dtype=np.float64,
+        ),
+        type_blocks={
+            "edg": MeshTypeBlock(
+                type_name="edg",
+                vertices_per_element=2,
+                elements=np.asarray([[0, 1], [1, 2], [2, 0]], dtype=np.int64),
+                geometric_entity_indices=np.asarray([0, 1, 2], dtype=np.int64),
+            ),
+            "tri": MeshTypeBlock(
+                type_name="tri",
+                vertices_per_element=3,
+                elements=np.asarray([[0, 1, 2]], dtype=np.int64),
+                geometric_entity_indices=np.asarray([0], dtype=np.int64),
+            ),
+        },
     )
 
-    def write_adaptive_config(config_dir: Path, enabled: int) -> Path:
-        return _write_particle_solver_config(
-            config_dir,
-            spatial_dim=2,
-            particles_path=particles_path,
-            geometry_updates={'bounds': [-10.0, 10.0, -10.0, 10.0], 'grid_shape': [51, 51]},
-            field_updates={'shear_rate': 0.0},
-            solver_updates={
-                'dt': 0.1,
-                't_end': 0.2,
-                'save_every': 1,
-                'min_tau_p_s': 1.0e-8,
-                'integrator': 'etd',
-                'adaptive_substep_enabled': int(enabled),
-                'adaptive_substep_tau_ratio': 0.5,
-                'adaptive_substep_max_splits': 4,
-            },
-            output_updates={'write_collision_diagnostics': 1},
+
+def _build_inputs(root: Path) -> tuple[Path, Path, Path, Path]:
+    return (
+        _write_square_mesh(root / "mesh.mphtxt"),
+        _write_field(root / "field.npz"),
+        _write_particles(root / "release.csv"),
+        _write_boundaries(root / "wall_contract.csv"),
+    )
+
+
+def _build_case(root: Path, out: Path, **updates: object) -> None:
+    mesh, field, release, boundaries = _build_inputs(root)
+    arguments: dict[str, object] = {
+        "field_bundle_path": field,
+        "release_table_path": release,
+        "boundaries_path": boundaries,
+        "diagnostic_grid_spacing_m": 0.5,
+        "coordinate_scale_m_per_model_unit": 1.0,
+        "coordinate_system": "cartesian_xy",
+        "model_name": "square-test",
+        "study": "std1",
+        "dataset": "dset1",
+        "solution": "sol1",
+        "solution_number": 1,
+        "vacuum_domain_ids": (1,),
+        "drag_law": "stokes",
+        "enabled_forces": ("electric",),
+        "gas_dynamic_viscosity_Pas": 1.8e-5,
+        "solver_dt_s": 0.1,
+        "solver_t_end_s": 1.0,
+    }
+    arguments.update(updates)
+    write_case_files(mesh, out, **arguments)
+
+
+def test_geometry_only_writes_no_runtime_contract(tmp_path: Path) -> None:
+    mesh = _write_square_mesh(tmp_path / "mesh.mphtxt")
+    out = tmp_path / "case"
+
+    write_case_files(
+        mesh,
+        out,
+        geometry_only=True,
+        diagnostic_grid_spacing_m=0.5,
+        coordinate_scale_m_per_model_unit=1.0,
+        vacuum_domain_ids=(1,),
+    )
+
+    assert (out / "generated" / "comsol_geometry_2d.npz").is_file()
+    assert not (out / "run_config.yaml").exists()
+    assert not (out / "comsol_manifest.yaml").exists()
+    with np.load(out / "generated" / "comsol_geometry_2d.npz") as geometry:
+        metadata = json.loads(str(np.asarray(geometry["metadata_json"]).item()))
+    topology = metadata["boundary_edge_topology"]
+    assert topology["identity_policy"] == "geometry-scaled-float64-v1"
+    assert topology["identity_resolution_m"] == pytest.approx(1.0)
+
+
+def test_geometry_only_rejects_field_bundle_before_output(tmp_path: Path) -> None:
+    mesh, field, _, _ = _build_inputs(tmp_path)
+    out = tmp_path / "case"
+
+    with pytest.raises(
+        ValueError,
+        match="geometry_only cannot be combined with a field bundle",
+    ):
+        write_case_files(
+            mesh,
+            out,
+            field_bundle_path=field,
+            geometry_only=True,
+            diagnostic_grid_spacing_m=0.5,
+            coordinate_scale_m_per_model_unit=1.0,
+            vacuum_domain_ids=(1,),
         )
 
-    cfg_off = write_adaptive_config(tmp_path / 'adaptive_off', 0)
-    cfg_on = write_adaptive_config(tmp_path / 'adaptive_on', 1)
-    out_off = tmp_path / 'out_adaptive_off'
-    out_on = tmp_path / 'out_adaptive_on'
-    run_solver_2d_from_yaml(cfg_off, output_dir=out_off)
-    run_solver_2d_from_yaml(cfg_on, output_dir=out_on)
-    diag_off = _collision_diagnostics(out_off)
-    diag_on = _collision_diagnostics(out_on)
-    assert int(diag_off['adaptive_substep_segments_count']) == 0
-    assert int(diag_off['adaptive_substep_trigger_count']) == 0
-    assert int(diag_on['adaptive_substep_enabled']) == 1
-    assert int(diag_on['adaptive_substep_segments_count']) > 0
-    assert int(diag_on['adaptive_substep_trigger_count']) > 0
+    assert not out.exists()
 
-def test_default_max_wall_hits_per_step_is_5(tmp_path: Path):
-    out_dir = tmp_path / 'out_default_hits'
-    _run_minimal_case(2, out_dir)
-    diag = _collision_diagnostics(out_dir)
-    assert int(diag['max_wall_hits_per_step']) == 5
-    assert int(diag['adaptive_substep_segments_count']) == 0
-    assert int(diag['adaptive_substep_trigger_count']) == 0
 
-def test_animation_helpers_support_interpolated_wall_event_overlay():
-    positions = np.asarray(
-        [
-            [[0.0, 0.0], [1.0, 0.0]],
-            [[0.5, 0.0], [1.0, 0.5]],
-            [[1.0, 0.0], [1.0, 1.0]],
-        ],
-        dtype=np.float64,
+def test_runnable_missing_inputs_keep_public_error_order(tmp_path: Path) -> None:
+    mesh, field, _, _ = _build_inputs(tmp_path)
+    out = tmp_path / "case"
+
+    with pytest.raises(
+        ValueError,
+        match="runnable COMSOL case requires explicit inputs",
+    ) as exc_info:
+        write_case_files(
+            mesh,
+            out,
+            field_bundle_path=field,
+            diagnostic_grid_spacing_m=0.5,
+            coordinate_scale_m_per_model_unit=1.0,
+            vacuum_domain_ids=(1,),
+        )
+
+    assert str(exc_info.value) == (
+        "runnable COMSOL case requires explicit inputs: "
+        "['release_table_path', 'boundaries_path', 'model_name', 'study', "
+        "'dataset', 'solution', 'solution_number', 'drag_law']"
     )
-    times = np.asarray([0.0, 1.0, 2.0], dtype=np.float64)
-    positions_i, times_i = _interpolate_frames(positions, times, factor=3)
-    assert positions_i.shape[0] == 7
-    assert times_i.shape[0] == 7
+    assert not out.exists()
 
-    wall_events = pd.DataFrame(
-        {
-            'time_s': [0.25, 1.75, 0.5],
-            'particle_id': [10, 10, 99],
+
+def test_cli_rejects_geometry_only_with_field_bundle_before_output(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    mesh, field, _, _ = _build_inputs(tmp_path)
+    out = tmp_path / "case"
+
+    with pytest.raises(SystemExit) as exc_info:
+        main(
+            [
+                "--mphtxt",
+                str(mesh),
+                "--field-bundle",
+                str(field),
+                "--out-dir",
+                str(out),
+                "--geometry-only",
+                "--diagnostic-grid-spacing-m",
+                "0.5",
+                "--coordinate-scale-m-per-model-unit",
+                "1.0",
+                "--vacuum-domain-id",
+                "1",
+            ]
+        )
+
+    assert exc_info.value.code == 2
+    stderr = capsys.readouterr().err
+    assert "--geometry-only cannot be combined with --field-bundle" in stderr
+    assert not out.exists()
+
+
+def test_cli_rejects_geometry_only_with_raw_export_before_output(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    out = tmp_path / "case"
+
+    with pytest.raises(SystemExit) as exc_info:
+        main(
+            [
+                "--raw-export-dir",
+                str(tmp_path / "missing-export"),
+                "--out-dir",
+                str(out),
+                "--profile",
+                "icp_cf4_o2",
+                "--geometry-only",
+                "--diagnostic-grid-spacing-m",
+                "0.5",
+            ]
+        )
+
+    assert exc_info.value.code == 2
+    stderr = capsys.readouterr().err
+    assert "--geometry-only cannot be combined with --raw-export-dir" in stderr
+    assert not out.exists()
+
+
+def test_runnable_artifact_stages_keep_their_dependency_order(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events: list[str] = []
+
+    def record_call(name: str) -> None:
+        original = getattr(builder_module, name)
+
+        def wrapped(*args: object, **kwargs: object):
+            events.append(name)
+            return original(*args, **kwargs)
+
+        monkeypatch.setattr(builder_module, name, wrapped)
+
+    for stage in (
+        "pack_field_bundle",
+        "write_geometry_npz",
+        "write_comsol_entity_maps",
+        "build_summary",
+        "canonical_boundary_table",
+        "canonical_release_table",
+        "copy_explicit_input",
+        "validate_gas",
+        "write_case_contract",
+    ):
+        record_call(stage)
+
+    _build_case(tmp_path, tmp_path / "case")
+
+    assert events == [
+        "canonical_boundary_table",
+        "pack_field_bundle",
+        "write_geometry_npz",
+        "write_comsol_entity_maps",
+        "build_summary",
+        "canonical_release_table",
+        "copy_explicit_input",
+        "copy_explicit_input",
+        "validate_gas",
+        "write_case_contract",
+    ]
+
+
+def test_runnable_validation_keeps_solution_and_projection_contracts(
+    tmp_path: Path,
+) -> None:
+    invalid_out = tmp_path / "invalid"
+    with pytest.raises(
+        ValueError,
+        match="solution_number must be a positive integer",
+    ):
+        _build_case(tmp_path, invalid_out, solution_number=0)
+    assert not invalid_out.exists()
+
+    # Declaring the detection tolerance is what tells the adapter boundary
+    # releases are expected; they are then snapped onto their declared entity
+    # and left there, which is where COMSOL puts an inlet particle.
+    valid_out = tmp_path / "valid"
+    _build_case(
+        tmp_path,
+        valid_out,
+        release_projection_tolerance_m=2.0e-6,
+    )
+    manifest = yaml.safe_load(
+        (valid_out / "comsol_manifest.yaml").read_text(encoding="utf-8")
+    )
+    assert manifest["metadata"]["release_boundary_projection"] == {
+        "tolerance_m": 2.0e-6,
+    }
+
+
+@pytest.mark.parametrize(
+    ("missing_name", "message"),
+    [
+        ("diagnostic_grid_spacing_m", "diagnostic_grid_spacing_m is required"),
+        (
+            "coordinate_scale_m_per_model_unit",
+            "coordinate_scale_m_per_model_unit is required",
+        ),
+        ("solver_dt_s", "solver_dt_s.*required"),
+        ("solver_t_end_s", "solver_t_end_s.*required"),
+    ],
+)
+def test_builder_rejects_missing_physical_and_time_scales_before_output(
+    tmp_path: Path,
+    missing_name: str,
+    message: str,
+) -> None:
+    mesh, field, release, boundaries = _build_inputs(tmp_path)
+    out = tmp_path / "case"
+    arguments: dict[str, object] = {
+        "field_bundle_path": field,
+        "release_table_path": release,
+        "boundaries_path": boundaries,
+        "diagnostic_grid_spacing_m": 0.5,
+        "coordinate_scale_m_per_model_unit": 1.0,
+        "model_name": "square-test",
+        "study": "std1",
+        "dataset": "dset1",
+        "solution": "sol1",
+        "solution_number": 1,
+        "vacuum_domain_ids": (1,),
+        "drag_law": "none",
+        "solver_dt_s": 0.1,
+        "solver_t_end_s": 1.0,
+    }
+    arguments[missing_name] = None
+
+    with pytest.raises(ValueError, match=message):
+        write_case_files(mesh, out, **arguments)
+
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    ("invalid_name", "invalid_value"),
+    [
+        ("diagnostic_grid_spacing_m", 0.0),
+        ("coordinate_scale_m_per_model_unit", float("nan")),
+        ("solver_dt_s", float("inf")),
+        ("solver_t_end_s", -1.0),
+    ],
+)
+def test_builder_rejects_invalid_physical_and_time_scales_before_output(
+    tmp_path: Path,
+    invalid_name: str,
+    invalid_value: float,
+) -> None:
+    mesh, field, release, boundaries = _build_inputs(tmp_path)
+    out = tmp_path / "case"
+    arguments: dict[str, object] = {
+        "field_bundle_path": field,
+        "release_table_path": release,
+        "boundaries_path": boundaries,
+        "diagnostic_grid_spacing_m": 0.5,
+        "coordinate_scale_m_per_model_unit": 1.0,
+        "model_name": "square-test",
+        "study": "std1",
+        "dataset": "dset1",
+        "solution": "sol1",
+        "solution_number": 1,
+        "vacuum_domain_ids": (1,),
+        "drag_law": "none",
+        "solver_dt_s": 0.1,
+        "solver_t_end_s": 1.0,
+    }
+    arguments[invalid_name] = invalid_value
+
+    with pytest.raises(ValueError, match=rf"{invalid_name}.*positive and finite"):
+        write_case_files(mesh, out, **arguments)
+
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    "omitted_option",
+    ["--diagnostic-grid-spacing-m", "--coordinate-scale-m-per-model-unit"],
+)
+def test_builder_cli_requires_geometry_scales_before_output(
+    tmp_path: Path,
+    omitted_option: str,
+) -> None:
+    mesh = _write_square_mesh(tmp_path / "mesh.mphtxt")
+    out = tmp_path / "case"
+    options = {
+        "--diagnostic-grid-spacing-m": "0.5",
+        "--coordinate-scale-m-per-model-unit": "1.0",
+    }
+    argv = [
+        "--mphtxt",
+        str(mesh),
+        "--out-dir",
+        str(out),
+        "--geometry-only",
+        "--vacuum-domain-id",
+        "1",
+    ]
+    for option, value in options.items():
+        if option != omitted_option:
+            argv.extend((option, value))
+
+    with pytest.raises(SystemExit):
+        main(argv)
+
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("omitted_option", ["--dt-s", "--t-end-s"])
+def test_builder_cli_requires_runnable_time_scales_before_output(
+    tmp_path: Path,
+    omitted_option: str,
+) -> None:
+    out = tmp_path / "case"
+    options = {"--dt-s": "0.1", "--t-end-s": "1.0"}
+    argv = [
+        "--out-dir",
+        str(out),
+        "--diagnostic-grid-spacing-m",
+        "0.5",
+        "--coordinate-scale-m-per-model-unit",
+        "1.0",
+    ]
+    for option, value in options.items():
+        if option != omitted_option:
+            argv.extend((option, value))
+
+    with pytest.raises(SystemExit):
+        main(argv)
+
+    assert not out.exists()
+
+
+def test_builder_emits_only_v2_case_inputs_and_manifest_is_self_consistent(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "case"
+    _build_case(tmp_path, out)
+
+    assert (out / "particles.csv").is_file()
+    assert (out / "boundaries.csv").is_file()
+    assert not (out / "materials.csv").exists()
+    assert not (out / "part_walls.csv").exists()
+
+    config_payload = yaml.safe_load(
+        (out / "run_config.yaml").read_text(encoding="utf-8")
+    )
+    assert set(config_payload) == {
+        "schema_version",
+        "case",
+        "inputs",
+        "physics",
+        "time",
+        "output",
+    }
+    assert config_payload["case"]["adapter"] == "comsol"
+    assert config_payload["inputs"] == {"comsol_manifest": "comsol_manifest.yaml"}
+    assert "drag" not in config_payload["physics"]
+    assert config_payload["physics"]["forces"] == {}
+    assert load_run_config(out / "run_config.yaml").case.adapter == "comsol"
+
+    manifest_payload = yaml.safe_load(
+        (out / "comsol_manifest.yaml").read_text(encoding="utf-8")
+    )
+    assert manifest_payload["schema_version"] == 2
+    assert manifest_payload["model"] == {
+        "name": "square-test",
+        "study": "std1",
+        "dataset": "dset1",
+        "solution": "sol1",
+    }
+    assert manifest_payload["time"] == {
+        "interpolation": "linear",
+        "support_s": [0.0, 1.0],
+    }
+    assert manifest_payload["coordinates"]["axis_order"] == ["x", "y"]
+    assert manifest_payload["fields"]["velocity"]["components"] == {
+        "x": "ux",
+        "y": "uy",
+    }
+    assert manifest_payload["fields"]["electric_field"]["components"] == {
+        "x": "E_x",
+        "y": "E_y",
+    }
+    for semantic, field_spec in manifest_payload["fields"].items():
+        assert semantic
+        assert not (
+            {"name", "physical_quantity", "mesh", "interpolation"} & set(field_spec)
+        )
+    assert manifest_payload["forces"] == [
+        {"solver_force": "drag", "enabled": True, "law": "stokes"},
+        {"solver_force": "electric", "enabled": True},
+    ]
+    assert manifest_payload["metadata"]["vacuum_domain_ids"] == [1]
+    assert manifest_payload["metadata"]["source_solution_number"] == 1
+    assert (
+        manifest_payload["metadata"]["geometry_source"]
+        == "explicit_comsol_vacuum_domain_selection"
+    )
+    for artifact in manifest_payload["artifacts"].values():
+        path = out / artifact["path"]
+        assert artifact["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+        assert artifact["size_bytes"] == path.stat().st_size
+    assert (
+        ComsolCaseManifest.load(out / "comsol_manifest.yaml").validate(strict=True)
+        == []
+    )
+
+
+def test_builder_writes_debug_output_interval_to_typed_config(tmp_path: Path) -> None:
+    out = tmp_path / "debug-case"
+
+    _build_case(
+        tmp_path,
+        out,
+        output_mode="debug",
+        trajectory_interval_steps=3,
+    )
+
+    config = yaml.safe_load((out / "run_config.yaml").read_text(encoding="utf-8"))
+    assert config["output"] == {
+        "mode": "debug",
+        "trajectory_interval_steps": 3,
+    }
+
+
+def test_builder_rejects_incomplete_boundary_coverage(tmp_path: Path) -> None:
+    mesh, field, release, _ = _build_inputs(tmp_path)
+    boundaries = _write_boundaries(tmp_path / "incomplete.csv", (1, 2, 3))
+
+    with pytest.raises(
+        ValueError, match="explicitly cover every generated geometry part"
+    ):
+        write_case_files(
+            mesh,
+            tmp_path / "case",
+            field_bundle_path=field,
+            release_table_path=release,
+            boundaries_path=boundaries,
+            diagnostic_grid_spacing_m=0.5,
+            coordinate_scale_m_per_model_unit=1.0,
+            model_name="square-test",
+            study="std1",
+            dataset="dset1",
+            solution="sol1",
+            solution_number=1,
+            vacuum_domain_ids=(1,),
+            drag_law="none",
+            solver_dt_s=0.1,
+            solver_t_end_s=1.0,
+        )
+
+
+def test_builder_rejects_missing_drag_gas_instead_of_filling_defaults(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="requires explicit gas values"):
+        _build_case(tmp_path, tmp_path / "case", gas_dynamic_viscosity_Pas=None)
+
+
+def test_builder_rejects_release_part_without_boundary_registration(
+    tmp_path: Path,
+) -> None:
+    mesh, field, _, boundaries = _build_inputs(tmp_path)
+    release = _write_particles(tmp_path / "unknown_source.csv", source_part_id=99)
+
+    with pytest.raises(ValueError, match="unregistered source_part_id"):
+        write_case_files(
+            mesh,
+            tmp_path / "case",
+            field_bundle_path=field,
+            release_table_path=release,
+            boundaries_path=boundaries,
+            diagnostic_grid_spacing_m=0.5,
+            coordinate_scale_m_per_model_unit=1.0,
+            model_name="square-test",
+            study="std1",
+            dataset="dset1",
+            solution="sol1",
+            solution_number=1,
+            vacuum_domain_ids=(1,),
+            drag_law="none",
+            solver_dt_s=0.1,
+            solver_t_end_s=1.0,
+        )
+
+
+def test_builder_maps_swapped_comsol_entities_to_solver_part_ids_once(
+    tmp_path: Path,
+) -> None:
+    mesh, field, _, _ = _build_inputs(tmp_path)
+    release = _write_particles(tmp_path / "mapped_release.csv", source_part_id=40)
+    boundaries = _write_boundaries(
+        tmp_path / "mapped_boundaries.csv",
+        (40, 10, 30, 20),
+        comsol_entity_ids=(1, 2, 3, 4),
+    )
+    out = tmp_path / "mapped_case"
+
+    write_case_files(
+        mesh,
+        out,
+        field_bundle_path=field,
+        release_table_path=release,
+        boundaries_path=boundaries,
+        diagnostic_grid_spacing_m=0.5,
+        coordinate_scale_m_per_model_unit=1.0,
+        model_name="square-test",
+        study="std1",
+        dataset="dset1",
+        solution="sol1",
+        solution_number=1,
+        vacuum_domain_ids=(1,),
+        drag_law="none",
+        solver_dt_s=0.1,
+        solver_t_end_s=1.0,
+    )
+
+    with np.load(out / "generated" / "comsol_geometry_2d.npz") as geometry:
+        np.testing.assert_array_equal(
+            geometry["boundary_edge_part_ids"],
+            np.asarray([40, 10, 30, 20], dtype=np.int32),
+        )
+        assert set(np.unique(geometry["nearest_boundary_part_id_map"])) <= {
+            10,
+            20,
+            30,
+            40,
         }
+    mapping = pd.read_csv(out / "generated" / "comsol_boundary_entity_mapping.csv")
+    assert mapping[["comsol_edge_entity_id", "solver_part_id"]].to_dict("records") == [
+        {"comsol_edge_entity_id": 1, "solver_part_id": 40},
+        {"comsol_edge_entity_id": 2, "solver_part_id": 10},
+        {"comsol_edge_entity_id": 3, "solver_part_id": 30},
+        {"comsol_edge_entity_id": 4, "solver_part_id": 20},
+    ]
+    assert list(pd.read_csv(out / "boundaries.csv")) == list(pd.read_csv(boundaries))
+
+
+def test_builder_reports_missing_then_extra_comsol_boundary_entities(
+    tmp_path: Path,
+) -> None:
+    mesh, field, release, _ = _build_inputs(tmp_path)
+    boundaries = _write_boundaries(
+        tmp_path / "wrong_entities.csv",
+        (10, 20, 30, 50),
+        comsol_entity_ids=(1, 2, 3, 5),
     )
-    xy, frame_ids = _prepare_event_overlay(
-        wall_events=wall_events,
-        sample_indices=np.asarray([0], dtype=np.int64),
-        particle_ids=np.asarray([10, 20], dtype=np.int64),
-        positions=positions_i,
-        times=times_i,
-        interpolate_positions=True,
+
+    with pytest.raises(
+        ValueError,
+        match="explicitly cover every generated geometry part",
+    ) as exc_info:
+        write_case_files(
+            mesh,
+            tmp_path / "wrong_case",
+            field_bundle_path=field,
+            release_table_path=release,
+            boundaries_path=boundaries,
+            diagnostic_grid_spacing_m=0.5,
+            coordinate_scale_m_per_model_unit=1.0,
+            model_name="square-test",
+            study="std1",
+            dataset="dset1",
+            solution="sol1",
+            solution_number=1,
+            vacuum_domain_ids=(1,),
+            drag_law="none",
+            solver_dt_s=0.1,
+            solver_t_end_s=1.0,
+        )
+
+    assert str(exc_info.value).endswith("missing=[4], stale=[5]")
+
+
+def test_builder_simple_force_flag_rejects_coefficient_bearing_force_before_writing(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "case"
+
+    with pytest.raises(
+        ValueError, match=r"--force only supports electric.*--force-inventory"
+    ):
+        _build_case(tmp_path, out, enabled_forces=("gravity",))
+
+    assert not out.exists()
+
+
+def test_builder_copies_validated_typed_force_inventory_without_losing_parameters(
+    tmp_path: Path,
+) -> None:
+    inventory = tmp_path / "forces.yaml"
+    inventory.write_text(
+        yaml.safe_dump(
+            {
+                "forces": [
+                    {
+                        "solver_force": "gravity",
+                        "enabled": True,
+                        "parameters": {
+                            "acceleration_mps2": [0.0, -9.81],
+                            "buoyancy": True,
+                        },
+                    },
+                    {
+                        "solver_force": "thermophoresis",
+                        "enabled": True,
+                        "model": "continuum",
+                        "parameters": {
+                            "gas_thermal_conductivity_W_mK": 0.031,
+                            "particle_thermal_conductivity_W_mK": 2.4,
+                        },
+                    },
+                ]
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
     )
-    assert xy.shape == (2, 2)
-    assert frame_ids.shape == (2,)
-    assert int(np.min(frame_ids)) >= 0
-    assert int(np.max(frame_ids)) < positions_i.shape[0]
+    out = tmp_path / "case"
+
+    _build_case(tmp_path, out, force_inventory_path=inventory)
+
+    manifest = ComsolCaseManifest.load(out / "comsol_manifest.yaml")
+    assert manifest.validate(strict=True) == []
+    model = manifest.force_model
+    assert model.drag.model == "stokes"
+    assert model.electric.enabled
+    assert model.gravity.acceleration_mps2 == (0.0, -9.81)
+    assert model.gravity.buoyancy
+    assert model.thermophoresis.model == "continuum"
+    assert model.thermophoresis.gas_thermal_conductivity_W_mK == pytest.approx(0.031)
+    assert model.thermophoresis.particle_thermal_conductivity_W_mK == pytest.approx(2.4)
+
+
+def test_builder_typed_inventory_fails_on_missing_force_physics_before_writing(
+    tmp_path: Path,
+) -> None:
+    inventory = tmp_path / "forces.yaml"
+    inventory.write_text(
+        yaml.safe_dump(
+            {
+                "forces": [
+                    {
+                        "solver_force": "thermophoresis",
+                        "enabled": True,
+                        "parameters": {
+                            "gas_thermal_conductivity_W_mK": 0.031,
+                        },
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    out = tmp_path / "case"
+
+    with pytest.raises(ValueError, match="particle_thermal_conductivity_W_mK"):
+        _build_case(tmp_path, out, force_inventory_path=inventory)
+
+    assert not out.exists()
+
+
+def test_builder_rejects_rz_lift_from_typed_inventory_before_writing(
+    tmp_path: Path,
+) -> None:
+    inventory = tmp_path / "forces.yaml"
+    inventory.write_text(
+        yaml.safe_dump(
+            {
+                "forces": [
+                    {
+                        "solver_force": "lift",
+                        "enabled": True,
+                        "model": "saffman",
+                        "parameters": {"coefficient": 6.46},
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    out = tmp_path / "case"
+
+    with pytest.raises(ValueError, match=r"axisymmetric_rz no-swirl.*lift"):
+        _build_case(
+            tmp_path,
+            out,
+            coordinate_system="axisymmetric_rz",
+            force_inventory_path=inventory,
+        )
+
+    assert not out.exists()
+
+
+def test_builder_requires_explicit_vacuum_domain_before_writing(tmp_path: Path) -> None:
+    mesh = _write_square_mesh(tmp_path / "mesh.mphtxt")
+    out = tmp_path / "case"
+
+    with pytest.raises(ValueError, match="explicit vacuum_domain_id"):
+        write_case_files(
+            mesh,
+            out,
+            geometry_only=True,
+            diagnostic_grid_spacing_m=0.5,
+            coordinate_scale_m_per_model_unit=1.0,
+        )
+
+    assert not out.exists()
+
+
+def test_field_valid_mask_never_replaces_physical_geometry(tmp_path: Path) -> None:
+    mesh, field, release, boundaries = _build_inputs(tmp_path)
+    with np.load(field) as source:
+        payload = {name: np.asarray(source[name]) for name in source.files}
+    payload["valid_mask"] = np.ones((3, 3), dtype=bool)
+    payload["valid_mask"][1, 1] = False
+    np.savez_compressed(field, **payload)
+    out = tmp_path / "case"
+
+    write_case_files(
+        mesh,
+        out,
+        field_bundle_path=field,
+        release_table_path=release,
+        boundaries_path=boundaries,
+        diagnostic_grid_spacing_m=0.5,
+        coordinate_scale_m_per_model_unit=1.0,
+        model_name="square-test",
+        study="std1",
+        dataset="dset1",
+        solution="sol1",
+        solution_number=1,
+        vacuum_domain_ids=(1,),
+        drag_law="none",
+        solver_dt_s=0.1,
+        solver_t_end_s=1.0,
+    )
+
+    with np.load(out / "generated" / "comsol_geometry_2d.npz") as geometry:
+        assert geometry["boundary_edges"].shape == (4, 2, 2)
+        metadata = json.loads(str(np.asarray(geometry["metadata_json"]).item()))
+        assert metadata["source_kind"] == "comsol_selected_vacuum_domain_geometry"
+        assert metadata["field_support_is_physical_boundary"] is False
+    with np.load(out / "generated" / "comsol_field_2d.npz") as packed_field:
+        assert np.count_nonzero(packed_field["valid_mask"]) == 8
+
+
+def test_vacuum_domain_selection_preserves_internal_solid_interface(
+    tmp_path: Path,
+) -> None:
+    mesh = _write_two_domain_mesh(tmp_path / "mesh.mphtxt")
+    out = tmp_path / "case"
+
+    write_case_files(
+        mesh,
+        out,
+        geometry_only=True,
+        diagnostic_grid_spacing_m=0.5,
+        coordinate_scale_m_per_model_unit=1.0,
+        vacuum_domain_ids=(1,),
+    )
+
+    with np.load(out / "generated" / "comsol_geometry_2d.npz") as geometry:
+        edges = np.asarray(geometry["boundary_edges"], dtype=np.float64)
+        assert edges.shape == (4, 2, 2)
+        assert float(np.max(edges[:, :, 0])) == pytest.approx(1.0)
+        assert any(np.allclose(edge[:, 0], 1.0) for edge in edges)
+    domains = pd.read_csv(out / "generated" / "comsol_domain_entity_mapping.csv")
+    assert domains.set_index("comsol_domain_entity_id")[
+        "selected_as_vacuum_domain"
+    ].to_dict() == {
+        1: True,
+        2: False,
+    }
+
+
+def test_adjacent_vacuum_domains_keep_shared_entity_out_of_containment(
+    tmp_path: Path,
+) -> None:
+    mesh = _write_two_domain_mesh(tmp_path / "mesh.mphtxt")
+    out = tmp_path / "case"
+
+    write_case_files(
+        mesh,
+        out,
+        geometry_only=True,
+        diagnostic_grid_spacing_m=0.5,
+        coordinate_scale_m_per_model_unit=1.0,
+        vacuum_domain_ids=(1, 2),
+    )
+
+    with np.load(out / "generated" / "comsol_geometry_2d.npz") as geometry:
+        edges = np.asarray(geometry["boundary_edges"], dtype=np.float64)
+        part_ids = np.asarray(geometry["boundary_edge_part_ids"], dtype=np.int32)
+        loops = np.asarray(geometry["boundary_loops_2d_flat"], dtype=np.float64)
+        nearest = np.asarray(geometry["nearest_boundary_part_id_map"], dtype=np.int32)
+        inside = np.asarray(geometry["valid_mask"], dtype=bool)
+        metadata = json.loads(str(np.asarray(geometry["metadata_json"]).item()))
+
+    assert edges.shape == (7, 2, 2)
+    assert 7 in part_ids
+    assert loops.shape == (6, 2)
+    assert np.all(inside)
+    assert 7 not in nearest
+    assert metadata["containment_boundary_edge_count"] == 6
+    assert metadata["internal_interface_edge_count"] == 1
+
+    loaded = build_precomputed_geometry(
+        {"npz_path": str(out / "generated" / "comsol_geometry_2d.npz")},
+        spatial_dim=2,
+        coordinate_system="cartesian_xy",
+    ).geometry
+    assert loaded.boundary_edges is not None
+    assert loaded.boundary_edges.shape == (7, 2, 2)
+    assert len(loaded.boundary_loops_2d) == 1
+    assert loaded.metadata["boundary_edge_topology"]["edge_count"] == 6
+
+
+def test_vacuum_domain_selection_rejects_unknown_domain_before_writing(
+    tmp_path: Path,
+) -> None:
+    mesh = _write_two_domain_mesh(tmp_path / "mesh.mphtxt")
+    out = tmp_path / "case"
+
+    with pytest.raises(ValueError, match=r"missing=\[3\].*available=\[1, 2\]"):
+        write_case_files(
+            mesh,
+            out,
+            geometry_only=True,
+            diagnostic_grid_spacing_m=0.5,
+            coordinate_scale_m_per_model_unit=1.0,
+            vacuum_domain_ids=(3,),
+        )
+
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    ("domain_ids", "message"),
+    [
+        ((), "at least one explicit vacuum_domain_id is required"),
+        ((True,), "vacuum_domain_ids must contain integers"),
+        ((0,), "vacuum_domain_ids must contain positive integers"),
+        ((1, 1), "vacuum_domain_ids must not contain duplicates"),
+    ],
+)
+def test_vacuum_domain_selection_validation_contract(
+    domain_ids: tuple[int | bool, ...],
+    message: str,
+) -> None:
+    mesh = _two_square_mesh(scale=1.0, separated=True)
+
+    with pytest.raises(ValueError, match=message):
+        select_vacuum_domains(mesh, domain_ids)
+
+
+def test_vacuum_selection_keeps_mesh_order_and_non_surface_blocks() -> None:
+    source = _two_square_mesh(scale=1.0, separated=True)
+    quad = source.type_blocks["quad"]
+    mesh = ParsedMesh(
+        sdim=source.sdim,
+        vertices=source.vertices,
+        type_blocks={
+            **source.type_blocks,
+            "quad": MeshTypeBlock(
+                type_name=quad.type_name,
+                vertices_per_element=quad.vertices_per_element,
+                elements=quad.elements,
+                geometric_entity_indices=np.asarray([1, 0], dtype=np.int64),
+            ),
+        },
+    )
+
+    selected, domain_ids = select_vacuum_domains(mesh, (2, 1))
+
+    assert domain_ids == (1, 2)
+    assert selected.type_blocks["edg"] is mesh.type_blocks["edg"]
+    np.testing.assert_array_equal(
+        selected.type_blocks["quad"].elements,
+        mesh.type_blocks["quad"].elements,
+    )
+    np.testing.assert_array_equal(
+        selected.type_blocks["quad"].geometric_entity_indices,
+        np.asarray([1, 0], dtype=np.int64),
+    )
+
+
+def test_mphtxt_parser_preserves_block_order_shapes_and_numeric_dtypes(
+    tmp_path: Path,
+) -> None:
+    parsed = parse_comsol_mphtxt(_write_square_mesh(tmp_path / "mesh.mphtxt"))
+
+    assert parsed.sdim == 2
+    assert list(parsed.type_blocks) == ["edg", "quad"]
+    assert parsed.vertices.shape == (4, 2)
+    assert parsed.vertices.dtype == np.float64
+    for name, shape in (("edg", (4, 2)), ("quad", (1, 4))):
+        block = parsed.type_blocks[name]
+        assert block.type_name == name
+        assert block.elements.shape == shape
+        assert block.elements.dtype == np.int64
+        assert block.geometric_entity_indices.dtype == np.int64
+
+    unchanged = scale_mesh_coordinates(parsed, 1.0)
+    scaled = scale_mesh_coordinates(parsed, 0.25)
+    assert unchanged is parsed
+    assert scaled.type_blocks is parsed.type_blocks
+    assert scaled.vertices.dtype == np.float64
+    np.testing.assert_array_equal(scaled.vertices, parsed.vertices * 0.25)
+
+
+def test_mesh_facade_directly_reexports_each_public_owner() -> None:
+    assert MeshTypeBlock is mesh_parsing.MeshTypeBlock
+    assert ParsedMesh is mesh_parsing.ParsedMesh
+    assert parse_comsol_mphtxt is mesh_parsing.parse_comsol_mphtxt
+    assert scale_mesh_coordinates is mesh_parsing.scale_mesh_coordinates
+    assert select_vacuum_domains is mesh_parsing.select_vacuum_domains
+    assert (
+        assign_part_ids_from_edge_entities
+        is mesh_topology.assign_part_ids_from_edge_entities
+    )
+    assert build_precomputed_arrays is mesh_topology.build_precomputed_arrays
+    assert (
+        domain_boundary_edge_vertex_ids is mesh_topology.domain_boundary_edge_vertex_ids
+    )
+    assert (
+        mesh_module.write_comsol_entity_maps is mesh_artifacts.write_comsol_entity_maps
+    )
+    assert mesh_module.write_geometry_npz is mesh_artifacts.write_geometry_npz
+
+
+def test_mphtxt_parser_keeps_marker_and_entity_count_errors(
+    tmp_path: Path,
+) -> None:
+    missing_marker = tmp_path / "missing.mphtxt"
+    missing_marker.write_text("2 # sdim\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Could not find marker: # number of mesh"):
+        parse_comsol_mphtxt(missing_marker)
+
+    mismatch = _write_square_mesh(tmp_path / "mismatch.mphtxt")
+    text = mismatch.read_text(encoding="utf-8").replace(
+        "4 # number of geometric entity indices",
+        "3 # number of geometric entity indices",
+        1,
+    )
+    mismatch.write_text(text, encoding="utf-8")
+    with pytest.raises(
+        ValueError,
+        match="Geometric entity size mismatch for edg: 3 vs 4",
+    ):
+        parse_comsol_mphtxt(mismatch)
+
+
+@pytest.mark.parametrize("scale", [1.0e-13, 1.0, 1.0e3])
+def test_comsol_edge_topology_and_part_assignment_are_scale_invariant(
+    scale: float,
+) -> None:
+    mesh = _two_square_mesh(scale=scale, separated=False)
+
+    boundary_vertex_ids = domain_boundary_edge_vertex_ids(
+        mesh.vertices,
+        mesh.type_blocks,
+    )
+    part_ids = assign_part_ids_from_edge_entities(mesh.type_blocks, boundary_vertex_ids)
+    edge_keys = {tuple(sorted((int(a), int(b)))) for a, b in boundary_vertex_ids}
+
+    assert edge_keys == {(0, 1), (1, 2), (2, 5), (4, 5), (3, 4), (0, 3)}
+    assert set(part_ids.tolist()) == {1, 2, 3, 4, 5, 6}
+    assert 7 not in part_ids  # The truly shared edge (1, 4) is not a domain boundary.
+
+    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=0.5 * scale)
+    normalized = np.asarray(arrays["boundary_edges"], dtype=np.float64) / scale
+    assert normalized.shape == (7, 2, 2)
+    assert int(arrays["containment_boundary_edge_count"]) == 6
+    assert int(arrays["internal_interface_edge_count"]) == 1
+    assert 7 in np.asarray(arrays["boundary_part_ids"], dtype=np.int32)
+    assert len(arrays["boundary_loops_2d"]) == 1
+    np.testing.assert_allclose(
+        np.diff(np.asarray(arrays["axes_x"], dtype=np.float64)) / scale,
+        0.5,
+        rtol=0.0,
+        atol=64.0 * np.finfo(np.float64).eps,
+    )
+    np.testing.assert_allclose(
+        np.diff(np.asarray(arrays["axes_y"], dtype=np.float64)) / scale,
+        0.5,
+        rtol=0.0,
+        atol=64.0 * np.finfo(np.float64).eps,
+    )
+    assert float(np.asarray(arrays["sdf"], dtype=np.float64)[1, 1]) < 0.0
+
+
+def test_comsol_boundary_edges_and_part_ids_keep_surface_traversal_order() -> None:
+    mesh = _two_square_mesh(scale=1.0, separated=False)
+
+    boundary_vertex_ids = domain_boundary_edge_vertex_ids(
+        mesh.vertices,
+        mesh.type_blocks,
+    )
+    part_ids = assign_part_ids_from_edge_entities(mesh.type_blocks, boundary_vertex_ids)
+
+    np.testing.assert_array_equal(
+        boundary_vertex_ids,
+        np.asarray(
+            [[0, 1], [4, 3], [3, 0], [1, 2], [2, 5], [5, 4]],
+            dtype=np.int64,
+        ),
+    )
+    np.testing.assert_array_equal(
+        part_ids,
+        np.asarray([1, 5, 6, 2, 3, 4], dtype=np.int32),
+    )
+
+
+@given(
+    scale=st.floats(
+        min_value=1.0e-12,
+        max_value=1.0e6,
+        allow_nan=False,
+        allow_infinity=False,
+        allow_subnormal=False,
+    )
+)
+@settings(max_examples=24, deadline=None)
+def test_comsol_edge_ownership_order_is_independent_of_coordinate_scale(
+    scale: float,
+) -> None:
+    mesh = _two_square_mesh(scale=scale, separated=False)
+
+    boundary_vertex_ids = domain_boundary_edge_vertex_ids(
+        mesh.vertices,
+        mesh.type_blocks,
+    )
+    part_ids = assign_part_ids_from_edge_entities(
+        mesh.type_blocks,
+        boundary_vertex_ids,
+    )
+
+    np.testing.assert_array_equal(
+        boundary_vertex_ids,
+        np.asarray(
+            [[0, 1], [4, 3], [3, 0], [1, 2], [2, 5], [5, 4]],
+            dtype=np.int64,
+        ),
+    )
+    np.testing.assert_array_equal(
+        part_ids,
+        np.asarray([1, 5, 6, 2, 3, 4], dtype=np.int32),
+    )
+
+
+def test_triangle_only_topology_keeps_order_dtypes_and_entity_adjacency() -> None:
+    mesh = _triangle_mesh()
+
+    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=0.5)
+
+    np.testing.assert_array_equal(
+        arrays["boundary_edges"],
+        mesh.vertices[np.asarray([[0, 1], [1, 2], [2, 0]], dtype=np.int64)],
+    )
+    np.testing.assert_array_equal(
+        arrays["boundary_part_ids"],
+        np.asarray([1, 2, 3], dtype=np.int32),
+    )
+    np.testing.assert_array_equal(
+        arrays["triangles"],
+        np.asarray([[0, 1, 2]], dtype=np.int64),
+    )
+    np.testing.assert_array_equal(
+        arrays["triangle_part_ids"],
+        np.asarray([1], dtype=np.int32),
+    )
+    assert np.asarray(arrays["quads"]).shape == (0, 4)
+    assert np.asarray(arrays["quad_part_ids"]).dtype == np.int32
+
+    boundary_rows = mesh_artifacts._comsol_boundary_entity_rows(mesh)
+    assert [row["adjacent_domain_ids"] for row in boundary_rows] == ["1", "1", "1"]
+    domain_rows = mesh_artifacts._comsol_domain_entity_rows(
+        mesh,
+        vacuum_domain_ids=(1,),
+    )
+    assert len(domain_rows) == 1
+    assert domain_rows[0]["mesh_element_types"] == "tri"
+    assert domain_rows[0]["selected_as_vacuum_domain"] is True
+
+
+def test_mesh_public_validation_errors_cover_each_owner_boundary(
+    tmp_path: Path,
+) -> None:
+    mesh = _triangle_mesh()
+    with pytest.raises(ValueError, match="positive finite value"):
+        scale_mesh_coordinates(mesh, 0.0)
+    with pytest.raises(ValueError, match="supports only 2D mesh"):
+        build_precomputed_arrays(
+            ParsedMesh(sdim=3, vertices=mesh.vertices, type_blocks=mesh.type_blocks),
+            diagnostic_grid_spacing_m=0.5,
+        )
+    with pytest.raises(ValueError, match="must include tri or quad"):
+        build_precomputed_arrays(
+            ParsedMesh(sdim=2, vertices=mesh.vertices, type_blocks={}),
+            diagnostic_grid_spacing_m=0.5,
+        )
+    with pytest.raises(ValueError, match=r"finite \(n, 2\) array"):
+        domain_boundary_edge_vertex_ids(np.zeros((2, 3)), mesh.type_blocks)
+    with pytest.raises(ValueError, match="must include edge entities"):
+        assign_part_ids_from_edge_entities(
+            {"tri": mesh.type_blocks["tri"]},
+            np.asarray([[0, 1]], dtype=np.int64),
+        )
+    with pytest.raises(ValueError, match=r"must be an \(n, 2\)"):
+        assign_part_ids_from_edge_entities(
+            mesh.type_blocks,
+            np.asarray([0, 1], dtype=np.int64),
+        )
+    invalid_edge_block = MeshTypeBlock(
+        type_name="edg",
+        vertices_per_element=3,
+        elements=np.asarray([[0, 1, 2]], dtype=np.int64),
+        geometric_entity_indices=np.asarray([0], dtype=np.int64),
+    )
+    with pytest.raises(ValueError, match="exactly two mesh vertex IDs"):
+        assign_part_ids_from_edge_entities(
+            {"edg": invalid_edge_block},
+            np.asarray([[0, 1]], dtype=np.int64),
+        )
+
+    assert (
+        mesh_artifacts.write_comsol_entity_maps(
+            tmp_path,
+            ParsedMesh(sdim=2, vertices=mesh.vertices, type_blocks={}),
+            active_part_ids=[],
+            vacuum_domain_ids=(),
+        )
+        == {}
+    )
+
+
+def test_diagnostic_grid_rejects_invalid_or_excessive_axis_counts() -> None:
+    with pytest.raises(ValueError, match="finite and strictly ordered"):
+        mesh_topology._make_uniform_axis(1.0, 0.0, 1.0)
+    with pytest.raises(ValueError, match="positive and finite"):
+        mesh_topology._make_uniform_axis(0.0, 1.0, 0.0)
+    with pytest.raises(ValueError, match="too many points on one axis"):
+        mesh_topology._make_uniform_axis(0.0, 1.0, 1.0e-9)
+
+    mesh = _two_square_mesh(scale=1.0, separated=False)
+    with pytest.raises(ValueError, match="too many 2D grid points"):
+        build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=2.0e-4)
+
+
+def test_comsol_boundary_entity_rows_keep_schema_order_and_adjacency() -> None:
+    source = _two_square_mesh(scale=1.0, separated=False)
+    edge_block = source.type_blocks["edg"]
+    quad_block = source.type_blocks["quad"]
+    mesh = ParsedMesh(
+        sdim=source.sdim,
+        vertices=source.vertices,
+        type_blocks={
+            "edg": MeshTypeBlock(
+                type_name=edge_block.type_name,
+                vertices_per_element=edge_block.vertices_per_element,
+                elements=edge_block.elements,
+                geometric_entity_indices=np.asarray(
+                    [2, 0, 2, 1, 0, 1, 3], dtype=np.int64
+                ),
+            ),
+            "quad": MeshTypeBlock(
+                type_name=quad_block.type_name,
+                vertices_per_element=quad_block.vertices_per_element,
+                elements=quad_block.elements,
+                geometric_entity_indices=np.asarray([4, 1], dtype=np.int64),
+            ),
+        },
+    )
+
+    rows = mesh_artifacts._comsol_boundary_entity_rows(mesh, active_part_ids=[2])
+
+    expected_columns = [
+        "solver_part_id",
+        "comsol_edge_entity_id",
+        "raw_comsol_edge_entity_index",
+        "comsol_api_selection_entity_id",
+        "active_in_solver_boundary",
+        "segment_count",
+        "x_min_m",
+        "x_max_m",
+        "y_min_m",
+        "y_max_m",
+        "adjacent_domain_ids",
+        "solver_part_name",
+        "comsol_material_name",
+    ]
+    assert [list(row) for row in rows] == [expected_columns] * 4
+    assert [
+        (
+            row["solver_part_id"],
+            row["active_in_solver_boundary"],
+            row["segment_count"],
+            row["x_min_m"],
+            row["x_max_m"],
+            row["adjacent_domain_ids"],
+        )
+        for row in rows
+    ] == [
+        (1, False, 2, 0.0, 2.0, "2;5"),
+        (2, True, 2, 0.0, 2.0, "2;5"),
+        (3, False, 2, 0.0, 2.0, "2;5"),
+        (4, False, 1, 1.0, 1.0, "2;5"),
+    ]
+    for part_id, row in enumerate(rows, start=1):
+        assert row["comsol_edge_entity_id"] == part_id
+        assert row["raw_comsol_edge_entity_index"] == part_id - 1
+        assert row["comsol_api_selection_entity_id"] == part_id - 1
+        assert row["y_min_m"] == 0.0
+        assert row["y_max_m"] == 1.0
+        assert row["solver_part_name"] == f"comsol_boundary_{part_id}"
+        assert row["comsol_material_name"] == "not_exported_from_mphtxt"
+
+
+def test_comsol_domain_rows_and_geometry_npz_keep_schema_and_dtypes(
+    tmp_path: Path,
+) -> None:
+    source = _two_square_mesh(scale=1.0, separated=False)
+    quad = source.type_blocks["quad"]
+    mesh = ParsedMesh(
+        sdim=source.sdim,
+        vertices=source.vertices,
+        type_blocks={
+            **source.type_blocks,
+            "quad": MeshTypeBlock(
+                type_name=quad.type_name,
+                vertices_per_element=quad.vertices_per_element,
+                elements=quad.elements,
+                geometric_entity_indices=np.asarray([0, 1], dtype=np.int64),
+            ),
+        },
+    )
+    rows = mesh_artifacts._comsol_domain_entity_rows(mesh, vacuum_domain_ids=(2,))
+
+    expected_columns = [
+        "comsol_domain_entity_id",
+        "raw_comsol_domain_entity_index",
+        "comsol_api_selection_entity_id",
+        "selected_as_vacuum_domain",
+        "element_count",
+        "mesh_element_types",
+        "x_min_m",
+        "x_max_m",
+        "y_min_m",
+        "y_max_m",
+        "comsol_material_name",
+    ]
+    assert [list(row) for row in rows] == [expected_columns, expected_columns]
+    assert [row["comsol_domain_entity_id"] for row in rows] == [1, 2]
+    assert [row["selected_as_vacuum_domain"] for row in rows] == [False, True]
+    assert [row["mesh_element_types"] for row in rows] == ["quad", "quad"]
+
+    arrays = build_precomputed_arrays(mesh, diagnostic_grid_spacing_m=0.5)
+    output = tmp_path / "geometry.npz"
+    write_geometry_npz(
+        output,
+        axes_x=np.asarray(arrays["axes_x"]),
+        axes_y=np.asarray(arrays["axes_y"]),
+        arrays=arrays,
+        mesh=mesh,
+        metadata={"coordinate_system": "cartesian_xy"},
+    )
+    with np.load(output) as payload:
+        assert payload.files == [
+            "axis_0",
+            "axis_1",
+            "sdf",
+            "normal_0",
+            "normal_1",
+            "valid_mask",
+            "nearest_boundary_part_id_map",
+            "boundary_edges",
+            "boundary_edge_part_ids",
+            "boundary_loops_2d_flat",
+            "boundary_loops_2d_offsets",
+            "mesh_vertices",
+            "mesh_triangles",
+            "mesh_triangle_part_ids",
+            "mesh_quads",
+            "mesh_quad_part_ids",
+            "metadata_json",
+        ]
+        assert payload["axis_0"].dtype == np.float64
+        assert payload["sdf"].dtype == np.float64
+        assert payload["valid_mask"].dtype == np.bool_
+        assert payload["nearest_boundary_part_id_map"].dtype == np.int32
+        assert payload["boundary_edge_part_ids"].dtype == np.int32
+        assert payload["mesh_triangles"].dtype == np.int32
+        assert payload["mesh_quads"].dtype == np.int32
+        assert json.loads(str(payload["metadata_json"])) == {
+            "coordinate_system": "cartesian_xy"
+        }
+
+
+def test_comsol_boundary_topology_errors_keep_actionable_context() -> None:
+    mesh = _two_square_mesh(scale=1.0, separated=False)
+    invalid_tri = MeshTypeBlock(
+        type_name="tri",
+        vertices_per_element=3,
+        elements=np.asarray([[0, 1, 99]], dtype=np.int64),
+        geometric_entity_indices=np.asarray([0], dtype=np.int64),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "COMSOL surface element references a mesh vertex outside the "
+            "vertex table: edge=\\(1, 99\\), vertex_count=6"
+        ),
+    ):
+        domain_boundary_edge_vertex_ids(mesh.vertices, {"tri": invalid_tri})
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "selected vacuum-domain boundary is missing an explicit COMSOL "
+            "edge entity: edge=\\(0, 2\\)"
+        ),
+    ):
+        assign_part_ids_from_edge_entities(
+            mesh.type_blocks,
+            np.asarray([[2, 0]], dtype=np.int64),
+        )
+
+
+def test_near_but_distinct_comsol_nodes_are_not_merged_by_decimal_rounding() -> None:
+    mesh = _two_square_mesh(scale=1.0e-13, separated=True)
+
+    boundary_vertex_ids = domain_boundary_edge_vertex_ids(
+        mesh.vertices,
+        mesh.type_blocks,
+    )
+    part_ids = assign_part_ids_from_edge_entities(mesh.type_blocks, boundary_vertex_ids)
+    boundary_edges = mesh.vertices[boundary_vertex_ids]
+    loops = build_boundary_loops_2d(boundary_edges)
+    topology = validate_boundary_edges_2d(boundary_edges)
+
+    assert boundary_vertex_ids.shape == (8, 2)
+    assert part_ids.tolist() == list(range(1, 9))
+    assert len(loops) == 2
+    assert topology["vertex_count"] == 8
+    assert topology["identity_resolution_m"] == pytest.approx(1.0e-13)
+    assert topology["identity_tolerance_m"] < 0.02e-13
+
+
+def _part_assignment_uses_node_ids_for_close_disconnected_edges() -> None:
+    mesh = _two_square_mesh(scale=1.0e-13, separated=True)
+    boundary_vertex_ids = domain_boundary_edge_vertex_ids(
+        mesh.vertices,
+        mesh.type_blocks,
+    )
+
+    # Nodes 1 and 4 are physically close but deliberately belong to different
+    # disconnected boundaries and different COMSOL edge entities.
+    assert np.linalg.norm(mesh.vertices[1] - mesh.vertices[4]) == pytest.approx(2.0e-15)
+    part_ids = assign_part_ids_from_edge_entities(mesh.type_blocks, boundary_vertex_ids)
+    keyed_parts = {
+        tuple(sorted((int(edge[0]), int(edge[1])))): int(part_id)
+        for edge, part_id in zip(boundary_vertex_ids, part_ids, strict=True)
+    }
+    assert keyed_parts[(0, 1)] == 1
+    assert keyed_parts[(4, 5)] == 5
+
+
+globals()[
+    "test_part_assignment_uses_node_ids_when_an_edge_has_near_duplicate_coordinates"
+] = _part_assignment_uses_node_ids_for_close_disconnected_edges

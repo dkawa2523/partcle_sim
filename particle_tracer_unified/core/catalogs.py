@@ -1,270 +1,131 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, Optional, Tuple
-
 import numpy as np
 
 from .datamodel import (
-    MaterialRow,
-    MaterialTable,
     PartWallRow,
     PartWallTable,
-    PhysicsCatalog,
-    ProcessStepRow,
     WallCatalog,
     WallPartModel,
 )
-from .integrator_registry import validate_integrator_name
-from .source_material_common import pick_float, pick_str
 
-WALL_LAW_ALIASES: Dict[str, str] = {
-    'specular': 'specular',
-    'bounce': 'specular',
-    'specular_bounce': 'specular',
-    'specular_reflection': 'specular',
-    'stick': 'stick',
-    'sticking': 'stick',
-    'freeze': 'stick',
-    'frozen': 'stick',
-    'absorb': 'absorb',
-    'absorbed': 'absorb',
-    'disappear': 'absorb',
-    'disappearing': 'absorb',
-    'open': 'escape',
-    'outflow': 'escape',
-    'exhaust': 'escape',
-    'escape': 'escape',
-    'field_support_exit': 'field_support_exit',
-    'pass_through': 'pass_through',
-    'passthrough': 'pass_through',
-    'transparent': 'pass_through',
-    'inactive': 'pass_through',
-    'continuity': 'pass_through',
-    'pair_continuity': 'pass_through',
-    'interior': 'pass_through',
-    'internal': 'pass_through',
-    'diffuse': 'diffuse',
-    'diffuse_scattering': 'diffuse',
-    'diffuse_reflection': 'diffuse',
-    'mixed_specular_diffuse': 'mixed_specular_diffuse',
-    'mixed_diffuse_specular': 'mixed_specular_diffuse',
-    'mixed_diffuse_and_specular_reflection': 'mixed_specular_diffuse',
-    'mixed_specular_and_diffuse_reflection': 'mixed_specular_diffuse',
-    'critical_sticking_velocity': 'critical_sticking_velocity',
-}
-SUPPORTED_WALL_LAWS = frozenset(WALL_LAW_ALIASES.values())
+SUPPORTED_WALL_LAWS = frozenset(
+    {
+        "stick",
+        "freeze",
+        "absorb",
+        "escape",
+        "pass_through",
+        "specular",
+        "cosine_diffuse",
+        "mixed_specular_diffuse",
+        "critical_sticking_velocity",
+    }
+)
 
 
-def _wall_law_key(value: object) -> str:
-    return str(value).strip().lower().replace('-', '_').replace(' ', '_').replace('/', '_')
+def normalize_wall_law_name(value: object, *, context: str = "wall law") -> str:
+    key = str(value).strip().lower()
+    if not key or key in {"nan", "none", "null"}:
+        raise ValueError(f"{context} must be a supported wall law")
+    if key not in SUPPORTED_WALL_LAWS:
+        expected = ", ".join(sorted(SUPPORTED_WALL_LAWS))
+        raise ValueError(f"Unsupported {context} {value!r}; expected one of {expected}")
+    return key
 
 
-def normalize_wall_law_name(value: object, *, context: str = 'wall law') -> str:
-    key = _wall_law_key(value)
-    if not key or key in {'nan', 'none', 'null'}:
-        raise ValueError(f'{context} must be a supported wall law')
-    if key not in WALL_LAW_ALIASES:
-        expected = ', '.join(sorted(SUPPORTED_WALL_LAWS))
-        raise ValueError(f'Unsupported {context} {value!r}; expected one of {expected}')
-    return WALL_LAW_ALIASES[key]
+def is_internal_pass_through(model: WallPartModel) -> bool:
+    """Whether a wall model represents a transparent interior interface."""
 
-
-def _body_acceleration_from_solver(solver_cfg: Mapping[str, Any], spatial_dim: int) -> Tuple[float, ...]:
-    forces_cfg = solver_cfg.get('forces', {}) if isinstance(solver_cfg.get('forces', {}), Mapping) else {}
-    gravity_raw = forces_cfg.get('gravity', {}) if isinstance(forces_cfg, Mapping) else {}
-    if isinstance(gravity_raw, str) and gravity_raw.strip().lower() in {'0', 'false', 'no', 'off'}:
-        return tuple([0.0] * spatial_dim)
-    if isinstance(gravity_raw, (bool, int)) and not bool(gravity_raw):
-        return tuple([0.0] * spatial_dim)
-    gravity_cfg = gravity_raw if isinstance(gravity_raw, Mapping) else {}
-    if gravity_cfg:
-        enabled_raw = gravity_cfg.get('enabled', 'auto')
-        if isinstance(enabled_raw, str) and enabled_raw.strip().lower() in {'0', 'false', 'no', 'off'}:
-            return tuple([0.0] * spatial_dim)
-        if isinstance(enabled_raw, (bool, int)) and not bool(enabled_raw):
-            return tuple([0.0] * spatial_dim)
-        if 'acceleration_mps2' in gravity_cfg and isinstance(gravity_cfg['acceleration_mps2'], (list, tuple)):
-            vals = [float(v) for v in gravity_cfg['acceleration_mps2']]
-            if len(vals) >= spatial_dim:
-                return tuple(vals[:spatial_dim])
-        if 'gravity_mps2' in gravity_cfg:
-            g = float(gravity_cfg.get('gravity_mps2', 9.81))
-            arr = [0.0] * spatial_dim
-            arr[-1] = -g
-            return tuple(arr)
-    if 'body_acceleration' in solver_cfg and isinstance(solver_cfg['body_acceleration'], (list, tuple)):
-        vals = [float(v) for v in solver_cfg['body_acceleration']]
-        if len(vals) >= spatial_dim:
-            return tuple(vals[:spatial_dim])
-    if 'gravity_mps2' in solver_cfg:
-        g = float(solver_cfg.get('gravity_mps2', 9.81))
-        arr = [0.0] * spatial_dim
-        arr[-1] = -g
-        return tuple(arr)
-    return tuple([0.0] * spatial_dim)
-
-
-def _validated_integrator(solver_cfg: Mapping[str, Any]) -> str:
-    return validate_integrator_name(solver_cfg.get('integrator', 'drag_relaxation'))
-
-
-def build_physics_catalog(config: Mapping[str, Any], spatial_dim: int) -> PhysicsCatalog:
-    solver_cfg = config.get('solver', {}) if isinstance(config.get('solver', {}), Mapping) else {}
-    return PhysicsCatalog(
-        base_flow_scale=1.0,
-        base_drag_tau_scale=1.0,
-        base_body_accel_scale=1.0,
-        integrator=_validated_integrator(solver_cfg),
-        min_tau_p_s=float(solver_cfg.get('min_tau_p_s', 1e-6)),
-        body_acceleration=_body_acceleration_from_solver(solver_cfg, spatial_dim),
-        metadata={'from_solver_cfg': True, 'spatial_dim': int(spatial_dim)},
+    return bool(
+        str(model.law_name) == "pass_through"
+        and str(model.metadata.get("role", "")) == "internal"
     )
 
 
-def build_wall_catalog(walls: Optional[PartWallTable], materials: Optional[MaterialTable], config: Mapping[str, Any]) -> WallCatalog:
-    wall_cfg = config.get('wall', {}) if isinstance(config.get('wall', {}), Mapping) else {}
-    materials_lu = materials.as_lookup() if materials is not None else {}
-    walls_lu = walls.as_lookup() if walls is not None else {}
-
-    def model_from_rows(part_id: int, part_name: str, wall_row: Optional[PartWallRow], mat_row: Optional[MaterialRow]) -> WallPartModel:
-        law_raw = pick_str(
-            getattr(wall_row, 'wall_law', None) if wall_row else None,
-            getattr(mat_row, 'wall_law', None) if mat_row else None,
-            wall_cfg.get('default_mode', wall_cfg.get('mode', 'specular')),
-            default='specular',
+def _validated_wall_coefficients(
+    row: PartWallRow,
+    part_id: int,
+) -> tuple[float, float, float, float]:
+    stick_probability = float(row.wall_stick_probability)
+    restitution = float(row.wall_restitution)
+    diffuse_fraction = float(row.wall_diffuse_fraction)
+    critical_velocity = float(row.wall_critical_sticking_velocity_mps)
+    values = (stick_probability, restitution, diffuse_fraction, critical_velocity)
+    if not all(np.isfinite(value) for value in values):
+        raise ValueError(f"Boundary part_id={part_id} has non-finite wall coefficients")
+    if not 0.0 <= stick_probability <= 1.0:
+        raise ValueError(
+            f"Boundary part_id={part_id} stick probability must be in [0, 1]"
         )
-        law_name = normalize_wall_law_name(law_raw, context=f'wall law for part_id={int(part_id)}')
-        stick_probability = pick_float(
-            getattr(wall_row, 'wall_stick_probability', np.nan) if wall_row else np.nan,
-            getattr(mat_row, 'wall_stick_probability', np.nan) if mat_row else np.nan,
-            wall_cfg.get('stick_probability', wall_cfg.get('default_stick_probability', 0.0)),
-            default=0.0,
+    if not 0.0 <= diffuse_fraction <= 1.0:
+        raise ValueError(
+            f"Boundary part_id={part_id} diffuse fraction must be in [0, 1]"
         )
-        restitution = pick_float(
-            getattr(wall_row, 'wall_restitution', np.nan) if wall_row else np.nan,
-            getattr(mat_row, 'wall_restitution', np.nan) if mat_row else np.nan,
-            wall_cfg.get('restitution', 1.0),
-            default=1.0,
+    if restitution < 0.0 or critical_velocity < 0.0:
+        raise ValueError(
+            f"Boundary part_id={part_id} wall coefficients must be non-negative"
         )
-        diffuse_fraction = pick_float(
-            getattr(wall_row, 'wall_diffuse_fraction', np.nan) if wall_row else np.nan,
-            getattr(mat_row, 'wall_diffuse_fraction', np.nan) if mat_row else np.nan,
-            wall_cfg.get('diffuse_fraction', 0.0),
-            default=0.0,
-        )
-        vcrit = pick_float(
-            getattr(wall_row, 'wall_critical_sticking_velocity_mps', np.nan) if wall_row else np.nan,
-            getattr(mat_row, 'wall_critical_sticking_velocity_mps', np.nan) if mat_row else np.nan,
-            wall_cfg.get('critical_sticking_velocity_mps', 0.0),
-            default=0.0,
-        )
-        reflectivity = pick_float(
-            getattr(wall_row, 'wall_reflectivity', np.nan) if wall_row else np.nan,
-            getattr(mat_row, 'wall_reflectivity', np.nan) if mat_row else np.nan,
-            0.0,
-            default=0.0,
-        )
-        roughness = pick_float(
-            getattr(wall_row, 'wall_roughness_rms', np.nan) if wall_row else np.nan,
-            getattr(mat_row, 'wall_roughness_rms', np.nan) if mat_row else np.nan,
-            0.0,
-            default=0.0,
-        )
-        material_id = int(getattr(wall_row, 'material_id', 0) if wall_row else (getattr(mat_row, 'material_id', 0) if mat_row else 0))
-        material_name = pick_str(
-            getattr(wall_row, 'material_name', None) if wall_row else None,
-            getattr(mat_row, 'material_name', None) if mat_row else None,
-            default='',
-        )
-        return WallPartModel(
-            part_id=int(part_id),
-            part_name=str(part_name),
-            material_id=material_id,
-            material_name=material_name,
-            law_name=law_name,
-            stick_probability=float(np.clip(stick_probability, 0.0, 1.0)),
-            restitution=float(max(restitution, 0.0)),
-            diffuse_fraction=float(np.clip(diffuse_fraction, 0.0, 1.0)),
-            critical_sticking_velocity_mps=float(max(vcrit, 0.0)),
-            reflectivity=float(np.clip(reflectivity, 0.0, 1.0)),
-            roughness_rms=float(max(roughness, 0.0)),
-            metadata={'resolved_from_material': mat_row.material_name if mat_row else '', 'resolved_from_part': part_name},
-        )
-
-    default_model = model_from_rows(0, 'default', None, None)
-    part_models = []
-    for part_id, wall_row in sorted(walls_lu.items(), key=lambda kv: kv[0]):
-        mat_row = materials_lu.get(int(wall_row.material_id)) if int(getattr(wall_row, 'material_id', 0)) > 0 else None
-        part_models.append(model_from_rows(int(part_id), str(wall_row.part_name), wall_row, mat_row))
-    return WallCatalog(default_model=default_model, part_models=tuple(part_models), metadata={'wall_part_count': len(part_models)})
+    return values
 
 
-def resolve_step_physics(physics_catalog: Optional[PhysicsCatalog], step: Optional[ProcessStepRow]) -> Dict[str, Any]:
-    if physics_catalog is None:
-        base_flow_scale = 1.0
-        base_drag_tau_scale = 1.0
-        base_body_accel_scale = 1.0
-        body_accel = np.zeros(3, dtype=np.float64)
-        integrator = 'drag_relaxation'
-        min_tau = 1e-6
-    else:
-        base_flow_scale = float(physics_catalog.base_flow_scale)
-        base_drag_tau_scale = float(physics_catalog.base_drag_tau_scale)
-        base_body_accel_scale = float(physics_catalog.base_body_accel_scale)
-        body_accel = np.asarray(physics_catalog.body_acceleration, dtype=np.float64)
-        integrator = physics_catalog.integrator
-        min_tau = float(physics_catalog.min_tau_p_s)
-    return {
-        'flow_scale': base_flow_scale,
-        'drag_tau_scale': base_drag_tau_scale,
-        'body_accel_scale': base_body_accel_scale,
-        'body_acceleration': body_accel,
-        'integrator': integrator,
-        'min_tau_p_s': min_tau,
-    }
+def _wall_part_model(row: PartWallRow, part_id: int) -> WallPartModel:
+    stick, restitution, diffuse, critical_velocity = _validated_wall_coefficients(
+        row,
+        part_id,
+    )
+    normalized_law = normalize_wall_law_name(
+        row.wall_law,
+        context=f"wall law for part_id={part_id}",
+    )
+    return WallPartModel(
+        part_id=part_id,
+        part_name=str(row.part_name),
+        material_id=int(row.material_id),
+        material_name=str(row.material_name),
+        law_name=normalized_law,
+        stick_probability=stick,
+        restitution=restitution,
+        diffuse_fraction=diffuse,
+        critical_sticking_velocity_mps=critical_velocity,
+        metadata={"role": str(row.role), **dict(row.metadata)},
+    )
 
 
-def resolve_step_wall_model(wall_catalog: Optional[WallCatalog], part_id: int, step: Optional[ProcessStepRow]) -> WallPartModel:
+def build_wall_catalog(
+    walls: PartWallTable | None,
+) -> WallCatalog:
+    """Build the boundary catalog without inherited defaults or fallbacks."""
+
+    if walls is None or not walls.rows:
+        raise ValueError("A non-empty canonical boundaries.csv is required")
+    part_models: list[WallPartModel] = []
+    seen: set[int] = set()
+    for row in walls.rows:
+        part_id = int(row.part_id)
+        if part_id in seen:
+            raise ValueError(f"Duplicate boundary part_id={part_id}")
+        seen.add(part_id)
+        part_models.append(_wall_part_model(row, part_id))
+    return WallCatalog(
+        part_models=tuple(part_models),
+        metadata={"wall_part_count": len(part_models)},
+    )
+
+
+def resolve_step_wall_model(
+    wall_catalog: WallCatalog | None,
+    part_id: int,
+) -> WallPartModel:
     if wall_catalog is None:
-        base = WallPartModel(part_id=int(part_id), part_name=f'part_{int(part_id)}', material_id=0, material_name='', law_name='specular', stick_probability=0.0, restitution=1.0, diffuse_fraction=0.0, critical_sticking_velocity_mps=0.0, reflectivity=0.0, roughness_rms=0.0, metadata={})
-    else:
-        base = wall_catalog.model_for_part(int(part_id))
-    return base
-
-
-def wall_catalog_summary(wall_catalog: Optional[WallCatalog]) -> Dict[str, Any]:
-    if wall_catalog is None:
-        return {'has_wall_catalog': False, 'wall_part_count': 0}
-    return {
-        'has_wall_catalog': True,
-        'wall_part_count': len(wall_catalog.part_models),
-        'default_law': wall_catalog.default_model.law_name,
-        'part_laws': {str(m.part_id): m.law_name for m in wall_catalog.part_models},
-    }
-
-
-def physics_catalog_summary(physics_catalog: Optional[PhysicsCatalog]) -> Dict[str, Any]:
-    if physics_catalog is None:
-        return {'has_physics_catalog': False}
-    return {
-        'has_physics_catalog': True,
-        'integrator': physics_catalog.integrator,
-        'base_flow_scale': float(physics_catalog.base_flow_scale),
-        'base_drag_tau_scale': float(physics_catalog.base_drag_tau_scale),
-        'base_body_accel_scale': float(physics_catalog.base_body_accel_scale),
-        'body_acceleration': list(map(float, physics_catalog.body_acceleration)),
-        'min_tau_p_s': float(physics_catalog.min_tau_p_s),
-    }
+        raise ValueError("Boundary catalog is required before applying a wall law")
+    return wall_catalog.model_for_part(int(part_id))
 
 
 __all__ = (
-    'SUPPORTED_WALL_LAWS',
-    'WALL_LAW_ALIASES',
-    'build_physics_catalog',
-    'build_wall_catalog',
-    'normalize_wall_law_name',
-    'physics_catalog_summary',
-    'resolve_step_physics',
-    'resolve_step_wall_model',
-    'wall_catalog_summary',
+    "SUPPORTED_WALL_LAWS",
+    "build_wall_catalog",
+    "is_internal_pass_through",
+    "normalize_wall_law_name",
+    "resolve_step_wall_model",
 )

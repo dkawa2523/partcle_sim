@@ -1,416 +1,556 @@
 from __future__ import annotations
 
+import hashlib
 import json
-import sys
+import re
 from pathlib import Path
-from types import SimpleNamespace
+from typing import Any
 
 import numpy as np
 import pandas as pd
 import pytest
+import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
-EXTERNAL = ROOT / "external" / "comsol_icp_export"
-sys.path.insert(0, str(EXTERNAL))
-
-from comsol_icp_export.field_bundle import build_field_bundle_from_table, write_field_bundle  # noqa: E402
-from comsol_icp_export.pack_solver_case import (  # noqa: E402
-    apply_material_inventory,
-    apply_wall_catalog_overrides,
-    write_wall_catalog_review,
-)
-from tools.build_comsol_case import (  # noqa: E402
-    FIELD_SUPPORT_BOUNDARY_PART_ID,
-    MeshTypeBlock,
-    ParsedMesh,
-    _all_comsol_edge_entity_reference,
-    _field_support_reference_edges,
-    _material_and_wall_rows,
-    _parse_part_id_list,
-)
-from tools.enforce_outward_source_velocity import enforce_outward_velocity  # noqa: E402
-from particle_tracer_unified.core.datamodel import ParticleTable, QuantitySeriesND, RegularFieldND  # noqa: E402
-from particle_tracer_unified.solvers.compiled_field_backend import compile_runtime_backend, sample_compiled_acceleration_vectors  # noqa: E402
+from particle_tracer_unified.comsol_case.cli import main
+from particle_tracer_unified.comsol_case.contracts import validate_raw_export
+from particle_tracer_unified.comsol_case.fields import build_profile_field_bundle
+from particle_tracer_unified.comsol_case.profiles import BUILD_PROFILES
+from particle_tracer_unified.io.comsol_manifest import ComsolCaseManifest
 
 
-def _sample_table() -> pd.DataFrame:
-    rows = []
-    for r in [0.0, 0.001, 0.002]:
-        for z in [0.0, 0.001, 0.002, 0.003]:
-            valid = not (r == 0.002 and z == 0.003)
+def _samples() -> pd.DataFrame:
+    rows: list[dict[str, float | int]] = []
+    for r in (0.0, 50.0, 100.0):
+        for z in (0.0, 50.0, 100.0):
             rows.append(
                 {
                     "r": r,
                     "z": z,
-                    "valid_mask": 1 if valid else 0,
-                    "ux": r + 2.0 * z if valid else np.nan,
-                    "uy": 0.5 * r - z if valid else np.nan,
-                    "mu": 1.8e-5 + 1.0e-6 * r + 2.0e-6 * z if valid else np.nan,
-                    "E_x": 10.0 * r + z if valid else np.nan,
-                    "E_y": -3.0 * z + r if valid else np.nan,
-                    "T": 320.0 + 10.0 * z if valid else np.nan,
-                    "ne": 1.0e16 + 1.0e18 * r if valid else np.nan,
+                    "valid_mask": 1,
+                    "ux": r + 2.0 * z,
+                    "uy": r - z,
+                    "mu": 1.8e-5,
+                    "E_x": 2.0 * r + z,
+                    "E_y": r - 3.0 * z,
+                    "T": 300.0 + z,
+                    "ne": 1.0e16 + r,
                 }
             )
     return pd.DataFrame(rows)
 
 
-def test_build_field_bundle_from_export_samples(tmp_path: Path) -> None:
-    table = _sample_table()
-    bundle = build_field_bundle_from_table(
-        table,
-        q_ref_c=1.602176634e-19,
-        m_ref_kg=6.64215627e-26,
+def _write_square_mesh(path: Path) -> Path:
+    path.write_text(
+        """2 # sdim
+4 # number of mesh vertices
+# Mesh vertex coordinates
+0 0
+100 0
+100 100
+0 100
+2 # number of element types
+3 edg # type name
+2 # number of vertices per element
+4 # number of elements
+# Elements
+0 1
+1 2
+2 3
+3 0
+4 # number of geometric entity indices
+# Geometric entity indices
+0
+1
+2
+3
+4 quad # type name
+4 # number of vertices per element
+1 # number of elements
+# Elements
+0 1 2 3
+1 # number of geometric entity indices
+# Geometric entity indices
+0
+""",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_boundaries(path: Path) -> Path:
+    pd.DataFrame(
+        [
+            {
+                "part_id": part_id,
+                "part_name": f"icp_wall_{part_id}",
+                "comsol_entity_id": part_id,
+                "role": "wall",
+                "wall_law": "specular",
+                "wall_stick_probability": 0.0,
+                "wall_restitution": 1.0,
+                "wall_diffuse_fraction": 0.0,
+                "wall_critical_sticking_velocity_mps": 0.0,
+                "material_id": part_id,
+                "material_name": "reviewed_material",
+                "metadata_json": "{}",
+            }
+            for part_id in (1, 2, 3, 4)
+        ]
+    ).to_csv(path, index=False)
+    return path
+
+
+def _write_release(path: Path) -> Path:
+    pd.DataFrame(
+        [
+            {
+                "particle_id": 1,
+                "release_time_s": 0.0,
+                "r_m": 0.5,
+                "z_m": 0.5,
+                "vr_mps": 0.0,
+                "vz_mps": 0.0,
+                "mass_kg": 1.0e-15,
+                "drag_diameter_m": 1.0e-6,
+                "charge_C": -1.0e-17,
+                "source_part_id": 1,
+                "density_kgm3": 1200.0,
+            }
+        ]
+    ).to_csv(path, index=False)
+    return path
+
+
+def _file_digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _raw_export_contract_inputs(
+    tmp_path: Path,
+) -> tuple[Path, Path, dict[str, Any]]:
+    mesh_path = _write_square_mesh(tmp_path / "mesh.mphtxt")
+    samples_path = tmp_path / "field_samples.csv"
+    _samples()[["r", "z", "valid_mask", "ux", "uy", "mu", "E_x", "E_y"]].to_csv(
+        samples_path, index=False
+    )
+    payload: dict[str, Any] = {
+        "source_kind": "comsol_java_api_external_export",
+        "model_name": "model",
+        "study": "std1",
+        "dataset": "dset1",
+        "solution": "sol1",
+        "solution_number": 1,
+        "comsol_version": "6.4",
+        "mesh_tag": "mesh1",
+        "parameter_name": "Vrf",
+        "parameter_value": "20[V]",
+        "geometry_model_unit": "cm",
+        "geometry_scale_m_per_model_unit": 0.01,
+        "solver_coordinate_unit": "m",
+        "vacuum_domain_ids": [1],
+        "mph_sha256": "1" * 64,
+        "config_sha256": "2" * 64,
+        "mesh_sha256": _file_digest(mesh_path),
+        "field_samples_sha256": _file_digest(samples_path),
+        "expression_mapping": {
+            "ux": "u",
+            "uy": "w",
+            "mu": "spf.mu",
+            "E_x": "-d(V,r)",
+            "E_y": "-d(V,z)",
+        },
+        "expression_units": {
+            "ux": "m/s",
+            "uy": "m/s",
+            "mu": "Pa*s",
+            "E_x": "V/m",
+            "E_y": "V/m",
+        },
+    }
+    manifest_path = tmp_path / "export_manifest.json"
+    manifest_path.write_text(json.dumps(payload), encoding="utf-8")
+    return tmp_path, manifest_path, payload
+
+
+def test_icp_profile_converts_export_grid_to_si_without_reference_particle_force(
+    tmp_path: Path,
+) -> None:
+    samples = tmp_path / "field_samples.csv"
+    _samples().to_csv(samples, index=False)
+
+    bundle = build_profile_field_bundle(
+        samples,
+        tmp_path / "field.npz",
+        profile=BUILD_PROFILES["icp_cf4_o2"],
         coordinate_scale_m_per_model_unit=0.01,
-        coordinate_model_unit="cm",
-        metadata={"case_name": "synthetic_icp"},
     )
 
-    assert bundle["axis_0"].shape == (3,)
-    assert bundle["axis_1"].shape == (4,)
-    np.testing.assert_allclose(bundle["axis_0"], [0.0, 1.0e-5, 2.0e-5])
-    np.testing.assert_allclose(bundle["axis_1"], [0.0, 1.0e-5, 2.0e-5, 3.0e-5])
-    assert bundle["times"].tolist() == [0.0]
-    assert bundle["valid_mask"].shape == (3, 4)
-    assert int(np.count_nonzero(bundle["valid_mask"])) == 11
-    assert {"ux", "uy", "mu", "E_x", "E_y", "T", "ne"}.issubset(bundle)
-    assert "ax" not in bundle
-    assert "ay" not in bundle
-
-    mask = bundle["valid_mask"]
-    assert np.isnan(bundle["ux"][~mask]).all()
-
-    metadata = json.loads(str(np.asarray(bundle["metadata_json"]).item()))
-    assert metadata["case_name"] == "synthetic_icp"
-    assert metadata["grid_shape"] == [3, 4]
-    assert metadata["valid_node_count"] == 11
-    assert metadata["raw_coordinate_model_unit"] == "cm"
-    assert metadata["coordinate_scale_m_per_model_unit"] == 0.01
-    assert metadata["quantity_summary"]["E_x"]["variation"] > 0.0
-
-    out = tmp_path / "bundle.npz"
-    write_field_bundle(bundle, out)
-    with np.load(out) as payload:
-        assert set(["axis_0", "axis_1", "valid_mask", "ux", "uy", "E_x", "E_y"]).issubset(payload.files)
+    with np.load(bundle) as payload:
+        np.testing.assert_allclose(payload["axis_0"], [0.0, 0.5, 1.0])
+        np.testing.assert_allclose(payload["axis_1"], [0.0, 0.5, 1.0])
+        assert {"ux", "uy", "mu", "E_x", "E_y", "T", "ne"}.issubset(payload.files)
         assert "ax" not in payload.files
         assert "ay" not in payload.files
+        metadata = json.loads(str(np.asarray(payload["metadata_json"]).item()))
+        assert metadata["profile"] == "icp_cf4_o2"
+        assert metadata["artifact_coordinate_unit"] == "m"
 
 
-def test_solver_uses_particle_q_over_m_for_exported_electric_field() -> None:
-    axes = (np.asarray([0.0, 1.0], dtype=np.float64), np.asarray([0.0, 1.0], dtype=np.float64))
-    valid_mask = np.ones((2, 2), dtype=bool)
-    times = np.asarray([0.0], dtype=np.float64)
+def test_icp_profile_rejects_incomplete_export_columns(tmp_path: Path) -> None:
+    samples = _samples().drop(columns=["E_y"])
+    path = tmp_path / "field_samples.csv"
+    samples.to_csv(path, index=False)
 
-    def series(name: str, data) -> QuantitySeriesND:
-        return QuantitySeriesND(name=name, unit="", times=times, data=np.asarray(data, dtype=np.float64))
-
-    field = RegularFieldND(
-        spatial_dim=2,
-        coordinate_system="cartesian_xy",
-        axis_names=("x", "y"),
-        axes=axes,
-        valid_mask=valid_mask,
-        quantities={
-            "ux": series("ux", np.zeros((1, 2, 2))),
-            "uy": series("uy", np.zeros((1, 2, 2))),
-            "E_x": series("E_x", np.ones((1, 2, 2)) * 4.0),
-            "E_y": series("E_y", np.ones((1, 2, 2)) * -6.0),
-        },
-    )
-    particles = ParticleTable(
-        spatial_dim=2,
-        particle_id=np.asarray([1], dtype=np.int64),
-        position=np.asarray([[0.5, 0.5]], dtype=np.float64),
-        velocity=np.asarray([[0.0, 0.0]], dtype=np.float64),
-        release_time=np.asarray([0.0], dtype=np.float64),
-        mass=np.asarray([2.0], dtype=np.float64),
-        diameter=np.asarray([1.0], dtype=np.float64),
-        density=np.asarray([1.0], dtype=np.float64),
-        charge=np.asarray([-0.5], dtype=np.float64),
-        source_part_id=np.asarray([1], dtype=np.int64),
-        material_id=np.asarray([1], dtype=np.int64),
-        source_event_tag=np.asarray([""], dtype=object),
-        source_law_override=np.asarray([""], dtype=object),
-        source_speed_scale_override=np.asarray([np.nan], dtype=np.float64),
-        stick_probability=np.asarray([0.0], dtype=np.float64),
-        dep_particle_rel_permittivity=np.asarray([np.nan], dtype=np.float64),
-        thermophoretic_coeff=np.asarray([np.nan], dtype=np.float64),
-    )
-    runtime = SimpleNamespace(
-        geometry_provider=SimpleNamespace(geometry=SimpleNamespace(axes=axes, valid_mask=valid_mask)),
-        field_provider=SimpleNamespace(field=field),
-        particles=particles,
-        gas=SimpleNamespace(density_kgm3=1.0, dynamic_viscosity_Pas=1.8e-5, temperature=300.0),
-    )
-
-    backend = compile_runtime_backend(runtime, 2, particles=particles)
-
-    assert backend.acceleration_source == "particle_charge_electric_field"
-    assert backend.electric_field_names == ("E_x", "E_y")
-    assert backend.electric_q_over_m_Ckg == pytest.approx(0.0)
-    accel = sample_compiled_acceleration_vectors(
-        backend,
-        2,
-        0.0,
-        np.asarray([[0.5, 0.5]], dtype=np.float64),
-        electric_q_over_m=np.asarray([-0.25], dtype=np.float64),
-    )
-    np.testing.assert_allclose(accel, [[-1.0, 1.5]])
+    with pytest.raises(ValueError, match="missing columns"):
+        build_profile_field_bundle(
+            path,
+            tmp_path / "field.npz",
+            profile=BUILD_PROFILES["icp_cf4_o2"],
+            coordinate_scale_m_per_model_unit=0.01,
+        )
 
 
-def test_uniform_export_field_is_rejected() -> None:
-    table = _sample_table()
-    table["ux"] = 1.0
-    table["uy"] = 0.0
-    table["E_x"] = 5.0
-    table["E_y"] = 0.0
-    with pytest.raises(ValueError, match="velocity field is spatially uniform"):
-        build_field_bundle_from_table(table, q_ref_c=1.0, m_ref_kg=2.0)
-
-
-def test_nonfinite_required_value_on_valid_support_is_rejected() -> None:
-    table = _sample_table()
-    table.loc[(table["r"] == 0.001) & (table["z"] == 0.001), "E_x"] = np.nan
-    with pytest.raises(ValueError, match="required field E_x is non-finite"):
-        build_field_bundle_from_table(table, q_ref_c=1.0, m_ref_kg=2.0, require_nonuniform=False)
-
-
-def test_incomplete_tensor_grid_is_rejected() -> None:
-    table = _sample_table().iloc[:-1].copy()
-    with pytest.raises(ValueError, match="complete tensor grid"):
-        build_field_bundle_from_table(table, q_ref_c=1.0, m_ref_kg=2.0, require_nonuniform=False)
-
-
-def test_generic_comsol_wall_catalog_does_not_guess_icp_roles() -> None:
-    _materials, walls, _fallback = _material_and_wall_rows([42, FIELD_SUPPORT_BOUNDARY_PART_ID])
-    by_part = {int(row["part_id"]): row for row in walls}
-
-    assert 3 not in by_part
-    assert by_part[42]["part_name"] == "comsol_boundary_42"
-    assert by_part[42]["material_name"] == "comsol_boundary"
-    assert by_part[42]["wall_law"] == "specular"
-    assert by_part[42]["wall_stick_probability"] == pytest.approx(0.0)
-    assert by_part[FIELD_SUPPORT_BOUNDARY_PART_ID]["part_name"] == "field_support_boundary"
-    assert by_part[FIELD_SUPPORT_BOUNDARY_PART_ID]["wall_law"] == "specular"
-    assert by_part[FIELD_SUPPORT_BOUNDARY_PART_ID]["wall_stick_probability"] == pytest.approx(0.0)
-
-
-def test_comsol_edge_entities_are_used_as_field_support_reference() -> None:
-    mesh = ParsedMesh(
-        sdim=2,
-        vertices=np.asarray(
-            [
-                [0.0, 0.0],
-                [1.0, 0.0],
-                [0.0, 1.0],
-            ],
-            dtype=np.float64,
-        ),
-        type_blocks={
-            "tri": MeshTypeBlock("tri", 3, np.asarray([[0, 1, 2]], dtype=np.int64), np.asarray([0], dtype=np.int32)),
-            "edg": MeshTypeBlock("edg", 2, np.asarray([[0, 1]], dtype=np.int64), np.asarray([8], dtype=np.int32)),
-        },
-    )
-
-    entity_edges, entity_ids = _all_comsol_edge_entity_reference(mesh)
-    reference_edges, reference_ids = _field_support_reference_edges(
-        mesh,
-        np.asarray([[[0.0, 0.0], [0.0, 1.0]]], dtype=np.float64),
-        np.asarray([FIELD_SUPPORT_BOUNDARY_PART_ID], dtype=np.int32),
-    )
-
-    assert entity_edges.shape == (1, 2, 2)
-    assert entity_ids.tolist() == [9]
-    assert reference_ids.tolist() == [9]
-    np.testing.assert_allclose(reference_edges, entity_edges)
-
-
-def test_material_inventory_updates_generated_entity_maps(tmp_path: Path) -> None:
-    generated = tmp_path / "generated"
-    generated.mkdir()
-    (generated / "material_inventory.json").write_text(
+def test_icp_profile_is_integrated_in_generic_builder_cli(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    mesh_path = _write_square_mesh(raw / "mesh.mphtxt")
+    samples_path = raw / "field_samples.csv"
+    _samples().to_csv(samples_path, index=False)
+    (raw / "export_manifest.json").write_text(
         json.dumps(
             {
-                "materials": [
-                    {"tag": "mat1", "label": "Silicon", "selection_entities": [4]},
-                    {"tag": "mat2", "label": "Quartz", "selection_entities": [5]},
-                ]
+                "source_kind": "comsol_java_api_external_export",
+                "model_name": "icp-cf4-o2",
+                "study": "std1",
+                "dataset": "dset3",
+                "solution": "sol2",
+                "solution_number": 17,
+                "comsol_version": "6.4.0.123",
+                "mesh_tag": "mesh1",
+                "parameter_name": "Vrf",
+                "parameter_value": "20[V]",
+                "geometry_model_unit": "cm",
+                "geometry_scale_m_per_model_unit": 0.01,
+                "solver_coordinate_unit": "m",
+                "vacuum_domain_ids": [1],
+                "mph_sha256": "1" * 64,
+                "config_sha256": "2" * 64,
+                "mesh_sha256": _file_digest(mesh_path),
+                "field_samples_sha256": _file_digest(samples_path),
+                "expression_mapping": {
+                    "ux": "u",
+                    "uy": "w",
+                    "mu": "spf.mu",
+                    "E_x": "-d(ptp.Vav,r)",
+                    "E_y": "-d(ptp.Vav,z)",
+                    "T": "ht.T",
+                    "ne": "ptp.neav",
+                },
+                "expression_units": {
+                    "ux": "m/s",
+                    "uy": "m/s",
+                    "mu": "Pa*s",
+                    "E_x": "V/m",
+                    "E_y": "V/m",
+                    "T": "K",
+                    "ne": "1/m^3",
+                },
             }
         ),
         encoding="utf-8",
     )
-    pd.DataFrame(
-        [
-            {"comsol_domain_entity_id": 4, "comsol_material_name": "not_exported_from_mphtxt"},
-            {"comsol_domain_entity_id": 5, "comsol_material_name": "not_exported_from_mphtxt"},
-        ]
-    ).to_csv(generated / "comsol_domain_entity_mapping.csv", index=False)
-    pd.DataFrame(
-        [
-            {
-                "solver_part_id": 9,
-                "adjacent_domain_ids": "4;5",
-                "comsol_material_name": "not_exported_from_mphtxt",
-            }
-        ]
-    ).to_csv(generated / "comsol_boundary_entity_mapping.csv", index=False)
+    release = _write_release(tmp_path / "release.csv")
+    boundaries = _write_boundaries(tmp_path / "boundaries_input.csv")
+    out = tmp_path / "case"
 
-    summary = apply_material_inventory(generated)
-    domains = pd.read_csv(generated / "comsol_domain_entity_mapping.csv")
-    boundaries = pd.read_csv(generated / "comsol_boundary_entity_mapping.csv")
-
-    assert summary["applied"] is True
-    assert domains["comsol_material_name"].tolist() == ["Silicon", "Quartz"]
-    assert boundaries.loc[0, "comsol_material_name"] == "Silicon|Quartz"
-
-
-def test_material_inventory_handles_zero_based_selection_entities(tmp_path: Path) -> None:
-    generated = tmp_path / "generated"
-    generated.mkdir()
-    (generated / "material_inventory.json").write_text(
-        json.dumps({"materials": [{"tag": "mat1", "label": "Silicon", "selection_entities": [3]}]}),
-        encoding="utf-8",
+    assert (
+        main(
+            [
+                "--profile",
+                "icp_cf4_o2",
+                "--raw-export-dir",
+                str(raw),
+                "--release-table",
+                str(release),
+                "--boundaries",
+                str(boundaries),
+                "--out-dir",
+                str(out),
+                "--diagnostic-grid-spacing-m",
+                "0.5",
+                "--dt-s",
+                "0.01",
+                "--t-end-s",
+                "0.2",
+                "--drag-law",
+                "stokes",
+                "--force",
+                "electric",
+                "--gas-dynamic-viscosity-Pas",
+                "1.8e-5",
+            ]
+        )
+        == 0
     )
-    pd.DataFrame(
-        [{"comsol_domain_entity_id": 4, "comsol_material_name": "not_exported_from_mphtxt"}]
-    ).to_csv(generated / "comsol_domain_entity_mapping.csv", index=False)
-    pd.DataFrame(
-        [{"solver_part_id": 9, "adjacent_domain_ids": "4", "comsol_material_name": "not_exported_from_mphtxt"}]
-    ).to_csv(generated / "comsol_boundary_entity_mapping.csv", index=False)
-
-    summary = apply_material_inventory(generated)
-    domains = pd.read_csv(generated / "comsol_domain_entity_mapping.csv")
-    boundaries = pd.read_csv(generated / "comsol_boundary_entity_mapping.csv")
-
-    assert summary["selection_entity_offset"] == 1
-    assert domains.loc[0, "comsol_material_name"] == "Silicon"
-    assert boundaries.loc[0, "comsol_material_name"] == "Silicon"
-
-
-def test_wall_catalog_overrides_update_walls_and_materials(tmp_path: Path) -> None:
-    pd.DataFrame(
-        [
-            {
-                "part_id": 9,
-                "part_name": "comsol_wall_9",
-                "material_id": 99,
-                "material_name": "comsol_wall",
-                "wall_law": "specular",
-                "wall_restitution": 0.95,
-                "wall_diffuse_fraction": 0.0,
-                "wall_stick_probability": 0.5,
-            }
-        ]
-    ).to_csv(tmp_path / "part_walls.csv", index=False)
-    pd.DataFrame(
-        [
-            {
-                "material_id": 99,
-                "material_name": "comsol_wall",
-                "source_law": "explicit_csv",
-                "source_speed_scale": 1.0,
-                "wall_law": "specular",
-                "wall_restitution": 0.95,
-                "wall_diffuse_fraction": 0.0,
-                "wall_stick_probability": 0.5,
-            }
-        ]
-    ).to_csv(tmp_path / "materials.csv", index=False)
-    overrides = tmp_path / "wall_catalog_overrides.csv"
-    pd.DataFrame(
-        [
-            {
-                "part_id": 9,
-                "part_name": "confirmed_rf_liner_9",
-                "material_id": 70,
-                "material_name": "confirmed_rf_liner",
-                "wall_law": "diffuse",
-                "wall_restitution": 0.4,
-                "wall_diffuse_fraction": 1.0,
-                "wall_stick_probability": 0.25,
-            }
-        ]
-    ).to_csv(overrides, index=False)
-
-    summary = apply_wall_catalog_overrides(tmp_path, overrides)
-    walls = pd.read_csv(tmp_path / "part_walls.csv")
-    materials = pd.read_csv(tmp_path / "materials.csv")
-
-    assert summary["changed_part_ids"] == [9]
-    assert walls.loc[0, "part_name"] == "confirmed_rf_liner_9"
-    assert walls.loc[0, "wall_law"] == "diffuse"
-    assert walls.loc[0, "wall_stick_probability"] == pytest.approx(0.25)
-    assert materials.loc[0, "material_id"] == 70
-    assert materials.loc[0, "material_name"] == "confirmed_rf_liner"
-    assert materials.loc[0, "wall_law"] == "diffuse"
-
-
-def test_wall_catalog_review_combines_wall_law_and_comsol_mapping(tmp_path: Path) -> None:
-    generated = tmp_path / "generated"
-    generated.mkdir()
-    pd.DataFrame(
-        [
-            {
-                "part_id": 9,
-                "part_name": "comsol_wall_9",
-                "material_id": 99,
-                "material_name": "comsol_wall",
-                "wall_law": "specular",
-                "wall_restitution": 0.95,
-                "wall_diffuse_fraction": 0.0,
-                "wall_stick_probability": 0.5,
-            }
-        ]
-    ).to_csv(tmp_path / "part_walls.csv", index=False)
-    pd.DataFrame(
-        [
-            {
-                "solver_part_id": 9,
-                "comsol_edge_entity_id": 9,
-                "active_in_solver_boundary": True,
-                "x_min_m": 0.0,
-                "x_max_m": 0.24,
-                "y_min_m": 0.13,
-                "y_max_m": 0.13,
-                "adjacent_domain_ids": "4;5",
-                "comsol_material_name": "Silicon|Quartz",
-            }
-        ]
-    ).to_csv(generated / "comsol_boundary_entity_mapping.csv", index=False)
-
-    summary = write_wall_catalog_review(tmp_path, generated)
-    review = pd.read_csv(generated / "wall_catalog_review.csv")
-
-    assert summary["written"] is True
-    assert review.loc[0, "part_id"] == 9
-    assert review.loc[0, "wall_law"] == "specular"
-    assert review.loc[0, "comsol_material_name"] == "Silicon|Quartz"
-
-
-def test_parse_source_part_ids() -> None:
-    assert _parse_part_id_list("32,36") == [32, 36]
-    assert _parse_part_id_list("32; 36") == [32, 36]
-    assert _parse_part_id_list("") is None
-
-
-def test_enforce_outward_source_velocity_reflects_only_inward_normal_component() -> None:
-    df = pd.DataFrame(
-        {
-            "particle_id": [1, 2],
-            "source_x": [0.0, 0.0],
-            "source_y": [0.0, 0.0],
-            "x": [0.0, 0.0],
-            "y": [1.0, 1.0],
-            "vx": [3.0, 4.0],
-            "vy": [-4.0, 5.0],
-        }
+    config = yaml.safe_load((out / "run_config.yaml").read_text(encoding="utf-8"))
+    manifest_payload = yaml.safe_load(
+        (out / "comsol_manifest.yaml").read_text(encoding="utf-8")
+    )
+    assert config["case"] == {
+        "spatial_dim": 2,
+        "coordinate_system": "axisymmetric_rz",
+        "adapter": "comsol",
+    }
+    assert config["inputs"] == {"comsol_manifest": "comsol_manifest.yaml"}
+    assert config["time"] == {"dt": 0.01, "t_end": 0.2}
+    assert manifest_payload["model"]["dataset"] == "dset3"
+    assert manifest_payload["coordinates"]["axis_order"] == ["r", "z"]
+    assert manifest_payload["fields"]["velocity"]["components"] == {
+        "r": "ux",
+        "z": "uy",
+    }
+    assert manifest_payload["fields"]["dynamic_viscosity"]["components"] == {
+        "value": "mu"
+    }
+    assert manifest_payload["fields"]["ne"] == {
+        "artifact": "field",
+        "components": {"value": "ne"},
+        "unit": "1/m^3",
+        "scale_to_si": 1.0,
+    }
+    assert all(
+        not ({"name", "physical_quantity", "mesh", "interpolation"} & set(field_spec))
+        for field_spec in manifest_payload["fields"].values()
+    )
+    assert manifest_payload["metadata"]["profile"] == "icp_cf4_o2"
+    assert manifest_payload["metadata"]["raw_export_manifest_sha256"]
+    assert manifest_payload["metadata"]["source_solution_number"] == 17
+    assert manifest_payload["metadata"]["vacuum_domain_ids"] == [1]
+    assert manifest_payload["metadata"]["source_comsol_version"] == "6.4.0.123"
+    assert manifest_payload["metadata"]["source_parameter"] == {
+        "name": "Vrf",
+        "value": "20[V]",
+    }
+    assert manifest_payload["metadata"]["source_expression_units"]["E_x"] == "V/m"
+    assert (
+        ComsolCaseManifest.load(out / "comsol_manifest.yaml").validate(strict=True)
+        == []
     )
 
-    corrected, summary = enforce_outward_velocity(df)
 
-    np.testing.assert_allclose(corrected["vx"], [3.0, 4.0])
-    np.testing.assert_allclose(corrected["vy"], [4.0, 5.0])
-    np.testing.assert_allclose(corrected["initial_speed_mps"], [5.0, np.sqrt(41.0)])
-    assert summary["corrected_particle_count"] == 1
-    assert summary["inward_count_before"] == 1
-    assert summary["inward_count_after"] == 0
+def test_model_specific_java_exporter_remains_in_external_boundary() -> None:
+    root = Path(__file__).resolve().parents[1]
+    assert (
+        root / "external" / "comsol_icp_export" / "java" / "IcpCf4O2SiEtchExporter.java"
+    ).is_file()
+
+
+def test_model_specific_java_exporter_validates_saved_solution_provenance() -> None:
+    java = (
+        Path(__file__).resolve().parents[1]
+        / "external"
+        / "comsol_icp_export"
+        / "java"
+        / "IcpCf4O2SiEtchExporter.java"
+    ).read_text(encoding="utf-8")
+
+    assert 'call(configuredDataset, "getString", "solution")' in java
+    assert 'call(configuredSolution, "study")' in java
+    assert 'call(configuredSolution, "getPNames")' in java
+    assert 'call(configuredSolution, "getPVals", solutionNumber)' in java
+    assert 'call(parameters, "evaluate", expectedExpression)' in java
+    assert "setModelParameter" not in java
+    assert 'call(call(model, "result"), "run")' not in java
+
+
+def _verify_model_specific_export_has_no_implicit_fallbacks() -> None:
+    root = Path(__file__).resolve().parents[1]
+    java = (
+        root / "external" / "comsol_icp_export" / "java" / "IcpCf4O2SiEtchExporter.java"
+    ).read_text(encoding="utf-8")
+    config = json.loads(
+        (
+            root / "external" / "comsol_icp_export" / "config" / "icp_cf4_o2_v20.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert "new int[]{17}" not in java
+    assert "selectedDatasets" not in java
+    assert "expression_dataset" not in java
+    assert all(len(candidates) == 1 for candidates in config["expressions"].values())
+    assert set(config["expressions"]) == set(config["units"])
+    assert config["study"] == "std2"
+    assert config["dataset"] == "dset3"
+    assert config["solution"] == "sol2"
+    assert config["solution_number"] == 1
+    assert (
+        config["vacuum_domain_ids"] == []
+    )  # Must be populated after reviewing COMSOL domain IDs.
+
+
+test_model_specific_export_contract_has_no_implicit_solution_or_expression_fallback = (
+    _verify_model_specific_export_has_no_implicit_fallbacks
+)
+
+
+def test_raw_export_contract_returns_stable_normalized_schema(tmp_path: Path) -> None:
+    raw_dir, manifest_path, payload = _raw_export_contract_inputs(tmp_path)
+
+    normalized = validate_raw_export(
+        raw_dir,
+        manifest_path,
+        payload,
+        profile=BUILD_PROFILES["icp_cf4_o2"],
+    )
+
+    assert normalized == {
+        "model_name": "model",
+        "study": "std1",
+        "dataset": "dset1",
+        "solution": "sol1",
+        "comsol_version": "6.4",
+        "mesh_tag": "mesh1",
+        "parameter_name": "Vrf",
+        "parameter_value": "20[V]",
+        "geometry_model_unit": "cm",
+        "solution_number": 1,
+        "geometry_scale_m_per_model_unit": 0.01,
+        "vacuum_domain_ids": (1,),
+        "expression_mapping": payload["expression_mapping"],
+        "expression_units": payload["expression_units"],
+        "mesh_sha256": payload["mesh_sha256"],
+        "field_samples_sha256": payload["field_samples_sha256"],
+        "mph_sha256": "1" * 64,
+        "config_sha256": "2" * 64,
+        "manifest_sha256": _file_digest(manifest_path),
+        "manifest_size_bytes": manifest_path.stat().st_size,
+    }
+
+
+@pytest.mark.parametrize(
+    ("overrides", "expected_message"),
+    [
+        (
+            {"source_kind": "other", "model_name": ""},
+            "raw export manifest source_kind must be comsol_java_api_external_export",
+        ),
+        (
+            {"model_name": " model ", "solution_number": 0},
+            "raw export manifest model_name must be a non-empty canonical string",
+        ),
+        (
+            {"solution_number": True, "geometry_scale_m_per_model_unit": 0.0},
+            "raw export manifest solution_number must be a positive integer",
+        ),
+        (
+            {
+                "geometry_scale_m_per_model_unit": float("nan"),
+                "solver_coordinate_unit": "cm",
+            },
+            "raw export manifest geometry_scale_m_per_model_unit must be "
+            "positive and finite",
+        ),
+        (
+            {"solver_coordinate_unit": "cm", "vacuum_domain_ids": "1"},
+            "raw export manifest solver_coordinate_unit must be exactly m",
+        ),
+        (
+            {"vacuum_domain_ids": "1", "expression_mapping": []},
+            "raw export manifest vacuum_domain_ids must be a non-empty integer list",
+        ),
+        (
+            {"vacuum_domain_ids": [1, True], "expression_mapping": []},
+            "raw export manifest vacuum_domain_ids must contain positive integers",
+        ),
+        (
+            {"vacuum_domain_ids": [1, 1], "expression_mapping": []},
+            "raw export manifest vacuum_domain_ids must be non-empty and unique",
+        ),
+        (
+            {"expression_mapping": [], "mesh_sha256": "invalid"},
+            "raw export manifest requires expression_mapping and "
+            "expression_units mappings",
+        ),
+        (
+            {
+                "expression_mapping": {"unexpected": "value"},
+                "expression_units": {"unexpected": "m/s"},
+                "mesh_sha256": "invalid",
+            },
+            "raw export manifest contains quantities not declared by the selected "
+            "profile: ['unexpected']",
+        ),
+        (
+            {"mesh_sha256": "invalid", "field_samples_sha256": "invalid"},
+            "raw export manifest mesh_sha256 must be a lowercase SHA-256 hex digest",
+        ),
+    ],
+)
+def test_raw_export_contract_preserves_validation_order_and_messages(
+    tmp_path: Path,
+    overrides: dict[str, object],
+    expected_message: str,
+) -> None:
+    raw_dir, manifest_path, payload = _raw_export_contract_inputs(tmp_path)
+
+    with pytest.raises(ValueError, match=re.escape(expected_message)) as captured:
+        validate_raw_export(
+            raw_dir,
+            manifest_path,
+            {**payload, **overrides},
+            profile=BUILD_PROFILES["icp_cf4_o2"],
+        )
+
+    assert str(captured.value) == expected_message
+
+
+def test_raw_export_contract_checks_sample_schema_before_source_digests(
+    tmp_path: Path,
+) -> None:
+    raw_dir, manifest_path, payload = _raw_export_contract_inputs(tmp_path)
+    samples_path = raw_dir / "field_samples.csv"
+    samples = pd.read_csv(samples_path)
+    samples["unexpected"] = 1.0
+    samples.to_csv(samples_path, index=False)
+    payload["field_samples_sha256"] = _file_digest(samples_path)
+    payload["mph_sha256"] = "invalid"
+    expected_message = (
+        "raw field sample quantities must exactly match export manifest "
+        "expression_mapping: samples_only=['unexpected'], manifest_only=[]"
+    )
+
+    with pytest.raises(ValueError, match=re.escape(expected_message)) as captured:
+        validate_raw_export(
+            raw_dir,
+            manifest_path,
+            payload,
+            profile=BUILD_PROFILES["icp_cf4_o2"],
+        )
+
+    assert str(captured.value) == expected_message
+
+
+def test_raw_export_contract_rejects_tampered_artifact_and_wrong_unit(
+    tmp_path: Path,
+) -> None:
+    raw_dir, manifest, payload = _raw_export_contract_inputs(tmp_path)
+
+    tampered = dict(payload)
+    tampered["mesh_sha256"] = "0" * 64
+    with pytest.raises(ValueError, match=r"artifact hash mismatch for mesh\.mphtxt"):
+        validate_raw_export(
+            raw_dir,
+            manifest,
+            tampered,
+            profile=BUILD_PROFILES["icp_cf4_o2"],
+        )
+
+    wrong_unit = dict(payload)
+    wrong_unit["expression_units"] = {**payload["expression_units"], "E_x": "V"}
+    with pytest.raises(ValueError, match="expression units do not match"):
+        validate_raw_export(
+            raw_dir,
+            manifest,
+            wrong_unit,
+            profile=BUILD_PROFILES["icp_cf4_o2"],
+        )

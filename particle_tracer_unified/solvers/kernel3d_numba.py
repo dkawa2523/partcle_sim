@@ -1,24 +1,19 @@
+"""Regular-grid 3D sampling leaves for the canonical motion kernel."""
+
 from __future__ import annotations
 
 import numpy as np
 from numba import njit
 
-from ..core.field_sampling import VALID_MASK_STATUS_CLEAN
+from .drag_models import (
+    _EPSTEIN_DEFAULT_ACCOMMODATION_DELTA,
+    effective_tau_from_drag_model,
+)
 from .integrator_common import (
-    DRAG_MODEL_STOKES,
-    INTEGRATOR_ETD2,
-    advance_state_3d,
-    advance_state_3d_etd,
-    compute_substep_count,
-    effective_tau_from_slip_speed,
+    compose_stage_acceleration_3d,
 )
-from .kernel_shared_numba import (
-    locate_axis,
-    mask_trilinear_point_valid,
-    mask_trilinear_status,
-    midpoint_local_dt,
-    should_capture_midpoint,
-)
+from .kernel_shared_numba import locate_axis, mask_trilinear_status
+from .motion_kernel_numba import advance_etd2_batch_inplace
 
 
 @njit(cache=True)
@@ -46,94 +41,145 @@ def _sample_trilinear(arr3d, xs, ys, zs, x, y, z):
 @njit(cache=True)
 def _sample_time_trilinear(arr, times, xs, ys, zs, t, x, y, z):
     nt = times.size
-    if nt <= 1:
-        return _sample_trilinear(arr[0], xs, ys, zs, x, y, z)
-    if t <= times[0]:
+    if nt <= 1 or t <= times[0]:
         return _sample_trilinear(arr[0], xs, ys, zs, x, y, z)
     if t >= times[nt - 1]:
         return _sample_trilinear(arr[nt - 1], xs, ys, zs, x, y, z)
-    j = np.searchsorted(times, t)
-    lo = j - 1
-    hi = j
-    denom = times[hi] - times[lo]
-    a = 0.0 if abs(denom) <= 1e-30 else (t - times[lo]) / denom
-    v0 = _sample_trilinear(arr[lo], xs, ys, zs, x, y, z)
-    v1 = _sample_trilinear(arr[hi], xs, ys, zs, x, y, z)
-    return v0 * (1.0 - a) + v1 * a
+    hi = np.searchsorted(times, t)
+    lo = hi - 1
+    denominator = times[hi] - times[lo]
+    alpha = 0.0 if denominator == 0.0 else (t - times[lo]) / denominator
+    value_lo = _sample_trilinear(arr[lo], xs, ys, zs, x, y, z)
+    value_hi = _sample_trilinear(arr[hi], xs, ys, zs, x, y, z)
+    return value_lo * (1.0 - alpha) + value_hi * alpha
 
 
 @njit(cache=True)
-def _sample_electric_accel_3d(electric_x, electric_y, electric_z, times, xs, ys, zs, t, x, y, z, q_over_m, electric_enabled):
-    ax = 0.0
-    ay = 0.0
-    az = 0.0
-    if electric_enabled != 0:
-        ex = _sample_time_trilinear(electric_x, times, xs, ys, zs, t, x, y, z)
-        ey = _sample_time_trilinear(electric_y, times, xs, ys, zs, t, x, y, z)
-        ez = _sample_time_trilinear(electric_z, times, xs, ys, zs, t, x, y, z)
-        ax = q_over_m * ex
-        ay = q_over_m * ey
-        az = q_over_m * ez
-    return ax, ay, az
-
-
-@njit(cache=True)
-def _sample_gas_properties_3d(
-    gas_density_grid,
-    gas_mu_grid,
-    gas_temperature_grid,
-    times,
-    xs,
-    ys,
-    zs,
-    t,
+def _regular_3d_stage(
+    particle_index,
+    time_s,
     x,
     y,
     z,
-    fallback_density_kgm3,
-    fallback_mu_pas,
-    fallback_temperature_K,
+    vx,
+    vy,
+    vz,
+    tau_stokes,
+    particle_diameter,
+    particle_density,
+    particle_mass,
+    gas_molecular_mass_kg,
+    drag_model_mode,
+    epstein_accommodation_delta,
+    body_ax,
+    body_ay,
+    body_az,
+    _fallback_density,
+    _fallback_mu,
+    _fallback_temperature,
+    xs,
+    ys,
+    zs,
+    times,
+    ux,
+    uy,
+    uz,
+    extra_accel_x,
+    extra_accel_y,
+    extra_accel_z,
+    gravity_buoyancy_enabled,
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
+    valid_mask,
 ):
-    rho_g = _sample_time_trilinear(gas_density_grid, times, xs, ys, zs, t, x, y, z)
-    mu_g = _sample_time_trilinear(gas_mu_grid, times, xs, ys, zs, t, x, y, z)
-    temp_g = _sample_time_trilinear(gas_temperature_grid, times, xs, ys, zs, t, x, y, z)
-    if not np.isfinite(rho_g) or rho_g <= 0.0:
-        rho_g = fallback_density_kgm3
-    if not np.isfinite(mu_g) or mu_g <= 0.0:
-        mu_g = fallback_mu_pas
-    if not np.isfinite(temp_g) or temp_g <= 0.0:
-        temp_g = fallback_temperature_K
-    return rho_g, mu_g, temp_g
+    flow_x = _sample_time_trilinear(ux, times, xs, ys, zs, time_s, x, y, z)
+    flow_y = _sample_time_trilinear(uy, times, xs, ys, zs, time_s, x, y, z)
+    flow_z = _sample_time_trilinear(uz, times, xs, ys, zs, time_s, x, y, z)
+    rho_g = _sample_time_trilinear(gas_density_grid, times, xs, ys, zs, time_s, x, y, z)
+    mu_g = _sample_time_trilinear(gas_mu_grid, times, xs, ys, zs, time_s, x, y, z)
+    temperature = _sample_time_trilinear(
+        gas_temperature_grid, times, xs, ys, zs, time_s, x, y, z
+    )
+    accel_x, accel_y, accel_z = compose_stage_acceleration_3d(
+        body_ax,
+        body_ay,
+        body_az,
+        extra_accel_x[particle_index],
+        extra_accel_y[particle_index],
+        extra_accel_z[particle_index],
+        rho_g,
+        particle_density,
+        gravity_buoyancy_enabled,
+        1.0,
+    )
+    slip = np.sqrt((vx - flow_x) ** 2 + (vy - flow_y) ** 2 + (vz - flow_z) ** 2)
+    tau = effective_tau_from_drag_model(
+        tau_stokes,
+        slip,
+        particle_diameter,
+        rho_g,
+        mu_g,
+        drag_model_mode,
+        particle_mass,
+        temperature,
+        gas_molecular_mass_kg,
+        epstein_accommodation_delta,
+    )
+    status = mask_trilinear_status(valid_mask, xs, ys, zs, x, y, z)
+    return flow_x, flow_y, flow_z, accel_x, accel_y, accel_z, tau, status
 
 
 @njit(cache=True)
-def advance_particles_3d_inplace(
+def _regular_3d_support(
+    x,
+    y,
+    z,
+    _epstein_accommodation_delta,
+    body_ax,
+    body_ay,
+    body_az,
+    _fallback_density,
+    _fallback_mu,
+    _fallback_temperature,
+    xs,
+    ys,
+    zs,
+    times,
+    ux,
+    uy,
+    uz,
+    extra_accel_x,
+    extra_accel_y,
+    extra_accel_z,
+    gravity_buoyancy_enabled,
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
+    valid_mask,
+):
+    return mask_trilinear_status(valid_mask, xs, ys, zs, x, y, z)
+
+
+def trace_regular_3d_batch_inplace(
     x,
     v,
     active,
     tau_p,
     particle_diameter,
     particle_density,
-    flow_scale_particle,
-    drag_tau_scale_particle,
-    body_accel_scale_particle,
-    t,
-    dt,
-    global_flow_scale,
-    global_drag_tau_scale,
-    global_body_accel_scale,
+    particle_mass,
+    t_end,
+    duration,
     body_ax,
     body_ay,
     body_az,
-    min_tau_p_s,
     gas_density_kgm3,
     gas_mu_pas,
     gas_temperature_K,
     gas_molecular_mass_kg,
     drag_model_mode,
-    integrator_mode,
     adaptive_substep_enabled,
-    adaptive_substep_tau_ratio,
     adaptive_substep_max_splits,
     xs,
     ys,
@@ -142,11 +188,6 @@ def advance_particles_3d_inplace(
     ux,
     uy,
     uz,
-    electric_q_over_m_particle,
-    electric_x,
-    electric_y,
-    electric_z,
-    dynamic_electric_enabled,
     extra_accel_x_particle,
     extra_accel_y_particle,
     extra_accel_z_particle,
@@ -155,419 +196,59 @@ def advance_particles_3d_inplace(
     gas_mu_grid,
     gas_temperature_grid,
     valid_mask,
-    core_valid_mask,
-    x_trial,
-    v_trial,
-    x_mid_trial,
+    x_end,
+    v_end,
+    x_mid,
     substep_counts,
     mask_status_flags,
+    local_error_resolved,
 ):
-    for i in range(x.shape[0]):
-        if not active[i]:
-            for j in range(3):
-                x_trial[i, j] = x[i, j]
-                v_trial[i, j] = v[i, j]
-                x_mid_trial[i, j] = x[i, j]
-            substep_counts[i] = 1
-            mask_status_flags[i] = VALID_MASK_STATUS_CLEAN
-            continue
-        tau_stokes = tau_p[i] * global_drag_tau_scale * max(drag_tau_scale_particle[i], 1e-6)
-        if tau_stokes < min_tau_p_s:
-            tau_stokes = min_tau_p_s
-        body_scale = global_body_accel_scale * body_accel_scale_particle[i]
-        q_over_m_i = 0.0
-        if dynamic_electric_enabled != 0:
-            q_over_m_i = electric_q_over_m_particle[i]
-        body_x_scaled = body_ax * body_scale
-        body_y_scaled = body_ay * body_scale
-        body_z_scaled = body_az * body_scale
-        extra_ax_i = extra_accel_x_particle[i]
-        extra_ay_i = extra_accel_y_particle[i]
-        extra_az_i = extra_accel_z_particle[i]
-        bax_base = body_x_scaled + extra_ax_i
-        bay_base = body_y_scaled + extra_ay_i
-        baz_base = body_z_scaled + extra_az_i
-        t_start = t - dt
-        xn = x[i, 0]
-        yn = x[i, 1]
-        zn = x[i, 2]
-        vxn = v[i, 0]
-        vyn = v[i, 1]
-        vzn = v[i, 2]
-        substep_tau = tau_stokes
-        if int(drag_model_mode) != int(DRAG_MODEL_STOKES):
-            flowx_start = _sample_time_trilinear(ux, times, xs, ys, zs, t_start, xn, yn, zn)
-            flowy_start = _sample_time_trilinear(uy, times, xs, ys, zs, t_start, xn, yn, zn)
-            flowz_start = _sample_time_trilinear(uz, times, xs, ys, zs, t_start, xn, yn, zn)
-            rho_g_start, mu_g_start, temp_g_start = _sample_gas_properties_3d(
-                gas_density_grid, gas_mu_grid, gas_temperature_grid,
-                times, xs, ys, zs, t_start, xn, yn, zn,
-                gas_density_kgm3, gas_mu_pas, gas_temperature_K,
-            )
-            targetx_start = global_flow_scale * flow_scale_particle[i] * flowx_start
-            targety_start = global_flow_scale * flow_scale_particle[i] * flowy_start
-            targetz_start = global_flow_scale * flow_scale_particle[i] * flowz_start
-            slip_start = np.sqrt(
-                (vxn - targetx_start) * (vxn - targetx_start)
-                + (vyn - targety_start) * (vyn - targety_start)
-                + (vzn - targetz_start) * (vzn - targetz_start)
-            )
-            tau_eff_start = effective_tau_from_slip_speed(
-                tau_stokes,
-                slip_start,
-                particle_diameter[i],
-                rho_g_start,
-                mu_g_start,
-                drag_model_mode,
-                min_tau_p_s,
-                particle_density[i],
-                temp_g_start,
-                gas_molecular_mass_kg,
-            )
-            if np.isfinite(tau_eff_start) and tau_eff_start > 0.0 and tau_eff_start < substep_tau:
-                substep_tau = tau_eff_start
-        n_substeps = compute_substep_count(
-            dt,
-            substep_tau,
-            adaptive_substep_enabled,
-            adaptive_substep_tau_ratio,
-            adaptive_substep_max_splits,
-        )
-        substep_counts[i] = n_substeps
-        dt_sub = dt / float(n_substeps)
-        mask_status = VALID_MASK_STATUS_CLEAN
-        if integrator_mode == INTEGRATOR_ETD2:
-            half_dt = 0.5 * dt
-            elapsed = 0.0
-            has_mid = False
-            xmid = xn
-            ymid = yn
-            zmid = zn
-            for sub_idx in range(n_substeps):
-                t_sub_start = t_start + float(sub_idx) * dt_sub
-                x0 = xn
-                y0 = yn
-                z0 = zn
-                vx0 = vxn
-                vy0 = vyn
-                vz0 = vzn
-                status = mask_trilinear_status(valid_mask, xs, ys, zs, xn, yn, zn)
-                if status > mask_status:
-                    mask_status = status
-                flowx0 = _sample_time_trilinear(ux, times, xs, ys, zs, t_sub_start, xn, yn, zn)
-                flowy0 = _sample_time_trilinear(uy, times, xs, ys, zs, t_sub_start, xn, yn, zn)
-                flowz0 = _sample_time_trilinear(uz, times, xs, ys, zs, t_sub_start, xn, yn, zn)
-                accx0, accy0, accz0 = _sample_electric_accel_3d(
-                    electric_x, electric_y, electric_z, times, xs, ys, zs,
-                    t_sub_start, xn, yn, zn, q_over_m_i, dynamic_electric_enabled,
-                )
-                rho_g0, mu_g0, temp_g0 = _sample_gas_properties_3d(
-                    gas_density_grid, gas_mu_grid, gas_temperature_grid,
-                    times, xs, ys, zs, t_sub_start, xn, yn, zn,
-                    gas_density_kgm3, gas_mu_pas, gas_temperature_K,
-                )
-                gravity_factor0 = 1.0
-                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
-                    gravity_factor0 = 1.0 - rho_g0 / particle_density[i]
-                bax0 = bax_base + (gravity_factor0 - 1.0) * body_x_scaled + accx0
-                bay0 = bay_base + (gravity_factor0 - 1.0) * body_y_scaled + accy0
-                baz0 = baz_base + (gravity_factor0 - 1.0) * body_z_scaled + accz0
-                targetx0 = global_flow_scale * flow_scale_particle[i] * flowx0
-                targety0 = global_flow_scale * flow_scale_particle[i] * flowy0
-                targetz0 = global_flow_scale * flow_scale_particle[i] * flowz0
-                slip0 = np.sqrt(
-                    (vxn - targetx0) * (vxn - targetx0)
-                    + (vyn - targety0) * (vyn - targety0)
-                    + (vzn - targetz0) * (vzn - targetz0)
-                )
-                tau_eff0 = effective_tau_from_slip_speed(
-                    tau_stokes,
-                    slip0,
-                    particle_diameter[i],
-                    rho_g0,
-                    mu_g0,
-                    drag_model_mode,
-                    min_tau_p_s,
-                    particle_density[i],
-                    temp_g0,
-                    gas_molecular_mass_kg,
-                )
-                xh, yh, zh, _vxh, _vyh, _vzh = advance_state_3d_etd(
-                    xn,
-                    yn,
-                    zn,
-                    vxn,
-                    vyn,
-                    vzn,
-                    targetx0,
-                    targety0,
-                    targetz0,
-                    bax0,
-                    bay0,
-                    baz0,
-                    tau_eff0,
-                    0.5 * dt_sub,
-                )
-                t_mid = t_sub_start + 0.5 * dt_sub
-                status = mask_trilinear_status(valid_mask, xs, ys, zs, xh, yh, zh)
-                if status > mask_status:
-                    mask_status = status
-                flowx_mid = _sample_time_trilinear(ux, times, xs, ys, zs, t_mid, xh, yh, zh)
-                flowy_mid = _sample_time_trilinear(uy, times, xs, ys, zs, t_mid, xh, yh, zh)
-                flowz_mid = _sample_time_trilinear(uz, times, xs, ys, zs, t_mid, xh, yh, zh)
-                accx_mid, accy_mid, accz_mid = _sample_electric_accel_3d(
-                    electric_x, electric_y, electric_z, times, xs, ys, zs,
-                    t_mid, xh, yh, zh, q_over_m_i, dynamic_electric_enabled,
-                )
-                rho_g_mid, mu_g_mid, temp_g_mid = _sample_gas_properties_3d(
-                    gas_density_grid, gas_mu_grid, gas_temperature_grid,
-                    times, xs, ys, zs, t_mid, xh, yh, zh,
-                    gas_density_kgm3, gas_mu_pas, gas_temperature_K,
-                )
-                gravity_factor_mid = 1.0
-                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
-                    gravity_factor_mid = 1.0 - rho_g_mid / particle_density[i]
-                bax_mid = bax_base + (gravity_factor_mid - 1.0) * body_x_scaled + accx_mid
-                bay_mid = bay_base + (gravity_factor_mid - 1.0) * body_y_scaled + accy_mid
-                baz_mid = baz_base + (gravity_factor_mid - 1.0) * body_z_scaled + accz_mid
-                targetx_mid = global_flow_scale * flow_scale_particle[i] * flowx_mid
-                targety_mid = global_flow_scale * flow_scale_particle[i] * flowy_mid
-                targetz_mid = global_flow_scale * flow_scale_particle[i] * flowz_mid
-                slip_mid = np.sqrt(
-                    (_vxh - targetx_mid) * (_vxh - targetx_mid)
-                    + (_vyh - targety_mid) * (_vyh - targety_mid)
-                    + (_vzh - targetz_mid) * (_vzh - targetz_mid)
-                )
-                tau_eff_mid = effective_tau_from_slip_speed(
-                    tau_stokes,
-                    slip_mid,
-                    particle_diameter[i],
-                    rho_g_mid,
-                    mu_g_mid,
-                    drag_model_mode,
-                    min_tau_p_s,
-                    particle_density[i],
-                    temp_g_mid,
-                    gas_molecular_mass_kg,
-                )
-                xn, yn, zn, vxn, vyn, vzn = advance_state_3d_etd(
-                    xn,
-                    yn,
-                    zn,
-                    vxn,
-                    vyn,
-                    vzn,
-                    targetx_mid,
-                    targety_mid,
-                    targetz_mid,
-                    bax_mid,
-                    bay_mid,
-                    baz_mid,
-                    tau_eff_mid,
-                    dt_sub,
-                )
-                if not has_mid:
-                    elapsed_next = elapsed + dt_sub
-                    if should_capture_midpoint(has_mid, elapsed, dt_sub, half_dt):
-                        dt_mid = midpoint_local_dt(elapsed, dt_sub, half_dt)
-                        if dt_mid <= 1.0e-15:
-                            xmid = x0
-                            ymid = y0
-                            zmid = z0
-                        elif dt_mid >= dt_sub - 1.0e-15:
-                            xmid = xn
-                            ymid = yn
-                            zmid = zn
-                        else:
-                            flowx0_mid = _sample_time_trilinear(ux, times, xs, ys, zs, t_sub_start, x0, y0, z0)
-                            flowy0_mid = _sample_time_trilinear(uy, times, xs, ys, zs, t_sub_start, x0, y0, z0)
-                            flowz0_mid = _sample_time_trilinear(uz, times, xs, ys, zs, t_sub_start, x0, y0, z0)
-                            accx0_mid, accy0_mid, accz0_mid = _sample_electric_accel_3d(
-                                electric_x, electric_y, electric_z, times, xs, ys, zs,
-                                t_sub_start, x0, y0, z0, q_over_m_i, dynamic_electric_enabled,
-                            )
-                            rho_g0_mid, mu_g0_mid, temp_g0_mid = _sample_gas_properties_3d(
-                                gas_density_grid, gas_mu_grid, gas_temperature_grid,
-                                times, xs, ys, zs, t_sub_start, x0, y0, z0,
-                                gas_density_kgm3, gas_mu_pas, gas_temperature_K,
-                            )
-                            gravity_factor0_mid = 1.0
-                            if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
-                                gravity_factor0_mid = 1.0 - rho_g0_mid / particle_density[i]
-                            bax0_mid = bax_base + (gravity_factor0_mid - 1.0) * body_x_scaled + accx0_mid
-                            bay0_mid = bay_base + (gravity_factor0_mid - 1.0) * body_y_scaled + accy0_mid
-                            baz0_mid = baz_base + (gravity_factor0_mid - 1.0) * body_z_scaled + accz0_mid
-                            targetx0_mid = global_flow_scale * flow_scale_particle[i] * flowx0_mid
-                            targety0_mid = global_flow_scale * flow_scale_particle[i] * flowy0_mid
-                            targetz0_mid = global_flow_scale * flow_scale_particle[i] * flowz0_mid
-                            slip0_mid = np.sqrt(
-                                (vx0 - targetx0_mid) * (vx0 - targetx0_mid)
-                                + (vy0 - targety0_mid) * (vy0 - targety0_mid)
-                                + (vz0 - targetz0_mid) * (vz0 - targetz0_mid)
-                            )
-                            tau_eff0_mid = effective_tau_from_slip_speed(
-                                tau_stokes,
-                                slip0_mid,
-                                particle_diameter[i],
-                                rho_g0_mid,
-                                mu_g0_mid,
-                                drag_model_mode,
-                                min_tau_p_s,
-                                particle_density[i],
-                                temp_g0_mid,
-                                gas_molecular_mass_kg,
-                            )
-                            xh_mid, yh_mid, zh_mid, _vxh_mid, _vyh_mid, _vzh_mid = advance_state_3d_etd(
-                                x0,
-                                y0,
-                                z0,
-                                vx0,
-                                vy0,
-                                vz0,
-                                targetx0_mid,
-                                targety0_mid,
-                                targetz0_mid,
-                                bax0_mid,
-                                bay0_mid,
-                                baz0_mid,
-                                tau_eff0_mid,
-                                0.5 * dt_mid,
-                            )
-                            t_mid_eval = t_sub_start + 0.5 * dt_mid
-                            status = mask_trilinear_status(valid_mask, xs, ys, zs, xh_mid, yh_mid, zh_mid)
-                            if status > mask_status:
-                                mask_status = status
-                            flowx_mid2 = _sample_time_trilinear(ux, times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid)
-                            flowy_mid2 = _sample_time_trilinear(uy, times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid)
-                            flowz_mid2 = _sample_time_trilinear(uz, times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid)
-                            accx_mid2, accy_mid2, accz_mid2 = _sample_electric_accel_3d(
-                                electric_x, electric_y, electric_z, times, xs, ys, zs,
-                                t_mid_eval, xh_mid, yh_mid, zh_mid, q_over_m_i, dynamic_electric_enabled,
-                            )
-                            rho_g_mid2, mu_g_mid2, temp_g_mid2 = _sample_gas_properties_3d(
-                                gas_density_grid, gas_mu_grid, gas_temperature_grid,
-                                times, xs, ys, zs, t_mid_eval, xh_mid, yh_mid, zh_mid,
-                                gas_density_kgm3, gas_mu_pas, gas_temperature_K,
-                            )
-                            gravity_factor_mid2 = 1.0
-                            if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
-                                gravity_factor_mid2 = 1.0 - rho_g_mid2 / particle_density[i]
-                            bax_mid2 = bax_base + (gravity_factor_mid2 - 1.0) * body_x_scaled + accx_mid2
-                            bay_mid2 = bay_base + (gravity_factor_mid2 - 1.0) * body_y_scaled + accy_mid2
-                            baz_mid2 = baz_base + (gravity_factor_mid2 - 1.0) * body_z_scaled + accz_mid2
-                            targetx_mid2 = global_flow_scale * flow_scale_particle[i] * flowx_mid2
-                            targety_mid2 = global_flow_scale * flow_scale_particle[i] * flowy_mid2
-                            targetz_mid2 = global_flow_scale * flow_scale_particle[i] * flowz_mid2
-                            slip_mid2 = np.sqrt(
-                                (_vxh_mid - targetx_mid2) * (_vxh_mid - targetx_mid2)
-                                + (_vyh_mid - targety_mid2) * (_vyh_mid - targety_mid2)
-                                + (_vzh_mid - targetz_mid2) * (_vzh_mid - targetz_mid2)
-                            )
-                            tau_eff_mid2 = effective_tau_from_slip_speed(
-                                tau_stokes,
-                                slip_mid2,
-                                particle_diameter[i],
-                                rho_g_mid2,
-                                mu_g_mid2,
-                                drag_model_mode,
-                                min_tau_p_s,
-                                particle_density[i],
-                                temp_g_mid2,
-                                gas_molecular_mass_kg,
-                            )
-                            xmid, ymid, zmid, _vxmid, _vymid, _vzmid = advance_state_3d_etd(
-                                x0,
-                                y0,
-                                z0,
-                                vx0,
-                                vy0,
-                                vz0,
-                                targetx_mid2,
-                                targety_mid2,
-                                targetz_mid2,
-                                bax_mid2,
-                                bay_mid2,
-                                baz_mid2,
-                                tau_eff_mid2,
-                                dt_mid,
-                            )
-                        has_mid = True
-                    elapsed = elapsed_next
-            if not has_mid:
-                xmid = xn
-                ymid = yn
-                zmid = zn
-            x_mid_trial[i, 0] = xmid
-            x_mid_trial[i, 1] = ymid
-            x_mid_trial[i, 2] = zmid
-        else:
-            for sub_idx in range(n_substeps):
-                t_eval = t_start + (float(sub_idx) + 1.0) * dt_sub
-                status = mask_trilinear_status(valid_mask, xs, ys, zs, xn, yn, zn)
-                if status > mask_status:
-                    mask_status = status
-                flowx = _sample_time_trilinear(ux, times, xs, ys, zs, t_eval, xn, yn, zn)
-                flowy = _sample_time_trilinear(uy, times, xs, ys, zs, t_eval, xn, yn, zn)
-                flowz = _sample_time_trilinear(uz, times, xs, ys, zs, t_eval, xn, yn, zn)
-                accx, accy, accz = _sample_electric_accel_3d(
-                    electric_x, electric_y, electric_z, times, xs, ys, zs,
-                    t_eval, xn, yn, zn, q_over_m_i, dynamic_electric_enabled,
-                )
-                rho_g, mu_g, temp_g = _sample_gas_properties_3d(
-                    gas_density_grid, gas_mu_grid, gas_temperature_grid,
-                    times, xs, ys, zs, t_eval, xn, yn, zn,
-                    gas_density_kgm3, gas_mu_pas, gas_temperature_K,
-                )
-                gravity_factor = 1.0
-                if gravity_buoyancy_enabled != 0 and particle_density[i] > 0.0:
-                    gravity_factor = 1.0 - rho_g / particle_density[i]
-                bax = bax_base + (gravity_factor - 1.0) * body_x_scaled + accx
-                bay = bay_base + (gravity_factor - 1.0) * body_y_scaled + accy
-                baz = baz_base + (gravity_factor - 1.0) * body_z_scaled + accz
-                targetx = global_flow_scale * flow_scale_particle[i] * flowx
-                targety = global_flow_scale * flow_scale_particle[i] * flowy
-                targetz = global_flow_scale * flow_scale_particle[i] * flowz
-                slip = np.sqrt(
-                    (vxn - targetx) * (vxn - targetx)
-                    + (vyn - targety) * (vyn - targety)
-                    + (vzn - targetz) * (vzn - targetz)
-                )
-                tau_eff = effective_tau_from_slip_speed(
-                    tau_stokes,
-                    slip,
-                    particle_diameter[i],
-                    rho_g,
-                    mu_g,
-                    drag_model_mode,
-                    min_tau_p_s,
-                    particle_density[i],
-                    temp_g,
-                    gas_molecular_mass_kg,
-                )
-                xn, yn, zn, vxn, vyn, vzn = advance_state_3d(
-                    xn,
-                    yn,
-                    zn,
-                    vxn,
-                    vyn,
-                    vzn,
-                    targetx,
-                    targety,
-                    targetz,
-                    bax,
-                    bay,
-                    baz,
-                    tau_eff,
-                    dt_sub,
-                    integrator_mode,
-                )
-            x_mid_trial[i, 0] = xn
-            x_mid_trial[i, 1] = yn
-            x_mid_trial[i, 2] = zn
-        x_trial[i, 0] = xn
-        x_trial[i, 1] = yn
-        x_trial[i, 2] = zn
-        v_trial[i, 0] = vxn
-        v_trial[i, 1] = vyn
-        v_trial[i, 2] = vzn
-        mask_status_flags[i] = mask_status
+    advance_etd2_batch_inplace(
+        _regular_3d_stage,
+        _regular_3d_support,
+        3,
+        x,
+        v,
+        active,
+        tau_p,
+        particle_diameter,
+        particle_density,
+        particle_mass,
+        t_end,
+        duration,
+        gas_molecular_mass_kg,
+        drag_model_mode,
+        adaptive_substep_enabled,
+        adaptive_substep_max_splits,
+        x_end,
+        v_end,
+        x_mid,
+        substep_counts,
+        mask_status_flags,
+        local_error_resolved,
+        _EPSTEIN_DEFAULT_ACCOMMODATION_DELTA,
+        body_ax,
+        body_ay,
+        body_az,
+        gas_density_kgm3,
+        gas_mu_pas,
+        gas_temperature_K,
+        xs,
+        ys,
+        zs,
+        times,
+        ux,
+        uy,
+        uz,
+        extra_accel_x_particle,
+        extra_accel_y_particle,
+        extra_accel_z_particle,
+        gravity_buoyancy_enabled,
+        gas_density_grid,
+        gas_mu_grid,
+        gas_temperature_grid,
+        valid_mask,
+    )
+
+
+__all__ = ("trace_regular_3d_batch_inplace",)

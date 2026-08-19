@@ -1,3 +1,0 @@
-solver_part_id,wall_type,stick_probability,restitution_n,restitution_t,diffuse_temperature,material_id,notes
-11,pass_through,0.0,1.0,1.0,,gas,non-colliding COMSOL selection
-12,stick,1.0,0.0,0.0,,sio2,depositing wall

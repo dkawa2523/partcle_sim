@@ -1,3 +1,0 @@
-material_id,material_name,source_law,source_speed_scale,wall_law,wall_restitution,wall_diffuse_fraction,wall_stick_probability
-1,release_surface,explicit_csv,1.0,stick,0.0,0.0,1.0
-2,chamber_wall,explicit_csv,1.0,mixed_specular_diffuse,0.85,0.20,0.0

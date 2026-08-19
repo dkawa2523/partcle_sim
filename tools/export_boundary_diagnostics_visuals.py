@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-import argparse
 import json
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import matplotlib
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
+
 matplotlib.use("Agg", force=True)
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+
 from particle_tracer_unified.core.field_sampling import (
     VALID_MASK_STATUS_HARD_INVALID,
     VALID_MASK_STATUS_MIXED_STENCIL,
@@ -18,184 +21,273 @@ from tools.visualization_common import (
     domain_part_medium_summary,
     draw_boundary_edges,
     draw_domain_parts_by_medium,
-    ensure_visualization_dirs,
+)
+from tools.visualization_data import (
     filter_display_boundary_geometry,
     require_2d_quantity,
 )
+from tools.visualization_reports import ensure_visualization_dirs
 
 
-def _valid_mask_status_grid(valid_mask: np.ndarray, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+@dataclass(frozen=True)
+class _Geometry:
+    x: np.ndarray
+    y: np.ndarray
+    sdf: np.ndarray
+    normal_x: np.ndarray
+    normal_y: np.ndarray
+    valid_mask: np.ndarray
+    boundary_edges: np.ndarray
+    boundary_part_ids: np.ndarray
+    mesh_vertices: np.ndarray
+    mesh_triangles: np.ndarray | None
+    mesh_triangle_part_ids: np.ndarray | None
+    mesh_quads: np.ndarray
+    mesh_quad_part_ids: np.ndarray | None
+
+
+@dataclass(frozen=True)
+class _BoundaryData:
+    geometry: _Geometry
+    velocity_x: np.ndarray
+    velocity_y: np.ndarray
+    valid_mask: np.ndarray
+    grid_x: np.ndarray
+    grid_y: np.ndarray
+    mixed_stencil_mask: np.ndarray
+    hard_invalid_mask: np.ndarray
+    speed: np.ndarray
+    medium_summary: pd.DataFrame
+    invalid_stop_points: np.ndarray
+
+
+def _optional_array(
+    payload: np.lib.npyio.NpzFile, name: str, dtype: npt.DTypeLike
+) -> np.ndarray | None:
+    return np.asarray(payload[name], dtype=dtype) if name in payload else None
+
+
+def _load_geometry(case_dir: Path) -> _Geometry:
+    path = case_dir / "generated" / "comsol_geometry_2d.npz"
+    if not path.is_file():
+        raise FileNotFoundError(f"Geometry npz not found: {path}")
+    with np.load(path) as payload:
+        geometry = _Geometry(
+            x=np.asarray(payload["axis_0"], dtype=np.float64),
+            y=np.asarray(payload["axis_1"], dtype=np.float64),
+            sdf=np.asarray(payload["sdf"], dtype=np.float64),
+            normal_x=np.asarray(payload["normal_0"], dtype=np.float64),
+            normal_y=np.asarray(payload["normal_1"], dtype=np.float64),
+            valid_mask=np.asarray(payload["valid_mask"], dtype=bool),
+            boundary_edges=np.asarray(payload["boundary_edges"], dtype=np.float64),
+            boundary_part_ids=np.asarray(
+                payload["boundary_edge_part_ids"], dtype=np.int32
+            ),
+            mesh_vertices=np.asarray(payload["mesh_vertices"], dtype=np.float64),
+            mesh_triangles=_optional_array(payload, "mesh_triangles", np.int32),
+            mesh_triangle_part_ids=_optional_array(
+                payload, "mesh_triangle_part_ids", np.int32
+            ),
+            mesh_quads=np.asarray(payload["mesh_quads"], dtype=np.int32),
+            mesh_quad_part_ids=_optional_array(payload, "mesh_quad_part_ids", np.int32),
+        )
+    edges, part_ids = filter_display_boundary_geometry(
+        geometry.boundary_edges, geometry.boundary_part_ids
+    )
+    if edges is None or part_ids is None:
+        raise ValueError(
+            "boundary diagnostics require displayable boundary edges with part IDs"
+        )
+    return replace(geometry, boundary_edges=edges, boundary_part_ids=part_ids)
+
+
+def _load_fields(case_dir: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    path = case_dir / "generated" / "comsol_field_2d.npz"
+    if not path.is_file():
+        raise FileNotFoundError(f"Field npz not found: {path}")
+    with np.load(path) as payload:
+        return (
+            require_2d_quantity(payload, "ux", "boundary diagnostics"),
+            require_2d_quantity(payload, "uy", "boundary diagnostics"),
+            np.asarray(payload["valid_mask"], dtype=bool),
+        )
+
+
+def _invalid_stop_points(output_dir: Path) -> np.ndarray:
+    path = output_dir / "final_particles.csv"
+    particles = pd.read_csv(path)
+    return particles.loc[
+        particles["final_state"].astype(str).eq("invalid_mask_stopped"),
+        ["x_m", "y_m"],
+    ].to_numpy(dtype=np.float64)
+
+
+def _valid_mask_status_grid(
+    valid_mask: np.ndarray, x: np.ndarray, y: np.ndarray
+) -> np.ndarray:
     axes = (np.asarray(x, dtype=np.float64), np.asarray(y, dtype=np.float64))
     status = np.zeros(np.asarray(valid_mask).shape, dtype=np.uint8)
     for ix, xv in enumerate(axes[0]):
         for iy, yv in enumerate(axes[1]):
-            status[ix, iy] = np.uint8(
-                sample_valid_mask_status(
-                    valid_mask,
-                    axes,
-                    np.asarray([float(xv), float(yv)], dtype=np.float64),
-                )
-            )
+            point = np.asarray([float(xv), float(yv)], dtype=np.float64)
+            status[ix, iy] = np.uint8(sample_valid_mask_status(valid_mask, axes, point))
     return status
 
 
-def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m: float = 2.5e-3, quiver_stride: int = 10) -> Path:
-    geom_npz = case_dir / "generated" / "comsol_geometry_2d.npz"
-    field_npz = case_dir / "generated" / "comsol_field_2d.npz"
-    if not geom_npz.exists():
-        raise FileNotFoundError(f"Geometry npz not found: {geom_npz}")
-    if not field_npz.exists():
-        raise FileNotFoundError(f"Field npz not found: {field_npz}")
-
-    with np.load(geom_npz) as g:
-        x = np.asarray(g["axis_0"], dtype=np.float64)
-        y = np.asarray(g["axis_1"], dtype=np.float64)
-        sdf = np.asarray(g["sdf"], dtype=np.float64)
-        nx = np.asarray(g["normal_0"], dtype=np.float64)
-        ny = np.asarray(g["normal_1"], dtype=np.float64)
-        geom_valid_mask = np.asarray(g["valid_mask"], dtype=bool)
-        boundary_edges = np.asarray(g["boundary_edges"], dtype=np.float64)
-        boundary_part_ids = np.asarray(g["boundary_edge_part_ids"], dtype=np.int32)
-        mesh_vertices = np.asarray(g["mesh_vertices"], dtype=np.float64)
-        mesh_triangles = np.asarray(g["mesh_triangles"], dtype=np.int32) if "mesh_triangles" in g else None
-        mesh_triangle_part_ids = np.asarray(g["mesh_triangle_part_ids"], dtype=np.int32) if "mesh_triangle_part_ids" in g else None
-        mesh_quads = np.asarray(g["mesh_quads"], dtype=np.int32)
-        mesh_quad_part_ids = np.asarray(g["mesh_quad_part_ids"], dtype=np.int32) if "mesh_quad_part_ids" in g else None
-    boundary_edges, boundary_part_ids = filter_display_boundary_geometry(boundary_edges, boundary_part_ids)
-    if boundary_edges is None or boundary_part_ids is None:
-        raise ValueError("boundary diagnostics require displayable boundary edges with part IDs")
-
-    with np.load(field_npz) as f:
-        ux = require_2d_quantity(f, "ux", "boundary diagnostics")
-        uy = require_2d_quantity(f, "uy", "boundary diagnostics")
-        field_valid_mask = np.asarray(f["valid_mask"], dtype=bool) if "valid_mask" in f else None
-
-    part_centers = []
-    for pid in np.unique(boundary_part_ids):
-        mask = boundary_part_ids == pid
-        c = boundary_edges[mask].mean(axis=(0, 1))
-        part_centers.append((int(pid), c))
-
-    xx, yy = np.meshgrid(x, y, indexing="ij")
-    valid_mask = geom_valid_mask if field_valid_mask is None else (geom_valid_mask & field_valid_mask)
-    valid_mask_status = _valid_mask_status_grid(valid_mask, x, y)
-    mixed_stencil_mask = valid_mask_status == int(VALID_MASK_STATUS_MIXED_STENCIL)
-    hard_invalid_mask = valid_mask_status == int(VALID_MASK_STATUS_HARD_INVALID)
-    speed = np.where(valid_mask, np.sqrt(ux * ux + uy * uy), np.nan)
-    out = ensure_visualization_dirs(output_dir)["boundary_diagnostics"]
-    out.mkdir(parents=True, exist_ok=True)
+def _load_boundary_data(case_dir: Path, output_dir: Path) -> _BoundaryData:
+    geometry = _load_geometry(case_dir)
+    velocity_x, velocity_y, field_mask = _load_fields(case_dir)
+    valid_mask = geometry.valid_mask & field_mask
+    grid_x, grid_y = np.meshgrid(geometry.x, geometry.y, indexing="ij")
+    mask_status = _valid_mask_status_grid(valid_mask, geometry.x, geometry.y)
     medium_summary = domain_part_medium_summary(
-        mesh_vertices,
-        mesh_triangles,
-        mesh_triangle_part_ids,
-        mesh_quads,
-        mesh_quad_part_ids,
-        x,
-        y,
+        geometry.mesh_vertices,
+        geometry.mesh_triangles,
+        geometry.mesh_triangle_part_ids,
+        geometry.mesh_quads,
+        geometry.mesh_quad_part_ids,
+        geometry.x,
+        geometry.y,
         valid_mask,
     )
-    if not medium_summary.empty:
-        medium_summary.to_csv(out / "domain_part_medium_summary.csv", index=False)
+    return _BoundaryData(
+        geometry=geometry,
+        velocity_x=velocity_x,
+        velocity_y=velocity_y,
+        valid_mask=valid_mask,
+        grid_x=grid_x,
+        grid_y=grid_y,
+        mixed_stencil_mask=(mask_status == int(VALID_MASK_STATUS_MIXED_STENCIL)),
+        hard_invalid_mask=(mask_status == int(VALID_MASK_STATUS_HARD_INVALID)),
+        speed=np.where(valid_mask, np.hypot(velocity_x, velocity_y), np.nan),
+        medium_summary=medium_summary,
+        invalid_stop_points=_invalid_stop_points(output_dir),
+    )
 
-    def draw_parts(
-        ax: plt.Axes,
-        *,
-        alpha: float,
-        linewidth: float,
-        edgecolor: str = "#ffffff",
-        label_part_ids: bool = False,
-        show_legend: bool = False,
-    ) -> None:
-        draw_domain_parts_by_medium(
-            ax,
-            mesh_vertices,
-            mesh_triangles,
-            mesh_triangle_part_ids,
-            mesh_quads,
-            mesh_quad_part_ids,
-            medium_summary=medium_summary,
-            alpha=alpha,
-            linewidth=linewidth,
-            edgecolor=edgecolor,
-            label_part_ids=label_part_ids,
-            show_legend=show_legend,
-        )
-    final_csv = output_dir / "final_particles.csv"
-    invalid_stop_points = np.zeros((0, 2), dtype=np.float64)
-    if final_csv.exists():
-        final_df = pd.read_csv(final_csv)
-        required_cols = {"x", "y", "invalid_mask_stopped"}
-        if required_cols.issubset(final_df.columns):
-            invalid_stop_points = final_df.loc[
-                final_df["invalid_mask_stopped"].astype(bool),
-                ["x", "y"],
-            ].to_numpy(dtype=np.float64)
 
+def _draw_parts(
+    ax: plt.Axes,
+    data: _BoundaryData,
+    *,
+    alpha: float,
+    label_part_ids: bool = False,
+    show_legend: bool = False,
+) -> None:
+    geometry = data.geometry
+    draw_domain_parts_by_medium(
+        ax,
+        geometry.mesh_vertices,
+        geometry.mesh_triangles,
+        geometry.mesh_triangle_part_ids,
+        geometry.mesh_quads,
+        geometry.mesh_quad_part_ids,
+        medium_summary=data.medium_summary,
+        alpha=alpha,
+        label_part_ids=label_part_ids,
+        show_legend=show_legend,
+    )
+
+
+def _save_spatial_figure(
+    fig: plt.Figure,
+    ax: plt.Axes,
+    geometry: _Geometry,
+    output_dir: Path,
+    filename: str,
+) -> None:
+    ax.set_xlabel("x [m]")
+    ax.set_ylabel("y [m]")
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlim(float(geometry.x.min()), float(geometry.x.max()))
+    ax.set_ylim(float(geometry.y.min()), float(geometry.y.max()))
+    fig.tight_layout()
+    fig.savefig(output_dir / filename, dpi=170)
+    plt.close(fig)
+
+
+def _plot_geometry(data: _BoundaryData, out: Path) -> None:
+    geometry = data.geometry
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    draw_parts(ax, alpha=0.50, linewidth=0.04, label_part_ids=True, show_legend=True)
-    draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.35, alpha=0.95, label_part_ids=True)
-    for pid, center in part_centers:
-        ax.text(float(center[0]), float(center[1]), str(pid), fontsize=8, ha="center", va="center", color="black")
+    _draw_parts(ax, data, alpha=0.50, label_part_ids=True, show_legend=True)
+    draw_boundary_edges(
+        ax,
+        geometry.boundary_edges,
+        geometry.boundary_part_ids,
+        linewidth=1.35,
+        alpha=0.95,
+        label_part_ids=True,
+    )
     ax.set_title("Recognized Boundary Geometry (edge parts)")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_xlim(float(x.min()), float(x.max()))
-    ax.set_ylim(float(y.min()), float(y.max()))
-    fig.tight_layout()
-    fig.savefig(out / "01_recognized_boundary_geometry.png", dpi=170)
-    plt.close(fig)
+    _save_spatial_figure(fig, ax, geometry, out, "01_recognized_boundary_geometry.png")
 
-    fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    draw_parts(ax, alpha=0.24, linewidth=0.02)
-    pcm = ax.pcolormesh(xx, yy, valid_mask.astype(float), shading="nearest", cmap="Blues", vmin=0.0, vmax=1.0, alpha=0.82)
-    draw_boundary_edges(ax, boundary_edges, None, linewidth=1.0, alpha=0.95)
-    ax.set_title("Recognized Domain Mask (inside/outside)")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_xlim(float(x.min()), float(x.max()))
-    ax.set_ylim(float(y.min()), float(y.max()))
-    cb = fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02)
-    cb.set_label("inside mask")
-    fig.tight_layout()
-    fig.savefig(out / "02_recognized_domain_mask.png", dpi=170)
-    plt.close(fig)
 
+def _plot_scalar(
+    data: _BoundaryData,
+    out: Path,
+    values: np.ndarray,
+    *,
+    filename: str,
+    title: str,
+    colorbar_label: str,
+    cmap: str,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    contour_sdf: bool = False,
+    stop_points: np.ndarray | None = None,
+) -> None:
+    geometry = data.geometry
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    draw_parts(ax, alpha=0.24, linewidth=0.02)
-    lim = max(abs(float(np.nanmin(sdf))), abs(float(np.nanmax(sdf))))
-    pcm = ax.pcolormesh(xx, yy, sdf, shading="nearest", cmap="coolwarm", vmin=-lim, vmax=lim, alpha=0.86)
-    draw_parts(ax, alpha=0.10, linewidth=0.04, edgecolor="#222222")
-    ax.contour(xx, yy, sdf, levels=[0.0], colors="black", linewidths=1.1)
-    draw_boundary_edges(ax, boundary_edges, None, linewidth=0.8, alpha=0.85)
-    ax.set_title("Diagnostic Signed Distance Field")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_xlim(float(x.min()), float(x.max()))
-    ax.set_ylim(float(y.min()), float(y.max()))
-    cb = fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02)
-    cb.set_label("sdf [m]")
-    fig.tight_layout()
-    fig.savefig(out / "03_signed_distance_field.png", dpi=170)
-    plt.close(fig)
+    _draw_parts(ax, data, alpha=0.24)
+    colors = ax.pcolormesh(
+        data.grid_x,
+        data.grid_y,
+        values,
+        shading="nearest",
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        alpha=0.82,
+    )
+    draw_boundary_edges(ax, geometry.boundary_edges, linewidth=1.0, alpha=0.9)
+    if contour_sdf:
+        ax.contour(
+            data.grid_x,
+            data.grid_y,
+            geometry.sdf,
+            levels=[0.0],
+            colors="black",
+            linewidths=0.9,
+        )
+    if stop_points is not None and stop_points.size:
+        ax.scatter(
+            stop_points[:, 0],
+            stop_points[:, 1],
+            s=10,
+            c="#4c1d95",
+            alpha=0.8,
+            label=f"invalid_mask_stopped ({int(stop_points.shape[0])})",
+        )
+        ax.legend(loc="best", fontsize=8)
+    ax.set_title(title)
+    fig.colorbar(colors, ax=ax, fraction=0.046, pad=0.02, label=colorbar_label)
+    _save_spatial_figure(fig, ax, geometry, out, filename)
 
+
+def _plot_normals(data: _BoundaryData, out: Path, normal_band_m: float) -> None:
+    geometry = data.geometry
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    draw_parts(ax, alpha=0.30, linewidth=0.02)
-    draw_boundary_edges(ax, boundary_edges, None, linewidth=1.0, alpha=0.95)
-    band = valid_mask & (np.abs(sdf) <= float(normal_band_m))
-    bx = xx[band]
-    by = yy[band]
-    bnx = nx[band]
-    bny = ny[band]
-    if bx.size:
-        step = max(1, int(np.ceil(bx.size / 500)))
+    _draw_parts(ax, data, alpha=0.30)
+    draw_boundary_edges(ax, geometry.boundary_edges, linewidth=1.0, alpha=0.95)
+    band = data.valid_mask & (np.abs(geometry.sdf) <= normal_band_m)
+    x = data.grid_x[band]
+    y = data.grid_y[band]
+    if x.size:
+        stride = max(1, int(np.ceil(x.size / 500)))
         ax.quiver(
-            bx[::step],
-            by[::step],
-            bnx[::step],
-            bny[::step],
+            x[::stride],
+            y[::stride],
+            geometry.normal_x[band][::stride],
+            geometry.normal_y[band][::stride],
             angles="xy",
             scale_units="xy",
             scale=250.0,
@@ -204,27 +296,29 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
             alpha=0.75,
         )
     ax.set_title("Boundary Normals sampled near the Wall")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_xlim(float(x.min()), float(x.max()))
-    ax.set_ylim(float(y.min()), float(y.max()))
-    fig.tight_layout()
-    fig.savefig(out / "04_boundary_normals_near_wall.png", dpi=170)
-    plt.close(fig)
+    _save_spatial_figure(fig, ax, geometry, out, "04_boundary_normals_near_wall.png")
 
+
+def _plot_flow(data: _BoundaryData, out: Path, quiver_stride: int) -> None:
+    geometry = data.geometry
     fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    draw_parts(ax, alpha=0.20, linewidth=0.02)
-    pcm = ax.pcolormesh(xx, yy, np.ma.masked_invalid(speed), shading="nearest", cmap="viridis", alpha=0.86)
-    draw_boundary_edges(ax, boundary_edges, None, linewidth=0.9, alpha=0.9)
-    sx = slice(None, None, max(1, int(quiver_stride)))
-    sy = slice(None, None, max(1, int(quiver_stride)))
-    qmask = valid_mask[sx, sy]
+    _draw_parts(ax, data, alpha=0.20)
+    colors = ax.pcolormesh(
+        data.grid_x,
+        data.grid_y,
+        np.ma.masked_invalid(data.speed),
+        shading="nearest",
+        cmap="viridis",
+        alpha=0.86,
+    )
+    draw_boundary_edges(ax, geometry.boundary_edges, linewidth=0.9, alpha=0.9)
+    stride = slice(None, None, max(1, quiver_stride))
+    quiver_mask = data.valid_mask[stride, stride]
     ax.quiver(
-        xx[sx, sy][qmask],
-        yy[sx, sy][qmask],
-        ux[sx, sy][qmask],
-        uy[sx, sy][qmask],
+        data.grid_x[stride, stride][quiver_mask],
+        data.grid_y[stride, stride][quiver_mask],
+        data.velocity_x[stride, stride][quiver_mask],
+        data.velocity_y[stride, stride][quiver_mask],
         angles="xy",
         scale_units="xy",
         scale=20.0,
@@ -233,95 +327,99 @@ def export_boundary_diagnostics(case_dir: Path, output_dir: Path, normal_band_m:
         alpha=0.35,
     )
     ax.set_title("Flow Speed / Vectors over Recognized Geometry")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_xlim(float(x.min()), float(x.max()))
-    ax.set_ylim(float(y.min()), float(y.max()))
-    fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02, label="speed [m/s]")
-    fig.tight_layout()
-    fig.savefig(out / "05_flow_speed_vectors_over_geometry.png", dpi=170)
-    plt.close(fig)
+    fig.colorbar(colors, ax=ax, fraction=0.046, pad=0.02, label="speed [m/s]")
+    _save_spatial_figure(
+        fig, ax, geometry, out, "05_flow_speed_vectors_over_geometry.png"
+    )
 
-    fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    draw_parts(ax, alpha=0.24, linewidth=0.02)
-    pcm = ax.pcolormesh(xx, yy, mixed_stencil_mask.astype(float), shading="nearest", cmap="OrRd", vmin=0.0, vmax=1.0, alpha=0.82)
-    draw_parts(ax, alpha=0.10, linewidth=0.04, edgecolor="#222222")
-    draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.0, alpha=0.9)
-    ax.contour(xx, yy, sdf, levels=[0.0], colors="black", linewidths=0.85)
-    ax.set_title("Mixed-Stencil Hotspots (point valid, stencil mixed)")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_xlim(float(x.min()), float(x.max()))
-    ax.set_ylim(float(y.min()), float(y.max()))
-    cb = fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02)
-    cb.set_label("mixed stencil mask")
-    fig.tight_layout()
-    fig.savefig(out / "06_mixed_stencil_hotspots.png", dpi=170)
-    plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(8.6, 6.2))
-    draw_parts(ax, alpha=0.24, linewidth=0.02)
-    pcm = ax.pcolormesh(xx, yy, hard_invalid_mask.astype(float), shading="nearest", cmap="Reds", vmin=0.0, vmax=1.0, alpha=0.82)
-    draw_parts(ax, alpha=0.10, linewidth=0.04, edgecolor="#222222")
-    draw_boundary_edges(ax, boundary_edges, boundary_part_ids, linewidth=1.0, alpha=0.9)
-    if invalid_stop_points.size:
-        ax.scatter(
-            invalid_stop_points[:, 0],
-            invalid_stop_points[:, 1],
-            s=10,
-            c="#4c1d95",
-            alpha=0.8,
-            label=f"invalid_mask_stopped ({int(invalid_stop_points.shape[0])})",
-        )
-        ax.legend(loc="best", fontsize=8)
-    ax.set_title("Hard-Invalid Region and Stop Hotspots")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_xlim(float(x.min()), float(x.max()))
-    ax.set_ylim(float(y.min()), float(y.max()))
-    cb = fig.colorbar(pcm, ax=ax, fraction=0.046, pad=0.02)
-    cb.set_label("hard invalid mask")
-    fig.tight_layout()
-    fig.savefig(out / "07_hard_invalid_stop_hotspots.png", dpi=170)
-    plt.close(fig)
-
+def _write_report(
+    data: _BoundaryData, case_dir: Path, output_dir: Path, out: Path
+) -> None:
+    geometry = data.geometry
     report = {
         "case_dir": str(case_dir.resolve()),
         "output_dir": str(output_dir.resolve()),
-        "boundary_edge_count": int(boundary_edges.shape[0]),
-        "boundary_part_ids": [int(v) for v in np.unique(boundary_part_ids)],
-        "domain_grid_shape": [int(valid_mask.shape[0]), int(valid_mask.shape[1])],
-        "mixed_stencil_grid_count": int(np.count_nonzero(mixed_stencil_mask)),
-        "hard_invalid_grid_count": int(np.count_nonzero(hard_invalid_mask)),
-        "invalid_mask_stopped_point_count": int(invalid_stop_points.shape[0]),
-        "files": sorted(p.name for p in out.glob("*.png")) + sorted(p.name for p in out.glob("*.csv")),
+        "boundary_edge_count": int(geometry.boundary_edges.shape[0]),
+        "boundary_part_ids": [
+            int(value) for value in np.unique(geometry.boundary_part_ids)
+        ],
+        "domain_grid_shape": [int(size) for size in data.valid_mask.shape],
+        "mixed_stencil_grid_count": int(np.count_nonzero(data.mixed_stencil_mask)),
+        "hard_invalid_grid_count": int(np.count_nonzero(data.hard_invalid_mask)),
+        "invalid_mask_stopped_point_count": int(data.invalid_stop_points.shape[0]),
+        "files": sorted(path.name for path in out.glob("*.png"))
+        + sorted(path.name for path in out.glob("*.csv")),
     }
-    (out / "boundary_diagnostics_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-    return out
-
-
-def main() -> int:
-    ap = argparse.ArgumentParser(description="Export boundary-recognition diagnostic visuals.")
-    ap.add_argument("--case-dir", type=Path, required=True)
-    ap.add_argument("--output-dir", type=Path, required=True)
-    ap.add_argument("--normal-band-m", type=float, default=2.5e-3)
-    ap.add_argument("--quiver-stride", type=int, default=10)
-    args = ap.parse_args()
-    from tools.export_visualizations import export_visualizations
-
-    index_path = export_visualizations(
-        output_dir=args.output_dir.resolve(),
-        case_dir=args.case_dir.resolve(),
-        modules=("boundary",),
-        boundary_normal_band_m=float(args.normal_band_m),
-        boundary_quiver_stride=max(1, int(args.quiver_stride)),
+    (out / "boundary_diagnostics_report.json").write_text(
+        json.dumps(report, indent=2), encoding="utf-8"
     )
-    print(f"wrote boundary diagnostics via unified pipeline: {index_path}")
-    return 0
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+def export_boundary_diagnostics(
+    case_dir: Path,
+    output_dir: Path,
+    normal_band_m: float = 2.5e-3,
+    quiver_stride: int = 10,
+) -> Path:
+    data = _load_boundary_data(case_dir, output_dir)
+    out = ensure_visualization_dirs(output_dir)["boundary_diagnostics"]
+    out.mkdir(parents=True, exist_ok=True)
+    data.medium_summary.to_csv(out / "domain_part_medium_summary.csv", index=False)
+
+    _plot_geometry(data, out)
+    _plot_scalar(
+        data,
+        out,
+        data.valid_mask.astype(float),
+        filename="02_recognized_domain_mask.png",
+        title="Recognized Domain Mask (inside/outside)",
+        colorbar_label="inside mask",
+        cmap="Blues",
+        vmin=0.0,
+        vmax=1.0,
+    )
+    sdf_limit = max(
+        abs(float(np.nanmin(data.geometry.sdf))),
+        abs(float(np.nanmax(data.geometry.sdf))),
+    )
+    _plot_scalar(
+        data,
+        out,
+        data.geometry.sdf,
+        filename="03_signed_distance_field.png",
+        title="Diagnostic Signed Distance Field",
+        colorbar_label="sdf [m]",
+        cmap="coolwarm",
+        vmin=-sdf_limit,
+        vmax=sdf_limit,
+        contour_sdf=True,
+    )
+    _plot_normals(data, out, normal_band_m)
+    _plot_flow(data, out, quiver_stride)
+    _plot_scalar(
+        data,
+        out,
+        data.mixed_stencil_mask.astype(float),
+        filename="06_mixed_stencil_hotspots.png",
+        title="Mixed-Stencil Hotspots (point valid, stencil mixed)",
+        colorbar_label="mixed stencil mask",
+        cmap="OrRd",
+        vmin=0.0,
+        vmax=1.0,
+        contour_sdf=True,
+    )
+    _plot_scalar(
+        data,
+        out,
+        data.hard_invalid_mask.astype(float),
+        filename="07_hard_invalid_stop_hotspots.png",
+        title="Hard-Invalid Region and Stop Hotspots",
+        colorbar_label="hard invalid mask",
+        cmap="Reds",
+        vmin=0.0,
+        vmax=1.0,
+        stop_points=data.invalid_stop_points,
+    )
+    _write_report(data, case_dir, output_dir, out)
+    return out

@@ -1,86 +1,47 @@
 from __future__ import annotations
 
-from typing import Callable, Dict, Optional
-
-import numpy as np
-
-from .compiled_field_backend import CompiledRuntimeBackendLike
-from .high_fidelity_freeflight import ValidMaskPrefixResolution
+from .diagnostics import increment_count
+from .segment_motion import (
+    SegmentMotionRequest,
+    ValidMaskPrefixResolution,
+    resolve_valid_mask_prefix,
+)
+from .stochastic_motion import (
+    PiecewiseLangevinPath,
+    resolve_piecewise_valid_mask_prefix,
+)
 
 
 def resolve_valid_mask_retry_then_stop(
+    request: SegmentMotionRequest,
     *,
-    resolve_prefix: Callable[..., ValidMaskPrefixResolution],
-    collision_diagnostics: Dict[str, object],
-    x0: np.ndarray,
-    v0: np.ndarray,
-    dt_segment: float,
-    t_end_segment: float,
-    spatial_dim: int,
-    compiled: CompiledRuntimeBackendLike,
-    integrator_mode: int,
-    adaptive_substep_enabled: int,
-    adaptive_substep_tau_ratio: float,
-    adaptive_substep_max_splits: int,
-    tau_p_i: float,
-    particle_diameter_i: float,
-    particle_density_i: float,
-    particle_mass_i: float,
-    dep_particle_rel_permittivity_i: float,
-    thermophoretic_coeff_i: float,
-    flow_scale_particle_i: float,
-    drag_scale_particle_i: float,
-    body_scale_particle_i: float,
-    global_flow_scale: float,
-    global_drag_tau_scale: float,
-    global_body_accel_scale: float,
-    body_accel: np.ndarray,
-    min_tau_p_s: float,
-    gas_density_kgm3: float,
-    gas_mu_pas: float,
-    gas_temperature_K: float,
-    gas_molecular_mass_kg: float,
-    drag_model_mode: int,
-    electric_q_over_m_i: Optional[float] = None,
-    force_runtime: object | None = None,
+    collision_diagnostics: dict[str, object],
     require_clean_prefix: bool = False,
+    stochastic_path: PiecewiseLangevinPath | None = None,
+    stochastic_offset_s: float = 0.0,
 ) -> ValidMaskPrefixResolution:
-    resolution = resolve_prefix(
-        x0=x0,
-        v0=v0,
-        dt_segment=float(dt_segment),
-        t_end_segment=float(t_end_segment),
-        spatial_dim=int(spatial_dim),
-        compiled=compiled,
-        integrator_mode=int(integrator_mode),
-        adaptive_substep_enabled=int(adaptive_substep_enabled),
-        adaptive_substep_tau_ratio=float(adaptive_substep_tau_ratio),
-        adaptive_substep_max_splits=int(adaptive_substep_max_splits),
-        tau_p_i=float(tau_p_i),
-        particle_diameter_i=float(particle_diameter_i),
-        particle_density_i=float(particle_density_i),
-        particle_mass_i=float(particle_mass_i),
-        dep_particle_rel_permittivity_i=float(dep_particle_rel_permittivity_i),
-        thermophoretic_coeff_i=float(thermophoretic_coeff_i),
-        flow_scale_particle_i=float(flow_scale_particle_i),
-        drag_scale_particle_i=float(drag_scale_particle_i),
-        body_scale_particle_i=float(body_scale_particle_i),
-        global_flow_scale=float(global_flow_scale),
-        global_drag_tau_scale=float(global_drag_tau_scale),
-        global_body_accel_scale=float(global_body_accel_scale),
-        body_accel=body_accel,
-        min_tau_p_s=float(min_tau_p_s),
-        gas_density_kgm3=float(gas_density_kgm3),
-        gas_mu_pas=float(gas_mu_pas),
-        gas_temperature_K=float(gas_temperature_K),
-        gas_molecular_mass_kg=float(gas_molecular_mass_kg),
-        drag_model_mode=int(drag_model_mode),
-        electric_q_over_m_i=electric_q_over_m_i,
-        force_runtime=force_runtime,
-        require_clean_prefix=bool(require_clean_prefix),
-        max_halving_count=int(adaptive_substep_max_splits),
+    """Find the longest accepted dyadic prefix of one motion request."""
+
+    if stochastic_path is None:
+        resolution = resolve_valid_mask_prefix(
+            request,
+            max_halving_count=int(request.adaptive_substep_max_splits),
+            require_clean_prefix=bool(require_clean_prefix),
+        )
+    else:
+        resolution = resolve_piecewise_valid_mask_prefix(
+            request,
+            stochastic_path,
+            stochastic_offset_s=float(stochastic_offset_s),
+            max_halving_count=int(request.adaptive_substep_max_splits),
+            require_clean_prefix=bool(require_clean_prefix),
+        )
+    increment_count(
+        collision_diagnostics, "invalid_mask_retry_count", resolution.retry_count
     )
-    collision_diagnostics['invalid_mask_retry_count'] += int(resolution.retry_count)
     if not bool(resolution.found_valid_prefix):
-        collision_diagnostics['invalid_mask_retry_exhausted_count'] += 1
+        increment_count(collision_diagnostics, "invalid_mask_retry_exhausted_count")
     return resolution
+
+
+__all__ = ("resolve_valid_mask_retry_then_stop",)

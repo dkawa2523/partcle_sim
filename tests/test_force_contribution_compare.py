@@ -4,15 +4,21 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
+import pytest
 import yaml
 
-from particle_tracer_unified.compare.first_step_compare import main as first_step_compare_main
-from particle_tracer_unified.solvers.forces import ForceContribution, build_force_catalog
-from particle_tracer_unified.solvers.runtime_outputs import _build_force_contribution_rows
+from particle_tracer_unified._application_runtime import force_contribution_rows
+from particle_tracer_unified.compare.first_step_compare import (
+    main as first_step_compare_main,
+)
+from particle_tracer_unified.force_models import parse_native_force_model
+from particle_tracer_unified.solvers.forces import (
+    ForceContribution,
+    resolve_force_catalog,
+)
 
 
 def test_force_contribution_row_contains_component_norms() -> None:
@@ -33,19 +39,17 @@ def test_force_contribution_row_contains_component_norms() -> None:
 
 
 def test_force_contribution_rows_label_added_mass_terms_as_acceleration() -> None:
-    catalog = build_force_catalog(
-        {
-            "solver": {
-                "forces": {
-                    "pressure_gradient": {"enabled": False},
-                    "virtual_mass": {"enabled": False},
-                }
-            }
-        }
+    catalog = resolve_force_catalog(
+        parse_native_force_model(
+            {"model": "stokes"},
+            {
+                "pressure_gradient": {"enabled": False},
+                "virtual_mass": {"enabled": False},
+            },
+            spatial_dim=2,
+        )
     )
-    payload = SimpleNamespace(prepared=SimpleNamespace(runtime=SimpleNamespace(force_catalog=catalog)))
-
-    rows = {row["name"]: row for row in _build_force_contribution_rows(payload)}
+    rows = {row["name"]: row for row in force_contribution_rows(catalog)}
 
     assert rows["pressure_gradient"]["physical_quantity"] == "acceleration"
     assert rows["virtual_mass"]["physical_quantity"] == "acceleration"
@@ -77,15 +81,45 @@ def test_boundary_compare_uses_first_hit_and_writes_summary(tmp_path: Path) -> N
     summary_json = tmp_path / "boundary_hit_comparison.json"
     pd.DataFrame(
         [
-            {"particle_id": 1, "hit_time_s": 0.2, "part_id": 20, "outcome": "late", "hit_x_m": 1.0},
-            {"particle_id": 1, "hit_time_s": 0.1, "part_id": 10, "outcome": "bounce", "hit_x_m": 0.5},
-            {"particle_id": 2, "hit_time_s": 0.3, "part_id": 30, "outcome": "stick", "hit_x_m": 2.0},
+            {
+                "particle_id": 1,
+                "hit_time_s": 0.2,
+                "part_id": 20,
+                "outcome": "late",
+                "hit_x_m": 1.0,
+            },
+            {
+                "particle_id": 1,
+                "hit_time_s": 0.1,
+                "part_id": 10,
+                "outcome": "bounce",
+                "hit_x_m": 0.5,
+            },
+            {
+                "particle_id": 2,
+                "hit_time_s": 0.3,
+                "part_id": 30,
+                "outcome": "stick",
+                "hit_x_m": 2.0,
+            },
         ]
     ).to_csv(python_csv, index=False)
     pd.DataFrame(
         [
-            {"particle_id": 1, "hit_time_s": 0.11, "comsol_entity_id": 10, "outcome": "bounce", "hit_x": 0.55},
-            {"particle_id": 2, "hit_time_s": 0.31, "comsol_entity_id": 31, "outcome": "freeze", "hit_x": 2.0},
+            {
+                "particle_id": 1,
+                "hit_time_s": 0.11,
+                "comsol_entity_id": 10,
+                "outcome": "bounce",
+                "hit_x": 0.55,
+            },
+            {
+                "particle_id": 2,
+                "hit_time_s": 0.31,
+                "comsol_entity_id": 31,
+                "outcome": "freeze",
+                "hit_x": 2.0,
+            },
         ]
     ).to_csv(comsol_csv, index=False)
 
@@ -142,15 +176,18 @@ def _write_first_step_case(
         geometry_bounds = [-1.0, 1.0, -1.0, 1.0]
         particle_position = (0.0, 0.0)
     shape = (axis_0.size, axis_1.size)
+    velocity_names = (
+        ("ur", "uz") if coordinate_system == "axisymmetric_rz" else ("ux", "uy")
+    )
     payload: dict[str, object] = {
         "axis_0": axis_0,
         "axis_1": axis_1,
         "times": np.asarray([0.0], dtype=np.float64),
         "valid_mask": np.ones(shape, dtype=bool),
-        "ux": float(flow[0]) * np.ones(shape, dtype=np.float64),
-        "uy": float(flow[1]) * np.ones(shape, dtype=np.float64),
+        velocity_names[0]: float(flow[0]) * np.ones(shape, dtype=np.float64),
+        velocity_names[1]: float(flow[1]) * np.ones(shape, dtype=np.float64),
     }
-    force_cfg: dict[str, object] = {"electric": {"enabled": False}}
+    force_cfg: dict[str, object] = {}
     if electric is not None:
         payload["E_x"] = float(electric[0]) * np.ones(shape, dtype=np.float64)
         payload["E_y"] = float(electric[1]) * np.ones(shape, dtype=np.float64)
@@ -158,58 +195,103 @@ def _write_first_step_case(
     field_path = root / "field.npz"
     np.savez_compressed(field_path, **payload)
     particles_path = root / "particles.csv"
+    coordinate_values = (
+        {
+            "r_m": float(particle_position[0]),
+            "z_m": float(particle_position[1]),
+            "vr_mps": float(particle_velocity[0]),
+            "vz_mps": float(particle_velocity[1]),
+        }
+        if coordinate_system == "axisymmetric_rz"
+        else {
+            "x_m": float(particle_position[0]),
+            "y_m": float(particle_position[1]),
+            "vx_mps": float(particle_velocity[0]),
+            "vy_mps": float(particle_velocity[1]),
+        }
+    )
     pd.DataFrame(
         [
             {
                 "particle_id": 1,
-                "x": float(particle_position[0]),
-                "y": float(particle_position[1]),
-                "vx": float(particle_velocity[0]),
-                "vy": float(particle_velocity[1]),
-                "release_time": 0.0,
-                "mass": float(particle_mass),
-                "diameter": float(particle_diameter),
-                "density": float(particle_density),
-                "charge": float(particle_charge),
+                **coordinate_values,
+                "release_time_s": 0.0,
+                "mass_kg": float(particle_mass),
+                "drag_diameter_m": float(particle_diameter),
+                "density_kgm3": float(particle_density),
+                "charge_C": float(particle_charge),
                 "source_part_id": 10,
                 "material_id": 1,
-                "source_event_tag": "",
-                "stick_probability": 0.0,
             }
         ]
     ).to_csv(particles_path, index=False)
-    solver: dict[str, object] = {
-        "dt": 1.0e-5,
-        "t_end": 1.0e-3,
-        "save_every": 1,
-        "integrator": "drag_relaxation",
-        "adaptive_substep_enabled": 0,
-        "valid_mask_policy": "retry_then_stop",
+    boundaries_path = root / "boundaries.csv"
+    pd.DataFrame(
+        [
+            {
+                "part_id": 10,
+                "part_name": "box_boundary",
+                "role": "wall",
+                "material_id": 1,
+                "material_name": "test_material",
+                "wall_law": "specular",
+                "wall_stick_probability": 0.0,
+                "wall_restitution": 1.0,
+                "wall_diffuse_fraction": 0.0,
+                "wall_critical_sticking_velocity_mps": 0.0,
+            }
+        ]
+    ).to_csv(boundaries_path, index=False)
+    physics: dict[str, object] = {
+        "drag": {"model": "stokes"},
+        "gas": {
+            "temperature_K": 300.0,
+            "dynamic_viscosity_Pas": float(gas_mu),
+            "density_kgm3": 1.0,
+            "molecular_mass_amu": 39.948,
+        },
         "forces": force_cfg,
+        "seed": 123,
     }
     if stochastic_enabled:
-        solver["stochastic_motion"] = {"enabled": True, "seed": 123, "temperature_source": "gas"}
-        force_cfg["brownian"] = {"enabled": True}
+        physics["stochastic"] = {
+            "enabled": True,
+            "model": "underdamped_langevin",
+            "temperature_source": "gas",
+            "seed": 123,
+        }
     config = {
-        "run": {"spatial_dim": 2, "coordinate_system": coordinate_system},
-        "paths": {"particles_csv": str(particles_path)},
-        "providers": {
-            "geometry": {"kind": "box", "bounds": geometry_bounds, "grid_shape": [5, 5]},
-            "field": {"kind": "precomputed_npz", "npz_path": str(field_path)},
+        "schema_version": 2,
+        "case": {
+            "spatial_dim": 2,
+            "coordinate_system": coordinate_system,
+            "adapter": "native",
         },
-        "gas": {"temperature_K": 300.0, "dynamic_viscosity_Pas": float(gas_mu), "density_kgm3": 1.0},
-        "source": {"preprocess": {"enabled": False}, "default_law": "explicit_csv"},
-        "input_contract": {"initial_particle_field_support": "warn"},
-        "provider_contract": {"boundary_field_support": "off"},
-        "solver": solver,
-        "output": {"artifact_mode": "minimal"},
+        "inputs": {
+            "particles": particles_path.name,
+            "boundaries": boundaries_path.name,
+            "geometry": {
+                "kind": "box",
+                "parameters": {
+                    "bounds": geometry_bounds,
+                    "grid_shape": [5, 5],
+                    "boundary_part_ids": [10, 10, 10, 10],
+                },
+            },
+            "field": {"kind": "precomputed_npz", "path": field_path.name},
+        },
+        "physics": physics,
+        "time": {"dt": 1.0e-5, "t_end": 1.0e-3},
+        "output": {"mode": "standard"},
     }
     config_path = root / "run_config.yaml"
     config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
     return config_path
 
 
-def test_first_step_compare_reports_constant_electric_acceleration(tmp_path: Path) -> None:
+def test_first_step_compare_reports_constant_electric_acceleration(
+    tmp_path: Path,
+) -> None:
     config_path = _write_first_step_case(
         tmp_path / "electric",
         electric=(3.0, -4.0),
@@ -218,24 +300,78 @@ def test_first_step_compare_reports_constant_electric_acceleration(tmp_path: Pat
     )
     out_dir = tmp_path / "electric_compare"
 
-    rc = first_step_compare_main(["--config", str(config_path), "--output-dir", str(out_dir)])
+    rc = first_step_compare_main(
+        ["--config", str(config_path), "--output-dir", str(out_dir)]
+    )
 
     assert rc == 0
     forces = pd.read_csv(out_dir / "force_contributions.csv")
-    assert forces.loc[0, "source_provenance_group"] == "known_source"
+    assert forces.columns.tolist() == [
+        "particle_id",
+        "source_part_id",
+        "time_s",
+        "drag_tau_eff_s",
+        "field_status",
+        "notes",
+        "x",
+        "y",
+        "drag_ax",
+        "drag_ay",
+        "electric_ax",
+        "electric_ay",
+        "thermo_ax",
+        "thermo_ay",
+        "dielectrophoretic_ax",
+        "dielectrophoretic_ay",
+        "lift_ax",
+        "lift_ay",
+        "pressure_gradient_ax",
+        "pressure_gradient_ay",
+        "virtual_mass_ax",
+        "virtual_mass_ay",
+        "brownian_ax",
+        "brownian_ay",
+        "external_ax",
+        "external_ay",
+        "total_ax",
+        "total_ay",
+    ]
+    assert int(forces.loc[0, "source_part_id"]) == 10
     np.testing.assert_allclose(forces.loc[0, "electric_ax"], 6.0)
     np.testing.assert_allclose(forces.loc[0, "electric_ay"], -8.0)
     np.testing.assert_allclose(forces.loc[0, "total_ax"], 6.0)
     np.testing.assert_allclose(forces.loc[0, "total_ay"], -8.0)
     assert (out_dir / "first_step_error.csv").exists()
     assert (out_dir / "first_step_summary.json").exists()
-    assert (out_dir / "first_step_compare_summary.json").exists()
+    summary = json.loads(
+        (out_dir / "first_step_summary.json").read_text(encoding="utf-8")
+    )
+    assert summary["enabled_forces"] == ["drag", "electric"]
+    assert summary["force_contribution_rows"] == 1
+    assert summary["force_total_update"]["velocity_residual_mps"] == {
+        "count": 1,
+        "mean": 0.0,
+        "max": 0.0,
+    }
+    assert summary["force_total_update"]["position_residual_m"] == {
+        "count": 1,
+        "mean": 0.0,
+        "max": 0.0,
+    }
     first_step = pd.read_csv(out_dir / "first_step_error.csv")
-    assert first_step.loc[0, "source_provenance_group"] == "known_source"
+    assert int(first_step.loc[0, "source_part_id"]) == 10
     assert float(first_step.loc[0, "force_total_update_velocity_residual_mps"]) < 1.0e-9
     assert float(first_step.loc[0, "force_total_update_position_residual_m"]) < 1.0e-12
     assert float(first_step.loc[0, "force_total_euler_velocity_residual_mps"]) < 1.0e-9
-    assert float(first_step.loc[0, "force_total_euler_position_residual_m"]) < 1.0e-12
+    expected_euler_position_residual = 0.5 * np.hypot(6.0, -8.0) * (1.0e-5) ** 2
+    euler_position_residual = np.asarray(
+        first_step.loc[0, "force_total_euler_position_residual_m"],
+        dtype=np.float64,
+    ).item()
+    assert euler_position_residual == pytest.approx(
+        expected_euler_position_residual,
+        rel=1.0e-7,
+    )
 
 
 def test_first_step_compare_reports_drag_only_acceleration(tmp_path: Path) -> None:
@@ -249,18 +385,24 @@ def test_first_step_compare_reports_drag_only_acceleration(tmp_path: Path) -> No
     )
     out_dir = tmp_path / "drag_compare"
 
-    rc = first_step_compare_main(["--config", str(config_path), "--output-dir", str(out_dir)])
+    rc = first_step_compare_main(
+        ["--config", str(config_path), "--output-dir", str(out_dir)]
+    )
 
     assert rc == 0
     forces = pd.read_csv(out_dir / "force_contributions.csv")
-    expected_tau = 1000.0 * 0.006 * 0.006 / (18.0 * 1.0)
+    expected_tau = 1.0 / (3.0 * np.pi * 1.0 * 0.006)
     np.testing.assert_allclose(forces.loc[0, "drag_tau_eff_s"], expected_tau)
     np.testing.assert_allclose(forces.loc[0, "drag_ax"], 1.0 / expected_tau)
     np.testing.assert_allclose(forces.loc[0, "drag_ay"], 0.0)
     np.testing.assert_allclose(forces.loc[0, "electric_ax"], 0.0)
     np.testing.assert_allclose(forces.loc[0, "total_ax"], 1.0 / expected_tau)
     first_step = pd.read_csv(out_dir / "first_step_error.csv")
-    assert float(first_step.loc[0, "force_total_update_velocity_residual_mps"]) < 1.0e-12
+    update_velocity_residual = np.asarray(
+        first_step.loc[0, "force_total_update_velocity_residual_mps"],
+        dtype=np.float64,
+    ).item()
+    assert update_velocity_residual < 1.0e-12
     assert float(first_step.loc[0, "force_total_update_position_residual_m"]) < 1.0e-14
     assert float(first_step.loc[0, "force_total_euler_velocity_residual_mps"]) > 0.0
 
@@ -274,10 +416,16 @@ def test_first_step_compare_disables_stochastic_by_default(tmp_path: Path) -> No
     out_a = tmp_path / "stochastic_compare_a"
     out_b = tmp_path / "stochastic_compare_b"
 
-    first_step_compare_main(["--config", str(config_path), "--output-dir", str(out_a), "--seed", "7"])
-    first_step_compare_main(["--config", str(config_path), "--output-dir", str(out_b), "--seed", "7"])
+    first_step_compare_main(
+        ["--config", str(config_path), "--output-dir", str(out_a), "--seed", "7"]
+    )
+    first_step_compare_main(
+        ["--config", str(config_path), "--output-dir", str(out_b), "--seed", "7"]
+    )
 
-    summary = json.loads((out_a / "first_step_compare_summary.json").read_text(encoding="utf-8"))
+    summary = json.loads(
+        (out_a / "first_step_summary.json").read_text(encoding="utf-8")
+    )
     forces = pd.read_csv(out_a / "force_contributions.csv")
     first_a = pd.read_csv(out_a / "first_step_error.csv")
     first_b = pd.read_csv(out_b / "first_step_error.csv")
@@ -288,7 +436,9 @@ def test_first_step_compare_disables_stochastic_by_default(tmp_path: Path) -> No
     pd.testing.assert_frame_equal(first_a, first_b)
 
 
-def test_first_step_compare_controls_stochastic_from_config_with_seed(tmp_path: Path) -> None:
+def test_first_step_compare_controls_stochastic_from_config_with_seed(
+    tmp_path: Path,
+) -> None:
     config_path = _write_first_step_case(
         tmp_path / "stochastic_controlled",
         flow=(0.0, 0.0),
@@ -298,13 +448,33 @@ def test_first_step_compare_controls_stochastic_from_config_with_seed(tmp_path: 
     out_b = tmp_path / "stochastic_controlled_b"
 
     first_step_compare_main(
-        ["--config", str(config_path), "--output-dir", str(out_a), "--stochastic", "from-config", "--seed", "7"]
+        [
+            "--config",
+            str(config_path),
+            "--output-dir",
+            str(out_a),
+            "--stochastic",
+            "from-config",
+            "--seed",
+            "7",
+        ]
     )
     first_step_compare_main(
-        ["--config", str(config_path), "--output-dir", str(out_b), "--stochastic", "from-config", "--seed", "7"]
+        [
+            "--config",
+            str(config_path),
+            "--output-dir",
+            str(out_b),
+            "--stochastic",
+            "from-config",
+            "--seed",
+            "7",
+        ]
     )
 
-    summary = json.loads((out_a / "first_step_summary.json").read_text(encoding="utf-8"))
+    summary = json.loads(
+        (out_a / "first_step_summary.json").read_text(encoding="utf-8")
+    )
     first_a = pd.read_csv(out_a / "first_step_error.csv")
     first_b = pd.read_csv(out_b / "first_step_error.csv")
     assert summary["stochastic_policy"] == "from-config"
@@ -341,12 +511,10 @@ def test_first_step_compare_dt_sweep_reports_drag_convergence(tmp_path: Path) ->
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     runs = summary["runs"]
     update_residuals = [
-        float(run["force_update_velocity_residual_mps"]["max"])
-        for run in runs
+        float(run["force_update_velocity_residual_mps"]["max"]) for run in runs
     ]
     euler_residuals = [
-        float(run["force_euler_velocity_residual_mps"]["max"])
-        for run in runs
+        float(run["force_euler_velocity_residual_mps"]["max"]) for run in runs
     ]
     assert max(update_residuals) < 1.0e-12
     assert euler_residuals[2] < euler_residuals[1] < euler_residuals[0]
@@ -355,7 +523,12 @@ def test_first_step_compare_dt_sweep_reports_drag_convergence(tmp_path: Path) ->
 
 
 def test_first_step_compare_merges_reference_errors(tmp_path: Path) -> None:
-    config_path = _write_first_step_case(tmp_path / "reference", electric=(1.0, 0.0), particle_mass=1.0, particle_charge=1.0)
+    config_path = _write_first_step_case(
+        tmp_path / "reference",
+        electric=(1.0, 0.0),
+        particle_mass=1.0,
+        particle_charge=1.0,
+    )
     reference_path = tmp_path / "reference.csv"
     pd.DataFrame(
         [
@@ -371,7 +544,14 @@ def test_first_step_compare_merges_reference_errors(tmp_path: Path) -> None:
     out_dir = tmp_path / "reference_compare"
 
     rc = first_step_compare_main(
-        ["--config", str(config_path), "--reference", str(reference_path), "--output-dir", str(out_dir)]
+        [
+            "--config",
+            str(config_path),
+            "--reference",
+            str(reference_path),
+            "--output-dir",
+            str(out_dir),
+        ]
     )
 
     assert rc == 0
@@ -388,14 +568,20 @@ def test_first_step_compare_axisymmetric_rz_uses_rz_columns(tmp_path: Path) -> N
     )
     out_dir = tmp_path / "axisymmetric_compare"
 
-    rc = first_step_compare_main(["--config", str(config_path), "--output-dir", str(out_dir)])
+    rc = first_step_compare_main(
+        ["--config", str(config_path), "--output-dir", str(out_dir)]
+    )
 
     assert rc == 0
-    summary = json.loads((out_dir / "first_step_compare_summary.json").read_text(encoding="utf-8"))
+    summary = json.loads(
+        (out_dir / "first_step_summary.json").read_text(encoding="utf-8")
+    )
     forces = pd.read_csv(out_dir / "force_contributions.csv")
     first_step = pd.read_csv(out_dir / "first_step_error.csv")
     assert summary["coordinate_system"] == "axisymmetric_rz"
     assert summary["axis_names"] == ["r", "z"]
     assert {"r", "z", "drag_ar", "drag_az"}.issubset(set(forces.columns))
-    assert {"r0", "z0", "r1_solver", "z1_solver", "vr1_solver", "vz1_solver"}.issubset(set(first_step.columns))
+    assert {"r0", "z0", "r1_solver", "z1_solver", "vr1_solver", "vz1_solver"}.issubset(
+        set(first_step.columns)
+    )
     assert "x0" not in first_step.columns

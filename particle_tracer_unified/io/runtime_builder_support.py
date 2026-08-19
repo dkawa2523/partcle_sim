@@ -1,130 +1,80 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any
 
 import numpy as np
 
-from ..core.datamodel import (
+from particle_tracer_unified.core.datamodel import (
     FieldProviderND,
     GeometryProviderND,
-    MaterialTable,
-    PartWallTable,
     ParticleTable,
-    ProcessStepTable,
-    SourceEventTable,
+    PartWallTable,
+    RegularFieldND,
+    TriangleMeshField2D,
 )
-from ..core.source_events import compile_source_events
-from ..io.tables import (
-    load_materials_csv,
-    load_part_walls_csv,
-    load_particles_csv,
-    load_process_steps_csv,
-    load_source_events_csv,
+from particle_tracer_unified.core.numerical_contracts import float_arrays_equal_ulps
+from particle_tracer_unified.io.tables import load_boundaries_csv, load_particles_csv
+from particle_tracer_unified.providers.precomputed import (
+    build_precomputed_field,
+    build_precomputed_geometry,
+    build_precomputed_triangle_mesh_field,
 )
-from ..providers.precomputed import build_precomputed_field, build_precomputed_geometry, build_precomputed_triangle_mesh_field
-from ..providers.synthetic import build_synthetic_field, build_synthetic_geometry
+from particle_tracer_unified.providers.synthetic import (
+    build_synthetic_field,
+    build_synthetic_geometry,
+)
 
 
 @dataclass(frozen=True)
 class ResolvedRuntimePaths:
     particles_path: Path
-    materials_path: Optional[Path]
-    walls_path: Optional[Path]
-    events_path: Optional[Path]
-    process_steps_path: Optional[Path]
+    boundaries_path: Path
 
 
 @dataclass(frozen=True)
 class LoadedRuntimeInputs:
     particles: ParticleTable
-    materials: Optional[MaterialTable]
-    walls: Optional[PartWallTable]
-    source_events: Optional[SourceEventTable]
-    process_steps: Optional[ProcessStepTable]
-    compiled_source_events: Optional[SourceEventTable]
+    walls: PartWallTable
 
 
 @dataclass(frozen=True)
 class RuntimeProviders:
-    geometry_provider: Optional[GeometryProviderND]
-    field_provider: Optional[FieldProviderND]
+    geometry_provider: GeometryProviderND | None
+    field_provider: FieldProviderND | None
 
 
-def _resolve_path(base: Path, value: Optional[str]) -> Optional[Path]:
-    if value is None or str(value).strip() == '':
+def _resolve_path(base: Path, value: str | None, *, context: str) -> Path | None:
+    if value is None:
         return None
-    path = Path(str(value))
+    if not isinstance(value, str):
+        raise ValueError(f"{context} must be a string")
+    if value == "":
+        raise ValueError(f"{context} must not be empty")
+    if value != value.strip():
+        raise ValueError(f"{context} must not contain leading or trailing whitespace")
+    path = Path(value)
     return (base / path).resolve() if not path.is_absolute() else path
 
 
-def _validate_process_steps(process_steps: Optional[ProcessStepTable]) -> None:
-    if process_steps is None:
-        return
-    rows = tuple(process_steps.rows)
-    if not rows:
-        raise ValueError('Configured process steps are empty')
-    names: set[str] = set()
-    for row in rows:
-        name = str(row.step_name).strip()
-        if not name:
-            raise ValueError('Process steps must have a non-empty step_name')
-        if name in names:
-            raise ValueError(f'Duplicate process step name: {name}')
-        names.add(name)
-        start_s = float(row.start_s)
-        end_s = float(row.end_s)
-        if not np.isfinite(start_s) or not np.isfinite(end_s):
-            raise ValueError(f'Process step {name} must have finite start_s/end_s')
-        if end_s <= start_s:
-            raise ValueError(f'Process step {name} must have end_s > start_s')
-
-
-def _validate_compiled_source_events(
-    source_events: Optional[SourceEventTable],
-    compiled_source_events: Optional[SourceEventTable],
-) -> None:
-    if source_events is None or compiled_source_events is None:
-        return
-    unresolved = []
-    for raw_row, compiled_row in zip(source_events.rows, compiled_source_events.rows):
-        if int(getattr(raw_row, 'enabled', 1)) == 0:
-            continue
-        status = str(getattr(compiled_row, 'metadata', {}).get('compile_status', '')).strip().lower()
-        if status != 'unresolved_binding':
-            continue
-        bind_parts = []
-        if getattr(raw_row, 'bind_step_name', ''):
-            bind_parts.append(f"step={raw_row.bind_step_name}")
-        bind_desc = ', '.join(bind_parts) if bind_parts else 'binding=absolute'
-        unresolved.append(f"{raw_row.event_name} ({bind_desc})")
-    if unresolved:
-        preview = '; '.join(unresolved[:3])
-        if len(unresolved) > 3:
-            preview += f'; ... (+{len(unresolved) - 3} more)'
-        raise ValueError(f'Unresolved source event bindings: {preview}')
-
-
-def resolve_runtime_input_paths(config_dir: Path, paths_cfg: Mapping[str, Any]) -> ResolvedRuntimePaths:
-    particles_path = _resolve_path(config_dir, paths_cfg.get('particles_csv'))
-    materials_path = _resolve_path(config_dir, paths_cfg.get('materials_csv'))
-    walls_path = _resolve_path(config_dir, paths_cfg.get('part_walls_csv'))
-    events_path = _resolve_path(config_dir, paths_cfg.get('source_events_csv'))
-    process_steps_path = _resolve_path(config_dir, paths_cfg.get('process_steps_csv'))
-    if _resolve_path(config_dir, paths_cfg.get('recipe_manifest_yaml')) is not None:
-        raise ValueError(
-            'paths.recipe_manifest_yaml is no longer supported; '
-            'use paths.process_steps_csv for optional time labels'
-        )
+def resolve_runtime_input_paths(
+    config_dir: Path, paths_cfg: Mapping[str, Any]
+) -> ResolvedRuntimePaths:
+    particles_path = _resolve_path(
+        config_dir, paths_cfg.get("particles_csv"), context="paths.particles_csv"
+    )
+    boundaries_path = _resolve_path(
+        config_dir, paths_cfg.get("boundaries_csv"), context="paths.boundaries_csv"
+    )
     if particles_path is None:
-        raise ValueError('paths.particles_csv is required')
+        raise ValueError("paths.particles_csv is required")
+    if boundaries_path is None:
+        raise ValueError("paths.boundaries_csv is required")
     return ResolvedRuntimePaths(
         particles_path=particles_path,
-        materials_path=materials_path,
-        walls_path=walls_path,
-        events_path=events_path,
-        process_steps_path=process_steps_path,
+        boundaries_path=boundaries_path,
     )
 
 
@@ -134,41 +84,29 @@ def load_runtime_inputs(
     spatial_dim: int,
     coordinate_system: str,
 ) -> LoadedRuntimeInputs:
-    particles = load_particles_csv(paths.particles_path, spatial_dim=spatial_dim, coordinate_system=coordinate_system)
-    materials = load_materials_csv(paths.materials_path) if paths.materials_path else None
-    walls = load_part_walls_csv(paths.walls_path) if paths.walls_path else None
-    source_events, process_steps, compiled_source_events = load_optional_source_timing(
-        events_path=paths.events_path,
-        process_steps_path=paths.process_steps_path,
+    particles = load_particles_csv(
+        paths.particles_path,
+        spatial_dim=spatial_dim,
+        coordinate_system=coordinate_system,
     )
+    walls = load_boundaries_csv(paths.boundaries_path)
     return LoadedRuntimeInputs(
         particles=particles,
-        materials=materials,
         walls=walls,
-        source_events=source_events,
-        process_steps=process_steps,
-        compiled_source_events=compiled_source_events,
     )
 
 
-def load_optional_source_timing(
-    *,
-    events_path: Optional[Path],
-    process_steps_path: Optional[Path],
-) -> tuple[Optional[SourceEventTable], Optional[ProcessStepTable], Optional[SourceEventTable]]:
-    source_events = load_source_events_csv(events_path) if events_path else None
-    process_steps = load_process_steps_csv(process_steps_path) if process_steps_path else None
-    _validate_process_steps(process_steps)
-    compiled_source_events = compile_source_events(source_events, process_steps)
-    _validate_compiled_source_events(source_events, compiled_source_events)
-    return source_events, process_steps, compiled_source_events
-
-
-def _resolved_provider_cfg(config_dir: Path, provider_cfg: Mapping[str, Any]) -> dict[str, Any]:
+def _resolved_provider_cfg(
+    config_dir: Path, provider_cfg: Mapping[str, Any]
+) -> dict[str, Any]:
     resolved_cfg = dict(provider_cfg)
-    resolved_npz = _resolve_path(config_dir, resolved_cfg.get('npz_path'))
+    resolved_npz = _resolve_path(
+        config_dir,
+        resolved_cfg.get("npz_path"),
+        context="providers.npz_path",
+    )
     if resolved_npz is not None:
-        resolved_cfg['npz_path'] = str(resolved_npz)
+        resolved_cfg["npz_path"] = str(resolved_npz)
     return resolved_cfg
 
 
@@ -179,21 +117,34 @@ def _align_field_provider_to_geometry(
     field = field_provider.field
     geom = geometry_provider.geometry
     if int(field.spatial_dim) != int(geom.spatial_dim):
-        raise ValueError('Field spatial_dim must match geometry spatial_dim')
-    field_kind = str(getattr(field_provider, 'kind', '')).strip().lower()
-    if field_kind == 'precomputed_triangle_mesh_npz':
+        raise ValueError("Field spatial_dim must match geometry spatial_dim")
+    if isinstance(field, TriangleMeshField2D):
         return field_provider
-    for axis_index, (field_axis, geometry_axis) in enumerate(zip(field.axes, geom.axes)):
-        if field_axis.shape != geometry_axis.shape or not np.allclose(field_axis, geometry_axis, atol=1e-12, rtol=0.0):
-            raise ValueError(f'Field axis_{axis_index} must exactly match geometry axis_{axis_index}')
+    if not isinstance(field, RegularFieldND):
+        raise TypeError(f"unsupported field data type: {type(field).__name__}")
+    spatial_dim = int(field.spatial_dim)
+    if len(field.axes) != spatial_dim or len(geom.axes) != spatial_dim:
+        raise ValueError(
+            "Field and geometry must each provide exactly spatial_dim axes"
+        )
+    for axis_index, (field_axis, geometry_axis) in enumerate(
+        zip(field.axes, geom.axes, strict=True)
+    ):
+        if not float_arrays_equal_ulps(field_axis, geometry_axis):
+            raise ValueError(
+                f"Field axis_{axis_index} must exactly match geometry axis_{axis_index}"
+            )
     field_valid_mask = np.asarray(field.valid_mask, dtype=bool)
     geometry_valid_mask = np.asarray(geom.valid_mask, dtype=bool)
     core_valid_mask = field_valid_mask & geometry_valid_mask
-    support_phi = getattr(field, 'support_phi', None)
+    support_phi = getattr(field, "support_phi", None)
     if support_phi is not None:
         support_phi_arr = np.asarray(support_phi, dtype=np.float64)
         if support_phi_arr.shape != field_valid_mask.shape:
-            raise ValueError(f'Field support_phi shape mismatch: expected {field_valid_mask.shape}, got {support_phi_arr.shape}')
+            raise ValueError(
+                "Field support_phi shape mismatch: "
+                f"expected {field_valid_mask.shape}, got {support_phi_arr.shape}"
+            )
         support_phi = support_phi_arr
     aligned_field = replace(
         field,
@@ -202,13 +153,30 @@ def _align_field_provider_to_geometry(
         core_valid_mask=core_valid_mask,
         metadata={
             **field.metadata,
-            'field_valid_mask_is_provider_native': True,
-            'field_valid_node_count': int(np.count_nonzero(field_valid_mask)),
-            'geometry_valid_node_count': int(np.count_nonzero(geometry_valid_mask)),
-            'core_valid_node_count': int(np.count_nonzero(core_valid_mask)),
+            "field_valid_mask_is_provider_native": True,
+            "field_valid_node_count": int(np.count_nonzero(field_valid_mask)),
+            "geometry_valid_node_count": int(np.count_nonzero(geometry_valid_mask)),
+            "core_valid_node_count": int(np.count_nonzero(core_valid_mask)),
         },
     )
     return replace(field_provider, field=aligned_field)
+
+
+def _provider_kind(cfg: Mapping[str, Any], *, context: str, allowed: set[str]) -> str:
+    if "kind" not in cfg:
+        raise ValueError(f"{context}.kind is required")
+    value = cfg["kind"]
+    if not isinstance(value, str):
+        raise ValueError(f"{context}.kind must be a string")
+    if value != value.strip():
+        raise ValueError(
+            f"{context}.kind must not contain leading or trailing whitespace"
+        )
+    if value not in allowed:
+        raise ValueError(
+            f"{context}.kind must be one of {sorted(allowed)}, got {value!r}"
+        )
+    return value
 
 
 def _build_geometry_provider(
@@ -218,11 +186,17 @@ def _build_geometry_provider(
     spatial_dim: int,
     coordinate_system: str,
 ) -> GeometryProviderND:
-    geom_kind = str(geom_cfg.get('kind', 'box')).strip().lower()
+    geom_kind = _provider_kind(
+        geom_cfg, context="providers.geometry", allowed={"box", "precomputed_npz"}
+    )
     resolved_cfg = _resolved_provider_cfg(config_dir, geom_cfg)
-    if geom_kind in {'precomputed_npz', 'npz'}:
-        return build_precomputed_geometry(resolved_cfg, spatial_dim=spatial_dim, coordinate_system=coordinate_system)
-    return build_synthetic_geometry(resolved_cfg, spatial_dim=spatial_dim, coordinate_system=coordinate_system)
+    if geom_kind == "precomputed_npz":
+        return build_precomputed_geometry(
+            resolved_cfg, spatial_dim=spatial_dim, coordinate_system=coordinate_system
+        )
+    return build_synthetic_geometry(
+        resolved_cfg, spatial_dim=spatial_dim, coordinate_system=coordinate_system
+    )
 
 
 def _build_field_provider(
@@ -232,31 +206,31 @@ def _build_field_provider(
     *,
     spatial_dim: int,
     coordinate_system: str,
-    gas_density_kgm3: float,
 ) -> FieldProviderND:
-    field_kind = str(field_cfg.get('kind', 'linear_shear')).strip().lower()
+    field_kind = _provider_kind(
+        field_cfg,
+        context="providers.field",
+        allowed={"linear_shear", "precomputed_npz", "precomputed_triangle_mesh_npz"},
+    )
     resolved_cfg = _resolved_provider_cfg(config_dir, field_cfg)
-    if field_kind in {'precomputed_npz', 'npz'}:
+    if field_kind == "precomputed_npz":
         return build_precomputed_field(
             resolved_cfg,
             spatial_dim=spatial_dim,
             coordinate_system=coordinate_system,
             axes=geometry_provider.geometry.axes,
-            gas_density_kgm3=float(gas_density_kgm3),
         )
-    if field_kind == 'precomputed_triangle_mesh_npz':
+    if field_kind == "precomputed_triangle_mesh_npz":
         return build_precomputed_triangle_mesh_field(
             resolved_cfg,
             spatial_dim=spatial_dim,
             coordinate_system=coordinate_system,
-            gas_density_kgm3=float(gas_density_kgm3),
         )
     return build_synthetic_field(
         resolved_cfg,
         spatial_dim=spatial_dim,
         coordinate_system=coordinate_system,
         axes=geometry_provider.geometry.axes,
-        gas_density_kgm3=float(gas_density_kgm3),
     )
 
 
@@ -266,40 +240,69 @@ def build_runtime_providers(
     providers_cfg: Mapping[str, Any],
     spatial_dim: int,
     coordinate_system: str,
-    gas_density_kgm3: float,
 ) -> RuntimeProviders:
-    geom_cfg = providers_cfg.get('geometry', {}) if isinstance(providers_cfg.get('geometry', {}), Mapping) else {}
-    field_cfg = providers_cfg.get('field', {}) if isinstance(providers_cfg.get('field', {}), Mapping) else {}
+    unknown = sorted(set(providers_cfg) - {"geometry", "field"})
+    if unknown:
+        raise ValueError(f"providers has unknown entries: {unknown}")
+
+    def provider_config(name: str) -> Mapping[str, Any] | None:
+        if name not in providers_cfg:
+            return None
+        value = providers_cfg[name]
+        if not isinstance(value, Mapping):
+            raise ValueError(f"providers.{name} must be a mapping")
+        return value
+
+    geom_cfg = provider_config("geometry")
+    field_cfg = provider_config("field")
 
     geometry_provider = (
-        _build_geometry_provider(config_dir, geom_cfg, spatial_dim=spatial_dim, coordinate_system=coordinate_system)
-        if geom_cfg
+        _build_geometry_provider(
+            config_dir,
+            geom_cfg,
+            spatial_dim=spatial_dim,
+            coordinate_system=coordinate_system,
+        )
+        if geom_cfg is not None
         else None
     )
     field_provider = None
-    if field_cfg:
+    if field_cfg is not None:
         if geometry_provider is None:
-            raise ValueError('providers.field requires providers.geometry so axes are available')
+            raise ValueError(
+                "providers.field requires providers.geometry so axes are available"
+            )
         field_provider = _build_field_provider(
             config_dir,
             field_cfg,
             geometry_provider,
             spatial_dim=spatial_dim,
             coordinate_system=coordinate_system,
-            gas_density_kgm3=float(gas_density_kgm3),
         )
-    if geometry_provider is not None and bool(geometry_provider.geometry.metadata.get('requires_field_bundle', False)) and field_provider is None:
-        raise ValueError('COMSOL geometry requires providers.field from a validated export bundle')
+    if (
+        geometry_provider is not None
+        and bool(
+            geometry_provider.geometry.metadata.get("requires_field_bundle", False)
+        )
+        and field_provider is None
+    ):
+        raise ValueError(
+            "COMSOL geometry requires providers.field from a validated export bundle"
+        )
     if geometry_provider is not None and field_provider is not None:
-        field_provider = _align_field_provider_to_geometry(field_provider, geometry_provider)
-    return RuntimeProviders(geometry_provider=geometry_provider, field_provider=field_provider)
+        field_provider = _align_field_provider_to_geometry(
+            field_provider, geometry_provider
+        )
+    return RuntimeProviders(
+        geometry_provider=geometry_provider, field_provider=field_provider
+    )
 
 
 __all__ = (
-    'LoadedRuntimeInputs',
-    'ResolvedRuntimePaths',
-    'RuntimeProviders',
-    'build_runtime_providers',
-    'load_runtime_inputs',
-    'resolve_runtime_input_paths',
+    "LoadedRuntimeInputs",
+    "ResolvedRuntimePaths",
+    "RuntimeProviders",
+    "build_runtime_providers",
+    "load_runtime_inputs",
+    "resolve_runtime_input_paths",
 )

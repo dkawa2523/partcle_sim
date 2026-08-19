@@ -2,6 +2,24 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 *.egg-info/
+.venv/
+.uv-cache/
+.uv-test-cache/
+.uv-tools/
+.uv-bin/
+.ruff_cache/
+.mypy_cache/
+.pyrefly_cache/
+.grimp_cache/
+.import_linter_cache/
+.hypothesis/
+.nox/
+.coverage
+htmlcov/
+mutants/
+.quality-cache/
+.quality/reports/
+.e2e-v02-*/
 
 _tmp_*/
 _tmp_*
@@ -33,3 +51,6 @@ data/*.mph
 *.mphbin
 *.mph.lock
 hs_err_pid*.log
+
+# stale temp dirs left by interrupted test runs
+tmp*/

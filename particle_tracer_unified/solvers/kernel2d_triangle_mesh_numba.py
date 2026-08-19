@@ -1,18 +1,35 @@
+"""Triangle-mesh 2D sampling leaves for the canonical motion kernel."""
+
 from __future__ import annotations
 
 import numpy as np
 from numba import njit
 
-from ..core.field_sampling import VALID_MASK_STATUS_CLEAN, VALID_MASK_STATUS_HARD_INVALID
-from .integrator_common import (
-    DRAG_MODEL_STOKES,
-    INTEGRATOR_ETD2,
-    advance_state_2d,
-    advance_state_2d_etd,
-    compute_substep_count,
-    effective_tau_from_slip_speed,
+from particle_tracer_unified.core.field_sampling import (
+    VALID_MASK_STATUS_CLEAN,
+    VALID_MASK_STATUS_HARD_INVALID,
 )
-from .kernel_shared_numba import midpoint_local_dt, should_capture_midpoint
+
+from .drag_models import (
+    _EPSTEIN_DEFAULT_ACCOMMODATION_DELTA,
+    effective_tau_from_drag_model,
+)
+from .motion_kernel_numba import (
+    _axisymmetric_rz_chart_radius,
+    advance_etd2_batch_inplace,
+)
+
+_OUTSIDE_MESH_RING_LIMIT = 2
+
+
+@njit(cache=True, inline="always")
+def _outside_acceleration_grid_2d(x, y, xmin, xmax, ymin, ymax, tolerance):
+    return (
+        x < xmin - tolerance
+        or x > xmax + tolerance
+        or y < ymin - tolerance
+        or y > ymax + tolerance
+    )
 
 
 @njit(cache=True)
@@ -34,18 +51,10 @@ def _find_triangle_and_barycentric(
     ymin = accel_origin[1]
     xmax = xmin + accel_cell_size[0] * accel_nx
     ymax = ymin + accel_cell_size[1] * accel_ny
-    if x < xmin - eps or x > xmax + eps or y < ymin - eps or y > ymax + eps:
+    if _outside_acceleration_grid_2d(x, y, xmin, xmax, ymin, ymax, eps):
         return -1, 0.0, 0.0, 0.0
-    ix = int(np.floor((x - xmin) / accel_cell_size[0]))
-    iy = int(np.floor((y - ymin) / accel_cell_size[1]))
-    if ix < 0:
-        ix = 0
-    if iy < 0:
-        iy = 0
-    if ix >= accel_nx:
-        ix = accel_nx - 1
-    if iy >= accel_ny:
-        iy = accel_ny - 1
+    ix = min(accel_nx - 1, max(0, int(np.floor((x - xmin) / accel_cell_size[0]))))
+    iy = min(accel_ny - 1, max(0, int(np.floor((y - ymin) / accel_cell_size[1]))))
     cell_id = ix * accel_ny + iy
     start = accel_cell_offsets[cell_id]
     stop = accel_cell_offsets[cell_id + 1]
@@ -71,30 +80,25 @@ def _find_triangle_and_barycentric(
         v1y = cy - ay
         v2x = x - ax
         v2y = y - ay
-        den = v0x * v1y - v0y * v1x
-        if abs(den) <= 1.0e-30:
+        edge_ab = np.sqrt(v0x * v0x + v0y * v0y)
+        edge_ca = np.sqrt(v1x * v1x + v1y * v1y)
+        determinant_scale = edge_ab * edge_ca
+        if determinant_scale <= 0.0:
             continue
-        beta = (v2x * v1y - v2y * v1x) / den
-        gamma = (v0x * v2y - v0y * v2x) / den
+        denominator = v0x * v1y - v0y * v1x
+        if abs(denominator) <= 64.0 * np.finfo(np.float64).eps * determinant_scale:
+            continue
+        beta = (v2x * v1y - v2y * v1x) / denominator
+        gamma = (v0x * v2y - v0y * v2x) / denominator
         alpha = 1.0 - beta - gamma
         edge_bcx = cx - bx
         edge_bcy = cy - by
-        edge_cax = ax - cx
-        edge_cay = ay - cy
-        edge_abx = bx - ax
-        edge_aby = by - ay
         edge_bc = np.sqrt(edge_bcx * edge_bcx + edge_bcy * edge_bcy)
-        edge_ca = np.sqrt(edge_cax * edge_cax + edge_cay * edge_cay)
-        edge_ab = np.sqrt(edge_abx * edge_abx + edge_aby * edge_aby)
-        area2 = abs(den)
-        h_alpha = area2 / max(edge_bc, 1.0e-30)
-        h_beta = area2 / max(edge_ca, 1.0e-30)
-        h_gamma = area2 / max(edge_ab, 1.0e-30)
-        if alpha < -eps / max(h_alpha, 1.0e-30):
-            continue
-        if beta < -eps / max(h_beta, 1.0e-30):
-            continue
-        if gamma < -eps / max(h_gamma, 1.0e-30):
+        area2 = abs(denominator)
+        h_alpha = area2 / edge_bc
+        h_beta = area2 / edge_ca
+        h_gamma = area2 / edge_ab
+        if alpha < -eps / h_alpha or beta < -eps / h_beta or gamma < -eps / h_gamma:
             continue
         distance_margin = min(alpha * h_alpha, beta * h_beta, gamma * h_gamma)
         if distance_margin > best_margin:
@@ -107,26 +111,160 @@ def _find_triangle_and_barycentric(
 
 
 @njit(cache=True)
-def _sample_triangle_vertex_series(arr, times, triangles, tri_idx, alpha, beta, gamma, t):
+def _triangle_barycentric_margin(vertices, triangles, tri_idx, x, y):
+    """Return barycentric weights and the signed inside distance of a point."""
+
+    i0 = triangles[tri_idx, 0]
+    i1 = triangles[tri_idx, 1]
+    i2 = triangles[tri_idx, 2]
+    ax = vertices[i0, 0]
+    ay = vertices[i0, 1]
+    v0x = vertices[i1, 0] - ax
+    v0y = vertices[i1, 1] - ay
+    v1x = vertices[i2, 0] - ax
+    v1y = vertices[i2, 1] - ay
+    edge_ab = np.sqrt(v0x * v0x + v0y * v0y)
+    edge_ca = np.sqrt(v1x * v1x + v1y * v1y)
+    determinant_scale = edge_ab * edge_ca
+    if determinant_scale <= 0.0:
+        return False, 0.0, 0.0, 0.0, -1.0e300
+    denominator = v0x * v1y - v0y * v1x
+    if abs(denominator) <= 64.0 * np.finfo(np.float64).eps * determinant_scale:
+        return False, 0.0, 0.0, 0.0, -1.0e300
+    v2x = x - ax
+    v2y = y - ay
+    beta = (v2x * v1y - v2y * v1x) / denominator
+    gamma = (v0x * v2y - v0y * v2x) / denominator
+    alpha = 1.0 - beta - gamma
+    edge_bcx = vertices[i2, 0] - vertices[i1, 0]
+    edge_bcy = vertices[i2, 1] - vertices[i1, 1]
+    edge_bc = np.sqrt(edge_bcx * edge_bcx + edge_bcy * edge_bcy)
+    area2 = abs(denominator)
+    margin = min(
+        alpha * (area2 / edge_bc),
+        beta * (area2 / edge_ca),
+        gamma * (area2 / edge_ab),
+    )
+    return True, alpha, beta, gamma, margin
+
+
+@njit(cache=True)
+def _best_margin_in_cell(
+    vertices, triangles, accel_cell_offsets, accel_triangle_indices, cell_id, x, y
+):
+    best_idx = -1
+    best_alpha = 0.0
+    best_beta = 0.0
+    best_gamma = 0.0
+    best_margin = -1.0e300
+    for flat_idx in range(accel_cell_offsets[cell_id], accel_cell_offsets[cell_id + 1]):
+        tri_idx = accel_triangle_indices[flat_idx]
+        ok, alpha, beta, gamma, margin = _triangle_barycentric_margin(
+            vertices, triangles, tri_idx, x, y
+        )
+        if ok and margin > best_margin:
+            best_margin = margin
+            best_idx = tri_idx
+            best_alpha = alpha
+            best_beta = beta
+            best_gamma = gamma
+    return best_idx, best_alpha, best_beta, best_gamma, best_margin
+
+
+@njit(cache=True)
+def _nearest_triangle_and_clamped_barycentric(
+    vertices,
+    triangles,
+    accel_origin,
+    accel_cell_size,
+    accel_nx,
+    accel_ny,
+    accel_cell_offsets,
+    accel_triangle_indices,
+    x,
+    y,
+    ring_limit,
+):
+    """Compiled form of ``_nearest_triangle_candidate``.
+
+    See :mod:`particle_tracer_unified.core.triangle_mesh_sampling_2d` for why
+    an outside point clamps to the nearest element instead of returning NaN.
+    """
+
+    ix = min(
+        accel_nx - 1,
+        max(0, int(np.floor((x - accel_origin[0]) / accel_cell_size[0]))),
+    )
+    iy = min(
+        accel_ny - 1,
+        max(0, int(np.floor((y - accel_origin[1]) / accel_cell_size[1]))),
+    )
+    best_idx = -1
+    best_alpha = 0.0
+    best_beta = 0.0
+    best_gamma = 0.0
+    best_margin = -1.0e300
+    for ring in range(int(ring_limit) + 1):
+        for cell_x in range(max(0, ix - ring), min(accel_nx, ix + ring + 1)):
+            for cell_y in range(max(0, iy - ring), min(accel_ny, iy + ring + 1)):
+                if ring > 0 and abs(cell_x - ix) != ring and abs(cell_y - iy) != ring:
+                    continue
+                idx, alpha, beta, gamma, margin = _best_margin_in_cell(
+                    vertices,
+                    triangles,
+                    accel_cell_offsets,
+                    accel_triangle_indices,
+                    cell_x * accel_ny + cell_y,
+                    x,
+                    y,
+                )
+                if idx >= 0 and margin > best_margin:
+                    best_margin = margin
+                    best_idx = idx
+                    best_alpha = alpha
+                    best_beta = beta
+                    best_gamma = gamma
+        if best_idx >= 0:
+            break
+    if best_idx < 0:
+        return -1, 0.0, 0.0, 0.0
+    clamped_alpha = max(0.0, best_alpha)
+    clamped_beta = max(0.0, best_beta)
+    clamped_gamma = max(0.0, best_gamma)
+    total = clamped_alpha + clamped_beta + clamped_gamma
+    if not (total > 0.0):
+        return -1, 0.0, 0.0, 0.0
+    return (
+        best_idx,
+        clamped_alpha / total,
+        clamped_beta / total,
+        clamped_gamma / total,
+    )
+
+
+@njit(cache=True)
+def _sample_triangle_vertex_series(
+    arr, times, triangles, tri_idx, alpha, beta, gamma, t
+):
     i0 = triangles[tri_idx, 0]
     i1 = triangles[tri_idx, 1]
     i2 = triangles[tri_idx, 2]
     if arr.ndim == 1:
         return alpha * arr[i0] + beta * arr[i1] + gamma * arr[i2]
     nt = times.size
-    if nt <= 1 or arr.shape[0] <= 1:
-        return alpha * arr[0, i0] + beta * arr[0, i1] + gamma * arr[0, i2]
-    if t <= times[0]:
+    if nt <= 1 or arr.shape[0] <= 1 or t <= times[0]:
         return alpha * arr[0, i0] + beta * arr[0, i1] + gamma * arr[0, i2]
     if t >= times[nt - 1]:
-        return alpha * arr[nt - 1, i0] + beta * arr[nt - 1, i1] + gamma * arr[nt - 1, i2]
+        return (
+            alpha * arr[nt - 1, i0] + beta * arr[nt - 1, i1] + gamma * arr[nt - 1, i2]
+        )
     hi = np.searchsorted(times, t)
     lo = hi - 1
-    denom = times[hi] - times[lo]
-    a = 0.0 if abs(denom) <= 1.0e-30 else (t - times[lo]) / denom
-    v0 = alpha * arr[lo, i0] + beta * arr[lo, i1] + gamma * arr[lo, i2]
-    v1 = alpha * arr[hi, i0] + beta * arr[hi, i1] + gamma * arr[hi, i2]
-    return v0 * (1.0 - a) + v1 * a
+    denominator = times[hi] - times[lo]
+    time_alpha = 0.0 if denominator == 0.0 else (t - times[lo]) / denominator
+    value_lo = alpha * arr[lo, i0] + beta * arr[lo, i1] + gamma * arr[lo, i2]
+    value_hi = alpha * arr[hi, i0] + beta * arr[hi, i1] + gamma * arr[hi, i2]
+    return value_lo * (1.0 - time_alpha) + value_hi * time_alpha
 
 
 @njit(cache=True)
@@ -150,7 +288,7 @@ def _sample_triangle_mesh_flow(
     x,
     y,
 ):
-    tri_idx, alpha, beta, gamma = _find_triangle_and_barycentric(
+    triangle_index, alpha, beta, gamma = _find_triangle_and_barycentric(
         vertices,
         triangles,
         accel_origin,
@@ -163,40 +301,194 @@ def _sample_triangle_mesh_flow(
         x,
         y,
     )
-    if tri_idx < 0:
-        return 0.0, 0.0, 1.0, 1.8e-5, 300.0, VALID_MASK_STATUS_HARD_INVALID
-    flowx = _sample_triangle_vertex_series(ux, times, triangles, tri_idx, alpha, beta, gamma, t)
-    flowy = _sample_triangle_vertex_series(uy, times, triangles, tri_idx, alpha, beta, gamma, t)
-    rho_g = _sample_triangle_vertex_series(gas_density_grid, times, triangles, tri_idx, alpha, beta, gamma, t)
-    mu_g = _sample_triangle_vertex_series(gas_mu_grid, times, triangles, tri_idx, alpha, beta, gamma, t)
-    temp_g = _sample_triangle_vertex_series(gas_temperature_grid, times, triangles, tri_idx, alpha, beta, gamma, t)
-    return flowx, flowy, rho_g, mu_g, temp_g, VALID_MASK_STATUS_CLEAN
+    status = VALID_MASK_STATUS_CLEAN
+    if triangle_index < 0:
+        status = VALID_MASK_STATUS_HARD_INVALID
+        (
+            triangle_index,
+            alpha,
+            beta,
+            gamma,
+        ) = _nearest_triangle_and_clamped_barycentric(
+            vertices,
+            triangles,
+            accel_origin,
+            accel_cell_size,
+            accel_nx,
+            accel_ny,
+            accel_cell_offsets,
+            accel_triangle_indices,
+            x,
+            y,
+            _OUTSIDE_MESH_RING_LIMIT,
+        )
+        if triangle_index < 0:
+            return 0.0, 0.0, np.nan, np.nan, np.nan, VALID_MASK_STATUS_HARD_INVALID
+    flow_x = _sample_triangle_vertex_series(
+        ux, times, triangles, triangle_index, alpha, beta, gamma, t
+    )
+    flow_y = _sample_triangle_vertex_series(
+        uy, times, triangles, triangle_index, alpha, beta, gamma, t
+    )
+    density = _sample_triangle_vertex_series(
+        gas_density_grid, times, triangles, triangle_index, alpha, beta, gamma, t
+    )
+    viscosity = _sample_triangle_vertex_series(
+        gas_mu_grid, times, triangles, triangle_index, alpha, beta, gamma, t
+    )
+    temperature = _sample_triangle_vertex_series(
+        gas_temperature_grid, times, triangles, triangle_index, alpha, beta, gamma, t
+    )
+    return flow_x, flow_y, density, viscosity, temperature, status
 
 
 @njit(cache=True)
-def advance_particles_2d_triangle_mesh_inplace(
+def _triangle_2d_stage(
+    particle_index,
+    time_s,
+    x,
+    y,
+    _z,
+    vx,
+    vy,
+    _vz,
+    tau_stokes,
+    particle_diameter,
+    _particle_density,
+    particle_mass,
+    gas_molecular_mass_kg,
+    drag_model_mode,
+    epstein_accommodation_delta,
+    body_ax,
+    body_ay,
+    vertices,
+    triangles,
+    accel_origin,
+    accel_cell_size,
+    accel_nx,
+    accel_ny,
+    accel_cell_offsets,
+    accel_triangle_indices,
+    support_tolerance,
+    times,
+    ux,
+    uy,
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
+    extra_accel_x,
+    extra_accel_y,
+    axisymmetric_rz=0,
+):
+    sample_x, chart_sign = _axisymmetric_rz_chart_radius(x, axisymmetric_rz)
+    flow_x, flow_y, rho_g, mu_g, temperature, status = _sample_triangle_mesh_flow(
+        vertices,
+        triangles,
+        accel_origin,
+        accel_cell_size,
+        accel_nx,
+        accel_ny,
+        accel_cell_offsets,
+        accel_triangle_indices,
+        support_tolerance,
+        times,
+        ux,
+        uy,
+        gas_density_grid,
+        gas_mu_grid,
+        gas_temperature_grid,
+        time_s,
+        sample_x,
+        y,
+    )
+    flow_x *= chart_sign
+    tau = effective_tau_from_drag_model(
+        tau_stokes,
+        np.sqrt((vx - flow_x) ** 2 + (vy - flow_y) ** 2),
+        particle_diameter,
+        rho_g,
+        mu_g,
+        drag_model_mode,
+        particle_mass,
+        temperature,
+        gas_molecular_mass_kg,
+        epstein_accommodation_delta,
+    )
+    return (
+        flow_x,
+        flow_y,
+        0.0,
+        chart_sign * (body_ax + extra_accel_x[particle_index]),
+        body_ay + extra_accel_y[particle_index],
+        0.0,
+        tau,
+        status,
+    )
+
+
+@njit(cache=True)
+def _triangle_2d_support(
+    x,
+    y,
+    _z,
+    _epstein_accommodation_delta,
+    body_ax,
+    body_ay,
+    vertices,
+    triangles,
+    accel_origin,
+    accel_cell_size,
+    accel_nx,
+    accel_ny,
+    accel_cell_offsets,
+    accel_triangle_indices,
+    support_tolerance,
+    times,
+    ux,
+    uy,
+    gas_density_grid,
+    gas_mu_grid,
+    gas_temperature_grid,
+    extra_accel_x,
+    extra_accel_y,
+    axisymmetric_rz=0,
+):
+    sample_x, _chart_sign = _axisymmetric_rz_chart_radius(x, axisymmetric_rz)
+    triangle_index, _alpha, _beta, _gamma = _find_triangle_and_barycentric(
+        vertices,
+        triangles,
+        accel_origin,
+        accel_cell_size,
+        accel_nx,
+        accel_ny,
+        accel_cell_offsets,
+        accel_triangle_indices,
+        support_tolerance,
+        sample_x,
+        y,
+    )
+    return (
+        VALID_MASK_STATUS_CLEAN
+        if triangle_index >= 0
+        else VALID_MASK_STATUS_HARD_INVALID
+    )
+
+
+def trace_triangle_2d_batch_inplace(
     x,
     v,
     active,
     tau_p,
     particle_diameter,
     particle_density,
-    flow_scale_particle,
-    drag_tau_scale_particle,
-    body_accel_scale_particle,
-    t,
-    dt,
-    global_flow_scale,
-    global_drag_tau_scale,
-    global_body_accel_scale,
+    particle_mass,
+    t_end,
+    duration,
     body_ax,
     body_ay,
-    min_tau_p_s,
     gas_molecular_mass_kg,
     drag_model_mode,
-    integrator_mode,
     adaptive_substep_enabled,
-    adaptive_substep_tau_ratio,
     adaptive_substep_max_splits,
     vertices,
     triangles,
@@ -215,242 +507,64 @@ def advance_particles_2d_triangle_mesh_inplace(
     gas_temperature_grid,
     extra_accel_x_particle,
     extra_accel_y_particle,
-    x_trial,
-    v_trial,
-    x_mid_trial,
+    x_end,
+    v_end,
+    x_mid,
     substep_counts,
     mask_status_flags,
+    local_error_resolved,
+    axisymmetric_rz=0,
 ):
-    for i in range(x.shape[0]):
-        if not active[i]:
-            x_trial[i, 0] = x[i, 0]
-            x_trial[i, 1] = x[i, 1]
-            v_trial[i, 0] = v[i, 0]
-            v_trial[i, 1] = v[i, 1]
-            x_mid_trial[i, 0] = x[i, 0]
-            x_mid_trial[i, 1] = x[i, 1]
-            substep_counts[i] = 1
-            mask_status_flags[i] = VALID_MASK_STATUS_CLEAN
-            continue
-        tau_stokes = tau_p[i] * global_drag_tau_scale * max(drag_tau_scale_particle[i], 1.0e-6)
-        if tau_stokes < min_tau_p_s:
-            tau_stokes = min_tau_p_s
-        body_scale = global_body_accel_scale * body_accel_scale_particle[i]
-        bax_base = body_ax * body_scale + extra_accel_x_particle[i]
-        bay_base = body_ay * body_scale + extra_accel_y_particle[i]
-        t_start = t - dt
-        xn = x[i, 0]
-        yn = x[i, 1]
-        vxn = v[i, 0]
-        vyn = v[i, 1]
-        substep_tau = tau_stokes
-        if int(drag_model_mode) != int(DRAG_MODEL_STOKES):
-            flowx_start, flowy_start, rho_g_start, mu_g_start, temp_g_start, _status_start = _sample_triangle_mesh_flow(
-                vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_start, xn, yn
-            )
-            targetx_start = global_flow_scale * flow_scale_particle[i] * flowx_start
-            targety_start = global_flow_scale * flow_scale_particle[i] * flowy_start
-            slip_start = np.sqrt((vxn - targetx_start) * (vxn - targetx_start) + (vyn - targety_start) * (vyn - targety_start))
-            tau_eff_start = effective_tau_from_slip_speed(
-                tau_stokes,
-                slip_start,
-                particle_diameter[i],
-                rho_g_start,
-                mu_g_start,
-                drag_model_mode,
-                min_tau_p_s,
-                particle_density[i],
-                temp_g_start,
-                gas_molecular_mass_kg,
-            )
-            if np.isfinite(tau_eff_start) and tau_eff_start > 0.0 and tau_eff_start < substep_tau:
-                substep_tau = tau_eff_start
-        n_substeps = compute_substep_count(
-            dt,
-            substep_tau,
-            adaptive_substep_enabled,
-            adaptive_substep_tau_ratio,
-            adaptive_substep_max_splits,
-        )
-        substep_counts[i] = n_substeps
-        dt_sub = dt / float(n_substeps)
-        mask_status = VALID_MASK_STATUS_CLEAN
-        if integrator_mode == INTEGRATOR_ETD2:
-            half_dt = 0.5 * dt
-            elapsed = 0.0
-            has_mid = False
-            xmid = xn
-            ymid = yn
-            for sub_idx in range(n_substeps):
-                t_sub_start = t_start + float(sub_idx) * dt_sub
-                x0 = xn
-                y0 = yn
-                vx0 = vxn
-                vy0 = vyn
-                flowx0, flowy0, rho_g0, mu_g0, temp_g0, status = _sample_triangle_mesh_flow(
-                    vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                    accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                    times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_sub_start, xn, yn
-                )
-                if status > mask_status:
-                    mask_status = status
-                bax0 = bax_base
-                bay0 = bay_base
-                targetx0 = global_flow_scale * flow_scale_particle[i] * flowx0
-                targety0 = global_flow_scale * flow_scale_particle[i] * flowy0
-                slip0 = np.sqrt((vxn - targetx0) * (vxn - targetx0) + (vyn - targety0) * (vyn - targety0))
-                tau_eff0 = effective_tau_from_slip_speed(
-                    tau_stokes,
-                    slip0,
-                    particle_diameter[i],
-                    rho_g0,
-                    mu_g0,
-                    drag_model_mode,
-                    min_tau_p_s,
-                    particle_density[i],
-                    temp_g0,
-                    gas_molecular_mass_kg,
-                )
-                xh, yh, _vxh, _vyh = advance_state_2d_etd(
-                    xn, yn, vxn, vyn, targetx0, targety0, bax0, bay0, tau_eff0, 0.5 * dt_sub
-                )
-                t_mid = t_sub_start + 0.5 * dt_sub
-                flowx_mid, flowy_mid, rho_g_mid, mu_g_mid, temp_g_mid, status = _sample_triangle_mesh_flow(
-                    vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                    accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                    times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_mid, xh, yh
-                )
-                if status > mask_status:
-                    mask_status = status
-                bax_mid = bax_base
-                bay_mid = bay_base
-                targetx_mid = global_flow_scale * flow_scale_particle[i] * flowx_mid
-                targety_mid = global_flow_scale * flow_scale_particle[i] * flowy_mid
-                slip_mid = np.sqrt((_vxh - targetx_mid) * (_vxh - targetx_mid) + (_vyh - targety_mid) * (_vyh - targety_mid))
-                tau_eff_mid = effective_tau_from_slip_speed(
-                    tau_stokes,
-                    slip_mid,
-                    particle_diameter[i],
-                    rho_g_mid,
-                    mu_g_mid,
-                    drag_model_mode,
-                    min_tau_p_s,
-                    particle_density[i],
-                    temp_g_mid,
-                    gas_molecular_mass_kg,
-                )
-                xn, yn, vxn, vyn = advance_state_2d_etd(
-                    xn, yn, vxn, vyn, targetx_mid, targety_mid, bax_mid, bay_mid, tau_eff_mid, dt_sub
-                )
-                if not has_mid:
-                    elapsed_next = elapsed + dt_sub
-                    if should_capture_midpoint(has_mid, elapsed, dt_sub, half_dt):
-                        dt_mid = midpoint_local_dt(elapsed, dt_sub, half_dt)
-                        if dt_mid <= 1.0e-15:
-                            xmid = x0
-                            ymid = y0
-                        elif dt_mid >= dt_sub - 1.0e-15:
-                            xmid = xn
-                            ymid = yn
-                        else:
-                            flowx0_mid, flowy0_mid, rho_g0_mid, mu_g0_mid, temp_g0_mid, status = _sample_triangle_mesh_flow(
-                                vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                                accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                                times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_sub_start, x0, y0
-                            )
-                            if status > mask_status:
-                                mask_status = status
-                            bax0_mid = bax_base
-                            bay0_mid = bay_base
-                            targetx0_mid = global_flow_scale * flow_scale_particle[i] * flowx0_mid
-                            targety0_mid = global_flow_scale * flow_scale_particle[i] * flowy0_mid
-                            slip0_mid = np.sqrt((vx0 - targetx0_mid) * (vx0 - targetx0_mid) + (vy0 - targety0_mid) * (vy0 - targety0_mid))
-                            tau_eff0_mid = effective_tau_from_slip_speed(
-                                tau_stokes,
-                                slip0_mid,
-                                particle_diameter[i],
-                                rho_g0_mid,
-                                mu_g0_mid,
-                                drag_model_mode,
-                                min_tau_p_s,
-                                particle_density[i],
-                                temp_g0_mid,
-                                gas_molecular_mass_kg,
-                            )
-                            xh_mid, yh_mid, _vxh_mid, _vyh_mid = advance_state_2d_etd(
-                                x0, y0, vx0, vy0, targetx0_mid, targety0_mid, bax0_mid, bay0_mid, tau_eff0_mid, 0.5 * dt_mid
-                            )
-                            t_mid_eval = t_sub_start + 0.5 * dt_mid
-                            flowx_mid2, flowy_mid2, rho_g_mid2, mu_g_mid2, temp_g_mid2, status = _sample_triangle_mesh_flow(
-                                vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                                accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                                times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_mid_eval, xh_mid, yh_mid
-                            )
-                            if status > mask_status:
-                                mask_status = status
-                            bax_mid2 = bax_base
-                            bay_mid2 = bay_base
-                            targetx_mid2 = global_flow_scale * flow_scale_particle[i] * flowx_mid2
-                            targety_mid2 = global_flow_scale * flow_scale_particle[i] * flowy_mid2
-                            slip_mid2 = np.sqrt((_vxh_mid - targetx_mid2) * (_vxh_mid - targetx_mid2) + (_vyh_mid - targety_mid2) * (_vyh_mid - targety_mid2))
-                            tau_eff_mid2 = effective_tau_from_slip_speed(
-                                tau_stokes,
-                                slip_mid2,
-                                particle_diameter[i],
-                                rho_g_mid2,
-                                mu_g_mid2,
-                                drag_model_mode,
-                                min_tau_p_s,
-                                particle_density[i],
-                                temp_g_mid2,
-                                gas_molecular_mass_kg,
-                            )
-                            xmid, ymid, _vxmid, _vymid = advance_state_2d_etd(
-                                x0, y0, vx0, vy0, targetx_mid2, targety_mid2, bax_mid2, bay_mid2, tau_eff_mid2, dt_mid
-                            )
-                        has_mid = True
-                    elapsed = elapsed_next
-            if not has_mid:
-                xmid = xn
-                ymid = yn
-            x_mid_trial[i, 0] = xmid
-            x_mid_trial[i, 1] = ymid
-        else:
-            for sub_idx in range(n_substeps):
-                t_eval = t_start + (float(sub_idx) + 1.0) * dt_sub
-                flowx, flowy, rho_g, mu_g, temp_g, status = _sample_triangle_mesh_flow(
-                    vertices, triangles, accel_origin, accel_cell_size, accel_nx, accel_ny,
-                    accel_cell_offsets, accel_triangle_indices, support_tolerance,
-                    times, ux, uy, gas_density_grid, gas_mu_grid, gas_temperature_grid, t_eval, xn, yn
-                )
-                if status > mask_status:
-                    mask_status = status
-                bax = bax_base
-                bay = bay_base
-                targetx = global_flow_scale * flow_scale_particle[i] * flowx
-                targety = global_flow_scale * flow_scale_particle[i] * flowy
-                slip = np.sqrt((vxn - targetx) * (vxn - targetx) + (vyn - targety) * (vyn - targety))
-                tau_eff = effective_tau_from_slip_speed(
-                    tau_stokes,
-                    slip,
-                    particle_diameter[i],
-                    rho_g,
-                    mu_g,
-                    drag_model_mode,
-                    min_tau_p_s,
-                    particle_density[i],
-                    temp_g,
-                    gas_molecular_mass_kg,
-                )
-                xn, yn, vxn, vyn = advance_state_2d(
-                    xn, yn, vxn, vyn, targetx, targety, bax, bay, tau_eff, dt_sub, integrator_mode
-                )
-            x_mid_trial[i, 0] = xn
-            x_mid_trial[i, 1] = yn
-        x_trial[i, 0] = xn
-        x_trial[i, 1] = yn
-        v_trial[i, 0] = vxn
-        v_trial[i, 1] = vyn
-        mask_status_flags[i] = mask_status
+    advance_etd2_batch_inplace(
+        _triangle_2d_stage,
+        _triangle_2d_support,
+        2,
+        x,
+        v,
+        active,
+        tau_p,
+        particle_diameter,
+        particle_density,
+        particle_mass,
+        t_end,
+        duration,
+        gas_molecular_mass_kg,
+        drag_model_mode,
+        adaptive_substep_enabled,
+        adaptive_substep_max_splits,
+        x_end,
+        v_end,
+        x_mid,
+        substep_counts,
+        mask_status_flags,
+        local_error_resolved,
+        _EPSTEIN_DEFAULT_ACCOMMODATION_DELTA,
+        body_ax,
+        body_ay,
+        vertices,
+        triangles,
+        accel_origin,
+        accel_cell_size,
+        accel_nx,
+        accel_ny,
+        accel_cell_offsets,
+        accel_triangle_indices,
+        support_tolerance,
+        times,
+        ux,
+        uy,
+        gas_density_grid,
+        gas_mu_grid,
+        gas_temperature_grid,
+        extra_accel_x_particle,
+        extra_accel_y_particle,
+        int(axisymmetric_rz),
+    )
+
+
+__all__ = (
+    "_find_triangle_and_barycentric",
+    "_sample_triangle_mesh_flow",
+    "_sample_triangle_vertex_series",
+    "trace_triangle_2d_batch_inplace",
+)

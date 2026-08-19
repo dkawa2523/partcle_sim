@@ -1,8 +1,13 @@
 {
-  "case_name": "icp_rf_bias_cf4_o2_si_etching_2d_v20",
-  "rf_bias_v": 20.0,
+  "model_name": "icp_rf_bias_cf4_o2_si_etching_2d_v20",
+  "study": "std2",
   "dataset": "dset3",
+  "solution": "sol2",
+  "solution_number": 1,
   "mesh_tag": "mesh1",
+  "parameter_name": "Vrf",
+  "parameter_value": "20[V]",
+  "vacuum_domain_ids": [],
   "geometry_model_unit": "cm",
   "geometry_scale_m_per_model_unit": 0.01,
   "grid": {
@@ -13,22 +18,52 @@
     "r_count": 251,
     "z_count": 221
   },
-  "q_ref_c": 1.602176634e-19,
-  "m_ref_kg": 6.64215627e-26,
   "expressions": {
-    "ux": ["withsol('sol2',u,setind(Vrf,17))", "u", "comp1.u", "spf.U"],
-    "uy": ["withsol('sol2',w,setind(Vrf,17))", "w", "comp1.w"],
-    "mu": ["withsol('sol2',spf.mu,setind(Vrf,17))", "spf.mu", "mu", "eta"],
-    "T": ["withsol('sol2',T,setind(Vrf,17))", "ht.T", "T"],
-    "p": ["withsol('sol2',p,setind(Vrf,17))", "p", "spf.p"],
-    "rho_g": ["withsol('sol2',spf.rho,setind(Vrf,17))", "spf.rho", "rho"],
-    "phi": ["withsol('sol2',ptp.Vav,setind(Vrf,17))", "ptp.Vav", "ptp.V", "V"],
-    "E_x": ["withsol('sol2',-d(ptp.Vav,r),setind(Vrf,17))", "-d(ptp.Vav,r)", "ptp.Er", "-d(V,r)", "-d(ptp.V,r)"],
-    "E_y": ["withsol('sol2',-d(ptp.Vav,z),setind(Vrf,17))", "-d(ptp.Vav,z)", "ptp.Ez", "-d(V,z)", "-d(ptp.V,z)"],
-    "ne": ["withsol('sol2',ptp.neav,setind(Vrf,17))", "ptp.neav", "ptp.ne", "ne"],
-    "Te": ["withsol('sol2',ptp.Teav,setind(Vrf,17))", "ptp.Teav", "ptp.Te", "Te"],
-    "ion_flux_cf3p": ["ptp.Gam_cf3p", "ptp.Gam_C_F3p"],
-    "etch_rate": ["etch_rate", "ptp.etch_rate"]
+    "ux": [
+      "u"
+    ],
+    "uy": [
+      "w"
+    ],
+    "mu": [
+      "spf.mu"
+    ],
+    "T": [
+      "ht.T"
+    ],
+    "p": [
+      "spf.p"
+    ],
+    "rho_g": [
+      "spf.rho"
+    ],
+    "phi": [
+      "ptp.Vav"
+    ],
+    "E_x": [
+      "-d(ptp.Vav,r)"
+    ],
+    "E_y": [
+      "-d(ptp.Vav,z)"
+    ],
+    "ne": [
+      "ptp.neav"
+    ],
+    "Te": [
+      "ptp.Teav"
+    ]
   },
-  "required": ["ux", "uy", "mu", "E_x", "E_y"]
+  "units": {
+    "ux": "m/s",
+    "uy": "m/s",
+    "mu": "Pa*s",
+    "T": "K",
+    "p": "Pa",
+    "rho_g": "kg/m^3",
+    "phi": "V",
+    "E_x": "V/m",
+    "E_y": "V/m",
+    "ne": "1/m^3",
+    "Te": "eV"
+  }
 }

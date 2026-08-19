@@ -1,0 +1,16 @@
+schema_version: 1
+artifact_type: large_binary_asset_ledger
+assets:
+  - logical_name: argon_gec_ccp_base2
+    repository_path: data/argon_gec_ccp_base2.mph
+    size_bytes: 21958703
+    sha256: 39cc7463804341ea6c3c8f2ddd88e01ed5fd084becde5909cf891974f6ec4aa5
+    external_uri: null
+    status: tracked_pending_external_uri
+  - logical_name: icp_rf_bias_cf4_o2_si_etching
+    repository_path: data/icp_rf_bias_cf4_o2_si_etching (2).mph
+    size_bytes: 92870327
+    sha256: 43da09cdc7d3696a262163330323fd9e91cc940fb8a93f137bb943e63e5224f8
+    external_uri: null
+    status: tracked_pending_external_uri
+

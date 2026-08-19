@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -21,27 +20,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class IcpCf4O2SiEtchExporter {
-    private static final String[] DEFAULT_REQUIRED = {"ux", "uy", "mu", "E_x", "E_y"};
-
     private static Path mphPath;
     private static Path configPath;
     private static Path outDir;
-    private static String dataset = "dset1";
-    private static String meshTag = "mesh1";
-    private static String geometryModelUnit = "cm";
-    private static double geometryScaleMPerModelUnit = 0.01;
-    private static double rfBiasV = 20.0;
-    private static double qRefC = 1.602176634e-19;
-    private static double mRefKg = 6.64215627e-26;
+    private static String modelName;
+    private static String study;
+    private static String dataset;
+    private static String solution;
+    private static int solutionNumber;
+    private static String meshTag;
+    private static String geometryModelUnit;
+    private static double geometryScaleMPerModelUnit;
+    private static String parameterName;
+    private static String parameterValue;
+    private static List<Integer> vacuumDomainIds = new ArrayList<>();
     private static double rMin = 0.0;
     private static double rMax = 0.16;
     private static double zMin = 0.0;
     private static double zMax = 0.20;
     private static int rCount = 241;
     private static int zCount = 301;
-    private static Map<String, List<String>> expressions = new LinkedHashMap<>();
-    private static List<String> required = Arrays.asList(DEFAULT_REQUIRED);
-    private static Map<String, String> selectedDatasets = new LinkedHashMap<>();
+    private static Map<String, String> expressions = new LinkedHashMap<>();
+    private static Map<String, String> expressionUnits = new LinkedHashMap<>();
+    private static int nodeSampleCount = 0;
 
     public static void main(String[] args) throws Exception {
         loadOptions(args);
@@ -49,7 +50,7 @@ public class IcpCf4O2SiEtchExporter {
         Files.createDirectories(outDir);
 
         Model model = ModelUtil.load("icp_model", mphPath.toString());
-        trySetModelParameter(model, "Vrf", rfBiasV + "[V]");
+        validateConfiguredProvenance(model);
         tryWriteMethodList(outDir.resolve("result_methods.txt"), safeCall(model, "result"));
         Object datasetList = safeCall(safeCall(model, "result"), "dataset");
         tryWriteMethodList(outDir.resolve("dataset_list_methods.txt"), datasetList);
@@ -57,18 +58,16 @@ public class IcpCf4O2SiEtchExporter {
 
         exportMesh(model, outDir.resolve("mesh.mphtxt"));
         tryWriteMaterialInventory(model, outDir.resolve("material_inventory.json"));
-        try {
-            call(call(model, "result"), "run");
-        } catch (Throwable ignored) {
-        }
 
         double[] rAxis = linspace(rMin, rMax, rCount);
         double[] zAxis = linspace(zMin, zMax, zCount);
-        String[] datasetTags = readDatasetTags(model);
-        Map<String, String> selected = selectExpressions(model, datasetTags, probeCoordinates(rAxis, zAxis));
+        Map<String, String> selected = validateExpressions(model, probeCoordinates(rAxis, zAxis));
 
         writeInventory(outDir.resolve("expression_inventory.json"), selected);
         writeFieldSamples(outDir.resolve("field_samples.csv"), model, selected, rAxis, zAxis);
+        // The mesh-node table is the artifact the solver samples.  The grid
+        // table above stays as a readable reference of the same export.
+        nodeSampleCount = writeNodeSamples(outDir.resolve("field_samples_nodes.csv"), model, selected);
         writeManifest(outDir.resolve("export_manifest.json"), selected, rAxis, zAxis);
 
         try {
@@ -85,13 +84,12 @@ public class IcpCf4O2SiEtchExporter {
         for (int i = 0; i + 1 < args.length; i += 2) {
             map.put(args[i].replaceFirst("^-+", ""), args[i + 1]);
         }
-        String mph = firstNonEmpty(map.get("mph"), System.getenv("COMSOL_ICP_MPH"), "data/icp_rf_bias_cf4_o2_si_etching (2).mph");
-        String config = firstNonEmpty(
-            map.get("config"),
-            System.getenv("COMSOL_ICP_CONFIG"),
-            "external/comsol_icp_export/config/icp_cf4_o2_v20.json"
-        );
-        String out = firstNonEmpty(map.get("outdir"), System.getenv("COMSOL_ICP_OUTDIR"), "_external_exports/icp_cf4_o2_v20");
+        String mph = firstNonEmpty(map.get("mph"), System.getenv("COMSOL_ICP_MPH"));
+        String config = firstNonEmpty(map.get("config"), System.getenv("COMSOL_ICP_CONFIG"));
+        String out = firstNonEmpty(map.get("outdir"), System.getenv("COMSOL_ICP_OUTDIR"));
+        if (mph == null || config == null || out == null) {
+            throw new IllegalArgumentException("mph, config, and outdir must be provided explicitly");
+        }
         mphPath = Paths.get(mph);
         configPath = Paths.get(config);
         outDir = Paths.get(out);
@@ -99,31 +97,111 @@ public class IcpCf4O2SiEtchExporter {
 
     private static void loadConfig(Path path) throws IOException {
         String text = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-        expressions = parseExpressionLists(text);
-        if (expressions.containsKey("required")) {
-            required = new ArrayList<>(expressions.get("required"));
-            expressions.remove("required");
+        Map<String, List<String>> configuredExpressions = parseExpressionLists(text);
+        configuredExpressions.remove("required");
+        for (Map.Entry<String, List<String>> entry : configuredExpressions.entrySet()) {
+            if (entry.getValue().size() != 1) {
+                throw new IllegalArgumentException(
+                    "Each COMSOL semantic quantity must declare exactly one expression; "
+                    + entry.getKey() + " has " + entry.getValue().size()
+                );
+            }
+            expressions.put(entry.getKey(), entry.getValue().get(0));
         }
-        dataset = jsonString(text, "dataset", dataset);
-        meshTag = jsonString(text, "mesh_tag", meshTag);
-        geometryModelUnit = jsonString(text, "geometry_model_unit", geometryModelUnit);
-        geometryScaleMPerModelUnit = jsonDouble(text, "geometry_scale_m_per_model_unit", geometryScaleMPerModelUnit);
-        rfBiasV = jsonDouble(text, "rf_bias_v", rfBiasV);
-        qRefC = jsonDouble(text, "q_ref_c", qRefC);
-        mRefKg = jsonDouble(text, "m_ref_kg", mRefKg);
-        rMin = jsonDouble(text, "r_min", rMin);
-        rMax = jsonDouble(text, "r_max", rMax);
-        zMin = jsonDouble(text, "z_min", zMin);
-        zMax = jsonDouble(text, "z_max", zMax);
-        rCount = (int) jsonDouble(text, "r_count", rCount);
-        zCount = (int) jsonDouble(text, "z_count", zCount);
+        expressionUnits = parseStringObject(text, "units");
+        if (expressions.isEmpty() || !expressions.keySet().equals(expressionUnits.keySet())) {
+            throw new IllegalArgumentException("expressions and units must be non-empty and have identical keys");
+        }
+        modelName = requiredJsonString(text, "model_name");
+        study = requiredJsonString(text, "study");
+        dataset = requiredJsonString(text, "dataset");
+        solution = requiredJsonString(text, "solution");
+        solutionNumber = requiredPositiveInt(text, "solution_number");
+        meshTag = requiredJsonString(text, "mesh_tag");
+        geometryModelUnit = requiredJsonString(text, "geometry_model_unit");
+        geometryScaleMPerModelUnit = requiredPositiveDouble(text, "geometry_scale_m_per_model_unit");
+        parameterName = requiredJsonString(text, "parameter_name");
+        parameterValue = requiredJsonString(text, "parameter_value");
+        vacuumDomainIds = requiredPositiveIntList(text, "vacuum_domain_ids");
+        rMin = requiredJsonDouble(text, "r_min");
+        rMax = requiredJsonDouble(text, "r_max");
+        zMin = requiredJsonDouble(text, "z_min");
+        zMax = requiredJsonDouble(text, "z_max");
+        rCount = requiredPositiveInt(text, "r_count");
+        zCount = requiredPositiveInt(text, "z_count");
+        if (!(rMax > rMin) || !(zMax > zMin) || rCount < 2 || zCount < 2) {
+            throw new IllegalArgumentException("grid bounds must increase and each grid count must be at least two");
+        }
     }
 
-    private static void trySetModelParameter(Model model, String name, String value) {
-        try {
-            Object param = call(model, "param");
-            call(param, "set", name, value);
-        } catch (Throwable ignored) {
+    private static void validateConfiguredProvenance(Model model) {
+        call(model, "study", study);
+        Object configuredSolution = call(model, "sol", solution);
+        Object configuredDataset = call(call(model, "result"), "dataset", dataset);
+        call(model, "mesh", meshTag);
+
+        requireTagReference(
+            "dataset " + dataset + " solution",
+            solution,
+            (String) call(configuredDataset, "getString", "solution")
+        );
+        requireTagReference(
+            "solution " + solution + " study",
+            study,
+            (String) call(configuredSolution, "study")
+        );
+        validateSolutionParameter(model, configuredSolution);
+    }
+
+    private static void requireTagReference(String owner, String expected, String actual) {
+        if (!expected.equals(actual)) {
+            throw new IllegalArgumentException(
+                owner + " must be " + expected + ", but the saved model references " + actual
+            );
+        }
+    }
+
+    private static void validateSolutionParameter(Model model, Object configuredSolution) {
+        String[] names = (String[]) call(configuredSolution, "getPNames");
+        int parameterIndex = -1;
+        for (int i = 0; i < names.length; i++) {
+            if (parameterName.equals(names[i])) {
+                parameterIndex = i;
+                break;
+            }
+        }
+        if (parameterIndex < 0) {
+            throw new IllegalArgumentException(
+                "Saved solution " + solution + " does not contain parameter " + parameterName
+            );
+        }
+
+        double[] values = (double[]) call(configuredSolution, "getPVals", solutionNumber);
+        if (parameterIndex >= values.length) {
+            throw new IllegalArgumentException(
+                "Saved solution " + solution + " has no parameter value for solution_number="
+                + solutionNumber
+            );
+        }
+
+        Object solutionInfo = call(configuredSolution, "getSolutioninfo");
+        String unit = stringOrEmpty(call(solutionInfo, "getUnit", parameterName)).trim();
+        String expectedExpression = unit.isEmpty() || "1".equals(unit)
+            ? "(" + parameterValue + ")"
+            : "((" + parameterValue + ")/(1[" + unit + "]))";
+        Object parameters = call(model, "param");
+        double expectedValue = ((Number) call(parameters, "evaluate", expectedExpression)).doubleValue();
+        double actualValue = values[parameterIndex];
+        double tolerance = 1.0e-12 * Math.max(1.0, Math.max(Math.abs(actualValue), Math.abs(expectedValue)));
+        if (!Double.isFinite(actualValue)
+            || !Double.isFinite(expectedValue)
+            || Math.abs(actualValue - expectedValue) > tolerance) {
+            throw new IllegalArgumentException(
+                "Saved solution parameter mismatch: " + parameterName + "=" + actualValue
+                + (unit.isEmpty() ? "" : "[" + unit + "]")
+                + " at solution_number=" + solutionNumber
+                + ", configured value=" + parameterValue
+            );
         }
     }
 
@@ -232,55 +310,34 @@ public class IcpCf4O2SiEtchExporter {
         return raw;
     }
 
-    private static String[] readDatasetTags(Model model) {
-        return new String[]{dataset};
-    }
-
-    private static Map<String, String> selectExpressions(Model model, String[] datasetTags, double[][] probeCoords) {
+    private static Map<String, String> validateExpressions(Model model, double[][] probeCoords) {
         Map<String, String> selected = new LinkedHashMap<>();
-        Map<String, String> failures = new LinkedHashMap<>();
-        for (Map.Entry<String, List<String>> entry : expressions.entrySet()) {
+        for (Map.Entry<String, String> entry : expressions.entrySet()) {
             String key = entry.getKey();
-            List<String> fail = new ArrayList<>();
-            for (String expr : entry.getValue()) {
-                for (String datasetTag : datasetTags) {
-                    String tag = "inv_" + sanitize(key);
-                    try {
-                        Object interp = createInterp(model, tag, datasetTag, expr);
-                        double value = evalFirstFinite(interp, probeCoords);
-                        if (Double.isFinite(value)) {
-                            selected.put(key, expr);
-                            selectedDatasets.put(key, datasetTag);
-                            failures.put(key, "");
-                            break;
-                        }
-                        fail.add(datasetTag + "/" + expr + ": non-finite");
-                    } catch (Throwable t) {
-                        fail.add(datasetTag + "/" + expr + ": " + t.getClass().getSimpleName() + ": " + t.getMessage());
-                    } finally {
-                        removeNumerical(model, tag);
-                    }
-                    if (selected.containsKey(key)) {
-                        break;
-                    }
+            String expr = entry.getValue();
+            String tag = "inv_" + sanitize(key);
+            try {
+                Object interp = createInterp(model, tag, expr, expressionUnits.get(key));
+                double value = evalFirstFinite(interp, probeCoords);
+                if (!Double.isFinite(value)) {
+                    throw new RuntimeException("configured expression has no finite probe value");
                 }
-                if (selected.containsKey(key)) {
-                    break;
-                }
-            }
-            if (!selected.containsKey(key)) {
-                failures.put(key, String.join("; ", fail));
-            }
-        }
-        for (String key : required) {
-            if (!selected.containsKey(key)) {
-                throw new RuntimeException("Required COMSOL expression not found for " + key + ": " + failures.get(key));
+                selected.put(key, expr);
+            } catch (Throwable t) {
+                throw new RuntimeException(
+                    "Configured COMSOL expression failed for " + key + " on dataset=" + dataset
+                    + ", solution=" + solution + ", solution_number=" + solutionNumber
+                    + ", expression=" + expr + ", unit=" + expressionUnits.get(key),
+                    t
+                );
+            } finally {
+                removeNumerical(model, tag);
             }
         }
         return selected;
     }
 
-    private static Object createInterp(Model model, String tag, String datasetTag, String expr) {
+    private static Object createInterp(Model model, String tag, String expr, String unit) {
         Object result = call(model, "result");
         Object numerical = call(result, "numerical");
         try {
@@ -289,11 +346,111 @@ public class IcpCf4O2SiEtchExporter {
         }
         call(numerical, "create", tag, "Interp");
         Object interp = call(result, "numerical", tag);
-        call(interp, "set", "data", datasetTag);
-        call(interp, "set", "solnum", new int[]{17});
+        call(interp, "set", "data", dataset);
+        call(interp, "set", "solnum", new int[]{solutionNumber});
         call(interp, "set", "expr", new String[]{expr});
+        call(interp, "set", "unit", new String[]{unit});
+        restrictToVacuumDomains(interp);
         tryWriteMethodList(outDir.resolve("numerical_feature_methods.txt"), interp);
         return interp;
+    }
+
+    /**
+     * Evaluate only inside the explicit vacuum-domain selection.
+     *
+     * Without a selection an Interp feature evaluates over every domain of the
+     * dataset, so a point on a vacuum/solid interface can be answered from the
+     * solid side and return NaN for a plasma-only expression.  Restricting the
+     * selection makes every mesh vertex of the particle domain return its
+     * vacuum-side value, which is what lets the case builder require a finite
+     * value at every node instead of carrying a near-wall fallback.
+     */
+    private static void restrictToVacuumDomains(Object interp) {
+        if (vacuumDomainIds.isEmpty()) {
+            throw new RuntimeException(
+                "vacuum_domain_ids must be non-empty: an export cannot resolve "
+                + "vacuum/solid interface nodes without an explicit selection"
+            );
+        }
+        int[] ids = new int[vacuumDomainIds.size()];
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = vacuumDomainIds.get(i).intValue();
+        }
+        Object selection = call(interp, "selection");
+        call(selection, "geom", 2);
+        call(selection, "set", ids);
+    }
+
+    /**
+     * Read mesh vertex coordinates in the order mesh.mphtxt writes them.
+     *
+     * The mphtxt vertex block and the API vertex array come from the same mesh
+     * object, so the row index is an exact identity for joining node values to
+     * mesh topology.  No coordinate rounding is involved.
+     */
+    private static double[][] meshVertexCoordinates(Model model) {
+        Object mesh = call(call(model, "mesh"), meshTag);
+        Object raw = call(mesh, "getVertex");
+        if (!(raw instanceof double[][])) {
+            throw new RuntimeException(
+                "COMSOL mesh getVertex did not return a coordinate matrix for mesh tag " + meshTag
+            );
+        }
+        double[][] vertices = (double[][]) raw;
+        if (vertices.length < 2 || vertices[0].length == 0) {
+            throw new RuntimeException("COMSOL mesh " + meshTag + " reported no vertices");
+        }
+        return vertices;
+    }
+
+    private static int writeNodeSamples(Path out, Model model, Map<String, String> selected) throws IOException {
+        double[][] vertices = meshVertexCoordinates(model);
+        int nodeCount = vertices[0].length;
+        double[][] coords = new double[2][nodeCount];
+        System.arraycopy(vertices[0], 0, coords[0], 0, nodeCount);
+        System.arraycopy(vertices[1], 0, coords[1], 0, nodeCount);
+
+        Map<String, Object> features = new LinkedHashMap<>();
+        Map<String, double[]> valuesByKey = new LinkedHashMap<>();
+        try {
+            for (Map.Entry<String, String> entry : selected.entrySet()) {
+                features.put(
+                    entry.getKey(),
+                    createInterp(
+                        model,
+                        "node_" + sanitize(entry.getKey()),
+                        entry.getValue(),
+                        expressionUnits.get(entry.getKey())
+                    )
+                );
+            }
+            for (String key : selected.keySet()) {
+                valuesByKey.put(key, evalMany(features.get(key), coords));
+            }
+        } finally {
+            for (String key : selected.keySet()) {
+                removeNumerical(model, "node_" + sanitize(key));
+            }
+        }
+
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(out, StandardCharsets.UTF_8))) {
+            writer.print("node_index,r,z");
+            for (String key : selected.keySet()) {
+                writer.print(",");
+                writer.print(key);
+            }
+            writer.println();
+            for (int i = 0; i < nodeCount; i++) {
+                writer.printf(Locale.US, "%d,%.17g,%.17g", i, coords[0][i], coords[1][i]);
+                for (String key : selected.keySet()) {
+                    double value = valuesByKey.get(key)[i];
+                    writer.print(",");
+                    writer.print(Double.isFinite(value) ? String.format(Locale.US, "%.17g", value) : "NaN");
+                }
+                writer.println();
+            }
+        }
+        return nodeCount;
     }
 
     private static void removeNumerical(Model model, String tag) {
@@ -322,7 +479,15 @@ public class IcpCf4O2SiEtchExporter {
     private static void writeFieldSamples(Path out, Model model, Map<String, String> selected, double[] rAxis, double[] zAxis) throws IOException {
         Map<String, Object> features = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : selected.entrySet()) {
-            features.put(entry.getKey(), createInterp(model, "grid_" + sanitize(entry.getKey()), selectedDatasets.get(entry.getKey()), entry.getValue()));
+            features.put(
+                entry.getKey(),
+                createInterp(
+                    model,
+                    "grid_" + sanitize(entry.getKey()),
+                    entry.getValue(),
+                    expressionUnits.get(entry.getKey())
+                )
+            );
         }
         double[][] coords = gridCoordinates(rAxis, zAxis);
         Map<String, double[]> valuesByKey = new LinkedHashMap<>();
@@ -342,7 +507,7 @@ public class IcpCf4O2SiEtchExporter {
                     boolean valid = true;
                     for (String key : selected.keySet()) {
                         double value = valuesByKey.get(key)[idx];
-                        if (required.contains(key) && !Double.isFinite(value)) {
+                        if (!Double.isFinite(value)) {
                             valid = false;
                         }
                     }
@@ -366,19 +531,22 @@ public class IcpCf4O2SiEtchExporter {
     private static void writeInventory(Path out, Map<String, String> selected) throws IOException {
         try (BufferedWriter w = Files.newBufferedWriter(out, StandardCharsets.UTF_8)) {
             w.write("{\n");
+            w.write("  \"study\": " + json(study) + ",\n");
             w.write("  \"dataset\": " + json(dataset) + ",\n");
-            w.write("  \"required\": " + jsonArray(required) + ",\n");
+            w.write("  \"solution\": " + json(solution) + ",\n");
+            w.write("  \"solution_number\": " + solutionNumber + ",\n");
             w.write("  \"selected\": {\n");
             int i = 0;
-            for (Map.Entry<String, List<String>> entry : expressions.entrySet()) {
+            for (Map.Entry<String, String> entry : expressions.entrySet()) {
                 if (i++ > 0) {
                     w.write(",\n");
                 }
                 String key = entry.getKey();
                 w.write("    " + json(key) + ": {");
-                w.write("\"expression\": " + json(selected.containsKey(key) ? selected.get(key) : "") + ", ");
-                w.write("\"dataset\": " + json(selectedDatasets.containsKey(key) ? selectedDatasets.get(key) : "") + ", ");
-                w.write("\"available\": " + selected.containsKey(key));
+                w.write("\"expression\": " + json(selected.get(key)) + ", ");
+                w.write("\"unit\": " + json(expressionUnits.get(key)) + ", ");
+                w.write("\"dataset\": " + json(dataset) + ", ");
+                w.write("\"available\": true");
                 w.write("}");
             }
             w.write("\n  }\n");
@@ -392,16 +560,25 @@ public class IcpCf4O2SiEtchExporter {
             w.write("  \"source_kind\": \"comsol_java_api_external_export\",\n");
             w.write("  \"mph_path\": " + json(mphPath.toString()) + ",\n");
             w.write("  \"mph_sha256\": " + json(sha256(mphPath)) + ",\n");
-            w.write("  \"comsol_version\": " + json("") + ",\n");
-            w.write("  \"rf_bias_v\": " + jsonNumber(rfBiasV) + ",\n");
+            w.write("  \"config_sha256\": " + json(sha256(configPath)) + ",\n");
+            w.write("  \"mesh_sha256\": " + json(sha256(outDir.resolve("mesh.mphtxt"))) + ",\n");
+            w.write("  \"field_samples_sha256\": " + json(sha256(outDir.resolve("field_samples.csv"))) + ",\n");
+            w.write("  \"field_node_samples_sha256\": " + json(sha256(outDir.resolve("field_samples_nodes.csv"))) + ",\n");
+            w.write("  \"field_node_sample_count\": " + nodeSampleCount + ",\n");
+            w.write("  \"field_node_identity\": \"comsol_mesh_vertex_index\",\n");
+            w.write("  \"comsol_version\": " + json(readComsolVersion()) + ",\n");
+            w.write("  \"model_name\": " + json(modelName) + ",\n");
+            w.write("  \"study\": " + json(study) + ",\n");
             w.write("  \"dataset\": " + json(dataset) + ",\n");
+            w.write("  \"solution\": " + json(solution) + ",\n");
+            w.write("  \"solution_number\": " + solutionNumber + ",\n");
             w.write("  \"mesh_tag\": " + json(meshTag) + ",\n");
+            w.write("  \"parameter_name\": " + json(parameterName) + ",\n");
+            w.write("  \"parameter_value\": " + json(parameterValue) + ",\n");
+            w.write("  \"vacuum_domain_ids\": " + jsonIntArray(vacuumDomainIds) + ",\n");
             w.write("  \"geometry_model_unit\": " + json(geometryModelUnit) + ",\n");
             w.write("  \"geometry_scale_m_per_model_unit\": " + jsonNumber(geometryScaleMPerModelUnit) + ",\n");
             w.write("  \"solver_coordinate_unit\": \"m\",\n");
-            w.write("  \"q_ref_c\": " + jsonNumber(qRefC) + ",\n");
-            w.write("  \"m_ref_kg\": " + jsonNumber(mRefKg) + ",\n");
-            w.write("  \"electric_acceleration_formula\": \"ax=q_ref_c/m_ref_kg*E_x, ay=q_ref_c/m_ref_kg*E_y\",\n");
             w.write("  \"grid_shape\": [" + rAxis.length + ", " + zAxis.length + "],\n");
             w.write("  \"r_bounds\": [" + jsonNumber(rAxis[0]) + ", " + jsonNumber(rAxis[rAxis.length - 1]) + "],\n");
             w.write("  \"z_bounds\": [" + jsonNumber(zAxis[0]) + ", " + jsonNumber(zAxis[zAxis.length - 1]) + "],\n");
@@ -418,9 +595,9 @@ public class IcpCf4O2SiEtchExporter {
                 w.write("    " + json(entry.getKey()) + ": " + json(entry.getValue()));
             }
             w.write("\n  },\n");
-            w.write("  \"expression_dataset\": {\n");
+            w.write("  \"expression_units\": {\n");
             int j = 0;
-            for (Map.Entry<String, String> entry : selectedDatasets.entrySet()) {
+            for (Map.Entry<String, String> entry : expressionUnits.entrySet()) {
                 if (j++ > 0) {
                     w.write(",\n");
                 }
@@ -689,14 +866,97 @@ public class IcpCf4O2SiEtchExporter {
         return out;
     }
 
-    private static double jsonDouble(String text, String key, double fallback) {
-        Matcher matcher = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*([-+0-9.eE]+)").matcher(text);
-        return matcher.find() ? Double.parseDouble(matcher.group(1)) : fallback;
+    private static Map<String, String> parseStringObject(String text, String key) {
+        Matcher object = Pattern.compile(
+            "\\\"" + Pattern.quote(key) + "\\\"\\s*:\\s*\\{(.*?)\\}",
+            Pattern.DOTALL
+        ).matcher(text);
+        if (!object.find()) {
+            throw new IllegalArgumentException("Missing JSON object: " + key);
+        }
+        Map<String, String> out = new LinkedHashMap<>();
+        Matcher entries = Pattern.compile("\\\"([^\\\"]+)\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").matcher(object.group(1));
+        while (entries.find()) {
+            out.put(entries.group(1), entries.group(2));
+        }
+        return out;
     }
 
-    private static String jsonString(String text, String key, String fallback) {
+    private static double requiredJsonDouble(String text, String key) {
+        Matcher matcher = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*([-+0-9.eE]+)").matcher(text);
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Missing numeric JSON value: " + key);
+        }
+        double value = Double.parseDouble(matcher.group(1));
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("JSON value must be finite: " + key);
+        }
+        return value;
+    }
+
+    private static double requiredPositiveDouble(String text, String key) {
+        double value = requiredJsonDouble(text, key);
+        if (!(value > 0.0)) {
+            throw new IllegalArgumentException("JSON value must be positive: " + key);
+        }
+        return value;
+    }
+
+    private static int requiredPositiveInt(String text, String key) {
+        double value = requiredPositiveDouble(text, key);
+        if (value != Math.rint(value) || value > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("JSON value must be a positive integer: " + key);
+        }
+        return (int) value;
+    }
+
+    private static String requiredJsonString(String text, String key) {
         Matcher matcher = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*\"(.*?)\"").matcher(text);
-        return matcher.find() ? matcher.group(1) : fallback;
+        if (!matcher.find() || matcher.group(1).trim().isEmpty()) {
+            throw new IllegalArgumentException("Missing non-empty JSON string: " + key);
+        }
+        return matcher.group(1);
+    }
+
+    private static List<Integer> requiredPositiveIntList(String text, String key) {
+        Matcher matcher = Pattern.compile(
+            "\\\"" + Pattern.quote(key) + "\\\"\\s*:\\s*\\[(.*?)\\]",
+            Pattern.DOTALL
+        ).matcher(text);
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Missing integer JSON list: " + key);
+        }
+        List<Integer> out = new ArrayList<>();
+        String body = matcher.group(1).trim();
+        if (!body.isEmpty()) {
+            for (String token : body.split(",")) {
+                int value = Integer.parseInt(token.trim());
+                if (value <= 0 || out.contains(value)) {
+                    throw new IllegalArgumentException(key + " must contain unique positive integers");
+                }
+                out.add(value);
+            }
+        }
+        if (out.isEmpty()) {
+            throw new IllegalArgumentException(
+                key + " must explicitly identify the COMSOL domains occupied by particles"
+            );
+        }
+        return out;
+    }
+
+    private static String readComsolVersion() {
+        try {
+            Method method = ModelUtil.class.getMethod("getComsolVersion");
+            Object value = method.invoke(null);
+            String text = value == null ? "" : value.toString().trim();
+            if (text.isEmpty()) {
+                throw new IllegalStateException("COMSOL version is empty");
+            }
+            return text;
+        } catch (Throwable t) {
+            throw new RuntimeException("Could not read COMSOL version for export provenance", t);
+        }
     }
 
     private static String firstNonEmpty(String... values) {
@@ -723,12 +983,12 @@ public class IcpCf4O2SiEtchExporter {
         return Double.isFinite(value) ? String.format(Locale.US, "%.17g", value) : "null";
     }
 
-    private static String jsonArray(List<String> values) {
-        List<String> quoted = new ArrayList<>();
-        for (String value : values) {
-            quoted.add(json(value));
+    private static String jsonIntArray(List<Integer> values) {
+        List<String> encoded = new ArrayList<>();
+        for (Integer value : values) {
+            encoded.add(Integer.toString(value));
         }
-        return "[" + String.join(", ", quoted) + "]";
+        return "[" + String.join(", ", encoded) + "]";
     }
 
     private static String jsonIntArray(int[] values) {

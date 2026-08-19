@@ -1,61 +1,200 @@
+"""The single v0.2 command-line entry point."""
+
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
+import sys
+from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import Any
 
-from .core.input_contract import write_input_contract_report
-from .core.provider_contract import write_provider_contract_report
-from .core.source_materials import write_source_summary
-from .io.runtime_builder import build_prepared_runtime_from_yaml, prepared_runtime_summary
-from .solvers.solver_entrypoints import run_solver_for_dim
+from ._version import PACKAGE_VERSION
+from .application import load_case, simulate, validate_case
+from .artifacts import validate_artifacts
+from .migration import migrate_legacy_case
+from .writer import write_result
 
-
-def _spatial_dim(prepared) -> int:
-    dim = int(prepared.runtime.spatial_dim)
-    if dim not in {2, 3}:
-        raise ValueError('run.spatial_dim must be 2 or 3')
-    return dim
-
-
-def _default_output_dir(config: Path, spatial_dim: int, *, reports_only: bool) -> Path:
-    if reports_only:
-        return config.parent / 'prepared_runtime_output'
-    return config.parent / f'run_output_{spatial_dim}d'
-
-
-def _write_prepared_reports(prepared, output_dir: Path) -> tuple[dict, dict]:
-    output_dir.mkdir(parents=True, exist_ok=True)
-    summary_path = output_dir / 'prepared_runtime_summary.json'
-    summary_path.write_text(json.dumps(prepared_runtime_summary(prepared), indent=2), encoding='utf-8')
-    if prepared.source_preprocess is not None:
-        write_source_summary(prepared.source_preprocess, output_dir)
-    provider_report = write_provider_contract_report(prepared, output_dir)
-    input_report = write_input_contract_report(prepared, output_dir)
-    return provider_report, input_report
+_COMPARE_COMMANDS = {
+    "field": "particle_tracer_unified.compare.field_compare",
+    "acceleration": "particle_tracer_unified.compare.acceleration_compare",
+    "trajectory": "particle_tracer_unified.compare.trajectory_compare",
+    "boundary": "particle_tracer_unified.compare.boundary_compare",
+    "first-step": "particle_tracer_unified.compare.first_step_compare",
+    "near-wall": "particle_tracer_unified.compare.near_wall_nohit",
+    "comsol-full": "particle_tracer_unified.compare.comsol_full_diagnostics",
+    "reference": "tools.compare_against_reference",
+}
+_COMSOL_COMMANDS = {
+    "build-case": "particle_tracer_unified.comsol_case.cli",
+}
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description='Build a prepared runtime and run the particle trajectory solver.')
-    parser.add_argument('config', type=Path)
-    parser.add_argument('--output-dir', type=Path, default=None)
-    parser.add_argument('--prepare-only', action='store_true')
-    parser.add_argument('--check-input', action='store_true', help='Write provider/input contract reports and exit before solving.')
-    args = parser.parse_args()
+def _json(value: Any) -> str:
+    if hasattr(value, "to_dict"):
+        value = value.to_dict()
+    return json.dumps(value, indent=2, sort_keys=True, default=str)
 
-    prepared = build_prepared_runtime_from_yaml(args.config)
-    dim = _spatial_dim(prepared)
 
-    reports_only = bool(args.prepare_only or args.check_input)
-    output_dir = args.output_dir or _default_output_dir(args.config, dim, reports_only=reports_only)
-    if reports_only:
-        provider_report, input_report = _write_prepared_reports(prepared, output_dir)
-        if args.check_input and (
-            not bool(provider_report.get('passed', True))
-            or not bool(input_report.get('passed', True))
-        ):
-            return 1
-        return 0
+def _module_main(module_name: str, arguments: Sequence[str]) -> int:
+    """Route retained specialist tools below the one public console script."""
 
-    run_solver_for_dim(prepared, output_dir=output_dir, spatial_dim=dim)
+    module = importlib.import_module(module_name)
+    entrypoint: Callable[[Sequence[str] | None], Any] | None = getattr(
+        module,
+        "main",
+        None,
+    )
+    if entrypoint is None:
+        raise ValueError(f"{module_name} does not expose main(argv)")
+    result = entrypoint([str(argument) for argument in arguments])
+    return int(result or 0)
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="particle-tracer",
+        description="Validate, run, migrate, and inspect particle trajectory cases.",
+    )
+    parser.add_argument(
+        "--version", action="version", version=f"particle-tracer {PACKAGE_VERSION}"
+    )
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    run = commands.add_parser("run", help="validate and run a canonical v0.2 case")
+    run.add_argument("config", type=Path)
+    run.add_argument("--output-dir", "-o", type=Path, default=None)
+
+    check = commands.add_parser("check", help="run the side-effect-free case preflight")
+    check.add_argument("config", type=Path)
+    check.add_argument(
+        "--full", action="store_true", help="include row/sample-level check detail"
+    )
+
+    migrate = commands.add_parser(
+        "migrate", help="convert a legacy YAML/CSV case to v0.2"
+    )
+    migrate.add_argument("config", type=Path)
+    migrate.add_argument("--output-dir", "-o", required=True, type=Path)
+    migrate.add_argument("--overwrite", action="store_true")
+
+    compare = commands.add_parser("compare", help="run a focused validation comparison")
+    compare.add_argument("workflow", choices=tuple(_COMPARE_COMMANDS))
+    compare.add_argument("arguments", nargs=argparse.REMAINDER)
+
+    artifacts = commands.add_parser(
+        "artifacts", help="validate the canonical artifact set"
+    )
+    artifacts.add_argument("root", type=Path)
+    artifacts.add_argument("--require-debug", action="store_true")
+
+    # Its complete option surface belongs to tools.export_visualizations and
+    # is routed before this generic parser in ``main``.
+    commands.add_parser("visualize", help="export optional visualizations")
+
+    comsol = commands.add_parser("comsol", help="COMSOL case extraction/build tools")
+    comsol.add_argument("workflow", choices=tuple(_COMSOL_COMMANDS))
+    comsol.add_argument("arguments", nargs=argparse.REMAINDER)
+    return parser
+
+
+def _run(args: argparse.Namespace) -> int:
+    case = load_case(args.config)
+    report = validate_case(case, detail="summary")
+    if not report.passed:
+        print(_json(report), file=sys.stderr)
+        return 2
+    result = simulate(case)
+    output_dir = args.output_dir or (Path(args.config).resolve().parent / "run_output")
+    manifest = write_result(result, output_dir)
+    print(
+        _json(
+            {
+                "schema_version": manifest.schema_version,
+                "output_dir": str(manifest.output_dir),
+                "artifacts": {
+                    record.artifact_type: {
+                        "path": str(record.path),
+                        "size_bytes": record.size_bytes,
+                        "sha256": record.sha256,
+                    }
+                    for record in manifest.records
+                },
+            }
+        )
+    )
     return 0
+
+
+def _check(args: argparse.Namespace) -> int:
+    case = load_case(args.config)
+    report = validate_case(case, detail="full" if args.full else "summary")
+    print(_json(report))
+    return 0 if report.passed else 1
+
+
+def _migrate(args: argparse.Namespace) -> int:
+    result = migrate_legacy_case(args.config, args.output_dir, overwrite=args.overwrite)
+    print(
+        _json(
+            {
+                "schema_version": 2,
+                "config": str(result.config_path),
+                "particles": str(result.particles_path)
+                if result.particles_path
+                else None,
+                "boundaries": str(result.boundaries_path)
+                if result.boundaries_path
+                else None,
+                "warnings": list(result.warnings),
+            }
+        )
+    )
+    return 0
+
+
+def _dispatch(args: argparse.Namespace) -> int:
+    if args.command == "run":
+        return _run(args)
+    if args.command == "check":
+        return _check(args)
+    if args.command == "migrate":
+        return _migrate(args)
+    if args.command == "compare":
+        return _module_main(_COMPARE_COMMANDS[args.workflow], args.arguments)
+    if args.command == "artifacts":
+        report = validate_artifacts(args.root, require_debug=bool(args.require_debug))
+        print(_json(report))
+        return 0 if bool(report["passed"]) else 1
+    if args.command == "comsol":
+        return _module_main(_COMSOL_COMMANDS[args.workflow], args.arguments)
+    raise ValueError(f"unknown command {args.command!r}")
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    raw_arguments = list(argv) if argv is not None else sys.argv[1:]
+    # ``visualize`` has no intermediate workflow selector.  Route it before
+    # argparse so its real parser owns ``--help`` and error messages as well as
+    # execution; the public process argument vector is only read, never
+    # rewritten.
+    if raw_arguments and raw_arguments[0] == "visualize":
+        try:
+            return _module_main("tools.export_visualizations", raw_arguments[1:])
+        except (FileNotFoundError, OSError, TypeError, ValueError) as exc:
+            print(f"particle-tracer: {exc}", file=sys.stderr)
+            return 2
+    parser = _build_parser()
+    args = parser.parse_args(raw_arguments)
+    try:
+        return _dispatch(args)
+    except (FileNotFoundError, OSError, TypeError, ValueError) as exc:
+        print(f"particle-tracer: {exc}", file=sys.stderr)
+        return 2
+
+
+__all__ = ["main"]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

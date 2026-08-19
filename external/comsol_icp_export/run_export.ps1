@@ -2,14 +2,14 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$ComsolExe,
 
-    [Parameter(Mandatory=$false)]
-    [string]$Mph = "data\icp_rf_bias_cf4_o2_si_etching (2).mph",
+    [Parameter(Mandatory=$true)]
+    [string]$Mph,
 
-    [Parameter(Mandatory=$false)]
-    [string]$Config = "external\comsol_icp_export\config\icp_cf4_o2_v20.json",
+    [Parameter(Mandatory=$true)]
+    [string]$Config,
 
-    [Parameter(Mandatory=$false)]
-    [string]$OutDir = "_external_exports\icp_cf4_o2_v20"
+    [Parameter(Mandatory=$true)]
+    [string]$OutDir
 )
 
 $ErrorActionPreference = "Stop"

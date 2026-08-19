@@ -1,107 +1,97 @@
 from __future__ import annotations
 
+from collections.abc import MutableMapping
 from dataclasses import dataclass
 from time import perf_counter
-from typing import MutableMapping
+from typing import cast
 
 import numpy as np
 
-from ..core.field_sampling import sample_time_grid_scalar
-from ..core.triangle_mesh_sampling_2d import sample_triangle_mesh_series
-from .compiled_field_backend import (
-    CompiledRuntimeBackendLike,
-    RegularRectilinearCompiledBackend,
-    TriangleMesh2DCompiledBackend,
-    coerce_compiled_backend,
-    sample_compiled_field_sample,
-    sample_compiled_flow_vectors,
-    sample_compiled_gas_properties_vectors,
-    sample_compiled_valid_mask_statuses,
+from particle_tracer_unified.domain import FieldRequest, StageFields
+
+from .compiled_backend_types import CompiledRuntimeBackend
+from .runtime_plan import StageFieldPlan
+from .sampling_backend import (
+    DYNAMIC_VISCOSITY,
+    ELECTRIC_FIELD,
+    FLOW_VELOCITY,
+    GAS_DENSITY,
+    TEMPERATURE,
+    VALID_MASK_STATUS,
+    CompiledSamplingBackend,
 )
 
 
 @dataclass(frozen=True)
-class FieldSamples:
-    """Stage-local field samples collected through existing backend samplers."""
+class FieldSamplingMetrics:
+    """Debug-only measurements kept separate from sampled field values."""
 
-    flow: np.ndarray | None = None
-    electric: np.ndarray | None = None
-    gas_density: np.ndarray | None = None
-    gas_mu: np.ndarray | None = None
-    gas_temperature: np.ndarray | None = None
-    valid_mask_status: np.ndarray | None = None
-    call_count: int = 0
-    point_count: int = 0
-
-
-@dataclass(frozen=True)
-class TimedFieldSamples:
-    samples: FieldSamples
     elapsed_s: float
+    call_count: int
+    point_count: int
 
 
-def _plan_flag(field_plan: object | None, name: str, default: bool) -> bool:
+def _explicit_or_planned(explicit: bool | None, planned: bool) -> bool:
+    return bool(planned) if explicit is None else bool(explicit)
+
+
+def _requested_gas_fields(
+    field_plan: StageFieldPlan | None,
+    *,
+    all_gas: bool | None,
+    density: bool | None,
+    viscosity: bool | None,
+    temperature: bool | None,
+) -> tuple[bool, bool, bool]:
+    if any(value is not None for value in (density, viscosity, temperature)):
+        return bool(density), bool(viscosity), bool(temperature)
+    if all_gas is not None:
+        requested = bool(all_gas)
+        return requested, requested, requested
     if field_plan is None:
-        return bool(default)
-    return bool(getattr(field_plan, name, default))
+        return False, False, False
+    return (
+        bool(field_plan.need_gas_density),
+        bool(field_plan.need_gas_mu),
+        bool(field_plan.need_gas_temperature),
+    )
 
 
-def _resolve_flag(value: bool | None, field_plan: object | None, name: str, default: bool) -> bool:
-    if value is None:
-        return _plan_flag(field_plan, name, default)
-    return bool(value)
-
-
-def _sample_electric_vectors(
-    compiled: CompiledRuntimeBackendLike,
-    spatial_dim: int,
-    t_eval: float,
-    positions: np.ndarray,
-) -> np.ndarray | None:
-    backend = coerce_compiled_backend(compiled)
-    pts = np.asarray(positions, dtype=np.float64)
-    if pts.ndim != 2:
-        raise ValueError('positions must have shape (n, spatial_dim)')
-    dim = int(spatial_dim)
-    if pts.shape[0] == 0:
-        return np.zeros((0, dim), dtype=np.float64)
-    if isinstance(backend, TriangleMesh2DCompiledBackend):
-        names = tuple(getattr(backend, 'electric_field_names', ()))
-        if len(names) < 2:
-            return None
-        field = backend.field
-        values = [
-            [
-                float(sample_triangle_mesh_series(field.quantities[names[0]], field, point, float(t_eval))),
-                float(sample_triangle_mesh_series(field.quantities[names[1]], field, point, float(t_eval))),
-            ]
-            for point in pts
-        ]
-        return np.asarray(values, dtype=np.float64)
-
-    if not isinstance(backend, RegularRectilinearCompiledBackend):
-        return None
-    if backend.electric_x is None or backend.electric_y is None:
-        return None
-    axes = backend.axes
-    times = np.asarray(backend.times, dtype=np.float64)
-    values: list[list[float]] = []
-    for point in pts:
-        row = [
-            float(sample_time_grid_scalar(backend.electric_x, axes, times, float(t_eval), point)),
-            float(sample_time_grid_scalar(backend.electric_y, axes, times, float(t_eval), point)),
-        ]
-        if dim == 3:
-            if backend.electric_z is None:
-                return None
-            row.append(float(sample_time_grid_scalar(backend.electric_z, axes, times, float(t_eval), point)))
-        values.append(row)
-    return np.asarray(values, dtype=np.float64)
+def _requested_quantities(
+    field_plan: StageFieldPlan | None,
+    *,
+    need_flow: bool | None,
+    need_electric: bool | None,
+    need_gas_properties: bool | None,
+    need_gas_density: bool | None,
+    need_gas_mu: bool | None,
+    need_gas_temperature: bool | None,
+    need_valid_mask: bool | None,
+) -> tuple[str, ...]:
+    planned_flow = bool(field_plan is not None and field_plan.need_flow)
+    planned_electric = bool(field_plan is not None and field_plan.need_electric)
+    planned_mask = bool(field_plan is not None and field_plan.need_valid_mask)
+    gas_density, gas_mu, gas_temperature = _requested_gas_fields(
+        field_plan,
+        all_gas=need_gas_properties,
+        density=need_gas_density,
+        viscosity=need_gas_mu,
+        temperature=need_gas_temperature,
+    )
+    requested = (
+        (FLOW_VELOCITY, _explicit_or_planned(need_flow, planned_flow)),
+        (ELECTRIC_FIELD, _explicit_or_planned(need_electric, planned_electric)),
+        (GAS_DENSITY, gas_density),
+        (DYNAMIC_VISCOSITY, gas_mu),
+        (TEMPERATURE, gas_temperature),
+        (VALID_MASK_STATUS, _explicit_or_planned(need_valid_mask, planned_mask)),
+    )
+    return tuple(name for name, enabled in requested if enabled)
 
 
 def sample_fields_for_stage(
-    compiled: CompiledRuntimeBackendLike,
-    field_plan: object | None,
+    compiled: CompiledRuntimeBackend,
+    field_plan: StageFieldPlan | None,
     points: np.ndarray,
     time_s: float,
     *,
@@ -109,161 +99,131 @@ def sample_fields_for_stage(
     need_flow: bool | None = None,
     need_electric: bool | None = None,
     need_gas_properties: bool | None = None,
+    need_gas_density: bool | None = None,
+    need_gas_mu: bool | None = None,
+    need_gas_temperature: bool | None = None,
     need_valid_mask: bool | None = None,
-    fallback_density_kgm3: float = 1.0,
-    fallback_mu_pas: float = 1.8e-5,
-    fallback_temperature_K: float = 300.0,
-) -> FieldSamples:
-    """Sample a stage bundle without changing provider/backend semantics."""
+    fallback_density_kgm3: float = float("nan"),
+    fallback_mu_pas: float = float("nan"),
+    fallback_temperature_K: float = float("nan"),
+) -> StageFields:
+    """Adapt solver-plan flags to one semantic batch request."""
 
     pts = np.asarray(points, dtype=np.float64)
     if pts.ndim != 2:
-        raise ValueError('points must have shape (n, spatial_dim)')
+        raise ValueError("points must have shape (n, spatial_dim)")
     dim = int(spatial_dim)
-    if pts.shape[1] < dim:
-        raise ValueError('points second dimension must be at least spatial_dim')
+    if pts.shape[1] != dim:
+        raise ValueError("points must have shape (n, spatial_dim)")
 
-    flow = None
-    electric = None
-    gas_density = None
-    gas_mu = None
-    gas_temperature = None
-    valid_mask_status = None
-    call_count = 0
-    point_count = 0
-
-    want_flow = _resolve_flag(need_flow, field_plan, 'need_flow', False)
-    want_electric = _resolve_flag(need_electric, field_plan, 'need_electric', False)
-    want_gas = (
-        bool(need_gas_properties)
-        if need_gas_properties is not None
-        else bool(getattr(field_plan, 'needs_gas_properties', False)) if field_plan is not None else False
+    quantities = _requested_quantities(
+        field_plan,
+        need_flow=need_flow,
+        need_electric=need_electric,
+        need_gas_properties=need_gas_properties,
+        need_gas_density=need_gas_density,
+        need_gas_mu=need_gas_mu,
+        need_gas_temperature=need_gas_temperature,
+        need_valid_mask=need_valid_mask,
     )
-    want_valid_mask = _resolve_flag(need_valid_mask, field_plan, 'need_valid_mask', False)
 
-    if want_flow:
-        flow = sample_compiled_flow_vectors(compiled, dim, float(time_s), pts)
-        call_count += 1
-    if want_electric:
-        electric = _sample_electric_vectors(compiled, dim, float(time_s), pts)
-        if electric is not None:
-            call_count += 1
-    if want_gas:
-        gas_density, gas_mu, gas_temperature = sample_compiled_gas_properties_vectors(
-            compiled,
-            dim,
-            float(time_s),
-            pts,
-            fallback_density_kgm3=float(fallback_density_kgm3),
-            fallback_mu_pas=float(fallback_mu_pas),
-            fallback_temperature_K=float(fallback_temperature_K),
+    backend = CompiledSamplingBackend(
+        compiled=compiled,
+        spatial_dim=dim,
+        fallback_density_kgm3=float(fallback_density_kgm3),
+        fallback_dynamic_viscosity_Pas=float(fallback_mu_pas),
+        fallback_temperature_K=float(fallback_temperature_K),
+        strict=False,
+    )
+    request = FieldRequest(quantities or (VALID_MASK_STATUS,))
+    stage = backend.sample(pts, float(time_s), request)
+    if not quantities:
+        stage = StageFields(
+            points_m=stage.points_m,
+            time_s=stage.time_s,
+            values={},
+            supported=stage.supported,
+            metadata=stage.metadata,
         )
-        call_count += 1
-    if want_valid_mask:
-        valid_mask_status = sample_compiled_valid_mask_statuses(compiled, pts)
-        call_count += 1
-
-    if call_count:
-        point_count = int(pts.shape[0]) * int(call_count)
-    return FieldSamples(
-        flow=flow,
-        electric=electric,
-        gas_density=gas_density,
-        gas_mu=gas_mu,
-        gas_temperature=gas_temperature,
-        valid_mask_status=valid_mask_status,
-        call_count=int(call_count),
-        point_count=int(point_count),
-    )
+    return stage
 
 
 def sample_scalar_fields_for_stage(
-    compiled: CompiledRuntimeBackendLike,
-    field_plan: object | None,
+    compiled: CompiledRuntimeBackend,
+    field_plan: StageFieldPlan | None,
     position: np.ndarray,
     time_s: float,
     *,
     spatial_dim: int,
     need_flow: bool | None = None,
+    need_electric: bool | None = None,
     need_gas_properties: bool | None = None,
+    need_gas_density: bool | None = None,
+    need_gas_mu: bool | None = None,
+    need_gas_temperature: bool | None = None,
     need_valid_mask: bool | None = None,
-    fallback_density_kgm3: float = 1.0,
-    fallback_mu_pas: float = 1.8e-5,
-    fallback_temperature_K: float = 300.0,
-) -> FieldSamples:
-    """Scalar stage bundle that preserves existing scalar sampler behavior."""
+    fallback_density_kgm3: float = float("nan"),
+    fallback_mu_pas: float = float("nan"),
+    fallback_temperature_K: float = float("nan"),
+) -> StageFields:
+    """Sample one point by delegating to the canonical batch implementation."""
 
     pos = np.asarray(position, dtype=np.float64)
-    want_flow = _resolve_flag(need_flow, field_plan, 'need_flow', False)
-    want_gas = (
-        bool(need_gas_properties)
-        if need_gas_properties is not None
-        else bool(getattr(field_plan, 'needs_gas_properties', False)) if field_plan is not None else False
-    )
-    want_valid_mask = _resolve_flag(need_valid_mask, field_plan, 'need_valid_mask', False)
-
-    sample = sample_compiled_field_sample(
+    if pos.ndim != 1 or pos.shape[0] != int(spatial_dim):
+        raise ValueError("position must have shape (spatial_dim,)")
+    return sample_fields_for_stage(
         compiled,
-        int(spatial_dim),
+        field_plan,
+        pos.reshape(1, int(spatial_dim)),
         float(time_s),
-        pos,
-        need_flow=bool(want_flow),
-        need_acceleration=False,
-        need_gas_properties=bool(want_gas),
-        need_valid_mask=bool(want_valid_mask),
+        spatial_dim=int(spatial_dim),
+        need_flow=need_flow,
+        need_electric=need_electric,
+        need_gas_properties=need_gas_properties,
+        need_gas_density=need_gas_density,
+        need_gas_mu=need_gas_mu,
+        need_gas_temperature=need_gas_temperature,
+        need_valid_mask=need_valid_mask,
         fallback_density_kgm3=float(fallback_density_kgm3),
         fallback_mu_pas=float(fallback_mu_pas),
         fallback_temperature_K=float(fallback_temperature_K),
     )
-    call_count = 1 if bool(want_flow or want_gas or want_valid_mask) else 0
-    flow = None
-    if sample.flow_velocity is not None:
-        flow = np.asarray(sample.flow_velocity, dtype=np.float64).reshape(1, -1)
-    gas_density = None if sample.gas_density_kgm3 is None else np.asarray([sample.gas_density_kgm3], dtype=np.float64)
-    gas_mu = None if sample.gas_mu_pas is None else np.asarray([sample.gas_mu_pas], dtype=np.float64)
-    gas_temperature = (
-        None if sample.gas_temperature_K is None else np.asarray([sample.gas_temperature_K], dtype=np.float64)
-    )
-    valid_mask_status = (
-        None if sample.valid_mask_status is None else np.asarray([sample.valid_mask_status], dtype=np.uint8)
-    )
-    return FieldSamples(
-        flow=flow,
-        electric=None,
-        gas_density=gas_density,
-        gas_mu=gas_mu,
-        gas_temperature=gas_temperature,
-        valid_mask_status=valid_mask_status,
-        call_count=int(call_count),
-        point_count=int(call_count),
-    )
 
 
-def timed_sample_fields_for_stage(*args, **kwargs) -> TimedFieldSamples:
+def measure_sample_fields_for_stage(
+    *args, **kwargs
+) -> tuple[StageFields, FieldSamplingMetrics]:
+    """Sample fields and measure the call for explicit debug diagnostics."""
+
     start = perf_counter()
     samples = sample_fields_for_stage(*args, **kwargs)
-    return TimedFieldSamples(samples=samples, elapsed_s=float(perf_counter() - start))
+    metrics = FieldSamplingMetrics(
+        elapsed_s=float(perf_counter() - start),
+        call_count=int(samples.metadata.get("sample_call_count", 0)),
+        point_count=int(samples.metadata.get("sample_point_count", 0)),
+    )
+    return samples, metrics
 
 
 def record_field_sampling_diagnostics(
     diagnostics: MutableMapping[str, object],
-    samples: FieldSamples,
-    elapsed_s: float,
+    metrics: FieldSamplingMetrics,
 ) -> None:
-    diagnostics['field_sampling_s'] = float(diagnostics.get('field_sampling_s', 0.0)) + float(elapsed_s)
-    diagnostics['field_sample_point_count'] = int(diagnostics.get('field_sample_point_count', 0)) + int(
-        samples.point_count
-    )
-    diagnostics['field_sample_call_count'] = int(diagnostics.get('field_sample_call_count', 0)) + int(
-        samples.call_count
-    )
+    diagnostics["field_sampling_s"] = float(
+        cast(float, diagnostics.get("field_sampling_s", 0.0))
+    ) + float(metrics.elapsed_s)
+    diagnostics["field_sample_point_count"] = int(
+        cast(int, diagnostics.get("field_sample_point_count", 0))
+    ) + int(metrics.point_count)
+    diagnostics["field_sample_call_count"] = int(
+        cast(int, diagnostics.get("field_sample_call_count", 0))
+    ) + int(metrics.call_count)
 
 
 __all__ = (
-    'FieldSamples',
-    'TimedFieldSamples',
-    'record_field_sampling_diagnostics',
-    'sample_fields_for_stage',
-    'sample_scalar_fields_for_stage',
-    'timed_sample_fields_for_stage',
+    "FieldSamplingMetrics",
+    "measure_sample_fields_for_stage",
+    "record_field_sampling_diagnostics",
+    "sample_fields_for_stage",
+    "sample_scalar_fields_for_stage",
 )

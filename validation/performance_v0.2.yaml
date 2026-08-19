@@ -1,0 +1,269 @@
+artifact_type: particle_tracer.performance_record
+schema_version: 2
+record_version: 0.2
+captured_at: 2026-08-09T14:32:38.3135360+09:00
+
+environment:
+  os: Windows 11 10.0.26200
+  architecture: 64-bit
+  cpu: Intel(R) Core(TM) Ultra 7 265KF
+  logical_processors: 20
+  python:
+    implementation: CPython
+    version: 3.12.13
+  packages:
+    numpy: 2.4.6
+    pandas: 3.0.5
+    pyyaml: 6.0.3
+    numba: 0.66.0
+
+command: >-
+  .\.venv\Scripts\python.exe validation\measure_performance_v0_2.py
+  --warmups 5 --repeats 21 --memory-repeats 3
+
+protocol:
+  scope: simulate(case) only; load_case and validate_case are excluded
+  timer: time.perf_counter
+  case_lifecycle: one loaded and preflight-validated SimulationCase reused per case
+  warmups_per_case: 5
+  timing_repeats_per_case: 21
+  memory_repeats_per_case: 3
+  jit_state: warm; Numba compilation is excluded by the warm-up calls
+  memory_instrument: Python standard-library tracemalloc
+  memory_scope: Python-traced allocations retained by or created during simulate(case)
+  memory_limitations:
+    - tracemalloc does not include NumPy or Numba native allocations
+    - values are not process RSS and must not be interpreted as total peak memory
+
+cases:
+  - name: native_regular_2d_minimal
+    config: examples/v02_minimal/run_config.yaml
+    particle_count: 2
+    step_count: 5
+    wall_time_s:
+      samples:
+        - 0.0016950997523963451
+        - 0.0016767000779509544
+        - 0.0017639999277889729
+        - 0.0018430002965033054
+        - 0.0013023000210523605
+        - 0.0012493003159761429
+        - 0.001382400281727314
+        - 0.0012973002158105373
+        - 0.0012765000574290752
+        - 0.0011881999671459198
+        - 0.0011670999228954315
+        - 0.0011504003778100014
+        - 0.0015361001715064049
+        - 0.0018488997593522072
+        - 0.0016756001859903336
+        - 0.0018131001852452755
+        - 0.0017864997498691082
+        - 0.0019021001644432545
+        - 0.0016606999561190605
+        - 0.0013228999450802803
+        - 0.001279899850487709
+      min: 0.0011504003778100014
+      median: 0.0015361001715064049
+      max: 0.0019021001644432545
+    tracemalloc_bytes:
+      current_samples: [15912, 15912, 15912]
+      peak_samples: [91842, 91842, 91842]
+      current_median: 15912
+      peak_median: 91842
+      peak_max: 91842
+
+  - name: native_regular_3d_minimal
+    config: examples/v02_minimal_3d/run_config.yaml
+    particle_count: 3
+    step_count: 10
+    wall_time_s:
+      samples:
+        - 0.039241000078618526
+        - 0.04642489971593022
+        - 0.03540279995650053
+        - 0.047134400345385075
+        - 0.05847099982202053
+        - 0.03701029997318983
+        - 0.0347013003192842
+        - 0.04235769994556904
+        - 0.044819900300353765
+        - 0.034237700048834085
+        - 0.030635700095444918
+        - 0.032330899965018034
+        - 0.030568299815058708
+        - 0.03292270004749298
+        - 0.03321920009329915
+        - 0.03158910013735294
+        - 0.03161730011925101
+        - 0.03043100005015731
+        - 0.031108399853110313
+        - 0.03133079968392849
+        - 0.03131909994408488
+      min: 0.03043100005015731
+      median: 0.03321920009329915
+      max: 0.05847099982202053
+    tracemalloc_bytes:
+      current_samples: [138206, 138206, 138162]
+      peak_samples: [530307, 530307, 530307]
+      current_median: 138206
+      peak_median: 530307
+      peak_max: 530307
+
+comparison_to_pre_trace_v0.2:
+  acceptance_criterion: representative runtime and peak memory must not regress by more than 10 percent
+  protocol_compatibility: same cases, simulate-only timer, warm JIT, and tracemalloc scope
+  reference:
+    source: earlier v0.2 measurement preserved before accepted-substep trace integration
+    native_regular_2d_minimal:
+      wall_time_median_s: 0.0016540000215172768
+      peak_memory_median_bytes: 92346
+    native_regular_3d_minimal:
+      wall_time_median_s: 0.038747299928218126
+      peak_memory_median_bytes: 539743
+  result:
+    native_regular_2d_minimal:
+      wall_time_change_percent: -7.13
+      peak_memory_change_percent: -0.55
+      passed: true
+    native_regular_3d_minimal:
+      wall_time_change_percent: -14.27
+      peak_memory_change_percent: -1.75
+      passed: true
+  status: passed
+
+comparison_to_v0.1:
+  acceptance_criterion: representative runtime and peak memory must not regress by more than 10 percent
+  status: not_comparable
+  baseline_record: validation/baseline_v0.1.yaml
+  reason:
+    - v0.1 recorded only whole-pytest-suite elapsed time, not representative per-case wall time
+    - v0.1 did not record per-case peak memory
+    - current tracemalloc values cannot be compared with an unrecorded or differently scoped baseline
+  conclusion: no pass or fail claim is made against the unavailable v0.1 per-case measurements
+  next_step: preserve this protocol and compare the same cases and memory instrument at the next release
+
+final_verification_after_execution_metadata_snapshot:
+  command: >-
+    .\.venv\Scripts\python.exe validation\measure_performance_v0_2.py
+    --warmups 5 --repeats 21 --memory-repeats 3
+  native_regular_2d_minimal:
+    wall_time_median_s: 0.0013903998769819736
+    peak_memory_median_bytes: 91842
+    wall_time_change_from_pre_trace_percent: -15.94
+    peak_memory_change_from_pre_trace_percent: -0.55
+    passed: true
+  native_regular_3d_minimal:
+    wall_time_median_s: 0.03651170013472438
+    peak_memory_median_bytes: 530307
+    wall_time_change_from_pre_trace_percent: -5.77
+    peak_memory_change_from_pre_trace_percent: -1.75
+    passed: true
+  status: passed
+
+post_cleanup_verification_under_external_load:
+  captured_at: 2026-08-09T19:00:00+09:00
+  command: >-
+    .\.venv\Scripts\python.exe validation\measure_performance_v0_2.py
+    --warmups 5 --repeats 21 --memory-repeats 3
+  environment_condition:
+    - eight unrelated Python worker processes continuously occupied CPU during the measurement
+    - those external processes were outside this workspace and were not stopped or modified
+  wall_time:
+    status: not_comparable
+    reason: scheduler contention violates the quiet-host condition of the recorded reference
+    observed_native_regular_2d_median_s: 0.001889900304377079
+    observed_native_regular_3d_median_s: 0.044402699917554855
+    conclusion: no runtime pass or fail claim is made from this contended sample
+  tracemalloc:
+    status: passed
+    native_regular_2d_peak_median_bytes: 90954
+    native_regular_2d_change_from_pre_trace_percent: -1.51
+    native_regular_3d_peak_median_bytes: 529419
+    native_regular_3d_change_from_pre_trace_percent: -1.91
+  functional_regression:
+    jit_enabled: 467 passed
+    jit_disabled: 467 passed
+
+final_v0_2_acceptance:
+  captured_at: 2026-08-09T19:49:40.8407150+09:00
+  command: >-
+    .\.venv\Scripts\python.exe validation\measure_performance_v0_2.py
+    --warmups 5 --repeats 21 --memory-repeats 3
+  environment_condition:
+    - no unrelated Python worker process was present during the recorded sample
+  native_regular_2d_minimal:
+    wall_time_median_s: 0.0012397002428770065
+    peak_memory_median_bytes: 90954
+    wall_time_change_from_pre_trace_percent: -25.05
+    peak_memory_change_from_pre_trace_percent: -1.51
+    passed: true
+  native_regular_3d_minimal:
+    wall_time_median_s: 0.04051410034298897
+    peak_memory_median_bytes: 529419
+    wall_time_change_from_pre_trace_percent: 4.56
+    peak_memory_change_from_pre_trace_percent: -1.91
+    passed: true
+  functional_regression:
+    jit_enabled: 526 passed
+    jit_disabled: 526 passed
+  artifact_acceptance:
+    native_regular_2d_minimal: exactly 3 standard artifacts; validator passed
+    native_regular_3d_minimal: exactly 3 standard artifacts; validator passed
+  status: passed
+
+post_architecture_refactor_acceptance:
+  captured_at: 2026-08-09T21:45:31.3869792+09:00
+  scope:
+    - runtime state/execution/contact responsibility split
+    - collision detection/localization/wall-response responsibility split
+    - compiled field types/compilation/base-sampling/force-assembly split
+    - COMSOL mesh/field/contract/report/orchestration/CLI split
+  functional_regression:
+    jit_enabled: 533 passed
+    jit_disabled: 533 passed
+  artifact_acceptance:
+    native_regular_2d_minimal: exactly 3 standard artifacts; validator passed
+    native_regular_3d_minimal: exactly 3 standard artifacts; validator passed
+  tracemalloc:
+    status: passed
+    native_regular_2d_peak_median_bytes: 90954
+    native_regular_3d_peak_median_bytes: 529419
+    conclusion: both values are no greater than the quiet-host final_v0_2_acceptance values
+  wall_time:
+    status: not_comparable
+    reason:
+      - four unrelated long-running Python workers outside this workspace occupied CPU
+      - scheduler contention violates the quiet-host condition of the recorded reference
+    conclusion: the last quiet-host timing remains the release reference; no new timing claim is made
+  status: functional_and_memory_acceptance_passed; quiet-host timing deferred
+
+post_fundamental_unification_acceptance:
+  captured_at: 2026-08-09T23:11:58.3653854+09:00
+  scope:
+    - one deterministic ETD2 segment-motion primitive for trial, refinement, collision replay, and valid-mask retry
+    - one immutable semantic ForceModel shared by native input, COMSOL manifest, runtime field binding, and JIT projection
+    - piecewise integrated-OU Brownian motion on the accepted deterministic leaf schedule
+  functional_regression:
+    jit_enabled: 552 passed
+    jit_disabled: 552 passed
+  artifact_acceptance:
+    native_regular_2d_minimal: exactly 3 standard artifacts; validator passed
+    native_regular_3d_minimal: exactly 3 standard artifacts; validator passed
+  removed_production_contracts:
+    forbidden_legacy_reference_count: 0
+    compileall: passed
+  tracemalloc:
+    status: passed
+    native_regular_2d_peak_median_bytes: 90954
+    native_regular_3d_peak_median_bytes: 529419
+    conclusion: both values equal the quiet-host final_v0_2_acceptance values and do not regress
+  wall_time:
+    status: not_comparable
+    observed_native_regular_2d_median_s: 0.001904199831187725
+    observed_native_regular_3d_median_s: 0.049508499912917614
+    reason:
+      - four unrelated long-running Python workers outside this workspace continuously occupied CPU
+      - scheduler contention violates the quiet-host reference condition
+    conclusion: no timing pass or fail claim is made; the quiet-host final_v0_2_acceptance remains the release reference
+  status: functional_artifact_and_memory_acceptance_passed; quiet-host timing deferred

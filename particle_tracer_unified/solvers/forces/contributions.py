@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Mapping
+from typing import Any
 
 import numpy as np
 
@@ -27,7 +28,9 @@ class ForceContribution:
             row[f"accel_{component}"] = float(acc[idx])
         if self.force is not None:
             force = np.asarray(self.force, dtype=np.float64)
-            row["force_norm"] = float(np.linalg.norm(force)) if force.size else float("nan")
+            row["force_norm"] = (
+                float(np.linalg.norm(force)) if force.size else float("nan")
+            )
             for idx, component in enumerate(("x", "y", "z")[: force.size]):
                 row[f"force_{component}"] = float(force[idx])
         for key, value in dict(self.metadata).items():

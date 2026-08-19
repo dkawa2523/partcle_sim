@@ -1,10 +1,14 @@
+"""Coordinate-system normalization and axisymmetric RZ metadata."""
+
 from __future__ import annotations
 
 import math
-from typing import Any, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 import numpy as np
 
+from .boundary_numerics import scaled_classification_tolerance
 
 SUPPORTED_COORDINATE_SYSTEMS = ("cartesian_xy", "axisymmetric_rz", "cartesian_xyz")
 
@@ -43,35 +47,82 @@ def normalize_coordinate_system(value: Any, spatial_dim: int) -> str:
     normalized = aliases.get(token)
     if normalized is None:
         supported = ", ".join(SUPPORTED_COORDINATE_SYSTEMS)
-        raise ValueError(f"Unsupported coordinate_system={raw!r}; supported values are: {supported}")
+        raise ValueError(
+            f"Unsupported coordinate_system={raw!r}; supported values are: {supported}"
+        )
     if dim == 2 and normalized == "cartesian_xyz":
         raise ValueError("coordinate_system=cartesian_xyz requires spatial_dim=3")
     if dim == 3 and normalized != "cartesian_xyz":
-        raise ValueError("spatial_dim=3 currently supports coordinate_system=cartesian_xyz")
+        raise ValueError(
+            "spatial_dim=3 currently supports coordinate_system=cartesian_xyz"
+        )
     return normalized
 
 
 def is_axisymmetric_rz(coordinate_system: Any, spatial_dim: int) -> bool:
-    return normalize_coordinate_system(coordinate_system, spatial_dim) == "axisymmetric_rz"
+    return (
+        normalize_coordinate_system(coordinate_system, spatial_dim) == "axisymmetric_rz"
+    )
 
 
-def axis_names_for_coordinate_system(coordinate_system: Any, spatial_dim: int) -> tuple[str, ...]:
+def axisymmetric_rz_chart_state(
+    position_m: np.ndarray,
+    velocity_mps: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Map a signed radial chart state to physical ``(r, z, v_r, v_z)``."""
+
+    position = np.asarray(position_m, dtype=np.float64).copy()
+    velocity = np.asarray(velocity_mps, dtype=np.float64).copy()
+    sign = -1.0 if float(position[0]) < 0.0 else 1.0
+    position[0] = abs(float(position[0]))
+    velocity[0] *= sign
+    return position, velocity, sign
+
+
+def canonicalize_axisymmetric_rz_state(
+    position_m: np.ndarray,
+    velocity_mps: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the unique externally visible RZ state with ``r >= 0``."""
+
+    position = np.asarray(position_m, dtype=np.float64).copy()
+    velocity = np.asarray(velocity_mps, dtype=np.float64).copy()
+    flip = (position[..., 0] < 0.0) | (
+        (position[..., 0] == 0.0) & (velocity[..., 0] < 0.0)
+    )
+    position[..., 0] = np.abs(position[..., 0])
+    velocity[..., 0] = np.where(flip, -velocity[..., 0], velocity[..., 0])
+    return position, velocity
+
+
+def canonicalize_axisymmetric_rz_positions(points_m: np.ndarray) -> np.ndarray:
+    points = np.asarray(points_m, dtype=np.float64).copy()
+    points[..., 0] = np.abs(points[..., 0])
+    return points
+
+
+def axis_names_for_coordinate_system(
+    coordinate_system: Any,
+    spatial_dim: int,
+) -> tuple[str, ...]:
     normalized = normalize_coordinate_system(coordinate_system, spatial_dim)
-    if normalized == "axisymmetric_rz":
-        return ("r", "z")
-    if normalized == "cartesian_xy":
-        return ("x", "y")
-    if normalized == "cartesian_xyz":
-        return ("x", "y", "z")
-    raise ValueError(f"Unsupported coordinate_system={normalized!r}")
+    return {
+        "axisymmetric_rz": ("r", "z"),
+        "cartesian_xy": ("x", "y"),
+        "cartesian_xyz": ("x", "y", "z"),
+    }[normalized]
 
 
 def ring_area_weight(radius_m: Any) -> Any:
     radius = np.asarray(radius_m, dtype=np.float64)
     if not np.all(np.isfinite(radius)):
-        raise ValueError("axisymmetric_rz ring_area_weight radius values must be finite")
+        raise ValueError(
+            "axisymmetric_rz ring_area_weight radius values must be finite"
+        )
     if np.any(radius < 0.0):
-        raise ValueError("axisymmetric_rz ring_area_weight radius values must be non-negative")
+        raise ValueError(
+            "axisymmetric_rz ring_area_weight radius values must be non-negative"
+        )
     weights = 2.0 * math.pi * radius
     if radius.ndim == 0:
         return float(weights)
@@ -89,30 +140,89 @@ def validate_axisymmetric_rz_radial_axis(
         return
     axis = np.asarray(axis_0, dtype=np.float64)
     if axis.ndim != 1 or axis.size == 0:
-        raise ValueError(f"axisymmetric_rz radial {context} must be a non-empty 1D axis")
+        raise ValueError(
+            f"axisymmetric_rz radial {context} must be a non-empty 1D axis"
+        )
     if not np.all(np.isfinite(axis)):
-        raise ValueError(f"axisymmetric_rz radial {context} must contain only finite values")
+        raise ValueError(
+            f"axisymmetric_rz radial {context} must contain only finite values"
+        )
     if np.min(axis) < 0.0:
         raise ValueError(f"axisymmetric_rz radial {context} must be non-negative")
 
 
 def _axis_tolerance(axis: np.ndarray) -> float:
-    diffs = np.diff(np.asarray(axis, dtype=np.float64))
+    axis_values = np.asarray(axis, dtype=np.float64)
+    diffs = np.diff(axis_values)
     positive = diffs[np.isfinite(diffs) & (diffs > 0.0)]
-    step_tol = float(np.min(positive)) * 1.0e-9 if positive.size else 0.0
-    return max(1.0e-12, step_tol)
+    if positive.size == 0:
+        raise ValueError(
+            "axisymmetric_rz reporting requires a positive radial grid spacing"
+        )
+    _roundoff, tolerance = scaled_classification_tolerance(
+        axis_values,
+        float(np.min(positive)),
+    )
+    return float(tolerance)
 
 
 def _ring_weight_summary(axis_0: np.ndarray) -> dict[str, Any]:
     weights = np.asarray(ring_area_weight(axis_0), dtype=np.float64)
-    finite = weights[np.isfinite(weights)]
-    if finite.size == 0:
-        return {"count": 0, "min": None, "max": None, "sum": 0.0}
     return {
         "count": int(weights.size),
-        "min": float(np.min(finite)),
-        "max": float(np.max(finite)),
-        "sum": float(np.sum(finite)),
+        "min": float(np.min(weights)),
+        "max": float(np.max(weights)),
+        "sum": float(np.sum(weights)),
+    }
+
+
+def _axis_boundary_metadata(
+    boundary_edges: Any,
+    boundary_edge_part_ids: Any,
+    tolerance_m: float,
+) -> tuple[list[int], list[int]]:
+    if boundary_edges is None:
+        return [], []
+    edges = np.asarray(boundary_edges, dtype=np.float64)
+    if edges.ndim != 3 or edges.shape[1:] != (2, 2):
+        return [], []
+
+    on_axis = np.all(np.abs(edges[:, :, 0]) <= tolerance_m, axis=1)
+    edge_indices = [int(value) for value in np.flatnonzero(on_axis).tolist()]
+    if boundary_edge_part_ids is None or not edge_indices:
+        return edge_indices, []
+    raw_part_ids = np.asarray(boundary_edge_part_ids, dtype=np.int32)
+    if raw_part_ids.size < edges.shape[0]:
+        return edge_indices, []
+    part_ids = sorted({int(raw_part_ids[index]) for index in edge_indices})
+    return edge_indices, part_ids
+
+
+def _rz_report(
+    axis_0: np.ndarray,
+    tolerance_m: float,
+    edge_indices: list[int],
+    part_ids: list[int],
+) -> dict[str, Any]:
+    return {
+        "coordinate_system": "axisymmetric_rz",
+        "axis_names": ["r", "z"],
+        "semantics": "2d_meridional_rz",
+        "radial_axis_name": "r",
+        "axial_axis_name": "z",
+        "radial_axis_min_m": float(np.min(axis_0)),
+        "radial_axis_max_m": float(np.max(axis_0)),
+        "radial_axis_nonnegative": 1,
+        "r0_on_grid": int(bool(np.any(np.abs(axis_0) <= tolerance_m))),
+        "r0_detection_tolerance_m": float(tolerance_m),
+        "r0_axis_boundary_edge_count": len(edge_indices),
+        "r0_axis_boundary_edge_indices": edge_indices,
+        "r0_axis_boundary_part_ids": part_ids,
+        "velocity_components": ["v_r", "v_z"],
+        "v_theta_dynamics": "out_of_scope",
+        "source_ring_weighting_policy": "not_applied_implicitly",
+        "ring_area_weight_formula": "2*pi*r",
+        "radial_ring_area_weight": _ring_weight_summary(axis_0),
     }
 
 
@@ -126,8 +236,6 @@ def axisymmetric_rz_geometry_report(
 ) -> dict[str, Any]:
     if not is_axisymmetric_rz(coordinate_system, spatial_dim):
         return {}
-    if int(spatial_dim) != 2:
-        raise ValueError("axisymmetric_rz geometry reporting requires spatial_dim=2")
     axes_tuple = tuple(axes)
     if len(axes_tuple) < 2:
         raise ValueError("axisymmetric_rz geometry reporting requires r and z axes")
@@ -139,43 +247,17 @@ def axisymmetric_rz_geometry_report(
         context="axis_0",
     )
     tol = _axis_tolerance(axis_0)
-    finite = axis_0[np.isfinite(axis_0)]
-    edge_indices: list[int] = []
-    part_ids: list[int] = []
-    if boundary_edges is not None:
-        edges = np.asarray(boundary_edges, dtype=np.float64)
-        if edges.ndim == 3 and edges.shape[1:] == (2, 2):
-            mask = np.all(np.abs(edges[:, :, 0]) <= tol, axis=1)
-            edge_indices = [int(v) for v in np.flatnonzero(mask).tolist()]
-            if boundary_edge_part_ids is not None and edge_indices:
-                raw_part_ids = np.asarray(boundary_edge_part_ids, dtype=np.int32)
-                if raw_part_ids.size >= edges.shape[0]:
-                    part_ids = sorted({int(raw_part_ids[idx]) for idx in edge_indices})
-    return {
-        "coordinate_system": "axisymmetric_rz",
-        "axis_names": ["r", "z"],
-        "semantics": "2d_meridional_rz",
-        "radial_axis_name": "r",
-        "axial_axis_name": "z",
-        "radial_axis_min_m": float(np.min(finite)) if finite.size else None,
-        "radial_axis_max_m": float(np.max(finite)) if finite.size else None,
-        "radial_axis_nonnegative": 1,
-        "r0_on_grid": int(bool(np.any(np.abs(axis_0) <= tol))),
-        "r0_detection_tolerance_m": float(tol),
-        "r0_axis_boundary_edge_count": int(len(edge_indices)),
-        "r0_axis_boundary_edge_indices": edge_indices,
-        "r0_axis_boundary_part_ids": part_ids,
-        "axis_boundary_policy": "report_only_collision_unchanged",
-        "collision_behavior": "unchanged",
-        "velocity_components": ["v_r", "v_z"],
-        "v_theta_dynamics": "out_of_scope",
-        "source_ring_weighting_policy": "not_applied_implicitly",
-        "ring_area_weight_formula": "2*pi*r",
-        "radial_ring_area_weight": _ring_weight_summary(axis_0),
-    }
+    edge_indices, part_ids = _axis_boundary_metadata(
+        boundary_edges,
+        boundary_edge_part_ids,
+        tol,
+    )
+    return _rz_report(axis_0, tol, edge_indices, part_ids)
 
 
-def axisymmetric_rz_report_from_metadata(metadata: Mapping[str, Any] | None) -> dict[str, Any]:
+def axisymmetric_rz_report_from_metadata(
+    metadata: Mapping[str, Any] | None,
+) -> dict[str, Any]:
     if not isinstance(metadata, Mapping):
         return {}
     report = metadata.get("axisymmetric_rz")

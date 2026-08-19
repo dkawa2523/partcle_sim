@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "particle-tracer-unified"
-version = "0.1.0"
+version = "0.2.0"
 description = "Particle trajectory solver for supplied 2D/3D fields and explicit boundary data"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -12,26 +12,39 @@ dependencies = [
   "numpy>=1.24",
   "pandas>=2.0",
   "PyYAML>=6.0",
-  "matplotlib>=3.7",
-  "numba>=0.58",
-  "scipy>=1.10"
+  "numba>=0.58"
 ]
 
+[project.optional-dependencies]
+viz = ["matplotlib>=3.7", "pillow>=10"]
+comsol-tools = []
+validation = ["scipy>=1.10"]
+
 [project.scripts]
-particle-tracer-run = "particle_tracer_unified.cli:main"
-particle-tracer-field-compare = "particle_tracer_unified.compare.field_compare:main"
-particle-tracer-acceleration-compare = "particle_tracer_unified.compare.acceleration_compare:main"
-particle-tracer-trajectory-compare = "particle_tracer_unified.compare.trajectory_compare:main"
-particle-tracer-boundary-compare = "particle_tracer_unified.compare.boundary_compare:main"
-particle-tracer-first-step-compare = "particle_tracer_unified.compare.first_step_compare:main"
-particle-tracer-near-wall-nohit = "particle_tracer_unified.compare.near_wall_nohit:main"
-particle-tracer-comsol-full-diagnostics = "particle_tracer_unified.compare.comsol_full_diagnostics:main"
-particle-tracer-build-comsol-case = "tools.build_comsol_case:main"
-particle-tracer-compare-reference = "tools.compare_against_reference:main"
-particle-tracer-collect-summaries = "tools.collect_run_summaries:main"
-particle-tracer-validate-artifacts = "tools.validate_comparison_artifacts:main"
-particle-tracer-export-visualizations = "tools.export_visualizations:main"
-particle-tracer-residual-gap-summary = "tools.summarize_comsol_residual_gap:main"
+particle-tracer = "particle_tracer_unified.cli:main"
+
+[dependency-groups]
+quality = [
+  "bandit>=1.8.6",
+  "detect-secrets>=1.5.0",
+  "diff-cover>=9.7.1",
+  "hypothesis>=6.138.0",
+  "import-linter>=2.3",
+  "matplotlib>=3.7",
+  "nox>=2025.5.1",
+  "pip-audit>=2.9.0",
+  "pillow>=10",
+  "pyrefly==1.2.0",
+  "pytest>=8.4",
+  "pytest-cov>=6.2",
+  "radon>=6.0.1",
+  "ruff>=0.12.8",
+  "scipy>=1.10",
+  "vulture>=2.14",
+]
+nightly = [
+  "mutmut>=3.3.1",
+]
 
 [tool.setuptools]
 include-package-data = true
@@ -39,3 +52,161 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["particle_tracer_unified*", "tools*"]
+
+[tool.uv]
+default-groups = ["quality"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+extend-exclude = [
+  ".git",
+  ".hypothesis",
+  ".mypy_cache",
+  ".nox",
+  ".pyrefly_cache",
+  ".quality-cache",
+  ".ruff_cache",
+  ".uv-cache",
+  ".uv-tools",
+  ".venv",
+  "mutants",
+]
+
+[tool.ruff.lint]
+select = [
+  "E4",
+  "E7",
+  "E9",
+  "E501",
+  "F",
+  "I",
+  "UP",
+  "B",
+  "SIM",
+  "C4",
+  "A",
+  "TID",
+  "PT",
+  "RUF",
+  "S",
+  "C90",
+]
+mccabe.max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+"quality_tools/**/*.py" = ["S603"]
+
+[tool.pyrefly]
+project-includes = [
+  "particle_tracer_unified/**/*.py",
+  "tools/**/*.py",
+  "validation/**/*.py",
+  "tests/**/*.py",
+]
+project-excludes = [
+  ".quality-cache/**",
+  ".venv/**",
+]
+search-path = [".", "tests"]
+python-version = "3.10"
+preset = "default"
+enabled-ignores = []
+baseline = ".quality/pyrefly-baseline.json"
+
+[tool.pytest.ini_options]
+addopts = ["-p", "no:cacheprovider"]
+
+[tool.coverage.run]
+branch = true
+source = ["particle_tracer_unified", "tools", "validation"]
+patch = ["subprocess"]
+omit = [
+  ".quality-cache/*",
+  "tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+precision = 4
+
+[tool.coverage.xml]
+output = ".quality/reports/coverage.xml"
+
+[tool.importlinter]
+root_packages = ["particle_tracer_unified"]
+include_external_packages = false
+exclude_type_checking_imports = false
+unmatched_ignore_imports_alerting = "error"
+
+[[tool.importlinter.contracts]]
+name = "Core must not depend on solver implementation"
+type = "forbidden"
+source_modules = ["particle_tracer_unified.core"]
+forbidden_modules = ["particle_tracer_unified.solvers"]
+ignore_imports = []
+
+[[tool.importlinter.contracts]]
+name = "Preflight must not depend on application orchestration"
+type = "forbidden"
+source_modules = [
+  "particle_tracer_unified.preflight",
+  "particle_tracer_unified.preflight_physics",
+  "particle_tracer_unified.preflight_types",
+]
+forbidden_modules = ["particle_tracer_unified.application"]
+
+[[tool.importlinter.contracts]]
+name = "Solvers must not depend on outer layers"
+type = "forbidden"
+source_modules = ["particle_tracer_unified.solvers"]
+forbidden_modules = [
+  "particle_tracer_unified.application",
+  "particle_tracer_unified.artifacts",
+  "particle_tracer_unified.cli",
+  "particle_tracer_unified.compare",
+  "particle_tracer_unified.comsol_case",
+  "particle_tracer_unified.configuration",
+  "particle_tracer_unified.io",
+  "particle_tracer_unified.migration",
+  "particle_tracer_unified.preflight",
+  "particle_tracer_unified.preflight_physics",
+  "particle_tracer_unified.preflight_types",
+  "particle_tracer_unified.providers",
+  "particle_tracer_unified.writer",
+]
+
+[[tool.importlinter.contracts]]
+name = "Domain and force configuration must not depend on runtime adapters"
+type = "forbidden"
+source_modules = [
+  "particle_tracer_unified.configuration",
+  "particle_tracer_unified._configuration_charge",
+  "particle_tracer_unified._configuration_core",
+  "particle_tracer_unified._configuration_document",
+  "particle_tracer_unified._configuration_inputs",
+  "particle_tracer_unified._configuration_physics",
+  "particle_tracer_unified.domain",
+  "particle_tracer_unified.force_models",
+]
+forbidden_modules = [
+  "particle_tracer_unified.application",
+  "particle_tracer_unified.cli",
+  "particle_tracer_unified.compare",
+  "particle_tracer_unified.comsol_case",
+  "particle_tracer_unified.io",
+  "particle_tracer_unified.migration",
+  "particle_tracer_unified.preflight",
+  "particle_tracer_unified.preflight_physics",
+  "particle_tracer_unified.preflight_types",
+  "particle_tracer_unified.providers",
+  "particle_tracer_unified.solvers",
+  "particle_tracer_unified.writer",
+]
+
+[tool.mutmut]
+paths_to_mutate = ["particle_tracer_unified/core/numerical_contracts.py"]
+tests_dir = ["tests/test_numerical_contracts_v02.py"]
+also_copy = ["pyproject.toml"]

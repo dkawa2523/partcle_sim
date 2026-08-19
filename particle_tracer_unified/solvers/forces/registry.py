@@ -1,132 +1,77 @@
+"""Resolve field bindings for an already-validated semantic force model."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Mapping
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Any
 
-from ...core.datamodel import TriangleMeshField2D
-from ...core.field_sampling import (
+from particle_tracer_unified.core.datamodel import TriangleMeshField2D
+from particle_tracer_unified.core.field_sampling import (
     choose_electric_field_quantity_names,
     choose_velocity_quantity_names,
 )
+from particle_tracer_unified.force_models import ForceModel, SemanticForce
+
+_OPTIONAL_FIELDS = {
+    "drag": ("rho_g", "mu", "T"),
+    "thermophoresis": ("rho_g", "mu"),
+    "lift": ("rho_g", "mu"),
+    "pressure_gradient": ("rho_g",),
+    "virtual_mass": ("rho_g",),
+}
 
 
-SUPPORTED_FORCE_NAMES = (
-    "drag",
-    "electric",
-    "gravity",
-    "brownian",
-    "thermophoresis",
-    "dielectrophoresis",
-    "lift",
-    "virtual_mass",
-    "pressure_gradient",
-)
+@dataclass(frozen=True, slots=True)
+class ForceBinding:
+    """Provider-specific fields bound to one semantic force definition."""
 
-_NON_DRAG_FORCE_NAMES = tuple(name for name in SUPPORTED_FORCE_NAMES if name != "drag")
-
-
-@dataclass(frozen=True)
-class ForceSpec:
-    name: str
-    enabled: bool
-    model: str
-    status: str
+    force: SemanticForce
     enabled_reason: str
     required_fields: tuple[str, ...] = ()
     optional_fields: tuple[str, ...] = ()
-    field_sources: dict[str, str] = field(default_factory=dict)
-    config: dict[str, Any] = field(default_factory=dict)
+    field_sources: tuple[tuple[str, str], ...] = ()
+
+    @property
+    def name(self) -> str:
+        return self.force.name
+
+    @property
+    def enabled(self) -> bool:
+        return bool(
+            self.force.enabled
+            and not (self.force.name == "drag" and self.force.model == "none")
+        )
+
+    @property
+    def model(self) -> str:
+        return self.force.model
+
+    @property
+    def status(self) -> str:
+        return self.force.status
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ForceCatalog:
-    specs: tuple[ForceSpec, ...]
+    model: ForceModel
+    bindings: tuple[ForceBinding, ...]
 
-    def by_name(self) -> dict[str, ForceSpec]:
-        return {spec.name: spec for spec in self.specs}
+    def by_name(self) -> dict[str, ForceBinding]:
+        return {binding.name: binding for binding in self.bindings}
 
     def enabled(self, name: str) -> bool:
-        spec = self.by_name().get(str(name))
-        return bool(spec.enabled) if spec is not None else False
+        binding = self.by_name().get(str(name))
+        return bool(binding.enabled) if binding is not None else False
 
-    def model(self, name: str, default: str = "") -> str:
-        spec = self.by_name().get(str(name))
-        return str(spec.model) if spec is not None and spec.model else str(default)
+    def enabled_names(self) -> tuple[str, ...]:
+        """Return semantic forces enabled by the validated model."""
 
+        return tuple(binding.name for binding in self.bindings if binding.enabled)
 
-def _as_mapping(value: object) -> Mapping[str, Any]:
-    return value if isinstance(value, Mapping) else {}
-
-
-def _bool(value: object, *, default: bool = False) -> bool:
-    if value is None:
-        return bool(default)
-    if isinstance(value, str):
-        text = value.strip().lower()
-        if text in {"1", "true", "yes", "on"}:
-            return True
-        if text in {"0", "false", "no", "off"}:
-            return False
-    return bool(value)
-
-
-def _force_cfg(solver_cfg: Mapping[str, Any], name: str) -> Mapping[str, Any]:
-    forces = _as_mapping(solver_cfg.get("forces", {}))
-    cfg = forces.get(name, {})
-    if cfg is None:
-        return {}
-    if isinstance(cfg, (bool, int, str)):
-        return {"enabled": cfg}
-    if not isinstance(cfg, Mapping):
-        raise ValueError(f"solver.forces.{name} must be a mapping or boolean")
-    return cfg
-
-
-def _force_is_configured(solver_cfg: Mapping[str, Any], name: str) -> bool:
-    forces = _as_mapping(solver_cfg.get("forces", {}))
-    return str(name) in {str(key) for key in forces.keys()}
-
-
-def _validate_known_force_names(solver_cfg: Mapping[str, Any]) -> None:
-    forces = _as_mapping(solver_cfg.get("forces", {}))
-    unknown = sorted(str(name) for name in forces.keys() if str(name) not in SUPPORTED_FORCE_NAMES)
-    if unknown:
-        raise ValueError(f"unknown solver.forces entries: {', '.join(unknown)}")
-
-
-def apply_manifest_force_inventory_to_solver_config(
-    solver_cfg: dict[str, Any],
-    manifest_forces: tuple[Mapping[str, Any], ...],
-) -> None:
-    forces_cfg = solver_cfg.setdefault("forces", {})
-    if not isinstance(forces_cfg, dict):
-        raise ValueError("solver.forces must be a mapping in COMSOL faithful mode")
-    listed_names: set[str] = set()
-    for force in manifest_forces:
-        solver_force = str(force.get("solver_force", "")).strip().lower()
-        if not solver_force:
-            continue
-        enabled = _bool(force.get("enabled", True), default=True)
-        listed_names.add(solver_force)
-        existing = forces_cfg.get(solver_force, {})
-        cfg = dict(existing if isinstance(existing, Mapping) else {})
-        cfg["enabled"] = bool(enabled)
-        if solver_force == "drag":
-            law = str(force.get("law", "")).strip().lower()
-            if not law:
-                raise ValueError("COMSOL faithful drag force must specify law in manifest")
-            cfg["model"] = law
-            solver_cfg["drag_model"] = law
-        forces_cfg[solver_force] = cfg
-    for name in _NON_DRAG_FORCE_NAMES:
-        if name in listed_names:
-            continue
-        existing = forces_cfg.get(name, {})
-        cfg = dict(existing if isinstance(existing, Mapping) else {})
-        cfg["enabled"] = False
-        forces_cfg[name] = cfg
-    if "drag" not in listed_names:
-        forces_cfg["drag"] = {"enabled": False}
+    def force_model_name(self, name: str, default: str = "") -> str:
+        binding = self.by_name().get(str(name))
+        return binding.model if binding is not None else str(default)
 
 
 def _field_quantities(field_provider: object) -> set[str]:
@@ -134,11 +79,9 @@ def _field_quantities(field_provider: object) -> set[str]:
         return set()
     field = getattr(field_provider, "field", None)
     quantities = getattr(field, "quantities", {})
-    return {str(name) for name in quantities.keys()} if isinstance(quantities, Mapping) else set()
-
-
-def _field_source_map(names: tuple[str, ...]) -> dict[str, str]:
-    return {name: f"field:{name}" for name in names}
+    return (
+        {str(name) for name in quantities} if isinstance(quantities, Mapping) else set()
+    )
 
 
 def _field_quantity_pair(
@@ -147,243 +90,128 @@ def _field_quantity_pair(
     y_candidates: tuple[str, ...],
 ) -> tuple[str, ...]:
     quantities = _field_quantities(field_provider)
-    x_name = next((str(name) for name in x_candidates if str(name) in quantities), "")
-    y_name = next((str(name) for name in y_candidates if str(name) in quantities), "")
+    x_name = next((name for name in x_candidates if name in quantities), "")
+    y_name = next((name for name in y_candidates if name in quantities), "")
     return (x_name, y_name) if x_name and y_name else ()
 
 
 def _electric_names(field_provider: object, spatial_dim: int) -> tuple[str, ...]:
-    if field_provider is None:
-        return ()
     field = getattr(field_provider, "field", None)
-    if field is None:
-        return ()
-    return tuple(choose_electric_field_quantity_names(field, int(spatial_dim)))
-
-
-def _velocity_names(field_provider: object, spatial_dim: int) -> tuple[str, ...]:
-    if field_provider is None:
-        return ()
-    field = getattr(field_provider, "field", None)
-    if field is None:
-        return ()
-    return tuple(choose_velocity_quantity_names(field, int(spatial_dim)))
-
-
-def _enabled_from_cfg(cfg: Mapping[str, Any], *, default: bool) -> bool:
-    return _bool(cfg.get("enabled", default), default=default)
-
-
-def _optional_spec(
-    name: str,
-    cfg: Mapping[str, Any],
-    *,
-    model_default: str,
-    enabled_reason: str,
-    required_fields: tuple[str, ...],
-    optional_fields: tuple[str, ...] = (),
-) -> ForceSpec:
-    enabled = _enabled_from_cfg(cfg, default=False)
-    return ForceSpec(
-        name=name,
-        enabled=enabled,
-        model=str(cfg.get("model", model_default)).strip() or str(model_default),
-        status="implemented",
-        enabled_reason=str(enabled_reason),
-        required_fields=required_fields if enabled else (),
-        optional_fields=optional_fields,
-        field_sources=_field_source_map(required_fields if enabled else ()),
-        config=dict(cfg),
+    return (
+        ()
+        if field is None
+        else tuple(choose_electric_field_quantity_names(field, spatial_dim))
     )
 
 
-def build_force_catalog(
-    config_payload: Mapping[str, Any],
-    *,
-    field_provider: object = None,
-    spatial_dim: int = 2,
-) -> ForceCatalog:
-    config = config_payload if isinstance(config_payload, Mapping) else {}
-    solver_cfg = _as_mapping(config.get("solver", {}))
-    _validate_known_force_names(solver_cfg)
-    available_quantities = _field_quantities(field_provider)
+def _velocity_names(field_provider: object, spatial_dim: int) -> tuple[str, ...]:
+    field = getattr(field_provider, "field", None)
+    return (
+        ()
+        if field is None
+        else tuple(choose_velocity_quantity_names(field, spatial_dim))
+    )
 
-    drag_cfg = _force_cfg(solver_cfg, "drag")
-    drag_enabled = _enabled_from_cfg(drag_cfg, default=True)
-    if not drag_enabled:
-        raise ValueError("solver.forces.drag.enabled=false is not supported by the current drag-relaxation solver")
-    drag_model = str(drag_cfg.get("model", solver_cfg.get("drag_model", "stokes"))).strip().lower()
-    velocity_names = _velocity_names(field_provider, spatial_dim)
-    fluid_accel_names = _field_quantity_pair(
+
+def _required_fields(
+    field_provider: object, spatial_dim: int
+) -> dict[str, tuple[str, ...]]:
+    available = _field_quantities(field_provider)
+    velocity = _velocity_names(field_provider, spatial_dim)
+    electric = _electric_names(field_provider, spatial_dim)
+    fluid_acceleration = _field_quantity_pair(
         field_provider,
         ("fluid_accel_x", "fluid_acceleration_x", "material_accel_x", "a_fluid_x"),
         ("fluid_accel_y", "fluid_acceleration_y", "material_accel_y", "a_fluid_y"),
     )
     field = getattr(field_provider, "field", None)
-    pressure_gradient_fields = velocity_names
-    if not pressure_gradient_fields and isinstance(field, TriangleMeshField2D):
-        pressure_gradient_fields = fluid_accel_names
-
-    electric_cfg = _force_cfg(solver_cfg, "electric")
-    electric_configured = _force_is_configured(solver_cfg, "electric")
-    electric_names = _electric_names(field_provider, spatial_dim)
-    electric_default = bool(electric_names)
-    electric_enabled = _enabled_from_cfg(electric_cfg, default=electric_default)
-    if electric_enabled and not electric_names:
-        raise ValueError("solver.forces.electric is enabled but no electric field quantity was found")
-
-    gravity_cfg = _force_cfg(solver_cfg, "gravity")
-    gravity_configured = _force_is_configured(solver_cfg, "gravity")
-    has_legacy_gravity = "gravity_mps2" in solver_cfg or "body_acceleration" in solver_cfg
-    gravity_enabled = _enabled_from_cfg(gravity_cfg, default=bool(has_legacy_gravity))
-
-    brownian_cfg = _force_cfg(solver_cfg, "brownian")
-    brownian_configured = _force_is_configured(solver_cfg, "brownian")
-    stochastic_cfg = solver_cfg.get("stochastic_motion", {})
-    brownian_default = _bool(_as_mapping(stochastic_cfg).get("enabled", False), default=False) if isinstance(stochastic_cfg, Mapping) else _bool(stochastic_cfg, default=False)
-    brownian_enabled = _enabled_from_cfg(brownian_cfg, default=brownian_default)
-
-    specs = [
-        ForceSpec(
-            name="drag",
-            enabled=True,
-            model=drag_model,
-            status="implemented",
-            enabled_reason="required_solver",
-            required_fields=velocity_names,
-            optional_fields=("rho_g", "mu", "T"),
-            field_sources=_field_source_map(velocity_names),
-            config=dict(drag_cfg),
-        ),
-        ForceSpec(
-            name="electric",
-            enabled=bool(electric_enabled),
-            model=str(electric_cfg.get("model", "particle_charge")).strip() or "particle_charge",
-            status="implemented",
-            enabled_reason=(
-                "explicit_config"
-                if electric_configured
-                else "field_default"
-                if electric_default
-                else "default_false"
-            ),
-            required_fields=electric_names if electric_enabled else (),
-            field_sources=_field_source_map(electric_names if electric_enabled else ()),
-            config=dict(electric_cfg),
-        ),
-        ForceSpec(
-            name="gravity",
-            enabled=bool(gravity_enabled),
-            model="constant_acceleration",
-            status="implemented",
-            enabled_reason=(
-                "explicit_config"
-                if gravity_configured
-                else "legacy_solver_config"
-                if has_legacy_gravity
-                else "default_false"
-            ),
-            field_sources={"gravity": "constant_config"} if gravity_enabled else {},
-            config=dict(gravity_cfg),
-        ),
-        ForceSpec(
-            name="brownian",
-            enabled=bool(brownian_enabled),
-            model=str(brownian_cfg.get("model", "underdamped_langevin")).strip() or "underdamped_langevin",
-            status="implemented",
-            enabled_reason=(
-                "explicit_config"
-                if brownian_configured
-                else "stochastic_motion_default"
-                if brownian_default
-                else "default_false"
-            ),
-            optional_fields=("T",),
-            field_sources={"T": "field:T_then_gas"} if brownian_enabled and "T" in _field_quantities(field_provider) else {},
-            config=dict(brownian_cfg),
-        ),
-        _optional_spec(
-            "thermophoresis",
-            _force_cfg(solver_cfg, "thermophoresis"),
-            model_default="talbot",
-            enabled_reason="explicit_config" if _force_is_configured(solver_cfg, "thermophoresis") else "default_false",
-            required_fields=("T",) if "T" in available_quantities else (),
-            optional_fields=("rho_g", "mu"),
-        ),
-        _optional_spec(
-            "dielectrophoresis",
-            _force_cfg(solver_cfg, "dielectrophoresis"),
-            model_default="dc",
-            enabled_reason="explicit_config" if _force_is_configured(solver_cfg, "dielectrophoresis") else "default_false",
-            required_fields=electric_names,
-        ),
-        _optional_spec(
-            "lift",
-            _force_cfg(solver_cfg, "lift"),
-            model_default="saffman",
-            enabled_reason="explicit_config" if _force_is_configured(solver_cfg, "lift") else "default_false",
-            required_fields=velocity_names,
-            optional_fields=("rho_g", "mu"),
-        ),
-        _optional_spec(
-            "pressure_gradient",
-            _force_cfg(solver_cfg, "pressure_gradient"),
-            model_default="fluid_material_acceleration",
-            enabled_reason="explicit_config" if _force_is_configured(solver_cfg, "pressure_gradient") else "default_false",
-            required_fields=pressure_gradient_fields,
-            optional_fields=("rho_g",),
-        ),
-        _optional_spec(
-            "virtual_mass",
-            _force_cfg(solver_cfg, "virtual_mass"),
-            model_default="particle_material_acceleration",
-            enabled_reason="explicit_config" if _force_is_configured(solver_cfg, "virtual_mass") else "default_false",
-            required_fields=velocity_names,
-            optional_fields=("rho_g",),
-        ),
-    ]
-    for spec in specs:
-        if (
-            bool(spec.enabled)
-            and spec.name in {"thermophoresis", "dielectrophoresis", "lift", "pressure_gradient", "virtual_mass"}
-            and not spec.required_fields
-        ):
-            raise ValueError(f"solver.forces.{spec.name} is enabled but required field quantities were not found")
-    return ForceCatalog(specs=tuple(specs))
+    pressure_fields = (
+        fluid_acceleration
+        if not velocity and isinstance(field, TriangleMeshField2D)
+        else velocity
+    )
+    return {
+        "drag": velocity,
+        "electric": electric,
+        "gravity": (),
+        "thermophoresis": ("T",) if "T" in available else (),
+        "dielectrophoresis": electric,
+        "lift": velocity,
+        "pressure_gradient": pressure_fields,
+        "virtual_mass": velocity,
+    }
 
 
-def solver_cfg_with_force_overrides(solver_cfg: Mapping[str, Any], catalog: ForceCatalog | None) -> dict[str, Any]:
-    out = dict(solver_cfg)
-    if catalog is None:
-        return out
-    by_name = catalog.by_name()
-    drag = by_name.get("drag")
-    if drag is not None and drag.model:
-        out["drag_model"] = drag.model
-    gravity = by_name.get("gravity")
-    if gravity is not None and not gravity.enabled:
-        out.pop("gravity_mps2", None)
-        out["body_acceleration"] = []
-    brownian = by_name.get("brownian")
-    if brownian is not None and brownian.config:
-        cfg = dict(brownian.config)
-        cfg["enabled"] = bool(brownian.enabled)
-        out["stochastic_motion"] = cfg
-    return out
+def _bind_force(
+    force: SemanticForce,
+    required_fields: tuple[str, ...],
+    declared: frozenset[str],
+) -> ForceBinding:
+    active = force.enabled and not (force.name == "drag" and force.model == "none")
+    required = required_fields if active else ()
+    reason = "explicit_config" if force.name in declared else "default_false"
+    if force.name == "drag" and not force.enabled:
+        reason = "explicit_none"
+    return ForceBinding(
+        force=force,
+        enabled_reason=reason,
+        required_fields=required,
+        optional_fields=_OPTIONAL_FIELDS.get(force.name, ()) if active else (),
+        field_sources=tuple((name, f"field:{name}") for name in required),
+    )
+
+
+def resolve_force_catalog(
+    model: ForceModel,
+    *,
+    field_provider: object = None,
+    spatial_dim: int = 2,
+) -> ForceCatalog:
+    """Bind provider quantities without changing force laws or coefficients."""
+
+    if not isinstance(model, ForceModel):
+        raise TypeError("resolve_force_catalog requires a typed ForceModel")
+    required = _required_fields(field_provider, int(spatial_dim))
+    bindings = tuple(
+        _bind_force(force, required[force.name], model.declared)
+        for force in model.definitions()
+    )
+    return ForceCatalog(model=model, bindings=bindings)
+
+
+def _field_summary(
+    bindings: tuple[ForceBinding, ...], attribute: str, *, sources: bool = False
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for item in bindings:
+        values = getattr(item, attribute)
+        if values:
+            result[item.name] = dict(values) if sources else list(values)
+    return result
+
+
+def _binding_summary(bindings: tuple[ForceBinding, ...]) -> dict[str, Any]:
+    return {
+        "enabled_forces": [item.name for item in bindings if item.enabled],
+        "disabled_forces": [item.name for item in bindings if not item.enabled],
+        "force_status": {item.name: item.status for item in bindings},
+        "force_models": {item.name: item.model for item in bindings},
+        "force_enabled_reason": {item.name: item.enabled_reason for item in bindings},
+        "force_required_fields": _field_summary(bindings, "required_fields"),
+        "force_optional_fields": _field_summary(bindings, "optional_fields"),
+        "force_field_sources": _field_summary(bindings, "field_sources", sources=True),
+    }
 
 
 def force_catalog_summary(catalog: ForceCatalog | None) -> dict[str, Any]:
     if catalog is None:
         return {"has_force_catalog": False}
-    specs = catalog.specs
-    return {
-        "has_force_catalog": True,
-        "enabled_forces": [spec.name for spec in specs if spec.enabled],
-        "disabled_forces": [spec.name for spec in specs if not spec.enabled],
-        "force_status": {spec.name: spec.status for spec in specs},
-        "force_models": {spec.name: spec.model for spec in specs if spec.model},
-        "force_enabled_reason": {spec.name: spec.enabled_reason for spec in specs},
-        "force_required_fields": {spec.name: list(spec.required_fields) for spec in specs if spec.required_fields},
-        "force_optional_fields": {spec.name: list(spec.optional_fields) for spec in specs if spec.optional_fields},
-        "force_field_sources": {spec.name: dict(spec.field_sources) for spec in specs if spec.field_sources},
-    }
+    return {"has_force_catalog": True, **_binding_summary(catalog.bindings)}
+
+
+__all__ = (
+    "ForceBinding",
+    "ForceCatalog",
+    "force_catalog_summary",
+    "resolve_force_catalog",
+)
