@@ -1,0 +1,43 @@
+name: quality-nightly
+
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-nightly:
+    name: quality-nightly
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+      - name: Install locked nightly environment
+        run: uv sync --frozen --group quality --group nightly
+      - name: Run nightly quality gate
+        env:
+          QUALITY_DIFF_BASE: HEAD^
+        run: uv run --frozen nox -s quality-nightly
+      - name: Upload nightly evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quality-nightly-reports
+          path: |
+            .quality/reports/
+            mutants/
+          if-no-files-found: warn

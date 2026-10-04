@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "captured_before_source_changes": true,
+  "environment": {
+    "python": "3.12.13",
+    "repository_has_git_metadata": false
+  },
+  "pytest": {
+    "passed": 552
+  },
+  "coverage": {
+    "all_python_branch_percent": 67.92477135128172,
+    "package_branch_percent": 77.7556705,
+    "all_python": {
+      "statements": 17341,
+      "covered_lines": 12399,
+      "branches": 5948,
+      "covered_branches": 3420
+    }
+  },
+  "ruff": {
+    "candidate_diagnostics": 4484,
+    "unformatted_files": 139,
+    "python_files": 153,
+    "c901_over_10": 64,
+    "maximum_complexity": 77
+  },
+  "pyrefly": {
+    "version": "1.2.0",
+    "preset": "default",
+    "diagnostics": 532
+  },
+  "radon": {
+    "functions_over_10": 171,
+    "maximum_complexity": 77
+  },
+  "imports": {
+    "cycles": 2
+  },
+  "bandit": {
+    "medium_or_high": 0,
+    "low_b101": 4
+  },
+  "pip_audit": {
+    "known_vulnerabilities": 0
+  },
+  "vulture": {
+    "candidates": 2,
+    "disposition": "Protocol parameter contract"
+  },
+  "secrets": {
+    "candidates": 2,
+    "disposition": "data/assets.yaml SHA-256 asset ledger values"
+  }
+}

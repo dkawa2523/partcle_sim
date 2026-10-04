@@ -7,3 +7,6 @@ __pycache__/
 .artifacts/
 .tmp_*/
 *.partial/
+
+# Local producer audit may contain host and licensed-install details
+/evidence/m3v/comsol_model_audit.txt

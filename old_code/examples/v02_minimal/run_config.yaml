@@ -1,0 +1,35 @@
+schema_version: 2
+case:
+  spatial_dim: 2
+  coordinate_system: cartesian_xy
+  adapter: native
+inputs:
+  particles: particles.csv
+  boundaries: boundaries.csv
+  geometry:
+    kind: box
+    parameters:
+      bounds: [-1.0, 1.0, -1.0, 1.0]
+      grid_shape: [41, 41]
+      boundary_part_ids: [10, 20, 20, 10]
+  field:
+    kind: linear_shear
+    parameters:
+      shear_rate: 1.0
+      dynamic_viscosity_Pas: 1.8e-5
+      time_mode: steady
+physics:
+  drag:
+    model: stokes
+  gas:
+    temperature_K: 300.0
+    dynamic_viscosity_Pas: 1.8e-5
+    density_kgm3: 1.2
+    molecular_mass_amu: 39.948
+  forces: {}
+  seed: 12345
+time:
+  dt: 0.01
+  t_end: 0.05
+output:
+  mode: standard
