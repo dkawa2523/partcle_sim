@@ -1,0 +1,3488 @@
+{
+  "benchmark": "p14u_representative_utility_v1",
+  "captured_at_utc": "2026-09-28T23:48:43.499417+00:00",
+  "conditions": {
+    "absolute_seconds_are_gating": false,
+    "execution_mode": "single-thread compiled CPU",
+    "harness_input_generation_uses_canonical_writer": true,
+    "harness_uses_test_only_artifact_helpers": true,
+    "memory_limit_mb": 8192,
+    "performance_particle_counts": [
+      10000,
+      100000,
+      1000000
+    ],
+    "performance_repeats_per_mode": 3,
+    "release_gate_complete": true,
+    "release_gate_reason": "complete canonical 10k/100k/1M matrix with three fresh-process repeats",
+    "rss_note": "peak RSS is a process-lifetime high-water mark; additional high-water is max(0, peak_after - peak_before), not instantaneous allocation",
+    "solver_execution_uses_only_public_api": true
+  },
+  "decisions": {
+    "parallelism": "P14-P closed internal multithreading negatively; P14-U measures the one serial engine and does not reopen scheduler design",
+    "profile_interpretation": "owner-specific optimization conclusions are withheld when runtime_or_dependency is the largest self-time owner",
+    "rz_parity": "radial zero and standard-gravity radial zero are solver invariants; scalar/axial smooth parity is an external producer-quality audit because one-sided r>=0 samples cannot prove the underlying continuation",
+    "surface_source": "this Cartesian XY line_length workload validates edge_fraction and uniform sampling on one line source group; it does not validate RZ revolved_area sampling or justify a realized-surface-table format"
+  },
+  "machine": {
+    "chamber_particles": "0.1.0.dev0",
+    "h5py": "3.16.0",
+    "logical_cpu_count": 20,
+    "machine": "AMD64",
+    "numpy": "2.5.3",
+    "peak_rss_source": "Windows GetProcessMemoryInfo",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.13",
+    "uv_lock_sha256": "sha256:e6fb37a4ad1ea2438d6ec4795c1b4b158160efcd989f2d398864edb4451ee839"
+  },
+  "performance": {
+    "median_observations": [
+      {
+        "additional_process_high_water_bytes": 36098048,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 312553472.0,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 56019.54227657272,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 343556096,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_count": 3,
+        "result_artifact_bytes": 5399774,
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 90000,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 1010000,
+            "safety_margin": 11016772,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99150944
+          },
+          "planned_bytes": 99150944,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.014066900126636028,
+          "open_result": 0.05614860006608069,
+          "public_end_to_end": 5.782094499794766,
+          "simulate": 5.712292300071567
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 36499456,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 312156160.0,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 60043.67088772512,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 344211456,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_count": 3,
+        "result_artifact_bytes": 5614618,
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 92048,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 1010000,
+            "safety_margin": 11017261,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99155345
+          },
+          "planned_bytes": 99155345,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.011729400139302015,
+          "open_result": 0.04133130004629493,
+          "public_end_to_end": 5.381160800112411,
+          "simulate": 5.329454299993813
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 248451072,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 313704448.0,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 60122.58167741567,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 556818432,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_count": 3,
+        "result_artifact_bytes": 48273909,
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 900000,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 10100000,
+            "safety_margin": 42007318,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378065858
+          },
+          "planned_bytes": 378065858,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.00936969998292625,
+          "open_result": 0.3124724000226706,
+          "public_end_to_end": 53.54643819993362,
+          "simulate": 53.224593999795616
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 248250368,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 313810944.0,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 59498.019744109646,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 555503616,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_count": 3,
+        "result_artifact_bytes": 48488753,
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 902048,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 10100000,
+            "safety_margin": 42007807,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378070259
+          },
+          "planned_bytes": 378070259,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.01103929989039898,
+          "open_result": 0.3638400000054389,
+          "public_end_to_end": 54.164156100014225,
+          "simulate": 53.783302600029856
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 491184128,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 325447680.0,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 58135.97355890881,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 799686656,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_count": 3,
+        "result_artifact_bytes": 477203239,
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9000000,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 101000000,
+            "safety_margin": 71594818,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644353358
+          },
+          "planned_bytes": 644353358,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.011382099939510226,
+          "open_result": 3.3271314001176506,
+          "public_end_to_end": 553.772232899908,
+          "simulate": 550.4337166999467
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 495013888,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 325742592.0,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 59930.34358718093,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 803532800,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_count": 3,
+        "result_artifact_bytes": 477418083,
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9002048,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 101000000,
+            "safety_margin": 71595307,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644357759
+          },
+          "planned_bytes": 644357759,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.010234299814328551,
+          "open_result": 3.647552700014785,
+          "public_end_to_end": 537.611011599889,
+          "simulate": 533.9532210999168
+        }
+      }
+    ],
+    "profile": {
+      "algorithm_revisions": {
+        "boundary_algorithm_revision": "point_wall_laws_v4",
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+        "engine_algorithm_revision": "deterministic_particle_engine_v27",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+        "exponential_midpoint_enclosure_revision": null,
+        "exponential_midpoint_revision": null,
+        "field_location_revision": "field_location_v3",
+        "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+        "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+        "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+        "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+        "result_algorithm_revision": "durable_segmented_result_v3",
+        "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+        "rng_algorithm_revision": "philox4x32_10_v1",
+        "source_algorithm_revision": "table_surface_schedule_v1",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+      },
+      "boundary_interactions": {
+        "axis_crossings": 0,
+        "residual_splits": 0,
+        "wall_events": 1000000
+      },
+      "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+      "event_work": {
+        "accepted_particle_pieces": 46323043,
+        "candidate_queries": 72124695,
+        "maximum_refinement_depth": 40,
+        "refinements": 25801652
+      },
+      "largest_self_time_owner": "events",
+      "operation": "separate_untimed_profile",
+      "output_mode": "none",
+      "output_utility": {
+        "exact_requested_ids_and_times": true,
+        "probe_frames": 0,
+        "probe_rows": 0,
+        "release_events": 1000000,
+        "target_stick_events": 1000000
+      },
+      "owner_specific_conclusion_allowed": true,
+      "particle_count": 1000000,
+      "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "profile_owner_self_seconds": {
+        "api": 0.011337700000000001,
+        "boundaries": 0.31753000000000003,
+        "case_format": 3.28e-05,
+        "cpu": 0.0297443,
+        "engine": 62.87895129999999,
+        "events": 153.23567620000003,
+        "fields": 142.72308029999996,
+        "geometry": 23.030099800000002,
+        "integrators": 62.363880400000006,
+        "output": 2.3425570999999996,
+        "physics": 23.67949389999999,
+        "rng": 0.0714327,
+        "runtime_or_dependency": 62.27391450000002,
+        "sources": 0.10442580000000001
+      },
+      "profile_top_functions": {
+        "top_by_cumulative_seconds": [
+          {
+            "cumulative_seconds": 534.9277696,
+            "function": "simulate",
+            "line": 40,
+            "primitive_calls": 1,
+            "self_seconds": 0.011337700000000001,
+            "source": "chamber_particles/api.py",
+            "total_calls": 1
+          },
+          {
+            "cumulative_seconds": 534.9164319,
+            "function": "run_simulation",
+            "line": 565,
+            "primitive_calls": 1,
+            "self_seconds": 0.0012597,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 1
+          },
+          {
+            "cumulative_seconds": 533.6579389,
+            "function": "_advance_active_slabs",
+            "line": 955,
+            "primitive_calls": 32,
+            "self_seconds": 0.0030836,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 32
+          },
+          {
+            "cumulative_seconds": 533.6528647,
+            "function": "run_slab",
+            "line": 983,
+            "primitive_calls": 496,
+            "self_seconds": 0.3146643,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 496
+          },
+          {
+            "cumulative_seconds": 533.3382004,
+            "function": "_advance_particle_slab",
+            "line": 1013,
+            "primitive_calls": 496,
+            "self_seconds": 0.1363413,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 496
+          },
+          {
+            "cumulative_seconds": 450.32061960000004,
+            "function": "_advance_macro_proposal",
+            "line": 1094,
+            "primitive_calls": 496,
+            "self_seconds": 1.7868116,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 496
+          },
+          {
+            "cumulative_seconds": 448.52470910000005,
+            "function": "_advance_curved_events",
+            "line": 1951,
+            "primitive_calls": 496,
+            "self_seconds": 2.127281,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 496
+          },
+          {
+            "cumulative_seconds": 204.04996060000002,
+            "function": "_build_step_proposal",
+            "line": 1503,
+            "primitive_calls": 2233,
+            "self_seconds": 0.0148435,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 204.0135564,
+            "function": "rk4_step",
+            "line": 268,
+            "primitive_calls": 2233,
+            "self_seconds": 0.11011580000000001,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 199.2849735,
+            "function": "_locate_curved_wave_batches",
+            "line": 2277,
+            "primitive_calls": 3904,
+            "self_seconds": 9.7826886,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 3904
+          },
+          {
+            "cumulative_seconds": 197.97871270000002,
+            "function": "_build_curved_rows",
+            "line": 1912,
+            "primitive_calls": 1737,
+            "self_seconds": 0.0078565,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 1737
+          },
+          {
+            "cumulative_seconds": 190.0971547,
+            "function": "_advance_with_initial_status",
+            "line": 1102,
+            "primitive_calls": 2233,
+            "self_seconds": 0.0194122,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 190.06669670000002,
+            "function": "_advance",
+            "line": 1050,
+            "primitive_calls": 2233,
+            "self_seconds": 0.1463122,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 189.9203845,
+            "function": "_advance_rk4",
+            "line": 1727,
+            "primitive_calls": 2233,
+            "self_seconds": 3.688397,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 167.8983684,
+            "function": "_evaluate_active_dynamics",
+            "line": 1188,
+            "primitive_calls": 11165,
+            "self_seconds": 0.138123,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 11165
+          },
+          {
+            "cumulative_seconds": 167.2184417,
+            "function": "__call__",
+            "line": 409,
+            "primitive_calls": 11165,
+            "self_seconds": 0.055124400000000004,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 11165
+          },
+          {
+            "cumulative_seconds": 167.1405766,
+            "function": "_evaluate_stage",
+            "line": 474,
+            "primitive_calls": 11165,
+            "self_seconds": 0.8395265000000001,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 11165
+          },
+          {
+            "cumulative_seconds": 147.3920143,
+            "function": "sample_batch",
+            "line": 267,
+            "primitive_calls": 11165,
+            "self_seconds": 0.4864854,
+            "source": "chamber_particles/fields.py",
+            "total_calls": 11165
+          },
+          {
+            "cumulative_seconds": 138.9291648,
+            "function": "_advance_positive_rk4",
+            "line": 1788,
+            "primitive_calls": 2233,
+            "self_seconds": 10.613280900000001,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 131.21880910000002,
+            "function": "_locate_field_stage",
+            "line": 349,
+            "primitive_calls": 11165,
+            "self_seconds": 0.0931202,
+            "source": "chamber_particles/fields.py",
+            "total_calls": 11165
+          }
+        ],
+        "top_by_self_seconds": [
+          {
+            "cumulative_seconds": 130.1133857,
+            "function": "_locate_field_rows",
+            "line": 398,
+            "primitive_calls": 11165,
+            "self_seconds": 130.1119439,
+            "source": "chamber_particles/fields.py",
+            "total_calls": 11165
+          },
+          {
+            "cumulative_seconds": 116.96237780000001,
+            "function": "_prepare_curved_path_batch",
+            "line": 1055,
+            "primitive_calls": 3904,
+            "self_seconds": 114.46590870000001,
+            "source": "chamber_particles/events.py",
+            "total_calls": 3904
+          },
+          {
+            "cumulative_seconds": 36.5524257,
+            "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+            "line": 0,
+            "primitive_calls": 2650458,
+            "self_seconds": 36.5524257,
+            "source": "~",
+            "total_calls": 2650458
+          },
+          {
+            "cumulative_seconds": 115.4574075,
+            "function": "locate_curved_first_event_batch",
+            "line": 909,
+            "primitive_calls": 1952,
+            "self_seconds": 36.4316787,
+            "source": "chamber_particles/events.py",
+            "total_calls": 1952
+          },
+          {
+            "cumulative_seconds": 19.0939003,
+            "function": "_upper_product_batch",
+            "line": 848,
+            "primitive_calls": 29029,
+            "self_seconds": 13.029013,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 29029
+          },
+          {
+            "cumulative_seconds": 12.8987025,
+            "function": "<method 'copy' of 'numpy.ndarray' objects>",
+            "line": 0,
+            "primitive_calls": 3186347,
+            "self_seconds": 12.8987025,
+            "source": "~",
+            "total_calls": 3186347
+          },
+          {
+            "cumulative_seconds": 12.0252741,
+            "function": "_bounded_event_row_stop",
+            "line": 4014,
+            "primitive_calls": 1952,
+            "self_seconds": 12.0252741,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 1952
+          },
+          {
+            "cumulative_seconds": 11.241237900000002,
+            "function": "_sample_compiled_rows",
+            "line": 501,
+            "primitive_calls": 55825,
+            "self_seconds": 11.234339100000001,
+            "source": "chamber_particles/fields.py",
+            "total_calls": 55825
+          },
+          {
+            "cumulative_seconds": 11.076936,
+            "function": "points_inside_volume",
+            "line": 1061,
+            "primitive_calls": 1968,
+            "self_seconds": 11.06649,
+            "source": "chamber_particles/geometry.py",
+            "total_calls": 1968
+          },
+          {
+            "cumulative_seconds": 138.9291648,
+            "function": "_advance_positive_rk4",
+            "line": 1788,
+            "primitive_calls": 2233,
+            "self_seconds": 10.613280900000001,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 199.2849735,
+            "function": "_locate_curved_wave_batches",
+            "line": 2277,
+            "primitive_calls": 3904,
+            "self_seconds": 9.7826886,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 3904
+          },
+          {
+            "cumulative_seconds": 13.558066100000001,
+            "function": "linear_drag_acceleration_abs_upper_batch",
+            "line": 385,
+            "primitive_calls": 8932,
+            "self_seconds": 8.575747400000001,
+            "source": "chamber_particles/physics/forces.py",
+            "total_calls": 8932
+          },
+          {
+            "cumulative_seconds": 17.448249,
+            "function": "_commit_curved_wall_row",
+            "line": 2951,
+            "primitive_calls": 1000000,
+            "self_seconds": 6.6373229,
+            "source": "chamber_particles/engine.py",
+            "total_calls": 1000000
+          },
+          {
+            "cumulative_seconds": 7.009977800000001,
+            "function": "count_aabb_candidates",
+            "line": 222,
+            "primitive_calls": 3904,
+            "self_seconds": 6.492957400000001,
+            "source": "chamber_particles/geometry.py",
+            "total_calls": 3904
+          },
+          {
+            "cumulative_seconds": 24.295694700000002,
+            "function": "acceleration_abs_upper_batch",
+            "line": 351,
+            "primitive_calls": 8932,
+            "self_seconds": 6.3899252,
+            "source": "chamber_particles/physics/runtime.py",
+            "total_calls": 8932
+          },
+          {
+            "cumulative_seconds": 10.555621200000001,
+            "function": "_upper_sum_batch",
+            "line": 860,
+            "primitive_calls": 20097,
+            "self_seconds": 6.142592100000001,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 20097
+          },
+          {
+            "cumulative_seconds": 7.0411618,
+            "function": "_copy_path_enclosure",
+            "line": 973,
+            "primitive_calls": 2233,
+            "self_seconds": 5.731981200000001,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 5.6517561,
+            "function": "_require_enclosure_contains_endpoint",
+            "line": 1015,
+            "primitive_calls": 2233,
+            "self_seconds": 5.620980800000001,
+            "source": "chamber_particles/integrators.py",
+            "total_calls": 2233
+          },
+          {
+            "cumulative_seconds": 18.904107500000002,
+            "function": "evaluate_batch",
+            "line": 186,
+            "primitive_calls": 11165,
+            "self_seconds": 4.9332268,
+            "source": "chamber_particles/physics/runtime.py",
+            "total_calls": 11165
+          },
+          {
+            "cumulative_seconds": 5.0476383,
+            "function": "fill_aabb_candidates_csr",
+            "line": 248,
+            "primitive_calls": 1952,
+            "self_seconds": 4.842222400000001,
+            "source": "chamber_particles/geometry.py",
+            "total_calls": 1952
+          }
+        ]
+      }
+    },
+    "raw_observations": [
+      {
+        "additional_process_high_water_bytes": 36098048,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 312705024,
+        "current_rss_before_bytes": 306466816,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 55492.03066879576,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 343695360,
+        "peak_rss_before_bytes": 307597312,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 0,
+        "result_artifact_bytes": 5399774,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 90000,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 1010000,
+            "safety_margin": 11016772,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99150944
+          },
+          "planned_bytes": 99150944,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.014252000022679567,
+          "open_result": 0.056701899971812963,
+          "public_end_to_end": 5.837549699936062,
+          "simulate": 5.766593799926341
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 36106240,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 312553472,
+        "current_rss_before_bytes": 306319360,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 56019.54227657272,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 343556096,
+        "peak_rss_before_bytes": 307449856,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 1,
+        "result_artifact_bytes": 5399774,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 90000,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 1010000,
+            "safety_margin": 11016772,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99150944
+          },
+          "planned_bytes": 99150944,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.014066900126636028,
+          "open_result": 0.055732900043949485,
+          "public_end_to_end": 5.782094499794766,
+          "simulate": 5.712292300071567
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 36048896,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 310804480,
+        "current_rss_before_bytes": 306245632,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 57179.85659460183,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 343425024,
+        "peak_rss_before_bytes": 307376128,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 2,
+        "result_artifact_bytes": 5399774,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 90000,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 1010000,
+            "safety_margin": 11016772,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99150944
+          },
+          "planned_bytes": 99150944,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.012711499817669392,
+          "open_result": 0.05614860006608069,
+          "public_end_to_end": 5.665238999994472,
+          "simulate": 5.59637639997527
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 36188160,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 312156160,
+        "current_rss_before_bytes": 306364416,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 60043.67088772512,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 343666688,
+        "peak_rss_before_bytes": 307478528,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 0,
+        "result_artifact_bytes": 5614618,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 92048,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 1010000,
+            "safety_margin": 11017261,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99155345
+          },
+          "planned_bytes": 99155345,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.010373200057074428,
+          "open_result": 0.04133130004629493,
+          "public_end_to_end": 5.381160800112411,
+          "simulate": 5.329454299993813
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 36532224,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 312377344,
+        "current_rss_before_bytes": 306548736,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 59561.56508518541,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 344211456,
+        "peak_rss_before_bytes": 307679232,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 1,
+        "result_artifact_bytes": 5614618,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 92048,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 1010000,
+            "safety_margin": 11017261,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99155345
+          },
+          "planned_bytes": 99155345,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.013474599923938513,
+          "open_result": 0.039532799972221255,
+          "public_end_to_end": 5.42560139996931,
+          "simulate": 5.372592200059444
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 36499456,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 10000
+        },
+        "core_payload_sha256": "sha256:957c9112b530ba7b47fcf33d37062b9a7a1074c24ffdfc7c256be250d1bf944d",
+        "current_rss_after_bytes": 311418880,
+        "current_rss_before_bytes": 306958336,
+        "event_work": {
+          "accepted_particle_pieces": 463030,
+          "candidate_queries": 720915,
+          "maximum_refinement_depth": 40,
+          "refinements": 257885
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 64623.670115851426,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 10000,
+          "target_stick_events": 10000
+        },
+        "particle_count": 10000,
+        "peak_rss_after_bytes": 344584192,
+        "peak_rss_before_bytes": 308084736,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 2,
+        "result_artifact_bytes": 5614618,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 90000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 92048,
+            "particle_schedule": 1200000,
+            "physics_runtime": 240016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 1010000,
+            "safety_margin": 11017261,
+            "slab_event_staging": 21677232,
+            "slab_event_work": 11760000,
+            "slab_failure_staging": 520000,
+            "slab_proposal_scratch": 20480000,
+            "slab_release_work": 2720000,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 141072,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 3168518,
+            "run": 99155345
+          },
+          "planned_bytes": 99155345,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 10000
+        },
+        "timing_s": {
+          "load_case": 0.011729400139302015,
+          "open_result": 0.05138449999503791,
+          "public_end_to_end": 5.01486250013113,
+          "simulate": 4.951745999976993
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 248451072,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 313962496,
+        "current_rss_before_bytes": 306606080,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 58864.11535366783,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 556187648,
+        "peak_rss_before_bytes": 307736576,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 0,
+        "result_artifact_bytes": 48273909,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 900000,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 10100000,
+            "safety_margin": 42007318,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378065858
+          },
+          "planned_bytes": 378065858,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.012238899944350123,
+          "open_result": 0.3306495000142604,
+          "public_end_to_end": 54.70538289984688,
+          "simulate": 54.36249199998565
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 248897536,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 313700352,
+        "current_rss_before_bytes": 306790400,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 62900.32469385964,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 556818432,
+        "peak_rss_before_bytes": 307920896,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 1,
+        "result_artifact_bytes": 48273909,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 900000,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 10100000,
+            "safety_margin": 42007318,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378065858
+          },
+          "planned_bytes": 378065858,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.009206300135701895,
+          "open_result": 0.31137969996780157,
+          "public_end_to_end": 51.19472879986279,
+          "simulate": 50.87414119997993
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 248442880,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 313704448,
+        "current_rss_before_bytes": 307707904,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 60122.58167741567,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 557281280,
+        "peak_rss_before_bytes": 308838400,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 2,
+        "result_artifact_bytes": 48273909,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 900000,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 10100000,
+            "safety_margin": 42007318,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378065858
+          },
+          "planned_bytes": 378065858,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.00936969998292625,
+          "open_result": 0.3124724000226706,
+          "public_end_to_end": 53.54643819993362,
+          "simulate": 53.224593999795616
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 247361536,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 313077760,
+        "current_rss_before_bytes": 306724864,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 59786.48974043221,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 555216896,
+        "peak_rss_before_bytes": 307855360,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 0,
+        "result_artifact_bytes": 48488753,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 902048,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 10100000,
+            "safety_margin": 42007807,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378070259
+          },
+          "planned_bytes": 378070259,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.010243699885904789,
+          "open_result": 0.3706690000835806,
+          "public_end_to_end": 53.90471239993349,
+          "simulate": 53.52379800006747
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 248250368,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 313810944,
+        "current_rss_before_bytes": 306122752,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 58530.21717123658,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 555503616,
+        "peak_rss_before_bytes": 307253248,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 1,
+        "result_artifact_bytes": 48488753,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 902048,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 10100000,
+            "safety_margin": 42007807,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378070259
+          },
+          "planned_bytes": 378070259,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.01103929989039898,
+          "open_result": 0.3208415999542922,
+          "public_end_to_end": 55.00449730013497,
+          "simulate": 54.67261449992657
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 249184256,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 100000
+        },
+        "core_payload_sha256": "sha256:a6c1dee26347a3452f100d593df569698ce5da563027539a27eea960204960d4",
+        "current_rss_after_bytes": 314998784,
+        "current_rss_before_bytes": 306843648,
+        "event_work": {
+          "accepted_particle_pieces": 4632298,
+          "candidate_queries": 7212570,
+          "maximum_refinement_depth": 40,
+          "refinements": 2580272
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 59498.019744109646,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 100000,
+          "target_stick_events": 100000
+        },
+        "particle_count": 100000,
+        "peak_rss_after_bytes": 557158400,
+        "peak_rss_before_bytes": 307974144,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 2,
+        "result_artifact_bytes": 48488753,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 900000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 902048,
+            "particle_schedule": 12000000,
+            "physics_runtime": 2400016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 10100000,
+            "safety_margin": 42007807,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 29960996,
+            "run": 378070259
+          },
+          "planned_bytes": 378070259,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.017009600065648556,
+          "open_result": 0.3638400000054389,
+          "public_end_to_end": 54.164156100014225,
+          "simulate": 53.783302600029856
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 495104000,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 325447680,
+        "current_rss_before_bytes": 306298880,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 58135.97355890881,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 802533376,
+        "peak_rss_before_bytes": 307429376,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 0,
+        "result_artifact_bytes": 477203239,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9000000,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 101000000,
+            "safety_margin": 71594818,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644353358
+          },
+          "planned_bytes": 644353358,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.011382099939510226,
+          "open_result": 3.3271314001176506,
+          "public_end_to_end": 553.772232899908,
+          "simulate": 550.4337166999467
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 488910848,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 325373952,
+        "current_rss_before_bytes": 306528256,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 58042.40285234917,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 796569600,
+        "peak_rss_before_bytes": 307658752,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 1,
+        "result_artifact_bytes": 477203239,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9000000,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 101000000,
+            "safety_margin": 71594818,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644353358
+          },
+          "planned_bytes": 644353358,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.009299099911004305,
+          "open_result": 3.9300645000766963,
+          "public_end_to_end": 555.2604420999996,
+          "simulate": 551.3210761002265
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 491184128,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 326152192,
+        "current_rss_before_bytes": 307372032,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 58410.50482382593,
+        "output_mode": "none",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 0,
+          "probe_rows": 0,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 799686656,
+        "peak_rss_before_bytes": 308502528,
+        "probe_payload_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "repeat_index": 2,
+        "result_artifact_bytes": 477203239,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9000000,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 101000000,
+            "safety_margin": 71594818,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644353358
+          },
+          "planned_bytes": 644353358,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.013315599877387285,
+          "open_result": 3.185989100020379,
+          "public_end_to_end": 551.0459674999584,
+          "simulate": 547.8466603998095
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 497336320,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 325742592,
+        "current_rss_before_bytes": 306089984,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 58064.02779534353,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 804556800,
+        "peak_rss_before_bytes": 307220480,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 0,
+        "result_artifact_bytes": 477418083,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9002048,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 101000000,
+            "safety_margin": 71595307,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644357759
+          },
+          "planned_bytes": 644357759,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.010049300035461783,
+          "open_result": 4.023375800112262,
+          "public_end_to_end": 555.1491751000285,
+          "simulate": 551.1157460999675
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 495013888,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 326483968,
+        "current_rss_before_bytes": 307388416,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 59930.34358718093,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 803532800,
+        "peak_rss_before_bytes": 308518912,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 1,
+        "result_artifact_bytes": 477418083,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9002048,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 101000000,
+            "safety_margin": 71595307,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644357759
+          },
+          "planned_bytes": 644357759,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.010234299814328551,
+          "open_result": 3.647552700014785,
+          "public_end_to_end": 537.611011599889,
+          "simulate": 533.9532210999168
+        }
+      },
+      {
+        "additional_process_high_water_bytes": 491999232,
+        "algorithm_revisions": {
+          "boundary_algorithm_revision": "point_wall_laws_v4",
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v6",
+          "engine_algorithm_revision": "deterministic_particle_engine_v27",
+          "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v11",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "field_location_revision": "field_location_v3",
+          "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+          "physics_catalog_revision": "deterministic_xy_rz_catalog_v4",
+          "physics_runtime_revision": "deterministic_compiled_physics_runtime_v3",
+          "required_field_revision": "required_field_rz_axis_domain_regular_v3",
+          "result_algorithm_revision": "durable_segmented_result_v3",
+          "rk4_enclosure_revision": "rk4_global_abs_enclosure_v1",
+          "rng_algorithm_revision": "philox4x32_10_v1",
+          "source_algorithm_revision": "table_surface_schedule_v1",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v5"
+        },
+        "boundary_interactions": {
+          "axis_crossings": 0,
+          "residual_splits": 0,
+          "wall_events": 1000000
+        },
+        "core_payload_sha256": "sha256:f8268d096d7642a2f942c0b598432cdf96e5bcb731f01d13246636e56e67e9a9",
+        "current_rss_after_bytes": 325648384,
+        "current_rss_before_bytes": 306577408,
+        "event_work": {
+          "accepted_particle_pieces": 46323043,
+          "candidate_queries": 72124695,
+          "maximum_refinement_depth": 40,
+          "refinements": 25801652
+        },
+        "failure_reason_counts": {
+          "field_support": 0,
+          "indeterminate_boundary_policy": 0,
+          "indeterminate_event": 0,
+          "indeterminate_surface_departure": 0,
+          "model_applicability": 0,
+          "nonfinite_physics": 0,
+          "numerical_event_budget": 0
+        },
+        "nominal_particle_macro_steps_per_simulate_s": 61592.589544423696,
+        "output_mode": "sample",
+        "output_utility": {
+          "exact_requested_ids_and_times": true,
+          "probe_frames": 4,
+          "probe_rows": 128,
+          "release_events": 1000000,
+          "target_stick_events": 1000000
+        },
+        "particle_count": 1000000,
+        "peak_rss_after_bytes": 799707136,
+        "peak_rss_before_bytes": 307707904,
+        "probe_payload_sha256": "sha256:a7f54c98ab8e1bb67b150926762d5d8f36b8da2b92c0ab163cac0af87fb8ff22",
+        "repeat_index": 2,
+        "result_artifact_bytes": 477418083,
+        "rss_semantics": "process-lifetime high-water; additional=max(0, after-before)",
+        "rss_source": "Windows GetProcessMemoryInfo",
+        "solver_memory_plan": {
+          "components": {
+            "active_index": 9000000,
+            "canonical_data": 19660,
+            "field_runtime": 0,
+            "geometry_query_scratch": 25165824,
+            "output_buffer": 9002048,
+            "particle_schedule": 120000000,
+            "physics_runtime": 24000016,
+            "prepared_geometry": 15712,
+            "probe_index": 256,
+            "replay_work": 1608,
+            "resident_state": 101000000,
+            "safety_margin": 71595307,
+            "slab_event_staging": 48889872,
+            "slab_event_work": 77070336,
+            "slab_failure_staging": 3407872,
+            "slab_proposal_scratch": 134217728,
+            "slab_release_work": 17825792,
+            "writer_reserve": 3145728
+          },
+          "event_candidate_capacity": 1048576,
+          "event_staging_bytes_per_row": 490,
+          "event_staging_capacity": 524288,
+          "event_staging_fixed_bytes": 16777232,
+          "event_work_bytes_per_particle": 1176,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 196608,
+          "limit_bytes": 8589934592,
+          "phase_peaks": {
+            "load_case": 85196,
+            "prepare": 297260996,
+            "run": 644357759
+          },
+          "planned_bytes": 644357759,
+          "release_work_bytes_per_particle": 272,
+          "replay_work_bytes": 1608,
+          "revision": "solver_owned_memory_plan_v10",
+          "runtime_layout_revision": "resident_soa_serial_slab_v5",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 65536
+        },
+        "timing_s": {
+          "load_case": 0.011055999901145697,
+          "open_result": 3.181427299976349,
+          "public_end_to_end": 522.735506700119,
+          "simulate": 519.5430202998687
+        }
+      }
+    ]
+  },
+  "rz_convergence": {
+    "axis_crossings": [
+      1,
+      1,
+      1
+    ],
+    "case": "variable axis-regular Epstein field with one signed-chart axis crossing",
+    "event_work": [
+      {
+        "accepted_particle_pieces": 32,
+        "candidate_queries": 52,
+        "maximum_refinement_depth": 20,
+        "refinements": 20
+      },
+      {
+        "accepted_particle_pieces": 40,
+        "candidate_queries": 59,
+        "maximum_refinement_depth": 19,
+        "refinements": 19
+      },
+      {
+        "accepted_particle_pieces": 60,
+        "candidate_queries": 79,
+        "maximum_refinement_depth": 19,
+        "refinements": 19
+      }
+    ],
+    "failure_count": [
+      0,
+      0,
+      0
+    ],
+    "fine_reference_errors": [
+      {
+        "position_m": 7.047539239968259e-07,
+        "velocity_m_s": 2.04332557851572e-06
+      },
+      {
+        "position_m": 8.496379710898339e-08,
+        "velocity_m_s": 4.951704180022887e-07
+      },
+      {
+        "position_m": 1.760772683212508e-08,
+        "velocity_m_s": 5.0872811740987345e-08
+      }
+    ],
+    "fine_reference_trend": "coarse-to-fine net decrease",
+    "input_parity_audit": {
+      "fields": {
+        "gas_density": {
+          "axis_derivative_max_abs": 1.0842021724855044e-19,
+          "kind": "scalar_even",
+          "passes": true,
+          "tolerance": 3.637978807091713e-12
+        },
+        "gas_mean_free_path": {
+          "axis_derivative_max_abs": 0.0,
+          "kind": "scalar_even",
+          "passes": true,
+          "tolerance": 3.637978807091713e-12
+        },
+        "gas_temperature": {
+          "axis_derivative_max_abs": 7.275957614183426e-12,
+          "kind": "scalar_even",
+          "passes": true,
+          "tolerance": 1.1132215149700642e-09
+        },
+        "gas_velocity": {
+          "axial_component_axis_derivative_max_abs": 6.661338147750939e-16,
+          "kind": "radial_odd_axial_even",
+          "passes": true,
+          "radial_component_axis_max_abs": 0.0,
+          "tolerance": 3.637978807091713e-12
+        }
+      },
+      "linear_counterexample_derivative_max_abs": 0.24999999999999994,
+      "linear_counterexample_detected": true,
+      "linear_counterexample_tolerance": 3.637978807091713e-12,
+      "method": "loaded canonical required fields; three-node axis derivative",
+      "passes": true,
+      "required_field_names": [
+        "gas_density",
+        "gas_mean_free_path",
+        "gas_temperature",
+        "gas_velocity"
+      ],
+      "standard_gravity_radial_component_m_s2": 0.0,
+      "standard_gravity_radial_zero": true
+    },
+    "reference_step_s": 0.003125,
+    "self_convergence_orders": {
+      "position_m": [
+        3.323917620262759
+      ],
+      "velocity_m_s": [
+        2.315995508279932
+      ]
+    },
+    "self_differences": [
+      {
+        "position_m": 6.744902065758396e-07,
+        "velocity_m_s": 2.5384959965180087e-06
+      },
+      {
+        "position_m": 6.73560702768583e-08,
+        "velocity_m_s": 5.097912358920098e-07
+      }
+    ],
+    "suite_note": "release uses the same RZ convergence matrix",
+    "time_steps_s": [
+      0.05,
+      0.025,
+      0.0125
+    ]
+  },
+  "suite": "release",
+  "xy_convergence": {
+    "case": "surface release + Epstein drag + non-affine conservative electric field + gravity + material target + 32--512 macro steps",
+    "global_to_dense_path_electric_acceleration_ratio": {
+      "dense_path_max_m_s2": 1.3500006167956897,
+      "dense_probe_count": 1026,
+      "global_max_m_s2": 2.5620427442864817,
+      "global_max_over_dense_path_max": 1.8978085731306178,
+      "global_min_m_s2": 0.15036588969642495,
+      "includes_exact_localized_hit_time": true,
+      "includes_source_time": true
+    },
+    "mesh": {
+      "p1": {
+        "errors": [
+          {
+            "hit_position_m": 0.001581936537094708,
+            "hit_time_s": 0.005078289789679502,
+            "position_m": 0.004552483790355333,
+            "velocity_m_s": 0.0076677451796341445
+          },
+          {
+            "hit_position_m": 0.0004038123491643675,
+            "hit_time_s": 0.004478765616198643,
+            "position_m": 0.0008119404170243705,
+            "velocity_m_s": 0.003189639652936227
+          },
+          {
+            "hit_position_m": 8.784511223297597e-05,
+            "hit_time_s": 0.0006733818524651269,
+            "position_m": 0.00017390913668502428,
+            "velocity_m_s": 0.0006716595435624084
+          }
+        ],
+        "observed_orders": {
+          "hit_position_m": [
+            1.9699347878959375,
+            2.2006511100801065
+          ],
+          "hit_time_s": [
+            0.18124155517787768,
+            2.73360442231951
+          ],
+          "position_m": [
+            2.487208113837034,
+            2.2230401317023967
+          ],
+          "velocity_m_s": [
+            1.2654089472151064,
+            2.247591407844004
+          ]
+        },
+        "same_layout_reference_x_y_cells": [
+          128,
+          128
+        ],
+        "target_boundary_id": [
+          20,
+          20,
+          20
+        ],
+        "target_facet_clearance": [
+          0.3172323744258243,
+          0.34668526414146594,
+          0.31674042329887264
+        ],
+        "target_facet_coordinate": [
+          0.6827676255741757,
+          0.34668526414146594,
+          0.6832595767011274
+        ],
+        "target_group": [
+          "target",
+          "target",
+          "target"
+        ],
+        "x_cells": [
+          8,
+          16,
+          32
+        ]
+      },
+      "q1": {
+        "errors": [
+          {
+            "hit_position_m": 2.277258307575858e-05,
+            "hit_time_s": 0.007038684914618898,
+            "position_m": 0.004210093646390911,
+            "velocity_m_s": 0.008389463130809016
+          },
+          {
+            "hit_position_m": 1.0235749696718699e-05,
+            "hit_time_s": 0.0043425875364278,
+            "position_m": 0.0007659142388335427,
+            "velocity_m_s": 0.003135752658764368
+          },
+          {
+            "hit_position_m": 1.8685071475066373e-06,
+            "hit_time_s": 0.0007087463123696125,
+            "position_m": 0.0001670990202253808,
+            "velocity_m_s": 0.0006833455716257486
+          }
+        ],
+        "observed_orders": {
+          "hit_position_m": [
+            1.1536811709905348,
+            2.4536587859915153
+          ],
+          "hit_time_s": [
+            0.6967509749191386,
+            2.6152137017958523
+          ],
+          "position_m": [
+            2.458597559504427,
+            2.196479585063159
+          ],
+          "velocity_m_s": [
+            1.4197667234973956,
+            2.1981245203381965
+          ]
+        },
+        "same_layout_reference_x_y_cells": [
+          128,
+          128
+        ],
+        "target_boundary_id": [
+          20,
+          20,
+          20
+        ],
+        "target_facet_clearance": [
+          0.32973006575027286,
+          0.34033927916538964,
+          0.3195891934307955
+        ],
+        "target_facet_coordinate": [
+          0.6702699342497271,
+          0.34033927916538964,
+          0.6804108065692045
+        ],
+        "target_group": [
+          "target",
+          "target",
+          "target"
+        ],
+        "x_cells": [
+          8,
+          16,
+          32
+        ]
+      },
+      "regular": {
+        "errors": [
+          {
+            "hit_position_m": 2.277258307575858e-05,
+            "hit_time_s": 0.007038684914618898,
+            "position_m": 0.004210093646390911,
+            "velocity_m_s": 0.008389463130809016
+          },
+          {
+            "hit_position_m": 1.0235749696718699e-05,
+            "hit_time_s": 0.0043425875364278,
+            "position_m": 0.0007659142388335427,
+            "velocity_m_s": 0.003135752658764368
+          },
+          {
+            "hit_position_m": 1.8685071475066373e-06,
+            "hit_time_s": 0.0007087463123696125,
+            "position_m": 0.0001670990202253808,
+            "velocity_m_s": 0.0006833455716257486
+          }
+        ],
+        "observed_orders": {
+          "hit_position_m": [
+            1.1536811709905348,
+            2.4536587859915153
+          ],
+          "hit_time_s": [
+            0.6967509749191386,
+            2.6152137017958523
+          ],
+          "position_m": [
+            2.458597559504427,
+            2.196479585063159
+          ],
+          "velocity_m_s": [
+            1.4197667234973956,
+            2.1981245203381965
+          ]
+        },
+        "same_layout_reference_x_y_cells": [
+          128,
+          128
+        ],
+        "target_boundary_id": [
+          20,
+          20,
+          20
+        ],
+        "target_facet_clearance": [
+          0.32973006575027286,
+          0.34033927916538964,
+          0.3195891934307955
+        ],
+        "target_facet_coordinate": [
+          0.6702699342497271,
+          0.34033927916538964,
+          0.6804108065692045
+        ],
+        "target_group": [
+          "target",
+          "target",
+          "target"
+        ],
+        "x_cells": [
+          8,
+          16,
+          32
+        ]
+      }
+    },
+    "mesh_refinement": "fixed-aspect nx=ny with a same-layout fine reference",
+    "reference_event_work": {
+      "accepted_particle_pieces": 990,
+      "candidate_queries": 1029,
+      "maximum_refinement_depth": 38,
+      "refinements": 39
+    },
+    "reference_failure_count": 0,
+    "reference_hit": {
+      "boundary_group": "target",
+      "boundary_id": 20,
+      "facet_id_within_reference_mesh": 85,
+      "normalized_facet_coordinate": 0.360727962301997,
+      "normalized_facet_endpoint_clearance": 0.360727962301997,
+      "outcome": "stuck",
+      "position_m": [
+        1.0,
+        0.3337613744109687
+      ],
+      "time_s": 3.7576499935232732
+    },
+    "time_errors": [
+      {
+        "hit_position_m": 3.6597317676356766e-08,
+        "hit_time_s": 1.3284935533874886e-05,
+        "position_m": 3.3858853383250676e-06,
+        "velocity_m_s": 1.0300486129155573e-05
+      },
+      {
+        "hit_position_m": 3.3361556295297135e-09,
+        "hit_time_s": 2.3539582372222867e-06,
+        "position_m": 2.0497200448055253e-07,
+        "velocity_m_s": 1.4687230833754228e-06
+      },
+      {
+        "hit_position_m": 1.269444827034505e-09,
+        "hit_time_s": 7.895703504345875e-07,
+        "position_m": 4.976545975310387e-08,
+        "velocity_m_s": 1.8526889022929538e-07
+      }
+    ],
+    "time_reference_error_orders": {
+      "hit_position_m": [
+        3.45547941680944,
+        1.393988897621453
+      ],
+      "hit_time_s": [
+        2.496630596936759,
+        1.5759490044774236
+      ],
+      "position_m": [
+        4.046034335869425,
+        2.042210199890646
+      ],
+      "velocity_m_s": [
+        2.810078109275183,
+        2.9868698583091335
+      ]
+    },
+    "time_reference_step_s": 0.00390625,
+    "time_self_convergence_orders": {
+      "hit_position_m": [
+        4.272190129331105
+      ],
+      "hit_time_s": [
+        3.321468290729561
+      ],
+      "position_m": [
+        4.532067039628453
+      ],
+      "velocity_m_s": [
+        2.7826696588251902
+      ]
+    },
+    "time_self_differences": [
+      {
+        "hit_position_m": 3.993347330588648e-08,
+        "hit_time_s": 1.5638893771097173e-05,
+        "position_m": 3.59085734280562e-06,
+        "velocity_m_s": 8.83176304578015e-06
+      },
+      {
+        "hit_position_m": 2.0667108024952086e-09,
+        "hit_time_s": 1.5643878867876992e-06,
+        "position_m": 1.5520654472744866e-07,
+        "velocity_m_s": 1.2834541931461274e-06
+      }
+    ],
+    "time_steps_s": [
+      0.0625,
+      0.03125,
+      0.015625
+    ]
+  }
+}

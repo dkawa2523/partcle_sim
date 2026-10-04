@@ -1,0 +1,74 @@
+schema_version: 1
+evaluation_id: M3-C0a
+evaluation_revision: 1
+expected_comsol_version: 6.4.0.429
+
+dataset:
+  relative_path: model_dataset/cf4_o2_etch_caseA_nonlinear_sass
+  expected_particles: 287
+  expected_times: 121
+  expected_rows: 34727
+
+variants:
+  formal_iondrag_theory_consistent: relative_flow_screened_collection_orbital_v1
+  formal_iondrag_image_minimal_corrected: electric_field_aligned_image_sensitivity_v1
+
+cases:
+  - caseP_10nm
+  - caseP_30nm
+  - caseP_100nm
+  - caseA_10nm
+  - caseA_30nm
+  - caseA_100nm
+
+model_files:
+  formal_iondrag_theory_consistent:
+    path: model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph
+    sha256: 3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524
+  formal_iondrag_image_minimal_corrected:
+    path: model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_image_minimal_corrected_10_30_100nm.mph
+    sha256: 23e376b8f0e7f3c8476e6f29fe3ec5429937f3154cda3a26097188b27aea103b
+
+required_package_files:
+  - manifest.csv
+  - validation/package_validation.csv
+  - config/global_parameters.csv
+  - config/physical_constants.csv
+  - config/variable_definitions.csv
+  - config/particle_physics_feature_settings.csv
+  - config/study_and_solver_settings.csv
+  - config/boundary_conditions_and_event_codes.csv
+  - config/background_field_column_dictionary.csv
+  - config/particle_output_column_dictionary.csv
+  - geometry/mesh_vertices_si.csv
+  - geometry/boundary_edges.csv
+  - geometry/domain_triangles.csv
+  - geometry/domain_quadrilaterals.csv
+  - input_fields/background_fields_mesh_points.csv
+  - input_fields/background_fields_regular_grid_301x301.csv
+  - results/release_state_t0_tidy.csv
+  - results/particle_history_full_tidy.csv
+  - results/particle_boundary_event_history_tidy.csv
+
+required_field_semantics:
+  gas_velocity_r_m_per_s: m/s
+  gas_velocity_z_m_per_s: m/s
+  gas_temperature_K: K
+  electric_field_r_V_per_m: V/m
+  electric_field_z_V_per_m: V/m
+  gradient_E2_r_V2_per_m3: V^2/m^3
+  gradient_E2_z_V2_per_m3: V^2/m^3
+  total_positive_ion_density_per_m3: 1/m^3
+  effective_positive_ion_mass_kg: kg
+  ion_velocity_r_m_per_s: m/s
+  ion_velocity_z_m_per_s: m/s
+  ion_thermal_energy_eV_as_V: V
+  axisymmetric_azimuthal_vorticity_per_s: 1/s
+
+# These are candidates only.  M3-C0 must characterize the Brownian-off full
+# physics path in both solvers before one row can be promoted to admissible.
+candidate_steps_s: [1.0e-5, 5.0e-6, 2.5e-6]
+
+stochastic_campaign:
+  replicas_per_package: 32
+  seed_base: 318000

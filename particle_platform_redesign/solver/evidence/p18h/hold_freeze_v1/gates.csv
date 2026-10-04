@@ -1,0 +1,16 @@
+gate,status,observed,limit
+candidate_active_position_vs_analytic,PASS,0.0,1e-12
+candidate_active_velocity_vs_analytic,PASS,0.0,1e-12
+candidate_active_position_vs_locked_comsol,PASS,4.726604209672303e-16,1e-12
+candidate_active_velocity_vs_locked_comsol,PASS,1.7763568394002505e-15,1e-12
+exactly_one_hold_event_and_zero_failures,PASS,"{""boundary_events"": 1, ""failure_events"": 0, ""law"": ""hold"", ""outcome"": ""held""}","{""boundary_events"": 1, ""failure_events"": 0, ""law"": ""hold"", ""outcome"": ""held""}"
+candidate_event_time_vs_analytic,PASS,1.9244588561617704e-18,5e-09
+candidate_event_time_vs_locked_comsol,PASS,4.342229700804445e-17,5e-09
+candidate_hit_position_vs_analytic,PASS,0.0,5e-08
+candidate_hit_position_vs_locked_comsol,PASS,2.7755575615628914e-17,5e-08
+saved_lifecycle_is_30_active_then_31_held,PASS,"{""active_frames"": 30, ""held_frames"": 31}","{""active_frames"": 30, ""held_frames"": 31}"
+candidate_held_position_retention,PASS,0.0,5e-12
+candidate_held_position_vs_locked_comsol,PASS,2.7755575615628914e-17,5e-12
+candidate_hold_retains_incident_velocity,PASS,"{""event_maximum_error_m_per_s"": 0.0, ""held_maximum_error_m_per_s"": 0.0}",1e-12
+candidate_hold_retains_charge,PASS,0.0,0.0
+candidate_terminal_state_is_held_and_valid,PASS,"{""final_lifecycle"": 5, ""kinematics_valid"": 1, ""manifest_terminal_counts"": {""escaped"": 0, ""failed"": 0, ""held"": 1, ""stuck"": 0}, ""series_escaped"": 0, ""series_failed"": 0, ""series_held"": 1, ""series_stuck"": 0}","{""final_lifecycle"": 5, ""held"": 1, ""kinematics_valid"": 1, ""other_terminal"": 0}"

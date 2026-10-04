@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C1-caseA-100nm-pre-event",
+  "evaluation_revision": 1,
+  "classification": "external_cross_representation_trajectory_comparison",
+  "labels": {
+    "candidate": "solver_canonical_p1_projection",
+    "reference": "comsol_native_field"
+  },
+  "scope": {
+    "workflow": "caseA",
+    "diameter_m": 1e-7,
+    "coordinate_system": "axisymmetric_rz_no_swirl",
+    "time_window_s": [0.0, 0.00045],
+    "output_interval_s": 1e-5,
+    "particles": 287,
+    "frames": 46,
+    "internal_steps_s": [6.25e-7, 3.125e-7, 1.5625e-7],
+    "brownian_active": false,
+    "dynamic_charge_active": true,
+    "boundary": "NOT_TESTED_PRE_EVENT_WINDOW",
+    "deterministic_contributions": [
+      "electric",
+      "relative_flow_ion_drag",
+      "epstein_drag",
+      "waldmann_thermophoresis",
+      "free_molecular_lift_sensitivity",
+      "dielectrophoresis",
+      "gravity_buoyancy"
+    ],
+    "field_representations": {
+      "candidate": "canonical_exact_connectivity_P1_projection_from_exported_nodal_values",
+      "reference": "COMSOL_native_finite_element_fields"
+    }
+  },
+  "reference": {
+    "source": "M3-C0b deterministic pre-event v6",
+    "root": "_out_m3c0b/caseA_100nm_theory_pre_event_v6",
+    "trajectory_sha256_by_step": {
+      "0p625us": "597738215dea51c751dc9e1681ea8a850d25f7f0b8307fc4e61af5abdb4c0e37",
+      "0p3125us": "d0b8f6278eece0f39deb6507ec6e66d6aa7e77958ebbb18f6dbcfdfcbc4de885",
+      "0p15625us": "b4e52479d83b1b4dc867c450cd5b91524be71294a3aaaad0b546eeded8868678"
+    },
+    "fine_force_sha256": "b904611577a6e72485030325ca59eff143996e6b7c953ee97feeb94a32a066eb",
+    "fine_rhs_sha256": "eb89326219f3a93dea616483756a9f44ac40ada8f6a7d2e2601347785d67f540",
+    "fine_native_primitive_raw_sha256": {
+      "neutral": "97e214deed3ded2bb7f27dcc850a53dd149e538fb14fa670a8df042db40a847a",
+      "electric": "66a002121b831709422d4199ed7d5d517ce780054ad63f4a4a7c2b491d6e123e",
+      "plasma": "1d70446403d99f4bddb63c257d29a7ef4e8fed55ee18db55c5db9403eb6229d7"
+    }
+  },
+  "acceptance": {
+    "minimum_rms_order": 0.75,
+    "maximum_fine_pair_relative_l2": {
+      "position": 1e-4,
+      "velocity": 5e-4,
+      "charge": 2e-5
+    },
+    "candidate_precision_vs_reference_factor": 2.0,
+    "roundoff_multiplier": 2048.0,
+    "cross_representation_envelope": "candidate fine-pair absolute change + reference fine-pair absolute change + float64 representation floor",
+    "result_dependent_tolerance_tuning": "PROHIBITED"
+  },
+  "layers": {
+    "frozen_field_rhs": {
+      "status": "SAVED_STATE_FORMULA_REPLAY_COMPLETE_RUNTIME_WIRING_NOT_TESTED",
+      "owner": "evaluate_pre_event_frozen_rhs.py with the separate thermophoresis PPR supplement",
+      "inputs": [
+        "COMSOL fine native primitives at saved trajectory states",
+        "COMSOL force_reference.csv",
+        "COMSOL rhs_reference.csv",
+        "candidate replay at the identical state/time keys"
+      ],
+      "comsol_rerun_required": false,
+      "claim": "saved-state producer-form replay only; production runtime sampling/wiring and trajectory agreement remain untested"
+    },
+    "cross_representation_trajectory": {
+      "status": "BLOCKED_CANDIDATE_RUN",
+      "owner": "evaluate_m3c1_pre_event.py",
+      "inputs": [
+        "three solver canonical P1 public-API trajectories with verified producer receipts",
+        "three locked COMSOL v6 trajectories"
+      ],
+      "comsol_rerun_required": false,
+      "claim": "locked Case-A 100 nm cross-representation comparison only; not same-field solver agreement"
+    },
+    "common_field_diagnostic": {
+      "status": "CONDITIONAL_NOT_RUN",
+      "owner": "external COMSOL companion workflow",
+      "trigger": "cross-representation mismatch remains after frozen field/RHS localization",
+      "comsol_rerun_required": true,
+      "claim": "time-discretization parity on one common canonical field; separate from this comparison"
+    }
+  },
+  "candidate": {
+    "case_sha256": null,
+    "trajectory_sha256_by_step": null,
+    "frozen_field_rhs_artifacts": null,
+    "status": "BLOCKED_ZERO_TRAJECTORY_ROWS"
+  },
+  "overall_status": "BLOCKED_CANDIDATE_RUN",
+  "claim_policy": {
+    "comsol_is_golden_truth": false,
+    "universal_equal_accuracy": false,
+    "boundary_accuracy": "NOT_TESTED",
+    "brownian_accuracy": "NOT_TESTED",
+    "all_three_layers_share_one_pass_status": false
+  }
+}

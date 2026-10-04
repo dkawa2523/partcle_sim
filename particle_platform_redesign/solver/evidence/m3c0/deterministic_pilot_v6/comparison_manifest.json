@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "classification": "external_comsol_reference_step_selection_confirmation",
+  "evaluation_id": "M3-C0b-pilot",
+  "evaluation_revision": 6,
+  "scientific_status": "PASS",
+  "execution_status": "COMPLETE",
+  "scope": "caseA_100nm_theory_pre_event_operational_step_selection_sequential_confirmation",
+  "production_solver_changed": false,
+  "claim_policy": "sequential_confirmation_of_operational_pre_event_step_selection_only_not_solver_agreement_or_universal_accuracy",
+  "source": {
+    "comsol_version": "6.4.0.429",
+    "load_mode": "ModelUtil.loadCopy",
+    "model_saved": false,
+    "process_count": 1,
+    "source_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "source_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "source_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "source_unchanged": true,
+    "isolated_source_copy_retained": false,
+    "compiled_class_retained": false
+  },
+  "protocol": {
+    "particles": 287,
+    "output_times": 46,
+    "records_per_run": 13202,
+    "time_window_s": [0.0, 0.00045],
+    "fixed_steps_s": [6.25e-7, 3.125e-7, 1.5625e-7],
+    "integrator": "classical_rk4",
+    "relative_tolerance": 1e-8,
+    "wall_accuracy_order": 1,
+    "all_records_active": true,
+    "observed_boundary_events": 0,
+    "brownian_active": false,
+    "saffman_active": false,
+    "dynamic_charge_active": true,
+    "deterministic_contributions": [
+      "electric",
+      "relative_flow_ion_drag",
+      "epstein_drag",
+      "waldmann_thermophoresis",
+      "free_molecular_lift_sensitivity",
+      "dielectrophoresis",
+      "gravity_buoyancy"
+    ]
+  },
+  "sequential_confirmation": {
+    "pilot_revision": 5,
+    "pilot_role": "calibration_only_and_historical_characterization",
+    "confirmation_added_previously_unseen_step_s": 1.5625e-7,
+    "previous_compact_decision_status": "INVALIDATED",
+    "previous_scientific_status": "CHARACTERIZED",
+    "previous_invalidation_reason": "The v5 fine-pair position relative L2 normalized by the absolute global-coordinate position norm, so the gate depended on the coordinate origin.",
+    "v5_shared_fine_pair_historical_position_origin_relative_l2": 6.145964082982306e-7,
+    "v5_shared_fine_pair_corrected_position_displacement_relative_l2": 5.8064307113296814e-5,
+    "v5_position_scientific_pass_superseded": true,
+    "active_position_gate_evidence_revision": 6,
+    "replacement_position_metric": "norm(x_h_minus_x_h_over_2)_2 / norm(x_h_over_2_minus_x_initial)_2",
+    "replacement_metric_is_translation_invariant": true
+  },
+  "runner_source_observation": {
+    "source_relative_path": "tools/vv/comsol/run_m3c0b_caseA_100nm_pilot.ps1",
+    "observed_sha256": "31c1392769f0cc7f1998be4edc60138ce102d0ac6be3d392aad884c3cc6a0819",
+    "observed_last_write_utc": "2026-10-01T00:46:27.2505116Z",
+    "run_provenance_generated_utc": "2026-10-01T00:52:41.0844850Z",
+    "staged_in_output": false,
+    "output_attested": false,
+    "interpretation": "Current source observation with a pre-run modification time; the v6 output did not stage or hash the runner."
+  },
+  "acceptance": {
+    "minimum_observed_order": 0.75,
+    "maximum_fine_pair_position_displacement_relative_l2": 0.0001,
+    "maximum_fine_pair_velocity_relative_l2": 0.0005,
+    "maximum_fine_pair_charge_relative_l2": 0.00002,
+    "require_all_records_active": true
+  },
+  "fine_pair": {
+    "coarse_step_s": 3.125e-7,
+    "fine_step_s": 1.5625e-7,
+    "records": 13202,
+    "status_agreement_fraction": 1.0,
+    "position_rms_m": 5.338714552062531e-8,
+    "position_max_m": 6.744157217240982e-7,
+    "position_displacement_relative_l2": 3.102727085428027e-5,
+    "velocity_rms_m_per_s": 0.00036430540472116613,
+    "velocity_max_m_per_s": 0.003133282319010014,
+    "velocity_relative_l2": 3.92483251084038e-5,
+    "charge_rms_e": 0.00033741954922298354,
+    "charge_max_e": 0.003898157714900208,
+    "charge_relative_l2": 1.3511393490811483e-6
+  },
+  "observed_order_base_2": {
+    "position": 0.9041136219836081,
+    "velocity": 0.9443119501831206,
+    "charge": 1.1238380758116033
+  },
+  "gates": {
+    "all_records_active": "PASS",
+    "position_observed_order": "PASS",
+    "velocity_observed_order": "PASS",
+    "charge_observed_order": "PASS",
+    "fine_pair_position_displacement_relative_l2": "PASS",
+    "fine_pair_velocity_relative_l2": "PASS",
+    "fine_pair_charge_relative_l2": "PASS"
+  },
+  "overlap_reproducibility": {
+    "status": "BITWISE_IDENTICAL",
+    "revisions_compared": [5, 6],
+    "steps_s": [6.25e-7, 3.125e-7],
+    "artifacts_per_step": [
+      "trajectory_reference.csv",
+      "force_reference.csv",
+      "rhs_reference.csv",
+      "event_observations.csv"
+    ],
+    "artifact_sha256": {
+      "dt_0p625us": {
+        "trajectory_reference.csv": "597738215dea51c751dc9e1681ea8a850d25f7f0b8307fc4e61af5abdb4c0e37",
+        "force_reference.csv": "15892977b11eaac555c566d819b76c66fe264fc0036b0d8983f08cf83d038c24",
+        "rhs_reference.csv": "dba671defd07b4bfd15f564f6a6755696ee2e86c922ca7656c4ceca89c2c4610",
+        "event_observations.csv": "8f562e0311415399795d0077d98d33edf351c101ed5741a4df180080825bc3a9"
+      },
+      "dt_0p3125us": {
+        "trajectory_reference.csv": "d0b8f6278eece0f39deb6507ec6e66d6aa7e77958ebbb18f6dbcfdfcbc4de885",
+        "force_reference.csv": "b970eee975e9e130a4bdd7908ea7c490159880ab6738d2080541c3dd959df80f",
+        "rhs_reference.csv": "346901ffb96522afd3a8f18746a049e4dfefd5b54617abf36882abcae06189c2",
+        "event_observations.csv": "8f562e0311415399795d0077d98d33edf351c101ed5741a4df180080825bc3a9"
+      }
+    }
+  },
+  "fine_step_force_configuration_sanity": {
+    "acceptance_gate": false,
+    "records": 13202,
+    "component_values_per_contribution": 26404,
+    "contributions": {
+      "electric": {
+        "finite_component_values": 26404,
+        "nonzero_component_values": 26404,
+        "maximum_absolute_component_N": 1.1532115211673226e-13
+      },
+      "ion_drag": {
+        "finite_component_values": 26404,
+        "nonzero_component_values": 26404,
+        "maximum_absolute_component_N": 1.3370812916761965e-15
+      },
+      "epstein": {
+        "finite_component_values": 26404,
+        "nonzero_component_values": 26404,
+        "maximum_absolute_component_N": 4.634487472294839e-15
+      },
+      "thermophoresis": {
+        "finite_component_values": 26404,
+        "nonzero_component_values": 26404,
+        "maximum_absolute_component_N": 2.6268927727513917e-15
+      },
+      "lift": {
+        "finite_component_values": 26404,
+        "nonzero_component_values": 26404,
+        "maximum_absolute_component_N": 1.1853567800455333e-18
+      },
+      "dielectrophoresis": {
+        "finite_component_values": 26404,
+        "nonzero_component_values": 26404,
+        "maximum_absolute_component_N": 9.19705121274324e-21
+      },
+      "gravity_buoyancy": {
+        "finite_component_values": 26404,
+        "nonzero_component_values": 13202,
+        "maximum_absolute_component_N": 1.1296449585749958e-17,
+        "component_pattern": "radial_zero_axial_nonzero"
+      }
+    }
+  },
+  "raw_output": {
+    "relative_path": "_out_m3c0b/caseA_100nm_theory_pre_event_v6",
+    "files": 43,
+    "bytes": 67561848,
+    "indexed_artifacts": 41,
+    "verified_index_mismatches": 0,
+    "intentionally_unindexed_files": [
+      "artifact_hashes.csv",
+      "run_status.json"
+    ],
+    "artifact_hashes_sha256": "fc9eeb307e39ff3ed32fe0b4b3c74a0725176362256e1f693a4e20195922cd0e",
+    "reference_manifest_sha256": "11adb260242720bf2efb3a0cf095d11e94ee2555303a314897e15c075ac1e9a8",
+    "self_convergence_sha256": "8fb53ffdbde43068a1bf59f00ba8ae0b51341075a87e63eda638ef3697575f35",
+    "run_status_sha256": "7255660d3485651a57a313b0bb931144fbd400633e0dedd8e6c70a29f3db884e",
+    "provenance_sha256": "588070d21033ef03ef30878a100594444fac712eb819cc170140307979bea6c6",
+    "configuration_sha256": "a5371c10ba7295229e49b7defd57a91dd52135ae95a17aa4976f234d9cb4e0bf",
+    "normalizer_sha256": "dda302bee82e014e01768b68ef50531897e3a1a36c1ce8b58740b03f46778705",
+    "java_source_sha256": "81c3e6996ede31f1f1e0c4603ac244b87c41d30346e03db415e2fd79d662046f",
+    "comsol_process_log_sha256": "b38f24bd90c3811ac6183f0111ede33af398f75f6a41053daeb9ebbc3f91ee07",
+    "comsol_batch_log_sha256": "60d2863efbb491447c1bd15f5f3e160e767e78f15e1702b57c8ca773e0828524"
+  },
+  "limitations": {
+    "certifies_solver_agreement": false,
+    "certifies_universal_physical_accuracy": false,
+    "certifies_physical_applicability": false,
+    "certifies_30_ms_boundary_event_convergence": false,
+    "certifies_other_sizes_cases_or_variants": false,
+    "certifies_freeze_or_brownian_behavior": false,
+    "matrix_expansion_required": true
+  }
+}

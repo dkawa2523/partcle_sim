@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "receipt_id": "M3-C2A-caseP-100nm-final-result-v1",
+  "status": "PASS",
+  "case_id": "M3-C2A_caseP_100nm_common-P1",
+  "claim_scope": "approximately_the_same_registered_population_observables_as_COMSOL_for_the_locked_case_design_without_pathwise_RNG_equality",
+  "physical_applicability": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+  "design": {
+    "particle_count": 287,
+    "output_time_count": 121,
+    "time_end_s": 0.03,
+    "replicas_per_participant": 32,
+    "observations_per_participant": 9184,
+    "comsol_setting": {
+      "integrator": "classical_rk4",
+      "fixed_step_s": 0.00002
+    },
+    "candidate_setting": {
+      "dt_s": 0.00002,
+      "brownian_interval_tree_depth": 3,
+      "geometry_rtol": 1e-08
+    }
+  },
+  "execution": {
+    "candidate": {
+      "complete_replicas": 32,
+      "trajectory_rows_per_replica": 34727,
+      "boundary_events_total": 0,
+      "failure_events_total": 0,
+      "final_active_particles_total": 9184,
+      "accepted_particle_pieces_per_replica": 3444000,
+      "candidate_queries_per_replica": 3444000,
+      "refinements_per_replica": 0
+    },
+    "comsol": {
+      "complete_replicas": 32,
+      "trajectory_rows_per_replica": 34727,
+      "boundary_events_total": 0,
+      "final_active_particles_total": 9184,
+      "study_isolation_pass_replicas": 32,
+      "enabled_physics": [
+        "fpt"
+      ],
+      "source_mph_unchanged": true,
+      "source_mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+    },
+    "source_identity_status": "PASS",
+    "common_active_particle_time_fraction": 1.0
+  },
+  "confirmatory_terminal_population_gate": {
+    "method": "two_sample_union_hoeffding",
+    "confidence": 0.975,
+    "familywise_alpha": 0.025,
+    "curves": [
+      "stuck",
+      "held",
+      "escaped",
+      "any_terminal"
+    ],
+    "equivalence_margin": 0.05,
+    "maximum_absolute_difference": 0.0,
+    "critical_radius": 0.03391568175974148,
+    "simultaneous_confidence_bound": 0.03391568175974148,
+    "status": "PASS",
+    "interpretation": "No terminal event occurred in either participant, so this gate is valid but uninformative for boundary parity."
+  },
+  "confirmatory_rz_fate_distribution_gate": {
+    "method": "two_sample_union_multinomial_l1",
+    "confidence": 0.975,
+    "familywise_alpha": 0.025,
+    "active_position_bins": 80,
+    "terminal_categories": [
+      "stuck",
+      "held",
+      "escaped"
+    ],
+    "category_count": 83,
+    "equivalence_margin_total_variation": 0.15,
+    "maximum_empirical_total_variation": 0.010670731707317093,
+    "two_sample_critical_radius": 0.120528952858136,
+    "simultaneous_confidence_bound": 0.13119968456545308,
+    "maximum_empirical_tv_that_can_pass": 0.029471047141863993,
+    "status": "PASS"
+  },
+  "descriptive_non_gating_trajectory_metrics": {
+    "maximum_mean_position_difference_m": 0.0002877927262712465,
+    "maximum_mean_position_difference_over_geometry_scale": 0.0007742698426486061,
+    "maximum_quantile_difference_m": 0.0007672173208302657,
+    "maximum_covariance_difference_m2": 0.00003593776841958555,
+    "maximum_rz_occupancy_total_variation": 0.010670731707317093
+  },
+  "artifacts": {
+    "evaluation_policy": {
+      "path": "../../../tools/vv/comsol/cases/m3c2_caseP_100nm_ensemble_evaluation_v5.json",
+      "sha256": "9d78a612c5750821d60a144633a58d1c7817db318d89ba19251c03111337fe02"
+    },
+    "selection_receipt": {
+      "path": "selection_receipt.json",
+      "sha256": "8f4dd06ec34d53428dcb9b7aa9ca50539c8181b4b4541d9c2423672913c5627a"
+    },
+    "final_registration": {
+      "path": "final_registration.json",
+      "sha256": "8b3ae1bd5fa52c58e35b15270b4fbb8ba034c028aa3afda464c3affd893b3bce"
+    },
+    "combined_campaign_manifest": {
+      "path": "combined_campaign_manifest.json",
+      "sha256": "115e050c7adefde11448232843a8bbc118bb9d2185efdd1703d3dddf30219c0a"
+    },
+    "candidate_campaign_manifest": {
+      "path": "candidate_campaign_manifest.json",
+      "sha256": "d3ceba7da6c77d13bf3c49517c1df6d943b93245d4b05defa14f8f7046e5d0f0"
+    },
+    "comsol_campaign_manifest": {
+      "path": "comsol_campaign_manifest.json",
+      "sha256": "cd22b2a18a0d479902942561804383ae9650fa4d52c4f899941b75804c124246"
+    },
+    "comsol_run_receipt": {
+      "path": "comsol_run_receipt.json",
+      "sha256": "36fd1b62e14c13fd289eb75c3eb65085544eae8fc2bd97ff5f910d1e9841e091"
+    },
+    "comsol_artifact_hash_ledger": {
+      "path": "comsol_artifact_hashes.csv",
+      "sha256": "4d95d9dc3343df5b8fea458d425b3b4c82218d7f6a4b6d5ab5e8517df4f38afd"
+    },
+    "evaluation_manifest": {
+      "path": "evaluation_manifest.json",
+      "sha256": "5ec9a7f67726f0533aba60d116e2bf2546f67589cda34e9053b1abffaa94bb69"
+    },
+    "ensemble_metrics": {
+      "path": "ensemble_metrics.csv",
+      "sha256": "79bbcc484dcd5e07e3528f3450708e276f0e3a03e5d0b64e243fbaa82b1ef51b"
+    },
+    "performance_record": {
+      "path": "performance.json",
+      "sha256": "f17df7df27042175b7815b67833153ab7fc76bc6b5b23bb9a69a0df5d9a503ac"
+    },
+    "rz_trajectory_svg": {
+      "path": "rz_ensemble_trajectory.svg",
+      "sha256": "1938eb06cf348f40030648da2415e17d0d33008655d25a0c45129d693bf70bda"
+    },
+    "observable_differences_svg": {
+      "path": "ensemble_observable_differences.svg",
+      "sha256": "22c66444706ab2ff15e7280d798ad0c8aae4d87e19b63c591d8b2bf99a93e71d"
+    },
+    "rz_trajectory_png": {
+      "path": "rz_ensemble_trajectory.png",
+      "sha256": "9356c7eb64d2bf0a2ada753b19f24a6711e5b0de8ab65d0f67a9b893f2665c28"
+    },
+    "observable_differences_png": {
+      "path": "ensemble_observable_differences.png",
+      "sha256": "8b030c5f3dac765a955e47272ddb9226c39136c2aaa3ab5e9c07d859e7675efe"
+    }
+  },
+  "external_vv_implementation": {
+    "evaluator_revision": "m3c2_stochastic_ensemble_evaluator_v5",
+    "evaluator_sha256": "6a05a8bb282a8f56f2279d1d7345c55b5caee7d55bea27c494126459d0ff9a88",
+    "assembler_sha256": "a31ae700bc61b0e72f4bb06206cd688b681b3daaa1b6b361ce242415965c67f2",
+    "candidate_runner_sha256": "9e3f13da8a73451a2570116de2345cb20d0c26b82397ebe9fbb1219b4029e71e",
+    "comsol_normalizer_sha256": "0424b8a9c0bd696e703841c53edcf50282693c07c3dfcf78d8656bf31acc5534",
+    "participant_specific_event_headers": "extra columns allowed, common required columns complete and unique",
+    "production_solver_changed_for_comparison": false
+  },
+  "performance": {
+    "accuracy_decision_role": "SEPARATE_FROM_ACCURACY_DECISION",
+    "candidate_timing_status": "NON_AUTHORITATIVE_EXTERNAL_WORKLOAD_OVERLAP",
+    "next_gate": "profile_the_three_accepted_287_particle_caseP_seeds_before_any_production_optimization_then_confirm_at_10000_and_100000_particles"
+  },
+  "reproducibility": {
+    "independent_evaluator_rerun_status": "PASS",
+    "byte_identical_evaluator_outputs": [
+      "evaluation_manifest.json",
+      "ensemble_metrics.csv",
+      "ensemble_observable_differences.svg",
+      "rz_ensemble_trajectory.svg",
+      "performance.json",
+      "README.md"
+    ],
+    "generated_readme_scope": "README.md in byte_identical_evaluator_outputs denotes the evaluator-generated README in the raw run and independent recheck directories, not the curated durable README.md beside this receipt.",
+    "durable_readme_scope": "The durable README.md is a curated non-gating interpretation that links to the hashed evaluator outputs and this receipt.",
+    "png_derivatives": {
+      "decision_role": "visual_only_non_gating",
+      "rasterizer": {
+        "runtime_bundle": "codex_workspace_dependencies_26.909.12148",
+        "node": "v24.19.0",
+        "sharp": "0.35.4",
+        "libvips": "8.18.6"
+      },
+      "rz_trajectory": {
+        "source_svg_sha256": "1938eb06cf348f40030648da2415e17d0d33008655d25a0c45129d693bf70bda",
+        "output_png_sha256": "9356c7eb64d2bf0a2ada753b19f24a6711e5b0de8ab65d0f67a9b893f2665c28"
+      },
+      "observable_differences": {
+        "source_svg_sha256": "22c66444706ab2ff15e7280d798ad0c8aae4d87e19b63c591d8b2bf99a93e71d",
+        "output_png_sha256": "8b030c5f3dac765a955e47272ddb9226c39136c2aaa3ab5e9c07d859e7675efe"
+      }
+    }
+  },
+  "limitations": [
+    "Pathwise equality is not evaluated because the two participants use independent random streams.",
+    "The locked Case-P charge model omits negative-ion current, so charging and trajectory physical applicability are not certified.",
+    "No terminal event occurred, so this campaign does not validate Case-P boundary-event parity or the geometry tolerance for eventful paths.",
+    "Continuous mean, covariance, and quantile summaries are descriptive and non-gating.",
+    "This result applies only to the locked common-P1 Case-P 100 nm design and does not certify native-field, another ion-drag model, another particle size, another geometry, or universal COMSOL equivalence.",
+    "COMSOL is a comparison participant rather than a golden definition of the solver physics."
+  ]
+}

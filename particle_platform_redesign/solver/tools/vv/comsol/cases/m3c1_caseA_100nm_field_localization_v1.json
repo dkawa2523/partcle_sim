@@ -1,0 +1,71 @@
+{
+    "schema_version": 1,
+    "evaluation_id": "M3-C1-caseA-100nm-field-representation-localization",
+    "evaluation_revision": 1,
+    "classification": "external_vv_existing_artifact_field_rhs_localization",
+    "scope": {
+        "workflow": "caseA",
+        "diameter_m": 1e-7,
+        "particles": 287,
+        "frames": 46,
+        "records": 13202,
+        "time_window_s": [0.0, 0.00045],
+        "output_interval_s": 1e-5,
+        "fixed_rk4_step_s": 1.5625e-7,
+        "brownian_active": false,
+        "comparison_scopes": ["identical_t0_state", "saved_native_path_states"],
+        "claims_integrated_trajectory_attribution": false,
+        "claims_native_fe_reconstruction": false
+    },
+    "artifacts": {
+        "candidate_input": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v4/candidate_input.h5",
+            "sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+            "content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c"
+        },
+        "candidate_configuration": {
+            "path": "tools/vv/comsol/cases/m3c1_caseA_100nm_exported_p1_v1.json",
+            "sha256": "acdee16230e8330a9012ec0c817ac4022fc8b28ec6449704a94cbfa35d642e4d"
+        },
+        "native_step_directory": {
+            "path": "_out_m3c0b/caseA_100nm_theory_pre_event_v6/dt_0p15625us"
+        },
+        "frozen_rhs_configuration": {
+            "path": "tools/vv/comsol/cases/m3c1_caseA_100nm_frozen_rhs_v1.json",
+            "sha256": "ad423fb8d3565ff99ce02af6d533029d55789b062718bdb6d437b8893c3745c4"
+        },
+        "ppr_particle_table": {
+            "path": "_out_m3c1/caseA_100nm_thermophoresis_ppr_v1/thermophoresis_ppr_particle_tidy.csv",
+            "sha256": "ed7afe83b02e3f8407f5a7c541fd9c5cb3f908b17ed6c94f6d99ea6887a99275"
+        },
+        "ppr_domain3_table": {
+            "path": "_out_m3c1/caseA_100nm_thermophoresis_ppr_v1/thermophoresis_ppr_domain3_points.csv",
+            "sha256": "b60c48b713558468d194ccd2c1764b03b4cf1efacc551480650a873a5dbe00aa"
+        },
+        "cross_representation_evidence": {
+            "path": "evidence/m3c1/case_a_100nm_pre_event_v6/comparison_manifest.json",
+            "sha256": "497946a9eec1d7d8191ad24c7dd7fd732cb8809acbd30f5d8ca35b4334421604"
+        },
+        "common_field_evidence": {
+            "path": "evidence/m3c1/case_a_100nm_common_p1_v1/comparison_manifest.json",
+            "sha256": "7d5dd2eaa18dbfc262083c22a812b3e6f494cc493b3994056b2a89fd18169e5c"
+        },
+        "frozen_rhs_evidence": {
+            "path": "evidence/m3c1/pre_event_frozen_rhs_v1/report.json",
+            "sha256": "90e479e32e2aafa476b8c35863174587ce9db65e9bf972aadebbaf19dfbc3144"
+        },
+        "ppr_evidence": {
+            "path": "evidence/m3c1/thermophoresis_ppr_v1/report.json",
+            "sha256": "41f34af20638ffe910eb65a0ebd5301bdaf709e1c9f7521d26fd72716fa5eb98"
+        }
+    },
+    "acceptance": {
+        "roundoff_relative_l2": 1e-12,
+        "ppr_node_coordinate_tolerance_m": 1e-14,
+        "ppr_node_heat_flux_relative_l2": 1e-12,
+        "require_complete_native_cohort": true,
+        "require_all_p1_samples_supported": true,
+        "require_t0_axis_incident_cell_exclusion": true,
+        "result_dependent_tolerance_tuning": "PROHIBITED"
+    }
+}

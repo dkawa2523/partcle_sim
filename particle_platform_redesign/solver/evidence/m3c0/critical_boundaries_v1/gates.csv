@@ -1,0 +1,133 @@
+producer,step_label,scenario_id,gate,status,observed_value,limit_value,unit,detail
+comsol,dt_1ms,surface_departure,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+comsol,dt_1ms,surface_departure,analytic_position_path,PASS,3.469446951953614e-18,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_1ms,surface_departure,analytic_velocity_path,PASS,1.1102230246251565e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_1ms,surface_departure,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_1ms,surface_departure,surface_departure,PASS,"[0.006, 0.00025000000000000006]","""z > 0""",m,first post-release frame is inside without a zero-time terminal state
+comsol,dt_1ms,specular_reflection,initial_state,PASS,1.734723475976807e-18,5e-14,m,initial_position_absolute_error_m
+comsol,dt_1ms,specular_reflection,analytic_position_path,PASS,1.2266347333466993e-17,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_1ms,specular_reflection,analytic_velocity_path,PASS,1.1102230246251565e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_1ms,specular_reflection,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_1ms,specular_reflection,reconstructed_event_time,PASS,6.5052130349130266e-18,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+comsol,dt_1ms,specular_reflection,post_event_residual_flight,PASS,6.5052130349130266e-18,5e-11,m,first post-event frame includes the analytic residual flight
+comsol,dt_1ms,axis_crossing,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+comsol,dt_1ms,axis_crossing,analytic_position_path,PASS,5.222209201006512e-18,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_1ms,axis_crossing,analytic_velocity_path,PASS,1.1102230246251565e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_1ms,axis_crossing,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_1ms,axis_crossing,reconstructed_event_time,PASS,2.168404344971009e-19,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+comsol,dt_1ms,axis_crossing,post_event_residual_flight,PASS,2.168404344971009e-19,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_1ms,surface_departure,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_1ms,surface_departure,analytic_position_path,PASS,0.0,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_1ms,surface_departure,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_1ms,surface_departure,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_1ms,surface_departure,surface_departure,PASS,"[0.006, 0.00025]","""z > 0""",m,first post-release frame is inside without a zero-time terminal state
+candidate,dt_1ms,specular_reflection,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_1ms,specular_reflection,analytic_position_path,PASS,1.939479807224432e-18,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_1ms,specular_reflection,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_1ms,specular_reflection,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_1ms,specular_reflection,reconstructed_event_time,PASS,4.336808689942018e-19,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+candidate,dt_1ms,specular_reflection,post_event_residual_flight,PASS,4.336808689942018e-19,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_1ms,axis_crossing,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_1ms,axis_crossing,analytic_position_path,PASS,1.734723475976807e-18,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_1ms,axis_crossing,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_1ms,axis_crossing,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_1ms,axis_crossing,reconstructed_event_time,PASS,0.0,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+candidate,dt_1ms,axis_crossing,post_event_residual_flight,PASS,0.0,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_1ms,specular_reflection,single_specular_event,PASS,"{""ids"": [2], ""laws"": [""specular""]}","{""ids"": [2], ""laws"": [""specular""]}",event identity,surface departure and axis passage emit no material-wall event
+candidate,dt_1ms,specular_reflection,direct_event_time,PASS,2.168404344971009e-19,5e-11,s absolute error,candidate public event row versus analytic impact time
+candidate,dt_1ms,axis_crossing,axis_is_not_material_wall,PASS,"{""axis_crossings"": 1, ""wall_event_ids"": [2]}","{""axis_crossings"": 1, ""wall_event_ids_excludes"": 3}",counts,axis passage is counted separately and has no wall event row
+candidate,dt_1ms,all,zero_failures,PASS,0,0,events,public result has no failure event
+cross_solver,dt_1ms,surface_departure,position_path,PASS,3.469446951953614e-18,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_1ms,surface_departure,velocity_path,PASS,1.1102230246251565e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+cross_solver,dt_1ms,specular_reflection,position_path,PASS,1.2174002125499814e-17,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_1ms,specular_reflection,velocity_path,PASS,1.1102230246251565e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+cross_solver,dt_1ms,axis_crossing,position_path,PASS,5.222209201006512e-18,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_1ms,axis_crossing,velocity_path,PASS,1.1102230246251565e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+comsol,dt_0p5ms,surface_departure,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+comsol,dt_0p5ms,surface_departure,analytic_position_path,PASS,2.6020852139652106e-18,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_0p5ms,surface_departure,analytic_velocity_path,PASS,2.220446049250313e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_0p5ms,surface_departure,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_0p5ms,surface_departure,surface_departure,PASS,"[0.006, 0.00025]","""z > 0""",m,first post-release frame is inside without a zero-time terminal state
+comsol,dt_0p5ms,specular_reflection,initial_state,PASS,1.734723475976807e-18,5e-14,m,initial_position_absolute_error_m
+comsol,dt_0p5ms,specular_reflection,analytic_position_path,PASS,8.542522420166516e-18,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_0p5ms,specular_reflection,analytic_velocity_path,PASS,2.2887833992611187e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_0p5ms,specular_reflection,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_0p5ms,specular_reflection,reconstructed_event_time,PASS,1.3010426069826053e-18,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+comsol,dt_0p5ms,specular_reflection,post_event_residual_flight,PASS,1.3010426069826053e-18,5e-11,m,first post-event frame includes the analytic residual flight
+comsol,dt_0p5ms,axis_crossing,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+comsol,dt_0p5ms,axis_crossing,analytic_position_path,PASS,1.570858918313846e-17,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_0p5ms,axis_crossing,analytic_velocity_path,PASS,2.237726045655905e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_0p5ms,axis_crossing,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_0p5ms,axis_crossing,reconstructed_event_time,PASS,0.0,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+comsol,dt_0p5ms,axis_crossing,post_event_residual_flight,PASS,0.0,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_0p5ms,surface_departure,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_0p5ms,surface_departure,analytic_position_path,PASS,0.0,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_0p5ms,surface_departure,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_0p5ms,surface_departure,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_0p5ms,surface_departure,surface_departure,PASS,"[0.006, 0.00025]","""z > 0""",m,first post-release frame is inside without a zero-time terminal state
+candidate,dt_0p5ms,specular_reflection,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_0p5ms,specular_reflection,analytic_position_path,PASS,1.939479807224432e-18,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_0p5ms,specular_reflection,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_0p5ms,specular_reflection,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_0p5ms,specular_reflection,reconstructed_event_time,PASS,4.336808689942018e-19,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+candidate,dt_0p5ms,specular_reflection,post_event_residual_flight,PASS,4.336808689942018e-19,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_0p5ms,axis_crossing,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_0p5ms,axis_crossing,analytic_position_path,PASS,1.734723475976807e-18,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_0p5ms,axis_crossing,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_0p5ms,axis_crossing,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_0p5ms,axis_crossing,reconstructed_event_time,PASS,0.0,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+candidate,dt_0p5ms,axis_crossing,post_event_residual_flight,PASS,0.0,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_0p5ms,specular_reflection,single_specular_event,PASS,"{""ids"": [2], ""laws"": [""specular""]}","{""ids"": [2], ""laws"": [""specular""]}",event identity,surface departure and axis passage emit no material-wall event
+candidate,dt_0p5ms,specular_reflection,direct_event_time,PASS,2.168404344971009e-19,5e-11,s absolute error,candidate public event row versus analytic impact time
+candidate,dt_0p5ms,axis_crossing,axis_is_not_material_wall,PASS,"{""axis_crossings"": 1, ""wall_event_ids"": [2]}","{""axis_crossings"": 1, ""wall_event_ids_excludes"": 3}",counts,axis passage is counted separately and has no wall event row
+candidate,dt_0p5ms,all,zero_failures,PASS,0,0,events,public result has no failure event
+cross_solver,dt_0p5ms,surface_departure,position_path,PASS,2.6020852139652106e-18,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_0p5ms,surface_departure,velocity_path,PASS,2.220446049250313e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+cross_solver,dt_0p5ms,specular_reflection,position_path,PASS,7.46132779436365e-18,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_0p5ms,specular_reflection,velocity_path,PASS,2.2887833992611187e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+cross_solver,dt_0p5ms,axis_crossing,position_path,PASS,1.3985787785349405e-17,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_0p5ms,axis_crossing,velocity_path,PASS,2.237726045655905e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+comsol,dt_0p25ms,surface_departure,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+comsol,dt_0p25ms,surface_departure,analytic_position_path,PASS,3.1273172206927508e-18,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_0p25ms,surface_departure,analytic_velocity_path,PASS,2.220446049250313e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_0p25ms,surface_departure,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_0p25ms,surface_departure,surface_departure,PASS,"[0.006, 0.00025]","""z > 0""",m,first post-release frame is inside without a zero-time terminal state
+comsol,dt_0p25ms,specular_reflection,initial_state,PASS,1.734723475976807e-18,5e-14,m,initial_position_absolute_error_m
+comsol,dt_0p25ms,specular_reflection,analytic_position_path,PASS,1.666147490140628e-17,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_0p25ms,specular_reflection,analytic_velocity_path,PASS,2.2887833992611187e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_0p25ms,specular_reflection,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_0p25ms,specular_reflection,reconstructed_event_time,PASS,6.5052130349130266e-18,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+comsol,dt_0p25ms,specular_reflection,post_event_residual_flight,PASS,6.5052130349130266e-18,5e-11,m,first post-event frame includes the analytic residual flight
+comsol,dt_0p25ms,axis_crossing,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+comsol,dt_0p25ms,axis_crossing,analytic_position_path,PASS,6.2546344413855015e-18,5e-11,m,maximum_position_absolute_error_m
+comsol,dt_0p25ms,axis_crossing,analytic_velocity_path,PASS,2.237726045655905e-16,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+comsol,dt_0p25ms,axis_crossing,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+comsol,dt_0p25ms,axis_crossing,reconstructed_event_time,PASS,4.336808689942018e-19,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+comsol,dt_0p25ms,axis_crossing,post_event_residual_flight,PASS,4.336808689942018e-19,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_0p25ms,surface_departure,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_0p25ms,surface_departure,analytic_position_path,PASS,0.0,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_0p25ms,surface_departure,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_0p25ms,surface_departure,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_0p25ms,surface_departure,surface_departure,PASS,"[0.006, 0.00025]","""z > 0""",m,first post-release frame is inside without a zero-time terminal state
+candidate,dt_0p25ms,specular_reflection,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_0p25ms,specular_reflection,analytic_position_path,PASS,1.939479807224432e-18,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_0p25ms,specular_reflection,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_0p25ms,specular_reflection,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_0p25ms,specular_reflection,reconstructed_event_time,PASS,4.336808689942018e-19,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+candidate,dt_0p25ms,specular_reflection,post_event_residual_flight,PASS,4.336808689942018e-19,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_0p25ms,axis_crossing,initial_state,PASS,0.0,5e-14,m,initial_position_absolute_error_m
+candidate,dt_0p25ms,axis_crossing,analytic_position_path,PASS,1.734723475976807e-18,5e-11,m,maximum_position_absolute_error_m
+candidate,dt_0p25ms,axis_crossing,analytic_velocity_path,PASS,0.0,5e-11,m/s,maximum_velocity_absolute_error_m_per_s
+candidate,dt_0p25ms,axis_crossing,nonterminal_lifecycle,PASS,true,true,boolean,all saved current and final statuses remain active
+candidate,dt_0p25ms,axis_crossing,reconstructed_event_time,PASS,0.0,5e-11,s absolute error,event time reconstructed from the first post-event state and residual distance
+candidate,dt_0p25ms,axis_crossing,post_event_residual_flight,PASS,0.0,5e-11,m,first post-event frame includes the analytic residual flight
+candidate,dt_0p25ms,specular_reflection,single_specular_event,PASS,"{""ids"": [2], ""laws"": [""specular""]}","{""ids"": [2], ""laws"": [""specular""]}",event identity,surface departure and axis passage emit no material-wall event
+candidate,dt_0p25ms,specular_reflection,direct_event_time,PASS,2.168404344971009e-19,5e-11,s absolute error,candidate public event row versus analytic impact time
+candidate,dt_0p25ms,axis_crossing,axis_is_not_material_wall,PASS,"{""axis_crossings"": 1, ""wall_event_ids"": [2]}","{""axis_crossings"": 1, ""wall_event_ids_excludes"": 3}",counts,axis passage is counted separately and has no wall event row
+candidate,dt_0p25ms,all,zero_failures,PASS,0,0,events,public result has no failure event
+cross_solver,dt_0p25ms,surface_departure,position_path,PASS,3.1273172206927508e-18,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_0p25ms,surface_departure,velocity_path,PASS,2.220446049250313e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+cross_solver,dt_0p25ms,specular_reflection,position_path,PASS,1.6133860946657727e-17,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_0p25ms,specular_reflection,velocity_path,PASS,2.2887833992611187e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid
+cross_solver,dt_0p25ms,axis_crossing,position_path,PASS,7.757919228897728e-18,5e-11,m,COMSOL and public-API trajectories on the common saved grid
+cross_solver,dt_0p25ms,axis_crossing,velocity_path,PASS,2.237726045655905e-16,5e-11,m/s,COMSOL and public-API velocities on the common saved grid

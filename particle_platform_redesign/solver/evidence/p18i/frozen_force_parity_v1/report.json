@@ -1,0 +1,371 @@
+{
+  "comsol_rerun": false,
+  "dataset_root": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass",
+  "evidence_role": "external_saved_primitive_frozen_force_parity",
+  "force_scale_residual_limit": 1e-10,
+  "generated_at_utc": "2026-09-30T21:23:58.146785+00:00",
+  "golden_truth": "NOT_CLAIMED",
+  "interpretation": "Native saved-formula replay is the only all-package parity gate. The theory production comparison is also a gate because it represents the same formula revision with production constants. Image Case P saved U=sqrt(norm(ui)^2+u_eps^2); Image Case A saved U=AS_ui_mag reconstructed from saved psi, Te, and mi. The production image revision deliberately uses U=norm(ui). Its residual is therefore a documented model-definition comparison and cannot produce FAIL. These frozen force checks make no integrated trajectory or physical-validity claim.",
+  "packages": [
+    {
+      "active_rows": 30671,
+      "case_kind": "A",
+      "finite": true,
+      "formula_revision": "electric_field_directed_image",
+      "model_definition_difference": "saved A speed authority 'saved_caseA_AS_ui_mag_reconstructed_from_psi_Te_mi_and_u_floor' differs from production canonical U=norm(saved_ui_vector); residual is informative, not a gate",
+      "native_saved_formula_force_global_relative_l2_residual": 2.403262544706493e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.1085794848281994e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_caseA_AS_ui_mag_reconstructed_from_psi_Te_mi_and_u_floor",
+      "native_vs_vector_ion_speed_relative_difference_max": 0.9767548619579373,
+      "native_worst_row": {
+        "particle_id": 52,
+        "time_s": 0.00019
+      },
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseA_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_difference_diagnosis": "ION_SPEED_AUTHORITY_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_force_global_relative_l2_residual": 0.17083144347569498,
+      "production_canonical_force_scale_normalized_residual_max": 0.8743683938003504,
+      "production_canonical_speed_authority": "norm(saved_ui_vector)",
+      "production_canonical_worst_row": {
+        "particle_id": 12,
+        "time_s": 0.027999999999999997
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "2043cfb90b49ddc0a5ae0397b2e9023e90b5c4540321d126d92e62ea84fa95a5"
+    },
+    {
+      "active_rows": 33962,
+      "case_kind": "A",
+      "finite": true,
+      "formula_revision": "electric_field_directed_image",
+      "model_definition_difference": "saved A speed authority 'saved_caseA_AS_ui_mag_reconstructed_from_psi_Te_mi_and_u_floor' differs from production canonical U=norm(saved_ui_vector); residual is informative, not a gate",
+      "native_saved_formula_force_global_relative_l2_residual": 1.6475936029150117e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 7.027998541744525e-16,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_caseA_AS_ui_mag_reconstructed_from_psi_Te_mi_and_u_floor",
+      "native_vs_vector_ion_speed_relative_difference_max": 0.9785283346398226,
+      "native_worst_row": {
+        "particle_id": 198,
+        "time_s": 0.0043
+      },
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseA_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_difference_diagnosis": "ION_SPEED_AUTHORITY_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_force_global_relative_l2_residual": 0.2010127100121527,
+      "production_canonical_force_scale_normalized_residual_max": 0.8857762682658931,
+      "production_canonical_speed_authority": "norm(saved_ui_vector)",
+      "production_canonical_worst_row": {
+        "particle_id": 64,
+        "time_s": 0.004
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826713e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806623097098119e-10,
+      "sha256": "405220f7f85b373e32217955e542614e33d4e307a81d52f8517e22046f7ca65d"
+    },
+    {
+      "active_rows": 34440,
+      "case_kind": "A",
+      "finite": true,
+      "formula_revision": "electric_field_directed_image",
+      "model_definition_difference": "saved A speed authority 'saved_caseA_AS_ui_mag_reconstructed_from_psi_Te_mi_and_u_floor' differs from production canonical U=norm(saved_ui_vector); residual is informative, not a gate",
+      "native_saved_formula_force_global_relative_l2_residual": 2.220258841753777e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 8.980759072297747e-16,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_caseA_AS_ui_mag_reconstructed_from_psi_Te_mi_and_u_floor",
+      "native_vs_vector_ion_speed_relative_difference_max": 0.7690427086238204,
+      "native_worst_row": {
+        "particle_id": 106,
+        "time_s": 0.0001
+      },
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseA_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_difference_diagnosis": "ION_SPEED_AUTHORITY_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_force_global_relative_l2_residual": 0.24589626928284478,
+      "production_canonical_force_scale_normalized_residual_max": 0.8327533638646362,
+      "production_canonical_speed_authority": "norm(saved_ui_vector)",
+      "production_canonical_worst_row": {
+        "particle_id": 20,
+        "time_s": 0.0034
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "9220ae74646618c1aa300bdaeffd8a5c35867d3b7d529a811c8c58419b669206"
+    },
+    {
+      "active_rows": 33714,
+      "case_kind": "P",
+      "finite": true,
+      "formula_revision": "electric_field_directed_image",
+      "model_definition_difference": "saved P speed authority 'saved_caseP_sqrt_norm_ui_squared_plus_u_eps_squared' differs from production canonical U=norm(saved_ui_vector); residual is informative, not a gate",
+      "native_saved_formula_force_global_relative_l2_residual": 4.355482745035783e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.5713780295980727e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_caseP_sqrt_norm_ui_squared_plus_u_eps_squared",
+      "native_vs_vector_ion_speed_relative_difference_max": 1.075238680200326e-06,
+      "native_worst_row": {
+        "particle_id": 69,
+        "time_s": 0.0022
+      },
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseP_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_difference_diagnosis": "ION_SPEED_AUTHORITY_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_force_global_relative_l2_residual": 4.228300671416818e-07,
+      "production_canonical_force_scale_normalized_residual_max": 1.0739283812905267e-06,
+      "production_canonical_speed_authority": "norm(saved_ui_vector)",
+      "production_canonical_worst_row": {
+        "particle_id": 11,
+        "time_s": 0.0015999999999999999
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "94524ed13fbd721fa406faea4f5998dbcd409a4e650ba03a33b250de60ae1a5c"
+    },
+    {
+      "active_rows": 34727,
+      "case_kind": "P",
+      "finite": true,
+      "formula_revision": "electric_field_directed_image",
+      "model_definition_difference": "saved P speed authority 'saved_caseP_sqrt_norm_ui_squared_plus_u_eps_squared' differs from production canonical U=norm(saved_ui_vector); residual is informative, not a gate",
+      "native_saved_formula_force_global_relative_l2_residual": 4.349652939301041e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.7901464527302965e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_caseP_sqrt_norm_ui_squared_plus_u_eps_squared",
+      "native_vs_vector_ion_speed_relative_difference_max": 1.652154501285818e-06,
+      "native_worst_row": {
+        "particle_id": 51,
+        "time_s": 0.00041000000000000005
+      },
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseP_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_difference_diagnosis": "ION_SPEED_AUTHORITY_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_force_global_relative_l2_residual": 6.995933221896993e-07,
+      "production_canonical_force_scale_normalized_residual_max": 1.6508315925756537e-06,
+      "production_canonical_speed_authority": "norm(saved_ui_vector)",
+      "production_canonical_worst_row": {
+        "particle_id": 4,
+        "time_s": 0.00045000000000000004
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826713e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806623097098119e-10,
+      "sha256": "61df6194f03fe326581e69e8ea47b859e4b8e95d8471d555d6c8e21ca0eb9108"
+    },
+    {
+      "active_rows": 34727,
+      "case_kind": "P",
+      "finite": true,
+      "formula_revision": "electric_field_directed_image",
+      "model_definition_difference": "saved P speed authority 'saved_caseP_sqrt_norm_ui_squared_plus_u_eps_squared' differs from production canonical U=norm(saved_ui_vector); residual is informative, not a gate",
+      "native_saved_formula_force_global_relative_l2_residual": 4.541267751528285e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.4680895288199533e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_caseP_sqrt_norm_ui_squared_plus_u_eps_squared",
+      "native_vs_vector_ion_speed_relative_difference_max": 1.077327860557327e-06,
+      "native_worst_row": {
+        "particle_id": 130,
+        "time_s": 0.0013
+      },
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseP_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_difference_diagnosis": "ION_SPEED_AUTHORITY_MODEL_DEFINITION_DIFFERENCE",
+      "production_canonical_force_global_relative_l2_residual": 4.7539508281705617e-07,
+      "production_canonical_force_scale_normalized_residual_max": 1.076011188670419e-06,
+      "production_canonical_speed_authority": "norm(saved_ui_vector)",
+      "production_canonical_worst_row": {
+        "particle_id": 23,
+        "time_s": 0.0009
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "2390ac6c3cdcd8a640c68e283e65fec8b1b91506ef7cca29a0a0a7612f092ed8"
+    },
+    {
+      "active_rows": 28354,
+      "case_kind": "A",
+      "finite": true,
+      "formula_revision": "relative_flow_screened",
+      "model_definition_difference": "NOT_APPLICABLE",
+      "native_saved_formula_force_global_relative_l2_residual": 3.744878848568186e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.318484211206812e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_relative_ion_particle_velocity_vector",
+      "native_worst_row": {
+        "particle_id": 246,
+        "time_s": 0.0039
+      },
+      "package": "cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "FAIL",
+      "production_canonical_difference_diagnosis": "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE_INDICATED",
+      "production_canonical_force_global_relative_l2_residual": 1.2650007110321278e-09,
+      "production_canonical_force_scale_normalized_residual_max": 1.2782726024474884e-09,
+      "production_canonical_speed_authority": "relative_ion_particle_velocity_vector",
+      "production_canonical_worst_row": {
+        "particle_id": 277,
+        "time_s": 0.00044
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "af61916d47dc634e4b3ca42139eebe7fe74a0fd27941250aefda2b39f4ad4a78"
+    },
+    {
+      "active_rows": 31269,
+      "case_kind": "A",
+      "finite": true,
+      "formula_revision": "relative_flow_screened",
+      "model_definition_difference": "NOT_APPLICABLE",
+      "native_saved_formula_force_global_relative_l2_residual": 1.8034601402058155e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 8.348149081992813e-16,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_relative_ion_particle_velocity_vector",
+      "native_worst_row": {
+        "particle_id": 53,
+        "time_s": 0.019000000000000003
+      },
+      "package": "cases/formal_iondrag_theory_consistent/caseA_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "FAIL",
+      "production_canonical_difference_diagnosis": "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE_INDICATED",
+      "production_canonical_force_global_relative_l2_residual": 1.2924281027777222e-09,
+      "production_canonical_force_scale_normalized_residual_max": 1.2968247975222003e-09,
+      "production_canonical_speed_authority": "relative_ion_particle_velocity_vector",
+      "production_canonical_worst_row": {
+        "particle_id": 19,
+        "time_s": 0.0025
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826713e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806623097098119e-10,
+      "sha256": "b11d49c4e60fe817a65df33ce6581533c78dcc43e2a8c61de204eb38c2fe488f"
+    },
+    {
+      "active_rows": 31775,
+      "case_kind": "A",
+      "finite": true,
+      "formula_revision": "relative_flow_screened",
+      "model_definition_difference": "NOT_APPLICABLE",
+      "native_saved_formula_force_global_relative_l2_residual": 3.6403812179399457e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.2331067453810688e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_relative_ion_particle_velocity_vector",
+      "native_worst_row": {
+        "particle_id": 285,
+        "time_s": 0.0014
+      },
+      "package": "cases/formal_iondrag_theory_consistent/caseA_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "FAIL",
+      "production_canonical_difference_diagnosis": "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE_INDICATED",
+      "production_canonical_force_global_relative_l2_residual": 1.2819159587801878e-09,
+      "production_canonical_force_scale_normalized_residual_max": 1.2891092363540532e-09,
+      "production_canonical_speed_authority": "relative_ion_particle_velocity_vector",
+      "production_canonical_worst_row": {
+        "particle_id": 200,
+        "time_s": 0.0007
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "c21f1865d98a8a37c92219b609732145e98dd0678222f48034609c704e655f6c"
+    },
+    {
+      "active_rows": 34727,
+      "case_kind": "P",
+      "finite": true,
+      "formula_revision": "relative_flow_screened",
+      "model_definition_difference": "NOT_APPLICABLE",
+      "native_saved_formula_force_global_relative_l2_residual": 4.737577334542823e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.4085594301208009e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_relative_ion_particle_velocity_vector",
+      "native_worst_row": {
+        "particle_id": 274,
+        "time_s": 0.014
+      },
+      "package": "cases/formal_iondrag_theory_consistent/caseP_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "FAIL",
+      "production_canonical_difference_diagnosis": "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE_INDICATED",
+      "production_canonical_force_global_relative_l2_residual": 1.142450476003264e-09,
+      "production_canonical_force_scale_normalized_residual_max": 1.243579919814743e-09,
+      "production_canonical_speed_authority": "relative_ion_particle_velocity_vector",
+      "production_canonical_worst_row": {
+        "particle_id": 43,
+        "time_s": 0.009000000000000001
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "8470c6399fe1cd549854958bee0e572dfb05bd04f3ccd767b514383b1788e11d"
+    },
+    {
+      "active_rows": 34727,
+      "case_kind": "P",
+      "finite": true,
+      "formula_revision": "relative_flow_screened",
+      "model_definition_difference": "NOT_APPLICABLE",
+      "native_saved_formula_force_global_relative_l2_residual": 3.8645456106920577e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.5628286908392745e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_relative_ion_particle_velocity_vector",
+      "native_worst_row": {
+        "particle_id": 251,
+        "time_s": 0.00045000000000000004
+      },
+      "package": "cases/formal_iondrag_theory_consistent/caseP_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "FAIL",
+      "production_canonical_difference_diagnosis": "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE_INDICATED",
+      "production_canonical_force_global_relative_l2_residual": 1.2370885343972816e-09,
+      "production_canonical_force_scale_normalized_residual_max": 1.2707134497094682e-09,
+      "production_canonical_speed_authority": "relative_ion_particle_velocity_vector",
+      "production_canonical_worst_row": {
+        "particle_id": 283,
+        "time_s": 0.0004900000000000001
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826713e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806623097098119e-10,
+      "sha256": "b7b0b29a11d7845ca947304a260f719e25eb73be07c16f3c0e2a2b9e95dcaf6f"
+    },
+    {
+      "active_rows": 34727,
+      "case_kind": "P",
+      "finite": true,
+      "formula_revision": "relative_flow_screened",
+      "model_definition_difference": "NOT_APPLICABLE",
+      "native_saved_formula_force_global_relative_l2_residual": 4.354299249805231e-16,
+      "native_saved_formula_force_scale_normalized_residual_max": 1.4520665467550812e-15,
+      "native_saved_formula_replay_status": "PASS",
+      "native_speed_authority": "saved_relative_ion_particle_velocity_vector",
+      "native_worst_row": {
+        "particle_id": 267,
+        "time_s": 0.024
+      },
+      "package": "cases/formal_iondrag_theory_consistent/caseP_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "production_canonical_comparison_status": "FAIL",
+      "production_canonical_difference_diagnosis": "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE_INDICATED",
+      "production_canonical_force_global_relative_l2_residual": 1.2115316987536034e-09,
+      "production_canonical_force_scale_normalized_residual_max": 1.2576080352150016e-09,
+      "production_canonical_speed_authority": "relative_ion_particle_velocity_vector",
+      "production_canonical_worst_row": {
+        "particle_id": 7,
+        "time_s": 0.0023
+      },
+      "saved_epsilon0_F_m_median": 8.854187818826714e-12,
+      "saved_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10,
+      "sha256": "a26087b4bd5704dddfd957ee6dd5d034698b293ba188ae8c64130e0ecda8a957"
+    }
+  ],
+  "summary": {
+    "active_rows": 397820,
+    "image_model_definition_difference_packages": 6,
+    "image_production_canonical_comparison_status": "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE",
+    "image_production_canonical_force_global_relative_l2_residual": 0.03464808930404709,
+    "image_production_canonical_force_scale_normalized_residual_max": 0.8857762682658931,
+    "native_saved_formula_force_global_relative_l2_residual": 4.3465505155762735e-16,
+    "native_saved_formula_force_scale_normalized_residual_max": 1.7901464527302965e-15,
+    "native_saved_formula_force_scale_normalized_residual_p99": 8.948675981409453e-16,
+    "native_saved_formula_replay_gate": "PASS",
+    "packages": 12,
+    "theory_production_canonical_difference_diagnosis": "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE_INDICATED",
+    "theory_production_canonical_force_global_relative_l2_residual": 1.1600500198950306e-09,
+    "theory_production_canonical_force_scale_normalized_residual_max": 1.2968247975222003e-09,
+    "theory_production_canonical_gate": "FAIL"
+  },
+  "tool_revision": "p18i_saved_primitive_ion_drag_parity_v1",
+  "trajectory_accuracy": "NOT_TESTED"
+}

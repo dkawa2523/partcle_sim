@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "recipe_id": "M3-C2A-caseP-100nm-event-tolerance-pre-final",
+  "recipe_revision": 2,
+  "classification": "external_vv_caseP_candidate_geometry_tolerance_pre_final_qualification",
+  "supersedes": {
+    "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_event_tolerance_pre_final_v1.json",
+    "sha256": "7d0d687d300482b15030d252a276cbbbaf88bf7f90d9508ef9cb435c1bec5837",
+    "reason": "format-normalized evaluator source lock; science matrix unchanged"
+  },
+  "contract": {
+    "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_stochastic_pilot_v1.json",
+    "sha256": "757755191ead405dc046afd1f09eca0953354d47b00e079f8537225715fa4954"
+  },
+  "contract_receipt": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseP_100nm_pilot_contract_v1/contract_receipt.json",
+    "sha256": "7f70c756db7b2982b1b8a4e92bb405836aa34debb44f032dffdcfc1d4cf20ec0"
+  },
+  "execution_authorization": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseP_100nm_pilot_execution_v1/execution_authorization.json",
+    "sha256": "3a040e08f046f664f3c6a36dec71464d27e193c9dc68e644ba64d2bc6251735d"
+  },
+  "canonical_input": {
+    "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_input.h5",
+    "sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9",
+    "content_hash": "sha256:8d0fb04a19283194d45ed84db73154e946cfa9c827c5048dba107287b2470c83"
+  },
+  "deterministic_case_template": {
+    "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_coarse.yaml",
+    "sha256": "48342e0ba7f7f3eeb94f36d98309ffb9d5d7c5350df321a8e8333d75a0189f9a"
+  },
+  "evaluation_plan": {
+    "policy": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_ensemble_evaluation_v5.json",
+      "sha256": "9d78a612c5750821d60a144633a58d1c7817db318d89ba19251c03111337fe02"
+    }
+  },
+  "evaluator": {
+    "path": "particle_platform_redesign/solver/tools/vv/comsol/evaluate_m3c2_caseP_event_tolerance_pre_final.py",
+    "sha256": "72057a34f769e9a9965e385c630b077b50dec7360a331cc63c885f3994755d19"
+  },
+  "caseA_transverse_event_companion": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseA_100nm_event_tolerance_cross_band_v2/qualification_decision.json",
+    "sha256": "8ef56344aeb377303af2d6796521f39a5c240c71cee02edc4aab7f05937ea6b7"
+  },
+  "pilot": {
+    "candidate_seeds": [919008],
+    "levels": [
+      {
+        "name": "geometry_rtol_reference",
+        "dt_s": 0.00002,
+        "brownian_interval_tree_depth": 3,
+        "geometry_rtol": 1e-8,
+        "purpose": "caseP_geometry_tolerance_reference_on_unseen_seed"
+      },
+      {
+        "name": "geometry_rtol_candidate",
+        "dt_s": 0.00002,
+        "brownian_interval_tree_depth": 3,
+        "geometry_rtol": 1e-9,
+        "purpose": "caseP_geometry_tolerance_sensitivity_on_unseen_seed"
+      }
+    ]
+  },
+  "physics": {
+    "integrator": "ou_langevin",
+    "noise_model": "inertial_langevin_fdt",
+    "noise_revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1",
+    "coefficient_policy": "macro_root_frozen_midpoint_v1",
+    "continuous_charge_revision": "aggregate_relative_drift_regularized_two_current_v1"
+  },
+  "execution": {
+    "time_end_s": 0.03,
+    "output_count": 121,
+    "memory_limit_mb": 512,
+    "public_api_path": ["load_case", "simulate", "open_result"],
+    "parallel_policy": "two_predeclared_cells_run_sequentially_without_overlapping_solver_processes"
+  },
+  "acceptance_gate": {
+    "policy_revision": "caseP_geometry_rtol_pre_final_v1",
+    "reference_geometry_rtol": 1e-8,
+    "candidate_geometry_rtol": 1e-9,
+    "required_zero_failures_both": true,
+    "nonempty_event_gate": "cross_band_stopping_time_allowance_v1",
+    "zero_event_gate": "all_121_scheduled_frames_and_final_state_bitwise_equal_with_identical_nan_masks",
+    "zero_event_validity_condition": "zero_candidate_boundary_events",
+    "final_fail_closed_rule": "reject_final_evaluation_if_candidate_final_boundary_event_count_is_nonzero_under_zero_event_validity"
+  },
+  "claim_policy": {
+    "qualification_scope": "candidate_geometry_tolerance_configuration_only",
+    "caseA_transverse_event_evidence_is_companion_not_direct_caseP_transfer": true,
+    "pathwise_comsol_equality": false,
+    "comsol_golden_truth": false,
+    "production_core_changed": false
+  }
+}

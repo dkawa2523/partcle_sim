@@ -1,0 +1,672 @@
+{
+  "schema_version": 1,
+  "evidence_id": "M3-C1-case-A-100nm-material-event-v1",
+  "classification": "external_vv_compact_common_p1_first_material_event_checkpoint",
+  "evaluation_status": "COMPLETE",
+  "overall_decision": "PASS_LOCKED_CASE_A_100NM_COMMON_P1_BROWNIAN_OFF_FIRST_WAFER_STICK",
+  "scope": {
+    "workflow": "caseA",
+    "diameter_m": 1e-07,
+    "coordinate_system": "axisymmetric_rz_no_swirl",
+    "field_representation": "canonical_exact_connectivity_P1_projection_from_exported_nodal_values",
+    "particles": 287,
+    "pre_event": {
+      "frames": 46,
+      "records": 13202,
+      "time_window_s": [
+        0.0,
+        0.00045
+      ],
+      "output_interval_s": 1e-05,
+      "internal_steps_s": [
+        6.25e-07,
+        3.125e-07,
+        1.5625e-07
+      ]
+    },
+    "material_event": {
+      "frames": 48,
+      "records": 13776,
+      "time_window_s": [
+        0.0,
+        0.00045875
+      ],
+      "fine_internal_step_s": 1.5625e-07,
+      "event_scope": "first_wafer_stick_only"
+    },
+    "brownian_active": false,
+    "dynamic_charge_active": true,
+    "deterministic_contributions": [
+      "electric",
+      "relative_flow_ion_drag",
+      "epstein_drag",
+      "waldmann_heat_flux_thermophoresis",
+      "free_molecular_lift_sensitivity",
+      "dielectrophoresis",
+      "gravity_buoyancy"
+    ]
+  },
+  "source_artifacts": {
+    "material_event_evaluation": {
+      "result": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_eval_v5/comparison_result.json",
+        "bytes": 63620,
+        "sha256": "4637303812d49496b75cbee4ad27128166afac442dc2b76af3af37c4f69ce746",
+        "status": "PASS",
+        "passed_gates": 20,
+        "failed_gates": 0
+      },
+      "source_gate_table": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_eval_v5/gates.csv",
+        "bytes": 3160,
+        "sha256": "9469dab6e79ccc4bce2dcdd9e3e40fa6328a8d969177104c2ea1a3e4d16e7d5d"
+      },
+      "evaluator": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_eval_v5/evaluate_m3c1_material_event.py",
+        "bytes": 88184,
+        "sha256": "67c4f0d7e36590461693eb26d934a0d7f312d05a8b669c69e7aaadd8cb0cf06d",
+        "tool_revision": "m3c1_common_p1_first_material_event_evaluation_v4"
+      },
+      "configuration": {
+        "path": "tools/vv/comsol/cases/m3c1_common_p1_material_event_v1.json",
+        "bytes": 3927,
+        "sha256": "d46a9f6040125e66d62c219861ab1b037d9b655dbeed9f029df13a0139ac3fed"
+      }
+    },
+    "v14_material_candidate": {
+      "directory": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3",
+      "run_report": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/candidate_run_report.json",
+        "bytes": 4100,
+        "sha256": "3a2b64208c110634166606722e9415113e3619aabbc605e75526b7bc2d490394",
+        "status": "COMPLETE"
+      },
+      "case": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/candidate_material_event.yaml",
+        "bytes": 4941,
+        "sha256": "a8876aab0ff133c4c09a257c70445b286ceabe051420711b575ac0f34962832a"
+      },
+      "result_manifest": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/result_material_event/run.json",
+        "bytes": 14843,
+        "sha256": "ca233da307fb30865a0b7097b2fe1dd2c9315c5ee616b123169f42c7c5ed785c",
+        "status": "complete",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v14"
+      },
+      "events": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/candidate_events.csv",
+        "bytes": 432,
+        "sha256": "b21ea640203473ab59c1a9e0828a57ccce73a26fc65ba1df6f867083119dfea9"
+      },
+      "trajectory": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/candidate_trajectory.csv",
+        "bytes": 1591633,
+        "sha256": "59cc1f2c1767a43db9b1ad72baf373574d03b92b7075cb2df773bc51057c5015"
+      },
+      "pre_event_trajectory": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/candidate_pre_event_trajectory.csv",
+        "bytes": 1524084,
+        "sha256": "47e76b58b15510bf0139aefaa689c43a0fa5e1d01979fc93393ac65ff63a750e"
+      },
+      "final_state": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/result_material_event/final.h5",
+        "bytes": 39668,
+        "sha256": "dfe3a0fa62dddb83e0832c85a75d1a6dbc57be0fc7f862ce156e523abc3a1031"
+      },
+      "checkpoint_450us": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/result_material_event/checkpoints/A.h5",
+        "bytes": 48692,
+        "sha256": "ddddd897dd2989ba8b637ff5727250253a40bc71d6115f92ea3dc2ad4920ad37"
+      },
+      "prepare_report": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/prepare_report.json",
+        "bytes": 3505,
+        "sha256": "fb3dfafece5fe15c00ba041fd567eab426b7bfee4c03cc79a17966659f6a58ad"
+      },
+      "producer_source": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/run_m3c1_material_event_candidate.py",
+        "bytes": 21064,
+        "sha256": "4b998659f192b60b3844c82fdbf2cc7e8e5404c133347f9d1af2b5fb90a121e3"
+      }
+    },
+    "v14_pre_event_candidate": {
+      "directory": "_out_m3c1/caseA_100nm_exported_p1_v5",
+      "run_report": {
+        "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_run_report.json",
+        "bytes": 11761,
+        "sha256": "f3dee103cab4e4b410b6eb611bfc1061508e01314d3225409354ac0714abb7c9",
+        "decision": "COMPLETE"
+      },
+      "prepare_report": {
+        "path": "_out_m3c1/caseA_100nm_exported_p1_v5/prepare_report.json",
+        "bytes": 9253,
+        "sha256": "6af375b16c3d2ddb42e5b5296257b0b240bdd27d7c444f2432a2ca4b73ba915e"
+      },
+      "canonical_input": {
+        "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_input.h5",
+        "bytes": 751995,
+        "sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1"
+      },
+      "runs": {
+        "dt_0p625us": {
+          "case": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_dt_0p625us.yaml",
+            "bytes": 5130,
+            "sha256": "d0764b66b63b654da854b8dc3bce223f8e91df7a5a3923a2ab06cc2a6ed3d4a0"
+          },
+          "result_manifest": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/result_dt_0p625us/run.json",
+            "bytes": 14842,
+            "sha256": "57300a6bcc1a5e01163de8949b296bd85dcba8c47d867f93818b1db5007d51d4",
+            "status": "complete"
+          },
+          "trajectory": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_trajectory_dt_0p625us.csv",
+            "bytes": 1598786,
+            "sha256": "ce133d51ae4307f6abba14d88f286ec251ff1706e4cd144729a3986db87e4c54"
+          },
+          "events": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_events_dt_0p625us.csv",
+            "bytes": 204,
+            "sha256": "991eca9b164368dedd5dfe18fa7abcb37fdbbe6b622fb26dea1b4997c3d86c9c"
+          }
+        },
+        "dt_0p3125us": {
+          "case": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_dt_0p3125us.yaml",
+            "bytes": 5132,
+            "sha256": "0e1a5254a4d11bb9f65583b2ef81a788aefaff4bdc3cc704588e6c16ba5066ed"
+          },
+          "result_manifest": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/result_dt_0p3125us/run.json",
+            "bytes": 14845,
+            "sha256": "f9b8d9ab3834152700e5cab292ce908f03e7964f5a5970a078857a6694653558",
+            "status": "complete"
+          },
+          "trajectory": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_trajectory_dt_0p3125us.csv",
+            "bytes": 1598996,
+            "sha256": "115df112ef24d41bc21b0ad06514e5202b97c60d0a3813ba97c85f9acdd4055d"
+          },
+          "events": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_events_dt_0p3125us.csv",
+            "bytes": 204,
+            "sha256": "991eca9b164368dedd5dfe18fa7abcb37fdbbe6b622fb26dea1b4997c3d86c9c"
+          }
+        },
+        "dt_0p15625us": {
+          "case": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_dt_0p15625us.yaml",
+            "bytes": 5134,
+            "sha256": "0fdf8c2e86c49b059f7f8b2a4817b0ab1e6db5d65ca91c1dd5b664867582d350"
+          },
+          "result_manifest": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/result_dt_0p15625us/run.json",
+            "bytes": 14848,
+            "sha256": "046a8f4f535b52d8ad69c32a077d75cf7a9a0edcc8221f94c57929fc6c8d35f8",
+            "status": "complete"
+          },
+          "trajectory": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_trajectory_dt_0p15625us.csv",
+            "bytes": 1598762,
+            "sha256": "0d3fa6e58db9c108079a45861eebda492bc84b2c3502c135bc74edcb155a8295"
+          },
+          "events": {
+            "path": "_out_m3c1/caseA_100nm_exported_p1_v5/candidate_events_dt_0p15625us.csv",
+            "bytes": 204,
+            "sha256": "991eca9b164368dedd5dfe18fa7abcb37fdbbe6b622fb26dea1b4997c3d86c9c"
+          }
+        }
+      }
+    },
+    "v14_pre_event_evaluation": {
+      "candidate_self_convergence": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_eval_v3/candidate_self_convergence.json",
+        "bytes": 94121,
+        "sha256": "ca0ef84cda1f1ddfc2b5eecc357eced4cb3648b48d582de10195c825bbbf38c7",
+        "status": "PASS"
+      },
+      "comparison_budget": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_eval_v3/comparison_budget.json",
+        "bytes": 5730,
+        "sha256": "ab3713fb54aba02f7a208920e377b1fb90daaba3e129a04e57da8b4b3048b7b5",
+        "status": "REGISTERED"
+      },
+      "comparison_result": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_eval_v3/comparison_result.json",
+        "bytes": 43920,
+        "sha256": "9fa50b0481ea662c07a64ba258977d0004831a50636c10d9ba5c96f1d94f90bf",
+        "status": "PASS",
+        "passed_gates": 9
+      },
+      "evaluator": {
+        "path": "tools/vv/comsol/evaluate_m3c1_common_field.py",
+        "bytes": 47474,
+        "sha256": "c073e44b3ffc1b26a229240b905d5b3976cd3f43fa9af2f2224e73ce31a4916e",
+        "tool_revision": "m3c1_common_canonical_p1_pre_event_v2"
+      },
+      "configuration": {
+        "path": "tools/vv/comsol/cases/m3c1_caseA_100nm_common_p1_v1.json",
+        "bytes": 5223,
+        "sha256": "db85d2187edd2b8807717a9f7272b6e198b3dc1a1a080df46e67980458fc763d"
+      }
+    },
+    "comsol_v7_reference": {
+      "directory": "_out_m3c1/caseA_100nm_common_p1_material_event_v7",
+      "run_receipt": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/common_p1_material_event_run_receipt.json",
+        "bytes": 18150,
+        "sha256": "e88af07a1288bfe8ad0f6596d9f0fe67e6e899ae11b1a5394c1c4467ec975809",
+        "status": "COMPLETE",
+        "comsol_version": "6.4.0.429"
+      },
+      "run_status": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/run_status.json",
+        "bytes": 227,
+        "sha256": "6ac9773bcd89136dd654c38727c2b09b861acc22ab3064c07184b86bf3589b5b",
+        "status": "COMPLETE"
+      },
+      "artifact_ledger": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/artifact_hashes.csv",
+        "bytes": 4239,
+        "sha256": "1d27a4597eacae09e6a288e917aef14c5245b032a6b756950a60f290df987b88"
+      },
+      "table_receipt": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/common_p1_table_receipt.json",
+        "bytes": 14714,
+        "sha256": "1c34e6753569420d6031c3118a532ec990bd96a935607ce498c7d1225d70cf97"
+      },
+      "prepared_table_validation": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/prepared_table_validation.json",
+        "bytes": 7711,
+        "sha256": "cea0f59b7d4a282794cf5a0f9b4fd1ac5a2ca2381e0c4864ba650477ae74da95",
+        "status": "PASS"
+      },
+      "raw_validation": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/material_event_raw_validation.json",
+        "bytes": 2361,
+        "sha256": "53f72d850f68c4441e55f39c38af998a4afc945378284e4f24ac19ce296369a8",
+        "status": "PASS"
+      },
+      "provenance": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/provenance.json",
+        "bytes": 2817,
+        "sha256": "6f81e1aedf6133e55cb532bda0236eec0b4b762925ea09548c68e821baf10886"
+      },
+      "raw_tables": {
+        "state": {
+          "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/dt_0p15625us/state_raw_wide.csv",
+          "bytes": 2922512,
+          "sha256": "c05f2431f8cb511ebddccdc7c14fd5b8735e98f820cef405905a5cb373ee72ae"
+        },
+        "force": {
+          "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/dt_0p15625us/force_raw_wide.csv",
+          "bytes": 6026115,
+          "sha256": "97eb45e745da104e119ae41c2b82a74f97a929f0e5986177c172558adfb3c3f4"
+        },
+        "primitive": {
+          "path": "_out_m3c1/caseA_100nm_common_p1_material_event_v7/dt_0p15625us/primitive_raw_wide.csv",
+          "bytes": 6211958,
+          "sha256": "fb2b63d883311fe228d2db460f91234e08f4ac586d9e49d2d3c89106b71341ac"
+        }
+      },
+      "source_mph": {
+        "path": "../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+        "path_basis": "solver_project_root",
+        "bytes": 544941923,
+        "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+      }
+    },
+    "common_p1_fine_reference_trajectory": {
+      "path": "_out_m3c1/caseA_100nm_common_p1_full_v3/dt_0p15625us/trajectory_reference.csv",
+      "bytes": 1603318,
+      "sha256": "ff8f235e64736ce0102a87e157488b6e7d014cad0159f4b40feac2fa043af9f3"
+    },
+    "v13_performance_baseline": {
+      "directory": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v2",
+      "run_report": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v2/candidate_run_report.json",
+        "bytes": 4107,
+        "sha256": "b24d46a103af200ee7ea89d7f180feb0a0682cab702eca1f79fe2c14bc1abc65",
+        "status": "COMPLETE"
+      },
+      "result_manifest": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v2/result_material_event/run.json",
+        "bytes": 14851,
+        "sha256": "ca13065178b817511f9a833600440741a2223b18c2a19bb2a4f635cfbec7a33d",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v13"
+      },
+      "events": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v2/candidate_events.csv",
+        "bytes": 431,
+        "sha256": "091d1ab1e411e30e54e351da861ae5e114c112f3b339e7da716e115ed659907b"
+      },
+      "trajectory": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v2/candidate_trajectory.csv",
+        "bytes": 1591583,
+        "sha256": "0ce27ffa9a5426b8199cbce960e65a72bb9e3e92d52f09206d6a1d5b764cbed4"
+      },
+      "checkpoint_450us": {
+        "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v2/result_material_event/checkpoints/A.h5",
+        "bytes": 48692,
+        "sha256": "38b9bb93788f093b746923224ebf9a73b28c372565d0f133f25f28d5bf562c7f"
+      }
+    },
+    "historical_roundoff_limited_self_comparison": {
+      "path": "_out_m3c1/caseA_100nm_common_p1_eval_v2/candidate_self_convergence.json",
+      "bytes": 94242,
+      "sha256": "4f1fd6f7ea9bfb6e0d014c9c312452f1fc16855d5deef6b4f394458341717557",
+      "status": "PASS",
+      "classifications": {
+        "position": "ROUNDOFF_LIMITED",
+        "velocity": "ROUNDOFF_LIMITED",
+        "charge": "ROUNDOFF_LIMITED"
+      },
+      "interpretation": "VALID_HISTORICAL_PRECISION_STABILITY_RECORD_NOT_INVALIDATED_TEMPORAL_ORDER_NOT_EVALUATED_BECAUSE_V13_ARTIFICIAL_EVENT_SUBDIVISION_EQUALIZED_ACCEPTED_PIECES"
+    },
+    "separate_cross_representation_result": {
+      "path": "_out_m3c1/caseA_100nm_pre_event_v6/cross_representation_comparison.json",
+      "bytes": 42525,
+      "sha256": "5b47e98d53312e8482bfba3aeb17d35ba6c30a71ce4c02b944d9f61e644500c7",
+      "status": "FAIL",
+      "relationship": "SEPARATE_NATIVE_FE_VS_CANONICAL_P1_ARTIFACT_NOT_SUPERSEDED"
+    }
+  },
+  "independent_recalculation": {
+    "method": "streamed SHA-256 and byte-size checks; exact ledger path-set comparison; strict CSV and COMSOL-wide-table parsing; direct float64 RMS, maximum, relative-L2, observed-order, event-difference, hold, lifecycle, and HDF5-checkpoint calculations",
+    "reference_artifact_ledger": {
+      "indexed_files": 40,
+      "indexed_bytes": 19174223,
+      "hash_or_size_mismatches": 0,
+      "path_coverage_mismatches": 0
+    },
+    "reference_raw_shapes": {
+      "state_raw_wide": [
+        287,
+        48,
+        15
+      ],
+      "force_raw_wide": [
+        287,
+        48,
+        20
+      ],
+      "primitive_raw_wide": [
+        287,
+        48,
+        24
+      ],
+      "all_values_finite": true
+    },
+    "material_candidate_shape_and_state": {
+      "trajectory_shape": [
+        13776,
+        8
+      ],
+      "event_shape": [
+        1,
+        17
+      ],
+      "pre_event_trajectory_shape": [
+        13202,
+        8
+      ],
+      "complete_unique_particle_time_grid": true,
+      "all_numeric_state_values_finite": true,
+      "lifecycle_row_counts": {
+        "active": 13774,
+        "stuck": 2
+      },
+      "final_lifecycle_counts": {
+        "active": 286,
+        "stuck": 1
+      },
+      "failure_events": 0
+    },
+    "reference_state": {
+      "current_status_row_counts": {
+        "1": 13774,
+        "3": 2
+      },
+      "final_current_status_counts": {
+        "1": 286,
+        "3": 1
+      },
+      "nonactive_particle_ids": [
+        57
+      ]
+    },
+    "material_event": {
+      "candidate": {
+        "particle_id": 57,
+        "event_ordinal": 1,
+        "canonical_boundary_id": 6,
+        "canonical_boundary_group": "wafer",
+        "canonical_external_id": 134,
+        "primary_facet_id": 38,
+        "law": "stick",
+        "outcome": "stuck",
+        "event_time_s": 0.00045782250019099044,
+        "hit_position_m": [
+          0.14790084010874993,
+          0.022
+        ],
+        "terminal_charge_e": 8.974770710019452,
+        "last_active_saved_time_s": 0.00045,
+        "first_stuck_saved_time_s": 0.000458,
+        "terminal_saved_rows": 2,
+        "post_event_velocity_maximum_absolute_component_m_per_s": 0.0,
+        "saved_stuck_velocity_maximum_absolute_component_m_per_s": 0.0,
+        "terminal_position_hold_m": 0.0,
+        "terminal_charge_hold_e": 0.0
+      },
+      "reference": {
+        "particle_id": 57,
+        "current_status_code": 3,
+        "event_time_s": 0.0004578225004067447,
+        "hit_position_m": [
+          0.1479008401087231,
+          0.022
+        ],
+        "terminal_charge_e": 8.974770714747834,
+        "last_active_saved_time_s": 0.00045000000000000004,
+        "first_terminal_saved_time_s": 0.000458,
+        "terminal_saved_rows": 2,
+        "terminal_position_hold_m": 0.0,
+        "terminal_charge_hold_e": 0.0
+      },
+      "absolute_differences": {
+        "event_time_s": 2.157542807607049e-13,
+        "hit_position_norm_m": 2.683964162031316e-14,
+        "terminal_charge_e": 4.7283812421028415e-09
+      }
+    },
+    "v14_pre_event_temporal_self_convergence": {
+      "trajectory_shape_each": [
+        13202,
+        8
+      ],
+      "all_states_active": true,
+      "events_per_run": 0,
+      "failures_per_run": 0,
+      "run_work": {
+        "dt_0p625us": {
+          "candidate_queries": 206927,
+          "refinements": 0,
+          "accepted_particle_pieces": 206927,
+          "maximum_refinement_depth": 0
+        },
+        "dt_0p3125us": {
+          "candidate_queries": 413567,
+          "refinements": 0,
+          "accepted_particle_pieces": 413567,
+          "maximum_refinement_depth": 0
+        },
+        "dt_0p15625us": {
+          "candidate_queries": 826847,
+          "refinements": 0,
+          "accepted_particle_pieces": 826847,
+          "maximum_refinement_depth": 0
+        }
+      },
+      "position": {
+        "coarse_pair_rms_m": 4.987912590869796e-10,
+        "fine_pair_rms_m": 1.2214212325959003e-10,
+        "fine_pair_maximum_m": 9.464614738029072e-10,
+        "fine_pair_relative_l2": 6.099791486063973e-08,
+        "observed_rms_order": 2.029875353701904,
+        "classification": "ORDER_EVALUATED",
+        "status": "PASS"
+      },
+      "velocity": {
+        "coarse_pair_rms_m_per_s": 3.7833593510803378e-06,
+        "fine_pair_rms_m_per_s": 8.937669620198225e-07,
+        "fine_pair_maximum_m_per_s": 5.911426737692563e-06,
+        "fine_pair_relative_l2": 8.321356016032579e-08,
+        "observed_rms_order": 2.0816971911764033,
+        "classification": "ORDER_EVALUATED",
+        "status": "PASS"
+      },
+      "charge": {
+        "coarse_pair_rms_e": 1.439875446391625e-05,
+        "fine_pair_rms_e": 3.491357494531639e-06,
+        "fine_pair_maximum_e": 4.573866982582331e-05,
+        "fine_pair_relative_l2": 1.3796067752988052e-08,
+        "observed_rms_order": 2.044084026475049,
+        "classification": "ORDER_EVALUATED",
+        "status": "PASS"
+      },
+      "interpretation": "EMPIRICAL_ORDER_FOR_THIS_PIECEWISE_P1_MESH_CROSSING_CASE_NOT_A_CERTIFICATION_OF_FORMAL_FOURTH_ORDER_RK4"
+    },
+    "current_same_field_pre_event": {
+      "candidate": "v14_dt_0p15625us",
+      "reference": "common_P1_COMSOL_dt_0p15625us",
+      "position": {
+        "count": 13202,
+        "rms_m": 4.06807283316903e-13,
+        "maximum_m": 1.2035778717837921e-12,
+        "relative_l2": 2.0316001855367802e-10
+      },
+      "velocity": {
+        "count": 13202,
+        "rms_m_per_s": 2.10847522277453e-09,
+        "maximum_m_per_s": 3.844306466969233e-09,
+        "relative_l2": 1.9630813983926987e-10
+      },
+      "charge": {
+        "count": 13202,
+        "rms_e": 1.1818881019499895e-07,
+        "maximum_e": 2.3758877887303242e-07,
+        "relative_l2": 4.670220207738041e-10
+      },
+      "passed_gates": 9,
+      "failed_gates": 0,
+      "status": "PASS"
+    },
+    "stored_report_consistency": {
+      "candidate_embedded_hash_links_checked": 22,
+      "candidate_embedded_hash_mismatches": 0,
+      "material_evaluation_json_gate_rows": 20,
+      "material_evaluation_source_csv_rows": 20,
+      "material_evaluation_gate_name_or_status_mismatches": 0,
+      "maximum_absolute_difference_from_recomputed_core_metrics": 1.3234889800848443e-23,
+      "all_recomputed_gate_statuses_match": true
+    }
+  },
+  "performance_observation": {
+    "counter_identity": "candidate_queries_equals_accepted_particle_pieces_plus_refinements",
+    "v13": {
+      "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v13",
+      "candidate_queries": 16427517,
+      "refinements": 7792306,
+      "accepted_particle_pieces": 8635211,
+      "maximum_refinement_depth": 16
+    },
+    "v14": {
+      "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v14",
+      "candidate_queries": 842927,
+      "refinements": 11,
+      "accepted_particle_pieces": 842916,
+      "maximum_refinement_depth": 11
+    },
+    "v13_to_v14": {
+      "candidate_queries_delta": -15584590,
+      "candidate_queries_reduction_fraction": 0.948688106668829,
+      "refinements_delta": -7792295,
+      "refinements_reduction_fraction": 0.999998588351125,
+      "accepted_particle_pieces_delta": -7792295,
+      "accepted_particle_pieces_reduction_fraction": 0.902386172150281,
+      "maximum_refinement_depth_delta": -5
+    },
+    "checkpoint_450us": {
+      "v13": {
+        "macro_time_s": 0.0004499999999999843,
+        "candidate_queries": 16073480,
+        "refinements": 7623460,
+        "accepted_particle_pieces": 8450020,
+        "maximum_refinement_depth": 6
+      },
+      "v14": {
+        "macro_time_s": 0.0004499999999999843,
+        "candidate_queries": 826560,
+        "refinements": 0,
+        "accepted_particle_pieces": 826560,
+        "maximum_refinement_depth": 0
+      },
+      "v13_refinements_by_checkpoint_numerator": 7623460,
+      "v13_final_refinements_denominator": 7792306,
+      "v13_refinements_by_checkpoint_fraction": 0.9783317030927687
+    },
+    "shell_wall_time": {
+      "authority": "operator_observed_shell_wall_time_supplied_with_task",
+      "artifact_embedded_timer": false,
+      "gating": false,
+      "precision": "approximate",
+      "v13_display": "approximately_14_minutes_13_seconds",
+      "v13_rounded_seconds": 853.0,
+      "v14_display": "approximately_36.5_seconds",
+      "v14_rounded_seconds": 36.5,
+      "approximate_speedup_from_rounded_observations": 23.36986301369863,
+      "interpretation": "machine_local_non_gating_shell_observation_not_solver_reported_runtime"
+    }
+  },
+  "gate_layers": {
+    "artifact_integrity": {
+      "rows": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "v14_temporal_self": {
+      "rows": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "current_same_field": {
+      "rows": 9,
+      "passed": 9,
+      "failed": 0
+    },
+    "material_event": {
+      "rows": 20,
+      "passed": 20,
+      "failed": 0
+    },
+    "gates_csv_total_rows": 39
+  },
+  "claim_separation": {
+    "accepted_claim": "PASS_ONLY_FOR_LOCKED_CASE_A_100NM_COMMON_CANONICAL_P1_BROWNIAN_OFF_FIRST_WAFER_STICK_AND_STATED_WINDOWS",
+    "cross_representation_native_FE_vs_canonical_P1": "FAIL_UNCHANGED_SEPARATE_ARTIFACT",
+    "native_field_agreement": "NOT_CLAIMED",
+    "general_boundary_accuracy": "NOT_CLAIMED_FIRST_WAFER_STICK_ONLY",
+    "other_boundary_groups_laws_and_later_events": "NOT_TESTED",
+    "thirty_millisecond_trajectory": "NOT_TESTED_STOPPED_AT_458P75US",
+    "brownian_accuracy": "NOT_TESTED_DISABLED",
+    "physical_model_validity": "NOT_CLAIMED",
+    "physical_applicability": "NOT_CLAIMED",
+    "formal_fourth_order_rk4_behavior": "NOT_CLAIMED_EMPIRICAL_ORDER_ABOUT_TWO_IN_THIS_CASE",
+    "terminal_velocity_parity": "NOT_GENERALIZED_BEYOND_RECORDED_FIRST_STICK_SAVED_OBSERVATIONS",
+    "universal_comsol_equivalent_accuracy": "NOT_CLAIMED",
+    "comsol_is_golden_truth": false,
+    "other_cases_sizes_windows_or_field_representations": "NOT_CLAIMED"
+  }
+}

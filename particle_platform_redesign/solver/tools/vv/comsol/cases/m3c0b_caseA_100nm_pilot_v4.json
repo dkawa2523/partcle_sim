@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C0b-pilot",
+  "evaluation_revision": 4,
+  "classification": "external_comsol_reference",
+  "expected_comsol_version": "6.4.0.429",
+  "source_model": {
+    "relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "load_mode": "ModelUtil.loadCopy",
+    "saved": false
+  },
+  "case": {
+    "workflow": "caseA",
+    "diameter_m": 1e-7,
+    "ion_drag_revision": "relative_flow_screened_collection_orbital_v1",
+    "particle_count": 287,
+    "output_times": 46,
+    "time_end_s": 0.00045,
+    "fixed_rk4_steps_s": [2.5e-6, 1.25e-6, 6.25e-7]
+  },
+  "numerics": {
+    "integrator": "classical_rk4",
+    "integrator_order": 4,
+    "relative_tolerance": 1e-8,
+    "wall_accuracy_order": 1,
+    "store_particle_status": true,
+    "store_extra": false
+  },
+  "physics": {
+    "brownian_active": false,
+    "saffman_active": false,
+    "dynamic_charge_active": true,
+    "deterministic_contributions": [
+      "electric",
+      "relative_flow_ion_drag",
+      "epstein_drag",
+      "waldmann_thermophoresis",
+      "free_molecular_lift_sensitivity",
+      "dielectrophoresis",
+      "gravity_buoyancy"
+    ]
+  },
+  "raw_export": {
+    "revision": 3,
+    "tables": [
+      "state_raw_wide.csv",
+      "force_raw_wide.csv",
+      "neutral_raw_wide.csv",
+      "electric_raw_wide.csv",
+      "plasma_raw_wide.csv"
+    ],
+    "join_key": ["particle_id", "time_s"]
+  },
+  "acceptance": {
+    "minimum_observed_order": 0.75,
+    "maximum_fine_pair_position_relative_l2": 5e-6,
+    "maximum_fine_pair_velocity_relative_l2": 5e-4,
+    "maximum_fine_pair_charge_relative_l2": 2e-5,
+    "require_all_records_active": true
+  },
+  "scope": {
+    "purpose": "establish a pre-event admissible fixed-step series for the full-deterministic Brownian-off reference before matrix expansion",
+    "certifies_solver_agreement": false,
+    "certifies_physical_applicability": false,
+    "matrix_expansion_required": true
+  }
+}

@@ -1,0 +1,42 @@
+format_version: 1
+source:
+  vertices_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/mesh_vertices_si.csv
+  triangles_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/domain_triangles.csv
+  quadrilaterals_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/domain_quadrilaterals.csv
+  boundary_edges_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/boundary_edges.csv
+  field_values_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/input_fields/background_fields_mesh_points.csv
+  field_columns_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/config/background_field_column_dictionary.csv
+domain:
+  external_id: 3
+  layout_name: plasma
+  quadrilateral_order: q1_reference
+  excluded_boundary_ids: [5]
+boundary_groups:
+  - name: wafer
+    external_ids: [6, 28, 29]
+    material_id: 0
+  - name: grounded_wall
+    external_ids: [8, 36, 38, 40, 41, 47]
+    material_id: 0
+  - name: focus_transition
+    external_ids: [32, 33, 45]
+    material_id: 0
+  - name: outer_dielectric
+    external_ids: [34, 46]
+    material_id: 0
+  - name: pump_outlet
+    external_ids: [35]
+    material_id: 0
+  - name: gas_inlet
+    external_ids: [37]
+    material_id: 0
+fields:
+  coordinate_columns: [r_m, z_m]
+  inside_column: inside_model_domain
+  gas_velocity_columns: [gas_velocity_r_m_per_s, gas_velocity_z_m_per_s]
+  gas_temperature_column: gas_temperature_K
+  gas_density_column: gas_density_kg_per_m3
+  gas_dynamic_viscosity_column: dynamic_viscosity_Pa_s
+  gas_mean_free_path_column: gas_mean_free_path_m
+  coordinate_match_tolerance_m: 1.5e-14
+  axis_radial_velocity_tolerance_m_s: 2.0e-4

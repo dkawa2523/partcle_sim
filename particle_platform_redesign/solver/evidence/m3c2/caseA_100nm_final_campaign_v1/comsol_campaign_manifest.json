@@ -1,0 +1,2055 @@
+{
+  "case_id": "formal_iondrag_theory_consistent/caseA_100nm",
+  "claim_policy": {
+    "comsol_golden_truth": false,
+    "pathwise_comparison": false,
+    "solver_accuracy": "NOT_EVALUATED",
+    "step_convergence": "NOT_EVALUATED"
+  },
+  "common_observation_times": [
+    0.0,
+    1e-05,
+    2e-05,
+    3.0000000000000004e-05,
+    4e-05,
+    5e-05,
+    6.000000000000001e-05,
+    7.000000000000001e-05,
+    8e-05,
+    9e-05,
+    0.0001,
+    0.00011,
+    0.00012000000000000002,
+    0.00013000000000000002,
+    0.00014000000000000001,
+    0.00015000000000000001,
+    0.00016,
+    0.00017,
+    0.00018,
+    0.00019,
+    0.0002,
+    0.00021,
+    0.00022,
+    0.00023,
+    0.00024000000000000003,
+    0.00025,
+    0.00026000000000000003,
+    0.00027,
+    0.00028000000000000003,
+    0.00029,
+    0.00030000000000000003,
+    0.00031,
+    0.00032,
+    0.00033000000000000005,
+    0.00034,
+    0.00035000000000000005,
+    0.00036,
+    0.00037000000000000005,
+    0.00038,
+    0.00039000000000000005,
+    0.0004,
+    0.00041000000000000005,
+    0.00042,
+    0.00043000000000000004,
+    0.00044,
+    0.00045000000000000004,
+    0.00046,
+    0.00047000000000000004,
+    0.00048000000000000007,
+    0.0004900000000000001,
+    0.0005,
+    0.0006,
+    0.0007,
+    0.0007999999999999999,
+    0.0009,
+    0.001,
+    0.0010999999999999998,
+    0.0012000000000000001,
+    0.0013,
+    0.0014,
+    0.0015,
+    0.0015999999999999999,
+    0.0017000000000000001,
+    0.0018,
+    0.0019000000000000002,
+    0.002,
+    0.0021,
+    0.0022,
+    0.0023,
+    0.0024000000000000002,
+    0.0025,
+    0.0026,
+    0.0027,
+    0.0028,
+    0.0029,
+    0.003,
+    0.0031,
+    0.0032,
+    0.0033,
+    0.0034,
+    0.0035,
+    0.0036,
+    0.0037,
+    0.0038,
+    0.0039,
+    0.004,
+    0.0041,
+    0.004200000000000001,
+    0.0043,
+    0.0044,
+    0.0045000000000000005,
+    0.0046,
+    0.0047,
+    0.0048000000000000004,
+    0.0049,
+    0.005,
+    0.006,
+    0.007,
+    0.008,
+    0.009000000000000001,
+    0.01,
+    0.011,
+    0.012,
+    0.013000000000000001,
+    0.014,
+    0.015000000000000001,
+    0.016,
+    0.017,
+    0.018000000000000002,
+    0.019000000000000003,
+    0.02,
+    0.020999999999999998,
+    0.022,
+    0.023,
+    0.024,
+    0.025,
+    0.026000000000000002,
+    0.027000000000000003,
+    0.027999999999999997,
+    0.028999999999999998,
+    0.03
+  ],
+  "coordinate_system": "axisymmetric_rz_no_swirl",
+  "execution_mode": "FinalCampaign",
+  "execution_request": {
+    "path": "m3c2_execution_request.json",
+    "registration": {
+      "authorization_artifacts": {
+        "evaluation_policy": {
+          "path": "../../../tools/vv/comsol/cases/m3c2_caseA_100nm_ensemble_evaluation_v3.json",
+          "sha256": "26139aa08cc3d893394cd15dcacf282bc7874dc3de06c1cdbfa0dc401caa055e"
+        },
+        "pilot_evaluation": {
+          "path": "../../../_out_m3c2/caseA_100nm_stochastic_pilot_evaluation_v3/evaluation_manifest.json",
+          "sha256": "609c3da551ada8859787d088d5ca53fc3ba31e93b0d20d79d1403b6015d91005"
+        },
+        "selection_receipt": {
+          "path": "selection_receipt.json",
+          "sha256": "3f214b75e876c36c42543dfc29b2861fcf262f8a845e6adc55b569a0977d975e"
+        }
+      },
+      "filename": "final_registration.json",
+      "kind": "m3c2_caseA_100nm_final_campaign",
+      "sha256": "76ed101469aa22819c350a3740662413b2995bb3925e7e1e3f41be531d897bf8"
+    },
+    "seed_isolation": {
+      "excluded_pilot_seeds": [
+        918160,
+        918161,
+        918162,
+        918163,
+        918164,
+        918165,
+        918166,
+        918167
+      ],
+      "other_participant_seeds": [
+        318192,
+        318193,
+        318194,
+        318195,
+        318196,
+        318197,
+        318198,
+        318199,
+        318200,
+        318201,
+        318202,
+        318203,
+        318204,
+        318205,
+        318206,
+        318207,
+        318208,
+        318209,
+        318210,
+        318211,
+        318212,
+        318213,
+        318214,
+        318215,
+        318216,
+        318217,
+        318218,
+        318219,
+        318220,
+        318221,
+        318222,
+        318223
+      ],
+      "participant_seed_sets_disjoint": true
+    },
+    "sha256": "7bbb98847b0e66798004248b7cc77f6f2cb6adc83c80cf418d13e59bd842c834"
+  },
+  "levels": [
+    {
+      "level_id": "dt_20us",
+      "numerical_setting": {
+        "fixed_step_s": 2e-05,
+        "integrator": "classical_rk4",
+        "purpose": "accepted_final"
+      },
+      "ordinal": 0,
+      "replicas": [
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318160/events.csv",
+            "sha256": "32baa4d0f00db9849fd942c697e99aa3e835cd96f5e278d1431e860a181c1b11"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318160/performance.json",
+            "sha256": "a283f91b5f93809bb179fd88a4dffd4d28cafabacb551abdae00aee0174654e8"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318160/trajectory_raw_wide.csv",
+            "sha256": "484963728ff415b8cc07b60c6af80547740e70176797e8bf869794526bf2dfbb"
+          },
+          "seed": 318160,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318160/trajectory.csv",
+            "sha256": "abe28d06096fb3ae18ff15dc859cf035ecf55ed418f224b9e41b19a027dce05d"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318161/events.csv",
+            "sha256": "6d34dfd132609dcc4fa72e6c9cba6ae1dcb6e3fffe31ec020aa2cd4140cb059a"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318161/performance.json",
+            "sha256": "1219cb4d75def569bd9905fc8e1190cf46e01f1003d7c1ae15bb96b7dc33d9ae"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318161/trajectory_raw_wide.csv",
+            "sha256": "73ba95029f101e5bc9a186111f62291047e32ce51e939fe9cc80d5b9ed70ebef"
+          },
+          "seed": 318161,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318161/trajectory.csv",
+            "sha256": "daa9b2202ff12682694004b469c333da85193166cfa4e23010d77026bbd36005"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318162/events.csv",
+            "sha256": "36e3be545b60c1a49dbbdce87c91076370f8907f6d7ea60239e8f5d64090c966"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318162/performance.json",
+            "sha256": "6da2aced3494736367c3fe573d0357108d70a545cc31dde22773459bf2a03886"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318162/trajectory_raw_wide.csv",
+            "sha256": "c3bbe5f7a6ffe1875fe9e2119224ce042c57f09c89aa94ab53b12c2b66da2c48"
+          },
+          "seed": 318162,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318162/trajectory.csv",
+            "sha256": "69df2ce55af6c48c1f9fa04758fb0e407a1d0a82e4b9d97cb2917e7f58aefb5e"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 267,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318163/events.csv",
+            "sha256": "a5af5e089b8f62ef93f06dc79a174cef981d02c749cc8676d1440c4f90bd85e2"
+          },
+          "final_lifecycle_counts": {
+            "active": 20,
+            "escaped": 219,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318163/performance.json",
+            "sha256": "310b287f2b193ed61af64aedd37090aa2d0500fe03211e9eb752ed79d522ea17"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318163/trajectory_raw_wide.csv",
+            "sha256": "f49ec41b974547229f903580c69d983f9e0e95a10c05bd8cb3d188c7a1e85842"
+          },
+          "seed": 318163,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318163/trajectory.csv",
+            "sha256": "fe19eeefdb98faf823ef77520eecf32f88456bf3bd74bf4f62cd13793725b4ec"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 262,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318164/events.csv",
+            "sha256": "104cd321f430eade15ede6e657fe95b462b7c467eb5ae6665e2c0dff21ac4dc4"
+          },
+          "final_lifecycle_counts": {
+            "active": 25,
+            "escaped": 214,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318164/performance.json",
+            "sha256": "9edcf8b8bf65fea7a261e04096117f1f28abda47e8bf4c1ed698ac9cc7802725"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318164/trajectory_raw_wide.csv",
+            "sha256": "4cb0a66d4aedf04a0cb24ef2e5286865d551b18b60443d632a0c8f3e150586b4"
+          },
+          "seed": 318164,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318164/trajectory.csv",
+            "sha256": "690fac910de99bacfc5d8132db92c9b1787dbeb595b5665e66d0d930b08c7757"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318165/events.csv",
+            "sha256": "9b01524e37603aefcafd63a2b33cade1fa26860eb9f602387f8678c35b56ff5e"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318165/performance.json",
+            "sha256": "5410e03ebc7ec6d2e842a3fa22b040f44cfae66e7f016872c890cf9110d26acd"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318165/trajectory_raw_wide.csv",
+            "sha256": "0788731691d1cb5e4bea771811a097b3241aae632c1906cbc2ee3c0a64aefc6d"
+          },
+          "seed": 318165,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318165/trajectory.csv",
+            "sha256": "f27664cad2ab379faf796cb1e4332caf7530c02a763169c143c94b5ecf469854"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 262,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318166/events.csv",
+            "sha256": "6c69d28c437e5250d0fb3138339fbf2ed38798bcaa641c716706e777d79d2f14"
+          },
+          "final_lifecycle_counts": {
+            "active": 25,
+            "escaped": 214,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318166/performance.json",
+            "sha256": "9e349ddd23b398a1dd1df82e0e17e7ca2aa72aa815b159a7df4a769ca38a1f87"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318166/trajectory_raw_wide.csv",
+            "sha256": "453c896075ec6a5ecb99fff3b57f0ef918ebb3c9735b9aa2d5ed8fa1e8d87dc4"
+          },
+          "seed": 318166,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318166/trajectory.csv",
+            "sha256": "360702b95f7d3fe1b95942aaccb63fa6b7897f1f7176bfde6a9c31038c93d80c"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 263,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318167/events.csv",
+            "sha256": "19a1f1acf7ca50013c7f95dcd8e74f56eff5691aeb4af026b3f43287fda33d2e"
+          },
+          "final_lifecycle_counts": {
+            "active": 24,
+            "escaped": 215,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318167/performance.json",
+            "sha256": "ea81a60d3f35bb0f5e115ad0886c2b07a4304967caf1332c568d25a855bb4483"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318167/trajectory_raw_wide.csv",
+            "sha256": "f93cb4b0ca069f3dc2e2fb38e6001cad94860a5b7ee46e60caa9d74d16b86133"
+          },
+          "seed": 318167,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318167/trajectory.csv",
+            "sha256": "2617567a3628ddbf20b7cab02d3d5cb7744ffa0b77602a5218d9c7db3a5abcb4"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 263,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318168/events.csv",
+            "sha256": "65f8a4105a6d5fa6bf3f14a94ad8d450b1aaaddbc79f5c23a7ec27ccdcaf507a"
+          },
+          "final_lifecycle_counts": {
+            "active": 24,
+            "escaped": 215,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318168/performance.json",
+            "sha256": "7b67ae822177b826c076fee9766485f6c8542826aa6e8ac73f0b54862cb4d1c4"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318168/trajectory_raw_wide.csv",
+            "sha256": "3b0d1113161b3177c576f737f00d7d352db39f2b7c6b211a17a380be45e9557f"
+          },
+          "seed": 318168,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318168/trajectory.csv",
+            "sha256": "a03adbffb910421b816d53e52e0e8b654c1c7f0ad6c065b2b6edd94d4eead3e2"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318169/events.csv",
+            "sha256": "b0d1e7b84220890ebbccfeedc0cbe29354a5573870db56d3a118fd91a50ed479"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318169/performance.json",
+            "sha256": "a16cd7c1d5ed8694ddfebb45de02424846082a833ed384480d90d4d30adb993b"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318169/trajectory_raw_wide.csv",
+            "sha256": "0fe43cf2e118991d94aacd794c92159102192615ea0ae093cff1f593e373805c"
+          },
+          "seed": 318169,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318169/trajectory.csv",
+            "sha256": "46ef2ad4c3f84976b387bca8e9eac824fa3f6e70188bf3043a755caa546eafac"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 262,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318170/events.csv",
+            "sha256": "b4198a763091eec70e4c4281780935890b51c06706db4eae009045c96b7d4bbe"
+          },
+          "final_lifecycle_counts": {
+            "active": 25,
+            "escaped": 214,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318170/performance.json",
+            "sha256": "adb2b93d538fc766ccf24572ee96e2c99ddf114170148cd2ce7150b0be75aaa6"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318170/trajectory_raw_wide.csv",
+            "sha256": "3d860e1f42f85b1cf4d87c09e7a88270e4cdb70683d933232c693d6961344740"
+          },
+          "seed": 318170,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318170/trajectory.csv",
+            "sha256": "9926169499f20e7b2f522e71f3894526655593cee2637cd0c7a71f933d126513"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318171/events.csv",
+            "sha256": "80b7f17f0c53e5834183876313fde59cdccf916b66b0129aefc2cffec0a96f0c"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318171/performance.json",
+            "sha256": "dc4236a1c2b80fd52b2eedd7d9c00890c5f59b6250807d482986e7d26fbaca02"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318171/trajectory_raw_wide.csv",
+            "sha256": "0744876c6d4342832d946fb60ad9c4a1691e9122963d275baee35d66e61fb32d"
+          },
+          "seed": 318171,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318171/trajectory.csv",
+            "sha256": "328231e34e2d719d64c834052267f3b9d8dce0f483de6e8214d5c134aca2c36b"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318172/events.csv",
+            "sha256": "6ffee565943e935908f1b4a7227499f1af1182d87845648de415b054c10912c8"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318172/performance.json",
+            "sha256": "9a4f7ab7d7afd89709e8d3ea3c1f7a6460852c7354c29c286d878f5198573376"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318172/trajectory_raw_wide.csv",
+            "sha256": "21145e1d89d325feef00a35690ad3008774f233ab06338c1e55a7c25a41eed9a"
+          },
+          "seed": 318172,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318172/trajectory.csv",
+            "sha256": "cdec56fece3a111b030ef1c8fdde312b43796a30f8e0cc5888380702e6bf5495"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318173/events.csv",
+            "sha256": "a5a2dbd013b18513f2c138e642eb9c15fdd36192d41d36aefdfb5986722ae5a8"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318173/performance.json",
+            "sha256": "e4ab06fd3790942b35c3a815fb973178236e7560da44acc87de757c726c8436c"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318173/trajectory_raw_wide.csv",
+            "sha256": "d578cbeb02a1e2ef49d0fba363bd03c8e5e98399a783b5b15002f20376bfe5d7"
+          },
+          "seed": 318173,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318173/trajectory.csv",
+            "sha256": "ad7a70c20d57cb6d891a50f195e4dddae2f3e6ed1e0cc4e35913ceea3e1b7b42"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318174/events.csv",
+            "sha256": "92b2b7c954485552f7b187845edfeb0529dd52abb14d6a241adcc4164a7fa56c"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318174/performance.json",
+            "sha256": "73cfad94a649c27a2a65f54c437d4ff4f4ca93b08dac918fbfec3623a4d5da4e"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318174/trajectory_raw_wide.csv",
+            "sha256": "7cadb9c9cd018e7f935d1995d28938fc6c9b49ad61f1a51f8c6f94ac5e77f852"
+          },
+          "seed": 318174,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318174/trajectory.csv",
+            "sha256": "1c8782b6b4ddc5f7567a0f590804cfa0d9de2193896c5cae0dad24efb22fa410"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318175/events.csv",
+            "sha256": "2fada5d65fa33e22a4e20ef8b4f23c5e0295e9682059f4c0e140e765017f1860"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318175/performance.json",
+            "sha256": "4126b0532d913e0f4c256a9e3230b62403a3efa4f46f1fc4d769caf9015d8f53"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318175/trajectory_raw_wide.csv",
+            "sha256": "a3c4172d49bde6a7522023b4f879cd07ff74a9b429f4511d82110c8ce63b7bb6"
+          },
+          "seed": 318175,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318175/trajectory.csv",
+            "sha256": "98ba46a4994fa8a77893ec84f132051722de2ff85e114a076497847744786b6f"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 266,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318176/events.csv",
+            "sha256": "05d173e51d27aea3b1529322bee8041c82369f778dd83587f2f680d8f39e24fe"
+          },
+          "final_lifecycle_counts": {
+            "active": 21,
+            "escaped": 218,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318176/performance.json",
+            "sha256": "2cbed37870255fbcab0c7a3a115955c9c350a4be871c7a9e8b6bf6ae23fa12d7"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318176/trajectory_raw_wide.csv",
+            "sha256": "5638e4d40f975a11a3a8cd5299d752ed40de0d2214ffe8b6a75e3c1d94529814"
+          },
+          "seed": 318176,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318176/trajectory.csv",
+            "sha256": "049b5b5e5b3073a9b7e64edf07022a81b43e773b0e2378b0fae92c81afce0c13"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 263,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318177/events.csv",
+            "sha256": "89d7d19ad270ebf5db81e071da2674634d1bdc46fabda064f8018dfd4398da82"
+          },
+          "final_lifecycle_counts": {
+            "active": 24,
+            "escaped": 215,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318177/performance.json",
+            "sha256": "049b20abfce49fd34d70ef93f9636d6216120bfd540a2bad0a2976130bae55c9"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318177/trajectory_raw_wide.csv",
+            "sha256": "e94427d3cc56285f0235b849a0bddff2b8052a0dfff33593e6dac734b855fc95"
+          },
+          "seed": 318177,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318177/trajectory.csv",
+            "sha256": "c1144ed171a2fbada025bdb283817ab3ecbc999a790d14d18279abf7204836f0"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 262,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318178/events.csv",
+            "sha256": "ae5c5962529dc3d8da2092a013962e8cca9ea5183a682183cce673708107a3d6"
+          },
+          "final_lifecycle_counts": {
+            "active": 25,
+            "escaped": 214,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318178/performance.json",
+            "sha256": "b6f74ce072699065975c8b1873c378d34e19149232d15449f8cf2453c0b22afb"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318178/trajectory_raw_wide.csv",
+            "sha256": "b058c68dd6c92ac44d9d9ed788f0912c311c00d662340df349f59fa33d3695e8"
+          },
+          "seed": 318178,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318178/trajectory.csv",
+            "sha256": "6f62ed26d084c4e7a24fc9b8a9dddb687404349d75a76fb770e5abcb7154e1c9"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318179/events.csv",
+            "sha256": "eeac831fbbdd903ba3374e8c287ae137c46c562c4bed1fb472f13500c6c8e170"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318179/performance.json",
+            "sha256": "29b4b77b5c28730b7a40ab7ceb6bd1376462d1c5aedc3884fc1a74f4e42d02f2"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318179/trajectory_raw_wide.csv",
+            "sha256": "086fe59c382293ce1c10c481309e344a654362648493b9fd376d0a5f23dfeecf"
+          },
+          "seed": 318179,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318179/trajectory.csv",
+            "sha256": "93a83992333d6bcb5d2288cf910b1d8aa8f2c4648d7df1c2c0f01b3148766f6a"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318180/events.csv",
+            "sha256": "fcae1b76058917e33d44a560341c386c519741526d09e149ad75ffece27156ae"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318180/performance.json",
+            "sha256": "fc46d804e44fb1f1d3bd9095bcec5e6dd122cfaa081b2a7f7b46d3526468b38b"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318180/trajectory_raw_wide.csv",
+            "sha256": "02a2e10017c6d6ebd411bf0ee2860207b5c4c92e00d7c34fe250dbc029f6f747"
+          },
+          "seed": 318180,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318180/trajectory.csv",
+            "sha256": "1fbd2111eaa3c950da5b4971524397dedce052f903dfa298dd1b0a26a4603da8"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 262,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318181/events.csv",
+            "sha256": "34a865dc467df8a2616207df122de4a851acadee9876557089672d66ad42c661"
+          },
+          "final_lifecycle_counts": {
+            "active": 25,
+            "escaped": 214,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318181/performance.json",
+            "sha256": "da004ddfeeb88d12dd8b343903aa81026f20397a2e995c94762f9ddeaa5dbd0a"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318181/trajectory_raw_wide.csv",
+            "sha256": "67aa3948f398d5604acdc904a72bba5bc8db82994b76b97d453f9f1b3ef67c3a"
+          },
+          "seed": 318181,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318181/trajectory.csv",
+            "sha256": "d965211afee32d782cb9808f62bdf42f62137e0cbaf7c371194c69652f1c8228"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318182/events.csv",
+            "sha256": "e6328b4106fa3c491033d8a7e25929c7636bd3a3f0674a842e35a80a1d796010"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318182/performance.json",
+            "sha256": "e125964929f51f2b25d5843fe7717f92845a436a65da88f2604538fa3b1ec794"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318182/trajectory_raw_wide.csv",
+            "sha256": "420a8d27375d9f0309fcb61c4d7fb87a415cbb7b23d1773ace8d4aff85e819c8"
+          },
+          "seed": 318182,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318182/trajectory.csv",
+            "sha256": "1f730fb8c102b737b21549372fe1a62780628bdf84f186aff722d166b017b11a"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 262,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318183/events.csv",
+            "sha256": "74198b417af6603833af885fef471313285ada31414e62d4234310b4a590a527"
+          },
+          "final_lifecycle_counts": {
+            "active": 25,
+            "escaped": 214,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318183/performance.json",
+            "sha256": "0c5977d9f98aefddf0dccb9de9eb7e29adf31120ba3066ea137abda0e0324e76"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318183/trajectory_raw_wide.csv",
+            "sha256": "5b81b044f909c1dc2fa7a27a404a9e2bd4c0f977aa4bad5ea7e821e8b0988fa1"
+          },
+          "seed": 318183,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318183/trajectory.csv",
+            "sha256": "017c8d89c91ce7628ae8934e32ef187a22773c370aac8d075f60b25f3a6c71a2"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318184/events.csv",
+            "sha256": "261b263fb1c6d91dd192e663335ec7819c945471154ed0a9e4b8f8055acf6485"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318184/performance.json",
+            "sha256": "1331e27b3d303bf60db72148bc0fcf980c32fc11116945933ae73bf73a584c16"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318184/trajectory_raw_wide.csv",
+            "sha256": "fd289fa7f370ddcc4e1460d85d6c8dc2ad23d18788291b5658673fb2ebf932cd"
+          },
+          "seed": 318184,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318184/trajectory.csv",
+            "sha256": "96dd81c15ff652d4d5a5673b82cf3f67a100df8bec653095b92bea98d61b7884"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318185/events.csv",
+            "sha256": "d0db538bcb3f7c749206b1c13054ebe016193359685c9b4d5e522b56e5917dd2"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318185/performance.json",
+            "sha256": "ffb31abe9460f7f05da8f4525d9740a1faeb4f4b2bbb409c18ef5a02dbc0e64f"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318185/trajectory_raw_wide.csv",
+            "sha256": "b763b9111e1fa7f7579e624826b49c23a10364f1163d3cecf322275a92a685b9"
+          },
+          "seed": 318185,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318185/trajectory.csv",
+            "sha256": "01df0956fdeef1101bb693c48e70610de9104b2997bca2d7eefd9140a4094820"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318186/events.csv",
+            "sha256": "17b29639df666c26c448394f05b8f0b6f8dbf5463ffa2b5175f60f4b68454376"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318186/performance.json",
+            "sha256": "476749616baa61ed49e6cc93892c1059ecb904396f60c6f37dca6d6608836d19"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318186/trajectory_raw_wide.csv",
+            "sha256": "497608cb4c615d38bee38de4461a2ff734e38f3b7c32cc66976a4275adeb1541"
+          },
+          "seed": 318186,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318186/trajectory.csv",
+            "sha256": "19328a08969c30201c1febaa0c8d91fcdc7235d7d721a3aa9233df0f265a01d2"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 264,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318187/events.csv",
+            "sha256": "e7033856d525f538671fa7b2ea9bc5b8b6efd733e04fb6a3c5e58f5601ae93b8"
+          },
+          "final_lifecycle_counts": {
+            "active": 23,
+            "escaped": 216,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318187/performance.json",
+            "sha256": "2d8f62cf9cd5eb248ca3e1400badcc0f43e7750fc9c8014a68a0e8782623ba11"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318187/trajectory_raw_wide.csv",
+            "sha256": "f27b37f90f8844f8384de36d766f191df4ad89fcc7cf6eb67000ce4892663c7e"
+          },
+          "seed": 318187,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318187/trajectory.csv",
+            "sha256": "c5817afefad3c6f98af826ca03c64aab6a93d99dbd2ebca0955181cb5930e536"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318188/events.csv",
+            "sha256": "befa611881decccc62b8fd0a836c08e3b5b591ea0b9fdc80c2e89cbc24664917"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318188/performance.json",
+            "sha256": "29438866f4792dbf92a38c547e9027815697d2ebda4be3fbd5d4d0ea21ab1196"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318188/trajectory_raw_wide.csv",
+            "sha256": "00f8bc43513e64f1455ccb35d7f69493fdf969b0319af7868ccded177147ef60"
+          },
+          "seed": 318188,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318188/trajectory.csv",
+            "sha256": "162fce7579b7d181fd18d79b1f8d8b48265f5f58f56ce9ab8dadebcb9a8d873d"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 265,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318189/events.csv",
+            "sha256": "d51befe5ce822c4f2c121597a912a9b6746ca881df734655755cf3cff39f05b0"
+          },
+          "final_lifecycle_counts": {
+            "active": 22,
+            "escaped": 217,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318189/performance.json",
+            "sha256": "3d4331a12a474e13146c8eb7181dda115f2574169824febe93538928a0f1d007"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318189/trajectory_raw_wide.csv",
+            "sha256": "65b48cbc6facf7b691c2de1eed6f36de4eda9eaabeb245197aae13d3962b900b"
+          },
+          "seed": 318189,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318189/trajectory.csv",
+            "sha256": "a8f6ca98ec3d17be2fe64fa094596f3644c8df7f26c186412e3d50e44028f4aa"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 269,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318190/events.csv",
+            "sha256": "85a9def576b931f53362f863269571eee54c95d41c5c97bac0dcc884f3153b10"
+          },
+          "final_lifecycle_counts": {
+            "active": 18,
+            "escaped": 221,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318190/performance.json",
+            "sha256": "b915989116255842b92b30524d6180ec7b0136bbedab1d1db5d72dcdfacafe65"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318190/trajectory_raw_wide.csv",
+            "sha256": "42c60de5d06922f279faf1a82e42763007b1f439a7df10038ea59af3ffe2912d"
+          },
+          "seed": 318190,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318190/trajectory.csv",
+            "sha256": "0fe863121becb1d681dd99047234300c0185d00cb9db3f2a2df2b7e11a55c052"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "event_count": 261,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_318191/events.csv",
+            "sha256": "469b9e7584305f9abaec531e6c1961b50ff99de314de4daa2ba0eb722f2e5c7b"
+          },
+          "final_lifecycle_counts": {
+            "active": 26,
+            "escaped": 213,
+            "stuck": 48
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_318191/performance.json",
+            "sha256": "bd7016c0ba10f8fdb2787f2b2068ead33e7e1f0f8f0b38a8b2666749932dfdce"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_318191/trajectory_raw_wide.csv",
+            "sha256": "1fe4bd98bac899d03aa9b5f567a92dc3b3d9128e01c775d0c5e690ea24656412"
+          },
+          "seed": 318191,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fptas"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": false,
+              "fptas": true,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_318191/trajectory.csv",
+            "sha256": "c37be61723e851d6e5d9c054db8acde686853a94fcb28e759a85c71bdb010158"
+          },
+          "trajectory_rows": 34727
+        }
+      ]
+    }
+  ],
+  "manifest_kind": "m3c2_participant",
+  "participant": "comsol",
+  "purpose": "final",
+  "schema_version": 1,
+  "status": "COMPLETE_NORMALIZED_NOT_EVALUATED",
+  "study_isolation": {
+    "required_enabled_multiphysics": [],
+    "required_enabled_physics": [
+      "fptas"
+    ],
+    "status": "PASS",
+    "validated_for_every_replica": true
+  },
+  "tool_revision": "m3c2_caseA_100nm_comsol_normalizer_v2"
+}

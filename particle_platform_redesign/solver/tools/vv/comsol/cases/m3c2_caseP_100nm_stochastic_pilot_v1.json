@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "contract_id": "M3-C2A-caseP-100nm-stochastic-pilot",
+  "contract_revision": 1,
+  "classification": "external_vv_execution_contract_not_run",
+  "campaign": {
+    "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+    "evaluation_case_id": "M3-C2A_caseP_100nm_common-P1",
+    "output_slug": "caseP_100nm",
+    "final_registration_kind": "m3c2_caseP_100nm_final_campaign",
+    "candidate_case_name_prefix": "m3c2_caseP_100nm"
+  },
+  "scope": {
+    "theory_variant": "formal_iondrag_theory_consistent",
+    "workflow": "caseP",
+    "particle_diameter_m": 1e-7,
+    "particle_count": 287,
+    "coordinate_system": "axisymmetric_rz_no_swirl",
+    "time_start_s": 0.0,
+    "time_end_s": 0.03,
+    "output_count": 121,
+    "output_schedule_segments": [
+      {"start_s": 0.0, "stop_s": 0.0005, "step_s": 1e-5},
+      {"start_s": 0.0006, "stop_s": 0.005, "step_s": 0.0001},
+      {"start_s": 0.006, "stop_s": 0.03, "step_s": 0.001}
+    ]
+  },
+  "source_model": {
+    "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "comsol_version": "6.4.0.429",
+    "load_policy": "ModelUtil.loadCopy",
+    "save_policy": "never_save_source_or_loaded_copy",
+    "study_execution_in_contract_lock": false
+  },
+  "common_p1_input": {
+    "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_input.h5",
+    "file_sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9",
+    "content_hash": "sha256:8d0fb04a19283194d45ed84db73154e946cfa9c827c5048dba107287b2470c83",
+    "field_representation": "canonical_exact_connectivity_p1",
+    "release": {
+      "source_name": "particles",
+      "particle_id_min": 1,
+      "particle_id_max": 287,
+      "release_time_s": 0.0,
+      "release_authority": "canonical_input_source_table"
+    },
+    "geometry": {
+      "nodes": 1987,
+      "triangles": 3779,
+      "boundary_lines": 160,
+      "geometry_authority": "canonical_input_geometry"
+    }
+  },
+  "boundary": {
+    "wafer": "stick",
+    "grounded_wall": "stick",
+    "focus_transition": "stick",
+    "outer_dielectric": "stick",
+    "gas_inlet": "hold",
+    "pump_outlet": "escape",
+    "axis": "coordinate_crossing_not_material_event"
+  },
+  "deterministic_physics": {
+    "dynamic_charge": {
+      "active": true,
+      "revision": "aggregate_relative_drift_regularized_two_current_v1"
+    },
+    "drag_revision": "epstein_linear_effective_gas_sensitivity_v1",
+    "electric_revision": "electric_coulomb_v1",
+    "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+    "thermophoresis_revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1",
+    "dielectrophoresis_revision": "quasistatic_spherical_gradient_e2_v1",
+    "lift_revision": "rarefied_vorticity_sensitivity_rz_v1",
+    "gravity_buoyancy_revision": "gravity_buoyancy_standard_v1",
+    "saffman_active": false
+  },
+  "stochastic_physics": {
+    "degrees_of_freedom": ["r", "z"],
+    "comsol": {
+      "physics_tag": "fpt",
+      "background_study": "std2",
+      "background_study_step": "ftper",
+      "background_solution": "sol2",
+      "out_of_plane_degrees_of_freedom": false,
+      "feature_tag": "bf1",
+      "feature_kind": "built_in_brownian_force",
+      "shared_variable_tag": "varDustField",
+      "viscosity_expression": "root.comp1.muB_d",
+      "viscosity_meaning": "epstein_equivalent_effective_viscosity",
+      "temperature_expression": "m3c1_Tg(r,z)",
+      "pressure_expression": "m3c1_rhog(r,z)*k_B_const*m3c1_Tg(r,z)/1.2753471408396638e-25[kg]",
+      "random_number_args": "UserDefined",
+      "seed_parameter": "P_brownian_seed",
+      "sole_seed_authority": "fpt.bf1.i",
+      "position_expressions": ["qr", "qz"],
+      "velocity_expressions": ["fpt.vr", "fpt.vz"],
+      "charge_state_expression": "ZP",
+      "particle_geometry": "pgeom_fpt",
+      "particle_dataset": "part_P_100nm"
+    },
+    "candidate": {
+      "brownian_revision": "inertial_joint_ou_v1",
+      "seed_authority": "case_random_seed"
+    }
+  },
+  "physical_applicability": {
+    "status": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+    "caseP_contains_negative_ions": true,
+    "locked_charge_model_includes_negative_ion_current": false,
+    "permitted_interpretation": "same_form_numerical_sensitivity_comparison_only",
+    "forbidden_interpretation": "physical_validation_of_caseP_charging_or_trajectory_truth"
+  },
+  "seed_plan": {
+    "final_cohort": {
+      "seed_source": {
+        "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_final_seed_allocation_v1.json",
+        "sha256": "9086dbdaf92cf1783b216a253bd5af4ce43fb45f50d675e7254b9e8859f21fa5",
+        "json_pointers": {
+          "comsol": "/participant_seed_sets/comsol",
+          "candidate": "/participant_seed_sets/candidate"
+        }
+      },
+      "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+      "replicas_per_participant": 32,
+      "execution_status": "PLANNED_NOT_RUN"
+    },
+    "pilot": {
+      "comsol_seeds": [919000, 919001, 919002, 919003],
+      "candidate_seeds": [919004, 919005, 919006, 919007],
+      "relationship": "disjoint_between_participants_and_from_all_audited_existing_campaign_seeds",
+      "execution_status": "NOT_AUTHORIZED"
+    }
+  },
+  "numerical_policy": {
+    "step_policy": "independent_solver_observable_convergence_not_equal_fixed_step",
+    "common_observation_times": "scope.output_schedule_segments",
+    "comsol_pilot_fixed_steps_s": [2e-5, 1e-5, 5e-6],
+    "pilot_purpose": "lock_each_solver_step_or_tolerance_recipe_and_observable_numerical_uncertainty_before_final_cohort",
+    "comparison_kind": "independent_seed_ensemble_observables_not_pathwise",
+    "pathwise_equality_claim": false
+  },
+  "input_artifacts": [
+    {
+      "role": "source_mph",
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+      "size_bytes": 544941923,
+      "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+    },
+    {
+      "role": "common_p1_input",
+      "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_input.h5",
+      "size_bytes": 747739,
+      "sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9"
+    },
+    {
+      "role": "deterministic_30ms_contract",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c1_theory_100nm_30ms_v2.json",
+      "size_bytes": 5344,
+      "sha256": "9a98f4edf2a6d7048e0a6aa4e3eacdc1e4b538b8ea11a9082baa212971dbe3a1"
+    },
+    {
+      "role": "common_p1_configuration",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c1_theory_100nm_30ms_comsol_v1.json",
+      "size_bytes": 4378,
+      "sha256": "10290e936b642523e72a4cd482befbdb50d7e4b4ae7aa72ee8e275eee068fa6a"
+    },
+    {
+      "role": "common_p1_evidence",
+      "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/prepare_report.json",
+      "size_bytes": 22254,
+      "sha256": "2e14019492554e68751806e165ff1783a6cc88e0edf4dfa2eaff79234f1e83f0"
+    },
+    {
+      "role": "m3c2_preflight_configuration",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_theory_caseA_100nm_anchor_v1.json",
+      "size_bytes": 2938,
+      "sha256": "cac5633f7961bda2a79b5768b2220d6b3c7e5def7189cf6d90e584f4caf8671f"
+    },
+    {
+      "role": "m3c2_preflight_evidence",
+      "path": "particle_platform_redesign/solver/evidence/m3c2/anchor_preflight_v1/comparison_manifest.json",
+      "size_bytes": 3517,
+      "sha256": "1c6ac403f41a8d1e305202f4e9aeada65d63383679a5c76c0440133aedc9fc96"
+    },
+    {
+      "role": "m3c2_final_seed_allocation",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_final_seed_allocation_v1.json",
+      "size_bytes": 3107,
+      "sha256": "9086dbdaf92cf1783b216a253bd5af4ce43fb45f50d675e7254b9e8859f21fa5"
+    },
+    {
+      "role": "m3c2_model_semantics_probe",
+      "path": "particle_platform_redesign/solver/evidence/m3c2/model_semantics_probe_v1/probe_manifest.json",
+      "size_bytes": 2273,
+      "sha256": "24af7067a4cba7cf441a9e621253c13f520a2dbc4e2e0854f32f5c8c0a38a4c4"
+    }
+  ],
+  "execution_authorization": {
+    "status": "NOT_AUTHORIZED",
+    "solver_accuracy_claim": "NOT_EVALUATED",
+    "required_before_execution": [
+      "lock_no-save_contract-driven_COMSOL_runner_and_normalizer",
+      "lock_contract-driven_candidate_runner_recipe",
+      "implement_and_test_evaluation_policy_revision_4_distribution_gate",
+      "run_and_accept_disjoint_seed_observable_convergence_pilot"
+    ]
+  },
+  "claim_policy": {
+    "contract_validation": "input_identity_and_semantic_intent_only",
+    "solver_accuracy": "NOT_EVALUATED",
+    "physical_applicability": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+    "comparison_scope": "locked_same_form_numerical_sensitivity_only",
+    "comsol_golden_truth": false,
+    "universal_comsol_equivalence": "NOT_CLAIMED"
+  }
+}

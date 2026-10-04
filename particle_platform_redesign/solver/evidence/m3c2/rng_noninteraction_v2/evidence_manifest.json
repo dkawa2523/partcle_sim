@@ -1,0 +1,165 @@
+{
+  "schema_version": 2,
+  "evidence_revision": 2,
+  "manifest_kind": "m3c2_rng_noninteraction_evidence",
+  "status": "PASS_DOCUMENTED_INDEPENDENT_PARTICLE_STREAMS_AND_ONE_WAY_DYNAMICS",
+  "created_date": "2026-10-04",
+  "change_reason": "final前のscope/hash検証補強",
+  "casep_scope": {
+    "contract_id": "M3-C2A-caseP-100nm-stochastic-pilot",
+    "source_case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+    "evaluation_case_id": "M3-C2A_caseP_100nm_common-P1",
+    "workflow": "caseP",
+    "physics_tag": "fpt",
+    "particle_count": 287,
+    "output_count": 121
+  },
+  "campaign_binding": {
+    "contract_sha256": "757755191ead405dc046afd1f09eca0953354d47b00e079f8537225715fa4954",
+    "input_sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9",
+    "input_content_hash": "sha256:8d0fb04a19283194d45ed84db73154e946cfa9c827c5048dba107287b2470c83",
+    "source_model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+  },
+  "locked_artifacts": {
+    "contract": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_stochastic_pilot_v1.json",
+      "bytes": 9280,
+      "sha256": "757755191ead405dc046afd1f09eca0953354d47b00e079f8537225715fa4954"
+    },
+    "source_model": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+      "bytes": 544941923,
+      "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+    },
+    "common_p1_input": {
+      "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_input.h5",
+      "bytes": 747739,
+      "sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9"
+    },
+    "java_runner": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/comsol/RunM3C2StochasticCampaign.java",
+      "bytes": 28540,
+      "sha256": "b1e9e3b6508bdbf3f258f6103375ca552f20c1aa41a90a5b95fa54c52824dd2f"
+    },
+    "powershell_launcher": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/run_m3c2_comsol_campaign.ps1",
+      "bytes": 34674,
+      "sha256": "d407e1b50e21ebf376c7d115002a5500cbe8596b84c4624bfd067fd1533981b6"
+    },
+    "feature_exporter": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/tools/AugmentCf4O2FormalPlotsAndExports.java",
+      "bytes": 43017,
+      "sha256": "9cf011175717499917ba01d803a9b22667bd1c05cedfef84a237e145ab3264cb"
+    },
+    "feature_inventory": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_image_minimal_corrected/caseP_100nm/external_reproduction/config/particle_physics_feature_settings.csv",
+      "bytes": 95473,
+      "sha256": "7c3fd36aafc3f6c952dc4ac21c6d2953f5e8eea0ecc696faa52be6a7b7f7767c"
+    },
+    "study_inventory": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_image_minimal_corrected/caseP_100nm/external_reproduction/config/study_and_solver_settings.csv",
+      "bytes": 47225,
+      "sha256": "fba31f0a83e2b4ca9af92d29121c0e5a970c1d8169311fff4240d6ff08729ac1"
+    },
+    "candidate_rng": {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/rng.py",
+      "bytes": 11431,
+      "sha256": "f3398ebc233953ae668b5ecd0d108981396af8e55e41baa605917c90bf82c247"
+    },
+    "candidate_rng_test": {
+      "path": "particle_platform_redesign/solver/tests/verification/test_rng.py",
+      "bytes": 5948,
+      "sha256": "aca0e48b24265254fbdcaba4c92e563095c0bd7f1d6d40c98031386793819b1b"
+    }
+  },
+  "comsol_rng_documentation": [
+    {
+      "artifact": {
+        "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.43.html",
+        "bytes": 7840,
+        "sha256": "fa6236cad505a0a5dfedab443d5ab8aaf78dc9ea6068d3f7dd6a5fbb3b318096"
+      },
+      "anchors": ["624542"],
+      "claim": "Brownian-force values differ by particle, solver time step, force component, and direction."
+    },
+    {
+      "artifact": {
+        "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_ug_modeling.05.13.html",
+        "bytes": 19465,
+        "sha256": "8b040b5f3d9ffe8296034f06ad8b5c72b713c3014735d4fa18010f61b7040b63"
+      },
+      "anchors": ["761056", "762116", "762121"],
+      "claim": "pidx, solver time, and the third random-function argument separate particle, time, and component streams."
+    },
+    {
+      "artifact": {
+        "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_ug_modeling.05.05.html",
+        "bytes": 24536,
+        "sha256": "7b4145f86d4a69d8faf904cb945e2ff95428a98d7a0a5c3935bab94c31a5fbec"
+      },
+      "anchors": ["748832"],
+      "claim": "Different model-particle results are generally uncorrelated and a changed seed yields an uncorrelated solution."
+    },
+    {
+      "artifact": {
+        "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_introduction.02.03.html",
+        "bytes": 26371,
+        "sha256": "38d72a15a0c6c8f06c0e8d31809e75ef5f181682edf677d57f284daaf067fc14"
+      },
+      "anchors": ["1942392"],
+      "claim": "The Brownian implementation uses unique random numbers for each particle at each solver time."
+    }
+  ],
+  "validated_semantics": {
+    "source_feature_allowlist": [
+      "auxq",
+      "axi1",
+      "bf1",
+      "depf",
+      "df1",
+      "dpcon1",
+      "ef1",
+      "gf1",
+      "idf",
+      "lf1",
+      "liftfm",
+      "outin",
+      "outpump",
+      "pp1",
+      "relg1",
+      "thpf1",
+      "wall1"
+    ],
+    "runtime_created_feature_allowlist": ["m3c2HeatFlux"],
+    "required_enabled_physics": ["fpt"],
+    "required_enabled_multiphysics": [],
+    "comsol_rng_authority": {
+      "random_number_args": "UserDefined",
+      "seed_parameter": "P_brownian_seed",
+      "sole_seed_authority": "fpt.bf1.i",
+      "out_of_plane_degrees_of_freedom": false
+    },
+    "candidate_rng_authority": {
+      "revision": "philox4x32_10_brownian_interval_tree_v1",
+      "counter_contains": ["particle_id", "macro_interval"],
+      "derived_key_contains": [
+        "case_random_seed",
+        "root_interval",
+        "tree_level",
+        "tree_index",
+        "component",
+        "draw_kind"
+      ],
+      "ordering_independence_tested": true
+    }
+  },
+  "statistical_assumptions": {
+    "independent_unit": "seed_x_fixed_source_particle_trajectory",
+    "fixed_source_design": true,
+    "particle_particle_interaction": false,
+    "two_way_background_coupling": false,
+    "within_trajectory_time_dependence": "retained_and_covered_by_simultaneous_union_bound",
+    "cross_solver_pathwise_rng_equality": false,
+    "qualification": "COMSOL documentation supports generally uncorrelated model-particle results; it is not a proof of literal mathematical independence of a deterministic PRNG."
+  }
+}

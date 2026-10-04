@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "receipt_kind": "m3c2_pilot_method_correction",
+  "receipt_id": "M3-C2A-caseA-100nm-pilot-method-correction-v3",
+  "status": "ACCEPTED_BEFORE_CONFIRMATORY_FINAL",
+  "authorized_local_date": "2026-10-04",
+  "timezone": "Asia/Tokyo",
+  "superseded_result": {
+    "path": "../../../_out_m3c2/caseA_100nm_stochastic_pilot_evaluation_v2/evaluation_manifest.json",
+    "status": "FAIL",
+    "disposition": "PRESERVED_AS_INVALID_PILOT_INFERENCE_METHOD_NOT_A_SOLVER_ACCURACY_FAILURE"
+  },
+  "corrected_result": {
+    "path": "../../../_out_m3c2/caseA_100nm_stochastic_pilot_evaluation_v3/evaluation_manifest.json",
+    "sha256": "609c3da551ada8859787d088d5ca53fc3ba31e93b0d20d79d1403b6015d91005",
+    "status": "PASS"
+  },
+  "method_correction": {
+    "problem": "Four whole-seed bootstrap replicates and per-source endpoint bounds do not estimate numerical convergence and produced boundary-inflated bounds unrelated to the observed population discretization difference.",
+    "correction": "The pilot is noninferential configuration screening. Each macro level is compared directly with the registered finest level on the same four terminal population curves used by the final claim, aggregated over seed-by-fixed-source trajectories.",
+    "registered_screening_margin": 0.0125,
+    "margin_changed_after_observation": false,
+    "continuous_metrics": "DESCRIPTIVE_ONLY",
+    "final_inference_unchanged": "TWO_SAMPLE_UNION_HOEFFDING_ON_UNSEEN_32_BY_287_COHORTS"
+  },
+  "artifacts": {
+    "evaluation_policy_v3": {
+      "path": "../../../tools/vv/comsol/cases/m3c2_caseA_100nm_ensemble_evaluation_v3.json",
+      "sha256": "26139aa08cc3d893394cd15dcacf282bc7874dc3de06c1cdbfa0dc401caa055e"
+    },
+    "evaluator_v3": {
+      "path": "../../../tools/vv/comsol/evaluate_m3c2_stochastic_ensemble.py",
+      "sha256": "15cf769914a0f9244a572f3b9cd7da026fbc7060612807eca20c2380467a6c6b"
+    },
+    "pilot_campaign": {
+      "path": "../../../_out_m3c2/caseA_100nm_stochastic_pilot_campaign_v2.json",
+      "sha256": "8e2f34f82a00a45e780b04b0944e36096f6dd973a341d7d22ed7eb288c7f2e2f"
+    },
+    "rng_noninteraction_evidence": {
+      "path": "../rng_noninteraction_v1/evidence_manifest.json",
+      "sha256": "e2dff2bf2bc556661fb90503b4495974b386b9d73e7ba1908bc2525998a733d1"
+    }
+  },
+  "selected_configuration": {
+    "comsol_level": "dt_20us",
+    "candidate_level": "macro_coarse",
+    "candidate_brownian_interval_tree_depth": 3,
+    "candidate_path_depth_3_to_4_maximum_terminal_difference": 0.0
+  },
+  "claim_limits": {
+    "pilot_proves_accuracy": false,
+    "pathwise_rng_equality": false,
+    "continuous_trajectory_equivalence": false,
+    "comsol_is_golden_truth": false,
+    "production_solver_changed": false
+  }
+}

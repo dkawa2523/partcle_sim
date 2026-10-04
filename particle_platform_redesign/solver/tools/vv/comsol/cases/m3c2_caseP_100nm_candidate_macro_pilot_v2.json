@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "recipe_id": "M3-C2A-caseP-100nm-qualified-macro-pilot",
+  "recipe_revision": 2,
+  "classification": "external_vv_candidate_macro_and_path_pilot_not_run",
+  "contract": {
+    "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_stochastic_pilot_v1.json",
+    "sha256": "757755191ead405dc046afd1f09eca0953354d47b00e079f8537225715fa4954"
+  },
+  "contract_receipt": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseP_100nm_pilot_contract_v1/contract_receipt.json",
+    "sha256": "7f70c756db7b2982b1b8a4e92bb405836aa34debb44f032dffdcfc1d4cf20ec0"
+  },
+  "canonical_input": {
+    "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_input.h5",
+    "sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9",
+    "content_hash": "sha256:8d0fb04a19283194d45ed84db73154e946cfa9c827c5048dba107287b2470c83"
+  },
+  "deterministic_case_template": {
+    "path": "particle_platform_redesign/solver/_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_coarse.yaml",
+    "sha256": "48342e0ba7f7f3eeb94f36d98309ffb9d5d7c5350df321a8e8333d75a0189f9a"
+  },
+  "pilot": {
+    "seed_source": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_stochastic_pilot_v1.json",
+      "sha256": "757755191ead405dc046afd1f09eca0953354d47b00e079f8537225715fa4954",
+      "json_pointer": "/seed_plan/pilot/candidate_seeds"
+    },
+    "levels": [
+      {
+        "name": "macro_coarse",
+        "dt_s": 0.00002,
+        "brownian_interval_tree_depth": 3,
+        "geometry_rtol": 1e-8,
+        "purpose": "macro_step_convergence"
+      },
+      {
+        "name": "macro_medium",
+        "dt_s": 0.00001,
+        "brownian_interval_tree_depth": 3,
+        "geometry_rtol": 1e-8,
+        "purpose": "macro_step_convergence"
+      },
+      {
+        "name": "macro_fine",
+        "dt_s": 0.000005,
+        "brownian_interval_tree_depth": 3,
+        "geometry_rtol": 1e-8,
+        "purpose": "macro_step_convergence"
+      },
+      {
+        "name": "path_fine",
+        "dt_s": 0.000005,
+        "brownian_interval_tree_depth": 4,
+        "geometry_rtol": 1e-8,
+        "purpose": "brownian_first_passage_path_depth_sensitivity",
+        "reference_level_id": "macro_fine"
+      }
+    ]
+  },
+  "physics": {
+    "integrator": "ou_langevin",
+    "noise_model": "inertial_langevin_fdt",
+    "noise_revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1",
+    "coefficient_policy": "macro_root_frozen_midpoint_v1",
+    "deterministic_forces": [
+      "drag",
+      "electric",
+      "ion_drag",
+      "thermophoresis",
+      "dielectrophoresis",
+      "lift",
+      "gravity_buoyancy"
+    ],
+    "continuous_charge_revision": "aggregate_relative_drift_regularized_two_current_v1"
+  },
+  "execution": {
+    "time_end_s": 0.03,
+    "output_count": 121,
+    "memory_limit_mb": 512,
+    "public_api_path": ["load_case", "simulate", "open_result"],
+    "parallel_policy": "sixteen_predeclared_cells_run_sequentially_without_overlapping_solver_processes"
+  },
+  "evaluation_plan": {
+    "policy": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_ensemble_evaluation_v5.json",
+      "sha256": "9d78a612c5750821d60a144633a58d1c7817db318d89ba19251c03111337fe02"
+    },
+    "macro_convergence_levels": ["macro_coarse", "macro_medium", "macro_fine"],
+    "path_sensitivity_pair": ["macro_fine", "path_fine"],
+    "stochastic_claim_unit": "four_seed_ensemble_not_pathwise_COMSOL_equality",
+    "accepted_macro_convergence_before_execution": "NOT_ESTABLISHED"
+  },
+  "physical_applicability": {
+    "status": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+    "caseP_contains_negative_ions": true,
+    "locked_charge_model_includes_negative_ion_current": false,
+    "permitted_interpretation": "same_form_numerical_sensitivity_comparison_only",
+    "forbidden_interpretation": "physical_validation_of_caseP_charging_or_trajectory_truth"
+  },
+  "execution_authorization": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseP_100nm_pilot_execution_v1/execution_authorization.json",
+    "sha256": "3a040e08f046f664f3c6a36dec71464d27e193c9dc68e644ba64d2bc6251735d"
+  },
+  "claim_policy": {
+    "geometry_rtol_1e-8": "PILOT_CONFIGURATION_TO_BE_SCREENED_NOT_YET_QUALIFIED_FOR_CASEP",
+    "macro_convergence": "NOT_ESTABLISHED_UNTIL_INDEPENDENT_EVALUATION",
+    "brownian_path_depth_convergence": "NOT_ESTABLISHED_UNTIL_INDEPENDENT_EVALUATION",
+    "physical_applicability": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+    "pathwise_comsol_equality": false,
+    "comsol_golden_truth": false,
+    "production_core_changed": false
+  }
+}

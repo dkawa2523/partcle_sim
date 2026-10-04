@@ -1,0 +1,50 @@
+format_version: 1
+input:
+  data_path: ../../../_out_f02_acceptance/case_a_thermal.h5
+  layout: plasma
+  gas_velocity_field: gas_velocity
+  gas_temperature_field: gas_temperature
+model:
+  revision: boltzmann_bohm_sheath_c2_v1
+  bulk_number_density_m3: 1.0e+15
+  electron_temperature_V: 4.0
+  positive_ion_mass_kg: 8.302695335869233e-26
+  bulk_potential_V: 15.0
+  ion_mobility_m2_V_s: 1.0
+  ion_flux_regularization_speed_m_s: 1.0
+  sheath_smoothing_V: 0.05
+  density_floor_m3: 1.0e+6
+  ion_speed_floor_m_s: 1.0e-3
+boundaries:
+  - group: wafer
+    priority: 30
+    potential: {kind: constant, value_V: -68.2710575}
+  - group: grounded_wall
+    priority: 20
+    potential: {kind: constant, value_V: 0.0}
+  - group: focus_transition
+    priority: 25
+    potential:
+      kind: radial_exponential
+      inner_value_V: -68.2710575
+      outer_value_V: -4.164647080658071
+      start_radius_m: 0.152
+      transition_length_m: 0.005
+  - group: outer_dielectric
+    priority: 20
+    potential: {kind: constant, value_V: -4.164647080658071}
+  - group: pump_outlet
+    priority: 40
+    potential: {kind: constant, value_V: 15.0}
+  - group: gas_inlet
+    priority: 40
+    potential: {kind: constant, value_V: 15.0}
+solver:
+  continuation_ramps: [0.0, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.7, 0.85, 1.0]
+  max_newton_iterations: 30
+  relative_residual_tolerance: 1.0e-9
+  absolute_residual_tolerance_C: 1.0e-22
+  max_linear_iterations: 1200
+  linear_krylov_dimension: 80
+  linear_relative_tolerance: 1.0e-11
+  minimum_line_search_factor: 0.0009765625

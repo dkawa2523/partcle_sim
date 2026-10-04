@@ -1,0 +1,50 @@
+{
+    "schema_version": 1,
+    "evaluation_id": "M3-C1-solver-canonical-p1-projection-candidate",
+    "evaluation_revision": 1,
+    "classification": "external_vv_candidate",
+    "case": {
+        "workflow": "caseA",
+        "diameter_m": 1e-7,
+        "particle_count": 287,
+        "output_times": 46,
+        "time_end_s": 0.00045,
+        "output_interval_s": 1e-5,
+        "fixed_rk4_steps_s": [6.25e-7, 3.125e-7, 1.5625e-7]
+    },
+    "parameters": {
+        "gas_molecular_mass_kg": 1.2753471408396638e-25,
+        "epstein_delta": 1.3534291735288517,
+        "maximum_neutral_speed_ratio": 0.1,
+        "maximum_relative_ion_speed_m_s": 25000.0,
+        "medium_relative_permittivity": 1.0,
+        "real_clausius_mossotti_factor": 0.5161290322580645,
+        "maximum_point_dipole_radius_m": 5e-8,
+        "lift_coefficient": 1.0,
+        "gravity_m_s2": [0.0, -9.80665]
+    },
+    "physics": {
+        "brownian_active": false,
+        "saffman_active": false,
+        "charge_revision": "aggregate_relative_drift_regularized_two_current_v1",
+        "drag_revision": "epstein_linear_effective_gas_sensitivity_v1",
+        "electric_revision": "electric_coulomb_v1",
+        "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+        "thermophoresis_revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1",
+        "dielectrophoresis_revision": "quasistatic_spherical_gradient_e2_v1",
+        "lift_revision": "rarefied_vorticity_sensitivity_rz_v1",
+        "gravity_buoyancy_revision": "gravity_buoyancy_standard_v1"
+    },
+    "scope": {
+        "reference": "M3-C0b v6 Case A 100 nm Brownian-off pre-event export",
+        "field_mode": "canonical_exact_connectivity_P1_projection_from_exported_nodal_values",
+        "trajectory_window": "0_to_450_us_before_first_observed_material_event",
+        "claims_solver_agreement": false,
+        "claims_boundary_parity": false,
+        "claims_physical_applicability": false,
+        "maximum_point_dipole_radius_m_authority": "benchmark_sensitivity_assumption_not_physical_certification",
+        "heat_flux_authority": "derived_export_not_ppr_nojac_primitive_authority",
+        "diagnostic_continuous_relative_ion_speed_limit_m_s": 30000.0,
+        "diagnostic_ion_speed_limit_authority": "component_box_execution_sentinel_not_physical_certification"
+    }
+}

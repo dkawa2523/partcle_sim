@@ -1,0 +1,497 @@
+{
+  "candidate_characterization": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c1\\theory_100nm_30ms_eval_v4\\candidate_characterization.json",
+    "sha256": "3096d3c8dbe5271cea2481adfcaf72a0474ce89f8222288f19f191824594ed9f",
+    "status": "PASS"
+  },
+  "comparison_policy": {
+    "primary_numerical_evidence": "candidate h/h2/h4 self-convergence",
+    "saved_comsol_is_golden_truth": false,
+    "saved_comsol_role": "external single-run cross-representation characterization",
+    "tune_solver_core_to_reference": false
+  },
+  "decision": "SOLVER_CONVERGENCE_PASS_COMSOL_REFERENCE_NOT_A_CORE_GATE",
+  "schema_version": 1,
+  "status": "CHARACTERIZED",
+  "tool_revision": "m3c1_existing_30ms_reference_evaluator_v1",
+  "workflows": {
+    "caseA": {
+      "candidate_execution_cost": {
+        "coarse": {
+          "accepted_particle_pieces": 6552137,
+          "artifact_write_span_s_not_a_benchmark": 395.1541049480438,
+          "candidate_queries": 6555106,
+          "checkpoint_bytes": 93184,
+          "checkpoint_file_count": 2,
+          "epoch_macro_steps": 64,
+          "macro_steps": 48000,
+          "maximum_dt_charge_lipschitz": 0.1793832275301837,
+          "run_manifest_sha256": "1f42cebb0eee987d805ceaf228e4a220e86ec50236915623e79b34e131519e0c",
+          "segment_bytes": 55473447,
+          "segment_file_count": 750,
+          "timing_interpretation": "filesystem timestamp span only; candidate cells overlapped, so this is not an isolated wall-time benchmark"
+        },
+        "fine": {
+          "accepted_particle_pieces": 26203426,
+          "artifact_write_span_s_not_a_benchmark": 1484.647258758545,
+          "candidate_queries": 26205867,
+          "checkpoint_bytes": 93184,
+          "checkpoint_file_count": 2,
+          "epoch_macro_steps": 64,
+          "macro_steps": 192000,
+          "maximum_dt_charge_lipschitz": 0.04484580688254593,
+          "run_manifest_sha256": "e1ac8e050381f61d3f80110e0ae57bbb57f0a7f0780747b5e00bcd9f29d69622",
+          "segment_bytes": 177164071,
+          "segment_file_count": 3000,
+          "timing_interpretation": "filesystem timestamp span only; candidate cells overlapped, so this is not an isolated wall-time benchmark"
+        },
+        "medium": {
+          "accepted_particle_pieces": 13102527,
+          "artifact_write_span_s_not_a_benchmark": 759.3081107139587,
+          "candidate_queries": 13105232,
+          "checkpoint_bytes": 93184,
+          "checkpoint_file_count": 2,
+          "epoch_macro_steps": 64,
+          "macro_steps": 96000,
+          "maximum_dt_charge_lipschitz": 0.08969161376509185,
+          "run_manifest_sha256": "6529e39c5a2e1f53e06fcf3ec2fbf8ed5e0039eba1e67e5c2ce5c6500f64f0ae",
+          "segment_bytes": 96831927,
+          "segment_file_count": 1500,
+          "timing_interpretation": "filesystem timestamp span only; candidate cells overlapped, so this is not an isolated wall-time benchmark"
+        }
+      },
+      "common_active_records": {
+        "candidate_fine_and_saved_comsol": 27730,
+        "three_candidate_runs_and_saved_comsol": 27730
+      },
+      "first_sampled_status_divergence_time_s": 0.0006,
+      "initial_state_difference": {
+        "charge_max_e": 0.0,
+        "position_max_m": 0.0,
+        "velocity_max_m_per_s": 0.0
+      },
+      "interpretation": {
+        "candidate_time_convergence": "PASS",
+        "cross_representation_role": "CHARACTERIZATION_NOT_CORE_ACCEPTANCE_GATE",
+        "particlewise_path_parity": "NOT_VALID_BROWNIAN_ON_VS_OFF",
+        "pointwise_rhs_parity": "NOT_ESTABLISHED_NATIVE_FE_VS_EXPORTED_P1",
+        "saved_comsol_time_convergence": "NOT_ESTABLISHED_SINGLE_FIXED_STEP_RUN",
+        "universal_comsol_equivalence": "NOT_CLAIMED"
+      },
+      "package": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass\\cases\\formal_iondrag_theory_consistent\\caseA_100nm\\external_reproduction",
+      "physics_compatibility": {
+        "candidate_brownian_active": false,
+        "field_representation": "COMSOL_NATIVE_FE_VS_CANDIDATE_EXPORTED_P1",
+        "saved_comsol_active_rows": 28354,
+        "saved_comsol_brownian_feature": {
+          "feature_labels": [
+            "Brownian force consistent with Epstein friction"
+          ],
+          "feature_tag": "bf1",
+          "seed_expressions": [
+            "[AS_brownian_seed]"
+          ],
+          "settings_rows": 39
+        },
+        "saved_comsol_maximum_brownian_force_N": 2.391130019388247e-15,
+        "saved_comsol_nonzero_brownian_force_rows": 28354,
+        "stochastic_pathwise_comparison": "NOT_VALID_MODEL_AND_RNG_MISMATCH"
+      },
+      "saved_comsol_time_solver": {
+        "classification": "EXPLICIT_FIXED_RK4_10US_MANUAL",
+        "solver_summary.fixed_step": "AS_particle_dt = 10 us",
+        "solver_summary.integration_method": "explicit fixed RK4",
+        "solver_summary.relative_tolerance": "1e-2",
+        "solver_summary.stored_time_range": "0 to 0.03 s, 121 output times",
+        "time.rtol": "1e-2",
+        "time.tauto": "manual",
+        "time.timeadaption": "none"
+      },
+      "source_hashes": {
+        "candidate": {
+          "coarse": "5956037ec05f9743fb822dbd139e13348ac2e1918fb7d995ffbceb3d24a57367",
+          "fine": "3e2c3579b74bebfe70c09c6b7e6669e74045f97abdc45de369564ddefb4e1661",
+          "medium": "4575a38742b36a939936fa27671f9201c467042e967bcd69060d07997f019367"
+        },
+        "configuration_sha256": "9a98f4edf2a6d7048e0a6aa4e3eacdc1e4b538b8ea11a9082baa212971dbe3a1",
+        "final_summary_sha256": "258baec4a67f36c8d0c01b446186b1cebfc4e2d22d307f8640edb82261854e6e",
+        "history_sha256": "af61916d47dc634e4b3ca42139eebe7fe74a0fd27941250aefda2b39f4ad4a78",
+        "particle_physics_settings_sha256": "8282454e51106d39d312e9582b45cf50585f77be682e90dd83bbaf2d68102cba",
+        "solver_settings_sha256": "93d0f837613779335bf4dff6a90e2df5be9376b4226e173bb69d88651bb31390"
+      },
+      "source_rows": {
+        "candidate": {
+          "coarse": 31519,
+          "fine": 31519,
+          "medium": 31519
+        },
+        "saved_comsol": 34727
+      },
+      "state_comparison": {
+        "charge": {
+          "candidate_coarse_medium": {
+            "count": 27730,
+            "maximum": 0.013237753521252671,
+            "p50": 2.420235716726893e-06,
+            "p90": 2.7946353228003318e-05,
+            "p99": 9.531245116420419e-05,
+            "relative_l2": 2.64777895449849e-07,
+            "rms": 0.00010744985871301127
+          },
+          "candidate_fine_vs_saved_comsol": {
+            "count": 27730,
+            "maximum": 484.5939594676013,
+            "p50": 3.7619000370114577,
+            "p90": 13.111852637160474,
+            "p99": 83.15534982823092,
+            "relative_l2": 0.04301963344712544,
+            "rms": 17.529866186693905
+          },
+          "candidate_medium_fine": {
+            "count": 27730,
+            "maximum": 0.0019837286599795334,
+            "p50": 6.24822359185373e-07,
+            "p90": 6.665434187880242e-06,
+            "p99": 2.085798834002615e-05,
+            "relative_l2": 4.4217541024361364e-08,
+            "rms": 1.794397725149649e-05
+          },
+          "candidate_observed_rms_order": 2.5820919840796686,
+          "cross_rms_to_candidate_fine_pair_rms": 976922.0023521793
+        },
+        "position": {
+          "candidate_coarse_medium": {
+            "count": 27730,
+            "maximum": 1.2360984952008062e-06,
+            "p50": 5.83442793443477e-10,
+            "p90": 1.3120996073391086e-08,
+            "p99": 4.1600528311126343e-08,
+            "relative_l2": 9.92705351428513e-07,
+            "rms": 1.922175455160434e-08
+          },
+          "candidate_fine_vs_saved_comsol": {
+            "count": 27730,
+            "maximum": 0.033995043397796035,
+            "p50": 0.0007679287489062512,
+            "p90": 0.0050081195317248,
+            "p99": 0.01739051023591872,
+            "relative_l2": 0.2287096801412577,
+            "rms": 0.0038606547707648866
+          },
+          "candidate_medium_fine": {
+            "count": 27730,
+            "maximum": 8.622517175890313e-08,
+            "p50": 1.5877439678656603e-10,
+            "p90": 3.0320253804722672e-09,
+            "p99": 1.0569265516374152e-08,
+            "relative_l2": 1.6869442967270135e-07,
+            "rms": 3.2664304067368658e-09
+          },
+          "candidate_observed_rms_order": 2.5569532228695513,
+          "cross_rms_to_candidate_fine_pair_rms": 1181918.5747237902
+        },
+        "velocity": {
+          "candidate_coarse_medium": {
+            "count": 27730,
+            "maximum": 0.0008371018437258493,
+            "p50": 9.190293455268807e-07,
+            "p90": 6.750853980152119e-06,
+            "p99": 1.987995318442151e-05,
+            "relative_l2": 1.238239169853391e-06,
+            "rms": 1.2447888025882635e-05
+          },
+          "candidate_fine_vs_saved_comsol": {
+            "count": 27730,
+            "maximum": 31.879544705329398,
+            "p50": 1.0322915685001837,
+            "p90": 2.404918626781843,
+            "p99": 7.5075811447865295,
+            "relative_l2": 0.2181669874937247,
+            "rms": 1.9227627316486928
+          },
+          "candidate_medium_fine": {
+            "count": 27730,
+            "maximum": 0.00022416586297428786,
+            "p50": 2.3631940112980972e-07,
+            "p90": 1.616407997522759e-06,
+            "p99": 5.006366138454062e-06,
+            "relative_l2": 2.531892966865183e-07,
+            "rms": 2.545285361262482e-06
+          },
+          "candidate_observed_rms_order": 2.2900016715261597,
+          "cross_rms_to_candidate_fine_pair_rms": 755421.2823881512
+        }
+      },
+      "terminal_comparison": {
+        "candidate_fate_counts": {
+          "active": 24,
+          "escaped": 215,
+          "stuck": 48
+        },
+        "confusion_reference_to_candidate": {
+          "active->active": 24,
+          "active->escaped": 27,
+          "escaped->escaped": 180,
+          "stuck->escaped": 8,
+          "stuck->stuck": 48
+        },
+        "exact_fate_matches": 252,
+        "particle_count": 287,
+        "reference_fate_counts": {
+          "active": 51,
+          "escaped": 180,
+          "stuck": 56
+        },
+        "same_terminal_fate_count": 228,
+        "same_terminal_position_difference_m": {
+          "count": 48,
+          "maximum": 0.0003752607885490755,
+          "p50": 1.0251671905686655e-05,
+          "p90": 2.6742457801146048e-05,
+          "p99": 0.00023056171448626852,
+          "rms": 5.700282654895663e-05
+        },
+        "same_terminal_time_difference_s": {
+          "count": 228,
+          "maximum": 0.012222341851674527,
+          "p50": 0.0007933908850045693,
+          "p90": 0.005387012562974571,
+          "p99": 0.010706284483314909,
+          "rms": 0.0032556476274289855
+        }
+      }
+    },
+    "caseP": {
+      "candidate_execution_cost": {
+        "coarse": {
+          "accepted_particle_pieces": 183680000,
+          "artifact_write_span_s_not_a_benchmark": 6627.23295044899,
+          "candidate_queries": 183680000,
+          "checkpoint_bytes": 97384,
+          "checkpoint_file_count": 2,
+          "epoch_macro_steps": 64,
+          "macro_steps": 640000,
+          "maximum_dt_charge_lipschitz": 0.48766203138663355,
+          "run_manifest_sha256": "86da6ace6872235c828518460652c922ca403b7e517fa9e4640260d21c59ffed",
+          "segment_bytes": 520626383,
+          "segment_file_count": 10000,
+          "timing_interpretation": "filesystem timestamp span only; candidate cells overlapped, so this is not an isolated wall-time benchmark"
+        },
+        "fine": {
+          "accepted_particle_pieces": 734720000,
+          "artifact_write_span_s_not_a_benchmark": 26034.8570458889,
+          "candidate_queries": 734720000,
+          "checkpoint_bytes": 97384,
+          "checkpoint_file_count": 2,
+          "epoch_macro_steps": 64,
+          "macro_steps": 2560000,
+          "maximum_dt_charge_lipschitz": 0.12191550784665839,
+          "run_manifest_sha256": "ff688945dfc3205a7b877bff3e0b4ca0ac1f1230e0fb794d1d73cd5a80a8c0cb",
+          "segment_bytes": 2072226383,
+          "segment_file_count": 40000,
+          "timing_interpretation": "filesystem timestamp span only; candidate cells overlapped, so this is not an isolated wall-time benchmark"
+        },
+        "medium": {
+          "accepted_particle_pieces": 367360000,
+          "artifact_write_span_s_not_a_benchmark": 13235.39863371849,
+          "candidate_queries": 367360000,
+          "checkpoint_bytes": 97384,
+          "checkpoint_file_count": 2,
+          "epoch_macro_steps": 64,
+          "macro_steps": 1280000,
+          "maximum_dt_charge_lipschitz": 0.24383101569331678,
+          "run_manifest_sha256": "d68f436f064e285250c7ffb19c8822d0c42b543b71a8227612a049240ae81c63",
+          "segment_bytes": 1037826383,
+          "segment_file_count": 20000,
+          "timing_interpretation": "filesystem timestamp span only; candidate cells overlapped, so this is not an isolated wall-time benchmark"
+        }
+      },
+      "common_active_records": {
+        "candidate_fine_and_saved_comsol": 34727,
+        "three_candidate_runs_and_saved_comsol": 34727
+      },
+      "first_sampled_status_divergence_time_s": null,
+      "initial_state_difference": {
+        "charge_max_e": 0.0,
+        "position_max_m": 0.0,
+        "velocity_max_m_per_s": 0.0
+      },
+      "interpretation": {
+        "candidate_time_convergence": "PASS",
+        "cross_representation_role": "CHARACTERIZATION_NOT_CORE_ACCEPTANCE_GATE",
+        "particlewise_path_parity": "NOT_VALID_BROWNIAN_ON_VS_OFF",
+        "pointwise_rhs_parity": "NOT_ESTABLISHED_NATIVE_FE_VS_EXPORTED_P1",
+        "saved_comsol_time_convergence": "NOT_ESTABLISHED_SINGLE_FIXED_STEP_RUN",
+        "universal_comsol_equivalence": "NOT_CLAIMED"
+      },
+      "package": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass\\cases\\formal_iondrag_theory_consistent\\caseP_100nm\\external_reproduction",
+      "physics_compatibility": {
+        "candidate_brownian_active": false,
+        "field_representation": "COMSOL_NATIVE_FE_VS_CANDIDATE_EXPORTED_P1",
+        "saved_comsol_active_rows": 34727,
+        "saved_comsol_brownian_feature": {
+          "feature_labels": [
+            "Case P Brownian force with Epstein/FDT friction"
+          ],
+          "feature_tag": "bf1",
+          "seed_expressions": [
+            "[brownian_seed]"
+          ],
+          "settings_rows": 39
+        },
+        "saved_comsol_maximum_brownian_force_N": 2.44227257713616e-15,
+        "saved_comsol_nonzero_brownian_force_rows": 34727,
+        "stochastic_pathwise_comparison": "NOT_VALID_MODEL_AND_RNG_MISMATCH"
+      },
+      "saved_comsol_time_solver": {
+        "classification": "EXPLICIT_FIXED_RK4_10US_MANUAL",
+        "solver_summary.fixed_step": "AS_particle_dt = 10 us",
+        "solver_summary.integration_method": "explicit fixed RK4",
+        "solver_summary.relative_tolerance": "1e-2",
+        "solver_summary.stored_time_range": "0 to 0.03 s, 121 output times",
+        "time.rtol": "1e-2",
+        "time.tauto": "manual",
+        "time.timeadaption": "none"
+      },
+      "source_hashes": {
+        "candidate": {
+          "coarse": "8c5a49dc5887f70f6f444c1aaf58bcf8df1d700a63d65de0a63e129cae6657c5",
+          "fine": "df512d605ba3b9d00d59078998325dca12aebf0933df4f7f0900e015ea9fb2fa",
+          "medium": "c3ca1918b2f6c10cbe310f4ad428583d37b7c1a3c1e7e1295230c422c77d0053"
+        },
+        "configuration_sha256": "9a98f4edf2a6d7048e0a6aa4e3eacdc1e4b538b8ea11a9082baa212971dbe3a1",
+        "final_summary_sha256": "64c6bc5139bb261885e8870d3b5b918e50135b446d51f1c615f884a05d9d731f",
+        "history_sha256": "8470c6399fe1cd549854958bee0e572dfb05bd04f3ccd767b514383b1788e11d",
+        "particle_physics_settings_sha256": "a9bc59344f7cae50e86a4586e3d5585ba908a7c48c43050556e1bf2af5377605",
+        "solver_settings_sha256": "a9f454566ae6b2d3be338d9d088c1a4365314f786435848317254188a377b710"
+      },
+      "source_rows": {
+        "candidate": {
+          "coarse": 34727,
+          "fine": 34727,
+          "medium": 34727
+        },
+        "saved_comsol": 34727
+      },
+      "state_comparison": {
+        "charge": {
+          "candidate_coarse_medium": {
+            "count": 34727,
+            "maximum": 1.5100940515822003e-06,
+            "p50": 1.1821271073131356e-08,
+            "p90": 1.3267220992929652e-07,
+            "p99": 5.294299523939107e-07,
+            "relative_l2": 3.4660641321993055e-10,
+            "rms": 1.1609309680959325e-07
+          },
+          "candidate_fine_vs_saved_comsol": {
+            "count": 34727,
+            "maximum": 30.09330048280512,
+            "p50": 4.068382409996957,
+            "p90": 12.34057820363388,
+            "p99": 19.55808216122369,
+            "relative_l2": 0.021791172954579052,
+            "rms": 7.246956113861181
+          },
+          "candidate_medium_fine": {
+            "count": 34727,
+            "maximum": 5.019178388465662e-07,
+            "p50": 2.9668285606021527e-09,
+            "p90": 3.2027946872403884e-08,
+            "p99": 1.3578785569734433e-07,
+            "relative_l2": 8.96983779965587e-11,
+            "rms": 3.004376746433879e-08
+          },
+          "candidate_observed_rms_order": 1.95014454633269,
+          "cross_rms_to_candidate_fine_pair_rms": 241213293.987285
+        },
+        "position": {
+          "candidate_coarse_medium": {
+            "count": 34727,
+            "maximum": 4.5184385161943993e-10,
+            "p50": 2.340029824991777e-12,
+            "p90": 3.7386747441898555e-11,
+            "p99": 1.3410637641775642e-10,
+            "relative_l2": 6.127101535845433e-10,
+            "rms": 3.074312797899542e-11
+          },
+          "candidate_fine_vs_saved_comsol": {
+            "count": 34727,
+            "maximum": 0.016482929586801337,
+            "p50": 0.0009568959727871935,
+            "p90": 0.004907573103482708,
+            "p99": 0.010191779429152566,
+            "relative_l2": 0.06162015009393662,
+            "rms": 0.003054098577212494
+          },
+          "candidate_medium_fine": {
+            "count": 34727,
+            "maximum": 1.583202827373894e-10,
+            "p50": 6.565856392606679e-13,
+            "p90": 8.894523089182843e-12,
+            "p99": 3.731989475990979e-11,
+            "relative_l2": 1.68128816651904e-10,
+            "rms": 8.435972044936012e-12
+          },
+          "candidate_observed_rms_order": 1.8656377409562441,
+          "cross_rms_to_candidate_fine_pair_rms": 362032799.6517987
+        },
+        "velocity": {
+          "candidate_coarse_medium": {
+            "count": 34727,
+            "maximum": 4.825271346215522e-07,
+            "p50": 2.651057864797387e-09,
+            "p90": 2.4575986961245364e-08,
+            "p99": 9.754093254824731e-08,
+            "relative_l2": 1.1773685210824918e-09,
+            "rms": 2.2301733795839845e-08
+          },
+          "candidate_fine_vs_saved_comsol": {
+            "count": 34727,
+            "maximum": 8.621719372913065,
+            "p50": 0.9231685267526243,
+            "p90": 2.359870862688292,
+            "p99": 5.077269190824155,
+            "relative_l2": 0.08258753227904536,
+            "rms": 1.5297230112723004
+          },
+          "candidate_medium_fine": {
+            "count": 34727,
+            "maximum": 1.4163825919313826e-07,
+            "p50": 6.765584843638605e-10,
+            "p90": 6.02604209658417e-09,
+            "p99": 2.709612277101098e-08,
+            "relative_l2": 3.223364762169622e-10,
+            "rms": 6.105702808027322e-09
+          },
+          "candidate_observed_rms_order": 1.8689265995178925,
+          "cross_rms_to_candidate_fine_pair_rms": 250540037.62861416
+        }
+      },
+      "terminal_comparison": {
+        "candidate_fate_counts": {
+          "active": 287
+        },
+        "confusion_reference_to_candidate": {
+          "active->active": 287
+        },
+        "exact_fate_matches": 287,
+        "particle_count": 287,
+        "reference_fate_counts": {
+          "active": 287
+        },
+        "same_terminal_fate_count": 0,
+        "same_terminal_position_difference_m": {
+          "count": 0,
+          "maximum": null,
+          "rms": null
+        },
+        "same_terminal_time_difference_s": {
+          "count": 0,
+          "maximum": null,
+          "rms": null
+        }
+      }
+    }
+  }
+}

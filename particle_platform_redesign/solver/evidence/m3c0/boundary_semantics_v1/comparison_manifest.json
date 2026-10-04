@@ -1,0 +1,503 @@
+{
+  "schema_version": 1,
+  "evidence_id": "M3-C0-boundary-semantics-v1",
+  "classification": "external_comsol_boundary_semantics_compact_evidence",
+  "evaluation_status": "COMPLETE",
+  "scientific_status": "PASS",
+  "decision": "PASS_ISOLATED_COMSOL_FREEZE_37_AND_DISAPPEAR_35_SEMANTICS",
+  "gate_counts": {
+    "pass": 44,
+    "fail": 0,
+    "characterized_not_gated": 6,
+    "total": 50
+  },
+  "scope": {
+    "workflow": "caseA",
+    "particle_diameter_m": 1e-07,
+    "particle_count_per_scenario": 1,
+    "scenarios": 2,
+    "runs_per_scenario": 3,
+    "total_runs": 6,
+    "output_frames_per_run": 61,
+    "output_interval_s": 2.5e-06,
+    "time_window_s": [
+      0.0,
+      0.00015
+    ],
+    "fixed_rk4_steps_s": [
+      1e-05,
+      5e-06,
+      2.5e-06
+    ],
+    "integrator": "classical_rk4",
+    "integrator_order": 4,
+    "relative_tolerance": 1e-08,
+    "wall_accuracy_order": 1,
+    "force_free": true,
+    "dynamic_charge_active": false,
+    "purpose": "isolate terminal boundary semantics from force and field interpolation"
+  },
+  "acceptance": {
+    "maximum_event_time_absolute_error_s": 5e-09,
+    "maximum_event_time_step_spread_s": 5e-09,
+    "maximum_hit_position_absolute_error_m": 5e-08,
+    "maximum_freeze_post_event_position_spread_m": 5e-12,
+    "require_expected_final_status": true,
+    "require_single_terminal_event": true,
+    "post_event_velocity_is_an_acceptance_gate": false
+  },
+  "source": {
+    "comsol_version": "COMSOL Multiphysics 6.4.0.429",
+    "process_count": 1,
+    "source_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "source_bytes": 544941923,
+    "source_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "source_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "source_sha256_recomputed": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "source_unchanged": true,
+    "load_mode": "ModelUtil.loadCopy",
+    "model_saved": false,
+    "isolated_source_copy_retained": false,
+    "compiled_class_retained": false
+  },
+  "authoritative_output": {
+    "relative_path": "_out_m3c/boundary_semantics_v1",
+    "files": 35,
+    "bytes": 272319,
+    "indexed_artifacts": 33,
+    "recomputed_hash_or_size_mismatches": 0,
+    "intentionally_unindexed_files": [
+      "artifact_hashes.csv",
+      "run_status.json"
+    ],
+    "artifacts": {
+      "boundary_semantics_report": {
+        "path": "boundary_semantics_report.json",
+        "bytes": 35737,
+        "sha256": "28bec57bad113c28f941aa3e84ce9a9b7ee47401bb59231f6583c8d555080704",
+        "status": "PASS"
+      },
+      "gates": {
+        "path": "gates.csv",
+        "bytes": 7908,
+        "sha256": "f8195cf1cc59f89902a083b322745035db6f104ae07f5119f509c7e041779524"
+      },
+      "artifact_hashes": {
+        "path": "artifact_hashes.csv",
+        "bytes": 3802,
+        "sha256": "6acbc3034bfa06e0e79827fd7998054bfb5607091ba32710d7c0d7523dbe463c"
+      },
+      "provenance": {
+        "path": "provenance.json",
+        "bytes": 1355,
+        "sha256": "35be42fa0c09cd9afdcf21f2a293a67311047fcc874a6926c7e7bfbc6703b2be"
+      },
+      "run_status": {
+        "path": "run_status.json",
+        "bytes": 171,
+        "sha256": "e8d5668c6c615cc545e24618baabfd44b867bfce1d67300de6127b30a7b91814",
+        "status": "COMPLETE"
+      },
+      "configuration": {
+        "path": "m3c_boundary_semantics_v1.json",
+        "bytes": 3128,
+        "sha256": "9b25e727e6fed2633edd3068d17e63fd4c2ae7bbcf213a1ce7a000a4a2d08bfb"
+      },
+      "normalizer": {
+        "path": "normalize_m3c_boundary_semantics.py",
+        "bytes": 35818,
+        "sha256": "6ecd476172e768daf10fe2c7f9b4a0ec1ee028c9ac8c1fd0aacb044902c6dd77"
+      },
+      "java_source": {
+        "path": "RunM3CBoundarySemantics.java",
+        "bytes": 14317,
+        "sha256": "f270887e54a7a7e0cff8b6790aa911fe307b6caf05a8130e9285c4c0f2f42aef"
+      },
+      "runner": {
+        "path": "run_m3c_boundary_semantics.ps1",
+        "bytes": 9621,
+        "sha256": "667657c58360866953efd075a2097a32ea1ce8e6416b9fdeb6792b438e1db0e3"
+      },
+      "comsol_process_log": {
+        "path": "comsol_process.log",
+        "bytes": 3182,
+        "sha256": "07f6d68d13d98fe0dbc3f8f903740ce07eb2d6a2b8d6ce4662ccb085ec68fc9e"
+      },
+      "comsol_batch_log": {
+        "path": "comsol_batch.log",
+        "bytes": 374,
+        "sha256": "973f5fba4d6f5ea7eae030d940199007ae4f0f2766993aec159b2a43dd51885e"
+      }
+    },
+    "current_source_matches_staged": {
+      "configuration": {
+        "path": "tools/vv/comsol/cases/m3c_boundary_semantics_v1.json",
+        "sha256": "9b25e727e6fed2633edd3068d17e63fd4c2ae7bbcf213a1ce7a000a4a2d08bfb",
+        "match": true
+      },
+      "normalizer": {
+        "path": "tools/vv/comsol/normalize_m3c_boundary_semantics.py",
+        "sha256": "6ecd476172e768daf10fe2c7f9b4a0ec1ee028c9ac8c1fd0aacb044902c6dd77",
+        "match": true
+      },
+      "java_source": {
+        "path": "tools/vv/comsol/comsol/RunM3CBoundarySemantics.java",
+        "sha256": "f270887e54a7a7e0cff8b6790aa911fe307b6caf05a8130e9285c4c0f2f42aef",
+        "match": true
+      },
+      "runner": {
+        "path": "tools/vv/comsol/run_m3c_boundary_semantics.ps1",
+        "sha256": "667657c58360866953efd075a2097a32ea1ce8e6416b9fdeb6792b438e1db0e3",
+        "match": true
+      }
+    }
+  },
+  "scenarios": {
+    "freeze_inlet_37": {
+      "boundary_feature": "outin",
+      "boundary_id": 37,
+      "wall_condition": "Freeze",
+      "source_position_m": [
+        0.23927,
+        0.115
+      ],
+      "source_velocity_m_per_s": [
+        10.0,
+        0.0
+      ],
+      "expected_status_code": 2,
+      "analytic_event_time_s": 7.3e-05,
+      "analytic_hit_position_m": [
+        0.24,
+        0.115
+      ],
+      "hit_position_basis": "DIRECT_COMSOL_FROZEN_STATE_OBSERVATION",
+      "status": "PASS",
+      "event_time_step_spread_s": 3.073713158996405e-17,
+      "event_time_step_spread_limit_s": 5e-09,
+      "runs": {
+        "dt_10us": {
+          "fixed_step_s": 1e-05,
+          "status": "PASS",
+          "frames": 61,
+          "active_frames": 30,
+          "terminal_frames": 31,
+          "active_to_terminal_transitions": 1,
+          "last_active_output_time_s": 7.25e-05,
+          "first_terminal_output_time_s": 7.5e-05,
+          "event_time_s": 7.300000000001076e-05,
+          "event_time_absolute_error_s": 1.0760706561918632e-17,
+          "hit_position_m": [
+            0.24000000000000002,
+            0.115
+          ],
+          "hit_position_euclidean_error_m": 2.7755575615628914e-17,
+          "post_event_position_spread_m": 0.0,
+          "post_event_velocity": {
+            "status": "CHARACTERIZED_NOT_GATED",
+            "classification": "exact_source_velocity_retained",
+            "finite_pairs": 31,
+            "nan_pairs": 0,
+            "maximum_difference_from_source_velocity_m_per_s": 0.0,
+            "maximum_speed_m_per_s": 10.0
+          },
+          "artifacts": {
+            "state_raw_wide.csv": {
+              "bytes": 17598,
+              "sha256": "1f7c398186e8189ae213ed7c2dfb65506e6dfdd6e7863c5d973ecf859e41db2b"
+            },
+            "state.csv": {
+              "bytes": 5040,
+              "sha256": "1b9ec5b24d9bad7147d93be00c6291d1c239282e00d3242923cb6d575f971cfd"
+            },
+            "event_observation.csv": {
+              "bytes": 391,
+              "sha256": "f57b97c9b05f879cb4dbe53314481ae28287cb7d0dd954c552f38aab0bddc655"
+            },
+            "step_summary.json": {
+              "bytes": 3930,
+              "sha256": "492855a5864051e1d960c7cb343c119ac42e1f90254ae369a750abd0e76807b2"
+            }
+          }
+        },
+        "dt_5us": {
+          "fixed_step_s": 5e-06,
+          "status": "PASS",
+          "frames": 61,
+          "active_frames": 30,
+          "terminal_frames": 31,
+          "active_to_terminal_transitions": 1,
+          "last_active_output_time_s": 7.25e-05,
+          "first_terminal_output_time_s": 7.5e-05,
+          "event_time_s": 7.300000000001432e-05,
+          "event_time_absolute_error_s": 1.4325021203964727e-17,
+          "hit_position_m": [
+            0.24000000000000002,
+            0.115
+          ],
+          "hit_position_euclidean_error_m": 2.7755575615628914e-17,
+          "post_event_position_spread_m": 0.0,
+          "post_event_velocity": {
+            "status": "CHARACTERIZED_NOT_GATED",
+            "classification": "exact_source_velocity_retained",
+            "finite_pairs": 31,
+            "nan_pairs": 0,
+            "maximum_difference_from_source_velocity_m_per_s": 0.0,
+            "maximum_speed_m_per_s": 10.0
+          },
+          "artifacts": {
+            "state_raw_wide.csv": {
+              "bytes": 17590,
+              "sha256": "f8e79cd29335d7c9ef775e511c11b7e875838ec79b5dbb69f095a6e97af1105c"
+            },
+            "state.csv": {
+              "bytes": 5032,
+              "sha256": "1b5e3d45732f4199428d332caea403d6a1f315cccbd332ef11537196037888dd"
+            },
+            "event_observation.csv": {
+              "bytes": 391,
+              "sha256": "636c1c8e5b24469c481438871b13f8e378efe553114e1dd9010bd013050790b2"
+            },
+            "step_summary.json": {
+              "bytes": 3929,
+              "sha256": "06076243d0fb6772c0796a06a1f0f4b2b4fa7eeb6c4025c7762a2e9433f84477"
+            }
+          }
+        },
+        "dt_2p5us": {
+          "fixed_step_s": 2.5e-06,
+          "status": "PASS",
+          "frames": 61,
+          "active_frames": 30,
+          "terminal_frames": 31,
+          "active_to_terminal_transitions": 1,
+          "last_active_output_time_s": 7.25e-05,
+          "first_terminal_output_time_s": 7.5e-05,
+          "event_time_s": 7.30000000000415e-05,
+          "event_time_absolute_error_s": 4.149783815188268e-17,
+          "hit_position_m": [
+            0.24000000000000002,
+            0.115
+          ],
+          "hit_position_euclidean_error_m": 2.7755575615628914e-17,
+          "post_event_position_spread_m": 0.0,
+          "post_event_velocity": {
+            "status": "CHARACTERIZED_NOT_GATED",
+            "classification": "exact_source_velocity_retained",
+            "finite_pairs": 31,
+            "nan_pairs": 0,
+            "maximum_difference_from_source_velocity_m_per_s": 0.0,
+            "maximum_speed_m_per_s": 10.0
+          },
+          "artifacts": {
+            "state_raw_wide.csv": {
+              "bytes": 17560,
+              "sha256": "09b1290d8409c56ad3bbf907a62523de8a1dc0e0f12d61909b4e2a8a9e0074df"
+            },
+            "state.csv": {
+              "bytes": 5000,
+              "sha256": "a120746a4afed53af2280233b6de249ede82913e39c21499d748eab4eacf7bfe"
+            },
+            "event_observation.csv": {
+              "bytes": 390,
+              "sha256": "e58d1586c4cea934710ab5cc6a28e492796bff496daf32d78598ea0f71c8d72c"
+            },
+            "step_summary.json": {
+              "bytes": 3930,
+              "sha256": "559b00547d04a7fad89daa0cf0688c97b2c2b52db5737abb657abcf3b9d115e0"
+            }
+          }
+        }
+      }
+    },
+    "disappear_pump_35": {
+      "boundary_feature": "outpump",
+      "boundary_id": 35,
+      "wall_condition": "Disappear",
+      "source_position_m": [
+        0.21,
+        0.00073
+      ],
+      "source_velocity_m_per_s": [
+        0.0,
+        -10.0
+      ],
+      "expected_status_code": 4,
+      "analytic_event_time_s": 7.3e-05,
+      "analytic_hit_position_m": [
+        0.21,
+        0.0
+      ],
+      "hit_position_basis": "ANALYTIC_RECONSTRUCTION_FROM_COMSOL_INITIAL_STATE_NOT_DIRECT_EVENT_OBSERVATION",
+      "status": "PASS",
+      "event_time_step_spread_s": 2.710505431213761e-20,
+      "event_time_step_spread_limit_s": 5e-09,
+      "runs": {
+        "dt_10us": {
+          "fixed_step_s": 1e-05,
+          "status": "PASS",
+          "frames": 61,
+          "active_frames": 30,
+          "terminal_frames": 31,
+          "active_to_terminal_transitions": 1,
+          "last_active_output_time_s": 7.25e-05,
+          "first_terminal_output_time_s": 7.5e-05,
+          "event_time_s": 7.299999999999997e-05,
+          "event_time_absolute_error_s": 2.710505431213761e-20,
+          "hit_position_m": [
+            0.21,
+            2.168404344971009e-19
+          ],
+          "hit_position_euclidean_error_m": 2.168404344971009e-19,
+          "post_event_position_nan_pairs": 31,
+          "post_event_velocity": {
+            "status": "CHARACTERIZED_NOT_GATED",
+            "classification": "not_available_after_event",
+            "finite_pairs": 0,
+            "nan_pairs": 31,
+            "maximum_difference_from_source_velocity_m_per_s": null,
+            "maximum_speed_m_per_s": null
+          },
+          "artifacts": {
+            "state_raw_wide.csv": {
+              "bytes": 17152,
+              "sha256": "aaca58415a5e521062bd6c36d09a91943a19287a1e739bb4472f9c97abc5d8cf"
+            },
+            "state.csv": {
+              "bytes": 4500,
+              "sha256": "b7ebd456d5ed59f4208abe24b1ae0b445c9a935028eb391c78134c9533d63500"
+            },
+            "event_observation.csv": {
+              "bytes": 415,
+              "sha256": "caed05968ddbcb3cec44163bd0bf34eb771d1903bbf817d8e4578ad5877e38ea"
+            },
+            "step_summary.json": {
+              "bytes": 3914,
+              "sha256": "fd92b5db340ec5d8dd126e3a68d6dd197cc4dd923359f9dcb3db89229f22d598"
+            }
+          }
+        },
+        "dt_5us": {
+          "fixed_step_s": 5e-06,
+          "status": "PASS",
+          "frames": 61,
+          "active_frames": 30,
+          "terminal_frames": 31,
+          "active_to_terminal_transitions": 1,
+          "last_active_output_time_s": 7.25e-05,
+          "first_terminal_output_time_s": 7.5e-05,
+          "event_time_s": 7.3e-05,
+          "event_time_absolute_error_s": 0.0,
+          "hit_position_m": [
+            0.21,
+            0.0
+          ],
+          "hit_position_euclidean_error_m": 0.0,
+          "post_event_position_nan_pairs": 31,
+          "post_event_velocity": {
+            "status": "CHARACTERIZED_NOT_GATED",
+            "classification": "not_available_after_event",
+            "finite_pairs": 0,
+            "nan_pairs": 31,
+            "maximum_difference_from_source_velocity_m_per_s": null,
+            "maximum_speed_m_per_s": null
+          },
+          "artifacts": {
+            "state_raw_wide.csv": {
+              "bytes": 16269,
+              "sha256": "08f712c6b95ce6dc7d36724646fcc5826a4136de7517ca65c0fe038c6f183a9b"
+            },
+            "state.csv": {
+              "bytes": 3617,
+              "sha256": "b0b08f27ea0fd9265da7321a8201aee7db4dd17794fb2c5e543a5c903258c808"
+            },
+            "event_observation.csv": {
+              "bytes": 383,
+              "sha256": "3e0560ed75da1857bba2563534932f1e9d2a78ddb33782c1ddc4b018b160b160"
+            },
+            "step_summary.json": {
+              "bytes": 3809,
+              "sha256": "3cbb92abd42089b75d03e2f1d99ec040df828ed4a00c02b959d706ee925f87f2"
+            }
+          }
+        },
+        "dt_2p5us": {
+          "fixed_step_s": 2.5e-06,
+          "status": "PASS",
+          "frames": 61,
+          "active_frames": 30,
+          "terminal_frames": 31,
+          "active_to_terminal_transitions": 1,
+          "last_active_output_time_s": 7.25e-05,
+          "first_terminal_output_time_s": 7.5e-05,
+          "event_time_s": 7.299999999999997e-05,
+          "event_time_absolute_error_s": 2.710505431213761e-20,
+          "hit_position_m": [
+            0.21,
+            2.168404344971009e-19
+          ],
+          "hit_position_euclidean_error_m": 2.168404344971009e-19,
+          "post_event_position_nan_pairs": 31,
+          "post_event_velocity": {
+            "status": "CHARACTERIZED_NOT_GATED",
+            "classification": "not_available_after_event",
+            "finite_pairs": 0,
+            "nan_pairs": 31,
+            "maximum_difference_from_source_velocity_m_per_s": null,
+            "maximum_speed_m_per_s": null
+          },
+          "artifacts": {
+            "state_raw_wide.csv": {
+              "bytes": 17194,
+              "sha256": "d4b8c39dd4e985614869226aae23693e561a4eaa9cbe1a50d627fc77d442b5e0"
+            },
+            "state.csv": {
+              "bytes": 4540,
+              "sha256": "caf8168b7f0ec980ca24ad71badd0aaca842be45a1feaca2491a62191a781f32"
+            },
+            "event_observation.csv": {
+              "bytes": 415,
+              "sha256": "caed05968ddbcb3cec44163bd0bf34eb771d1903bbf817d8e4578ad5877e38ea"
+            },
+            "step_summary.json": {
+              "bytes": 3917,
+              "sha256": "345d1472576a35824b238dc796b3f0df5f670ef3be4a6d3a021090b5c70eb348"
+            }
+          }
+        }
+      }
+    }
+  },
+  "independent_recalculation": {
+    "method": "streamed SHA-256 and byte-size checks; strict parse of each normalized 61-frame state table and one-row event table; direct float64 recomputation of status transitions, event-time errors and spread, hit-position errors, Freeze retention, Disappear NaN retention, and post-event velocity classification",
+    "all_six_particle_frame_grids_complete": true,
+    "rows_per_run": 61,
+    "active_rows_per_run": 30,
+    "terminal_rows_per_run": 31,
+    "single_terminal_transition_per_run": true,
+    "raw_to_normalized_value_mismatches": 0,
+    "all_recomputed_gate_statuses_match": true,
+    "all_exact_metrics_match_authoritative_report": true,
+    "artifact_ledger_hash_or_size_mismatches": 0,
+    "source_hash_matches_before_and_after_attestation": true
+  },
+  "claim_separation": {
+    "comsol_boundary_37_freeze_terminal_semantics": "PASS_ONLY_FOR_THIS_ISOLATED_FORCE_FREE_NORMAL_IMPACT_CASE",
+    "comsol_boundary_35_disappear_terminal_semantics": "PASS_ONLY_FOR_THIS_ISOLATED_FORCE_FREE_NORMAL_IMPACT_CASE",
+    "post_event_velocity": "CHARACTERIZED_NOT_GATED",
+    "production_solver_boundary_parity": "NOT_TESTED",
+    "full_physics_trajectory_agreement": "NOT_TESTED",
+    "grazing_or_corner_events": "NOT_TESTED",
+    "probabilistic_sticking_or_reflection": "NOT_TESTED",
+    "native_field_or_canonical_p1_equivalence": "NOT_TESTED",
+    "rk4_fourth_order_convergence": "NOT_CLAIMED_BY_THREE_STEP_EVENT_TIME_SELF_CONSISTENCY",
+    "charge_state": "NOT_EXPORTED_OR_TESTED",
+    "canonical_lifecycle_mapping": "NOT_CERTIFIED",
+    "p18h_closure": "NOT_CLAIMED",
+    "boundary_identity_observation": "CONFIGURED_FEATURE_SELECTION_AND_ANALYTIC_PATH_NOT_A_RAW_HIT_BOUNDARY_ID",
+    "other_boundaries_cases_sizes_or_impact_geometries": "NOT_CLAIMED",
+    "universal_comsol_equivalent_accuracy": "NOT_CLAIMED",
+    "comsol_is_golden_truth": false,
+    "hash_audit_interpretation": "AUDIT_TIME_INTERNAL_INTEGRITY_NOT_AN_EXTERNAL_IMMUTABILITY_ATTESTATION"
+  }
+}

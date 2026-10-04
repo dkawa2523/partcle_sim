@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C2-anchor-preflight",
+  "evaluation_revision": 1,
+  "seed_plan": {
+    "path": "particle_platform_redesign/solver/evidence/m3c0/reference_lock_v1/seed_cohort.csv",
+    "expected_replicas_per_case": 32,
+    "expected_execution_status": "PLANNED_NOT_RUN"
+  },
+  "m3c0_locks": {
+    "artifact_hashes": "particle_platform_redesign/solver/evidence/m3c0/reference_lock_v1/artifact_hashes.csv",
+    "model_identity": "particle_platform_redesign/solver/evidence/m3c0/reference_lock_v1/model_identity.csv"
+  },
+  "model": {
+    "variant": "formal_iondrag_theory_consistent",
+    "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph"
+  },
+  "anchors": [
+    {
+      "case_id": "formal_iondrag_theory_consistent/caseA_100nm",
+      "role": "primary_campaign",
+      "package": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction",
+      "background_dataset": "dset_AS_field",
+      "brownian_feature_tag": "bf1",
+      "brownian_seed_parameter": "AS_brownian_seed",
+      "brownian_seed_expression": "[AS_brownian_seed]"
+    },
+    {
+      "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+      "role": "paired_inventory",
+      "package": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseP_100nm/external_reproduction",
+      "background_dataset": "dset_cacheP",
+      "brownian_feature_tag": "bf1",
+      "brownian_seed_parameter": "brownian_seed",
+      "brownian_seed_expression": "[brownian_seed]"
+    }
+  ],
+  "locked_package_artifacts": [
+    "manifest.csv",
+    "config/global_parameters.csv",
+    "config/particle_physics_feature_settings.csv",
+    "results/particle_history_full_tidy.csv"
+  ],
+  "required_companion_semantics": {
+    "field_representation": "common_p1_canonical_primitives",
+    "coordinates": "rz_meridional",
+    "brownian_degrees_of_freedom": 2,
+    "comsol_out_of_plane_degrees_of_freedom": false,
+    "comsol_random_number_mode": "UserDefined",
+    "comsol_brownian_feature": "built_in_bf1",
+    "comsol_brownian_viscosity": "epstein_equivalent_effective_viscosity",
+    "candidate_brownian_revision": "inertial_joint_ou_v1",
+    "comparison_kind": "independent_seed_ensemble_observables_not_pathwise",
+    "step_policy": "independent_solver_observable_convergence_not_equal_fixed_step"
+  },
+  "campaign_case_ids": [
+    "formal_iondrag_theory_consistent/caseA_100nm"
+  ],
+  "participants": [
+    {
+      "name": "comsol_common_p1_rz_companion",
+      "field_contract": "common_p1_canonical_primitives",
+      "stochastic_contract": "rz_projected_two_dof_fdt_companion"
+    },
+    {
+      "name": "solver_b03_candidate",
+      "field_contract": "common_p1_canonical_primitives",
+      "stochastic_contract": "inertial_joint_ou_v1"
+    }
+  ]
+}

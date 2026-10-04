@@ -1,0 +1,127 @@
+{
+  "adapter": {
+    "axis_radial_velocity_correction": {
+      "corrected_node_count": 34,
+      "maximum_correction_m_s": 0.00015312853079596514
+    },
+    "boundary_group_facet_counts": {
+      "focus_transition": 28,
+      "gas_inlet": 15,
+      "grounded_wall": 58,
+      "outer_dielectric": 8,
+      "pump_outlet": 9,
+      "wafer": 42
+    },
+    "deterministic_repeat_hash_match": true,
+    "excluded_axis_facet_count": 33,
+    "maximum_coordinate_match_distance_m": 5.721958498152797e-17,
+    "minimum_triangle_quality": 0.04238782600001075,
+    "node_count": 1987,
+    "physical_boundary_facet_count": 160,
+    "source_quadrilateral_count": 826,
+    "source_triangle_count": 2127,
+    "split_diagonal_03_count": 561,
+    "split_diagonal_12_count": 265,
+    "triangle_count": 3779
+  },
+  "builder": {
+    "charge_balance_error_C": 5.849821291975012e-21,
+    "deterministic_repeat_hash_match": true,
+    "electron_density_floor_node_count": 53,
+    "free_node_count": 1826,
+    "gmres_basis_and_hessenberg_bytes": 1235088,
+    "krylov_dimension": 80,
+    "line_search_reduction_count": 0,
+    "linear_iteration_count": 2821,
+    "maximum_newton_iteration_count_per_ramp": 12,
+    "relative_residual": 1.8440702467515396e-13,
+    "solve_wall_seconds_observations": [
+      0.689043200109154,
+      0.736935299821198
+    ],
+    "timing_semantics": "machine-local solve-only observations; not a portable gate"
+  },
+  "classification": "external_field_production_integration_not_solver_core_acceptance",
+  "closeout_revision": "f02_closeout_v1",
+  "coverage": {
+    "comsol_boundary_freeze_parity": "NOT_TESTED",
+    "comsol_trajectory_parity": "NOT_APPLICABLE_TO_FIXED_ELECTRIC_INTEGRATION_SMOKE",
+    "direct_imported_plasma_field_adapter": "OUT_OF_SCOPE_SEPARATE_T02_SLICE",
+    "independent_field_mesh_convergence": "NOT_TESTED_SINGLE_REFERENCE_MESH",
+    "same_exported_node_field_comparison": "TESTED"
+  },
+  "date": "2026-09-29",
+  "environment": {
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.13"
+  },
+  "field_comparison": {
+    "axisymmetric_weighting": "2_pi_r_lumped_p1_volume",
+    "boundary_shared_group_corner_node_count": 6,
+    "classification": "descriptive_external_vv_not_solver_acceptance",
+    "relative_weighted_l2": {
+      "electric_field": 0.17045852131627637,
+      "electric_potential": 0.019990067281922198,
+      "electron_number_density": 0.0383014825314747,
+      "positive_ion_number_density": 0.02535366661950341,
+      "positive_ion_speed": 0.038141395812992064,
+      "positive_ion_velocity": 0.725956140528184,
+      "space_charge_density": 0.19157276081162408
+    }
+  },
+  "hashes": {
+    "adapter_configuration_sha256": "sha256:3eec2e4c7bce228ebdaa9e8ed187c3841a79396697b4a2e1c2b6584321538fa6",
+    "builder_configuration_sha256": "sha256:fe834f938d0a81146cd45188dd48c043923aec833704c475f8e68c9922b0bbf7",
+    "canonical_augmented_fields_content_sha256": "sha256:b8bf3e55037f37cd0ffaef92d83a7d8a8a2d4d09351922db2e67933c1f9e8788",
+    "canonical_thermal_content_sha256": "sha256:5e49169b7a0f7c242314fb2ff12843caaaa5a4c0d0a1637dfbe1c97e37db71b1",
+    "field_comparison_report_sha256": "sha256:f3efabefdc7aa111422a74240eb65723507cf1335581257d86b20d5f244d5885",
+    "integration_case_file_sha256": "sha256:cbde70b2f5461286fee963609b17948d379baf2cdf4b5d62a4de97e58af36998",
+    "reference_column_dictionary_sha256": "sha256:15bc4d1d22f54bd161e4eed773fcdab6f993400b544448b543a6cdeb40d5ce4f",
+    "reference_node_fields_sha256": "sha256:bf941c93652d8a50036fc1e7e5cff4f4fdb352c887189317e0702ecd67360de9",
+    "source_csv_set_sha256": "sha256:ab110cd07a7ac55672d047304966806f8ff7fff8c0482ed106b7503d7de6165e",
+    "trajectory_result_manifest_sha256": "sha256:26079a31f3b4c01fb7fa5335e6c78803cf0a4d7c351d00a8e42e681f7bdfa08c"
+  },
+  "quality": {
+    "core_verification_and_scenario_tests": 414,
+    "external_tool_tests": 24,
+    "import_contracts_kept": 3,
+    "status": "PASS"
+  },
+  "revisions": {
+    "adapter": "comsol_axisymmetric_csv_adapter_v1",
+    "builder": "reduced_electrostatic_builder_v1",
+    "builder_discretization": "axisymmetric_p1_newton_gmres_v1",
+    "builder_model": "boltzmann_bohm_sheath_c2_v1",
+    "comparison": "reduced_field_comparison_v1",
+    "engine": "deterministic_particle_engine_v28",
+    "field_semantics": "reduced_electrostatic_fields_v1",
+    "memory_plan": "solver_owned_memory_plan_v11",
+    "physics_catalog": "deterministic_xy_rz_catalog_v5",
+    "physics_runtime": "deterministic_compiled_physics_runtime_v4"
+  },
+  "status": "PASS_WITH_EXPLICIT_COVERAGE_LIMITS",
+  "trajectory_integration": {
+    "boundary_event_count": 0,
+    "charge_unchanged": true,
+    "failure_event_count": 0,
+    "frame_count": 3,
+    "frame_row_count": 96,
+    "lifecycle_at_end": {
+      "active": 32,
+      "escaped": 0,
+      "failed": 0,
+      "stuck": 0
+    },
+    "macro_step_count": 10,
+    "maximum_displacement_m": 2.0714897943841714e-05,
+    "maximum_velocity_change_m_s": 0.07147363404571028,
+    "particle_count": 32,
+    "resolved_models": [
+      "fixed_charge_v1",
+      "electric_coulomb_v1"
+    ],
+    "resolved_path": "rk4_reintegrated"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "evidence_id": "M3-C1-thermophoresis-PPR-v1",
+  "classification": "external_comsol_saved_row_primitive_closure",
+  "source_output": "_out_m3c1/caseA_100nm_thermophoresis_ppr_v1",
+  "configuration": {
+    "path": "tools/vv/comsol/cases/m3c1_caseA_100nm_thermophoresis_ppr_v1.json",
+    "sha256": "a7c55e73db540296f166359faee8075b0539684dbcadb86325df16bc3729ef34"
+  },
+  "provenance": {
+    "source_model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "source_model_unchanged": true,
+    "m3c0b_v6_unchanged": true,
+    "load_mode": "ModelUtil.loadCopy",
+    "model_saved": false,
+    "process_count": 1,
+    "steps_run": 1,
+    "provenance_sha256": "1e34e02af8b82c52e8ebc402eadbb90c1abb226daec63d64d230d757f59317be"
+  },
+  "particle_saved_states": {
+    "status": "PASS",
+    "records": 13202,
+    "unique_keys": 13202,
+    "particles": 287,
+    "output_times": 46,
+    "all_finite": true,
+    "all_active": true,
+    "raw_sha256": "e138d8f2b76eef3d6cc781828a796e95fc63994d4bcac8d2721365d4ef51f119"
+  },
+  "coordinate_identity_to_locked_v6": {
+    "status": "PASS",
+    "maximum_absolute_difference_m": 0.0,
+    "limit_m": 1e-14,
+    "reference_state_sha256": "1241b91683f37076a3482c6792e29f0b215cd96434f25a82aff6b04a95679a58"
+  },
+  "waldmann_ppr_replay": {
+    "status": "PASS",
+    "primitive_authority": "feature_internal_ppr",
+    "formula": "F=(32/15)*(d0/2)^2*q/sqrt(8*R*T/(pi*Mmix))",
+    "force_component_limit": 1e-10,
+    "force_component_scale_normalized_residual_max": 4.4046499933294035e-16,
+    "force_global_relative_l2_residual": 1.0992667494449471e-16,
+    "heat_flux_identity_normalized_residual_max": 0.0,
+    "rerun_vs_locked_v6_exported_force_residual_max": 0.0
+  },
+  "background_dataset_mesh_point_samples": {
+    "status": "PASS",
+    "raw_rows": 33449,
+    "selected_domain": 3,
+    "selected_domain_rows": 1987,
+    "selected_domain_unique_coordinate_pairs": 1987,
+    "selected_domain_all_columns_finite": true,
+    "fractional_smoothed_domain_rows": 316,
+    "raw_sha256": "edf3e78473a0e7524d84396fd2d16febfb733fb9fdd0cf83fbf2e3c96b293714",
+    "raw_filename_semantics": "provenance_locked_legacy_name_not_a_native_node_claim",
+    "native_fe_node_identity": "NOT_TESTED_NO_NODE_IDS",
+    "mesh_topology": "NOT_EXPORTED",
+    "interpolation_ownership": "NOT_CERTIFIED"
+  },
+  "normalized_artifacts": {
+    "particle_tidy": {
+      "path": "_out_m3c1/caseA_100nm_thermophoresis_ppr_v1/thermophoresis_ppr_particle_tidy.csv",
+      "rows": 13202,
+      "sha256": "ed7afe83b02e3f8407f5a7c541fd9c5cb3f908b17ed6c94f6d99ea6887a99275"
+    },
+    "domain3_points": {
+      "path": "_out_m3c1/caseA_100nm_thermophoresis_ppr_v1/thermophoresis_ppr_domain3_points.csv",
+      "rows": 1987,
+      "sha256": "b60c48b713558468d194ccd2c1764b03b4cf1efacc551480650a873a5dbe00aa",
+      "scientific_label": "background_dataset_mesh_point_samples"
+    },
+    "full_evaluation": {
+      "path": "_out_m3c1/caseA_100nm_thermophoresis_ppr_v1/thermophoresis_ppr_evaluation.json",
+      "sha256": "ca28c48199300264c092a3746d6aa5a1ebfb76d8d8a391c834e18291e6f94a07"
+    }
+  },
+  "claims": {
+    "saved_row_ppr_primitive_closure": "PASS",
+    "integrated_trajectory": "NOT_TESTED",
+    "continuous_path_applicability": "NOT_TESTED",
+    "physical_applicability": "NOT_TESTED",
+    "native_mesh_topology_or_interpolant": "NOT_TESTED",
+    "comsol_is_golden_truth": false
+  },
+  "overall_status": "PASS"
+}

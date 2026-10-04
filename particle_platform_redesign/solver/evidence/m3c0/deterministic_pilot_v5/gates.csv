@@ -1,0 +1,9 @@
+gate,status,value,threshold
+compact_evidence_decision,INVALIDATED,historical_evaluator_status=PASS,replaced_by_v6_origin_invariant_position_gate
+all_records_active,PASS,true,true
+position_observed_order,PASS,1.0579673343657396,">=0.75"
+velocity_observed_order,PASS,1.000715854935095,">=0.75"
+charge_observed_order,PASS,1.064923502156796,">=0.75"
+fine_pair_position_relative_l2,PASS,6.145964082982306e-7,"<=5e-6"
+fine_pair_velocity_relative_l2,PASS,7.552445902714432e-5,"<=5e-4"
+fine_pair_charge_relative_l2,PASS,2.9444834716967805e-6,"<=2e-5"

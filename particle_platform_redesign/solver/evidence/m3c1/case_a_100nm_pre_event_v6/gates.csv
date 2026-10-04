@@ -1,0 +1,17 @@
+layer,quantity,statistic,observed,operator,limit,observed_to_limit,status,interpretation
+candidate_self,position,fine_relative_l2,2.677331196127922e-14,<=,1e-4,,PASS,roundoff_limited_precision_only
+candidate_self,velocity,fine_relative_l2,1.448610117908637e-14,<=,5e-4,,PASS,roundoff_limited_precision_only
+candidate_self,charge,fine_relative_l2,5.456212097587488e-15,<=,2e-5,,PASS,roundoff_limited_precision_only
+reference_self,active_records,count,13202,==,13202,1,PASS,pre_event_window_only
+reference_self,position,fine_relative_l2,3.102727085428029e-5,<=,1e-4,,PASS,operational_step_selection_only
+reference_self,velocity,fine_relative_l2,3.924832510840385e-5,<=,5e-4,,PASS,operational_step_selection_only
+reference_self,charge,fine_relative_l2,1.3511393490811462e-6,<=,2e-5,,PASS,operational_step_selection_only
+reference_self,position,observed_rms_order,0.9041136219836077,>=,0.75,,PASS,order_evaluated
+reference_self,velocity,observed_rms_order,0.9443119501831206,>=,0.75,,PASS,order_evaluated
+reference_self,charge,observed_rms_order,1.1238380758116033,>=,0.75,,PASS,order_evaluated
+cross_representation,position,rms_m,3.437485727086595e-4,<=,5.3387228259403245e-8,6438.779159660046,FAIL,native_FE_vs_canonical_P1
+cross_representation,position,maximum_m,2.660729292906687e-3,<=,6.744158047424948e-7,3945.235675374787,FAIL,native_FE_vs_canonical_P1
+cross_representation,velocity,rms_m_per_s,1.919910730173562,<=,3.6430541525847614e-4,5270.058170316732,FAIL,native_FE_vs_canonical_P1
+cross_representation,velocity,maximum_m_per_s,11.668961060303342,<=,3.133282330386992e-3,3724.197129360541,FAIL,native_FE_vs_canonical_P1
+cross_representation,charge,rms_e,17.58471490428266,<=,3.3741975576776693e-4,52115.24993333687,FAIL,native_FE_vs_canonical_P1
+cross_representation,charge,maximum_e,157.15163693423065,<=,3.8981579387940995e-3,40314.332923833696,FAIL,native_FE_vs_canonical_P1

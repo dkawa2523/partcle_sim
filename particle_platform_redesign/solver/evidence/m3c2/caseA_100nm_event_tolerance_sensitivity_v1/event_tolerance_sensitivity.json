@@ -1,0 +1,50 @@
+{
+  "baseline": {
+    "event_work": {
+      "accepted_particle_pieces": 6538918,
+      "candidate_queries": 6541259,
+      "maximum_refinement_depth": 27,
+      "refinements": 2341
+    },
+    "geometry_rtol": 1e-08,
+    "receipt": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c2\\caseA_100nm_event_tolerance_diagnostic_v2\\levels\\event_tolerance_diagnostic\\seed_918164\\run_receipt.json",
+    "receipt_sha256": "0748272e4cffbcf4648b97a3e6fda7e0a0fe40b83da500b4fe7179e16ad7cc58"
+  },
+  "baseline_event_count": 266,
+  "candidate": {
+    "event_work": {
+      "accepted_particle_pieces": 6539040,
+      "candidate_queries": 6541679,
+      "maximum_refinement_depth": 30,
+      "refinements": 2639
+    },
+    "geometry_rtol": 1e-09,
+    "receipt": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c2\\caseA_100nm_event_tolerance_sensitivity_v3\\levels\\event_tolerance_sensitivity\\seed_918164\\run_receipt.json",
+    "receipt_sha256": "3a383892f5448dcd90a954c47cf35cca0c3ccce6f19bef9f5656cc96be1e25fd"
+  },
+  "candidate_event_count": 266,
+  "claim": "event-tolerance configuration qualification only; no COMSOL or physics-fit claim",
+  "exact_identity_mismatches": [],
+  "gates": {
+    "event_identity_exact": true,
+    "event_keys_exact": true,
+    "final_fates_exact": true,
+    "position_budget": true,
+    "time_budget": false,
+    "zero_failures": true
+  },
+  "maximum_position_delta_over_max_recorded_budget": 0.3223258144991541,
+  "maximum_position_ratio_event": [
+    92,
+    1
+  ],
+  "maximum_time_delta_over_max_recorded_budget": 50892.066175786,
+  "maximum_time_ratio_event": [
+    150,
+    1
+  ],
+  "recipe": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\cases\\m3c2_caseA_100nm_candidate_pilot_v3.json",
+  "recipe_sha256": "08f1ac7f66d7e870383f750c3c0bed437756684a62d4328dbe45d025fba46f5f",
+  "status": "FAIL",
+  "tool_revision": "m3c2_event_tolerance_sensitivity_evaluator_v1"
+}

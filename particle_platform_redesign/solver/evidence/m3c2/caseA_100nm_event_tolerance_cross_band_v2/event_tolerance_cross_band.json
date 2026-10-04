@@ -1,0 +1,63 @@
+{
+  "candidate": {
+    "event_work": {
+      "accepted_particle_pieces": 6561568,
+      "candidate_queries": 6564223,
+      "maximum_refinement_depth": 30,
+      "refinements": 2655
+    },
+    "geometry_rtol": 1e-09,
+    "receipt": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c2\\caseA_100nm_event_tolerance_cross_band_v4\\levels\\event_tolerance_candidate\\seed_918165\\run_receipt.json",
+    "receipt_sha256": "03c34857558732338ec5de3a58746522f8fd6478046a692aa2d1ddb90db8536b"
+  },
+  "candidate_event_count": 262,
+  "claim": "event-tolerance configuration qualification on an unseen seed only; no COMSOL or physics-fit claim",
+  "exact_identity_mismatches": [],
+  "gates": {
+    "cross_band_time_allowance": true,
+    "event_identity_exact": true,
+    "event_keys_exact": true,
+    "event_normals_exact": true,
+    "final_fates_exact": true,
+    "normal_speed_agreement": true,
+    "position_composed_budget": true,
+    "signed_outward_transversality_guard": true,
+    "zero_failures": true
+  },
+  "maximum_position_delta_over_composed_budget": 0.4823995321304241,
+  "maximum_position_ratio_event": [
+    286,
+    1
+  ],
+  "maximum_time_delta_over_composed_stopping_time_allowance": 0.4543240341560484,
+  "maximum_time_ratio_event": [
+    90,
+    1
+  ],
+  "minimum_certified_boundary_transverse_speed_m_per_s": 2.04562075602541,
+  "normal_mismatches": [],
+  "normal_speed_mismatches": [],
+  "policy_revision": "cross_band_stopping_time_allowance_v1",
+  "recipe": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\cases\\m3c2_caseA_100nm_candidate_pilot_v4.json",
+  "recipe_sha256": "b12f6fef7ae09653bb7b8935ac8546416d73f9c95af96aee6fae4144dec1c2ff",
+  "reference": {
+    "event_work": {
+      "accepted_particle_pieces": 6561358,
+      "candidate_queries": 6563599,
+      "maximum_refinement_depth": 27,
+      "refinements": 2241
+    },
+    "geometry_rtol": 1e-08,
+    "receipt": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c2\\caseA_100nm_event_tolerance_cross_band_v4\\levels\\event_tolerance_reference\\seed_918165\\run_receipt.json",
+    "receipt_sha256": "33621f81769e3cfdc5afc61a595aa28ae08d485ba1fd8a1be4db48fe1a5eb21e"
+  },
+  "reference_event_count": 262,
+  "signed_speed_guard_failures": [],
+  "status": "PASS",
+  "tool_revision": "m3c2_event_tolerance_cross_band_evaluator_v2",
+  "v3_invalid_gate_evidence": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\m3c2\\caseA_100nm_event_tolerance_sensitivity_v1\\event_tolerance_sensitivity.json",
+    "retained_status": "FAIL",
+    "sha256": "63a1349dc18a9f4ffe514e0c87591b09a3107d4f05cf4d7908a07a4f57d0971b"
+  }
+}

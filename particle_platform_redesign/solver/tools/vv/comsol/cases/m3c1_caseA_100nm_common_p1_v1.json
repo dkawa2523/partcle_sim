@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C1-caseA-100nm-common-canonical-p1-pre-event",
+  "evaluation_revision": 2,
+  "classification": "external_same_canonical_p1_full_physics_trajectory_diagnostic",
+  "labels": {
+    "candidate": "solver_canonical_p1_projection",
+    "reference": "comsol_common_canonical_p1"
+  },
+  "scope": {
+    "workflow": "caseA",
+    "diameter_m": 1e-7,
+    "coordinate_system": "axisymmetric_rz_no_swirl",
+    "time_window_s": [0.0, 0.00045],
+    "output_interval_s": 1e-5,
+    "particles": 287,
+    "frames": 46,
+    "internal_steps_s": [6.25e-7, 3.125e-7, 1.5625e-7],
+    "brownian_active": false,
+    "dynamic_charge_active": true,
+    "boundary": "NOT_TESTED_PRE_EVENT_WINDOW",
+    "deterministic_contributions": [
+      "electric",
+      "relative_flow_ion_drag",
+      "epstein_drag",
+      "waldmann_thermophoresis",
+      "free_molecular_lift_sensitivity",
+      "dielectrophoresis",
+      "gravity_buoyancy"
+    ],
+    "field_representation": "canonical_exact_connectivity_P1_projection_from_exported_nodal_values"
+  },
+  "candidate": {
+    "producer_tool_revision": "m3c1_solver_canonical_p1_projection_candidate_v3",
+    "configuration_sha256": "acdee16230e8330a9012ec0c817ac4022fc8b28ec6449704a94cbfa35d642e4d",
+    "input_file_sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+    "input_content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c",
+    "engine_algorithm_revision": "particle_engine_v31",
+    "physics_models": {
+      "charge": {
+        "model": "plasma_continuous",
+        "revision": "aggregate_relative_drift_regularized_two_current_v1"
+      },
+      "dielectrophoresis": {
+        "model": "quasistatic_spherical",
+        "revision": "quasistatic_spherical_gradient_e2_v1"
+      },
+      "drag": {
+        "model": "epstein_linear",
+        "revision": "epstein_linear_effective_gas_sensitivity_v1"
+      },
+      "electric": {
+        "model": "coulomb",
+        "revision": "electric_coulomb_v1"
+      },
+      "gravity_buoyancy": {
+        "model": "standard",
+        "revision": "gravity_buoyancy_standard_v1"
+      },
+      "ion_drag": {
+        "model": "screened_collection_orbital",
+        "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+      },
+      "lift": {
+        "lift_coefficient": 1.0,
+        "model": "rarefied_vorticity_sensitivity",
+        "revision": "rarefied_vorticity_sensitivity_rz_v1"
+      },
+      "thermophoresis": {
+        "model": "waldmann_gallis",
+        "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+      }
+    }
+  },
+  "reference": {
+    "producer_tool_revision": "m3c1_full_physics_common_p1_reference_v1",
+    "table_tool_revision": "m3c1_full_physics_common_p1_tables_v1",
+    "source_mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "table_receipt_filename": "common_p1_table_receipt.json",
+    "artifact_hashes_filename": "artifact_hashes.csv",
+    "normalization_summary_filename": "normalization_summary.json",
+    "validation": {
+      "prepared_table_artifact_count": 26,
+      "initial_state_roundoff_multiplier": 4096.0,
+      "initial_primitive_component_count": 22,
+      "initial_primitive_value_count": 6314,
+      "initial_primitive_roundoff_multiplier": 4096.0
+    },
+    "trajectory_hash_binding": "common_p1_run_receipt.json plus artifact_hashes.csv; hashes are generated after the isolated COMSOL run"
+  },
+  "acceptance": {
+    "minimum_rms_order": 0.75,
+    "maximum_fine_pair_relative_l2": {
+      "position": 1e-4,
+      "velocity": 5e-4,
+      "charge": 2e-5
+    },
+    "roundoff_multiplier": 2048.0,
+    "same_field_absolute_limits": {
+      "position": {
+        "rms": 6e-8,
+        "maximum": 7e-7
+      },
+      "velocity": {
+        "rms": 4e-4,
+        "maximum": 0.0035
+      },
+      "charge": {
+        "rms": 4e-4,
+        "maximum": 0.0045
+      }
+    },
+    "limit_basis": {
+      "source_artifact": "_out_m3c1/caseA_100nm_pre_event_v6/cross_representation_budget.json",
+      "source_sha256": "b9c2d044c1f01ea0aa7d43885521c82ac54e0802c6737d5e8e1780ceaf5095b7",
+      "source_tool_revision": "m3c1_cross_representation_pre_event_v4",
+      "source_native_v6_fine_pair_envelope": {
+        "position": {
+          "rms": 5.3387228259403245e-8,
+          "maximum": 6.744158047424948e-7
+        },
+        "velocity": {
+          "rms": 0.00036430541525847614,
+          "maximum": 0.003133282330386992
+        },
+        "charge": {
+          "rms": 0.00033741975576776693,
+          "maximum": 0.0038981579387940995
+        }
+      },
+      "rounding_policy": "each absolute gate is rounded upward before the common-field COMSOL run",
+      "common_field_cross_difference_was_read": false
+    },
+    "result_dependent_tolerance_tuning": "PROHIBITED"
+  },
+  "claim_policy": {
+    "same_field_solver_agreement": "decided only by this diagnostic's fixed gates",
+    "physical_model_validity": "NOT_CLAIMED",
+    "comsol_universal_equal_accuracy": false,
+    "boundary_accuracy": "NOT_TESTED_PRE_EVENT_WINDOW",
+    "brownian_accuracy": "NOT_TESTED_DISABLED",
+    "cross_representation_result": "SEPARATE_ARTIFACT"
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "claim_policy": {
+    "certifies": [
+      "the production hold boundary law for this one force-free normal-impact R-Z microcase",
+      "the production held lifecycle retains hit position and incident velocity in this external microcase",
+      "agreement with the locked COMSOL Freeze trajectory for this isolated microcase"
+    ],
+    "does_not_certify": [
+      "COMSOL as a golden truth",
+      "grazing or corner impacts",
+      "full-physics trajectory agreement",
+      "COMSOL charge retention or nonzero-charge retention from this zero-charge external microcase",
+      "charge evolution after a terminal event",
+      "a paused particle that can resume",
+      "other geometries, particle sizes, boundaries, or COMSOL models"
+    ]
+  },
+  "evaluation_id": "P18-H-hold-freeze",
+  "gate_summary": {
+    "fail": 0,
+    "pass": 15
+  },
+  "gates": [
+    {
+      "gate": "candidate_active_position_vs_analytic",
+      "limit": 1e-12,
+      "observed": 0.0,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_active_velocity_vs_analytic",
+      "limit": 1e-12,
+      "observed": 0.0,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_active_position_vs_locked_comsol",
+      "limit": 1e-12,
+      "observed": 4.726604209672303e-16,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_active_velocity_vs_locked_comsol",
+      "limit": 1e-12,
+      "observed": 1.7763568394002505e-15,
+      "status": "PASS"
+    },
+    {
+      "gate": "exactly_one_hold_event_and_zero_failures",
+      "limit": {
+        "boundary_events": 1,
+        "failure_events": 0,
+        "law": "hold",
+        "outcome": "held"
+      },
+      "observed": {
+        "boundary_events": 1,
+        "failure_events": 0,
+        "law": "hold",
+        "outcome": "held"
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_event_time_vs_analytic",
+      "limit": 5e-09,
+      "observed": 1.9244588561617704e-18,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_event_time_vs_locked_comsol",
+      "limit": 5e-09,
+      "observed": 4.342229700804445e-17,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_hit_position_vs_analytic",
+      "limit": 5e-08,
+      "observed": 0.0,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_hit_position_vs_locked_comsol",
+      "limit": 5e-08,
+      "observed": 2.7755575615628914e-17,
+      "status": "PASS"
+    },
+    {
+      "gate": "saved_lifecycle_is_30_active_then_31_held",
+      "limit": {
+        "active_frames": 30,
+        "held_frames": 31
+      },
+      "observed": {
+        "active_frames": 30,
+        "held_frames": 31
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_held_position_retention",
+      "limit": 5e-12,
+      "observed": 0.0,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_held_position_vs_locked_comsol",
+      "limit": 5e-12,
+      "observed": 2.7755575615628914e-17,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_hold_retains_incident_velocity",
+      "limit": 1e-12,
+      "observed": {
+        "event_maximum_error_m_per_s": 0.0,
+        "held_maximum_error_m_per_s": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_hold_retains_charge",
+      "limit": 0.0,
+      "observed": 0.0,
+      "status": "PASS"
+    },
+    {
+      "gate": "candidate_terminal_state_is_held_and_valid",
+      "limit": {
+        "final_lifecycle": 5,
+        "held": 1,
+        "kinematics_valid": 1,
+        "other_terminal": 0
+      },
+      "observed": {
+        "final_lifecycle": 5,
+        "kinematics_valid": 1,
+        "manifest_terminal_counts": {
+          "escaped": 0,
+          "failed": 0,
+          "held": 1,
+          "stuck": 0
+        },
+        "series_escaped": 0,
+        "series_failed": 0,
+        "series_held": 1,
+        "series_stuck": 0
+      },
+      "status": "PASS"
+    }
+  ],
+  "interpretation": {
+    "charge": "candidate self-retention only; COMSOL charge was not exported",
+    "comsol_role": "external locked reference, not golden truth",
+    "held_semantics": "terminal and inactive, with retained queryable kinematics",
+    "post_event_velocity": "candidate retention is gated; COMSOL retention is characterized"
+  },
+  "metrics": {
+    "active_frames": 30,
+    "active_position_analytic_maximum_m": 0.0,
+    "active_position_cross_maximum_m": 4.726604209672303e-16,
+    "active_velocity_analytic_maximum_m_per_s": 0.0,
+    "active_velocity_cross_maximum_m_per_s": 1.7763568394002505e-15,
+    "candidate_event_time_s": 7.299999999999807e-05,
+    "candidate_hit_position_m": [
+      0.24,
+      0.115
+    ],
+    "candidate_receipt": {
+      "event_rows": 1,
+      "failure_event_count": 0,
+      "trajectory_rows": 61
+    },
+    "charge_retention_error_e": 0.0,
+    "event_velocity_retention_error_m_per_s": 0.0,
+    "held_frames": 31,
+    "held_position_cross_maximum_m": 2.7755575615628914e-17,
+    "held_position_spread_m": 0.0,
+    "held_velocity_retention_error_m_per_s": 0.0,
+    "reference_event_time_s": 7.30000000000415e-05,
+    "reference_hit_position_m": [
+      0.24000000000000002,
+      0.115
+    ]
+  },
+  "provenance": {
+    "candidate_events_sha256": "befba3b3162aecccbd7a3abfb9793091ea1ba2c54aaed233756e0554b76ab853",
+    "candidate_manifest_sha256": "5395e89b6f7c64c8bac6894e36fd49a8671e9d5c8cf428bb239d8419a01bea77",
+    "candidate_report_sha256": "534507ca4d0456cd37c894bf3c457645c4b0de0a72e009b047d52de79dcd4568",
+    "candidate_root": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_p18h\\hold_freeze_claim_v2",
+    "candidate_trajectory_sha256": "da7c6fdf9ed164ce695417835e15c23d2463b94d95b707c9f10605dd85f9f785",
+    "configuration": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\cases\\p18h_hold_freeze_v1.json",
+    "configuration_sha256": "ae4b3cdf3a16b0ce211bebc27b5b8a7408279d3bcc480b9165a70b1addc534c0",
+    "evaluator_source_sha256": "4aacdf55dc306913044f20b358dea02d66720ef04659fc64b48dd9613ed630e7",
+    "locked_reference": {
+      "compact_gates": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\m3c0\\boundary_semantics_v2\\gates.csv",
+        "sha256": "8d6ea238789fcc89d2d6c2988433c70e63af491253e0d9c71787eb51a7c97ea7"
+      },
+      "compact_manifest": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\m3c0\\boundary_semantics_v2\\comparison_manifest.json",
+        "sha256": "eb9cb9701643ee8621d8ca2f34edde088ae3e8c66a2ebbfdd39eea4a2597d20e"
+      },
+      "compact_readme": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\m3c0\\boundary_semantics_v2\\README.md",
+        "sha256": "45c794241dfaaa52c299e5ea4aeb9e7b3bd6bf2bf7344403a318520c60165a12"
+      },
+      "event": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c\\boundary_semantics_v2\\freeze_inlet_37\\dt_2p5us\\event_observation.csv",
+        "sha256": "e58d1586c4cea934710ab5cc6a28e492796bff496daf32d78598ea0f71c8d72c"
+      },
+      "state": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c\\boundary_semantics_v2\\freeze_inlet_37\\dt_2p5us\\state.csv",
+        "sha256": "a120746a4afed53af2280233b6de249ede82913e39c21499d748eab4eacf7bfe"
+      },
+      "summary": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c\\boundary_semantics_v2\\freeze_inlet_37\\dt_2p5us\\step_summary.json",
+        "sha256": "2a284bb2a10d7c28a527c24d5778c1c1fc78bae75543c82a6a91770a56e5315a"
+      }
+    },
+    "producer_source_sha256": "9b25a66be9d9650a22b60295eb442d17207e2c83b0a30c85c4e459529e0d56a1"
+  },
+  "revisions": {
+    "boundary_algorithm_revision": "point_wall_laws_v5",
+    "case_schema_version": 2,
+    "engine_algorithm_revision": "particle_engine_v32",
+    "result_algorithm_revision": "durable_segmented_result_v4",
+    "result_schema_version": 2
+  },
+  "schema_version": 1,
+  "scope": {
+    "comsol_rerun": false,
+    "coordinate_system": "axisymmetric_rz",
+    "dynamic_charge": false,
+    "force_free": true,
+    "frames": 61,
+    "particles": 1
+  },
+  "status": "PASS",
+  "tool_revision": "p18h_hold_freeze_evaluator_v1"
+}

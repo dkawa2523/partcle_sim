@@ -1,0 +1,3051 @@
+{
+  "accuracy_claim": "NOT_EVALUATED_BY_RUNNER",
+  "comparison_status": "READY_FOR_INDEPENDENT_ENSEMBLE_FINAL_EVALUATION",
+  "final_registration": {
+    "authorization_artifacts": {
+      "evaluation_policy": {
+        "path": "tools/vv/comsol/cases/m3c2_caseA_100nm_ensemble_evaluation_v3.json",
+        "sha256": "26139aa08cc3d893394cd15dcacf282bc7874dc3de06c1cdbfa0dc401caa055e"
+      },
+      "pilot_evaluation": {
+        "path": "_out_m3c2/caseA_100nm_stochastic_pilot_evaluation_v3/evaluation_manifest.json",
+        "sha256": "609c3da551ada8859787d088d5ca53fc3ba31e93b0d20d79d1403b6015d91005"
+      },
+      "selection_receipt": {
+        "path": "evidence/m3c2/caseA_100nm_final_campaign_v1/selection_receipt.json",
+        "sha256": "3f214b75e876c36c42543dfc29b2861fcf262f8a845e6adc55b569a0977d975e"
+      }
+    },
+    "path": "candidate_final_registration.json",
+    "sha256": "76ed101469aa22819c350a3740662413b2995bb3925e7e1e3f41be531d897bf8"
+  },
+  "input_content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c",
+  "input_sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+  "levels": {
+    "macro_coarse": {
+      "brownian_interval_tree_depth": 3,
+      "dt_s": 2e-05,
+      "geometry_rtol": 1e-08,
+      "purpose": "accepted_final",
+      "replicas": [
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318192/case.yaml",
+          "case_sha256": "140ea99c0d7f8a9080d07499661d5ff86e0a7d351079694c2e450af5b1afd77a",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 262,
+          "events": "levels/macro_coarse/seed_318192/events.csv",
+          "events_sha256": "5fdd55a79a9926d56f3f917b3c3ebc60b68ac4b8675699577da2b06dffba992f",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318192/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318192/performance.json",
+          "performance_sha256": "3bb2c04a172cfafdadd6f1b2d3aa1bd36184ddba6c6f3a8eb40a688575bb61fa",
+          "receipt": "levels/macro_coarse/seed_318192/run_receipt.json",
+          "receipt_sha256": "52eb2713ae61f447e87bc8a4a343bf65f473e74d1e8cf7585507fd03cfc204fe",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318192/result",
+          "result_counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31539,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "d270f148eb2dc32ce3dbf66083593e9c912931dacd576b11e4c0ef3c0f453cf3",
+          "seed": 318192,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318192/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "f023919f491e9ee8dcc42c0b9a73176e3c938cbf214c765da5be88f087668d69"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318193/case.yaml",
+          "case_sha256": "021e336d8b2a4d3686131e3c4be77b1235b5cde44a5c3184307d3e56657fd5ec",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318193/events.csv",
+          "events_sha256": "873d10f52069fb7f92688b453b96c04406fd329a6c0020c35b997ced1dc22c05",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318193/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318193/performance.json",
+          "performance_sha256": "af6f52c3d60af0798a0cb1e36648e040831401ea32aaee706f2c7d3a876e558a",
+          "receipt": "levels/macro_coarse/seed_318193/run_receipt.json",
+          "receipt_sha256": "d9760a0674d22b46008909f06b32014e4863a88952ac47474b5b625cab50789b",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318193/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31522,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "50335baf8b8f40968c2d8d227a1cd9348cae3906c56191e435804eecefffc834",
+          "seed": 318193,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318193/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "3525f240d93a48b30c7c65bb4c4c8620c50b0fb5308217ebb5c7874276fb6fb0"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318194/case.yaml",
+          "case_sha256": "e037d844e76c51e5958f87ce6d003cea84771197b551e840fb52f14b1da4f494",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 265,
+          "events": "levels/macro_coarse/seed_318194/events.csv",
+          "events_sha256": "3994444a0780db954783c254b93ff1f5125933b8403cb102689ed9f923b391df",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318194/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318194/performance.json",
+          "performance_sha256": "4aef31fc792568f08b4dad4e3041123b1d1fbfafd20dd9b655b0062d120e6f81",
+          "receipt": "levels/macro_coarse/seed_318194/run_receipt.json",
+          "receipt_sha256": "54e0c43bf670812a5c16078225c42ff8aafcf20dda9bebc9bb715d644a993357",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318194/result",
+          "result_counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31531,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "7ee61628a03c466c43f5d0d3f718647c37f30f38d988939f65faaf4b3f22c1a1",
+          "seed": 318194,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318194/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "1df948cd2b7c6011d88f9684d2dbb91c154193a3f553141c0320013c102fc09f"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318195/case.yaml",
+          "case_sha256": "2d7ae6af6f3f9272b0d5a8b1d0cb3f0ca0e21367d853d332ef33a1af6ea3ca94",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 267,
+          "events": "levels/macro_coarse/seed_318195/events.csv",
+          "events_sha256": "1b1d5e21ff6fb08724e93a19bd798b64f498f82f79972f08c53d16f58d66ee9e",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318195/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318195/performance.json",
+          "performance_sha256": "a800e94825c5be17694b802fc8fe631f394176d6e638b34381c855663e516006",
+          "receipt": "levels/macro_coarse/seed_318195/run_receipt.json",
+          "receipt_sha256": "0edd19dcafca233758d85798c346e7b135f426987d1e7847dc44d557834a7e86",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318195/result",
+          "result_counts": {
+            "boundary_events": 267,
+            "failure_events": 0,
+            "frame_rows": 31520,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "7f937f197ce218325d0ebe9db30d4c63327216b8c030ffb5c9a07fec27802461",
+          "seed": 318195,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318195/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "9194f3e6401c04e70e348124198d5c06c68f4f3a661d17cf6108b46bea7293cb"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318196/case.yaml",
+          "case_sha256": "78735e9ac33b0ce408953fc773641f79eb7e83c35c006a34511fef3cfe1e6df9",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 266,
+          "events": "levels/macro_coarse/seed_318196/events.csv",
+          "events_sha256": "721b3e2fe811bd0a8031a62eb33298f5f93c128c552b48a5b779ad91383939d8",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318196/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318196/performance.json",
+          "performance_sha256": "7b615ed16a8953790fe2c6be053e4f82f9bf2e19f18aac34b96d716093bacd9d",
+          "receipt": "levels/macro_coarse/seed_318196/run_receipt.json",
+          "receipt_sha256": "0eaea797fcfac009fba591294f21221e40b63841ae50d08d59d107deb81c58fb",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318196/result",
+          "result_counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31535,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "6f2493ab5b53caf4928fd3553c54caa0c9788eeb456d7023b69cc553de612ca2",
+          "seed": 318196,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318196/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "578eabcec2bcd68d08ee0302917d6edcab4c3937a697c6f30688993c86a0d6b4"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318197/case.yaml",
+          "case_sha256": "1c9dd7b25d288ddd2581f8bbb6acdcdb8f7755c3ee3068a7c324ac31dd764b47",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 263,
+          "events": "levels/macro_coarse/seed_318197/events.csv",
+          "events_sha256": "432615430fadc7ea9096ca22153bf7349c4ce59c3fcedca0ec357232a06cba6f",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318197/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318197/performance.json",
+          "performance_sha256": "705277c2c63e45a296e72f90a08c0cb9c9dcea31f464153f386266ced54ab11b",
+          "receipt": "levels/macro_coarse/seed_318197/run_receipt.json",
+          "receipt_sha256": "c137054e74b19554797e01459afe6b10e42f24c6142be02cabc6298a44621169",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318197/result",
+          "result_counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31534,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "2cea518bebc53eba518c4976abc31b1ea3bb7aa34e64eb99fbaa72ad23395c7d",
+          "seed": 318197,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318197/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "e5940fc86f5a73d86dd9040a8ff1529aac0ac4f4cb49b70f8a8f6d28893618c0"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318198/case.yaml",
+          "case_sha256": "70cc27a89dbaf76ba2dd98232da6703e5ceb14df954ff52fd71701a8ccc6ad79",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 262,
+          "events": "levels/macro_coarse/seed_318198/events.csv",
+          "events_sha256": "884bb11a55db63b84939cbb2551ae21c59e75429ca637df1f69ec1e0bbe59d60",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318198/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318198/performance.json",
+          "performance_sha256": "204ff47a8423311ec19aefd50fa871a857fa063d87e7730f37c7374f246972c7",
+          "receipt": "levels/macro_coarse/seed_318198/run_receipt.json",
+          "receipt_sha256": "ccd104f1f69293b0b14a9a57d6379d255f0c67e4d3cfd050d0d4d7a8fa5a5001",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318198/result",
+          "result_counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31524,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "9019c473a3ddff45127830bb16e4b244679299bb08fc8c38b4d81831b19d63fb",
+          "seed": 318198,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318198/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "a89bc78c4514aa2851fd1ed8fa4cee2ad5de9abf5b1a68ef7786aedc8bddd809"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318199/case.yaml",
+          "case_sha256": "ed12e99d056dbf8b4fbde1fd558c6028ce6a14591e84d531e2ca8426dbca737e",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318199/events.csv",
+          "events_sha256": "9951e22c32c8b85b58b5867344b739ca4b7adc03321dcd3f3b060e21c6758193",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318199/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318199/performance.json",
+          "performance_sha256": "54f1c0ae910b04def6696e1d70fa8963b505f7a9ee2390a0c04aae20032b7629",
+          "receipt": "levels/macro_coarse/seed_318199/run_receipt.json",
+          "receipt_sha256": "4bc82f9be6b562490c1e4047d69a9a4db9bf0c09484bea32862cd213943157d7",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318199/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31526,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "240c1e543795c54342798d5b13ccb235671be59253625138007a09f3a0bbfcdc",
+          "seed": 318199,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318199/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "2f41fe923c4546e66b6012404a6c5dafd038746da169e2151d8deffd884d570e"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318200/case.yaml",
+          "case_sha256": "14307fff63aeab094a6eb2eaa9be29a6161acaab8b853d8fe5e195e02fccfb9b",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 266,
+          "events": "levels/macro_coarse/seed_318200/events.csv",
+          "events_sha256": "0d19b135506d48442f7a31c3d69bbb2ea9c30e33ea648bedf8702a805513e720",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318200/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318200/performance.json",
+          "performance_sha256": "e27d6afa613353427385da280bf1476acf687e3e85fe98acd566877fde2697ea",
+          "receipt": "levels/macro_coarse/seed_318200/run_receipt.json",
+          "receipt_sha256": "e8fef64db38d21a0e875c98c2ded8074caca1ba01823deb2b63265d1a9126cea",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318200/result",
+          "result_counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "45a648fecdccb3dad7ec97c1800bc19b32fb93386e1660c57c510bbd58cfd292",
+          "seed": 318200,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318200/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "8433f5697ee131f6ebc150e54b7afa5e67e1102e61826d00dd957492abc762cf"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318201/case.yaml",
+          "case_sha256": "dd580efa7cb584d9e91227950bd22a4d4296ddd49df5c293a7be266045659dcb",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318201/events.csv",
+          "events_sha256": "50c119b0e42c1d3f781921d4521e0bf5fb67aa8c6617871ab8bb31e22bb37cf8",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318201/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318201/performance.json",
+          "performance_sha256": "3569d0c9617f6c80177d2c861062a7da16093257634a96fc4636584d3cf6e8d8",
+          "receipt": "levels/macro_coarse/seed_318201/run_receipt.json",
+          "receipt_sha256": "a0674ac47272d0817c81dc7bbfdc56bb221a4068b16c5ae48516999962f7c1ff",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318201/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31540,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "f2d492daabecaf06c12d44211a1bf4afb31bd164097a732682a165724518811b",
+          "seed": 318201,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318201/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "b1bf9a65e34859afc72704ff64a4d8b78d375a8d220d30d30f9ee0cbe766f71a"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318202/case.yaml",
+          "case_sha256": "9d622e155891f2a0eb1b738b5658e558f451282ce4ea4a647d061d0878510fa8",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 265,
+          "events": "levels/macro_coarse/seed_318202/events.csv",
+          "events_sha256": "2e8d02326ea372ab68b367f646085bcc73bb285558fa4055cf2debc78177b3f3",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318202/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318202/performance.json",
+          "performance_sha256": "3c7be4dc9e758440b4e67fa8e23a7ec827ac8f871c44704b556604199455acc2",
+          "receipt": "levels/macro_coarse/seed_318202/run_receipt.json",
+          "receipt_sha256": "e02d3365f01d51766629ea0904b274b5d7fbe83c5e2491202f98f5b82909af66",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318202/result",
+          "result_counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31527,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "1b323e0d4a74d44cb98c209174dea4ab3f28f5852ba4b250a95da1cc62158925",
+          "seed": 318202,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318202/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "9de65ea212ae8d9428211866186afd9f3358fad73c97c793447bf7615c80461a"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318203/case.yaml",
+          "case_sha256": "a345d5119258264f702f62bc6311c6101b6a53a7dd73be1d7bbfec004eefd7a5",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318203/events.csv",
+          "events_sha256": "20e2f7b29ee36567ffde8e96a915113649d2174c6e1304282550b084046159ba",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318203/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318203/performance.json",
+          "performance_sha256": "5b89fa60849fd78e4dc3b525003854a283f39fe8c9d897c9fe3acc6d247c2885",
+          "receipt": "levels/macro_coarse/seed_318203/run_receipt.json",
+          "receipt_sha256": "a2bb2793e40685f3f560592f8fc5fa172c9d8b5c4608658872a993ae42678738",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318203/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31535,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "80d49d08d2a17f3ee74b7d33d00b8b16d5ba17d35083cc1fc34be96268031c92",
+          "seed": 318203,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318203/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "a89c7463c8e6eb74083ee45bd1b12ad385d92d39a98127fd5e594c3a3a9775da"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318204/case.yaml",
+          "case_sha256": "1a81a76c30b8ecf8ec0ac0718b4c5defb9093c7e501871d9645384942156bafe",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 262,
+          "events": "levels/macro_coarse/seed_318204/events.csv",
+          "events_sha256": "da5bf767e732f0c3a119ac7c929dbf54e75162897a99aefe56aed9138113d8e4",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318204/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318204/performance.json",
+          "performance_sha256": "27271c2a1d4166691a29a572a86f3578b7a7ab346a4d6e6ad4624566519bcfe9",
+          "receipt": "levels/macro_coarse/seed_318204/run_receipt.json",
+          "receipt_sha256": "ace94b484fa4e72a9cd63f35500874ff8e93963743a6561b26c0dce25d3c13fc",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318204/result",
+          "result_counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31522,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "51f2d82aef4d1696e12ceb3c8cc68805e1fbefb6f2b3f6de05f3b02eff90248d",
+          "seed": 318204,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318204/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "5cdaf19db15a802dc8bf893cf470a8e20bff1871f664d6cdf32de42e1c30084e"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318205/case.yaml",
+          "case_sha256": "dcae5a63e95797e1b3ac3efb067547fd52d4185b73317fe3b199fba08f2dc1fb",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318205/events.csv",
+          "events_sha256": "3ed1540c67791dab5389562b0994850102c7cd861d01782878c49fe9868ee7f1",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318205/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318205/performance.json",
+          "performance_sha256": "0522e5a6a2792131186736ee09a3540e646333c90062f985c692c128a7b73102",
+          "receipt": "levels/macro_coarse/seed_318205/run_receipt.json",
+          "receipt_sha256": "8ee42a8bd179d9a897e68912d1c3010aa430aea10aa11a5c691b157c4a0e296d",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318205/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31535,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "015b9c324a31e54c52bea15d9de957b65e1f7d86ece7e2d1e8f02df6222ffbde",
+          "seed": 318205,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318205/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "a17e3f122ccbdeeb7965e752112356f901b03301a71ef4efbb693457d235e7e9"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318206/case.yaml",
+          "case_sha256": "10fd42144540ccb7d0f89b9126af63649d20ba83d7ffc2e5473b7ce4491573a6",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 262,
+          "events": "levels/macro_coarse/seed_318206/events.csv",
+          "events_sha256": "f37cb14ec09021c1b1130aff37e7b7230424fb8879b8a2516280afe8930bef50",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318206/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318206/performance.json",
+          "performance_sha256": "def3383321a7acce62a2a6b21bb13da16913e3f19e62778357358e317e584b68",
+          "receipt": "levels/macro_coarse/seed_318206/run_receipt.json",
+          "receipt_sha256": "8a8e63a8dff51b997ec1d9f7dfbd9e5a4448d09deb38ec2b98c4f7e4055c6e91",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318206/result",
+          "result_counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31527,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "f0a493c72baddeab44c3e2dc1a97967e638275123c2d05156c3c8a5a7ef6e42b",
+          "seed": 318206,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318206/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "df3c7afd5663e8ab3ed7c5cb6062b795c89cf27ea5a74551f9e82f946913cc67"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318207/case.yaml",
+          "case_sha256": "60728d26cb97f06a078860b8a03a8028c88905147af30456fc8167815c291f83",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 267,
+          "events": "levels/macro_coarse/seed_318207/events.csv",
+          "events_sha256": "7fdb3b18dcb757f3b775372a2c0901d5f5554a545a9c136699a30ca4c458d9bb",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318207/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318207/performance.json",
+          "performance_sha256": "c780a14a4afbcfeb626e0e47466f536fe08d6abd582d75badee5d49d34935070",
+          "receipt": "levels/macro_coarse/seed_318207/run_receipt.json",
+          "receipt_sha256": "021ee45c7a295be4f1ef3ff7503898cfd4a80094471fa8310c852fdc0ff62e3f",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318207/result",
+          "result_counts": {
+            "boundary_events": 267,
+            "failure_events": 0,
+            "frame_rows": 31519,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "b100070ee1046e1cc388ed28bf8636b74650e75bc696ebe882c120bc701218a6",
+          "seed": 318207,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318207/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "daea0f5363205d5ab0be1e98f3aebb4ca8b76d23514c0ba3ae4ab67845650ad5"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318208/case.yaml",
+          "case_sha256": "783f900f3f258d9932a34e26072d536ddb6dbbf4ea137d5d72fb7e084db51859",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318208/events.csv",
+          "events_sha256": "018f9e649cb6b8079dc5930cda56c4b4c8939b9e0d71ae8e93ec3e19f331aca8",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318208/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318208/performance.json",
+          "performance_sha256": "9d60ee7d28432491b00fac177c8d0c42f70e1ba3c077c889530fcaa700846999",
+          "receipt": "levels/macro_coarse/seed_318208/run_receipt.json",
+          "receipt_sha256": "d73aa19002fa946534a5d68727ee15edf34ff380e1b919cb980c716ceb2d15b3",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318208/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31503,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "d49732f686a267e124859c5853a2f0b6077be6136a4abdafd3af71ddce00370b",
+          "seed": 318208,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318208/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "62b399b12fe16c229f5cf7d7932a53d92793d5c09c1443c59f994e213fb70bbc"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318209/case.yaml",
+          "case_sha256": "15ea91adff0634918c265ad4a4adbf24202c1465bf1d0b6678ea7e64f67fc5a9",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 265,
+          "events": "levels/macro_coarse/seed_318209/events.csv",
+          "events_sha256": "3640debd74fa34a4465381ab87468ccc172a58d52fe939dce520d81ea79ae901",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318209/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318209/performance.json",
+          "performance_sha256": "28b54db6c5261b0a6b7dcc061a8744df2ac8f4dca07fb3f2b30f04dbeccae4c6",
+          "receipt": "levels/macro_coarse/seed_318209/run_receipt.json",
+          "receipt_sha256": "d024fca0d7730c5873eff13b28867def96fa7d4f8d04d4fc6866499427cb82fc",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318209/result",
+          "result_counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "ec73853e44f61caa300c93a3eaac0853013c6829384eee33589e677e7ec0515a",
+          "seed": 318209,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318209/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "dcc3bded926205def3d62546b47b74fccd069e36c1a7dab2183b3be8e6e2c2f5"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318210/case.yaml",
+          "case_sha256": "3580343f632c23e095b005a6b39e336d37a3c1cf8966df1d0513e7c7ab3cdf62",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 263,
+          "events": "levels/macro_coarse/seed_318210/events.csv",
+          "events_sha256": "5913862f573e5cc0da529d013fab308943d1cc4042d9b0f0b2fdf7eabafa3835",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318210/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318210/performance.json",
+          "performance_sha256": "e85145c86530eff2feefe895c5eccf9a54429d04058ba2e5306dc89e6a64e4b2",
+          "receipt": "levels/macro_coarse/seed_318210/run_receipt.json",
+          "receipt_sha256": "0b3c083136db46bf88a2f1228fbb8c8999f1cd60aba8bb6351fc032f12bc4351",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318210/result",
+          "result_counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "0cec4da5b2588d10705b6e7bcd0f60237919531b6c7632ed300cc65e4ab7c336",
+          "seed": 318210,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318210/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "5a99f92fe181453ba3195ad849b10e80aafee951cd78f02d93d63b52e3b122ef"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318211/case.yaml",
+          "case_sha256": "5f658be271d8144ffeff015608e7b5a3eb1770ecac327a22678acba0a5b98f60",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 263,
+          "events": "levels/macro_coarse/seed_318211/events.csv",
+          "events_sha256": "d5249548d0975da6035a3bda4d34b6355a1128d6700cbe6d80777bef2e58e224",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318211/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318211/performance.json",
+          "performance_sha256": "d47bb6c58093e348caff4fe3af2adb384a30e602c77774fc6e3fd9c8e29b884c",
+          "receipt": "levels/macro_coarse/seed_318211/run_receipt.json",
+          "receipt_sha256": "4c8f0be6dee0d63c4abed41895fcb19267acf9a75080f0dd13ab00c25701497c",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318211/result",
+          "result_counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31530,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "be2499c6f85b2114632e9ee230d45ec69318167a7691d24c0592e970111e18c7",
+          "seed": 318211,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318211/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "ca998dfb65ea408e45a27ba420c5b3ec4e884946d28897a0ae2108c441609d06"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318212/case.yaml",
+          "case_sha256": "5c82db241173ab17e40bc313c38e03ff2ebb20c62322b9decd8e3f37a061503a",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318212/events.csv",
+          "events_sha256": "bf1ac16fa2176623222e98af352fdf6f2af5ad20b6d7afd39914b1011bf20c99",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318212/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318212/performance.json",
+          "performance_sha256": "d7fc61569c670527fbd218bb4c3daa7d44ee6dc82a828993edf6e7b0ccc3d658",
+          "receipt": "levels/macro_coarse/seed_318212/run_receipt.json",
+          "receipt_sha256": "832e7fa6f32d3ca3b4c87bb269782c49e964692f20de3f48403c0df17b28932e",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318212/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31550,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "92d0b3f3a5351862daf1ac011216049a1e48e47fbd9c237f1abf397b1d323bff",
+          "seed": 318212,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318212/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "15dfd4bf6668c818f4afe0731f9c7c819b36f4921bab49097dc169e6b199121a"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318213/case.yaml",
+          "case_sha256": "3ba37e1aa90773072180b48c84af732d2dbf255160b77d981a6bc8d71a052aa8",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 262,
+          "events": "levels/macro_coarse/seed_318213/events.csv",
+          "events_sha256": "de76fe179b46353e64c03d384fe7edefc5cf4c1bbe44fb18f46a341b9011bf47",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318213/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318213/performance.json",
+          "performance_sha256": "f12a43e386f92eb7942f0301ad6f086bb7f05c0d45ef6eeeb12f728d0dd2ef7c",
+          "receipt": "levels/macro_coarse/seed_318213/run_receipt.json",
+          "receipt_sha256": "27b91078862598d3dda26d989bf532830aaf75598cbc0a11505812df51179983",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318213/result",
+          "result_counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31516,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "973dd25d3d47dc4c6efcab7b3389fcf54913f2417123fc1bbb6578fd62a78d5e",
+          "seed": 318213,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318213/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "61a72af3e76187a741aa1e116c5848b18a86a0ceb3e40cce8507425a6992cb77"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318214/case.yaml",
+          "case_sha256": "d6f13c92722e09b9963ee02deb79940976d665fccdac4fae37ac2afaa6deb20c",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 265,
+          "events": "levels/macro_coarse/seed_318214/events.csv",
+          "events_sha256": "030aa6d866f8bf3f66bcf1feb341fc56e5f2b6caee2c985d8b9232d42eb46843",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318214/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318214/performance.json",
+          "performance_sha256": "09f00e57655f265175927aab409400a46a3bce9c0f1b1628d811e2e338184e5f",
+          "receipt": "levels/macro_coarse/seed_318214/run_receipt.json",
+          "receipt_sha256": "32d5f5abdf7416d71f4c105c49f12ea32c6df0686ac1c7bdbe4654908cab6cb8",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318214/result",
+          "result_counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31541,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "c5e853f46fb42a92faa139d401808dbfdbf313095c4778205be0bebfe2261f96",
+          "seed": 318214,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318214/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "0c6650e2656f51cd6abbabd93feceb7f0ab0a5ced860bdb8a17bc92de702bd0b"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318215/case.yaml",
+          "case_sha256": "68229957da1bc32e10bd05514ffe695f4013de6a6c5a8317311df28b4a993ddd",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318215/events.csv",
+          "events_sha256": "a88da47ef1e9de905076e1281d677a9aa016fa14aa5a42f29a72abd380018e01",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318215/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318215/performance.json",
+          "performance_sha256": "f6b4e921b400c3abaf295ecf263507f259cd0084d5de6c3248adab96c8e95eb7",
+          "receipt": "levels/macro_coarse/seed_318215/run_receipt.json",
+          "receipt_sha256": "b1e6ec9df00c363d6a63e51f02cb557e8b5dd4d1d96273ba717b2b008214dbb7",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318215/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31527,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "88252510e25271c66d4a920ff69ab03cfc6aae47ea6a9694fdb2aa77abdfc678",
+          "seed": 318215,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318215/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "9665f9229386293d4ee6305fc306db6843f3a4bfed745328e8aea0265a628c26"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318216/case.yaml",
+          "case_sha256": "57cba5c80bbbb79d0d72ccaac3717854e2a1816afe07bba09b913d1f1e520014",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 263,
+          "events": "levels/macro_coarse/seed_318216/events.csv",
+          "events_sha256": "a06b6eebf940c20624ea1f45592a053dd7c51bc6672c82595690086e5663276b",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318216/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318216/performance.json",
+          "performance_sha256": "e1dc547c2f084cff9b299a6e0617b774f3df1b92aaf4131cc160405910557bb1",
+          "receipt": "levels/macro_coarse/seed_318216/run_receipt.json",
+          "receipt_sha256": "494fe724050aa0a56cb1d8e9333cde48110d3045ca0b79f0f5f416b699e3f031",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318216/result",
+          "result_counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31536,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "0e8397785cbfc4d4ea032bcd8045160ec76c26e45b1a9651831f8c16fd99f41e",
+          "seed": 318216,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318216/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "ae7e114daf71839ccb81c1bd7a4729f66ecca32a41390382639b5ac5d46ba707"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318217/case.yaml",
+          "case_sha256": "9772384708493ae5d31d1efdb6816a23ba6fc2f09911a235b55045d5999956bc",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 263,
+          "events": "levels/macro_coarse/seed_318217/events.csv",
+          "events_sha256": "0c640f0b244736715d3b425f9b160e3c8adb325a60e69060f982b0c05bebac12",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318217/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318217/performance.json",
+          "performance_sha256": "dfeabc7e61549adfa2ce123f4b02e8588f2c9b3de276c5b920d1d996033b458e",
+          "receipt": "levels/macro_coarse/seed_318217/run_receipt.json",
+          "receipt_sha256": "82088cd3fb39dd9c9491d1a427a72f86b238bfd10d3df3db7107bb230dc53b23",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318217/result",
+          "result_counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31529,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "8b545d81eaa90f18f5d1539b815095a1c94d2d4e1f487cd0e1cf653b5d509258",
+          "seed": 318217,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318217/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "9a9740db86f0106d44c7ebd25472d3fe15937a7fad538d6bfc443afcb5f99ed5"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318218/case.yaml",
+          "case_sha256": "1d91b1188afab7fd953055fba4a0ee8cd039c61b78b8f8b91c1706019711a6a7",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 263,
+          "events": "levels/macro_coarse/seed_318218/events.csv",
+          "events_sha256": "66992f38c0f4fc2f0d8c20a2f9ceb06f19a8eb5ec3c2e69cd66c9b34492e8e56",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318218/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318218/performance.json",
+          "performance_sha256": "1ded04cc6421624e1210edadcc6cdb85415b958daa906081dd59381de9d55f9c",
+          "receipt": "levels/macro_coarse/seed_318218/run_receipt.json",
+          "receipt_sha256": "10c6c43fe1bd27c46333a0b31539fa5cb7ac5dd7e63b6c42a2c30d77d724342f",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318218/result",
+          "result_counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31528,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "69d44acfc15b2d43bd8aee1813b33094629ef7d33cbc0d720b974558c3f37f19",
+          "seed": 318218,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318218/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "d2f33497b0c8148a6e25549f8869cdcb4c1e66f3f1da8ed881ea2e016615577d"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318219/case.yaml",
+          "case_sha256": "e6a5482e21946cb6c0bf5b55de4f9db542ed8e3d18df6af6b5e4cb0168528f5a",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 265,
+          "events": "levels/macro_coarse/seed_318219/events.csv",
+          "events_sha256": "b5d9c9f7abcd09435de63148f7e7464a7492d974cc6b18fbe69fa06b57ae4bd9",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318219/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318219/performance.json",
+          "performance_sha256": "5f782638df284713624acfa70744d15e00f333819c6813682e62800250ab9e92",
+          "receipt": "levels/macro_coarse/seed_318219/run_receipt.json",
+          "receipt_sha256": "633fcec1c1adf9f381101885a2567684df7f5dcc0e3e00decfcde1ab8b664886",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318219/result",
+          "result_counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31511,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "81d1b8a3c22f623205a07bf9a72d83a5ee8dd04350cc20afb77be800cf68634b",
+          "seed": 318219,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318219/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "aaf2e3bc8ef0bf386b9fa7b6e58454b05ed29938ab8a0bb9d4a82c5da51569b8"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318220/case.yaml",
+          "case_sha256": "eb51b863ee72461c714e7dc94a3880a353f0366710f34b4aeeb3006bbe272fd7",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 263,
+          "events": "levels/macro_coarse/seed_318220/events.csv",
+          "events_sha256": "89bb52c7c4aa858c229d0042d0eb4244d36da353e38ca7c4776efdc3f4635826",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318220/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318220/performance.json",
+          "performance_sha256": "caeae342f1af885bf84fbff39c808b37bfba1f86e5692aa26fb55c634b970ad3",
+          "receipt": "levels/macro_coarse/seed_318220/run_receipt.json",
+          "receipt_sha256": "e81c8b7a057dc38c5dd4bea5e030b1cb45e255d19b8eaa871123ddb638987e3f",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318220/result",
+          "result_counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31531,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "01bfa5d53999d67d7f9cb615dd44adc6c634a3eb3b4da5126437a4c9807a14a3",
+          "seed": 318220,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318220/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "1b6a04a497375abcbaadd42dd0b6f43d1650a4d4f1f9f02b5cd185d673c39086"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318221/case.yaml",
+          "case_sha256": "f0576796edc1256d79dfbc63596a90ceced9d3801e26ca7810cb974e68d973ce",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 264,
+          "events": "levels/macro_coarse/seed_318221/events.csv",
+          "events_sha256": "b07403976548100f4c6aa2ef90382dc77344e054377567fca5564f8fcc6e6b94",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318221/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318221/performance.json",
+          "performance_sha256": "3d75520200ec88e9488eed552f659e36d5683ba139d30135ee7157bf5e725e58",
+          "receipt": "levels/macro_coarse/seed_318221/run_receipt.json",
+          "receipt_sha256": "cef83cc5aedc3c8b7e37898169d1f6e0dacc1ff9ff98ce8b9f05138d4808a16c",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318221/result",
+          "result_counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31526,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "87fafd1c328149f88b07e40b95d91ba2c661073d15acda63bf8dce1a899510db",
+          "seed": 318221,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318221/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "eb90a925054bfff8048e27ce7acf3bd7242fd6b24366e1e77721e5c6b471d0ac"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318222/case.yaml",
+          "case_sha256": "f80d890e4f7e4536b277d97c409e3eb7784d0e8bb3fed9a3e60e96d1c266f67b",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 266,
+          "events": "levels/macro_coarse/seed_318222/events.csv",
+          "events_sha256": "ef30d30425cd83ac0a11a1e064a52ab84faf40fc70fff257e7a7fa31b1fc95ce",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318222/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318222/performance.json",
+          "performance_sha256": "4470cfd7cd21eb4ca411dbfa7a19a3e4e85445ca5683741020fe07ce37f1728c",
+          "receipt": "levels/macro_coarse/seed_318222/run_receipt.json",
+          "receipt_sha256": "ad72a854a92ff52e5bb26e4cbee25a117bb3df6b4f154af0c72d4be0e2292608",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318222/result",
+          "result_counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31528,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "c647dc621bda6caa2b60e09e075fd738d0823ff77e26f78a9bebf67e4a1b1b74",
+          "seed": 318222,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318222/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "957e5c95bdc770d543c0fc138e57197e2625826ec774252491392043ff12f8ce"
+        },
+        {
+          "brownian_interval_tree_depth": 3,
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "case": "levels/macro_coarse/seed_318223/case.yaml",
+          "case_sha256": "65219d56bcd7c6fd1122b2cfbe757d9e81582dabf3f9cf025dd1d052a35bce94",
+          "dt_s": 2e-05,
+          "engine_algorithm_revision": "particle_engine_v36",
+          "event_rows": 267,
+          "events": "levels/macro_coarse/seed_318223/events.csv",
+          "events_sha256": "c1204c324b6920e8c95ef0d46da2c0c1ca90447a14593def8943958807b97862",
+          "failure_reason_counts": {
+            "field_support": 0,
+            "indeterminate_applicability_certificate": 0,
+            "indeterminate_boundary_policy": 0,
+            "indeterminate_event": 0,
+            "indeterminate_surface_departure": 0,
+            "integrator_accuracy": 0,
+            "model_applicability": 0,
+            "nonfinite_physics": 0,
+            "numerical_event_budget": 0
+          },
+          "failure_rows": 0,
+          "failures": "levels/macro_coarse/seed_318223/failures.csv",
+          "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+          "geometry_rtol": 1e-08,
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "level": "macro_coarse",
+          "participant": "candidate",
+          "performance": "levels/macro_coarse/seed_318223/performance.json",
+          "performance_sha256": "21f4ee8c6fe582836c074ee11c089fcc5806057e8d2a01ecd212956c00b11e54",
+          "receipt": "levels/macro_coarse/seed_318223/run_receipt.json",
+          "receipt_sha256": "d73eb27f1dbed2fa40cad44b10e2fc83a9c030f66186d5e00a6bffe98ddc05c6",
+          "recovered_after_postprocess_failure": false,
+          "resolved_physics_models": {
+            "charge": {
+              "model": "plasma_continuous",
+              "revision": "aggregate_relative_drift_regularized_two_current_v1"
+            },
+            "dielectrophoresis": {
+              "model": "quasistatic_spherical",
+              "revision": "quasistatic_spherical_gradient_e2_v1"
+            },
+            "drag": {
+              "model": "epstein_linear",
+              "revision": "epstein_linear_effective_gas_sensitivity_v1"
+            },
+            "electric": {
+              "model": "coulomb",
+              "revision": "electric_coulomb_v1"
+            },
+            "gravity_buoyancy": {
+              "model": "standard",
+              "revision": "gravity_buoyancy_standard_v1"
+            },
+            "ion_drag": {
+              "model": "screened_collection_orbital",
+              "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+            },
+            "lift": {
+              "lift_coefficient": 1.0,
+              "model": "rarefied_vorticity_sensitivity",
+              "revision": "rarefied_vorticity_sensitivity_rz_v1"
+            },
+            "noise": {
+              "model": "inertial_langevin_fdt",
+              "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+            },
+            "thermophoresis": {
+              "model": "waldmann_gallis",
+              "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+            }
+          },
+          "result": "levels/macro_coarse/seed_318223/result",
+          "result_counts": {
+            "boundary_events": 267,
+            "failure_events": 0,
+            "frame_rows": 31530,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "result_manifest_sha256": "b01906d059ff494761b139d2a625482badffe041566a9cf4ef0687d15a2a329e",
+          "seed": 318223,
+          "status": "COMPLETE",
+          "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3",
+          "trajectory": "levels/macro_coarse/seed_318223/trajectory.csv",
+          "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+          "trajectory_rows": 34727,
+          "trajectory_sha256": "4392446cb5f6598957163855e7e2e2178fd55bcc993a4a13126dcf52e945ac75"
+        }
+      ]
+    }
+  },
+  "output_count": 121,
+  "participant": "candidate",
+  "particle_count": 287,
+  "prepare_report": "prepare_report.json",
+  "prepare_report_sha256": "3063a14d40a780e37a3056368a1b4bfcb50ef3f2ae612cabb482829011f5ca61",
+  "purpose": "final",
+  "status": "COMPLETE",
+  "time_end_s": 0.03,
+  "tool_revision": "m3c2_caseA_100nm_candidate_campaign_runner_v3"
+}

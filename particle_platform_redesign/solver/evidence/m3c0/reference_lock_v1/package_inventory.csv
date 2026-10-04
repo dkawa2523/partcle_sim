@@ -1,0 +1,13 @@
+case_id,model_revision,rows,particles,times,terminal_status_counts,brownian_off,freeze_seen,disappear_seen,status
+formal_iondrag_theory_consistent/caseP_10nm,relative_flow_screened_collection_orbital_v1,34727,287,121,1:287,False,False,False,PASS
+formal_iondrag_theory_consistent/caseP_30nm,relative_flow_screened_collection_orbital_v1,34727,287,121,1:287,False,False,False,PASS
+formal_iondrag_theory_consistent/caseP_100nm,relative_flow_screened_collection_orbital_v1,34727,287,121,1:287,False,False,False,PASS
+formal_iondrag_theory_consistent/caseA_10nm,relative_flow_screened_collection_orbital_v1,34727,287,121,1:11;4:276,False,False,True,PASS
+formal_iondrag_theory_consistent/caseA_30nm,relative_flow_screened_collection_orbital_v1,34727,287,121,1:51;4:236,False,False,True,PASS
+formal_iondrag_theory_consistent/caseA_100nm,relative_flow_screened_collection_orbital_v1,34727,287,121,1:51;3:56;4:180,False,False,True,PASS
+formal_iondrag_image_minimal_corrected/caseP_10nm,electric_field_aligned_image_sensitivity_v1,34727,287,121,1:287,False,False,False,PASS
+formal_iondrag_image_minimal_corrected/caseP_30nm,electric_field_aligned_image_sensitivity_v1,34727,287,121,1:287,False,False,False,PASS
+formal_iondrag_image_minimal_corrected/caseP_100nm,electric_field_aligned_image_sensitivity_v1,34727,287,121,1:260;3:27,False,False,False,PASS
+formal_iondrag_image_minimal_corrected/caseA_10nm,electric_field_aligned_image_sensitivity_v1,34727,287,121,1:192;4:95,False,False,True,PASS
+formal_iondrag_image_minimal_corrected/caseA_30nm,electric_field_aligned_image_sensitivity_v1,34727,287,121,1:254;4:33,False,False,True,PASS
+formal_iondrag_image_minimal_corrected/caseA_100nm,electric_field_aligned_image_sensitivity_v1,34727,287,121,1:209;3:56;4:22,False,False,True,PASS

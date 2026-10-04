@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C1-theory-consistent-100nm-30ms-COMSOL-common-P1",
+  "evaluation_revision": 2,
+  "classification": "external_comsol_deterministic_same_field_reference",
+  "shared_contract": {
+      "relative_path": "tools/vv/comsol/cases/m3c1_theory_100nm_30ms_v2.json",
+      "required_evaluation_revision": 2,
+    "owned_facts": [
+      "case matrix and output schedule",
+      "workflow-specific fixed RK4 step series and charge Lipschitz certificate",
+      "physics revisions and enabled contributions",
+      "boundary semantics and claim policy"
+    ]
+  },
+  "source_model": {
+    "repository_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "comsol_version": "6.4.0.429",
+    "load_policy": "isolated_source_copy_loaded_with_ModelUtil.loadCopy",
+    "save_policy": "never_save_model",
+    "process_policy": "comsolbatch_-nosave_-np_1"
+  },
+  "workflows": {
+    "caseP": {
+      "physics_tag": "fpt",
+      "background_study": "std2",
+      "background_solution": "sol2",
+      "source_dataset": "part_P_100nm",
+      "particle_geometry": "pgeom_fpt",
+      "position_dofs": [
+        "qr",
+        "qz"
+      ],
+      "charge_state": "ZP",
+      "source_release_charge": "Z0_P"
+    },
+    "caseA": {
+      "physics_tag": "fptas",
+      "background_study": "stdASf",
+      "background_solution": "sol26",
+      "source_dataset": "part_AS_100nm",
+      "particle_geometry": "pgeom_fptas",
+      "position_dofs": [
+        "q3r",
+        "q3z"
+      ],
+      "charge_state": "ZAS",
+      "source_release_charge": "AS_Z0"
+    }
+  },
+  "inventory_evidence": {
+    "method": "read-only loadCopy inspection without study execution or save",
+    "java_source": "tools/vv/comsol/comsol/InspectM3C1Theory100nm30ms.java",
+    "verified_particle_count": 287,
+    "verified_boundary_selections": {
+      "material_stick": [
+        6,
+        8,
+        28,
+        29,
+        32,
+        33,
+        34,
+        36,
+        38,
+        40,
+        41,
+        45,
+        46,
+        47
+      ],
+      "gas_inlet_freeze_hold": [
+        37
+      ],
+      "pump_disappear_escape": [
+        35
+      ],
+      "axis_not_a_material_event": [
+        5
+      ]
+    }
+  },
+  "same_field_contract": {
+    "representation": "canonical_exact_connectivity_P1_sectionwise",
+    "table_preparer": "tools/vv/comsol/prepare_m3c1_common_p1_tables.py",
+    "primitive_component_count": 22,
+    "release_function_count": 3,
+    "forbid_native_field_producers_in_particle_rhs": true,
+    "deterministic_contributions": [
+      "electric",
+      "relative_flow_screened_collection_orbital_ion_drag",
+      "effective_gas_epstein_drag",
+      "waldmann_heat_flux_thermophoresis",
+      "rarefied_vorticity_lift",
+      "dielectrophoresis",
+      "gravity_buoyancy"
+    ],
+    "dynamic_charge": "continuous_aggregate_collection_rate",
+    "brownian": false,
+    "saffman": false
+  },
+  "raw_export": {
+    "revision": 1,
+    "per_step_tables": [
+      "state_raw_wide.csv",
+      "force_raw_wide.csv",
+      "primitive_raw_wide.csv"
+    ],
+    "state_column_count": 15,
+    "force_column_count": 20,
+    "primitive_column_count": 24,
+    "include_nan": true,
+    "full_precision": true,
+    "status_authority": "particlestatus plus physics.fs",
+    "event_time_authority": "physics.st",
+    "escape_hit_position_policy": "NOT_DIRECTLY_OBSERVED when COMSOL emits NaN; do not synthesize a hit coordinate"
+  },
+  "provenance": {
+    "required_case_artifacts": [
+      "common_p1_table_receipt.json",
+      "prepared_table_validation.json",
+      "run_spec.properties",
+      "comsol_process.log",
+      "reference_run_report.json",
+      "artifact_hashes.csv"
+    ],
+    "hash_source_model_before_and_after": true,
+    "hash_candidate_input_and_every_prepared_table": true,
+    "no_clobber": true
+  },
+  "claim_policy": {
+    "same_field_time_integration_and_event_comparison": "ELIGIBLE_AFTER_NORMALIZATION_AND_PREREGISTERED_GATES",
+    "native_field_end_to_end_agreement": "NOT_CLAIMED_BY_THIS_RUN",
+    "brownian_accuracy": "NOT_TESTED",
+    "physical_model_applicability": "SEPARATE_FROM_NUMERICAL_PARITY",
+    "universal_comsol_equivalence": "NOT_CLAIMED"
+  }
+}

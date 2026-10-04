@@ -1,0 +1,526 @@
+{
+  "candidate_metrics": {
+    "dt_0p25ms": {
+      "axis_crossing": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 0.0,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 1.734723475976807e-18,
+        "maximum_velocity_absolute_error_m_per_s": 0.0,
+        "observed_residual_distance_m": 5.000000000000013e-05,
+        "reconstructed_event_time_s": 0.00195
+      },
+      "specular_reflection": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 4.336808689942018e-19,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 1.939479807224432e-18,
+        "maximum_velocity_absolute_error_m_per_s": 0.0,
+        "observed_residual_distance_m": 4.99999999999997e-05,
+        "reconstructed_event_time_s": 0.0019500000000000003
+      },
+      "surface_departure": {
+        "all_frames_active": true,
+        "departed_into_domain": true,
+        "final_status_active": true,
+        "first_positive_time_position_m": [
+          0.006,
+          0.00025
+        ],
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 0.0,
+        "maximum_velocity_absolute_error_m_per_s": 0.0
+      }
+    },
+    "dt_0p5ms": {
+      "axis_crossing": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 0.0,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 1.734723475976807e-18,
+        "maximum_velocity_absolute_error_m_per_s": 0.0,
+        "observed_residual_distance_m": 5.000000000000013e-05,
+        "reconstructed_event_time_s": 0.00195
+      },
+      "specular_reflection": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 4.336808689942018e-19,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 1.939479807224432e-18,
+        "maximum_velocity_absolute_error_m_per_s": 0.0,
+        "observed_residual_distance_m": 4.99999999999997e-05,
+        "reconstructed_event_time_s": 0.0019500000000000003
+      },
+      "surface_departure": {
+        "all_frames_active": true,
+        "departed_into_domain": true,
+        "final_status_active": true,
+        "first_positive_time_position_m": [
+          0.006,
+          0.00025
+        ],
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 0.0,
+        "maximum_velocity_absolute_error_m_per_s": 0.0
+      }
+    },
+    "dt_1ms": {
+      "axis_crossing": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 0.0,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 1.734723475976807e-18,
+        "maximum_velocity_absolute_error_m_per_s": 0.0,
+        "observed_residual_distance_m": 5.000000000000013e-05,
+        "reconstructed_event_time_s": 0.00195
+      },
+      "specular_reflection": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 4.336808689942018e-19,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 1.939479807224432e-18,
+        "maximum_velocity_absolute_error_m_per_s": 0.0,
+        "observed_residual_distance_m": 4.99999999999997e-05,
+        "reconstructed_event_time_s": 0.0019500000000000003
+      },
+      "surface_departure": {
+        "all_frames_active": true,
+        "departed_into_domain": true,
+        "final_status_active": true,
+        "first_positive_time_position_m": [
+          0.006,
+          0.00025
+        ],
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 0.0,
+        "maximum_velocity_absolute_error_m_per_s": 0.0
+      }
+    }
+  },
+  "candidate_runs": {
+    "dt_0p25ms": {
+      "axis_crossings": 1,
+      "boundary_event_laws": [
+        "specular"
+      ],
+      "boundary_event_outcomes": [
+        "reflected"
+      ],
+      "boundary_event_particle_ids": [
+        2
+      ],
+      "boundary_event_positions_m": [
+        [
+          0.01,
+          0.006389999999999999
+        ]
+      ],
+      "boundary_event_post_velocity_m_per_s": [
+        [
+          -1.0,
+          0.2
+        ]
+      ],
+      "boundary_event_pre_velocity_m_per_s": [
+        [
+          1.0,
+          0.2
+        ]
+      ],
+      "boundary_event_times_s": [
+        0.0019500000000000001
+      ],
+      "canonical_input_sha256": "a0f807e15f4c5bf2a016d8c59b5977d25b1720304bbff0c7bf05cda0cc5c367a",
+      "case_sha256": "dc10094feae264dd511554d7ce274639f51512843fd2607da45e8c45b8ea41de",
+      "failure_count": 0,
+      "release_particle_ids": [
+        1,
+        2,
+        3
+      ],
+      "result_manifest_sha256": "fe91dceaf751d4181a799ab84bb985105f3d26cc1feaa6e0239ebe14a85b5030",
+      "revisions": {
+        "boundary_algorithm_revision": "point_wall_laws_v5",
+        "case_schema_version": 2,
+        "engine_algorithm_revision": "particle_engine_v36",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
+        "result_algorithm_revision": "durable_segmented_result_v5",
+        "result_schema_version": 2,
+        "source_algorithm_revision": "table_surface_schedule_v1"
+      },
+      "wall_events": 1
+    },
+    "dt_0p5ms": {
+      "axis_crossings": 1,
+      "boundary_event_laws": [
+        "specular"
+      ],
+      "boundary_event_outcomes": [
+        "reflected"
+      ],
+      "boundary_event_particle_ids": [
+        2
+      ],
+      "boundary_event_positions_m": [
+        [
+          0.01,
+          0.006389999999999999
+        ]
+      ],
+      "boundary_event_post_velocity_m_per_s": [
+        [
+          -1.0,
+          0.2
+        ]
+      ],
+      "boundary_event_pre_velocity_m_per_s": [
+        [
+          1.0,
+          0.2
+        ]
+      ],
+      "boundary_event_times_s": [
+        0.0019500000000000001
+      ],
+      "canonical_input_sha256": "a0f807e15f4c5bf2a016d8c59b5977d25b1720304bbff0c7bf05cda0cc5c367a",
+      "case_sha256": "b681335d7bb84d90e1da92f4358c530d931e850886050db034279ba08a4047fa",
+      "failure_count": 0,
+      "release_particle_ids": [
+        1,
+        2,
+        3
+      ],
+      "result_manifest_sha256": "9dc31bbd72d794b8207b6db24235a389afec0aa0a8a3e8b29c2980536d555e95",
+      "revisions": {
+        "boundary_algorithm_revision": "point_wall_laws_v5",
+        "case_schema_version": 2,
+        "engine_algorithm_revision": "particle_engine_v36",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
+        "result_algorithm_revision": "durable_segmented_result_v5",
+        "result_schema_version": 2,
+        "source_algorithm_revision": "table_surface_schedule_v1"
+      },
+      "wall_events": 1
+    },
+    "dt_1ms": {
+      "axis_crossings": 1,
+      "boundary_event_laws": [
+        "specular"
+      ],
+      "boundary_event_outcomes": [
+        "reflected"
+      ],
+      "boundary_event_particle_ids": [
+        2
+      ],
+      "boundary_event_positions_m": [
+        [
+          0.01,
+          0.006389999999999999
+        ]
+      ],
+      "boundary_event_post_velocity_m_per_s": [
+        [
+          -1.0,
+          0.2
+        ]
+      ],
+      "boundary_event_pre_velocity_m_per_s": [
+        [
+          1.0,
+          0.2
+        ]
+      ],
+      "boundary_event_times_s": [
+        0.0019500000000000001
+      ],
+      "canonical_input_sha256": "a0f807e15f4c5bf2a016d8c59b5977d25b1720304bbff0c7bf05cda0cc5c367a",
+      "case_sha256": "a5068e976eae54ed9dd3f9f55c851e6f137657fc13054a0815ea0d0cf143670e",
+      "failure_count": 0,
+      "release_particle_ids": [
+        1,
+        2,
+        3
+      ],
+      "result_manifest_sha256": "9f8af2e3965e18b1808f9ad52014b64c7afdacc34f070e20d734d694c95e5248",
+      "revisions": {
+        "boundary_algorithm_revision": "point_wall_laws_v5",
+        "case_schema_version": 2,
+        "engine_algorithm_revision": "particle_engine_v36",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
+        "result_algorithm_revision": "durable_segmented_result_v5",
+        "result_schema_version": 2,
+        "source_algorithm_revision": "table_surface_schedule_v1"
+      },
+      "wall_events": 1
+    }
+  },
+  "claim_separation": {
+    "comsol_is_golden_truth": false,
+    "force_field_native_representation": "NOT_APPLICABLE_TO_FORCE_FREE_MICROCASE",
+    "grazing_corner_multiple_hit_probabilistic": "NOT_TESTED",
+    "rz_axis_non_wall_continuation": "TESTED",
+    "specular_reflection_and_residual_flight": "TESTED",
+    "surface_departure": "TESTED",
+    "terminal_boundary_semantics": "REUSED_FROM_M3C0_BOUNDARY_SEMANTICS_V2"
+  },
+  "comsol_metrics": {
+    "dt_0p25ms": {
+      "axis_crossing": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 4.336808689942018e-19,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 6.2546344413855015e-18,
+        "maximum_velocity_absolute_error_m_per_s": 2.237726045655905e-16,
+        "observed_residual_distance_m": 5.0000000000000565e-05,
+        "reconstructed_event_time_s": 0.0019499999999999995
+      },
+      "specular_reflection": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 6.5052130349130266e-18,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 1.734723475976807e-18,
+        "maximum_position_absolute_error_m": 1.666147490140628e-17,
+        "maximum_velocity_absolute_error_m_per_s": 2.2887833992611187e-16,
+        "observed_residual_distance_m": 5.0000000000006636e-05,
+        "reconstructed_event_time_s": 0.0019499999999999934
+      },
+      "surface_departure": {
+        "all_frames_active": true,
+        "departed_into_domain": true,
+        "final_status_active": true,
+        "first_positive_time_position_m": [
+          0.006,
+          0.00025
+        ],
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 3.1273172206927508e-18,
+        "maximum_velocity_absolute_error_m_per_s": 2.220446049250313e-16
+      }
+    },
+    "dt_0p5ms": {
+      "axis_crossing": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 0.0,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 1.570858918313846e-17,
+        "maximum_velocity_absolute_error_m_per_s": 2.237726045655905e-16,
+        "observed_residual_distance_m": 5.000000000000013e-05,
+        "reconstructed_event_time_s": 0.00195
+      },
+      "specular_reflection": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 1.3010426069826053e-18,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 1.734723475976807e-18,
+        "maximum_position_absolute_error_m": 8.542522420166516e-18,
+        "maximum_velocity_absolute_error_m_per_s": 2.2887833992611187e-16,
+        "observed_residual_distance_m": 5.000000000000143e-05,
+        "reconstructed_event_time_s": 0.0019499999999999986
+      },
+      "surface_departure": {
+        "all_frames_active": true,
+        "departed_into_domain": true,
+        "final_status_active": true,
+        "first_positive_time_position_m": [
+          0.006,
+          0.00025
+        ],
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 2.6020852139652106e-18,
+        "maximum_velocity_absolute_error_m_per_s": 2.220446049250313e-16
+      }
+    },
+    "dt_1ms": {
+      "axis_crossing": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 2.168404344971009e-19,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 5.222209201006512e-18,
+        "maximum_velocity_absolute_error_m_per_s": 1.1102230246251565e-16,
+        "observed_residual_distance_m": 5.000000000000035e-05,
+        "reconstructed_event_time_s": 0.0019499999999999997
+      },
+      "specular_reflection": {
+        "all_frames_active": true,
+        "event_time_absolute_error_s": 6.5052130349130266e-18,
+        "expected_residual_distance_m": 5.000000000000013e-05,
+        "final_status_active": true,
+        "first_post_event_output_time_s": 0.002,
+        "frames": 25,
+        "initial_position_absolute_error_m": 1.734723475976807e-18,
+        "maximum_position_absolute_error_m": 1.2266347333466993e-17,
+        "maximum_velocity_absolute_error_m_per_s": 1.1102230246251565e-16,
+        "observed_residual_distance_m": 5.0000000000006636e-05,
+        "reconstructed_event_time_s": 0.0019499999999999934
+      },
+      "surface_departure": {
+        "all_frames_active": true,
+        "departed_into_domain": true,
+        "final_status_active": true,
+        "first_positive_time_position_m": [
+          0.006,
+          0.00025000000000000006
+        ],
+        "frames": 25,
+        "initial_position_absolute_error_m": 0.0,
+        "maximum_position_absolute_error_m": 3.469446951953614e-18,
+        "maximum_velocity_absolute_error_m_per_s": 1.1102230246251565e-16
+      }
+    }
+  },
+  "comsol_provenance": {
+    "classification": "external_comsol_and_public_api_microcase",
+    "comsol_root": "C:\\Program Files\\COMSOL\\COMSOL64\\Multiphysics_copy1",
+    "comsol_version": "COMSOL Multiphysics 6.4.0.429",
+    "evaluation_id": "M3-C0-critical-boundaries",
+    "evaluation_revision": 1,
+    "generated_utc": "2026-10-04T12:57:33.8341949Z",
+    "model_saved": false,
+    "model_source": "from_scratch",
+    "process_count": 1,
+    "staged_sources": {
+      "config": "b3ad73862ee9e542f1e9ba754b582903c154aba004bbe7d7b621cfbc7e4a4bcf",
+      "evaluator": "6e217a55132817b014b4a7154584304424af4b4cb48e4e48765fbdb82361addc",
+      "java": "602b66579326401309528eea0b29f035f34348444a0c2b90414e128888bcda4b",
+      "runner": "1fbb18dc992064f3f25ae5aa7f6e4a4d0c74aec736a8ba1c59e2fc8fd9f7d783"
+    }
+  },
+  "comsol_raw_sha256": {
+    "dt_0p25ms": "128dab8007e27cd5d767ee80ab26e2cbddacd648a75357b6c104715704a56a2a",
+    "dt_0p5ms": "69d48825486e381d54d02f0c003a02265681ece724c08b405d6c6bfd6741f181",
+    "dt_1ms": "79e05f088d73503e0aa191940857375632a55a652d9830a1854e5a8ed657338a"
+  },
+  "configuration_receipts": {
+    "configuration_count": 3,
+    "run_pass_count": 1,
+    "solve_pass_count": 3,
+    "validated": true
+  },
+  "configuration_sha256": "b3ad73862ee9e542f1e9ba754b582903c154aba004bbe7d7b621cfbc7e4a4bcf",
+  "cross_solver_metrics": {
+    "dt_0p25ms": {
+      "axis_crossing": {
+        "maximum_position_difference_m": 7.757919228897728e-18,
+        "maximum_velocity_difference_m_per_s": 2.237726045655905e-16
+      },
+      "specular_reflection": {
+        "maximum_position_difference_m": 1.6133860946657727e-17,
+        "maximum_velocity_difference_m_per_s": 2.2887833992611187e-16
+      },
+      "surface_departure": {
+        "maximum_position_difference_m": 3.1273172206927508e-18,
+        "maximum_velocity_difference_m_per_s": 2.220446049250313e-16
+      }
+    },
+    "dt_0p5ms": {
+      "axis_crossing": {
+        "maximum_position_difference_m": 1.3985787785349405e-17,
+        "maximum_velocity_difference_m_per_s": 2.237726045655905e-16
+      },
+      "specular_reflection": {
+        "maximum_position_difference_m": 7.46132779436365e-18,
+        "maximum_velocity_difference_m_per_s": 2.2887833992611187e-16
+      },
+      "surface_departure": {
+        "maximum_position_difference_m": 2.6020852139652106e-18,
+        "maximum_velocity_difference_m_per_s": 2.220446049250313e-16
+      }
+    },
+    "dt_1ms": {
+      "axis_crossing": {
+        "maximum_position_difference_m": 5.222209201006512e-18,
+        "maximum_velocity_difference_m_per_s": 1.1102230246251565e-16
+      },
+      "specular_reflection": {
+        "maximum_position_difference_m": 1.2174002125499814e-17,
+        "maximum_velocity_difference_m_per_s": 1.1102230246251565e-16
+      },
+      "surface_departure": {
+        "maximum_position_difference_m": 3.469446951953614e-18,
+        "maximum_velocity_difference_m_per_s": 1.1102230246251565e-16
+      }
+    }
+  },
+  "evaluation_id": "M3-C0-critical-boundaries",
+  "evaluation_revision": 1,
+  "evaluation_status": "COMPLETE",
+  "gate_counts": {
+    "fail": 0,
+    "pass": 132
+  },
+  "maxima": {
+    "candidate_position_error_m": 1.939479807224432e-18,
+    "candidate_velocity_error_m_per_s": 0.0,
+    "comsol_position_error_m": 1.666147490140628e-17,
+    "comsol_velocity_error_m_per_s": 2.2887833992611187e-16,
+    "cross_solver_position_difference_m": 1.6133860946657727e-17,
+    "cross_solver_velocity_difference_m_per_s": 2.2887833992611187e-16
+  },
+  "schema_version": 1,
+  "scientific_status": "PASS",
+  "scope": {
+    "certifies": [
+      "surface-start particle departs into the domain without a zero-time wall event",
+      "specular normal component reversal and same-step residual free flight",
+      "R-Z symmetry-axis passage remains active and is not emitted as a material-wall event",
+      "the same initial states and analytic paths pass in COMSOL and the production public API"
+    ],
+    "does_not_certify": [
+      "grazing or corner interactions",
+      "multiple material-wall hits",
+      "probabilistic wall laws",
+      "finite-radius contact",
+      "force or field interpolation",
+      "native-field equivalence"
+    ]
+  },
+  "tool_revision": "m3c_critical_boundaries_evaluator_v1"
+}

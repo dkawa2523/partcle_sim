@@ -1,0 +1,9 @@
+gate,status,reason
+M3C2-PF-01-seed-plan,PASS,"32 complete, unique, nonoverlapping planned seeds per anchor"
+M3C2-PF-02-artifact-identity,PASS,source model and selected package artifacts equal the M3-C0 SHA-256 lock
+M3C2-PF-03-saved-feature-audit,PASS,"saved Brownian feature, configured seed expression, reported components, and active finite history were inspected"
+M3C2-PF-04-saved-cohort-completeness,FAIL,one saved history per anchor is not the preregistered 32-seed cohort
+M3C2-PF-05-saved-semantic-parity,FAIL,"native fields, one saved run, and an unverified effective random stream cannot authorize an ensemble comparison"
+M3C2-PF-06-common-p1-companion,NOT_RUN,32-seed COMSOL RZ-projected common-P1 companion is planned in run_matrix.csv
+M3C2-PF-07-b03-candidate,NOT_RUN,32-seed B03 exact-OU common-P1 candidate is planned in run_matrix.csv
+M3C2-PF-08-comparison-authorization,BLOCKED,both meaning-matched cohorts must exist before statistical evaluation

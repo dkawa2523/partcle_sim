@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C1-caseA-100nm-thermophoresis-PPR-export",
+  "evaluation_revision": 1,
+  "classification": "external_comsol_reference_correction",
+  "expected_comsol_version": "6.4.0.429",
+  "source_model": {
+    "relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "load_mode": "ModelUtil.loadCopy",
+    "saved": false
+  },
+  "preserved_reference": {
+    "evaluation_id": "M3-C0b-pilot",
+    "evaluation_revision": 6,
+    "root": "_out_m3c0b/caseA_100nm_theory_pre_event_v6",
+    "step_directory": "dt_0p15625us",
+    "state_raw_sha256": "1241b91683f37076a3482c6792e29f0b215cd96434f25a82aff6b04a95679a58",
+    "force_raw_sha256": "5d953eacc414e41f12246f0d80b3055f5f4fcc7761cbcc67244f300e4113e3b3",
+    "modified_by_this_run": false
+  },
+  "case": {
+    "workflow": "caseA",
+    "diameter_m": 1e-7,
+    "particle_count": 287,
+    "output_times": 46,
+    "time_end_s": 0.00045,
+    "output_interval_s": 1e-5,
+    "fixed_rk4_step_s": 1.5625e-7,
+    "step_directory": "dt_0p15625us"
+  },
+  "numerics": {
+    "integrator": "classical_rk4",
+    "integrator_order": 4,
+    "relative_tolerance": 1e-8,
+    "wall_accuracy_order": 1,
+    "store_particle_status": true,
+    "store_extra": false,
+    "brownian_active": false,
+    "saffman_active": false,
+    "dynamic_charge_active": true
+  },
+  "thermophoretic_feature": {
+    "physics": "fptas",
+    "feature": "thpf1",
+    "selected_domain": 3,
+    "model": "Waldmann",
+    "UsePPR": true,
+    "temperature_input": "root.comp1.AS_Tg",
+    "temperature_definition": "withsol('sol2',T,setval(Vrf,100[V]))",
+    "thermal_conductivity": "k_mix",
+    "background_gas_molar_mass": "Mmix",
+    "background_gas_molar_mass_kg_per_mol": 0.0768032,
+    "particle_radius": "d0/2",
+    "recovered_temperature_gradient": {
+      "r": "ppr(d(root.comp1.AS_Tg,r))",
+      "z": "ppr(d(root.comp1.AS_Tg,z))"
+    },
+    "recovered_heat_flux": {
+      "r": "-k_mix*ppr(d(root.comp1.AS_Tg,r))",
+      "z": "-k_mix*ppr(d(root.comp1.AS_Tg,z))"
+    },
+    "waldmann_replay": {
+      "mean_thermal_speed": "sqrt(8*R_const*root.comp1.AS_Tg/(pi*Mmix))",
+      "force_from_heat_flux": "(32/15)*(d0/2)^2*q/sqrt(8*R_const*root.comp1.AS_Tg/(pi*Mmix))"
+    }
+  },
+  "raw_export": {
+    "particle_saved_states": {
+      "table": "thermophoresis_ppr_particle_raw_wide.csv",
+      "dataset": "new fine-step Particle dataset",
+      "join_key": ["particle_id", "time_s"],
+      "includes": [
+        "particle coordinates and status",
+        "fptas.thpf1.Ftfr and fptas.thpf1.Ftfz",
+        "unrecovered temperature gradient",
+        "ppr-recovered temperature gradient",
+        "ppr-recovered Fourier heat flux"
+      ]
+    },
+    "native_mesh_nodes": {
+      "table": "thermophoresis_ppr_native_mesh_nodes.csv",
+      "dataset": "dset_AS_field",
+      "location": "fromdataset",
+      "level": "surface",
+      "smooth": "material",
+      "export_recover": "off",
+      "operator_recovery": "explicit ppr expressions",
+      "domain_column": "dom"
+    }
+  },
+  "acceptance": {
+    "expected_particle_records": 13202,
+    "require_unique_particle_time_keys": true,
+    "require_all_particle_rows_finite": true,
+    "require_all_particle_status_active": true,
+    "require_v6_state_coordinate_identity": true,
+    "maximum_v6_coordinate_absolute_difference_m": 1e-14,
+    "maximum_waldmann_force_component_scale_normalized_residual": 1e-10,
+    "producer_primitive_promotion_requires_force_replay_pass": true
+  },
+  "scope": {
+    "purpose": "replace the unrecovered M3-C0b v6 temperature-gradient diagnostic with the exact UsePPR thermophoretic primitive at saved particle states and native background mesh nodes",
+    "fine_step_only": true,
+    "modifies_production_solver": false,
+    "modifies_source_mph": false,
+    "modifies_m3c0b_v6_evidence": false,
+    "certifies_integrated_trajectory": false,
+    "certifies_physical_applicability": false
+  }
+}

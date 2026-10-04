@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "decision": "GEOMETRY_RTOL_1E-8_OPERATIONALLY_QUALIFIED_FOR_TRANSVERSE_TERMINAL_EVENTS_IN_THIS_CASE",
+  "policy_revision": "cross_band_stopping_time_allowance_v1",
+  "candidate_seed": 918165,
+  "locked_artifacts": {
+    "recipe": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseA_100nm_candidate_pilot_v4.json",
+      "sha256": "b12f6fef7ae09653bb7b8935ac8546416d73f9c95af96aee6fae4144dec1c2ff"
+    },
+    "evaluator": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/evaluate_m3c2_event_tolerance_cross_band.py",
+      "sha256": "e7b97751f49f897c222d7905a6a2bbc485a25847a3aecfc87615a0918416ef0f"
+    },
+    "v3_invalid_gate_evidence": {
+      "path": "particle_platform_redesign/solver/evidence/m3c2/caseA_100nm_event_tolerance_sensitivity_v1/event_tolerance_sensitivity.json",
+      "sha256": "63a1349dc18a9f4ffe514e0c87591b09a3107d4f05cf4d7908a07a4f57d0971b"
+    },
+    "candidate_manifest": {
+      "path": "particle_platform_redesign/solver/_out_m3c2/caseA_100nm_event_tolerance_cross_band_v4/candidate_pilot_manifest.json",
+      "sha256": "0e63434e2ead8717a7b60532c8949f2d36ee1c0ebe619d737b5f7bb0b7839c3c"
+    },
+    "reference_receipt": {
+      "path": "particle_platform_redesign/solver/_out_m3c2/caseA_100nm_event_tolerance_cross_band_v4/levels/event_tolerance_reference/seed_918165/run_receipt.json",
+      "sha256": "33621f81769e3cfdc5afc61a595aa28ae08d485ba1fd8a1be4db48fe1a5eb21e"
+    },
+    "candidate_receipt": {
+      "path": "particle_platform_redesign/solver/_out_m3c2/caseA_100nm_event_tolerance_cross_band_v4/levels/event_tolerance_candidate/seed_918165/run_receipt.json",
+      "sha256": "03c34857558732338ec5de3a58746522f8fd6478046a692aa2d1ddb90db8536b"
+    },
+    "evaluation": {
+      "path": "particle_platform_redesign/solver/evidence/m3c2/caseA_100nm_event_tolerance_cross_band_v2/event_tolerance_cross_band.json",
+      "sha256": "92bf69531ae943022941887671c7f243a6d128636a197a9dac6c22c54e777a80"
+    },
+    "execution_authorization": {
+      "path": "particle_platform_redesign/solver/evidence/m3c2/caseA_100nm_pilot_execution_v1/execution_authorization.json",
+      "sha256": "16395fb0f085bd15e13060b2246bd4acc6799c5709c6b6ac917ea618afd9afb7"
+    }
+  },
+  "observations": {
+    "reference_geometry_rtol": 1e-8,
+    "candidate_geometry_rtol": 1e-9,
+    "event_count_both": 262,
+    "failure_count_both": 0,
+    "maximum_position_delta_over_composed_budget": 0.4823995321304241,
+    "maximum_time_delta_over_composed_stopping_time_allowance": 0.4543240341560484,
+    "minimum_certified_boundary_transverse_speed_m_per_s": 2.04562075602541
+  },
+  "scope": {
+    "qualified": "operational geometry tolerance for transverse terminal events in the locked Case-A 100 nm stochastic configuration",
+    "not_qualified": [
+      "tangent or non-transverse contacts",
+      "reflecting or nonterminal event chains",
+      "macro-step convergence",
+      "Brownian path-depth convergence",
+      "COMSOL agreement",
+      "general product-wide geometry tolerance"
+    ],
+    "production_core_changed": false,
+    "macro_pilot_executed": false
+  },
+  "future_schema_note": "Persist an actual localization time-bracket radius and a bracket-wide certified speed lower bound before generalizing this gate beyond the present transverse terminal-event scope."
+}

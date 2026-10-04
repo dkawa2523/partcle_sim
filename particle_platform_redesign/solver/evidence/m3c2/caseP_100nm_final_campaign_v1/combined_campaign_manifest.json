@@ -1,0 +1,1184 @@
+{
+  "campaign_binding": {
+    "contract_sha256": "757755191ead405dc046afd1f09eca0953354d47b00e079f8537225715fa4954",
+    "input_content_hash": "sha256:8d0fb04a19283194d45ed84db73154e946cfa9c827c5048dba107287b2470c83",
+    "input_sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9"
+  },
+  "case_id": "M3-C2A_caseP_100nm_common-P1",
+  "evaluation_policy_sha256": "9d78a612c5750821d60a144633a58d1c7817db318d89ba19251c03111337fe02",
+  "manifest_kind": "m3c2_campaign",
+  "participant_manifests": {
+    "candidate": {
+      "path": "../caseP_100nm_candidate_final_v1/candidate_campaign_manifest.json",
+      "sha256": "d3ceba7da6c77d13bf3c49517c1df6d943b93245d4b05defa14f8f7046e5d0f0"
+    },
+    "comsol": {
+      "path": "../caseP_100nm_comsol_final_v1/comsol_campaign_manifest.json",
+      "sha256": "cd22b2a18a0d479902942561804383ae9650fa4d52c4f899941b75804c124246"
+    }
+  },
+  "participants": {
+    "candidate": {
+      "levels": [
+        {
+          "level_id": "macro_coarse",
+          "numerical_setting": {
+            "brownian_interval_tree_depth": 3,
+            "dt_s": 2e-05,
+            "geometry_rtol": 1e-08,
+            "purpose": "accepted_final"
+          },
+          "ordinal": 0,
+          "replicas": [
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319032/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319032,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319032/trajectory.csv",
+                "sha256": "4fe4bbadef5e80407f1672c12ec1ce52a1a141ef72dbef15fc660fa78160c9d4"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319033/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319033,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319033/trajectory.csv",
+                "sha256": "7acef4ecef5cb557a4001fa7df0a1cfee2cd79e725d2ec3b966de6803cc427ad"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319034/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319034,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319034/trajectory.csv",
+                "sha256": "933431e3e853601dc86fc1e07add60f02f9b29724dc631e4b0ed2ba362af536a"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319035/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319035,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319035/trajectory.csv",
+                "sha256": "d79d778af2a6062b499226e2b965154152db3ef6c4f7f3bc89055332f9a1d484"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319036/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319036,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319036/trajectory.csv",
+                "sha256": "a9bf8bdd13ac372858149ab36b00c70ca04a5fa9777f0c3ed1c1e8c79398aff3"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319037/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319037,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319037/trajectory.csv",
+                "sha256": "0b2a8fa14995b20101a1479048e2c34e2c004d654edbca630103812266c1762e"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319038/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319038,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319038/trajectory.csv",
+                "sha256": "15d054f267c4040b963d9e50c0891aab89509f29d7c6fbe7e3c7df9ef4abf047"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319039/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319039,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319039/trajectory.csv",
+                "sha256": "4ac884d0157e2df1ab900a571e7d3b708a6085c142259b55bdb74184fab4a3eb"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319040/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319040,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319040/trajectory.csv",
+                "sha256": "d2232da82b34c41797e0a824f885fbcb550e313513e820126918f309ee3790cb"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319041/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319041,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319041/trajectory.csv",
+                "sha256": "e3376456f43e63e6c999089271592ac5723eb774b2b342db1a5f3a2c83c9b2de"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319042/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319042,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319042/trajectory.csv",
+                "sha256": "5a626d52ab83a67c72651470c77b0e507c43015f25079b78b64c5284a31c13ab"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319043/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319043,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319043/trajectory.csv",
+                "sha256": "192b0dc4ccadf84c669c5a16e4211577f5f4555b3e3ce96fb78a3a30933d5aba"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319044/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319044,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319044/trajectory.csv",
+                "sha256": "f73e1698ea28f20640083f28abd107b4630446a0ede6de6c5f32e244d41aeffe"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319045/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319045,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319045/trajectory.csv",
+                "sha256": "29291ad3fee7fd2625c91749e42ae4aeac97738b9cd04cf2edbdd06f8b7ded3c"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319046/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319046,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319046/trajectory.csv",
+                "sha256": "680e73c29c66489ada5ad04a5a247c7c55b0e30eef2aa9e6113b240cec1c1c00"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319047/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319047,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319047/trajectory.csv",
+                "sha256": "2129b2e6aba748cb1e0f62a0b0732caca396b960af538c79d8e66aff271c4921"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319048/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319048,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319048/trajectory.csv",
+                "sha256": "1aafb24865dfa07f5ffeb1bb59d5588b60d0d3cb495c369de2e7a8f76d607b4d"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319049/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319049,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319049/trajectory.csv",
+                "sha256": "a68c77ba2788ecd3765521952a834026734c43619f1b217760d033047620be5a"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319050/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319050,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319050/trajectory.csv",
+                "sha256": "c6898a5392ba20fb3a1f002cf5da98c8c588fc263889204c2472b2054dc20f38"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319051/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319051,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319051/trajectory.csv",
+                "sha256": "97f3d028a82c42d9c54c44329d9dce6bb8b5e58e5013d3a82e9f5b59e8e8c705"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319052/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319052,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319052/trajectory.csv",
+                "sha256": "3dcca0f782467a633abbf7859948a2c08685e17b1e6e3539bdc8ac2584509a50"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319053/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319053,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319053/trajectory.csv",
+                "sha256": "99d22139a91302ee5c2897b08fe23f83cca325a39ae12fa525b29d41195a5006"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319054/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319054,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319054/trajectory.csv",
+                "sha256": "47ffe9529545dce75ab749c10a2426fc19dbbfdaf3b5734722f4ff439db6d6af"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319055/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319055,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319055/trajectory.csv",
+                "sha256": "73cbde381e46d93121cdda712aa6673010f688eb132f871fbcbb74d6512f9964"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319056/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319056,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319056/trajectory.csv",
+                "sha256": "60755ae41ae30b924e60488e8d8dac3d97ed16fa1454ca4944238c1e833214ed"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319057/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319057,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319057/trajectory.csv",
+                "sha256": "a21d39885d132cb4e071cc2a35fab59ad3c367bfd21546fb68855ef133e3aad7"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319058/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319058,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319058/trajectory.csv",
+                "sha256": "e273b24bb020d9cd2b7642e03c5875df3faa0432c4d463a139f9ad1ae733c27b"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319059/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319059,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319059/trajectory.csv",
+                "sha256": "f78a0ef2bf948e8d23805ba284a604754dd259bf55b3c3e1d703e2815f930c76"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319060/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319060,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319060/trajectory.csv",
+                "sha256": "7756a1bf5efe19b65da54e3c34ee718794715db0c712277cf3054bbef2095803"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319061/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319061,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319061/trajectory.csv",
+                "sha256": "796cd5da38e860dc83e55da954b792076456c7eb31d2fac2385245794d4cad85"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319062/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319062,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319062/trajectory.csv",
+                "sha256": "9ab4208f96e84ac2e85dba14f5e26cad195d538393f80c99bca644e66854bf02"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319063/events.csv",
+                "sha256": "7608a194040bb48e94564d4003dd70f38e56e699892535a64c60d69e69af5ff2"
+              },
+              "seed": 319063,
+              "trajectory": {
+                "path": "../caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319063/trajectory.csv",
+                "sha256": "aebc2d86a0970589f6d3cbde0101cc65b6fb8c1ca35e260465076efe729bb6b5"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "comsol": {
+      "levels": [
+        {
+          "level_id": "dt_20us",
+          "numerical_setting": {
+            "fixed_step_s": 2e-05,
+            "integrator": "classical_rk4",
+            "purpose": "accepted_final"
+          },
+          "ordinal": 0,
+          "replicas": [
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319000/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319000,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319000/trajectory.csv",
+                "sha256": "4d1e5b42ceb062bf6b9a2fa58e1f2ba993615b901b7fc2c41d6642db3d49a1dd"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319001/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319001,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319001/trajectory.csv",
+                "sha256": "afb4a41dcf3b7e3d3124dba0b931d0becada93cfe44dde53a24064b292d648a0"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319002/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319002,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319002/trajectory.csv",
+                "sha256": "909586e80d822b2195d1bde3282fc4554e604dfa065e890adb2dcfdc8c61ab4c"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319003/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319003,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319003/trajectory.csv",
+                "sha256": "33ed80a80dcc031872db04bdc7567c8f35c2e35ae2ef0af0c7df8ae66d634862"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319004/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319004,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319004/trajectory.csv",
+                "sha256": "d7d338c1c29febe41fa8191e46a5bb6e09274cf395f02c0a243f5478988abaf5"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319005/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319005,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319005/trajectory.csv",
+                "sha256": "e36e7ff7bc15e583d69bf43a54ebe0e9f3a34497520830d9816d65a127abee3f"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319006/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319006,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319006/trajectory.csv",
+                "sha256": "f6e218060eec2544928abf47f419a1ab21789be62c0d4c0f03acb0f6afdd2e6c"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319007/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319007,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319007/trajectory.csv",
+                "sha256": "6af6526a3db623135f29513214941a43e964b3dd004a0872b6c78e261efc2e63"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319008/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319008,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319008/trajectory.csv",
+                "sha256": "dabbd05b25970f45ce596dec22efd16677f69381f92321675793f0a7356093d7"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319009/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319009,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319009/trajectory.csv",
+                "sha256": "98edcf1649918657c69b5fd592a982a7d5069dec97404b9b59513045827c4841"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319010/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319010,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319010/trajectory.csv",
+                "sha256": "aac7e89ed582a9f1e8669cea20949c49f19989fdff163583a72388721801222f"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319011/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319011,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319011/trajectory.csv",
+                "sha256": "5a70a487407470ff862840d568ce1f9b8bfc66e7240bc7041428f310870cb4ce"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319012/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319012,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319012/trajectory.csv",
+                "sha256": "e8b2b2e620c6d6a60284d0c00ad2c3574273116288d6670f27bf9873892f2b66"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319013/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319013,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319013/trajectory.csv",
+                "sha256": "1e82af6e997010b8cd3b8842cb35c3d1a9514bc4b86ea39a60ce2390970ffbfd"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319014/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319014,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319014/trajectory.csv",
+                "sha256": "edf123f8f9d1a2cd18b3834d09f11693688222a4b00c63b9cc8697774dcf13d2"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319015/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319015,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319015/trajectory.csv",
+                "sha256": "c7c1ee13ee17d63ca5c707b2ea8cdf802f0c59751070bf56024a659c99536a4a"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319016/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319016,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319016/trajectory.csv",
+                "sha256": "a5aa29de436f4fd0ae2e4b8dbba81d90f784a14f598b4225e4a316c3840befcd"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319017/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319017,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319017/trajectory.csv",
+                "sha256": "918ce8ff4d30e5217010df2ac70143fa4285253a9d52ee342c55dc17e5fede77"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319018/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319018,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319018/trajectory.csv",
+                "sha256": "a10ddf79897efb3e61a6dbb5480752866a255eb7ab89afdad0a5eb7038ca6da1"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319019/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319019,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319019/trajectory.csv",
+                "sha256": "e08f3abc17f94a5b1f82f14ae51a665bec2060e50861082719ffb909fe015db8"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319020/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319020,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319020/trajectory.csv",
+                "sha256": "46f6a2d5a6c9ac5abf0512f8ebfc190d72eb775a07e3f065b7b0370836830f34"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319021/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319021,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319021/trajectory.csv",
+                "sha256": "08a5a8253f4341ebaada03ebf2fc77c92cd133d8ca3d9b01668669819d624a76"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319022/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319022,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319022/trajectory.csv",
+                "sha256": "7a243fcfb4c1a346e3806e11f63f528bc537827821cafda08f9421622d027d9a"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319023/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319023,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319023/trajectory.csv",
+                "sha256": "a27a811d80f52b63f3113fdc6c1a71b32ebf3d357b484a3668c52fbed107cee7"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319024/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319024,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319024/trajectory.csv",
+                "sha256": "4e16f85d9944a0004532dbb2863841ef7d4d13ae8762a674f76f6f2a83b8c688"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319025/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319025,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319025/trajectory.csv",
+                "sha256": "de60f29a85926bf980676861f88bc2285b67ab9693cb2fa9c5ee67a24d041360"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319026/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319026,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319026/trajectory.csv",
+                "sha256": "f0f90c95702a579181d826321650043cf8137fe68426a54166f0d4896777da0a"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319027/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319027,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319027/trajectory.csv",
+                "sha256": "6642a80c21fc98b6915eda1b5a39e23d89c9e6efbfce0e0c204bd870f3476040"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319028/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319028,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319028/trajectory.csv",
+                "sha256": "11f68888c73d2267efe95568d238c628cba41463d0bfb52a97f8986606fe454a"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319029/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319029,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319029/trajectory.csv",
+                "sha256": "c27adcb7304b36cd163c4deac50053a97676a930920a19389035c88483e437c8"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319030/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319030,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319030/trajectory.csv",
+                "sha256": "b8a7a5419135f1492452f6321800e7f78d0cf48ca8c7591767ca5b92aec77851"
+              }
+            },
+            {
+              "events": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319031/events.csv",
+                "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+              },
+              "seed": 319031,
+              "trajectory": {
+                "path": "../caseP_100nm_comsol_final_v1/levels/dt_20us/replicas/seed_319031/trajectory.csv",
+                "sha256": "6db7f124b44f2a1e3a45cc67ac6a1d20644df1f4b6f7e457da51bca7c8ac9744"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "purpose": "final",
+  "schema_version": 1,
+  "scope": {
+    "canonical_input": {
+      "content_hash": "sha256:8d0fb04a19283194d45ed84db73154e946cfa9c827c5048dba107287b2470c83",
+      "path": "../../_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_input.h5",
+      "sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9"
+    },
+    "geometry_bounds_m": [
+      0.0,
+      0.25,
+      0.0,
+      0.13
+    ],
+    "output_times_s": [
+      0.0,
+      1e-05,
+      2e-05,
+      3.0000000000000004e-05,
+      4e-05,
+      5e-05,
+      6.000000000000001e-05,
+      7.000000000000001e-05,
+      8e-05,
+      9e-05,
+      0.0001,
+      0.00011,
+      0.00012000000000000002,
+      0.00013000000000000002,
+      0.00014000000000000001,
+      0.00015000000000000001,
+      0.00016,
+      0.00017,
+      0.00018,
+      0.00019,
+      0.0002,
+      0.00021,
+      0.00022,
+      0.00023,
+      0.00024000000000000003,
+      0.00025,
+      0.00026000000000000003,
+      0.00027,
+      0.00028000000000000003,
+      0.00029,
+      0.00030000000000000003,
+      0.00031,
+      0.00032,
+      0.00033000000000000005,
+      0.00034,
+      0.00035000000000000005,
+      0.00036,
+      0.00037000000000000005,
+      0.00038,
+      0.00039000000000000005,
+      0.0004,
+      0.00041000000000000005,
+      0.00042,
+      0.00043000000000000004,
+      0.00044,
+      0.00045000000000000004,
+      0.00046,
+      0.00047000000000000004,
+      0.00048000000000000007,
+      0.0004900000000000001,
+      0.0005,
+      0.0006,
+      0.0007,
+      0.0007999999999999999,
+      0.0009,
+      0.001,
+      0.0010999999999999998,
+      0.0012000000000000001,
+      0.0013,
+      0.0014,
+      0.0015,
+      0.0015999999999999999,
+      0.0017000000000000001,
+      0.0018,
+      0.0019000000000000002,
+      0.002,
+      0.0021,
+      0.0022,
+      0.0023,
+      0.0024000000000000002,
+      0.0025,
+      0.0026,
+      0.0027,
+      0.0028,
+      0.0029,
+      0.003,
+      0.0031,
+      0.0032,
+      0.0033,
+      0.0034,
+      0.0035,
+      0.0036,
+      0.0037,
+      0.0038,
+      0.0039,
+      0.004,
+      0.0041,
+      0.004200000000000001,
+      0.0043,
+      0.0044,
+      0.0045000000000000005,
+      0.0046,
+      0.0047,
+      0.0048000000000000004,
+      0.0049,
+      0.005,
+      0.006,
+      0.007,
+      0.008,
+      0.009000000000000001,
+      0.01,
+      0.011,
+      0.012,
+      0.013000000000000001,
+      0.014,
+      0.015000000000000001,
+      0.016,
+      0.017,
+      0.018000000000000002,
+      0.019000000000000003,
+      0.02,
+      0.020999999999999998,
+      0.022,
+      0.023,
+      0.024,
+      0.025,
+      0.026000000000000002,
+      0.027000000000000003,
+      0.027999999999999997,
+      0.028999999999999998,
+      0.03
+    ],
+    "particle_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188,
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      223,
+      224,
+      225,
+      226,
+      227,
+      228,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      275,
+      276,
+      277,
+      278,
+      279,
+      280,
+      281,
+      282,
+      283,
+      284,
+      285,
+      286,
+      287
+    ]
+  }
+}

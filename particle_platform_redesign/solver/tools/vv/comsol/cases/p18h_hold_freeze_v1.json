@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "P18-H-hold-freeze",
+  "evaluation_revision": 1,
+  "classification": "external_comsol_terminal_boundary_comparison",
+  "case": {
+    "coordinate_system": "axisymmetric_rz",
+    "motion_mode": "axisymmetric_rz_meridional",
+    "particle_id": 1,
+    "source_position_m": [0.23927, 0.115],
+    "source_velocity_m_per_s": [10.0, 0.0],
+    "source_charge_number_e": 0.0,
+    "particle_mass_kg": 1e-15,
+    "particle_diameter_m": 1e-7,
+    "domain_r_m": [0.2, 0.24],
+    "domain_z_m": [0.0, 0.23],
+    "hold_boundary_r_m": 0.24,
+    "fixed_rk4_step_s": 2.5e-6,
+    "output_interval_s": 2.5e-6,
+    "output_frames": 61,
+    "time_end_s": 1.5e-4,
+    "analytic_event_time_s": 7.3e-5,
+    "analytic_hit_position_m": [0.24, 0.115]
+  },
+  "reference": {
+    "compact_manifest_relative_path": "evidence/m3c0/boundary_semantics_v2/comparison_manifest.json",
+    "compact_manifest_sha256": "eb9cb9701643ee8621d8ca2f34edde088ae3e8c66a2ebbfdd39eea4a2597d20e",
+    "compact_gates_relative_path": "evidence/m3c0/boundary_semantics_v2/gates.csv",
+    "compact_gates_sha256": "8d6ea238789fcc89d2d6c2988433c70e63af491253e0d9c71787eb51a7c97ea7",
+    "compact_readme_relative_path": "evidence/m3c0/boundary_semantics_v2/README.md",
+    "compact_readme_sha256": "45c794241dfaaa52c299e5ea4aeb9e7b3bd6bf2bf7344403a318520c60165a12",
+    "state_relative_path": "_out_m3c/boundary_semantics_v2/freeze_inlet_37/dt_2p5us/state.csv",
+    "state_sha256": "a120746a4afed53af2280233b6de249ede82913e39c21499d748eab4eacf7bfe",
+    "event_relative_path": "_out_m3c/boundary_semantics_v2/freeze_inlet_37/dt_2p5us/event_observation.csv",
+    "event_sha256": "e58d1586c4cea934710ab5cc6a28e492796bff496daf32d78598ea0f71c8d72c",
+    "summary_relative_path": "_out_m3c/boundary_semantics_v2/freeze_inlet_37/dt_2p5us/step_summary.json",
+    "summary_sha256": "2a284bb2a10d7c28a527c24d5778c1c1fc78bae75543c82a6a91770a56e5315a",
+    "expected_status_code": 2,
+    "wall_condition": "Freeze",
+    "comsol_version": "6.4.0.429"
+  },
+  "expected_candidate": {
+    "case_schema_version": 2,
+    "result_schema_version": 2,
+    "engine_algorithm_revision": "particle_engine_v32",
+    "boundary_algorithm_revision": "point_wall_laws_v5",
+    "result_algorithm_revision": "durable_segmented_result_v4",
+    "boundary_law": "hold",
+    "boundary_outcome": "held",
+    "lifecycle_code": 5
+  },
+  "acceptance": {
+    "active_position_absolute_m": 1e-12,
+    "active_velocity_absolute_m_per_s": 1e-12,
+    "event_time_absolute_s": 5e-9,
+    "hit_position_norm_m": 5e-8,
+    "held_position_spread_m": 5e-12,
+    "held_position_cross_absolute_m": 5e-12,
+    "retained_velocity_absolute_m_per_s": 1e-12,
+    "retained_charge_absolute_e": 0.0
+  },
+  "claim_policy": {
+    "certifies": [
+      "the production hold boundary law for this one force-free normal-impact R-Z microcase",
+      "the production held lifecycle retains hit position and incident velocity in this external microcase",
+      "agreement with the locked COMSOL Freeze trajectory for this isolated microcase"
+    ],
+    "does_not_certify": [
+      "COMSOL as a golden truth",
+      "grazing or corner impacts",
+      "full-physics trajectory agreement",
+      "COMSOL charge retention or nonzero-charge retention from this zero-charge external microcase",
+      "charge evolution after a terminal event",
+      "a paused particle that can resume",
+      "other geometries, particle sizes, boundaries, or COMSOL models"
+    ]
+  }
+}

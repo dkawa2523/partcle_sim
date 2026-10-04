@@ -1,0 +1,37 @@
+{
+  "benchmark_role": "machine_local_non_gating_warm_stage_observation",
+  "compiled_cpu_tile_revision": "compiled_cpu_tile_v13",
+  "cpu": "Intel(R) Core(TM) Ultra 7 265KF",
+  "models": [
+    {
+      "acceleration_checksum": 0.0,
+      "bound_array_bytes": 1600088,
+      "median_seconds": 0.02705699997022748,
+      "name": "aggregate_charge_only",
+      "rows_per_second": 3695901.2495855526
+    },
+    {
+      "acceleration_checksum": 87.77286488413357,
+      "bound_array_bytes": 1600104,
+      "median_seconds": 0.028538200072944164,
+      "name": "aggregate_charge_plus_relative_flow_screened_ion_drag",
+      "rows_per_second": 3504075.2305470617
+    },
+    {
+      "acceleration_checksum": 86.20678835625944,
+      "bound_array_bytes": 1600088,
+      "median_seconds": 0.028825900051742792,
+      "name": "aggregate_charge_plus_image_ion_drag",
+      "rows_per_second": 3469102.4328988497
+    }
+  ],
+  "numba": "0.67.0",
+  "numpy": "2.5.3",
+  "operating_system": "Microsoft Windows 11 Pro",
+  "particle_rows": 100000,
+  "physics_catalog_revision": "inertial_langevin_xy_catalog_v12",
+  "physics_runtime_revision": "inertial_langevin_compiled_physics_runtime_v11",
+  "python": "3.12.13",
+  "repeats": 9,
+  "workspace_reused": true
+}

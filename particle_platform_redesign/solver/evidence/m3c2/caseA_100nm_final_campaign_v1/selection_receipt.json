@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "receipt_kind": "m3c2_post_pilot_final_authorization",
+  "status": "AUTHORIZED_FOR_CONFIRMATORY_FINAL",
+  "policy_sha256": "26139aa08cc3d893394cd15dcacf282bc7874dc3de06c1cdbfa0dc401caa055e",
+  "pilot_report_sha256": "609c3da551ada8859787d088d5ca53fc3ba31e93b0d20d79d1403b6015d91005",
+  "pilot_scope_sha256": "e7b89611f13b68cb3ee926ff85d431fc9a12d43eb72e35904d4b050e43269759",
+  "common_design_sha256": "8836401e6bdaa30b6395a312bc93472079ecf3d42fceb5dcb9602ec7a3be35c8",
+  "seed_plan_sha256": "bb17fa9d0388647debdfb56e57007dfdf34c3949b91bbbac71767e16e11dea6b",
+  "selected_final_levels": {
+    "candidate": {
+      "level_id": "macro_coarse",
+      "ordinal": 0,
+      "numerical_setting": {
+        "dt_s": 0.00002,
+        "brownian_interval_tree_depth": 3,
+        "geometry_rtol": 1e-08,
+        "purpose": "accepted_final"
+      }
+    },
+    "comsol": {
+      "level_id": "dt_20us",
+      "ordinal": 0,
+      "numerical_setting": {
+        "integrator": "classical_rk4",
+        "fixed_step_s": 0.00002,
+        "purpose": "accepted_final"
+      }
+    }
+  }
+}

@@ -1,0 +1,230 @@
+schema_version: 1
+comparison_id: M3-V-caseA-100nm-deterministic-common-physics-v1
+classification: external_comsol_matched_case_diagnostic
+claim_policy: within_preregistered_tolerances_only
+
+# This is deliberately a blocked manifest.  It describes the first useful
+# matched case and records what the current saved model does, but it must not be
+# used to launch COMSOL until every required readiness item is CONFIRMED.  Zero
+# tolerances below are fail-closed sentinels, not acceptance budgets.
+readiness:
+  - name: source_mph_hash_locked
+    required: true
+    status: CONFIRMED
+    evidence: evidence/m3v/mph_hashes.csv; theory model SHA-256 3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524
+    reason: Existing M3-V read-only load preserved the source MPH hash.
+  - name: source_model_copy_and_no_save_plan_reviewed
+    required: true
+    status: BLOCKED
+    evidence: No deterministic companion run receipt exists.
+    reason: The future COMSOL run must use a copy and must never save over the audited source MPH.
+  - name: brownian_disabled_in_reference
+    required: true
+    status: BLOCKED
+    evidence: Current particle_physics_feature_settings.csv has bf1 enabled with i=[AS_brownian_seed]; exported Brownian r/z samples are nonzero.
+    reason: A deterministic trajectory comparison cannot reuse the current single-seed trajectory.
+  - name: common_deterministic_force_set_confirmed
+    required: true
+    status: BLOCKED
+    evidence: Current saved Case A enables ion drag, thermophoresis, lift, DEP, dynamic charge, electric, drag, gravity/buoyancy, and Brownian.
+    reason: The first matched case must enable only the explicitly common, independently aligned force set.
+  - name: fixed_charge_minus_one_confirmed
+    required: true
+    status: BLOCKED
+    evidence: Current saved model advances the auxq dynamic aggregate charge from AS_Z0=-1.
+    reason: The first match freezes charge to isolate field, force, RK4, and boundary behavior.
+  - name: candidate_case_checked_through_public_api
+    required: true
+    status: BLOCKED
+    evidence: No candidate case or result hash is registered.
+    reason: The candidate must use the normal load_case/simulate/open_result path, not a COMSOL-specific core mode.
+  - name: tolerance_budget_preregistered_from_convergence
+    required: true
+    status: BLOCKED
+    evidence: COMSOL self-convergence, candidate self-convergence, and export uncertainty are not yet available.
+    reason: Result-dependent tolerance widening is prohibited.
+  - name: normalized_comparison_artifacts_exported
+    required: true
+    status: BLOCKED
+    evidence: No field, force, RK-stage, trajectory, or sparse-event artifact is registered below.
+    reason: Saved 121-time trajectories do not contain RK stages or an exact sparse event ledger.
+  - name: freeze_boundary_mapping_confirmed
+    required: true
+    status: BLOCKED
+    evidence: Current 12 packages contain zero positive Freeze events; boundary 37 is described only as reverse-escape freeze.
+    reason: Freeze must not be silently equated with stick or escape without a positive microcase and event ledger.
+
+setting_alignment:
+  - name: motion.coordinate_system
+    required_value: axisymmetric_rz_no_swirl
+    reference_value: axisymmetric_rz_no_swirl
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: Existing Case A particle model and exported r/z state columns.
+    candidate_evidence: Candidate case has not been generated.
+  - name: integrator.method
+    required_value: classical_rk4_fixed
+    reference_value: classical_rk4_fixed
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: study_and_solver_settings.csv solver_summary integration_method=explicit fixed RK4.
+    candidate_evidence: Candidate case has not been generated.
+  - name: integrator.fixed_step_s
+    required_value: 1.0e-5
+    reference_value: 1.0e-5
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: AS_particle_dt=10 us and solver_summary fixed_step.
+    candidate_evidence: Candidate case has not been generated.
+  - name: stochastic.brownian
+    required_value: disabled
+    reference_value: enabled_single_seed_21
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: bf1 and AS_brownian_seed in current saved model; this must change in the companion copy.
+    candidate_evidence: Candidate case has not been generated.
+  - name: charge.model
+    required_value: fixed_charge_number_minus_one
+    reference_value: dynamic_relative_drift_regularized_two_current
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: auxq.R and AS_Z0=-1 in current saved model; auxq must be disabled in the companion copy.
+    candidate_evidence: Candidate case has not been generated.
+  - name: deterministic_force_set
+    required_value:
+      - electric_coulomb_v1
+      - epstein_linear_v1_delta_1_plus_0p9_pi_over_8
+      - gravity_buoyancy_standard_v1
+    reference_value:
+      - electric_coulomb_v1
+      - epstein_linear_v1_delta_1_plus_0p9_pi_over_8
+      - gravity_buoyancy_standard_v1
+      - relative_flow_screened_collection_orbital_v1
+      - waldmann_thermophoresis_reference
+      - free_molecular_lift_sensitivity
+      - static_dielectrophoresis
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: Current feature inventory; extra forces must be disabled in the deterministic companion.
+    candidate_evidence: Candidate case has not been generated.
+  - name: trajectory.scope
+    required_value: pre_first_material_event_or_event_delimited_continuous_segment
+    reference_value: NOT_EXPORTED_AS_EVENT_DELIMITED
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: Current history is a saved-time state table; exact event times are unavailable.
+    candidate_evidence: Candidate case has not been generated.
+  - name: boundary_mapping
+    required_value: explicit_sparse_event_mapping_reviewed
+    reference_value: freeze_mapping_unconfirmed
+    candidate_value: NOT_CONFIGURED
+    reference_evidence: boundary_conditions_and_event_codes.csv and zero observed Freeze events.
+    candidate_evidence: Candidate case has not been generated.
+
+artifacts:
+  reference:
+    field_probe: {path: null, sha256: null}
+    force_probe: {path: null, sha256: null}
+    integrator_probe: {path: null, sha256: null}
+    trajectory: {path: null, sha256: null}
+    events: {path: null, sha256: null}
+  candidate:
+    field_probe: {path: null, sha256: null}
+    force_probe: {path: null, sha256: null}
+    integrator_probe: {path: null, sha256: null}
+    trajectory: {path: null, sha256: null}
+    events: {path: null, sha256: null}
+
+layers:
+  field:
+    required: true
+    artifact: field_probe
+    keys:
+      - {name: probe_id, reference_column: probe_id, candidate_column: probe_id, kind: text}
+    numeric:
+      - {name: r, reference_column: r_m, candidate_column: r_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: z, reference_column: z_m, candidate_column: z_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: gas_velocity_r, reference_column: gas_velocity_r_m_per_s, candidate_column: gas_velocity_r_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: gas_velocity_z, reference_column: gas_velocity_z_m_per_s, candidate_column: gas_velocity_z_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: gas_temperature, reference_column: gas_temperature_K, candidate_column: gas_temperature_K, unit: K, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 300.0}
+      - {name: gas_density, reference_column: gas_density_kg_per_m3, candidate_column: gas_density_kg_per_m3, unit: kg/m^3, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-4}
+      - {name: electric_field_r, reference_column: electric_field_r_V_per_m, candidate_column: electric_field_r_V_per_m, unit: V/m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: electric_field_z, reference_column: electric_field_z_V_per_m, candidate_column: electric_field_z_V_per_m, unit: V/m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+    categorical:
+      - {name: support, reference_column: support, candidate_column: support}
+      - {name: domain_id, reference_column: domain_id, candidate_column: domain_id}
+  force:
+    required: true
+    artifact: force_probe
+    keys:
+      - {name: particle_id, reference_column: particle_id, candidate_column: particle_id, kind: integer}
+      - {name: time_s, reference_column: time_s, candidate_column: time_s, kind: float}
+    numeric:
+      - {name: electric_r, reference_column: electric_force_r_N, candidate_column: electric_force_r_N, unit: N, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-18}
+      - {name: electric_z, reference_column: electric_force_z_N, candidate_column: electric_force_z_N, unit: N, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-18}
+      - {name: epstein_r, reference_column: epstein_force_r_N, candidate_column: epstein_force_r_N, unit: N, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-18}
+      - {name: epstein_z, reference_column: epstein_force_z_N, candidate_column: epstein_force_z_N, unit: N, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-18}
+      - {name: gravity_buoyancy_r, reference_column: gravity_buoyancy_force_r_N, candidate_column: gravity_buoyancy_force_r_N, unit: N, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-18}
+      - {name: gravity_buoyancy_z, reference_column: gravity_buoyancy_force_z_N, candidate_column: gravity_buoyancy_force_z_N, unit: N, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-18}
+      - {name: total_acceleration_r, reference_column: acceleration_r_m_per_s2, candidate_column: acceleration_r_m_per_s2, unit: m/s^2, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: total_acceleration_z, reference_column: acceleration_z_m_per_s2, candidate_column: acceleration_z_m_per_s2, unit: m/s^2, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+    categorical: []
+  integrator:
+    required: true
+    artifact: integrator_probe
+    keys:
+      - {name: particle_id, reference_column: particle_id, candidate_column: particle_id, kind: integer}
+      - {name: step_index, reference_column: step_index, candidate_column: step_index, kind: integer}
+      - {name: stage, reference_column: stage, candidate_column: stage, kind: text}
+    numeric:
+      - {name: stage_time, reference_column: time_s, candidate_column: time_s, unit: s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-5}
+      - {name: r, reference_column: r_m, candidate_column: r_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 0.1}
+      - {name: z, reference_column: z_m, candidate_column: z_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 0.1}
+      - {name: velocity_r, reference_column: velocity_r_m_per_s, candidate_column: velocity_r_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: velocity_z, reference_column: velocity_z_m_per_s, candidate_column: velocity_z_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+    categorical: []
+  trajectory:
+    required: true
+    artifact: trajectory
+    keys:
+      - {name: particle_id, reference_column: particle_id, candidate_column: particle_id, kind: integer}
+      - {name: time_s, reference_column: time_s, candidate_column: time_s, kind: float}
+    numeric:
+      - {name: r, reference_column: r_m, candidate_column: r_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 0.1}
+      - {name: z, reference_column: z_m, candidate_column: z_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 0.1}
+      - {name: velocity_r, reference_column: velocity_r_m_per_s, candidate_column: velocity_r_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: velocity_z, reference_column: velocity_z_m_per_s, candidate_column: velocity_z_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: charge_number, reference_column: charge_number_e, candidate_column: charge_number_e, unit: e, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+    categorical:
+      - {name: lifecycle, reference_column: lifecycle, candidate_column: lifecycle}
+  boundary:
+    required: true
+    artifact: events
+    keys:
+      - {name: particle_id, reference_column: particle_id, candidate_column: particle_id, kind: integer}
+      - {name: event_ordinal, reference_column: event_ordinal, candidate_column: event_ordinal, kind: integer}
+    numeric:
+      - {name: event_time, reference_column: event_time_s, candidate_column: event_time_s, unit: s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0e-5}
+      - {name: hit_r, reference_column: hit_r_m, candidate_column: hit_r_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 0.1}
+      - {name: hit_z, reference_column: hit_z_m, candidate_column: hit_z_m, unit: m, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 0.1}
+      - {name: normal_r, reference_column: normal_r, candidate_column: normal_r, unit: '1', absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: normal_z, reference_column: normal_z, candidate_column: normal_z, unit: '1', absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: pre_velocity_r, reference_column: pre_velocity_r_m_per_s, candidate_column: pre_velocity_r_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: pre_velocity_z, reference_column: pre_velocity_z_m_per_s, candidate_column: pre_velocity_z_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: post_velocity_r, reference_column: post_velocity_r_m_per_s, candidate_column: post_velocity_r_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+      - {name: post_velocity_z, reference_column: post_velocity_z_m_per_s, candidate_column: post_velocity_z_m_per_s, unit: m/s, absolute_tolerance: 0.0, relative_tolerance: 0.0, scale: 1.0}
+    categorical:
+      - {name: event_type, reference_column: event_type, candidate_column: event_type}
+      - {name: boundary_semantic, reference_column: boundary_semantic, candidate_column: boundary_semantic}
+      - {name: outcome, reference_column: outcome, candidate_column: outcome}
+
+accuracy_evidence:
+  - name: comsol_time_step_self_convergence
+    status: NOT_TESTED
+    evidence: No Brownian-off 10/5/2.5 us COMSOL series exists.
+    reason: The current single 10 us saved run cannot estimate COMSOL time-discretization error.
+  - name: candidate_time_step_self_convergence
+    status: NOT_TESTED
+    evidence: No matched candidate case exists.
+    reason: Candidate RK4 time-discretization error is not yet estimated on the matched case.
+  - name: field_mesh_and_export_uncertainty
+    status: NOT_TESTED
+    evidence: F02 compared one mesh on the same exported nodes only.
+    reason: Independent mesh convergence and arbitrary-point COMSOL evaluation uncertainty remain unknown.
+  - name: boundary_event_convergence
+    status: NOT_TESTED
+    evidence: No sparse COMSOL event ledger or Freeze-positive microcase exists.
+    reason: Saved output times cannot certify first-hit time or post-event residual-time behavior.

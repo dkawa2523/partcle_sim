@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "manifest_kind": "m3c2_rng_noninteraction_evidence",
+  "status": "PASS_DOCUMENTED_INDEPENDENT_PARTICLE_STREAMS_AND_ONE_WAY_DYNAMICS",
+  "scope": "M3-C2A Case-A 100 nm common-P1 stochastic ensemble",
+  "created_date": "2026-10-04",
+  "comsol_version": "6.4",
+  "comsol_installed_documentation": [
+    {
+      "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.43.html",
+      "bytes": 7840,
+      "sha256": "fa6236cad505a0a5dfedab443d5ab8aaf78dc9ea6068d3f7dd6a5fbb3b318096",
+      "line": 92,
+      "anchor": "624542",
+      "evidence": "Brownian-force values are independent by direction and differ by particle, solver time step, and force component."
+    },
+    {
+      "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_ug_modeling.05.13.html",
+      "bytes": 19465,
+      "sha256": "8b040b5f3d9ffe8296034f06ad8b5c72b713c3014735d4fa18010f61b7040b63",
+      "line_anchors": [
+        {"line": 85, "anchor": "761056", "meaning": "pidx is unique by model particle and separates particle random values"},
+        {"line": 86, "anchor": "762116", "meaning": "solver time separates values for one particle"},
+        {"line": 87, "anchor": "762121", "meaning": "a third argument separates variables and vector components"}
+      ]
+    },
+    {
+      "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_ug_modeling.05.05.html",
+      "bytes": 24536,
+      "sha256": "7b4145f86d4a69d8faf904cb945e2ff95428a98d7a0a5c3935bab94c31a5fbec",
+      "line": 143,
+      "anchor": "748832",
+      "evidence": "Different model-particle results are generally uncorrelated; changing the seed produces a solution uncorrelated with the previous seed."
+    },
+    {
+      "path": "C:/Program Files/COMSOL/COMSOL64/Multiphysics/doc/help/wtpwebapps/ROOT/doc/com.comsol.help.particle/particle_introduction.02.03.html",
+      "bytes": 26371,
+      "sha256": "38d72a15a0c6c8f06c0e8d31809e75ef5f181682edf677d57f284daaf067fc14",
+      "line": 74,
+      "anchor": "1942392",
+      "evidence": "The Brownian implementation seeds unique random numbers for each particle at each solver time step."
+    }
+  ],
+  "comsol_locked_companion": {
+    "runner": {
+      "path": "tools/vv/comsol/comsol/RunM3C2CaseA100StochasticPilot.java",
+      "bytes": 26254,
+      "sha256": "06f30e1c63592682602e73153067c13fc9a9f965e57cb7621ecce8f819dd52c1",
+      "anchors": [
+        {"lines": "371-375", "meaning": "disable every physics and multiphysics solve-for entry"},
+        {"lines": "393-407", "meaning": "assert only fptas is active and every multiphysics coupling remains off"},
+        {"lines": "429-435", "meaning": "create the transient and enable only fptas"},
+        {"line": 542, "meaning": "record user-defined Brownian random arguments and fptas.bf1.i seed authority"}
+      ]
+    },
+    "exhaustive_feature_exporter": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/tools/AugmentCf4O2FormalPlotsAndExports.java",
+      "bytes": 43017,
+      "sha256": "9cf011175717499917ba01d803a9b22667bd1c05cedfef84a237e145ab3264cb",
+      "anchors": [175, 176, 189, 190],
+      "meaning": "iterates every physics feature and study feature and every sorted property"
+    },
+    "particle_feature_inventory": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_image_minimal_corrected/caseA_100nm/external_reproduction/config/particle_physics_feature_settings.csv",
+      "bytes": 101706,
+      "sha256": "0488de828cc590268c468ef5a9fb393879ab98c1a715b5424316195663a6cdb0",
+      "finding": "The exhaustive fptas feature inventory contains no particle-particle interaction feature."
+    },
+    "study_inventory": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_image_minimal_corrected/caseA_100nm/external_reproduction/config/study_and_solver_settings.csv",
+      "bytes": 50892,
+      "sha256": "1cb85bc919d87a75e18417e5aaba9ffd6ff598d5c098636ce731692a5c53639b",
+      "anchors": [49, 107],
+      "finding": "The particle transient activates fptas alone and the companion runner independently forces every multiphysics coupling off."
+    }
+  },
+  "candidate_rng": {
+    "implementation": {
+      "path": "src/chamber_particles/rng.py",
+      "bytes": 11431,
+      "sha256": "f3398ebc233953ae668b5ecd0d108981396af8e55e41baa605917c90bf82c247",
+      "anchors": [152, 165, 168, 191, 202, 210, 285],
+      "finding": "Philox4x32-10 counters include the particle ID and macro interval; derived keys separate root interval, tree node, component, and draw kind."
+    },
+    "verification": {
+      "path": "tests/verification/test_rng.py",
+      "bytes": 5948,
+      "sha256": "aca0e48b24265254fbdcaba4c92e563095c0bd7f1d6d40c98031386793819b1b",
+      "anchor": "test_brownian_normals_have_stable_interval_tree_identity",
+      "finding": "The regression locks ordering independence and sensitivity to seed, interval, component, tree node, and root identity."
+    }
+  },
+  "statistical_assumptions": {
+    "independent_unit": "seed_x_fixed_source_particle_trajectory",
+    "fixed_source_design": true,
+    "particle_particle_interaction": false,
+    "two_way_background_coupling": false,
+    "within_trajectory_time_dependence": "retained_and_covered_by_simultaneous_union_bound",
+    "cross_solver_pathwise_rng_equality": false,
+    "qualification": "COMSOL documentation says different particle results are generally uncorrelated; this supports the registered finite-sample design but is not a proof of literal mathematical independence of a deterministic PRNG."
+  }
+}

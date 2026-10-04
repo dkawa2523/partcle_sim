@@ -1,0 +1,88 @@
+{
+  "common_p1_input": {
+    "boundary_lines": 160,
+    "content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c",
+    "file_sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+    "nodes": 1987,
+    "particle_count": 287,
+    "release_time_s": 0.0,
+    "triangles": 3779
+  },
+  "comparison_decision": "NOT_EVALUATED",
+  "comsol_or_candidate_executed": false,
+  "contract_sha256": "d720e94e0342f65ed3a6466a2357299c228495e173848897d6719b0d9feca2df",
+  "contract_validation_status": "PASS_INPUT_IDENTITY_AND_SEMANTICS_LOCKED",
+  "evidence_id": "M3-C2A-caseA-100nm-pilot-contract-receipt-v1",
+  "execution_status": "NOT_AUTHORIZED",
+  "gates": [
+    {
+      "gate": "input_artifact_identity",
+      "status": "PASS"
+    },
+    {
+      "gate": "common_p1_content_release_geometry",
+      "status": "PASS"
+    },
+    {
+      "gate": "deterministic_physics_and_boundary",
+      "status": "PASS"
+    },
+    {
+      "gate": "rz_brownian_target_semantics",
+      "status": "PASS"
+    },
+    {
+      "gate": "pilot_seed_isolation",
+      "status": "PASS"
+    },
+    {
+      "gate": "runner_recipes_and_pilot",
+      "status": "BLOCKED_NOT_LOCKED_OR_RUN"
+    }
+  ],
+  "numerical_policy": {
+    "common_observation_times": "scope.output_schedule_segments",
+    "comparison_kind": "independent_seed_ensemble_observables_not_pathwise",
+    "pathwise_equality_claim": false,
+    "pilot_purpose": "lock_each_solver_step_or_tolerance_recipe_and_observable_numerical_uncertainty_before_final_cohort",
+    "step_policy": "independent_solver_observable_convergence_not_equal_fixed_step"
+  },
+  "pilot_status": "NOT_RUN",
+  "remaining_blockers": [
+    "lock_no-save_COMSOL_runner_recipe_that_applies_UserDefined_and_bf1.i",
+    "lock_candidate_runner_recipe",
+    "lock_each_solver_pilot_step_or_tolerance_series_and_observables",
+    "complete_and_accept_disjoint_seed_pilot"
+  ],
+  "schema_version": 1,
+  "seed_isolation": {
+    "all_pilot_seeds_disjoint_from_final": true,
+    "candidate_pilot_seeds": [
+      918164,
+      918165,
+      918166,
+      918167
+    ],
+    "comsol_pilot_seeds": [
+      918160,
+      918161,
+      918162,
+      918163
+    ],
+    "final_replicas_per_participant": 32,
+    "final_unique_seed_labels": 32,
+    "participant_pilot_seed_sets_disjoint": true
+  },
+  "solver_accuracy_claim": "NOT_EVALUATED",
+  "solver_core_changed": false,
+  "stochastic_semantics": {
+    "brownian_feature": "bf1",
+    "brownian_viscosity_expression": "root.comp1.AS_muB",
+    "required_runner_random_number_args": "UserDefined",
+    "required_seed_authority": "fptas.bf1.i",
+    "source_out_of_plane": false,
+    "source_random_number_args": "GenerateUnique"
+  },
+  "tool_revision": "m3c2_caseA_100nm_pilot_contract_locker_v1",
+  "tool_sha256": "bf3ca0468252f3843557411bf4c0c4826a134630a76848fca190897a0e11fe2d"
+}

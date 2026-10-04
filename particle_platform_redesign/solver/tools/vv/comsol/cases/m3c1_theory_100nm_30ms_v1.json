@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C1-theory-consistent-100nm-30ms",
+  "evaluation_revision": 1,
+  "classification": "external_vv_deterministic_common_exact_p1_matrix",
+  "theory_variant": "formal_iondrag_theory_consistent",
+  "matrix": {
+    "particle_diameter_m": 1e-7,
+    "particle_count": 287,
+    "time_end_s": 0.03,
+    "fixed_rk4_steps_s": [6.25e-7, 3.125e-7, 1.5625e-7],
+    "output_schedule_source": "results/particle_history_full_tidy.csv",
+    "output_schedule_segments": [
+      {"start_s": 0.0, "stop_s": 0.0005, "step_s": 1e-5},
+      {"start_s": 0.0006, "stop_s": 0.005, "step_s": 0.0001},
+      {"start_s": 0.006, "stop_s": 0.03, "step_s": 0.001}
+    ],
+    "output_count": 121
+  },
+  "workflows": {
+    "caseA": {
+      "package_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction",
+      "screening_length_column": "bounded_screening_length_m",
+      "maximum_neutral_speed_ratio": 0.1,
+      "neutral_transport_classification": "producer_effective_gas_sensitivity_not_physical_certification",
+      "expected_sha256": {
+        "config/background_field_column_dictionary.csv": "15bc4d1d22f54bd161e4eed773fcdab6f993400b544448b543a6cdeb40d5ce4f",
+        "input_fields/background_fields_mesh_points.csv": "bf941c93652d8a50036fc1e7e5cff4f4fdb352c887189317e0702ecd67360de9",
+        "results/release_state_t0_tidy.csv": "c109ff0152742911d5a1d7e73bd6a0e65580211b2711c3d94aa3b86dfc3b7685",
+        "results/particle_history_full_tidy.csv": "af61916d47dc634e4b3ca42139eebe7fe74a0fd27941250aefda2b39f4ad4a78",
+        "results/particle_boundary_event_history_tidy.csv": "59a2ac2e51fd312ee42c59581f8c132738abe209144840e7fcd49d16230fdffd"
+      }
+    },
+    "caseP": {
+      "package_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseP_100nm/external_reproduction",
+      "screening_length_column": "screening_length_m",
+      "maximum_neutral_speed_ratio": 0.25,
+      "neutral_transport_classification": "producer_effective_gas_sensitivity_not_physical_certification",
+      "expected_sha256": {
+        "config/background_field_column_dictionary.csv": "d733749164ceac512ce252dc7641a8f66c61aaeee32a443ab7a683eaca931793",
+        "input_fields/background_fields_mesh_points.csv": "ab3264d25bddf994561f1780d2a1f2c8d1ed27410fdaaebda32b9e8ea34f39cb",
+        "results/release_state_t0_tidy.csv": "7df5ab32b34f1535d72a6e35c5d344aaffe037b289f0f3d646146a6a6644935a",
+        "results/particle_history_full_tidy.csv": "8470c6399fe1cd549854958bee0e572dfb05bd04f3ccd767b514383b1788e11d",
+        "results/particle_boundary_event_history_tidy.csv": "c8a78fbd8351fe75ef74e2693b4eb26dc11946ebc1b040e28348b21c5109e930"
+      }
+    }
+  },
+  "shared_geometry_sha256": {
+    "geometry/mesh_vertices_si.csv": "23450d02e45c69f60eed3cc23268c6c0d846fea1c55e6cfbe57591fdedaa1dca",
+    "geometry/domain_triangles.csv": "3499cb657fce871016b1e07d9cb799655794f8657e30ba2162e12efa73efa5bc",
+    "geometry/domain_quadrilaterals.csv": "7f6619549c8ddb65781cfd8dcbf27803ece9dae0cf445304d1aacbe43b997f4c",
+    "geometry/boundary_edges.csv": "6da9097588ebc6df2f66759d4f132d2ab0e2a6bf071416dd1b113ac2e58828d5"
+  },
+  "physics": {
+    "brownian_active": false,
+    "saffman_active": false,
+    "charge_revision": "aggregate_relative_drift_regularized_two_current_v1",
+    "drag_revision": "epstein_linear_effective_gas_sensitivity_v1",
+    "electric_revision": "electric_coulomb_v1",
+    "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+    "thermophoresis_revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1",
+    "dielectrophoresis_revision": "quasistatic_spherical_gradient_e2_v1",
+    "lift_revision": "rarefied_vorticity_sensitivity_rz_v1",
+    "gravity_buoyancy_revision": "gravity_buoyancy_standard_v1"
+  },
+  "parameters": {
+    "gas_molecular_mass_kg": 1.2753471408396638e-25,
+    "epstein_diffuse_fraction": 0.9,
+    "maximum_relative_ion_speed_m_s": 30000.0,
+    "medium_relative_permittivity": 1.0,
+    "real_clausius_mossotti_factor": 0.5161290322580645,
+    "maximum_point_dipole_radius_m": 5.000000000000001e-8,
+    "point_dipole_classification": "benchmark_sensitivity_execution_guard_not_physical_certification",
+    "lift_coefficient": 1.0,
+    "gravity_m_s2": [0.0, -9.80665]
+  },
+  "boundaries": {
+    "wafer": "stick",
+    "grounded_wall": "stick",
+    "focus_transition": "stick",
+    "outer_dielectric": "stick",
+    "gas_inlet": "hold",
+    "pump_outlet": "escape"
+  },
+  "acceptance": {
+    "initial_state_ulp_multiplier": 4096,
+    "minimum_rms_order": 0.75,
+    "roundoff_multiplier": 4096,
+    "cross_envelope_safety_factor": 2.0
+  },
+  "claim_policy": {
+    "same_field_scope": "canonical_exact_connectivity_p1_only",
+    "native_comsol_field_equivalence": "NOT_TESTED_SEPARATE_WORKFLOW",
+    "physical_applicability": "NOT_CERTIFIED_MODEL_FORM_SENSITIVITY",
+    "brownian_comparison": "NOT_TESTED_BROWNIAN_DISABLED",
+    "universal_comsol_accuracy": false
+  }
+}

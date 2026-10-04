@@ -1,0 +1,116 @@
+{
+  "classification": "EXTERNAL_VV_NEUTRAL_TRANSPORT_CLOSURE",
+  "comsol_run_performed": false,
+  "configuration_sha256": "a0079e6b670673172e72351d8d8f98a3129b110d3acb9600bda82666c21a7f0f",
+  "dataset_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass",
+  "dataset_role": "REFERENCE_INPUT_NOT_GOLDEN_TRUTH",
+  "decision": {
+    "continuous_path_runtime_certification": "NOT_TESTED",
+    "epstein_linear_effective_gas_sensitivity_v1": "REQUIRED_FOR_SAME_FORM_REFERENCE_COMPARISON",
+    "required_runtime_applicability_input": "explicit maximum_speed_ratio in (0, 1]",
+    "species_resolved_mixture_truth": "NOT_CLAIMED",
+    "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1": "REQUIRED_FOR_SAME_FORM_REFERENCE_COMPARISON"
+  },
+  "evaluation_id": "P18-R",
+  "evaluation_revision": 1,
+  "execution_status": "PASS",
+  "gates": [
+    {
+      "gate": "P18R-01-package-and-source-identity",
+      "reason": "exactly 12 locked packages and two source MPH hashes verified",
+      "status": "PASS"
+    },
+    {
+      "gate": "P18R-02-neutral-settings-and-export-provenance",
+      "reason": "Epstein/Waldmann settings, Mmix, sigmaR, k_mix, validation, and no-rerun flags verified",
+      "status": "PASS"
+    },
+    {
+      "gate": "P18R-03-native-linear-epstein-formula-replay",
+      "reason": "all saved active rows replayed; maximum vector relative residual=1.05859e-15",
+      "status": "PASS"
+    },
+    {
+      "gate": "P18R-04-p15e-effective-mmix-numerical-sensitivity",
+      "reason": "S, Kn, and finite-versus-linear coefficient differences characterized with Mmix only",
+      "status": "PASS"
+    },
+    {
+      "gate": "P18R-05-p15e-existing-revision-physical-applicability",
+      "reason": "CF4/O2 mixture accommodation semantics and particle surface temperature are not established",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "gate": "P18R-06-waldmann-gradient-heat-flux-equivalence",
+      "reason": "q=-k grad(T), m=M/N_A, and R=N_A k_B give the same (32/15) a^2 q/c_bar force",
+      "status": "PASS"
+    },
+    {
+      "gate": "P18R-07-trajectory-thermophoresis-force-replay",
+      "reason": "saved trajectory rows contain neither translational q nor trajectory-local PPR temperature gradient",
+      "status": "NOT_TESTED"
+    },
+    {
+      "gate": "P18R-08-p16-saved-row-low-speed-characterization",
+      "reason": "effective-Mmix saved-row low-speed and Kn coverage characterized without claiming mixture physics",
+      "status": "PASS"
+    },
+    {
+      "gate": "P18R-09-p16-existing-revision-physical-applicability",
+      "reason": "the existing P16 revision is single-species while the saved reference is an unresolved CF4/O2 mixture",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "gate": "P18R-10-continuous-path-applicability",
+      "reason": "saved output frames do not certify all integrator stages or the continuous accepted path",
+      "status": "NOT_TESTED"
+    },
+    {
+      "gate": "P18R-11-background-fourier-gradient-scale",
+      "reason": "lambda*|grad(T)|/T characterized on finite inside-domain saved grid rows only",
+      "status": "PASS"
+    }
+  ],
+  "generated_utc": "2026-09-30T23:08:11.926595+00:00",
+  "limitations": [
+    "Mmix is used only to quantify formula sensitivity; it does not resolve mixture moments",
+    "particle surface temperature and species accommodation semantics are not exported",
+    "trajectory-local translational heat flux and PPR temperature gradient are not exported",
+    "saved frames do not certify integrator stages or continuous accepted paths",
+    "background gradient ranges are descriptive saved-grid evidence, not a force replay"
+  ],
+  "schema_version": 1,
+  "software": {
+    "numpy": "2.5.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.13"
+  },
+  "solver_core_called": false,
+  "summary": {
+    "active_rows": 397820,
+    "background_lambda_gradT_over_T_range": [
+      0.00020868872501054265,
+      0.08600306462853821
+    ],
+    "finite_vs_linear_coefficient_relative_difference_max": 0.04743023653840828,
+    "finite_vs_linear_coefficient_relative_difference_p90_case_range": [
+      0.00045204409154231406,
+      0.019342783020283298
+    ],
+    "linear_force_relative_residual_max": 1.0585919309819979e-15,
+    "mean_free_path_over_radius_min": 39515.005161349654,
+    "p15e_speed_ratio_S_max": 0.5730616769473486,
+    "p15e_speed_ratio_S_p90_case_range": [
+      0.05531470675674839,
+      0.3634890872356677
+    ],
+    "p16_low_speed_saved_row_coverage_case_range": [
+      0.5428341060270107,
+      1.0
+    ],
+    "p16_low_speed_saved_row_coverage_weighted": 0.7758609421346337,
+    "package_count": 12,
+    "waldmann_algebraic_relative_residual_max": 6.629100736441229e-16
+  },
+  "tool_sha256": "912a4e961877ab67bd844eff7f8dd3442e5ae3cdb09d54528507b3f6eee60b8e"
+}

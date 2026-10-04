@@ -1,0 +1,80 @@
+{
+  "classification": "EXTERNAL_VV_REFERENCE_READINESS_LOCK",
+  "configuration_sha256": "3f40c8ad96d03535d6282659128c7c87fcee8b85efb306b9de32534bd510e32d",
+  "dataset_root": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass",
+  "evaluation_id": "M3-C0a",
+  "evaluation_revision": 1,
+  "expected_comsol_version": "6.4.0.429",
+  "gates": [
+    {
+      "gate": "M3C0A-01-model-identity",
+      "reason": "MPH hashes",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C0A-02-package-structure",
+      "reason": "12 packages, 287 particles, 121 times and required files",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C0A-03-formula-parameter-lock",
+      "reason": "exact config and reference artifacts hashed; selected charge/force rows normalized",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C0A-04-field-name-unit-lock",
+      "reason": "required canonical primitive names, COMSOL expressions and units",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C0A-05-derived-field-full-provenance",
+      "reason": "solution tag, averaging definition, recovery method and topology id were not exported",
+      "status": "NOT_TESTED"
+    },
+    {
+      "gate": "M3C0A-06-ion-drag-only-pair",
+      "reason": "all non-ion-drag physical settings and field/geometry payloads must match",
+      "status": "FAIL"
+    },
+    {
+      "gate": "M3C0A-07-brownian-off-references",
+      "reason": "existing histories contain nonzero Brownian force",
+      "status": "NOT_TESTED"
+    },
+    {
+      "gate": "M3C0A-08-admissible-step-series",
+      "reason": "candidate 10/5/2.5 us series requires both-solver full-physics characterization",
+      "status": "NOT_TESTED"
+    },
+    {
+      "gate": "M3C0A-09-freeze-positive-example",
+      "reason": "no status-code 2 sample in existing histories",
+      "status": "NOT_TESTED"
+    },
+    {
+      "gate": "M3C0A-10-disappear-observation",
+      "reason": "status-code 4 is present; dedicated pre/post-hit microcase remains future evidence",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C0A-11-seed-cohort",
+      "reason": "32 unique preregistered seeds per package",
+      "status": "PASS"
+    }
+  ],
+  "generated_utc": "2026-09-30T15:53:38.895539+00:00",
+  "golden_truth": "NOT_CLAIMED",
+  "limitations": [
+    "existing 12 histories are Brownian-on single-seed references",
+    "accepted RK steps and RK stages are not exported",
+    "positive Freeze behavior is not exercised",
+    "derived-field solution/averaging/recovery/topology provenance is incomplete",
+    "Case-P ion-drag variants contain a non-ion-drag lift confounder"
+  ],
+  "overall_status": "PARTIAL_RERUN_REQUIRED",
+  "packages": 12,
+  "schema_version": 1,
+  "seed_rows": 384,
+  "solver_core_changed": false,
+  "tool_sha256": "0641495b400b5d6515bad564b794278267b54a35f455904c77b4f49060cc77a1"
+}

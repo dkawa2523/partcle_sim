@@ -1,0 +1,73 @@
+name: solver-release
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/solver-release.yml"
+      - "particle_platform_redesign/solver/**"
+  push:
+    paths:
+      - ".github/workflows/solver-release.yml"
+      - "particle_platform_redesign/solver/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wheel-and-public-api:
+    name: ${{ matrix.os }} / Python 3.12
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: particle_platform_redesign/solver
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Set up locked uv series
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+          cache-dependency-glob: particle_platform_redesign/solver/uv.lock
+      - name: Synchronize locked development environment
+        run: uv sync --locked
+      - name: Run standard quality gates
+        run: |
+          uv lock --check
+          uv run --locked ruff format --check src tests tools
+          uv run --locked ruff check src tests tools
+          uv run --locked pyrefly check --summarize-errors
+          uv run --locked lint-imports
+          uv run --locked python scripts/check_complexity.py
+          uv run --locked python -m pytest tests/verification tests/scenarios -q
+      - name: Run warm performance smoke
+        run: |
+          $report = Join-Path "${{ runner.temp }}" "p14-smoke.json"
+          uv run --locked python -m tests.performance.p14_matrix --suite smoke --json $report
+      - name: Build wheel and run clean-install public API smoke
+        run: |
+          $dist = Join-Path "${{ runner.temp }}" "chamber-particles-dist"
+          $runtime = Join-Path "${{ runner.temp }}" "chamber-particles-runtime"
+          uv build --wheel --out-dir $dist
+          $env:UV_PROJECT_ENVIRONMENT = $runtime
+          uv sync --locked --no-dev --no-install-project
+          $python = if ($IsWindows) {
+            Join-Path $runtime "Scripts/python.exe"
+          } else {
+            Join-Path $runtime "bin/python"
+          }
+          $wheel = Get-ChildItem -LiteralPath $dist -Filter "*.whl" -File -ErrorAction Stop
+          if ($wheel.Count -ne 1) { throw "expected exactly one wheel" }
+          uv pip install --python $python --no-deps $wheel.FullName
+          & $python -m tests.release_smoke

@@ -1,0 +1,51 @@
+scenario_id,step_label,gate,status,observed_value,limit_value,unit,detail
+freeze_inlet_37,dt_10us,exactly_one_particle,PASS,1,1,particles,one wide particle row
+freeze_inlet_37,dt_10us,complete_61_frame_time_grid,PASS,61,61,frames,0 through 150 us at 2.5 us intervals
+freeze_inlet_37,dt_10us,expected_final_status,PASS,[2],2,status code,all final-status values and the final current status equal the configured code
+freeze_inlet_37,dt_10us,single_terminal_event,PASS,1,1,active-to-terminal transitions,"one leading active segment followed by the configured terminal status, with the event time bracketed by the adjacent saved frames"
+freeze_inlet_37,dt_10us,analytic_event_time,PASS,1.0760706561918632e-17,5e-09,s absolute error,COMSOL stop_or_event_time_s versus the force-free analytic event time
+freeze_inlet_37,dt_10us,analytic_hit_position,PASS,2.7755575615628914e-17,5e-08,m Euclidean error,Freeze uses the held COMSOL position; Disappear uses the labelled reconstruction
+freeze_inlet_37,dt_10us,freeze_post_event_position_retention,PASS,0.0,5e-12,m,all post-event positions are finite and fixed relative to the first held state
+freeze_inlet_37,dt_10us,post_event_velocity,CHARACTERIZED_NOT_GATED,exact_source_velocity_retained,,classification,velocity is characterized only; this configuration declares no velocity gate
+freeze_inlet_37,dt_5us,exactly_one_particle,PASS,1,1,particles,one wide particle row
+freeze_inlet_37,dt_5us,complete_61_frame_time_grid,PASS,61,61,frames,0 through 150 us at 2.5 us intervals
+freeze_inlet_37,dt_5us,expected_final_status,PASS,[2],2,status code,all final-status values and the final current status equal the configured code
+freeze_inlet_37,dt_5us,single_terminal_event,PASS,1,1,active-to-terminal transitions,"one leading active segment followed by the configured terminal status, with the event time bracketed by the adjacent saved frames"
+freeze_inlet_37,dt_5us,analytic_event_time,PASS,1.4325021203964727e-17,5e-09,s absolute error,COMSOL stop_or_event_time_s versus the force-free analytic event time
+freeze_inlet_37,dt_5us,analytic_hit_position,PASS,2.7755575615628914e-17,5e-08,m Euclidean error,Freeze uses the held COMSOL position; Disappear uses the labelled reconstruction
+freeze_inlet_37,dt_5us,freeze_post_event_position_retention,PASS,0.0,5e-12,m,all post-event positions are finite and fixed relative to the first held state
+freeze_inlet_37,dt_5us,post_event_velocity,CHARACTERIZED_NOT_GATED,exact_source_velocity_retained,,classification,velocity is characterized only; this configuration declares no velocity gate
+freeze_inlet_37,dt_2p5us,exactly_one_particle,PASS,1,1,particles,one wide particle row
+freeze_inlet_37,dt_2p5us,complete_61_frame_time_grid,PASS,61,61,frames,0 through 150 us at 2.5 us intervals
+freeze_inlet_37,dt_2p5us,expected_final_status,PASS,[2],2,status code,all final-status values and the final current status equal the configured code
+freeze_inlet_37,dt_2p5us,single_terminal_event,PASS,1,1,active-to-terminal transitions,"one leading active segment followed by the configured terminal status, with the event time bracketed by the adjacent saved frames"
+freeze_inlet_37,dt_2p5us,analytic_event_time,PASS,4.149783815188268e-17,5e-09,s absolute error,COMSOL stop_or_event_time_s versus the force-free analytic event time
+freeze_inlet_37,dt_2p5us,analytic_hit_position,PASS,2.7755575615628914e-17,5e-08,m Euclidean error,Freeze uses the held COMSOL position; Disappear uses the labelled reconstruction
+freeze_inlet_37,dt_2p5us,freeze_post_event_position_retention,PASS,0.0,5e-12,m,all post-event positions are finite and fixed relative to the first held state
+freeze_inlet_37,dt_2p5us,post_event_velocity,CHARACTERIZED_NOT_GATED,exact_source_velocity_retained,,classification,velocity is characterized only; this configuration declares no velocity gate
+freeze_inlet_37,,h_h2_h4_event_time_self_consistency,PASS,3.073713158996405e-17,5e-09,s maximum spread,"maximum event-time spread across dt_10us, dt_5us, and dt_2p5us"
+disappear_pump_35,dt_10us,exactly_one_particle,PASS,1,1,particles,one wide particle row
+disappear_pump_35,dt_10us,complete_61_frame_time_grid,PASS,61,61,frames,0 through 150 us at 2.5 us intervals
+disappear_pump_35,dt_10us,expected_final_status,PASS,[4],4,status code,all final-status values and the final current status equal the configured code
+disappear_pump_35,dt_10us,single_terminal_event,PASS,1,1,active-to-terminal transitions,"one leading active segment followed by the configured terminal status, with the event time bracketed by the adjacent saved frames"
+disappear_pump_35,dt_10us,analytic_event_time,PASS,2.710505431213761e-20,5e-09,s absolute error,COMSOL stop_or_event_time_s versus the force-free analytic event time
+disappear_pump_35,dt_10us,analytic_hit_position,PASS,2.168404344971009e-19,5e-08,m Euclidean error,Freeze uses the held COMSOL position; Disappear uses the labelled reconstruction
+disappear_pump_35,dt_10us,disappear_post_event_position_is_nan,PASS,31,31,post-event frames,both saved position components are NaN after the Disappear event
+disappear_pump_35,dt_10us,post_event_velocity,CHARACTERIZED_NOT_GATED,not_available_after_event,,classification,velocity is characterized only; this configuration declares no velocity gate
+disappear_pump_35,dt_5us,exactly_one_particle,PASS,1,1,particles,one wide particle row
+disappear_pump_35,dt_5us,complete_61_frame_time_grid,PASS,61,61,frames,0 through 150 us at 2.5 us intervals
+disappear_pump_35,dt_5us,expected_final_status,PASS,[4],4,status code,all final-status values and the final current status equal the configured code
+disappear_pump_35,dt_5us,single_terminal_event,PASS,1,1,active-to-terminal transitions,"one leading active segment followed by the configured terminal status, with the event time bracketed by the adjacent saved frames"
+disappear_pump_35,dt_5us,analytic_event_time,PASS,0.0,5e-09,s absolute error,COMSOL stop_or_event_time_s versus the force-free analytic event time
+disappear_pump_35,dt_5us,analytic_hit_position,PASS,0.0,5e-08,m Euclidean error,Freeze uses the held COMSOL position; Disappear uses the labelled reconstruction
+disappear_pump_35,dt_5us,disappear_post_event_position_is_nan,PASS,31,31,post-event frames,both saved position components are NaN after the Disappear event
+disappear_pump_35,dt_5us,post_event_velocity,CHARACTERIZED_NOT_GATED,not_available_after_event,,classification,velocity is characterized only; this configuration declares no velocity gate
+disappear_pump_35,dt_2p5us,exactly_one_particle,PASS,1,1,particles,one wide particle row
+disappear_pump_35,dt_2p5us,complete_61_frame_time_grid,PASS,61,61,frames,0 through 150 us at 2.5 us intervals
+disappear_pump_35,dt_2p5us,expected_final_status,PASS,[4],4,status code,all final-status values and the final current status equal the configured code
+disappear_pump_35,dt_2p5us,single_terminal_event,PASS,1,1,active-to-terminal transitions,"one leading active segment followed by the configured terminal status, with the event time bracketed by the adjacent saved frames"
+disappear_pump_35,dt_2p5us,analytic_event_time,PASS,2.710505431213761e-20,5e-09,s absolute error,COMSOL stop_or_event_time_s versus the force-free analytic event time
+disappear_pump_35,dt_2p5us,analytic_hit_position,PASS,2.168404344971009e-19,5e-08,m Euclidean error,Freeze uses the held COMSOL position; Disappear uses the labelled reconstruction
+disappear_pump_35,dt_2p5us,disappear_post_event_position_is_nan,PASS,31,31,post-event frames,both saved position components are NaN after the Disappear event
+disappear_pump_35,dt_2p5us,post_event_velocity,CHARACTERIZED_NOT_GATED,not_available_after_event,,classification,velocity is characterized only; this configuration declares no velocity gate
+disappear_pump_35,,h_h2_h4_event_time_self_consistency,PASS,2.710505431213761e-20,5e-09,s maximum spread,"maximum event-time spread across dt_10us, dt_5us, and dt_2p5us"

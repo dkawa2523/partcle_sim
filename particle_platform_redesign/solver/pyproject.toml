@@ -1,0 +1,114 @@
+[build-system]
+requires = ["uv_build>=0.11.16,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "chamber-particles"
+version = "0.1.0.dev0"
+description = "Particle trajectory solver for externally supplied chamber fields and geometry"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "h5py>=3.11,<4",
+  "numba>=0.67,<0.68",
+  "numpy>=2.0,<2.6",
+  "pyyaml>=6.0.2,<7",
+]
+
+[project.scripts]
+chamber-particles = "chamber_particles.cli:main"
+
+[dependency-groups]
+dev = [
+  "import-linter",
+  "pyrefly",
+  "pytest",
+  "radon",
+  "ruff",
+]
+
+[tool.uv]
+required-version = ">=0.11.16,<0.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+select = [
+  "E4",
+  "E7",
+  "E9",
+  "F",
+  "I",
+  "UP",
+  "B",
+  "C4",
+  "NPY",
+  "PERF",
+  "RUF",
+]
+
+[tool.pyrefly]
+project-includes = ["src/chamber_particles", "tools"]
+project-excludes = []
+search-path = ["src", "."]
+python-version = "3.12"
+check-unannotated-defs = true
+infer-return-types = "never"
+preset = "default"
+
+[tool.importlinter]
+root_package = "chamber_particles"
+include_external_packages = false
+exclude_type_checking_imports = false
+
+[[tool.importlinter.contracts]]
+name = "Low-level numerics stay independent of orchestration and I/O"
+type = "forbidden"
+source_modules = [
+  "chamber_particles.cpu",
+  "chamber_particles.coordinates",
+  "chamber_particles.geometry",
+  "chamber_particles.fields",
+  "chamber_particles.integrators",
+  "chamber_particles.stochastic",
+  "chamber_particles.rng",
+  "chamber_particles.events",
+  "chamber_particles.boundaries",
+]
+forbidden_modules = [
+  "chamber_particles.api",
+  "chamber_particles.case",
+  "chamber_particles.engine",
+  "chamber_particles.output",
+]
+
+[[tool.importlinter.contracts]]
+name = "Integrator proposals stay independent of geometry and wall response"
+type = "forbidden"
+source_modules = ["chamber_particles.integrators"]
+forbidden_modules = [
+  "chamber_particles.geometry",
+  "chamber_particles.events",
+  "chamber_particles.boundaries",
+]
+
+[[tool.importlinter.contracts]]
+name = "Physics models consume sampled primitives only"
+type = "forbidden"
+source_modules = ["chamber_particles.physics"]
+forbidden_modules = [
+  "chamber_particles.api",
+  "chamber_particles.case",
+  "chamber_particles.case_format",
+  "chamber_particles.engine",
+  "chamber_particles.output",
+  "chamber_particles.fields",
+  "chamber_particles.geometry",
+  "chamber_particles.integrators",
+  "chamber_particles.events",
+  "chamber_particles.boundaries",
+  "chamber_particles.sources",
+]

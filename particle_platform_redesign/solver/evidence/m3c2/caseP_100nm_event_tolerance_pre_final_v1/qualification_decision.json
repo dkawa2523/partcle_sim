@@ -1,0 +1,64 @@
+{
+  "candidate": {
+    "geometry_rtol": 1e-09,
+    "receipt": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c2\\caseP_100nm_event_tolerance_pre_final_v1\\levels\\geometry_rtol_candidate\\seed_919008\\run_receipt.json",
+    "receipt_sha256": "47e5a5081be0901b397888f7f83be5c8a4d18d2ac9c0f0f440ac69fe3b1c18fd"
+  },
+  "candidate_event_count": 0,
+  "claim": "Case-P candidate geometry-tolerance configuration only; no COMSOL fit claim",
+  "classification": "PASS_NO_EVENT_OPERATIONAL_BRIDGE",
+  "event_comparison": {
+    "candidate_event_count": 0,
+    "exact_identity_mismatches": [],
+    "gates": {
+      "cross_band_time_allowance": true,
+      "event_identity_exact": true,
+      "event_keys_exact": true,
+      "event_normals_exact": true,
+      "final_fates_exact": true,
+      "normal_speed_agreement": true,
+      "position_composed_budget": true,
+      "signed_outward_transversality_guard": true,
+      "zero_failures": true
+    },
+    "maximum_position_delta_over_composed_budget": 0.0,
+    "maximum_position_ratio_event": null,
+    "maximum_time_delta_over_composed_stopping_time_allowance": 0.0,
+    "maximum_time_ratio_event": null,
+    "minimum_certified_boundary_transverse_speed_m_per_s": null,
+    "normal_mismatches": [],
+    "normal_speed_mismatches": [],
+    "reference_event_count": 0,
+    "signed_speed_guard_failures": [],
+    "status": "PASS"
+  },
+  "final_fail_closed_rule": "when validity_condition is zero_candidate_boundary_events, reject final evaluation if any candidate final replica contains a boundary event",
+  "final_state_bitwise_comparison": {
+    "exact": true,
+    "mismatches": []
+  },
+  "qualification_kind": "m3c2_caseP_geometry_rtol_pre_final",
+  "recipe": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\cases\\m3c2_caseP_100nm_event_tolerance_pre_final_v1.json",
+  "recipe_sha256": "7d0d687d300482b15030d252a276cbbbaf88bf7f90d9508ef9cb435c1bec5837",
+  "reference": {
+    "geometry_rtol": 1e-08,
+    "receipt": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c2\\caseP_100nm_event_tolerance_pre_final_v1\\levels\\geometry_rtol_reference\\seed_919008\\run_receipt.json",
+    "receipt_sha256": "169d52789c3c9de75cdc944041f5a32f6859b6067ebfe30d33c17269b8db205e"
+  },
+  "reference_event_count": 0,
+  "scheduled_state_bitwise_comparison": {
+    "candidate_frame_count": 121,
+    "exact": true,
+    "mismatches": [],
+    "reference_frame_count": 121
+  },
+  "schema_version": 1,
+  "seed": 919008,
+  "selected_setting": {
+    "brownian_interval_tree_depth": 3,
+    "dt_s": 2e-05
+  },
+  "status": "PASS",
+  "tool_revision": "m3c2_caseP_event_tolerance_pre_final_evaluator_v1",
+  "validity_condition": "zero_candidate_boundary_events"
+}

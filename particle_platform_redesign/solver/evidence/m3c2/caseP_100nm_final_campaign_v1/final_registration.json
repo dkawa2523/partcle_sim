@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "registration_kind": "m3c2_caseP_100nm_final_campaign",
+  "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+  "purpose": "final",
+  "execution_status": "NOT_RUN",
+  "participant_seed_source": {
+    "path": "../../../tools/vv/comsol/cases/m3c2_caseP_100nm_final_seed_allocation_v1.json",
+    "sha256": "9086dbdaf92cf1783b216a253bd5af4ce43fb45f50d675e7254b9e8859f21fa5",
+    "json_pointers": {
+      "comsol": "/participant_seed_sets/comsol",
+      "candidate": "/participant_seed_sets/candidate"
+    }
+  },
+  "comsol_numerical_setting": {
+    "integrator": "classical_rk4",
+    "fixed_step_s": 0.00002
+  },
+  "physical_applicability": {
+    "status": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+    "caseP_contains_negative_ions": true,
+    "locked_charge_model_includes_negative_ion_current": false,
+    "permitted_interpretation": "same_form_numerical_sensitivity_comparison_only",
+    "forbidden_interpretation": "physical_validation_of_caseP_charging_or_trajectory_truth"
+  },
+  "candidate_final_event_gate": {
+    "validity_condition": "zero_candidate_boundary_events",
+    "decision": "REJECT_FINAL_EVALUATION_IF_ANY_CANDIDATE_FINAL_BOUNDARY_EVENT_IS_PRESENT"
+  },
+  "execution_authorization": {
+    "status": "AUTHORIZED",
+    "evaluation_policy": {
+      "path": "../../../tools/vv/comsol/cases/m3c2_caseP_100nm_ensemble_evaluation_v5.json",
+      "sha256": "9d78a612c5750821d60a144633a58d1c7817db318d89ba19251c03111337fe02"
+    },
+    "pilot_evaluation": {
+      "path": "../../../_out_m3c2/caseP_100nm_pilot_evaluation_v5/evaluation_manifest.json",
+      "sha256": "5ada9bd6ad4f4236eb2aabfc84852eedb6e0a091ce0abb7ef5e8368c83f96fdc"
+    },
+    "selection_receipt": {
+      "path": "selection_receipt.json",
+      "sha256": "8f4dd06ec34d53428dcb9b7aa9ca50539c8181b4b4541d9c2423672913c5627a"
+    }
+  },
+  "claim_policy": {
+    "confirmatory_final_not_run": true,
+    "pathwise_comsol_equality": false,
+    "comsol_golden_truth": false,
+    "physical_caseP_certification": false,
+    "production_core_changed": false
+  }
+}

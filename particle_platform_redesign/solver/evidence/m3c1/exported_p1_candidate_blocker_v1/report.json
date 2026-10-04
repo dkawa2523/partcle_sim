@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "evidence_id": "M3-C1-exported-P1-candidate-blocker-v1",
+  "classification": "external_vv_checkpoint",
+  "decision": "BLOCKED_NO_TRAJECTORY_AGREEMENT",
+  "candidate_representation": {
+    "scientific_label": "exported_exact_connectivity_canonical_P1_projection",
+    "native_comsol_fe_interpolant": "NOT_CLAIMED",
+    "historical_native_word_in_scratch_names": "NON_SCIENTIFIC_LEGACY_LABEL",
+    "matched_node_count": 1987,
+    "maximum_coordinate_match_distance_m": 5.721958498152797e-17,
+    "thermophoretic_input_primitive_authority": "NOT_TESTED_PPR_NOT_IN_THIS_V1_INPUT"
+  },
+  "source_artifacts": {
+    "candidate_prepare_report": {
+      "path": "_out_m3c1/caseA_100nm_native_v1/prepare_report.json",
+      "sha256": "594b11a98eb1c7f07684b10394a14d1affb72429ea2b31888c177e0cd616d395"
+    },
+    "candidate_run_report": {
+      "path": "_out_m3c1/caseA_100nm_native_v1/candidate_run_report.json",
+      "sha256": "07800e81138ffd02752c399d4ec809b70078003f84540a2af51622e08bda7026"
+    },
+    "frozen_rhs_report": {
+      "path": "evidence/m3c1/pre_event_frozen_rhs_v1/report.json",
+      "sha256": "90e479e32e2aafa476b8c35863174587ce9db65e9bf972aadebbaf19dfbc3144"
+    },
+    "thermophoresis_ppr_report": {
+      "path": "evidence/m3c1/thermophoresis_ppr_v1/report.json",
+      "sha256": "41f34af20638ffe910eb65a0ebd5301bdaf709e1c9f7521d26fd72716fa5eb98"
+    }
+  },
+  "upstream_identity": {
+    "source_comsol_model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "candidate_configuration_sha256": "6b4b44074fc029bca70cf1495bad8cf0933c0dd32954f9e02e74e243b106f9ee",
+    "candidate_input_file_sha256": "995f20dd99c1834f176596c0a47a84d209937e89cd185d9029fc9c86dc3df108",
+    "candidate_input_content_hash": "sha256:1dfb821cea76e81ae76b29601849b1ec61c50ee5de62e5cb26eb2512789ad207",
+    "base_canonical_data_sha256": "5d487cc07c3f3a791b6a7e18be792693783ffb884001b8318a43e90b9168a313",
+    "field_values_sha256": "bf941c93652d8a50036fc1e7e5cff4f4fdb352c887189317e0702ecd67360de9",
+    "column_dictionary_sha256": "15bc4d1d22f54bd161e4eed773fcdab6f993400b544448b543a6cdeb40d5ce4f",
+    "release_table_sha256": "c109ff0152742911d5a1d7e73bd6a0e65580211b2711c3d94aa3b86dfc3b7685",
+    "reference_trajectory_sha256": {
+      "dt_0p625us": "597738215dea51c751dc9e1681ea8a850d25f7f0b8307fc4e61af5abdb4c0e37",
+      "dt_0p3125us": "d0b8f6278eece0f39deb6507ec6e66d6aa7e77958ebbb18f6dbcfdfcbc4de885",
+      "dt_0p15625us": "b4e52479d83b1b4dc867c450cd5b91524be71294a3aaaad0b546eeded8868678"
+    },
+    "locked_v6_state_raw_sha256": "1241b91683f37076a3482c6792e29f0b215cd96434f25a82aff6b04a95679a58",
+    "ppr_particle_raw_sha256": "e138d8f2b76eef3d6cc781828a796e95fc63994d4bcac8d2721365d4ef51f119"
+  },
+  "saved_row_producer_form_closure": {
+    "status": "PASS_SAVED_ROWS_ONLY",
+    "passed": 8,
+    "total": 8,
+    "records": 13202,
+    "particles": 287,
+    "output_times": 46,
+    "composition": {
+      "frozen_rhs_report_passed": 7,
+      "ppr_thermophoresis_supplement_passed": 1
+    },
+    "frozen_rhs_maximum_scale_normalized_residual": 1.2659055420084512e-15,
+    "ppr_thermophoresis_maximum_scale_normalized_residual": 4.4046499933294035e-16
+  },
+  "production_coverage": {
+    "status": "PARTIAL",
+    "saved_row_pure_model_comparison": {
+      "pass": 4,
+      "documented_constant_convention_difference": 3,
+      "authoritative_ppr_primitive_not_re_evaluated": 1
+    },
+    "runtime_field_sampling_and_stage_wiring": "NOT_TESTED",
+    "continuous_path_applicability": "NOT_TESTED",
+    "boundary_behavior": "NOT_TESTED"
+  },
+  "candidate_execution": {
+    "engine_algorithm_revision": "particle_engine_v30",
+    "public_api_path": [
+      "load_case",
+      "simulate",
+      "open_result"
+    ],
+    "diagnostic_step_sizes_s": [
+      6.25e-7,
+      3.125e-7,
+      1.5625e-7
+    ],
+    "initial_pointwise_state": {
+      "sample_count": 287,
+      "field_support_count": 287,
+      "stage_applicable_count": 287,
+      "maximum_relative_ion_speed_m_s": 15354.76726984887,
+      "maximum_neutral_speed_ratio": 0.0014665428365538409,
+      "minimum_gas_mean_free_path_over_particle_radius": 40556.38566578311
+    },
+    "continuous_enclosure": {
+      "classification": "CORE_CONTINUOUS_PATH_ENCLOSURE_BLOCKER",
+      "global_component_and_acceleration_bounds": true,
+      "deepest_observed_piece_duration_s": 9.765625e-9,
+      "deepest_observed_maximum_relative_ion_speed_upper_m_s": 249539.93753588165,
+      "deepest_observed_maximum_neutral_speed_ratio_upper": 788.448680021989
+    },
+    "result": {
+      "particles_failed_at_time_zero_per_step_size": 287,
+      "failure_reason_as_currently_recorded": "model_applicability",
+      "trajectory_rows_per_step_size": 0,
+      "trajectory_agreement": "NOT_TESTED_NO_COMPLETE_TRAJECTORY_MATRIX"
+    },
+    "interpretation": "Local initial samples are valid; the conservative global certificate is inconclusive. This does not establish a physical model violation."
+  },
+  "claims": {
+    "saved_row_producer_form_closure": "PASS",
+    "production_pure_model_and_wiring": "PARTIAL",
+    "integrated_exported_p1_candidate": "BLOCKED",
+    "comsol_trajectory_agreement": "NOT_TESTED",
+    "native_comsol_interpolant_parity": "NOT_CLAIMED",
+    "physical_applicability": "NOT_TESTED",
+    "comsol_is_golden_truth": false
+  }
+}

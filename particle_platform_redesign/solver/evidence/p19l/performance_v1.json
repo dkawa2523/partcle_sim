@@ -1,0 +1,220 @@
+{
+  "benchmark_role": "machine_local_non_gating_public_api_global_fast_vs_local_fallback",
+  "case_pair": {
+    "global_fast_expected_path": "global applicability proof; no local cell ranges",
+    "local_fallback_expected_path": "global proof inconclusive; bounded left-cell applicability proof",
+    "only_input_difference": "unused far-right gas-velocity x component is 0 m/s for global_fast and 100 m/s for local_fallback",
+    "shared": "safe left-cell Stokes-Cunningham XY cohort; dt=5e-6 s; end=1e-4 s; fixed-step general RK4; no trajectory output"
+  },
+  "environment": {
+    "chamber_particles": "0.1.0.dev0",
+    "driver_sha256": "sha256:4956f051750ea1ccf3d09e4f8509d0b01c32ccaadfd8e0bbe58f0708ef9de2b4",
+    "h5py": "3.16.0",
+    "logical_cpu_count": 20,
+    "machine": "AMD64",
+    "numpy": "2.5.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.13",
+    "uv_lock_sha256": "sha256:e6fb37a4ad1ea2438d6ec4795c1b4b158160efcd989f2d398864edb4451ee839"
+  },
+  "execution_order": [
+    "global_fast",
+    "local_fallback",
+    "local_fallback",
+    "global_fast",
+    "global_fast",
+    "local_fallback",
+    "local_fallback",
+    "global_fast",
+    "global_fast",
+    "local_fallback",
+    "local_fallback",
+    "global_fast",
+    "global_fast",
+    "local_fallback"
+  ],
+  "macro_steps": 20,
+  "memory_accounting": {
+    "audit": {
+      "certificate_interval_stack": {
+        "actual_bytes_per_row": 66,
+        "headroom_bytes_per_row": 6,
+        "planned_bytes_per_row": 72,
+        "split_budget": 2,
+        "stack_capacity": 3
+      },
+      "local_candidate_arena": {
+        "actual_peak_at_slab_bytes": 2195464,
+        "actual_peak_formula_bytes": "536*N+8",
+        "arrays": "int64 counts, bounded counts, N+1 CSR offsets, and at most 64*N int64 candidate IDs",
+        "headroom_at_slab_bytes": 32760,
+        "maximum_cells_per_row": 64,
+        "planned_at_slab_bytes": 2228224,
+        "planned_formula_bytes": "544*N"
+      },
+      "primitive_range_temporaries": {
+        "accounting_owner": "general stage scratch",
+        "benchmark_persistent_lower_upper_bytes_per_row": 80,
+        "general_stage_scratch_bytes_per_row": 2048
+      },
+      "rk4_dense_path": {
+        "actual_and_planned_bytes_per_row": 176,
+        "arrays": "start/target time; 4x2 position controls; 4x2 velocity controls; 4 charge controls; all float64"
+      }
+    },
+    "checks": {
+      "candidate_arena_contains_maximum_arrays": true,
+      "certificate_component_matches_slab": true,
+      "certificate_manifest_matches_stack_plus_candidate": true,
+      "dense_path_component_matches_slab": true,
+      "dense_path_manifest_is_176_bytes_per_row": true
+    },
+    "manifest": {
+      "certificate_work_bytes_per_particle": 616,
+      "components": {
+        "active_index": 36864,
+        "canonical_data": 409986,
+        "field_runtime": 0,
+        "geometry_query_scratch": 0,
+        "output_buffer": 36864,
+        "particle_schedule": 491520,
+        "physics_runtime": 98320,
+        "prepared_geometry": 96,
+        "probe_index": 0,
+        "replay_work": 0,
+        "resident_state": 413696,
+        "safety_margin": 2059839,
+        "slab_certificate_work": 2523136,
+        "slab_dense_path": 720896,
+        "slab_event_staging": 0,
+        "slab_event_work": 0,
+        "slab_failure_staging": 212992,
+        "slab_proposal_scratch": 8388608,
+        "slab_release_work": 0,
+        "slab_stochastic_tree_work": 0,
+        "writer_reserve": 3145728
+      },
+      "dense_path_bytes_per_particle": 176,
+      "event_candidate_capacity": 0,
+      "event_staging_bytes_per_row": 0,
+      "event_staging_capacity": 0,
+      "event_staging_fixed_bytes": 0,
+      "event_work_bytes_per_particle": 0,
+      "failure_staging_bytes_per_particle": 52,
+      "field_preparation_transient_bytes": 0,
+      "geometry_preparation_transient_bytes": 1024,
+      "limit_bytes": 134217728,
+      "phase_peaks": {
+        "load_case": 475522,
+        "prepare": 1679025,
+        "run": 18538545
+      },
+      "planned_bytes": 18538545,
+      "release_work_bytes_per_particle": 0,
+      "replay_work_bytes": 0,
+      "revision": "solver_owned_memory_plan_v13",
+      "runtime_layout_revision": "resident_soa_serial_slab_v6",
+      "scratch_bytes_per_particle": 2048,
+      "semantics": "predicted peak of solver-owned arrays; not process RSS",
+      "slab_particles": 4096,
+      "stochastic_tree_work_bytes_per_particle": 0
+    },
+    "particle_count_matches_single_slab": true,
+    "same_plan_for_both_modes": true
+  },
+  "particle_count": 4096,
+  "repeats_per_mode": 7,
+  "revisions": {
+    "compiled_cpu_tile_revision": "compiled_cpu_tile_v16",
+    "engine_algorithm_revision": "particle_engine_v31",
+    "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v12",
+    "field_location_revision": "field_location_v4",
+    "memory_plan_revision": "solver_owned_memory_plan_v13",
+    "physics_catalog_revision": "inertial_langevin_xy_catalog_v15",
+    "physics_runtime_revision": "inertial_langevin_compiled_physics_runtime_v16",
+    "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v2",
+    "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+    "step_proposal_revision": "coupled_fixed_step_proposal_v8"
+  },
+  "scientific_payload_identity": {
+    "active_final_rows": 4096,
+    "bitwise_identical": true,
+    "boundary_event_rows": 0,
+    "failure_event_rows": 0,
+    "included": [
+      "final particles",
+      "release events",
+      "boundary events",
+      "failure events",
+      "lifecycle series"
+    ],
+    "manifest_excluded_because_input_content_hashes_intentionally_differ": true,
+    "sha256_by_mode": {
+      "global_fast": "sha256:a32d22ba3529c15d6e0b122088a38be75a9b961067ff07d85ed2deab5a917949",
+      "local_fallback": "sha256:a32d22ba3529c15d6e0b122088a38be75a9b961067ff07d85ed2deab5a917949"
+    }
+  },
+  "scope_limit": "Current-tree fast-versus-local observation only; not a pre-P19 comparison, portable speed threshold, RSS measurement, or COMSOL/physics validation.",
+  "separate_cprofile_observation": {
+    "global_fast": {
+      "global_continuous_applicability_batch_calls": 20,
+      "interpretation": "separate untimed observational profile; no monkeypatch or mock",
+      "local_component_bounds_calls": 0,
+      "local_continuous_applicability_batch_calls": 0,
+      "rk4_dense_interval_range_certificate_calls": 20
+    },
+    "local_fallback": {
+      "global_continuous_applicability_batch_calls": 20,
+      "interpretation": "separate untimed observational profile; no monkeypatch or mock",
+      "local_component_bounds_calls": 20,
+      "local_continuous_applicability_batch_calls": 40,
+      "rk4_dense_interval_range_certificate_calls": 20
+    }
+  },
+  "separate_tracemalloc_observation": {
+    "global_fast": {
+      "additional_peak_over_baseline_bytes": 9926561,
+      "baseline_traced_bytes": 0,
+      "current_traced_bytes_after_simulate": 74318,
+      "peak_traced_bytes": 9926561,
+      "semantics": "Python tracemalloc scope around public simulate; includes visible NumPy/Python allocations and result writing; not process RSS or solver-owned-plan replacement"
+    },
+    "local_fallback": {
+      "additional_peak_over_baseline_bytes": 9927244,
+      "baseline_traced_bytes": 0,
+      "current_traced_bytes_after_simulate": 74983,
+      "peak_traced_bytes": 9927244,
+      "semantics": "Python tracemalloc scope around public simulate; includes visible NumPy/Python allocations and result writing; not process RSS or solver-owned-plan replacement"
+    }
+  },
+  "timing": {
+    "global_fast": {
+      "median_seconds": 0.9276380999945104,
+      "particle_steps_per_second": 88310.30118371031,
+      "repeat_seconds": [
+        0.874327699886635,
+        0.9097033001016825,
+        0.9396423001307994,
+        1.0301363000180572,
+        0.9680704998318106,
+        0.9276380999945104,
+        0.9255568999797106
+      ]
+    },
+    "local_fallback": {
+      "median_seconds": 0.934550599893555,
+      "particle_steps_per_second": 87657.10493292782,
+      "repeat_seconds": [
+        0.9515201000031084,
+        0.9275795000139624,
+        0.9281760999001563,
+        0.9961698001716286,
+        0.95507250004448,
+        0.934550599893555,
+        0.9230678000021726
+      ]
+    },
+    "local_fallback_to_global_fast_median_ratio": 1.007451720556848
+  }
+}

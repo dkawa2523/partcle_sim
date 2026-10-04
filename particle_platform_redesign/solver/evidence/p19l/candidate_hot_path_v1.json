@@ -1,0 +1,83 @@
+{
+  "benchmark_role": "machine_local_non_gating_m3c1_candidate_hot_path",
+  "case": {
+    "config": "_out_m3c1/caseA_100nm_exported_p1_v3/candidate_dt_0p625us.yaml",
+    "macro_steps": 1,
+    "particle_count": 287,
+    "physics_and_field": "unchanged Case A 100 nm canonical P1 deterministic candidate",
+    "time_step_s": 6.25e-7
+  },
+  "profile_diagnosis_before_change": {
+    "cprofile_function_calls": 4820256,
+    "cprofile_seconds": 2.497,
+    "curved_event_seconds": 2.184,
+    "event_locator_calls": 127,
+    "event_query_rows": 25953,
+    "event_status_clear_rows": 13120,
+    "event_status_split_rows": 12833,
+    "generic_chord_bound_calls": 25953,
+    "generic_chord_bound_cumulative_seconds": 0.967,
+    "local_applicability_certificate_calls": 80,
+    "local_applicability_certificate_rows": 13120,
+    "local_applicability_certificate_seconds": 0.285,
+    "local_certificate_subdivision": "none; every queried local range was proven",
+    "reintegrated_proposal_builds": 126,
+    "root_cause": "the conservative global RK4 support/event enclosure overlaps material boundaries and drives a complete 6-to-7-level event refinement tree; Python row-at-a-time chord arithmetic was a secondary removable cost"
+  },
+  "retained_change": {
+    "description": "validate once and evaluate the unchanged outward generic chord-deviation arithmetic in row batches",
+    "event_algorithm_revision_changed": false,
+    "event_geometry_or_order_changed": false,
+    "production_owner": "integrators.curved_chord_deviation_bounds",
+    "trajectory_or_event_semantics_changed": false
+  },
+  "scientific_payload_identity": {
+    "bitwise_identical": true,
+    "included": [
+      "final particle state",
+      "trajectory frames"
+    ],
+    "sha256_after": "sha256:8dafaf295c7ca47efd7b86a79410996e3e8fda38a9924f66d9a082f3006bb0c3",
+    "sha256_before": "sha256:8dafaf295c7ca47efd7b86a79410996e3e8fda38a9924f66d9a082f3006bb0c3"
+  },
+  "timing": {
+    "after_repeat_seconds": [
+      1.0201492998749018,
+      1.2155142999254167,
+      1.314554699929431,
+      1.316978600108996,
+      1.3041528000030667
+    ],
+    "after_warmed_median_seconds": 1.3041528000030667,
+    "before_repeat_seconds": [
+      1.3656597998924553,
+      1.6474748000036925,
+      1.6519106000196189,
+      1.6843362001236528,
+      1.6286013999488205
+    ],
+    "before_warmed_median_seconds": 1.6474748000036925,
+    "median_speedup": 1.2632528949060406,
+    "median_time_reduction_fraction": 0.20839286889235353
+  },
+  "rejected_optimizations": [
+    {
+      "reason": "the dense Bernstein output path does not enclose the family of shortened same-integrator RK4 reintegrations used by first-hit localization; six real RK4 wall regressions resulted",
+      "trial": "use the dense-path chord tube for event broad phase"
+    },
+    {
+      "reason": "a wall-safe tighter broad phase can bypass dyadic work still required by the global field-support certificate and broke reflected residual-time advancement",
+      "trial": "intersect the global event AABB with a tighter chord tube"
+    }
+  ],
+  "quality": {
+    "complexity": "pass; every function and method CC < 16",
+    "full_verification_and_scenarios": "575 passed",
+    "import_linter": "3 contracts kept",
+    "pyrefly": "0 errors",
+    "ruff": "format and lint pass",
+    "targeted_wall_event_integrator": "178 passed",
+    "uv_lock": "current"
+  },
+  "scope_limit": "This is a machine-local performance diagnosis, not a portable threshold, COMSOL comparison, or proof that the remaining conservative event refinement is optimal."
+}

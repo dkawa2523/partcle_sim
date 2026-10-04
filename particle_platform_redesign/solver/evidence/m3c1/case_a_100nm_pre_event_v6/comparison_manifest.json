@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "evidence_id": "M3-C1-case-A-100nm-pre-event-v6",
+  "classification": "external_vv_compact_checkpoint",
+  "evaluation_status": "COMPLETE",
+  "overall_decision": "CROSS_REPRESENTATION_FAIL_COMMON_FIELD_FULL_PHYSICS_REQUIRED",
+  "scope": {
+    "workflow": "caseA",
+    "diameter_m": 1e-7,
+    "coordinate_system": "axisymmetric_rz_no_swirl",
+    "brownian_active": false,
+    "dynamic_charge_active": true,
+    "deterministic_force_count": 7,
+    "time_window_s": [
+      0.0,
+      0.00045
+    ],
+    "output_interval_s": 1e-5,
+    "particles": 287,
+    "frames": 46,
+    "records_per_run": 13202,
+    "initial_state_sha256": "cc23ff17294a768fbe81fe45b8310e850159f3787373815663e0a4937fa157ed",
+    "candidate_canonical_layout": {
+      "nodes": 1987,
+      "tri3_cells": 3779,
+      "boundary_lines": 160,
+      "nodal_fields": 17,
+      "sources": 287
+    },
+    "boundary_scope": "NOT_TESTED_PRE_EVENT_WINDOW",
+    "candidate_field_representation": "canonical_exact_connectivity_P1_projection_from_exported_nodal_values",
+    "reference_field_representation": "COMSOL_native_finite_element_fields"
+  },
+  "source_artifacts": {
+    "historical_blocker_report": {
+      "path": "evidence/m3c1/exported_p1_candidate_blocker_v1/report.json",
+      "sha256": "05d4fdebcd6f473ab4bd3892c33d8c651eb2971b635976a1dca0df789054458b"
+    },
+    "candidate_prepare_report": {
+      "path": "_out_m3c1/caseA_100nm_exported_p1_v4/prepare_report.json",
+      "sha256": "6af375b16c3d2ddb42e5b5296257b0b240bdd27d7c444f2432a2ca4b73ba915e"
+    },
+    "candidate_run_report": {
+      "path": "_out_m3c1/caseA_100nm_exported_p1_v4/candidate_run_report.json",
+      "sha256": "7f3687e6c73096f2459fadcd5782ffcd41994c13652a193da284f7af49bd541d"
+    },
+    "candidate_input": {
+      "path": "_out_m3c1/caseA_100nm_exported_p1_v4/candidate_input.h5",
+      "file_sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+      "content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c"
+    },
+    "candidate_configuration": {
+      "path": "tools/vv/comsol/cases/m3c1_caseA_100nm_exported_p1_v1.json",
+      "sha256": "acdee16230e8330a9012ec0c817ac4022fc8b28ec6449704a94cbfa35d642e4d"
+    },
+    "evaluation_configuration": {
+      "path": "tools/vv/comsol/cases/m3c1_caseA_100nm_pre_event_v1.json",
+      "sha256": "a9e9bd559c1388398cebf4ad4729a176a8b028537bf0f6b62efae6329bd87826"
+    },
+    "candidate_self_convergence": {
+      "path": "_out_m3c1/caseA_100nm_pre_event_v6/candidate_self_convergence.json",
+      "sha256": "2086097be2805e577c371872d91572283872e5e4287bb21d5516163880a449f7"
+    },
+    "reference_self_convergence": {
+      "path": "_out_m3c1/caseA_100nm_pre_event_v6/reference_self_convergence.json",
+      "sha256": "34c2135139a4ee48dcaa13cf1ab4544e8f1563a1d6e3edf6ab3b69093f3a8024"
+    },
+    "registered_budget": {
+      "path": "_out_m3c1/caseA_100nm_pre_event_v6/cross_representation_budget.json",
+      "sha256": "b9c2d044c1f01ea0aa7d43885521c82ac54e0802c6737d5e8e1780ceaf5095b7"
+    },
+    "cross_representation_comparison": {
+      "path": "_out_m3c1/caseA_100nm_pre_event_v6/cross_representation_comparison.json",
+      "sha256": "5b47e98d53312e8482bfba3aeb17d35ba6c30a71ce4c02b944d9f61e644500c7"
+    },
+    "locked_reference_manifest": {
+      "path": "_out_m3c0b/caseA_100nm_theory_pre_event_v6/reference_manifest.json",
+      "sha256": "11adb260242720bf2efb3a0cf095d11e94ee2555303a314897e15c075ac1e9a8"
+    },
+    "locked_comsol_self_convergence": {
+      "path": "_out_m3c0b/caseA_100nm_theory_pre_event_v6/comsol_self_convergence.json",
+      "sha256": "8fb53ffdbde43068a1bf59f00ba8ae0b51341075a87e63eda638ef3697575f35"
+    },
+    "locked_reference_run_status": {
+      "path": "_out_m3c0b/caseA_100nm_theory_pre_event_v6/run_status.json",
+      "sha256": "7255660d3485651a57a313b0bb931144fbd400633e0dedd8e6c70a29f3db884e"
+    },
+    "locked_reference_artifact_hashes": {
+      "path": "_out_m3c0b/caseA_100nm_theory_pre_event_v6/artifact_hashes.csv",
+      "sha256": "fc9eeb307e39ff3ed32fe0b4b3c74a0725176362256e1f693a4e20195922cd0e"
+    },
+    "p19_local_certificate_performance": {
+      "path": "evidence/p19l/performance_v1.json",
+      "sha256": "4a14ae33626b69221e4ab503878030cf9c45c3f54f65fe0f9c03bbc55cde4e86"
+    },
+    "p19_candidate_hot_path": {
+      "path": "evidence/p19l/candidate_hot_path_v1.json",
+      "sha256": "a6486d6e36c6769a945f86601649e2e71dc7b88d530460db4a98a2292c59b001"
+    }
+  },
+  "candidate_execution": {
+    "status": "COMPLETE",
+    "engine_algorithm_revision": "particle_engine_v31",
+    "physics_runtime_revision": "inertial_langevin_compiled_physics_runtime_v17",
+    "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v2",
+    "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+    "public_api_path": [
+      "load_case",
+      "simulate",
+      "open_result"
+    ],
+    "certificate_interpretation": {
+      "historical_global_zero_particle_speed_box_upper_m_s": 25684.269392465645,
+      "declared_relative_ion_speed_limit_m_s": 25000.0,
+      "global_only_result": "INCONCLUSIVE",
+      "bounded_local_certificate_result": "PASS_ALL_ACCEPTED_PIECES",
+      "physical_limit_relaxed": false
+    },
+    "runs": {
+      "dt_0p625us": {
+        "dt_s": 6.25e-7,
+        "macro_steps": 721,
+        "trajectory_rows": 13202,
+        "boundary_events": 0,
+        "failure_events": 0,
+        "active_final_particles": 287,
+        "accepted_particle_pieces": 8450307,
+        "candidate_queries": 16693687,
+        "refinements": 8243380,
+        "maximum_refinement_depth": 8,
+        "case_sha256": "d0764b66b63b654da854b8dc3bce223f8e91df7a5a3923a2ab06cc2a6ed3d4a0",
+        "result_manifest_sha256": "82f81acaf88cfbe4ff26a5a2e30813e5bfbbe903e6650fd031c3a50ced851d95",
+        "trajectory_sha256": "f4267b4b3778eb122ff8bd8514d379e71521c449ff008e4684aeb16e5cc73b38",
+        "events_sha256": "991eca9b164368dedd5dfe18fa7abcb37fdbbe6b622fb26dea1b4997c3d86c9c"
+      },
+      "dt_0p3125us": {
+        "dt_s": 3.125e-7,
+        "macro_steps": 1441,
+        "trajectory_rows": 13202,
+        "boundary_events": 0,
+        "failure_events": 0,
+        "active_final_particles": 287,
+        "accepted_particle_pieces": 8450307,
+        "candidate_queries": 16487047,
+        "refinements": 8036740,
+        "maximum_refinement_depth": 7,
+        "case_sha256": "0e1a5254a4d11bb9f65583b2ef81a788aefaff4bdc3cc704588e6c16ba5066ed",
+        "result_manifest_sha256": "6c9de0d9716feb328a3a6a55504db395e34d834a9441e42ff07666e315c8ca10",
+        "trajectory_sha256": "50252b4bf5e2a8cd419dd0445fe0504b2a85631d894e756b0129d2b1d3a2ce00",
+        "events_sha256": "991eca9b164368dedd5dfe18fa7abcb37fdbbe6b622fb26dea1b4997c3d86c9c"
+      },
+      "dt_0p15625us": {
+        "dt_s": 1.5625e-7,
+        "macro_steps": 2881,
+        "trajectory_rows": 13202,
+        "boundary_events": 0,
+        "failure_events": 0,
+        "active_final_particles": 287,
+        "accepted_particle_pieces": 8450307,
+        "candidate_queries": 16073767,
+        "refinements": 7623460,
+        "maximum_refinement_depth": 6,
+        "case_sha256": "0fdf8c2e86c49b059f7f8b2a4817b0ab1e6db5d65ca91c1dd5b664867582d350",
+        "result_manifest_sha256": "ba20e9ccc36e5476e3a5a73e07edb8d2f4c340a041b16e4ad0216f1b39c58a10",
+        "trajectory_sha256": "af8924333ffb8d4d1017ca1469972cdd7a8a9588f3606650e7f1bb427dc7811a",
+        "events_sha256": "991eca9b164368dedd5dfe18fa7abcb37fdbbe6b622fb26dea1b4997c3d86c9c"
+      }
+    }
+  },
+  "candidate_self_precision": {
+    "status": "PASS",
+    "interpretation": "precision stability only; RK4 order below the float64 floor is not established",
+    "fine_pair": {
+      "position": {
+        "classification": "ROUNDOFF_LIMITED",
+        "rms_m": 5.361083529624204e-17,
+        "maximum_m": 3.332294980281256e-16,
+        "relative_l2": 2.677331196127922e-14,
+        "roundoff_floor_m": 8.268516709539565e-14
+      },
+      "velocity": {
+        "classification": "ROUNDOFF_LIMITED",
+        "rms_m_per_s": 1.5559000960328219e-13,
+        "maximum_m_per_s": 9.952581161020994e-13,
+        "relative_l2": 1.448610117908637e-14,
+        "roundoff_floor_m_per_s": 1.0381720033490003e-11
+      },
+      "charge": {
+        "classification": "ROUNDOFF_LIMITED",
+        "rms_e": 1.3807983073469224e-12,
+        "maximum_e": 1.872990651463624e-11,
+        "relative_l2": 5.456212097587488e-15,
+        "roundoff_floor_e": 2.048480503375101e-10
+      }
+    }
+  },
+  "reference_self_convergence": {
+    "status": "PASS",
+    "scope": "pre_event_operational_step_selection_only",
+    "records_per_run": 13202,
+    "all_records_active": true,
+    "observed_boundary_events": 0,
+    "fine_pair": {
+      "position": {
+        "classification": "ORDER_EVALUATED",
+        "rms_m": 5.338714552062532e-8,
+        "maximum_m": 6.744157217240982e-7,
+        "relative_l2": 3.102727085428029e-5,
+        "observed_rms_order": 0.9041136219836077
+      },
+      "velocity": {
+        "classification": "ORDER_EVALUATED",
+        "rms_m_per_s": 0.0003643054047211661,
+        "maximum_m_per_s": 0.0031332823190100135,
+        "relative_l2": 3.924832510840385e-5,
+        "observed_rms_order": 0.9443119501831206
+      },
+      "charge": {
+        "classification": "ORDER_EVALUATED",
+        "rms_e": 0.00033741954922298354,
+        "maximum_e": 0.003898157714900208,
+        "relative_l2": 1.3511393490811462e-6,
+        "observed_rms_order": 1.1238380758116033
+      }
+    }
+  },
+  "registered_cross_representation_envelopes": {
+    "status": "REGISTERED_BEFORE_COMPARISON",
+    "policy": "reference_fine_step_change_plus_candidate_float64_precision_contribution",
+    "position": {
+      "rms_m": 5.3387228259403245e-8,
+      "maximum_m": 6.744158047424948e-7
+    },
+    "velocity": {
+      "rms_m_per_s": 0.00036430541525847614,
+      "maximum_m_per_s": 0.003133282330386992
+    },
+    "charge": {
+      "rms_e": 0.00033741975576776693,
+      "maximum_e": 0.0038981579387940995
+    }
+  },
+  "cross_representation_comparison": {
+    "status": "FAIL",
+    "failed_gates": 6,
+    "total_gates": 6,
+    "position": {
+      "rms_m": 0.0003437485727086595,
+      "maximum_m": 0.002660729292906687,
+      "relative_l2": 0.1997780545708958
+    },
+    "velocity": {
+      "rms_m_per_s": 1.919910730173562,
+      "maximum_m_per_s": 11.668961060303342,
+      "relative_l2": 0.20684096239153862
+    },
+    "charge": {
+      "rms_e": 17.58471490428266,
+      "maximum_e": 157.15163693423065,
+      "relative_l2": 0.07041500797527477
+    }
+  },
+  "p19_context": {
+    "local_certificate_public_api_performance": {
+      "role": "machine_local_non_gating",
+      "global_fast_median_s": 0.9276380999945104,
+      "local_fallback_median_s": 0.934550599893555,
+      "local_to_global_ratio": 1.007451720556848,
+      "scientific_payload_bitwise_identical": true
+    },
+    "candidate_hot_path": {
+      "role": "machine_local_non_gating_one_macro_step_v3_candidate",
+      "source_physics_runtime_revision": "inertial_langevin_compiled_physics_runtime_v16",
+      "final_v4_candidate_end_to_end_performance": "NOT_MEASURED_BY_THIS_ARTIFACT",
+      "before_warmed_median_s": 1.6474748000036925,
+      "after_warmed_median_s": 1.3041528000030667,
+      "median_speedup": 1.2632528949060406,
+      "scientific_payload_bitwise_identical": true
+    },
+    "claim_limit": "performance provenance only; neither record is a COMSOL or physical-validity gate"
+  },
+  "known_input_limitations": {
+    "heat_flux_primitive_authority": "NOT_TESTED_PRIMITIVE_AUTHORITY_IN_THIS_V4_CANDIDATE_INPUT",
+    "axis_radial_projection": {
+      "corrected_node_count": 34,
+      "electric_field_maximum_correction_V_per_m": 11.638867437690713,
+      "positive_ion_velocity_maximum_correction_m_per_s": 320.6616507508536,
+      "gradient_mean_e_squared_maximum_correction_V2_per_m3": 36614916.36485488
+    },
+    "dep_point_dipole_physical_certification": "NOT_TESTED",
+    "overall_physical_applicability": "NOT_CERTIFIED"
+  },
+  "claim_separation": {
+    "candidate_execution": "COMPLETE",
+    "candidate_self_precision": "PASS_ROUNDOFF_LIMITED",
+    "reference_operational_self_convergence": "PASS",
+    "locked_cross_representation_case_and_window": "NOT_SUPPORTED",
+    "same_field_full_physics_solver_agreement": "NOT_TESTED",
+    "boundary_accuracy": "NOT_TESTED_PRE_EVENT_WINDOW",
+    "physical_applicability": "NOT_TESTED_NOT_CERTIFIED",
+    "universal_comsol_equivalent_accuracy": "NOT_CLAIMED",
+    "comsol_is_golden_truth": false
+  },
+  "next_required_diagnostic": {
+    "source_comparison_report_state": "CONDITIONAL_NOT_RUN",
+    "status": "TRIGGERED_NOT_RUN_REQUIRED",
+    "name": "common_field_full_physics",
+    "trigger": "all_six_locked_cross_representation_gates_failed",
+    "purpose": "remove native-FE versus canonical-P1 field sampling as a variable before attributing or changing solver behavior",
+    "required_common_authorities": [
+      "full deterministic primitive values including PPR heat flux",
+      "axis policy",
+      "release and initial state",
+      "physics parameters",
+      "time and output schedule"
+    ],
+    "solver_core_change_authorized_by_this_evidence": false
+  }
+}

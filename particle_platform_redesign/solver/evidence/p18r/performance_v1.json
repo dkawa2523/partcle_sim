@@ -1,0 +1,75 @@
+{
+  "acceptance": {
+    "bound_array_bytes_identical": true,
+    "continuous_applicability_identical": true,
+    "output_bitwise_identical": true,
+    "stage_applicability_identical": true,
+    "workspace_bytes_identical_by_reuse": true
+  },
+  "benchmark_role": "machine_local_non_gating_warm_physics_stage_revision_equivalence",
+  "compiled_cpu_tile_revision": "compiled_cpu_tile_v16",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) Ultra 7 265KF",
+    "numba": "0.67.0",
+    "numpy": "2.5.3",
+    "operating_system": "Windows 11 10.0.26200",
+    "python": "3.12.13"
+  },
+  "execution_order": "old,new repeated nine times after both configurations were warmed",
+  "identical_input_arrays": true,
+  "maximum_observed_relative_speed_ratio": 0.01569605210748738,
+  "maximum_speed_ratio_configured": 0.1,
+  "minimum_lambda_over_particle_radius": 10000.0,
+  "new": {
+    "all_repeat_digests_identical": true,
+    "bound_array_bytes": 2500040,
+    "continuous_applicable_rows": 100000,
+    "drag_revision": "epstein_linear_effective_gas_sensitivity_v1",
+    "median_seconds": 0.0267643,
+    "output_sha256": "f23e6ccc4e43738f30a466ee2d349c7527de25d3ef791006f19599f8011970e2",
+    "repeat_seconds": [
+      0.0265516,
+      0.0265158,
+      0.0274698,
+      0.0264967,
+      0.0266405,
+      0.0267643,
+      0.026901,
+      0.0271039,
+      0.0268406
+    ],
+    "rows_per_second": 3736320.396946679,
+    "stage_applicable_rows": 100000,
+    "thermophoresis_revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+  },
+  "new_to_old_median_ratio": 1.0019691745564678,
+  "old": {
+    "all_repeat_digests_identical": true,
+    "bound_array_bytes": 2500040,
+    "continuous_applicable_rows": 100000,
+    "drag_revision": "epstein_linear_v1",
+    "median_seconds": 0.0267117,
+    "output_sha256": "f23e6ccc4e43738f30a466ee2d349c7527de25d3ef791006f19599f8011970e2",
+    "repeat_seconds": [
+      0.0267117,
+      0.0266788,
+      0.0268331,
+      0.0270094,
+      0.0268982,
+      0.0265095,
+      0.0264889,
+      0.0265601,
+      0.0273217
+    ],
+    "rows_per_second": 3743677.8640071577,
+    "stage_applicable_rows": 100000,
+    "thermophoresis_revision": "waldmann_gallis_free_molecular_single_species_heat_flux_v1"
+  },
+  "particle_rows": 100000,
+  "physics_catalog_revision": "inertial_langevin_xy_catalog_v15",
+  "physics_runtime_revision": "inertial_langevin_compiled_physics_runtime_v14",
+  "repeats_per_revision": 9,
+  "scope_limit": "Direct same-form stage comparison only; not end-to-end, trajectory, COMSOL, mixture-physics, or portable timing evidence.",
+  "workspace_bytes": 6600000,
+  "workspace_reused": true
+}

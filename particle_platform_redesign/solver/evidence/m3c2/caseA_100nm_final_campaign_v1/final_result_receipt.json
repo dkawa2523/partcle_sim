@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "receipt_id": "M3-C2A-caseA-100nm-final-result-v1",
+  "status": "PASS",
+  "case_id": "M3-C2A_caseA_100nm_common-P1",
+  "claim_scope": "approximately_the_same_terminal_population_accuracy_as_COMSOL_for_the_locked_case_design_without_pathwise_RNG_equality",
+  "design": {
+    "particle_count": 287,
+    "output_time_count": 121,
+    "time_end_s": 0.03,
+    "replicas_per_participant": 32,
+    "observations_per_participant": 9184,
+    "comsol_setting": {
+      "integrator": "classical_rk4",
+      "fixed_step_s": 0.00002
+    },
+    "candidate_setting": {
+      "dt_s": 0.00002,
+      "brownian_interval_tree_depth": 3,
+      "geometry_rtol": 1e-08
+    }
+  },
+  "execution": {
+    "candidate": {
+      "complete_replicas": 32,
+      "trajectory_rows_per_replica": 34727,
+      "boundary_events_total": 8451,
+      "failure_events_total": 0
+    },
+    "comsol": {
+      "complete_replicas": 32,
+      "trajectory_rows_per_replica": 34727,
+      "boundary_events_total": 8448,
+      "study_isolation_pass_replicas": 32,
+      "enabled_physics": [
+        "fptas"
+      ]
+    },
+    "source_identity_status": "PASS"
+  },
+  "confirmatory_terminal_population_gate": {
+    "method": "two_sample_union_hoeffding",
+    "confidence": 0.95,
+    "familywise_alpha": 0.05,
+    "curves": [
+      "stuck",
+      "held",
+      "escaped",
+      "any_terminal"
+    ],
+    "equivalence_margin": 0.05,
+    "maximum_absolute_difference": 0.005988675958188083,
+    "critical_radius": 0.032784144435947335,
+    "simultaneous_confidence_bound": 0.03877282039413542,
+    "status": "PASS"
+  },
+  "descriptive_non_gating_trajectory_metrics": {
+    "maximum_mean_position_difference_m": 0.001148051740361991,
+    "maximum_mean_position_difference_over_geometry_scale": 0.004203560673385925,
+    "maximum_quantile_difference_m": 0.005927973888763427,
+    "maximum_covariance_difference_m2": 0.00012344589415388648,
+    "maximum_rz_occupancy_total_variation": 0.025883062916228106,
+    "common_active_particle_time_fraction": 0.8061738704754225
+  },
+  "artifacts": {
+    "evaluation_policy": {
+      "path": "../../../tools/vv/comsol/cases/m3c2_caseA_100nm_ensemble_evaluation_v3.json",
+      "sha256": "26139aa08cc3d893394cd15dcacf282bc7874dc3de06c1cdbfa0dc401caa055e"
+    },
+    "selection_receipt": {
+      "path": "selection_receipt.json",
+      "sha256": "3f214b75e876c36c42543dfc29b2861fcf262f8a845e6adc55b569a0977d975e"
+    },
+    "combined_campaign_manifest": {
+      "path": "combined_campaign_manifest.json",
+      "sha256": "db0daad5f3b01aafb7506146037329f58579d67ac5a3453c865b8dd048c1bff3"
+    },
+    "candidate_campaign_manifest": {
+      "path": "candidate_campaign_manifest.json",
+      "sha256": "238543f25d9e71a5792e631905d067b7ce76882654805931b57d5b227afc59e8"
+    },
+    "comsol_campaign_manifest": {
+      "path": "comsol_campaign_manifest.json",
+      "sha256": "2534f4d0ead87590baf7b1df786e3e00397f95564819f2288455daea85498288"
+    },
+    "evaluation_manifest": {
+      "path": "evaluation_manifest.json",
+      "sha256": "dd0911c67bc7ce3930d3de05b59e1a4c6db0b8cf4a00e200420e9db8d419951a"
+    },
+    "ensemble_metrics": {
+      "path": "ensemble_metrics.csv",
+      "sha256": "4d0d0fc0401b391f5c7e69b6c0ad1c2f356b36e45e428192cc8de56b1c53d7ef"
+    },
+    "rz_trajectory_png": {
+      "path": "rz_ensemble_trajectory.png",
+      "sha256": "d3a845e551bbfd9117ba3015cdfd911f44ed2cdf88ed771c99e7ee8816e16e54"
+    },
+    "observable_differences_png": {
+      "path": "ensemble_observable_differences.png",
+      "sha256": "69758eaa9514c7ef4aecb45c9c5bb2ac9cb51c33be6e0cfb79d26d1c4f5bfdc0"
+    }
+  },
+  "performance": {
+    "accuracy_decision_role": "SEPARATE_FROM_ACCURACY_DECISION",
+    "candidate_timing_status": "NON_AUTHORITATIVE_EXTERNAL_WORKLOAD_OVERLAP",
+    "next_gate": "profile_the_accepted_full_force_workload_at_10000_and_100000_particles_before_any_production_optimization"
+  },
+  "reproducibility": {
+    "independent_evaluator_rerun_status": "PASS",
+    "byte_identical_evaluator_outputs": [
+      "evaluation_manifest.json",
+      "ensemble_metrics.csv",
+      "ensemble_observable_differences.svg",
+      "rz_ensemble_trajectory.svg",
+      "performance.json",
+      "README.md"
+    ],
+    "readme_scope": "README.md above is the evaluator-generated output; the README in this durable evidence directory is a curated summary."
+  },
+  "limitations": [
+    "Pathwise equality is not evaluated because the two participants use independent random streams.",
+    "Continuous position, covariance, quantile, and occupancy metrics are descriptive and non-gating.",
+    "This result applies only to the locked common-P1 Case-A 100 nm design and does not certify native-field, Case-P, another ion-drag model, another particle size, or universal COMSOL equivalence.",
+    "COMSOL is a comparison participant rather than a golden definition of the solver physics."
+  ]
+}

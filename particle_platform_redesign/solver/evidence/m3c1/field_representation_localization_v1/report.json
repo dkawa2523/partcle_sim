@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C1-caseA-100nm-field-representation-localization",
+  "tool_revision": "m3c1_field_representation_localization_v1",
+  "overall_status": "PASS_LOCALIZED",
+  "first_difference_layer": "FIELD_REPRESENTATION_OR_SAMPLING",
+  "comsol_rerun_performed": false,
+  "next_discriminator": {
+    "required_for_current_decision": false,
+    "without_particle_rerun": "static native/PPR primitive export at saved candidate coordinates from the existing stationary solution",
+    "requires_particle_rerun": "integrated grouped-hybrid attribution only"
+  },
+  "scope": {
+    "particles": 287,
+    "frames": 46,
+    "records": 13202,
+    "time_window_s": [0.0, 0.00045],
+    "comparison_scopes": ["identical_t0_state", "saved_native_path_states"]
+  },
+  "fixed_acceptance": {
+    "roundoff_relative_l2": 1e-12,
+    "ppr_node_coordinate_tolerance_m": 1e-14,
+    "ppr_node_heat_flux_relative_l2": 1e-12,
+    "result_dependent_tolerance_tuning": "PROHIBITED"
+  },
+  "prior_decisions": {
+    "cross_representation": "FAIL_6_OF_6",
+    "same_field": "PASS_9_OF_9",
+    "frozen_producer_forms": "PASS_7_OF_8_WITH_ONE_LATER_PPR_CLOSURE",
+    "ppr_thermophoresis": "PASS"
+  },
+  "cohort": {
+    "status": "PASS",
+    "all_active": true,
+    "particles": 287,
+    "frames": 46,
+    "records": 13202
+  },
+  "ppr_node_binding": {
+    "status": "PASS",
+    "matched_nodes": 1987,
+    "unique_reference_nodes": 1987,
+    "maximum_coordinate_difference_m": 5.721958498152797e-17,
+    "axis_node_count": 34,
+    "after_axis_policy_relative_l2": 6.338106055700018e-17,
+    "after_axis_policy_maximum_absolute_W_per_m2": 2.929642751054232e-14
+  },
+  "axis_projection_exclusion": {
+    "status": "PASS",
+    "axis_node_count": 34,
+    "axis_incident_cell_count": 67,
+    "axis_incident_cell_maximum_r_m": 0.007517953530915272,
+    "minimum_t0_sample_r_m": 0.14,
+    "minimum_all_native_path_sample_r_m": 0.13999532393040234
+  },
+  "identical_t0_key_relative_l2": {
+    "electric_field": 0.028620728726031667,
+    "electron_number_density": 0.048928705740119774,
+    "positive_ion_number_density": 0.01366199478326269,
+    "positive_ion_velocity": 0.026968376339439284,
+    "gradient_mean_e_squared": 0.1259955413662082,
+    "gas_translational_heat_flux": 0.007921763663068737,
+    "charge_rate": 0.049101396439728405,
+    "total_acceleration": 0.03989452875541078
+  },
+  "saved_native_path_key_relative_l2": {
+    "electric_field": 0.027215677893262243,
+    "positive_ion_velocity": 0.03205461026207609,
+    "gradient_mean_e_squared": 0.29195059404890955,
+    "charge_rate": 0.06652730724631291,
+    "total_acceleration": 0.2111019965566178
+  },
+  "artifacts": {
+    "configuration": {
+      "path": "tools/vv/comsol/cases/m3c1_caseA_100nm_field_localization_v1.json",
+      "sha256": "62818a795bf9386c45e1f75b8eadf8e0fd42ed4c2e487b2fc888c838183f4a98"
+    },
+    "evaluator": {
+      "path": "tools/vv/comsol/evaluate_m3c1_field_localization.py",
+      "sha256": "6a6e6470ccbe0a812d2e12a8350507a49b3c5015de8f3ced35fb7d6d1c79a9ce"
+    },
+    "field_metrics.csv": {
+      "sha256": "23bb55812a6942f794fc069157feb5b4c9b2eae40d9b5af62428c6e310931a3c"
+    },
+    "rhs_metrics.csv": {
+      "sha256": "e9407a75a5a5b7ebd36ef5ccef24c9496b5ff11aa4b08c8091125124217943d3"
+    },
+    "gates.csv": {
+      "sha256": "1670d47248dcff3760721240052fd20ebe58d37e3fe061da66c0743600f8ee5e"
+    }
+  },
+  "claims": {
+    "earliest_observed_difference": "localized at identical t=0 state before trajectory divergence",
+    "native_fe_topology_or_interpolant_reconstruction": "NOT_CLAIMED",
+    "integrated_per_field_causal_attribution": "NOT_TESTED",
+    "physical_model_validity": "NOT_CLAIMED",
+    "universal_comsol_equivalent_accuracy": "NOT_CLAIMED",
+    "comsol_is_golden_truth": false
+  }
+}

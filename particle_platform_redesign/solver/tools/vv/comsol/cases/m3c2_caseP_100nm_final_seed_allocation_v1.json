@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "allocation_kind": "m3c2_final_seed_allocation",
+  "allocation_id": "M3-C2A-caseP-100nm-final-seeds",
+  "allocation_revision": 1,
+  "classification": "preregistered_unexecuted_disjoint_campaign_seed_allocation",
+  "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+  "purpose": "final",
+  "replicas_per_participant": 32,
+  "participant_seed_sets": {
+    "comsol": [
+      319000, 319001, 319002, 319003, 319004, 319005, 319006, 319007,
+      319008, 319009, 319010, 319011, 319012, 319013, 319014, 319015,
+      319016, 319017, 319018, 319019, 319020, 319021, 319022, 319023,
+      319024, 319025, 319026, 319027, 319028, 319029, 319030, 319031
+    ],
+    "candidate": [
+      319032, 319033, 319034, 319035, 319036, 319037, 319038, 319039,
+      319040, 319041, 319042, 319043, 319044, 319045, 319046, 319047,
+      319048, 319049, 319050, 319051, 319052, 319053, 319054, 319055,
+      319056, 319057, 319058, 319059, 319060, 319061, 319062, 319063
+    ]
+  },
+  "execution_status": "PLANNED_NOT_RUN",
+  "authorization": "NOT_AUTHORIZED_PENDING_ACCEPTED_PILOT",
+  "seed_audit": {
+    "scope": "all_current_m3c2_campaign_seed_authorities_and_global_12_package_reservation_ledger",
+    "completed_before_allocation": true,
+    "authorities": [
+      {
+        "role": "global_12_package_reservation_ledger",
+        "path": "particle_platform_redesign/solver/evidence/m3c0/reference_lock_v1/seed_cohort.csv",
+        "sha256": "8b09d9f2dbd5a413f0fbfeb376e544718473a090900376de4fe98ee730979f6f",
+        "reserved_seed_min": 318000,
+        "reserved_seed_max": 318383
+      },
+      {
+        "role": "caseA_current_pilot_seed_authority",
+        "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseA_100nm_stochastic_pilot_v1.json",
+        "sha256": "d720e94e0342f65ed3a6466a2357299c228495e173848897d6719b0d9feca2df",
+        "json_pointers": [
+          "/seed_plan/pilot/comsol_seeds",
+          "/seed_plan/pilot/candidate_seeds"
+        ]
+      },
+      {
+        "role": "caseA_current_final_policy_seed_authority",
+        "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseA_100nm_ensemble_evaluation_v3.json",
+        "sha256": "26139aa08cc3d893394cd15dcacf282bc7874dc3de06c1cdbfa0dc401caa055e",
+        "json_pointers": [
+          "/final/seed_plan/comsol",
+          "/final/seed_plan/candidate"
+        ]
+      },
+      {
+        "role": "caseA_executed_final_registration_seed_authority",
+        "path": "particle_platform_redesign/solver/evidence/m3c2/caseA_100nm_final_campaign_v1/final_registration.json",
+        "sha256": "76ed101469aa22819c350a3740662413b2995bb3925e7e1e3f41be531d897bf8",
+        "json_pointers": [
+          "/participant_seed_sets/comsol",
+          "/participant_seed_sets/candidate"
+        ]
+      }
+    ],
+    "audited_existing_campaign_seed_ranges": [
+      [318000, 318383],
+      [918160, 918167]
+    ],
+    "selected_seed_ranges": {
+      "comsol": [319000, 319031],
+      "candidate": [319032, 319063]
+    },
+    "collision_count": 0,
+    "participant_sets_disjoint": true
+  }
+}

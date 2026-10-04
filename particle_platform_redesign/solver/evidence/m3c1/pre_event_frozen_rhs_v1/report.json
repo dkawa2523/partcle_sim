@@ -1,0 +1,342 @@
+{
+  "classification": "EXTERNAL_VV_FROZEN_STATE_COMPARISON",
+  "combined_force_diagnostic": {
+    "producer_formula_candidate": {
+      "absolute_residual_max": 3.2222486141640986e-16,
+      "global_relative_l2_residual": 0.0011919715106319577,
+      "scale_normalized_residual_max": 0.912793100744099,
+      "scale_normalized_residual_p99": 0.08642370717672172,
+      "worst_row": {
+        "particle_id": 282,
+        "time_s": 0.00041000000000000005
+      }
+    },
+    "production_models": {
+      "absolute_residual_max": 3.222248613681195e-16,
+      "global_relative_l2_residual": 0.0011919715089522942,
+      "scale_normalized_residual_max": 0.9127931059991459,
+      "scale_normalized_residual_p99": 0.08642370940346612,
+      "worst_row": {
+        "particle_id": 282,
+        "time_s": 0.00041000000000000005
+      }
+    },
+    "status": "CHARACTERIZED_NOT_A_GATE_WHILE_THERMOPHORESIS_PRIMITIVE_IS_UNRESOLVED"
+  },
+  "comsol_rerun_performed": false,
+  "configuration": {
+    "file_name": "m3c1_caseA_100nm_frozen_rhs_v1.json",
+    "sha256": "ad423fb8d3565ff99ce02af6d533029d55789b062718bdb6d437b8893c3745c4"
+  },
+  "continuous_path_applicability": "NOT_TESTED",
+  "field_interpolation_agreement": "NOT_TESTED",
+  "generated_at_utc": "2026-10-01T01:37:25.173494+00:00",
+  "golden_truth": "NOT_CLAIMED",
+  "input": {
+    "output_times": 46,
+    "particles": 287,
+    "provenance": {
+      "model_saved": false,
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c0b\\caseA_100nm_theory_pre_event_v6\\provenance.json",
+      "sha256": "588070d21033ef03ef30878a100594444fac712eb819cc170140307979bea6c6",
+      "source_load_mode": "ModelUtil.loadCopy",
+      "source_model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "source_unchanged": true
+    },
+    "raw_sha256": {
+      "electric_raw_wide.csv": "66a002121b831709422d4199ed7d5d517ce780054ad63f4a4a7c2b491d6e123e",
+      "force_raw_wide.csv": "5d953eacc414e41f12246f0d80b3055f5f4fcc7761cbcc67244f300e4113e3b3",
+      "neutral_raw_wide.csv": "97e214deed3ded2bb7f27dcc850a53dd149e538fb14fa670a8df042db40a847a",
+      "plasma_raw_wide.csv": "1d70446403d99f4bddb63c257d29a7ef4e8fed55ee18db55c5db9403eb6229d7",
+      "state_raw_wide.csv": "1241b91683f37076a3482c6792e29f0b215cd96434f25a82aff6b04a95679a58"
+    },
+    "records": 13202,
+    "step_directory_name": "dt_0p15625us"
+  },
+  "integrated_trajectory_accuracy": "NOT_TESTED",
+  "interpretation": "Producer replay, production-model output, and local saved-row applicability are separate results. The thermophoretic diagnostic uses an unrecovered Fourier gradient while the COMSOL feature requested PPR, so it cannot be promoted to formula parity. Saved output frames do not certify field interpolation, RK stages, continuous-path applicability, events, or integrated trajectory agreement.",
+  "known_gaps": [
+    "COMSOL UsePPR=1 but the saved trajectory exports only unrecovered temperature gradients",
+    "DEP point-dipole applicability has no saved-run certificate",
+    "saved output frames do not expose intermediate integrator stages or continuous paths"
+  ],
+  "models": {
+    "dielectrophoresis": {
+      "applicability": {
+        "continuous_path_status": "NOT_TESTED",
+        "saved_row_coverage": null,
+        "saved_row_status": "NOT_TESTED_POINT_DIPOLE_CERTIFICATION_MISSING"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 1.5163421500797057e-36,
+        "global_relative_l2_residual": 1.9609554118315157e-16,
+        "scale_normalized_residual_max": 3.7967625140341084e-16,
+        "scale_normalized_residual_p99": 3.4209941716349825e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 87,
+          "time_s": 0.00021
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 6.274320978092668e-30,
+        "global_relative_l2_residual": 6.806623370730707e-10,
+        "scale_normalized_residual_max": 6.806625834622093e-10,
+        "scale_normalized_residual_p99": 6.806625145442823e-10,
+        "status": "DOCUMENTED_CONSTANT_CONVENTION_DIFFERENCE",
+        "worst_row": {
+          "particle_id": 57,
+          "time_s": 0.0002
+        }
+      }
+    },
+    "dynamic_charge": {
+      "applicability": {
+        "basis": "declared relative-ion-speed envelope",
+        "continuous_path_status": "NOT_TESTED",
+        "sampled_maximum_relative_ion_speed_m_s": 17992.100259448238,
+        "saved_row_coverage": 1.0,
+        "saved_row_status": "PASS"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 2.3283064365386963e-10,
+        "global_relative_l2_residual": 7.803795380919363e-18,
+        "scale_normalized_residual_max": 2.257552018944532e-16,
+        "scale_normalized_residual_p99": 1.1002932725253948e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 278,
+          "time_s": 0.00045000000000000004
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 0.0022993097081780434,
+        "global_relative_l2_residual": 8.931455486956658e-10,
+        "scale_normalized_residual_max": 3.929288147943532e-09,
+        "scale_normalized_residual_p99": 3.545705970705537e-09,
+        "status": "DOCUMENTED_CONSTANT_CONVENTION_DIFFERENCE",
+        "worst_row": {
+          "particle_id": 287,
+          "time_s": 0.00045000000000000004
+        }
+      }
+    },
+    "electric": {
+      "applicability": {
+        "continuous_path_status": "NOT_TESTED",
+        "saved_row_coverage": 1.0,
+        "saved_row_status": "APPLICABLE_NO_ADDITIONAL_LOCAL_GATE"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 0.0,
+        "global_relative_l2_residual": 0.0,
+        "scale_normalized_residual_max": 0.0,
+        "scale_normalized_residual_p99": 0.0,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 1,
+          "time_s": 0.0
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 1.3010227344586376e-29,
+        "global_relative_l2_residual": 5.898165412940102e-17,
+        "scale_normalized_residual_max": 1.669168899185629e-16,
+        "scale_normalized_residual_p99": 1.6086149876509199e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 231,
+          "time_s": 2e-05
+        }
+      }
+    },
+    "epstein_drag": {
+      "applicability": {
+        "basis": "saved-row high-Kn and effective-gas speed-ratio gates",
+        "continuous_path_status": "NOT_TESTED",
+        "sampled_maximum_relative_speed_ratio": 0.06455651014478188,
+        "sampled_minimum_mean_free_path_over_radius": 39553.74651385394,
+        "saved_row_coverage": 1.0,
+        "saved_row_status": "PASS"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 3.169279980835197e-30,
+        "global_relative_l2_residual": 2.400568022236394e-16,
+        "scale_normalized_residual_max": 8.965731482823172e-16,
+        "scale_normalized_residual_p99": 6.053624774981856e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 207,
+          "time_s": 3.0000000000000004e-05
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 3.963976989918002e-30,
+        "global_relative_l2_residual": 2.46902103858648e-16,
+        "scale_normalized_residual_max": 9.672453607659756e-16,
+        "scale_normalized_residual_p99": 6.246945238859694e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 210,
+          "time_s": 0.00037000000000000005
+        }
+      }
+    },
+    "free_molecular_lift_sensitivity": {
+      "applicability": {
+        "basis": "saved-row high-Kn gate",
+        "continuous_path_status": "NOT_TESTED",
+        "sampled_minimum_mean_free_path_over_radius": 39553.74651385394,
+        "saved_row_coverage": 1.0,
+        "saved_row_status": "PASS"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 1.98520314706213e-34,
+        "global_relative_l2_residual": 9.542821765174518e-17,
+        "scale_normalized_residual_max": 2.8602478642604584e-16,
+        "scale_normalized_residual_p99": 2.166089022660002e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 105,
+          "time_s": 0.00044
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 2.1532551377761246e-34,
+        "global_relative_l2_residual": 1.1485762803380175e-16,
+        "scale_normalized_residual_max": 4.698154026531023e-16,
+        "scale_normalized_residual_p99": 2.8388694470734885e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 159,
+          "time_s": 0.00030000000000000003
+        }
+      }
+    },
+    "gravity_buoyancy": {
+      "applicability": {
+        "continuous_path_status": "NOT_TESTED",
+        "saved_row_coverage": 1.0,
+        "saved_row_status": "APPLICABLE_NO_ADDITIONAL_LOCAL_GATE"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 3.0814879110195774e-33,
+        "global_relative_l2_residual": 1.0633865472023086e-16,
+        "scale_normalized_residual_max": 2.7278375408205994e-16,
+        "scale_normalized_residual_p99": 2.727837537546657e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 57,
+          "time_s": 0.00039000000000000005
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 3.0814879110195774e-33,
+        "global_relative_l2_residual": 1.0922785902800373e-16,
+        "scale_normalized_residual_max": 2.727837541337459e-16,
+        "scale_normalized_residual_p99": 2.727837538003421e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 8,
+          "time_s": 0.00044
+        }
+      }
+    },
+    "relative_flow_ion_drag": {
+      "applicability": {
+        "basis": "declared relative-ion-speed envelope",
+        "continuous_path_status": "NOT_TESTED",
+        "sampled_maximum_effective_ion_speed_m_s": 17995.554013580226,
+        "saved_row_coverage": 1.0,
+        "saved_row_status": "PASS"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 1.3871488197020411e-30,
+        "global_relative_l2_residual": 3.705858526223003e-16,
+        "scale_normalized_residual_max": 1.2659055420084512e-15,
+        "scale_normalized_residual_p99": 7.854130038860133e-16,
+        "status": "PASS",
+        "worst_row": {
+          "particle_id": 229,
+          "time_s": 0.00039000000000000005
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 1.752365987089084e-24,
+        "global_relative_l2_residual": 1.2757979348230986e-09,
+        "scale_normalized_residual_max": 1.2782725008626567e-09,
+        "scale_normalized_residual_p99": 1.278263889626937e-09,
+        "status": "DOCUMENTED_CONSTANT_CONVENTION_DIFFERENCE",
+        "worst_row": {
+          "particle_id": 273,
+          "time_s": 0.00045000000000000004
+        }
+      }
+    },
+    "waldmann_thermophoresis": {
+      "applicability": {
+        "basis": "saved-row high-Kn and effective-gas speed-ratio gates",
+        "continuous_path_status": "NOT_TESTED",
+        "sampled_maximum_relative_speed_ratio": 0.06455651014478188,
+        "sampled_minimum_mean_free_path_over_radius": 39553.74651385394,
+        "saved_row_coverage": 1.0,
+        "saved_row_status": "PASS"
+      },
+      "producer_formula_replay": {
+        "absolute_residual_max": 3.22224861416415e-16,
+        "global_relative_l2_residual": 0.02640212381720393,
+        "scale_normalized_residual_max": 0.1518848029947857,
+        "scale_normalized_residual_p99": 0.10292760864111462,
+        "status": "NOT_TESTED_PRIMITIVE_AUTHORITY",
+        "worst_row": {
+          "particle_id": 285,
+          "time_s": 0.00024000000000000003
+        }
+      },
+      "production_model_comparison": {
+        "absolute_residual_max": 3.22224861416415e-16,
+        "global_relative_l2_residual": 0.02640212381720393,
+        "scale_normalized_residual_max": 0.1518848029947857,
+        "scale_normalized_residual_p99": 0.10292760864111464,
+        "status": "NOT_TESTED_PRIMITIVE_AUTHORITY",
+        "worst_row": {
+          "particle_id": 285,
+          "time_s": 0.00024000000000000003
+        }
+      }
+    }
+  },
+  "producer_constant_diagnosis": {
+    "inferred_epsilon0_F_m_median": 8.854187818826714e-12,
+    "inferred_epsilon0_relative_spread": 0.0,
+    "inferred_vs_production_epsilon0_relative_difference_median": 6.806624921756877e-10
+  },
+  "resolved_parameters": {
+    "clausius_mossotti_factor": 0.5161290322580645,
+    "electron_thermal_voltage_V": 4.0,
+    "epstein_delta": 1.3534291735288517,
+    "gravity_m_s2": [
+      0.0,
+      -9.80665
+    ],
+    "lift_coefficient": 1.0,
+    "maximum_effective_gas_speed_ratio": 1.0,
+    "maximum_relative_ion_speed_m_s": 1000000.0,
+    "medium_relative_permittivity": 1.0,
+    "minimum_ion_energy_V": 0.01,
+    "neutral_molecular_mass_kg": 1.2753471408396638e-25,
+    "relative_speed_regularization_m_s": 1.0
+  },
+  "summary": {
+    "producer_formula_replay_fail": 0,
+    "producer_formula_replay_not_tested": 1,
+    "producer_formula_replay_pass": 7,
+    "production_model_documented_difference": 3,
+    "production_model_fail": 0,
+    "production_model_not_tested": 1,
+    "production_model_pass": 4,
+    "saved_row_applicability_not_applicable_models": []
+  },
+  "tool_revision": "m3c1_pre_event_frozen_rhs_v1",
+  "tool_sha256": "7c7b0c7f8f697a8e5bfc62c8e62fdd6811341d9da47680021c711882ab812f46"
+}

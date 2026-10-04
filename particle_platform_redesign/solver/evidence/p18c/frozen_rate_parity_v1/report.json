@@ -1,0 +1,240 @@
+{
+  "comsol_rerun": false,
+  "current_scale_residual_limit": 1e-12,
+  "dataset_root": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass",
+  "evidence_role": "external_saved_primitive_frozen_rate_parity",
+  "generated_at_utc": "2026-09-30T20:39:54.915961+00:00",
+  "golden_truth": "NOT_CLAIMED",
+  "interpretation": "PASS establishes production-model replay of exported dZ/dt at the saved active primitive states only. The sampled speed envelope is derived from those rows and is not a production applicability certificate. This evidence neither treats the provider dataset as truth nor establishes integrated charge or trajectory parity.",
+  "model_revision": "aggregate_relative_drift_regularized_two_current_v1",
+  "packages": [
+    {
+      "active_rows": 30671,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.0022992505691945553,
+      "charge_rate_global_relative_l2_residual": 1.1964155378901006e-09,
+      "current_scale_normalized_residual_max": 1.766542540668338e-09,
+      "current_scale_normalized_residual_p90": 1.7131189181031122e-09,
+      "current_scale_normalized_residual_p99": 1.7586436808717455e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseA_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 18068.707044004503,
+      "sha256": "2043cfb90b49ddc0a5ae0397b2e9023e90b5c4540321d126d92e62ea84fa95a5",
+      "worst_row": {
+        "particle_id": 244,
+        "time_s": 0.0006
+      }
+    },
+    {
+      "active_rows": 33962,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 2.668077650014311e-05,
+      "charge_rate_global_relative_l2_residual": 6.341192846583726e-10,
+      "current_scale_normalized_residual_max": 1.7564958538160716e-09,
+      "current_scale_normalized_residual_p90": 1.738848310833789e-09,
+      "current_scale_normalized_residual_p99": 1.7538726418037344e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseA_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 15355.687257724458,
+      "sha256": "405220f7f85b373e32217955e542614e33d4e307a81d52f8517e22046f7ca65d",
+      "worst_row": {
+        "particle_id": 8,
+        "time_s": 0.006
+      }
+    },
+    {
+      "active_rows": 34440,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.0002191213716287166,
+      "charge_rate_global_relative_l2_residual": 8.842287222628291e-10,
+      "current_scale_normalized_residual_max": 1.7487186953440166e-09,
+      "current_scale_normalized_residual_p90": 1.6917854495547396e-09,
+      "current_scale_normalized_residual_p99": 1.735795780015159e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseA_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 15355.687257724458,
+      "sha256": "9220ae74646618c1aa300bdaeffd8a5c35867d3b7d529a811c8c58419b669206",
+      "worst_row": {
+        "particle_id": 287,
+        "time_s": 0.002
+      }
+    },
+    {
+      "active_rows": 33714,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.010536981746554375,
+      "charge_rate_global_relative_l2_residual": 5.136205355721808e-09,
+      "current_scale_normalized_residual_max": 1.885085291643157e-09,
+      "current_scale_normalized_residual_p90": 1.7238249721497659e-09,
+      "current_scale_normalized_residual_p99": 1.8711913867939367e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseP_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 19474.174253554316,
+      "sha256": "94524ed13fbd721fa406faea4f5998dbcd409a4e650ba03a33b250de60ae1a5c",
+      "worst_row": {
+        "particle_id": 88,
+        "time_s": 0.0007999999999999999
+      }
+    },
+    {
+      "active_rows": 34727,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.00013648884487338364,
+      "charge_rate_global_relative_l2_residual": 1.3483566163806215e-09,
+      "current_scale_normalized_residual_max": 1.764672185482309e-09,
+      "current_scale_normalized_residual_p90": 1.5483485362793801e-09,
+      "current_scale_normalized_residual_p99": 1.695494439236382e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseP_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 19503.277138437516,
+      "sha256": "61df6194f03fe326581e69e8ea47b859e4b8e95d8471d555d6c8e21ca0eb9108",
+      "worst_row": {
+        "particle_id": 3,
+        "time_s": 0.0010999999999999998
+      }
+    },
+    {
+      "active_rows": 34727,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.000920589838642627,
+      "charge_rate_global_relative_l2_residual": 1.854692389262803e-09,
+      "current_scale_normalized_residual_max": 1.8691080716688727e-09,
+      "current_scale_normalized_residual_p90": 1.6989449248332303e-09,
+      "current_scale_normalized_residual_p99": 1.8392029166709723e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_image_minimal_corrected/caseP_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 19475.85748732194,
+      "sha256": "2390ac6c3cdcd8a640c68e283e65fec8b1b91506ef7cca29a0a0a7612f092ed8",
+      "worst_row": {
+        "particle_id": 15,
+        "time_s": 0.0019000000000000002
+      }
+    },
+    {
+      "active_rows": 28354,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.002299280371516943,
+      "charge_rate_global_relative_l2_residual": 1.1567712411316849e-09,
+      "current_scale_normalized_residual_max": 1.765424469518055e-09,
+      "current_scale_normalized_residual_p90": 1.716905175481439e-09,
+      "current_scale_normalized_residual_p99": 1.7586680218462882e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 18073.340212865653,
+      "sha256": "af61916d47dc634e4b3ca42139eebe7fe74a0fd27941250aefda2b39f4ad4a78",
+      "worst_row": {
+        "particle_id": 244,
+        "time_s": 0.0006
+      }
+    },
+    {
+      "active_rows": 31269,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 2.6683926989790052e-05,
+      "charge_rate_global_relative_l2_residual": 6.230909438730907e-10,
+      "current_scale_normalized_residual_max": 1.7534200806223888e-09,
+      "current_scale_normalized_residual_p90": 1.7422151537717623e-09,
+      "current_scale_normalized_residual_p99": 1.7499168951169334e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_theory_consistent/caseA_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 15355.687257724458,
+      "sha256": "b11d49c4e60fe817a65df33ce6581533c78dcc43e2a8c61de204eb38c2fe488f",
+      "worst_row": {
+        "particle_id": 252,
+        "time_s": 0.005
+      }
+    },
+    {
+      "active_rows": 31775,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.00021919867140240967,
+      "charge_rate_global_relative_l2_residual": 8.618038884787862e-10,
+      "current_scale_normalized_residual_max": 1.7419603357179952e-09,
+      "current_scale_normalized_residual_p90": 1.715038591094433e-09,
+      "current_scale_normalized_residual_p99": 1.7364341585251637e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_theory_consistent/caseA_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 15355.687257724458,
+      "sha256": "c21f1865d98a8a37c92219b609732145e98dd0678222f48034609c704e655f6c",
+      "worst_row": {
+        "particle_id": 5,
+        "time_s": 0.0036
+      }
+    },
+    {
+      "active_rows": 34727,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.014067761600017548,
+      "charge_rate_global_relative_l2_residual": 6.667646780462474e-09,
+      "current_scale_normalized_residual_max": 1.885490907154802e-09,
+      "current_scale_normalized_residual_p90": 1.71720117984249e-09,
+      "current_scale_normalized_residual_p99": 1.87307067240637e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_theory_consistent/caseP_100nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 19480.48816073817,
+      "sha256": "8470c6399fe1cd549854958bee0e572dfb05bd04f3ccd767b514383b1788e11d",
+      "worst_row": {
+        "particle_id": 140,
+        "time_s": 0.0009
+      }
+    },
+    {
+      "active_rows": 34727,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.00014893693150952458,
+      "charge_rate_global_relative_l2_residual": 1.5736682032058638e-09,
+      "current_scale_normalized_residual_max": 1.7394670650428248e-09,
+      "current_scale_normalized_residual_p90": 1.487700699625135e-09,
+      "current_scale_normalized_residual_p99": 1.6522016176889909e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_theory_consistent/caseP_10nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 19503.740209385247,
+      "sha256": "b7b0b29a11d7845ca947304a260f719e25eb73be07c16f3c0e2a2b9e95dcaf6f",
+      "worst_row": {
+        "particle_id": 57,
+        "time_s": 0.0009
+      }
+    },
+    {
+      "active_rows": 34727,
+      "all_rows_within_sampled_speed_envelope": true,
+      "charge_rate_absolute_residual_max_number_s": 0.0011882690014317632,
+      "charge_rate_global_relative_l2_residual": 2.375679233830897e-09,
+      "current_scale_normalized_residual_max": 1.85877139590896e-09,
+      "current_scale_normalized_residual_p90": 1.6508911154811672e-09,
+      "current_scale_normalized_residual_p99": 1.784419182035663e-09,
+      "finite": true,
+      "package": "cases/formal_iondrag_theory_consistent/caseP_30nm/external_reproduction/results/particle_history_full_tidy.csv",
+      "pass": false,
+      "sampled_maximum_relative_ion_speed_m_s": 19478.04790461489,
+      "sha256": "a26087b4bd5704dddfd957ee6dd5d034698b293ba188ae8c64130e0ecda8a957",
+      "worst_row": {
+        "particle_id": 57,
+        "time_s": 0.0017000000000000001
+      }
+    }
+  ],
+  "summary": {
+    "active_rows": 397820,
+    "all_packages_pass": false,
+    "charge_rate_absolute_residual_max_number_s": 0.014067761600017548,
+    "charge_rate_global_relative_l2_residual": 2.691228833499504e-09,
+    "current_scale_normalized_residual_max": 1.885490907154802e-09,
+    "current_scale_normalized_residual_p90": 1.7090493088726213e-09,
+    "current_scale_normalized_residual_p99": 1.7841805707675678e-09,
+    "packages": 12
+  },
+  "tool_revision": "p18c_saved_primitive_charge_parity_v1",
+  "trajectory_accuracy": "NOT_TESTED"
+}

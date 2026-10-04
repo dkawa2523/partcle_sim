@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "contract_id": "M3-C2A-caseA-100nm-stochastic-pilot",
+  "contract_revision": 1,
+  "classification": "external_vv_execution_contract_not_run",
+  "scope": {
+    "theory_variant": "formal_iondrag_theory_consistent",
+    "workflow": "caseA",
+    "particle_diameter_m": 1e-7,
+    "particle_count": 287,
+    "coordinate_system": "axisymmetric_rz_no_swirl",
+    "time_start_s": 0.0,
+    "time_end_s": 0.03,
+    "output_count": 121,
+    "output_schedule_segments": [
+      {"start_s": 0.0, "stop_s": 0.0005, "step_s": 1e-5},
+      {"start_s": 0.0006, "stop_s": 0.005, "step_s": 0.0001},
+      {"start_s": 0.006, "stop_s": 0.03, "step_s": 0.001}
+    ]
+  },
+  "source_model": {
+    "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "comsol_version": "6.4.0.429",
+    "load_policy": "ModelUtil.loadCopy",
+    "save_policy": "never_save_source_or_loaded_copy",
+    "study_execution_in_contract_lock": false
+  },
+  "common_p1_input": {
+    "path": "particle_platform_redesign/solver/_out_m3c1/caseA_100nm_exported_p1_v4/candidate_input.h5",
+    "file_sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+    "content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c",
+    "field_representation": "canonical_exact_connectivity_p1",
+    "release": {
+      "source_name": "particles",
+      "particle_id_min": 1,
+      "particle_id_max": 287,
+      "release_time_s": 0.0,
+      "release_authority": "canonical_input_source_table"
+    },
+    "geometry": {
+      "nodes": 1987,
+      "triangles": 3779,
+      "boundary_lines": 160,
+      "geometry_authority": "canonical_input_geometry"
+    }
+  },
+  "boundary": {
+    "wafer": "stick",
+    "grounded_wall": "stick",
+    "focus_transition": "stick",
+    "outer_dielectric": "stick",
+    "gas_inlet": "hold",
+    "pump_outlet": "escape",
+    "axis": "coordinate_crossing_not_material_event"
+  },
+  "deterministic_physics": {
+    "dynamic_charge": {
+      "active": true,
+      "revision": "aggregate_relative_drift_regularized_two_current_v1"
+    },
+    "drag_revision": "epstein_linear_effective_gas_sensitivity_v1",
+    "electric_revision": "electric_coulomb_v1",
+    "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+    "thermophoresis_revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1",
+    "dielectrophoresis_revision": "quasistatic_spherical_gradient_e2_v1",
+    "lift_revision": "rarefied_vorticity_sensitivity_rz_v1",
+    "gravity_buoyancy_revision": "gravity_buoyancy_standard_v1",
+    "saffman_active": false
+  },
+  "stochastic_physics": {
+    "degrees_of_freedom": ["r", "z"],
+    "comsol": {
+      "physics_tag": "fptas",
+      "out_of_plane_degrees_of_freedom": false,
+      "feature_tag": "bf1",
+      "feature_kind": "built_in_brownian_force",
+      "viscosity_expression": "root.comp1.AS_muB",
+      "viscosity_meaning": "epstein_equivalent_effective_viscosity",
+      "random_number_args": "UserDefined",
+      "seed_expression": "AS_brownian_seed",
+      "sole_seed_authority": "fptas.bf1.i"
+    },
+    "candidate": {
+      "brownian_revision": "inertial_joint_ou_v1",
+      "seed_authority": "case_random_seed"
+    }
+  },
+  "seed_plan": {
+    "final_cohort": {
+      "path": "particle_platform_redesign/solver/evidence/m3c2/anchor_preflight_v1/run_matrix.csv",
+      "case_id": "formal_iondrag_theory_consistent/caseA_100nm",
+      "replicas_per_participant": 32,
+      "execution_status": "PLANNED_NOT_RUN"
+    },
+    "pilot": {
+      "comsol_seeds": [918160, 918161, 918162, 918163],
+      "candidate_seeds": [918164, 918165, 918166, 918167],
+      "relationship": "disjoint_between_participants_and_from_final_cohort",
+      "execution_status": "NOT_AUTHORIZED"
+    }
+  },
+  "numerical_policy": {
+    "step_policy": "independent_solver_observable_convergence_not_equal_fixed_step",
+    "common_observation_times": "scope.output_schedule_segments",
+    "pilot_purpose": "lock_each_solver_step_or_tolerance_recipe_and_observable_numerical_uncertainty_before_final_cohort",
+    "comparison_kind": "independent_seed_ensemble_observables_not_pathwise",
+    "pathwise_equality_claim": false
+  },
+  "input_artifacts": [
+    {
+      "role": "source_mph",
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+      "size_bytes": 544941923,
+      "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+    },
+    {
+      "role": "common_p1_input",
+      "path": "particle_platform_redesign/solver/_out_m3c1/caseA_100nm_exported_p1_v4/candidate_input.h5",
+      "size_bytes": 751995,
+      "sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1"
+    },
+    {
+      "role": "deterministic_30ms_contract",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c1_theory_100nm_30ms_v2.json",
+      "size_bytes": 5344,
+      "sha256": "9a98f4edf2a6d7048e0a6aa4e3eacdc1e4b538b8ea11a9082baa212971dbe3a1"
+    },
+    {
+      "role": "common_p1_configuration",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c1_caseA_100nm_common_p1_v1.json",
+      "size_bytes": 5223,
+      "sha256": "db85d2187edd2b8807717a9f7272b6e198b3dc1a1a080df46e67980458fc763d"
+    },
+    {
+      "role": "common_p1_evidence",
+      "path": "particle_platform_redesign/solver/evidence/m3c1/case_a_100nm_common_p1_v1/comparison_manifest.json",
+      "size_bytes": 19487,
+      "sha256": "7d5dd2eaa18dbfc262083c22a812b3e6f494cc493b3994056b2a89fd18169e5c"
+    },
+    {
+      "role": "m3c2_preflight_configuration",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_theory_caseA_100nm_anchor_v1.json",
+      "size_bytes": 2938,
+      "sha256": "cac5633f7961bda2a79b5768b2220d6b3c7e5def7189cf6d90e584f4caf8671f"
+    },
+    {
+      "role": "m3c2_preflight_evidence",
+      "path": "particle_platform_redesign/solver/evidence/m3c2/anchor_preflight_v1/comparison_manifest.json",
+      "size_bytes": 3517,
+      "sha256": "1c6ac403f41a8d1e305202f4e9aeada65d63383679a5c76c0440133aedc9fc96"
+    },
+    {
+      "role": "m3c2_final_seed_allocation",
+      "path": "particle_platform_redesign/solver/evidence/m3c2/anchor_preflight_v1/run_matrix.csv",
+      "size_bytes": 12794,
+      "sha256": "bb0d9e72030c67c937128561c72a97300c3efb52d735dbf601f56e51221f3c18"
+    },
+    {
+      "role": "m3c2_model_semantics_probe",
+      "path": "particle_platform_redesign/solver/evidence/m3c2/model_semantics_probe_v1/probe_manifest.json",
+      "size_bytes": 2273,
+      "sha256": "24af7067a4cba7cf441a9e621253c13f520a2dbc4e2e0854f32f5c8c0a38a4c4"
+    }
+  ],
+  "execution_authorization": {
+    "status": "NOT_AUTHORIZED",
+    "solver_accuracy_claim": "NOT_EVALUATED",
+    "required_before_execution": [
+      "lock_no-save_COMSOL_runner_recipe_that_applies_UserDefined_and_bf1.i",
+      "lock_candidate_runner_recipe",
+      "lock_each_solver_pilot_step_or_tolerance_series_and_observables",
+      "complete_and_accept_disjoint_seed_pilot"
+    ]
+  },
+  "claim_policy": {
+    "contract_validation": "input_identity_and_semantic_intent_only",
+    "solver_accuracy": "NOT_EVALUATED",
+    "comsol_golden_truth": false,
+    "universal_comsol_equivalence": "NOT_CLAIMED"
+  }
+}

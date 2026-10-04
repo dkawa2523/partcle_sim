@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "receipt_id": "M3-C2A-caseA-100nm-pilot-execution-authorization-v1",
+  "status": "AUTHORIZED_BY_EXPLICIT_USER_DIRECTION",
+  "authorized_local_date": "2026-10-04",
+  "timezone": "Asia/Tokyo",
+  "authorization_source": {
+    "kind": "current_thread_explicit_user_direction",
+    "meaning": "Proceed with the planned M3-C2 pilot, including COMSOL reruns where necessary, and iterate evaluation without stopping at implementation alone."
+  },
+  "historical_contract_receipt": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseA_100nm_pilot_contract_v1/contract_receipt.json",
+    "sha256": "c1121d9441264453d1ccee20a7f00382d5a58e38bff592a92f1a2bbb5d180da2",
+    "execution_status_at_lock": "NOT_AUTHORIZED",
+    "mutated": false
+  },
+  "supersession": {
+    "scope": "execution_authority_only",
+    "meaning": "This receipt supplies later execution authority without modifying or relabeling the immutable pre-execution contract receipt.",
+    "contract_identity_and_semantics_unchanged": true
+  },
+  "pilot_scope": {
+    "case_id": "formal_iondrag_theory_consistent/caseA_100nm",
+    "purpose": "independent_participant_numerical_convergence_and_stochastic_ensemble_pilot",
+    "time_end_s": 0.03,
+    "particle_count": 287,
+    "output_frames": 121,
+    "authorized_activities": [
+      "candidate_pilot_support_diagnostics_and_numerical_qualification",
+      "candidate_four_seed_pilot",
+      "comsol_four_seed_three_level_no_save_pilot",
+      "pilot_normalization_and_preregistered_evaluation"
+    ]
+  },
+  "comsol": {
+    "execution_contract": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseA_100nm_stochastic_pilot_v1.json",
+      "sha256": "d720e94e0342f65ed3a6466a2357299c228495e173848897d6719b0d9feca2df"
+    },
+    "seeds": [918160, 918161, 918162, 918163],
+    "levels": [
+      {"level_id": "dt_20us", "fixed_rk4_step_s": 0.00002},
+      {"level_id": "dt_10us", "fixed_rk4_step_s": 0.00001},
+      {"level_id": "dt_5us", "fixed_rk4_step_s": 0.000005}
+    ],
+    "execution_policy": "sequential_comsolbatch_loadCopy_nosave_np1"
+  },
+  "candidate": {
+    "runner_recipe": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseA_100nm_candidate_pilot_v1.json",
+      "sha256": "f2b96690cac830e5d28c6173520d343a3e999114eecd3293e1152af377b0f6fa"
+    },
+    "seeds": [918164, 918165, 918166, 918167],
+    "levels": [
+      {"level_id": "macro_coarse", "dt_s": 0.00002, "brownian_interval_tree_depth": 3},
+      {"level_id": "macro_medium", "dt_s": 0.00001, "brownian_interval_tree_depth": 3},
+      {"level_id": "macro_fine", "dt_s": 0.000005, "brownian_interval_tree_depth": 3},
+      {"level_id": "path_fine", "dt_s": 0.000005, "brownian_interval_tree_depth": 4}
+    ]
+  },
+  "evaluation_policy": {
+    "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseA_100nm_ensemble_evaluation_v1.json",
+    "sha256": "5b0a43df05fb95a70b1a9b459a145abb1b926de546ef7a3068d9cfe32f40d58a"
+  },
+  "final_cohort": {
+    "authorized": false,
+    "replicas_per_participant": 32,
+    "seed_allocation": {
+      "path": "particle_platform_redesign/solver/evidence/m3c2/anchor_preflight_v1/run_matrix.csv",
+      "sha256": "bb0d9e72030c67c937128561c72a97300c3efb52d735dbf601f56e51221f3c18"
+    },
+    "requirement": "A separate post-pilot decision and execution authorization are required."
+  },
+  "claim_policy": {
+    "pilot_accuracy_before_evaluation": "NOT_EVALUATED",
+    "pathwise_comsol_equality": false,
+    "comsol_golden_truth": false,
+    "universal_comsol_equivalence": false,
+    "threshold_adjustment_after_pilot": "forbidden_without_a_new_policy_revision_and_unseen_cohort"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "receipt_kind": "m3c2_post_pilot_final_authorization",
+  "status": "AUTHORIZED_FOR_CONFIRMATORY_FINAL",
+  "execution_status": "NOT_RUN",
+  "policy_sha256": "9d78a612c5750821d60a144633a58d1c7817db318d89ba19251c03111337fe02",
+  "pilot_report_sha256": "5ada9bd6ad4f4236eb2aabfc84852eedb6e0a091ce0abb7ef5e8368c83f96fdc",
+  "pilot_scope_sha256": "437895fc6107ec011550911e9a186ff39bdb65a13298aa179053b2c98520642c",
+  "common_design_sha256": "4900a9168b20d46bf15e02411d61c431a59f1964b3ef4bd56a8ace50cae3356f",
+  "seed_plan_sha256": "c4273c5b5a01e6a855705cb314a62151b89304c18f7fac0208d9272fe31f3c0f",
+  "seed_allocation": {
+    "path": "../../../tools/vv/comsol/cases/m3c2_caseP_100nm_final_seed_allocation_v1.json",
+    "sha256": "9086dbdaf92cf1783b216a253bd5af4ce43fb45f50d675e7254b9e8859f21fa5"
+  },
+  "rng_noninteraction_evidence": {
+    "path": "../rng_noninteraction_v2/evidence_manifest.json",
+    "sha256": "e2dd0bc356953baa296062a5831febefbcc375c4a141d11956fa07d878d894af"
+  },
+  "geometry_tolerance_qualification": {
+    "path": "../caseP_100nm_event_tolerance_pre_final_v2/qualification_decision.json",
+    "sha256": "c7f790c6c3548013de32d3902ed21750d6f40a20e477d0133136f1b7a198b0ed"
+  },
+  "selected_final_levels": {
+    "candidate": {
+      "level_id": "macro_coarse",
+      "ordinal": 0,
+      "numerical_setting": {
+        "dt_s": 0.00002,
+        "brownian_interval_tree_depth": 3,
+        "geometry_rtol": 1e-8,
+        "purpose": "accepted_final"
+      }
+    },
+    "comsol": {
+      "level_id": "dt_20us",
+      "ordinal": 0,
+      "numerical_setting": {
+        "integrator": "classical_rk4",
+        "fixed_step_s": 0.00002,
+        "purpose": "accepted_final"
+      }
+    }
+  },
+  "candidate_final_event_gate": {
+    "validity_condition": "zero_candidate_boundary_events",
+    "decision": "REJECT_FINAL_EVALUATION_IF_ANY_CANDIDATE_FINAL_BOUNDARY_EVENT_IS_PRESENT",
+    "enforcement_owner": "m3c2_stochastic_ensemble_evaluator_v5"
+  },
+  "physical_applicability": {
+    "status": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+    "caseP_contains_negative_ions": true,
+    "locked_charge_model_includes_negative_ion_current": false,
+    "permitted_interpretation": "same_form_numerical_sensitivity_comparison_only",
+    "forbidden_interpretation": "physical_validation_of_caseP_charging_or_trajectory_truth"
+  },
+  "claim_policy": {
+    "pathwise_comsol_equality": false,
+    "comsol_golden_truth": false,
+    "physical_caseP_certification": false,
+    "threshold_adjustment_after_pilot": false
+  }
+}

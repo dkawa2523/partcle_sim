@@ -1,0 +1,12 @@
+gate,status,reason
+M3C0A-01-model-identity,PASS,MPH hashes
+M3C0A-02-package-structure,PASS,"12 packages, 287 particles, 121 times and required files"
+M3C0A-03-formula-parameter-lock,PASS,exact config and reference artifacts hashed; selected charge/force rows normalized
+M3C0A-04-field-name-unit-lock,PASS,"required canonical primitive names, COMSOL expressions and units"
+M3C0A-05-derived-field-full-provenance,NOT_TESTED,"solution tag, averaging definition, recovery method and topology id were not exported"
+M3C0A-06-ion-drag-only-pair,FAIL,all non-ion-drag physical settings and field/geometry payloads must match
+M3C0A-07-brownian-off-references,NOT_TESTED,existing histories contain nonzero Brownian force
+M3C0A-08-admissible-step-series,NOT_TESTED,candidate 10/5/2.5 us series requires both-solver full-physics characterization
+M3C0A-09-freeze-positive-example,NOT_TESTED,no status-code 2 sample in existing histories
+M3C0A-10-disappear-observation,PASS,status-code 4 is present; dedicated pre/post-hit microcase remains future evidence
+M3C0A-11-seed-cohort,PASS,32 unique preregistered seeds per package

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "policy_kind": "m3c2_stochastic_ensemble",
+  "policy_id": "M3-C2A-caseA-100nm-ensemble-evaluation",
+  "policy_revision": 1,
+  "classification": "preregistered_before_complete_pilot_and_final_cohort",
+  "bootstrap": {
+    "confidence": 0.95,
+    "resamples": 2000,
+    "seed": 42026017,
+    "resampling_unit": "whole_seed_cluster",
+    "simultaneous_scope": "all_defined_particle_id_time_components_within_each_family"
+  },
+  "quantiles": [0.1, 0.5, 0.9],
+  "occupancy": {
+    "radial_bins": 10,
+    "axial_bins": 8,
+    "role": "auxiliary_population_view_not_accuracy_gate"
+  },
+  "pilot": {
+    "replicas_per_participant": 4,
+    "minimum_levels": 3,
+    "numerical_margin_fraction": 0.25,
+    "path_sensitivity_margin_fraction": 0.25,
+    "maximum_fine_to_coarse_ratio": 0.8,
+    "level_seed_coupling": "paired_common_random_number_for_weak_observables_not_strong_pathwise_convergence",
+    "macro_level_purpose": "macro_step_convergence",
+    "candidate_path_level_purpose": "brownian_first_passage_path_depth_sensitivity"
+  },
+  "final": {
+    "replicas_per_participant": 32,
+    "participant_seed_relationship": "independent_disjoint_unpaired",
+    "equivalence_margins": {
+      "mean_position": 0.002,
+      "covariance": 0.000025,
+      "quantile": 0.005,
+      "occupancy_tv": 0.1,
+      "fate_probability": 0.05,
+      "first_arrival_cdf": 0.05
+    }
+  },
+  "margin_meaning": {
+    "position_scale": "canonical R-Z geometry bounding-box diagonal",
+    "mean_position": "per-particle-ID per-time initial-displacement ensemble mean",
+    "covariance": "per-particle-ID per-time R-Z seed covariance divided by geometry_scale_squared",
+    "quantile": "per-particle-ID per-time initial-displacement seed quantiles",
+    "fate_probability": "per-particle-ID per-time fate indicators",
+    "first_arrival_cdf": "per-particle-ID per-time terminal first-arrival indicators",
+    "occupancy_tv": "auxiliary all-particle active R-Z fixed-bin total variation"
+  },
+  "claim_policy": {
+    "pathwise_equality": false,
+    "comsol_golden_truth": false,
+    "universal_comsol_equivalence": false,
+    "threshold_adjustment_after_pilot": "forbidden_without_new_policy_revision_and_new_unseen_cohort"
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "P18-R",
+  "evaluation_revision": 1,
+  "dataset_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass",
+  "expected_comsol_version": "COMSOL 6.4.0.429",
+  "structure": {
+    "rows": 34727,
+    "particles": 287,
+    "times": 121
+  },
+  "effective_neutral_sensitivity": {
+    "molar_mass_kg_per_mol": 0.0768032,
+    "diffuse_reflection_fraction": 0.9,
+    "thermal_conductivity_W_per_m_K": 0.0165,
+    "minimum_mean_free_path_over_radius": 10.0,
+    "maximum_low_speed_ratio": 0.1,
+    "force_vector_relative_residual_limit": 1e-12,
+    "algebraic_equivalence_residual_limit": 2e-15
+  },
+  "source_models": {
+    "model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_image_minimal_corrected_10_30_100nm.mph": "23e376b8f0e7f3c8476e6f29fe3ec5429937f3154cda3a26097188b27aea103b"
+  },
+  "case_ids": [
+    "formal_iondrag_theory_consistent/caseP_10nm",
+    "formal_iondrag_theory_consistent/caseP_30nm",
+    "formal_iondrag_theory_consistent/caseP_100nm",
+    "formal_iondrag_theory_consistent/caseA_10nm",
+    "formal_iondrag_theory_consistent/caseA_30nm",
+    "formal_iondrag_theory_consistent/caseA_100nm",
+    "formal_iondrag_image_minimal_corrected/caseP_10nm",
+    "formal_iondrag_image_minimal_corrected/caseP_30nm",
+    "formal_iondrag_image_minimal_corrected/caseP_100nm",
+    "formal_iondrag_image_minimal_corrected/caseA_10nm",
+    "formal_iondrag_image_minimal_corrected/caseA_30nm",
+    "formal_iondrag_image_minimal_corrected/caseA_100nm"
+  ],
+  "hashes": {
+    "global_parameters_by_diameter_nm": {
+      "10": "a38196b02aa348b68d3aca4344141d8c56e3c1f9f7ca000b4e6798b01a550f0f",
+      "30": "905ad42ea82bc5e7d4786cdd47d366a3ba05b0ecd00161e968702f2b98a69ca1",
+      "100": "aba627c82652bab5f6ae27ad333eb4496712ad32f51f8cc52baddd50dcfa578a"
+    },
+    "settings_by_variant_case": {
+      "formal_iondrag_theory_consistent/caseP": "a9bc59344f7cae50e86a4586e3d5585ba908a7c48c43050556e1bf2af5377605",
+      "formal_iondrag_theory_consistent/caseA": "8282454e51106d39d312e9582b45cf50585f77be682e90dd83bbaf2d68102cba",
+      "formal_iondrag_image_minimal_corrected/caseP": "7c3fd36aafc3f6c952dc4ac21c6d2953f5e8eea0ecc696faa52be6a7b7f7767c",
+      "formal_iondrag_image_minimal_corrected/caseA": "0488de828cc590268c468ef5a9fb393879ab98c1a715b5424316195663a6cdb0"
+    },
+    "validation_by_case": {
+      "caseP": "bc88df8df019d36172398ce8559f60d2dc1a2f7d2cb208fa728d6981c3585c79",
+      "caseA": "67bb1aacadad8e3bc20ee7cf81ea20f779e1a4868f14789422a5c0288141776e"
+    },
+    "manifest_by_case_id": {
+      "formal_iondrag_theory_consistent/caseP_10nm": "e408733f20c55bfcd362a5d207c3353bc38fca8f2c66b482b5006e62ef131293",
+      "formal_iondrag_theory_consistent/caseP_30nm": "5bddb7c6f89f48e3a06fb938748a5f00c155e0d71b4ca8689cd6372cd850bce6",
+      "formal_iondrag_theory_consistent/caseP_100nm": "5efed41cb98bb4ca813cc6d89b547dffd906fb0ab460b1f0965e9f57feefe2dc",
+      "formal_iondrag_theory_consistent/caseA_10nm": "86a60d2a1ef749f96d742f8f23ac5857a2696e3a131c852f129b9c300c89550f",
+      "formal_iondrag_theory_consistent/caseA_30nm": "1b85e3dc78fa66b56af5e4927801e1a882a289f79c4c425a17b0b4931cdf3707",
+      "formal_iondrag_theory_consistent/caseA_100nm": "2a6baeb0ae8bae03b2afca3d763078c83117bbe7a1e2aa41fdbcaab6c4e66dd2",
+      "formal_iondrag_image_minimal_corrected/caseP_10nm": "aec44f90a1b1e46cd3a0d816cc0da44f6654c4c168f60d2279e064ccd8d2392c",
+      "formal_iondrag_image_minimal_corrected/caseP_30nm": "26bc43bd65fb81e71714539e0e3661613d8f5f3498809e97d9c235f3848b0d8b",
+      "formal_iondrag_image_minimal_corrected/caseP_100nm": "2e54480c5179b5e6599aadc9760073a3b59b23499e479121ab5444136077728a",
+      "formal_iondrag_image_minimal_corrected/caseA_10nm": "28dcc1b53bb9599d017603b38c5d875e4ed193c59bf713a60c6e409e886f90e7",
+      "formal_iondrag_image_minimal_corrected/caseA_30nm": "8aca14918178cd316a8f535384789838521ceffb6b61dc0b8e69bff028ba11d3",
+      "formal_iondrag_image_minimal_corrected/caseA_100nm": "c317f70e343fd07d1e72c14175b62687b3fc62daf548ea381b2adf1c9ab5ac9d"
+    },
+    "history_by_case_id": {
+      "formal_iondrag_theory_consistent/caseP_10nm": "b7b0b29a11d7845ca947304a260f719e25eb73be07c16f3c0e2a2b9e95dcaf6f",
+      "formal_iondrag_theory_consistent/caseP_30nm": "a26087b4bd5704dddfd957ee6dd5d034698b293ba188ae8c64130e0ecda8a957",
+      "formal_iondrag_theory_consistent/caseP_100nm": "8470c6399fe1cd549854958bee0e572dfb05bd04f3ccd767b514383b1788e11d",
+      "formal_iondrag_theory_consistent/caseA_10nm": "b11d49c4e60fe817a65df33ce6581533c78dcc43e2a8c61de204eb38c2fe488f",
+      "formal_iondrag_theory_consistent/caseA_30nm": "c21f1865d98a8a37c92219b609732145e98dd0678222f48034609c704e655f6c",
+      "formal_iondrag_theory_consistent/caseA_100nm": "af61916d47dc634e4b3ca42139eebe7fe74a0fd27941250aefda2b39f4ad4a78",
+      "formal_iondrag_image_minimal_corrected/caseP_10nm": "61df6194f03fe326581e69e8ea47b859e4b8e95d8471d555d6c8e21ca0eb9108",
+      "formal_iondrag_image_minimal_corrected/caseP_30nm": "2390ac6c3cdcd8a640c68e283e65fec8b1b91506ef7cca29a0a0a7612f092ed8",
+      "formal_iondrag_image_minimal_corrected/caseP_100nm": "94524ed13fbd721fa406faea4f5998dbcd409a4e650ba03a33b250de60ae1a5c",
+      "formal_iondrag_image_minimal_corrected/caseA_10nm": "405220f7f85b373e32217955e542614e33d4e307a81d52f8517e22046f7ca65d",
+      "formal_iondrag_image_minimal_corrected/caseA_30nm": "9220ae74646618c1aa300bdaeffd8a5c35867d3b7d529a811c8c58419b669206",
+      "formal_iondrag_image_minimal_corrected/caseA_100nm": "2043cfb90b49ddc0a5ae0397b2e9023e90b5c4540321d126d92e62ea84fa95a5"
+    },
+    "field_by_case_id": {
+      "formal_iondrag_theory_consistent/caseP_10nm": "8448c8cd894180eb60692fbe10988080c16aac6cbaa6f19e00130330063204ae",
+      "formal_iondrag_theory_consistent/caseP_30nm": "8448c8cd894180eb60692fbe10988080c16aac6cbaa6f19e00130330063204ae",
+      "formal_iondrag_theory_consistent/caseP_100nm": "891022ee599707d39a852aaf83bb6f01adcb310f7e0baa58360a43284d114c72",
+      "formal_iondrag_theory_consistent/caseA_10nm": "5cc335f7ccb237f9b8d6746a99fa1b4d7a0b22141e9aab35d1ccc784924d38d9",
+      "formal_iondrag_theory_consistent/caseA_30nm": "8ae69c44a91bc34940e81a813d7c72e7b2177204ec72b1ab4eb5cb88e6485092",
+      "formal_iondrag_theory_consistent/caseA_100nm": "f581198b5014598386fa3fbacb468be40ac5890c7e4ff03799a39a1bfbf7527b",
+      "formal_iondrag_image_minimal_corrected/caseP_10nm": "b6ef0f5af68a8b6c94d2c446c16c428a876749caeaba28e431931bbb22d02d6b",
+      "formal_iondrag_image_minimal_corrected/caseP_30nm": "b6ef0f5af68a8b6c94d2c446c16c428a876749caeaba28e431931bbb22d02d6b",
+      "formal_iondrag_image_minimal_corrected/caseP_100nm": "50db184a54eeda865bf4c15ac22568f0598f9abada23d260f6c1b15982e982ae",
+      "formal_iondrag_image_minimal_corrected/caseA_10nm": "f93838b080a9bb75475058503c2b451aa64643ceead9dd947b117f606c82a026",
+      "formal_iondrag_image_minimal_corrected/caseA_30nm": "31c0796a9b41e441b37d74bdb236580acbad1b67aa4983be0cf6612ae477cdf2",
+      "formal_iondrag_image_minimal_corrected/caseA_100nm": "293ec6bdc8fd9aea6f5a78d068fc638e84f20b0982102eb348e20af40c5d9c01"
+    }
+  },
+  "case_profiles": {
+    "caseP": {
+      "physics_tag": "fpt",
+      "settings": {
+        "df1|Rarefaction_Effects": "[Epstein]",
+        "df1|MeanFreePathCalculation": "[IdealGasHardSphereCollisions]",
+        "df1|sigmaR": "[sigmaR_p]",
+        "df1|rho": "[root.comp1.rho_g_d]",
+        "df1|u": "[0, 0, 0]",
+        "df1|u_src": "[root.comp1.u]",
+        "df1|minput_temperature_src": "[root.comp1.T]",
+        "thpf1|ThermophoreticForceModel": "[Waldmann]",
+        "thpf1|MeanFreePathCalculation": "[IdealGasHardSphereCollisions]",
+        "thpf1|UsePPR": "[1]",
+        "thpf1|mg": "[Mmix]",
+        "thpf1|k": "[k_mix]",
+        "thpf1|rho": "[root.comp1.rho_g_d]",
+        "thpf1|minput_temperature_src": "[root.comp1.T]",
+        "thpf1|alphaE": "[1]",
+        "thpf1|alphaT": "[1]"
+      }
+    },
+    "caseA": {
+      "physics_tag": "fptas",
+      "settings": {
+        "df1|Rarefaction_Effects": "[Epstein]",
+        "df1|MeanFreePathCalculation": "[IdealGasHardSphereCollisions]",
+        "df1|sigmaR": "[sigmaR_p]",
+        "df1|rho": "[root.comp1.AS_rhog]",
+        "df1|u": "[root.comp1.AS_ugr, 0[m/s], root.comp1.AS_ugz]",
+        "df1|u_src": "[userdef]",
+        "df1|minput_temperature_src": "[userdef]",
+        "thpf1|ThermophoreticForceModel": "[Waldmann]",
+        "thpf1|MeanFreePathCalculation": "[IdealGasHardSphereCollisions]",
+        "thpf1|UsePPR": "[1]",
+        "thpf1|mg": "[Mmix]",
+        "thpf1|k": "[k_mix]",
+        "thpf1|rho": "[root.comp1.AS_rhog]",
+        "thpf1|minput_temperature_src": "[userdef]",
+        "thpf1|alphaE": "[1]",
+        "thpf1|alphaT": "[1]"
+      }
+    }
+  }
+}

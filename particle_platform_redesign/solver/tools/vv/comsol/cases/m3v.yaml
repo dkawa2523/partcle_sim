@@ -1,0 +1,82 @@
+schema_version: 1
+evaluation_id: M3-V
+evaluation_revision: 3
+
+dataset:
+  relative_path: model_dataset/cf4_o2_etch_caseA_nonlinear_sass
+  classification: reference_only
+  expected_particles: 287
+  expected_times: 121
+  expected_rows: 34727
+  expected_time_start_s: 0.0
+  expected_time_end_s: 0.03
+  # Internal fixed RK4/Brownian update interval recorded by the model. The 121
+  # exported output times are intentionally nonuniform and are audited separately.
+  internal_solver_step_s: 1.0e-5
+
+# These are workflow/profile names only. They must never become branches in the
+# trajectory engine. Both producers must ultimately write the same canonical
+# field format consumed by load_case().
+field_sources:
+  caseP:
+    mode: imported_external_plasma_fields
+    reference_dataset: dsetPmean
+  caseA:
+    mode: reduced_electrostatic_reference
+    reference_dataset: dset_AS_field
+    builder_model: sass_boltzmann_bohm_poisson_v1
+
+# Ion drag is orthogonal to field production. The image-aligned closure is a
+# sensitivity model, not a truth model.
+ion_drag_models:
+  formal_iondrag_theory_consistent: relative_flow_screened_collection_orbital_v1
+  formal_iondrag_image_minimal_corrected: electric_field_aligned_image_sensitivity_v1
+
+particle_diameters_nm: [10, 30, 100]
+
+physics_reference:
+  oml_stationary_maxwellian_debye_huckel_v1:
+    maximum_radius_over_debye: 0.1
+    maximum_ion_drift_over_mean_thermal_speed: 0.1
+  relative_drift_regularized_two_current_v1:
+    relative_speed_regularization_m_per_s: 1.0
+    minimum_ion_energy_eV_as_V: 0.01
+    exponential_argument_min: -50.0
+    exponential_argument_max: 50.0
+    frozen_rate_current_scale_residual_limit: 1.0e-10
+  epstein_linear_v1:
+    minimum_mean_free_path_over_radius: 10.0
+    maximum_relative_speed_over_mean_thermal_speed: 0.1
+    diffuse_reflection_fraction: 0.9
+    force_vector_relative_residual_limit: 1.0e-12
+  neutral_mixture:
+    # The COMSOL reference case specifies 80 mol% CF4 and 20 mol% O2.
+    cf4_mole_fraction: 0.8
+    o2_mole_fraction: 0.2
+    cf4_molar_mass_kg_per_mol: 0.0880043
+    o2_molar_mass_kg_per_mol: 0.0319988
+
+force_columns:
+  electric: electric_force_magnitude_N
+  ion_drag: ion_drag_force_magnitude_N
+  epstein_drag: Epstein_drag_force_magnitude_N
+  thermophoresis: thermophoretic_force_magnitude_N
+  free_molecular_lift: free_molecular_lift_force_magnitude_N
+  dielectrophoresis: dielectrophoretic_force_magnitude_N
+  gravity_buoyancy: gravity_buoyancy_force_magnitude_N
+  brownian_sample: Brownian_force_magnitude_N
+
+# Only meridional r-z components contribute to this 2-D axisymmetric particle
+# trajectory. The exported phi Brownian sample is deliberately excluded.
+force_components:
+  electric: [electric_force_r_N, electric_force_z_N]
+  ion_drag: [ion_drag_force_r_N, ion_drag_force_z_N]
+  epstein_drag: [Epstein_drag_force_r_N, Epstein_drag_force_z_N]
+  thermophoresis: [thermophoretic_force_r_N, thermophoretic_force_z_N]
+  free_molecular_lift: [free_molecular_lift_force_r_N, free_molecular_lift_force_z_N]
+  dielectrophoresis: [dielectrophoretic_force_r_N, dielectrophoretic_force_z_N]
+  gravity_buoyancy: [gravity_buoyancy_force_r_N, gravity_buoyancy_force_z_N]
+  brownian_sample: [Brownian_force_r_N, Brownian_force_z_N]
+
+sensitivity:
+  position_difference_threshold_m: 1.0e-4

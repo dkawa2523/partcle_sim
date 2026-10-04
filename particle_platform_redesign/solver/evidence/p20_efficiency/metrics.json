@@ -1,0 +1,377 @@
+{
+  "benchmark": "p20_efficiency_v1",
+  "benchmark_role": "manual_machine_local_non_gating",
+  "cadence_efficiency": {
+    "comparisons": {
+      "artifact_byte_reduction": 2907292,
+      "artifact_byte_reduction_fraction": 0.9015177590773751,
+      "artifact_file_count_reduction": 64,
+      "current_median_speedup_over_fixed_64": 1.4369467708486892,
+      "payload_digest_exact_match": true,
+      "planned_memory_exact_match": true,
+      "segment_count_reduction_factor": 64.0
+    },
+    "current_work_scaled": {
+      "artifact_bytes": 317594,
+      "artifact_file_count": 6,
+      "checkpoint_bytes": 15344,
+      "checkpoint_count": 1,
+      "durable_commit_cadence": {
+        "barrier": "accepted_macro_step",
+        "revision": "cumulative_solver_work_v1",
+        "work_components": [
+          "macro_step_count",
+          "accepted_particle_pieces",
+          "candidate_queries",
+          "refinements"
+        ],
+        "work_threshold": 1048576
+      },
+      "elapsed_s": [
+        1.9497358999215066,
+        1.9150502998381853,
+        1.9337154000531882
+      ],
+      "exponential_midpoint_revision": null,
+      "failure_reason_counts": {
+        "field_support": 0,
+        "indeterminate_applicability_certificate": 0,
+        "indeterminate_boundary_policy": 0,
+        "indeterminate_event": 0,
+        "indeterminate_surface_departure": 0,
+        "integrator_accuracy": 0,
+        "model_applicability": 0,
+        "nonfinite_physics": 0,
+        "numerical_event_budget": 0
+      },
+      "final_charge_number_max": 0.0,
+      "final_charge_number_min": 0.0,
+      "integrator": "rk4_fixed",
+      "latest_checkpoint_work": {
+        "accepted_particle_pieces": 32768,
+        "candidate_queries": 0,
+        "macro_step_count": 4096,
+        "refinements": 0,
+        "total": 36864
+      },
+      "lifecycle_counts": {
+        "active": 8,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      },
+      "macro_step_count": 4096,
+      "maximum_dt_charge_lipschitz": 0.0,
+      "median_elapsed_s": 1.9337154000531882,
+      "particle_count": 8,
+      "payload_sha256": "sha256:6376db3a74723b69f9e3f6190ea0b7dfd4f7063e860121ccc98e80c97bf70384",
+      "planned_memory_bytes": 3546288,
+      "planned_run_peak_bytes": 3546288,
+      "production_revision_tuple": {
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v17",
+        "engine_algorithm_revision": "particle_engine_v36",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
+        "exponential_midpoint_revision": null,
+        "memory_plan_revision": "solver_owned_memory_plan_v13",
+        "physics_runtime_revision": "charge_jacobian_compiled_physics_runtime_v18",
+        "result_algorithm_revision": "durable_segmented_result_v5",
+        "runtime_layout_revision": "resident_soa_serial_slab_v6",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "segment_bytes": 283856,
+      "segment_count": 1,
+      "segment_macro_step_max": 4096,
+      "segment_macro_step_min": 4096,
+      "timed_repeats": 3
+    },
+    "fixed_64_emulation": {
+      "artifact_bytes": 3224886,
+      "artifact_file_count": 70,
+      "checkpoint_bytes": 30688,
+      "checkpoint_count": 2,
+      "durable_commit_cadence": {
+        "barrier": "accepted_macro_step",
+        "revision": "cumulative_solver_work_v1",
+        "work_components": [
+          "macro_step_count",
+          "accepted_particle_pieces",
+          "candidate_queries",
+          "refinements"
+        ],
+        "work_threshold": 576
+      },
+      "elapsed_s": [
+        2.7710666998755187,
+        2.77864609984681,
+        2.8049941998906434
+      ],
+      "exponential_midpoint_revision": null,
+      "failure_reason_counts": {
+        "field_support": 0,
+        "indeterminate_applicability_certificate": 0,
+        "indeterminate_boundary_policy": 0,
+        "indeterminate_event": 0,
+        "indeterminate_surface_departure": 0,
+        "integrator_accuracy": 0,
+        "model_applicability": 0,
+        "nonfinite_physics": 0,
+        "numerical_event_budget": 0
+      },
+      "final_charge_number_max": 0.0,
+      "final_charge_number_min": 0.0,
+      "integrator": "rk4_fixed",
+      "latest_checkpoint_work": {
+        "accepted_particle_pieces": 32768,
+        "candidate_queries": 0,
+        "macro_step_count": 4096,
+        "refinements": 0,
+        "total": 36864
+      },
+      "lifecycle_counts": {
+        "active": 8,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      },
+      "macro_step_count": 4096,
+      "maximum_dt_charge_lipschitz": 0.0,
+      "median_elapsed_s": 2.77864609984681,
+      "particle_count": 8,
+      "payload_sha256": "sha256:6376db3a74723b69f9e3f6190ea0b7dfd4f7063e860121ccc98e80c97bf70384",
+      "planned_memory_bytes": 3546288,
+      "planned_run_peak_bytes": 3546288,
+      "production_revision_tuple": {
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v17",
+        "engine_algorithm_revision": "particle_engine_v36",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
+        "exponential_midpoint_revision": null,
+        "memory_plan_revision": "solver_owned_memory_plan_v13",
+        "physics_runtime_revision": "charge_jacobian_compiled_physics_runtime_v18",
+        "result_algorithm_revision": "durable_segmented_result_v5",
+        "runtime_layout_revision": "resident_soa_serial_slab_v6",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "segment_bytes": 3175808,
+      "segment_count": 64,
+      "segment_macro_step_max": 64,
+      "segment_macro_step_min": 64,
+      "timed_repeats": 3
+    },
+    "legacy_emulation": "benchmark-process-only cadence constants floor=64*(N+1) and per_particle=0; the guarded exact ballistic workload contributes N accepted pieces plus one macro count per step, so this threshold commits every 64 macro steps",
+    "workload": {
+      "cumulative_work": 36864,
+      "macro_steps": 4096,
+      "motion": "stationary boundaryless ballistic",
+      "output": "no trajectory frames or probes",
+      "particles": 8,
+      "work_per_macro": 9
+    }
+  },
+  "captured_at_utc": "2026-10-03T16:42:25.654686+00:00",
+  "conditions": {
+    "comsol_dependency": false,
+    "execution_order": "one warmup per mode, then alternating mode order by timed repeat in one process",
+    "jit": "warm in-process compiled execution; cold compilation is excluded",
+    "outside_timed_scope": "case materialization, load_case, open_result, validation, artifact accounting, and payload hashing",
+    "timed_repeats_per_mode": 3,
+    "timed_scope": "simulate only",
+    "warmups_per_mode": 1
+  },
+  "continuous_charge_operational_utility": {
+    "accuracy_scope": {
+      "claim": "no equal-accuracy claim: the two step sizes intentionally produce different discrete payloads and only demonstrate operational utility",
+      "separate_tests": [
+        "tests/verification/test_integrators.py::test_exponential_midpoint_charge_is_affine_exact_stiff_and_monotone",
+        "tests/verification/test_integrators.py::test_exponential_midpoint_couples_nonlinear_charge_and_motion_at_second_order",
+        "tests/scenarios/test_force_coupled_run.py::test_continuous_charge_stability_gate_is_owned_by_explicit_rk4",
+        "tests/scenarios/test_force_coupled_run.py::test_aggregate_charge_coupled_time_refinement"
+      ]
+    },
+    "comparisons": {
+      "both_completed_without_particle_failure": true,
+      "macro_step_reduction": 112,
+      "macro_step_reduction_factor": 8.0,
+      "median_simulate_speedup": 5.012452493835134,
+      "payload_digest_compared_for_accuracy": false
+    },
+    "old_admissible_step": {
+      "artifact_bytes": 127694,
+      "artifact_file_count": 6,
+      "checkpoint_bytes": 29144,
+      "checkpoint_count": 1,
+      "durable_commit_cadence": {
+        "barrier": "accepted_macro_step",
+        "revision": "cumulative_solver_work_v1",
+        "work_components": [
+          "macro_step_count",
+          "accepted_particle_pieces",
+          "candidate_queries",
+          "refinements"
+        ],
+        "work_threshold": 1048576
+      },
+      "elapsed_s": [
+        0.35889209993183613,
+        0.3618991000112146,
+        0.35884419991634786
+      ],
+      "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+      "failure_reason_counts": {
+        "field_support": 0,
+        "indeterminate_applicability_certificate": 0,
+        "indeterminate_boundary_policy": 0,
+        "indeterminate_event": 0,
+        "indeterminate_surface_departure": 0,
+        "integrator_accuracy": 0,
+        "model_applicability": 0,
+        "nonfinite_physics": 0,
+        "numerical_event_budget": 0
+      },
+      "final_charge_number_max": -18026.626346412646,
+      "final_charge_number_min": -18026.626346412646,
+      "integrator": "exponential_midpoint",
+      "latest_checkpoint_work": {
+        "accepted_particle_pieces": 16384,
+        "candidate_queries": 16384,
+        "macro_step_count": 128,
+        "refinements": 0,
+        "total": 32896
+      },
+      "lifecycle_counts": {
+        "active": 128,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      },
+      "macro_step_count": 128,
+      "maximum_dt_charge_lipschitz": 0.2608516581481289,
+      "median_elapsed_s": 0.35889209993183613,
+      "particle_count": 128,
+      "payload_sha256": "sha256:39adae946e77715d7873d41b58a733aa73e5af4b42f14e814538edbcd37a1313",
+      "planned_memory_bytes": 15939326,
+      "planned_run_peak_bytes": 15939326,
+      "production_revision_tuple": {
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v17",
+        "engine_algorithm_revision": "particle_engine_v36",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
+        "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+        "memory_plan_revision": "solver_owned_memory_plan_v13",
+        "physics_runtime_revision": "charge_jacobian_compiled_physics_runtime_v18",
+        "result_algorithm_revision": "durable_segmented_result_v5",
+        "runtime_layout_revision": "resident_soa_serial_slab_v6",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "segment_bytes": 65488,
+      "segment_count": 1,
+      "segment_macro_step_max": 128,
+      "segment_macro_step_min": 128,
+      "timed_repeats": 3
+    },
+    "stable_larger_step": {
+      "artifact_bytes": 124102,
+      "artifact_file_count": 6,
+      "checkpoint_bytes": 29144,
+      "checkpoint_count": 1,
+      "durable_commit_cadence": {
+        "barrier": "accepted_macro_step",
+        "revision": "cumulative_solver_work_v1",
+        "work_components": [
+          "macro_step_count",
+          "accepted_particle_pieces",
+          "candidate_queries",
+          "refinements"
+        ],
+        "work_threshold": 1048576
+      },
+      "elapsed_s": [
+        0.07160010002553463,
+        0.07229760009795427,
+        0.07026599999517202
+      ],
+      "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+      "failure_reason_counts": {
+        "field_support": 0,
+        "indeterminate_applicability_certificate": 0,
+        "indeterminate_boundary_policy": 0,
+        "indeterminate_event": 0,
+        "indeterminate_surface_departure": 0,
+        "integrator_accuracy": 0,
+        "model_applicability": 0,
+        "nonfinite_physics": 0,
+        "numerical_event_budget": 0
+      },
+      "final_charge_number_max": -18015.743572926414,
+      "final_charge_number_min": -18015.743572926414,
+      "integrator": "exponential_midpoint",
+      "latest_checkpoint_work": {
+        "accepted_particle_pieces": 2048,
+        "candidate_queries": 2048,
+        "macro_step_count": 16,
+        "refinements": 0,
+        "total": 4112
+      },
+      "lifecycle_counts": {
+        "active": 128,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      },
+      "macro_step_count": 16,
+      "maximum_dt_charge_lipschitz": 2.086813265185031,
+      "median_elapsed_s": 0.07160010002553463,
+      "particle_count": 128,
+      "payload_sha256": "sha256:192f7e00b8f5b7f0a6cd9efac803316c17c59f07ab108cc1290e31e54f2a32ff",
+      "planned_memory_bytes": 15939326,
+      "planned_run_peak_bytes": 15939326,
+      "production_revision_tuple": {
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v17",
+        "engine_algorithm_revision": "particle_engine_v36",
+        "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
+        "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+        "memory_plan_revision": "solver_owned_memory_plan_v13",
+        "physics_runtime_revision": "charge_jacobian_compiled_physics_runtime_v18",
+        "result_algorithm_revision": "durable_segmented_result_v5",
+        "runtime_layout_revision": "resident_soa_serial_slab_v6",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "segment_bytes": 61904,
+      "segment_count": 1,
+      "segment_macro_step_max": 16,
+      "segment_macro_step_min": 16,
+      "timed_repeats": 3
+    },
+    "workload": {
+      "integrator": "exponential_midpoint",
+      "motion": "stationary XY cohort; continuous stationary-Maxwellian charge",
+      "output": "no trajectory frames or probes",
+      "particles": 128,
+      "physical_interval_s": 32.0
+    }
+  },
+  "interpretation": {
+    "cadence_claim": "the cadence pair has identical public scientific payload bytes; only durable partitioning and its manifest identity differ",
+    "charge_accuracy_claim": "none between the two benchmark step sizes; the larger step demonstrates stable operational execution and relies on separate convergence and stiff-limit tests",
+    "portable_threshold": "none; elapsed times and ratios are machine-local observations"
+  },
+  "machine": {
+    "chamber_particles": "0.1.0.dev0",
+    "driver_sha256": "sha256:ca843a1321c75e5616d29ffb560ae44f5f0c9fa919a3875d0bf867f3c594d216",
+    "h5py": "3.16.0",
+    "logical_cpu_count": 20,
+    "machine": "AMD64",
+    "numba": "0.67.0",
+    "numpy": "2.5.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.13",
+    "uv_lock_sha256": "sha256:e81eb7fc2daff0be0162f6b318d7889eb7799885cdb9c8785d64c8e3333afc33"
+  }
+}

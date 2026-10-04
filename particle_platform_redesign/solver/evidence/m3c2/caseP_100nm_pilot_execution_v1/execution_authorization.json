@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "authorization_kind": "m3c2_pilot_execution_authorization",
+  "authorization_id": "M3-C2A-caseP-100nm-pilot-execution-authorization-v1",
+  "status": "AUTHORIZED_BY_EXPLICIT_USER_DIRECTION",
+  "authorized_local_date": "2026-10-04",
+  "timezone": "Asia/Tokyo",
+  "authorization_source": {
+    "kind": "current_thread_explicit_user_direction",
+    "meaning": "Proceed with the prioritized M3-C2 Case-P pilot implementation and execution after the shared contract, participant runners, normalizers, and evaluator are locked."
+  },
+  "contract": {
+    "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_stochastic_pilot_v1.json",
+    "sha256": "757755191ead405dc046afd1f09eca0953354d47b00e079f8537225715fa4954"
+  },
+  "contract_receipt": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseP_100nm_pilot_contract_v1/contract_receipt.json",
+    "sha256": "7f70c756db7b2982b1b8a4e92bb405836aa34debb44f032dffdcfc1d4cf20ec0"
+  },
+  "campaign": {
+    "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+    "evaluation_case_id": "M3-C2A_caseP_100nm_common-P1",
+    "output_slug": "caseP_100nm",
+    "final_registration_kind": "m3c2_caseP_100nm_final_campaign",
+    "candidate_case_name_prefix": "m3c2_caseP_100nm"
+  },
+  "purpose": "pilot",
+  "participants": [
+    "comsol",
+    "candidate"
+  ],
+  "historical_lock_policy": {
+    "contract_and_receipt_remain_immutable": true,
+    "contract_execution_status_at_lock": "NOT_AUTHORIZED",
+    "authorization_supersedes_only_the_execution_gate": true
+  },
+  "claim_policy": {
+    "solver_accuracy_before_independent_evaluation": "NOT_EVALUATED",
+    "physical_applicability": "NOT_CERTIFIED_NEGATIVE_ION_CURRENT_OMITTED",
+    "pathwise_comsol_equality": false,
+    "comsol_golden_truth": false,
+    "final_campaign_authorized": false
+  }
+}

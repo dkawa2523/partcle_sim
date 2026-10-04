@@ -1,0 +1,40 @@
+{
+  "captured_at_utc": "2026-09-29T05:59:48.4747959Z",
+  "evidence_revision": "release_platform_smoke_v1",
+  "package": {
+    "name": "chamber-particles",
+    "version": "0.1.0.dev0"
+  },
+  "public_operations": [
+    "load_case",
+    "simulate",
+    "open_result"
+  ],
+  "quality": {
+    "complexity": "passed",
+    "import_linter": "3 contracts kept, 0 broken",
+    "pyrefly": "0 errors",
+    "ruff_format": "passed",
+    "ruff_lint": "passed",
+    "verification_and_scenarios": "384 passed"
+  },
+  "runs": [
+    {
+      "operating_system": "Microsoft Windows NT 10.0.26200.0",
+      "platform": "windows",
+      "python": "3.12.13",
+      "status": "complete",
+      "wheel": "chamber_particles-0.1.0.dev0-py3-none-any.whl",
+      "wheel_sha256": "sha256:877d7c36a833508af68e0929c8e3ac9e3659cd5f92f1a0cdac741fbc5ec07a71"
+    },
+    {
+      "operating_system": "Ubuntu 24.04.4 LTS; WSL2 kernel 6.6.87.2",
+      "platform": "linux-wsl2",
+      "python": "3.12.3",
+      "status": "complete",
+      "wheel": "chamber_particles-0.1.0.dev0-py3-none-any.whl",
+      "wheel_sha256": "sha256:c14fa84fdf9b453ec17c858c89d2fe366fa3a753e013f10873d3c9b23ec30ac6"
+    }
+  ],
+  "uv_lock_sha256": "sha256:e6fb37a4ad1ea2438d6ec4795c1b4b158160efcd989f2d398864edb4451ee839"
+}

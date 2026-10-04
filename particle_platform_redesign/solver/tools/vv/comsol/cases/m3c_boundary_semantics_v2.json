@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C0-boundary-semantics",
+  "evaluation_revision": 2,
+  "classification": "external_comsol_reference",
+  "expected_comsol_version": "6.4.0.429",
+  "source_model": {
+    "relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "load_mode": "ModelUtil.loadCopy",
+    "staged_filename": "source_copy.mph",
+    "saved": false
+  },
+  "case": {
+    "workflow": "caseA",
+    "particle_diameter_m": 1e-7,
+    "particle_count_per_scenario": 1,
+    "output_interval_s": 2.5e-6,
+    "output_frames": 61,
+    "time_end_s": 1.5e-4,
+    "fixed_rk4_steps": [
+      {"label": "dt_10us", "seconds": 1e-5},
+      {"label": "dt_5us", "seconds": 5e-6},
+      {"label": "dt_2p5us", "seconds": 2.5e-6}
+    ]
+  },
+  "numerics": {
+    "integrator": "classical_rk4",
+    "integrator_order": 4,
+    "relative_tolerance": 1e-8,
+    "wall_accuracy_order": 1,
+    "store_particle_status": true,
+    "store_extra": false
+  },
+  "physics": {
+    "force_free": true,
+    "dynamic_charge_active": false,
+    "purpose": "isolate active free flight and terminal boundary semantics from force and field interpolation"
+  },
+  "scenarios": [
+    {
+      "id": "freeze_inlet_37",
+      "boundary_feature": "outin",
+      "boundary_id": 37,
+      "wall_condition": "Freeze",
+      "source_position_m": [0.23927, 0.115],
+      "source_velocity_m_s": [10.0, 0.0],
+      "expected_status_code": 2,
+      "analytic_event_time_s": 7.3e-5,
+      "analytic_hit_position_m": [0.24, 0.115]
+    },
+    {
+      "id": "disappear_pump_35",
+      "boundary_feature": "outpump",
+      "boundary_id": 35,
+      "wall_condition": "Disappear",
+      "source_position_m": [0.21, 0.00073],
+      "source_velocity_m_s": [0.0, -10.0],
+      "expected_status_code": 4,
+      "analytic_event_time_s": 7.3e-5,
+      "analytic_hit_position_m": [0.21, 0.0]
+    }
+  ],
+  "raw_export": {
+    "revision": 1,
+    "table": "state_raw_wide.csv",
+    "columns_per_frame": 9,
+    "columns": [
+      "particle_id",
+      "time_s",
+      "r_m",
+      "z_m",
+      "velocity_r_m_per_s",
+      "velocity_z_m_per_s",
+      "current_status_code",
+      "final_status_code",
+      "stop_or_event_time_s"
+    ]
+  },
+  "acceptance": {
+    "maximum_event_time_absolute_error_s": 5e-9,
+    "maximum_event_time_step_spread_s": 5e-9,
+    "maximum_hit_position_absolute_error_m": 5e-8,
+    "maximum_freeze_post_event_position_spread_m": 5e-12,
+    "maximum_active_position_absolute_error_m": 1e-12,
+    "maximum_active_velocity_absolute_error_m_per_s": 1e-12,
+    "require_expected_final_status": true,
+    "require_single_terminal_event": true
+  },
+  "scope": {
+    "certifies": [
+      "COMSOL force-free active-frame path against x(t)=x0+v0*t and v(t)=v0",
+      "COMSOL boundary 37 Freeze terminal-state semantics in an isolated force-free normal-impact case",
+      "COMSOL boundary 35 Disappear terminal-state semantics in an isolated force-free normal-impact case"
+    ],
+    "does_not_certify": [
+      "production solver boundary parity",
+      "full-physics trajectory agreement",
+      "grazing or corner events",
+      "probabilistic sticking or reflection",
+      "native-field or canonical-P1 equivalence"
+    ]
+  }
+}

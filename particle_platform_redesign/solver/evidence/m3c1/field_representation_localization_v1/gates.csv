@@ -1,0 +1,10 @@
+gate,observed,operator,limit,status,interpretation
+locked_prior_decisions,4_BOUND,==,4_BOUND,PASS,separate historical decisions
+native_saved_state_cohort,13202,==,13202,PASS,complete active grid
+ppr_particle_binding,13202,==,13202,PASS,same keys and coordinates
+ppr_node_heat_flux_relative_l2,6.338106055700018e-17,<=,1e-12,PASS,coordinate-matched PPR node values after registered axis policy
+canonical_p1_support,1.0,==,1.0,PASS,all native saved states
+t0_axis_projection_excluded,0.14,>,0.007517953530915272,PASS,t0 samples cannot depend on projected axis nodes
+t0_field_difference_above_roundoff,14,>=,1,PASS,"classification threshold is a pre-existing roundoff limit, not accuracy tolerance"
+t0_charge_rate_propagation,0.049101396439728405,>,1e-12,PASS,same state and production formula; primitives differ only by representation
+t0_acceleration_propagation,0.03989452875541078,>,1e-12,PASS,same state and production formula; primitives differ only by representation

@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "tool_revision": "m3c2_caseA_100nm_comsol_runner_v3",
+  "status": "COMPLETE_FINAL_CAMPAIGN_NOT_EVALUATED",
+  "mode": "FinalCampaign",
+  "source_mph": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass\\model\\icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+  "source_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "source_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "source_unchanged": true,
+  "source_load_policy": "ModelUtil.loadCopy",
+  "process_policy": "comsolbatch_-nosave_-error_on_-isolated_prefsdir_-np_1",
+  "model_saved": false,
+  "common_p1_input": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c1\\caseA_100nm_exported_p1_v4\\candidate_input.h5",
+  "common_p1_input_sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+  "common_p1_content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c",
+  "contract_sha256": "d720e94e0342f65ed3a6466a2357299c228495e173848897d6719b0d9feca2df",
+  "runner_sha256": "47f35be9ea6e965f44531c5f882cf15a01b4c78b7866298359f47ef8a870a15b",
+  "java_sha256": "e497cb11fa70ed82e6fe4b97c11b636bd76dc7ce181cf01c00ac2dda5b65b787",
+  "validation_entry_java_sha256": "efd3f5e75ef48fd46ad6e06bda810b00828151c001bb3c5f3468a008f4eb3fb2",
+  "generated_request_java_sha256": "3eddd7a86fe75900f624cf8a53d05cb05714a586661fc00459615589fb0c2d35",
+  "preparer_sha256": "5fcc035680f13b17b624051645d99b531a302a64a07c51c32f7b3d8780d50b16",
+  "normalizer_sha256": "f68d0b197f9dd5042b597a168dd75220802997500aba1a52cd426d8402646738",
+  "execution_request_sha256": "7bbb98847b0e66798004248b7cc77f6f2cb6adc83c80cf418d13e59bd842c834",
+  "request_csv_sha256": "79b6738ba082d4c0378942d8def67877b579010dcad7999ff9f5fdc6b6e213a7",
+  "campaign_registration": {
+    "filename": "final_registration.json",
+    "sha256": "76ed101469aa22819c350a3740662413b2995bb3925e7e1e3f41be531d897bf8"
+  },
+  "comsol_version": "COMSOL Multiphysics 6.4.0.429",
+  "seeds": [
+    318160,
+    318161,
+    318162,
+    318163,
+    318164,
+    318165,
+    318166,
+    318167,
+    318168,
+    318169,
+    318170,
+    318171,
+    318172,
+    318173,
+    318174,
+    318175,
+    318176,
+    318177,
+    318178,
+    318179,
+    318180,
+    318181,
+    318182,
+    318183,
+    318184,
+    318185,
+    318186,
+    318187,
+    318188,
+    318189,
+    318190,
+    318191
+  ],
+  "fixed_rk4_steps_s": [
+    2E-05
+  ],
+  "output_schedule": [
+    {
+      "start_s": 0.0,
+      "stop_s": 0.0005,
+      "step_s": 1E-05
+    },
+    {
+      "start_s": 0.0006,
+      "stop_s": 0.005,
+      "step_s": 0.0001
+    },
+    {
+      "start_s": 0.006,
+      "stop_s": 0.03,
+      "step_s": 0.001
+    }
+  ],
+  "normalized_manifest": "comsol_campaign_manifest.json",
+  "scientific_claim": "NOT_EVALUATED",
+  "generated_utc": "2026-10-04T02:42:35.6921406Z"
+}

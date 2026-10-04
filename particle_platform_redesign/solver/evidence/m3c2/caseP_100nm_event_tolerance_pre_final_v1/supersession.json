@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "record_kind": "m3c2_caseP_geometry_rtol_qualification_supersession",
+  "status": "SUPERSEDED_NON_AUTHORITATIVE",
+  "reason": "The v1 evaluator source was not Ruff-format normalized. The science matrix and seed are unchanged in v2, which was prepared and executed in a new immutable directory.",
+  "superseded": {
+    "recipe": {
+      "path": "../../../tools/vv/comsol/cases/m3c2_caseP_100nm_event_tolerance_pre_final_v1.json",
+      "sha256": "7d0d687d300482b15030d252a276cbbbaf88bf7f90d9508ef9cb435c1bec5837"
+    },
+    "candidate_manifest": {
+      "path": "../../../_out_m3c2/caseP_100nm_event_tolerance_pre_final_v1/candidate_pilot_manifest.json",
+      "sha256": "6d90659216558674e161e8f83a3124812a8ba0de5df38f9309f1baab62acfdea"
+    },
+    "qualification": {
+      "path": "qualification_decision.json",
+      "sha256": "7641402f606dce23b9a6a6b134dacc21a4347397e3b0e1221ac7057e1e8ed489"
+    }
+  },
+  "authoritative_replacement": {
+    "recipe": {
+      "path": "../../../tools/vv/comsol/cases/m3c2_caseP_100nm_event_tolerance_pre_final_v2.json",
+      "sha256": "f98fca3be289e134ff84a20570c58fc7c7d8f20edde88838b45f9d002874b708"
+    },
+    "candidate_manifest": {
+      "path": "../../../_out_m3c2/caseP_100nm_event_tolerance_pre_final_v2/candidate_pilot_manifest.json",
+      "sha256": "e19d7a2f47216506fc73e4f679c5ef0392d1e241140fec64f2868845498eb32a"
+    },
+    "qualification": {
+      "path": "../caseP_100nm_event_tolerance_pre_final_v2/qualification_decision.json",
+      "sha256": "c7f790c6c3548013de32d3902ed21750d6f40a20e477d0133136f1b7a198b0ed"
+    }
+  },
+  "science_identity": {
+    "seed": 919008,
+    "dt_s": 0.00002,
+    "brownian_interval_tree_depth": 3,
+    "reference_geometry_rtol": 1e-8,
+    "candidate_geometry_rtol": 1e-9,
+    "unchanged": true
+  }
+}

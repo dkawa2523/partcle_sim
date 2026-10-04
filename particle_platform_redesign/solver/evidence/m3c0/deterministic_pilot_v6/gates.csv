@@ -1,0 +1,8 @@
+gate,status,value,threshold
+all_records_active,PASS,true,true
+position_observed_order,PASS,0.9041136219836081,">=0.75"
+velocity_observed_order,PASS,0.9443119501831206,">=0.75"
+charge_observed_order,PASS,1.1238380758116033,">=0.75"
+fine_pair_position_displacement_relative_l2,PASS,3.102727085428027e-5,"<=1e-4"
+fine_pair_velocity_relative_l2,PASS,3.92483251084038e-5,"<=5e-4"
+fine_pair_charge_relative_l2,PASS,1.3511393490811483e-6,"<=2e-5"

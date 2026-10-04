@@ -1,0 +1,87 @@
+{
+  "accuracy_claim": "NOT_EVALUATED",
+  "anchor_cases": [
+    "formal_iondrag_theory_consistent/caseA_100nm",
+    "formal_iondrag_theory_consistent/caseP_100nm"
+  ],
+  "campaign_cases": [
+    "formal_iondrag_theory_consistent/caseA_100nm"
+  ],
+  "campaign_lock_status": "NOT_CREATED",
+  "comparison_decision": "NOT_AUTHORIZED",
+  "configuration_sha256": "cac5633f7961bda2a79b5768b2220d6b3c7e5def7189cf6d90e584f4caf8671f",
+  "evaluation_id": "M3-C2-anchor-preflight",
+  "evaluation_revision": 1,
+  "future_companion_requirements": {
+    "brownian_degrees_of_freedom": 2,
+    "candidate_brownian_revision": "inertial_joint_ou_v1",
+    "comparison_kind": "independent_seed_ensemble_observables_not_pathwise",
+    "comsol_brownian_feature": "built_in_bf1",
+    "comsol_brownian_viscosity": "epstein_equivalent_effective_viscosity",
+    "comsol_out_of_plane_degrees_of_freedom": false,
+    "comsol_random_number_mode": "UserDefined",
+    "coordinates": "rz_meridional",
+    "field_representation": "common_p1_canonical_primitives",
+    "step_policy": "independent_solver_observable_convergence_not_equal_fixed_step"
+  },
+  "gates": [
+    {
+      "gate": "M3C2-PF-01-seed-plan",
+      "reason": "32 complete, unique, nonoverlapping planned seeds per anchor",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C2-PF-02-artifact-identity",
+      "reason": "source model and selected package artifacts equal the M3-C0 SHA-256 lock",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C2-PF-03-saved-feature-audit",
+      "reason": "saved Brownian feature, configured seed expression, reported components, and active finite history were inspected",
+      "status": "PASS"
+    },
+    {
+      "gate": "M3C2-PF-04-saved-cohort-completeness",
+      "reason": "one saved history per anchor is not the preregistered 32-seed cohort",
+      "status": "FAIL"
+    },
+    {
+      "gate": "M3C2-PF-05-saved-semantic-parity",
+      "reason": "native fields, one saved run, and an unverified effective random stream cannot authorize an ensemble comparison",
+      "status": "FAIL"
+    },
+    {
+      "gate": "M3C2-PF-06-common-p1-companion",
+      "reason": "32-seed COMSOL RZ-projected common-P1 companion is planned in run_matrix.csv",
+      "status": "NOT_RUN"
+    },
+    {
+      "gate": "M3C2-PF-07-b03-candidate",
+      "reason": "32-seed B03 exact-OU common-P1 candidate is planned in run_matrix.csv",
+      "status": "NOT_RUN"
+    },
+    {
+      "gate": "M3C2-PF-08-comparison-authorization",
+      "reason": "both meaning-matched cohorts must exist before statistical evaluation",
+      "status": "BLOCKED"
+    }
+  ],
+  "generated_utc": "2026-10-03T22:01:34.690210+00:00",
+  "golden_truth": "NOT_CLAIMED",
+  "overall_status": "BLOCKED_MISSING_MEANING_MATCHED_COHORT",
+  "planned_replicas_per_participant": 32,
+  "planned_run_count": 64,
+  "run_matrix_authority": "PROVISIONAL_SEED_ALLOCATION_ONLY",
+  "saved_reference_run_count_per_anchor": 1,
+  "schema_version": 1,
+  "seed_plan_sha256": "8b09d9f2dbd5a413f0fbfeb376e544718473a090900376de4fe98ee730979f6f",
+  "semantic_mismatch_codes": [
+    "COMSOL_STEPWISE_BROWNIAN_REQUIRES_ENSEMBLE_CONVERGENCE",
+    "NATIVE_FIELD_NOT_COMMON_P1",
+    "ONE_SAVED_RUN_NOT_32_SEED_COHORT",
+    "SAVED_RANDOM_STREAM_IDENTITY_NOT_PROVEN"
+  ],
+  "solver_core_changed": false,
+  "tool_revision": "m3c2_anchor_preflight_v1",
+  "tool_sha256": "739fc7bdeb2ba4be49af9758614a486f5a5bc49a5afbd41d6d3cdea9528eb78e"
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C1-pre-event-frozen-RHS",
+  "evaluation_revision": 1,
+  "classification": "external_comsol_frozen_state_comparison",
+  "input": {
+    "m3c0b_revision": 6,
+    "step_directory": "dt_0p15625us",
+    "expected_records": 13202,
+    "expected_particles": 287,
+    "expected_output_times": 46,
+    "source_model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "raw_sha256": {
+      "state_raw_wide.csv": "1241b91683f37076a3482c6792e29f0b215cd96434f25a82aff6b04a95679a58",
+      "force_raw_wide.csv": "5d953eacc414e41f12246f0d80b3055f5f4fcc7761cbcc67244f300e4113e3b3",
+      "neutral_raw_wide.csv": "97e214deed3ded2bb7f27dcc850a53dd149e538fb14fa670a8df042db40a847a",
+      "electric_raw_wide.csv": "66a002121b831709422d4199ed7d5d517ce780054ad63f4a4a7c2b491d6e123e",
+      "plasma_raw_wide.csv": "1d70446403d99f4bddb63c257d29a7ef4e8fed55ee18db55c5db9403eb6229d7"
+    }
+  },
+  "parameters": {
+    "electron_thermal_voltage_V": 4.0,
+    "neutral_molecular_mass_kg": 1.2753471408396638e-25,
+    "epstein_diffuse_reflection_fraction": 0.9,
+    "lift_coefficient": 1.0,
+    "particle_relative_permittivity": 4.2,
+    "medium_relative_permittivity": 1.0,
+    "gravity_m_s2": [0.0, -9.80665],
+    "relative_speed_regularization_m_s": 1.0,
+    "minimum_ion_energy_V": 0.01,
+    "maximum_relative_ion_speed_m_s": 1000000.0,
+    "maximum_effective_gas_speed_ratio": 1.0
+  },
+  "comparison": {
+    "producer_scale_normalized_residual_limit": 1e-10,
+    "production_scale_normalized_residual_limit": 1e-10,
+    "thermophoretic_primitive_authority": "unrecovered_fourier_gradient_not_feature_internal_ppr",
+    "known_constant_convention_models": [
+      "dynamic_charge",
+      "relative_flow_ion_drag",
+      "dielectrophoresis"
+    ]
+  },
+  "scope": {
+    "certifies_integrated_trajectory": false,
+    "certifies_continuous_path_applicability": false,
+    "certifies_field_interpolation": false,
+    "purpose": "compare producer-form replay, production pure-model output, and saved-row applicability without treating any one as the other"
+  }
+}

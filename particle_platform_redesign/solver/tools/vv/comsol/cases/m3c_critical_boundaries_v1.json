@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "M3-C0-critical-boundaries",
+  "evaluation_revision": 1,
+  "classification": "external_comsol_and_public_api_microcase",
+  "expected_comsol_version": "6.4.0.429",
+  "model": {
+    "source": "from_scratch",
+    "coordinate_system": "2D axisymmetric r-z",
+    "geometry": "rectangle",
+    "radius_m": 0.01,
+    "height_m": 0.02,
+    "axis_boundary_id": 1,
+    "surface_boundary_id": 2,
+    "outer_wall_boundary_id": 4,
+    "wall_condition": "Bounce",
+    "axis_feature_type": "AxialSymmetry",
+    "axis_condition": "Bounce",
+    "saved": false
+  },
+  "case": {
+    "motion_mode": "axisymmetric_rz_meridional",
+    "particle_diameter_m": 1e-7,
+    "particle_mass_kg": 5.235987755982988e-19,
+    "source_charge_number_e": 0.0,
+    "output_interval_s": 0.00025,
+    "output_frames": 25,
+    "time_end_s": 0.006,
+    "fixed_rk4_steps": [
+      {"label": "dt_1ms", "seconds": 0.001},
+      {"label": "dt_0p5ms", "seconds": 0.0005},
+      {"label": "dt_0p25ms", "seconds": 0.00025}
+    ]
+  },
+  "particles": [
+    {
+      "id": "surface_departure",
+      "particle_id": 1,
+      "source_kind": "surface_edge_fraction",
+      "source_boundary": "lower_surface",
+      "edge_fraction": 0.6,
+      "source_position_m": [0.006, 0.0],
+      "source_velocity_m_per_s": [0.0, 1.0],
+      "path_kind": "free_flight"
+    },
+    {
+      "id": "specular_reflection",
+      "particle_id": 2,
+      "source_kind": "table",
+      "source_position_m": [0.00805, 0.006],
+      "source_velocity_m_per_s": [1.0, 0.2],
+      "path_kind": "outer_wall_specular",
+      "analytic_event_time_s": 0.00195,
+      "analytic_hit_position_m": [0.01, 0.00639],
+      "analytic_post_velocity_m_per_s": [-1.0, 0.2]
+    },
+    {
+      "id": "axis_crossing",
+      "particle_id": 3,
+      "source_kind": "table",
+      "source_position_m": [0.00195, 0.014],
+      "source_velocity_m_per_s": [-1.0, 0.1],
+      "path_kind": "axis_fold",
+      "analytic_event_time_s": 0.00195,
+      "analytic_hit_position_m": [0.0, 0.014195],
+      "analytic_post_velocity_m_per_s": [1.0, 0.1]
+    }
+  ],
+  "comsol_raw_export": {
+    "table": "state_raw_wide.csv",
+    "columns_per_frame": 8,
+    "columns": [
+      "particle_id",
+      "time_s",
+      "r_m",
+      "z_m",
+      "velocity_r_m_per_s",
+      "velocity_z_m_per_s",
+      "current_status_code",
+      "final_status_code"
+    ]
+  },
+  "acceptance": {
+    "maximum_initial_absolute_error_m": 5e-14,
+    "maximum_position_absolute_error_m": 5e-11,
+    "maximum_velocity_absolute_error_m_per_s": 5e-11,
+    "maximum_event_time_absolute_error_s": 5e-11,
+    "maximum_cross_solver_position_difference_m": 5e-11,
+    "maximum_cross_solver_velocity_difference_m_per_s": 5e-11,
+    "require_all_frames_active": true,
+    "require_single_reflection_event_in_candidate": true,
+    "require_zero_axis_wall_events_in_candidate": true,
+    "require_one_candidate_axis_crossing": true,
+    "require_zero_failures": true
+  },
+  "scope": {
+    "certifies": [
+      "surface-start particle departs into the domain without a zero-time wall event",
+      "specular normal component reversal and same-step residual free flight",
+      "R-Z symmetry-axis passage remains active and is not emitted as a material-wall event",
+      "the same initial states and analytic paths pass in COMSOL and the production public API"
+    ],
+    "does_not_certify": [
+      "grazing or corner interactions",
+      "multiple material-wall hits",
+      "probabilistic wall laws",
+      "finite-radius contact",
+      "force or field interpolation",
+      "native-field equivalence"
+    ]
+  }
+}

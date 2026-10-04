@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "evidence_id": "M3-C2-model-semantics-probe-v1",
+  "evaluation_revision": 1,
+  "tool_revision": "m3c2_model_semantics_probe_v1",
+  "overall_status": "COMPLETE_READ_ONLY_CHARACTERIZATION",
+  "scientific_status": "CHARACTERIZED_NOT_COMPARISON",
+  "accuracy_claim": "NOT_EVALUATED",
+  "source_mph": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass\\model\\icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+  "source_mph_sha256": "3BBF08E3469758313EAC5DE473A7A0DD4CC9A6F72C9722393229F0B856E9B524",
+  "source_hash_unchanged": true,
+  "java_inspector_sha256": "3F941EA17A3D10DA7597A313985D9170B6539A27016C583D128B15F94E947E81",
+  "powershell_runner_sha256": "18BAD19DE7C8F5EAC6F25D5DBB15FF36A82E54F8529EB4EAB425B0B287BD05A7",
+  "compiled_class_sha256": "8D520DD5A24E99DE621AFA148F9E604FD136CF6E7BF7C6F5B0794FD6FE89DE1B",
+  "comsol_version": "COMSOL Multiphysics 6.4.0.429",
+  "process_policy": "comsolbatch_-nosave_-np_1",
+  "load_copy": true,
+  "study_run": false,
+  "model_save": false,
+  "records": 8,
+  "interfaces": [
+    {
+      "case": "caseP_100nm",
+      "physics_tag": "fpt",
+      "formulation": "NewtonianFirstOrder",
+      "include_out_of_plane": "0",
+      "random_number_args": "GenerateUnique",
+      "brownian_feature": "bf1",
+      "brownian_active": "true",
+      "brownian_i": "brownian_seed",
+      "brownian_mu": "root.comp1.muB_d",
+      "brownian_temperature": "293.15[K]",
+      "brownian_temperature_source": "root.comp1.T",
+      "particle_dataset": "part_P_100nm",
+      "particle_position_dofs": "[comp1.qr, comp1.qz]"
+    },
+    {
+      "case": "caseA_100nm",
+      "physics_tag": "fptas",
+      "formulation": "NewtonianFirstOrder",
+      "include_out_of_plane": "0",
+      "random_number_args": "GenerateUnique",
+      "brownian_feature": "bf1",
+      "brownian_active": "true",
+      "brownian_i": "AS_brownian_seed",
+      "brownian_mu": "root.comp1.AS_muB",
+      "brownian_temperature": "root.comp1.AS_Tg",
+      "brownian_temperature_source": "userdef",
+      "particle_dataset": "part_AS_100nm",
+      "particle_position_dofs": "[comp1.q3r, comp1.q3z]"
+    }
+  ]
+}

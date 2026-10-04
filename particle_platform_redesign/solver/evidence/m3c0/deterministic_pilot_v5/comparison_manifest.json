@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "classification": "external_comsol_reference_step_adequacy",
+  "evaluation_id": "M3-C0b-pilot",
+  "evaluation_revision": 5,
+  "scientific_status": "CHARACTERIZED",
+  "decision_status": "INVALIDATED",
+  "historical_evaluator_status": "PASS",
+  "execution_status": "COMPLETE",
+  "scope": "caseA_100nm_theory_pre_event_fixed_step_admissibility",
+  "production_solver_changed": false,
+  "invalidation": {
+    "affected_gate": "fine_pair_position_relative_l2",
+    "reason": "The position relative L2 denominator was the norm of the absolute global RZ coordinates, so the gate depended on the coordinate origin.",
+    "historical_metric": "norm(x_h_minus_x_h_over_2)_2 / norm(x_h_over_2)_2",
+    "historical_value": 6.145964082982306e-7,
+    "historical_threshold": 5e-6,
+    "corrected_shared_pair_position_displacement_relative_l2": 5.8064307113296814e-5,
+    "raw_values_retained": true,
+    "replacement_evaluation_revision": 6,
+    "position_scientific_pass_superseded": true,
+    "replacement_metric": "norm(x_h_minus_x_h_over_2)_2 / norm(x_h_over_2_minus_x_initial)_2"
+  },
+  "source": {
+    "comsol_version": "6.4.0.429",
+    "load_mode": "ModelUtil.loadCopy",
+    "model_saved": false,
+    "process_count": 1,
+    "source_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "source_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+  },
+  "protocol": {
+    "particles": 287,
+    "output_times": 46,
+    "time_window_s": [0.0, 0.00045],
+    "fixed_steps_s": [1.25e-6, 6.25e-7, 3.125e-7],
+    "integrator": "classical_rk4",
+    "relative_tolerance": 1e-8,
+    "wall_accuracy_order": 1,
+    "all_records_active": true
+  },
+  "fine_pair": {
+    "position_rms_m": 9.990840381458387e-8,
+    "position_relative_l2": 6.145964082982306e-7,
+    "velocity_rms_m_per_s": 0.0007010223052047067,
+    "velocity_relative_l2": 7.552445902714432e-5,
+    "charge_rms_e": 0.0007353247974379822,
+    "charge_relative_l2": 2.9444834716967805e-6
+  },
+  "observed_order_base_2": {
+    "position": 1.0579673343657396,
+    "velocity": 1.000715854935095,
+    "charge": 1.064923502156796
+  },
+  "preceding_v3_characterization": {
+    "status": "CHARACTERIZED",
+    "acceptance_threshold": "NOT_REGISTERED_FOR_PILOT",
+    "fixed_steps_s": [1e-5, 5e-6, 2.5e-6],
+    "observed_order_position": 0.659250921076923,
+    "observed_order_velocity": 0.9508263877181236,
+    "observed_order_charge": 0.24149928382505328,
+    "relative_path": "_out_m3c0b/caseA_100nm_theory_pilot_v3",
+    "artifact_hashes_sha256": "75b0297f54d4083e72722600b7a9cacede7581a8c3100742192b54686eb25909",
+    "reference_manifest_sha256": "83217d8c415b22751992a73654bf7832b07cfdddc52889fa463f41512a0dd7fc",
+    "self_convergence_sha256": "601c63599f53ee3e2ca770050ee572ed7fb238320b11013f26f8bf0d4a5fb398",
+    "run_status_sha256": "204bc89aca93a9c2d3035df9e6883a26b7fafa29b0a7d8683fb23dc8d2c9103c"
+  },
+  "preceding_v4_failure": {
+    "status": "FAIL",
+    "failed_gate": "charge_observed_order",
+    "value": 0.7159552098357378,
+    "threshold": 0.75,
+    "threshold_changed_after_result": false,
+    "relative_path": "_out_m3c0b/caseA_100nm_theory_pre_event_v4",
+    "artifact_hashes_sha256": "6dca8f985ed45980c01be79e683b08abbdaa4654be373532b84f99635ba5f026",
+    "reference_manifest_sha256": "a5124b30980221211cc65f3e864b92ee6c1169eb6ec5f2c3d3b6337355834cca",
+    "self_convergence_sha256": "5912ccbf7e9c8d50b7119545160edf86e14a87698afdc7ba7ed677074ceca1e7",
+    "run_status_sha256": "8c7421f14d6d64885fb2628996ff8105057cfadfe192f3ff3a6fc67e17a93eb6"
+  },
+  "raw_output": {
+    "relative_path": "_out_m3c0b/caseA_100nm_theory_pre_event_v5",
+    "files": 43,
+    "bytes": 67558107,
+    "artifact_hashes_sha256": "59e37983e6921c938f798cff34640664747ce10a3365072d3ceb955788d754b7",
+    "reference_manifest_sha256": "e20c1aea04d36b984c083551879b725118b2cce2a8017aa760c430042e841a4f",
+    "self_convergence_sha256": "ec54406f696d1252549e8c928d5e521d8ee69af96bd96fa172fd62fc898408c9",
+    "run_status_sha256": "4a808b854dbee8bf0d6739a0f0bfc65d17caa9b45f351d65b3d497a8d2bacfdb"
+  },
+  "historical_claim_policy": "pre_event_step_admissibility_only_not_solver_agreement",
+  "claim_policy": "historical_characterization_only_invalidated_step_admission_not_solver_agreement"
+}

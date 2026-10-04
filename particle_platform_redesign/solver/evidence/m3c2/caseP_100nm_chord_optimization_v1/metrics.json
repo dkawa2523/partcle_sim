@@ -1,0 +1,77 @@
+{
+  "schema": "accepted_workload_chord_optimization_v1",
+  "status": "PASS_RETAINED",
+  "scope": {
+    "particles": 287,
+    "end_time_s": 0.03,
+    "dt_s": 2e-05,
+    "brownian_interval_tree_depth": 3,
+    "output_frames": 121,
+    "seeds": [319032, 319047, 319063],
+    "numba_num_threads": 1,
+    "accepted_particle_pieces_per_seed": 3444000,
+    "candidate_queries_per_seed": 3444000
+  },
+  "change": {
+    "owner": "integrators.curved_chord_deviation_bounds",
+    "description": "Replace the Python row-by-axis loop with one serial compiled batch and share the component formula with events.",
+    "removed_symbols": [
+      "integrators._upper_scalar_product",
+      "events._curved_default_chord_component"
+    ],
+    "added_runtime_modes": 0,
+    "added_user_settings": 0,
+    "physics_or_timestep_changed": false
+  },
+  "before": {
+    "authority": "../caseP_100nm_owner_profile_v1/profile.json",
+    "authority_sha256": "746aebd05630b15c73515bbcdabb271eb953f144cd331bece91e46aad555b915",
+    "public_end_to_end_wall_s": [45.49235580000095, 45.466772800078616, 45.265203800052404],
+    "simulate_wall_s": [45.43070409982465, 45.40054409997538, 45.20492920000106],
+    "public_end_to_end_process_s": [45.234375, 45.21875, 44.78125],
+    "peak_rss_bytes": [371040256, 370761728, 371474432],
+    "public_end_to_end_wall_median_s": 45.466772800078616,
+    "public_end_to_end_wall_mad_s": 0.025582999922335148,
+    "simulate_wall_median_s": 45.40054409997538,
+    "chord_profile_self_s": [11.9854257, 12.2589492, 12.0844416]
+  },
+  "after": {
+    "local_raw_report": ".artifacts/m3c2-casep-after-chord-isolated-v1.json",
+    "local_raw_report_sha256": "db952c2a35527b32f06787126472327aed96d6b79246cae2a913075dfc1c641d",
+    "profile_raw_report": ".artifacts/m3c2-casep-after-chord-v1.json",
+    "profile_raw_report_sha256": "9369df914ca6cfba2edef2cc7eef81e6fe937f30d39634ef890faa4a033cbb5a",
+    "public_end_to_end_wall_s": [39.880095899803564, 40.759648100007325, 39.55757740000263],
+    "simulate_wall_s": [39.81643130001612, 40.68960219994187, 39.49196600005962],
+    "public_end_to_end_process_s": [39.546875, 40.484375, 39.390625],
+    "peak_rss_bytes": [373219328, 373493760, 373018624],
+    "public_end_to_end_wall_median_s": 39.880095899803564,
+    "simulate_wall_median_s": 39.81643130001612,
+    "chord_profile_self_s": [2.4838766000000003, 2.468373, 2.5021468000000002]
+  },
+  "decision": {
+    "public_end_to_end_wall_reduction_fraction": 0.12287383854667143,
+    "simulate_wall_reduction_fraction": 0.12299660523148413,
+    "public_end_to_end_process_reduction_fraction": 0.12543192812715964,
+    "retention_threshold_fraction": 0.05,
+    "retention_threshold_seconds": 2.273338640003931,
+    "threshold_passed": true,
+    "exact_scientific_payload_all_seeds": true,
+    "exact_work_counts_all_seeds": true,
+    "exact_algorithm_revisions_all_seeds": true,
+    "failures_all_seeds": 0,
+    "wall_events_all_seeds": 0,
+    "axis_crossings_all_seeds": 0,
+    "solver_owned_memory_plan_unchanged": true
+  },
+  "source_identity": {
+    "integrators_py_sha256": "abb9f0b7ff695d8f76757b39e58359e8898fcddcb2a628d68d0bc4f55228dca",
+    "events_py_sha256": "c3a4869156170b45b67f81136355d0cf61464a47adb890a54ee5b79771768398",
+    "benchmark_driver_sha256": "52218cce271161c0c2f170f45cf5908e30ae87ba545d4c213932986a9fefe83d",
+    "uv_lock_sha256": "e81eb7fc2daff0be0162f6b318d7889eb7799885cdb9c8785d64c8e3333afc33"
+  },
+  "claim_limits": [
+    "This is an accepted 287-particle full-physics workload optimization, not a 10000-particle product throughput certification.",
+    "It does not establish a portable speedup or a formal COMSOL speed ratio.",
+    "No additional hot owner is authorized by this result."
+  ]
+}
