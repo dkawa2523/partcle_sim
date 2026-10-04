@@ -13,6 +13,11 @@ comparison.
   clean-install, and `load_case` / `simulate` / `open_result` smoke evidence. Its lock and
   algorithm revisions are historical; it is not the remote release-CI receipt for the current
   production revision.
+- `release_remote_ci_v1.json`: GitHub Actions receipt for successful Windows and Ubuntu
+  Python 3.12 jobs. It records run/job URLs, the tested head SHA, the tested lock digest, 620
+  verification/scenario tests, the seven-row performance smoke (one cold and six warm), wheel
+  build, runtime-only clean install, and the three-public-API smoke. It records the successful
+  remote-CI evidence used to close P14-R; it is not COMSOL V&V or portable performance evidence.
 
 Both performance JSON files contain their machine fingerprint, locked-environment digest,
 execution conditions, algorithm revisions, scientific payload digests, and pass/fail checks.

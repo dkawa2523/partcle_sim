@@ -40,7 +40,7 @@ T03の最小analysis/visualizationの完了で定義する。
 - tableまたはpart surfaceから粒子を発生させる。
 - fixed charge、drag、electric、gravity/buoyancyを連成して積分する。
 - point particleのfirst hitを連続軌道上で検出する。
-- stick、escape、nondeposition terminal hold、restitutionを含む現行`specular`、probabilistic stickを扱う。完全鏡面は反発係数1/1である。
+- stick、escape、restitutionを含む現行`specular`、probabilistic stickを扱う。完全鏡面は反発係数1/1である。
 - 10^4～10^6粒子のstateをresidentに保ち、thread数非依存のbounded tile slabによるCPU batchで処理する。
 - final state、boundary event、選択trajectoryをstreaming保存し、中断runをresumeできる。
 
@@ -1330,7 +1330,10 @@ P14-R/T03はsolverの物理・event意味を変えない。query DSL、汎用dat
 2026-09-29時点で、`solver/evidence/v0.1/`へP14-R baseline v27の54 raw observation、P14-U、Windows/WSL2の
 platform smokeを保存した。v27 matrixは18条件×3反復、全repeat/revision/science-key identity、memory-plan fitを満たし、
 regular 10k→1Mの`simulate` log slopeは0.9864だった。絶対秒数は引き続きmachine-localかつnon-gatingである。
-T03とlocal release gateは完了し、P14-Rには新workflowの初回remote成功だけが残る。
+2026-10-05に新workflowの初回remote実行がWindows/Linuxとも成功し、receipt固定のtested head/lockで620件、
+性能smoke 7行（cold 1＋warm 6）、wheel、runtime-only clean install、三公開API smokeを完了した。
+receiptは`solver/evidence/v0.1/release_remote_ci_v1.json`であり、T03、P14-R、`0.1.0.dev0`開発baselineの
+配布可能性closureは完了した。これは正式版packageの公開を意味しない。
 
 ### Stage 2A：電荷・熱・軸対称場中の3D粒子
 
@@ -1343,7 +1346,7 @@ Stage 2Aを一括実装せず、次の三つの縦切りにする。
 Debye–Hückel表面電位、ion drift / `a / lambda_D`適用gate、有限charge invariant、
 rate/derivative bound、`hL <= 0.5`のexplicit stiffness gateを一組として扱う。P15着手を
 P14-Rのexact Git baselineと初回remote CI成功まで禁止していた旧順序は、ユーザーの明示指示で解除した。
-P14-Rのremote CIは未完の独立release trackとして残り、P15の実装完了を遡って阻害しない。
+P14-Rのremote CIは後に完了した。旧順序の解除とP15の実装判断を遡って変更しない。
 
 最初のproduction changeは次のRK4縦切りとして受け入れた。
 
@@ -2047,7 +2050,7 @@ M3-C2Aを再開せず、元Case-Pとは別の選択可能な物理拡張と、2D
    再計算しない。species-resolved current、Case-P分岐、第二engine、診断frameworkは追加しない。独立oracle、finite bound、
    compiled parity、公開API scenario、標準quality gateまでをproduction受入条件とし、catalog v17、runtime
    `signed_ion_compiled_physics_runtime_v19`、compiled tile v18で完了した。engine/state/schemaは変更せず、標準
-   verification/scenario 621件とRuff、Pyrefly、import-linter、complexity、lock gateを通過した。
+   P21受入時のverification/scenario 621件とRuff、Pyrefly、import-linter、complexity、lock gateを通過した。
 2. **critical boundary microcase（完了、PASS）**：一つのfrom-scratch 2D axisymmetric rectangleで、3粒子による
    surface contact departure、specular reflectionと同step残時間、R-Z axis passageをCOMSOL、production public API、解析解で
    比較した。`dt=1/0.5/0.25 ms`の132 gateは全PASS、最大solver間位置差は`1.61339e-17 m`である。authorityは
@@ -2161,9 +2164,9 @@ CPU parityと転送を含むend-to-end speedupがないcaseではGPUを選ばな
 | P14 | synthetic performance | 10k/100k/1M、regular/P1/Q1、realistic unstructured cell count、initial localization/cross-cell motion、event/output/thread matrixとbottleneck判断 | 完了（engine v20 / compiled tile v4 / field v3 / geometry v4 / memory plan v6。23行×3観測、336 verification/scenario。case/result schema v1は不変） |
 | P14-P | serial runtime convergence | bounded slab、stackless boundary BVH、row-target flat SoA event wavefront、compiled boundary/RNG、stable output。並列gate未達時のthread API削除 | 完了。engine v27 / compiled tile v6 / proposal v5 / event v11 / runtime layout v5 / memory plan v10 / geometry v5。case schema v2、single-thread compiled engineへ収束 |
 | P14-U | representative use | surface＋非一様場＋材料wall＋多数step、時間/mesh収束、global-bound/event cost、直列end-to-end性能 | 完了。18 raw＋6 median、別1M profileを受入れ、単一owner支配なしのためproduction変更なし |
-| P14-R | release closure | performance evidence保存、Windows/Linux wheel・clean install・三API smoke、文書authority整理 | 進行中。baseline v27の54観測とP14-Uを保存し、Windows/WSL2のlocked gate、wheel、runtime-only clean install、三API smokeは合格。新規CIの初回remote成功だけが残る |
+| P14-R | release closure | performance evidence保存、Windows/Linux wheel・clean install・三API smoke、文書authority整理 | 完了。baseline v27/P14-U/local auditを履歴として保持し、receipt固定のtested head/lockについてremote Windows/Linuxで620件、性能smoke 7行（cold 1＋warm 6）、wheel、runtime-only clean install、三API smokeが合格。`release_remote_ci_v1.json`をreceiptとする |
 | T03 | analysis/visualization | bounded boundary-event iterator、ResultViewだけを読む最小集計・軌道・event可視化 | 完了。ResultViewだけを読み、source resultへ書き戻さず、revision・source hash・parameterを派生成果物へ保存する |
-| P15 | continuous charge | `oml_stationary_maxwellian_debye_huckel_v1`、RK4-first連成、charge-aware enclosure、explicit stiffness拒否、その受入後のnative explicit midpoint | 完了。engine v28 / proposal v6 / RK4・指数enclosure v2 / memory plan v11。P14-R remote CIは独立release track |
+| P15 | continuous charge | `oml_stationary_maxwellian_debye_huckel_v1`、RK4-first連成、charge-aware enclosure、explicit stiffness拒否、その受入後のnative explicit midpoint | 完了。engine v28 / proposal v6 / RK4・指数enclosure v2 / memory plan v11。後続P14-R remote CIも完了 |
 | M3-V | external target applicability/relevance＋matched companion | 直接MPH inventory、12 package構造、formula parity、sampled applicability、force/variant感度、別成果物の決定論exact-P1 pre-event軌道 | 完了。元の12 package全軌道は`NOT_APPLICABLE`。共通P1場・共通3力のCase-A 100 nm companionだけは事前登録幅内でPASS。native-field、boundary、stochastic、builder/3-Dは未認定 |
 | P15-D | relative-drift continuous charge | 単一正イオン種、shifted-Maxwellian OML、非正電位invariant、明示drift envelope、compiled/runtime parity、両積分器・壁・XY/RZ・resume統合 | 完了。compiled tile v8 / catalog v6 / runtime v5。engine/proposal/schemaは不変 |
 | P15-E | finite-speed Epstein drag | 有限相対速度の一つのversioned free-molecular drag、低速極限、明示Kn/速度比適用域、独立速度積分oracle、両積分器の収束・compiled parity | 完了。Maxwell鏡面/等温拡散混合、rate/Jacobian別bound、catalog v7 / runtime v6 / compiled tile v9。linear modelへの自動切替なし |
@@ -2203,8 +2206,8 @@ geometry v4のmixed-cell BVHへ置換した。両者ともindexはbroad phaseで
 field outside/masked provisionalは物理最近傍/tieを保つfull scanなのでO(cell数)制約を残す。geometryは局所形状が
 float64で解像不能ならprepareでfail-closedとし、大きな絶対座標だけでは拒否しない。memory plan v6はindex resident、
 field 256 B/cell、geometry 1,024 B/cellのprepare transientを含む。solver-coreへtimer、第二engine、cache frameworkを
-追加しない。現在はP14-Pの直列収束、P14-Uの代表用途gate、T03とP15の二つのproduction sliceを完了した。
-P14-Rの初回remote workflowは配布可能なv0.1を閉じる独立trackとして残る。P15出口の外部M3-V評価と
+追加しない。現在はP14-Pの直列収束、P14-Uの代表用途gate、T03とP14-R、およびP15の二つのproduction sliceを完了した。
+配布可能なv0.1はremote Windows/Linux workflow成功で閉じた。P15出口の外部M3-V評価と
 field-production F01/F02、trajectory physicsのP15-D relative-drift charge、P15-E finite-speed Epstein、
 P15-F collisionless Barnes ion drag、P16 Waldmann--Gallis thermophoresis、Brownian B01/B02、P18-C/I/D/L/R、P19-Lは完了した。
 M3-C0b v6はpre-eventの運用上の刻み選択だけを受理済みである。M3-C1 frozen saved-state producer-form replayは
@@ -2466,8 +2469,9 @@ release/manual gateとする。coverage率を目的にprivate branchのtestを�
 2026-09-29のlocal release auditではWindows 11 / Python 3.12.13とWSL2 Ubuntu / Python 3.12.3のwheel、
 runtime-only clean install、三公開API smokeが合格し、Linuxのlocked標準gateも合格した。旧root workflowは復元せず、
 新solverだけを対象にしたWindows/Linux workflowを新設した。P14-R baseline v27の18条件×3反復＝54観測、P14-U、
-両platformのlocal auditは`solver/evidence/v0.1/`へ保存済みである。P14-R完了には、新workflowをrepositoryへ反映し、
-初回remote実行の成功を確認する。
+両platformのlocal auditは`solver/evidence/v0.1/`へ保存済みである。2026-10-05に新workflowをrepositoryへ反映し、
+初回remote Windows/Linux実行を成功させた。run `37217687830`とtested head、tested lock、両job結果は
+`solver/evidence/v0.1/release_remote_ci_v1.json`に固定し、P14-Rを完了とする。
 
 ### 18.4 versioning
 
@@ -2536,7 +2540,7 @@ migrationを作らない。
   同じengineへ追加し、global support/event enclosureとrev3b逐次event意味論を維持した。physics runtime v16はその性能snapshot、
   v17はDEP上限の1 ULP外向き境界だけを変更した。runtime v18はcharge Jacobian、exponential midpoint v3は
   charge-stable affine exponential root、result v5はwork-scaled cadenceを追加した。旧P14-R着手blockerは
-  ユーザーの明示指示で解除し、remote CIは別release trackに残す。
+  ユーザーの明示指示で解除し、別release trackのremote CIも2026-10-05に完了した。
 - P21/M3-C3は既存二電流revisionを保持したままaggregate three-currentをcatalog v17 / runtime v19 / tile v18で同じ
   charge plan/runtimeへ統合した。critical 2-D boundary microcaseも132/132 PASSで完了した。Case-P派生companion入力監査は
   canonical負イオンprimitive authority不足により`BLOCKED / NOT_EVALUATED`で閉じ、任意物理の将来coverageへ分離した。
@@ -2586,9 +2590,10 @@ migrationを作らない。
 - COMSOLなしで上記をverifyできる。
 
 P14完了によりsynthetic solver-core、P14-U完了により代表用途の数値・utility・直列性能baselineを満たした。
-T03も`ResultView`だけから代表集計・軌道・event可視化を生成して完了した。保存済みcurrent evidenceとlocal
-Windows/Linux release auditは合格しており、上の製品v0.1全体を完了と呼ぶにはP14-Rのremote workflow初回成功が必要である。synthetic baseline、target utility、
-配布gate、外部tool完了を混同しない。
+T03も`ResultView`だけから代表集計・軌道・event可視化を生成して完了した。receipt固定のremote Windows/Linux release
+workflowも成功したため、P14-Rと`0.1.0.dev0`開発baselineの配布可能性closureは完了である。正式版packageの公開ではない。
+synthetic baseline、target utility、配布gate、
+外部tool完了を混同しない。
 
 ### 後続stage完了
 

@@ -1,151 +1,74 @@
-# Particle Tracer Unified
+# Particle trajectory platform clean-room workspace
 
-外部で用意した場・粒子初期条件・形状・境界条件から、粒子軌道を計算する
-Pythonパッケージです。2D Cartesian、axisymmetric RZ、3D Cartesianを扱います。
+This workspace has been reorganized for a zero-based implementation of a
+semiconductor-chamber particle trajectory solver. The former implementation is
+not the foundation of the new product.
 
-計算の対象は、与えられた場に対する一方向連成のLagrangian point-particle
-モデルです。COMSOLを内蔵したり再実行したりはせず、native入力または明示的な
-COMSOL exportを同じsolver契約へ変換します。
+## Start here
 
-## 必要環境とインストール
+1. Read [`particle_platform_redesign/README.md`](particle_platform_redesign/README.md).
+2. Read [`particle_platform_redesign/AGENTS.md`](particle_platform_redesign/AGENTS.md)
+   before editing the design or future solver.
+3. Use [`particle_platform_redesign/implementation_plan.md`](particle_platform_redesign/implementation_plan.md)
+   for implementation order and exit criteria.
+4. Use [`particle_platform_redesign/quality_tooling_plan.md`](particle_platform_redesign/quality_tooling_plan.md)
+   for uv, Ruff, import-linter, Pyrefly, and Radon policy.
 
-- Python 3.10以上
-- runtime: NumPy、pandas、PyYAML、Numba
+## Directory roles
 
-```console
-python -m pip install -e .
-```
+- `particle_platform_redesign/`: new specifications, reviewed architecture,
+  implementation plan, the independent solver project, audit evidence, and
+  external V&V design.
+- `model_dataset/`: preserved reference models and exports used only as input
+  evidence and external validation material.
+- `old_code/`: read-only archive of the previous codebase, tests, tools,
+  configuration, environments, and generated caches.
+- `.git/`: retained at the repository root so history and recovery remain
+  available.
 
-可視化または検証用の追加依存が必要な場合だけextraを指定します。
+The ACL-protected legacy scratch directories have now been moved into
+`old_code/`; no legacy implementation directory remains active at the root.
 
-```console
-python -m pip install -e ".[viz,validation]"
-```
+The independent uv project at `particle_platform_redesign/solver/` now includes
+the P00--P16 foundation, B01--B03 Brownian slices, and the P18-C/I/D/L/R optional
+physics revisions. The current engine includes producer-neutral YAML/HDF5 input,
+XY/RZ regular/P1/Q1 fields, continuous charge and deterministic force coupling,
+RK4/exponential-midpoint motion, exact and curved material events, deterministic
+wall RNG, durable segmented output, checkpoint/resume, and the P14 synthetic
+performance baseline.
 
-## Quickstart
-
-同梱の2D例を検証し、実行して、成果物を再検証します。
-
-```console
-particle-tracer check examples/v02_minimal/run_config.yaml --full
-particle-tracer run examples/v02_minimal/run_config.yaml -o run_output
-particle-tracer artifacts run_output
-```
-
-3D例は
-[`examples/v02_minimal_3d/run_config.yaml`](examples/v02_minimal_3d/run_config.yaml)
-です。
-
-Python APIの実行動線は4操作です。
-
-```python
-from particle_tracer_unified import load_case, simulate, validate_case, write_result
-
-case = load_case("examples/v02_minimal/run_config.yaml")
-report = validate_case(case, detail="summary")
-if not report.passed:
-    raise ValueError(report)
-
-result = simulate(case)
-manifest = write_result(result, "run_output")
-```
-
-- `load_case()`はcanonical入力を読み、解決済みの`SimulationCase`を返します。
-- `validate_case()`はファイルを書かずにpreflightを行います。
-- `simulate()`は数値計算だけを行い、`SimulationResult`を返します。
-- `write_result()`だけが、新規または空の出力directoryへ成果物を書きます。
-
-## 入力と成果物
-
-runtimeが受け付ける入力は`schema_version: 2`のcanonical YAML/CSVです。未知のkey、
-曖昧な値、必要なSI単位や物性の欠落は入口で拒否します。旧形式はruntimeで解釈せず、
-`particle-tracer migrate`でcanonical形式へ変換します。
-
-standard modeの成果物は次の3ファイルです。
-
-- `final_particles.csv`
-- `run_summary.json`
-- `wall_summary.csv`
-
-debug modeではtrajectory、wall event、step summary、force contribution、詳細診断を
-追加します。入力列、設定、artifact schemaの詳細は
-[入力と成果物](docs/input_artifacts.md)を参照してください。
-
-## CLI
-
-公開console scriptは`particle-tracer`の1つです。
-
-| command | 役割 |
-|---|---|
-| `run CONFIG [-o DIR]` | preflight後にcaseを実行して成果物を保存 |
-| `check CONFIG [--full]` | 副作用なしのpreflight |
-| `migrate CONFIG -o DIR` | legacy入力をcanonical v0.2へ変換 |
-| `compare WORKFLOW ...` | field・acceleration・trajectory・boundary等の比較 |
-| `artifacts DIR [--require-debug]` | artifact schemaと構成を検証 |
-| `visualize ...` | optionalなgraph・animation・mechanics・boundary可視化 |
-| `comsol build-case ...` | 明示的なCOMSOL exportからcaseを構築 |
-
-`comsol build-case` はfieldの保存形式を明示入力から選びます。
-`--field-node-samples` はCOMSOLのmesh節点値をそのまま使い、境界層メッシュの
-細分と真空領域の境界をそのままsupportにします。`--field-bundle` は解を正則格子へ
-再サンプルした従来形式です。両者は排他で、選んだ形式はmanifestのfield artifact
-`format` に記録されます。詳細は[COMSOLとV&V](docs/comsol_vv.md)を参照してください。
-
-各commandの引数は`particle-tracer COMMAND --help`で確認できます。
-
-## 品質コマンド
-
-品質toolはruntime依存から分離されています。
-
-```console
-uv sync --frozen --group quality
-uv run --frozen nox -s quality-fast -- particle_tracer_unified/example.py tests/test_example.py
-uv run --frozen nox -s quality-pr
-```
-
-- `quality-fast`: 指定した変更Python fileをRuffでformat・安全なfix後、baseline-awareな
-  lint、Pyrefly、pytestを実行します。Git metadataがないsnapshotではpath指定が必須です。
-- `quality-pr`: format/lint、型、architecture、複雑度、branch/変更行coverage、security、
-  dependency、secret、dead-code候補をcheck-onlyで検査します。
-- `quality-nightly`: PR gateに複数実行条件、性能・memory、mutation testを加えます。
-- `quality-baseline`: 品質baselineを明示更新します。通常検査やCIからは実行しません。
-
-nightlyはLinux/WSLの`fork`を必要とするmutmutを含みます。
-
-```console
-uv sync --frozen --group quality --group nightly
-uv run --frozen nox -s quality-nightly
-```
-
-## 使い分ける選択肢
-
-既定値はどれもCOMSOL比較を前提に選んであります。別の目的で使う場合だけ変更してください。
-
-| 選択肢 | 既定 | 変える理由 |
-|---|---|---|
-| fieldの保存形式 | `--field-node-samples`（mesh native） | 参照用に正則格子が欲しい場合だけ `--field-bundle`。格子は最薄の物理層を自力で解像する必要があり、壁に隣接するcellはstencilが領域外nodeに触れて粒子を停止させます |
-| `physics.wall_interaction.contact_sliding` | COMSOLケースは `false`、nativeは `true` | 壁へ落ち着いた粒子をその場に留めたい場合は `true`。COMSOLに点粒子の接触modelはありません |
-| `physics.wall_interaction.max_hits_per_step` | 5 | 1 stepあたりのbounceが多いケースで引き上げます。予算切れはnumerical stopです |
-| `time.max_substep_splits` | 4（16 substep） | シース通過や壁接近など、滑らかな自由飛行より細かい分割が要るケースで引き上げます |
-
-`compare near-wall` は壁近傍で停止した粒子を数える診断です。mesh native fieldでは
-supportがmeshと一致して停止帯が生じないため、主に正則格子ケースの評価に使います。
-
-## 互換性の境界
-
-- 公開Python操作は`load_case`、`validate_case`、`simulate`、`write_result`です。
-- runtime入力と成果物はschema version 2を正本とします。
-- legacy互換はmigration層だけが担当します。
-- `write_result()`は既存のimmutable成果物を上書きしません。
-- 大型assetの識別情報は[`data/assets.yaml`](data/assets.yaml)で管理します。
-
-## 文書
-
-- [COMSOLからケースを組み立てる手順](docs/comsol_workflow.md) — COMSOLのモデルと
-  設定を出発点にした手順書。最初に読むもの
-- [Architecture](docs/architecture.md)
-- [入力と成果物](docs/input_artifacts.md)
-- [物理モデルと数値計算](docs/physics_numerics.md)
-- [COMSOLとV&V](docs/comsol_vv.md) — 手順が強制する契約
-
-コーディングエージェント向けの入口は [`CLAUDE.md`](CLAUDE.md) です。
+P14-P has closed the ineffective multithreaded runtime and converged production
+execution on one deterministic compiled serial engine. See
+[`particle_platform_redesign/solver/docs/parallel_execution_plan.md`](particle_platform_redesign/solver/docs/parallel_execution_plan.md).
+The current semantics use engine v36, compiled tile v18, proposal v10, event v16,
+runtime layout v6, memory plan v13, geometry v5, physics catalog
+`inertial_langevin_rz_catalog_v17`, physics runtime v19, and wall laws
+`point_wall_laws_v5`. Perfect specular reflection is parameterless, non-unit
+restitution is a separate law, and standard RZ gravity cannot have a radial
+component. P14-U representative-use validation is complete: its formal
+10k/100k/1M release gate passed while retaining the single compiled serial
+production engine. The accepted machine-local report is preserved at
+[`particle_platform_redesign/solver/evidence/v0.1/p14u_release_v1.json`](particle_platform_redesign/solver/evidence/v0.1/p14u_release_v1.json).
+T03 analysis/visualization is complete. P14-R and the `0.1.0.dev0` development
+baseline's distribution-readiness closure are complete: the receipt-fixed release
+workflow passed on remote Windows and Linux, including 620 tests, a seven-row
+performance smoke (one cold and six warm), wheel build, runtime-only clean install,
+and the three-public-API smoke. This CI result is not COMSOL V&V or portable
+performance evidence. The external M3-C0b v6 run sequentially confirmed
+only the Case-A 100 nm pre-event operational step selection; it is not solver
+agreement or a universal accuracy claim. B03 is complete for the explicitly projected two-degree-of-freedom RZ
+closure: fixed/continuous charge, native/effective-gas linear Epstein drag,
+additive forces, frozen-midpoint macro roots, exact conditional OU trees, linear
+dense charge, and fresh-root continuation after an axis fold. It is not an
+isotropic 3-D Brownian model or a general strong/weak-order-two result. No COMSOL
+study was rerun for this core closeout. Charge-stable coupling and the work-scaled
+durable cadence are complete. The later candidate-v3 Case A/P runs pass their own
+`h,h/2,h/4` self-convergence, and the meaning-matched common-P1 100 nm independent-
+seed comparison is closed as `CLOSED_ACCEPTED_WITH_LIMITATIONS`. The saved native-
+field COMSOL runs remain descriptive characterization rather than a core gate.
+Additional packages and product-scale performance are separate work packages;
+the preserved M3-C1 event-v14 artifacts remain historical evidence. The accepted
+2-D conclusion is limited to the 100 nm common-P1 two-current Case-A/Case-P anchor
+and the critical-boundary microcase (`2D_CRITICAL_VV_COMPLETE`); native COMSOL
+fields, other sizes and ion-drag variants, three-current COMSOL trajectories, 3-D,
+and general COMSOL equivalence are not certified.

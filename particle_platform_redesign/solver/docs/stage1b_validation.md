@@ -46,7 +46,7 @@ P15は`oml_stationary_maxwellian_debye_huckel_v1`をRK4-firstで受け入れ、�
 受け入れた。現行RK4は`h L_Z <= 0.5`を維持し、exponential pathはmidpoint-frozen affine exponential
 updateを使う。両methodはfinite invariant/rate/derivative bound、charge-aware electric/path enclosureを共有する。
 case/result/checkpoint/event schemaとXY/RZ、wall、output、
-checkpointの既存stateは変更していない。P14-R remote CIは未完の独立release trackとして残る。
+checkpointの既存stateは変更していない。P14-R remote CIは2026-10-05にWindows/Linuxとも完了した。
 
 Numba 0.67とNumPy `<2.6`をlockし、P14 closeoutまではfield location/interpolation、sample済みprimitiveからのphysics、
 classical RK4の配列算術を`fastmath=False, parallel=False`で実行した。現行v36も同じ決定論的設定の
@@ -256,7 +256,7 @@ frame/probe行数、global/nested revisionを検査して合格した。release 
 336件のverification/scenario（20.56 s）と標準品質gateが合格した。これによりP14のsynthetic solver-core
 performance baselineを完了する。parallel runtimeの収束はP14-P、その完成経路で主用途を結合した
 時間/mesh収束とglobal-bound/event costを測るのはP14-U、
-T03 analysis/visualizationは完了し、配布可能なv0.1にはP14-Rの初回remote workflow成功だけが独立trackとして残る。
+T03 analysis/visualizationとP14-R remote Windows/Linux workflowが完了し、配布可能なv0.1を閉じた。
 P15 continuous chargeと外部M3-V applicability/relevance評価は完了した。M3-Vは現datasetへの全軌道比較を
 `NOT_APPLICABLE`とし、field production、trajectory physics、state dimensionを独立workstreamへ分けた。
 trajectory physicsの最初の後続であるP15-D shifted-Maxwellian chargeも、単一正イオン・非正電位の明示範囲で
@@ -399,8 +399,8 @@ timingから分離した1M `none` profileではowner self timeのeventsが28.7%�
 engineを維持する。`none`とsampleの観測群は逐次実行したため、両者の秒数差をsampling overheadの因果推定には使わない。
 絶対秒数はmachine-localかつnon-gatingで、COMSOLとの速度比較ではない。RSSはload/simulate/openまでをsampleした
 process high-waterであり、後続の外部validationは含まない。P14/P14-Uの受理済みJSONとplatform smokeは
-`../evidence/v0.1/`へ保存した。T03とlocal Windows/Linux release auditも完了した。P14-Rの初回remote workflowは
-独立release trackに残り、P15 continuous chargeと外部M3-V relevance評価は完了した。M3-Vの未検証項目を
+`../evidence/v0.1/`へ保存した。T03、local audit、P14-R remote Windows/Linux workflowも完了した。remote receiptは
+`../evidence/v0.1/release_remote_ci_v1.json`である。P15 continuous chargeと外部M3-V relevance評価も完了した。M3-Vの未検証項目を
 production合格へ読み替えない。P15-D shifted-Maxwellian chargeは明示したspecies・非正電位範囲で完了し、
 後続は三つの独立workstreamとして進める。
 

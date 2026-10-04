@@ -1979,9 +1979,10 @@ production engine一つである。第二schedulerやexperimental flagは残さ�
 これはCOMSOL一致を正解にするgateではなく、現行数値coreが目的用途を精度・速度・入力表現の三面で解けるかを
 判定するgateである。常設diagnostic frameworkや第二engineは作らない。正式releaseはXY時間/mesh収束、RZ収束/parity、
 失敗0、出力utilityとidentityを満たした。profile費用はevents 28.7%、fields 26.8%ほかへ分散し、単一owner支配を
-示さないためproductionはengine v28のsingle-thread compiled経路一つのまま維持する。秒数はmachine-localな
-非gating値であり、COMSOL比やportable性能ではない。T03とP14-Rのlocal gate/evidenceは完了し、P14-Rの
-初回remote workflowだけが独立release trackに残る。P15着手をそれまで禁止していた順序はユーザーの明示指示で解除した。
+示さないため現行productionはengine v36のsingle-thread compiled経路一つを維持する。秒数はmachine-localな
+非gating値であり、COMSOL比やportable性能ではない。T03とP14-Rのlocal gate/evidenceに加え、receipt固定の
+remote Windows/Linux workflowも完了し、`0.1.0.dev0`開発baselineの配布可能性closureを満たした。これは正式版packageの
+公開を意味しない。P15着手をそれまで禁止していた順序はユーザーの明示指示で解除した。
 
 ### Stage 2A：帯電・熱・決定論3D粒子
 
@@ -2136,7 +2137,10 @@ common-fieldでのtime-discretization parityと、各producer固有fieldを含�
 
 ---
 
-## 21. v0.1の採用判断
+## 21. 現行`0.1.0.dev0`の採用状態
+
+この表はP14-R baselineに、その後同じ単一engineへ受理した機能を加えた現行開発版の状態である。
+初期baselineと後続stageを同一時点のrelease scopeとして扱わない。
 
 | 項目 | 採用 | 後続・不採用理由 |
 |---|---|---|

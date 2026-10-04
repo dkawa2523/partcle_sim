@@ -22,7 +22,7 @@
 | P14 performance | machine fingerprint、mesh、10^4/10^5/10^6粒子、出力量、warm-up、thread、locator bottleneck判断 | engine v20 / compiled tile v4 / field v3 / geometry v4 / memory plan v6としてsynthetic baselineを完了。23行×3観測、336 verification/scenario。当時は`threads: 1`を既定推奨し大規模regularでhost幅を実測選択したが、この運用判断は直後のP14-Pでsupersedeされ、現行productionにはthread選択がない |
 | P14-P serial runtime convergence | outer worker-waveをflat SoA event wavefrontへ置換し、内部parallelを実測して採否を確定 | 完了。4-thread 0.923x、1-thread v20比23.7%退行のためmultithreadingを削除。engine v27 / compiled tile v6 / proposal v5 / event v11 / runtime layout v5 / memory plan v10 / geometry v5、case schema v2 |
 | P14-U representative use | surface release＋非一様場＋材料wall＋多数stepの時間/mesh収束、global-bound/event cost、直列end-to-end性能・memory・output | 完了。正式release 18 raw観測＋6 median、別1M profileを受入れ、productionは単一の直列engineのまま維持 |
-| P14-R release closure | P14 evidence保存、Windows/Linux wheel・clean install・三API smoke、current/history文書authority整理 | 進行中。v27の54観測、P14-U、Windows/WSL2 local auditは保存済み。新規workflowの初回remote成功だけが残る |
+| P14-R release closure | P14 evidence保存、Windows/Linux wheel・clean install・三API smoke、current/history文書authority整理 | 完了。receipt固定のtested head/lockについてremote Windows/Linuxで620件、性能smoke 7行（cold 1＋warm 6）、wheel、runtime-only clean install、三API smokeが合格。run `37217687830`をreceiptへ固定 |
 | T03 analysis/visualization | bounded boundary-event iterator、`ResultView`だけを読む最小集計・軌道・event可視化 | 完了。source resultを変更せず、tool revision・source manifest hash・parameterを派生成果物へ保存する |
 | P15 continuous charge | stationary Maxwellian OML＋Debye--Hückel、rate/derivative/charge bound、state-evolving dispatch、charge-aware enclosure、非stiff RK4-first、その受入後のexplicit midpoint | production完了。engine v28 / proposal v6 / 両enclosure v2 / memory plan v11を維持 |
 | M3-V external applicability / matched companion | 直接MPH inventory、12 package、式parity、sampled applicability、variant感度、別成果物の決定論exact-P1 pre-event軌道 | 完了。元datasetの比較処理はPASSだが物理認証は`NOT_CERTIFIED`。共通P1場・共通3力のCase-A 100 nm companionの時間離散parityのみPASS。native-field、boundary、stochasticへ拡張せず、core gateにしない |
@@ -470,7 +470,7 @@ solver内部のthread幅選択そのものを後続P14-Pで削除した。
 P14は各軸を直交させたsynthetic baselineであり、非一様force、surface release、材料wall、一般曲線event、
 多数macro stepを同時に使うtarget workloadを測っていなかった。また当時のouter worker-wave、particle別Python event調停、
 stage配列割当て、worker数比例scratchを完成形とは扱わなかった。後続P14-Pで並列runtimeを削除して単一直列engineへ
-収束し、P14-Uで代表用途、T03で最小解析・可視化を閉じた。P14-Rの初回remote workflowは独立release trackに残し、
+収束し、P14-Uで代表用途、T03で最小解析・可視化を閉じた。P14-Rのremote Windows/Linux workflowも完了し、
 P15 continuous chargeは旧着手blockerを解除して完了した。
 T04は後続profileで
 accepted-state cacheまたはremesh需要が示された場合だけ再開する。
@@ -540,7 +540,7 @@ fields 26.8%ほかへ分散し、単一owner支配を示さないためproductio
 | 必要field/state | 既存resident `charge_number=Z`を唯一のcharge authorityとし、sourceが`Z_0`を所有する。fieldは`n_e,n_i,T_e,T_i,u_i`、定数parameterは単一価正イオン質量、粒子属性は`electrostatic_radius_m`を使う。全量は正かつ有限、`M_i<=0.1`と`a/lambda_D<=0.1`、finite `[Z_min,Z_max]`、`abs(R_Z)`と`L_Z>=abs(dR_Z/dZ)`のboundを必須とする |
 | 対応座標・integrator | XYとRZ no-swirlの既存basis/axis regularityへ対応する。最初に古典RK4で位置・速度・Zを同じ4 stageにより進め、その後native exponential motionへchargeを接続した。RK4は`h L_Z<=0.5`と全stage/endpointのinvariant包含を維持する。現行exponential pathは後段decisionのmidpoint-frozen affine exponential `J<=0`を使い、この値をstability gateにしない |
 | 解析解またはreference | 電子・イオンbranchの単位・符号・`phi=0`での連続性、一意平衡とbracket、invariantとboundの包含を純粋scalar式で検証する。一定primitiveの独立高精度ODE、test-onlyの`Z'=-k(Z-Z*)`と一様Eの解析連成解に対するRK4 4次収束、explicit midpoint 2次、drift/Debye gate反例、XY/RZ・compiled parityを使う |
-| 性能・memory影響 | 既存Z state、result、boundary event、checkpoint列を再利用しschemaを増やさない。bounded slabへcharge bound用の有限scratchだけを計上し、charge区間からelectric acceleration/path enclosureを構築する。slab幅・output schedule・checkpoint-resumeで科学payloadを不変にする。P14-R remote CIは未完の独立release trackとして残す |
+| 性能・memory影響 | 既存Z state、result、boundary event、checkpoint列を再利用しschemaを増やさない。bounded slabへcharge bound用の有限scratchだけを計上し、charge区間からelectric acceleration/path enclosureを構築する。slab幅・output schedule・checkpoint-resumeで科学payloadを不変にする。独立release trackだったP14-R remote CIも後に完了した |
 | 置換・削除する旧経路 | `fixed` model自体は残し、fixed-only dispatchと非零charge-rate一律拒否を選択したcontinuous modelのstage経路で置換する。clip、floor、自動model切替、平衡置換、charge-only subcycle/operator split、implicit-midpoint stiff fallback、第二engine、第二charge state、汎用plugin/ODE frameworkは追加しない |
 
 P15着手をexact P14-R Git baselineと初回remote CI成功まで禁止していた旧順序は、ユーザーの明示指示で解除した。

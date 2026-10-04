@@ -182,16 +182,16 @@ Case Aでは最終状態そのものも大きく異なる。最終status不一�
 ただし「熱流体場＋任意のプラズマパラメータから静電場を作る」機能は、solverとは別の
 `electrostatic_builder` として公式に提供する。
 
-### 3.3 P14-R v0.1 baselineと後続追加
+### 3.3 P14-R `0.1.0.dev0` baselineと後続追加
 
-| 軸 | P14-R v0.1 baseline | 後続・現行追加 |
+| 軸 | P14-R baseline | 後続の現行追加／未実装候補 |
 |---|---|---|
 | 座標 | cartesian_xy microcase、axisymmetric_rz meridional | RZ場中Cartesian 3D粒子、cartesian_xyz |
 | 場 | 定常、P1三角形、Q1四辺形、規則格子 | 時間依存、P2以上、移動mesh |
 | 積分 | 一般固定RK4、native指数midpoint | 適応高次、GPU専用方式 |
-| 物理 | 適用域を明示したEpstein linear / air Stokes–Cunningham、電気、重力、fixed/continuous charge、有限速度drag、Barnesと集約場向け二revisionのion drag、単一気体またはeffective-gasのWaldmann--Gallis熱泳動、球形準静的DEP、RZ rarefied-vorticity lift感度、effective-gas linear Epstein感度、限定B02 Brownian | B03 RZ projected charged/forced Brownian。追加model revisionは後続 |
-| 確率 | B02の固定depth joint OU/conditional tree/cubic Hermite event・replay | B03 RZ projected composition、adaptive確率clear、Cartesian 3-D Brownian |
-| 壁 | stick、escape、非deposition terminal hold、parameterlessな完全鏡面`specular`、係数付き`restitution`、明示fallbackを持つ定数確率stick | material依存付着、diffuse、re-entrainment、接触運動 |
+| 物理 | 適用域を明示したEpstein linear / air Stokes–Cunningham、電気、重力、fixed charge | **現行追加**：continuous charge、有限速度drag、Barnesと集約場向け二revisionのion drag、単一気体またはeffective-gasのWaldmann--Gallis熱泳動、球形準静的DEP、RZ rarefied-vorticity lift感度、effective-gas linear Epstein感度。追加model revisionは後続 |
+| 確率 | なし（deterministic baseline） | **現行追加**：B02固定depth joint OUとB03 RZ projected charged/forced Brownian。**未実装**：Cartesian 3-D Brownian |
+| 壁 | stick、escape、parameterlessな完全鏡面`specular`、係数付き`restitution`、明示fallbackを持つ定数確率stick | **現行追加**：非deposition terminal hold。**未実装**：material依存付着、diffuse、re-entrainment、接触運動 |
 | 出力 | final/event/probe/series、選択trajectory、segmented HDF5、checkpoint/resume | 分散実行・remote store |
 
 未対応の組合せはPreparedRun作成時に具体的な理由とともに拒否する。現行engine revision
@@ -294,7 +294,7 @@ engine接続済みである。このv26試行はP14-Pの速度・memory gateに�
 P14-P closeoutのv27 compiled single-thread runtimeへ一本化した。詳細な実装・計測・削除条件は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を権威とする。主用途を結合した
 時間/mesh収束とglobal-bound/event costは、その後のP14-Uで閉じた。T03とP14-Rのlocal gate/evidenceも完了し、
-配布経路にはP14-Rの初回remote workflowだけが独立trackとして残る。P15はユーザーの明示指示で旧着手blockerを解除し、
+2026-10-05のremote Windows/Linux workflow成功でP14-Rとv0.1配布経路を閉じた。P15はユーザーの明示指示で旧着手blockerを解除し、
 RK4-firstと、その受入後のexplicit midpoint chargeまで完了した。外部M3-V applicability/relevance評価も完了し、
 P15 stationary OMLと元datasetの全軌道比較は適用外、式parityと次workstreamだけを確定した。
 T04はprofile条件付きのままである。
@@ -1737,8 +1737,8 @@ memoryとsynthetic end-to-end scalingを説明できる。
 
 完了条件：現行model範囲で、目的用途のtrajectory精度とevent精度、入力表現、end-to-end時間・memoryを
 同じcaseから説明できる。P14-U正式releaseはこの条件を満たした。秒数はmachine-localな記述値であり、
-COMSOL比較またはportable thresholdではない。T03とPhase 1Rのlocal gate/evidenceは完了し、P14-Rの
-初回remote workflowは独立release trackに残る。Phase 2AのP15は旧着手blockerを解除して完了した。
+COMSOL比較またはportable thresholdではない。T03とP14-Rのlocal gate/evidenceに加え、remote Windows/Linux
+workflowも完了した。Phase 2AのP15は旧着手blockerを解除して完了した。
 
 ### Phase 2A：帯電、熱、決定論3D粒子
 
@@ -1834,8 +1834,10 @@ RMS観測次数は`2.029875353701904/2.0816971911764033/2.044084026475049`、fin
 このfine candidateと既存common-P1 referenceの現行comparisonも9/9をPASSした。COMSOL referenceとcommon-field入力は
 不変なので再実行せず、既存hash固定referenceを再評価した。P18-Hも同じ方針で既存Freeze referenceへの15/15 gateを
 閉じた。B03 core、charge-stable coupling、work-scaled cadence、P20 performance closeoutも完了した。続くmeaning-matched
-external V&V/M3-C2はcommon-P1 Case-A/Case-P 100 nm finalまで完了した。Case-PのR-Z/fate gateはPASSしたが、negative-ion
-current未実装のためphysical applicabilityは未認定である。受理済み3 seedの287粒子owner discoveryも科学payload・work・
+external V&V/M3-C2はcommon-P1 Case-A/Case-P 100 nm finalまで完了した。Case-PのR-Z/fate gateはPASSしたが、anchorは
+negative-ion currentを選択しない固定二電流same-form比較であり、Case-Pプラズマ全体のphysical applicabilityは未認定である。
+任意の三電流production revisionは後続P21で完了したが、外部三電流軌道比較は入力authority不足で非認定のままである。
+受理済み3 seedの287粒子owner discoveryも科学payload・work・
 case identity・revisionを完全一致させて完了した。支配ownerは`integrators`（自己時間比42.58--42.86%）だったが、
 事前登録済みbounded ownerではないため最適化は未承認でproduction変更はない。M3-C2A anchorは
 `CLOSED_ACCEPTED_WITH_LIMITATIONS`である。10,000粒子以上の性能は製品SLAを先に定義した独立work packageだけで評価し、

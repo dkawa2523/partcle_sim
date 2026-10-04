@@ -270,9 +270,10 @@ resolved cadenceはmanifestとresume identityに含まれ、output scheduleとsl
 P14はengine v20 / compiled tile v4 / field v3 / geometry v4 / memory plan v6として完了しました。23行×3観測matrixの
 identity/revision/memory checkとverification/scenario 336件が合格しています。geometry v4はtable-start volume containmentを
 mixed-cell BVHで絞り、局所的にfloat64で解像不能なcellをprepareで拒否します。3観測medianでregular 100k/1Mは
-20 workerで1.8796x/4.7965xでしたがevent-heavyでは負のscaleでした。配布可能なv0.1には
-T03 analysis/visualizationは完了しました。P14-Rはbaseline v27/P14-U evidence保存とlocal Windows/Linuxの
-wheel・runtime-only clean install・三API smokeまで合格し、初回remote workflow成功だけが残ります。
+20 workerで1.8796x/4.7965xでしたがevent-heavyでは負のscaleでした。T03 analysis/visualizationは完了しました。
+P14-Rはbaseline v27/P14-Uを履歴として保持し、receipt固定のtested head/lockについてremote Windows/Linuxで
+620件、性能smoke 7行（cold 1＋warm 6）、wheel、runtime-only clean install、三API smokeまで合格したため、
+`0.1.0.dev0`開発baselineの配布可能性closureを完了しました。これは正式版packageの公開を意味しません。
 
 P14-Pは否定的closeoutまで完了しました。focused correction後のregular 1Mは1/2/4 threadで
 9.32/10.09/10.10 s、4-thread speedup 0.923xで、v20の1-thread 7.534 sからも23.7%退行しました。
@@ -292,7 +293,8 @@ first-hit、可変RZ場のaxis crossing/parity、`none`/sample出力utility、ev
 `release_gate_complete=true`、18 raw観測/6 median、failure 0、出力utilityと科学payload/revision identityの一致を
 満たしました。受理済みreportは[`evidence/v0.1/p14u_release_v1.json`](evidence/v0.1/p14u_release_v1.json)です。これは
 machine-local evidenceで、他のrelease evidenceも[`evidence/v0.1/`](evidence/v0.1/)に保存します。製品runtimeは
-一つのsingle-thread compiled engineのままです。P14-Rの初回remote workflowは未完の独立release trackとして残ります。
+一つのsingle-thread compiled engineのままです。P14-Rのremote receiptは
+[`release_remote_ci_v1.json`](evidence/v0.1/release_remote_ci_v1.json)で、COMSOL V&Vやportable性能の証拠ではありません。
 P15は旧着手blockerをユーザーの明示指示で解除して両explicit sliceを完了しました。続く外部M3-V評価、
 canonical RZ/P1 reduced electrostatic builder F01、F02 provider adapter/integrationも完了しました。F02は代表meshの
 linear solve、32粒子fixed-electric smoke、同一export node上の記述的field比較までをcore外で閉じています。

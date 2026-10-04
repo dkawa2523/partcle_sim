@@ -1,0 +1,77 @@
+{
+  "run_completed_at_utc": "2026-10-04T16:51:58Z",
+  "claims": {
+    "comsol_vv": false,
+    "large_scale_performance_recertified": false,
+    "p14_r_release_closure": "COMPLETE",
+    "portable_performance_claim": false,
+    "release_ci": "PASS"
+  },
+  "evidence_revision": "release_remote_ci_v1",
+  "jobs": [
+    {
+      "completed_at_utc": "2026-10-04T16:51:58Z",
+      "conclusion": "success",
+      "duration_seconds": 637,
+      "job_id": 111481447599,
+      "name": "windows-latest / Python 3.12",
+      "public_api_smoke": "passed",
+      "quality_gates": "passed",
+      "runtime_only_clean_install": "passed",
+      "started_at_utc": "2026-10-04T16:41:21Z",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/37217687830/job/111481447599",
+      "performance_smoke": {
+        "cold_rows": 1,
+        "rows": 7,
+        "status": "passed",
+        "warm_rows": 6
+      },
+      "verification_scenario_tests": "620 passed",
+      "wheel_build": "passed"
+    },
+    {
+      "completed_at_utc": "2026-10-04T16:49:25Z",
+      "conclusion": "success",
+      "duration_seconds": 485,
+      "job_id": 111481447734,
+      "name": "ubuntu-latest / Python 3.12",
+      "public_api_smoke": "passed",
+      "quality_gates": "passed",
+      "runtime_only_clean_install": "passed",
+      "started_at_utc": "2026-10-04T16:41:20Z",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/37217687830/job/111481447734",
+      "performance_smoke": {
+        "cold_rows": 1,
+        "rows": 7,
+        "status": "passed",
+        "warm_rows": 6
+      },
+      "verification_scenario_tests": "620 passed",
+      "wheel_build": "passed"
+    }
+  ],
+  "package": {
+    "name": "chamber-particles",
+    "public_operations": [
+      "load_case",
+      "simulate",
+      "open_result"
+    ],
+    "version": "0.1.0.dev0"
+  },
+  "repository": "dkawa2523/partcle_sim",
+  "run": {
+    "attempt": 1,
+    "conclusion": "success",
+    "event": "push",
+    "head_branch": "ci/solver-release-2d-20261005",
+    "head_sha": "4829b89b73a2eb22ebd918d95e22c997d1104f97",
+    "run_id": 37217687830,
+    "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/37217687830",
+    "workflow": "solver-release"
+  },
+  "uv_lock_path": "particle_platform_redesign/solver/uv.lock",
+  "uv_lock_sha256": "sha256:e81eb7fc2daff0be0162f6b318d7889eb7799885cdb9c8785d64c8e3333afc33",
+  "workflow_path": ".github/workflows/solver-release.yml",
+  "workflow_sha256": "sha256:d1970b6a934bc43b65c59ed95132d8a9d65b9b070c1a02beec7f315ef2af68bd"
+}
