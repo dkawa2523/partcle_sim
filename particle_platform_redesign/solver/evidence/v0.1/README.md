@@ -18,6 +18,11 @@ comparison.
   verification/scenario tests, the seven-row performance smoke (one cold and six warm), wheel
   build, runtime-only clean install, and the three-public-API smoke. It records the successful
   remote-CI evidence used to close P14-R; it is not COMSOL V&V or portable performance evidence.
+- `release_remote_ci_v2.json`: GitHub Actions receipt for the static 2-D release-candidate
+  closeout. The hash-fixed `sim_rev5` source passed on Windows and Ubuntu with 625
+  verification/scenario tests, the producer-neutral Quick Start, the seven-row performance
+  smoke, wheel build, runtime-only clean install, and the three-public-API smoke. It is not
+  COMSOL V&V, a portable timing promise, or a formal `0.1.0` publication receipt.
 
 Both performance JSON files contain their machine fingerprint, locked-environment digest,
 execution conditions, algorithm revisions, scientific payload digests, and pass/fail checks.

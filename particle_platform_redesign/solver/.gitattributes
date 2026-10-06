@@ -3,6 +3,9 @@
 # Evidence receipts hash exact producer bytes. Never apply newline conversion
 # inside the immutable evidence tree; source/config files remain LF-normalized.
 evidence/** binary
+# Release receipts are authored in-repository and are not inputs to raw-byte
+# evidence ledgers, so keep them reviewable as normalized text.
+evidence/v0.1/** -binary diff merge text eol=lf
 
 *.h5 binary
 *.hdf5 binary
