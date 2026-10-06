@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "campaign_id": "M3-C3-caseP-100nm-three-current",
+  "campaign_revision": 5,
+  "classification": "external_vv_deterministic_three_current_common_p1",
+  "primitive_input": {
+    "solver_relative_path": "_out_m3c3/caseP_negative_ion_primitives_v3/candidate_input_three_current.h5",
+    "sha256": "f14efc8bd453505baaa9fc1ddf71f91e5145fb07cb8bdeecd1955d40cec8d124",
+    "content_hash": "sha256:30290ae385797fc22fccad74f05e1dd1d2310af786a42e53c586fd628d682464"
+  },
+  "primitive_receipt": {
+    "solver_relative_path": "_out_m3c3/caseP_negative_ion_primitives_v3/primitive_receipt.json",
+    "sha256": "600c0198617d230e8e9ed6d9ef2f4a5177560cc2c984e710ea6af7d557f86b75"
+  },
+  "candidate_template": {
+    "solver_relative_path": "_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/candidate_coarse.yaml",
+    "sha256": "48342e0ba7f7f3eeb94f36d98309ffb9d5d7c5350df321a8e8333d75a0189f9a"
+  },
+  "source_mph": {
+    "repository_relative_path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+  },
+  "schedule": {
+    "particle_count": 287,
+    "time_end_s": 0.03,
+    "output_count": 121,
+    "candidate_steps_s": [2.5e-6, 1.25e-6, 6.25e-7],
+    "comsol_reference_steps_s": [5e-6, 2.5e-6, 1.25e-6]
+  },
+  "numerics": {
+    "event_geometry_rtol": 1e-9,
+    "event_roundoff_ulps": 64,
+    "event_tolerance_policy": "scale_aware_and_materially_below_the_trajectory_acceptance_floor"
+  },
+  "physics": {
+    "brownian_active": false,
+    "charge_revision": "aggregate_relative_drift_regularized_three_current_v1",
+    "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+    "candidate_integrator": "exponential_midpoint",
+    "effective_gas_maximum_speed_ratio": 1.0,
+    "effective_gas_classification": "producer_effective_gas_sensitivity_not_physical_certification",
+    "maximum_relative_ion_speed_m_s": 1000000.0,
+    "particle_speed_envelope_m_s": 1000.0
+  },
+  "acceptance": {
+    "policy_source_solver_relative_path": "tools/vv/comsol/cases/m3c1_caseA_100nm_common_p1_v1.json",
+    "policy_source_sha256": "db85d2187edd2b8807717a9f7272b6e198b3dc1a1a080df46e67980458fc763d",
+    "minimum_rms_order": 0.75,
+    "direct_uncertainty_multiplier": 4.0,
+    "direct_uncertainty_components": [
+      "candidate_fine_pair",
+      "comsol_reference_pair"
+    ],
+    "lifecycle_exact": true
+  },
+  "claim_policy": {
+    "field_scope": "canonical_exact_connectivity_p1",
+    "brownian": "DISABLED",
+    "three_current_model_form": "BENCHMARKED_NOT_UNIVERSALLY_CERTIFIED",
+    "comsol_universal_equal_accuracy": false
+  }
+}

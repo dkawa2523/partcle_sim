@@ -1,0 +1,8 @@
+workstream,workstream_priority,candidate,decision,evidence
+canonical_field_production,1,independent_reduced_electrostatic_builder,mandatory_first_party_preprocessor_with_canonical_output,Case-A equations and boundary groups inventoried; independent parity not tested
+trajectory_physics,1,relative_drift_regularized_two_current_charge_v1,required_before_reference_trajectory_replay,minimum sampled stationary-OML coverage=0; scalar-mass mismatches=6/12; species mismatches=6/12; reference formula omits negative-ion collection and is not a universal model
+trajectory_physics,2,finite_speed_epstein_drag,required_for_uncovered_reference_states,minimum sampled linear-Epstein coverage=0.542834
+trajectory_physics,3,versioned_relative_flow_ion_drag,implement_as_explicit_model_not_case_profile,reference-only p90 abs-impulse/mass reaches 9211.19 m/s; paired Case-A histories diverge
+trajectory_physics,4,waldmann_thermophoresis_p16,retain_as_separate_deterministic_model,reference-only p90 abs-impulse/mass reaches 322.935 m/s; gradient oracle remains controlled work
+trajectory_physics,5,brownian_multi_seed_campaign,validate_distribution_before_production_acceptance,current reference has one seed and only a timestep-dependent RMS noise scale
+state_dimension,1,cartesian_3d_p17,retain_independent_product_roadmap_item,NOT_TESTED by this axisymmetric reference matrix

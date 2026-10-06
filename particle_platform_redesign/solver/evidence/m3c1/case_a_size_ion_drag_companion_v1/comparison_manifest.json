@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "evidence_id": "M3-C1-caseA-size-ion-drag-common-P1-companion-v1",
+  "status": "PASS",
+  "cell_pass_count": 3,
+  "cell_count": 3,
+  "scope": {
+    "particles": 287,
+    "frames": 46,
+    "time_window_s": [0.0, 0.00045],
+    "candidate_steps_s": [6.25e-7, 3.125e-7, 1.5625e-7],
+    "field": "one shared canonical exact-connectivity P1 authority",
+    "brownian": false,
+    "boundary": "NOT_TESTED_PRE_EVENT_WINDOW"
+  },
+  "source": {
+    "mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "shared_field_input_sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+    "shared_field_content_hash": "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c",
+    "campaign_config_sha256": "5bd1b958c82130b1025fdea221d7ced7ce829e79bff6512125c034fe21c8a6d4",
+    "gate_policy_sha256": "db85d2187edd2b8807717a9f7272b6e198b3dc1a1a080df46e67980458fc763d",
+    "result_dependent_tolerance_tuning": false
+  },
+  "applicability": {
+    "effective_gas_maximum_speed_ratio": 1.0,
+    "comsol_saved_point_maximum_speed_ratio": {
+      "caseA_10nm_relative_flow": 0.393341848,
+      "caseA_30nm_relative_flow": 0.132057190,
+      "caseA_100nm_image": 0.073585559
+    },
+    "solver_core_changed": false
+  },
+  "cells": {
+    "caseA_10nm_relative_flow": {
+      "status": "PASS",
+      "candidate_order_position_velocity_charge": [2.08556029000614, 2.0777628520544686, 1.966774729576932],
+      "reference_order_position_velocity_charge": [2.0855603045906053, 2.077762851958997, 1.966774717252307],
+      "fine_difference": {
+        "position_rms_m": 4.0189472907015086e-13,
+        "position_maximum_m": 1.1061175734239915e-12,
+        "position_relative_l2": 2.9277460298259895e-11,
+        "velocity_rms_m_s": 1.7423855745483177e-9,
+        "velocity_maximum_m_s": 3.41187781975777e-9,
+        "velocity_relative_l2": 3.402691720265476e-11,
+        "charge_rms_e": 3.513394672796024e-9,
+        "charge_maximum_e": 6.60977050870315e-9,
+        "charge_relative_l2": 2.7669410329175896e-10
+      },
+      "candidate_fine_sha256": "78ec242d38d155732339330273280183bdbe7ce3967b35ef7dd3082129b8d8db",
+      "reference_fine_sha256": "2a8ac237c58c76927a82d5faec163b76f586dc83cd91a1cdf7a2841bda2ad95d"
+    },
+    "caseA_30nm_relative_flow": {
+      "status": "PASS",
+      "candidate_order_position_velocity_charge": [1.8721156685847733, 1.8584064618669067, 1.994330534277438],
+      "reference_order_position_velocity_charge": [1.8721156407964679, 1.8584063463389024, 1.994330356318096],
+      "fine_difference": {
+        "position_rms_m": 5.25388357416497e-13,
+        "position_maximum_m": 1.389467321815849e-12,
+        "position_relative_l2": 9.40907381058938e-11,
+        "velocity_rms_m_s": 2.5260434516717365e-9,
+        "velocity_maximum_m_s": 4.580070523336438e-9,
+        "velocity_relative_l2": 9.553675868988996e-11,
+        "charge_rms_e": 2.0342138607095293e-8,
+        "charge_maximum_e": 4.15538892184486e-8,
+        "charge_relative_l2": 3.7277306103495233e-10
+      },
+      "candidate_fine_sha256": "c27c4ad01e841cb4696c476b02c925e2662f992028b9e13195cc54f308fe02ca",
+      "reference_fine_sha256": "18860621af72726719bc9d1c9dc4288cf6dc7a6734af60fa0796c275a6ae5503"
+    },
+    "caseA_100nm_image": {
+      "status": "PASS",
+      "candidate_order_position_velocity_charge": [1.9419824796267164, 1.9358013742617544, 1.8295779907152303],
+      "reference_order_position_velocity_charge": [1.941982625550199, 1.9358013478349603, 1.8295795800645969],
+      "fine_difference": {
+        "position_rms_m": 3.8769440221081826e-13,
+        "position_maximum_m": 1.1409399321559212e-12,
+        "position_relative_l2": 1.9680598977534097e-10,
+        "velocity_rms_m_s": 1.9708992297755863e-9,
+        "velocity_maximum_m_s": 3.7799342636129654e-9,
+        "velocity_relative_l2": 1.8689950165931344e-10,
+        "charge_rms_e": 1.1799609854633251e-7,
+        "charge_maximum_e": 2.3727159259578912e-7,
+        "charge_relative_l2": 4.66732921548995e-10
+      },
+      "candidate_fine_sha256": "80c77cd3278c9cc94094c5002e1278251eee39f1cddf35cd6b7b6458cd0ab335",
+      "reference_fine_sha256": "566d333d3ab457604dacd08e7b0711ea3ac14498b28e04628d79b4a084590d31"
+    }
+  },
+  "claim_policy": {
+    "same_field_time_integration_agreement": "SUPPORTED_WITHIN_PREDECLARED_LIMITS",
+    "comsol_is_golden_truth": false,
+    "native_field_agreement": "NOT_CERTIFIED",
+    "physical_model_validity": "NOT_CERTIFIED_BY_TRAJECTORY_AGREEMENT",
+    "general_boundary_accuracy": "NOT_TESTED_PRE_EVENT_WINDOW",
+    "brownian_accuracy": "NOT_TESTED"
+  }
+}

@@ -1,0 +1,3379 @@
+[
+  {
+    "label": "icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "path": "icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "read_only": "true",
+    "type": "model",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "dataset_tags": "[dset1, dset2, rev1, dset3, dset4, rev2, rev3, cln1, cpt1, dset5, dset_cacheP, dset10, dset11, part_P_10nm, dset12, dset13, part_P_30nm, dset14, dset15, part_P_100nm, dset_AS_field, dset16, dset17, part_AS_10nm, dset18, dset19, part_AS_30nm, dset20, dset21, part_AS_100nm]",
+    "physics_tags": "[ptp, spf, ht, mf, pcv, pce2, pcne, pcte, pcni, pcnm, pcgr, pcgz, pcmi, fpt, esass, fptas]",
+    "solution_tags": "[sol1, sol2, sol3, sol8, sol9, sol10, sol11, sol12, sol13, sol14, sol15, sol16, sol26, sol27, sol28, sol29, sol30, sol31, sol32, sol33, sol34, sol35]",
+    "study_tags": "[std1, std2, std3, stdP10, stdP30, stdP100, stdASf, stdAS10, stdAS30, stdAS100]",
+    "type": "inventory",
+    "variable_groups": "[var1, varDustField, varReleaseIC, varAS]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "4[V]",
+    "name": "AS_Te",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1e15[1/m^3]",
+    "name": "AS_ne0",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1e15[1/m^3]",
+    "name": "AS_ni0",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "50[g/mol]/N_A_const",
+    "name": "AS_mi",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1[m^2/(V*s)]",
+    "name": "AS_mu_i",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "15[V]",
+    "name": "AS_Vp",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "0[V]",
+    "name": "AS_Vwall",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "-68.2710575[V]",
+    "name": "AS_Vwafer",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_Vp-AS_float_drop",
+    "name": "AS_Vdielectric",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "10[us]",
+    "name": "AS_particle_dt",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "-1",
+    "name": "AS_Z0",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "10[us]",
+    "name": "particle_dt",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_particle_dt",
+    "name": "timestep",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1[m/s]",
+    "name": "u_eps",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "0.01[V]",
+    "name": "Ti_floor",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "0.9",
+    "name": "sigmaR_p",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "0.8*88.0043[g/mol]+0.2*31.9988[g/mol]",
+    "name": "Mmix",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1",
+    "name": "brownian_seed",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "21",
+    "name": "AS_brownian_seed",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1",
+    "name": "iondrag_scale_P",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1",
+    "name": "iondrag_scale_A",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1",
+    "name": "AS_iondrag_scale",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1",
+    "name": "C_lift_fm",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "2e-18[m^2]",
+    "name": "sigma_in",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "2200[kg/m^3]",
+    "name": "rho_p",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "4.2",
+    "name": "epsr_p",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "10[nm]",
+    "name": "d0",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1[V^2/m^2]",
+    "name": "E2floor",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "0.05[V]",
+    "name": "AS_dV_smooth",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "-50",
+    "name": "AS_exp_min",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "5",
+    "name": "AS_exp_max",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1[m/s]",
+    "name": "AS_flux_speed_floor",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "0.152[m]",
+    "name": "AS_focus_r0",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "5[mm]",
+    "name": "AS_focus_transition",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1e6[1/m^3]",
+    "name": "AS_n_floor",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1",
+    "name": "AS_sheath_ramp",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1e-3[m/s]",
+    "name": "AS_u_floor",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_Te*log(sqrt(AS_mi/(2*pi*me_const)))",
+    "name": "AS_float_drop",
+    "type": "parameter",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "withsol('sol2',u,setval(Vrf,100[V]))",
+    "group": "varAS",
+    "name": "AS_ugr",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "withsol('sol2',w,setval(Vrf,100[V]))",
+    "group": "varAS",
+    "name": "AS_ugz",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "withsol('sol2',T,setval(Vrf,100[V]))",
+    "group": "varAS",
+    "name": "AS_Tg",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(withsol('sol2',spf.pA,setval(Vrf,100[V])),0.01[Pa])",
+    "group": "varAS",
+    "name": "AS_pabs",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "VAS-AS_Vp",
+    "group": "varAS",
+    "name": "AS_psi_raw",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "flc2hs(-AS_psi_raw,AS_dV_smooth)",
+    "group": "varAS",
+    "name": "AS_sheath_gate",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_psi_raw*AS_sheath_gate",
+    "group": "varAS",
+    "name": "AS_psi",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "sqrt(e_const*AS_Te/AS_mi)",
+    "group": "varAS",
+    "name": "AS_uB",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(AS_n_floor,AS_ne0*exp(max(AS_exp_min,min(AS_exp_max,AS_psi/AS_Te))))",
+    "group": "varAS",
+    "name": "AS_ne",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "sqrt(max(AS_u_floor^2,AS_uB^2-2*e_const*AS_psi/AS_mi))",
+    "group": "varAS",
+    "name": "AS_ui_mag",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(AS_n_floor,AS_ni0*AS_uB/AS_ui_mag)",
+    "group": "varAS",
+    "name": "AS_ni",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "e_const*(AS_ni-AS_ne)",
+    "group": "varAS",
+    "name": "AS_rhoq",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "-d(VAS,r)",
+    "group": "varAS",
+    "name": "AS_Er",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "-d(VAS,z)",
+    "group": "varAS",
+    "name": "AS_Ez",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(k_B_const*AS_Tg/e_const,Ti_floor)",
+    "group": "varAS",
+    "name": "AS_TiV",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_mu_i*k_B_const*AS_Tg/e_const",
+    "group": "varAS",
+    "name": "AS_Di",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_ni*AS_ugr+AS_mu_i*AS_ni*AS_Er-AS_Di*d(AS_ni,r)",
+    "group": "varAS",
+    "name": "AS_Gir",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_ni*AS_ugz+AS_mu_i*AS_ni*AS_Ez-AS_Di*d(AS_ni,z)",
+    "group": "varAS",
+    "name": "AS_Giz",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "sqrt(AS_Gir^2+AS_Giz^2+(AS_ni0*AS_flux_speed_floor)^2)",
+    "group": "varAS",
+    "name": "AS_Gimag",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_ui_mag*AS_Gir/AS_Gimag",
+    "group": "varAS",
+    "name": "AS_uir",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "AS_ui_mag*AS_Giz/AS_Gimag",
+    "group": "varAS",
+    "name": "AS_uiz",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "pi*(d0/2)^2*AS_ne*sqrt(8*e_const*AS_Te/(pi*me_const))",
+    "group": "varAS",
+    "name": "AS_Ge0",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(d0/2,AS_lambdaD_bulk)",
+    "group": "varAS",
+    "name": "AS_lambdaD",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/AS_lambdaD))",
+    "group": "varAS",
+    "name": "AS_phi1",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(root.comp1.spf.pA,0.01[Pa])",
+    "group": "varDustField",
+    "name": "pabs_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "pabs_d*Mmix/(R_const*T)",
+    "group": "varDustField",
+    "name": "rho_g_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "mu_ref*(T/Tref)^0.70",
+    "group": "varDustField",
+    "name": "mu_g_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "withsol('sol3',-Vscale*d(pcVn,r))",
+    "group": "varDustField",
+    "name": "Er_P",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "withsol('sol3',-Vscale*d(pcVn,z))",
+    "group": "varDustField",
+    "name": "Ez_P",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(1e6[1/m^3],withsol('sol3',Nscale*pcNen))",
+    "group": "varDustField",
+    "name": "ne_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(1e6[1/m^3],withsol('sol3',Nscale*pcNin))",
+    "group": "varDustField",
+    "name": "ni_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(0[1/m^3],withsol('sol3',Nscale*pcNmn))",
+    "group": "varDustField",
+    "name": "nm_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(0.05[V],withsol('sol3',Tescale*pcTen))",
+    "group": "varDustField",
+    "name": "Te_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(1e-28[kg],withsol('sol3',Mscale*pcMin))",
+    "group": "varDustField",
+    "name": "mi_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "ui_capfac*uir_raw",
+    "group": "varDustField",
+    "name": "uir_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "ui_capfac*uiz_raw",
+    "group": "varDustField",
+    "name": "uiz_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "mu_g_d*sqrt(pi/(2*pabs_d*rho_g_d))",
+    "group": "varDustField",
+    "name": "lambda_g_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(d0/2,1/sqrt(max(invLD2_d,1[1/m^2])))",
+    "group": "varDustField",
+    "name": "lambdaD_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "1/max(ng_d*sigma_in,1[1/m])",
+    "group": "varDustField",
+    "name": "lambda_in_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "max(k_B_const*T/e_const,Ti_floor)",
+    "group": "varDustField",
+    "name": "TiV_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "pi*(d0/2)^2*ne_d*sqrt(8*e_const*Te_d/(pi*me_const))",
+    "group": "varDustField",
+    "name": "Ge0_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "expression": "e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/lambdaD_d))",
+    "group": "varDustField",
+    "name": "phi1_d",
+    "type": "variable",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case P dynamic mean charge from total ne and total positive-ion density",
+    "feature_tag": "auxq",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fpt",
+    "property": "R",
+    "type": "physics_setting",
+    "value": "[((pi*(d0/2)^2*root.comp1.ni_d*sqrt((((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))*if((ZP*root.comp1.phi1_d)<=0[V],1-(ZP*root.comp1.phi1_d)/(max(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2)/(2*e_const),Ti_floor)),exp(max(-50,min(50,-(ZP*root.comp1.phi1_d)/(max(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2)/(2*e_const),Ti_floor)))))))-(root.comp1.Ge0_d*if((ZP*root.comp1.phi1_d)<=0[V],exp(max(-50,min(50,(ZP*root.comp1.phi1_d)/root.comp1.Te_d))),1+(ZP*root.comp1.phi1_d)/root.comp1.Te_d)))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fpt",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Theory-consistent Case P ion drag retained: relative ion-particle flow, collection plus orbital scattering",
+    "feature_tag": "idf",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fpt",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[((iondrag_scale_P*(pi*min((max(d0/2,min(root.comp1.lambdaD_d,root.comp1.lambda_in_d)))^2,(d0/2)^2*max(0,1-2*e_const*(ZP*root.comp1.phi1_d)/(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))+4*pi*((sqrt(ZP^2+1e-20)*e_const^2/(4*pi*epsilon0_const*root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))^2*(max(0,0.5*log(((max(d0/2,min(root.comp1.lambdaD_d,root.comp1.lambda_in_d)))^2+((sqrt(ZP^2+1e-20)*e_const^2/(4*pi*epsilon0_const*root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))^2)/(min((max(d0/2,min(root.comp1.lambdaD_d,root.comp1.lambda_in_d)))^2,(d0/2)^2*max(0,1-2*e_const*(ZP*root.comp1.phi1_d)/(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))+((sqrt(ZP^2+1e-20)*e_const^2/(4*pi*epsilon0_const*root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))^2)))))*root.comp1.ni_d*root.comp1.mi_d*sqrt((((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2)))*(root.comp1.uir_d-fpt.vr)), 0[N], ((iondrag_scale_P*(pi*min((max(d0/2,min(root.comp1.lambdaD_d,root.comp1.lambda_in_d)))^2,(d0/2)^2*max(0,1-2*e_const*(ZP*root.comp1.phi1_d)/(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))+4*pi*((sqrt(ZP^2+1e-20)*e_const^2/(4*pi*epsilon0_const*root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))^2*(max(0,0.5*log(((max(d0/2,min(root.comp1.lambdaD_d,root.comp1.lambda_in_d)))^2+((sqrt(ZP^2+1e-20)*e_const^2/(4*pi*epsilon0_const*root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))^2)/(min((max(d0/2,min(root.comp1.lambdaD_d,root.comp1.lambda_in_d)))^2,(d0/2)^2*max(0,1-2*e_const*(ZP*root.comp1.phi1_d)/(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))+((sqrt(ZP^2+1e-20)*e_const^2/(4*pi*epsilon0_const*root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))))^2)))))*root.comp1.ni_d*root.comp1.mi_d*sqrt((((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2)))*(root.comp1.uiz_d-fpt.vz))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fpt",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case P particle; diameter set independently by each 10/30/100 nm study",
+    "feature_tag": "pp1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "ParticlePropertySpec",
+    "type": "physics_setting",
+    "value": "[SpecifyDensityAndDiameter]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "dp",
+    "type": "physics_setting",
+    "value": "[d0]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "rhop",
+    "type": "physics_setting",
+    "value": "[rho_p]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "ChargeSpecification",
+    "type": "physics_setting",
+    "value": "[UserDefined]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "Z",
+    "type": "physics_setting",
+    "value": "[ZP]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "v",
+    "type": "physics_setting",
+    "value": "[0, 0, 0]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case P lower source: r=range(14,0.1,18) cm, z=range(2.3,0.05,2.6) cm; 287 unique sites; upward local gas-speed magnitude; deterministic +/-15 deg radial spread",
+    "feature_tag": "relg1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "x0",
+    "type": "physics_setting",
+    "value": "[range(14,0.1,18), range(2.3,0.05,2.6)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "v0",
+    "type": "physics_setting",
+    "value": "[root.comp1.release_speed_P*sin(root.comp1.release_theta), 0[m/s], release_axial_sign*root.comp1.release_speed_P*cos(root.comp1.release_theta)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "rt",
+    "type": "physics_setting",
+    "value": "[0[s]]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "aux0_auxq",
+    "type": "physics_setting",
+    "value": "[Z0_P]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "SamplingFromDistribution",
+    "type": "physics_setting",
+    "value": "[Deterministic]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "InitialVelocity",
+    "type": "physics_setting",
+    "value": "[Expression]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P Epstein drag, 80/20 CF4/O2, saved gas velocity",
+    "feature_tag": "df1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "DragLaw",
+    "type": "physics_setting",
+    "value": "[Stokes]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "Rarefaction_Effects",
+    "type": "physics_setting",
+    "value": "[Epstein]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "sigmaR",
+    "type": "physics_setting",
+    "value": "[sigmaR_p]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "u_src",
+    "type": "physics_setting",
+    "value": "[root.comp1.u]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.rho_g_d]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.mu_g_d]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P Brownian force with Epstein/FDT friction",
+    "feature_tag": "bf1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fpt",
+    "property": "i",
+    "type": "physics_setting",
+    "value": "[brownian_seed]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fpt",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.muB_d]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fpt",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P electric force from saved RF-cycle mean plasma potential",
+    "feature_tag": "ef1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fpt",
+    "property": "E",
+    "type": "physics_setting",
+    "value": "[root.comp1.Er_P, 0[V/m], root.comp1.Ez_P]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fpt",
+    "property": "SpecifyForceUsing",
+    "type": "physics_setting",
+    "value": "[ElectricField]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P active free-molecular lift sensitivity",
+    "feature_tag": "liftfm",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fpt",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[C_lift_fm*pi*root.comp1.rho_g_d*root.comp1.lambda_g_d*(d0/2)^2*(root.comp1.w-fpt.vz)*nojac(d(root.comp1.u,z)-d(root.comp1.w,r)), 0[N], -C_lift_fm*pi*root.comp1.rho_g_d*root.comp1.lambda_g_d*(d0/2)^2*(root.comp1.u-fpt.vr)*nojac(d(root.comp1.u,z)-d(root.comp1.w,r))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fpt",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P RF-cycle DEP from mean(E^2)",
+    "feature_tag": "depf",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fpt",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[2*pi*epsilon0_const*(d0/2)^3*root.comp1.Kcm_d*nojac(d(root.comp1.E2rf_P,r)), 0[N], 2*pi*epsilon0_const*(d0/2)^3*root.comp1.Kcm_d*nojac(d(root.comp1.E2rf_P,z))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fpt",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P Waldmann free-molecular thermophoresis, CF4/O2 properties",
+    "feature_tag": "thpf1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "ThermophoreticForceModel",
+    "type": "physics_setting",
+    "value": "[Waldmann]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "mg",
+    "type": "physics_setting",
+    "value": "[Mmix]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.rho_g_d]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.mu_g_d]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "k",
+    "type": "physics_setting",
+    "value": "[k_mix]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "Cp",
+    "type": "physics_setting",
+    "value": "[Cp_mix]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[6, 8, 28, 29, 32, 33, 34, 36, 38, 40, 41, 45, 46, 47]",
+    "feature_label": "Case P automatic exterior wall - stick/deposit; opening features override",
+    "feature_tag": "wall1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "wall1",
+    "physics_tag": "fpt",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Stick]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[37]",
+    "feature_label": "Case P gas inlet - freeze reverse escape",
+    "feature_tag": "outin",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "outin",
+    "physics_tag": "fpt",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Freeze]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[35]",
+    "feature_label": "Case P pump outlet - disappear",
+    "feature_tag": "outpump",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "outpump",
+    "physics_tag": "fpt",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Disappear]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[5]",
+    "feature_label": "Case P axis symmetry",
+    "feature_tag": "axi1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Dynamic aggregate charge from total electron density AS_ne and total positive-ion density AS_ni",
+    "feature_tag": "auxq",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fptas",
+    "property": "R",
+    "type": "physics_setting",
+    "value": "[((pi*(d0/2)^2*root.comp1.AS_ni*sqrt((((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))*if((ZAS*root.comp1.AS_phi1)<=0[V],1-(ZAS*root.comp1.AS_phi1)/(max(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2)/(2*e_const),Ti_floor)),exp(max(-50,min(50,-(ZAS*root.comp1.AS_phi1)/(max(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2)/(2*e_const),Ti_floor)))))))-(root.comp1.AS_Ge0*if((ZAS*root.comp1.AS_phi1)<=0[V],exp(max(-50,min(50,(ZAS*root.comp1.AS_phi1)/AS_Te))),1+(ZAS*root.comp1.AS_phi1)/AS_Te)))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fptas",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[stdAS10/time]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Theory-consistent ion drag: relative ion-particle flow, collection plus orbital scattering",
+    "feature_tag": "idf",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fptas",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[((AS_iondrag_scale*(pi*min((max(d0/2,min(root.comp1.AS_lambdaD,root.comp1.AS_lambda_in)))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*root.comp1.AS_phi1)/(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))+4*pi*((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))^2*(max(0,0.5*log(((max(d0/2,min(root.comp1.AS_lambdaD,root.comp1.AS_lambda_in)))^2+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))^2)/(min((max(d0/2,min(root.comp1.AS_lambdaD,root.comp1.AS_lambda_in)))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*root.comp1.AS_phi1)/(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))^2)))))*root.comp1.AS_ni*AS_mi*sqrt((((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2)))*(root.comp1.AS_uir-fptas.vr)), 0[N], ((AS_iondrag_scale*(pi*min((max(d0/2,min(root.comp1.AS_lambdaD,root.comp1.AS_lambda_in)))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*root.comp1.AS_phi1)/(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))+4*pi*((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))^2*(max(0,0.5*log(((max(d0/2,min(root.comp1.AS_lambdaD,root.comp1.AS_lambda_in)))^2+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))^2)/(min((max(d0/2,min(root.comp1.AS_lambdaD,root.comp1.AS_lambda_in)))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*root.comp1.AS_phi1)/(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))))^2)))))*root.comp1.AS_ni*AS_mi*sqrt((((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2)))*(root.comp1.AS_uiz-fptas.vz))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fptas",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case A SASS particle; diameter set by independent 10/30/100 nm studies; common dynamic charge ZAS",
+    "feature_tag": "pp1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "ParticlePropertySpec",
+    "type": "physics_setting",
+    "value": "[SpecifyDensityAndDiameter]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "dp",
+    "type": "physics_setting",
+    "value": "[d0]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "rhop",
+    "type": "physics_setting",
+    "value": "[rho_p]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "ChargeSpecification",
+    "type": "physics_setting",
+    "value": "[UserDefined]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "Z",
+    "type": "physics_setting",
+    "value": "[ZAS]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "v",
+    "type": "physics_setting",
+    "value": "[0, 0, 0]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "287 unique lower sites; upward local saved-gas speed; deterministic +/-15 deg radial spread; ZAS(0)=AS_Z0",
+    "feature_tag": "relg1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "x0",
+    "type": "physics_setting",
+    "value": "[range(14,0.1,18), range(2.3,0.05,2.6)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "v0",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_release_speed*sin(root.comp1.release_theta), 0[m/s], release_axial_sign*root.comp1.AS_release_speed*cos(root.comp1.release_theta)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "rt",
+    "type": "physics_setting",
+    "value": "[0[s]]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "aux0_auxq",
+    "type": "physics_setting",
+    "value": "[AS_Z0]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "SamplingFromDistribution",
+    "type": "physics_setting",
+    "value": "[Deterministic]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "InitialVelocity",
+    "type": "physics_setting",
+    "value": "[Expression]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Epstein drag from unchanged saved thermal-flow solution",
+    "feature_tag": "df1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "DragLaw",
+    "type": "physics_setting",
+    "value": "[Stokes]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "Rarefaction_Effects",
+    "type": "physics_setting",
+    "value": "[Epstein]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "sigmaR",
+    "type": "physics_setting",
+    "value": "[sigmaR_p]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "u_src",
+    "type": "physics_setting",
+    "value": "[userdef]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_rhog]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_mug]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Brownian force consistent with Epstein friction",
+    "feature_tag": "bf1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fptas",
+    "property": "i",
+    "type": "physics_setting",
+    "value": "[AS_brownian_seed]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fptas",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_muB]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fptas",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Electric force from independent nonlinear SASS field",
+    "feature_tag": "ef1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fptas",
+    "property": "E",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_Er, 0[V/m], root.comp1.AS_Ez]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fptas",
+    "property": "SpecifyForceUsing",
+    "type": "physics_setting",
+    "value": "[ElectricField]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Active free-molecular lift sensitivity",
+    "feature_tag": "liftfm",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fptas",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[C_lift_fm*pi*root.comp1.AS_rhog*root.comp1.AS_lambdag*(d0/2)^2*(root.comp1.AS_ugz-fptas.vz)*nojac(d(root.comp1.AS_ugr,z)-d(root.comp1.AS_ugz,r)), 0[N], -C_lift_fm*pi*root.comp1.AS_rhog*root.comp1.AS_lambdag*(d0/2)^2*(root.comp1.AS_ugr-fptas.vr)*nojac(d(root.comp1.AS_ugr,z)-d(root.comp1.AS_ugz,r))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fptas",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Static DEP from nonlinear SASS field",
+    "feature_tag": "depf",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fptas",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[2*pi*epsilon0_const*(d0/2)^3*root.comp1.AS_Kcm*nojac(d(root.comp1.AS_E2,r)), 0[N], 2*pi*epsilon0_const*(d0/2)^3*root.comp1.AS_Kcm*nojac(d(root.comp1.AS_E2,z))]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fptas",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Waldmann thermophoresis from unchanged saved temperature field",
+    "feature_tag": "thpf1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "ThermophoreticForceModel",
+    "type": "physics_setting",
+    "value": "[Waldmann]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "mg",
+    "type": "physics_setting",
+    "value": "[Mmix]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_rhog]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_mug]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "k",
+    "type": "physics_setting",
+    "value": "[k_mix]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "Cp",
+    "type": "physics_setting",
+    "value": "[Cp_mix]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[6, 8, 28, 29, 32, 33, 34, 36, 38, 40, 41, 45, 46, 47]",
+    "feature_label": "Exterior wall: stick/deposit; openings override",
+    "feature_tag": "wall1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "wall1",
+    "physics_tag": "fptas",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Stick]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[37]",
+    "feature_label": "Gas inlet: freeze reverse escape",
+    "feature_tag": "outin",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "outin",
+    "physics_tag": "fptas",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Freeze]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[35]",
+    "feature_label": "Pump outlet: disappear",
+    "feature_tag": "outpump",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "outpump",
+    "physics_tag": "fptas",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Disappear]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[5]",
+    "feature_label": "Axis symmetry",
+    "feature_tag": "axi1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - theory-consistent relative-velocity collection plus orbital ion drag",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Nonlinear Boltzmann-electron and Bohm-ion SASS space charge",
+    "feature_tag": "rhoAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "rhoAS",
+    "physics_tag": "esass",
+    "property": "rhoq",
+    "type": "physics_setting",
+    "value": "[AS_rhoq]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[6, 28, 29]",
+    "feature_label": "User-input physical wafer potential with continuation ramp",
+    "feature_tag": "waferAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "waferAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vwafer-AS_Vp)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[8, 36, 38, 40, 41, 47]",
+    "feature_label": "User-input physical grounded-wall potential with continuation ramp",
+    "feature_tag": "wallAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "wallAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vwall-AS_Vp)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[32, 33, 45]",
+    "feature_label": "Smooth wafer-edge to effective dielectric floating-potential transition",
+    "feature_tag": "dielectricAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "dielectricAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vdielectric+(AS_Vwafer-AS_Vdielectric)*exp(-max(0[m],r-AS_focus_r0)/AS_focus_transition)-AS_Vp)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[34, 46]",
+    "feature_label": "User-overridable outer dielectric floating potential",
+    "feature_tag": "dielectricOuterAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "dielectricOuterAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vdielectric-AS_Vp)]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "entities": "[35, 37]",
+    "feature_label": "Remote gas openings fixed at the prescribed plasma-bulk potential",
+    "feature_tag": "bulkAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "feature_tag": "bulkAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp]",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol1",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol2",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol3",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol8",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol9",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol10",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol11",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol12",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol13",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol14",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol15",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol16",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol26",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol27",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol28",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol29",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol30",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol31",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol32",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol33",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol34",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol35",
+    "type": "solution",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "read_only": "true",
+    "type": "model_pass",
+    "variant": "relative_flow_screened_collection_orbital_v1"
+  },
+  {
+    "label": "icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_image_minimal_corrected_10_30_100nm.mph",
+    "path": "icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_image_minimal_corrected_10_30_100nm.mph",
+    "read_only": "true",
+    "type": "model",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "dataset_tags": "[dset1, dset2, rev1, dset3, dset4, rev2, rev3, cln1, cpt1, dset5, dset_cacheP, dset10, dset11, part_P_10nm, dset12, dset13, part_P_30nm, dset14, dset15, part_P_100nm, dset_AS_field, dset16, dset17, part_AS_10nm, dset18, dset19, part_AS_30nm, dset20, dset21, part_AS_100nm]",
+    "physics_tags": "[ptp, spf, ht, mf, pcv, pce2, pcne, pcte, pcni, pcnm, pcgr, pcgz, pcmi, fpt, esass, fptas]",
+    "solution_tags": "[sol1, sol2, sol3, sol8, sol9, sol11, sol12, sol14, sol15, sol26, sol27, sol28, sol29, sol30, sol31, sol32, sol33, sol34, sol35, sol36, sol37, sol38]",
+    "study_tags": "[std1, std2, std3, stdP10, stdP30, stdP100, stdASf, stdAS10, stdAS30, stdAS100]",
+    "type": "inventory",
+    "variable_groups": "[var1, varDustField, varReleaseIC, varAS]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "4[V]",
+    "name": "AS_Te",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1e15[1/m^3]",
+    "name": "AS_ne0",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1e15[1/m^3]",
+    "name": "AS_ni0",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "50[g/mol]/N_A_const",
+    "name": "AS_mi",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1[m^2/(V*s)]",
+    "name": "AS_mu_i",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "15[V]",
+    "name": "AS_Vp",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "0[V]",
+    "name": "AS_Vwall",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "-68.2710575[V]",
+    "name": "AS_Vwafer",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_Vp-AS_float_drop",
+    "name": "AS_Vdielectric",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "10[us]",
+    "name": "AS_particle_dt",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "-1",
+    "name": "AS_Z0",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "10[us]",
+    "name": "particle_dt",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_particle_dt",
+    "name": "timestep",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1[m/s]",
+    "name": "u_eps",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "0.01[V]",
+    "name": "Ti_floor",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "0.9",
+    "name": "sigmaR_p",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "0.8*88.0043[g/mol]+0.2*31.9988[g/mol]",
+    "name": "Mmix",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1",
+    "name": "brownian_seed",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "21",
+    "name": "AS_brownian_seed",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1",
+    "name": "iondrag_scale_P",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1",
+    "name": "iondrag_scale_A",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1",
+    "name": "AS_iondrag_scale",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1",
+    "name": "C_lift_fm",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "2e-18[m^2]",
+    "name": "sigma_in",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "2200[kg/m^3]",
+    "name": "rho_p",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "4.2",
+    "name": "epsr_p",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "10[nm]",
+    "name": "d0",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1[V^2/m^2]",
+    "name": "E2floor",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "0.05[V]",
+    "name": "AS_dV_smooth",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "-50",
+    "name": "AS_exp_min",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "5",
+    "name": "AS_exp_max",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1[m/s]",
+    "name": "AS_flux_speed_floor",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "0.152[m]",
+    "name": "AS_focus_r0",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "5[mm]",
+    "name": "AS_focus_transition",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1e6[1/m^3]",
+    "name": "AS_n_floor",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1",
+    "name": "AS_sheath_ramp",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1e-3[m/s]",
+    "name": "AS_u_floor",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_Te*log(sqrt(AS_mi/(2*pi*me_const)))",
+    "name": "AS_float_drop",
+    "type": "parameter",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "withsol('sol2',u,setval(Vrf,100[V]))",
+    "group": "varAS",
+    "name": "AS_ugr",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "withsol('sol2',w,setval(Vrf,100[V]))",
+    "group": "varAS",
+    "name": "AS_ugz",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "withsol('sol2',T,setval(Vrf,100[V]))",
+    "group": "varAS",
+    "name": "AS_Tg",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(withsol('sol2',spf.pA,setval(Vrf,100[V])),0.01[Pa])",
+    "group": "varAS",
+    "name": "AS_pabs",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "VAS-AS_Vp",
+    "group": "varAS",
+    "name": "AS_psi_raw",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "flc2hs(-AS_psi_raw,AS_dV_smooth)",
+    "group": "varAS",
+    "name": "AS_sheath_gate",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_psi_raw*AS_sheath_gate",
+    "group": "varAS",
+    "name": "AS_psi",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "sqrt(e_const*AS_Te/AS_mi)",
+    "group": "varAS",
+    "name": "AS_uB",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(AS_n_floor,AS_ne0*exp(max(AS_exp_min,min(AS_exp_max,AS_psi/AS_Te))))",
+    "group": "varAS",
+    "name": "AS_ne",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "sqrt(max(AS_u_floor^2,AS_uB^2-2*e_const*AS_psi/AS_mi))",
+    "group": "varAS",
+    "name": "AS_ui_mag",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(AS_n_floor,AS_ni0*AS_uB/AS_ui_mag)",
+    "group": "varAS",
+    "name": "AS_ni",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "e_const*(AS_ni-AS_ne)",
+    "group": "varAS",
+    "name": "AS_rhoq",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "-d(VAS,r)",
+    "group": "varAS",
+    "name": "AS_Er",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "-d(VAS,z)",
+    "group": "varAS",
+    "name": "AS_Ez",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(k_B_const*AS_Tg/e_const,Ti_floor)",
+    "group": "varAS",
+    "name": "AS_TiV",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_mu_i*k_B_const*AS_Tg/e_const",
+    "group": "varAS",
+    "name": "AS_Di",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_ni*AS_ugr+AS_mu_i*AS_ni*AS_Er-AS_Di*d(AS_ni,r)",
+    "group": "varAS",
+    "name": "AS_Gir",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_ni*AS_ugz+AS_mu_i*AS_ni*AS_Ez-AS_Di*d(AS_ni,z)",
+    "group": "varAS",
+    "name": "AS_Giz",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "sqrt(AS_Gir^2+AS_Giz^2+(AS_ni0*AS_flux_speed_floor)^2)",
+    "group": "varAS",
+    "name": "AS_Gimag",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_ui_mag*AS_Gir/AS_Gimag",
+    "group": "varAS",
+    "name": "AS_uir",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "AS_ui_mag*AS_Giz/AS_Gimag",
+    "group": "varAS",
+    "name": "AS_uiz",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "pi*(d0/2)^2*AS_ne*sqrt(8*e_const*AS_Te/(pi*me_const))",
+    "group": "varAS",
+    "name": "AS_Ge0",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(d0/2,AS_lambdaD_bulk)",
+    "group": "varAS",
+    "name": "AS_lambdaD",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/AS_lambdaD))",
+    "group": "varAS",
+    "name": "AS_phi1",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(root.comp1.spf.pA,0.01[Pa])",
+    "group": "varDustField",
+    "name": "pabs_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "pabs_d*Mmix/(R_const*T)",
+    "group": "varDustField",
+    "name": "rho_g_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "mu_ref*(T/Tref)^0.70",
+    "group": "varDustField",
+    "name": "mu_g_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "withsol('sol3',-Vscale*d(pcVn,r))",
+    "group": "varDustField",
+    "name": "Er_P",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "withsol('sol3',-Vscale*d(pcVn,z))",
+    "group": "varDustField",
+    "name": "Ez_P",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(1e6[1/m^3],withsol('sol3',Nscale*pcNen))",
+    "group": "varDustField",
+    "name": "ne_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(1e6[1/m^3],withsol('sol3',Nscale*pcNin))",
+    "group": "varDustField",
+    "name": "ni_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(0[1/m^3],withsol('sol3',Nscale*pcNmn))",
+    "group": "varDustField",
+    "name": "nm_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(0.05[V],withsol('sol3',Tescale*pcTen))",
+    "group": "varDustField",
+    "name": "Te_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(1e-28[kg],withsol('sol3',Mscale*pcMin))",
+    "group": "varDustField",
+    "name": "mi_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "ui_capfac*uir_raw",
+    "group": "varDustField",
+    "name": "uir_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "ui_capfac*uiz_raw",
+    "group": "varDustField",
+    "name": "uiz_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "mu_g_d*sqrt(pi/(2*pabs_d*rho_g_d))",
+    "group": "varDustField",
+    "name": "lambda_g_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(d0/2,1/sqrt(max(invLD2_d,1[1/m^2])))",
+    "group": "varDustField",
+    "name": "lambdaD_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "1/max(ng_d*sigma_in,1[1/m])",
+    "group": "varDustField",
+    "name": "lambda_in_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "max(k_B_const*T/e_const,Ti_floor)",
+    "group": "varDustField",
+    "name": "TiV_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "pi*(d0/2)^2*ne_d*sqrt(8*e_const*Te_d/(pi*me_const))",
+    "group": "varDustField",
+    "name": "Ge0_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "expression": "e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/lambdaD_d))",
+    "group": "varDustField",
+    "name": "phi1_d",
+    "type": "variable",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case P dynamic mean charge from total ne and total positive-ion density",
+    "feature_tag": "auxq",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fpt",
+    "property": "R",
+    "type": "physics_setting",
+    "value": "[((pi*(d0/2)^2*root.comp1.ni_d*sqrt((((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2))*if((ZP*root.comp1.phi1_d)<=0[V],1-(ZP*root.comp1.phi1_d)/(max(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2)/(2*e_const),Ti_floor)),exp(max(-50,min(50,-(ZP*root.comp1.phi1_d)/(max(root.comp1.mi_d*(((root.comp1.uir_d-fpt.vr)^2+(root.comp1.uiz_d-fpt.vz)^2)+(8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d))+u_eps^2)/(2*e_const),Ti_floor)))))))-(root.comp1.Ge0_d*if((ZP*root.comp1.phi1_d)<=0[V],exp(max(-50,min(50,(ZP*root.comp1.phi1_d)/root.comp1.Te_d))),1+(ZP*root.comp1.phi1_d)/root.comp1.Te_d)))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fpt",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P image-form ion drag, minimally corrected: +E direction, E=0 guard, common ZP",
+    "feature_tag": "idf",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fpt",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[((iondrag_scale_P*root.comp1.mi_d*root.comp1.ni_d*sqrt(((root.comp1.uir_d^2+root.comp1.uiz_d^2+u_eps^2)+8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d)))*sqrt((root.comp1.uir_d^2+root.comp1.uiz_d^2+u_eps^2))*((pi*(d0/2)^2*max(0,1-(ZP*root.comp1.phi1_d)/root.comp1.TiV_d))+(pi*((e_const^2*ZP/(2*pi*epsilon0_const*root.comp1.mi_d*((root.comp1.uir_d^2+root.comp1.uiz_d^2+u_eps^2)+8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d)))))^2*log(max(1+1e-12,root.comp1.lambdaD_image_P/(d0/2))))))*root.comp1.Er_P/sqrt(root.comp1.Er_P^2+root.comp1.Ez_P^2+E2floor)), 0[N], ((iondrag_scale_P*root.comp1.mi_d*root.comp1.ni_d*sqrt(((root.comp1.uir_d^2+root.comp1.uiz_d^2+u_eps^2)+8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d)))*sqrt((root.comp1.uir_d^2+root.comp1.uiz_d^2+u_eps^2))*((pi*(d0/2)^2*max(0,1-(ZP*root.comp1.phi1_d)/root.comp1.TiV_d))+(pi*((e_const^2*ZP/(2*pi*epsilon0_const*root.comp1.mi_d*((root.comp1.uir_d^2+root.comp1.uiz_d^2+u_eps^2)+8*e_const*root.comp1.TiV_d/(pi*root.comp1.mi_d)))))^2*log(max(1+1e-12,root.comp1.lambdaD_image_P/(d0/2))))))*root.comp1.Ez_P/sqrt(root.comp1.Er_P^2+root.comp1.Ez_P^2+E2floor))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fpt",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case P particle; diameter set independently by each 10/30/100 nm study",
+    "feature_tag": "pp1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "ParticlePropertySpec",
+    "type": "physics_setting",
+    "value": "[SpecifyDensityAndDiameter]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "dp",
+    "type": "physics_setting",
+    "value": "[d0]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "rhop",
+    "type": "physics_setting",
+    "value": "[rho_p]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "ChargeSpecification",
+    "type": "physics_setting",
+    "value": "[UserDefined]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "Z",
+    "type": "physics_setting",
+    "value": "[ZP]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fpt",
+    "property": "v",
+    "type": "physics_setting",
+    "value": "[0, 0, 0]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case P lower source: r=range(14,0.1,18) cm, z=range(2.3,0.05,2.6) cm; 287 unique sites; upward local gas-speed magnitude; deterministic +/-15 deg radial spread",
+    "feature_tag": "relg1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "x0",
+    "type": "physics_setting",
+    "value": "[range(14,0.1,18), range(2.3,0.05,2.6)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "v0",
+    "type": "physics_setting",
+    "value": "[root.comp1.release_speed_P*sin(root.comp1.release_theta), 0[m/s], release_axial_sign*root.comp1.release_speed_P*cos(root.comp1.release_theta)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "rt",
+    "type": "physics_setting",
+    "value": "[0[s]]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "aux0_auxq",
+    "type": "physics_setting",
+    "value": "[Z0_P]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "SamplingFromDistribution",
+    "type": "physics_setting",
+    "value": "[Deterministic]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fpt",
+    "property": "InitialVelocity",
+    "type": "physics_setting",
+    "value": "[Expression]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P Epstein drag, 80/20 CF4/O2, saved gas velocity",
+    "feature_tag": "df1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "DragLaw",
+    "type": "physics_setting",
+    "value": "[Stokes]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "Rarefaction_Effects",
+    "type": "physics_setting",
+    "value": "[Epstein]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "sigmaR",
+    "type": "physics_setting",
+    "value": "[sigmaR_p]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "u_src",
+    "type": "physics_setting",
+    "value": "[root.comp1.u]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.rho_g_d]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.mu_g_d]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fpt",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P Brownian force with Epstein/FDT friction",
+    "feature_tag": "bf1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fpt",
+    "property": "i",
+    "type": "physics_setting",
+    "value": "[brownian_seed]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fpt",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.muB_d]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fpt",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P electric force from saved RF-cycle mean plasma potential",
+    "feature_tag": "ef1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fpt",
+    "property": "E",
+    "type": "physics_setting",
+    "value": "[root.comp1.Er_P, 0[V/m], root.comp1.Ez_P]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fpt",
+    "property": "SpecifyForceUsing",
+    "type": "physics_setting",
+    "value": "[ElectricField]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P free-molecular lift; saved-field vorticity evaluation for boundary robustness",
+    "feature_tag": "liftfm",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fpt",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[C_lift_fm*pi*root.comp1.rho_g_d*root.comp1.lambda_g_d*(d0/2)^2*(root.comp1.w-fpt.vz)*(nojac(root.comp1.spf.vorticityphi)), 0[N], -C_lift_fm*pi*root.comp1.rho_g_d*root.comp1.lambda_g_d*(d0/2)^2*(root.comp1.u-fpt.vr)*(nojac(root.comp1.spf.vorticityphi))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fpt",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P RF-cycle DEP from mean(E^2)",
+    "feature_tag": "depf",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fpt",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[2*pi*epsilon0_const*(d0/2)^3*root.comp1.Kcm_d*nojac(d(root.comp1.E2rf_P,r)), 0[N], 2*pi*epsilon0_const*(d0/2)^3*root.comp1.Kcm_d*nojac(d(root.comp1.E2rf_P,z))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fpt",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Case P Waldmann free-molecular thermophoresis, CF4/O2 properties",
+    "feature_tag": "thpf1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "ThermophoreticForceModel",
+    "type": "physics_setting",
+    "value": "[Waldmann]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "mg",
+    "type": "physics_setting",
+    "value": "[Mmix]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.rho_g_d]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.mu_g_d]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "k",
+    "type": "physics_setting",
+    "value": "[k_mix]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fpt",
+    "property": "Cp",
+    "type": "physics_setting",
+    "value": "[Cp_mix]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[6, 8, 28, 29, 32, 33, 34, 36, 38, 40, 41, 45, 46, 47]",
+    "feature_label": "Case P automatic exterior wall - stick/deposit; opening features override",
+    "feature_tag": "wall1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "wall1",
+    "physics_tag": "fpt",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Stick]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[37]",
+    "feature_label": "Case P gas inlet - freeze reverse escape",
+    "feature_tag": "outin",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "outin",
+    "physics_tag": "fpt",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Freeze]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[35]",
+    "feature_label": "Case P pump outlet - disappear",
+    "feature_tag": "outpump",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "outpump",
+    "physics_tag": "fpt",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Disappear]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[5]",
+    "feature_label": "Case P axis symmetry",
+    "feature_tag": "axi1",
+    "physics_label": "Case P - saved full-plasma fields, lower upward release, multi-size studies",
+    "physics_tag": "fpt",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Dynamic aggregate charge from total electron density AS_ne and total positive-ion density AS_ni",
+    "feature_tag": "auxq",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fptas",
+    "property": "R",
+    "type": "physics_setting",
+    "value": "[((pi*(d0/2)^2*root.comp1.AS_ni*sqrt((((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2))*if((ZAS*root.comp1.AS_phi1)<=0[V],1-(ZAS*root.comp1.AS_phi1)/(max(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2)/(2*e_const),Ti_floor)),exp(max(-50,min(50,-(ZAS*root.comp1.AS_phi1)/(max(AS_mi*(((root.comp1.AS_uir-fptas.vr)^2+(root.comp1.AS_uiz-fptas.vz)^2)+(8*e_const*root.comp1.AS_TiV/(pi*AS_mi))+u_eps^2)/(2*e_const),Ti_floor)))))))-(root.comp1.AS_Ge0*if((ZAS*root.comp1.AS_phi1)<=0[V],exp(max(-50,min(50,(ZAS*root.comp1.AS_phi1)/AS_Te))),1+(ZAS*root.comp1.AS_phi1)/AS_Te)))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "auxq",
+    "physics_tag": "fptas",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[stdAS10/time]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Image-form ion drag, minimally corrected: +E direction, E=0 guard, common ZAS",
+    "feature_tag": "idf",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fptas",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[((AS_iondrag_scale*AS_mi*root.comp1.AS_ni*sqrt((root.comp1.AS_ui_mag^2+8*e_const*root.comp1.AS_TiV/(pi*AS_mi)+u_eps^2))*root.comp1.AS_ui_mag*((pi*(d0/2)^2*max(0,1-(ZAS*root.comp1.AS_phi1)/root.comp1.AS_TiV))+(pi*((e_const^2*ZAS/(2*pi*epsilon0_const*AS_mi*(root.comp1.AS_ui_mag^2+8*e_const*root.comp1.AS_TiV/(pi*AS_mi)+u_eps^2))))^2*log(max(1+1e-12,root.comp1.AS_lambdaD_image/(d0/2))))))*root.comp1.AS_Er/sqrt(root.comp1.AS_E2)), 0[N], ((AS_iondrag_scale*AS_mi*root.comp1.AS_ni*sqrt((root.comp1.AS_ui_mag^2+8*e_const*root.comp1.AS_TiV/(pi*AS_mi)+u_eps^2))*root.comp1.AS_ui_mag*((pi*(d0/2)^2*max(0,1-(ZAS*root.comp1.AS_phi1)/root.comp1.AS_TiV))+(pi*((e_const^2*ZAS/(2*pi*epsilon0_const*AS_mi*(root.comp1.AS_ui_mag^2+8*e_const*root.comp1.AS_TiV/(pi*AS_mi)+u_eps^2))))^2*log(max(1+1e-12,root.comp1.AS_lambdaD_image/(d0/2))))))*root.comp1.AS_Ez/sqrt(root.comp1.AS_E2))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "idf",
+    "physics_tag": "fptas",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "Case A SASS particle; diameter set by independent 10/30/100 nm studies; common dynamic charge ZAS",
+    "feature_tag": "pp1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "ParticlePropertySpec",
+    "type": "physics_setting",
+    "value": "[SpecifyDensityAndDiameter]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "dp",
+    "type": "physics_setting",
+    "value": "[d0]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "rhop",
+    "type": "physics_setting",
+    "value": "[rho_p]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "ChargeSpecification",
+    "type": "physics_setting",
+    "value": "[UserDefined]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "Z",
+    "type": "physics_setting",
+    "value": "[ZAS]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "pp1",
+    "physics_tag": "fptas",
+    "property": "v",
+    "type": "physics_setting",
+    "value": "[0, 0, 0]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[]",
+    "feature_label": "287 unique lower sites; upward local saved-gas speed; deterministic +/-15 deg radial spread; ZAS(0)=AS_Z0",
+    "feature_tag": "relg1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "x0",
+    "type": "physics_setting",
+    "value": "[range(14,0.1,18), range(2.3,0.05,2.6)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "v0",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_release_speed*sin(root.comp1.release_theta), 0[m/s], release_axial_sign*root.comp1.AS_release_speed*cos(root.comp1.release_theta)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "rt",
+    "type": "physics_setting",
+    "value": "[0[s]]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "aux0_auxq",
+    "type": "physics_setting",
+    "value": "[AS_Z0]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "SamplingFromDistribution",
+    "type": "physics_setting",
+    "value": "[Deterministic]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "relg1",
+    "physics_tag": "fptas",
+    "property": "InitialVelocity",
+    "type": "physics_setting",
+    "value": "[Expression]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Epstein drag from unchanged saved thermal-flow solution",
+    "feature_tag": "df1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "DragLaw",
+    "type": "physics_setting",
+    "value": "[Stokes]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "Rarefaction_Effects",
+    "type": "physics_setting",
+    "value": "[Epstein]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "sigmaR",
+    "type": "physics_setting",
+    "value": "[sigmaR_p]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "u_src",
+    "type": "physics_setting",
+    "value": "[userdef]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_rhog]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_mug]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "df1",
+    "physics_tag": "fptas",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Brownian force consistent with Epstein friction",
+    "feature_tag": "bf1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fptas",
+    "property": "i",
+    "type": "physics_setting",
+    "value": "[AS_brownian_seed]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fptas",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_muB]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "bf1",
+    "physics_tag": "fptas",
+    "property": "StudyStep",
+    "type": "physics_setting",
+    "value": "[std2/ftper]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Electric force from independent nonlinear SASS field",
+    "feature_tag": "ef1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fptas",
+    "property": "E",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_Er, 0[V/m], root.comp1.AS_Ez]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "ef1",
+    "physics_tag": "fptas",
+    "property": "SpecifyForceUsing",
+    "type": "physics_setting",
+    "value": "[ElectricField]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Active free-molecular lift sensitivity",
+    "feature_tag": "liftfm",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fptas",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[C_lift_fm*pi*root.comp1.AS_rhog*root.comp1.AS_lambdag*(d0/2)^2*(root.comp1.AS_ugz-fptas.vz)*nojac(d(root.comp1.AS_ugr,z)-d(root.comp1.AS_ugz,r)), 0[N], -C_lift_fm*pi*root.comp1.AS_rhog*root.comp1.AS_lambdag*(d0/2)^2*(root.comp1.AS_ugr-fptas.vr)*nojac(d(root.comp1.AS_ugr,z)-d(root.comp1.AS_ugz,r))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "liftfm",
+    "physics_tag": "fptas",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Static DEP from nonlinear SASS field",
+    "feature_tag": "depf",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fptas",
+    "property": "F",
+    "type": "physics_setting",
+    "value": "[2*pi*epsilon0_const*(d0/2)^3*root.comp1.AS_Kcm*nojac(d(root.comp1.AS_E2,r)), 0[N], 2*pi*epsilon0_const*(d0/2)^3*root.comp1.AS_Kcm*nojac(d(root.comp1.AS_E2,z))]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "depf",
+    "physics_tag": "fptas",
+    "property": "SpecifyForce",
+    "type": "physics_setting",
+    "value": "[Directly]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Waldmann thermophoresis from unchanged saved temperature field",
+    "feature_tag": "thpf1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "ThermophoreticForceModel",
+    "type": "physics_setting",
+    "value": "[Waldmann]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "mg",
+    "type": "physics_setting",
+    "value": "[Mmix]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "rho",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_rhog]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "mu",
+    "type": "physics_setting",
+    "value": "[root.comp1.AS_mug]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "k",
+    "type": "physics_setting",
+    "value": "[k_mix]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "thpf1",
+    "physics_tag": "fptas",
+    "property": "Cp",
+    "type": "physics_setting",
+    "value": "[Cp_mix]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[6, 8, 28, 29, 32, 33, 34, 36, 38, 40, 41, 45, 46, 47]",
+    "feature_label": "Exterior wall: stick/deposit; openings override",
+    "feature_tag": "wall1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "wall1",
+    "physics_tag": "fptas",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Stick]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[37]",
+    "feature_label": "Gas inlet: freeze reverse escape",
+    "feature_tag": "outin",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "outin",
+    "physics_tag": "fptas",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Freeze]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[35]",
+    "feature_label": "Pump outlet: disappear",
+    "feature_tag": "outpump",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "outpump",
+    "physics_tag": "fptas",
+    "property": "WallCondition",
+    "type": "physics_setting",
+    "value": "[Disappear]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[5]",
+    "feature_label": "Axis symmetry",
+    "feature_tag": "axi1",
+    "physics_label": "Case A SASS - 10/30/100 nm particles - image-form ion drag with minimal sign and numerical corrections",
+    "physics_tag": "fptas",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[3]",
+    "feature_label": "Nonlinear Boltzmann-electron and Bohm-ion SASS space charge",
+    "feature_tag": "rhoAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "rhoAS",
+    "physics_tag": "esass",
+    "property": "rhoq",
+    "type": "physics_setting",
+    "value": "[AS_rhoq]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[6, 28, 29]",
+    "feature_label": "User-input physical wafer potential with continuation ramp",
+    "feature_tag": "waferAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "waferAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vwafer-AS_Vp)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[8, 36, 38, 40, 41, 47]",
+    "feature_label": "User-input physical grounded-wall potential with continuation ramp",
+    "feature_tag": "wallAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "wallAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vwall-AS_Vp)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[32, 33, 45]",
+    "feature_label": "Smooth wafer-edge to effective dielectric floating-potential transition",
+    "feature_tag": "dielectricAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "dielectricAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vdielectric+(AS_Vwafer-AS_Vdielectric)*exp(-max(0[m],r-AS_focus_r0)/AS_focus_transition)-AS_Vp)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[34, 46]",
+    "feature_label": "User-overridable outer dielectric floating potential",
+    "feature_tag": "dielectricOuterAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "dielectricOuterAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp+AS_sheath_ramp*(AS_Vdielectric-AS_Vp)]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "entities": "[35, 37]",
+    "feature_label": "Remote gas openings fixed at the prescribed plasma-bulk potential",
+    "feature_tag": "bulkAS",
+    "physics_label": "Case A SASS - independent nonlinear sheath electrostatics",
+    "physics_tag": "esass",
+    "type": "physics_feature",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "feature_tag": "bulkAS",
+    "physics_tag": "esass",
+    "property": "V0",
+    "type": "physics_setting",
+    "value": "[AS_Vp]",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol1",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol2",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol3",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol8",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol9",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol11",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol12",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol14",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol15",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol26",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol27",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol28",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol29",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol30",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol31",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol32",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol33",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol34",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol35",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol36",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol37",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "empty": "false",
+    "tag": "sol38",
+    "type": "solution",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "read_only": "true",
+    "type": "model_pass",
+    "variant": "electric_field_aligned_image_sensitivity_v1"
+  },
+  {
+    "model_count": "2",
+    "model_save": "false",
+    "read_only": "true",
+    "study_run": "false",
+    "type": "audit_pass"
+  }
+]

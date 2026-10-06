@@ -1,0 +1,14 @@
+gate,status,reason
+M3V-01-direct-model-inventory,PASS,two MPH files loaded read-only; no study run and no save
+M3V-02-reference-package-structure,PASS,12 reference-only packages have the declared rectangular history and provenance
+M3V-03-p15-charge-trajectory-applicability,NOT_APPLICABLE,sampled P15 applicability range=0..0; scalar-ion-mass mismatch cases=6/12; species mismatch cases=6/12; continuous-path certification is also required
+M3V-03b-reference-charge-rate-formula-parity,PASS,"frozen-state relative-drift regularized two-current law reconstructed from saved primitives; parity is provenance evidence, not physical acceptance"
+M3V-03c-reference-charge-local-stiffness-characterization,PASS,analytic frozen-state dR/dZ sampled at saved rows; this is not a continuous-path or integrator stability certificate
+M3V-04-p15-epstein-trajectory-applicability,NOT_APPLICABLE,sampled linear-Epstein coverage range=0.542834..1; continuous-path certification is also required
+M3V-04b-reference-epstein-formula-parity,PASS,COMSOL Epstein force reconstructed with delta=1+sigma_R*pi/8; formula parity does not extend the linear model applicability domain
+M3V-05-force-and-charge-relevance,PASS,all derived values are finite and independently replayable formulas match; saved-grid force quadrature remains relevance-only
+M3V-06-reference-package-variant-sensitivity,PASS,full time histories compared; Case A has an ion-drag-only configuration diff but only one stochastic realization; Case P also has a lift expression diff
+M3V-07-full-production-trajectory-comparison,NOT_APPLICABLE,reference trajectories contain unmatched charge and force closures
+M3V-08-boundary-validation,NOT_TESTED,reference releases are internal and contain no enabled reflection case
+M3V-09-stochastic-validation,NOT_TESTED,one Brownian seed cannot validate a stochastic distribution
+M3V-10-reduced-electrostatic-builder-parity,NOT_TESTED,MPH closure inventoried; independent canonical-field builder is a later slice

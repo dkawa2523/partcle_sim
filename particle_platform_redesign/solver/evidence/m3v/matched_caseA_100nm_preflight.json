@@ -1,0 +1,326 @@
+{
+  "artifact_root": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3v_matched\\caseA_100nm",
+  "blockers": [
+    {
+      "category": "readiness",
+      "name": "source_model_copy_and_no_save_plan_reviewed",
+      "reason": "The future COMSOL run must use a copy and must never save over the audited source MPH.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "readiness",
+      "name": "brownian_disabled_in_reference",
+      "reason": "A deterministic trajectory comparison cannot reuse the current single-seed trajectory.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "readiness",
+      "name": "common_deterministic_force_set_confirmed",
+      "reason": "The first matched case must enable only the explicitly common, independently aligned force set.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "readiness",
+      "name": "fixed_charge_minus_one_confirmed",
+      "reason": "The first match freezes charge to isolate field, force, RK4, and boundary behavior.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "readiness",
+      "name": "candidate_case_checked_through_public_api",
+      "reason": "The candidate must use the normal load_case/simulate/open_result path, not a COMSOL-specific core mode.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "readiness",
+      "name": "tolerance_budget_preregistered_from_convergence",
+      "reason": "Result-dependent tolerance widening is prohibited.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "readiness",
+      "name": "normalized_comparison_artifacts_exported",
+      "reason": "Saved 121-time trajectories do not contain RK stages or an exact sparse event ledger.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "readiness",
+      "name": "freeze_boundary_mapping_confirmed",
+      "reason": "Freeze must not be silently equated with stick or escape without a positive microcase and event ledger.",
+      "status": "BLOCKED"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "motion.coordinate_system",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "integrator.method",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "integrator.fixed_step_s",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "stochastic.brownian",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "charge.model",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "deterministic_force_set",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "trajectory.scope",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "setting_alignment",
+      "name": "boundary_mapping",
+      "reason": "reference and candidate must both equal required_value",
+      "status": "FAIL"
+    },
+    {
+      "category": "artifact",
+      "name": "reference.field_probe",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "candidate.field_probe",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "reference.force_probe",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "candidate.force_probe",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "reference.integrator_probe",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "candidate.integrator_probe",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "reference.trajectory",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "candidate.trajectory",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "reference.events",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    },
+    {
+      "category": "artifact",
+      "name": "candidate.events",
+      "reason": "path and sha256 are not registered",
+      "status": "MISSING"
+    }
+  ],
+  "claim": {
+    "comsol_equal_accuracy": "NOT_CLAIMED",
+    "golden_truth": "NOT_CLAIMED",
+    "interpretation": "PASS means only within preregistered tolerances for the hashed artifacts and scope.",
+    "supported_claim": "insufficient_evidence"
+  },
+  "comparison_id": "M3-V-caseA-100nm-deterministic-common-physics-v1",
+  "manifest_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\cases\\m3v_matched_caseA_100nm.yaml",
+  "manifest_sha256": "8c11274c40cefe97eb89cfa23a005b34b7cabd08e6236b8478a531d54ff19a4b",
+  "readiness": [
+    {
+      "evidence": "evidence/m3v/mph_hashes.csv; theory model SHA-256 3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "name": "source_mph_hash_locked",
+      "reason": "Existing M3-V read-only load preserved the source MPH hash.",
+      "required": true,
+      "status": "CONFIRMED"
+    },
+    {
+      "evidence": "No deterministic companion run receipt exists.",
+      "name": "source_model_copy_and_no_save_plan_reviewed",
+      "reason": "The future COMSOL run must use a copy and must never save over the audited source MPH.",
+      "required": true,
+      "status": "BLOCKED"
+    },
+    {
+      "evidence": "Current particle_physics_feature_settings.csv has bf1 enabled with i=[AS_brownian_seed]; exported Brownian r/z samples are nonzero.",
+      "name": "brownian_disabled_in_reference",
+      "reason": "A deterministic trajectory comparison cannot reuse the current single-seed trajectory.",
+      "required": true,
+      "status": "BLOCKED"
+    },
+    {
+      "evidence": "Current saved Case A enables ion drag, thermophoresis, lift, DEP, dynamic charge, electric, drag, gravity/buoyancy, and Brownian.",
+      "name": "common_deterministic_force_set_confirmed",
+      "reason": "The first matched case must enable only the explicitly common, independently aligned force set.",
+      "required": true,
+      "status": "BLOCKED"
+    },
+    {
+      "evidence": "Current saved model advances the auxq dynamic aggregate charge from AS_Z0=-1.",
+      "name": "fixed_charge_minus_one_confirmed",
+      "reason": "The first match freezes charge to isolate field, force, RK4, and boundary behavior.",
+      "required": true,
+      "status": "BLOCKED"
+    },
+    {
+      "evidence": "No candidate case or result hash is registered.",
+      "name": "candidate_case_checked_through_public_api",
+      "reason": "The candidate must use the normal load_case/simulate/open_result path, not a COMSOL-specific core mode.",
+      "required": true,
+      "status": "BLOCKED"
+    },
+    {
+      "evidence": "COMSOL self-convergence, candidate self-convergence, and export uncertainty are not yet available.",
+      "name": "tolerance_budget_preregistered_from_convergence",
+      "reason": "Result-dependent tolerance widening is prohibited.",
+      "required": true,
+      "status": "BLOCKED"
+    },
+    {
+      "evidence": "No field, force, RK-stage, trajectory, or sparse-event artifact is registered below.",
+      "name": "normalized_comparison_artifacts_exported",
+      "reason": "Saved 121-time trajectories do not contain RK stages or an exact sparse event ledger.",
+      "required": true,
+      "status": "BLOCKED"
+    },
+    {
+      "evidence": "Current 12 packages contain zero positive Freeze events; boundary 37 is described only as reverse-escape freeze.",
+      "name": "freeze_boundary_mapping_confirmed",
+      "reason": "Freeze must not be silently equated with stick or escape without a positive microcase and event ledger.",
+      "required": true,
+      "status": "BLOCKED"
+    }
+  ],
+  "ready_for_comparison": false,
+  "report_kind": "matched_case_preflight",
+  "setting_alignment": [
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "motion.coordinate_system",
+      "reference_evidence": "Existing Case A particle model and exported r/z state columns.",
+      "reference_value": "axisymmetric_rz_no_swirl",
+      "required_value": "axisymmetric_rz_no_swirl",
+      "status": "FAIL"
+    },
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "integrator.method",
+      "reference_evidence": "study_and_solver_settings.csv solver_summary integration_method=explicit fixed RK4.",
+      "reference_value": "classical_rk4_fixed",
+      "required_value": "classical_rk4_fixed",
+      "status": "FAIL"
+    },
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "integrator.fixed_step_s",
+      "reference_evidence": "AS_particle_dt=10 us and solver_summary fixed_step.",
+      "reference_value": 1e-05,
+      "required_value": 1e-05,
+      "status": "FAIL"
+    },
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "stochastic.brownian",
+      "reference_evidence": "bf1 and AS_brownian_seed in current saved model; this must change in the companion copy.",
+      "reference_value": "enabled_single_seed_21",
+      "required_value": "disabled",
+      "status": "FAIL"
+    },
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "charge.model",
+      "reference_evidence": "auxq.R and AS_Z0=-1 in current saved model; auxq must be disabled in the companion copy.",
+      "reference_value": "dynamic_relative_drift_regularized_two_current",
+      "required_value": "fixed_charge_number_minus_one",
+      "status": "FAIL"
+    },
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "deterministic_force_set",
+      "reference_evidence": "Current feature inventory; extra forces must be disabled in the deterministic companion.",
+      "reference_value": [
+        "electric_coulomb_v1",
+        "epstein_linear_v1_delta_1_plus_0p9_pi_over_8",
+        "gravity_buoyancy_standard_v1",
+        "relative_flow_screened_collection_orbital_v1",
+        "waldmann_thermophoresis_reference",
+        "free_molecular_lift_sensitivity",
+        "static_dielectrophoresis"
+      ],
+      "required_value": [
+        "electric_coulomb_v1",
+        "epstein_linear_v1_delta_1_plus_0p9_pi_over_8",
+        "gravity_buoyancy_standard_v1"
+      ],
+      "status": "FAIL"
+    },
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "trajectory.scope",
+      "reference_evidence": "Current history is a saved-time state table; exact event times are unavailable.",
+      "reference_value": "NOT_EXPORTED_AS_EVENT_DELIMITED",
+      "required_value": "pre_first_material_event_or_event_delimited_continuous_segment",
+      "status": "FAIL"
+    },
+    {
+      "candidate_evidence": "Candidate case has not been generated.",
+      "candidate_value": "NOT_CONFIGURED",
+      "name": "boundary_mapping",
+      "reference_evidence": "boundary_conditions_and_event_codes.csv and zero observed Freeze events.",
+      "reference_value": "freeze_mapping_unconfirmed",
+      "required_value": "explicit_sparse_event_mapping_reviewed",
+      "status": "FAIL"
+    }
+  ],
+  "status": "BLOCKED",
+  "tool_revision": "m3v_matched_case_comparison_v1",
+  "verified_artifacts": []
+}

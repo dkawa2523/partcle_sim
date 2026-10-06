@@ -2,8 +2,10 @@ param(
     [string]$ComsolRoot = "C:\Program Files\COMSOL\COMSOL64\Multiphysics_copy1",
     [string]$CandidateInput = "",
     [string]$OutputDirectory = "",
-    [ValidateSet("pre_event", "material_event")]
-    [string]$RunProfile = "pre_event"
+    [ValidateSet("pre_event", "material_event", "campaign")]
+    [string]$RunProfile = "pre_event",
+    [string]$ConfigPath = "",
+    [string]$RunSpecPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -62,16 +64,111 @@ function Confirm-PreparedTableArtifacts {
     }
 }
 
+function Read-CampaignRunSpec {
+    param([string]$Path)
+
+    $Values = [ordered]@{}
+    foreach ($RawLine in Get-Content -LiteralPath $Path) {
+        $Line = $RawLine.Trim()
+        if ($Line.Length -eq 0 -or $Line.StartsWith("#") -or $Line.StartsWith("!")) {
+            continue
+        }
+        $Separator = $Line.IndexOf("=")
+        if ($Separator -le 0) {
+            throw "Campaign run spec entries must use key=value"
+        }
+        $Key = $Line.Substring(0, $Separator).Trim()
+        $Value = $Line.Substring($Separator + 1).Trim()
+        if ($Values.Contains($Key) -or [string]::IsNullOrWhiteSpace($Value)) {
+            throw "Campaign run spec contains a duplicate key or empty value: $Key"
+        }
+        $Values[$Key] = $Value
+    }
+    $Expected = @(
+        "case_id",
+        "diameter_nm",
+        "ion_drag_revision",
+        "deterministic_contribution_name"
+    )
+    if ($Values.Count -ne $Expected.Count -or
+        @($Values.Keys | Where-Object { $_ -notin $Expected }).Count -ne 0 -or
+        @($Expected | Where-Object { $_ -notin $Values.Keys }).Count -ne 0) {
+        throw "Campaign run spec must contain exactly: $($Expected -join ', ')"
+    }
+    return [pscustomobject]$Values
+}
+
+function New-CampaignEntrySource {
+    param([pscustomobject]$Spec)
+
+    $Tuple = @(
+        [string]$Spec.case_id,
+        [string]$Spec.diameter_nm,
+        [string]$Spec.ion_drag_revision,
+        [string]$Spec.deterministic_contribution_name
+    ) -join "|"
+    switch ($Tuple) {
+        "caseA_10nm_relative_flow|10|relative_flow_screened_collection_orbital_aggregate_ion_v1|relative_flow_screened_collection_orbital_ion_drag" {
+            return @'
+/** Generated transport-only campaign entry. */
+public final class RunM3C1CaseACommonP1Campaign {
+  private RunM3C1CaseACommonP1Campaign() {}
+  public static void main(String[] args) throws Exception {
+    RunM3C1CaseA100CommonP1.runCampaign("caseA_10nm_relative_flow", 10, "relative_flow_screened_collection_orbital_aggregate_ion_v1", "relative_flow_screened_collection_orbital_ion_drag");
+  }
+}
+'@
+        }
+        "caseA_30nm_relative_flow|30|relative_flow_screened_collection_orbital_aggregate_ion_v1|relative_flow_screened_collection_orbital_ion_drag" {
+            return @'
+/** Generated transport-only campaign entry. */
+public final class RunM3C1CaseACommonP1Campaign {
+  private RunM3C1CaseACommonP1Campaign() {}
+  public static void main(String[] args) throws Exception {
+    RunM3C1CaseA100CommonP1.runCampaign("caseA_30nm_relative_flow", 30, "relative_flow_screened_collection_orbital_aggregate_ion_v1", "relative_flow_screened_collection_orbital_ion_drag");
+  }
+}
+'@
+        }
+        "caseA_100nm_image|100|electric_field_directed_image_orbital_sensitivity_v1|electric_field_directed_image_orbital_ion_drag" {
+            return @'
+/** Generated transport-only campaign entry. */
+public final class RunM3C1CaseACommonP1Campaign {
+  private RunM3C1CaseACommonP1Campaign() {}
+  public static void main(String[] args) throws Exception {
+    RunM3C1CaseA100CommonP1.runCampaign("caseA_100nm_image", 100, "electric_field_directed_image_orbital_sensitivity_v1", "electric_field_directed_image_orbital_ion_drag");
+  }
+}
+'@
+        }
+        default {
+            throw "Unsupported common-P1 campaign case tuple"
+        }
+    }
+}
+
 $SolverRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $RepositoryRoot = (Resolve-Path (Join-Path $SolverRoot "..\..")).Path
 $IsMaterialEvent = $RunProfile -eq "material_event"
-$ConfigPath = Join-Path $PSScriptRoot $(
-    if ($IsMaterialEvent) {
-        "cases\m3c1_common_p1_material_event_v1.json"
-    } else {
-        "cases\m3c1_common_p1_reference_run_v1.json"
+$IsCampaign = $RunProfile -eq "campaign"
+if ($IsCampaign) {
+    if ([string]::IsNullOrWhiteSpace($ConfigPath) -or
+        [string]::IsNullOrWhiteSpace($RunSpecPath)) {
+        throw "Campaign runs require explicit ConfigPath and RunSpecPath"
     }
-)
+} elseif (-not [string]::IsNullOrWhiteSpace($ConfigPath) -or
+    -not [string]::IsNullOrWhiteSpace($RunSpecPath)) {
+    throw "ConfigPath and RunSpecPath are reserved for the campaign profile"
+}
+if ([string]::IsNullOrWhiteSpace($ConfigPath)) {
+    $ConfigPath = Join-Path $PSScriptRoot $(
+        if ($IsMaterialEvent) {
+            "cases\m3c1_common_p1_material_event_v1.json"
+        } else {
+            "cases\m3c1_common_p1_reference_run_v1.json"
+        }
+    )
+}
 $JavaSource = Join-Path $PSScriptRoot "comsol\RunM3C1CaseA100CommonP1.java"
 $MaterialEventJavaSource = Join-Path `
     $PSScriptRoot "comsol\RunM3C1CaseA100CommonP1MaterialEvent.java"
@@ -97,6 +194,9 @@ $RequiredInputs = @($ConfigPath, $JavaSource, $Preparer, $Postprocessor, $Compil
 if ($IsMaterialEvent) {
     $RequiredInputs += $MaterialEventJavaSource
 }
+if ($IsCampaign) {
+    $RequiredInputs += $RunSpecPath
+}
 foreach ($Required in $RequiredInputs) {
     if (-not (Test-Path -LiteralPath $Required -PathType Leaf)) {
         throw "Required M3-C1 common-P1 input does not exist: $Required"
@@ -116,6 +216,9 @@ if ([string]::IsNullOrWhiteSpace($CandidateInput)) {
     )
 }
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
+    if ($IsCampaign) {
+        throw "Campaign runs require an explicit OutputDirectory"
+    }
     $OutputDirectory = Join-Path $SolverRoot $(
         if ($IsMaterialEvent) {
             "_out_m3c1\caseA_100nm_common_p1_material_event_v1"
@@ -177,6 +280,14 @@ $MaterialEventJavaSourceHash = $(
         ""
     }
 )
+$CampaignJavaSourceHash = ""
+$RunSpecSourceHash = $(
+    if ($IsCampaign) {
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $RunSpecPath).Hash.ToLowerInvariant()
+    } else {
+        ""
+    }
+)
 $PreparerSourceHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Preparer).Hash.ToLowerInvariant()
 $PostprocessorSourceHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Postprocessor).Hash.ToLowerInvariant()
 $RunnerHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $PSCommandPath).Hash.ToLowerInvariant()
@@ -199,17 +310,32 @@ $SourceCopy = Join-Path $OutputDirectory "source_copy.mph"
 $StagedJava = Join-Path $OutputDirectory "RunM3C1CaseA100CommonP1.java"
 $StagedMaterialEventJava = Join-Path `
     $OutputDirectory "RunM3C1CaseA100CommonP1MaterialEvent.java"
+$StagedCampaignJava = Join-Path `
+    $OutputDirectory "RunM3C1CaseACommonP1Campaign.java"
+$StagedRunSpec = Join-Path $OutputDirectory "run_spec.properties"
 $StagedConfig = Join-Path $OutputDirectory ([System.IO.Path]::GetFileName($ConfigPath))
 $StagedPreparer = Join-Path $OutputDirectory "prepare_m3c1_common_p1_tables.py"
 $StagedPostprocessor = Join-Path $OutputDirectory ([System.IO.Path]::GetFileName($Postprocessor))
 $SharedClassFile = Join-Path $OutputDirectory "RunM3C1CaseA100CommonP1.class"
 $MaterialEventClassFile = Join-Path `
     $OutputDirectory "RunM3C1CaseA100CommonP1MaterialEvent.class"
-$ClassFile = $(if ($IsMaterialEvent) { $MaterialEventClassFile } else { $SharedClassFile })
+$CampaignClassFile = Join-Path $OutputDirectory "RunM3C1CaseACommonP1Campaign.class"
+$ClassFile = $(
+    if ($IsMaterialEvent) {
+        $MaterialEventClassFile
+    } elseif ($IsCampaign) {
+        $CampaignClassFile
+    } else {
+        $SharedClassFile
+    }
+)
 $ClassStatusFile = "${ClassFile}.status"
 $CompiledClassFiles = @($SharedClassFile)
 if ($IsMaterialEvent) {
     $CompiledClassFiles += $MaterialEventClassFile
+}
+if ($IsCampaign) {
+    $CompiledClassFiles += $CampaignClassFile
 }
 $ClassStatusFiles = @($CompiledClassFiles | ForEach-Object { "${_}.status" })
 $StatusFile = Join-Path $OutputDirectory "run_status.json"
@@ -247,9 +373,26 @@ try {
     if ($IsMaterialEvent) {
         Copy-Item -LiteralPath $MaterialEventJavaSource -Destination $StagedMaterialEventJava
     }
+    if ($IsCampaign) {
+        Copy-Item -LiteralPath $RunSpecPath -Destination $StagedRunSpec
+    }
     Copy-Item -LiteralPath $ConfigPath -Destination $StagedConfig
     Copy-Item -LiteralPath $Preparer -Destination $StagedPreparer
     Copy-Item -LiteralPath $Postprocessor -Destination $StagedPostprocessor
+
+    if ($IsCampaign) {
+        $RunSpec = Read-CampaignRunSpec $StagedRunSpec
+        $CampaignEntrySource = New-CampaignEntrySource $RunSpec
+        $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllText(
+            $StagedCampaignJava,
+            $CampaignEntrySource,
+            $Utf8NoBom
+        )
+        $CampaignJavaSourceHash = (
+            Get-FileHash -Algorithm SHA256 -LiteralPath $StagedCampaignJava
+        ).Hash.ToLowerInvariant()
+    }
 
     $StagedLocks = [ordered]@{
         java = @($StagedJava, $JavaSourceHash)
@@ -262,6 +405,13 @@ try {
             $StagedMaterialEventJava,
             $MaterialEventJavaSourceHash
         )
+    }
+    if ($IsCampaign) {
+        $StagedLocks["campaign_entry_java"] = @(
+            $StagedCampaignJava,
+            $CampaignJavaSourceHash
+        )
+        $StagedLocks["campaign_run_spec"] = @($StagedRunSpec, $RunSpecSourceHash)
     }
     foreach ($Name in $StagedLocks.Keys) {
         $Actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $StagedLocks[$Name][0]).Hash.ToLowerInvariant()
@@ -284,6 +434,12 @@ try {
                 throw "COMSOL material-event Java compilation failed with exit code $LASTEXITCODE"
             }
         }
+        if ($IsCampaign) {
+            & $Compiler -classpathadd $OutputDirectory $StagedCampaignJava
+            if ($LASTEXITCODE -ne 0) {
+                throw "COMSOL campaign Java compilation failed with exit code $LASTEXITCODE"
+            }
+        }
         $MissingClasses = @(
             $CompiledClassFiles | Where-Object {
                 -not (Test-Path -LiteralPath $_ -PathType Leaf)
@@ -295,8 +451,9 @@ try {
         $BatchLog = Join-Path $OutputDirectory "comsol_batch.log"
         $ProcessLog = Join-Path $OutputDirectory "comsol_process.log"
         & $Batch -inputfile $ClassFile -nosave -np 1 -batchlog $BatchLog *> $ProcessLog
-        if ($LASTEXITCODE -ne 0) {
-            throw "COMSOL M3-C1 common-P1 run failed with exit code $LASTEXITCODE"
+        $BatchExitCode = $LASTEXITCODE
+        if ($BatchExitCode -ne 0) {
+            throw "COMSOL M3-C1 common-P1 run failed with exit code $BatchExitCode"
         }
         $ClassStatusText = $(
             if (Test-Path -LiteralPath $ClassStatusFile -PathType Leaf) {
@@ -384,6 +541,27 @@ try {
         staged_preparer = [System.IO.Path]::GetFileName($StagedPreparer)
         staged_postprocessor = [System.IO.Path]::GetFileName($StagedPostprocessor)
         run_profile = $RunProfile
+        campaign_run_spec = $(
+            if ($IsCampaign) {
+                [ordered]@{
+                    source = [System.IO.Path]::GetFullPath($RunSpecPath)
+                    source_sha256 = $RunSpecSourceHash
+                    staged = [System.IO.Path]::GetFileName($StagedRunSpec)
+                }
+            } else {
+                $null
+            }
+        )
+        campaign_entry_java = $(
+            if ($IsCampaign) {
+                [System.IO.Path]::GetFileName($StagedCampaignJava)
+            } else {
+                $null
+            }
+        )
+        campaign_entry_java_sha256 = $(
+            if ($IsCampaign) { $CampaignJavaSourceHash } else { $null }
+        )
         material_event_entry_java = $(
             if ($IsMaterialEvent) {
                 [System.IO.Path]::GetFileName($StagedMaterialEventJava)
@@ -533,9 +711,27 @@ try {
                 }
                 $RunReceipt = [ordered]@{
                     schema_version = 1
-                    tool_revision = "m3c1_full_physics_common_p1_reference_v1"
-                    classification = "external_comsol_full_physics_common_p1_reference"
+                    tool_revision = $(
+                        if ($IsCampaign) {
+                            "m3c_casea_size_iondrag_companion_comsol_v1"
+                        } else {
+                            "m3c1_full_physics_common_p1_reference_v1"
+                        }
+                    )
+                    classification = $(
+                        if ($IsCampaign) {
+                            [string]$Config.classification
+                        } else {
+                            "external_comsol_full_physics_common_p1_reference"
+                        }
+                    )
                     status = "COMPLETE"
+                    campaign_spec = $(
+                        if ($IsCampaign) { $Summary.campaign_spec } else { $null }
+                    )
+                    campaign_run_spec_sha256 = $(
+                        if ($IsCampaign) { $RunSpecSourceHash } else { $null }
+                    )
                     candidate_input_sha256 = $CandidateHash
                     table_receipt_sha256 = $TableReceiptHash
                     source_sha256_before = $SourceHashBefore

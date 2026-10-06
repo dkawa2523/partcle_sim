@@ -1,0 +1,58 @@
+{
+  "assessment_date": "2026-09-30",
+  "comparison_id": "M3-V-caseA-100nm-deterministic-common-physics-v1",
+  "current_comsol_run_authorized": false,
+  "evidence_kind": "matched_case_readiness",
+  "existing_reference": {
+    "case_id": "formal_iondrag_theory_consistent/caseA_100nm",
+    "particle_feature_settings_sha256": "8282454e51106d39d312e9582b45cf50585f77be682e90dd83bbaf2d68102cba",
+    "source_mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "study_solver_settings_sha256": "93d0f837613779335bf4dff6a90e2df5be9376b4226e173bb69d88651bb31390",
+    "trajectory_sha256": "af61916d47dc634e4b3ca42139eebe7fe74a0fd27941250aefda2b39f4ad4a78"
+  },
+  "blockers": [
+    {
+      "id": "brownian_off_reference",
+      "status": "BLOCKED",
+      "evidence": "bf1 is enabled with AS_brownian_seed=21 and exported Brownian r/z samples are nonzero",
+      "required_resolution": "create and audit a deterministic companion copy with Brownian disabled"
+    },
+    {
+      "id": "common_force_and_charge_settings",
+      "status": "BLOCKED",
+      "evidence": "the saved trajectory advances dynamic charge and includes ion drag, thermophoresis, lift, and DEP",
+      "required_resolution": "freeze charge at -1 and retain only the preregistered common electric, linear-Epstein, and gravity/buoyancy set"
+    },
+    {
+      "id": "candidate_case",
+      "status": "BLOCKED",
+      "evidence": "no candidate case/result hash is registered",
+      "required_resolution": "build and check the candidate through the normal public API"
+    },
+    {
+      "id": "tolerance_budget",
+      "status": "BLOCKED",
+      "evidence": "no COMSOL/candidate time-step series or field/export uncertainty budget is registered",
+      "required_resolution": "preregister tolerances from convergence and export evidence before viewing trajectory differences"
+    },
+    {
+      "id": "normalized_artifacts",
+      "status": "BLOCKED",
+      "evidence": "the 121 saved times contain neither RK stages nor an exact sparse event ledger",
+      "required_resolution": "export hashed field, force, integrator, trajectory, and event CSV artifacts"
+    },
+    {
+      "id": "freeze_mapping",
+      "status": "BLOCKED",
+      "evidence": "all 12 existing packages contain zero positive Freeze events",
+      "required_resolution": "run a dedicated positive Freeze microcase and review the canonical outcome mapping"
+    }
+  ],
+  "next_safe_command": "uv run --locked python tools/vv/comsol/compare_matched_case.py preflight tools/vv/comsol/cases/m3v_matched_caseA_100nm.yaml --artifact-root _out_m3v_matched/caseA_100nm --output _out_m3v_matched/preflight.json",
+  "next_safe_command_expected_exit_code": 2,
+  "physics_certification_status": "NOT_CERTIFIED",
+  "schema_version": 1,
+  "status": "BLOCKED_DO_NOT_RUN_COMSOL",
+  "supported_claim_after_all_layers_pass": "within_preregistered_tolerances_for_the_hashed_artifacts_only",
+  "tool_revision": "m3v_matched_case_comparison_v1"
+}

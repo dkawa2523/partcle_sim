@@ -1,6 +1,6 @@
-"""Normalize the M3-C1 full-physics common-P1 COMSOL reference.
+"""Normalize an M3-C1 full-physics common-P1 COMSOL reference.
 
-The tool is external V&V only. It validates the fixed Case-A 100 nm export,
+The tool is external V&V only. It validates the fixed Case-A pre-event export,
 checks the realized source state against the candidate table at t=0, and emits
 deterministic long-form state, force, RHS, primitive, and event artifacts. It
 does not select tolerances for solver agreement and does not modify the solver.
@@ -130,6 +130,7 @@ RAW_TABLES: Final = {
 }
 STATUS_NAMES: Final = {1: "active", 2: "frozen", 3: "stuck", 4: "escaped"}
 RECEIPT_PREFIX: Final = "M3C1_COMMON_P1|configuration|"
+CAMPAIGN_RECEIPT_PREFIX: Final = "M3C1_COMMON_P1|campaign_spec|"
 DETERMINISTIC_CONTRIBUTIONS: Final = (
     "electric,relative_flow_ion_drag,epstein_drag,waldmann_heat_flux_thermophoresis,"
     "free_molecular_lift_sensitivity,dielectrophoresis,gravity_buoyancy"
@@ -407,7 +408,7 @@ def _receipt_fields(log_path: Path, text: str) -> dict[str, str]:
     return fields
 
 
-def _parse_receipts(log_path: Path) -> dict[str, dict[str, str]]:
+def _parse_receipts(log_path: Path, deterministic_contributions: str) -> dict[str, dict[str, str]]:
     lines = [
         line[line.index(RECEIPT_PREFIX) :].strip()
         for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -450,7 +451,7 @@ def _parse_receipts(log_path: Path) -> dict[str, dict[str, str]]:
         "field_source": "canonical_exact_connectivity_P1_sectionwise",
         "initial_state_source": "candidate_realized_source_table",
         "primitive_function_count": "22",
-        "deterministic_contributions": DETERMINISTIC_CONTRIBUTIONS,
+        "deterministic_contributions": deterministic_contributions,
         "integrator": "classical_rk4",
         "integrator_order": "4",
         "relative_tolerance": "1e-8",
@@ -484,6 +485,105 @@ def _parse_receipts(log_path: Path) -> dict[str, dict[str, str]]:
     return result
 
 
+def _campaign_spec(root: Path, config: dict[str, Any]) -> dict[str, str] | None:
+    path = root / "run_spec.properties"
+    if not path.is_file():
+        return None
+    values: dict[str, str] = {}
+    for line_number, raw in enumerate(path.read_text(encoding="ascii").splitlines(), start=1):
+        line = raw.strip()
+        if not line or line.startswith(("#", "!")):
+            continue
+        if "=" not in line:
+            raise ValueError(f"{path}:{line_number}: expected key=value")
+        key, value = (part.strip() for part in line.split("=", 1))
+        if not key or not value or key in values:
+            raise ValueError(f"{path}:{line_number}: duplicate or empty run-spec entry")
+        values[key] = value
+    expected_keys = {
+        "case_id",
+        "diameter_nm",
+        "ion_drag_revision",
+        "deterministic_contribution_name",
+    }
+    if set(values) != expected_keys:
+        raise ValueError(f"{path}: run spec must contain exactly {sorted(expected_keys)}")
+    supported = {
+        (
+            "caseA_10nm_relative_flow",
+            "10",
+            "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+            "relative_flow_screened_collection_orbital_ion_drag",
+        ),
+        (
+            "caseA_30nm_relative_flow",
+            "30",
+            "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+            "relative_flow_screened_collection_orbital_ion_drag",
+        ),
+        (
+            "caseA_100nm_image",
+            "100",
+            "electric_field_directed_image_orbital_sensitivity_v1",
+            "electric_field_directed_image_orbital_ion_drag",
+        ),
+    }
+    observed = tuple(
+        values[key]
+        for key in (
+            "case_id",
+            "diameter_nm",
+            "ion_drag_revision",
+            "deterministic_contribution_name",
+        )
+    )
+    if observed not in supported:
+        raise ValueError(f"{path}: unsupported campaign tuple")
+    case = config["payload"]["case"]
+    if not math.isclose(
+        float(case.get("diameter_m", -1.0)),
+        float(values["diameter_nm"]) * 1.0e-9,
+        rel_tol=2.0e-15,
+        abs_tol=0.0,
+    ):
+        raise ValueError(f"{path}: diameter differs from staged reference config")
+    contributions = config["deterministic_contributions"].split(",")
+    if contributions.count(values["deterministic_contribution_name"]) != 1:
+        raise ValueError(f"{path}: deterministic contribution differs from staged config")
+    return values
+
+
+def _verify_campaign_receipts(log_path: Path, spec: dict[str, str] | None) -> None:
+    lines = [
+        line[line.index(CAMPAIGN_RECEIPT_PREFIX) :].strip()
+        for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if CAMPAIGN_RECEIPT_PREFIX in line
+    ]
+    if spec is None:
+        if lines:
+            raise ValueError(f"{log_path}: campaign receipts exist without run_spec.properties")
+        return
+    if len(lines) != 1:
+        raise ValueError(f"{log_path}: expected one campaign receipt, found {len(lines)}")
+    for line in lines:
+        if _receipt_fields(log_path, line) != spec:
+            raise ValueError(f"{log_path}: campaign receipt differs from run_spec.properties")
+
+
+def _deterministic_contributions(payload: dict[str, Any], path: Path) -> str:
+    physics = payload.get("physics")
+    if physics is None:
+        return DETERMINISTIC_CONTRIBUTIONS
+    if not isinstance(physics, dict):
+        raise ValueError(f"{path}: physics must be a mapping")
+    contributions = physics.get("deterministic_contributions")
+    if not isinstance(contributions, list) or len(contributions) != 7:
+        raise ValueError(f"{path}: deterministic contributions must contain seven names")
+    if any(not isinstance(value, str) or not value for value in contributions):
+        raise ValueError(f"{path}: deterministic contribution names must be nonempty strings")
+    return ",".join(contributions)
+
+
 def _load_config(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8-sig"))
     if payload.get("evaluation_revision") != 1:
@@ -514,10 +614,12 @@ def _load_config(path: Path) -> dict[str, Any]:
     primitive_multiplier = float(validation.get("initial_primitive_roundoff_multiplier", 0.0))
     if not math.isfinite(primitive_multiplier) or primitive_multiplier <= 0.0:
         raise ValueError(f"{path}: initial-primitive roundoff multiplier must be positive")
+    deterministic_contributions = _deterministic_contributions(payload, path)
     return {
         "sha256": _sha256(path),
         "state_roundoff_multiplier": state_multiplier,
         "primitive_roundoff_multiplier": primitive_multiplier,
+        "deterministic_contributions": deterministic_contributions,
         "payload": payload,
     }
 
@@ -869,7 +971,10 @@ def normalize(output_directory: Path, config_path: Path) -> dict[str, Any]:
     table_validation = _load_prepared_table_validation(root)
     release_path = root / "common_p1_release_probes.csv"
     release, release_primitives = _read_release(release_path)
-    receipts = _parse_receipts(root / "comsol_process.log")
+    spec = _campaign_spec(root, config)
+    log_path = root / "comsol_process.log"
+    _verify_campaign_receipts(log_path, spec)
+    receipts = _parse_receipts(log_path, config["deterministic_contributions"])
     runs: dict[str, Any] = {}
     histories: dict[str, dict[tuple[int, int], tuple[float, ...]]] = {}
     for name in STEP_S:
@@ -908,6 +1013,8 @@ def normalize(output_directory: Path, config_path: Path) -> dict[str, Any]:
             "brownian_accuracy": "NOT_TESTED",
         },
     }
+    if spec is not None:
+        summary["campaign_spec"] = spec
     _write_json(root / "normalization_summary.json", summary)
     return summary
 

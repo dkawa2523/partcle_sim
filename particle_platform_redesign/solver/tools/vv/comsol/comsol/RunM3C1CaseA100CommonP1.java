@@ -18,7 +18,9 @@ import java.util.Locale;
  * particle-interface topology. Every spatial primitive consumed by the
  * particle RHS is rebound to a sectionwise P1 function prepared from the
  * candidate HDF5. Brownian and Saffman lift remain disabled. The source model
- * is loaded from an isolated copy and is never saved.
+ * is loaded from an isolated copy and is never saved. Campaign runs consume
+ * only the 22 named P1 primitives plus the size-specific release state;
+ * producer-derived particle-background columns are never bound or trusted.
  */
 public final class RunM3C1CaseA100CommonP1 {
   private static final String SOURCE = "source_copy.mph";
@@ -30,6 +32,18 @@ public final class RunM3C1CaseA100CommonP1 {
   private static final String PRE_EVENT_TLIST = "range(0[s],1e-5[s],4.5e-4[s])";
   private static final String MATERIAL_EVENT_TLIST =
       "range(0[s],1e-5[s],4.5e-4[s]) 4.58e-4[s] 4.5875e-4[s]";
+  private static final String RELATIVE_FLOW_REVISION =
+      "relative_flow_screened_collection_orbital_aggregate_ion_v1";
+  private static final String IMAGE_REVISION =
+      "electric_field_directed_image_orbital_sensitivity_v1";
+  private static final String RELATIVE_FLOW_CONTRIBUTION =
+      "relative_flow_screened_collection_orbital_ion_drag";
+  private static final String IMAGE_CONTRIBUTION =
+      "electric_field_directed_image_orbital_ion_drag";
+  private static final int SPEC_CASE_ID = 0;
+  private static final int SPEC_DIAMETER_NM = 1;
+  private static final int SPEC_ION_DRAG_REVISION = 2;
+  private static final int SPEC_CONTRIBUTION = 3;
   private static final int[] PRE_EVENT_STEP_CODES = {625, 3125, 15625};
   private static final int[] MATERIAL_EVENT_STEP_CODES = {15625};
 
@@ -67,6 +81,65 @@ public final class RunM3C1CaseA100CommonP1 {
       "2*pi*epsilon0_const*1*(d0/2)^3*0.5161290322580645";
   private static final String DEP_R = DEP_FACTOR + "*m3c1_gradE2r(r,z)";
   private static final String DEP_Z = DEP_FACTOR + "*m3c1_gradE2z(r,z)";
+  private static final String IMAGE_EPSILON = "8.8541878128e-12[F/m]";
+  private static final String IMAGE_ION_SPEED =
+      "sqrt(m3c1_uir(r,z)^2+m3c1_uiz(r,z)^2)";
+  private static final String IMAGE_SPEED_SQUARE =
+      "(" + IMAGE_ION_SPEED + "^2+8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z))"
+          + "+(1[m/s])^2)";
+  private static final String IMAGE_CAPACITANCE_SCREENING =
+      "max(d0/2,m3c1_lambdaD(r,z))";
+  private static final String IMAGE_SURFACE_POTENTIAL =
+      "(ZAS*e_const/(4*pi*" + IMAGE_EPSILON + "*(d0/2)*(1+(d0/2)/"
+          + IMAGE_CAPACITANCE_SCREENING + ")))";
+  private static final String IMAGE_COLLECTION_CROSS_SECTION =
+      "(pi*(d0/2)^2*max(0,1-" + IMAGE_SURFACE_POTENTIAL + "/m3c1_TiV(r,z)))";
+  private static final String IMAGE_IMPACT =
+      "(e_const^2*ZAS/(2*pi*" + IMAGE_EPSILON + "*m3c1_mi(r,z)*"
+          + IMAGE_SPEED_SQUARE + "))";
+  private static final String IMAGE_SCREENING =
+      "sqrt(" + IMAGE_EPSILON + "*m3c1_Te(r,z)/(e_const*m3c1_ni(r,z)))";
+  private static final String IMAGE_ORBITAL_CROSS_SECTION =
+      "(pi*" + IMAGE_IMPACT + "^2*log(max(1+1e-12," + IMAGE_SCREENING + "/(d0/2))))";
+  private static final String IMAGE_FORCE_MAGNITUDE =
+      "(m3c1_mi(r,z)*m3c1_ni(r,z)*sqrt(" + IMAGE_SPEED_SQUARE + ")*"
+          + IMAGE_ION_SPEED + "*(" + IMAGE_COLLECTION_CROSS_SECTION + "+"
+          + IMAGE_ORBITAL_CROSS_SECTION + "))";
+  private static final String IMAGE_ELECTRIC_NORM =
+      "sqrt(m3c1_Er(r,z)^2+m3c1_Ez(r,z)^2+(1[V/m])^2)";
+  private static final String IMAGE_FORCE_R =
+      IMAGE_FORCE_MAGNITUDE + "*m3c1_Er(r,z)/" + IMAGE_ELECTRIC_NORM;
+  private static final String IMAGE_FORCE_Z =
+      IMAGE_FORCE_MAGNITUDE + "*m3c1_Ez(r,z)/" + IMAGE_ELECTRIC_NORM;
+
+  private static String[] legacy100Relative() {
+    return new String[] {
+      "caseA_100nm", "100", RELATIVE_FLOW_REVISION, "relative_flow_ion_drag"
+    };
+  }
+
+  private static String[] campaignSpec(
+      String caseId, int diameterNm, String revision, String contribution) {
+    require(caseId != null && !caseId.isEmpty(), "case_id must not be empty");
+    require(revision != null && !revision.isEmpty(), "ion_drag_revision must not be empty");
+    require(
+        contribution != null && !contribution.isEmpty(),
+        "deterministic_contribution_name must not be empty");
+    boolean relative =
+        ("caseA_10nm_relative_flow".equals(caseId) && diameterNm == 10)
+            || ("caseA_30nm_relative_flow".equals(caseId) && diameterNm == 30);
+    boolean image = "caseA_100nm_image".equals(caseId) && diameterNm == 100;
+    require(relative || image, "Unsupported common-P1 campaign case tuple");
+    require(
+        (relative && RELATIVE_FLOW_REVISION.equals(revision))
+            || (image && IMAGE_REVISION.equals(revision)),
+        "ion_drag_revision does not match the supported case tuple");
+    require(
+        (relative && RELATIVE_FLOW_CONTRIBUTION.equals(contribution))
+            || (image && IMAGE_CONTRIBUTION.equals(contribution)),
+        "deterministic_contribution_name does not match the supported case tuple");
+    return new String[] {caseId, Integer.toString(diameterNm), revision, contribution};
+  }
 
   private static final String[] STATE_COLUMNS = {
     "particle_id", "time_s", "r_m", "z_m", "velocity_r_m_per_s",
@@ -258,10 +331,15 @@ public final class RunM3C1CaseA100CommonP1 {
     return result;
   }
 
-  private static void bindProducerFormulas(Physics physics) {
+  private static void bindProducerFormulas(Physics physics, String[] spec) {
     String[] rate = physics.feature("auxq").getStringArray("R");
     require(rate.length >= 1, "Missing source dynamic-charge formula");
     physics.feature("auxq").set("R", new String[] {p1ProducerExpression(rate[0])});
+    if (IMAGE_REVISION.equals(spec[SPEC_ION_DRAG_REVISION])) {
+      physics.feature("idf").set(
+          "F", new String[] {IMAGE_FORCE_R, "0[N]", IMAGE_FORCE_Z});
+      return;
+    }
     String[] ion = physics.feature("idf").getStringArray("F");
     require(ion.length >= 3, "Missing source relative-flow ion-drag formula");
     physics.feature("idf").set(
@@ -283,7 +361,7 @@ public final class RunM3C1CaseA100CommonP1 {
     feature.set("StudyStep", study + "/time");
   }
 
-  private static void configurePhysics(Model model, String study) {
+  private static void configurePhysics(Model model, String study, String[] spec) {
     Physics physics = model.component("comp1").physics(PHYSICS);
     for (String tag : new String[] {
         "bf1", "lf1", "auxq", "idf", "ef1", "df1", "thpf1", "liftfm", "depf",
@@ -298,8 +376,8 @@ public final class RunM3C1CaseA100CommonP1 {
     }
 
     bindP1Variables(model);
-    bindProducerFormulas(physics);
-    model.param().set("d0", "100[nm]");
+    bindProducerFormulas(physics, spec);
+    model.param().set("d0", spec[SPEC_DIAMETER_NM] + "[nm]");
     model.param().set("sigmaR_p", "0.9");
 
     physics.feature("relg1").set(
@@ -390,18 +468,20 @@ public final class RunM3C1CaseA100CommonP1 {
     return base;
   }
 
-  private static String createAndRunStudy(Model model, int stepCode, String profile) {
+  private static String createAndRunStudy(
+      Model model, int stepCode, String profile, String[] spec) {
     String study = "stdM3C1P1" + stepCode;
     String step = stepExpression(stepCode);
     model.param().set("M3C1P1_dt", step);
     require(!has(model.study().tags(), study), "Common-P1 study tag already exists: " + study);
     model.study().create(study);
-    model.study(study).label("M3-C1 full-physics canonical-P1 Case A 100 nm");
+    model.study(study).label(
+        "M3-C1 full-physics canonical-P1 " + spec[SPEC_CASE_ID].replace('_', ' '));
 
     model.study(study).create("param", "Parametric");
     StudyFeature parameter = model.study(study).feature("param");
     parameter.set("pname", new String[] {"d0"});
-    parameter.set("plistarr", new String[] {"100"});
+    parameter.set("plistarr", new String[] {spec[SPEC_DIAMETER_NM]});
     parameter.set("punit", new String[] {"nm"});
     parameter.set("sweeptype", "sparse");
     try { parameter.set("keepsol", "all"); }
@@ -422,7 +502,7 @@ public final class RunM3C1CaseA100CommonP1 {
     time.set("notsoluse", "current");
     time.set("notsolnum", "last");
 
-    configurePhysics(model, study);
+    configurePhysics(model, study, spec);
     model.study(study).createAutoSequences("all");
     String base = baseSolver(model, study);
     SolverFeature transientSolver = model.sol(base).feature("t1");
@@ -568,14 +648,21 @@ public final class RunM3C1CaseA100CommonP1 {
     }
   }
 
-  private static void runOne(int stepCode, String profile) throws Exception {
+  private static String deterministicContributions(String[] spec) {
+    return "electric," + spec[SPEC_CONTRIBUTION]
+        + ",epstein_drag,waldmann_heat_flux_thermophoresis,"
+        + "free_molecular_lift_sensitivity,dielectrophoresis,gravity_buoyancy";
+  }
+
+  private static void runOne(int stepCode, String profile, String[] spec) throws Exception {
     Model model = null;
     String directory = stepDirectory(stepCode);
     try {
-      model = ModelUtil.loadCopy("M3C1CommonP1" + stepCode, SOURCE);
+      model = ModelUtil.loadCopy(
+          "M3C1CommonP1" + spec[SPEC_DIAMETER_NM] + "nm" + stepCode, SOURCE);
       createSectionwiseFunctions(model);
       createReleaseFunctions(model);
-      String solution = createAndRunStudy(model, stepCode, profile);
+      String solution = createAndRunStudy(model, stepCode, profile, spec);
       String dataset = "partM3C1P1" + stepCode;
       createParticleDataset(model, dataset, solution);
       double[] times = model.sol(solution).getPVals();
@@ -599,8 +686,7 @@ public final class RunM3C1CaseA100CommonP1 {
           "field_source", "canonical_exact_connectivity_P1_sectionwise",
           "initial_state_source", "candidate_realized_source_table",
           "primitive_function_count", Integer.toString(P1_NAMES.length),
-          "deterministic_contributions",
-          "electric,relative_flow_ion_drag,epstein_drag,waldmann_heat_flux_thermophoresis,free_molecular_lift_sensitivity,dielectrophoresis,gravity_buoyancy",
+          "deterministic_contributions", deterministicContributions(spec),
           "integrator", "classical_rk4", "integrator_order", "4",
           "relative_tolerance", "1e-8", "wall_accuracy_order", "1",
           "store_particle_status", "true", "store_extra", "false", "physics", PHYSICS,
@@ -614,6 +700,10 @@ public final class RunM3C1CaseA100CommonP1 {
   }
 
   private static void run(String profile) throws Exception {
+    run(profile, legacy100Relative(), false);
+  }
+
+  private static void run(String profile, String[] spec, boolean campaign) throws Exception {
     try {
       require(
           PRE_EVENT_PROFILE.equals(profile) || MATERIAL_EVENT_PROFILE.equals(profile),
@@ -621,9 +711,16 @@ public final class RunM3C1CaseA100CommonP1 {
       System.out.println("M3C1_COMMON_P1|launch|run_profile=" + profile);
       System.out.flush();
       ModelUtil.showProgress(false);
-      for (int stepCode : stepCodes(profile)) runOne(stepCode, profile);
+      if (campaign) {
+        emit(
+            "campaign_spec", "case_id", spec[SPEC_CASE_ID],
+            "diameter_nm", spec[SPEC_DIAMETER_NM],
+            "ion_drag_revision", spec[SPEC_ION_DRAG_REVISION],
+            "deterministic_contribution_name", spec[SPEC_CONTRIBUTION]);
+      }
+      for (int stepCode : stepCodes(profile)) runOne(stepCode, profile, spec);
       emit(
-          "run_pass", "case", "caseA_100nm", "run_profile", profile, "steps",
+          "run_pass", "case", spec[SPEC_CASE_ID], "run_profile", profile, "steps",
           isMaterialEventProfile(profile) ? "1.5625e-7" : "6.25e-7,3.125e-7,1.5625e-7",
           "common_field", "canonical_exact_connectivity_P1_sectionwise",
           "model_saved", "false");
@@ -640,6 +737,14 @@ public final class RunM3C1CaseA100CommonP1 {
 
   static void runMaterialEvent() throws Exception {
     run(MATERIAL_EVENT_PROFILE);
+  }
+
+  static void runCampaign(
+      String caseId, int diameterNm, String revision, String contribution) throws Exception {
+    run(
+        PRE_EVENT_PROFILE,
+        campaignSpec(caseId, diameterNm, revision, contribution),
+        true);
   }
 
   public static void main(String[] args) throws Exception {

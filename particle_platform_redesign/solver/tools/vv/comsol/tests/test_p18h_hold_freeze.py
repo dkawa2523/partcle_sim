@@ -22,7 +22,7 @@ def _write_csv(path: Path, header: tuple[str, ...], rows: list[tuple[object, ...
 
 def _synthetic_config(tmp_path: Path) -> tuple[Path, Path]:
     payload: dict[str, Any] = json.loads(CONFIG.read_text(encoding="utf-8"))
-    payload["expected_candidate"]["engine_algorithm_revision"] = "particle_engine_v36"
+    payload["expected_candidate"]["engine_algorithm_revision"] = "particle_engine_v37"
     payload["expected_candidate"]["result_algorithm_revision"] = "durable_segmented_result_v5"
     reference_root = tmp_path / "reference"
     reference_root.mkdir()

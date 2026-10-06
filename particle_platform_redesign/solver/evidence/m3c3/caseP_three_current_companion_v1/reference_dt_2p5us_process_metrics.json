@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "exit_code": 0,
+  "wall_time_s": 307.1338333,
+  "peak_rss_bytes": 3362066432,
+  "process_count": 1,
+  "fixed_rk4_step_s": 2.5E-06,
+  "numerical_run_role": "time_step_refinement"
+}

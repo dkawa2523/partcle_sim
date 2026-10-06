@@ -1,100 +1,66 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "evidence_id": "M3-C3-caseP-three-current-companion-v1",
-  "overall_status": "BLOCKED",
-  "evaluation_status": "NOT_EVALUATED",
-  "physical_applicability_status": "UNDETERMINED",
-  "claim": "optional_negative_ion_single_aggregate_sensitivity_not_original_caseP_parity",
-  "original_caseP_anchor_changed": false,
+  "overall_status": "PASS",
+  "evaluation_status": "COMPLETE",
+  "claim": "registered_common_p1_brownian_off_three_current_trajectory_and_event_agreement",
+  "original_caseP_two_current_anchor_changed": false,
+  "production_solver_changed_for_comparison": false,
   "source": {
     "comsol_version": "6.4.0.429",
     "mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
-    "canonical_input_sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9",
-    "canonical_node_count": 1987,
-    "canonical_cell_count": 3779,
-    "read_only": true,
-    "existing_negative_ion_field_authority": "total_density_pcnm_only",
-    "missing_canonical_authorities": [
-      "aggregate_total_velocity",
-      "effective_mass",
-      "thermal_voltage"
-    ]
+    "source_unchanged": true,
+    "model_save": false
   },
-  "negative_ion_authority": {
-    "species": ["F-", "O-"],
-    "charge_magnitude": 1,
-    "molar_mass_kg_per_mol": {"F-": 0.019, "O-": 0.016},
-    "temperature": "gas_temperature",
-    "velocity": "gas_convection_plus_species_diffusion_velocity",
-    "aggregation": "number_density_and_number_flux_weighted_single_aggregate",
-    "screening_length": "reuse_existing_explicit_common_P1_field"
-  },
-  "export_blocker": {
-    "cutpoint_evalpoint": {
-      "selection": "none",
-      "coordinate_count": 1987,
-      "result": "nonfinite_negative_ion_density",
-      "canonical_node_index": 11,
-      "source_external_vertex_id": 101,
-      "coordinate_m": [0.0354181, 0.022]
-    },
-    "domain3_interp": {
-      "expressions": 5,
-      "result": "Undefined post expression",
-      "feature": "Interpolation"
-    },
-    "domain3_eval_coordinate_match": {
-      "coordinate_tolerance_m": 1e-14,
-      "result": "no_unique_bijection_at_canonical_node_0",
-      "qualification": "attempted locked tolerance but not the exact Python matcher implementation"
-    },
-    "prohibited_workarounds": [
-      "coordinate_nudge",
-      "different_domain_fallback",
-      "missing_value_interpolation",
-      "nearest_value_substitution"
-    ]
-  },
-  "single_point_evaluability_sample": {
-    "coordinate_m": [0.14, 0.023],
-    "negative_ion_number_density_per_m3": 1.0946545811434909e11,
-    "negative_ion_velocity_r_m_per_s": 741.0886584096645,
-    "negative_ion_velocity_z_m_per_s": 512003.53016202105,
-    "effective_negative_ion_mass_kg": 2.907768130315183e-26,
-    "negative_ion_thermal_voltage_V": 0.02596432649399907,
-    "authority_scope": "expression_evaluability_only_not_common_P1_field"
-  },
-  "initial_charge": {
-    "policy": "solve_the_same_three_current_monotone_root_at_every_release_point_for_both_solvers",
-    "generated": false,
-    "old_two_current_Z0_reused": false
-  },
-  "relative_speed_applicability": {
-    "existing_30000_m_per_s_reusable": false,
-    "reason": "single-point negative-ion speed already exceeds 5.12e5 m/s",
-    "required_authority": "full node extrema plus explicit particle-speed envelope plus continuous-path check"
-  },
-  "representative_run": {
+  "scope": {
     "particle_diameter_nm": 100,
     "particle_count": 287,
     "duration_s": 0.03,
     "output_count": 121,
     "brownian": false,
-    "deterministic_forces": "all_enabled_caseP_forces",
-    "charge_revision": "aggregate_relative_drift_regularized_three_current_v1",
-    "comsol_step_s": 1e-5,
-    "candidate_steps_s": [1e-5, 5e-6],
-    "executed": false,
-    "comsol_rerun_required": true,
-    "expected_wall_time_after_unblock": "3-5 minutes"
+    "field": "canonical_exact_connectivity_common_p1",
+    "candidate_steps_s": [2.5e-6, 1.25e-6, 6.25e-7],
+    "comsol_steps_s": [5e-6, 2.5e-6, 1.25e-6]
   },
-  "completion_requirements": [
-    "finite domain-3 boundary-defined five-primitive export in canonical 1987-node order",
-    "axis radial-velocity policy recorded and applied once",
-    "finite relative-ion-speed applicability certificate",
-    "three-current release equilibrium roots shared by both solvers",
-    "COMSOL 10us and candidate 10us/5us trajectories",
-    "all-time r-z-v-Z and exact event-fate comparison"
-  ],
-  "unblocking_input": "producer-side one-sided domain-3 values at every canonical P1 node or an equivalent hash-locked canonical field file"
+  "artifacts": {
+    "trajectory_evaluation": {
+      "path": "trajectory_evaluation.json",
+      "sha256": "4000f129b1a9733db70fbf0d319e508d5df1616d27afe74f1199f3e9d0d40e6e"
+    },
+    "campaign_config": {
+      "path": "campaign_config.json",
+      "sha256": "828d1e3954e8f7d55086c907fc2a985d6b50d85789d4ff9254f8309e403407d1"
+    },
+    "shared_release_receipt": {
+      "path": "three_current_release_receipt.json",
+      "sha256": "3f2d7fb3b95ba8bc4d7a3fa4f7b49765f6fc07abb2501124142f3a096cad524d"
+    },
+    "comsol_run_receipts": {
+      "dt_5us": "3111a9873753325f254269687df4528012481092677a52e40a55c691df3a36cc",
+      "dt_2p5us": "5e5376956ca99f66966ff971a8ee26b4407336308366319d70aa09d29ac479b3",
+      "dt_1p25us": "bcef02bbe2ec0f8a5bd3b83343afe72d64cd3a973dfa7d9aa4e25cc3640b838e"
+    },
+    "negative_ion_authority": "../caseP_negative_ion_primitives_v1/primitive_receipt.json",
+    "caseA_size_and_ion_drag_authority": "../../m3c1/case_a_size_ion_drag_companion_v1/comparison_manifest.json"
+  },
+  "gate_status": {
+    "candidate_self_convergence": "PASS",
+    "comsol_self_convergence": "PASS",
+    "all_time_position_charge_and_common_active_velocity_comparison": "PASS",
+    "candidate_event_convergence": "PASS",
+    "comsol_event_convergence": "PASS",
+    "event_identity_and_time_comparison": "PASS"
+  },
+  "final_fates": {
+    "active": 146,
+    "stuck": 141
+  },
+  "limitations": [
+    "not native COMSOL FE equivalence",
+    "not Brownian pathwise equivalence",
+    "not species-resolved negative-ion physics",
+    "not universal geometry or boundary equivalence",
+    "not physical-model validation",
+    "not an equal-accuracy performance comparison"
+  ]
 }

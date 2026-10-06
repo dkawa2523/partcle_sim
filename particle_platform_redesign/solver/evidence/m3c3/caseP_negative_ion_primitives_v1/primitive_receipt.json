@@ -1,0 +1,57 @@
+{
+  "artifacts": {
+    "boundary_csv_sha256": "522c175e7dc9df78fac9eefabaa1b0c4894bf08745442e2a87b6179b8df4d882",
+    "domain_csv_sha256": "654e68a74d4c00ef9b8c66d7aa53c84a6f384b22b0fc899e4e2fe5315153e136",
+    "java_source_sha256": "1426e6408c62a8e621d2babcb8fb319d9c3663f8082f54a20798eb007b3db128",
+    "normalizer_sha256": "ab9e5994ed76bce62abee31c85fe9c426963205844f96cda516174fdc774c770",
+    "runner_script_sha256": "ec5d5c7bd42bcb89dbe62f8c186e1acbf9628c88d0c9aee45cbcf4aa99c80c2a"
+  },
+  "axis_regularity_projection": {
+    "global_speed_max_after_projection_m_per_s": 742625.4559170194,
+    "projected_node_count": 34,
+    "reason": "canonical axisymmetric RZ vector regularity",
+    "rule": "negative_ion_velocity_r(r=0)=+0.0",
+    "source_abs_max_m_per_s": 1919.783603268964
+  },
+  "boundary_node_count": 161,
+  "boundary_provider_point_count": 1761,
+  "canonical_input_sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9",
+  "canonical_node_count": 1987,
+  "canonical_output_sha256": "f14efc8bd453505baaa9fc1ddf71f91e5145fb07cb8bdeecd1955d40cec8d124",
+  "coordinate_nudge": false,
+  "coordinate_provenance": {
+    "canonical_unit": "m",
+    "comsol_geometry_unit": "cm",
+    "conversion_factor_cm_to_m": 0.01,
+    "duplicate_provider_rows_verified_consistent": 0,
+    "match_tolerance_m": 1e-14,
+    "maximum_coordinate_match_delta_m": 2.7755575615628914e-17
+  },
+  "different_domain_fallback": false,
+  "domain_provider_point_count": 153919,
+  "evidence_id": "M3-C3-caseP-negative-ion-primitives-v1",
+  "missing_value_imputation": false,
+  "model_save": false,
+  "primitive_definition": {
+    "density": "n_F_minus + n_O_minus",
+    "effective_mass": "sum_s(m_s*n_s)/sum_s(n_s)",
+    "temperature_authority": "canonical gas_temperature field",
+    "thermal_voltage": "k_B*T_g/e",
+    "velocity": "sum_s(n_s*(gas_velocity+species_diffusion_velocity))/sum_s(n_s)"
+  },
+  "ranges": {
+    "axis_radial_velocity_abs_max_after_projection_m_per_s": 0.0,
+    "effective_negative_ion_mass_kg": [2.9042913461892875e-26, 3.086164654228932e-26],
+    "negative_ion_number_density_per_m3": [30058240260.476597, 3.3314834507302732e16],
+    "negative_ion_speed_max_m_per_s": 742625.4559170194,
+    "negative_ion_thermal_voltage_V": [0.025247012813963066, 0.04728284958371649],
+    "negative_ion_velocity_r_m_per_s": [-202126.20260443058, 446511.2185485288],
+    "negative_ion_velocity_z_m_per_s": [-307013.1476242658, 725060.2710684187],
+    "source_axis_radial_velocity_abs_max_m_per_s": 1919.783603268964
+  },
+  "schema_version": 1,
+  "source_mph_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "source_mph_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "source_unchanged": true,
+  "status": "PASS"
+}

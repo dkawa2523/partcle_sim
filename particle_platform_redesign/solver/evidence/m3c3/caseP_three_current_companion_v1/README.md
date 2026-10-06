@@ -1,75 +1,63 @@
-# M3-C3 Case-P three-current companion closeout
+# M3-C3 Case-P three-current companion
 
 ## 結論
 
-`BLOCKED / NOT_EVALUATED`。これは物理modelの`NOT_APPLICABLE`判定ではない。元Case-Pの
-`auxq.R`は電子・正イオンの二電流式であり、負イオン密度`nm_d`を電流へ含めない。このanchorは変更せず、
-M3-C3は負イオンを追加する独立した感度評価companionとしてのみ定義した。
+`PASS / COMPLETE`。Case-P source MPHを変更せず、100 nm、287粒子、30 ms、121出力時刻、
+Brownian-offの代表caseについて、candidateとCOMSOLのaggregate three-current軌道を同じ
+exact-connectivity common-P1場と共有初期状態で比較した。両者の3段階時間刻み自己収束、全時刻の
+position/charge、両側active時のvelocity、lifecycle、141件のterminal eventがすべて登録gateを通過した。
 
-このstatusは本artifactの三電流外部coverageだけに適用する。元二電流anchor、完了済みproduction revision、critical
-boundaryを未完了へ戻さない。P21と明示scopeの2D benchmarkの終了判断は`implementation_plan.md`と
-`vv_methodology.md`が所有し、このcoverageは解除入力を受領した場合だけ独立work packageとして開く。
+本判定のauthorityは[`trajectory_evaluation.json`](trajectory_evaluation.json)と3段階の
+`reference_dt_*_run_receipt.json`である。Case-Aの
+10/30 nm relative-flow ion dragと100 nm image ion dragは
+[`../../m3c1/case_a_size_ion_drag_companion_v1/`](../../m3c1/case_a_size_ion_drag_companion_v1/README.md)
+が所有する。これにより、現モデルを使う優先1--4は完了した。
 
-COMSOL sourceから共通P1全1987節点の負イオンprimitiveを有限値で取得できなかったため、companion H5、
-three-current平衡初期電荷、COMSOL/candidate軌道はいずれも生成・実行していない。旧Case-P trajectoryを
-three-current結果として流用してはならない。
+## 比較条件
 
-既存datasetが明示的に保持する負イオン量はtotal density `pcnm`だけであり、aggregate total velocity、mass、
-thermal voltageのcanonical authorityはない。
+- candidate: exponential midpoint、`dt=2.5/1.25/0.625 us`
+- COMSOL: classical RK4、`dt=5/2.5/1.25 us`
+- charge: `aggregate_relative_drift_regularized_three_current_v1`
+- ion drag: `relative_flow_screened_collection_orbital_aggregate_ion_v1`
+- drag: `epstein_linear_effective_gas_sensitivity_v1`
+- thermophoresis、DEP、R-Z free-molecular lift、gravity、Freeze/Disappearを有効化
+- 全6 runの終端人口: `stuck=141`、`active=146`
 
-## 確認できたsource意味論
+初期電荷は一つの共有三電流平衡artifactから設定した。source MPHのSHA-256は
+`3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524`で、各COMSOL runの
+前後で不変である。負イオン5 primitiveのauthorityは
+[`../caseP_negative_ion_primitives_v1/`](../caseP_negative_ion_primitives_v1/README.md)である。
 
-- source MPH SHA-256: `3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524`
-- COMSOL: `6.4.0.429`
-- F-: `z=-1`, `M=0.019 kg/mol`; O-: `z=-1`, `M=0.016 kg/mol`
-- 両speciesとも`UseGasForIonTemperature`。したがって`V_T-=k_B T_g/e`。
-- plasma transportはconvection、migration、mixture-diffusion correctionが有効。
-- Equation Viewの`Vdr_*`/`Vdz_*`は`j/(rho*w)`で定義されたdiffusion velocityである。aggregateに使う
-  total species velocityは`(u+Vdr, w+Vdz)`であり、ガス速度を二重加算しない。
-- 内部点`(r,z)=(0.14,0.023) m`のread-only probeは
-  `n-=1.0946545811434909e11 1/m^3`, `u-r=741.0886584096645 m/s`,
-  `u-z=512003.53016202105 m/s`, `m-=2.907768130315183e-26 kg`,
-  `V_T-=0.02596432649399907 V`を返した。これは式の評価可能性確認であり、P1場authorityではない。
+## 数値結果
 
-## companion契約
+candidateのfine-pair relative L2はposition `2.848e-6`、velocity `9.743e-6`、charge
+`4.168e-6`、観測RMS収束次数はそれぞれ`2.133`、`2.156`、`1.950`だった。COMSOLは
+`5.132e-6`、`1.213e-5`、`6.147e-6`、収束次数は`2.103`、`2.413`、`2.407`だった。
 
-負イオンはF-とO-を一つへ畳み込むsingle-aggregate approximationであり、species-resolvedな物理認定ではない。
+最細解同士の全時刻比較は次のとおりである。
 
-- `n-=n_F+n_O`
-- `u-=sum(n_s u_s)/sum(n_s)`（`u_s`は上記total species velocity）
-- `m-=sum(m_s n_s)/sum(n_s)`
-- `V_T-=k_B T_g/e`
-- `n-=0`時の速度・質量fallbackは有限な式評価のためだけで、物理状態を捏造しない。
-- screening lengthは既存の明示common-P1 fieldを両solverで共有し、負イオン寄与から再計算しない。
-- 全release点の`Z0`は同一three-current式の単調rootとして再計算し、両solverへ同じ値を与える。
-- `maximum_relative_ion_speed_m_s`はfit parameterではなく、正負ion node field extremaと明示したparticle-speed
-  envelopeから作る適用証明値とする。内部点だけで約`5.12e5 m/s`であるため、既存`30000 m/s`を流用できない。
+| 量 | RMS | maximum | relative L2 |
+|---|---:|---:|---:|
+| position [m] | `1.098e-7` | `1.121e-6` | `1.571e-6` |
+| velocity [m/s], common-active states | `3.514e-4` | `2.596e-3` | `4.959e-6` |
+| charge [e] | `1.507e-3` | `2.446e-2` | `2.254e-6` |
 
-## export blocker
+terminal particle/outcome/semanticは141件すべて一致した。event time差はRMS `4.702e-9 s`、
+maximum `2.753e-8 s`で、candidate/COMSOL双方の刻み収束から事前定義した不確かさ内である。
 
-hash-lockした既存common-P1 H5は1987 nodes / 3779 trianglesである。以下の二つの最小経路をfail-closedで確認した。
+## 抗力入力の修正
 
-1. selectionを付けない`CutPoint2D(data=dset1, 1987 exact coordinates)` + `EvalPoint`は座標の行数・順序確認を
-   通過したが、最初の`n-`評価がcanonical node 11で非有限になった。node 11は
-   `(r,z)=(0.0354181,0.022) m`、source external vertex ID 101の境界nodeである。
-2. 一つの`Interp`へ5式と`double[2][1987]`を渡しdomain 3を明示した経路も
-   `Undefined post expression - Feature: Interpolation`で停止した。
-3. domain-3 `Eval`のprovider節点を取得し、locked `1e-14 m`でcanonical節点との一意な全単射を試みたが、
-   canonical node 0で一意な対応を作れなかった。この試行は既存Python matcherそのものではなく、同じtoleranceを
-   用いた探索なので、Python matcher合格を否定するclaimには使わない。
+最初のCOMSOL companionは組込みEpstein dragの値欄だけをP1へ変更したが、速度と圧力のsource selectorが
+native場を指したままで、P1密度・温度と混在していた。同一状態RHS診断でこのowner混在を特定した。
+最終runは組込みdragを無効化し、candidateと同じP1速度・密度・温度、同じ分子質量、
+`delta=1+0.9*pi/8`を使う明示custom force一つへ置換した。係数fit、gate緩和、solver coreの変更はない。
 
-座標nudge、別domain fallback、欠損補間、近傍値代入はprimitiveのownerを変えるため採用しない。解除には、producer側で
-one-sided domain-3境界値を定義した同じ1987座標順の5 primitive export、または同内容のhash-lock済みcanonical field
-fileが必要である。各rowには有限な`n-`, total `u-r/u-z`, `m-`, `V_T-`を含め、source hash、座標hash、単位、
-axis radial-velocity規則を記録する。
+COMSOL 1-processの観測wall timeは5/2.5/1.25 usで`179.41/307.13/569.77 s`、peak RSSは
+約`3.32--3.38 GB`だった。これは外部reference生成の記録であり、candidateとのequal-accuracy速度比較ではない。
 
-## 解除後の一回だけの比較
+## 主張しないこと
 
-- 100 nm、287 particles、30 ms、121 common output times
-- Brownian off、全決定論力、three-current、同一three-current `Z0`
-- COMSOL RK4 `dt=10 us`を1回
-- candidate `dt=10 us`と`5 us`
-- candidate 10/5 us自己差を数値幅とし、全時刻の`r,z,v,Z`とevent/fateを判定
-
-COMSOL rerunは必須である。primitive exportとcompanion準備後の目安は、COMSOLが約85秒、candidate 2本が
-各約46--55秒、比較と検査を含め合計3--5分。追加seed/sweepは不要。
+本結果は登録済みcommon-P1、Brownian-off、100 nm代表caseの同一model-form時間積分agreementだけを支持する。
+native COMSOL FE一般同等性、Brownian pathwise一致、species-resolved負イオン、任意形状・任意条件、
+物理近似自体の妥当性、普遍的COMSOL同等性、COMSOLより高速という主張には使わない。元Case-P二電流anchorも
+変更しない。grazing/corner/multiple-hitとnative FE一般性は、識別可能な別モデルで評価する次工程である。

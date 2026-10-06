@@ -228,6 +228,45 @@ def test_normalizes_common_p1_reference_and_checks_initial_state(
     assert all(run["event_count"] == 0 for run in summary["runs"].values())
 
 
+def test_normalizes_one_staged_campaign_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _small_protocol(monkeypatch)
+    root = tmp_path / "reference"
+    config_path = _write_fixture(root)
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config["case"]["diameter_m"] = 1.0e-8
+    contribution = "relative_flow_screened_collection_orbital_ion_drag"
+    contributions = common.DETERMINISTIC_CONTRIBUTIONS.split(",")
+    contributions[1] = contribution
+    config["physics"] = {"deterministic_contributions": contributions}
+    config_path.write_text(json.dumps(config), encoding="utf-8")
+    spec = {
+        "case_id": "caseA_10nm_relative_flow",
+        "diameter_nm": "10",
+        "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+        "deterministic_contribution_name": contribution,
+    }
+    (root / "run_spec.properties").write_text(
+        "".join(f"{key}={value}\n" for key, value in spec.items()),
+        encoding="ascii",
+    )
+    log_path = root / "comsol_process.log"
+    configuration_lines = log_path.read_text(encoding="utf-8").replace(
+        common.DETERMINISTIC_CONTRIBUTIONS,
+        ",".join(contributions),
+    )
+    campaign_line = "M3C1_COMMON_P1|campaign_spec|" + "|".join(
+        f"{key}={value}" for key, value in spec.items()
+    )
+    log_path.write_text(configuration_lines + "\n" + campaign_line, encoding="utf-8")
+
+    summary = common.normalize(root, config_path)
+
+    assert summary["status"] == "COMPLETE"
+    assert summary["campaign_spec"] == spec
+
+
 def test_rejects_comsol_initial_state_that_differs_from_candidate(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

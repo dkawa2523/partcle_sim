@@ -1091,16 +1091,20 @@ original Case-P anchor. It is integrated as catalog v17, runtime
 single engine; the standard verification/scenario suite and all quality gates
 passed.
 
-Priority 3 input audit is closed as `BLOCKED / NOT_EVALUATED`, not as physical
-`NOT_APPLICABLE`. A finite canonical five-primitive negative-ion field could
-not be produced on all common-P1 nodes without undefined boundary values or a
-nonunique mesh mapping. No companion H5, three-current initial charge, COMSOL
-trajectory, or candidate trajectory was run, and the original two-current
-Case-P anchor is unchanged. The compact authority and exact unblock input are
+Priority 3's input blocker is resolved. A producer-owned domain cache plus
+one-sided domain-3 boundary cache generated the finite canonical five-primitive
+negative-ion field on all 1987 common-P1 nodes. The source MPH remained hash
+unchanged; no coordinate nudge, missing-value imputation, or alternate-domain
+fallback was used. Priority 4 is also complete: the shared three-current initial
+charge drove a common-P1, Brownian-off, 100 nm, 287-particle, 30 ms comparison.
+Candidate and COMSOL three-level self-convergence, position/charge over common
+finite lifecycle states, common-active velocity comparison, and 141 terminal
+event identities/times all pass. The original two-current
+Case-P anchor is unchanged. The compact authority and current status are
 [`../../../evidence/m3c3/caseP_three_current_companion_v1/`](../../../evidence/m3c3/caseP_three_current_companion_v1/README.md).
 This optional-model external coverage is separated from the P21 exit. P21 and
 the explicitly scoped two-current common-P1 2-D benchmark are
-`CLOSED_ACCEPTED_WITH_LIMITATIONS` / `2D_CRITICAL_VV_COMPLETE`; no
-three-current COMSOL trajectory equivalence is certified.
-The external V&V tool suite passed 301 tests; that does not replace the missing
-producer field authority.
+`CLOSED_ACCEPTED_WITH_LIMITATIONS` / `2D_CRITICAL_VV_COMPLETE`. The result does
+not certify native FE equivalence, Brownian pathwise agreement, species-resolved
+physics, arbitrary geometries/conditions, physical-model validity, or universal
+COMSOL equivalence.

@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "status": "LOCKED_FOR_EXECUTION",
+  "case_id": "caseP_100nm_three_current",
+  "expected_source_mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "source_mph_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "source_mph_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "reference_run_config_sha256": "2172fb930f6520c1d9268f4935e9181c4845be80eac0b1bba3cde947baccbd0a",
+  "numerical_run": {
+    "role": "time_step_refinement",
+    "fixed_rk4_step_s": 2.5E-06,
+    "base_config_fixed_rk4_step_s": 1E-05
+  },
+  "artifacts": [
+    {
+      "role": "source_mph",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass\\model\\icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+      "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+    },
+    {
+      "role": "canonical_three_current_input",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c3_casep_three_current_v4\\candidate_input_three_current_z0.h5",
+      "sha256": "09608da624b7a921d634e8ccf748739ffb67899c1bacc114805ecb9333ff5fec"
+    },
+    {
+      "role": "reference_run_config",
+      "path": "reference_run_config.json",
+      "sha256": "2172fb930f6520c1d9268f4935e9181c4845be80eac0b1bba3cde947baccbd0a"
+    },
+    {
+      "role": "primitive_receipt",
+      "path": "primitive_receipt.json",
+      "sha256": "600c0198617d230e8e9ed6d9ef2f4a5177560cc2c984e710ea6af7d557f86b75"
+    },
+    {
+      "role": "release_receipt",
+      "path": "three_current_release_receipt.json",
+      "sha256": "3f2d7fb3b95ba8bc4d7a3fa4f7b49765f6fc07abb2501124142f3a096cad524d"
+    },
+    {
+      "role": "release_state",
+      "path": "three_current_release_state.csv",
+      "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+    },
+    {
+      "role": "table_receipt",
+      "path": "m3c3_table_receipt.json",
+      "sha256": "6b8cf87d4c4c8ce24abc9bdeb7582fdb87b1d7a41b1f7d4c122771ba59891d8e"
+    },
+    {
+      "role": "java_runner",
+      "path": "RunM3C3CasePThreeCurrent.java",
+      "sha256": "7312d8ef9e71babf7764e0a081d6837de6b58886a894dcf85b072ea69870b295"
+    },
+    {
+      "role": "powershell_runner",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\run_m3c3_caseP_three_current.ps1",
+      "sha256": "0501e5d64b457c1e7269e990957b67392ede0ca32425673d5c8d2535919f7ef5"
+    },
+    {
+      "role": "table_preparer",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\prepare_m3c3_caseP_reference_tables.py",
+      "sha256": "055c046886715105755dc2b650c76665bd950cce8aaff89c218cac55151fce64"
+    },
+    {
+      "role": "normalizer",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\normalize_m3c3_caseP_three_current.py",
+      "sha256": "a35bfec9cfb43940c2b42c390fd5f690fcfd20c64f6b42bec18c9408f57f7a68"
+    }
+  ]
+}

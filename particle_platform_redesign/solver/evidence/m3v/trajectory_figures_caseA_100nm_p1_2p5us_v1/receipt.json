@@ -1,0 +1,1834 @@
+{
+  "alignment": {
+    "first_particle_id": 1,
+    "key": [
+      "particle_id",
+      "time_s"
+    ],
+    "last_particle_id": 287,
+    "matched_rows": 11767,
+    "particles": 287,
+    "status": "PASS"
+  },
+  "atlas": {
+    "bytes": 59780,
+    "path": "index.html",
+    "role": "html_atlas",
+    "sha256": "f76e009f2d70c661c0eb49a06f6bf0a8120e9a8ca15ca0b9bbacafab9e49b94b"
+  },
+  "figures": [
+    {
+      "bytes": 472025,
+      "path": "overview_rz.svg",
+      "role": "summary_svg",
+      "sha256": "5c8b94a8f68f720bef8504895722a8648101d431c7cef936849f4ec455f547c0"
+    },
+    {
+      "bytes": 943662,
+      "path": "coordinates_vs_time.svg",
+      "role": "summary_svg",
+      "sha256": "b98b6c53e612602fcca470677b9e8e100cc43e735f8520e38093baf3fe8e1042"
+    },
+    {
+      "bytes": 236067,
+      "path": "position_difference_vs_time.svg",
+      "role": "summary_svg",
+      "sha256": "a1a712e3abd6ba1f0eee152c39a7feb0798ee988504454d91aff9d27d63a5a03"
+    },
+    {
+      "bytes": 1346858,
+      "path": "position_difference_heatmap.svg",
+      "role": "summary_svg",
+      "sha256": "1c2649a7d93a1057ba1d50521c9e5a8aebf45ac251335dee9ad89122ed65f597"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000001.svg",
+      "role": "particle_svg",
+      "sha256": "6d0ddf1faadf4db3b92da1a2100e4c34c8563d22b52fa08129fa573faa526572"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000002.svg",
+      "role": "particle_svg",
+      "sha256": "f2427778376a874da584c835a80f532a91ff80bb5655079e99cb205ca1deecbd"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000003.svg",
+      "role": "particle_svg",
+      "sha256": "8a9c20a21b4a5fe9a4c8d98b399df7f056e2089a2fe58c80f26dd608d9d4175e"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000004.svg",
+      "role": "particle_svg",
+      "sha256": "60dad553379178fa37723ef5f2eb1ccc31aa7c63bf2d8313cb646ff8e0ee5cad"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000005.svg",
+      "role": "particle_svg",
+      "sha256": "0ccbb4f3b43c4e6e7844fc6e53bad4224949c7982005f813be44aa6c596ea103"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000006.svg",
+      "role": "particle_svg",
+      "sha256": "bb66b8b276a52b41dec87f5dd0320f43ca5d3647bfff85991790abc06cc95d26"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000007.svg",
+      "role": "particle_svg",
+      "sha256": "635affc9863bf81e6ae7f0a90fbe99ca7aaf023f7252cf6a1b40ad3959d37b65"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000008.svg",
+      "role": "particle_svg",
+      "sha256": "1663e86c5b55ae6143bb7e5a5f0ef903534a063698d331fa695ebf396ad34985"
+    },
+    {
+      "bytes": 12704,
+      "path": "particles/particle_000009.svg",
+      "role": "particle_svg",
+      "sha256": "a48cc6fb9c07ef3ad8c622a5c287726e400be927ab1773e2888cd3ec262e8e26"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000010.svg",
+      "role": "particle_svg",
+      "sha256": "4e9dd2173187f00e3fe41269f9e5a4a29a743b0c3397a9d198f2bc72704f4a0e"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000011.svg",
+      "role": "particle_svg",
+      "sha256": "80b02f18887fa15042bdab8c23c35ae1e069c2d4abfbcb82b737f90dc14bca51"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000012.svg",
+      "role": "particle_svg",
+      "sha256": "5d4348f90052100904d7ccf5d2a8787ee2a93d636863158e2c1d5f642dd90a35"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000013.svg",
+      "role": "particle_svg",
+      "sha256": "39e0e0a6f288d2c2d0c6f1a1446efdd2a8dbaac3cef40a0b33d15b12c71d9047"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000014.svg",
+      "role": "particle_svg",
+      "sha256": "5c5ed431dd625a142db08b0841911fe68b25c8617d6785f6b5be1e71314cc7af"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000015.svg",
+      "role": "particle_svg",
+      "sha256": "0b1097ca3a67ff28d2cb50e04262a73a0be8ce102f5d8704b0177547ad97b613"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000016.svg",
+      "role": "particle_svg",
+      "sha256": "04b34939564999503b2db1753b774b6bd5db60678bad19a24bed687e63fea1b3"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000017.svg",
+      "role": "particle_svg",
+      "sha256": "31a56eec21b888cb3215912cd47fc27012f23fde1828e459d3002accee2b4c90"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000018.svg",
+      "role": "particle_svg",
+      "sha256": "e723d88cf9f362a6969c5d51f5ce5d0610b5e4a7752efdf14fd6a5430945ea81"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000019.svg",
+      "role": "particle_svg",
+      "sha256": "7eb08715a83e96ec0a585ae5aca2e40ee461ce2360592930a378910e631b6568"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000020.svg",
+      "role": "particle_svg",
+      "sha256": "f1acbe63cbcff149ba307c51f9e641a565f041e74813857e4c7714b2cdb6cef1"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000021.svg",
+      "role": "particle_svg",
+      "sha256": "f56ee7b0bc9dd4443fc2ff2dd18517bd0f5c6d063461b019cf90695b37e0e5c2"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000022.svg",
+      "role": "particle_svg",
+      "sha256": "5e2ee30989fb7bfec2ba727bba63467919183d7e6284b8af87919bc5269b9b73"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000023.svg",
+      "role": "particle_svg",
+      "sha256": "e44aedbd3c555b4388be47dccd7bc88e678c9fdbd9a3f7c850a35955725a8517"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000024.svg",
+      "role": "particle_svg",
+      "sha256": "876a9264c2756901ffd00fb1397038d2745f67224953eff1febec9e85573cddc"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000025.svg",
+      "role": "particle_svg",
+      "sha256": "d10b2843a9ca9aac6e0083fa73237beabb61b84d5c01460d0888842a411528eb"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000026.svg",
+      "role": "particle_svg",
+      "sha256": "510dad5beaadcedea6ecf69dada5e45ac528d100dfebb35e40cb8bafb8c7845c"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000027.svg",
+      "role": "particle_svg",
+      "sha256": "80acb8b98917010bd74a70705fbb98f9ab537b775a3ec9f359872ed56e332ddb"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000028.svg",
+      "role": "particle_svg",
+      "sha256": "21a8897b48306aef2eee81a876f5aaccdea71440baf81d76186af90927d666a2"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000029.svg",
+      "role": "particle_svg",
+      "sha256": "82e20e0804388863c11a7a72a73cb7df2eed283d7a98981429b29c1ce8dec852"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000030.svg",
+      "role": "particle_svg",
+      "sha256": "ca97755c67b63cbc6929b92d0aaa28178afb2702876f3b68595480ee12b98ac4"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000031.svg",
+      "role": "particle_svg",
+      "sha256": "0842d9f1f064876b6df1468a1dceb511062bffab32008be86afe6f298db0ecab"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000032.svg",
+      "role": "particle_svg",
+      "sha256": "6e187a88be5ead98215f91856a942e2792e4892199dd13bb0b7006bacc9b67a8"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000033.svg",
+      "role": "particle_svg",
+      "sha256": "517ba431100175e92e3aa4a20e81b0f0200649f57dd95c01ac6dabf04fde1b4d"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000034.svg",
+      "role": "particle_svg",
+      "sha256": "85b6ce8268fa9ef429dbf126512b35db0f9e4c08add0a2f239d454629394952d"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000035.svg",
+      "role": "particle_svg",
+      "sha256": "36531986869548ef2f66f88b562c36374de8032cd2f29c55f965aafadc8cdbcd"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000036.svg",
+      "role": "particle_svg",
+      "sha256": "917cfa143150514039d1fbb960ff67207eee864d51d49d102bd4d8cd0f52dab0"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000037.svg",
+      "role": "particle_svg",
+      "sha256": "54038c690687f3a07a42c784858e2f2f5731431a290290ea8cb22691e8e36716"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000038.svg",
+      "role": "particle_svg",
+      "sha256": "9b15e3c9fb93c2dbe2d18e65427c4f78af27413ae06136198640421a6df1adbf"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000039.svg",
+      "role": "particle_svg",
+      "sha256": "9b0f96c6bfb52926bda2822230faceaae7a2781e9a9ec0b3efd6f00326f8707a"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000040.svg",
+      "role": "particle_svg",
+      "sha256": "fc5694d421f6454532809e750bc2c1c9ebe09c5a549024272eae17f422438147"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000041.svg",
+      "role": "particle_svg",
+      "sha256": "0b535dc6b8783b37b536cae941eb12af45c9273308b632621a37c4fd13ab64d1"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000042.svg",
+      "role": "particle_svg",
+      "sha256": "1631ccc5cdeb4aba3388a4c03e7aa6f74f8c8db59e78547a73cc1a8bb8bafea4"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000043.svg",
+      "role": "particle_svg",
+      "sha256": "3e0c848da6c4a8ffe259a95c60f92f450105c8bf7f691e41de66fce2dbc119e8"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000044.svg",
+      "role": "particle_svg",
+      "sha256": "c86f33f7699ececda6cbc7a41f51cca1399ddcf1483571ade339a6e084a55891"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000045.svg",
+      "role": "particle_svg",
+      "sha256": "9c5229497c223c383d407950281be29cad1bb2e171e4d111bf3b17f24e220ec9"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000046.svg",
+      "role": "particle_svg",
+      "sha256": "cc579c95e3c6b6add7717a589f2c42a6dd357fa41d73d92af5c6f25d939a5b61"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000047.svg",
+      "role": "particle_svg",
+      "sha256": "1d91ef5a0272e5afbf5714679c6fdaf0ed7ac800bd7cfd62dcb92defd8400370"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000048.svg",
+      "role": "particle_svg",
+      "sha256": "6e22c7bef87b42dc4673fcd898a20433d94fc1a654e0d13f5cb154c7d5265be6"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000049.svg",
+      "role": "particle_svg",
+      "sha256": "62657b4b487f71aab4adb26809beb3a52a543035526959a8412f7fb9d4503ef0"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000050.svg",
+      "role": "particle_svg",
+      "sha256": "bc434f0178467dd38315584e950980d40ae1bc000cf04fd1b4d2587daee68649"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000051.svg",
+      "role": "particle_svg",
+      "sha256": "4bcf9e9c0d5f3ea6dd7595aaaafc0c59dd32568b698471344bd4a75ba1aa5af7"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000052.svg",
+      "role": "particle_svg",
+      "sha256": "8b6ca3ee7c60de706a93765869a9f749071c5e6f6055796e92dee6477c727375"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000053.svg",
+      "role": "particle_svg",
+      "sha256": "efb1a5aeac45e8ebcaaa24a23d5299c90b7b51db3be9f26e38da8affec60d6d7"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000054.svg",
+      "role": "particle_svg",
+      "sha256": "1e152623f5e26063ba3e448745f94ac084a3e3adeea3fe9d88a60253fab83f39"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000055.svg",
+      "role": "particle_svg",
+      "sha256": "c1bdf649d2368c9b196d78bbeb2d9e1b48bbd7446a5b69d5d3e4a55b71e2b47e"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000056.svg",
+      "role": "particle_svg",
+      "sha256": "f7a248e7b5b45e596ff83bfd849a12a7bc7f8212c5b40db904eb8df40b9a8b6e"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000057.svg",
+      "role": "particle_svg",
+      "sha256": "e64e71b98a3a1c9c18c48cb86db028e4de69894fb3c963b7bc558107035d4a30"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000058.svg",
+      "role": "particle_svg",
+      "sha256": "cb16b68b6f5f563ad0922b3f9a3f41537abdb630faec518be9d1d1ea1ce4cf20"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000059.svg",
+      "role": "particle_svg",
+      "sha256": "da264fb52ab132285ed1f1f2bb6c1c70d36a739965e76208997e3720618f0411"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000060.svg",
+      "role": "particle_svg",
+      "sha256": "00afe8b55c49c94dd995a10d772ca777ca964f2682b458cb9a2795f203fd7418"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000061.svg",
+      "role": "particle_svg",
+      "sha256": "0b7e2dbbbd27cfceadb0baee22880bab59ed490d8140a801142db00df0bd7dce"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000062.svg",
+      "role": "particle_svg",
+      "sha256": "3cf841b96657c9f2b60da3b73fc59720c979a8479572ab55b69423628b0081c7"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000063.svg",
+      "role": "particle_svg",
+      "sha256": "9c875cc970e4013bf8b75339e5a6fd0e9f1bcaf2553b380dc9b996b0be62294d"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000064.svg",
+      "role": "particle_svg",
+      "sha256": "ccd4ebc1b877ffe44bdf9980c2bafc27c809a5ca8cef94f8387685a8de8948ae"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000065.svg",
+      "role": "particle_svg",
+      "sha256": "55ebd54c699b9597801aa0912fb823c4153a94a2f5de69d00665a050c8bb1d66"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000066.svg",
+      "role": "particle_svg",
+      "sha256": "799d81571b0c09542740b7497961a32034bca241efba823d844bbc31056a97af"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000067.svg",
+      "role": "particle_svg",
+      "sha256": "9c1108a86049bfbc50f977aff38ea1ab3845cb3ea023aa486a73410b0cc2d44a"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000068.svg",
+      "role": "particle_svg",
+      "sha256": "1563a43dcb9936df865ec483cba6fff203ad38bfd3f74ad311838a4842c8df09"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000069.svg",
+      "role": "particle_svg",
+      "sha256": "76d9e39c58bd941449eb758869a22b109744651a85cb5df644d191019b53b8c0"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000070.svg",
+      "role": "particle_svg",
+      "sha256": "a1fce569aadc90927258eb3fd11d0970d7b8d141eda3f6d7b83bd7bea522698c"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000071.svg",
+      "role": "particle_svg",
+      "sha256": "4d429344ea0b832933fce5e8e1fedce8e96790c30a1d9a2b8bfe761419d6d3ae"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000072.svg",
+      "role": "particle_svg",
+      "sha256": "12a4fcb51cdeb5265f561120d6ab2d55497ed04c13966c1b96b75b7fab3f0ce9"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000073.svg",
+      "role": "particle_svg",
+      "sha256": "042d324a24a8a42b45124c917749f9b916fd47e96dbb9f83a87b7b057a4a6dd9"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000074.svg",
+      "role": "particle_svg",
+      "sha256": "89e7e46961e698fa5cea3d635b79be64025226e415852a045c2c9f3a7dfef779"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000075.svg",
+      "role": "particle_svg",
+      "sha256": "b73347bbacae3cb671cc660beb2fde3d3e70db283a7d8dec456a3e3673548281"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000076.svg",
+      "role": "particle_svg",
+      "sha256": "53fc7565e3c0720c556772a9ba6c97c988979cbedce7e2c25bb8a22e516349f0"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000077.svg",
+      "role": "particle_svg",
+      "sha256": "b6d7faabbc6327add5477aad86f2435fd167597682e7adcbc536c50bf4e99c71"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000078.svg",
+      "role": "particle_svg",
+      "sha256": "361c0d8cbb77583ce84c3117a3b7e7992c003b329cb8033c2f55d6eeaa9c2889"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000079.svg",
+      "role": "particle_svg",
+      "sha256": "5d221a66c4fc448b45126b263122357b8d6bd3cd5b64c96985b62601d5ac7781"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000080.svg",
+      "role": "particle_svg",
+      "sha256": "3273394f25ad7b6633d6ed8ecbec21d4631180b52937714b775de3e3a8f5d8ad"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000081.svg",
+      "role": "particle_svg",
+      "sha256": "0e79d3ad2d5f5e35ea572ad609a144275febacdd91f1084baaf2c44eb8ce43a2"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000082.svg",
+      "role": "particle_svg",
+      "sha256": "e6fca9f8fc535d4895e2be669352ff24e9dea2da9fd68a6b687144bba956befc"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000083.svg",
+      "role": "particle_svg",
+      "sha256": "0ea9220a155f44e05b9d73305314beefbe535a45354f7de57651d445aad57a4c"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000084.svg",
+      "role": "particle_svg",
+      "sha256": "5d96f3ac76fa030dfb9e7b399599db956ee6a537663795d982de6b01699ef0bd"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000085.svg",
+      "role": "particle_svg",
+      "sha256": "2480dd1e4700bd1a6038618f94e903e5e026f666a5ac0cc00d5d1e0b81fd35e6"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000086.svg",
+      "role": "particle_svg",
+      "sha256": "903ae8de524df274ce3ae9421da613e68958c611e6490d4fc10c383acb0ccc40"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000087.svg",
+      "role": "particle_svg",
+      "sha256": "d3729a88bb19a024f4058becd4b1bdd5ea7fd57d7f59701c437960c56d935660"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000088.svg",
+      "role": "particle_svg",
+      "sha256": "8e42087e511675b641b3b4e275e316f9a7062ba7f47d95affb40135949b3f9b9"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000089.svg",
+      "role": "particle_svg",
+      "sha256": "930820164c4248d63ba77d4d0baa91c75105fedf8b83658ae4143e32523ccf97"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000090.svg",
+      "role": "particle_svg",
+      "sha256": "45b88e92f9a38eccce5b343056412f5833fba7263de937fecdb931cafb662264"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000091.svg",
+      "role": "particle_svg",
+      "sha256": "9f164a067debddcd4c20ea06d34a709c356af4ce405bbd4b158851e9b187537b"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000092.svg",
+      "role": "particle_svg",
+      "sha256": "e3dfb8ba939378b1562ce785b777a415ae996f3f76b6584afbcb8349b65273a4"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000093.svg",
+      "role": "particle_svg",
+      "sha256": "b3c4ed387a3576ff678abf7f8ab341599e49b65fd839d003ac800f95f4f5d846"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000094.svg",
+      "role": "particle_svg",
+      "sha256": "98e547b484638889e6e6d15e96935fb991ee110ce3e852d210bbc1786a4347c4"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000095.svg",
+      "role": "particle_svg",
+      "sha256": "41693847c2c6a1f52e9ba434bfc1b5f1a2b01783146f14a63d38bd9d55c93168"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000096.svg",
+      "role": "particle_svg",
+      "sha256": "d41a93d6d9e305f74696a7d12dfa6023ba7aeded69f05cc4461bd0cdd7d7922f"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000097.svg",
+      "role": "particle_svg",
+      "sha256": "525831ca955b283b64488cf5675d3456b2d453c60763c0bfaabcf5bbe8bbe50f"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000098.svg",
+      "role": "particle_svg",
+      "sha256": "1741f2cd1aff2646029c0216d92ebde5204b218b9d77dbbca757498692707428"
+    },
+    {
+      "bytes": 12707,
+      "path": "particles/particle_000099.svg",
+      "role": "particle_svg",
+      "sha256": "d7f6f9a27564bfd34295f49992812b1b7ad2f7eb3deff7a1492ac4db392fe38c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000100.svg",
+      "role": "particle_svg",
+      "sha256": "0784037ca5d48d3e56f1507668dae995686aa4a920bb0e67be79962dc4aac6a7"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000101.svg",
+      "role": "particle_svg",
+      "sha256": "87854e3d3e78fb19c3236d2e8aa52a7ea0854b7459f985cd745a8127e01acbf3"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000102.svg",
+      "role": "particle_svg",
+      "sha256": "0c3feff8ba4c56f3f0b9e4c734b50ef9e59d0d28a0b1ae913aa533855cc7b64a"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000103.svg",
+      "role": "particle_svg",
+      "sha256": "3d5bc1071e3ab36c10d52bb20ee1c517f6851fb20fe43f1e55b1cd6f2fdce079"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000104.svg",
+      "role": "particle_svg",
+      "sha256": "7aefb9ba970c4b56f8f807a8f426132a8d584efdd394c10cbff6e9515c2ac0d4"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000105.svg",
+      "role": "particle_svg",
+      "sha256": "b66407b904822442ffd14df233bf1ee50dbc73ada3858bc09758a135be9eff83"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000106.svg",
+      "role": "particle_svg",
+      "sha256": "08f3bd8e784d66053e3fb79cb4d239fb21dc834c20d8ab1ce3ae9e76d70b750c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000107.svg",
+      "role": "particle_svg",
+      "sha256": "fcfd4ccbe7591a632366ecfc4d270cda80b3f8880e2ada106551da823db9ce27"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000108.svg",
+      "role": "particle_svg",
+      "sha256": "3d9fbd2f51b1c22a9a6f16ee31d9115065954ae7243f16dee193bca2c2a0ad07"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000109.svg",
+      "role": "particle_svg",
+      "sha256": "355b1be14777c7d5d02a263bacc4193a29c345cc866bb96e2ce5f03fdbcdb546"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000110.svg",
+      "role": "particle_svg",
+      "sha256": "4bd716c2e9bb08d4d141290e36386f1683817a628a11c97a73e41fda2e02066e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000111.svg",
+      "role": "particle_svg",
+      "sha256": "344e1009a06b61019d669cbfa10f6c67ed305d07b013839f5c2f4cfd054a9e1b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000112.svg",
+      "role": "particle_svg",
+      "sha256": "4613e977ce5406198e8675d8e405333b88973266075484c548da21977256ce0f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000113.svg",
+      "role": "particle_svg",
+      "sha256": "784a1308eef2aa1813e4195a65fff61f382b060e56dd2bf42c80169bd69143b6"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000114.svg",
+      "role": "particle_svg",
+      "sha256": "7c215935f69e1fcaa6fbcf22ddc251f138dcb911064e1ffd232f46759b70fad1"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000115.svg",
+      "role": "particle_svg",
+      "sha256": "df1ee58c4aa4769cf52ffd985410472e7c117db2eaaf2ba5e7a952f4e9801ca0"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000116.svg",
+      "role": "particle_svg",
+      "sha256": "dd0e9c6ad3d8aa3e0c0d034a55d1d781be563ba9ae8eade9563c497eb1884720"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000117.svg",
+      "role": "particle_svg",
+      "sha256": "c98458e09cbe465b7fe53b7851f3daf83f166e5512847b7eda5579870a3c84b9"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000118.svg",
+      "role": "particle_svg",
+      "sha256": "52aeb6e808956fe1fb52c94702e1f41dac30204f2f3e7007ad70681e86cea1ea"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000119.svg",
+      "role": "particle_svg",
+      "sha256": "044000847d3020e0ebc9ee8b5be7a20f42b2fa1a5dd22c5071ab262d26c63975"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000120.svg",
+      "role": "particle_svg",
+      "sha256": "2a2e0a10b71abfaad9f2acb881d07f06c05834458b380d76beaf622472b0081e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000121.svg",
+      "role": "particle_svg",
+      "sha256": "3dd7233b6e1d436bf42050bc11b9da5a2da8bbc47a8a1481b3db47a5a0a04b3a"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000122.svg",
+      "role": "particle_svg",
+      "sha256": "711d3d91c791cc21a7cbee56353829348e325aa7b4182a6dd5f69c2571ae72d8"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000123.svg",
+      "role": "particle_svg",
+      "sha256": "90c052cb2d117b8bb35101a2bd1cf92b8b00364ca31f9710168fa1fa7bb1f47e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000124.svg",
+      "role": "particle_svg",
+      "sha256": "9bb6eeae628429a8f081047fd7a8e4e98a8b11f1f2da6330b1491c5462699d4f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000125.svg",
+      "role": "particle_svg",
+      "sha256": "b1df640ad6f1d629f3f676962affe5b9b17c65c99e020fc3fc2f9f6aab506e19"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000126.svg",
+      "role": "particle_svg",
+      "sha256": "7b4a742a68594821d8ac0a7350240b5c15c5a53bb9e33bb9f04a16023279e8a4"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000127.svg",
+      "role": "particle_svg",
+      "sha256": "63787040713ed0132ca03c51443788fa5f3a7804830534879f7b0fcc6db0d21b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000128.svg",
+      "role": "particle_svg",
+      "sha256": "8793b5a3ae3cfb92c4edfc884f0f0cf6f8350e2e655782aedc3f6823a918c2bf"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000129.svg",
+      "role": "particle_svg",
+      "sha256": "d94c58a4a2d8bd70a42acec73517c6e684b8d8924737ac450deb07ea29fa1d7f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000130.svg",
+      "role": "particle_svg",
+      "sha256": "2b0097ac8efaa570edb55cf1b384716d27a20b09b8115a8f8757aa1df6c2d787"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000131.svg",
+      "role": "particle_svg",
+      "sha256": "5681cf204e92db4161885957d12171666595442afabbb31d51faab49e5d1c48b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000132.svg",
+      "role": "particle_svg",
+      "sha256": "78523d40696db3e9c8c4713cb6943fd14514406f91b5a3bd031c2004aa96c566"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000133.svg",
+      "role": "particle_svg",
+      "sha256": "2bfe62ad3ed8b8f82bc7f215ae20e151f665c12d779b2e19da11c8cc707e8150"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000134.svg",
+      "role": "particle_svg",
+      "sha256": "71da630b791c39f19a95001ebb477b081b1189936cb943f2054b2fc642140809"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000135.svg",
+      "role": "particle_svg",
+      "sha256": "ce0659e5c61d8e7350d8635783f372ddbd1cee1e69aaef334dd34b2cd7c8e0fa"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000136.svg",
+      "role": "particle_svg",
+      "sha256": "88d3cff1aa8d51f76d216b713d36abab62d8df010eea3a8de8e53af4754423a5"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000137.svg",
+      "role": "particle_svg",
+      "sha256": "94dc778a01728e958fcc5ccc1749433b80bcd73c9537ead01ae40fcee8f3d7a0"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000138.svg",
+      "role": "particle_svg",
+      "sha256": "9044099e5f7d943b0f926f01c6c77885a6238df021f456059d784d5da91fd7e0"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000139.svg",
+      "role": "particle_svg",
+      "sha256": "001e3ad9b407b20cf5eb70d08a30b357e6f010abafd220a18d064fce17ef3ff7"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000140.svg",
+      "role": "particle_svg",
+      "sha256": "4f2c4a3eb823a279a2e0c016814997ee22ca5d7e691bb4c4a461e9ed4eeeae24"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000141.svg",
+      "role": "particle_svg",
+      "sha256": "5f50959e21e2aa7c7ff0f2a445d9ea81ed84505d1c56937545f052cf106d5827"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000142.svg",
+      "role": "particle_svg",
+      "sha256": "23338e5384066fd3855f05ef31bc0d8f21a04ab50ddc4d25286446378113a2c5"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000143.svg",
+      "role": "particle_svg",
+      "sha256": "ddbfdfa3acbf59b0d233e0f9d09e4ee647d784a08ac5ac56d715c1077689a17e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000144.svg",
+      "role": "particle_svg",
+      "sha256": "759f15a14baab6e151df2a355b7e311ff94928e8d6666b83de035c82823085c0"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000145.svg",
+      "role": "particle_svg",
+      "sha256": "c6e55a8fb7ade1f0e9faf3f2d326ca86767985ce84fec9b29e5b163f36f16282"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000146.svg",
+      "role": "particle_svg",
+      "sha256": "433b2ec8967cabf4189f108676b0fe164d04792b2cfdd5de319f6cb599104ca4"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000147.svg",
+      "role": "particle_svg",
+      "sha256": "2355927088915e4e8a0701871477d0fa4e7bfc0f0d284185ee1e152184f1e744"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000148.svg",
+      "role": "particle_svg",
+      "sha256": "f9eea981f2702e982f68dee0d9f98c78d977773bef24955e90b795a0bfbcc1f4"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000149.svg",
+      "role": "particle_svg",
+      "sha256": "91428f305173d4f345412c55de83360facce09ab7e6c8a8adac6414333d1b88a"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000150.svg",
+      "role": "particle_svg",
+      "sha256": "ede8557b0625660ba23d80485b99e4b6b71e2407455b0c4be009e0cf33f835d4"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000151.svg",
+      "role": "particle_svg",
+      "sha256": "2752ddd07a2fdd40356fd709c53f43db2ba1b49ef31588538c54baf398005fd7"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000152.svg",
+      "role": "particle_svg",
+      "sha256": "bc9e005e9158bb47b7d19bf831d38d9ecbd3bf08a8baaae140dc21e53bd505f9"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000153.svg",
+      "role": "particle_svg",
+      "sha256": "7cf6af2613b98e34d7de15df078ed65b492eb2e31872796eb119d41ffa49e042"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000154.svg",
+      "role": "particle_svg",
+      "sha256": "ead6827acda8ae3275ef50a46ca5755df795b3aa4e35c775f86260747162dc19"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000155.svg",
+      "role": "particle_svg",
+      "sha256": "3c8ab6098c6c99ae94d56f9645d3378d1e2a3068625bd8a56c301ec62f585c55"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000156.svg",
+      "role": "particle_svg",
+      "sha256": "3d42c96ccfa78d5e220abc7ba3645b30386c2ace14faffa101ad075bb0989d1c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000157.svg",
+      "role": "particle_svg",
+      "sha256": "4d3d563bbb9097db11a9a5d6a5a707dc2e3357cd0d32a2acc1d055d37ecc8c9a"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000158.svg",
+      "role": "particle_svg",
+      "sha256": "82320f9ac85c5dd1cd169f67468623c457b7f7a17c4222d3917e93e671a29514"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000159.svg",
+      "role": "particle_svg",
+      "sha256": "35dd027db5c2070c2eabc8cdce8f0b1f7e50651ec8f6e66492c28d9b5518a6dc"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000160.svg",
+      "role": "particle_svg",
+      "sha256": "9dfadd29113644c7062524c3b6eb1ad2f893d3661bb9ac519df0b0fb64ad7fe8"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000161.svg",
+      "role": "particle_svg",
+      "sha256": "0ac6b603bcb9d84e2d84d630c5d4b0c137cf1d5519a24c4b8faae254472026c2"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000162.svg",
+      "role": "particle_svg",
+      "sha256": "a1316f0ef192db28d42b264f578491cbfff1f568156feb57dd87cd15781caf1b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000163.svg",
+      "role": "particle_svg",
+      "sha256": "3553699015a0f4a6b0dc7f0309be752dcbb390f87d51c679eb84bff2b5b9361c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000164.svg",
+      "role": "particle_svg",
+      "sha256": "18b5a485caa873b3c1912b29525325118d40a1a83394e615dca631ed1c090768"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000165.svg",
+      "role": "particle_svg",
+      "sha256": "2fdc25c577e9666328deb5065b0f7a194dda7211190f6c6fd1ebd67cdf49ab67"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000166.svg",
+      "role": "particle_svg",
+      "sha256": "6dd38c37fe6f8239ac5a735886f134a8f91e14d330eddd6f1c2d881e2782a095"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000167.svg",
+      "role": "particle_svg",
+      "sha256": "8a798e48a0d7b8fbfd6298f94e78ca98c673dcc5e304d4a2dc996230a3e1eb04"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000168.svg",
+      "role": "particle_svg",
+      "sha256": "2757a686aa27eddccc53feee4868ea436ad1d7f56c9e93d715a839d14909132e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000169.svg",
+      "role": "particle_svg",
+      "sha256": "4d0da0e03b40ae4fd04adb6e353b7501d5f96b689761ea5b882833fb2c3e560b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000170.svg",
+      "role": "particle_svg",
+      "sha256": "701be2973664e101dd3e5836480c4b8450790d8951eb1ce5d3138d96127bf9e2"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000171.svg",
+      "role": "particle_svg",
+      "sha256": "a8548bcab6ce2d20658e4f5b612a002bb6220d32596b070fd8b234fe9d65283f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000172.svg",
+      "role": "particle_svg",
+      "sha256": "c0cd8cb13b79272d8a0b55562057ebba8293ea2a2db2c1084d54ec752b02831b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000173.svg",
+      "role": "particle_svg",
+      "sha256": "f7dc226f448b49a8ac7b3cc1adbf156a238c8c8918e8a8ec40c87180e06dce2b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000174.svg",
+      "role": "particle_svg",
+      "sha256": "022927fca2130a7c5d616bb9503935c16da6101672e01323e7b056e62b213773"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000175.svg",
+      "role": "particle_svg",
+      "sha256": "a1a567894ddf8dce835191c0e2324dc7b0442feee8e2392eeb2e8d35caba0e95"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000176.svg",
+      "role": "particle_svg",
+      "sha256": "5627eb948dea4ca51c35d8831ac49b4da53bc9a1304db0581b029e5d4c147e01"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000177.svg",
+      "role": "particle_svg",
+      "sha256": "ba6b49096c621f6f338263da84191e22c22fec693764579674414b40a35bbe7e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000178.svg",
+      "role": "particle_svg",
+      "sha256": "121f7f583b3487cf3a3280565a7c85ccacdf5b9f8377c7e95ec7701235b10ed5"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000179.svg",
+      "role": "particle_svg",
+      "sha256": "9b5a0b2232a8c2cc74c0d83dae0f5a16f597cbcaf50e62a7e1ac2d46af7532d2"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000180.svg",
+      "role": "particle_svg",
+      "sha256": "3ad811dbe5fb3be9c11099cae4ff1d4c2b8f7e943047900cd8a828ae611f24de"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000181.svg",
+      "role": "particle_svg",
+      "sha256": "5a5956e83c798b70c1ab9cb0f14f5646416c7f94f517e5f0c928be91da3f6dcd"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000182.svg",
+      "role": "particle_svg",
+      "sha256": "41cb239bb41826655956b0b89f87172a3f7be1c6388b40b9fa613b72da4fb1a1"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000183.svg",
+      "role": "particle_svg",
+      "sha256": "8e23fe43183f788e1b4340fe0ef94081167d5a1da7a31a45f611e97935612879"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000184.svg",
+      "role": "particle_svg",
+      "sha256": "df317dc48f02f6e4f847a529bd3a19f2de62af6f6ef935f91ba5c7cf7ad02adb"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000185.svg",
+      "role": "particle_svg",
+      "sha256": "edfa22371686490ce9c4af7d28b4c8193699af1464332c505928aeade0a790ce"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000186.svg",
+      "role": "particle_svg",
+      "sha256": "cc668c43da7f26bfc638b5586aa3f49e6bdd0903d526c21ff34d8008d59cdf4a"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000187.svg",
+      "role": "particle_svg",
+      "sha256": "62633ef7a59b59f7c5733b3de9409e18a10936bb4b7e6db4cb603a1f9c11e363"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000188.svg",
+      "role": "particle_svg",
+      "sha256": "3af6178fb41fa0537675cb2c520a8b6b7020e1ed789976b5893b7e44221184bd"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000189.svg",
+      "role": "particle_svg",
+      "sha256": "4da431b76c23bd1b9d6207407c5c1125385d1bdf801c01842d5eed368b5450ad"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000190.svg",
+      "role": "particle_svg",
+      "sha256": "0f6932486f8aa4f3364d10dca9d7a3045dc1d84f4aad0236755de5955d08b6f9"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000191.svg",
+      "role": "particle_svg",
+      "sha256": "bda4e769ea15e5019bfffa26b44c3cca0f72f35d0db7e1cabdab0765890cd591"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000192.svg",
+      "role": "particle_svg",
+      "sha256": "74ae581cf544267b702b4431b2d37ad7b8f321fe954678bf27029d939528c25b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000193.svg",
+      "role": "particle_svg",
+      "sha256": "edc9d391b91e2070bda36a6b2c6b8f409fabdd52c828cf3eafdcd803e96a948e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000194.svg",
+      "role": "particle_svg",
+      "sha256": "6e6f8ae13a65b5c84670d4639bc30edd8e1dce8a8a3967fc7afd9dd20fff3f89"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000195.svg",
+      "role": "particle_svg",
+      "sha256": "eadd848cb3e77f239c42753c8cf1292577965b018211e62dae3494f49519fb0d"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000196.svg",
+      "role": "particle_svg",
+      "sha256": "b18039da1b9ec93711005c6df3def5a456b0963754bf7191ab8446afc56c9a42"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000197.svg",
+      "role": "particle_svg",
+      "sha256": "fd89c6fa3d346c1d0a2dee3078a0164c2de0e8eac015230f8b0af2d9076a8321"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000198.svg",
+      "role": "particle_svg",
+      "sha256": "8ccc4986cb9de0da838ceb70fe516e954e92956685dbcd7d3b3c97a579e36855"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000199.svg",
+      "role": "particle_svg",
+      "sha256": "b3aec16c70656ee1a632cc68d098d7275b37a827eb0697b517ce1b32180060e6"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000200.svg",
+      "role": "particle_svg",
+      "sha256": "eddc34fa264ac6d9095b70b59dfb658c3220968aead6916c0dc7fd3e06f32229"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000201.svg",
+      "role": "particle_svg",
+      "sha256": "5992e94a5fc4db62d9167182bf29d310291a846bf9c764df8d7925b686954567"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000202.svg",
+      "role": "particle_svg",
+      "sha256": "db6ee67a40973a9fd245b9f332d5d936b415981bf60958ac2d0fd1852fd866ad"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000203.svg",
+      "role": "particle_svg",
+      "sha256": "913cb35fd131c5d20d70c243d3ac2e1585434f6a16ffbb05d3ec55b904fdb930"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000204.svg",
+      "role": "particle_svg",
+      "sha256": "d4725b0950efa37147b27b9b373e14d24dbbc80a4653704628ccb6e4470d40c2"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000205.svg",
+      "role": "particle_svg",
+      "sha256": "92c4171e5b2e0e96b78f50d8b0ff1c121708f21fe0b9c1792e5cb9951ec90397"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000206.svg",
+      "role": "particle_svg",
+      "sha256": "74f415df9782ed8297f210259ef3e194c61ce9324b12e01bede4a5ff312a4215"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000207.svg",
+      "role": "particle_svg",
+      "sha256": "c0ed0a0980dc2e78244b207f9303340ed5bee827c627f045f66b553aef64d1c2"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000208.svg",
+      "role": "particle_svg",
+      "sha256": "01e6d2e889b1962506eacdd1e5f5edb1ae43c88d42e4a2a94d54df08b9ad1f6b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000209.svg",
+      "role": "particle_svg",
+      "sha256": "94b9a9898148591fd57813279ce0d162df78941bee94565d90c94674c0f9d513"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000210.svg",
+      "role": "particle_svg",
+      "sha256": "76f79b50b2a51b1218c08bca5fad16d8f01b3995fb83934cd74d2a1f4f58a10f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000211.svg",
+      "role": "particle_svg",
+      "sha256": "e3876d32226c9dc02b9d86dfadb036f7e1b124649b1aeab665c05202f40755ac"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000212.svg",
+      "role": "particle_svg",
+      "sha256": "9a78edb70ac1c0a7b63a7c34001e61c0988cb9e83f22f3bcdbaceed4212950de"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000213.svg",
+      "role": "particle_svg",
+      "sha256": "7f0d73bae93773d558da9a44a1b7e2aa9e1949d1cc922cc33e381acb8837b407"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000214.svg",
+      "role": "particle_svg",
+      "sha256": "ecb1c5a685f31a78823ae06b1e4afc2e9a0180250eb875c62766e16f307fa268"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000215.svg",
+      "role": "particle_svg",
+      "sha256": "d6caaafa15da1e3a481fa979a45f2fbdadd961aef0eeee2b4cb8ff58abdb6f37"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000216.svg",
+      "role": "particle_svg",
+      "sha256": "adf8092a3116f64768e089612d9c8ade8a4c798616c5b1ff7afa493cbd919ceb"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000217.svg",
+      "role": "particle_svg",
+      "sha256": "3005ec1e62ad613842a3fa8a634a8afe2c91ca3f60047ac88f0c19f888993574"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000218.svg",
+      "role": "particle_svg",
+      "sha256": "f9ee56f26a7ed7ae52733b33f7d81cc867aff28f29e1981018a80d74455b9fe7"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000219.svg",
+      "role": "particle_svg",
+      "sha256": "6423a527208a2b836bd5e34716fb120cbb9e3213f466d2f38e23daaaf9b66069"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000220.svg",
+      "role": "particle_svg",
+      "sha256": "dbf7d4293224a9e1495cc5f0cc685e0efd9e09531a485b76fc18aa2ceb92b118"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000221.svg",
+      "role": "particle_svg",
+      "sha256": "ec75776512202fe6e73999766170509c57a6dd0325173f472443f057d8cdf51c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000222.svg",
+      "role": "particle_svg",
+      "sha256": "58c51feafa0029e9c4307eff170234a427c442f2f8e42b01afceb49bb6b80f01"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000223.svg",
+      "role": "particle_svg",
+      "sha256": "fad9179cb797c3e0608906bab6e2bfe47464ed9b36785ab7d2b6ac827bae1bf7"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000224.svg",
+      "role": "particle_svg",
+      "sha256": "7acdd573870af2aad0032c2731d7d81ee62099f02bdbc5f29ed02ea67c83ed62"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000225.svg",
+      "role": "particle_svg",
+      "sha256": "2e123f25321e02a71905759d8b6f0d50840edbb9257c4a87ea10fc2b21a1b894"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000226.svg",
+      "role": "particle_svg",
+      "sha256": "ccc0e50293358f92ac207fddd763ebaf05c4e645a57e1a0e3a4765e565313170"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000227.svg",
+      "role": "particle_svg",
+      "sha256": "24f737fa2da00f983e07489a6bb6476cb0e93aaf09c6d257e4415225f55ecf0c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000228.svg",
+      "role": "particle_svg",
+      "sha256": "9a2abae17a004e172612e88cf888624e0a8963dbe5412fc014be6dab7192ae64"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000229.svg",
+      "role": "particle_svg",
+      "sha256": "ab7f4f4f64998c7a25a2dd6feb26c1c946e61890f0465256213f36b41b0280af"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000230.svg",
+      "role": "particle_svg",
+      "sha256": "c390e226a74171e9da56592203dcd99702ecbc8d3a8574514c5b503ceced68af"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000231.svg",
+      "role": "particle_svg",
+      "sha256": "edbc429a391e86afd055345059310cf1e6c969bef77df6e4e3889e79f74d992b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000232.svg",
+      "role": "particle_svg",
+      "sha256": "fd82680b6fc5baeaba152895ebbd1971de7fd2c54cc7895e89f07dee2d49c097"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000233.svg",
+      "role": "particle_svg",
+      "sha256": "dd443b3a81228c5787e7874efb8107f4f12b6effbf2a851a67ee53d40a82816f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000234.svg",
+      "role": "particle_svg",
+      "sha256": "e1905cf51ff4d931b23833049fbd7bc939bc98a2115353b95b66f0f1c6c45832"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000235.svg",
+      "role": "particle_svg",
+      "sha256": "0b6a7f0127dace2eea9d71a307badbc4ad16e198e2203ab8d6ad3cf992b5d539"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000236.svg",
+      "role": "particle_svg",
+      "sha256": "2b682ce1b9075960a90214ac4ba5643ff56b1810c809e263dcdd94f33cc6df5c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000237.svg",
+      "role": "particle_svg",
+      "sha256": "4892441afabae2d94f483e74b3aa331c819fd459902018640937963614e9aa48"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000238.svg",
+      "role": "particle_svg",
+      "sha256": "e127d5e624898974120810d9b6aad837838065040bd45a3d1820360487ea37f8"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000239.svg",
+      "role": "particle_svg",
+      "sha256": "5afbb5ee2b4a1d7fe7c950c728f79b27dbcb24d579d9cc3cc904c74da302fff9"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000240.svg",
+      "role": "particle_svg",
+      "sha256": "7fe68593e51556f8bf27c1e2d46e473976858965b6babf0042340da742262269"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000241.svg",
+      "role": "particle_svg",
+      "sha256": "461636cfb030cf216e8fae5cd6f5d9a005d859d700990c4e4793ba1b1b4f68fc"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000242.svg",
+      "role": "particle_svg",
+      "sha256": "b2ab2bbb384e60669c9804b1935872310a7594e9220e1ab07e21127c3cf3a2e9"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000243.svg",
+      "role": "particle_svg",
+      "sha256": "b8b3df270b906df1d07ef10aaa7be028670fba5b399b4744ab275cad69ffce30"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000244.svg",
+      "role": "particle_svg",
+      "sha256": "df95f61229f2656d0af38219137df2dee99332e81c3c38d860c16427a6d0e681"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000245.svg",
+      "role": "particle_svg",
+      "sha256": "663b97c3eff8519f449c8c26502311381d50da4dfde9e10b4468006f1c04af75"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000246.svg",
+      "role": "particle_svg",
+      "sha256": "0a4f8b8a7d14b5d8a80fb384bb93b76d95a36b087a6d48d6cbb64dddc8ab971f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000247.svg",
+      "role": "particle_svg",
+      "sha256": "47af997954247e04608edc50f184789e1530864ddeee5366f5a192c512e45c8c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000248.svg",
+      "role": "particle_svg",
+      "sha256": "c18b7249932832974cc5254e19cbb20d6f8ffe4e399cfc63b8a7d51f419c1a52"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000249.svg",
+      "role": "particle_svg",
+      "sha256": "e66da5fdd30b76834e243f1b9fbd2c665c6e4b99f79b6496d5f1aaf4f28d5b49"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000250.svg",
+      "role": "particle_svg",
+      "sha256": "61fe2bd1053c2d2d52b913ae861a1fe289d0e76e80b190d64d89a7c876ba6dff"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000251.svg",
+      "role": "particle_svg",
+      "sha256": "6032117cc8353bb4979a079225b0b847fc60e4dfa03f01c7adf341f9989b277f"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000252.svg",
+      "role": "particle_svg",
+      "sha256": "91f528784536a3a0ad620a1fcf6e9fa155e57da125d301bd8bbc134c05cf510d"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000253.svg",
+      "role": "particle_svg",
+      "sha256": "a651eefaa3ebbde5c409bdb683cb8fba25dcbb6d3136cde0e402bbc526b97cb9"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000254.svg",
+      "role": "particle_svg",
+      "sha256": "f24ff9baf993f29fa15899126478d91005a817db7b9112f18532284b6b174dff"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000255.svg",
+      "role": "particle_svg",
+      "sha256": "ba459da87972627c7d82498f9ac13c615ac8b3561bbadd01fc921a99b72589a2"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000256.svg",
+      "role": "particle_svg",
+      "sha256": "47e874f28de854aedcc4dae18919982c5df6702091f250de8b64de136af61994"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000257.svg",
+      "role": "particle_svg",
+      "sha256": "bc204b2d8432d6d87e5443c99eda2051a9cf61e257e40ffdcd1500b35761d8f6"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000258.svg",
+      "role": "particle_svg",
+      "sha256": "125c196a0ccbfd0abd36de7db4ec378ee44074ec1d8cbd6e2567023c21c08adb"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000259.svg",
+      "role": "particle_svg",
+      "sha256": "07d3818e2c3ddae6d72a67981061e631496ddd1104655c34a6b8c4578f67d62e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000260.svg",
+      "role": "particle_svg",
+      "sha256": "32a42ed6270fc72ab8bfeb8687e422f0648788b54e2f3cfd140fb1ac55a57e6b"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000261.svg",
+      "role": "particle_svg",
+      "sha256": "97dc7947f03d00291905729e5eafe630045ee5371b53b5b78db9396bf8d2cd3e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000262.svg",
+      "role": "particle_svg",
+      "sha256": "d6391736f214f0d18c9a30987d43dc1eb66729ef40d05a10fce9959c439a6892"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000263.svg",
+      "role": "particle_svg",
+      "sha256": "f831df7e45e1db2096776ea18915ef32e185518c8aa29bc8c132e02355484c58"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000264.svg",
+      "role": "particle_svg",
+      "sha256": "6b3e0cb838d7ac505fc17c54f4653e6e2a558667544798cb935bbe163eb353b1"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000265.svg",
+      "role": "particle_svg",
+      "sha256": "ad5ab1d496e4a97f8362369651dc8143646f2b0ea9a6662a048acbb7ca51659c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000266.svg",
+      "role": "particle_svg",
+      "sha256": "5f8478ab83011aca3988b0959c2b0afe71cef2a7418ffc831f6250467d709ee0"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000267.svg",
+      "role": "particle_svg",
+      "sha256": "2090dac4a2fe7c1b3ce52a582234b64f52a4b49501280c50bb3683e3f7eee0cb"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000268.svg",
+      "role": "particle_svg",
+      "sha256": "80c8325417a7fbe8bb8a7bdd46cf3799ff225e3d6ca243ba3b5d850337010bb2"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000269.svg",
+      "role": "particle_svg",
+      "sha256": "0432413f76763f4fae1525c23b394cf470d9c865b8f7b0fa7bd79fb4032f8790"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000270.svg",
+      "role": "particle_svg",
+      "sha256": "bf0e91f1783eb87c59799984c204a2ff50366084a4ae5fc447e5dbbc71238eaa"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000271.svg",
+      "role": "particle_svg",
+      "sha256": "42b2f48378cab53d28c0d27c53002a596bcca51ddfca1789d4401cf106ef4896"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000272.svg",
+      "role": "particle_svg",
+      "sha256": "5644887eb7dc9ad476d960540d323a14d72210d9359d3fd966cec00cd276f8fe"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000273.svg",
+      "role": "particle_svg",
+      "sha256": "7d0c818e11f911596e2a67b3f4bdc540a3d0489dc1cfc42d6211ac04755b7903"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000274.svg",
+      "role": "particle_svg",
+      "sha256": "bac30f5ffe690590e42717a4a8c3d7048feb1938a697604bc8e8df6372ab2252"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000275.svg",
+      "role": "particle_svg",
+      "sha256": "298eefd6c3de5aec80273fcf4d88ca4fba038a9034406efe087c5598d8fc5695"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000276.svg",
+      "role": "particle_svg",
+      "sha256": "c445cf89bcfbc2d4ac138e62921c4f5e55000931c32a0eb1dee68160d93b8268"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000277.svg",
+      "role": "particle_svg",
+      "sha256": "1448b4c91cbe727e0c47a914100f75d5ceb5c0584bf013f1197412de72394fcf"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000278.svg",
+      "role": "particle_svg",
+      "sha256": "343a7050e20ea30809fb6c44115b341d9d975c1f236b6e67b3c054defce154ed"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000279.svg",
+      "role": "particle_svg",
+      "sha256": "188ec1d16b1fe2edf3335bb7f233adc7fb3b44f23593a6078718bf089bab0df5"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000280.svg",
+      "role": "particle_svg",
+      "sha256": "001d5fdbca774aaf6f9861fd9037ecdb553dd14561210be8a0ccd54885164d38"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000281.svg",
+      "role": "particle_svg",
+      "sha256": "b261e7ad478f35a70979faaa518929ef658c1eec30cde87d74a7aed28c8f3177"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000282.svg",
+      "role": "particle_svg",
+      "sha256": "41cb8bad6871d634562ad62bb8da36777e5ea9811579cf4107f284644d550e40"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000283.svg",
+      "role": "particle_svg",
+      "sha256": "1e5348207f29e3020acda4ffe4b72bb34265b694a7009933cdee7595f3b7c573"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000284.svg",
+      "role": "particle_svg",
+      "sha256": "01a78763dc07004c06a22e1c4aa0e86512334f38b174ca90b53284d1ff2aa676"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000285.svg",
+      "role": "particle_svg",
+      "sha256": "82e121a238d2d1e70702bc07efca351d50b4f452d12ea5b028bdb3f48b15742e"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000286.svg",
+      "role": "particle_svg",
+      "sha256": "0866e09a9ce34021ec6e0eb5d9761528d5ed989e25e44d3108d70e58a90b745c"
+    },
+    {
+      "bytes": 12710,
+      "path": "particles/particle_000287.svg",
+      "role": "particle_svg",
+      "sha256": "fb31ec09f7619b9ec75b2a67489e097bc05dedf24df1e60f257f2b2da0533b0f"
+    },
+    {
+      "bytes": 85391,
+      "path": "overview_rz.png",
+      "role": "summary_png",
+      "sha256": "63322536aec873e63db8fcf18853ae2067a734d2ef65c72e6d6e533fd51c698d"
+    },
+    {
+      "bytes": 238585,
+      "path": "coordinates_vs_time.png",
+      "role": "summary_png",
+      "sha256": "f2163e46db53756a60e4f852176fe1a97267867bbc71ce79244914270dc28d23"
+    },
+    {
+      "bytes": 382338,
+      "path": "position_difference_vs_time.png",
+      "role": "summary_png",
+      "sha256": "fb96fc4bf01cd712376357c1a18f194e741fc4037c67adc6defb5767518a8b5c"
+    },
+    {
+      "bytes": 159928,
+      "path": "position_difference_heatmap.png",
+      "role": "summary_png",
+      "sha256": "69ca4b8d2800adc2d0fc108958868aae38919353a9f3de741a217588f2d2b084"
+    }
+  ],
+  "inputs": {
+    "candidate": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3v_matched\\candidate_caseA_100nm_v1\\candidate_trajectory_2p5us.csv",
+      "sha256": "05e1020db2161ada0139fc63f3941cc1060a728e9ca395150ca2ece0bb9e92fe"
+    },
+    "reference": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3v_matched\\caseA_100nm_canonical_p1_sectionwise_v4\\dt_2p5us\\trajectory_reference.csv",
+      "sha256": "e5d4308bc63497d35ac38bb2999c5ddef1fd990b8d349c97bda0be0d24559ca8"
+    }
+  },
+  "label": "Case A 100 nm exact-P1, dt=2.5 us",
+  "metrics": {
+    "position_difference_m": {
+      "maximum": 2.172439027618709e-15,
+      "p50": 7.044344449510712e-16,
+      "p95": 1.5065551564613747e-15,
+      "p99": 1.7597485032362974e-15,
+      "rms": 8.642657594230575e-16,
+      "worst_particle_id": 271
+    }
+  },
+  "rendering": {
+    "png": {
+      "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "version": ""
+    },
+    "style": {
+      "candidate": "dashed blue",
+      "redundant_encoding": true,
+      "reference": "solid orange"
+    },
+    "svg": "native_dependency_free"
+  },
+  "report_kind": "external_trajectory_figure_receipt",
+  "schema_version": 1,
+  "scope": {
+    "boundary_accuracy": "NOT_TESTED_BY_FIGURE",
+    "comparison": "aligned normalized trajectory coordinates",
+    "external_only": true,
+    "physical_model_validity": "NOT_CLAIMED",
+    "solver_imported": false
+  },
+  "tool_revision": "m3v_matched_trajectory_plot_v1"
+}

@@ -1,0 +1,136 @@
+{
+  "case_id": "caseP_100nm_three_current",
+  "configuration": {
+    "background_solution": "sol2",
+    "background_step": "ftper",
+    "background_study": "std2",
+    "boundary_35": "disappear_escape",
+    "boundary_37": "freeze_hold",
+    "boundary_material": "stick",
+    "brownian_active": "false",
+    "case": "caseP_100nm_three_current",
+    "charge_revision": "aggregate_relative_drift_regularized_three_current_v1",
+    "drag_implementation": "explicit_custom_force",
+    "drag_revision": "epstein_linear_effective_gas_sensitivity_v1",
+    "dynamic_charge_active": "true",
+    "field_source": "canonical_exact_connectivity_P1_sectionwise",
+    "integrator": "classical_rk4",
+    "integrator_order": "4",
+    "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+    "maximum_relative_ion_speed_m_s": "1e6",
+    "model_saved": "false",
+    "output_times": "121",
+    "particle_rows": "287",
+    "physics": "fpt",
+    "relative_tolerance": "1e-8",
+    "release_source": "shared_three_current_release_table",
+    "saffman_active": "false",
+    "source_model": "source_copy.mph",
+    "step_s": "5e-6",
+    "time_end_s": "0.03"
+  },
+  "execution_inputs": {
+    "path": "execution_inputs.json",
+    "record": {
+      "artifacts": [
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass\\model\\icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+          "role": "source_mph",
+          "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c3_casep_three_current_v4\\candidate_input_three_current_z0.h5",
+          "role": "canonical_three_current_input",
+          "sha256": "09608da624b7a921d634e8ccf748739ffb67899c1bacc114805ecb9333ff5fec"
+        },
+        {
+          "path": "reference_run_config.json",
+          "role": "reference_run_config",
+          "sha256": "2172fb930f6520c1d9268f4935e9181c4845be80eac0b1bba3cde947baccbd0a"
+        },
+        {
+          "path": "primitive_receipt.json",
+          "role": "primitive_receipt",
+          "sha256": "600c0198617d230e8e9ed6d9ef2f4a5177560cc2c984e710ea6af7d557f86b75"
+        },
+        {
+          "path": "three_current_release_receipt.json",
+          "role": "release_receipt",
+          "sha256": "3f2d7fb3b95ba8bc4d7a3fa4f7b49765f6fc07abb2501124142f3a096cad524d"
+        },
+        {
+          "path": "three_current_release_state.csv",
+          "role": "release_state",
+          "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+        },
+        {
+          "path": "m3c3_table_receipt.json",
+          "role": "table_receipt",
+          "sha256": "6b8cf87d4c4c8ce24abc9bdeb7582fdb87b1d7a41b1f7d4c122771ba59891d8e"
+        },
+        {
+          "path": "RunM3C3CasePThreeCurrent.java",
+          "role": "java_runner",
+          "sha256": "f62ed672d4d1ad296edfa5369a045cf63e032b41f7619381f8ee11e4ef43b2e5"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\run_m3c3_caseP_three_current.ps1",
+          "role": "powershell_runner",
+          "sha256": "0501e5d64b457c1e7269e990957b67392ede0ca32425673d5c8d2535919f7ef5"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\prepare_m3c3_caseP_reference_tables.py",
+          "role": "table_preparer",
+          "sha256": "055c046886715105755dc2b650c76665bd950cce8aaff89c218cac55151fce64"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\normalize_m3c3_caseP_three_current.py",
+          "role": "normalizer",
+          "sha256": "a35bfec9cfb43940c2b42c390fd5f690fcfd20c64f6b42bec18c9408f57f7a68"
+        }
+      ],
+      "case_id": "caseP_100nm_three_current",
+      "expected_source_mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "numerical_run": {
+        "base_config_fixed_rk4_step_s": 1e-05,
+        "fixed_rk4_step_s": 5e-06,
+        "role": "time_step_refinement"
+      },
+      "reference_run_config_sha256": "2172fb930f6520c1d9268f4935e9181c4845be80eac0b1bba3cde947baccbd0a",
+      "schema_version": 1,
+      "source_mph_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "source_mph_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "status": "LOCKED_FOR_EXECUTION"
+    },
+    "sha256": "9533fb8f6c93bc9df3a931ef826d40889f11c2e555a9fb692db07edc92c28fa6"
+  },
+  "normalization_summary": {
+    "path": "normalization_summary.json",
+    "sha256": "febf241ba82ec7f763bd600b1ca9c919ee76eb2e62a7b036bf7f483e8be5ab8c"
+  },
+  "process_metrics": {
+    "exit_code": 0,
+    "fixed_rk4_step_s": 5e-06,
+    "numerical_run_role": "time_step_refinement",
+    "peak_rss_bytes": 3384496128,
+    "process_count": 1,
+    "schema_version": 1,
+    "wall_time_s": 179.406856
+  },
+  "reference_run_config_sha256": "2172fb930f6520c1d9268f4935e9181c4845be80eac0b1bba3cde947baccbd0a",
+  "run": {
+    "case": "caseP_100nm_three_current",
+    "model_saved": "false",
+    "output_times": "121",
+    "particles": "287",
+    "step_s": "5e-6",
+    "time_end_s": "0.03"
+  },
+  "schema_version": 1,
+  "solve": {
+    "base_solution": "sol36",
+    "seconds": "144.464",
+    "step_s": "5e-6"
+  },
+  "status": "PASS"
+}
