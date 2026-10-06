@@ -4,16 +4,41 @@
 clean-room solverです。このdirectoryは旧実装から独立したuv projectであり、COMSOLや
 `model_dataset/`をruntime dependencyにしません。
 
+製品として受理する機能、非対応の組合せ、schema/version方針とエラー対処は
+[`docs/support_and_errors.md`](docs/support_and_errors.md)に集約しています。
+
+## Quick Start
+
+この例はCOMSOLや参照datasetを使わず、10 mm角のXY geometry、table粒子源、鏡面反射壁と
+付着壁をcanonical HDF5/YAMLへ書きます。solver directoryで次を実行してください。各出力は
+上書きしないため、再実行時は別の`.artifacts/quickstart-*`を指定します。
+
+```console
+uv sync --locked
+uv run --locked python examples/quickstart/create_case.py .artifacts/quickstart/input
+uv run --locked chamber-particles check .artifacts/quickstart/input/case.yaml
+uv run --locked chamber-particles run .artifacts/quickstart/input/case.yaml -o .artifacts/quickstart/result
+uv run --locked chamber-particles inspect .artifacts/quickstart/result
+uv run --locked python -m tools.analysis .artifacts/quickstart/result --output .artifacts/quickstart/derived/summary.json
+uv run --locked python -m tools.visualization .artifacts/quickstart/result --output-directory .artifacts/quickstart/derived/visualization
+```
+
+計算後は`summary.json`に最終粒子状態と境界到達集計、`trajectory.svg`に粒子軌道、
+`boundary_events.svg`に境界eventが保存されます。この例の正常結果は1粒子、境界event 2件、
+failure 0件、最終状態`stuck`です。実入力を作るproducerも
+[`chamber_particles.case_format`](src/chamber_particles/case_format.py)のcanonical writerで同じ
+`case.h5`を作り、設定契約は[`docs/case_format_v2.md`](docs/case_format_v2.md)に従います。
+
 ## 現在の到達点
 
 P00からP05と、P06 revision 1の物理式・RK4 reference、revision 2の証明済み一定加速度経路、revision 3aの
 boundaryless RK4 enclosure、revision 3bの一般RK4材料壁経路まで実装しています。revision 3bの数値pathは
-`coupled_rk4_engine_v6`で確立し、現行の`particle_engine_v36` / `compiled_cpu_tile_v18` /
+`coupled_rk4_engine_v6`で確立し、現行の`particle_engine_v37` / `compiled_cpu_tile_v18` /
 `coupled_fixed_step_proposal_v10` / event v16 / physics catalog `inertial_langevin_rz_catalog_v17` /
-physics runtime `signed_ion_compiled_physics_runtime_v19` /
+physics runtime `signed_ion_compiled_physics_runtime_v20` /
 RK4 enclosure v2 / dense path `rk4_position_hermite_state_extension_v3` /
-charge-stable exponential midpoint `charge_stable_exponential_midpoint_v3`・enclosure v3 /
-field location v4 / runtime layout v6 / memory plan v13 /
+charge-stable exponential midpoint `charge_stable_exponential_midpoint_v3`・enclosure v4 /
+field location v4 / runtime layout v6 / memory plan v14 /
 boundary algorithm `point_wall_laws_v5`では、
 一定加速度に加えて、fixedまたはP15/P18-C continuous charge・Cartesian XY/RZ・Epstein/Stokes--Cunningham・electric・
 gravity・thermophoresis・ion drag・quasistatic spherical DEP・RZ rarefied-vorticity lift sensitivityの
@@ -99,7 +124,7 @@ importできます。
   `F=K (omega_phi e_phi) x (u_g-v)`、`K=C_L*pi*rho_g*lambda_g*a^2`、`a=drag_diameter_m/2`を
   既存の明示加速度passで評価します。gas velocity `[m/s]`、gas density `[kg/m^3]`、mean free path `[m]`と、
   producer所有のsigned azimuthal vorticity `[1/s]`を使い、core内で速度場を微分しません。`C_L`は有限正値を明示し、
-  `lambda_g/a>=10`をfail-closedに要求します。速度依存boundは単一callbackへ統合され、exponential enclosure v3が
+  `lambda_g/a>=10`をfail-closedに要求します。速度依存boundは単一callbackへ統合され、exponential enclosure v4が
   start/half-predictorの速度boxで再評価します。B02 Brownianとの同時利用、Stokes--Cunningham、Cartesian/3-D、
   一般Saffmanへのfallbackは拒否します。
 - P15-Eは`epstein_finite_speed_maxwell_mixed_equal_temperature_v1`を追加しました。鏡面と完全熱適応・
@@ -370,7 +395,7 @@ noise-free midpoint predictorで`gamma,u,T,a,G,J=dG/dZ`を1回評価し、`J<=0`
 axis hit後は元remainderを折り返さず、accepted prefix commit＋fold後の残時間を新しいroot ordinalで再開します。
 native/effective-gas線形Epstein、fixed/continuous charge、既存additive force、terminal `stick`/`escape`/`hold`が対象で、
 B02はbitwise不変です。これはRZ meridional projected 2-DOFであり、等方3-D Brownianでも一般SDEのstrong/weak 2次でもありません。
-現行revisionはengine v36 / proposal v10 / catalog v17 / event v16 / runtime v19 / compiled tile v18 / memory plan v13です。
+現行revisionはengine v37 / proposal v10 / catalog v17 / event v16 / runtime v20 / compiled tile v18 / memory plan v14です。
 B03の正式な公開API characterizationは24/24実行を全粒子active・failure 0で完了しました。20,000粒子の
 machine-local medianはB02 fixed `5.7722 s`、B03 fixed `11.7142 s`、continuous charge＋gravity `11.8427 s`、
 axis restart `16.3002 s`で、最大process peak RSSは`226,316,288 B`です。静的path arrayは`648 B/row`で
@@ -398,11 +423,18 @@ portable timingまたは異なるstep間のequal-accuracyを主張しません�
 これは元Case-P COMSOL `auxq`が意図する電子＋正イオン二電流とのsame-form比較で、後続のaggregate three-currentや
 species-resolved物理を認定しません。pathwise RNG一致、普遍的COMSOL同等性、eventful boundary parityも主張しません。
 authorityは[`evidence/m3c2/caseP_100nm_final_campaign_v1/`](evidence/m3c2/caseP_100nm_final_campaign_v1/README.md)です。
+別のdeterministic common-P1 companionでは、size-specific入力/provenanceを修正し、10/30 nm relative-flow ion dragと
+100 nm image ion dragの各287粒子・0--450 us・3刻みについて、candidate/COMSOL自己収束とcross-solver 9 gateを
+すべて`PASS`しました。event-free、Brownian-offの限定比較で、上記M3-C2A anchorの主張範囲は変更しません。authorityは
+[`evidence/m3c1/case_a_size_ion_drag_companion_v1/`](evidence/m3c1/case_a_size_ion_drag_companion_v1/README.md)です。
 optional aggregate three-currentのproduction実装はP21 priority 1で完了し、priority 2のcritical boundary microcaseも`PASS`です。
-外部Case-P派生companionのpriority 3入力監査はcanonical負イオンprimitive authority不足で`BLOCKED / NOT_EVALUATED`として閉じ、
-軌道は実行していません。物理modelの`NOT_APPLICABLE`ではなく、元Case-P二電流anchorは不変です。この任意物理の外部coverageは
-P21の出口から分離し、P21と明示scopeの2D benchmarkは`CLOSED_ACCEPTED_WITH_LIMITATIONS`、
-`2D_CRITICAL_VV_COMPLETE`です。三電流のCOMSOL軌道同等性は非認定です。authorityは
+外部Case-P派生companionのpriority 3はproducer-owned one-sided cacheによりcanonical負イオン5 primitiveを
+全1987節点へ生成して入力blockerを解消しました。priority 4のcommon-P1、Brownian-off、100 nm、287粒子、30 ms代表caseも、
+candidate/COMSOL双方の3段階自己収束、共通の有限lifecycle stateでのposition/charge、
+両側active時のvelocity、141件のterminal event/fateを`PASS`しました。
+元Case-P二電流anchorは不変です。この任意物理の外部coverageはP21の出口から分離し、P21と明示scopeの2D benchmarkは
+`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`です。本結果はnative FE、Brownian、species-resolved物理、
+任意形状・任意条件、普遍的COMSOL同等性を認定しません。authorityは
 [`evidence/m3c3/caseP_three_current_companion_v1/`](evidence/m3c3/caseP_three_current_companion_v1/README.md)です。
 
 final計時は`NON_AUTHORITATIVE_EXTERNAL_WORKLOAD_OVERLAP`です。accepted candidate seed `319032`、`319047`、`319063`の

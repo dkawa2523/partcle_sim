@@ -14,6 +14,8 @@ solver coreの依存先ではありません。旧ソルバーと旧環境は内
   単一責務、最小設定、command、CI適用方針。
 - [`product_specification.md`](product_specification.md) — 製品目的、物理・帯電・発生源・境界理論、
   数値基盤、最小API、入力・出力、高速化、複雑化防止、段階的実装を固定する**主仕様書**。
+- [`solver/docs/support_and_errors.md`](solver/docs/support_and_errors.md) — 静的2-D v0.1の対応範囲、
+  明示的な非対応組合せ、公開例外、粒子単位failure、schema互換方針をまとめた利用者向け入口。
 - [`architecture_proposal.md`](architecture_proposal.md) — Canonical DataBundle、実行計画、backend、
   詳細な責務境界を扱うarchitecture authority。文書間の優先順位は一律ではなく、
   [`AGENTS.md`](AGENTS.md) の責務別authority表に従います。
@@ -162,7 +164,7 @@ P18-LはRZ/no-swirl専用の`rarefied_vorticity_sensitivity_rz_v1`を追加し�
 `F=K (omega_phi e_phi) x (u_g-v)`、`K=C_L*pi*rho_g*lambda_g*a^2`、
 `a=drag_diameter_m/2`を既存の明示加速度passで評価します。`C_L`は有限正値をcaseへ明示し、producer提供の
 signed方位vorticity `[1/s]`だけを使ってcore内で速度場を微分しません。`lambda_g/a>=10`をfail-closedに要求し、
-B02 Brownianとの同時利用は拒否します。速度依存boundは一つのcallbackへ統合し、exponential enclosure v3が
+B02 Brownianとの同時利用は拒否します。速度依存boundは一つのcallbackへ統合し、exponential enclosure v4が
 開始速度とhalf predictorの速度boxで再評価します。exponential midpoint v2、engine v30、proposal v7は維持しています。
 Brownian数値基盤B01に続き、B02はCartesian XY・fixed charge・Epstein linear drag-onlyの
 `ou_langevin`をproductionへ接続しました。凍結係数に対するjoint OU endpoint、物理interval-tree Philox normal、
@@ -180,7 +182,7 @@ root始点からのnoise-free predictorでmidpointを決め、`gamma,u,T,a,G=dZ/
 Strang/K-O-K分割ではありません。axis hitはaccepted prefixをfoldし、残時間を新しいstochastic rootで
 再開します。B02はbitwise不変、terminal wallは`stick`/`escape`/`hold`に限定します。これはr/zへ投影した
 2自由度closureであり、等方3-D Brownianや一般state-dependent SDEのstrong order・weak 2次は主張しません。
-現行revisionはengine v36、proposal v10、catalog v17、event v16、runtime v19、compiled tile v18、memory plan v13です。
+現行revisionはengine v37、proposal v10、catalog v17、event v16、runtime v20、compiled tile v18、memory plan v14です。
 event v15で導入した物理budget＋roundoff budgetとroot-relative TwoDiffを維持し、event v16はvalidなRK4 dense rowの
 position Bernstein control enclosureをfacet half-spaceへ射影します。全4制御点の外向き上限が既存budgetの負側に
 厳密に入る候補だけをconvex-hull性からclearし、証明不能、不正なcontrol、exponential・scalar経路は引き続き
@@ -265,9 +267,9 @@ P15-F、Waldmann--Gallis thermophoresisはP16、集約二電流continuous charge
 P18-I、quasistatic spherical DEPはP18-D、RZ rarefied-vorticity lift sensitivityはP18-L、effective-gas drag / thermophoresis
 sensitivityはP18-R、上記Brownian縦切りはB02、局所continuous-path applicability certificateはP19-L、aggregateな
 単一価負イオン収集を加えるthree-current chargeはP21 priority 1で完了しました。
-現行revisionはengine v36、compiled tile v18、proposal v10、event v16、boundary v5、result algorithm v5、
-result/checkpoint schema v2、field location v4、memory plan v13、physics catalog v17、
-physics runtime v19、RK4 enclosure v2、dense path v3、charge-stable exponential midpoint v3 / enclosure v3です。dense path v3は
+現行revisionはengine v37、compiled tile v18、proposal v10、event v16、boundary v5、result algorithm v5、
+result/checkpoint schema v2、field location v4、memory plan v14、physics catalog v17、
+physics runtime v20、RK4 enclosure v2、dense path v3、charge-stable exponential midpoint v3 / enclosure v4です。dense path v3は
 始点相対のBernstein enclosureとTwoDiff残差を使い、world座標への戻しを外向きに丸めることで、
 座標原点に依存してevent certificateが閉じない問題を解消しました。このdense-path変更当時はendpoint、path、
 engine v32、event v14、RK4 global enclosure v2を変更しておらず、保存済みM3-C1証跡もその履歴revisionを維持します。本体を凍結した外部M3-Vの
@@ -379,12 +381,24 @@ compact authorityは
 情報を持ちません。これは元Case-P COMSOL `auxq`が意図する電子＋正イオン二電流とのsame-form比較で、後続のaggregate
 three-currentやspecies-resolved物理を認定しません。pathwise RNG一致、普遍的COMSOL同等性、eventful boundary parityも主張しません。
 authorityは[`solver/evidence/m3c2/caseP_100nm_final_campaign_v1/`](solver/evidence/m3c2/caseP_100nm_final_campaign_v1/README.md)です。
+別のdeterministic common-P1 companionでは、size-specificな入力とprovenanceを修正し、10/30 nmの
+relative-flow ion dragと100 nmのimage ion dragについて、各287粒子・0--450 us・3刻みのcandidate/COMSOL自己収束と
+cross-solver 9 gateをすべて`PASS`しました。これはevent-free、Brownian-offの限定比較で、上記M3-C2A stochastic anchorの
+主張範囲を変更しません。authorityは
+[`solver/evidence/m3c1/case_a_size_ion_drag_companion_v1/`](solver/evidence/m3c1/case_a_size_ion_drag_companion_v1/README.md)です。
 optional aggregate three-currentのproduction実装はP21 priority 1で完了しました。priority 2のcritical boundary microcaseも
-`PASS`です。外部Case-P派生companionのpriority 3入力監査はcanonical負イオンprimitive authority不足で
-`BLOCKED / NOT_EVALUATED`として閉じ、軌道は実行していません。物理modelの`NOT_APPLICABLE`ではなく、元Case-P二電流anchorは
-不変です。この異なる任意物理の外部coverageはP21の出口から分離し、P21と明示scopeの2D benchmarkは
-`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`です。三電流のCOMSOL軌道同等性は認定しません。authorityは
+`PASS`です。外部Case-P派生companionのpriority 3はproducer-owned one-sided cacheによりcanonical負イオン5 primitiveを
+全1987節点へ生成して入力blockerを解消しました。priority 4の共有three-current `Z0`を用いたcommon-P1、Brownian-off、100 nm、
+287粒子、30 msの比較で、candidateと明示drag COMSOL referenceの各3刻み収束、全frameのlifecycle/finite mask exact、
+共通の有限lifecycle stateの`r,z,Z`、共通active stateの`v`、141件のevent/fate identityをすべて`PASS`しました。
+元Case-P二電流anchorは不変です。
+この異なる任意物理の外部coverageはP21の出口から分離し、P21と明示scopeの2D benchmarkは
+`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`です。このscoped numerical agreementは物理model validationや
+普遍的COMSOL同等性の認定ではありません。authorityは
 [`solver/evidence/m3c3/caseP_three_current_companion_v1/`](solver/evidence/m3c3/caseP_three_current_companion_v1/README.md)です。
+旧M3-C0 umbrellaに残る全12 package総当たり、完全derived-field provenance、RK probeは
+`DEFERRED_NOT_RELEASE_BLOCKING`です。現行v0.1の完了条件へ含めず、科学revisionまたは明示的なcoverage拡張時だけ
+独立work packageとして再開します。
 
 本体coreへCOMSOL分岐や比較用toleranceを追加していません。final計時は
 `NON_AUTHORITATIVE_EXTERNAL_WORKLOAD_OVERLAP`です。受理済みcandidate seed `319032`、`319047`、`319063`の

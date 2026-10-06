@@ -462,10 +462,13 @@ Debye長や別の寄与を再計算しない。
 元Case-PのCOMSOL `auxq`は電子と正イオンの二電流を意図的に使い、負イオン密度は診断量に留めている。したがって既存の
 Case-P same-form anchorは二電流式の比較として解釈し、三電流revisionをその不具合修正や遡及的な再認定に使わない。三電流の
 物理・軌道比較は、設定意味を揃えた別のCase-P派生companionで評価する。production revisionはcatalog v17、runtime v19、
-compiled tile v18として同じsingle engineへ統合済みで、標準verification/scenario suiteと品質gateを通過した。外部companion入力監査は
-canonical負イオンprimitive authority不足により`BLOCKED / NOT_EVALUATED`で閉じ、物理modelの`NOT_APPLICABLE`とは扱わない。
-軌道は実行しておらず、元Case-P二電流anchorは不変である。この任意物理の外部coverageはP21の出口から分離し、三電流の
-COMSOL軌道同等性を非認定のまま、P21/M3-C3は`CLOSED_ACCEPTED_WITH_LIMITATIONS`とする。外部statusのauthorityは
+compiled tile v18として同じsingle engineへ統合済みで、標準verification/scenario suiteと品質gateを通過した。外部companionは
+producer-owned one-sided cacheによりcanonical負イオン5 primitiveを全1987節点へ生成し、入力blockerを解消した。
+priority 4の共有three-current `Z0`を用いたcommon-P1、Brownian-off、100 nm、287粒子、30 msの代表比較は、candidateと明示drag COMSOL referenceの
+各3刻み収束、全frameのlifecycle/finite mask exact、共通の有限lifecycle stateの`r,z,Z`、共通active stateの`v`、
+141件のevent/fate identityをすべて`PASS`した。元Case-P二電流anchorは不変である。
+この任意物理の外部coverageはP21の出口から分離し、物理model validationや普遍的COMSOL同等性へ拡張しない。
+P21/M3-C3は`CLOSED_ACCEPTED_WITH_LIMITATIONS`のままである。外部statusのauthorityは
 [`vv_methodology.md`](vv_methodology.md)と
 [`solver/evidence/m3c3/caseP_three_current_companion_v1/`](solver/evidence/m3c3/caseP_three_current_companion_v1/README.md)である。
 
@@ -604,8 +607,8 @@ conditional splitし、geometryやoutput要求で引き直さない。
 12 packageごとの独立seed ensembleでmean、covariance、MSD、occupancy、fate、first-arrival分布を評価する。
 
 このB03 compositionの初回closeoutはengine v34 / proposal v9 / catalog v16 / event v15 / runtime v17 / compiled tile v16 /
-memory plan v13としてcore受入を完了した。現行supersessionはengine v36 / proposal v10 / catalog v17 /
-event v16 / runtime v19 / compiled tile v18 / memory plan v13である。COMSOL再実行はcore受入に不要だった。
+memory plan v13としてcore受入を完了した。現行supersessionはengine v37 / proposal v10 / catalog v17 /
+event v16 / runtime v20 / compiled tile v18 / memory plan v14である。COMSOL再実行はcore受入に不要だった。
 P20 performance closeoutとmeaning-matched common-P1 Case-A/Case-P 100 nm external V&V/M3-C2は完了した。Case-Pは
 元COMSOL `auxq`どおりの二電流same-form比較であり、後続three-currentまたはspecies-resolved物理を認定しない。受理済みCase-P seed 3件の
 287粒子owner discoveryも、受理済み科学payload・work・case identity・revisionの完全一致を保って完了した。支配ownerは
@@ -830,7 +833,7 @@ facetはdeterministicなcount/prefix/fillで保持する。これによりscratc
 P15/P15-Dのcontinuous chargeもこの実行原理を使い、時間依存場、3-Dへ同じ原理を拡張できる。
 deferred event depthのworst-caseは一般scratchへ隠さず、P14-P時点のmemory plan v10で
 `event_work_bytes_per_particle = 24 * (max_refinements + 1)`、component `slab_event_work`として計上する。
-現行memory plan v13もこのevent-work計上を維持する。
+現行memory plan v14もこのevent-work計上を維持する。
 候補、event/failure staging、surface release、direct replayはnamed componentへ分離し、pack時だけのgatherは12.5%
 safety marginが所有する。正確なbyte式は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)が所有する。

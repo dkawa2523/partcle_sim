@@ -51,6 +51,17 @@ jobs:
           uv run --locked lint-imports
           uv run --locked python scripts/check_complexity.py
           uv run --locked python -m pytest tests/verification tests/scenarios -q
+      - name: Run producer-neutral Quick Start
+        run: |
+          $root = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
+          uv run --locked ruff format --check examples
+          uv run --locked ruff check examples
+          uv run --locked python examples/quickstart/create_case.py (Join-Path $root "input")
+          uv run --locked chamber-particles check (Join-Path $root "input/case.yaml")
+          uv run --locked chamber-particles run (Join-Path $root "input/case.yaml") -o (Join-Path $root "result")
+          uv run --locked chamber-particles inspect (Join-Path $root "result")
+          uv run --locked python -m tools.analysis (Join-Path $root "result") --output (Join-Path $root "derived/summary.json")
+          uv run --locked python -m tools.visualization (Join-Path $root "result") --output-directory (Join-Path $root "derived/visualization")
       - name: Run warm performance smoke
         run: |
           $report = Join-Path "${{ runner.temp }}" "p14-smoke.json"

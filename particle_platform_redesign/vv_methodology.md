@@ -42,22 +42,24 @@ R-Z軸通過をCOMSOL/public API/解析解で比較し、3刻み・132/132 gate�
 [`solver/evidence/m3c0/critical_boundaries_v1/`](solver/evidence/m3c0/critical_boundaries_v1/README.md)である。
 
 aggregate three-current production revisionはcatalog v17 / runtime v19 / tile v18で同じsingle engineへ統合され、標準
-verification/scenario suiteと品質gateを通過した。Case-P派生companionのpriority 3入力監査は`BLOCKED / NOT_EVALUATED`で閉じた。
-これは物理modelの`NOT_APPLICABLE`ではない。common-P1全1987節点のfiniteな負イオン5 primitive authorityを境界未定義値と
-非一意mesh mappingなしに作れず、companion H5、three-current `Z0`、COMSOL/candidate軌道は実行していない。元Case-P
-二電流anchorは不変である。三電流の外部同等性は非認定のconditional coverageへ分離し、P21と明示scopeの2D benchmarkは
-`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`とする。compact authorityは
-[`solver/evidence/m3c3/caseP_three_current_companion_v1/`](solver/evidence/m3c3/caseP_three_current_companion_v1/README.md)である。
-外部V&V tool suite 301件は合格したが、これは欠けたproducer field authorityの代替ではない。
+verification/scenario suiteと品質gateを通過した。Case-P派生companionのpriority 3はproducer-owned one-sided cacheにより
+common-P1全1987節点のfiniteな負イオン5 primitive authorityを生成し、入力blockerを解消した。priority 4の共有three-current `Z0`を用いた
+common-P1、Brownian-off、100 nm、287粒子、30 msの外部比較は、candidateと明示drag COMSOL referenceの各3刻み収束、
+全frameのlifecycle/finite mask exact、共通の有限lifecycle stateの`r,z,Z`直接gate、共通active stateの`v`直接gate、
+141件のevent/fate identityとevent時刻gateをすべて`PASS`した。元Case-P二電流anchorは不変である。この結果を非認定の
+physical-model validationや普遍的COMSOL同等性へ拡張せず、P21と明示scopeの2D benchmarkは
+`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`とする。判定authorityは
+[`solver/evidence/m3c3/caseP_three_current_companion_v1/`](solver/evidence/m3c3/caseP_three_current_companion_v1/README.md)の
+`trajectory_evaluation.json`と明示dragの3件の`reference_dt_*_run_receipt.json`である。
 
 元Case-PのCOMSOL `auxq` は負イオン密度を診断出力にだけ使い、帯電電流へ加えていない。したがって負イオン対応は元Case-Pの
 不具合修正や既存anchorの再認定ではなく、明示的に選ぶ拡張modelとする。三電流revisionは`R_Z=Gamma_+-Gamma_e-Gamma_-`、
 明示`n_-`,`V_-`,`u_-`,`m_-` fieldを使うaggregate singly-negative-ion collectionとし、screeningは既存の明示fieldだけを
 authorityにする。species-resolved currentや負イオンprimitiveからのscreening再計算は範囲外である。
 上記を閉じる改良は、(1) この一般charge revision、(2) 完了済みcritical boundary microcase、(3) charge revisionを使う
-Case-P派生のmeaning-matched COMSOL companionとcandidateのrepresentative full-physics比較一つに限定する。3の解除入力は、
+Case-P派生のmeaning-matched COMSOL companionとcandidateのrepresentative full-physics比較一つに限定する。3の入力は、
 producer側でone-sided domain-3境界値を定義した同じcanonical節点順の`n_-`, total `u_{-,r}`, total `u_{-,z}`, `m_-`,
-`V_{T,-}` export、または同等のhash-lock済みfield fileである。解除後は100 nm・287粒子・30 msの比較を一回だけ行う。
+`V_{T,-}` exportで満たし、100 nm・287粒子・30 msの比較を一回だけ実行した。
 既存のCase-A terminal evidenceと元Case-P anchorは再利用し、Case名によるcore分岐、新しい診断framework、全12 packageの
 総当たりは作らない。
 
@@ -628,7 +630,7 @@ V01～V05はBrownian offで先に完成させる。V04の確率付着は同一�
 | P18-H（完了） | producer-neutral terminal hold | 解析・resume・Brownianを含む公開回帰をPASS。既存hash固定Freeze referenceへのcandidateはCOMSOL再実行なしで15/15 PASS。力なしnormal-impact意味だけを認定し、full physicsやgrazing/cornerへ一般化しない |
 | B03（完了） | charged/forced RZ Brownian composition | macro-root stochastic exponential-midpointによるRZ投影、fixed/continuous charge、線形Epstein、全決定論寄与の単一proposalを解析解・ensemble・identityで検証。一般SDEのstrong/weak 2次や等方3-Dは非主張 |
 | M3-C2 | charged/forced RZ Brownian ensemble | common-P1 Case-A/Case-P 100 nm final完了。Case-Pは20 us、32+32独立seed、各287粒子×121 frame / 30 ms。83区分R-Z/fate TV `0.010670731707317093`、同時上限`0.13119968456545308 < 0.15`でPASS。終端gateはevent 0で非情報的。元Case-P `auxq`どおりの二電流same-form結果で、three-current、species-resolved物理、pathwise RNG、boundary parity、普遍的COMSOL同等性は非主張 |
-| P21 / M3-C3（`CLOSED_ACCEPTED_WITH_LIMITATIONS`） | aggregate three-current / critical 2-D closure | priority 1 productionはcatalog v17 / runtime v19 / tile v18と標準品質gateで完了。boundary priorityも一つの3粒子microcaseで132/132 PASS、最大solver間位置差`1.61339e-17 m`。grazing/corner、multiple/probabilistic、force/native-fieldは非主張。priority 3はfull canonical負イオン5 primitive authority不足で`BLOCKED / NOT_EVALUATED`として入力監査を終了し、三電流外部同等性は非認定のconditional coverageへ分離。元二電流anchorは不変で、明示scopeについて`2D_CRITICAL_VV_COMPLETE` |
+| P21 / M3-C3（`CLOSED_ACCEPTED_WITH_LIMITATIONS`） | aggregate three-current / critical 2-D closure | priority 1 productionはcatalog v17 / runtime v19 / tile v18と標準品質gateで完了。boundary priorityも一つの3粒子microcaseで132/132 PASS、最大solver間位置差`1.61339e-17 m`。grazing/corner、multiple/probabilistic、force/native-fieldは非主張。priority 3はfull canonical負イオン5 primitive authorityを全1987節点へ生成して入力blockerを解消。priority 4は共有Z0とcommon-P1、Brownian-off、100 nm・287粒子・30 msの比較でcandidate/明示drag COMSOLの各3刻み収束、全frameのlifecycle/finite mask exact、共通有限stateの`r,z,Z`、共通active stateの`v`、141 event/fate identityをすべてPASS。元二電流anchorは不変で、普遍的COMSOL同等性と物理model validationは非主張 |
 | Stage 4A | 時間線形場と不連続切替 | 時間補間、step split |
 | Stage 4B | 単一四面体、3D surface、平面壁 | 3D補間、segment-triangle、面積分布 |
 | 高次要素対応時 | P2以上の最小mesh | node/DOF順、形状関数、収束 |
@@ -775,10 +777,13 @@ Brownian-on、native finite-element fieldの単一runで、candidateと確率・
     specular reflection＋同step残時間、R-Z axis passageをCOMSOL/public API/解析解で比較した。3刻みの132 gateは全PASS、
     最大solver間位置差は`1.61339e-17 m`である。grazing/corner、multiple/probabilistic、力・native fieldは非主張とし、
     aggregate three-current production受入は別途621 tests＋品質gateで完了した。
-26. priority 3はfull canonical負イオン5 primitive authorityを作れなかったため、`BLOCKED / NOT_EVALUATED`で入力監査を閉じた。
-    H5、three-current `Z0`、COMSOL/candidate軌道は実行しておらず、物理modelの`NOT_APPLICABLE`ではない。解除にはproducer側の
-    one-sided domain-3 canonical 5 primitive exportまたは同等のhash-lock済みfield fileが必要で、解除後は100 nm・287粒子・
-    30 ms比較を独立coverageとして一回だけ行う。元Case-P二電流anchorと完了済みP21/2D benchmarkは再開しない。
+26. priority 3はproducer側のone-sided domain-3 cacheからfull canonical負イオン5 primitive authorityを全1987節点へ生成し、
+    入力blockerを解消した。source MPHはhash不変で、座標nudge、欠損補完、別domain fallbackはない。
+27. priority 4は共有three-current `Z0`を両solverへ渡したcommon-P1、Brownian-off、100 nm・287粒子・30 ms比較を
+    独立coverageとして一回実行し、
+    candidate/明示drag COMSOLの3刻み収束、全frameのlifecycle/finite mask exact、共通有限stateの`r,z,Z`、
+    共通active stateの`v`、141 event/fate identityをすべてPASSした。元Case-P二電流anchorと
+    完了済みP21/2D benchmarkは再開せず、普遍的COMSOL同等性や物理model validationは主張しない。
 
 M3-C0a offline lockは上記1のうち、MPH identity、現12 package、式・parameter、field名/単位、variant差分、
 候補刻み、32 seed cohortを固定済みである。ただし現履歴はBrownian-onで、Case Pのvariantにはlift式差があり、
@@ -818,10 +823,11 @@ Brownianを比較する時だけ`ensemble_metrics.parquet`を追加する。最�
 
 2D比較の終了判断は§1.1の四つの必須判断と五つの終了条件だけで行う。現在の100 nm common-P1
 Case-A/Case-P anchorは、その限定scopeについて`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。aggregate three-current productionと
-critical boundary microcaseも完了した。Case-P派生三電流比較は入力authority不足で`BLOCKED / NOT_EVALUATED`であり、三電流の
-外部同等性を認定しないが、元Case-P二電流anchorとは異なる任意物理なので終了条件から分離する。したがってP21と明示scopeの
-2D benchmarkは`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`である。解除入力を受領した場合の
-100 nm・287粒子・30 ms比較一回は、新しい外部coverageであり、このbenchmarkを再開しない。
+critical boundary microcaseも完了した。Case-P派生三電流比較はcommon-P1、Brownian-off、100 nm・287粒子・30 msの
+独立coverageとして完了し、candidate/明示drag COMSOLの3刻み収束、全frameのlifecycle/finite mask exact、
+共通有限stateの`r,z,Z`、共通active stateの`v`、141 event/fate identityをすべてPASSした。
+元Case-P二電流anchorとは異なる任意物理なので終了条件から分離し、普遍的COMSOL同等性や物理model validationへ拡張しない。
+したがってP21と明示scopeの2D benchmarkは`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`である。
 
 性能、全12 package、追加粒径、第2 ion-drag、native-field、3D、時間依存場はこの終了条件に含めない。詳細Gate、内部step probe、
 多数の統計表は、四つの必須判断のどこで差が始まるか不明な場合だけ使用し、通常比較の常設要件やsolver coreの依存物にしない。

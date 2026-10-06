@@ -22,15 +22,15 @@ checkpoint/resume、bounded writerへ拡張した。P14は同じ公開経路の�
 - checkpoint schema: version 1、固定epoch cadence: 64 macro steps
 - case schema、result schema、proposal、event、physics model/result semanticsはP14で変更しない
 
-現行revisionはengine `particle_engine_v36`、compiled tile
+現行revisionはengine `particle_engine_v37`、compiled tile
 `compiled_cpu_tile_v18`、CPU runtime `resident_soa_serial_slab_v6`、memory plan
-`solver_owned_memory_plan_v13`、proposal `coupled_fixed_step_proposal_v10`、RK4 enclosure
-`rk4_global_abs_enclosure_v2`、charge-stable exponential midpoint v3 / enclosure v3、event
+`solver_owned_memory_plan_v14`、proposal `coupled_fixed_step_proposal_v10`、RK4 enclosure
+`rk4_global_abs_enclosure_v2`、charge-stable exponential midpoint v3 / enclosure v4、event
 `line_quadratic_rk4_axis_first_hit_v16`、dense path `rk4_position_hermite_state_extension_v3`、field location v4、geometry
 `line_boundary_stackless_volume_cell_bvh_v5`である。P14の上記revisionと
 性能値は置換前baselineとして残し、現行runtime名と混同しない。result algorithm v5、result/checkpoint schema 2である。
 physics catalogは`inertial_langevin_rz_catalog_v17`、physics runtimeは
-`signed_ion_compiled_physics_runtime_v19`、boundary algorithmは`point_wall_laws_v5`である。case schemaはthread設定を削除したv2である。memory plan v13はdeferred event depthを
+`signed_ion_compiled_physics_runtime_v20`、boundary algorithmは`point_wall_laws_v5`である。case schemaはthread設定を削除したv2である。memory plan v14はdeferred event depthを
 `event_work_bytes_per_particle`、Brownian tree、P19-L dense path・certificate workをそれぞれ別のnamed componentで解決し、
 候補、event/failure staging、surface release、direct replayも分離する。pack時だけのgatherは12.5% safety marginが所有し、正確なbyte式は
 [`parallel_execution_plan.md`](parallel_execution_plan.md)が所有する。
@@ -49,7 +49,7 @@ case/result/checkpoint/event schemaとXY/RZ、wall、output、
 checkpointの既存stateは変更していない。P14-R remote CIは2026-10-05にWindows/Linuxとも完了した。
 
 Numba 0.67とNumPy `<2.6`をlockし、P14 closeoutまではfield location/interpolation、sample済みprimitiveからのphysics、
-classical RK4の配列算術を`fastmath=False, parallel=False`で実行した。現行v36も同じ決定論的設定の
+classical RK4の配列算術を`fastmath=False, parallel=False`で実行した。現行v37も同じ決定論的設定の
 single-thread compiled runtimeである。regular fieldはsupported
 containing-cell common pathだけ全cell走査を行わず、O(1)個の候補を使う。P1/Q1はaccepted endpointの
 previous-cell hintを最速経路とし、hintなし/missのsupported containmentはfield所有のread-only cell AABB BVHで
@@ -307,7 +307,7 @@ prepare済みinvariant内だけを許可し、証明不能ならfail-closedす�
 mean/full covariance exactness、noise-off 2次収束、manufactured weak mean観測次数`>=0.9`、axis restart、
 tree-depth first-passage、slab/output/resume identityで閉じた。fixed/continuous charge、native/effective linear Epstein、
 既存additive force、terminal `stick`/`escape`/`hold`を扱う。等方3-D Brownianや一般SDEのstrong order/weak 2次は主張しない。
-現行revisionはengine v36 / proposal v10 / catalog v17 / event v16 / runtime v19 / compiled tile v18 / memory plan v13である。
+現行revisionはengine v37 / proposal v10 / catalog v17 / event v16 / runtime v20 / compiled tile v18 / memory plan v14である。
 B03の正式な公開API characterizationは24/24実行を全粒子active・failure 0で完了した。静的上限`648 B/row`は
 `2048 B/row`以内で、20,000粒子までの計時とprocess peak RSSは[`evidence/b03/`](../evidence/b03/README.md)に
 machine-local・non-gating証跡として保存した。この計時/RSSは初回B03 closeout（engine v34 / proposal v9 / runtime v17 /
@@ -352,7 +352,7 @@ P14-Pでは次の構造へ置換した。
 自動tuner、別scheduler、multiprocessingは代替案にしない。
 
 `deterministic_particle_engine_v20` / `resident_soa_worker_microtile_v3`はP14-P着手前のbaselineとして保存する
-履歴であり、現行v36はouter pool、future wave、worker別scratch、thread maskを削除し、
+履歴であり、現行v37はouter pool、future wave、worker別scratch、thread maskを削除し、
 bounded slab、再利用workspace、stackless boundary BVH、同期single-owner writerへ移行した。
 linear/quadratic exactと一般曲線eventはflat SoA wavefront、boundary/Philoxはcompiled batch、fieldからenclosureは
 row numerical status、surface releaseはbatch、frame/probeはdirect replay、event/failureはbounded stagingへ統合済みである。

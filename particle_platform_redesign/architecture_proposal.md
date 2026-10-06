@@ -195,7 +195,7 @@ Case Aでは最終状態そのものも大きく異なる。最終status不一�
 | 出力 | final/event/probe/series、選択trajectory、segmented HDF5、checkpoint/resume | 分散実行・remote store |
 
 未対応の組合せはPreparedRun作成時に具体的な理由とともに拒否する。現行engine revision
-`particle_engine_v36`でproduction利用できるsubsetは、table/surface source、fixed charge、
+`particle_engine_v37`でproduction利用できるsubsetは、table/surface source、fixed charge、
 `oml_stationary_maxwellian_debye_huckel_v1`または
 `oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1`、P18-C aggregate continuous charge、P15-E finite-speed Epstein、
 P15-F collisionless BarnesまたはP18-Iの二つのaggregate ion drag、P18-D quasistatic spherical DEP、
@@ -229,7 +229,7 @@ foldを追加した。engine v10 / event v6はCartesian XYの証明済み一定�
 certificateを追加した。engine v11 / event v7はCartesian XY一般RK4の厳密内向きsurface departure、
 single-facet active-boundary residual、右連続state jump、state-shared interaction capを追加した。tangentまたは
 facet端点/cornerからの一般RK4 departureはfail-closedである。engine v12 / event v8でforce-coupled RZを
-同じwork loopへ追加した。現行engine v36もその意味論を両integratorとも共有する。`coordinates.py`がsigned/canonical基底、
+同じwork loopへ追加した。現行engine v37もその意味論を両integratorとも共有する。`coordinates.py`がsigned/canonical基底、
 `fields.py`がaxis regularity、`events.py`がaxis局在、engineがwall/axis arbitrationとresidual commitを所有する。
 P06-Sはdrag責務を小さいphysics runtimeへ
 集約し、P08はparticle-local failure、series/probe、薄いCLIでStage 1Aをcloseした。P09は
@@ -264,10 +264,10 @@ containmentだけを、それぞれ`fields.py`と`geometry.py`所有のread-only
 O(cell数)のまま残す。geometryは局所的にfloat64で解像不能なcellをprepareで拒否し、大offsetだけでは拒否しない。
 `cpu.py`は両index residentとfield 256 B/cell、geometry 1,024 B/cellのprepare transientをmemory planへ計上する。
 
-現行milestoneとalgorithm revisionは`implementation_plan.md`と実行manifestをauthorityとする。現行値はengine v36、
-compiled tile v18、proposal v10、event v16、field location v4、memory plan v13、RK4 enclosure v2、dense path
-`rk4_position_hermite_state_extension_v3`、charge-stable exponential midpoint v3 / enclosure v3、physics catalog v17、
-physics runtime `signed_ion_compiled_physics_runtime_v19`、boundary v5、result algorithm v5、result/checkpoint schema v2である。
+現行milestoneとalgorithm revisionは`implementation_plan.md`と実行manifestをauthorityとする。現行値はengine v37、
+compiled tile v18、proposal v10、event v16、field location v4、memory plan v14、RK4 enclosure v2、dense path
+`rk4_position_hermite_state_extension_v3`、charge-stable exponential midpoint v3 / enclosure v4、physics catalog v17、
+physics runtime `signed_ion_compiled_physics_runtime_v20`、boundary v5、result algorithm v5、result/checkpoint schema v2である。
 runtime v16はP19-L実装・性能snapshotで、v17はDEP認証上限の1 ULP外向き境界だけを変えた。architecture上は、single-thread compiled engine、bounded slab、stackless boundary BVH、
 単一physics stage pass、単一writerを維持する。
 P18-Cはengine、proposal、event、resident state、memory plan、永続schemaを変えず、この境界内へ追加した。
@@ -1054,8 +1054,8 @@ root基準`G_mid+J(Z_root-Z_mid)`のaffine exponentialとして全leaf interval�
 検証は定数係数mean/full covarianceのexactness、noise-offの2次収束、manufactured charge-electricの
 weak mean観測次数`>=0.9`、axis restart、tree-depth first-passage、slab/output/resume identityとする。
 一般state-dependent SDEのstrong orderやweak 2次を主張しない。初回受入revisionはengine v34、proposal v9、catalog v16、
-event v15、runtime v17、compiled tile v16、memory plan v13であり、現行supersessionはengine v36、proposal v10、
-event v16、catalog v17、runtime v19、compiled tile v18である。B03 path arrayの静的な保守上限は一slab rowあたり
+event v15、runtime v17、compiled tile v16、memory plan v13であり、現行supersessionはengine v37、proposal v10、
+event v16、catalog v17、runtime v20、compiled tile v18である。B03 path arrayの静的な保守上限は一slab rowあたり
 `648 B`で、受入上限`2048 B`内に収まる。正式characterizationは2,000/20,000粒子×4構成×3反復を全粒子active・
 failure 0で完了し、計時/RSSは[`solver/evidence/b03/`](solver/evidence/b03/README.md)のmachine-local・non-gating証跡とする。
 characterizationで検出した反復加算由来の終端tailはengine v34で除去した。macro timeは補償積和による
@@ -1133,7 +1133,7 @@ proposal v3、enclosure v1、schema/APIはこの数値変更では不変であ�
 start-contact certificateを追加した。engine v11 / event v7は一般RK4へinterior-facet start-contact certificateと
 single-facet active-boundary residualを拡張した。interaction capはparticle residual stateで共有し、次hitが実際にある時だけ
 残区間を分割する。event時刻のactive jumpとterminal transitionは右連続である。
-engine v12 / event v8でこの意味論を保ったままRZ signed-stage/axis eventを追加し、現行engine v36も維持する。
+engine v12 / event v8でこの意味論を保ったままRZ signed-stage/axis eventを追加し、現行engine v37も維持する。
 P11の指数pathも同じleft-first piece列とfirst-event arbitrationを使う。現行event locatorはintegratorが渡すmethod固有の
 component-wise deviationを受け、指数法では全短縮secantを含むvelocity enclosureから
 `h * (v_upper - v_lower) + roundoff`を外向きに作る。position enclosure全幅を流用した過剰分割や、
@@ -1836,7 +1836,11 @@ RMS観測次数は`2.029875353701904/2.0816971911764033/2.044084026475049`、fin
 閉じた。B03 core、charge-stable coupling、work-scaled cadence、P20 performance closeoutも完了した。続くmeaning-matched
 external V&V/M3-C2はcommon-P1 Case-A/Case-P 100 nm finalまで完了した。Case-PのR-Z/fate gateはPASSしたが、anchorは
 negative-ion currentを選択しない固定二電流same-form比較であり、Case-Pプラズマ全体のphysical applicabilityは未認定である。
-任意の三電流production revisionは後続P21で完了したが、外部三電流軌道比較は入力authority不足で非認定のままである。
+任意の三電流production revisionは後続P21で完了した。外部三電流軌道比較の5 primitive入力authorityも
+producer companionのpriority 3で解消した。priority 4の共有three-current初期電荷を用いたcommon-P1、Brownian-off、100 nm、287粒子、
+30 msの独立V&Vは、candidateと明示drag COMSOL referenceの各3刻み収束、全frameのlifecycle/finite mask exact、
+共通の有限lifecycle stateの`r,z,Z`、共通active stateの`v`、141件のevent/fate identityをすべてPASSした。
+これは物理model validationまたは普遍的COMSOL同等性の認定ではない。
 受理済み3 seedの287粒子owner discoveryも科学payload・work・
 case identity・revisionを完全一致させて完了した。支配ownerは`integrators`（自己時間比42.58--42.86%）だったが、
 事前登録済みbounded ownerではないため最適化は未承認でproduction変更はない。M3-C2A anchorは

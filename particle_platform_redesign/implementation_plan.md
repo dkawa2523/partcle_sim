@@ -926,7 +926,7 @@ deterministic CPUではfastmathを既定無効にし、force加算順とstable p
 hardwareではslab幅、trajectory保存scheduleを変えても粒子別final/event/RNG、failure/refinement counter、
 frame/probe/seriesが一致することを要求する。
 
-P12の最大`W` worker wave、futureのtile順merge、worker-local scratchは履歴であり、現行engine v36では削除済みである。
+P12の最大`W` worker wave、futureのtile順merge、worker-local scratchは履歴であり、現行engine v37では削除済みである。
 geometry broad phaseのexact predicate、保守的RK4 clear/split証明、同時刻wall意味論は維持する。boundary BVHの
 stackless traversal、linear/quadratic exactと一般曲線eventのflat SoA wavefront、boundary/RNG batch、row numerical
 status、batch surface release、direct columnar replay、bounded event/failure stagingはengine接続済みである。
@@ -1269,7 +1269,7 @@ P14-Pでparallel runtimeを閉じた後、P14-Uで判定する。
 手順2～6をengine v26へ統合後、focused correctionを測定した。regular 1Mは1/2/4 threadで
 9.32/10.09/10.10 s、4-thread speedup 0.923xで、1-threadもv20履歴比23.7%退行した。microkernelは約3.75xでも
 proposal/enclosureの直列調停が支配したため、巨大融合kernelを追加せず手順7の削除条件を実行した。
-現行engine v36 / compiled tile v18 / proposal v10 / event v16 / runtime layout v6 / memory plan v13 / geometry v5は
+現行engine v37 / compiled tile v18 / proposal v10 / event v16 / runtime layout v6 / memory plan v14 / geometry v5は
 single-thread compiled runtimeである。field/physics/integratorはpreallocated workspaceを使い、exact/curved/
 axis/residualはflat SoA wavefront、boundary/Philoxとsurface releaseはcompiled batch、failureはrow numerical status、
 frame/probeはdirect columnar replay、event/failureはbounded SoA/CSR stagingを使う。outer pool、worker別scratch、
@@ -1783,7 +1783,7 @@ B02のXY/fixed-charge/drag-only revisionの数値pathとpayloadはbitwise不変�
 時刻別平均・共分散、分位点、分布距離、fate確率、first-arrival CDFの事前登録区間で行う。
 
 初回closeout revisionはcatalog v16、engine v34、proposal v9、event v15、runtime v17、compiled tile v16、memory plan v13である。
-現行supersessionはengine v36、proposal v10、event v16、catalog v17、runtime v19、compiled tile v18である。
+現行supersessionはengine v37、proposal v10、event v16、catalog v17、runtime v20、compiled tile v18である。
 CPU layoutは新schedulerを作らずv6を維持し、case/result/checkpoint schemaにB03専用配列やmutable RNG cursorを追加していない。
 B03 path arrayの静的な保守上限は一slab rowあたり`648 B`で、受入上限`2048 B`内にある。最終characterizationは
 2,000/20,000粒子×4構成×3反復の24/24実行を全粒子active・failure 0で完了した。20,000粒子のmachine-local medianは
@@ -1835,7 +1835,8 @@ P19-L完了revisionはengine v31、proposal v8、event v12、field location v4�
 dense path 176 B/row、split budget 2のinterval stack 72 B/row、最大64 cell候補arena 544 B/rowを計上する。4,096粒子×20 stepの
 公開API観測はglobal/local `0.9276381/0.9345506 s`、比`1.0074517`、科学payload bitwise一致だった。これはmachine-localな
 非gating観測である。P19-L性能snapshotはphysics runtime v16、v17はDEP上限の1 ULP外向き境界だけを変更した。
-現行runtime v19はv18のcharge Jacobian payloadを維持し、optional aggregate three-currentを同じstage passへ追加する。
+現行runtime v20はv19のoptional aggregate three-currentを維持し、relative-flow ion dragの局所interval force boundと
+prepared charge invariantをexponential path certificateへ提供する。
 代表Case-A 287粒子1 stepでは、意味論を変えないgeneric chord算術のbatch化でwarmed medianを
 `1.647475→1.304153 s`（`1.263x`）とし、final＋frameをbitwise同一に保った。このP19-L時点ではwork形状を変えず、global
 enclosureとevent refinementの結合を後続課題として残した。後続event v14がそのevent-query側だけを閉じ、P19-L履歴値は
@@ -2039,7 +2040,7 @@ accuracy/convergence work packageで再認定する。
 #### P21 / M3-C3：aggregate three-currentとcritical 2-D closure
 
 M3-C2Aを再開せず、元Case-Pとは別の選択可能な物理拡張と、2Dで最も重要な境界正例を一つの有限work packageで閉じる。
-順序と停止条件は次の3件だけとする。
+順序と停止条件は次の4件だけとする。
 
 1. **aggregate three-current production revision（完了）**：
    `aggregate_relative_drift_regularized_two_current_v1`を変更せず、aggregateな単一価負イオン電流を加える
@@ -2056,23 +2057,25 @@ M3-C2Aを再開せず、元Case-Pとは別の選択可能な物理拡張と、2D
    比較した。`dt=1/0.5/0.25 ms`の132 gateは全PASS、最大solver間位置差は`1.61339e-17 m`である。authorityは
    [`solver/evidence/m3c0/critical_boundaries_v1/`](solver/evidence/m3c0/critical_boundaries_v1/README.md)とする。
    grazing/corner、multiple material hit、probabilistic law、有限半径、力・native fieldへ一般化しない。
-3. **conditional Case-P派生companion（入力監査完了、`BLOCKED / NOT_EVALUATED`）**：priority 1の三電流を明示選択する
-   代表100 nm full-physics caseの入力authorityを監査した。common-P1全1987節点について、有限な`n_-`、total `u_{-,r}`、
-   total `u_{-,z}`、`m_-`、`V_{T,-}`を持つcanonical fieldを、境界の未定義値や非一意mesh対応なしには作れなかった。
-   そのためcompanion H5、three-current `Z0`、COMSOL軌道、candidate軌道は生成・実行していない。これは物理modelの
-   `NOT_APPLICABLE`判定ではなく、元Case-P M3-C2Aの二電流anchorも変更しない。compact authorityは
+3. **conditional Case-P派生companion入力authority（`PASS`）**：priority 1の三電流を明示選択する
+   代表100 nm full-physics caseの入力authorityをproducer companionで生成した。common-P1全1987節点について、有限な`n_-`、
+   total `u_{-,r}`、total `u_{-,z}`、`m_-`、`V_{T,-}`を、domain cacheとdomain-3側boundary cacheからcanonical H5へ格納した。
+   COMSOL geometryのcm→SI m変換とRZ axis正則性射影を一度だけ明示し、source MPHを変更していない。
+4. **conditional Case-P派生trajectory evaluation（`PASS`）**：共有three-current `Z0`を用いた
+   common-P1、Brownian-off、100 nm、287粒子、30 msの比較で、candidateと明示drag COMSOL referenceの各3刻み収束、
+   全frameのlifecycle/finite mask exact、共通の有限lifecycle stateの`r,z,Z`、共通active stateの`v`、141件のevent/fate identityと
+   event時刻gateがすべて`PASS`した。元Case-P M3-C2Aの二電流anchorは変更しない。compact authorityは
    [`solver/evidence/m3c3/caseP_three_current_companion_v1/`](solver/evidence/m3c3/caseP_three_current_companion_v1/README.md)である。
-   外部V&V tool suiteは301件を通過したが、欠けたfield authorityを補うものではない。
 
-P21/M3-C3は`CLOSED_ACCEPTED_WITH_LIMITATIONS`とする。priority 1の任意三電流revisionとpriority 2のcritical boundaryは完了した。
-priority 3は元Case-P二電流anchorの同等性に必要な作業ではなく、異なる任意物理の外部coverageであるためP21の出口から分離する。
+P21/M3-C3は`CLOSED_ACCEPTED_WITH_LIMITATIONS`とする。priority 1の任意三電流revision、priority 2のcritical boundary、
+priority 3の入力authority、priority 4のtrajectory evaluationは完了した。priority 3/4は元Case-P二電流anchorの同等性に必要な
+作業ではなく、異なる任意物理の外部coverageであるためP21の出口から分離する。
 これにより、100 nm common-P1二電流anchorと上記critical boundaryを明示scopeとする`2D_CRITICAL_VV_COMPLETE`を宣言する。
-これはnative-field、追加粒径、第2 ion-drag、三電流のCOMSOL軌道同等性、3Dを認定しない。
+これはnative-field、追加粒径、第2 ion-drag、3D、普遍的COMSOL同等性、物理modelの妥当性を認定しない。
 
-三電流coverageの再開条件は、producer側でone-sided domain-3境界値を定義した同じcanonical節点順の5 primitive export、または
-同等のhash-lock済みfield fileを受領することである。受領時はP21や既存benchmarkを再開せず、独立した外部V&V work packageとして
-100 nm・287粒子・30 msの代表比較を一回だけ実行し、初期意味、各電流と全有効右辺、Brownian-off軌道・電荷履歴、event/fate、
-candidate自己収束を判定する。全12 package、追加seed、native-field、性能比較へ拡張しない。
+三電流coverageの再開条件だったproducer側one-sided domain-3 canonical 5 primitive exportを満たし、P21や既存benchmarkを
+再開せず、独立した外部V&V work packageと100 nm・287粒子・30 msの代表比較を一回だけ実行した。
+このscoped numerical agreementを全12 package、追加seed、native-field、性能比較、物理model validationへ拡張しない。
 
 外部成果物は`tools/vv/comsol`だけが所有し、core testのgolden fileにしない。各caseの結果は、model revision、field producer、
 入力hash、step、seed集合、対応可能/不可能な量を一つのmanifestへ保存する。
@@ -2090,9 +2093,13 @@ common-P1 first material-stick 20/20＋prefix 9/9、v14 solver-only 3刻み自�
 自己収束もPASSした。保存COMSOLとの差はBrownian-on/offとfield表現差を含むためcharacterizationに限定する。
 charge-stable coupling、durable I/O cadence、P20 performance closeoutも完了した。後続の意味一致M3-C2A common-P1 Case-A/Case-P
 100 nm finalは各32+32 seedで`PASS`した。Case-Pの非自明なauthorityは登録済みR-Z/fate分布gateであり、終端event 0のgateを
-境界parityへ拡張しない。native-field provider、第2 ion-drag、10/30 nmは引き続き`NOT_TESTED`または別work packageである。
-aggregate three-currentのCase-P派生外部評価は入力authority不足で`BLOCKED / NOT_EVALUATED`として閉じ、任意物理の
-conditional coverageへ分離した。P21/M3-C3 productionとcritical boundary microcaseは完了し、後者は132/132 PASSした。
+境界parityへ拡張しない。native-field providerは引き続き`NOT_TESTED`である。別のdeterministic common-P1 work packageでは、
+size-specific入力/provenanceを修正し、10/30 nm relative-flow ion dragと100 nm image ion dragの各287粒子・0--450 us・
+3刻み自己収束とcross-solver 9 gateをすべて`PASS`した。このevent-free、Brownian-off結果をM3-C2A stochastic anchorへ混ぜない。
+authorityは[`solver/evidence/m3c1/case_a_size_ion_drag_companion_v1/`](solver/evidence/m3c1/case_a_size_ion_drag_companion_v1/README.md)である。
+aggregate three-currentのCase-P派生外部評価はcanonical負イオン5 primitive入力blockerを解消し、common-P1、Brownian-off、
+100 nm・287粒子・30 msの代表trajectory比較を`PASS`したconditional coverageへ分離した。P21/M3-C3 productionと
+critical boundary microcaseも完了し、後者は132/132 PASSした。
 P21/M3-C3と明示scopeの2D benchmarkは`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。
 accepted seed 3件の287粒子owner discoveryは科学identityを完全一致させて完了したが、
 `integrators`は事前登録済みbounded ownerでないため最適化は未承認である。M3-C2A anchorは
@@ -2150,11 +2157,11 @@ CPU parityと転送を含むend-to-end speedupがないcaseではGPUを選ばな
 | P03 | coordinates/single-point field | XY/RZ、regular/P1/Q1、conditioning-aware location | 完了 |
 | P04 | ballistic engine/output | table source、SoA ballistic、release event、final/frame、最小ResultView | 完了 |
 | P05 | geometry/event | 大域topology audit、line BVH、ballistic exact first hit、stick/escape | 完了 |
-| P06 core | coupled RK4/physics | revision 1：既存force verification。revision 2：証明済み一定加速度。revision 3a：boundaryless XY regular enclosure。revision 3b：sequential accepted RK4 material tube、wavefront、transverse certificate、accepted-path memory checkpoint | 完了（P06 close時engine v8 / event v5。現行engine v36 / proposal v10 / RK4 enclosure v2が意味論を維持） |
+| P06 core | coupled RK4/physics | revision 1：既存force verification。revision 2：証明済み一定加速度。revision 3a：boundaryless XY regular enclosure。revision 3b：sequential accepted RK4 material tube、wavefront、transverse certificate、accepted-path memory checkpoint | 完了（P06 close時engine v8 / event v5。現行engine v37 / proposal v10 / RK4 enclosure v2が意味論を維持） |
 | P06-U | unstructured material | exact-mesh fully-supported P1/Q1、Cartesian XY一般RK4、topology-complete material boundary | 完了。boundaryless unstructuredは未解禁 |
 | P06-RZ | RZ force | signed stage basis、RZ metadata/axis regularity、canonical support像、RK4 axis event/residual | 完了（engine v12 / event v8 / physics catalog v2 / required field v3） |
 | P06-S | Stokes–Cunningham | 小さいphysics runtimeへのdrag責務集約、Stokes schema/applicability/oracleのXY/RZ追加 | 完了（engine v13 / physics catalog v3 / physics runtime v1） |
-| P07 | wall/source RNG | Philox counter RNG、fixed-time surface、静止壁law、corner、exact-path residual、RZ axis split | engine v11 / event v7までのsliceを完了し、現行engine v36が意味論を維持。分布拡張、moving wallは未完了 |
+| P07 | wall/source RNG | Philox counter RNG、fixed-time surface、静止壁law、corner、exact-path residual、RZ axis split | engine v11 / event v7までのsliceを完了し、現行engine v37が意味論を維持。分布拡張、moving wallは未完了 |
 | P08 | Stage 1A closure | particle-local failure reason/継続規則、小型series/probe、薄いCLI、公開API scenario、収束report | 完了（engine v14 / result algorithm v2） |
 | P09 | memory/runtime layout | YAML/resources先行parse、HDF5 metadata gate、固定ID対応のresident stateとstable resident-row active list、bounded microtile、load/prepare/run memory plan、RSS/semantic harness | 完了（engine v15 / runtime layout v1 / memory plan v1。代表実測を完了し、synthetic全規模判定はP14、target-use判定はP14-U。hintは消費者とともにP10へ移動） |
 | P10 | compiled CPU | Numba field/physics/RK4、regular supported-containing O(1) common path、P1/Q1 hint/full-search、`state_at`/wall/residual/output schedule parity | 完了（engine v16 / compiled tile v1 / runtime layout v2 / memory plan v2 / physics runtime v2。large-mesh P1/Q1性能はP14） |
@@ -2177,7 +2184,7 @@ CPU parityと転送を含むend-to-end speedupがないcaseではGPUを選ばな
 | B01 | inertial Brownian numerics | exact joint OU covariance/update、物理interval-tree Philox normal、親endpoint保存conditional half-split、ensemble verification | 完了。`stochastic.py`と`rng.py`だけ。production integrator/case/event/output/checkpoint/memory planは未接続 |
 | B02 | inertial Brownian production | Cartesian XY、Epstein linear、fixed charge、固定depth OU/Hermite、terminal stick/escape、frame/probe、resume、row-local数値失敗 | 完了。engine v30 / proposal v7 / catalog v10 / runtime v9 / runtime layout v6 / memory plan v12。連続OU first-passageは非主張 |
 | P17 | axisymmetric field / Cartesian 3-D | XYZ state、RZ mapping、回転面event、3-D normal、schema/output/memory | state-dimension独立workstream。一般可変次元frameworkは作らない |
-| M3-C0 | comparison evidence freeze | 12 packageの式・parameter・field意味、admissibleなBrownian-off `h/h2/h4`、frozen RHS/RK stage、正例Freeze/Disappear、package別seed cohortを外部成果物として固定 | 進行中。M3-C0a offline lock完了。v5の旧PASSは原点依存な位置relative L2のため`INVALIDATED`、履歴statusは`CHARACTERIZED`。Case-A 100 nm pre-event v6は運用上の刻み選択だけをPASS。力なしboundary正例v2はexact 6 configuration receiptと全active-frame解析解をfail-closedで検証し、56 PASS / 0 FAILでFreeze status 2の位置保持・velocity保持とDisappear status 4の位置/速度NaNを確認した。v1は監査強度不足の履歴成果物としてsuperseded。30 ms全体、残るcase/variant、完全derived-field provenance、RK probeは未完了。core変更なし |
+| M3-C0 | comparison evidence freeze | 12 packageの式・parameter・field意味、admissibleなBrownian-off `h/h2/h4`、frozen RHS/RK stage、正例Freeze/Disappear、package別seed cohortを外部成果物として固定 | `DEFERRED_NOT_RELEASE_BLOCKING`。M3-C0a offline lock、Case-A 100 nm pre-event v6の運用刻み選択、力なしboundary正例v2の56 PASS / 0 FAILは完了。v5の旧PASSは原点依存な位置relative L2のため`INVALIDATED`、履歴statusは`CHARACTERIZED`。30 ms全12 package総当たり、完全derived-field provenance、RK probeは現行v0.1と`2D_CRITICAL_VV_COMPLETE`の完了条件へ含めず、科学revisionまたは明示的なcoverage拡張時だけ独立work packageとして再開する。core変更なし |
 | P18-C | benchmark-reference continuous charge | regularized relative-drift aggregate two-currentをoptional versioned revisionとして独立実装 | 完了。catalog v11 / runtime v10 / compiled tile v12、engine/schema不変。独立oracle・bound・両積分器・XY/RZ・event/resume合格。外部保存式再生PASSと定数規約を含む厳密provider一致FAILを分離 |
 | P18-I | selectable ion-drag sensitivity models | relative-flow screened式とelectric-field-directed image式を二つの排他的revisionとして実装 | 完了。catalog v12 / runtime v11 / compiled tile v13、engine/schema不変。Barnesを変更せず、blend・fallback・Case P/A分岐なし。外部frozen-force判定は`evidence/p18i/`へ分離 |
 | P18-D | quasistatic spherical DEP | producer提供`grad(mean_E_squared)`を使うoptional explicit-acceleration model | 完了。catalog v13 / runtime v12 / compiled tile v14、engine/schema不変。半径認証、bound、pure/compiled parity、XY/RZ、両積分器の解析収束を確認。Case-A 100 nm common-P1複合sliceはM3-C1でPASSしたが、DEP単独・native-field parityと物理妥当性は未認定 |
@@ -2191,7 +2198,7 @@ CPU parityと転送を含むend-to-end speedupがないcaseではGPUを選ばな
 | durable cadence | work-scaled atomic result commit | `W=macro+accepted+queries+refinements`、`T=max(2^20,128N)`、accepted macro barrier、resume identity | 完了。engine v36 / result v5 / cadence `cumulative_solver_work_v1`。同期single-owner writer、output/slab非依存 |
 | P20 | operational efficiency closeout | work-scaled cadenceとcharge-stable larger-step utilityのpublic-API manual evidence | 完了。`solver/evidence/p20_efficiency/`のmachine-local・non-gating証拠。portable timing、異なるstep間のequal-accuracy、COMSOL比較は非主張 |
 | M3-C2A | stochastic anchor benchmark | 独立seedの時刻別moment・分布・fate・first-arrivalとCI | `CLOSED_ACCEPTED_WITH_LIMITATIONS`。common-P1 Case-A/Case-P 100 nm final完了。Case-Pは20 us、32+32独立seed、各287粒子×121 frame / 30 ms。83区分R-Z/fate TVは`0.010670731707317093`、同時上限`0.13119968456545308 < 0.15`でPASS。終端gateはevent 0で非情報的。元Case-P `auxq`どおりの二電流same-form結果であり、後続three-current・species-resolved物理・pathwise RNG・普遍的COMSOL・boundary parityは非主張。287粒子owner discoveryも科学identity完全一致で完了。scale性能とcoverage拡張は別work package |
-| P21 / M3-C3 | aggregate three-currentとcritical 2-D closure | optionalな単一価負イオン集約電流、critical boundary microcase、Case-P派生companionの入力監査を一軸ずつ閉じる | `CLOSED_ACCEPTED_WITH_LIMITATIONS`。priority 1はcatalog v17 / runtime v19 / tile v18と標準品質gateで完了。priority 2も`solver/evidence/m3c0/critical_boundaries_v1/`で132/132 PASS、最大solver間位置差`1.61339e-17 m`。priority 3はfull canonical 5 primitive authorityを作れず`BLOCKED / NOT_EVALUATED`で監査を閉じ、H5/Z0/両軌道を実行していないため三電流の外部同等性は非認定。元M3-C2A二電流anchorは不変。将来入力を受領した場合だけ独立coverageで100 nm・287粒子・30 ms比較を一回行い、P21や既存benchmarkは再開しない |
+| P21 / M3-C3 | aggregate three-currentとcritical 2-D closure | optionalな単一価負イオン集約電流、critical boundary microcase、Case-P派生companionの入力監査を一軸ずつ閉じる | `CLOSED_ACCEPTED_WITH_LIMITATIONS`。priority 1はcatalog v17 / runtime v19 / tile v18と標準品質gateで完了。priority 2も`solver/evidence/m3c0/critical_boundaries_v1/`で132/132 PASS、最大solver間位置差`1.61339e-17 m`。priority 3はproducer-owned one-sided cacheによりfull canonical 5 primitive authorityを全1987節点へ生成して入力blockerを解消。priority 4は共有Z0とcommon-P1、Brownian-off、100 nm・287粒子・30 msの代表比較でcandidate/明示drag COMSOLの各3刻み収束、全frameのlifecycle/finite mask exact、共通有限stateの`r,z,Z`、共通active stateの`v`、141 event/fate identityをすべてPASS。元M3-C2A二電流anchorは不変で、普遍的COMSOL同等性や物理model validationは非主張 |
 
 P14は全組合せの直積を作らず、粒子数、layout/motion、hit数、output、JIT、threadを直交させた23行×3観測を
 三公開APIのfresh childで測った。全行でrevision、result shape、memory fit、要求JIT環境、科学payload identityを
@@ -2520,7 +2527,7 @@ migrationを作らない。
   event v9/physics runtime v3はP11を完了した。engine v18/compiled tile v3/geometry v3/runtime layout v3/
   memory plan v3はP12、engine v19/result algorithm v3/checkpoint schema 1/memory plan v4はP13を完了した。
   engine v20/compiled tile v4/field v3/geometry v4/memory plan v6はP14のsynthetic baselineを完了した。
-  現行engine v36/compiled tile v18/proposal v10/event v16/runtime layout v6/memory plan v13/geometry v5はP14-Pの
+  現行engine v37/compiled tile v18/proposal v10/event v16/runtime layout v6/memory plan v14/geometry v5はP14-Pの
   single-thread compiled engineへ収束し、outer pool、thread mask、worker別scratch、object event/replayを削除済みで、
   exact/curved wavefront、row status、batch release、direct replay、bounded stagingも接続済みである。P14-Uで
   代表用途を閉じ、T03も完了した。P15の物理・数値decisionとproduction実装は
@@ -2542,8 +2549,10 @@ migrationを作らない。
   charge-stable affine exponential root、result v5はwork-scaled cadenceを追加した。旧P14-R着手blockerは
   ユーザーの明示指示で解除し、別release trackのremote CIも2026-10-05に完了した。
 - P21/M3-C3は既存二電流revisionを保持したままaggregate three-currentをcatalog v17 / runtime v19 / tile v18で同じ
-  charge plan/runtimeへ統合した。critical 2-D boundary microcaseも132/132 PASSで完了した。Case-P派生companion入力監査は
-  canonical負イオンprimitive authority不足により`BLOCKED / NOT_EVALUATED`で閉じ、任意物理の将来coverageへ分離した。
+  charge plan/runtimeへ統合した。critical 2-D boundary microcaseも132/132 PASSで完了した。Case-P派生companionは
+  canonical負イオン5 primitive authorityを全1987節点へ生成して入力blockerを解消し、common-P1、Brownian-off、
+  100 nm・287粒子・30 msの代表trajectory比較でcandidate/明示drag COMSOLの3刻み収束、全frameのlifecycle/finite mask exact、
+  共通有限stateの`r,z,Z`、共通active stateの`v`、141 event/fate identityをPASSした。
   P21と明示scopeの2D critical benchmarkは`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。
 - P07の現行sliceでsurface measure、fixed position/velocity/time、model weight、velocity-sign departure、
   law組合せと「interaction cap後に次hitがある時だけresidual intervalをsplitする」C09規則を固定した。

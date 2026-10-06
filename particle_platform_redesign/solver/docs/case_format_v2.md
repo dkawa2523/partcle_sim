@@ -3,10 +3,10 @@
 この文書は、外部producerとsolverの間で受け渡す`case.yaml`と`case.h5`の実装契約です。
 COMSOL固有の列名、study、selectionはここへ持ち込まず、adapterがSIとcanonical semanticsへ変換します。
 
-現記載は現行engine `particle_engine_v36`、compiled CPU tile v18、proposal v10、event v16、physics catalog
-`inertial_langevin_rz_catalog_v17`、physics runtime `signed_ion_compiled_physics_runtime_v19`、
-RK4 enclosure v2、dense path `rk4_position_hermite_state_extension_v3`、charge-stable exponential midpoint v3 / enclosure v3、
-field location v4、runtime layout v6、memory plan v13、boundary algorithm `point_wall_laws_v5`までの実装契約である。case schema v2は実測で製品価値を示せなかった粒子内multithreading設定を削除し、
+現記載は現行engine `particle_engine_v37`、compiled CPU tile v18、proposal v10、event v16、physics catalog
+`inertial_langevin_rz_catalog_v17`、physics runtime `signed_ion_compiled_physics_runtime_v20`、
+RK4 enclosure v2、dense path `rk4_position_hermite_state_extension_v3`、charge-stable exponential midpoint v3 / enclosure v4、
+field location v4、runtime layout v6、memory plan v14、boundary algorithm `point_wall_laws_v5`までの実装契約である。case schema v2は実測で製品価値を示せなかった粒子内multithreading設定を削除し、
 `resources`をmemory budgetだけへ戻した。cumulative solver workで決めるdurable epoch、checkpoint、resume identity、
 同期single-owner writerはsolver内部とresult formatの責務であり、YAML/HDF5へcheckpoint cadenceやresume modeの
 設定keyを追加しない。format v1は未releaseの試作schemaとして拒否し、過去の`resources.threads`を受ける

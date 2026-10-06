@@ -126,8 +126,8 @@ P14-Uは並列方式の選定ではなく、完成した単一直列runtimeを�
 
 ## 8. M3-C2A closeoutと条件付き性能work package
 
-上記P14-P/P14-U値は履歴である。現行productionはengine v36 / compiled tile v18 / proposal v10 / runtime v19 /
-event v16 / memory plan v13である。M3-C2A common-P1 Case-P 100 nm finalは20 us、32+32独立seed、各287粒子、30 ms、
+上記P14-P/P14-U値は履歴である。現行productionはengine v37 / compiled tile v18 / proposal v10 / runtime v20 /
+event v16 / memory plan v14である。M3-C2A common-P1 Case-P 100 nm finalは20 us、32+32独立seed、各287粒子、30 ms、
 121 frameで完了した。登録済み83区分R-Z/fate gateは最大empirical TV `0.010670731707317093`、同時上限
 `0.13119968456545308 < 0.15`で`PASS`した。終端gateはevent 0のため境界parityには情報を持たない。元Case-P `auxq`どおりの
 二電流same-form結果であり、後続three-current、species-resolved物理、pathwise RNG、普遍的COMSOL同等性、boundary parityは認定しない。

@@ -7,11 +7,13 @@ not the foundation of the new product.
 ## Start here
 
 1. Read [`particle_platform_redesign/README.md`](particle_platform_redesign/README.md).
-2. Read [`particle_platform_redesign/AGENTS.md`](particle_platform_redesign/AGENTS.md)
+2. Use [`particle_platform_redesign/solver/docs/support_and_errors.md`](particle_platform_redesign/solver/docs/support_and_errors.md)
+   for the static 2-D product support matrix, explicit limitations, and error guidance.
+3. Read [`particle_platform_redesign/AGENTS.md`](particle_platform_redesign/AGENTS.md)
    before editing the design or future solver.
-3. Use [`particle_platform_redesign/implementation_plan.md`](particle_platform_redesign/implementation_plan.md)
+4. Use [`particle_platform_redesign/implementation_plan.md`](particle_platform_redesign/implementation_plan.md)
    for implementation order and exit criteria.
-4. Use [`particle_platform_redesign/quality_tooling_plan.md`](particle_platform_redesign/quality_tooling_plan.md)
+5. Use [`particle_platform_redesign/quality_tooling_plan.md`](particle_platform_redesign/quality_tooling_plan.md)
    for uv, Ruff, import-linter, Pyrefly, and Radon policy.
 
 ## Directory roles
@@ -40,9 +42,9 @@ performance baseline.
 P14-P has closed the ineffective multithreaded runtime and converged production
 execution on one deterministic compiled serial engine. See
 [`particle_platform_redesign/solver/docs/parallel_execution_plan.md`](particle_platform_redesign/solver/docs/parallel_execution_plan.md).
-The current semantics use engine v36, compiled tile v18, proposal v10, event v16,
-runtime layout v6, memory plan v13, geometry v5, physics catalog
-`inertial_langevin_rz_catalog_v17`, physics runtime v19, and wall laws
+The current semantics use engine v37, compiled tile v18, proposal v10, event v16,
+runtime layout v6, memory plan v14, geometry v5, physics catalog
+`inertial_langevin_rz_catalog_v17`, physics runtime v20, and wall laws
 `point_wall_laws_v5`. Perfect specular reflection is parameterless, non-unit
 restitution is a separate law, and standard RZ gravity cannot have a radial
 component. P14-U representative-use validation is complete: its formal
@@ -68,7 +70,8 @@ seed comparison is closed as `CLOSED_ACCEPTED_WITH_LIMITATIONS`. The saved nativ
 field COMSOL runs remain descriptive characterization rather than a core gate.
 Additional packages and product-scale performance are separate work packages;
 the preserved M3-C1 event-v14 artifacts remain historical evidence. The accepted
-2-D conclusion is limited to the 100 nm common-P1 two-current Case-A/Case-P anchor
-and the critical-boundary microcase (`2D_CRITICAL_VV_COMPLETE`); native COMSOL
-fields, other sizes and ion-drag variants, three-current COMSOL trajectories, 3-D,
-and general COMSOL equivalence are not certified.
+2-D conclusion includes the critical-boundary microcase, the Case-A common-P1
+10/30 nm relative-flow and 100 nm image-ion-drag companions, and the Case-P
+common-P1 100 nm aggregate-three-current trajectory (`2D_CRITICAL_VV_COMPLETE`).
+Native COMSOL FE fields, 3-D, arbitrary geometry, and general COMSOL equivalence
+are not certified.

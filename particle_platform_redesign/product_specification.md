@@ -996,7 +996,10 @@ COMSOL固有の名称は付けない。外部adapterが必要な刻みと設定�
 
 局所的に `dv/dt = -(v-u)/tau + a` と置き、midpointで係数を固定する。現行integratorは
 `charge_stable_exponential_midpoint_v3`、速度依存するP18-Lを含む現行path enclosureは
-`exponential_midpoint_global_abs_enclosure_v3`である。`E=exp(-h/tau)`、
+`exponential_midpoint_local_stage_enclosure_v4`である。run-global enclosureを常に安全なfallbackとし、
+start half-step predictorが通る局所field rangeから得たstage force boundとの共通部分だけを採用する。
+連続applicabilityもglobal-firstで、未証明rowだけ同じ局所primitive rangeとprepared charge invariantで再認証する。
+`E=exp(-h/tau)`、
 `A=1-E`として
 
 \[
@@ -1597,7 +1600,7 @@ regular 1Mの4-thread speedupが0.923xで事前gateに届かなかったため�
 code/testを削除し、compiled single-thread engineを唯一のproduction経路とした。詳細な測定と採否条件は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を権威とする。
 
-現行v36はouter pool、future wave、worker別scratch、内部thread teamを持たず、thread非依存slab、
+現行v37はouter pool、future wave、worker別scratch、内部thread teamを持たず、thread非依存slab、
 field/physics/integrator workspace、stackless boundary BVH、同期single-owner writerへ統一している。
 memory plan v11はdeferred event depthを `event_work_bytes_per_particle = 24 * (max_refinements + 1)` として
 `slab_event_work`へ独立計上し、depth依存容量を一般proposal scratchへ隠さない。
@@ -1725,7 +1728,7 @@ Stage 0～1Aで固定するcore microcase packは次の`C01`～`C10`の10件と�
 | C09 | thin gapと複数反射 | residual time、boundary event ordinal、interaction budget failure |
 | C10 | corner同時hit | candidate facet set、effective response normal、priority、曖昧policy failure |
 
-現行`particle_engine_v36`ではC04/C05が証明済み`quadratic_exact`経路、C02/C03が一般
+現行`particle_engine_v37`ではC04/C05が証明済み`quadratic_exact`経路、C02/C03が一般
 `rk4_reintegrated`経路の公開API scenarioとして有効である。後者はfully-supported common
 `RegularLayout`、fixed charge、既存のEpstein/electric/gravity、連続support/applicability enclosureを満たす
 XY/RZ caseを扱う。revision 3b/P06-RZでは同じsubsetをtopology-completeな材料boundaryと連成し、terminal
@@ -1787,7 +1790,7 @@ P14が所有し、23行×3観測matrixで完了した。target-useの結合判�
 製品性能完了を意味しなかった。P14で支配的と確認し、field-owned BVHでsupported containmentだけをindex化した。
 outside/masked provisionalはO(cell数) full scanを維持し、T04 cache/remeshは後続profile条件付きとする。
 同じmatrixの3観測medianでregular 100k/1Mは20 workerが1 worker比1.8796x/4.7965xだったが、
-event 10k×20 hitは0.8882xだった。P14-Pの内部parallel試行もregular 1Mで0.923xだったため、現行v36は
+event 10k×20 hitは0.8882xだった。P14-Pの内部parallel試行もregular 1Mで0.923xだったため、現行v37は
 single-thread compiled runtimeだけを提供する。artifact byte rateは
 public workflow全体のeffective rateで、writer単体帯域ではない。table startのvolume全走査もgeometry v4のBVHへ
 置換し、局所的にfloat64で解像不能なcellはprepareで拒否する。memory plan v6は両index residentとfield
@@ -1963,7 +1966,7 @@ field builderのテストはPoisson解析解、電荷保存、mesh収束で行�
 v26でworker wave、future merge、worker別scratch、object event/replayを削除し、内部thread team、slab、
 stackless BVH、同期writer、exact/curved wavefront、row status、batch release、direct replay、bounded stagingまで
 統合した。しかしregular 1Mでも4-thread speedupが0.923xだったため、製品gate未達としてcase schema v2から
-thread設定と内部thread teamを削除した。現行v36は`fastmath=False, parallel=False`のsingle-thread compiled
+thread設定と内部thread teamを削除した。現行v37は`fastmath=False, parallel=False`のsingle-thread compiled
 production engine一つである。第二schedulerやexperimental flagは残さない。判断根拠は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を権威とする。
 
@@ -1979,7 +1982,7 @@ production engine一つである。第二schedulerやexperimental flagは残さ�
 これはCOMSOL一致を正解にするgateではなく、現行数値coreが目的用途を精度・速度・入力表現の三面で解けるかを
 判定するgateである。常設diagnostic frameworkや第二engineは作らない。正式releaseはXY時間/mesh収束、RZ収束/parity、
 失敗0、出力utilityとidentityを満たした。profile費用はevents 28.7%、fields 26.8%ほかへ分散し、単一owner支配を
-示さないため現行productionはengine v36のsingle-thread compiled経路一つを維持する。秒数はmachine-localな
+示さないため現行productionはengine v37のsingle-thread compiled経路一つを維持する。秒数はmachine-localな
 非gating値であり、COMSOL比やportable性能ではない。T03とP14-Rのlocal gate/evidenceに加え、receipt固定の
 remote Windows/Linux workflowも完了し、`0.1.0.dev0`開発baselineの配布可能性closureを満たした。これは正式版packageの
 公開を意味しない。P15着手をそれまで禁止していた順序はユーザーの明示指示で解除した。
@@ -2106,9 +2109,9 @@ accepted 3 seedの科学payload/work/revisionを完全一致させ、end-to-end�
 これは製品scaleまたはCOMSOL速度比の認定ではない。authorityは
 [`solver/evidence/m3c2/caseP_100nm_chord_optimization_v1/`](solver/evidence/m3c2/caseP_100nm_chord_optimization_v1/README.md)である。
 この外部進捗は製品solverの目的・公開API・dependency方向を変更しない。
-現行revisionはengine v36、compiled tile v18、proposal v10、event v16、boundary v5、result algorithm v5、
-result/checkpoint schema v2、field location v4、memory plan v13、physics catalog v17、physics runtime v19、
-RK4 enclosure v2、dense path v3、charge-stable exponential midpoint v3 / enclosure v3である。dense path v3は座標原点相対の
+現行revisionはengine v37、compiled tile v18、proposal v10、event v16、boundary v5、result algorithm v5、
+result/checkpoint schema v2、field location v4、memory plan v14、physics catalog v17、physics runtime v20、
+RK4 enclosure v2、dense path v3、charge-stable exponential midpoint v3 / enclosure v4である。dense path v3は座標原点相対の
 Bernstein enclosure、TwoDiff残差、world座標への方向付き外向き丸めを使う。dense位置評価も相対制御点と残差から
 作り、始終点では保存済みendpointを厳密に戻す。公開chord-deviation boundだけはworld座標評価を覆う狭い
 `8*eps`絶対座標termを含むが、物理的な曲率とenclosureは原点相対である。v3は、v2の広いpaddingにより
@@ -2216,7 +2219,7 @@ engine v10 / event v6はCartesian XYの証明済み一定加速度surfaceへ拡�
 source-facet start-contact certificateを追加した。engine v11 / event v7はCartesian XY一般RK4の厳密内向き
 surface departureとsingle-facet active-boundary residualを追加した。tangent、facet端点/corner、その他証明不能な
 start-contactはfail-closedである。engine v12 / event v8でforce-coupled RZのsigned stage basis、axis event、
-残時間継続を同じwork loopへ追加し、現行engine v36もその意味論を維持する。P11の指数法も
+残時間継続を同じwork loopへ追加し、現行engine v37もその意味論を維持する。P11の指数法も
 同じmaterial/RZ event loopを利用する。richer distribution、moving wallは
 後続gateまで明示拒否する。
 未使用機能の値を先にdefault化せず、次をowner packageの

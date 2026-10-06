@@ -4,9 +4,10 @@
 適用域外での別modelへの自動切替、backend固有の係数を認めない。runtime contributionはdragを、stageで
 凍結した正の`linear_relaxation(rate, target_velocity)`、その他の力を`explicit_acceleration`として返す。
 現行physics catalog revisionは`inertial_langevin_rz_catalog_v17`、physics runtime revisionは
-`signed_ion_compiled_physics_runtime_v19`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
+`signed_ion_compiled_physics_runtime_v20`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
 v17はDEP認証上限の直列化丸めを一つのfloat64 successorまで外向きに扱い、v18は各charge stageへ
 `charge_rate_derivative_s_inv=J`を追加し、v19はoptional aggregate three-currentを同じstage payloadへ統合した。
+v20はrelative-flow ion dragの局所interval上界とprepared charge invariantを同じruntime ownerへ追加した。
 continuous modelはfiniteな`J<=0`、fixed chargeは`J=0`を返す。
 
 ## Particle authority
@@ -677,10 +678,13 @@ C_-=\begin{cases}
 実装は既存のcharge plan、compiled pass、resident `Z`、RK4/exponential couplingを共有し、第二engineやCase-P分岐を作らない。
 production受入はcatalog v17、runtime `signed_ion_compiled_physics_runtime_v19`、compiled tile v18で完了した。独立oracle、
 zero-densityでのrate/Jacobian/global-bound退化、finite bound、compiled/public-API回帰を含む標準verification/scenario suiteと、Ruff、Pyrefly、
-import-linter、complexity、lock gateを通過した。engine、state、schemaは変更していない。外部Case-P派生companion入力監査は
-canonical負イオンprimitive authority不足により`BLOCKED / NOT_EVALUATED`で閉じ、物理modelの`NOT_APPLICABLE`とは扱わない。
-軌道は未実行で元Case-P二電流anchorも不変である。この任意物理の外部coverageはP21の出口から分離し、三電流外部同等性を
-非認定のまま、P21/M3-C3は`CLOSED_ACCEPTED_WITH_LIMITATIONS`とする。詳細statusは
+import-linter、complexity、lock gateを通過した。engine、state、schemaは変更していない。外部Case-P派生companionは
+producer-owned one-sided cacheによりcanonical負イオン5 primitiveを全1987節点へ生成し、入力blockerを解消した。
+共有初期電荷を使うcommon-P1、Brownian-off、100 nm、287粒子、30 ms代表trajectoryでは、candidate/COMSOL双方の
+3段階自己収束、共通の有限lifecycle stateでのposition/charge、両側active時のvelocity、
+141件のterminal event/fateを`PASS`した。元Case-P二電流anchorは不変である。
+この任意物理の外部coverageはP21の出口から分離し、native FE、Brownian、species-resolved物理、任意形状・任意条件、
+普遍的COMSOL同等性は認定しない。P21/M3-C3は`CLOSED_ACCEPTED_WITH_LIMITATIONS`のままである。詳細statusは
 [`../../vv_methodology.md`](../../vv_methodology.md)と
 [`../evidence/m3c3/caseP_three_current_companion_v1/`](../evidence/m3c3/caseP_three_current_companion_v1/README.md)が所有する。
 
@@ -995,8 +999,8 @@ overdamped Brownian limit、miss probability 0を主張しない。
 resolved modelにはnoise model/revisionを記録し、manifestにはBrownian RNG、joint OU、conditional splitの各revision、
 tree depth、root/split draw stream、`macro_root_frozen_start_v1`、`path_kind=cubic_hermite`を残す。checkpoint resume
 identityはRNG/OU/split revision、coefficient policy、depth、resolved modelを含み、mutable RNG cursorを保存しない。
-B02の上記model/revisionとpayloadは現行engine v36でもbitwise不変である。現行全体revisionはengine v36、proposal v10、
-catalog v17、runtime v19、runtime layout v6、memory plan v13である。
+B02の上記model/revisionとpayloadは現行engine v37でもbitwise不変である。現行全体revisionはengine v37、proposal v10、
+catalog v17、runtime v20、runtime layout v6、memory plan v14である。
 root covariance、conditional split、mean updateがfloat64で表現不能なrowは`nonfinite_physics`となり、同一batchの
 正常rowは継続する。`gamma*h`上限をこの実表現可能性検査の代用にはしない。
 COMSOLまたは`model_dataset`との比較は物理式のauthorityでなく、core外のV&Vだけが所有する。
@@ -1013,8 +1017,8 @@ charge、既存additive forceを一つの`ou_langevin` proposalへ合成する�
 conditional OU treeはrootの凍結係数とendpointを保つ。axis hitではaccepted prefixをcommitしてradial stateをfoldし、残時間を
 fresh `root_stochastic_interval`として再評価・独立drawで再開する。元root remainderはfold/restrictしない。terminal lawは
 `stick`/`escape`/`hold`だけである。等方3-D Brownianでも一般state-dependent SDEのstrong order/weak 2次でもない。
-COMSOL再実行なしに解析・manufactured・identity gateを閉じ、現行revisionはengine v36 / proposal v10 / catalog v17 /
-event v16 / runtime v19 / compiled tile v18 / memory plan v13である。正式characterizationは24/24実行を全粒子active・
+COMSOL再実行なしに解析・manufactured・identity gateを閉じ、現行revisionはengine v37 / proposal v10 / catalog v17 /
+event v16 / runtime v20 / compiled tile v18 / memory plan v14である。正式characterizationは24/24実行を全粒子active・
 failure 0で完了し、静的なB03 path-array上限`648 B/row`が`2048 B/row`以内であることも確認した。計時とRSSは
 [`evidence/b03/`](../evidence/b03/README.md)の初回closeout（engine v34 / proposal v9 / runtime v17 / tile v16）に
 属するmachine-local・non-gating観測であり、物理妥当性の証拠ではない。

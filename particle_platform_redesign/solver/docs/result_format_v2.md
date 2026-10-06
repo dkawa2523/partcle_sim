@@ -1,6 +1,6 @@
 # Result format v2
 
-この文書は現行engine v36、result algorithm v5、checkpoint schema 2の永続resultと
+この文書は現行engine v37、result algorithm v5、checkpoint schema 2の永続resultと
 `ResultView`の契約です。軌道計算の入力契約は
 [`case_format_v2.md`](case_format_v2.md)が所有し、集計、可視化、COMSOL比較はこのresultを読むcore外の
 toolが所有します。
@@ -92,8 +92,9 @@ boundary eventは、局在した材料境界到達と適用済みlawを一行に
 failureは物理wall interactionではないためwall RNG ordinalを消費しません。現在のcodeは
 `1=numerical_event_budget`、`2=indeterminate_event`、`3=indeterminate_boundary_policy`、
 `4=indeterminate_surface_departure`、`5=field_support`、`6=model_applicability`、
-`7=nonfinite_physics`です。後三者も動的に一粒子へ局在できる時だけlocalです。入力不正、静的・共有
-field layout/model係数/bound、topology、I/O失敗は引き続きrun-fatalです。
+`7=nonfinite_physics`、`8=integrator_accuracy`、`9=indeterminate_applicability_certificate`です。
+動的に一粒子へ局在できる問題だけをlocal failureにします。入力不正、静的・共有field layout/model係数/bound、
+topology、I/O失敗は引き続きrun-fatalです。
 
 ```text
 /events/failure/time_s          float64 [D]
@@ -261,19 +262,19 @@ manifestは少なくとも次を記録します。
 P06 revision 3bの数値pathはengine `coupled_rk4_engine_v6`で確立した。現行algorithm revisionは次である。
 
 ```text
-engine          particle_engine_v36
+engine          particle_engine_v37
 compiled tile   compiled_cpu_tile_v18
 runtime layout  resident_soa_serial_slab_v6
-memory plan     solver_owned_memory_plan_v13
+memory plan     solver_owned_memory_plan_v14
 step proposal   coupled_fixed_step_proposal_v10
 RK4 enclosure   rk4_global_abs_enclosure_v2
 RK4 dense path  rk4_position_hermite_state_extension_v3
 exponential     charge_stable_exponential_midpoint_v3
-exp enclosure   exponential_midpoint_global_abs_enclosure_v3
+exp enclosure   exponential_midpoint_local_stage_enclosure_v4
 event           line_quadratic_rk4_axis_first_hit_v16
 boundary        point_wall_laws_v5
 physics catalog inertial_langevin_rz_catalog_v17
-physics runtime signed_ion_compiled_physics_runtime_v19
+physics runtime signed_ion_compiled_physics_runtime_v20
 required field  required_field_rz_axis_domain_regular_v3
 field location  field_location_v4
 geometry        line_boundary_stackless_volume_cell_bvh_v5
@@ -415,8 +416,8 @@ axis hitではaccepted prefixの既存axis counterに加え、残時間の新し
 従来のBrownian RNG identityに反映される。mutable RNG cursorやaxis専用datasetは追加しない。
 B02は`macro_root_frozen_start_v1`を維持し、旧resultの意味とpayloadを変更しない。
 B03の初回closeoutはcatalog v16 / engine v34 / proposal v9 / event v15 / runtime v17 / compiled tile v16 /
-memory plan v13で完了した。現行supersessionはengine v36 / proposal v10 / event v16 / catalog v17 / runtime v19 /
-compiled tile v18 / memory plan v13である。
+memory plan v13で完了した。現行supersessionはengine v37 / proposal v10 / event v16 / catalog v17 / runtime v20 /
+compiled tile v18 / memory plan v14である。
 CPU layoutはv6のままで、B03 path arrayの静的な保守上限は`648 B/row`、受入上限は`2048 B/row`である。
 正式characterizationは24/24実行を全粒子active・failure 0で完了した。計時とprocess RSSはmachine-localな
 外部performance証跡[`evidence/b03/`](../evidence/b03/README.md)が所有し、portable result契約や合否閾値へ格上げしない。
@@ -472,7 +473,7 @@ manifestの`maximum_dt_charge_lipschitz`はfixed chargeでは0、continuous char
 `dt * L_Z`上限であり、選択methodにかかわらず0.5以下を要求する。
 `memory_plan` mappingは次を持ちます。
 
-- `revision: solver_owned_memory_plan_v13`と`runtime_layout_revision: resident_soa_serial_slab_v6`
+- `revision: solver_owned_memory_plan_v14`と`runtime_layout_revision: resident_soa_serial_slab_v6`
 - `semantics`、`limit_bytes`、`planned_bytes`
 - `geometry_preparation_transient_bytes`、`field_preparation_transient_bytes`
 - `slab_particles`、`scratch_bytes_per_particle`、`event_work_bytes_per_particle`、

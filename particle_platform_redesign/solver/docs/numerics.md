@@ -645,7 +645,7 @@ holdはhit状態を保持したinactive terminalで、残時間や後続macroで
 
 ## 8. P08 particle-local failureと出力schedule
 
-engine v14で導入し、現行engine v36が維持する規則は、有限な開始stateから一粒子へ再現可能に局在できる
+engine v14で導入し、現行engine v37が維持する規則は、有限な開始stateから一粒子へ再現可能に局在できる
 event budget枯渇、event/boundary/departure不決定、
 動的field support/model applicability逸脱、particle physicsの非有限導出値だけをfailed terminalへ変換する。
 field、physics、integrator、enclosureは同じbatch pass内のrow statusへ最初のfailure ownerを書き、有限placeholderで
@@ -726,9 +726,11 @@ x_1=x_0+h\phi_1(z)v_0+h(1-\phi_1(z))u+h^2\phi_2(z)a_{add},
 
 `exponential_midpoint_step`も現行`coupled_fixed_step_proposal_v10`の`StepProposal`を返す。
 `state_at()`、wall/axis hit時刻までの短縮再積分、hit後の残時間、trajectory/frame/probeは同じmethodを
-proposal始点から再評価する。現行`exponential_midpoint_global_abs_enclosure_v3`はprepared physics boundsと
-速度依存する全非drag加速度bound callbackから
-全短縮predictor/stateの位置・速度を外向きに包絡する。event locatorへ渡す曲線/chord偏差はposition box全幅ではなく、
+proposal始点から再評価する。現行`exponential_midpoint_local_stage_enclosure_v4`はv3のrun-global包絡を
+常にfallbackとして保持し、start half-step predictorが通る局所field rangeで認証したstage force boundとの
+共通部分だけを採用する。局所range、force算術、stage enclosureのいずれかが非有限・未証明ならglobal包絡を維持し、
+狭めるために安全性を弱めない。連続applicabilityもglobal-firstで、未証明rowだけ局所primitive rangeと
+prepared charge invariantで再認証する。event locatorへ渡す曲線/chord偏差はposition box全幅ではなく、
 全短縮位置secantを含むvelocity enclosureに対して成分ごとに
 `h * (v_upper - v_lower) + float64 roundoff padding`で包絡する。このmethod-neutral boundを
 RK4と指数法の共通first-hit/refinement loopで用い、材料壁とRZ axisを調停する。第二event engine、
@@ -852,8 +854,8 @@ host幅は大規模regular/event-lightを同機で
 
 ## 15. P14-P serial convergence（完了）
 
-上記P12～P14はv20までの数値意味と履歴実装を記録する。現行engine v36 / compiled tile v18 / proposal v10 /
-event v16 / CPU runtime layout v6 / memory plan v13 / geometry v5では、力の式、積分順、first-event意味、
+上記P12～P14はv20までの数値意味と履歴実装を記録する。現行engine v37 / compiled tile v18 / proposal v10 /
+event v16 / CPU runtime layout v6 / memory plan v14 / geometry v5では、力の式、積分順、first-event意味、
 accepted-state規則を変えず、外側`ThreadPoolExecutor`、future wave、worker別scratch、thread maskを削除した。
 field/physics/integratorはbounded slabとpreallocated workspaceへの`*_into` pass、boundary BVHはpreorder + skipの
 stackless traversalを使う。writerは同期single-ownerである。
@@ -1082,9 +1084,9 @@ slab vector演算とし、数値例外が出た時だけrow別再評価で不良
 accepted stateで`nonfinite_physics`となり、同じslabの正常粒子と独立なright subtreeは継続する。shape不一致や
 内部不変条件破損まで粒子failureへ隠さない。
 
-現行revisionは`particle_engine_v36`、`coupled_fixed_step_proposal_v10`、
-`inertial_langevin_rz_catalog_v17`、`signed_ion_compiled_physics_runtime_v19`、
-`resident_soa_serial_slab_v6`、`solver_owned_memory_plan_v13`である。result algorithm v5、result/checkpoint schema 2、
+現行revisionは`particle_engine_v37`、`coupled_fixed_step_proposal_v10`、
+`inertial_langevin_rz_catalog_v17`、`signed_ion_compiled_physics_runtime_v20`、
+`resident_soa_serial_slab_v6`、`solver_owned_memory_plan_v14`である。result algorithm v5、result/checkpoint schema 2、
 compiled tile v18、event v16、field location v4、geometry v5、boundary v5を使う。B02 manifestは
 `philox4x32_10_brownian_interval_tree_v1`、`inertial_joint_ou_v1`、
 `conditional_gaussian_half_split_v1`、`macro_root_frozen_start_v1`、depth、root/split stream、resolved noise model/revision、
@@ -1116,7 +1118,7 @@ hitまでcommitしてRZ stateをfoldし、macro残時間は次の`root_stochasti
 weak mean観測次数`>=0.9`、axis restart、optional-force compiled parity、tree-depth first-passage、
 slab/output/checkpoint identityを受け入れた。continuous chargeのaffine-exponential dense pathはprepare済みinvariant内だけを許可し、
 証明不能ならfail-closedとする。一般state-dependent SDEのstrong orderまたはweak 2次、等方3-D Brownianは主張しない。
-現行revisionはcatalog v17 / engine v36 / proposal v10 / event v16 / runtime v19 / compiled tile v18 / memory plan v13である。
+現行revisionはcatalog v17 / engine v37 / proposal v10 / event v16 / runtime v20 / compiled tile v18 / memory plan v14である。
 B03 path arrayの静的な保守上限は`648 B/row`で、`2048 B/row`上限内にある。正式characterizationは24/24実行を
 全粒子active・failure 0で完了し、計時、process RSS、solver plan、stochastic/event workを
 [`evidence/b03/`](../evidence/b03/README.md)へmachine-local・non-gating証跡として保存した。これは初回B03
@@ -1132,7 +1134,8 @@ budgetの負側へ厳密に入る時だけ、convex-hull性から全区間の非
 残してsplit/fail-closedする。monotone clearはcubic Hermite derivative-Bernstein enclosureの明示opt-inだけに限定し、
 exponential、scalar pathはv16 certificateを使わない。first-hitとterminal意味、tolerance、endpointは変更しない。
 control payloadは`144 B/row`、構築時追加peakは`128 B/row`で、保守的な同時live見積り約`1.76 KB/row`は既存
-`2048 B/row`一般stage scratch上限内に収まるためmemory plan v13を維持する。broad AABB pre-countはこの
+`2048 B/row`一般stage scratch上限内に収まるため、event v16導入時点ではmemory plan v13を維持した。現行v14は
+exponential local-stage/applicability範囲探索にも最大64 cellの候補arena 544 B/rowを明示計上する。broad AABB pre-countはこの
 facet-local clearより前の保守的なperformance work量であり、accepted event数を表さない。
 
 ### 22.2 Charge-stable deterministic pathとdurable cadence（完了）
@@ -1292,7 +1295,8 @@ memory plan v13はdense path 176 B/row、split budget 2の現設定でinterval s
 非gating観測であり、portableな速度保証ではない。P19-L完了revisionはengine v31、proposal v8、event v12、field location v4、
 memory plan v13、dense path `rk4_position_hermite_state_extension_v2`である。これは履歴的なP19-L完了revisionである。
 P19-L性能artifactはruntime v16を記録し、v17との差は上記DEP上限の1 ULP境界意味論だけである。
-現行runtime v19はv18のcharge Jacobian payloadを維持し、optional aggregate three-currentを同じstage passへ追加する。
+現行runtime v20はv19のcharge Jacobianとoptional aggregate three-currentを維持し、局所force/applicability証明へ
+relative-flow ion dragのinterval boundとprepared charge invariantを追加する。
 
 Case-A 100 nm・287粒子・1 stepの後続profileでは、P19 certificateは80 call・13,120 rowをすべて分割なしで局所証明し、
 元の`2.497 s` profile中約`0.285 s`だった。支配したevent refinementに対し、generic velocity-box
