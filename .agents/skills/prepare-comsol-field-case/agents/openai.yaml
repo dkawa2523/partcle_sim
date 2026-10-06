@@ -1,0 +1,3 @@
+interface:
+  display_name: "Prepare COMSOL Field Case"
+  short_description: "Turn COMSOL geometry and fields into a checked solver case"

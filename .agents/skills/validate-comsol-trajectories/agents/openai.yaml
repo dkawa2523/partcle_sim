@@ -1,0 +1,3 @@
+interface:
+  display_name: "Validate COMSOL Trajectories"
+  short_description: "Run a meaning-matched external COMSOL trajectory comparison"

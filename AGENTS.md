@@ -32,3 +32,12 @@ following ownership rules.
 
 The detailed numerical invariants, module ownership, quality gates, and change
 workflow are authoritative in `particle_platform_redesign/AGENTS.md`.
+
+## Project skills
+
+- Use `$prepare-comsol-field-case` to turn a COMSOL geometry/field model without
+  particle tracing into a checked solver case.
+- Use `$validate-comsol-trajectories` for a meaning-matched external comparison
+  with a COMSOL particle-tracing model.
+- Use `$visualize-particle-trajectories` for geometry-overlaid trajectories,
+  animations, population views, and COMSOL comparison figures.
