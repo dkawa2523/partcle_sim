@@ -18,8 +18,10 @@ from chamber_particles.integrators import (
     curved_chord_deviation_bound,
     curved_chord_deviation_bounds,
     enclose_exponential_midpoint_path,
+    enclose_exponential_midpoint_path_from_stage_bounds,
     enclose_rk4_path,
     exponential_frozen_start_predictor,
+    exponential_frozen_start_predictor_enclosure,
     exponential_midpoint_step,
     restrict_cubic_hermite_proposal,
     rk4_step,
@@ -77,7 +79,7 @@ def test_frozen_start_predictor_does_not_sample_its_predicted_endpoint() -> None
     predictor = exponential_frozen_start_predictor(
         np.asarray([7], dtype="<i8"),
         np.asarray([1.0]),
-        np.asarray([1.2]),
+        np.asarray([0.2]),
         np.asarray([[0.05, 0.1]]),
         np.asarray([[-1.0, 0.2]]),
         np.asarray([3.0]),
@@ -89,6 +91,144 @@ def test_frozen_start_predictor_does_not_sample_its_predicted_endpoint() -> None
     np.testing.assert_array_equal(calls[0][1], [[0.05, 0.1]])
     np.testing.assert_allclose(predictor.charge_number, [2.2], rtol=0.0, atol=1.0e-15)
     assert predictor.position_m[0, 0] < 0.0
+
+
+def test_frozen_start_enclosure_contains_shortened_cancellation_and_charge_paths() -> None:
+    particle = np.asarray([0], dtype="<i8")
+    start_time = np.asarray([0.0])
+    position = np.asarray([[0.0, 0.0]])
+    velocity = np.asarray([[1.0, 0.0]])
+    charge = np.asarray([0.0])
+
+    def cancellation_relaxation(
+        particle_index: np.ndarray,
+        time_s: np.ndarray,
+        position_m: np.ndarray,
+        velocity_m_s: np.ndarray,
+        charge_number: np.ndarray,
+    ) -> RelaxationEvaluation:
+        del time_s, position_m, velocity_m_s, charge_number
+        count = particle_index.size
+        return RelaxationEvaluation(
+            linear_drag_rate_s_inv=np.ones(count),
+            target_velocity_m_s=np.broadcast_to([1.0e8, 0.0], (count, 2)).copy(),
+            additive_acceleration_m_s2=np.broadcast_to([-99_999_999.0, 0.0], (count, 2)).copy(),
+            charge_rate_number_s=np.zeros(count),
+            charge_rate_derivative_s_inv=np.zeros(count),
+            support_inside=np.ones(count, dtype=np.bool_),
+            applicability_inside=np.ones(count, dtype=np.bool_),
+            numerical_status=np.zeros(count, dtype=np.uint8),
+        )
+
+    maximum_elapsed = np.asarray([9.0e-4])
+    enclosure = exponential_frozen_start_predictor_enclosure(
+        particle,
+        start_time,
+        maximum_elapsed,
+        position,
+        velocity,
+        charge,
+        evaluator=cancellation_relaxation,
+    )
+    for elapsed in (1.17e-5, maximum_elapsed[0]):
+        sample = exponential_frozen_start_predictor(
+            particle,
+            start_time,
+            np.asarray([elapsed]),
+            position,
+            velocity,
+            charge,
+            evaluator=cancellation_relaxation,
+        )
+        assert np.all(sample.position_m >= enclosure.path.position_lower_m)
+        assert np.all(sample.position_m <= enclosure.path.position_upper_m)
+        assert np.all(sample.velocity_m_s >= enclosure.path.velocity_lower_m_s)
+        assert np.all(sample.velocity_m_s <= enclosure.path.velocity_upper_m_s)
+
+    def charge_relaxation(
+        particle_index: np.ndarray,
+        time_s: np.ndarray,
+        position_m: np.ndarray,
+        velocity_m_s: np.ndarray,
+        charge_number: np.ndarray,
+    ) -> RelaxationEvaluation:
+        del time_s, position_m, velocity_m_s, charge_number
+        count = particle_index.size
+        return RelaxationEvaluation(
+            linear_drag_rate_s_inv=np.zeros(count),
+            target_velocity_m_s=np.zeros((count, 2)),
+            additive_acceleration_m_s2=np.zeros((count, 2)),
+            charge_rate_number_s=np.full(count, 1.960693341106391e16),
+            charge_rate_derivative_s_inv=np.full(count, -279983106869968.34),
+            support_inside=np.ones(count, dtype=np.bool_),
+            applicability_inside=np.ones(count, dtype=np.bool_),
+            numerical_status=np.zeros(count, dtype=np.uint8),
+        )
+
+    charge_start = np.asarray([-17.743713998575295])
+    maximum_elapsed = np.asarray([7.89837667143159e-10])
+    charge_enclosure = exponential_frozen_start_predictor_enclosure(
+        particle,
+        start_time,
+        maximum_elapsed,
+        position,
+        np.zeros((1, 2)),
+        charge_start,
+        evaluator=charge_relaxation,
+    )
+    for elapsed in (3.0 * maximum_elapsed[0] / 128.0, maximum_elapsed[0]):
+        sample = exponential_frozen_start_predictor(
+            particle,
+            start_time,
+            np.asarray([elapsed]),
+            position,
+            np.zeros((1, 2)),
+            charge_start,
+            evaluator=charge_relaxation,
+        )
+        assert sample.charge_number[0] >= charge_enclosure.charge_lower_number[0]
+        assert sample.charge_number[0] <= charge_enclosure.charge_upper_number[0]
+
+
+def test_frozen_start_predictor_uses_elapsed_when_half_time_is_not_representable() -> None:
+    start_time = np.asarray([1.0])
+    full_duration = np.asarray([np.nextafter(1.0, np.inf) - 1.0])
+    half_duration = 0.5 * full_duration
+    assert start_time[0] + half_duration[0] == start_time[0]
+
+    def relaxation(
+        particle_index: np.ndarray,
+        time_s: np.ndarray,
+        position_m: np.ndarray,
+        velocity_m_s: np.ndarray,
+        charge_number: np.ndarray,
+    ) -> RelaxationEvaluation:
+        del time_s, position_m, velocity_m_s, charge_number
+        count = particle_index.size
+        return RelaxationEvaluation(
+            linear_drag_rate_s_inv=np.zeros(count),
+            target_velocity_m_s=np.zeros((count, 2)),
+            additive_acceleration_m_s2=np.broadcast_to([1.0e16, 0.0], (count, 2)).copy(),
+            charge_rate_number_s=np.zeros(count),
+            charge_rate_derivative_s_inv=np.zeros(count),
+            support_inside=np.ones(count, dtype=np.bool_),
+            applicability_inside=np.ones(count, dtype=np.bool_),
+            numerical_status=np.zeros(count, dtype=np.uint8),
+        )
+
+    enclosure = exponential_frozen_start_predictor_enclosure(
+        np.asarray([0], dtype="<i8"),
+        start_time,
+        half_duration,
+        np.zeros((1, 2)),
+        np.zeros((1, 2)),
+        np.zeros(1),
+        evaluator=relaxation,
+    )
+    assert enclosure.sample.velocity_m_s[0, 0] > 1.0
+    assert enclosure.sample.position_m[0, 0] > 0.0
+    assert enclosure.sample.velocity_m_s[0, 0] <= enclosure.path.velocity_upper_m_s[0, 0]
+    assert enclosure.sample.position_m[0, 0] <= enclosure.path.position_upper_m[0, 0]
 
 
 def test_cubic_hermite_preserves_endpoint_state_and_derivative() -> None:
@@ -3022,3 +3162,47 @@ def test_rk4_dense_charge_has_cubic_local_order() -> None:
 
     observed = [math.log(errors[index] / errors[index + 1], 2.0) for index in (2, 3)]
     assert min(observed) > 3.8
+
+
+def test_exponential_stage_bound_assembly_matches_callback_enclosure() -> None:
+    particle_index = np.asarray([4, 9], dtype="<i8")
+    start_time_s = np.asarray([0.0, 0.2], dtype="<f8")
+    target_time_s = np.asarray([0.03, 0.24], dtype="<f8")
+    position_m = np.asarray([[0.2, -0.3], [-0.4, 0.5]], dtype="<f8")
+    velocity_m_s = np.asarray([[0.6, -0.2], [0.1, 0.7]], dtype="<f8")
+    rate = np.asarray([2.0, 0.5], dtype="<f8")
+    target = np.asarray([[1.0, 0.8], [0.2, 0.3]], dtype="<f8")
+    additive = np.asarray([[0.3, 0.1], [0.05, 0.04]], dtype="<f8")
+    callback = enclose_exponential_midpoint_path(
+        particle_index,
+        start_time_s,
+        target_time_s,
+        position_m,
+        velocity_m_s,
+        linear_drag_rate_upper_s_inv=rate,
+        target_velocity_abs_upper_m_s=target,
+        additive_acceleration_abs_bounder=_table_acceleration_bounder(
+            particle_index,
+            additive,
+        ),
+    )
+    assembled = enclose_exponential_midpoint_path_from_stage_bounds(
+        particle_index,
+        start_time_s,
+        target_time_s,
+        position_m,
+        velocity_m_s,
+        linear_drag_rate_upper_s_inv=rate,
+        target_velocity_abs_upper_m_s=target,
+        additive_start_abs_upper_m_s2=additive,
+        additive_midpoint_abs_upper_m_s2=additive,
+        numerical_status=np.zeros(2, dtype=np.uint8),
+    )
+    for name in (
+        "position_lower_m",
+        "position_upper_m",
+        "velocity_lower_m_s",
+        "velocity_upper_m_s",
+        "numerical_status",
+    ):
+        np.testing.assert_array_equal(getattr(assembled, name), getattr(callback, name))

@@ -117,7 +117,7 @@ def test_c01_runs_through_all_three_public_operations(tmp_path: Path) -> None:
         + lifecycle.failed
     )
     np.testing.assert_array_equal(population, np.full(summary.macro_step_count, 1, dtype="<u8"))
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v36"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v37"
     assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
     assert result.manifest["step_proposal_revision"] == "coupled_fixed_step_proposal_v10"
     assert result.manifest["rk4_enclosure_revision"] is None

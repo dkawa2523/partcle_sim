@@ -35,18 +35,18 @@ from tests.verification.microcases import build_microcase
 
 _MODES = ("fresh", "warm")
 _EXPECTED_REVISIONS: dict[str, str | None] = {
-    "engine_algorithm_revision": "particle_engine_v36",
+    "engine_algorithm_revision": "particle_engine_v37",
     "compiled_cpu_tile_revision": "compiled_cpu_tile_v18",
-    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v19",
+    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v20",
     "step_proposal_revision": "coupled_fixed_step_proposal_v10",
     "rk4_enclosure_revision": None,
     "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
-    "exponential_midpoint_enclosure_revision": ("exponential_midpoint_global_abs_enclosure_v3"),
+    "exponential_midpoint_enclosure_revision": ("exponential_midpoint_local_stage_enclosure_v4"),
     "field_location_revision": "field_location_v4",
     "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
     "result_algorithm_revision": "durable_segmented_result_v5",
 }
-_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v13"
+_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v14"
 _EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_serial_slab_v6"
 
 

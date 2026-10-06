@@ -97,6 +97,7 @@ from .forces import (
     rarefied_vorticity_lift_global_bounds,
     relative_flow_screened_continuous_applicability_batch,
     relative_flow_screened_ion_drag_global_bound,
+    relative_flow_screened_ion_drag_local_bound,
     stokes_cunningham_continuous_applicability_batch,
     stokes_cunningham_rate_upper_s_inv,
     waldmann_gallis_continuous_applicability_batch,
@@ -114,7 +115,7 @@ type UInt8Array = NDArray[np.uint8]
 # global-bound convention and is applied before the final directed rounding.
 _LOCAL_BOUND_ROUNDOFF_FACTOR = 1.0 + 64.0 * np.finfo(np.float64).eps
 
-PHYSICS_RUNTIME_REVISION = "signed_ion_compiled_physics_runtime_v19"
+PHYSICS_RUNTIME_REVISION = "signed_ion_compiled_physics_runtime_v20"
 
 _EMPTY_SCALAR = np.empty(0, dtype=np.float64)
 _EMPTY_VECTOR = np.empty((0, 2), dtype=np.float64)
@@ -429,6 +430,7 @@ class PhysicsRuntime:
     ion_drag_bounds: _IonDragRuntimeBounds | None
     lift_bounds: _RarefiedVorticityLiftBounds | None
     external_acceleration_abs_upper_m_s2: FloatArray
+    localizable_external_base_abs_upper_m_s2: FloatArray | None
     constant_acceleration_m_s2: FloatArray | None
 
     def brownian_thermal_velocity_variance(
@@ -843,6 +845,157 @@ class PhysicsRuntime:
         result[status != NUMERICAL_STATUS_OK] = 0.0
         return result, status
 
+    def local_additive_acceleration_abs_upper_batch(
+        self,
+        particle_index: Int64Array,
+        velocity_lower_m_s: FloatArray,
+        velocity_upper_m_s: FloatArray,
+        charge_lower_number: FloatArray,
+        charge_upper_number: FloatArray,
+        primitive_ranges: Mapping[str, LocalPrimitiveRange],
+    ) -> tuple[FloatArray, BoolArray, UInt8Array]:
+        """Bound midpoint additive acceleration over one local state box.
+
+        The compact local path is available only when every charge-dependent
+        force has a local interval implementation.  Other additive terms keep
+        their prepared run-global bound, so this method never weakens an
+        existing certificate.
+        """
+
+        indices = np.asarray(particle_index, dtype=np.int64)
+        velocity_lower = np.asarray(velocity_lower_m_s, dtype=np.float64)
+        velocity_upper = np.asarray(velocity_upper_m_s, dtype=np.float64)
+        charge_lower = np.asarray(charge_lower_number, dtype=np.float64)
+        charge_upper = np.asarray(charge_upper_number, dtype=np.float64)
+        count = int(indices.size)
+        if (
+            indices.ndim != 1
+            or velocity_lower.shape != (count, 2)
+            or velocity_upper.shape != (count, 2)
+            or charge_lower.shape != (count,)
+            or charge_upper.shape != (count,)
+        ):
+            raise PhysicsEvaluationError("local additive-acceleration state has an invalid shape")
+        if bool((indices < 0).any() or (indices >= self.mass_kg.size).any()):
+            raise PhysicsEvaluationError(
+                "local additive-acceleration particle indices are outside resident state"
+            )
+        if self.localizable_external_base_abs_upper_m_s2 is None:
+            raise PhysicsEvaluationError(
+                "selected charge-dependent forces have no local acceleration certificate"
+            )
+        finite = np.isfinite(velocity_lower).all(axis=1)
+        finite &= np.isfinite(velocity_upper).all(axis=1)
+        finite &= np.isfinite(charge_lower) & np.isfinite(charge_upper)
+        ordered = (velocity_lower <= velocity_upper).all(axis=1)
+        ordered &= charge_lower <= charge_upper
+        status = np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8)
+        status[~(finite & ordered)] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+        applicable = finite & ordered
+        result = self.localizable_external_base_abs_upper_m_s2[indices].copy()
+
+        electric = self.plan.electric
+        if electric is not None:
+            field_lower, field_upper = _local_range(
+                primitive_ranges,
+                electric.electric_field,
+                count,
+                2,
+            )
+            field_abs_upper = _local_nonnegative_upper(
+                np.maximum(np.abs(field_lower), np.abs(field_upper))
+            )
+            charge_abs_upper = _local_nonnegative_upper(
+                np.maximum(np.abs(charge_lower), np.abs(charge_upper))
+            )
+            with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+                electric_bound = _local_nonnegative_upper(
+                    charge_abs_upper[:, None]
+                    * ELEMENTARY_CHARGE_C
+                    * field_abs_upper
+                    / self.mass_kg[indices, None]
+                )
+            with np.errstate(over="ignore", invalid="ignore"):
+                result = np.nextafter(result + electric_bound, np.inf)
+
+        ion_drag = self.plan.ion_drag
+        if ion_drag is not None:
+            if not isinstance(ion_drag, RelativeFlowScreenedIonDragPlan):
+                raise PhysicsEvaluationError(
+                    "selected ion-drag revision has no local acceleration certificate"
+                )
+            ion_density_lower, ion_density_upper = _local_positive_scalar_range(
+                primitive_ranges,
+                ion_drag.positive_ion_number_density_field,
+                count,
+            )
+            del ion_density_lower
+            ion_voltage_lower, ion_voltage_upper = _local_positive_scalar_range(
+                primitive_ranges,
+                ion_drag.positive_ion_thermal_voltage_field,
+                count,
+            )
+            ion_velocity_lower, ion_velocity_upper = _local_range(
+                primitive_ranges,
+                ion_drag.positive_ion_velocity_field,
+                count,
+                2,
+            )
+            ion_mass_lower, ion_mass_upper = _local_positive_scalar_range(
+                primitive_ranges,
+                ion_drag.effective_positive_ion_mass_field,
+                count,
+            )
+            _, screening_upper = _local_positive_scalar_range(
+                primitive_ranges,
+                ion_drag.screening_length_field,
+                count,
+            )
+            _, mean_free_path_upper = _local_positive_scalar_range(
+                primitive_ranges,
+                ion_drag.ion_neutral_mean_free_path_field,
+                count,
+            )
+            ion_bound, ion_applicable = relative_flow_screened_ion_drag_local_bound(
+                mass_kg=self.mass_kg[indices],
+                electrostatic_radius_m=self.electrostatic_radius_m[indices],
+                charge_number_lower=charge_lower,
+                charge_number_upper=charge_upper,
+                velocity_lower_m_s=velocity_lower,
+                velocity_upper_m_s=velocity_upper,
+                positive_ion_number_density_upper_m3=ion_density_upper,
+                positive_ion_thermal_voltage_lower_V=ion_voltage_lower,
+                positive_ion_thermal_voltage_upper_V=ion_voltage_upper,
+                positive_ion_velocity_lower_m_s=ion_velocity_lower,
+                positive_ion_velocity_upper_m_s=ion_velocity_upper,
+                effective_positive_ion_mass_lower_kg=ion_mass_lower,
+                effective_positive_ion_mass_upper_kg=ion_mass_upper,
+                screening_length_upper_m=screening_upper,
+                ion_neutral_mean_free_path_upper_m=mean_free_path_upper,
+                maximum_relative_ion_speed_m_s=ion_drag.maximum_relative_ion_speed_m_s,
+            )
+            applicable &= ion_applicable
+            with np.errstate(over="ignore", invalid="ignore"):
+                result = np.nextafter(result + ion_bound, np.inf)
+
+        lift_bounds = self.lift_bounds
+        velocity_abs_upper = np.maximum(np.abs(velocity_lower), np.abs(velocity_upper))
+        if lift_bounds is not None:
+            lift, lift_status = rarefied_vorticity_lift_acceleration_abs_upper_batch(
+                coupling_rate_abs_upper_s_inv=(lift_bounds.coupling_rate_abs_upper_s_inv[indices]),
+                gas_velocity_abs_upper_m_s=lift_bounds.gas_velocity_abs_upper_m_s,
+                velocity_abs_upper_m_s=velocity_abs_upper,
+                numerical_status=np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8),
+            )
+            status[lift_status != NUMERICAL_STATUS_OK] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+            with np.errstate(over="ignore", invalid="ignore"):
+                result = np.nextafter(result + lift, np.inf)
+        invalid = ~np.isfinite(result).all(axis=1) | (result < 0.0).any(axis=1)
+        status[invalid] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+        applicable[status != CONTINUOUS_APPLICABILITY_OK] = False
+        result[status != CONTINUOUS_APPLICABILITY_OK] = 0.0
+        return result, applicable, status
+
     def acceleration_abs_upper(
         self,
         particle_index: Int64Array,
@@ -1017,6 +1170,22 @@ class PhysicsRuntime:
         certified[status != CONTINUOUS_APPLICABILITY_OK] = False
         return certified, status
 
+    def prepared_charge_invariant_interval(
+        self,
+        reference_charge_number: FloatArray,
+    ) -> tuple[FloatArray, FloatArray]:
+        """Return the conservative charge range valid for every shortened path.
+
+        Continuous-charge preparation proves one forward-invariant interval
+        over all admitted primitives.  A case without continuous charging
+        retains its reference charge exactly.
+        """
+
+        reference = np.asarray(reference_charge_number, dtype=np.float64)
+        if reference.ndim != 1 or not bool(np.isfinite(reference).all()):
+            raise PhysicsEvaluationError("reference charge must be one finite column")
+        return _ion_drag_charge_interval(reference, self.charge_bounds)
+
     def local_continuous_applicability_batch(
         self,
         particle_index: Int64Array,
@@ -1163,6 +1332,8 @@ class PhysicsRuntime:
         """Bytes owned by prepared runtime bounds for engine memory accounting."""
 
         total = int(self.external_acceleration_abs_upper_m_s2.nbytes)
+        if self.localizable_external_base_abs_upper_m_s2 is not None:
+            total += int(self.localizable_external_base_abs_upper_m_s2.nbytes)
         if self.drag_bounds is not None:
             total += int(self.drag_bounds.rate_upper_s_inv.nbytes)
             total += int(self.drag_bounds.target_velocity_abs_upper_m_s.nbytes)
@@ -2477,6 +2648,14 @@ def prepare_physics_runtime(
         dielectrophoresis_acceleration_bound,
         primitive_ranges,
     )
+    localizable_external_base = _prepare_localizable_external_base(
+        plan,
+        mass_kg,
+        displaced_volume_m3,
+        thermophoresis_acceleration_bound,
+        dielectrophoresis_acceleration_bound,
+        primitive_ranges,
+    )
     constant = _constant_acceleration(
         plan,
         coordinate_system,
@@ -2488,6 +2667,8 @@ def prepare_physics_runtime(
         primitive_ranges,
     )
     external.setflags(write=False)
+    if localizable_external_base is not None:
+        localizable_external_base.setflags(write=False)
     if constant is not None:
         constant.setflags(write=False)
     return PhysicsRuntime(
@@ -2502,6 +2683,7 @@ def prepare_physics_runtime(
         ion_drag_bounds,
         lift_bounds,
         external,
+        localizable_external_base,
         constant,
     )
 
@@ -3045,6 +3227,47 @@ def _prepare_external_acceleration_bound(
     if not bool(np.isfinite(external).all()):
         raise PhysicsEvaluationError("force enclosure contains a non-finite bound")
     return external
+
+
+def _prepare_localizable_external_base(
+    plan: PhysicsPlan,
+    mass_kg: FloatArray,
+    displaced_volume_m3: FloatArray,
+    thermophoresis_acceleration_abs_upper_m_s2: FloatArray | None,
+    dielectrophoresis_acceleration_abs_upper_m_s2: FloatArray | None,
+    ranges: Mapping[str, PrimitiveRange],
+) -> FloatArray | None:
+    """Prepare force terms unchanged by local charge/ion-flow tightening."""
+
+    ion_drag = plan.ion_drag
+    localizable = ion_drag is None or isinstance(ion_drag, RelativeFlowScreenedIonDragPlan)
+    if not localizable or (plan.electric is None and ion_drag is None):
+        return None
+    result = np.zeros((mass_kg.size, 2), dtype=np.float64)
+    gravity = plan.gravity_buoyancy
+    if gravity is not None:
+        density = _positive_scalar_range(ranges, gravity.gas_density_field)
+        contribution = gravity_buoyancy_acceleration_abs_upper(
+            mass_kg=mass_kg,
+            displaced_volume_m3=displaced_volume_m3,
+            gas_density_lower_kg_m3=float(density.lower[0]),
+            gas_density_upper_kg_m3=float(density.upper[0]),
+            gravity_m_s2=gravity.gravity_m_s2,
+        )
+        result = np.nextafter(result + contribution, np.inf)
+    if thermophoresis_acceleration_abs_upper_m_s2 is not None:
+        result = np.nextafter(
+            result + thermophoresis_acceleration_abs_upper_m_s2,
+            np.inf,
+        )
+    if dielectrophoresis_acceleration_abs_upper_m_s2 is not None:
+        result = np.nextafter(
+            result + dielectrophoresis_acceleration_abs_upper_m_s2,
+            np.inf,
+        )
+    if not bool(np.isfinite(result).all()):
+        raise PhysicsEvaluationError("localizable force base contains a non-finite bound")
+    return result
 
 
 def _constant_acceleration(

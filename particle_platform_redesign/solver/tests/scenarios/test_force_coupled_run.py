@@ -166,6 +166,8 @@ def _continuous_charge_case(
     maximum_relative_ion_speed_m_s: float = 1.0e4,
     negative_ion_density_m3: float = 0.0,
     negative_ion_velocity_m_s: tuple[float, float] = (0.0, 0.0),
+    far_electric_field_V_m: tuple[float, float] | None = None,
+    far_ion_velocity_m_s: tuple[float, float] | None = None,
 ) -> Path:
     paths = materialize_microcase("C07", directory)
     case = load_case(paths.case_path)
@@ -179,11 +181,17 @@ def _continuous_charge_case(
     coordinate_system = "axisymmetric_rz" if axisymmetric_rz else "cartesian_xy"
     vector_components = ("r", "z") if axisymmetric_rz else ("x", "y")
     vector_basis = "axisymmetric_rz" if axisymmetric_rz else "cartesian_xy"
+    layout_x = np.asarray(
+        [radial_shift[0], radial_shift[0] + 1.0]
+        if far_electric_field_V_m is None and far_ion_velocity_m_s is None
+        else [radial_shift[0], radial_shift[0] + 1.0, radial_shift[0] + 2.0],
+        dtype="<f8",
+    )
     layout = RegularLayout(
         "plasma",
-        np.asarray([radial_shift[0], radial_shift[0] + 1.0], dtype="<f8"),
+        layout_x,
         np.asarray([0.0, 1.0], dtype="<f8"),
-        np.ones((1, 1), dtype="<u1"),
+        np.ones((layout_x.size - 1, 1), dtype="<u1"),
     )
 
     def uniform_field(
@@ -193,7 +201,19 @@ def _continuous_charge_case(
         basis: str,
         unit: str,
     ) -> FieldData:
-        values = np.repeat(np.asarray([value], dtype="<f8"), 4, axis=0)
+        values = np.repeat(
+            np.asarray([value], dtype="<f8"),
+            layout.axis0_m.size * layout.axis1_m.size,
+            axis=0,
+        )
+        if name == "electric_field" and far_electric_field_V_m is not None:
+            values.reshape(layout.axis0_m.size, layout.axis1_m.size, -1)[-1, :, :] = (
+                far_electric_field_V_m
+            )
+        if name == "ion_velocity" and far_ion_velocity_m_s is not None:
+            values.reshape(layout.axis0_m.size, layout.axis1_m.size, -1)[-1, :, :] = (
+                far_ion_velocity_m_s
+            )
         return FieldData(name, "plasma", "node", components, basis, values, unit)
 
     fields = [
@@ -583,6 +603,43 @@ def test_signed_aggregate_charge_public_api_preserves_zero_density_limit(
         "model": "plasma_continuous",
         "revision": _SIGNED_AGGREGATE_CHARGE_REVISION,
     }
+
+
+def test_exponential_midpoint_uses_local_enclosure_for_unused_extreme_cell(
+    tmp_path: Path,
+) -> None:
+    case_path = _continuous_charge_case(
+        tmp_path / "local-force-enclosure",
+        integrator="exponential_midpoint",
+        dt_s=0.25,
+        output=False,
+        charge_revision=_SIGNED_AGGREGATE_CHARGE_REVISION,
+        ion_velocity_m_s=(80.0, 20.0),
+        negative_ion_density_m3=1.0e9,
+        negative_ion_velocity_m_s=(-35.0, 15.0),
+        far_electric_field_V_m=(1.0e18, -1.0e18),
+        far_ion_velocity_m_s=(1.0e8, -1.0e8),
+    )
+    document = yaml.safe_load(case_path.read_text(encoding="utf-8"))
+    document["time"]["end_s"] = 0.25
+    case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    output = tmp_path / "local-force-enclosure-result"
+
+    summary = simulate(load_case(case_path), output)
+    result = open_result(output)
+    final = result.read_final()
+
+    assert summary.failure_event_count == 0
+    assert result.manifest["event_refinement"]["maximum_refinement_depth"] <= 1
+    assert np.isfinite(final.position_m).all()
+    assert np.isfinite(final.velocity_m_s).all()
+    assert np.isfinite(final.charge_number).all()
+    memory_plan = result.manifest["memory_plan"]
+    assert memory_plan["revision"] == "solver_owned_memory_plan_v14"
+    assert memory_plan["certificate_work_bytes_per_particle"] == 544
+    assert memory_plan["components"]["slab_certificate_work"] == (
+        544 * memory_plan["slab_particles"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -1794,12 +1851,12 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
         assert plan["planned_bytes"] <= plan["limit_bytes"]
 
     reference = results[1]
-    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v36"
+    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v37"
     assert reference.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
     assert reference.manifest["geometry_algorithm_revision"] == (
         "line_boundary_stackless_volume_cell_bvh_v5"
     )
-    assert plans[1]["revision"] == "solver_owned_memory_plan_v13"
+    assert plans[1]["revision"] == "solver_owned_memory_plan_v14"
     assert plans[1]["runtime_layout_revision"] == "resident_soa_serial_slab_v6"
     assert reference.manifest["resolved"]["physics_models"]["electric"]["model"] == "coulomb"
     reference_boundary = reference.read_boundary_events()
@@ -2285,7 +2342,7 @@ def test_constant_acceleration_surface_uses_the_first_nonzero_normal_derivative(
         [frame.velocity_m_s[0] for frame in frames],
         [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]],
     )
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v36"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v37"
     assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
     assert result.manifest["event_algorithm_revision"] == "line_quadratic_rk4_axis_first_hit_v16"
     assert result.manifest["resolved"]["path_kind"] == "quadratic_exact"
@@ -2831,6 +2888,8 @@ def test_finite_speed_epstein_converges_with_both_production_integrators(
             "rk4_dense" if integrator == "rk4_fixed" else "exponential_midpoint_reintegrated"
         )
         assert result.manifest["resolved"]["path_kind"] == expected_path
+        if integrator == "exponential_midpoint":
+            assert result.manifest["memory_plan"]["certificate_work_bytes_per_particle"] == 544
 
     assert errors[0] > errors[1] > errors[2] > errors[3]
     observed_orders = np.log2(np.asarray(errors[:-1]) / np.asarray(errors[1:]))
@@ -2886,7 +2945,7 @@ def test_exponential_midpoint_c03_matches_the_closed_form(
     )
     assert (
         result.manifest["exponential_midpoint_enclosure_revision"]
-        == "exponential_midpoint_global_abs_enclosure_v3"
+        == "exponential_midpoint_local_stage_enclosure_v4"
     )
     assert result.manifest["maximum_dt_over_tau"] == pytest.approx(4.0 * dt_s)
 
@@ -3806,7 +3865,7 @@ def test_barnes_ion_drag_constant_field_time_convergence(
     assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_rz_catalog_v17"
     assert (
         last_result.manifest["physics_runtime_revision"]
-        == "signed_ion_compiled_physics_runtime_v19"
+        == "signed_ion_compiled_physics_runtime_v20"
     )
 
 

@@ -1230,6 +1230,278 @@ def relative_flow_screened_ion_drag_global_bound(
     return np.broadcast_to(scalar_upper[:, None], (count, 2)).copy()
 
 
+def relative_flow_screened_ion_drag_local_bound(
+    *,
+    mass_kg: FloatArray,
+    electrostatic_radius_m: FloatArray,
+    charge_number_lower: FloatArray,
+    charge_number_upper: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    positive_ion_number_density_upper_m3: FloatArray,
+    positive_ion_thermal_voltage_lower_V: FloatArray,
+    positive_ion_thermal_voltage_upper_V: FloatArray,
+    positive_ion_velocity_lower_m_s: FloatArray,
+    positive_ion_velocity_upper_m_s: FloatArray,
+    effective_positive_ion_mass_lower_kg: FloatArray,
+    effective_positive_ion_mass_upper_kg: FloatArray,
+    screening_length_upper_m: FloatArray,
+    ion_neutral_mean_free_path_upper_m: FloatArray,
+    maximum_relative_ion_speed_m_s: float,
+) -> tuple[FloatArray, BoolArray]:
+    """Bound relative-flow ion drag over row-local state/primitive boxes.
+
+    Unlike the run-global preparation bound, this certificate retains a
+    positive lower bound on relative speed when the particle and ion velocity
+    boxes are disjoint.  That lower bound is essential for bounding the
+    charge-dependent orbital impact parameter without replacing it by the
+    full screening disk.
+    """
+
+    count = _common_count(
+        mass_kg,
+        electrostatic_radius_m,
+        charge_number_lower,
+        charge_number_upper,
+        positive_ion_number_density_upper_m3,
+        positive_ion_thermal_voltage_lower_V,
+        positive_ion_thermal_voltage_upper_V,
+        effective_positive_ion_mass_lower_kg,
+        effective_positive_ion_mass_upper_kg,
+        screening_length_upper_m,
+        ion_neutral_mean_free_path_upper_m,
+    )
+    vector_ranges = (
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        positive_ion_velocity_lower_m_s,
+        positive_ion_velocity_upper_m_s,
+    )
+    if any(value.shape != (count, 2) for value in vector_ranges):
+        raise PhysicsEvaluationError("local ion-drag velocity bounds must have shape [N, 2]")
+    for value in vector_ranges:
+        _require_finite(value, "local ion-drag velocity bound")
+    if bool(
+        (charge_number_lower > charge_number_upper).any()
+        or (velocity_lower_m_s > velocity_upper_m_s).any()
+        or (positive_ion_velocity_lower_m_s > positive_ion_velocity_upper_m_s).any()
+    ):
+        raise PhysicsEvaluationError("local ion-drag bounds are reversed")
+    _require_positive(mass_kg, "mass_kg")
+    _require_positive(electrostatic_radius_m, "electrostatic_radius_m")
+    _require_finite(charge_number_lower, "charge_number_lower")
+    _require_finite(charge_number_upper, "charge_number_upper")
+    _require_positive(
+        positive_ion_number_density_upper_m3,
+        "positive_ion_number_density_upper_m3",
+    )
+    _require_positive(
+        positive_ion_thermal_voltage_lower_V,
+        "positive_ion_thermal_voltage_lower_V",
+    )
+    _require_positive(
+        positive_ion_thermal_voltage_upper_V,
+        "positive_ion_thermal_voltage_upper_V",
+    )
+    _require_positive(
+        effective_positive_ion_mass_lower_kg,
+        "effective_positive_ion_mass_lower_kg",
+    )
+    _require_positive(
+        effective_positive_ion_mass_upper_kg,
+        "effective_positive_ion_mass_upper_kg",
+    )
+    _require_positive(screening_length_upper_m, "screening_length_upper_m")
+    _require_positive(
+        ion_neutral_mean_free_path_upper_m,
+        "ion_neutral_mean_free_path_upper_m",
+    )
+    if bool(
+        (positive_ion_thermal_voltage_lower_V > positive_ion_thermal_voltage_upper_V).any()
+        or (effective_positive_ion_mass_lower_kg > effective_positive_ion_mass_upper_kg).any()
+    ):
+        raise PhysicsEvaluationError("local ion-drag primitive bounds are reversed")
+    relative_speed_limit = _finite_positive_scalar(
+        maximum_relative_ion_speed_m_s,
+        "maximum_relative_ion_speed_m_s",
+    )
+
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        relative_component_upper = _outward_abs_upper(
+            np.maximum(
+                np.abs(positive_ion_velocity_lower_m_s - velocity_upper_m_s),
+                np.abs(positive_ion_velocity_upper_m_s - velocity_lower_m_s),
+            ),
+            "local ion-drag relative-component upper bound",
+        )
+        relative_component_lower = np.maximum(
+            positive_ion_velocity_lower_m_s - velocity_upper_m_s,
+            velocity_lower_m_s - positive_ion_velocity_upper_m_s,
+        )
+        relative_component_lower = _outward_nonnegative_lower(
+            np.maximum(relative_component_lower, 0.0),
+            "local ion-drag relative-component lower bound",
+        )
+        relative_speed_upper = _outward_abs_upper(
+            np.hypot(relative_component_upper[:, 0], relative_component_upper[:, 1]),
+            "local ion-drag relative-speed upper bound",
+        )
+        relative_speed_lower = _outward_nonnegative_lower(
+            np.hypot(relative_component_lower[:, 0], relative_component_lower[:, 1]),
+            "local ion-drag relative-speed lower bound",
+        )
+        speed_square_lower = _outward_nonnegative_lower(
+            relative_speed_lower**2
+            + 8.0
+            * ELEMENTARY_CHARGE_C
+            * positive_ion_thermal_voltage_lower_V
+            / (math.pi * effective_positive_ion_mass_upper_kg)
+            + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2,
+            "local ion-drag effective-speed-square lower bound",
+        )
+        speed_square_upper = _outward_abs_upper(
+            relative_speed_upper**2
+            + 8.0
+            * ELEMENTARY_CHARGE_C
+            * positive_ion_thermal_voltage_upper_V
+            / (math.pi * effective_positive_ion_mass_lower_kg)
+            + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2,
+            "local ion-drag effective-speed-square upper bound",
+        )
+        charge_abs_upper = np.maximum(
+            np.abs(charge_number_lower),
+            np.abs(charge_number_upper),
+        )
+        charge_abs_lower = np.minimum(
+            np.abs(charge_number_lower),
+            np.abs(charge_number_upper),
+        )
+        charge_abs_lower[(charge_number_lower <= 0.0) & (charge_number_upper >= 0.0)] = 0.0
+        capacitance_lower = _outward_nonnegative_lower(
+            4.0
+            * math.pi
+            * VACUUM_PERMITTIVITY_F_M
+            * electrostatic_radius_m
+            * (
+                1.0
+                + electrostatic_radius_m
+                / np.maximum(electrostatic_radius_m, screening_length_upper_m)
+            ),
+            "local ion-drag capacitance lower bound",
+        )
+        potential_abs_upper = _outward_abs_upper(
+            charge_abs_upper * ELEMENTARY_CHARGE_C / capacitance_lower,
+            "local ion-drag potential upper bound",
+        )
+        screening_radius_upper = np.maximum(
+            electrostatic_radius_m,
+            np.minimum(screening_length_upper_m, ion_neutral_mean_free_path_upper_m),
+        )
+        screening_square_upper = _outward_abs_upper(
+            screening_radius_upper**2,
+            "local ion-drag screening-square upper bound",
+        )
+        focused_collection_square_upper = _outward_abs_upper(
+            electrostatic_radius_m**2
+            * (
+                1.0
+                + 2.0
+                * ELEMENTARY_CHARGE_C
+                * potential_abs_upper
+                / (effective_positive_ion_mass_lower_kg * speed_square_lower)
+            ),
+            "local ion-drag focused collection-square upper bound",
+        )
+        collection_square_upper = np.minimum(
+            screening_square_upper,
+            focused_collection_square_upper,
+        )
+        orbital_impact_lower = _outward_nonnegative_lower(
+            np.sqrt(charge_abs_lower**2 + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
+            * ELEMENTARY_CHARGE_C**2
+            / (
+                4.0
+                * math.pi
+                * VACUUM_PERMITTIVITY_F_M
+                * effective_positive_ion_mass_upper_kg
+                * speed_square_upper
+            ),
+            "local ion-drag orbital-impact lower bound",
+        )
+        orbital_impact_upper = _outward_abs_upper(
+            np.sqrt(charge_abs_upper**2 + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
+            * ELEMENTARY_CHARGE_C**2
+            / (
+                4.0
+                * math.pi
+                * VACUUM_PERMITTIVITY_F_M
+                * effective_positive_ion_mass_lower_kg
+                * speed_square_lower
+            ),
+            "local ion-drag orbital-impact upper bound",
+        )
+        logarithm_argument_upper = _outward_abs_upper(
+            (
+                screening_square_upper
+                + _outward_abs_upper(
+                    orbital_impact_upper**2,
+                    "local ion-drag orbital-impact-square upper bound",
+                )
+            )
+            / _outward_nonnegative_lower(
+                orbital_impact_lower**2,
+                "local ion-drag orbital-impact-square lower bound",
+            ),
+            "local ion-drag logarithm-argument upper bound",
+        )
+        logarithm_upper = _outward_abs_upper(
+            0.5 * np.log(logarithm_argument_upper),
+            "local ion-drag logarithm upper bound",
+        )
+        collection_cross_section_upper = _outward_abs_upper(
+            math.pi * collection_square_upper,
+            "local ion-drag collection-cross-section upper bound",
+        )
+        orbital_cross_section_upper = _outward_abs_upper(
+            4.0 * math.pi * orbital_impact_upper**2 * np.maximum(logarithm_upper, 0.0),
+            "local ion-drag orbital-cross-section upper bound",
+        )
+        force_factor_upper = _outward_abs_upper(
+            positive_ion_number_density_upper_m3
+            * effective_positive_ion_mass_upper_kg
+            * np.sqrt(speed_square_upper)
+            * (collection_cross_section_upper + orbital_cross_section_upper)
+            / mass_kg,
+            "local ion-drag force-factor upper bound",
+        )
+        acceleration_upper = _outward_abs_upper(
+            force_factor_upper[:, None] * relative_component_upper,
+            "local ion-drag acceleration upper bound",
+        )
+
+    finite = all(
+        bool(np.isfinite(value).all())
+        for value in (
+            relative_speed_lower,
+            relative_speed_upper,
+            speed_square_lower,
+            speed_square_upper,
+            capacitance_lower,
+            potential_abs_upper,
+            screening_radius_upper,
+            collection_square_upper,
+            orbital_impact_lower,
+            orbital_impact_upper,
+            logarithm_upper,
+            acceleration_upper,
+        )
+    )
+    if not finite or bool((acceleration_upper < 0.0).any()):
+        raise PhysicsEvaluationError("local relative-flow ion-drag bound is not finite")
+    applicable = relative_speed_upper <= relative_speed_limit
+    return acceleration_upper, applicable
+
+
 def electric_field_directed_image_ion_drag_global_bound(
     *,
     mass_kg: FloatArray,
@@ -2339,6 +2611,18 @@ def _outward_abs_upper(value: FloatArray, name: str) -> FloatArray:
     _require_nonnegative(result, name)
     with np.errstate(over="ignore", invalid="ignore"):
         result = np.nextafter(result * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    if not bool(np.isfinite(result).all()):
+        raise PhysicsEvaluationError(f"{name} is not finite")
+    return result
+
+
+def _outward_nonnegative_lower(value: FloatArray, name: str) -> FloatArray:
+    """Contract a short nonnegative float64 expression toward zero."""
+
+    result = np.asarray(value, dtype=np.float64)
+    _require_nonnegative(result, name)
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        result = np.nextafter(result / _BOUND_ROUNDOFF_FACTOR, 0.0)
     if not bool(np.isfinite(result).all()):
         raise PhysicsEvaluationError(f"{name} is not finite")
     return result

@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+# Evidence receipts hash exact producer bytes. Never apply newline conversion
+# inside the immutable evidence tree; source/config files remain LF-normalized.
+evidence/** binary
+
+*.h5 binary
+*.hdf5 binary
+*.npy binary
+*.npz binary
+*.png binary
+*.pdf binary
+*.prof binary
+*.svg binary
+*.whl binary

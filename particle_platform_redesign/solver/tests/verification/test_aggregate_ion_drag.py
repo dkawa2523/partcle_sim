@@ -11,6 +11,7 @@ from chamber_particles.physics.forces import (
     relative_flow_screened_collection_orbital_ion_drag,
     relative_flow_screened_continuous_applicability_batch,
     relative_flow_screened_ion_drag_global_bound,
+    relative_flow_screened_ion_drag_local_bound,
 )
 
 _E = Decimal("1.602176634e-19")
@@ -322,6 +323,56 @@ def test_revision_global_bounds_and_relative_path_gate_are_conservative() -> Non
     )
     assert applicable.tolist() == [True, False]
     assert status.tolist() == [0, 0]
+
+
+def test_relative_flow_local_bound_contains_sampled_state_and_primitive_box() -> None:
+    mass = np.asarray([2.0e-18])
+    radius = np.asarray([5.0e-8])
+    charge_lower = np.asarray([-190.0])
+    charge_upper = np.asarray([-120.0])
+    velocity_lower = np.asarray([[10.0, -15.0]])
+    velocity_upper = np.asarray([[20.0, -5.0]])
+    ion_velocity_lower = np.asarray([[100.0, 25.0]])
+    ion_velocity_upper = np.asarray([[130.0, 40.0]])
+    bound, applicable = relative_flow_screened_ion_drag_local_bound(
+        mass_kg=mass,
+        electrostatic_radius_m=radius,
+        charge_number_lower=charge_lower,
+        charge_number_upper=charge_upper,
+        velocity_lower_m_s=velocity_lower,
+        velocity_upper_m_s=velocity_upper,
+        positive_ion_number_density_upper_m3=np.asarray([1.2e15]),
+        positive_ion_thermal_voltage_lower_V=np.asarray([0.02]),
+        positive_ion_thermal_voltage_upper_V=np.asarray([0.08]),
+        positive_ion_velocity_lower_m_s=ion_velocity_lower,
+        positive_ion_velocity_upper_m_s=ion_velocity_upper,
+        effective_positive_ion_mass_lower_kg=np.asarray([6.0e-26]),
+        effective_positive_ion_mass_upper_kg=np.asarray([9.0e-26]),
+        screening_length_upper_m=np.asarray([4.0e-5]),
+        ion_neutral_mean_free_path_upper_m=np.asarray([7.0e-5]),
+        maximum_relative_ion_speed_m_s=300.0,
+    )
+    assert applicable.tolist() == [True]
+
+    rng = np.random.default_rng(20261002)
+    for _ in range(256):
+        actual = relative_flow_screened_collection_orbital_ion_drag(
+            mass_kg=mass,
+            electrostatic_radius_m=radius,
+            charge_number=rng.uniform(charge_lower, charge_upper),
+            velocity_m_s=rng.uniform(velocity_lower, velocity_upper),
+            positive_ion_number_density_m3=rng.uniform(7.0e14, 1.2e15, size=1),
+            positive_ion_thermal_voltage_V=rng.uniform(0.02, 0.08, size=1),
+            positive_ion_velocity_m_s=rng.uniform(
+                ion_velocity_lower,
+                ion_velocity_upper,
+            ),
+            effective_positive_ion_mass_kg=rng.uniform(6.0e-26, 9.0e-26, size=1),
+            screening_length_m=rng.uniform(8.0e-6, 4.0e-5, size=1),
+            ion_neutral_mean_free_path_m=rng.uniform(9.0e-6, 7.0e-5, size=1),
+            maximum_relative_ion_speed_m_s=300.0,
+        )
+        assert bool((np.abs(actual.acceleration_m_s2) <= bound).all())
 
 
 def test_image_formula_uses_vector_norm_not_saved_case_specific_speed_floor() -> None:

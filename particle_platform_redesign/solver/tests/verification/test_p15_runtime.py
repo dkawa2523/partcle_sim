@@ -187,8 +187,10 @@ def test_dynamic_electric_enclosure_uses_invariant_charge_and_disables_exact_pat
     assert runtime.maximum_charge_rate_abs_number_s == (
         runtime.charge_bounds.model.charge_rate_abs_upper_number_s
     )
+    assert runtime.localizable_external_base_abs_upper_m_s2 is not None
     expected_bound_bytes = (
         expected.nbytes
+        + runtime.localizable_external_base_abs_upper_m_s2.nbytes
         + runtime.charge_bounds.positive_ion_velocity_abs_upper_m_s.nbytes
         + 9 * np.dtype("<f8").itemsize
     )

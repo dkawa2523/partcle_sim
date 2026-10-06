@@ -108,8 +108,10 @@ from .integrators import (
     cubic_hermite_step,
     curved_chord_deviation_bounds,
     enclose_exponential_midpoint_path,
+    enclose_exponential_midpoint_path_from_stage_bounds,
     enclose_rk4_path,
     exponential_frozen_start_predictor,
+    exponential_frozen_start_predictor_enclosure,
     exponential_midpoint_step,
     restrict_cubic_hermite_proposal,
     rk4_step,
@@ -188,7 +190,7 @@ from .stochastic import (
 
 type _PathInput = str | PathLike[str]
 
-ENGINE_ALGORITHM_REVISION = "particle_engine_v36"
+ENGINE_ALGORITHM_REVISION = "particle_engine_v37"
 COMPILED_CPU_TILE_REVISION = "compiled_cpu_tile_v18"
 DURABLE_COMMIT_CADENCE_REVISION = "cumulative_solver_work_v1"
 
@@ -740,6 +742,14 @@ class _StageDynamics:
         certified[status != CONTINUOUS_APPLICABILITY_OK] = False
         return certified, status
 
+    def prepared_charge_invariant_interval(
+        self,
+        reference_charge_number: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Expose the runtime-owned invariant used by continuous path proofs."""
+
+        return self.runtime.prepared_charge_invariant_interval(reference_charge_number)
+
     def local_continuous_applicability_batch(
         self,
         particle_index: np.ndarray,
@@ -801,6 +811,69 @@ class _StageDynamics:
             certified[available_rows] = available_certified
             status[available_rows] = available_status
         return certified, status, range_available
+
+    def local_additive_acceleration_abs_upper_batch(
+        self,
+        particle_index: np.ndarray,
+        position_lower_m: np.ndarray,
+        position_upper_m: np.ndarray,
+        velocity_lower_m_s: np.ndarray,
+        velocity_upper_m_s: np.ndarray,
+        charge_lower_number: np.ndarray,
+        charge_upper_number: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Bound midpoint force over one local predictor enclosure."""
+
+        position_lower = np.asarray(position_lower_m, dtype="<f8")
+        position_upper = np.asarray(position_upper_m, dtype="<f8")
+        velocity_lower = np.asarray(velocity_lower_m_s, dtype="<f8")
+        velocity_upper = np.asarray(velocity_upper_m_s, dtype="<f8")
+        if self.coordinate_system == "axisymmetric_rz":
+            signed_position_lower = position_lower
+            signed_position_upper = position_upper
+            position_lower, position_upper = canonicalize_rz_enclosure(
+                signed_position_lower,
+                signed_position_upper,
+            )
+            velocity_lower, velocity_upper = _canonicalize_rz_velocity_enclosure(
+                signed_position_lower,
+                signed_position_upper,
+                velocity_lower,
+                velocity_upper,
+            )
+        local_fields = self.fields.local_component_bounds(position_lower, position_upper)
+        range_available = local_fields.range_available
+        count = int(particle_index.size)
+        bound = np.zeros((count, 2), dtype="<f8")
+        applicable = np.zeros(count, dtype=np.bool_)
+        status = np.full(
+            count,
+            CONTINUOUS_APPLICABILITY_OK,
+            dtype=np.uint8,
+        )
+        available_rows = np.flatnonzero(range_available).astype("<i8", copy=False)
+        if available_rows.size:
+            primitive_ranges = {
+                name: LocalPrimitiveRange(
+                    local_fields.lower[name][available_rows],
+                    local_fields.upper[name][available_rows],
+                )
+                for name in local_fields.lower
+            }
+            local_bound, local_applicable, local_status = (
+                self.runtime.local_additive_acceleration_abs_upper_batch(
+                    particle_index[available_rows],
+                    velocity_lower[available_rows],
+                    velocity_upper[available_rows],
+                    charge_lower_number[available_rows],
+                    charge_upper_number[available_rows],
+                    primitive_ranges,
+                )
+            )
+            bound[available_rows] = local_bound
+            applicable[available_rows] = local_applicable
+            status[available_rows] = local_status
+        return bound, applicable, status, range_available
 
     def linear_relaxation_abs_bounds(
         self,
@@ -1720,7 +1793,7 @@ def _guard_langevin_root_duration(
         predictor = exponential_frozen_start_predictor(
             particle_index,
             start_time_s,
-            midpoint_time_s,
+            0.5 * duration_s,
             start_position_m,
             start_velocity_m_s,
             start_charge_number,
@@ -3263,6 +3336,16 @@ def _prepare_memory_plan(
         enabled=event_paths,
     )
     event_staging_capacity = event_candidate_capacity // 2
+    dense_certificate = _uses_rk4_dense_certificate(
+        case,
+        physics,
+        runtime.constant_acceleration_m_s2,
+    )
+    local_range_certificate = dense_certificate or (
+        case.spec.solver.integrator == "exponential_midpoint"
+        and physics.requires_stage_evaluation
+        and runtime.constant_acceleration_m_s2 is None
+    )
     memory_plan = plan_cpu_memory(
         limit_bytes=memory_limit_bytes,
         particle_count=schedule.particle_count,
@@ -3299,15 +3382,7 @@ def _prepare_memory_plan(
         # A yielded locator result remains live while the next broad-phase
         # columns and the synchronously packed output candidate column coexist.
         geometry_query_scratch_bytes=(3 * event_candidate_capacity * np.dtype("<i8").itemsize),
-        dense_path_bytes_per_particle=(
-            176
-            if _uses_rk4_dense_certificate(
-                case,
-                physics,
-                runtime.constant_acceleration_m_s2,
-            )
-            else 0
-        ),
+        dense_path_bytes_per_particle=(176 if dense_certificate else 0),
         stochastic_tree_work_bytes_per_particle=(_stochastic_tree_work_bytes_per_particle(physics)),
         event_work_bytes_per_particle=_event_work_bytes_per_particle(
             case,
@@ -3315,11 +3390,8 @@ def _prepare_memory_plan(
         ),
         certificate_work_bytes_per_particle=_certificate_work_bytes_per_particle(
             case,
-            enabled=_uses_rk4_dense_certificate(
-                case,
-                physics,
-                runtime.constant_acceleration_m_s2,
-            ),
+            dense_enabled=dense_certificate,
+            local_range_enabled=local_range_certificate,
         ),
         release_work_bytes_per_particle=_surface_release_work_bytes_per_particle(
             schedule,
@@ -3463,6 +3535,7 @@ def _certify_curved_path(
     target_time_s: np.ndarray,
     start_position_m: np.ndarray,
     start_velocity_m_s: np.ndarray,
+    start_charge_number: np.ndarray,
 ) -> CurvedPathEnclosure | None:
     """Build the selected integrator's safety enclosure before arbitration."""
 
@@ -3481,7 +3554,7 @@ def _certify_curved_path(
             acceleration_abs_bounder=prepared.dynamics.acceleration_abs_upper,
         )
     rate_upper, target_upper = prepared.dynamics.linear_relaxation_abs_bounds(particle_index)
-    return enclose_exponential_midpoint_path(
+    global_enclosure = enclose_exponential_midpoint_path(
         particle_index,
         start_time_s,
         target_time_s,
@@ -3491,6 +3564,156 @@ def _certify_curved_path(
         target_velocity_abs_upper_m_s=target_upper,
         additive_acceleration_abs_bounder=(prepared.dynamics.additive_acceleration_abs_upper),
     )
+    if prepared.dynamics.runtime.localizable_external_base_abs_upper_m_s2 is None:
+        return global_enclosure
+    return _tighten_exponential_midpoint_enclosure(
+        prepared,
+        particle_index,
+        start_time_s,
+        target_time_s,
+        start_position_m,
+        start_velocity_m_s,
+        start_charge_number,
+        rate_upper,
+        target_upper,
+        global_enclosure,
+    )
+
+
+def _tighten_exponential_midpoint_enclosure(
+    prepared: _PreparedRun,
+    particle_index: np.ndarray,
+    start_time_s: np.ndarray,
+    target_time_s: np.ndarray,
+    start_position_m: np.ndarray,
+    start_velocity_m_s: np.ndarray,
+    start_charge_number: np.ndarray,
+    rate_upper_s_inv: np.ndarray,
+    target_velocity_abs_upper_m_s: np.ndarray,
+    fallback: CurvedPathEnclosure,
+) -> CurvedPathEnclosure:
+    """Tighten only rows whose global enclosure cannot finish certification."""
+
+    duration_s = target_time_s - start_time_s
+    charge_lower, charge_upper = prepared.dynamics.prepared_charge_invariant_interval(
+        start_charge_number
+    )
+    global_applicable, global_status = prepared.dynamics.global_continuous_applicability_batch(
+        particle_index,
+        fallback.velocity_lower_m_s,
+        fallback.velocity_upper_m_s,
+        charge_lower,
+        charge_upper,
+    )
+    support_inside = _curved_position_bounds_inside_support(
+        prepared,
+        fallback.position_lower_m,
+        fallback.position_upper_m,
+        np.zeros(particle_index.size, dtype=np.bool_),
+        np.zeros(particle_index.size, dtype="<f8"),
+    )
+    globally_proven = global_applicable & (global_status == CONTINUOUS_APPLICABILITY_OK)
+    selected = np.flatnonzero((duration_s > 0.0) & (~globally_proven | ~support_inside)).astype(
+        "<i8", copy=False
+    )
+    if not selected.size:
+        return fallback
+    predictor_box = exponential_frozen_start_predictor_enclosure(
+        particle_index[selected],
+        start_time_s[selected],
+        0.5 * duration_s[selected],
+        start_position_m[selected],
+        start_velocity_m_s[selected],
+        start_charge_number[selected],
+        evaluator=prepared.dynamics.evaluate_relaxation,
+    )
+    predictor = predictor_box.sample
+    valid = predictor.numerical_status == NUMERICAL_STATUS_OK
+    valid &= predictor.support_inside & predictor.applicability_inside
+    if not bool(valid.any()):
+        return fallback
+
+    predictor_position_lower = predictor_box.path.position_lower_m
+    predictor_position_upper = predictor_box.path.position_upper_m
+    predictor_velocity_lower = predictor_box.path.velocity_lower_m_s
+    predictor_velocity_upper = predictor_box.path.velocity_upper_m_s
+    predictor_charge_lower = predictor_box.charge_lower_number
+    predictor_charge_upper = predictor_box.charge_upper_number
+    valid &= predictor_box.path.numerical_status == NUMERICAL_STATUS_OK
+    finite = np.isfinite(predictor_position_lower).all(axis=1)
+    finite &= np.isfinite(predictor_position_upper).all(axis=1)
+    finite &= np.isfinite(predictor_velocity_lower).all(axis=1)
+    finite &= np.isfinite(predictor_velocity_upper).all(axis=1)
+    finite &= np.isfinite(predictor_charge_lower) & np.isfinite(predictor_charge_upper)
+    valid &= finite
+    if not bool(valid.any()):
+        return fallback
+
+    try:
+        local_bound, local_applicable, local_status, range_available = (
+            prepared.dynamics.local_additive_acceleration_abs_upper_batch(
+                particle_index[selected],
+                predictor_position_lower,
+                predictor_position_upper,
+                predictor_velocity_lower,
+                predictor_velocity_upper,
+                predictor_charge_lower,
+                predictor_charge_upper,
+            )
+        )
+    except (FieldLocationError, PhysicsEvaluationError, ValueError):
+        return fallback
+    valid &= range_available & local_applicable
+    valid &= local_status == CONTINUOUS_APPLICABILITY_OK
+    local_rows = np.flatnonzero(valid).astype("<i8", copy=False)
+    if not local_rows.size:
+        return fallback
+    local = enclose_exponential_midpoint_path_from_stage_bounds(
+        particle_index[selected[local_rows]],
+        start_time_s[selected[local_rows]],
+        target_time_s[selected[local_rows]],
+        start_position_m[selected[local_rows]],
+        start_velocity_m_s[selected[local_rows]],
+        linear_drag_rate_upper_s_inv=rate_upper_s_inv[selected[local_rows]],
+        target_velocity_abs_upper_m_s=target_velocity_abs_upper_m_s[selected[local_rows]],
+        additive_start_abs_upper_m_s2=local_bound[local_rows],
+        additive_midpoint_abs_upper_m_s2=local_bound[local_rows],
+        numerical_status=np.full(local_rows.size, NUMERICAL_STATUS_OK, dtype=np.uint8),
+    )
+    result = CurvedPathEnclosure(
+        fallback.position_lower_m.copy(),
+        fallback.position_upper_m.copy(),
+        fallback.velocity_lower_m_s.copy(),
+        fallback.velocity_upper_m_s.copy(),
+        fallback.numerical_status.copy(),
+    )
+    local_ok = local.numerical_status == NUMERICAL_STATUS_OK
+    accepted_rows = selected[local_rows[local_ok]]
+    if accepted_rows.size:
+        local_position_lower = np.maximum(
+            fallback.position_lower_m[accepted_rows],
+            local.position_lower_m[local_ok],
+        )
+        local_position_upper = np.minimum(
+            fallback.position_upper_m[accepted_rows],
+            local.position_upper_m[local_ok],
+        )
+        local_velocity_lower = np.maximum(
+            fallback.velocity_lower_m_s[accepted_rows],
+            local.velocity_lower_m_s[local_ok],
+        )
+        local_velocity_upper = np.minimum(
+            fallback.velocity_upper_m_s[accepted_rows],
+            local.velocity_upper_m_s[local_ok],
+        )
+        ordered = (local_position_lower <= local_position_upper).all(axis=1)
+        ordered &= (local_velocity_lower <= local_velocity_upper).all(axis=1)
+        accepted = accepted_rows[ordered]
+        result.position_lower_m[accepted] = local_position_lower[ordered]
+        result.position_upper_m[accepted] = local_position_upper[ordered]
+        result.velocity_lower_m_s[accepted] = local_velocity_lower[ordered]
+        result.velocity_upper_m_s[accepted] = local_velocity_upper[ordered]
+    return result
 
 
 def _build_step_proposal(
@@ -3560,6 +3783,7 @@ def _propose_root_batch(
             target_time_s,
             start_position_m,
             start_velocity_m_s,
+            start_charge_number,
         )
         proposal = _build_step_proposal(
             prepared,
@@ -4142,14 +4366,47 @@ def _continuous_applicability_verdicts(
                 charge_upper,
             )
         else:
-            velocity_abs_upper = np.maximum(
-                np.abs(velocity_lower),
-                np.abs(velocity_upper),
+            charge_lower, charge_upper = prepared.dynamics.prepared_charge_invariant_interval(
+                proposal.start_charge_number[selected]
             )
-            verdict, status = prepared.dynamics.continuous_applicability_batch(
+            verdict, status = prepared.dynamics.global_continuous_applicability_batch(
                 indices,
-                velocity_abs_upper,
+                velocity_lower,
+                velocity_upper,
+                charge_lower,
+                charge_upper,
             )
+            _require_applicability_certificate_result(
+                verdict,
+                status,
+                indices.size,
+                "global exponential",
+            )
+            global_proven = verdict & (status == CONTINUOUS_APPLICABILITY_OK)
+            local_rows = np.flatnonzero(~global_proven).astype("<i8", copy=False)
+            if local_rows.size:
+                local, local_status, range_available = (
+                    prepared.dynamics.local_continuous_applicability_batch(
+                        indices[local_rows],
+                        enclosure.position_lower_m[selected[local_rows]],
+                        enclosure.position_upper_m[selected[local_rows]],
+                        velocity_lower[local_rows],
+                        velocity_upper[local_rows],
+                        charge_lower[local_rows],
+                        charge_upper[local_rows],
+                    )
+                )
+                _require_applicability_certificate_result(
+                    local,
+                    local_status,
+                    local_rows.size,
+                    "local exponential",
+                    range_available,
+                )
+                resolved = np.flatnonzero(range_available).astype("<i8", copy=False)
+                target_rows = local_rows[resolved]
+                verdict[target_rows] = local[resolved]
+                status[target_rows] = local_status[resolved]
     except (PhysicsEvaluationError, ValueError) as error:
         raise EngineError("curved-path applicability batch could not be evaluated") from error
     if verdict.shape != (indices.size,) or status.shape != (indices.size,):
@@ -4281,6 +4538,7 @@ def _build_curved_rows(
         targets,
         positions,
         velocities,
+        charges,
     )
     proposal = _build_step_proposal(
         prepared,
@@ -8092,11 +8350,12 @@ def _uses_rk4_dense_certificate(
 def _certificate_work_bytes_per_particle(
     case: SimulationCase,
     *,
-    enabled: bool,
+    dense_enabled: bool,
+    local_range_enabled: bool,
 ) -> int:
-    """Account the total-split-bounded dense certificate DFS columns."""
+    """Account dense DFS state and the bounded local-field candidate arena."""
 
-    if not enabled:
+    if not dense_enabled and not local_range_enabled:
         return 0
     stack_capacity = case.spec.solver.event.max_refinements + 1
     # Two float64 interval endpoints per live stack slot; int64 stack top and
@@ -8104,9 +8363,15 @@ def _certificate_work_bytes_per_particle(
     # The local-field owner additionally retains at most 64 int64 candidate
     # cell IDs plus count, bounded-count, and CSR-offset columns per row.  The
     # extra eight-byte rounding covers the terminal CSR offset.  Primitive
-    # lower/upper transients stay inside the general stage scratch allowance.
-    interval_stack_bytes = 16 * stack_capacity + 24
-    candidate_arena_bytes = (LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW + 4) * np.dtype("<i8").itemsize
+    # lower/upper and predictor transients stay inside the general stage scratch
+    # allowance. Exponential local-stage certification uses the candidate arena
+    # without the RK4 dense interval stack.
+    interval_stack_bytes = 16 * stack_capacity + 24 if dense_enabled else 0
+    candidate_arena_bytes = (
+        (LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW + 4) * np.dtype("<i8").itemsize
+        if local_range_enabled
+        else 0
+    )
     return interval_stack_bytes + candidate_arena_bytes
 
 

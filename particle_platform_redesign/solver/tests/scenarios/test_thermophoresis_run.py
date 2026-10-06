@@ -63,7 +63,7 @@ def test_waldmann_affine_heat_flux_time_convergence(
     assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_rz_catalog_v17"
     assert (
         last_result.manifest["physics_runtime_revision"]
-        == "signed_ion_compiled_physics_runtime_v19"
+        == "signed_ion_compiled_physics_runtime_v20"
     )
 
 

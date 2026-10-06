@@ -78,7 +78,7 @@ def test_stochastic_exponential_midpoint_has_second_order_noise_free_limit() -> 
             predictor = exponential_frozen_start_predictor(
                 np.asarray([1], dtype="<i8"),
                 start_s,
-                midpoint_s,
+                np.asarray([0.5 * step_s]),
                 position,
                 velocity,
                 charge,
@@ -168,7 +168,7 @@ def test_charge_electric_stochastic_midpoint_weak_mean_is_at_least_first_order()
             predictor = exponential_frozen_start_predictor(
                 np.asarray([1], dtype="<i8"),
                 start_s,
-                midpoint_s,
+                np.asarray([0.5 * step_s]),
                 position,
                 velocity,
                 charge,

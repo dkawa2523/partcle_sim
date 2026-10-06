@@ -32,7 +32,7 @@ STEP_PROPOSAL_REVISION = "coupled_fixed_step_proposal_v10"
 RK4_ENCLOSURE_REVISION = "rk4_global_abs_enclosure_v2"
 RK4_DENSE_PATH_REVISION = "rk4_position_hermite_state_extension_v3"
 EXPONENTIAL_MIDPOINT_REVISION = "charge_stable_exponential_midpoint_v3"
-EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION = "exponential_midpoint_global_abs_enclosure_v3"
+EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION = "exponential_midpoint_local_stage_enclosure_v4"
 # With unit roundoff u=eps/2, 16*eps=32u exceeds the dense expression's gamma_6,
 # the scale construction's gamma_5, and the O(u^2) rounded-turn displacement.
 _QUADRATIC_ROUNDOFF_EPS_FACTOR = 16.0
@@ -41,6 +41,10 @@ _QUADRATIC_ROUNDOFF_EPS_FACTOR = 16.0
 # covers both dense values and the chord construction while keeping arithmetic
 # error separate from the geometry tolerance.
 _CURVED_CHORD_ROUNDOFF_EPS_FACTOR = 64.0
+# The frozen-start predictor contains cancellation-prone ``expm1`` and affine
+# combinations. Its local field box must contain every shortened predictor
+# evaluated by the same compiled kernel, not only the exact mathematical path.
+_FROZEN_PREDICTOR_ROUNDOFF_EPS_FACTOR = 128.0
 # With unit roundoff u=eps/2, 8*eps=16u covers the final world-coordinate
 # translation of the dense value, both translated chord endpoints, and the
 # four rounded operations in the public endpoint-chord expression.  Relative
@@ -169,6 +173,27 @@ class ProposalSample:
     support_inside: BoolArray
     applicability_inside: BoolArray
     numerical_status: UInt8Array
+
+
+@dataclass(frozen=True, slots=True)
+class FrozenStartPredictorEnclosure:
+    """Frozen-start predictor endpoint and all-shortened-time enclosure."""
+
+    sample: ProposalSample
+    path: CurvedPathEnclosure
+    charge_lower_number: FloatArray
+    charge_upper_number: FloatArray
+
+
+@dataclass(frozen=True, slots=True)
+class _FrozenStartPredictorData:
+    """One start evaluation shared by the predictor and its enclosure."""
+
+    sample: ProposalSample
+    elapsed_s: FloatArray
+    target_velocity_m_s: FloatArray
+    additive_acceleration_m_s2: FloatArray
+    charge_rate_number_s: FloatArray
 
 
 @dataclass(frozen=True, slots=True)
@@ -1641,7 +1666,7 @@ def exponential_midpoint_step(
 def exponential_frozen_start_predictor(
     particle_index: Int64Array,
     start_time_s: FloatArray,
-    target_time_s: FloatArray,
+    elapsed_s: FloatArray,
     start_position_m: FloatArray,
     start_velocity_m_s: FloatArray,
     start_charge_number: FloatArray,
@@ -1651,22 +1676,88 @@ def exponential_frozen_start_predictor(
     """Predict a coefficient midpoint without sampling the predicted endpoint.
 
     This is the deterministic half-root predictor used by the stochastic
-    exponential-midpoint composition.  It evaluates the accepted root start
-    once, freezes those coefficients, and advances to ``target_time_s``.  The
+    exponential-midpoint composition. It evaluates the accepted root start
+    once, freezes those coefficients, and advances by ``elapsed_s``. Elapsed
+    time is authoritative even when ``start_time_s + elapsed_s`` rounds back
+    to the start. The
     caller owns geometry admission of the returned point before any field or
     physics evaluation may occur there.
     """
 
-    count = int(particle_index.size)
-    targets = np.asarray(target_time_s, dtype=np.float64)
-    _validate_inputs(
-        count,
+    return _frozen_start_predictor_data(
+        particle_index,
         start_time_s,
-        targets,
+        elapsed_s,
+        start_position_m,
+        start_velocity_m_s,
+        start_charge_number,
+        evaluator=evaluator,
+    ).sample
+
+
+def exponential_frozen_start_predictor_enclosure(
+    particle_index: Int64Array,
+    start_time_s: FloatArray,
+    elapsed_s: FloatArray,
+    start_position_m: FloatArray,
+    start_velocity_m_s: FloatArray,
+    start_charge_number: FloatArray,
+    *,
+    evaluator: RelaxationStageEvaluator,
+) -> FrozenStartPredictorEnclosure:
+    """Return one predictor and a box for every shortened predictor time.
+
+    The coefficients are evaluated once at the accepted start and then frozen.
+    With nonnegative relaxation, velocity without additive acceleration is a
+    convex combination of ``v0`` and ``u``; its additive memory is at most
+    ``s``. Position uses nonnegative velocity weights summing to ``s`` and an
+    additive memory no larger than ``s**2/2``. These facts bound every
+    ``0 <= s <= H``. Absolute-term padding additionally contains float64
+    cancellation in the compiled predictor and affine charge kernels.
+    """
+
+    data = _frozen_start_predictor_data(
+        particle_index,
+        start_time_s,
+        elapsed_s,
+        start_position_m,
+        start_velocity_m_s,
+        start_charge_number,
+        evaluator=evaluator,
+    )
+    return _enclose_frozen_start_predictor(
+        data,
+        start_time_s,
         start_position_m,
         start_velocity_m_s,
         start_charge_number,
     )
+
+
+def _frozen_start_predictor_data(
+    particle_index: Int64Array,
+    start_time_s: FloatArray,
+    elapsed_s: FloatArray,
+    start_position_m: FloatArray,
+    start_velocity_m_s: FloatArray,
+    start_charge_number: FloatArray,
+    *,
+    evaluator: RelaxationStageEvaluator,
+) -> _FrozenStartPredictorData:
+    """Evaluate one frozen start and retain the coefficients used to advance."""
+
+    count = int(particle_index.size)
+    elapsed = np.asarray(elapsed_s, dtype=np.float64)
+    _validate_inputs(
+        count,
+        start_time_s,
+        start_time_s,
+        start_position_m,
+        start_velocity_m_s,
+        start_charge_number,
+    )
+    if elapsed.shape != (count,) or not bool(np.isfinite(elapsed).all() and (elapsed >= 0.0).all()):
+        raise ValueError("frozen-start predictor elapsed time must be finite and nonnegative")
     numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
     support = np.ones(count, dtype=np.bool_)
     applicable = np.ones(count, dtype=np.bool_)
@@ -1692,7 +1783,6 @@ def exponential_frozen_start_predictor(
         additive_acceleration[rows] = start.additive_acceleration_m_s2
         charge_rate[rows] = start.charge_rate_number_s
         charge_derivative[rows] = start.charge_rate_derivative_s_inv
-    elapsed = targets - start_time_s
     position, velocity = _exponential_update_active(
         start_position_m,
         start_velocity_m_s,
@@ -1711,14 +1801,137 @@ def exponential_frozen_start_predictor(
         elapsed,
         numerical_status,
     )
-    return ProposalSample(
-        particle_index=particle_index.copy(),
-        position_m=position,
-        velocity_m_s=velocity,
-        charge_number=charge,
-        support_inside=support,
-        applicability_inside=applicable,
-        numerical_status=numerical_status,
+    return _FrozenStartPredictorData(
+        sample=ProposalSample(
+            particle_index=particle_index.copy(),
+            position_m=position,
+            velocity_m_s=velocity,
+            charge_number=charge,
+            support_inside=support,
+            applicability_inside=applicable,
+            numerical_status=numerical_status,
+        ),
+        elapsed_s=elapsed.copy(),
+        target_velocity_m_s=target_velocity,
+        additive_acceleration_m_s2=additive_acceleration,
+        charge_rate_number_s=charge_rate,
+    )
+
+
+def _enclose_frozen_start_predictor(
+    data: _FrozenStartPredictorData,
+    start_time_s: FloatArray,
+    start_position_m: FloatArray,
+    start_velocity_m_s: FloatArray,
+    start_charge_number: FloatArray,
+) -> FrozenStartPredictorEnclosure:
+    """Enclose the compiled frozen-start predictor at its arithmetic scale."""
+
+    sample = data.sample
+    status = sample.numerical_status.copy()
+    position_lower = start_position_m.copy()
+    position_upper = start_position_m.copy()
+    velocity_lower = start_velocity_m_s.copy()
+    velocity_upper = start_velocity_m_s.copy()
+    charge_lower = start_charge_number.copy()
+    charge_upper = start_charge_number.copy()
+    del start_time_s
+    duration_s = data.elapsed_s
+    moving = np.flatnonzero(duration_s > 0.0).astype("<i8", copy=False)
+    if moving.size:
+        duration = duration_s[moving, None]
+        velocity = start_velocity_m_s[moving]
+        target = data.target_velocity_m_s[moving]
+        acceleration_abs = np.abs(data.additive_acceleration_m_s2[moving])
+        with np.errstate(over="ignore", invalid="ignore"):
+            velocity_additive = duration * acceleration_abs
+            velocity_exact_lower = np.minimum(velocity, target) - velocity_additive
+            velocity_exact_upper = np.maximum(velocity, target) + velocity_additive
+
+            minimum_velocity = np.minimum(np.minimum(velocity, target), 0.0)
+            maximum_velocity = np.maximum(np.maximum(velocity, target), 0.0)
+            acceleration_displacement = 0.5 * duration * duration * acceleration_abs
+            position_exact_lower = (
+                start_position_m[moving] + duration * minimum_velocity - acceleration_displacement
+            )
+            position_exact_upper = (
+                start_position_m[moving] + duration * maximum_velocity + acceleration_displacement
+            )
+
+            eps_factor = _FROZEN_PREDICTOR_ROUNDOFF_EPS_FACTOR * np.finfo(np.float64).eps
+            underflow = (
+                _FROZEN_PREDICTOR_ROUNDOFF_EPS_FACTOR * np.finfo(np.float64).smallest_subnormal
+            )
+            velocity_scale = (
+                np.abs(velocity)
+                + np.abs(target)
+                + velocity_additive
+                + np.abs(sample.velocity_m_s[moving])
+            )
+            velocity_padding = np.nextafter(eps_factor * velocity_scale + underflow, np.inf)
+            position_scale = (
+                np.abs(start_position_m[moving])
+                + duration * (np.abs(velocity) + np.abs(target))
+                + acceleration_displacement
+                + np.abs(sample.position_m[moving])
+            )
+            position_padding = np.nextafter(eps_factor * position_scale + underflow, np.inf)
+
+            velocity_lower[moving] = np.nextafter(
+                np.minimum(velocity_exact_lower, sample.velocity_m_s[moving]) - velocity_padding,
+                -np.inf,
+            )
+            velocity_upper[moving] = np.nextafter(
+                np.maximum(velocity_exact_upper, sample.velocity_m_s[moving]) + velocity_padding,
+                np.inf,
+            )
+            position_lower[moving] = np.nextafter(
+                np.minimum(position_exact_lower, sample.position_m[moving]) - position_padding,
+                -np.inf,
+            )
+            position_upper[moving] = np.nextafter(
+                np.maximum(position_exact_upper, sample.position_m[moving]) + position_padding,
+                np.inf,
+            )
+
+            charge_scale = (
+                np.abs(start_charge_number[moving])
+                + np.abs(sample.charge_number[moving])
+                + duration_s[moving] * np.abs(data.charge_rate_number_s[moving])
+            )
+            charge_padding = np.nextafter(eps_factor * charge_scale + underflow, np.inf)
+            charge_lower[moving] = np.nextafter(
+                np.minimum(start_charge_number[moving], sample.charge_number[moving])
+                - charge_padding,
+                -np.inf,
+            )
+            charge_upper[moving] = np.nextafter(
+                np.maximum(start_charge_number[moving], sample.charge_number[moving])
+                + charge_padding,
+                np.inf,
+            )
+
+    path = _normalize_enclosure_bounds(
+        start_position_m,
+        start_velocity_m_s,
+        position_lower,
+        position_upper,
+        velocity_lower,
+        velocity_upper,
+        status,
+    )
+    invalid_charge = ~np.isfinite(charge_lower) | ~np.isfinite(charge_upper)
+    invalid_charge |= charge_lower > charge_upper
+    first_failure = (path.numerical_status == NUMERICAL_STATUS_OK) & invalid_charge
+    path.numerical_status[first_failure] = INTEGRATOR_NUMERICAL_FAILURE
+    failed = path.numerical_status != NUMERICAL_STATUS_OK
+    charge_lower[failed] = start_charge_number[failed]
+    charge_upper[failed] = start_charge_number[failed]
+    return FrozenStartPredictorEnclosure(
+        sample=sample,
+        path=path,
+        charge_lower_number=charge_lower,
+        charge_upper_number=charge_upper,
     )
 
 
@@ -1909,44 +2122,111 @@ def enclose_exponential_midpoint_path(
     ):
         raise ValueError("exponential coefficient bounds must be finite and nonnegative")
 
+    duration_s = target_time_s - start_time_s
+    moving = np.flatnonzero(duration_s > 0.0)
+    additive_start_abs = np.zeros((count, 2), dtype=np.float64)
+    additive_midpoint_abs = np.zeros((count, 2), dtype=np.float64)
+    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
+    if moving.size:
+        duration = duration_s[moving, None]
+        velocity_abs = np.abs(start_velocity_m_s[moving])
+        moving_status = numerical_status[moving].copy()
+        start_bound, moving_status = _bounded_acceleration(
+            additive_acceleration_abs_bounder,
+            particle_index[moving],
+            velocity_abs,
+            moving_status,
+        )
+        velocity_base_abs = np.maximum(velocity_abs, target_upper[moving])
+        half_duration = _upper_product_batch(duration, 0.5, moving_status)
+        midpoint_velocity_abs = _upper_sum_batch(
+            velocity_base_abs,
+            _upper_product_batch(half_duration, start_bound, moving_status),
+            moving_status,
+        )
+        midpoint_bound, moving_status = _bounded_acceleration(
+            additive_acceleration_abs_bounder,
+            particle_index[moving],
+            midpoint_velocity_abs,
+            moving_status,
+        )
+        additive_start_abs[moving] = start_bound
+        additive_midpoint_abs[moving] = midpoint_bound
+        numerical_status[moving] = moving_status
+    return enclose_exponential_midpoint_path_from_stage_bounds(
+        particle_index,
+        start_time_s,
+        target_time_s,
+        start_position_m,
+        start_velocity_m_s,
+        linear_drag_rate_upper_s_inv=rate_upper,
+        target_velocity_abs_upper_m_s=target_upper,
+        additive_start_abs_upper_m_s2=additive_start_abs,
+        additive_midpoint_abs_upper_m_s2=additive_midpoint_abs,
+        numerical_status=numerical_status,
+    )
+
+
+def enclose_exponential_midpoint_path_from_stage_bounds(
+    particle_index: Int64Array,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    start_position_m: FloatArray,
+    start_velocity_m_s: FloatArray,
+    *,
+    linear_drag_rate_upper_s_inv: FloatArray,
+    target_velocity_abs_upper_m_s: FloatArray,
+    additive_start_abs_upper_m_s2: FloatArray,
+    additive_midpoint_abs_upper_m_s2: FloatArray,
+    numerical_status: UInt8Array,
+) -> CurvedPathEnclosure:
+    """Assemble an exponential enclosure from independently proven stage bounds."""
+
+    count = _validate_enclosure_inputs(
+        particle_index,
+        start_time_s,
+        target_time_s,
+        start_position_m,
+        start_velocity_m_s,
+    )
+    rate_upper = np.asarray(linear_drag_rate_upper_s_inv, dtype=np.float64)
+    target_upper = np.asarray(target_velocity_abs_upper_m_s, dtype=np.float64)
+    additive_start = np.asarray(additive_start_abs_upper_m_s2, dtype=np.float64)
+    additive_midpoint = np.asarray(additive_midpoint_abs_upper_m_s2, dtype=np.float64)
+    status = np.asarray(numerical_status, dtype=np.uint8).copy()
+    if (
+        rate_upper.shape != (count,)
+        or target_upper.shape != (count, 2)
+        or additive_start.shape != (count, 2)
+        or additive_midpoint.shape != (count, 2)
+        or status.shape != (count,)
+    ):
+        raise ValueError("exponential stage bounds have an invalid shape")
+    finite_nonnegative = all(
+        bool(np.isfinite(value).all() and (value >= 0.0).all())
+        for value in (rate_upper, target_upper, additive_start, additive_midpoint)
+    )
+    if not finite_nonnegative:
+        raise ValueError("exponential stage bounds must be finite and nonnegative")
+
     result = CurvedPathEnclosure(
         position_lower_m=start_position_m.copy(),
         position_upper_m=start_position_m.copy(),
         velocity_lower_m_s=start_velocity_m_s.copy(),
         velocity_upper_m_s=start_velocity_m_s.copy(),
-        numerical_status=np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8),
+        numerical_status=status.copy(),
     )
     duration_s = target_time_s - start_time_s
     moving = np.flatnonzero(duration_s > 0.0)
     if not moving.size:
         return result
-
     duration = duration_s[moving, None]
     velocity = start_velocity_m_s[moving]
-    numerical_status = np.full(moving.size, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    moving_particle_index = particle_index[moving]
+    moving_status = status[moving].copy()
     velocity_abs = np.abs(velocity)
-    additive_start_abs, numerical_status = _bounded_acceleration(
-        additive_acceleration_abs_bounder,
-        moving_particle_index,
-        velocity_abs,
-        numerical_status,
-    )
     velocity_base_abs = np.maximum(velocity_abs, target_upper[moving])
-    half_duration = _upper_product_batch(duration, 0.5, numerical_status)
-    midpoint_velocity_abs = _upper_sum_batch(
-        velocity_base_abs,
-        _upper_product_batch(half_duration, additive_start_abs, numerical_status),
-        numerical_status,
-    )
-    additive_midpoint_abs, numerical_status = _bounded_acceleration(
-        additive_acceleration_abs_bounder,
-        moving_particle_index,
-        midpoint_velocity_abs,
-        numerical_status,
-    )
-    additive_upper = np.maximum(additive_start_abs, additive_midpoint_abs)
-    rate_argument = _upper_product_batch(duration_s[moving], rate_upper[moving], numerical_status)[
+    additive_upper = np.maximum(additive_start[moving], additive_midpoint[moving])
+    rate_argument = _upper_product_batch(duration_s[moving], rate_upper[moving], moving_status)[
         :, None
     ]
     with np.errstate(under="ignore", invalid="ignore"):
@@ -1955,10 +2235,10 @@ def enclose_exponential_midpoint_path(
     decayed_velocity = minimum_decay * velocity
     decay_lower = np.nextafter(np.minimum(velocity, decayed_velocity), -np.inf)
     decay_upper = np.nextafter(np.maximum(velocity, decayed_velocity), np.inf)
-    target_radius = _upper_product_batch(relaxed_fraction, target_upper[moving], numerical_status)
+    target_radius = _upper_product_batch(relaxed_fraction, target_upper[moving], moving_status)
     relaxed_lower = np.nextafter(decay_lower - target_radius, -np.inf)
     relaxed_upper = np.nextafter(decay_upper + target_radius, np.inf)
-    additive_velocity = _upper_product_batch(duration, additive_upper, numerical_status)
+    additive_velocity = _upper_product_batch(duration, additive_upper, moving_status)
     velocity_lower = np.nextafter(
         np.minimum(velocity, relaxed_lower) - additive_velocity,
         -np.inf,
@@ -1971,14 +2251,14 @@ def enclose_exponential_midpoint_path(
         _upper_product_batch(
             duration,
             velocity_base_abs,
-            numerical_status,
+            moving_status,
         ),
         _upper_product_batch(
-            _upper_product_batch(duration, duration, numerical_status),
-            _upper_product_batch(additive_upper, 0.5, numerical_status),
-            numerical_status,
+            _upper_product_batch(duration, duration, moving_status),
+            _upper_product_batch(additive_upper, 0.5, moving_status),
+            moving_status,
         ),
-        numerical_status,
+        moving_status,
     )
     with np.errstate(over="ignore", invalid="ignore"):
         position_lower = np.nextafter(start_position_m[moving] - position_radius, -np.inf)
@@ -1990,7 +2270,7 @@ def enclose_exponential_midpoint_path(
         position_upper,
         velocity_lower,
         velocity_upper,
-        numerical_status,
+        moving_status,
     )
     _require_finite_enclosure(moving_enclosure)
     result.position_lower_m[moving] = moving_enclosure.position_lower_m

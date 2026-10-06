@@ -10,7 +10,7 @@ import numpy as np
 from numba import njit
 
 CPU_RUNTIME_LAYOUT_REVISION = "resident_soa_serial_slab_v6"
-MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v13"
+MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v14"
 
 _MAX_SLAB_PARTICLES = 65_536
 _MINIMUM_SAFETY_MARGIN_BYTES = 64 * 1024

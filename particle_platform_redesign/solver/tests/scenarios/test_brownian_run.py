@@ -150,7 +150,7 @@ def test_rz_brownian_constant_gravity_matches_joint_ou_mean_covariance_and_charg
         "stochastic_exponential_midpoint_v1"
     )
     assert result.manifest["brownian_charge_dense_revision"] == ("macro_root_affine_exponential_v2")
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v36"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v37"
     assert result.manifest["step_proposal_revision"] == "coupled_fixed_step_proposal_v10"
     assert result.manifest["physics_catalog_revision"] == "inertial_langevin_rz_catalog_v17"
     resume_identity = result.manifest["resume_identity"]
@@ -450,7 +450,7 @@ def test_rz_brownian_checkpoint_resume_is_bitwise_identical(
         _assert_record_identity(first, second)
     assert expected.manifest["resume_identity"] == actual.manifest["resume_identity"]
     assert actual.manifest["resume_identity"]["engine_algorithm_revision"] == (
-        "particle_engine_v36"
+        "particle_engine_v37"
     )
 
 

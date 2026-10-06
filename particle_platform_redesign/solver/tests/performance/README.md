@@ -54,7 +54,7 @@ requested frames and adds the P06-U capability. Event v6 added the certified
 constant-acceleration surface start-contact rule. Engine v11 / event v7
 extended that rule to strict-inward Cartesian general-RK4 start contact and
 active-wall residual time. Engine v12 / event v8 added the P06-RZ
-signed-stage/axis-event capability; current engine v36 preserves it while
+signed-stage/axis-event capability; current engine v37 preserves it while
 adding P06-S/P08/P09 behavior, the P10 compiled array passes, and the P11
 exponential-midpoint path. It preserves P12 event semantics, but P14-P removed
 that milestone's outer worker partition. All eight
@@ -582,9 +582,9 @@ sampled through load, simulate, and open; it excludes later external validation.
 The JSON is local evidence only. P14-R owns preservation of release evidence.
 The quick smoke continues to validate only driver and gate shape.
 
-Current production is engine v36 / compiled tile v18 / proposal v10 / event v16,
-physics catalog v17 / runtime v19, runtime layout v6, RK4 enclosure v2, dense path v3,
-charge-stable exponential midpoint v3 / enclosure v3, result v5, field location v4, and memory plan v13 after P15 stationary charge, P15-D shifted-Maxwellian charge, P15-E
+Current production is engine v37 / compiled tile v18 / proposal v10 / event v16,
+physics catalog v17 / runtime v20, runtime layout v6, RK4 enclosure v2, dense path v3,
+charge-stable exponential midpoint v3 / enclosure v4, result v5, field location v4, and memory plan v14 after P15 stationary charge, P15-D shifted-Maxwellian charge, P15-E
 finite-speed Epstein, P15-F collisionless Barnes ion drag, and P16
 Waldmann--Gallis thermophoresis, plus the narrowly scoped B02 inertial-Brownian
 path and P18-R effective-gas drag/thermophoresis sensitivities. Engine v30 localizes an unrepresentable OU row without stopping valid
