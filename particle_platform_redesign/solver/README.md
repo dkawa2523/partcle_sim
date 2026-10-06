@@ -4,6 +4,10 @@
 clean-room solverです。このdirectoryは旧実装から独立したuv projectであり、COMSOLや
 `model_dataset/`をruntime dependencyにしません。
 
+正式公開版は`0.1.0`です。配布wheelとSHA-256は
+[`v0.1.0` GitHub Release](https://github.com/dkawa2523/partcle_sim/releases/tag/v0.1.0)に置きます。
+本repositoryには現時点で利用ライセンスを設定していないため、再利用条件は権利者の明示許諾が必要です。
+
 製品として受理する機能、非対応の組合せ、schema/version方針とエラー対処は
 [`docs/support_and_errors.md`](docs/support_and_errors.md)に集約しています。
 
@@ -298,7 +302,8 @@ mixed-cell BVHで絞り、局所的にfloat64で解像不能なcellをprepareで
 20 workerで1.8796x/4.7965xでしたがevent-heavyでは負のscaleでした。T03 analysis/visualizationは完了しました。
 P14-Rはbaseline v27/P14-Uを履歴として保持し、receipt固定のtested head/lockについてremote Windows/Linuxで
 620件、性能smoke 7行（cold 1＋warm 6）、wheel、runtime-only clean install、三API smokeまで合格したため、
-`0.1.0.dev0`開発baselineの配布可能性closureを完了しました。これは正式版packageの公開を意味しません。
+`0.1.0.dev0`開発baselineの配布可能性closureを完了しました。その後、現行static 2-D scopeを`0.1.0`として
+固定し、tag上の同じWindows/Linux gateが成功した場合だけ正式GitHub Releaseを生成する形へ移行しました。
 
 P14-Pは否定的closeoutまで完了しました。focused correction後のregular 1Mは1/2/4 threadで
 9.32/10.09/10.10 s、4-thread speedup 0.923xで、v20の1-thread 7.534 sからも23.7%退行しました。

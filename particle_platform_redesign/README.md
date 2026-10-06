@@ -256,7 +256,9 @@ P14-Uは同じ直列engineにXY surface release、Epstein drag、非affine電場
 絶対秒数はmachine-localな記述証拠です。
 T03 analysis/visualizationは完了しました。P14-Rはcurrent evidence保存に加え、receipt固定のtested head/lockについて
 remote Windows/Linuxで620件、性能smoke 7行（cold 1＋warm 6）、wheel、runtime-only clean install、
-三公開API smokeまで合格し、`0.1.0.dev0`開発baselineの配布可能性closureを完了しました。
+三公開API smokeまで合格し、`0.1.0.dev0`開発baselineの配布可能性closureを完了しました。このbaselineと
+同じsingle-engineへ受理済みのstatic 2-D機能を正式版`0.1.0`として固定し、tagのWindows/Linux gate成功後だけ
+検証済みwheelをGitHub Releaseへ公開します。
 このCI成功はCOMSOL V&Vまたはportable性能の追加認定ではありません。P15は旧着手blockerをユーザーの明示指示で
 解除し、RK4-firstと、その受入後のexplicit midpoint chargeまで完了しました。続く外部M3-V評価、canonical
 RZ/P1 field builder F01、provider adapterと代表統合を担うF02も完了しました。F02はmixed meshのP1化、代表規模

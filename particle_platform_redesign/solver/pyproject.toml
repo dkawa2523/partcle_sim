@@ -4,10 +4,17 @@ build-backend = "uv_build"
 
 [project]
 name = "chamber-particles"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Particle trajectory solver for externally supplied chamber fields and geometry"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Physics",
+]
 dependencies = [
   "h5py>=3.11,<4",
   "numba>=0.67,<0.68",
@@ -17,6 +24,10 @@ dependencies = [
 
 [project.scripts]
 chamber-particles = "chamber_particles.cli:main"
+
+[project.urls]
+Repository = "https://github.com/dkawa2523/partcle_sim"
+Issues = "https://github.com/dkawa2523/partcle_sim/issues"
 
 [dependency-groups]
 dev = [

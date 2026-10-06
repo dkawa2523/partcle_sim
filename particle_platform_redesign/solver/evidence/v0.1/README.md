@@ -24,6 +24,12 @@ comparison.
   smoke, wheel build, runtime-only clean install, and the three-public-API smoke. It is not
   COMSOL V&V, a portable timing promise, or a formal `0.1.0` publication receipt.
 
+The formal `v0.1.0` tag workflow publishes the verified wheel together with
+`SHA256SUMS.txt` on the
+[GitHub Release](https://github.com/dkawa2523/partcle_sim/releases/tag/v0.1.0). The immutable
+tag, successful workflow run, and wheel digest form the publication receipt; the historical
+development receipts above remain unchanged.
+
 Both performance JSON files contain their machine fingerprint, locked-environment digest,
 execution conditions, algorithm revisions, scientific payload digests, and pass/fail checks.
 The historical v20 69-observation raw artifact no longer exists; it is not reconstructed from

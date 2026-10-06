@@ -2140,10 +2140,10 @@ common-fieldでのtime-discretization parityと、各producer固有fieldを含�
 
 ---
 
-## 21. 現行`0.1.0.dev0`の採用状態
+## 21. 正式公開版`0.1.0`の採用状態
 
-この表はP14-R baselineに、その後同じ単一engineへ受理した機能を加えた現行開発版の状態である。
-初期baselineと後続stageを同一時点のrelease scopeとして扱わない。
+この表はP14-R baselineに、その後同じ単一engineへ受理した機能を加えた`0.1.0`のrelease scopeである。
+各機能の受入時点と証拠は維持し、初期baselineと後続stageを同一時点の検証結果として扱わない。
 
 | 項目 | 採用 | 後続・不採用理由 |
 |---|---|---|

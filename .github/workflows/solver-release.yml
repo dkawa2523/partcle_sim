@@ -82,3 +82,72 @@ jobs:
           if ($wheel.Count -ne 1) { throw "expected exactly one wheel" }
           uv pip install --python $python --no-deps $wheel.FullName
           & $python -m tests.release_smoke
+      - name: Retain verified release wheel
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: chamber-particles-wheel
+          path: ${{ runner.temp }}/chamber-particles-dist/*.whl
+          if-no-files-found: error
+          retention-days: 90
+
+  publish-github-release:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: wheel-and-public-api
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v7
+      - name: Download verified wheel
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: chamber-particles-wheel
+          path: ${{ runner.temp }}/chamber-particles-release
+      - name: Verify release identity and prepare checksum
+        id: release
+        run: |
+          $tag = "${{ github.ref_name }}"
+          if (-not $tag.StartsWith("v")) { throw "release tag must start with v" }
+          $version = $tag.Substring(1)
+          $directory = Join-Path "${{ runner.temp }}" "chamber-particles-release"
+          $wheel = @(Get-ChildItem -LiteralPath $directory -Filter "*.whl" -File -ErrorAction Stop)
+          if ($wheel.Count -ne 1) { throw "expected exactly one verified wheel" }
+          $expectedName = "chamber_particles-$version-py3-none-any.whl"
+          if ($wheel[0].Name -ne $expectedName) {
+            throw "tag/wheel mismatch: expected $expectedName, found $($wheel[0].Name)"
+          }
+          $wheelHash = (Get-FileHash -LiteralPath $wheel[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          $checksums = Join-Path $directory "SHA256SUMS.txt"
+          [IO.File]::WriteAllText(
+            $checksums,
+            "$wheelHash  $($wheel[0].Name)`n",
+            [Text.UTF8Encoding]::new($false)
+          )
+          "wheel=$($wheel[0].FullName)" >> $env:GITHUB_OUTPUT
+          "checksums=$checksums" >> $env:GITHUB_OUTPUT
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $assets = @(
+            "${{ steps.release.outputs.wheel }}",
+            "${{ steps.release.outputs.checksums }}"
+          )
+          gh release view $tag --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag @assets --clobber --repo "${{ github.repository }}"
+          } else {
+            gh release create $tag @assets `
+              --repo "${{ github.repository }}" `
+              --verify-tag `
+              --title "chamber-particles $tag" `
+              --notes-file "particle_platform_redesign/solver/RELEASE_NOTES.md"
+          }

@@ -130,7 +130,7 @@ failureをepsilon、tolerance拡大、clampで消して成功扱いにしませ�
 
 ## schemaとversionの方針
 
-現行開発版はpackage `0.1.0.dev0`、YAML case schema 2、canonical HDF5 data schema 1、result schema 2、
+正式公開版はpackage `0.1.0`、YAML case schema 2、canonical HDF5 data schema 1、result schema 2、
 checkpoint schema 2です。
 
 - readerは現行versionだけを受け、未知version・未知key・未知datasetをfail-closedで拒否します。

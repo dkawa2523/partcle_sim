@@ -2604,6 +2604,10 @@ workflowも成功したため、P14-Rと`0.1.0.dev0`開発baselineの配布可�
 synthetic baseline、target utility、配布gate、
 外部tool完了を混同しない。
 
+正式版`0.1.0`は、このbaselineと同じsingle-engineへ受理済みの現行static 2-D機能を固定する。
+`v0.1.0` tagのWindows/Linux release gateが双方成功した場合だけ、検証済みwheelとSHA-256を
+GitHub Releaseへ公開する。PyPI、sdist、3-D、時間依存場、COMSOL比の速度保証はこのreleaseへ含めない。
+
 ### 後続stage完了
 
 各stageは、該当する解析解・scenario・performanceの三層が揃い、前stageの経路を複製せず同じengineへ
