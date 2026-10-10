@@ -242,7 +242,8 @@ def test_boundary_oracles_are_bound_to_geometry_laws_and_identity(tmp_path: Path
     c08 = load_case(c08_paths.case_path)
     c08_expected = _read_expected(c08_paths.expected_path)
     c08_source = c08.spec.sources[0]
-    assert c08_source.parameters["particle_id_start"] == 801
+    assert c08_source.parameters == {"table": "surface_particles"}
+    np.testing.assert_array_equal(c08.data.sources[0].particle_id, [801])
     assert c08_expected["boundary_events"][0]["particle_id"] == 801
     assert [boundary.boundary_group for boundary in c08.spec.boundaries] == [
         "collector",

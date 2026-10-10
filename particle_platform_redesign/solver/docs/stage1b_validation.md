@@ -22,25 +22,31 @@ checkpoint/resume、bounded writerへ拡張した。P14は同じ公開経路の�
 - checkpoint schema: version 1、固定epoch cadence: 64 macro steps
 - case schema、result schema、proposal、event、physics model/result semanticsはP14で変更しない
 
-現行revisionはengine `particle_engine_v37`、compiled tile
-`compiled_cpu_tile_v18`、CPU runtime `resident_soa_serial_slab_v6`、memory plan
-`solver_owned_memory_plan_v14`、proposal `coupled_fixed_step_proposal_v10`、RK4 enclosure
+現行revisionはengine `particle_engine_v45`、compiled tile
+`compiled_cpu_tile_v21`、CPU runtime `resident_soa_serial_slab_v6`、memory plan
+`solver_owned_memory_plan_v16`、proposal `coupled_fixed_step_proposal_v10`、RK4 enclosure
 `rk4_global_abs_enclosure_v2`、charge-stable exponential midpoint v3 / enclosure v4、event
-`line_quadratic_rk4_axis_first_hit_v16`、dense path `rk4_position_hermite_state_extension_v3`、field location v4、geometry
-`line_boundary_stackless_volume_cell_bvh_v5`である。P14の上記revisionと
-性能値は置換前baselineとして残し、現行runtime名と混同しない。result algorithm v5、result/checkpoint schema 2である。
-physics catalogは`inertial_langevin_rz_catalog_v17`、physics runtimeは
-`signed_ion_compiled_physics_runtime_v20`、boundary algorithmは`point_wall_laws_v5`である。case schemaはthread設定を削除したv2である。memory plan v14はdeferred event depthを
+`line_quadratic_curved_capsule_periodic_first_hit_v21`、dense path `rk4_position_hermite_state_extension_v3`、field location v4、geometry
+`line_boundary_capsule_contact_bvh_v7`である。P14の上記revisionと
+性能値は置換前baselineとして残し、現行runtime名と混同しない。result algorithm v6、result schema 3、checkpoint schema 2である。
+physics catalogは`inertial_langevin_2d_catalog_v23`、physics runtimeは
+`signed_ion_compiled_physics_runtime_v22`、boundary algorithmは`contact_wall_laws_v7`、source algorithmは
+`realized_internal_surface_contact_schedule_v5`である。canonical case/data/result schemaは3、checkpoint schemaは2である。
+memory plan v16はdeferred event depthを
 `event_work_bytes_per_particle`、Brownian tree、P19-L dense path・certificate workをそれぞれ別のnamed componentで解決し、
 候補、event/failure staging、surface release、direct replayも分離する。pack時だけのgatherは12.5% safety marginが所有し、正確なbyte式は
 [`parallel_execution_plan.md`](parallel_execution_plan.md)が所有する。
+Brownian tree workは実際の候補率でなく`adaptive_max_depth`から保守的に解決する。
 現行dense path v3は、root始点相対のBernstein enclosure、TwoDiff残差、world座標への方向付き
 外向き丸めにより、座標原点に依存してevent certificateが閉じない不具合を修正した。endpoint、path、
 v3導入時のevent algorithmとengine v32 / event v14 / RK4 global enclosure v2は不変だった。event v15は
 geometry budgetとroundoff budgetを加算し、補償したfacet-local offset dotとroot-relative TwoDiff Hermite評価・包絡を使う。
-現行event v16はvalidなRK4 dense rowのposition Bernstein control enclosureをfacet half-spaceへ射影し、4制御点すべての
+event v16はvalidなRK4 dense rowのposition Bernstein control enclosureをfacet half-spaceへ射影し、4制御点すべての
 外向き上限が既存budgetの負側に厳密に入る候補だけをclearする。証明不能ならsplit/fail-closedを維持する。
 cubic Hermite derivative-Bernstein enclosureだけがmonotone clearへ明示opt-inし、exponential/scalarはfail-closedする。
+現行event v21はevent v19 / v18の同時incident facet集合を曲線pathでも保持し、exact、RK4、exponential、Brownianの
+材料facetへ共通のpriority/combined-normal意味論を適用する。static Cartesian XYの周期facetは同じfirst-event順序で
+対応facetへpure translationし、材料lawやwall RNGを使わない。
 
 P15は`oml_stationary_maxwellian_debye_huckel_v1`をRK4-firstで受け入れ、その後native exponential midpoint chargeも
 受け入れた。現行RK4は`h L_Z <= 0.5`を維持し、exponential pathはmidpoint-frozen affine exponential
@@ -49,7 +55,7 @@ case/result/checkpoint/event schemaとXY/RZ、wall、output、
 checkpointの既存stateは変更していない。P14-R remote CIは2026-10-05にWindows/Linuxとも完了した。
 
 Numba 0.67とNumPy `<2.6`をlockし、P14 closeoutまではfield location/interpolation、sample済みprimitiveからのphysics、
-classical RK4の配列算術を`fastmath=False, parallel=False`で実行した。現行v37も同じ決定論的設定の
+classical RK4の配列算術を`fastmath=False, parallel=False`で実行した。現行v45も同じ決定論的設定の
 single-thread compiled runtimeである。regular fieldはsupported
 containing-cell common pathだけ全cell走査を行わず、O(1)個の候補を使う。P1/Q1はaccepted endpointの
 previous-cell hintを最速経路とし、hintなし/missのsupported containmentはfield所有のread-only cell AABB BVHで
@@ -217,7 +223,7 @@ revision、memory-plan fit、科学payload identityをhard checkした。絶対�
 0.636655/0.779968 s（1.1737x/1.1473x）、event 10k×20 hitは1 worker 33.509603 sに対して
 20 worker 37.728221 s（0.8882x）だった。
 したがってP14時点では`threads: 1`を既定推奨とした。その後P14-Pの内部parallel試行も製品gateを満たさず、
-現行case schema v2はthread設定を削除してsingle-thread compiled runtimeへ収束した。
+現行case schema v3はthread設定を持たず、single-thread compiled runtimeを維持する。
 
 このthread比較はparallel ownershipとsynthetic scalingの証拠であり、一般的な並列効率の完成を意味しない。
 20 workerの並列効率はregular 100k/1Mでも約9.4%/24.0%、P1/Q1 10kでは約5.9%/5.7%である。
@@ -292,8 +298,8 @@ compiled tile v16だけを更新し、engine、proposal、integrator、enclosure
 `NOT_APPLICABLE`、PPR `q_eff`欠損によるthermophoresis replayは`NOT_TESTED`である。保存frameは連続pathを認証せず、
 COMSOL studyは再実行していない。新revisionはreference/sensitivity設定を可能にするだけで物理的真値を確立しない。
 
-B02はCartesian XY、fixed charge、Epstein linear drag-only、terminal `stick`/`escape`へ限定した
-`ou_langevin`を同じproduction engineへ接続した。凍結係数joint OU endpoint、fixed-depth conditional tree、
+B02初回sliceはCartesian XY、fixed charge、Epstein linear drag-only、terminal `stick`/`escape`へ限定した
+`ou_langevin`を同じproduction engineへ接続した。凍結係数joint OU endpoint、conditional tree、
 cubic Hermite leaf pathをevent、frame/probe、checkpoint/resumeへ通し、ensemble covariance、depth 6/7/8の
 first-passage安定化、output/slab/resume identityを受け入れた。engine v30は`gamma*h` gateとは別にroot covariance、
 split、mean更新の実表現可能性を検査し、例外時だけrow別に局在して不良粒子を`nonfinite_physics`へ移し、正常粒子を
@@ -306,8 +312,12 @@ prepare済みinvariant内だけを許可し、証明不能ならfail-closedす�
 新しいroot ordinalと独立drawで再開し、元cubic remainderをfold/restrictしない。受入は定数係数
 mean/full covariance exactness、noise-off 2次収束、manufactured weak mean観測次数`>=0.9`、axis restart、
 tree-depth first-passage、slab/output/resume identityで閉じた。fixed/continuous charge、native/effective linear Epstein、
-既存additive force、terminal `stick`/`escape`/`hold`を扱う。等方3-D Brownianや一般SDEのstrong order/weak 2次は主張しない。
-現行revisionはengine v37 / proposal v10 / catalog v17 / event v16 / runtime v20 / compiled tile v18 / memory plan v14である。
+既存additive forceを扱う。初回closeoutのwall subsetはterminal `stick`/`escape`/`hold`だけだった。
+等方3-D Brownianや一般SDEのstrong order/weak 2次は主張しない。
+現行revisionはengine v45 / proposal v10 / catalog v23 / event v21 / runtime v22 / compiled tile v21 / memory plan v16である。
+B05では`interval_tree_depth`を全rootへ一様な精度authorityとして維持し、wall/RZ-axis/証明不能候補だけを
+`adaptive_max_depth`まで条件付き分割する。base=maxは従来固定depthへ退化する。memory plan v16は候補率ではなく
+max depthからtree workを保守的に計画し、連続OU exact first-passageやzero miss probabilityは主張しない。
 B03の正式な公開API characterizationは24/24実行を全粒子active・failure 0で完了した。静的上限`648 B/row`は
 `2048 B/row`以内で、20,000粒子までの計時とprocess peak RSSは[`evidence/b03/`](../evidence/b03/README.md)に
 machine-local・non-gating証跡として保存した。この計時/RSSは初回B03 closeout（engine v34 / proposal v9 / runtime v17 /
@@ -318,6 +328,15 @@ B03 coreの受入にCOMSOL再実行は不要だった。charge-stable coupling�
 `0.010670731707317093`、同時上限`0.13119968456545308 < 0.15`を`PASS`した。終端gateはevent 0で非情報的である。
 これは元COMSOL `auxq`どおりの二電流same-form結果で、後続three-currentやspecies-resolved物理を認定せず、
 pathwise/native-field/boundary parityへも一般化しない。optional three-current productionはP21 priority 1で完了した。
+
+B04は現行boundary v7のactive `specular`/`restitution`/`maxwell_thermal`/`probabilistic_stick`を
+B02/B03の同じfirst-hit経路へ接続した。hitまでのHermite prefixだけをcommitし、反射後stateから
+残時間を新しい`root_stochastic_interval`ordinalと独立root drawで再開し、元rootの未使用cubic tailは
+破棄する。低noiseのXY/RZ複数hit、restitution、probabilistic fallback、Maxwell鏡面branch、B03 charge/force、
+axis→wall、実noiseのcontainment/depth/slab、checkpoint/resume identityで受け入れた。surface sourceは
+canonical rowでrealize済みのstrictly inwardな初期速度を使い、零速度や接線速度をnudgeで通さない。
+B04も有限depth numerical pathであり、continuous OUのexact first-passageまたは
+reflection-conditioned bridgeは主張しない。
 charge-stable sliceはRK4のexplicit `hL_Z<=0.5`を残し、deterministic exponential midpoint/B03へ
 midpoint-frozen affine exponential `J<=0` rootを統合した。clip、charge-only subcycle、第二engineはない。
 cadenceは`W=macro_step_count+accepted_particle_pieces+candidate_queries+refinements`、
@@ -352,7 +371,7 @@ P14-Pでは次の構造へ置換した。
 自動tuner、別scheduler、multiprocessingは代替案にしない。
 
 `deterministic_particle_engine_v20` / `resident_soa_worker_microtile_v3`はP14-P着手前のbaselineとして保存する
-履歴であり、現行v37はouter pool、future wave、worker別scratch、thread maskを削除し、
+履歴であり、現行v45はouter pool、future wave、worker別scratch、thread maskを削除し、
 bounded slab、再利用workspace、stackless boundary BVH、同期single-owner writerへ移行した。
 linear/quadratic exactと一般曲線eventはflat SoA wavefront、boundary/Philoxはcompiled batch、fieldからenclosureは
 row numerical status、surface releaseはbatch、frame/probeはdirect replay、event/failureはbounded stagingへ統合済みである。
@@ -391,8 +410,8 @@ raw peak RSS最大値は767.3 MiB、1Mのsolver-owned planは614.5 MiBだった�
 各N件と要求output utilityを確認し、共通payload digest、algorithm revision、event work、wall counterはrepeat/output
 mode間で各粒子数group内において一致した。probe digestは各mode内のrepeat間で一致し、probeを持たない`none`とsampleでは意図的に異なる。
 XYの時間収束とregular/P1/Q1 mesh収束、target first-hit、RZの時間収束、axis crossing、canonical入力field parity、
-gravity parityも合格した。sourceの受入範囲はXY `line_length`であり、RZ `revolved_area`のsource weightingはこのgateでは
-検証していない。
+gravity parityも合格した。履歴generatorの受入範囲はXY line-length分布であり、RZ回転面分布はこのgateでは
+検証していない。現行runtimeはgeneratorと分離したcanonical realized surface rowを入力とする。
 
 timingから分離した1M `none` profileではowner self timeのeventsが28.7%、fieldsが26.8%で、単一ownerが支配して
 いなかった。この結果だけを根拠に局所最適化や第二runtimeを追加せず、productionは一つのsingle-thread compiled

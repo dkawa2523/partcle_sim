@@ -1,0 +1,3 @@
+# Scientific receipts use SHA-256 of exact bytes, including historic CRLF.
+# Keep them readable in Git diffs while disabling newline conversion.
+* -text whitespace=cr-at-eol

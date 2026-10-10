@@ -1,0 +1,136 @@
+{
+  "method": "Independent radial/angular Gauss-Legendre integration of shifted 3D Gaussian; no production formula in reference integrand",
+  "quadrature_orders": [
+    128,
+    256
+  ],
+  "shifted_OML": [
+    {
+      "s": 0.0,
+      "production_P": 1.0,
+      "quadrature_P": 0.9999999999999984,
+      "production_H": 1.0,
+      "quadrature_H": 0.9999999999999943,
+      "relative_error_P": 1.5543122344752192e-15,
+      "relative_error_H": 5.773159728050814e-15,
+      "max_moment_difference_128_256": 8.215650382226158e-15
+    },
+    {
+      "s": 1e-06,
+      "production_P": 1.0000000000001665,
+      "quadrature_P": 1.0000000000001654,
+      "production_H": 0.9999999999998331,
+      "quadrature_H": 0.9999999999998277,
+      "relative_error_P": 1.1102230246251565e-15,
+      "relative_error_H": 5.551115123125783e-15,
+      "max_moment_difference_128_256": 8.43769498715119e-15
+    },
+    {
+      "s": 0.5,
+      "production_P": 1.041154974992153,
+      "quadrature_P": 1.0411549749921514,
+      "production_H": 0.9598504379197681,
+      "quadrature_H": 0.9598504379197631,
+      "relative_error_P": 1.5543122344752192e-15,
+      "relative_error_H": 5.10702591327572e-15,
+      "max_moment_difference_128_256": 7.993605777301127e-15
+    },
+    {
+      "s": 2.0,
+      "production_P": 1.5630276582715665,
+      "quadrature_P": 1.563027658271573,
+      "production_H": 0.5981440066613041,
+      "quadrature_H": 0.5981440066613043,
+      "relative_error_P": 4.107825191113079e-15,
+      "relative_error_H": 3.3306690738754696e-16,
+      "max_moment_difference_128_256": 1.580957587066223e-13
+    },
+    {
+      "s": 5.0,
+      "production_P": 3.2586167521716556,
+      "quadrature_P": 3.2586167521717964,
+      "production_H": 0.25066268375731304,
+      "quadrature_H": 0.2506626837573229,
+      "relative_error_P": 4.318767565791859e-14,
+      "relative_error_H": 3.941291737419306e-14,
+      "max_moment_difference_128_256": 2.9984903449076228e-12
+    }
+  ],
+  "Barnes_neutral_collection": [
+    {
+      "U_over_mean_thermal_speed": 0.001,
+      "production_dimensionless_momentum": 0.0025464803627095523,
+      "independent_Maxwell_momentum": 0.003395306317234453,
+      "production_over_exact": 0.7500001840139457,
+      "applicable": true
+    },
+    {
+      "U_over_mean_thermal_speed": 0.01,
+      "production_dimensionless_momentum": 0.025466064102418595,
+      "independent_Maxwell_momentum": 0.03395391912584165,
+      "production_over_exact": 0.7500184001745143,
+      "applicable": true
+    },
+    {
+      "U_over_mean_thermal_speed": 0.1,
+      "production_dimensionless_momentum": 0.2559179812096195,
+      "independent_Maxwell_momentum": 0.34039436748414553,
+      "production_over_exact": 0.7518278962754557,
+      "applicable": true
+    },
+    {
+      "U_over_mean_thermal_speed": 1.0,
+      "production_dimensionless_momentum": 3.6012652646284247,
+      "independent_Maxwell_momentum": 4.190990826328585,
+      "production_over_exact": 0.8592873174535733,
+      "applicable": true
+    },
+    {
+      "U_over_mean_thermal_speed": 3.0,
+      "production_dimensionless_momentum": 24.158021810153787,
+      "independent_Maxwell_momentum": 24.874678593294497,
+      "production_over_exact": 0.9711893048003483,
+      "applicable": true
+    }
+  ],
+  "aggregate_zero_drift_asymptote": {
+    "neglects": "1 m/s regularizer and 0.01 V floor",
+    "attractive_increment_ratio": 0.7853981633974483,
+    "examples": [
+      {
+        "minus_phi_over_Vi": 1,
+        "effective_speed_over_stationary_OML": 0.8926990816987241
+      },
+      {
+        "minus_phi_over_Vi": 3,
+        "effective_speed_over_stationary_OML": 0.8390486225480862
+      },
+      {
+        "minus_phi_over_Vi": 10,
+        "effective_speed_over_stationary_OML": 0.8049074212704075
+      }
+    ]
+  },
+  "Talbot_convention_comparison": [
+    {
+      "Kn_d": 0.01,
+      "conductivity_ratio": 0.01,
+      "current_over_radius_convention": 0.6376089836489709
+    },
+    {
+      "Kn_d": 0.1,
+      "conductivity_ratio": 0.01,
+      "current_over_radius_convention": 0.8353162831589375
+    },
+    {
+      "Kn_d": 1.0,
+      "conductivity_ratio": 0.01,
+      "current_over_radius_convention": 1.6113292657514782
+    },
+    {
+      "Kn_d": 10.0,
+      "conductivity_ratio": 0.01,
+      "current_over_radius_convention": 1.9498419805828926
+    }
+  ]
+}

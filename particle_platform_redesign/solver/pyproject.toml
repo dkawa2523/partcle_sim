@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "chamber-particles"
-version = "0.1.0"
+version = "0.2.0"
 description = "Particle trajectory solver for externally supplied chamber fields and geometry"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
@@ -82,6 +82,7 @@ source_modules = [
   "chamber_particles.cpu",
   "chamber_particles.coordinates",
   "chamber_particles.geometry",
+  "chamber_particles.topology",
   "chamber_particles.fields",
   "chamber_particles.integrators",
   "chamber_particles.stochastic",
@@ -94,6 +95,7 @@ forbidden_modules = [
   "chamber_particles.case",
   "chamber_particles.engine",
   "chamber_particles.output",
+  "chamber_particles.yaml_input",
 ]
 
 [[tool.importlinter.contracts]]
@@ -122,4 +124,5 @@ forbidden_modules = [
   "chamber_particles.events",
   "chamber_particles.boundaries",
   "chamber_particles.sources",
+  "chamber_particles.yaml_input",
 ]

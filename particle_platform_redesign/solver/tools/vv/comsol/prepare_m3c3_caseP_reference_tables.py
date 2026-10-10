@@ -22,7 +22,9 @@ import h5py
 import numpy as np
 from numpy.typing import NDArray
 
-TOOL_REVISION: Final = "m3c3_caseP_three_current_reference_tables_v1"
+from tools.vv.comsol.actual_run_receipt import write_boundary_meaning
+
+TOOL_REVISION: Final = "m3c3_caseP_three_current_reference_tables_v2"
 EXPECTED_PARTICLES: Final = 287
 
 
@@ -224,6 +226,7 @@ def prepare(
         staged_release = output / "three_current_release_state.csv"
         shutil.copyfile(release_csv, staged_release)
         artifacts.append(staged_release)
+        artifacts.append(write_boundary_meaning(candidate_h5, output))
 
         receipt: dict[str, object] = {
             "schema_version": 1,

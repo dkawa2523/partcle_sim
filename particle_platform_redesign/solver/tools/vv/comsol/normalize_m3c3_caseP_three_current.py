@@ -16,7 +16,15 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Final
 
-TOOL_REVISION: Final = "m3c3_caseP_three_current_comsol_normalizer_v3"
+from chamber_particles.case_format import read_with_info
+from tools.vv.comsol.actual_run_receipt import (
+    inventory_artifact,
+    materialize_actual_run_receipts,
+    normalize_terminal_event,
+    read_actual_run_receipt,
+)
+
+TOOL_REVISION: Final = "m3c3_caseP_three_current_comsol_normalizer_v4"
 EXPECTED_PARTICLES: Final = 287
 EXPECTED_FRAMES: Final = 121
 TIME_END_S: Final = 0.03
@@ -60,11 +68,6 @@ RELEASE_HEADER: Final = (
     "charge_number_e",
 )
 STATUS: Final = {1: "active", 2: "held", 3: "stuck", 4: "escaped"}
-BOUNDARY: Final = {
-    "held": "gas_inlet_hold",
-    "stuck": "material_stick_boundary_unspecified",
-    "escaped": "pump_outlet_escape",
-}
 CONFIGURATION_PREFIX: Final = "M3C3_CASEP|configuration|"
 SOLVE_PREFIX: Final = "M3C3_CASEP|solve_pass|"
 RUN_PREFIX: Final = "M3C3_CASEP|run_pass|"
@@ -339,9 +342,9 @@ def _normalize_particle(
         event = (
             particle_id,
             event_time,
-            "terminal_boundary",
+            "terminal_status",
             outcome,
-            BOUNDARY[outcome],
+            "",
         )
     return particle_id, final_lifecycle, event, initial_errors
 
@@ -361,6 +364,8 @@ def _normalize_trajectories(
     ids: set[int] = set()
     lifecycle_counts: Counter[str] = Counter()
     events: list[tuple[object, ...]] = []
+    event_evidence: list[dict[str, Any]] = []
+    actual = read_actual_run_receipt(root, root / "boundary_meaning.json")
     initial_error_max = [0.0] * 5
     with trajectory_path.open("x", newline="", encoding="utf-8") as stream:
         writer = csv.writer(stream, lineterminator="\n")
@@ -378,7 +383,11 @@ def _normalize_trajectories(
                 for current, observed in zip(initial_error_max, initial_errors, strict=True)
             ]
             if event is not None:
+                event, evidence = normalize_terminal_event(
+                    actual, particle_id, str(event[3]), float(str(event[1]))
+                )
                 events.append(event)
+                event_evidence.append(evidence)
     if ids != set(range(1, EXPECTED_PARTICLES + 1)):
         raise ValueError(f"{raw_path}: particle IDs must be exactly 1..287")
     with events_path.open("x", newline="", encoding="utf-8") as stream:
@@ -388,6 +397,9 @@ def _normalize_trajectories(
     return {
         "trajectory_rows": EXPECTED_PARTICLES * EXPECTED_FRAMES,
         "event_count": len(events),
+        "actual_run_readback": actual.artifact,
+        "terminal_boundary_evidence": event_evidence,
+        "boundary_behavior": "NOT_TESTED" if not events else "REQUIRES_MEANING_PREFLIGHT",
         "final_lifecycle_counts": dict(sorted(lifecycle_counts.items())),
         "initial_state_absolute_error_max": dict(
             zip(
@@ -405,7 +417,11 @@ def _normalize_trajectories(
 def _verified_execution_inputs(root: Path) -> dict[str, Any]:
     path = root / "execution_inputs.json"
     inputs = json.loads(path.read_text(encoding="utf-8-sig"))
-    if inputs.get("schema_version") != 1 or inputs.get("status") != "LOCKED_FOR_EXECUTION":
+    if (
+        type(inputs.get("schema_version")) is not int
+        or inputs.get("schema_version") != 1
+        or inputs.get("status") != "LOCKED_FOR_EXECUTION"
+    ):
         raise ValueError(f"{path}: execution input record is not locked")
     artifacts = inputs.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
@@ -425,11 +441,29 @@ def _verified_execution_inputs(root: Path) -> dict[str, Any]:
     return inputs
 
 
+def _canonical_content_identity(root: Path, execution_inputs: dict[str, Any]) -> str | None:
+    records = [
+        record
+        for record in execution_inputs["artifacts"]
+        if record.get("role") == "canonical_three_current_input"
+    ]
+    if not records:
+        return None
+    if len(records) != 1:
+        raise ValueError("execution input must have one canonical field authority")
+    path = Path(records[0]["path"])
+    if not path.is_absolute():
+        path = root / path
+    _, info = read_with_info(path)
+    return info.content_hash
+
+
 def normalize(root: Path) -> dict[str, Any]:
     root = root.resolve()
     execution_inputs = _verified_execution_inputs(root)
     fixed_step_s, step_text, numerical_run_role = _numerical_run(execution_inputs)
     log = root / "comsol_process.log"
+    materialize_actual_run_receipts(root)
     configuration = _single_receipt(log, CONFIGURATION_PREFIX)
     _validate_configuration(configuration, step_text)
     solve = _single_receipt(log, SOLVE_PREFIX)
@@ -461,6 +495,9 @@ def normalize(root: Path) -> dict[str, Any]:
     summary = {
         "schema_version": 1,
         "tool_revision": TOOL_REVISION,
+        "meaning_preflight_inventory": inventory_artifact(root),
+        "source_model_sha256": execution_inputs["source_mph_sha256_after"],
+        "canonical_input_content_hash": _canonical_content_identity(root, execution_inputs),
         "status": "COMPLETE_NORMALIZED_NOT_EVALUATED",
         "case_id": "caseP_100nm_three_current",
         "coordinate_system": "axisymmetric_rz_no_swirl",
@@ -482,6 +519,9 @@ def normalize(root: Path) -> dict[str, Any]:
         },
         "trajectory_rows": metrics["trajectory_rows"],
         "event_count": metrics["event_count"],
+        "actual_run_readback": metrics["actual_run_readback"],
+        "terminal_boundary_evidence": metrics["terminal_boundary_evidence"],
+        "boundary_behavior": metrics["boundary_behavior"],
         "final_lifecycle_counts": metrics["final_lifecycle_counts"],
         "initial_state_absolute_error_max": metrics["initial_state_absolute_error_max"],
         "claim_policy": {
@@ -499,6 +539,7 @@ def normalize(root: Path) -> dict[str, Any]:
         "case_id": summary["case_id"],
         "reference_run_config_sha256": execution_inputs["reference_run_config_sha256"],
         "configuration": configuration,
+        "actual_run_readback": metrics["actual_run_readback"],
         "solve": solve,
         "run": run,
         "execution_inputs": {

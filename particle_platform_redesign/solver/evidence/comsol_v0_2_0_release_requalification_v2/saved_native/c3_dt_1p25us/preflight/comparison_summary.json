@@ -1,0 +1,41 @@
+{
+  "blockers": [],
+  "classification_counts": {
+    "ADAPTER_REQUIRED": 0,
+    "AMBIGUOUS": 0,
+    "NOT_APPLICABLE": 1,
+    "SUPPORTED": 28
+  },
+  "comparison_questions": {
+    "native_fe_end_to_end_reproduction": {
+      "allowed_claim": "end_to_end_reproduction_including_field_representation_error",
+      "classification": "NOT_APPLICABLE",
+      "includes_field_production_import_or_recovery_error": true,
+      "outcome": {
+        "evidence": [],
+        "status": "NOT_APPLICABLE",
+        "summary": "Numeric verdict remains with registered trajectory/event evaluator; binding agreement alone is not physical proof."
+      }
+    },
+    "same_canonical_field_solver_parity": {
+      "allowed_claim": "solver_parity_on_one_identical_canonical_field",
+      "classification": "SUPPORTED",
+      "includes_field_production_import_or_recovery_error": false,
+      "outcome": {
+        "evidence": [],
+        "status": "NOT_TESTED",
+        "summary": "Numeric verdict remains with registered trajectory/event evaluator; binding agreement alone is not physical proof."
+      }
+    }
+  },
+  "golden_truth": "NOT_CLAIMED",
+  "inventory_id": "C3-current-axis-normalized-1p25us",
+  "inventory_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_v0_2_0_release_requalification_v2\\saved_native\\c3_dt_1p25us\\meaning_inventory.json",
+  "inventory_sha256": "2937a209f57a2213f257d4d2ee33a1d67d5e664d064da217d9f4c60179cee37a",
+  "overall_classification": "SUPPORTED",
+  "questions_must_not_share_one_error_number": true,
+  "report_kind": "comsol_meaning_preflight_summary",
+  "requested_questions_ready": true,
+  "schema_version": 2,
+  "tool_revision": "comsol_meaning_preflight_v2"
+}

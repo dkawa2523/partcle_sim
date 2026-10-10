@@ -1,4 +1,4 @@
-"""Map COMSOL cache DOFs to the locked common-P1 nodes and add five primitives."""
+"""Map COMSOL cache DOFs to current common-P1 nodes and add four primitives."""
 
 from __future__ import annotations
 
@@ -6,16 +6,15 @@ import argparse
 import csv
 import hashlib
 import json
-import os
-import shutil
+from dataclasses import replace
 from pathlib import Path
 
-import h5py
 import numpy as np
 from numpy.typing import NDArray
 
+from chamber_particles.case_format import DataBundle, FieldData, P1TriLayout, read_with_info, write
+
 EXPECTED_MPH_SHA256 = "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
-EXPECTED_INPUT_SHA256 = "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9"
 GEOMETRY_CM_TO_M = 0.01
 COORDINATE_TOLERANCE_M = 1.0e-14
 K_B_J_PER_K = 1.380649e-23
@@ -94,57 +93,29 @@ def _map_nodes(
     }
 
 
-def _write_field(
-    fields: h5py.Group,
-    name: str,
-    values: NDArray[np.float64],
-    components: tuple[str, ...],
-    unit: str,
-    stored_basis: str,
+def _checked_gas_temperature(bundle: DataBundle) -> FieldData:
+    gas = next((field for field in bundle.fields if field.name == "gas_temperature"), None)
+    if gas is None:
+        raise ValueError("canonical gas_temperature is required")
+    layout = next(layout for layout in bundle.layouts if layout.name == gas.layout)
+    if (
+        not isinstance(layout, P1TriLayout)
+        or gas.association != "node"
+        or gas.time_s is not None
+        or not np.array_equal(layout.nodes_m, bundle.geometry.nodes_m)
+    ):
+        raise ValueError("negative-ion projection requires a static common-node P1 temperature")
+    return gas
+
+
+def _validate_negative_primitives(
+    density: NDArray[np.float64],
+    velocity: NDArray[np.float64],
+    effective_mass: NDArray[np.float64],
+    thermal_voltage: NDArray[np.float64],
 ) -> None:
-    if name in fields:
-        raise ValueError(f"field already exists: {name}")
-    group = fields.create_group(name)
-    text = h5py.string_dtype(encoding="utf-8")
-    group.create_dataset("association", data="node", dtype=text)
-    group.create_dataset("components", data=np.asarray(components, dtype=text))
-    group.create_dataset("layout", data="plasma", dtype=text)
-    group.create_dataset("stored_basis", data=stored_basis, dtype=text)
-    group.create_dataset("unit", data=unit, dtype=text)
-    group.create_dataset("values", data=np.asarray(values, dtype=np.float64))
-
-
-def normalize(args: argparse.Namespace) -> dict[str, object]:
-    canonical_input = args.canonical_input.resolve()
-    source_mph = args.source_mph.resolve()
-    output = args.output.resolve()
-    receipt = args.receipt.resolve()
-    if output.exists() or receipt.exists():
-        raise FileExistsError("M3-C3 output and receipt are no-clobber artifacts")
-    if _sha256(canonical_input) != EXPECTED_INPUT_SHA256:
-        raise ValueError("locked common-P1 input hash mismatch")
-    source_hash_before = _sha256(source_mph)
-    if source_hash_before != EXPECTED_MPH_SHA256:
-        raise ValueError("locked source MPH hash mismatch")
-
-    domain = _read_provider(args.domain_csv.resolve())
-    boundary = _read_provider(args.boundary_csv.resolve())
-    with h5py.File(canonical_input, "r") as source:
-        nodes_m = np.asarray(source["geometry/nodes_m"], dtype=np.float64)
-        lines = np.asarray(source["geometry/boundary/line2"], dtype=np.int64)
-        gas_temperature_K = np.asarray(source["fields/gas_temperature/values"], dtype=np.float64)[
-            :, 0
-        ]
-    boundary_mask = np.zeros(nodes_m.shape[0], dtype=np.bool_)
-    boundary_mask[np.unique(lines)] = True
-    cache, mapping = _map_nodes(nodes_m, boundary_mask, domain, boundary)
-
-    density = cache[:, 0]
     if np.any(density <= 0.0):
         raise ValueError("negative-ion density must be positive at every canonical node")
-    velocity = cache[:, 1:3] / density[:, None]
-    effective_mass = cache[:, 3] / density
-    thermal_voltage = K_B_J_PER_K * gas_temperature_K / ELEMENTARY_CHARGE_C
     arrays = (density, velocity, effective_mass, thermal_voltage)
     if not all(np.all(np.isfinite(array)) for array in arrays):
         raise ValueError("canonical negative-ion primitives contain nonfinite values")
@@ -157,68 +128,103 @@ def normalize(args: argparse.Namespace) -> dict[str, object]:
     if np.any(thermal_voltage <= 0.0):
         raise ValueError("negative-ion thermal voltage must be positive")
 
+
+def normalize(args: argparse.Namespace) -> dict[str, object]:
+    canonical_input = args.canonical_input.resolve()
+    source_mph = args.source_mph.resolve()
+    output = args.output.resolve()
+    receipt = args.receipt.resolve()
+    if output.exists() or receipt.exists():
+        raise FileExistsError("M3-C3 output and receipt are no-clobber artifacts")
+    input_hash = _sha256(canonical_input)
+    if input_hash != args.expected_input_sha256:
+        raise ValueError("locked common-P1 input hash mismatch")
+    source_hash_before = _sha256(source_mph)
+    if source_hash_before != EXPECTED_MPH_SHA256:
+        raise ValueError("locked source MPH hash mismatch")
+
+    domain = _read_provider(args.domain_csv.resolve())
+    boundary = _read_provider(args.boundary_csv.resolve())
+    bundle, input_info = read_with_info(canonical_input)
+    nodes_m = bundle.geometry.nodes_m
+    lines = bundle.geometry.boundary.line2
+    gas = _checked_gas_temperature(bundle)
+    gas_temperature_K = gas.values[:, 0]
+    boundary_mask = np.zeros(nodes_m.shape[0], dtype=np.bool_)
+    boundary_mask[np.unique(lines)] = True
+    cache, mapping = _map_nodes(nodes_m, boundary_mask, domain, boundary)
+
+    density = cache[:, 0].copy()
+    velocity = cache[:, 1:3] / density[:, None]
+    effective_mass = cache[:, 3] / density
+    thermal_voltage = K_B_J_PER_K * gas_temperature_K / ELEMENTARY_CHARGE_C
+    _validate_negative_primitives(density, velocity, effective_mass, thermal_voltage)
+
     axis = np.abs(nodes_m[:, 0]) <= COORDINATE_TOLERANCE_M
     source_axis_radial_max = float(np.max(np.abs(velocity[axis, 0]), initial=0.0))
     velocity[axis, 0] = 0.0
     speed_max = float(np.max(np.linalg.norm(velocity, axis=1)))
 
     output.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output.with_name(output.name + ".tmp")
-    if temporary.exists():
-        raise FileExistsError(f"temporary output already exists: {temporary}")
-    try:
-        shutil.copy2(canonical_input, temporary)
-        with h5py.File(temporary, "r+") as target:
-            fields = target["fields"]
-            _write_field(
-                fields,
-                "negative_ion_number_density",
-                density[:, None],
-                ("value",),
-                "1/m^3",
-                "scalar",
-            )
-            _write_field(
-                fields,
-                "negative_ion_velocity",
-                velocity,
-                ("r", "z"),
-                "m/s",
-                "axisymmetric_rz",
-            )
-            _write_field(
-                fields,
-                "effective_negative_ion_mass",
-                effective_mass[:, None],
-                ("value",),
-                "kg",
-                "scalar",
-            )
-            _write_field(
-                fields,
-                "negative_ion_thermal_voltage",
-                thermal_voltage[:, None],
-                ("value",),
-                "V",
-                "scalar",
-            )
-        os.replace(temporary, output)
-    finally:
-        if temporary.exists():
-            temporary.unlink()
+    added = (
+        FieldData(
+            "negative_ion_number_density",
+            gas.layout,
+            "node",
+            ("value",),
+            "scalar",
+            density[:, None],
+            "1/m^3",
+        ),
+        FieldData(
+            "negative_ion_velocity",
+            gas.layout,
+            "node",
+            ("r", "z"),
+            "axisymmetric_rz",
+            velocity,
+            "m/s",
+        ),
+        FieldData(
+            "effective_negative_ion_mass",
+            gas.layout,
+            "node",
+            ("value",),
+            "scalar",
+            effective_mass[:, None],
+            "kg",
+        ),
+        FieldData(
+            "negative_ion_thermal_voltage",
+            gas.layout,
+            "node",
+            ("value",),
+            "scalar",
+            thermal_voltage[:, None],
+            "V",
+        ),
+    )
+    existing = {field.name for field in bundle.fields}
+    if any(field.name in existing for field in added):
+        raise ValueError("negative-ion primitive already exists")
+    output_info = write(output, replace(bundle, fields=bundle.fields + added))
 
     source_hash_after = _sha256(source_mph)
     if source_hash_after != source_hash_before:
         raise RuntimeError("locked source MPH changed during normalization")
     record: dict[str, object] = {
         "schema_version": 1,
-        "evidence_id": "M3-C3-caseP-negative-ion-primitives-v1",
+        "evidence_id": "M3-C3-caseP-negative-ion-primitives-v2",
+        "tool_revision": "m3c3_negative_ion_primitives_v2",
         "status": "PASS",
         "source_mph_sha256_before": source_hash_before,
         "source_mph_sha256_after": source_hash_after,
         "source_unchanged": True,
-        "canonical_input_sha256": EXPECTED_INPUT_SHA256,
+        "canonical_input_sha256": input_hash,
+        "canonical_input_content_hash": input_info.content_hash,
         "canonical_output_sha256": _sha256(output),
+        "canonical_output_content_hash": output_info.content_hash,
+        "canonical_schema_version": output_info.schema_version,
         "canonical_node_count": int(nodes_m.shape[0]),
         "boundary_node_count": int(np.count_nonzero(boundary_mask)),
         "domain_provider_point_count": int(domain[0].shape[0]),
@@ -288,6 +294,7 @@ def normalize(args: argparse.Namespace) -> dict[str, object]:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--canonical-input", type=Path, required=True)
+    parser.add_argument("--expected-input-sha256", required=True)
     parser.add_argument("--domain-csv", type=Path, required=True)
     parser.add_argument("--boundary-csv", type=Path, required=True)
     parser.add_argument("--source-mph", type=Path, required=True)

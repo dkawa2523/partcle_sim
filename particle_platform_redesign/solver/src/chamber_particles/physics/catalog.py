@@ -12,10 +12,9 @@ from .forces import (
     WALDMANN_GALLIS_MAX_SPEED_OVER_MEAN_THERMAL,
 )
 
-PHYSICS_CATALOG_REVISION = "inertial_langevin_rz_catalog_v17"
+PHYSICS_CATALOG_REVISION = "inertial_langevin_2d_catalog_v23"
 
-BROWNIAN_FROZEN_START_REVISION = "inertial_langevin_fdt_epstein_linear_frozen_start_v1"
-BROWNIAN_RZ_MIDPOINT_REVISION = "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+BROWNIAN_MIDPOINT_2D_REVISION = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
 
 _EPSTEIN_LINEAR_REVISION = "epstein_linear_v1"
 _EPSTEIN_LINEAR_EFFECTIVE_GAS_REVISION = "epstein_linear_effective_gas_sensitivity_v1"
@@ -25,6 +24,8 @@ _WALDMANN_GALLIS_SINGLE_SPECIES_REVISION = (
 _WALDMANN_GALLIS_EFFECTIVE_GAS_REVISION = (
     "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
 )
+_TALBOT_REVISION = "talbot_cross_regime_radius_knudsen_v1"
+_SAFFMAN_REVISION = "saffman_unbounded_creeping_shear_v1"
 _AGGREGATE_TWO_CURRENT_REVISION = "aggregate_relative_drift_regularized_two_current_v1"
 _AGGREGATE_THREE_CURRENT_REVISION = "aggregate_relative_drift_regularized_three_current_v1"
 
@@ -44,6 +45,7 @@ class RequiredField:
     components: tuple[str, ...]
     stored_basis: str
     positive: bool = False
+    zero_on_rz_axis: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,6 +136,7 @@ class InertialLangevinNoisePlan:
 
     revision: str
     interval_tree_depth: int
+    adaptive_max_depth: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -164,6 +167,25 @@ class WaldmannGallisThermophoresisPlan:
     gas_mean_free_path_field: str
     gas_molecular_mass_kg: float
     maximum_speed_ratio: float
+
+
+@dataclass(frozen=True, slots=True)
+class TalbotThermophoresisPlan:
+    """Resolved inputs for the explicitly selected Talbot cross-regime revision."""
+
+    gas_temperature_field: str
+    gas_temperature_gradient_field: str
+    gas_density_field: str
+    gas_dynamic_viscosity_field: str
+    gas_thermal_conductivity_field: str
+    gas_mean_free_path_field: str
+    particle_thermal_conductivity_W_m_K: float
+    thermal_slip_coefficient: float
+    momentum_exchange_coefficient: float
+    thermal_exchange_coefficient: float
+
+
+type ThermophoresisPlan = WaldmannGallisThermophoresisPlan | TalbotThermophoresisPlan
 
 
 @dataclass(frozen=True, slots=True)
@@ -233,16 +255,31 @@ class RarefiedVorticityLiftPlan:
 
 
 @dataclass(frozen=True, slots=True)
+class SaffmanLiftPlan:
+    """Resolved inputs for unbounded creeping-flow Saffman lift."""
+
+    coordinate_system: CoordinateSystem
+    gas_velocity_field: str
+    gas_density_field: str
+    gas_dynamic_viscosity_field: str
+    gas_mean_free_path_field: str
+    out_of_plane_gas_vorticity_field: str
+
+
+type LiftPlan = RarefiedVorticityLiftPlan | SaffmanLiftPlan
+
+
+@dataclass(frozen=True, slots=True)
 class PhysicsPlan:
     """One model per category, in the fixed contribution order."""
 
     charge: ChargePlan | None
     drag: DragPlan | None
     noise: InertialLangevinNoisePlan | None
-    thermophoresis: WaldmannGallisThermophoresisPlan | None
+    thermophoresis: ThermophoresisPlan | None
     ion_drag: IonDragPlan | None
     dielectrophoresis: QuasistaticSphericalDielectrophoresisPlan | None
-    lift: RarefiedVorticityLiftPlan | None
+    lift: LiftPlan | None
     electric: ElectricPlan | None
     gravity_buoyancy: GravityBuoyancyPlan | None
     required_fields: tuple[RequiredField, ...]
@@ -309,11 +346,9 @@ class PhysicsPlan:
                 "model": "inertial_langevin_fdt",
                 "revision": self.noise.revision,
             }
-        if self.thermophoresis is not None:
-            result["thermophoresis"] = {
-                "model": "waldmann_gallis",
-                "revision": self.thermophoresis.revision,
-            }
+        thermophoresis_model = _resolved_thermophoresis_model(self.thermophoresis)
+        if thermophoresis_model is not None:
+            result["thermophoresis"] = thermophoresis_model
         if isinstance(self.ion_drag, BarnesCollisionlessIonDragPlan):
             result["ion_drag"] = {
                 "model": "barnes_collisionless",
@@ -337,12 +372,9 @@ class PhysicsPlan:
                 "model": "quasistatic_spherical",
                 "revision": "quasistatic_spherical_gradient_e2_v1",
             }
-        if self.lift is not None:
-            result["lift"] = {
-                "model": "rarefied_vorticity_sensitivity",
-                "revision": "rarefied_vorticity_sensitivity_rz_v1",
-                "lift_coefficient": self.lift.lift_coefficient,
-            }
+        lift_model = _resolved_lift_model(self.lift)
+        if lift_model is not None:
+            result["lift"] = lift_model
         if self.electric is not None:
             result["electric"] = {
                 "model": "coulomb",
@@ -354,6 +386,39 @@ class PhysicsPlan:
                 "revision": "gravity_buoyancy_standard_v1",
             }
         return result
+
+
+def _resolved_thermophoresis_model(
+    plan: ThermophoresisPlan | None,
+) -> dict[str, str | float] | None:
+    """Serialize the selected thermophoresis revision for the run manifest."""
+
+    if isinstance(plan, WaldmannGallisThermophoresisPlan):
+        return {"model": "waldmann_gallis", "revision": plan.revision}
+    if isinstance(plan, TalbotThermophoresisPlan):
+        return {
+            "model": "talbot",
+            "revision": _TALBOT_REVISION,
+            "particle_thermal_conductivity_W_m_K": plan.particle_thermal_conductivity_W_m_K,
+            "thermal_slip_coefficient": plan.thermal_slip_coefficient,
+            "momentum_exchange_coefficient": plan.momentum_exchange_coefficient,
+            "thermal_exchange_coefficient": plan.thermal_exchange_coefficient,
+        }
+    return None
+
+
+def _resolved_lift_model(plan: LiftPlan | None) -> dict[str, str | float] | None:
+    """Serialize the selected lift revision for the run manifest."""
+
+    if isinstance(plan, RarefiedVorticityLiftPlan):
+        return {
+            "model": "rarefied_vorticity_sensitivity",
+            "revision": "rarefied_vorticity_sensitivity_rz_v1",
+            "lift_coefficient": plan.lift_coefficient,
+        }
+    if isinstance(plan, SaffmanLiftPlan):
+        return {"model": "saffman", "revision": _SAFFMAN_REVISION}
+    return None
 
 
 def resolve_physics_plan(
@@ -389,18 +454,7 @@ def resolve_physics_plan(
     _require_matching_electric_field(ion_drag, electric)
     gravity = _resolve_gravity(models.get("gravity_buoyancy"), coordinate_system)
     _require_matching_neutral_gas(drag, thermophoresis, lift, gravity)
-    _require_noise_compatibility(
-        noise,
-        coordinate_system,
-        charge,
-        drag,
-        thermophoresis,
-        ion_drag,
-        dielectrophoresis,
-        lift,
-        electric,
-        gravity,
-    )
+    _require_noise_compatibility(noise, drag)
     vector_components, vector_basis = _vector_metadata(coordinate_system)
 
     requirements = _charge_requirements(charge, vector_components, vector_basis)
@@ -436,7 +490,7 @@ def resolve_physics_plan(
                 _scalar_field(drag.gas_mean_free_path_field, "m", positive=True),
             )
         )
-    if thermophoresis is not None:
+    if isinstance(thermophoresis, WaldmannGallisThermophoresisPlan):
         requirements.extend(
             (
                 _vector_field(
@@ -455,6 +509,34 @@ def resolve_physics_plan(
                     "W/m^2",
                     vector_components,
                     vector_basis,
+                ),
+                _scalar_field(
+                    thermophoresis.gas_mean_free_path_field,
+                    "m",
+                    positive=True,
+                ),
+            )
+        )
+    elif isinstance(thermophoresis, TalbotThermophoresisPlan):
+        requirements.extend(
+            (
+                _scalar_field(thermophoresis.gas_temperature_field, "K", positive=True),
+                _vector_field(
+                    thermophoresis.gas_temperature_gradient_field,
+                    "K/m",
+                    vector_components,
+                    vector_basis,
+                ),
+                _scalar_field(thermophoresis.gas_density_field, "kg/m^3", positive=True),
+                _scalar_field(
+                    thermophoresis.gas_dynamic_viscosity_field,
+                    "Pa*s",
+                    positive=True,
+                ),
+                _scalar_field(
+                    thermophoresis.gas_thermal_conductivity_field,
+                    "W/(m*K)",
+                    positive=True,
                 ),
                 _scalar_field(
                     thermophoresis.gas_mean_free_path_field,
@@ -571,7 +653,7 @@ def resolve_physics_plan(
                 vector_basis,
             )
         )
-    if lift is not None:
+    if isinstance(lift, RarefiedVorticityLiftPlan):
         requirements.extend(
             (
                 _vector_field(
@@ -586,6 +668,31 @@ def resolve_physics_plan(
                     lift.azimuthal_gas_vorticity_field,
                     "1/s",
                     positive=False,
+                    zero_on_rz_axis=True,
+                ),
+            )
+        )
+    elif isinstance(lift, SaffmanLiftPlan):
+        requirements.extend(
+            (
+                _vector_field(
+                    lift.gas_velocity_field,
+                    "m/s",
+                    vector_components,
+                    vector_basis,
+                ),
+                _scalar_field(lift.gas_density_field, "kg/m^3", positive=True),
+                _scalar_field(
+                    lift.gas_dynamic_viscosity_field,
+                    "Pa*s",
+                    positive=True,
+                ),
+                _scalar_field(lift.gas_mean_free_path_field, "m", positive=True),
+                _scalar_field(
+                    lift.out_of_plane_gas_vorticity_field,
+                    "1/s",
+                    positive=False,
+                    zero_on_rz_axis=vector_basis == "axisymmetric_rz",
                 ),
             )
         )
@@ -684,86 +791,52 @@ def _resolve_noise(
 ) -> InertialLangevinNoisePlan | None:
     if model is None:
         return None
-    _exact_keys(
-        model,
-        {"model", "revision", "interval_tree_depth"},
-        "physics.noise",
-    )
+    required_keys = {"model", "revision", "interval_tree_depth"}
+    extra_keys = set(model) - required_keys - {"adaptive_max_depth"}
+    missing_keys = required_keys - set(model)
+    if missing_keys or extra_keys:
+        raise PhysicsConfigurationError(
+            "physics.noise keys do not match the model revision; "
+            f"missing={sorted(missing_keys)}, extra={sorted(extra_keys)}"
+        )
     if _text(model["model"], "physics.noise.model") != "inertial_langevin_fdt":
         raise PhysicsConfigurationError("physics.noise model must be inertial_langevin_fdt")
     revision = _text(model["revision"], "physics.noise.revision")
-    supported_revisions = {
-        BROWNIAN_FROZEN_START_REVISION,
-        BROWNIAN_RZ_MIDPOINT_REVISION,
-    }
-    if revision not in supported_revisions:
+    if revision != BROWNIAN_MIDPOINT_2D_REVISION:
         raise PhysicsConfigurationError(
-            f"inertial_langevin_fdt revision must be one of {sorted(supported_revisions)}"
+            f"inertial_langevin_fdt revision must be {BROWNIAN_MIDPOINT_2D_REVISION}"
         )
+    interval_tree_depth = _bounded_integer(
+        model["interval_tree_depth"],
+        "physics.noise.interval_tree_depth",
+        minimum=0,
+        maximum=10,
+    )
+    adaptive_max_depth = _bounded_integer(
+        model.get("adaptive_max_depth", interval_tree_depth),
+        "physics.noise.adaptive_max_depth",
+        minimum=interval_tree_depth,
+        maximum=10,
+    )
     return InertialLangevinNoisePlan(
         revision=revision,
-        interval_tree_depth=_bounded_integer(
-            model["interval_tree_depth"],
-            "physics.noise.interval_tree_depth",
-            minimum=0,
-            maximum=10,
-        ),
+        interval_tree_depth=interval_tree_depth,
+        adaptive_max_depth=adaptive_max_depth,
     )
 
 
 def _require_noise_compatibility(
     noise: InertialLangevinNoisePlan | None,
-    coordinate_system: CoordinateSystem,
-    charge: ChargePlan | None,
     drag: DragPlan | None,
-    thermophoresis: WaldmannGallisThermophoresisPlan | None,
-    ion_drag: IonDragPlan | None,
-    dielectrophoresis: QuasistaticSphericalDielectrophoresisPlan | None,
-    lift: RarefiedVorticityLiftPlan | None,
-    electric: ElectricPlan | None,
-    gravity: GravityBuoyancyPlan | None,
 ) -> None:
     if noise is None:
         return
-    if noise.revision == BROWNIAN_FROZEN_START_REVISION:
-        if coordinate_system != "cartesian_xy":
-            raise PhysicsConfigurationError(
-                "the frozen-start inertial_langevin_fdt revision supports cartesian_xy motion only"
-            )
-        if charge is not None:
-            raise PhysicsConfigurationError(
-                "the frozen-start inertial_langevin_fdt revision requires fixed charge"
-            )
-        if not isinstance(drag, EpsteinDragPlan) or drag.revision != _EPSTEIN_LINEAR_REVISION:
-            raise PhysicsConfigurationError(
-                "the frozen-start inertial_langevin_fdt revision requires epstein_linear_v1 drag"
-            )
-        if any(
-            model is not None
-            for model in (
-                thermophoresis,
-                ion_drag,
-                dielectrophoresis,
-                lift,
-                electric,
-                gravity,
-            )
-        ):
-            raise PhysicsConfigurationError(
-                "the frozen-start inertial_langevin_fdt revision does not compose "
-                "with additional force models"
-            )
-        return
-    if coordinate_system != "axisymmetric_rz":
-        raise PhysicsConfigurationError(
-            "the RZ projected inertial_langevin_fdt revision requires axisymmetric_rz motion"
-        )
     if not isinstance(drag, EpsteinDragPlan) or drag.revision not in {
         _EPSTEIN_LINEAR_REVISION,
         _EPSTEIN_LINEAR_EFFECTIVE_GAS_REVISION,
     }:
         raise PhysicsConfigurationError(
-            "the RZ projected inertial_langevin_fdt revision requires a supported "
+            "the 2-D midpoint inertial_langevin_fdt revision requires a supported "
             "linear Epstein drag revision"
         )
 
@@ -1267,9 +1340,16 @@ def _require_error_applicability(model: Mapping[str, object], model_id: str) -> 
 
 def _resolve_thermophoresis(
     model: Mapping[str, object] | None,
-) -> WaldmannGallisThermophoresisPlan | None:
+) -> ThermophoresisPlan | None:
     if model is None:
         return None
+    model_id = _text(model.get("model"), "physics.thermophoresis.model")
+    if model_id == "talbot":
+        return _resolve_talbot_thermophoresis(model)
+    if model_id != "waldmann_gallis":
+        raise PhysicsConfigurationError(
+            "physics.thermophoresis model must be waldmann_gallis or talbot"
+        )
     required = {
         "model",
         "revision",
@@ -1296,8 +1376,6 @@ def _resolve_thermophoresis(
             "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
         )
     _exact_keys(model, required, "physics.thermophoresis")
-    if _text(model["model"], "physics.thermophoresis.model") != "waldmann_gallis":
-        raise PhysicsConfigurationError("physics.thermophoresis model must be waldmann_gallis")
     if _text(model["applicability"], "physics.thermophoresis.applicability") != "error":
         raise PhysicsConfigurationError(
             "Waldmann--Gallis thermophoresis supports applicability=error only"
@@ -1325,69 +1403,133 @@ def _resolve_thermophoresis(
     )
 
 
+def _resolve_talbot_thermophoresis(
+    model: Mapping[str, object],
+) -> TalbotThermophoresisPlan:
+    _exact_keys(
+        model,
+        {
+            "model",
+            "revision",
+            "gas_temperature_field",
+            "gas_temperature_gradient_field",
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_thermal_conductivity_field",
+            "gas_mean_free_path_field",
+            "particle_thermal_conductivity_W_m_K",
+            "thermal_slip_coefficient",
+            "momentum_exchange_coefficient",
+            "thermal_exchange_coefficient",
+            "applicability",
+        },
+        "physics.thermophoresis",
+    )
+    revision = _text(model["revision"], "physics.thermophoresis.revision")
+    if revision != _TALBOT_REVISION:
+        raise PhysicsConfigurationError(f"talbot revision must be {_TALBOT_REVISION}")
+    if _text(model["applicability"], "physics.thermophoresis.applicability") != "error":
+        raise PhysicsConfigurationError("Talbot thermophoresis supports applicability=error only")
+    return TalbotThermophoresisPlan(
+        gas_temperature_field=_name(model["gas_temperature_field"], "gas_temperature_field"),
+        gas_temperature_gradient_field=_name(
+            model["gas_temperature_gradient_field"],
+            "gas_temperature_gradient_field",
+        ),
+        gas_density_field=_name(model["gas_density_field"], "gas_density_field"),
+        gas_dynamic_viscosity_field=_name(
+            model["gas_dynamic_viscosity_field"],
+            "gas_dynamic_viscosity_field",
+        ),
+        gas_thermal_conductivity_field=_name(
+            model["gas_thermal_conductivity_field"],
+            "gas_thermal_conductivity_field",
+        ),
+        gas_mean_free_path_field=_name(
+            model["gas_mean_free_path_field"],
+            "gas_mean_free_path_field",
+        ),
+        particle_thermal_conductivity_W_m_K=_positive_number(
+            model["particle_thermal_conductivity_W_m_K"],
+            "physics.thermophoresis.particle_thermal_conductivity_W_m_K",
+        ),
+        thermal_slip_coefficient=_positive_number(
+            model["thermal_slip_coefficient"],
+            "physics.thermophoresis.thermal_slip_coefficient",
+        ),
+        momentum_exchange_coefficient=_positive_number(
+            model["momentum_exchange_coefficient"],
+            "physics.thermophoresis.momentum_exchange_coefficient",
+        ),
+        thermal_exchange_coefficient=_positive_number(
+            model["thermal_exchange_coefficient"],
+            "physics.thermophoresis.thermal_exchange_coefficient",
+        ),
+    )
+
+
 def _require_matching_neutral_gas(
     drag: DragPlan | None,
-    thermophoresis: WaldmannGallisThermophoresisPlan | None,
-    lift: RarefiedVorticityLiftPlan | None,
+    thermophoresis: ThermophoresisPlan | None,
+    lift: LiftPlan | None,
     gravity: GravityBuoyancyPlan | None,
 ) -> None:
-    if drag is not None and thermophoresis is not None:
+    _require_compatible_neutral_gas_models(drag, thermophoresis, lift)
+    neutral_models = tuple(
+        model for model in (drag, thermophoresis, lift, gravity) if model is not None
+    )
+    shared_attributes = (
+        "gas_velocity_field",
+        "gas_density_field",
+        "gas_temperature_field",
+        "gas_dynamic_viscosity_field",
+        "gas_mean_free_path_field",
+        "gas_molecular_mass_kg",
+    )
+    mismatched = [
+        name
+        for name in shared_attributes
+        if len({getattr(model, name) for model in neutral_models if hasattr(model, name)}) > 1
+    ]
+    if mismatched:
+        raise PhysicsConfigurationError(
+            "enabled physics models must use the same neutral-gas background; "
+            f"mismatched={mismatched}"
+        )
+
+
+def _require_compatible_neutral_gas_models(
+    drag: DragPlan | None,
+    thermophoresis: ThermophoresisPlan | None,
+    lift: LiftPlan | None,
+) -> None:
+    if drag is not None and isinstance(thermophoresis, WaldmannGallisThermophoresisPlan):
         if isinstance(drag, StokesCunninghamDragPlan):
             raise PhysicsConfigurationError(
                 "Waldmann--Gallis thermophoresis has no applicability overlap with "
                 "stokes_cunningham drag"
             )
-        shared = (
-            ("gas_velocity_field", drag.gas_velocity_field),
-            ("gas_temperature_field", drag.gas_temperature_field),
-            ("gas_mean_free_path_field", drag.gas_mean_free_path_field),
-            ("gas_molecular_mass_kg", drag.gas_molecular_mass_kg),
-        )
-        mismatched = [name for name, value in shared if getattr(thermophoresis, name) != value]
-        if mismatched:
+        if isinstance(drag, EpsteinDragPlan) and (
+            (drag.revision == _EPSTEIN_LINEAR_EFFECTIVE_GAS_REVISION)
+            != (thermophoresis.revision == _WALDMANN_GALLIS_EFFECTIVE_GAS_REVISION)
+        ):
             raise PhysicsConfigurationError(
-                "physics.drag and physics.thermophoresis must use the same neutral-gas "
-                f"background; mismatched={mismatched}"
+                "physics.drag and physics.thermophoresis cannot mix single-species and "
+                "effective-gas revisions"
             )
-    _require_matching_lift_background(drag, thermophoresis, lift, gravity)
-
-
-def _require_matching_lift_background(
-    drag: DragPlan | None,
-    thermophoresis: WaldmannGallisThermophoresisPlan | None,
-    lift: RarefiedVorticityLiftPlan | None,
-    gravity: GravityBuoyancyPlan | None,
-) -> None:
-    if lift is None:
-        return
-    if isinstance(drag, StokesCunninghamDragPlan):
+    if isinstance(lift, RarefiedVorticityLiftPlan) and isinstance(drag, StokesCunninghamDragPlan):
         raise PhysicsConfigurationError(
             "rarefied-vorticity lift has no applicability overlap with stokes_cunningham drag"
         )
-    shared: list[tuple[str, str]] = []
-    if drag is not None:
-        shared.extend(
-            (
-                ("gas_velocity_field", drag.gas_velocity_field),
-                ("gas_density_field", drag.gas_density_field),
-                ("gas_mean_free_path_field", drag.gas_mean_free_path_field),
+    if isinstance(lift, SaffmanLiftPlan):
+        if drag is not None and not isinstance(drag, StokesCunninghamDragPlan):
+            raise PhysicsConfigurationError(
+                "Saffman lift composes only with stokes_cunningham drag or no drag"
             )
-        )
-    if thermophoresis is not None:
-        shared.extend(
-            (
-                ("gas_velocity_field", thermophoresis.gas_velocity_field),
-                ("gas_mean_free_path_field", thermophoresis.gas_mean_free_path_field),
+        if isinstance(thermophoresis, WaldmannGallisThermophoresisPlan):
+            raise PhysicsConfigurationError(
+                "Saffman lift has no applicability overlap with Waldmann--Gallis thermophoresis"
             )
-        )
-    if gravity is not None:
-        shared.append(("gas_density_field", gravity.gas_density_field))
-    mismatched = [name for name, value in shared if getattr(lift, name) != value]
-    if mismatched:
-        raise PhysicsConfigurationError(
-            "physics.lift must use the same neutral-gas background as other enabled models; "
-            f"mismatched={sorted(set(mismatched))}"
-        )
 
 
 def _require_matching_ion_species(
@@ -1542,7 +1684,13 @@ def _resolve_dielectrophoresis(
             "physics.dielectrophoresis.real_clausius_mossotti_factor must be a finite "
             "number in [-0.5, 1]"
         )
-    factor = float(factor_value)
+    try:
+        factor = float(factor_value)
+    except OverflowError as exc:
+        raise PhysicsConfigurationError(
+            "physics.dielectrophoresis.real_clausius_mossotti_factor must be a finite "
+            "number in [-0.5, 1]"
+        ) from exc
     if not math.isfinite(factor) or not -0.5 <= factor <= 1.0:
         raise PhysicsConfigurationError(
             "physics.dielectrophoresis.real_clausius_mossotti_factor must be a finite "
@@ -1568,9 +1716,12 @@ def _resolve_dielectrophoresis(
 def _resolve_lift(
     model: Mapping[str, object] | None,
     coordinate_system: CoordinateSystem,
-) -> RarefiedVorticityLiftPlan | None:
+) -> LiftPlan | None:
     if model is None:
         return None
+    model_id = _text(model.get("model"), "physics.lift.model")
+    if model_id == "saffman":
+        return _resolve_saffman_lift(model, coordinate_system)
     _exact_keys(
         model,
         {
@@ -1585,8 +1736,10 @@ def _resolve_lift(
         },
         "physics.lift",
     )
-    if _text(model["model"], "physics.lift.model") != "rarefied_vorticity_sensitivity":
-        raise PhysicsConfigurationError("physics.lift model must be rarefied_vorticity_sensitivity")
+    if model_id != "rarefied_vorticity_sensitivity":
+        raise PhysicsConfigurationError(
+            "physics.lift model must be rarefied_vorticity_sensitivity or saffman"
+        )
     expected = "rarefied_vorticity_sensitivity_rz_v1"
     if _text(model["revision"], "physics.lift.revision") != expected:
         raise PhysicsConfigurationError(
@@ -1614,6 +1767,48 @@ def _resolve_lift(
         lift_coefficient=_positive_number(
             model["lift_coefficient"],
             "physics.lift.lift_coefficient",
+        ),
+    )
+
+
+def _resolve_saffman_lift(
+    model: Mapping[str, object],
+    coordinate_system: CoordinateSystem,
+) -> SaffmanLiftPlan:
+    _exact_keys(
+        model,
+        {
+            "model",
+            "revision",
+            "gas_velocity_field",
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_mean_free_path_field",
+            "out_of_plane_gas_vorticity_field",
+            "applicability",
+        },
+        "physics.lift",
+    )
+    revision = _text(model["revision"], "physics.lift.revision")
+    if revision != _SAFFMAN_REVISION:
+        raise PhysicsConfigurationError(f"saffman revision must be {_SAFFMAN_REVISION}")
+    if _text(model["applicability"], "physics.lift.applicability") != "error":
+        raise PhysicsConfigurationError("Saffman lift supports applicability=error only")
+    return SaffmanLiftPlan(
+        coordinate_system=coordinate_system,
+        gas_velocity_field=_name(model["gas_velocity_field"], "gas_velocity_field"),
+        gas_density_field=_name(model["gas_density_field"], "gas_density_field"),
+        gas_dynamic_viscosity_field=_name(
+            model["gas_dynamic_viscosity_field"],
+            "gas_dynamic_viscosity_field",
+        ),
+        gas_mean_free_path_field=_name(
+            model["gas_mean_free_path_field"],
+            "gas_mean_free_path_field",
+        ),
+        out_of_plane_gas_vorticity_field=_name(
+            model["out_of_plane_gas_vorticity_field"],
+            "out_of_plane_gas_vorticity_field",
         ),
     )
 
@@ -1658,8 +1853,21 @@ def _resolve_gravity(
     return GravityBuoyancyPlan(_name(model["gas_density_field"], "gas_density_field"), gravity)
 
 
-def _scalar_field(name: str, unit: str, *, positive: bool) -> RequiredField:
-    return RequiredField(name, unit, ("value",), "scalar", positive)
+def _scalar_field(
+    name: str,
+    unit: str,
+    *,
+    positive: bool,
+    zero_on_rz_axis: bool = False,
+) -> RequiredField:
+    return RequiredField(
+        name,
+        unit,
+        ("value",),
+        "scalar",
+        positive,
+        zero_on_rz_axis,
+    )
 
 
 def _vector_field(
@@ -1714,7 +1922,10 @@ def _name(value: object, parameter: str) -> str:
 def _positive_number(value: object, location: str) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float):
         raise PhysicsConfigurationError(f"{location} must be a positive finite number")
-    number = float(value)
+    try:
+        number = float(value)
+    except OverflowError as exc:
+        raise PhysicsConfigurationError(f"{location} must be a positive finite number") from exc
     if not math.isfinite(number) or number <= 0.0:
         raise PhysicsConfigurationError(f"{location} must be a positive finite number")
     return number
@@ -1730,7 +1941,10 @@ def _maximum_speed_ratio(value: object, location: str) -> float:
 def _unit_interval_number(value: object, location: str) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float):
         raise PhysicsConfigurationError(f"{location} must be a finite number in [0, 1]")
-    number = float(value)
+    try:
+        number = float(value)
+    except OverflowError as exc:
+        raise PhysicsConfigurationError(f"{location} must be a finite number in [0, 1]") from exc
     if not math.isfinite(number) or not 0.0 <= number <= 1.0:
         raise PhysicsConfigurationError(f"{location} must be a finite number in [0, 1]")
     return number
@@ -1757,7 +1971,10 @@ def _pair(value: object, location: str) -> tuple[float, float]:
     for item in value:
         if isinstance(item, bool) or not isinstance(item, int | float):
             raise PhysicsConfigurationError(f"{location} must contain finite numbers")
-        number = float(item)
+        try:
+            number = float(item)
+        except OverflowError as exc:
+            raise PhysicsConfigurationError(f"{location} must contain finite numbers") from exc
         if not math.isfinite(number):
             raise PhysicsConfigurationError(f"{location} must contain finite numbers")
         result.append(number)

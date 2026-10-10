@@ -1,0 +1,153 @@
+{
+  "artifacts": {
+    "boundary_meaning.json": {
+      "sha256": "57b178132fc0b507154eda495741f2c7a5ad028b765854d71421b7444dd2c419",
+      "size_bytes": 728
+    },
+    "m3c1_Er_sectionwise.txt": {
+      "sha256": "1ba30ee6365bd8d82e8daa6909baf287b82a9b3fd7023e3516764d2acc231ebd",
+      "size_bytes": 168050
+    },
+    "m3c1_Ez_sectionwise.txt": {
+      "sha256": "9772d09024ec8401872f8b259a1ca3fe0a4a8d95d51193330f0955d1df30792f",
+      "size_bytes": 169012
+    },
+    "m3c1_Te_sectionwise.txt": {
+      "sha256": "d19de46a570f4057468b30e7b5561a363d0bd4397a841f21c3e84c14bb7e2602",
+      "size_bytes": 167622
+    },
+    "m3c1_Tg_sectionwise.txt": {
+      "sha256": "1b054ced1e010b41e5c9053b892bb0a3128be0516308a76acdd5c61ee9e942cb",
+      "size_bytes": 167615
+    },
+    "m3c1_TiV_sectionwise.txt": {
+      "sha256": "9c567027c5167d56cf7cd22608ad60f2f0bb388d585368e114efadf6af67cdd9",
+      "size_bytes": 171625
+    },
+    "m3c1_Z0.txt": {
+      "sha256": "759921bb042fd22393b91eeaa081a66420d79914ef045dd8a7e8bcab40e8fb60",
+      "size_bytes": 15440
+    },
+    "m3c1_gradE2r_sectionwise.txt": {
+      "sha256": "cec2e9f5a0a4e4d578d53cd3b80b5204ca3b086e38f041c602892c80cf99aa6f",
+      "size_bytes": 166017
+    },
+    "m3c1_gradE2z_sectionwise.txt": {
+      "sha256": "281ba5c53a2d2d05f4dc42830bb1d5e5fe85ffadf92aa5328cc03d90486da83e",
+      "size_bytes": 166863
+    },
+    "m3c1_lambdaD_sectionwise.txt": {
+      "sha256": "c6b42e278fdcb9b815143e9c90938e978fbd7e9ba2e013c5359019fa011190b1",
+      "size_bytes": 175608
+    },
+    "m3c1_lambdaIn_sectionwise.txt": {
+      "sha256": "7208562a7d2c93737b56fe39d63e6a389dfdd200395056dbe3222aab4ddb1f23",
+      "size_bytes": 173601
+    },
+    "m3c1_lambdag_sectionwise.txt": {
+      "sha256": "6a9cd3b36c1a7f2bf128fe32c040fa77790ba190a14b369332824ca3bb56dc0f",
+      "size_bytes": 173596
+    },
+    "m3c1_mi_sectionwise.txt": {
+      "sha256": "d831c8c816ac0e0ec6451f32edd367c70707bd3bb968424640de2adfda26b96c",
+      "size_bytes": 175576
+    },
+    "m3c1_mug_sectionwise.txt": {
+      "sha256": "04a7153e3dcb6c4eced3dda33ae8cf6a1561f4d055126427b5365780c8405216",
+      "size_bytes": 175594
+    },
+    "m3c1_ne_sectionwise.txt": {
+      "sha256": "6a7071584702520ad537f377deca9e335576cb78e89b981122e5d379a44650f5",
+      "size_bytes": 166899
+    },
+    "m3c1_ni_sectionwise.txt": {
+      "sha256": "9f31e480a460eb5c94510d2c11cea2c05116b2ed4d4193db658d9db95bcb1061",
+      "size_bytes": 167019
+    },
+    "m3c1_omegaPhi_sectionwise.txt": {
+      "sha256": "1265de72eaaa5de51c76fb2c0031257e4d3ebcc89f003a6eee624ea453e13a51",
+      "size_bytes": 167826
+    },
+    "m3c1_qr_sectionwise.txt": {
+      "sha256": "75b38582e7b6b5d08f34fe77824a8770bfa4a46b7d21ba7181848f5e043f67d7",
+      "size_bytes": 168281
+    },
+    "m3c1_qz_sectionwise.txt": {
+      "sha256": "9f745b08048a34e0bfb0b0617722b2a676578456bc35d350da2bb73f624d211e",
+      "size_bytes": 169087
+    },
+    "m3c1_rhog_sectionwise.txt": {
+      "sha256": "bb7d5bd89b21aca4f987c9001e6ba3d827d4277ba3215cdcb896ee9bb942b04b",
+      "size_bytes": 175597
+    },
+    "m3c1_ugr_sectionwise.txt": {
+      "sha256": "eca2274ad41b5a00577c2ef7c0c46a326a1ddaecbd7dbb0d6691b23ae9d501f3",
+      "size_bytes": 171814
+    },
+    "m3c1_ugz_sectionwise.txt": {
+      "sha256": "db98461f36d0e4bca481ea3838a89d7ce703fff5e6b92f7a68c7ca8897a09bac",
+      "size_bytes": 172700
+    },
+    "m3c1_uir_sectionwise.txt": {
+      "sha256": "b5a3c89ec0e6e796f653d6d4fdb0df63462b15994f2b856eb0e32a6bc43ffb44",
+      "size_bytes": 167841
+    },
+    "m3c1_uiz_sectionwise.txt": {
+      "sha256": "a01afb2019ea49e6618c743cfac8edc9f0b6263a7a32553dad2ff7e4d3c12d52",
+      "size_bytes": 168970
+    },
+    "m3c1_vr0.txt": {
+      "sha256": "f049bdfc719d0e7ce0268f56f2f29ff3da5f3d9991b1fd15e3f798cc1ad16923",
+      "size_bytes": 16054
+    },
+    "m3c1_vz0.txt": {
+      "sha256": "db9e192b94d7969354cef5fcd541ba7c281fa6132dd7c68978f21666438ab078",
+      "size_bytes": 15716
+    },
+    "m3c3_TnV_sectionwise.txt": {
+      "sha256": "ea2bc8d21616fa9d99b01dc6f42f2a542a9e3da36a49201a88ce9d2aea6a5943",
+      "size_bytes": 171625
+    },
+    "m3c3_mn_sectionwise.txt": {
+      "sha256": "f8ce61c9bda86f1b802dfcd0a843e44da7caf33c271d7dda19b8c969e27a241e",
+      "size_bytes": 175576
+    },
+    "m3c3_nn_sectionwise.txt": {
+      "sha256": "dabd17dac5c8a263efae1ec616af47dfd0fe815af63772c770ba398168eaebf0",
+      "size_bytes": 167430
+    },
+    "m3c3_unr_sectionwise.txt": {
+      "sha256": "91cee0b1f03a1f808663be06a55b7f31a34ebf9ad0a018f1837e3118670128b9",
+      "size_bytes": 168399
+    },
+    "m3c3_unz_sectionwise.txt": {
+      "sha256": "3d65d16b25ebd5146ec3f5a127c2faaf4c8edd33413c504dc50bc1805856d262",
+      "size_bytes": 168248
+    },
+    "three_current_release_state.csv": {
+      "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267",
+      "size_bytes": 29148
+    }
+  },
+  "candidate": {
+    "content_hash": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+    "file_sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc",
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_prepared_axis_normalized\\candidate_input_three_current_z0.h5"
+  },
+  "component_count": 27,
+  "layout": {
+    "cell_count": 3779,
+    "interpolation": "exact_first_order_triangular_sectionwise",
+    "node_count": 1987
+  },
+  "release": {
+    "authority": "candidate_owned_three_current_release_state",
+    "initial_charge_recomputed_by_comsol": false,
+    "input_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_prepared_axis_normalized\\three_current_release_state.csv",
+    "input_sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267",
+    "particle_count": 287
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "tool_revision": "m3c3_caseP_three_current_reference_tables_v2"
+}

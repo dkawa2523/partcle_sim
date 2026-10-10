@@ -8,8 +8,8 @@ import numpy as np
 import pytest
 import yaml
 
-from chamber_particles import SimulationError, load_case, open_result, simulate
-from chamber_particles.case_format import write
+from chamber_particles import CaseError, load_case, open_result, simulate
+from chamber_particles.case_format import RealizedSurfaceSource, write
 from tests.verification.microcases import materialize_microcase
 
 
@@ -36,8 +36,10 @@ def test_c08_surface_departure_reflection_and_reimpact_use_one_event_path(
     np.testing.assert_array_equal(boundary.velocity_post_m_s, [[-1.0, 0.0], [0.0, 0.0]])
     np.testing.assert_allclose(final.position_m, [[0.0, 0.5]], rtol=0.0, atol=3.0e-16)
     np.testing.assert_array_equal(final.lifecycle, [2])
-    assert result.manifest["source_algorithm_revision"] == "table_surface_schedule_v1"
-    assert result.manifest["rng_algorithm_revision"] == "philox4x32_10_v1"
+    assert result.manifest["source_algorithm_revision"] == (
+        "realized_internal_surface_contact_schedule_v5"
+    )
+    assert result.manifest["rng_algorithm_revision"] == "philox4x32_10_v2"
     assert result.manifest["boundary_interactions"]["wall_events"] == 2
     memory_plan = result.manifest["memory_plan"]
     assert memory_plan["release_work_bytes_per_particle"] == 272
@@ -72,20 +74,36 @@ def test_restitution_is_published_by_the_public_event_and_manifest(tmp_path: Pat
     )
     assert resolved == {
         "group": "mirror",
+        "contact_geometry": "particle_surface",
         "priority": 20,
         "law": "restitution",
         "normal_restitution": 0.5,
         "tangential_restitution": 0.25,
         "stick_probability": None,
         "otherwise_law": None,
+        "wall_temperature_K": None,
+        "diffuse_reflection_fraction": None,
+        "wall_velocity_m_s": None,
     }
 
 
 def test_surface_release_at_run_end_has_a_right_continuous_frame(tmp_path: Path) -> None:
     paths = materialize_microcase("C08", tmp_path / "release-at-end")
+    case = load_case(paths.case_path)
+    source = case.data.sources[0]
+    assert isinstance(source, RealizedSurfaceSource)
     document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
     end_s = document["time"]["end_s"]
-    document["sources"][0]["release"]["time_s"] = end_s
+    data_path = paths.case_path.with_name("release-at-end.h5")
+    info = write(
+        data_path,
+        replace(
+            case.data,
+            sources=(replace(source, release_time_s=np.asarray([end_s], dtype="<f8")),),
+        ),
+    )
+    document["case"]["data_path"] = data_path.name
+    document["case"]["expected_content_hash"] = info.content_hash
     document["output"]["trajectories"] = {
         "selection": "all",
         "schedule": {"explicit_times_s": [end_s]},
@@ -105,25 +123,41 @@ def test_surface_release_at_run_end_has_a_right_continuous_frame(tmp_path: Path)
     np.testing.assert_array_equal(frames[0].lifecycle, [1])
 
 
-def test_large_surface_count_fails_memory_gate_before_realization_or_output(
+def test_large_realized_surface_table_fails_input_memory_gate_before_output(
     tmp_path: Path,
 ) -> None:
     paths = materialize_microcase("C08", tmp_path / "large-surface-count")
+    case = load_case(paths.case_path)
+    source = case.data.sources[0]
+    assert isinstance(source, RealizedSurfaceSource)
+    count = 20_000
+    large_source = replace(
+        source,
+        particle_id=np.arange(801, 801 + count, dtype="<i8"),
+        release_time_s=np.zeros(count, dtype="<f8"),
+        facet_id=np.full(count, 3, dtype="<i8"),
+        facet_parameter=np.full(count, 0.5, dtype="<f8"),
+        velocity_m_s=np.broadcast_to(source.velocity_m_s, (count, 2)).copy(),
+        charge_number=np.zeros(count, dtype="<f8"),
+        mass_kg=np.full(count, source.mass_kg[0], dtype="<f8"),
+        drag_diameter_m=np.full(count, source.drag_diameter_m[0], dtype="<f8"),
+        electrostatic_radius_m=np.full(count, source.electrostatic_radius_m[0], dtype="<f8"),
+        contact_radius_m=np.full(count, source.contact_radius_m[0], dtype="<f8"),
+        displaced_volume_m3=np.zeros(count, dtype="<f8"),
+        model_weight=np.ones(count, dtype="<f8"),
+        material_id=np.zeros(count, dtype="<i4"),
+    )
+    data_path = paths.case_path.with_name("large-surface.h5")
+    info = write(data_path, replace(case.data, sources=(large_source,)))
     document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
-    document["sources"][0]["count"] = 1_000_000
-    document["resources"]["memory_limit_mb"] = 4
+    document["case"]["data_path"] = data_path.name
+    document["case"]["expected_content_hash"] = info.content_hash
+    document["resources"]["memory_limit_mb"] = 1
     paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
 
-    data_path = paths.case_path.with_name("case.h5")
-    assert data_path.stat().st_size < 4 * 1024 * 1024
-    case = load_case(paths.case_path)
     output = tmp_path / "result"
-
-    with pytest.raises(
-        SimulationError,
-        match=r"predicted minimum solver footprint exceeds resources\.memory_limit_mb",
-    ):
-        simulate(case, output)
+    with pytest.raises(CaseError, match=r"canonical numeric arrays require"):
+        load_case(paths.case_path)
 
     assert not output.exists()
     assert not output.with_name(f"{output.name}.partial").exists()
@@ -194,7 +228,7 @@ def test_c09_residual_subdivision_preserves_all_hits_and_fails_at_its_budget(
     assert memory_plan["release_work_bytes_per_particle"] == 64
     assert memory_plan["event_staging_capacity"] == (memory_plan["event_candidate_capacity"] // 2)
     assert memory_plan["slab_particles"] <= memory_plan["event_staging_capacity"]
-    assert memory_plan["event_staging_bytes_per_row"] == 490
+    assert memory_plan["event_staging_bytes_per_row"] == 624
     assert memory_plan["event_staging_fixed_bytes"] == (
         2 * memory_plan["event_candidate_capacity"] * np.dtype("<i8").itemsize + 16
     )
@@ -214,7 +248,7 @@ def test_c09_residual_subdivision_preserves_all_hits_and_fails_at_its_budget(
         memory_plan["slab_particles"] * memory_plan["failure_staging_bytes_per_particle"]
     )
     assert memory_plan["components"]["geometry_query_scratch"] == (
-        3 * memory_plan["event_candidate_capacity"] * np.dtype("<i8").itemsize
+        4 * memory_plan["event_candidate_capacity"] * np.dtype("<i8").itemsize
     )
     # One C09 particle produces five interactions, while only one output row
     # is solver-owned at once.  The completed payload therefore demonstrates
@@ -222,7 +256,7 @@ def test_c09_residual_subdivision_preserves_all_hits_and_fails_at_its_budget(
     assert split.read_boundary_events().particle_id.size == 5
     assert memory_plan["slab_particles"] == 1
     assert memory_plan["components"]["slab_event_staging"] == (
-        memory_plan["event_staging_fixed_bytes"] + 490
+        memory_plan["event_staging_fixed_bytes"] + 624
     )
 
     failed_paths = materialize_microcase("C09", tmp_path / "failed-case")
@@ -494,6 +528,7 @@ def _add_stationary_c09_particle(path: Path) -> None:
         electrostatic_radius_m=np.concatenate(
             (original.electrostatic_radius_m, original.electrostatic_radius_m[:1])
         ),
+        contact_radius_m=np.concatenate((original.contact_radius_m, original.contact_radius_m[:1])),
         displaced_volume_m3=np.concatenate(
             (original.displaced_volume_m3, original.displaced_volume_m3[:1])
         ),

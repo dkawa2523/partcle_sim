@@ -1,0 +1,21 @@
+{
+  "fixed_rk4_step_s": 2e-05,
+  "output_bytes": 8183345,
+  "output_frames": 121,
+  "participant": "comsol",
+  "particle_count": 287,
+  "peak_rss_bytes": 3658698752,
+  "peak_rss_measurement_scope": "maximum_working_set_of_comsolbatch_process_for_batch",
+  "process_count": 1,
+  "schema_version": 1,
+  "scope": {
+    "particles": 287,
+    "time_end_s": 0.03
+  },
+  "seed": 939100,
+  "solve_wall_seconds": 45.573,
+  "stage_times_s": {
+    "solve": 45.573
+  },
+  "wall_time_s": 45.573
+}

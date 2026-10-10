@@ -1,4 +1,4 @@
-"""Stateless counter-based random numbers shared by sources and wall laws."""
+"""Stateless counter-based random numbers for wall laws and Brownian paths."""
 
 from __future__ import annotations
 
@@ -11,12 +11,13 @@ from numpy.typing import NDArray
 type FloatArray = NDArray[np.float64]
 type UInt64Array = NDArray[np.uint64]
 
-RNG_ALGORITHM_REVISION = "philox4x32_10_v1"
+RNG_ALGORITHM_REVISION = "philox4x32_10_v2"
 BROWNIAN_RNG_REVISION = "philox4x32_10_brownian_interval_tree_v1"
 
-SOURCE_FACET_DRAW = 0x53524601
-SOURCE_POSITION_DRAW = 0x53525001
 WALL_PROBABILISTIC_STICK_STREAM = 0x57414C01
+WALL_MAXWELL_DIFFUSE_STREAM = 0x57414C02
+WALL_MAXWELL_NORMAL_STREAM = 0x57414C03
+WALL_MAXWELL_TANGENTIAL_STREAM = 0x57414C04
 BROWNIAN_ROOT_NORMAL_STREAM = 0x42524F01
 BROWNIAN_SPLIT_NORMAL_STREAM = 0x42525301
 
@@ -49,81 +50,23 @@ def philox4x32_10(
     return int(block[0]), int(block[1]), int(block[2]), int(block[3])
 
 
-def source_uniform_open(
-    seed: int,
-    source_id: int,
-    source_particle_ordinal: int,
-    draw_kind: int,
-) -> float:
-    """Return one source draw strictly inside ``(0, 1)``."""
-
-    ordinal_low, ordinal_high = _split_uint64(source_particle_ordinal, "source ordinal")
-    block = philox4x32_10(
-        (
-            ordinal_low,
-            ordinal_high,
-            _uint32(source_id, "source ID"),
-            _uint32(draw_kind, "source draw kind"),
-        ),
-        _seed_key(seed),
-    )
-    integer = ((block[0] << 32) | block[1]) >> 12
-    return (float(integer) + 0.5) * _UNIT52
-
-
-def source_uniform_open_batch(
-    seed: int,
-    source_id: int,
-    source_particle_ordinal: UInt64Array,
-    draw_kind: int,
-) -> FloatArray:
-    """Vectorized source draws with the exact scalar counter/key convention."""
-
-    ordinal = np.asarray(source_particle_ordinal)
-    if ordinal.ndim != 1 or ordinal.dtype.kind not in {"i", "u"}:
-        raise ValueError("source ordinals must be one integer vector")
-    if ordinal.dtype.kind == "i" and bool((ordinal < 0).any()):
-        raise ValueError("source ordinals must be nonnegative")
-    ordinal_u64 = ordinal.astype(np.uint64, copy=False)
-    c0 = (ordinal_u64 & np.uint64(_MASK32)).astype(np.uint32)
-    c1 = (ordinal_u64 >> np.uint64(32)).astype(np.uint32)
-    c2 = np.full(ordinal.size, _uint32(source_id, "source ID"), dtype=np.uint32)
-    c3 = np.full(ordinal.size, _uint32(draw_kind, "source draw kind"), dtype=np.uint32)
-    k0, k1 = _seed_key(seed)
-    for round_index in range(10):
-        product0 = np.uint64(_PHILOX_M0) * c0.astype(np.uint64)
-        product1 = np.uint64(_PHILOX_M1) * c2.astype(np.uint64)
-        high0 = (product0 >> np.uint64(32)).astype(np.uint32)
-        high1 = (product1 >> np.uint64(32)).astype(np.uint32)
-        low0 = product0.astype(np.uint32)
-        low1 = product1.astype(np.uint32)
-        c0, c1, c2, c3 = (
-            high1 ^ c1 ^ np.uint32(k0),
-            low1,
-            high0 ^ c3 ^ np.uint32(k1),
-            low0,
-        )
-        if round_index != 9:
-            k0 = (k0 + _PHILOX_W0) & _MASK32
-            k1 = (k1 + _PHILOX_W1) & _MASK32
-    integer = ((c0.astype(np.uint64) << np.uint64(32)) | c1.astype(np.uint64)) >> np.uint64(12)
-    return (integer.astype(np.float64) + 0.5) * _UNIT52
-
-
 def wall_uniform(
     seed: int,
     particle_id: int,
     physical_boundary_event_ordinal: int,
+    stream: int,
 ) -> float:
-    """Return the wall-law draw in ``[0, 1)`` for one physical event."""
+    """Return one explicitly selected wall-stream draw in ``[0, 1)``."""
 
     _split_uint64(particle_id, "particle ID")
     _uint32(physical_boundary_event_ordinal, "physical boundary event ordinal")
+    _uint32(stream, "wall stream")
     _seed_key(seed)
     return _wall_uniform_kernel(
         np.uint64(seed),
         np.uint64(particle_id),
         np.uint64(physical_boundary_event_ordinal),
+        np.uint64(stream),
     )
 
 
@@ -131,10 +74,12 @@ def wall_uniform_batch(
     seed: int,
     particle_id: UInt64Array,
     physical_boundary_event_ordinal: UInt64Array,
+    stream: int,
 ) -> FloatArray:
-    """Evaluate wall-law draws for an independent batch of event rows."""
+    """Evaluate one explicit wall stream for independent event rows."""
 
     _seed_key(seed)
+    stream_word = _uint32(stream, "wall stream")
     particles = _nonnegative_uint64_vector(particle_id, "particle IDs")
     ordinals = _nonnegative_uint64_vector(
         physical_boundary_event_ordinal,
@@ -145,7 +90,73 @@ def wall_uniform_batch(
     if bool((ordinals > np.uint64(_MASK32)).any()):
         raise ValueError("physical boundary event ordinal must fit in an unsigned 32-bit integer")
     result = np.empty(particles.size, dtype=np.float64)
-    _wall_uniform_batch_into_kernel(np.uint64(seed), particles, ordinals, result)
+    _wall_uniform_batch_into_kernel(
+        np.uint64(seed),
+        particles,
+        ordinals,
+        np.uint64(stream_word),
+        result,
+    )
+    return result
+
+
+def wall_uniform_open_batch(
+    seed: int,
+    particle_id: UInt64Array,
+    physical_boundary_event_ordinal: UInt64Array,
+    stream: int,
+) -> FloatArray:
+    """Evaluate one explicit wall stream strictly inside ``(0, 1)``."""
+
+    _seed_key(seed)
+    stream_word = _uint32(stream, "wall stream")
+    particles = _nonnegative_uint64_vector(particle_id, "particle IDs")
+    ordinals = _nonnegative_uint64_vector(
+        physical_boundary_event_ordinal,
+        "physical boundary event ordinals",
+    )
+    if particles.shape != ordinals.shape:
+        raise ValueError("particle IDs and physical boundary event ordinals must align")
+    if bool((ordinals > np.uint64(_MASK32)).any()):
+        raise ValueError("physical boundary event ordinal must fit in an unsigned 32-bit integer")
+    result = np.empty(particles.size, dtype=np.float64)
+    _wall_uniform_open_batch_into_kernel(
+        np.uint64(seed),
+        particles,
+        ordinals,
+        np.uint64(stream_word),
+        result,
+    )
+    return result
+
+
+def wall_standard_normal_batch(
+    seed: int,
+    particle_id: UInt64Array,
+    physical_boundary_event_ordinal: UInt64Array,
+    stream: int,
+) -> FloatArray:
+    """Evaluate one standard normal from each explicit wall stream counter."""
+
+    _seed_key(seed)
+    stream_word = _uint32(stream, "wall stream")
+    particles = _nonnegative_uint64_vector(particle_id, "particle IDs")
+    ordinals = _nonnegative_uint64_vector(
+        physical_boundary_event_ordinal,
+        "physical boundary event ordinals",
+    )
+    if particles.shape != ordinals.shape:
+        raise ValueError("particle IDs and physical boundary event ordinals must align")
+    if bool((ordinals > np.uint64(_MASK32)).any()):
+        raise ValueError("physical boundary event ordinal must fit in an unsigned 32-bit integer")
+    result = np.empty(particles.size, dtype=np.float64)
+    _wall_standard_normal_batch_into_kernel(
+        np.uint64(seed),
+        particles,
+        ordinals,
+        np.uint64(stream_word),
+        result,
+    )
     return result
 
 
@@ -252,13 +263,14 @@ def _wall_uniform_kernel(
     seed: np.uint64,
     particle_id: np.uint64,
     physical_boundary_event_ordinal: np.uint64,
+    stream: np.uint64,
 ) -> float:
     mask32 = np.uint64(_MASK32)
     block = _philox4x32_10_kernel(
         particle_id & mask32,
         particle_id >> np.uint64(32),
         physical_boundary_event_ordinal,
-        np.uint64(WALL_PROBABILISTIC_STICK_STREAM),
+        stream,
         seed & mask32,
         seed >> np.uint64(32),
     )
@@ -271,6 +283,7 @@ def _wall_uniform_batch_into_kernel(
     seed: np.uint64,
     particle_id: UInt64Array,
     physical_boundary_event_ordinal: UInt64Array,
+    stream: np.uint64,
     result: FloatArray,
 ) -> None:
     for row in range(particle_id.size):
@@ -278,7 +291,57 @@ def _wall_uniform_batch_into_kernel(
             seed,
             particle_id[row],
             physical_boundary_event_ordinal[row],
+            stream,
         )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _wall_uniform_open_batch_into_kernel(
+    seed: np.uint64,
+    particle_id: UInt64Array,
+    physical_boundary_event_ordinal: UInt64Array,
+    stream: np.uint64,
+    result: FloatArray,
+) -> None:
+    mask32 = np.uint64(_MASK32)
+    for row in range(particle_id.size):
+        particle = particle_id[row]
+        block = _philox4x32_10_kernel(
+            particle & mask32,
+            particle >> np.uint64(32),
+            physical_boundary_event_ordinal[row],
+            stream,
+            seed & mask32,
+            seed >> np.uint64(32),
+        )
+        integer = ((block[0] << np.uint64(32)) | block[1]) >> np.uint64(12)
+        result[row] = (float(integer) + 0.5) * _UNIT52
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _wall_standard_normal_batch_into_kernel(
+    seed: np.uint64,
+    particle_id: UInt64Array,
+    physical_boundary_event_ordinal: UInt64Array,
+    stream: np.uint64,
+    result: FloatArray,
+) -> None:
+    mask32 = np.uint64(_MASK32)
+    for row in range(particle_id.size):
+        particle = particle_id[row]
+        block = _philox4x32_10_kernel(
+            particle & mask32,
+            particle >> np.uint64(32),
+            physical_boundary_event_ordinal[row],
+            stream,
+            seed & mask32,
+            seed >> np.uint64(32),
+        )
+        integer0 = ((block[0] << np.uint64(32)) | block[1]) >> np.uint64(12)
+        integer1 = ((block[2] << np.uint64(32)) | block[3]) >> np.uint64(12)
+        uniform0 = (float(integer0) + 0.5) * _UNIT52
+        uniform1 = (float(integer1) + 0.5) * _UNIT52
+        result[row] = math.sqrt(-2.0 * math.log(uniform0)) * math.cos(2.0 * math.pi * uniform1)
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)

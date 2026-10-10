@@ -59,19 +59,20 @@ type _Mode = Literal["cold", "warm"]
 type _Output = Literal["none", "sample", "all"]
 type _Layout = Literal["regular", "p1", "q1"]
 type _Motion = Literal["initial", "cross"]
+type _FieldTime = Literal["static", "fixed_topology_linear"]
 
 _PROBE_PARTICLE_IDS = tuple(range(1, 33))
 _EXPECTED_REVISIONS = {
-    "engine_algorithm_revision": "particle_engine_v37",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v18",
-    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v20",
+    "engine_algorithm_revision": "particle_engine_v46",
+    "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
     "step_proposal_revision": "coupled_fixed_step_proposal_v10",
     "field_location_revision": "field_location_v4",
-    "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
-    "result_algorithm_revision": "durable_segmented_result_v5",
-    "geometry_algorithm_revision": "line_boundary_stackless_volume_cell_bvh_v5",
+    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "result_algorithm_revision": "durable_segmented_result_v6",
+    "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v7",
 }
-_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v14"
+_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v16"
 _EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_serial_slab_v6"
 
 
@@ -86,12 +87,16 @@ class _MatrixRow:
     output: _Output
     mode: _Mode
     cell_count: int
+    field_time: _FieldTime
 
     @property
     def data_key(self) -> str:
         if self.family == "event":
             return f"{self.family}-n{self.particle_count}-h{self.hit_count}"
-        return f"field-{self.layout}-{self.motion}-n{self.particle_count}-c{self.cell_count}"
+        return (
+            f"field-{self.layout}-{self.motion}-{self.field_time}-"
+            f"n{self.particle_count}-c{self.cell_count}"
+        )
 
     @property
     def science_key(self) -> str:
@@ -124,6 +129,11 @@ def main() -> None:
 def _arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--suite", choices=("smoke", "release"), default="smoke")
+    parser.add_argument(
+        "--rows",
+        nargs="+",
+        help="measure only these preset row IDs; a subset does not certify the complete matrix",
+    )
     parser.add_argument(
         "--repeats",
         type=_positive_integer,
@@ -163,6 +173,12 @@ def _driver(arguments: argparse.Namespace) -> None:
     rows = _matrix_rows(suite)
     if suite == "release":
         _validate_release_coverage(rows)
+    if arguments.rows is not None:
+        requested = set(arguments.rows)
+        unknown = requested.difference(row.row_id for row in rows)
+        if unknown:
+            raise ValueError(f"unknown {suite} row IDs: {sorted(unknown)}")
+        rows = tuple(row for row in rows if row.row_id in requested)
 
     with tempfile.TemporaryDirectory(prefix="chamber-particles-p14-") as temporary:
         root = Path(temporary)
@@ -201,6 +217,7 @@ def _driver(arguments: argparse.Namespace) -> None:
             "captured_at_utc": datetime.now(UTC).isoformat(),
             "non_gating_seconds": True,
             "suite": suite,
+            "matrix_scope": "selected_rows" if arguments.rows is not None else "complete_preset",
             "conditions": {
                 "rows": len(rows),
                 "repeats_per_row": repeats,
@@ -275,6 +292,18 @@ def _matrix_rows(suite: _Suite) -> tuple[_MatrixRow, ...]:
                 "all",
                 "warm",
                 1,
+            ),
+            _row(
+                "regular-time",
+                "field",
+                64,
+                "regular",
+                "initial",
+                0,
+                "all",
+                "warm",
+                1,
+                field_time="fixed_topology_linear",
             ),
             _row("p1-initial", "field", 64, "p1", "initial", 0, "none", "warm", 32),
             _row(
@@ -352,6 +381,18 @@ def _matrix_rows(suite: _Suite) -> tuple[_MatrixRow, ...]:
                 "warm",
                 1,
             ),
+            _row(
+                "regular-n10000-time",
+                "field",
+                10_000,
+                "regular",
+                "initial",
+                0,
+                "none",
+                "warm",
+                1,
+                field_time="fixed_topology_linear",
+            ),
         )
     )
     for layout, cells in (("p1", 10_368), ("q1", 2_500)):
@@ -423,6 +464,8 @@ def _row(
     output: _Output,
     mode: _Mode,
     cell_count: int,
+    *,
+    field_time: _FieldTime = "static",
 ) -> _MatrixRow:
     return _MatrixRow(
         row_id,
@@ -434,6 +477,7 @@ def _row(
         output,
         mode,
         cell_count,
+        field_time,
     )
 
 
@@ -498,9 +542,13 @@ def _case_material(row: _MatrixRow, suite: _Suite) -> tuple[DataBundle, dict[str
 
     definition = _expanded_definition(build_microcase("C04"), row.particle_count)
     if row.layout == "regular":
+        specification = copy.deepcopy(definition.spec)
+        data = _nonuniform_electric_data(definition.data)
+        if row.field_time == "fixed_topology_linear":
+            data = _constant_snapshot_field(data, specification)
         return (
-            _nonuniform_electric_data(definition.data),
-            copy.deepcopy(definition.spec),
+            data,
+            specification,
             4,
             "rk4_dense",
         )
@@ -581,6 +629,28 @@ def _unstructured_field_case(
         sources=(source,),
     )
     return data, specification
+
+
+def _constant_snapshot_field(
+    data: DataBundle,
+    specification: Mapping[str, Any],
+) -> DataBundle:
+    time_specification = specification["time"]
+    times = np.asarray(
+        [time_specification["start_s"], time_specification["end_s"]],
+        dtype="<f8",
+    )
+    fields = tuple(
+        replace(
+            field,
+            values=np.repeat(field.values[None, ...], times.size, axis=0),
+            time_s=times.copy(),
+        )
+        if field.name == "electric_field"
+        else field
+        for field in data.fields
+    )
+    return replace(data, fields=fields)
 
 
 def _mesh_dimensions(layout: _Layout, requested_cells: int, suite: _Suite) -> tuple[int, int]:
@@ -825,6 +895,7 @@ def _execute_run(
         "motion": row["motion"],
         "hit_count_per_particle": row["hit_count"],
         "output_mode": row["output"],
+        "field_time": row["field_time"],
         "execution_mode": "serial",
         "cell_count": row["cell_count"],
         "macro_step_count": summary.macro_step_count,
@@ -1011,6 +1082,7 @@ def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, o
                 "motion": representative["motion"],
                 "hit_count_per_particle": representative["hit_count_per_particle"],
                 "output_mode": representative["output_mode"],
+                "field_time": representative["field_time"],
                 "execution_mode": representative["execution_mode"],
                 "cell_count": representative["cell_count"],
                 "observations": len(selected),
@@ -1060,6 +1132,7 @@ def _comparisons(summaries: Sequence[Mapping[str, object]]) -> dict[str, object]
                 if value["mode"] == "warm"
                 and cold is not None
                 and value["output_mode"] == cold["output_mode"]
+                and value["field_time"] == cold["field_time"]
             ),
             None,
         )
@@ -1081,6 +1154,7 @@ def _regular_particle_scaling(
             and value["layout"] == "regular"
             and value["mode"] == "warm"
             and value["output_mode"] == "none"
+            and value["field_time"] == "static"
             and int(value["particle_count"]) in {10_000, 100_000, 1_000_000}
         ),
         key=lambda value: int(value["particle_count"]),
@@ -1134,6 +1208,7 @@ def _coverage(rows: Sequence[_MatrixRow]) -> dict[str, object]:
         "unstructured_motion": sorted({row.motion for row in rows if row.layout in {"p1", "q1"}}),
         "hit_counts_per_particle": sorted({row.hit_count for row in rows if row.family == "event"}),
         "output_modes": sorted({row.output for row in rows}),
+        "field_time_modes": sorted({row.field_time for row in rows if row.family == "field"}),
         "jit_modes": sorted({row.mode for row in rows}),
     }
 
@@ -1146,6 +1221,7 @@ def _validate_release_coverage(rows: Sequence[_MatrixRow]) -> None:
         "unstructured_motion": {"initial", "cross"},
         "hit_counts_per_particle": {0, 1, 5, 20},
         "output_modes": {"none", "sample", "all"},
+        "field_time_modes": {"static", "fixed_topology_linear"},
         "jit_modes": {"cold", "warm"},
     }
     for name, expected in expectations.items():

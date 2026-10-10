@@ -1,0 +1,25 @@
+{
+  "existing_hard_checks_passed": "temporal/dense/spatial convergence, RZ parity, exact release and target-stick counts, zero failures, repeat/output-mode payload/revision/event-work identity, and maximum-count untimed profile identity",
+  "particle_output_rows": 6,
+  "performance_observations": 18,
+  "process": {
+    "batch": "p14u_release",
+    "elapsed_s": 10005.5741721,
+    "exit_code": 0,
+    "finished_at_utc": "2026-10-10T04:43:37.5263304Z",
+    "started_at_utc": "2026-10-10T01:56:51.9521583Z"
+  },
+  "profile_particle_count": 1000000,
+  "raw_log_sha256": "adfd213efd0b64ee341f8f46823497e1faa048e812ad2ca2f178e3e56a94e1e6",
+  "registration_sha256": "e7e2c14b89606d84a8747ced0d8b6a86abb3026f7c488fceff5f077ffa1f1ec0",
+  "release_gate_complete": true,
+  "repeats_per_row": 3,
+  "report_sha256": "adfd213efd0b64ee341f8f46823497e1faa048e812ad2ca2f178e3e56a94e1e6",
+  "scope": "Existing manufactured coupled XY drag/electric/gravity surface-release and two-DOF meridional RZ workload; complete canonical 10k/100k/1M none/sample engineering matrix with three warm fresh-process repeats. Separate profile has overhead and is excluded from timing medians. No SLA, universal accuracy, general SDE or all-physics 1M guarantee.",
+  "separate_profile_complete": true,
+  "source_and_recipes_unchanged": true,
+  "source_guard_path": "frozen_source_verification.json",
+  "source_guard_sha256": "452c1ea58ad39009d819e654843c933e648cf03c1921d7385f52341b889de4e7",
+  "status": "PASS",
+  "tool_observed_process_exit_code": 0
+}

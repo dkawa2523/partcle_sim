@@ -4,7 +4,11 @@
 粒子engine、reduced electrostatic builder、COMSOL比較器のいずれでもありません。COMSOL固有の列名、entity ID、
 mixed mesh規則はこのdirectoryだけが所有し、`src/chamber_particles/`からimportされません。
 
-## v1の変換
+## v2の変換
+
+設定は`format_version: 2`、adapter revisionは`comsol_axisymmetric_csv_adapter_v2`である。
+共通YAML parserは全階層の重複keyとmerge key（`<<`）を拒否する。mergeを使った設定はkeyを明記して移行する。
+通常のaliasは引き続き利用でき、provenanceは元のUTF-8 bytesをhashする。物理field semanticsはv1を維持する。
 
 - 指定した1個の2-D axisymmetric domainだけを抽出する
 - providerのQ1 node順を明示的に要求し、各quadを二候補のうち最小triangle品質が高い対角でP1化する

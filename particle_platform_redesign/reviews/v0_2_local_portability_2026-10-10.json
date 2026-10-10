@@ -1,0 +1,255 @@
+{
+  "captured_at_utc": "2026-10-10T00:24:46.435188+00:00",
+  "corrections": [
+    "Earlier email.get_payload() text used implicit ASCII decoding and replaced Japanese characters. That false mismatch did not invalidate wheel1307. Corrected decode=True bytes followed by UTF-8 proves raw equality.",
+    "stale_readme_wheel_rejected.log and stale_readme_wheel_rejected_confirmed.log are excluded debugging observations, not the negative regression. True README-only negative is metadata_readme_negative_confirmed.log.",
+    "Earlier Linux core process printed847PASS but its Bash wrapper returned exit2. Separate confirmed standard-command rerun passed847 and returned exit0; only that rerun is the final gate."
+  ],
+  "current_identity": {
+    "captured_snapshot": {
+      "path": "particle_platform_redesign/reviews/v0_2_portability_source_snapshot_2026-10-10.json",
+      "sha256": "b3b765bff622d723c12c741952ccc57d6225c86473177c44deafc6cbb311f048"
+    },
+    "changed_since_capture": [
+      "particle_platform_redesign/quality_tooling_plan.md",
+      "particle_platform_redesign/solver/RELEASE_NOTES.md",
+      "particle_platform_redesign/solver/docs/numerics.md",
+      "particle_platform_redesign/solver/tests/release_smoke.py"
+    ],
+    "production_python_file_count": 27,
+    "production_python_map_sha256": "9ddc6e8f9eede832565c62129ad4e1a9d09fbddd0d1b280af7117b78a193e69c",
+    "production_python_sha256": {
+      "chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+      "chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+      "chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+      "chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+      "chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+      "chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+      "chamber_particles/engine.py": "566a6de8e52ff8bebe5ed1d16361cdef09576244021251b37b31f879f54a9eca",
+      "chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+      "chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+      "chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+      "chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+      "chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+      "chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+      "chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+      "chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+      "chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+    },
+    "readme_sha256": "e03a93cd3940303d74e150209c3cdfb4299b9b1b141a2edeff7fb35af309a3bb",
+    "release_smoke_description_policy": "RFC metadata body bytes explicitly decoded as UTF-8; LF-normalized text comparison ignores terminal newlines. Final observed artifact also has exact raw README/body equality on both OSs.",
+    "release_smoke_sha256": "263528e0b64e5e5e8963a14d24992e8235137308a78d772524edeeec9016ad48",
+    "snapshot_file_count": 337,
+    "snapshot_scope": "Capture-time exact-byte tree, not a claim that mutable documents remain unchanged. Collected verification/scenario tests and scientific production sources remain exact. Only noncollected release_smoke.py changed among code/tool/config files after capture.",
+    "source_installed_wheel_27_python_bytes_match_on_both_os": true,
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+  },
+  "linux": {
+    "core": {
+      "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q",
+      "elapsed_s": 385.17,
+      "exit_code": 0,
+      "log": {
+        "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/core_pytest_confirmed.log",
+        "sha256": "f95a4120aba915151ca7d1d05a2265d8f8bb03d58e4b3bf50c507790ff69eb7a"
+      },
+      "passed": 847
+    },
+    "exit_recording": "Sequential commands use Bash set -e; completed tool process returned exit0. Raw logs stored directly on Windows volume.",
+    "kind": "Local WSL Ubuntu; not remote GitHub runner",
+    "p14_smoke": {
+      "event_heavy_20_hits_total_events": 1280,
+      "exit_code": 0,
+      "particles_per_row": 64,
+      "receipt": {
+        "path": "particle_platform_redesign/reviews/v0_2_linux_p14_smoke_2026-10-10.json",
+        "sha256": "44bd1855a79d8197971dbc679f12aae9f7cc74e566660b22716b2138d77f2943"
+      },
+      "rows": 8,
+      "scope": "Functional/identity smoke under concurrent quality-gate load; timings are not acceptance measurements."
+    },
+    "portable_external": {
+      "command": "uv run --locked python -m pytest tools/comsol_adapter/tests tools/electrostatic_builder/tests tools/field_preprocessor/tests tools/vv/comsol/tests/test_meaning_preflight.py tools/vv/comsol/tests/test_boundary_response_mapping.py tools/vv/comsol/tests/test_curved_wall_line2_convergence.py tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py -q",
+      "elapsed_s": 9.38,
+      "exit_code": 0,
+      "log": {
+        "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/portable_tools_pytest.log",
+        "sha256": "9991c60b841e74d24b1ba673e7c1d75f625fca50bbd21c3b64e7781df2c9c103"
+      },
+      "passed": 120,
+      "scope": "CI-selected license-free portable subset; not all historical asset-dependent external tests."
+    },
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "quickstart": [
+      {
+        "command": "uv run --locked python examples/quickstart/create_case.py /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/input",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/quickstart_create.log",
+          "sha256": "e817da3f2c843afce1427086d1a0cedc16c6320b651b99f5111b6bf935638539"
+        },
+        "operation": "create"
+      },
+      {
+        "command": "uv run --locked chamber-particles check /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/input/case.yaml",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/quickstart_check.log",
+          "sha256": "7757656f5c1d982b3c3b87de01e7a049c97dc5dfdc65d6ef0e1d1410aa79b410"
+        },
+        "operation": "check"
+      },
+      {
+        "command": "uv run --locked chamber-particles run /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/input/case.yaml -o /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/result",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/quickstart_run.log",
+          "sha256": "2a1a9047df733bac2ba57b2b8a3fb454dc2526a4700293e8822c75fe4b19182e"
+        },
+        "operation": "run"
+      },
+      {
+        "command": "uv run --locked chamber-particles inspect /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/result",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/quickstart_inspect.log",
+          "sha256": "692b20dcb976db5530a1ec672cfcc606571329002127c2663ee3a737ae8798d5"
+        },
+        "operation": "inspect"
+      },
+      {
+        "command": "uv run --locked python -m tools.analysis /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/result --output /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/derived/summary.json",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/quickstart_analysis.log",
+          "sha256": "7ca847155eae45102af208632aea66e63b228d1c1fa29665e0cd9938f30d538b"
+        },
+        "operation": "analysis"
+      },
+      {
+        "command": "uv run --locked python -m tools.visualization /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/result --output-directory /var/tmp/chamber-particles-v02-final-506d40154b3a4b32b30623e913440427-confirmed/quickstart/derived/visualization",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/quickstart_visualization.log",
+          "sha256": "76a5b5d3639af14295470201dd4545cb8975e297f824e797901e95e4e08d0405"
+        },
+        "operation": "visualization"
+      }
+    ],
+    "runtime_only": {
+      "exit_code": 0,
+      "installation": "Same original Windows-built13070487 wheel installed without dependencies into clean Linux runtime containing only locked runtime dependencies.",
+      "log": {
+        "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/runtime_final_smoke.log",
+        "sha256": "e19a38ed60196172fcb15ab8d37fda5178e3aa47c3774e8999f38c79fe483165"
+      },
+      "metadata_byte_identity": {
+        "path": "particle_platform_redesign/reviews/v0_2_linux_long_description_byte_identity_2026-10-10.json",
+        "sha256": "917eb302d0c7c3ea257350e573c7be5ac38332c0c7eb84be31499c7ec994efa1"
+      },
+      "receipt": {
+        "path": "particle_platform_redesign/reviews/v0_2_final_linux_clean_wheel_2026-10-10.json",
+        "sha256": "e19a38ed60196172fcb15ab8d37fda5178e3aa47c3774e8999f38c79fe483165"
+      }
+    },
+    "static_gates": [
+      {
+        "command": "uv lock --check",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/lock_final.log",
+          "sha256": "9e74056a25238c65b4f48fca99aa47a4cd07a7f0aaee54549e7404805ec6d207"
+        },
+        "name": "dependency_lock"
+      },
+      {
+        "command": "uv run --locked ruff format --check src tests tools examples scripts",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/ruff_format_final.log",
+          "sha256": "f996212e7c06f8543d4212df37fbcbdd1355ae8e02ca1fbab1c9037817ec908c"
+        },
+        "name": "format"
+      },
+      {
+        "command": "uv run --locked ruff check src tests tools examples scripts",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/ruff_lint_final.log",
+          "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+        },
+        "name": "lint"
+      },
+      {
+        "command": "uv run --locked pyrefly check",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/pyrefly_final.log",
+          "sha256": "00bf7f939cadeab2e734345bcf167892a98d269eea956a08672500f47b91f3bd"
+        },
+        "name": "types"
+      },
+      {
+        "command": "uv run --locked lint-imports",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/imports_final.log",
+          "sha256": "e899be16bac7f347d5358d7b58a58fb6e37c17bc6c1c05b2a5b13964c9702dab"
+        },
+        "name": "imports"
+      },
+      {
+        "command": "uv run --locked python scripts/check_complexity.py",
+        "exit_code": 0,
+        "log": {
+          "path": "particle_platform_redesign/reviews/v0_2_linux_portability_logs_2026-10-10/complexity_final.log",
+          "sha256": "576cbe6bddc2256d9d083822708093e59d15773d1784e6003e110e7a538d2ad3"
+        },
+        "name": "complexity"
+      }
+    ]
+  },
+  "readme_negative": {
+    "expected_rejection": "wheel long description differs from the current source README",
+    "observed_exit_code": 1,
+    "receipt": {
+      "path": "particle_platform_redesign/reviews/v0_2_readme_guard_negative_2026-10-10.json",
+      "sha256": "ec6b294f64990cb82787ffcf2be4c37b81d4d7c349e7611517330dcf7edcabd0"
+    },
+    "scope": "README-only edit in temporary copied checkout;27 Python sources unchanged, frozen README and original wheel untouched."
+  },
+  "remote_ci": {
+    "reason": "Current dirty source has not been pushed; dispatch of a remote existing ref would not test this exact tree. No push/tag/publication requested or performed.",
+    "status": "not_run"
+  },
+  "scope": "Local Windows and WSL Ubuntu candidate quality and runtime-only portability. No remote CI execution, publication, timing SLA, application accuracy, or new native COMSOL certification.",
+  "status": "pass",
+  "wheel": {
+    "existing_original_artifact_retained": true,
+    "path": "particle_platform_redesign/solver/dist/chamber_particles-0.2.0-py3-none-any.whl",
+    "sha256": "13070487ab93bc0724061baa13eff3a196c2ed83c22a6a84d727ebdd68c2e20b",
+    "version": "0.2.0"
+  },
+  "windows_runtime_only": {
+    "exit_code": 0,
+    "metadata_byte_identity": {
+      "path": "particle_platform_redesign/reviews/v0_2_windows_long_description_byte_identity_2026-10-10.json",
+      "sha256": "0ea1942abdee7a20ea79d5358ebe4b673c6b2631bc83ce60a1481271cc5abeaf"
+    },
+    "receipt": {
+      "path": "particle_platform_redesign/reviews/v0_2_final_windows_clean_wheel_2026-10-10.json",
+      "sha256": "d4e41790ea80bd6857353b57b8adf1d83dd0903182e54170cf085a12de8c4f23"
+    }
+  }
+}

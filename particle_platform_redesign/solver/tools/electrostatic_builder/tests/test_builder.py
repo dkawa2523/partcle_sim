@@ -239,6 +239,30 @@ def test_canonical_workflow_preserves_input_and_adds_particle_ready_fields(
     assert provenance["producer_metadata"]["boundary_conditions"][0]["group"] == "wafer"
 
 
+@pytest.mark.parametrize(
+    ("replacement", "error"),
+    [
+        ("  electron_temperature_V: 4.0\n  electron_temperature_V: 5.0", "duplicate YAML key"),
+        ("  <<: {electron_temperature_V: 4.0}\n  electron_temperature_V: 4.0", "merge keys"),
+        (f"  electron_temperature_V: {10**400}", "must be a finite number"),
+    ],
+)
+def test_builder_rejects_ambiguous_or_unrepresentable_input_before_publication(
+    tmp_path: Path, replacement: str, error: str
+) -> None:
+    config = tmp_path / "builder.yaml"
+    config.write_text(
+        _configuration_text("missing-source.h5").replace(
+            "  electron_temperature_V: 4.0", replacement
+        ),
+        encoding="utf-8",
+    )
+    output = tmp_path / "augmented.h5"
+    with pytest.raises(ValueError, match=error):
+        build_from_configuration(config, output)
+    assert not output.exists()
+
+
 def _nonlinear_profile(mesh_count: int) -> np.ndarray:
     nodes, cells = _grid(
         mesh_count,
@@ -315,7 +339,7 @@ def _thermal_bundle() -> DataBundle:
 
 def _configuration_text(source_name: str) -> str:
     return f"""\
-format_version: 1
+format_version: 2
 input:
   data_path: {source_name}
   layout: plasma

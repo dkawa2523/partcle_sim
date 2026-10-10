@@ -1,0 +1,39 @@
+{
+  "status": "PASS_WITH_SOURCE_CONSOLE_LAUNCHER_ENVIRONMENT_LIMITATION",
+  "operations": [
+    {
+      "step": "generate",
+      "exit_code": 0
+    },
+    {
+      "step": "check",
+      "exit_code": 1
+    },
+    {
+      "step": "module-check",
+      "exit_code": 0
+    },
+    {
+      "step": "module-run",
+      "exit_code": 0
+    },
+    {
+      "step": "module-inspect",
+      "exit_code": 0
+    },
+    {
+      "step": "analyze",
+      "exit_code": 0
+    },
+    {
+      "step": "visualize",
+      "exit_code": 0
+    }
+  ],
+  "scope": "Current source quickstart generator, check/run/inspect via the same module CLI, analysis and visualization; all six scientific operations exit 0.",
+  "console_source_launcher": "Windows application control rejects source .venv console launcher with os error 4551; runtime-only clean-wheel console CLI is separately verified.",
+  "output_base": "C:/Users/user/AppData/Local/Temp/chamber-particles-v02-quickstart-final-20261010",
+  "engine_revision": "particle_engine_v46",
+  "failure_event_count": 0,
+  "boundary_event_count": 2
+}

@@ -25,6 +25,13 @@ comparison-conditions table:
   random-seed semantics;
 - integration/output settings and lifecycle/event meanings.
 
+Represent that table with the seven producer-neutral layers documented under
+**Generic meaning preflight** in
+`particle_platform_redesign/solver/tools/vv/comsol/README.md`, and run
+`tools/vv/comsol/meaning_preflight.py` before numerical comparison. Resolve
+`ADAPTER_REQUIRED` items externally; stop on `AMBIGUOUS`. A question may receive
+`PASS` or `FAIL` only when its own preflight condition is `SUPPORTED`.
+
 Map equations by physical meaning, not by similarly named variables. Identify
 the supported solver revision for every enabled COMSOL model. If a model is not
 supported, compare a clearly named reduced slice or report it as out of scope;

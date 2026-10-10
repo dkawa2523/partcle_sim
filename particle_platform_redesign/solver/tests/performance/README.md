@@ -54,7 +54,7 @@ requested frames and adds the P06-U capability. Event v6 added the certified
 constant-acceleration surface start-contact rule. Engine v11 / event v7
 extended that rule to strict-inward Cartesian general-RK4 start contact and
 active-wall residual time. Engine v12 / event v8 added the P06-RZ
-signed-stage/axis-event capability; current engine v37 preserves it while
+signed-stage/axis-event capability; current engine v46 preserves it while
 adding P06-S/P08/P09 behavior, the P10 compiled array passes, and the P11
 exponential-midpoint path. It preserves P12 event semantics, but P14-P removed
 that milestone's outer worker partition. All eight
@@ -110,7 +110,9 @@ the revision 3b regular-XY memory checkpoint. P06-U material P1/Q1 support and
 P06-RZ force coupling, P06-S Stokes--Cunningham, and the P08 Stage 1A closure
 are also complete. P09 memory/runtime layout, P10 compiled CPU, the P11
 `exponential_midpoint` ability gate, the P12 event-heavy worker partition, and the P13 durable-result gate are complete.
-P14 subsequently recorded the exact-only historical matrix below; richer source distributions and moving walls remain separate later extensions.
+P14 subsequently recorded the exact-only historical matrix below. Current
+source distributions are realized externally into canonical internal/surface
+rows; moving walls remain a separate later extension.
 
 Absolute timings depend on the machine and filesystem and are never pytest or CI
 acceptance thresholds. Generated JSON is measurement output and should normally
@@ -259,7 +261,7 @@ Every observation uses the same three public APIs and a fresh child with a
 unique, initially empty `NUMBA_CACHE_DIR`. `fresh` measures the first run in
 that process. `warm` performs one or more untimed public runs before measuring.
 The harness requires exact semantic-result identity across modes and repeats,
-the resolved CPU/exponential path, the current `compiled_cpu_tile_v18`, and the
+the resolved CPU/exponential path, the current `compiled_cpu_tile_v21`, and the
 current physics-runtime, proposal, enclosure, event, and result revisions. It also
 checks the current memory-plan revisions and remains a manually invoked,
 non-gating measurement.
@@ -338,7 +340,9 @@ writer bandwidth.
 small orthogonal matrix instead of a Cartesian product. The release preset covers
 10,000, 100,000, and 1,000,000 particles; regular, P1, and Q1 fields; initial
 location and cross-cell motion; 0, 1, 5, and 20 boundary hits per particle;
-none, sampled, and all-particle output; and cold and warm compilation states.
+none, sampled, and all-particle output; fixed-topology linear time fields via a
+two-snapshot static-equivalence row with scientific-payload identity; and cold
+and warm compilation states.
 The current harness is serial-only. The all-particle
 row is limited to the short 10,000-particle case.
 
@@ -582,19 +586,30 @@ sampled through load, simulate, and open; it excludes later external validation.
 The JSON is local evidence only. P14-R owns preservation of release evidence.
 The quick smoke continues to validate only driver and gate shape.
 
-Current production is engine v37 / compiled tile v18 / proposal v10 / event v16,
-physics catalog v17 / runtime v20, runtime layout v6, RK4 enclosure v2, dense path v3,
-charge-stable exponential midpoint v3 / enclosure v4, result v5, field location v4, and memory plan v14 after P15 stationary charge, P15-D shifted-Maxwellian charge, P15-E
+Current production is engine v46 / compiled tile v21 / proposal v10 /
+event `line_quadratic_curved_capsule_periodic_first_hit_v22`, geometry v7, source v5,
+physics catalog v23 / runtime v22, runtime layout v6, RK4 enclosure v2, dense path v3,
+charge-stable exponential midpoint v3 / enclosure v4, result v6, canonical case/data/result schema 3,
+checkpoint schema 2, field location v4, spatial gradient v2, and memory plan v16 after P15 stationary charge, P15-D shifted-Maxwellian charge, P15-E
 finite-speed Epstein, P15-F collisionless Barnes ion drag, and P16
 Waldmann--Gallis thermophoresis, plus the narrowly scoped B02 inertial-Brownian
 path and P18-R effective-gas drag/thermophoresis sensitivities. Engine v30 localizes an unrepresentable OU row without stopping valid
 neighbors. Engine v31 adds P19-L's bounded local applicability certificate.
 Historical M3-C1 event v14 narrowed only eligible dense event broad-phase queries;
 event v15 added the geometry-plus-roundoff budget and robust local Hermite predicates.
-Current event v16 additionally clears an RK4 candidate only when the integrator-owned
+Event v16 additionally clears an RK4 candidate only when the integrator-owned
 position Bernstein control enclosure lies strictly inside the facet half-space after
 the existing budget; otherwise it retains the candidate and fails closed. It does not
-change first-event or terminal semantics. These revisions do not
+change first-event or terminal semantics. Event v20 retained every
+incident facet simultaneous with the first localized hit for exact, RK4,
+exponential, and Brownian material paths, then applies the shared priority/combined-normal
+rule; it additionally arbitrates static Cartesian-XY periodic centre crossings against
+finite-radius material contact. It also proves finite-radius exact departure for every
+simultaneous material candidate before omitting a zero-time residual contact, without a
+position nudge or suppression of later impacts. Current event v22 / geometry v7 /
+source v5 additionally apply each material group's particle-surface or particle-centre
+contact geometry while retaining the physical body radius for force and boundary laws.
+Memory plan v16 counts the corresponding bounded contact-mode work. These revisions do not
 retroactively relabel the P11 or P14-U observations above. P14-R remote CI
 remains a separate release track. The external M3-V applicability/relevance
 evaluation is complete; it did not certify full trajectory equivalence. Its
@@ -704,6 +719,17 @@ uv run --locked python -m tests.performance.b03_characterization \
   --json evidence/b03/performance_v1.json
 ```
 
+For B05 comparisons, `--tree-depth` remains the mandatory uniform numerical
+path depth. `--adaptive-max-depth` is the maximum conditional refinement near
+wall, RZ-axis, or indeterminate paths; omitting it makes it equal to the base
+depth and therefore exercises the fixed-depth degeneration of the same
+engine. Compare fixed and adaptive runs with the same build and case inputs,
+for example `--tree-depth 3 --adaptive-max-depth 3` versus
+`--tree-depth 3 --adaptive-max-depth 8`. The report records both depths,
+accepted pieces, candidate queries, elapsed time, and the max-depth memory
+plan. This comparison does not claim that base depth 3 has the same
+first-passage resolution as a uniform depth-8 path.
+
 All 24 measured runs finished with every particle active and zero failures.
 The measured B03 acceptance revisions were read from every execution manifest: engine v34,
 proposal v9, event v15, catalog v16, runtime v17, compiled tile v16, memory
@@ -746,6 +772,41 @@ high-water, while solver-planned bytes cover solver-owned arrays; neither is a
 substitute for the other. This is not a COMSOL comparison, a physical-validity
 claim, a portable speed threshold, isotropic 3-D Brownian evidence, or a
 general state-dependent SDE order result.
+
+### B05 conditional-refinement observation
+
+The then-current engine v41 / event v18 / memory-plan v15 tree was remeasured on
+2026-10-08 with 500 and 5,000 particles, two macro steps, two warm repeats, and
+one warm-up per repeat. The measured scope remained the public
+`load_case -> simulate -> open_result` path. For 5,000 particles the median
+public times were:
+
+| Scenario | Fixed depth 2 (s) | Adaptive 2 to 5 (s) | Fixed depth 5 (s) | Fixed-5 / adaptive |
+|---|---:|---:|---:|---:|
+| XY fixed drag | 0.167 | 0.164 | 1.005 | 6.11x |
+| RZ fixed drag | 0.258 | 0.349 | 1.695 | 4.85x |
+| RZ continuous charge | 0.271 | 0.358 | 1.711 | 4.78x |
+| RZ axis restart | 1.017 | 1.205 | 2.862 | 2.38x |
+
+The three clear-path adaptive runs were bitwise identical to fixed depth 2.
+The axis row intentionally refined locally: it processed 89,077 accepted pieces
+instead of the fixed-depth-5 row's 439,077 pieces, while both recorded 5,000
+axis crossings, zero failures, and all particles active. Adaptive and uniform
+depth 5 both conservatively planned 30,848,780 bytes in that row; the observed
+work reduction does not weaken the worst-case memory bound.
+
+This is evidence that conditional refinement avoids uniform depth-5 work when
+only a subset of paths needs that maximum resolution. It is not evidence that
+adaptive execution is always faster than the shallower depth-2 discretization:
+the RZ rows paid about 1.18x to 1.35x for classification when compared with
+fixed depth 2. Uniform depth 5 is a cost comparator, not a physical golden
+reference. These machine-local results exclude trajectory-frame I/O and do not
+define a portable performance threshold.
+
+A final P14 smoke run covered eight rows across regular, P1, and Q1 layouts,
+static and fixed-topology-linear fields, no-output and all-frame output, and a
+20-hit-per-particle event row. All rows completed with the pinned revisions,
+exact science-key identity, and no failures.
 
 ## M3-C2 Case-P 287-particle owner discovery
 
@@ -889,3 +950,52 @@ fixed-64 emulation and current-cadence runs have byte-identical assembled
 public scientific payloads; its larger stable charge step demonstrates fewer
 macro steps but is explicitly not an equal-accuracy comparison or portable
 timing claim.
+
+## 2026-10-09 scoped improvement baseline
+
+The existing P14 harness accepts `--rows` to select exact preset row IDs. The
+report labels this `selected_rows`, retains per-row identities and scientific
+digests, and does not present it as a complete release matrix.
+
+```powershell
+uv run --locked python -m tests.performance.p14_matrix --suite release `
+  --rows regular-n10000 event-h0-n10000 event-h20-n10000 --repeats 3 `
+  --json ../reviews/improvement_baseline_2026-10-09.json
+```
+
+The saved [warm baseline](../../../reviews/improvement_baseline_2026-10-09.json)
+uses fresh processes, private initially empty Numba caches, one thread, and one
+warm-up before each observation. Three-repeat medians on this Windows machine:
+
+| Row | simulate s | public API total s | solver plan bytes | peak RSS bytes |
+|---|---:|---:|---:|---:|
+| regular, 10k | 0.41986 | 0.43346 | 48,708,029 | 400,707,584 |
+| event, zero hits, 10k | 0.20418 | 0.21694 | 90,211,707 | 276,824,064 |
+| event, 20 hits each, 10k | 4.31827 | 4.51880 | 90,211,707 | 340,226,048 |
+
+Scientific digests match within each row. The high-event row produced 200,000
+boundary events. The [cold regular observation](../../../reviews/improvement_cold_baseline_2026-10-09.json)
+is one empty-cache run: simulate 9.65291 s, public total 9.67361 s. It is not a
+distribution or a portable startup guarantee. These baseline observations used engine
+v44, catalog v23, physics runtime v22, compiled tile v21, and memory plan v15.
+Current production supersedes them with engine v46 / event v22 / geometry v7 /
+source v5 / memory plan v16; catalog v23 / physics runtime v22 / compiled tile v21
+are unchanged. The stored baseline revisions and measurements remain historical evidence.
+
+The [evidence-only profile](../../../reviews/improvement_profile_2026-10-09.json)
+and its [script](../../../reviews/improvement_profile_2026-10-09.py) reuse the
+P14 public-run cases. Boundary/failure buffer allocation cost about 78 us and
+97 us in the zero-hit and high-event profiled cases, respectively, each with
+one macro and one slab. This does not support the proposed allocation reuse
+as a useful optimization in this scope. That production change is deferred.
+Profile overhead and post-timing digest work are recorded; profile timings are
+not throughput estimates. Long runs with many macros/restarts remain a
+different workload. These observations select work; they do not certify a
+product accuracy budget, SLA, COMSOL speed ratio, or all 100k/1M workloads.
+
+The [current measured engineering scope report](../../../reviews/product_performance_acceptance_2026-10-09.json)
+records default-contact before/after scientific payload identity, solver-owned plans,
+machine-local timing and RSS, representative regular 100k/1M observations, and a
+current-only mixed-contact 10k observation. Its small analytic checks qualify those
+preset cases only. It records no approved product accuracy budget, wall-time SLA,
+speedup, or regression-ratio threshold; the 100k/1M rows each have one observation.

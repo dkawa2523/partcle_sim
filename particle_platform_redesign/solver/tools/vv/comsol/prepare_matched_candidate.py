@@ -185,6 +185,7 @@ def _release_source(package: Path) -> tuple[RealizedTableSource, dict[str, objec
         charge_number=np.full(len(rows), -1.0, dtype="<f8"),
         mass_kg=mass,
         drag_diameter_m=diameter,
+        contact_radius_m=np.zeros(len(rows), dtype="<f8"),
         electrostatic_radius_m=radius,
         displaced_volume_m3=volume.astype("<f8"),
         model_weight=np.ones(len(rows), dtype="<f8"),
@@ -202,7 +203,7 @@ def _release_source(package: Path) -> tuple[RealizedTableSource, dict[str, objec
 def _case_document(data_name: str, content_hash: str, dt_s: float) -> dict[str, object]:
     output_times = [index * _OUTPUT_INTERVAL_S for index in range(41)]
     return {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": f"m3v_caseA_100nm_common_deterministic_dt_{dt_s:.9g}",
             "data_path": data_name,

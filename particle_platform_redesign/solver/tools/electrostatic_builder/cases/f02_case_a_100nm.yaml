@@ -1,4 +1,4 @@
-format_version: 1
+format_version: 2
 input:
   data_path: ../../../_out_f02_acceptance/case_a_thermal.h5
   layout: plasma

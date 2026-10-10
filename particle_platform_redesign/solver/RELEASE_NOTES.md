@@ -1,4 +1,72 @@
-# chamber-particles 0.1.0
+# chamber-particles 0.2.0
+
+`0.2.0`は時間依存場・接触geometry・境界応答・Brownian処理を、既存の2-D engineへ統合したminor releaseです。
+`0.1.0`のstatic 2-D baselineは同版のtagに保持します。
+
+## 0.2.0の変更
+
+- canonical YAML case/HDF5 data/result schemaをv3へ更新。fixed-topology fieldは静的`values[N,C]`または
+  `time_s[T]`＋`values[T,N,C]`を持ち、実stage時刻の線形補間とtime-knot分割を使う
+- static 2-D Cartesian XYのconforming boundary pairをpure translationで接続する
+  `translation_periodic_xy_v1`を追加。材料wall lawと周期transferを分離し、required fieldのseam一致をprepare時に検査
+- `contact_wall_laws_v7`でMaxwell thermalを含む応答へcandidate固有接触法線を統一。sourceは粒子ごとのrealized internal/surface scheduleへ統一
+- B04でBrownian粒子のactive-wall hit後をpost-wall stateからfresh stochastic rootとして継続
+- B05で全rootへ一様なbase depthを維持し、wall/RZ-axis/証明不能候補だけを`adaptive_max_depth`まで条件付き分割。
+  base=maxは従来固定depthへ退化し、連続OUのexact first-passageは主張しない
+- Brownianを`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`へ統一。XY/RZ、fixed/continuous charge、
+  native/effective-gas線形Epsteinと適用域が交わる既存additive forceを同じOU/FDT engineで合成する
+- event v19でevent v18の有限半径first contactと同時incident facet集合を維持し、exact、一般RK4、
+  exponential、Brownianの材料wallと周期transferを同じfirst-event順序で解決
+- event v20で有限半径粒子が同時接触した複数facetから反射後に離脱するexact残時間を、暗黙の有限contact集合として
+  candidateごとに証明する。位置nudgeは行わず、証明不能接触・後続impact・材料/周期混在cornerはfail-closedのまま維持する
+- physics catalog v20でneutral drag、thermophoresis、lift、gravity/buoyancyの重複背景authorityを
+  liftの有無によらず照合し、linear Epstein/Waldmannのnative/effective-gas混在をfail-closedにする
+- Talbot熱泳動を原著の半径Knと明示係数Cs,Cm,Ctへ統一し、`talbot_cross_regime_radius_knudsen_v1`へ更新。
+  旧直径Kn revisionの入力を拒否し、純粋式・bound・compiled・公開scenarioを同時に検証
+- YAMLのnested duplicate/merge keyを主要入力で統一して拒否し、巨大数値の変換失敗を既存domain例外へ翻訳
+- finalの粒子数とmanifestの整合、非負・狭義昇順IDをpublish/open/readの共通検査へ追加
+- 外部field preprocessor v4はP1・regular・affine Q1からfull regularへのstatic/linear-time cacheを認証。
+  共通partitionの物理測度normと全時間区間のBernstein誤差比上界を用い、warped Q1・coverage不整合・解像不能patch・資源超過は公開拒否
+- 境界groupに`contact_geometry: particle_surface | particle_center`を追加。独立した粒子半径を保持して材料接触と仮想開口通過を混在できる。
+  exact端capの離脱証明と、反射originのmacro/checkpointを跨ぐ継続を修正
+- 外部比較はcurrent executor、hash付きexpected/observed artifact、実boundary responseを照合。
+  未観測の設定・boundary ID・terminal原因を認証済みにしない
+- 独立OU oracle、可変係数・位置依存流速の実noise ensemble、harmonic dense local/global試験を追加
+- 独立Kramers基準解と実noise first-arrival CDF比較、非dyadic dense covariance、RZ folded OU、continuous chargeの限定精度証拠を追加
+- release CIの品質gate・Quick Start・wheel検査を独立stepに分離し、途中のnative終了コードを後続成功で隠さない
+- 単調なHermite壁接近で、roundoff幅が非接触・接触条件の隙間に入ると時間表現限界まで二分する問題を修正。
+  厳密な法線速度下界とendpoint signed-distance上界から全区間の内側を証明し、位置nudgeや許容誤差の拡大は使わない
+- 外部field producerへ任意の`--source-time-diagnostic`を追加。不均一時刻の内部snapshot省略に対する値・gradient・境界traceの感度を既存samplerでreportする
+- 一定係数OUの反復鏡面反射とRZ到達に独立Gaussian/Kramers参照を追加。登録済み誤差基準で解像度ごとの適格性を判定する
+- Unicodeを含むcase名・pathをASCII pipeへ安全にJSON出力するCLIへ修正
+- source・wheel・runtime-only installの全Python source digestとREADME由来のMETADATA本文を照合し、三APIとconsole/module CLI、time-field、surface/center接触をclean installで検証する
+- 空replayの検索とevent ordinal上限の反復構築を削減。同一条件の効率測定と科学payload照合を保存
+- engine v46、event `line_quadratic_curved_capsule_periodic_first_hit_v22`、physics catalog v23、physics runtime v22、memory plan v16、source
+  `realized_internal_surface_contact_schedule_v5`、compiled tile v21、canonical case/data/result schema 3、checkpoint schema 2、
+  result algorithm `durable_segmented_result_v6`
+
+過去schemaのcompatibility readerやmigration shimはありません。`0.1.0`入力を使う場合は
+公開tagのsolverを使うか、producer側で明示的にschema v3へ再生成します。
+
+## 用途別保証と配布
+
+検証保証は、独立解析解・Green/OU/Kramers reference・登録ensemble・時間/mesh収束を持つ指定profileへ限定します。
+正式P14/B03/P14-Uの反復測定は測定機での工学的受入であり、未指定の利用者accuracy・時間・RSS SLAへ読み替えません。
+COMSOL比較は保存済みnative参照と現行v46のversion再資格です。元Brownian登録の未達、未観測のboundary原因/ID、
+native FE・内部stage・物理modelの実験的妥当性などの制約は保持します。
+条件と結果の入口は
+[`support_and_errors.md`](https://github.com/dkawa2523/partcle_sim/blob/v0.2.0/particle_platform_redesign/solver/docs/support_and_errors.md)
+です。
+
+同じtagのWindows/Linux品質gate、Quick Start、wheel build、runtime-only clean install、三API/CLI smokeを通したwheelと
+`SHA256SUMS.txt`をGitHub Releaseで配布します。wheelは`chamber_particles` packageとCLIを含み、source companionの
+`tools/`・`examples/`・外部V&Vは含みません。外部の生CSV/HDF5/MPHはGit配布せず、証拠のhashと再現条件を保存します。
+Python 3.12、single-thread CPU、2-D XY/RZ meridionalが対象です。開発statusはalpha、PyPI・sdist・3-D・GPU・
+普遍的COMSOL同等性は今回の配布scopeに含めません。利用ライセンスは設定しておらず、再利用には権利者の明示許諾が必要です。
+
+---
+
+# chamber-particles 0.1.0（公開済み）
 
 `0.1.0`は、半導体製造チャンバー内の粒子軌道を外部場とgeometryから計算する
 clean-room solverの最初の正式公開版です。公開状態はalphaであり、対応範囲を明示して使います。

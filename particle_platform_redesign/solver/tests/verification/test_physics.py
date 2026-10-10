@@ -201,9 +201,10 @@ def test_inertial_langevin_catalog_resolves_one_epstein_coupled_plan() -> None:
 
     assert isinstance(plan.noise, InertialLangevinNoisePlan)
     assert plan.noise.interval_tree_depth == 4
+    assert plan.noise.adaptive_max_depth == 4
     assert plan.resolved_models()["noise"] == {
         "model": "inertial_langevin_fdt",
-        "revision": "inertial_langevin_fdt_epstein_linear_frozen_start_v1",
+        "revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2",
     }
     assert [field.name for field in plan.required_fields].count("gas_temperature") == 1
 
@@ -219,22 +220,29 @@ def test_rz_inertial_langevin_catalog_retains_revision_and_composes_supported_mo
 ) -> None:
     drag = _epstein_linear_model()
     drag["revision"] = drag_revision
+    thermophoresis_revision = "waldmann_gallis_free_molecular_single_species_heat_flux_v1"
     if drag_revision == "epstein_linear_effective_gas_sensitivity_v1":
         drag["maximum_speed_ratio"] = 0.6
+        thermophoresis_revision = (
+            "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+        )
+    thermophoresis: dict[str, object] = {
+        "model": "waldmann_gallis",
+        "revision": thermophoresis_revision,
+        "gas_velocity_field": "gas_velocity",
+        "gas_temperature_field": "gas_temperature",
+        "gas_translational_heat_flux_field": "gas_heat_flux",
+        "gas_mean_free_path_field": "gas_mean_free_path",
+        "gas_molecular_mass_kg": 4.65e-26,
+        "applicability": "error",
+    }
+    if drag_revision == "epstein_linear_effective_gas_sensitivity_v1":
+        thermophoresis["maximum_speed_ratio"] = 0.6
     models: dict[str, dict[str, object]] = {
         "charge": (_plasma_continuous_charge_model() if continuous_charge else {"model": "fixed"}),
         "drag": drag,
-        "noise": _rz_inertial_langevin_noise_model(),
-        "thermophoresis": {
-            "model": "waldmann_gallis",
-            "revision": "waldmann_gallis_free_molecular_single_species_heat_flux_v1",
-            "gas_velocity_field": "gas_velocity",
-            "gas_temperature_field": "gas_temperature",
-            "gas_translational_heat_flux_field": "gas_heat_flux",
-            "gas_mean_free_path_field": "gas_mean_free_path",
-            "gas_molecular_mass_kg": 4.65e-26,
-            "applicability": "error",
-        },
+        "noise": _inertial_langevin_noise_model(interval_tree_depth=3),
+        "thermophoresis": thermophoresis,
         "ion_drag": {
             "model": "barnes_collisionless",
             "revision": (
@@ -284,10 +292,9 @@ def test_rz_inertial_langevin_catalog_retains_revision_and_composes_supported_mo
     plan = resolve_physics_plan(models, "axisymmetric_rz")
 
     assert isinstance(plan.noise, InertialLangevinNoisePlan)
-    assert plan.noise.revision == (
-        "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
-    )
+    assert plan.noise.revision == ("inertial_langevin_fdt_epstein_linear_midpoint_2d_v2")
     assert plan.noise.interval_tree_depth == 3
+    assert plan.noise.adaptive_max_depth == 3
     assert plan.resolved_models()["noise"]["revision"] == plan.noise.revision
     assert plan.resolved_models()["drag"]["revision"] == drag_revision
     assert set(plan.resolved_models()) == {
@@ -309,13 +316,8 @@ def test_rz_inertial_langevin_catalog_retains_revision_and_composes_supported_mo
     assert all(field.components == ("r", "z") for field in vector_fields.values())
 
 
-def test_rz_inertial_langevin_catalog_rejects_wrong_coordinate_and_nonlinear_drag() -> None:
-    noise = _rz_inertial_langevin_noise_model()
-    with pytest.raises(PhysicsConfigurationError, match="requires axisymmetric_rz"):
-        resolve_physics_plan(
-            {"charge": {"model": "fixed"}, "drag": _epstein_linear_model(), "noise": noise},
-            "cartesian_xy",
-        )
+def test_2d_inertial_langevin_catalog_rejects_nonlinear_drag() -> None:
+    noise = _inertial_langevin_noise_model()
     with pytest.raises(PhysicsConfigurationError, match="linear Epstein"):
         resolve_physics_plan(
             {
@@ -325,6 +327,39 @@ def test_rz_inertial_langevin_catalog_rejects_wrong_coordinate_and_nonlinear_dra
             },
             "axisymmetric_rz",
         )
+
+
+def test_xy_inertial_langevin_composes_continuous_charge_and_additive_force() -> None:
+    plan = resolve_physics_plan(
+        {
+            "charge": _plasma_continuous_charge_model(),
+            "drag": _epstein_linear_model(),
+            "noise": _inertial_langevin_noise_model(),
+            "electric": {
+                "model": "coulomb",
+                "revision": "electric_coulomb_v1",
+                "electric_field": "electric_field",
+            },
+            "gravity_buoyancy": {
+                "model": "standard",
+                "revision": "gravity_buoyancy_standard_v1",
+                "gas_density_field": "gas_density",
+                "gravity_m_s2": [0.25, -9.81],
+            },
+        },
+        "cartesian_xy",
+    )
+
+    assert plan.evolves_continuous_state
+    assert plan.noise is not None
+    assert plan.noise.revision == "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
+    assert set(plan.resolved_models()) == {
+        "charge",
+        "drag",
+        "noise",
+        "electric",
+        "gravity_buoyancy",
+    }
 
 
 def test_rz_inertial_langevin_accepts_aggregate_charge_and_relative_ion_drag() -> None:
@@ -350,7 +385,7 @@ def test_rz_inertial_langevin_accepts_aggregate_charge_and_relative_ion_drag() -
                 "applicability": "error",
             },
             "drag": drag,
-            "noise": _rz_inertial_langevin_noise_model(),
+            "noise": _inertial_langevin_noise_model(interval_tree_depth=3),
             "ion_drag": {
                 "model": "screened_collection_orbital",
                 "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
@@ -367,57 +402,22 @@ def test_rz_inertial_langevin_accepts_aggregate_charge_and_relative_ion_drag() -
     )
     assert plan.resolved_models()["ion_drag"]["model"] == "screened_collection_orbital"
     assert plan.noise is not None
-    assert plan.noise.revision == (
-        "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
-    )
+    assert plan.noise.revision == ("inertial_langevin_fdt_epstein_linear_midpoint_2d_v2")
 
 
 def test_inertial_langevin_catalog_rejects_incompatible_physics() -> None:
     noise = _inertial_langevin_noise_model()
-    cases: tuple[
-        tuple[dict[str, dict[str, object]], Literal["cartesian_xy", "axisymmetric_rz"], str], ...
-    ] = (
-        (
-            {"charge": {"model": "fixed"}, "drag": _epstein_linear_model(), "noise": noise},
-            "axisymmetric_rz",
-            "cartesian_xy",
-        ),
-        (
-            {
-                "charge": _plasma_continuous_charge_model(),
-                "drag": _epstein_linear_model(),
-                "noise": noise,
-            },
-            "cartesian_xy",
-            "fixed charge",
-        ),
-        (
-            {
+    incompatible_drag_models = (None, _finite_speed_epstein_model(), _stokes_cunningham_model())
+    for coordinate_system in ("cartesian_xy", "axisymmetric_rz"):
+        for drag in incompatible_drag_models:
+            models: dict[str, dict[str, object]] = {
                 "charge": {"model": "fixed"},
-                "drag": _finite_speed_epstein_model(),
                 "noise": noise,
-            },
-            "cartesian_xy",
-            "epstein_linear",
-        ),
-        (
-            {
-                "charge": {"model": "fixed"},
-                "drag": _epstein_linear_model(),
-                "noise": noise,
-                "electric": {
-                    "model": "coulomb",
-                    "revision": "electric_coulomb_v1",
-                    "electric_field": "electric_field",
-                },
-            },
-            "cartesian_xy",
-            "additional force",
-        ),
-    )
-    for models, coordinate_system, message in cases:
-        with pytest.raises(PhysicsConfigurationError, match=message):
-            resolve_physics_plan(models, coordinate_system)
+            }
+            if drag is not None:
+                models["drag"] = drag
+            with pytest.raises(PhysicsConfigurationError, match="linear Epstein"):
+                resolve_physics_plan(models, coordinate_system)
 
 
 @pytest.mark.parametrize("depth", [-1, 11, True, 1.0])
@@ -426,6 +426,42 @@ def test_inertial_langevin_catalog_requires_bounded_integer_depth(depth: object)
     noise["interval_tree_depth"] = depth
 
     with pytest.raises(PhysicsConfigurationError, match=r"integer in \[0, 10\]"):
+        resolve_physics_plan(
+            {
+                "charge": {"model": "fixed"},
+                "drag": _epstein_linear_model(),
+                "noise": noise,
+            },
+            "cartesian_xy",
+        )
+
+
+def test_inertial_langevin_catalog_resolves_optional_adaptive_max_depth() -> None:
+    noise = _inertial_langevin_noise_model()
+    noise["adaptive_max_depth"] = 8
+
+    plan = resolve_physics_plan(
+        {
+            "charge": {"model": "fixed"},
+            "drag": _epstein_linear_model(),
+            "noise": noise,
+        },
+        "cartesian_xy",
+    )
+
+    assert plan.noise is not None
+    assert plan.noise.interval_tree_depth == 4
+    assert plan.noise.adaptive_max_depth == 8
+
+
+@pytest.mark.parametrize("maximum", [-1, 3, 11, True, 1.0])
+def test_inertial_langevin_catalog_requires_adaptive_max_at_least_base(
+    maximum: object,
+) -> None:
+    noise = _inertial_langevin_noise_model()
+    noise["adaptive_max_depth"] = maximum
+
+    with pytest.raises(PhysicsConfigurationError, match=r"integer in \[4, 10\]"):
         resolve_physics_plan(
             {
                 "charge": {"model": "fixed"},
@@ -649,6 +685,42 @@ def test_finite_speed_epstein_catalog_declares_one_explicit_surface_model() -> N
                 {"charge": {"model": "fixed"}, "drag": damaged},
                 "cartesian_xy",
             )
+
+
+@pytest.mark.parametrize(
+    ("category", "parameter"),
+    [
+        ("drag", "gas_molecular_mass_kg"),
+        ("drag", "diffuse_reflection_fraction"),
+        ("dielectrophoresis", "real_clausius_mossotti_factor"),
+        ("gravity_buoyancy", "gravity_m_s2"),
+    ],
+)
+def test_physics_catalog_rejects_integer_float_overflow_with_domain_error(
+    category: str,
+    parameter: str,
+) -> None:
+    models: dict[str, dict[str, object]] = {
+        "drag": _finite_speed_epstein_model(),
+        "dielectrophoresis": {
+            "model": "quasistatic_spherical",
+            "revision": "quasistatic_spherical_gradient_e2_v1",
+            "gradient_mean_e_squared_field": "gradient_e2",
+            "medium_relative_permittivity": 1.0,
+            "real_clausius_mossotti_factor": 0.5,
+            "maximum_point_dipole_radius_m": 1.0e-7,
+        },
+        "gravity_buoyancy": {
+            "model": "standard",
+            "revision": "gravity_buoyancy_standard_v1",
+            "gas_density_field": "gas_density",
+            "gravity_m_s2": [0.0, -9.81],
+        },
+    }
+    model = models[category]
+    model[parameter] = [10**400, -9.81] if parameter == "gravity_m_s2" else 10**400
+    with pytest.raises(PhysicsConfigurationError, match=parameter):
+        resolve_physics_plan({"charge": {"model": "fixed"}, category: model}, "cartesian_xy")
 
 
 @pytest.mark.parametrize("speed_ratio", [0.2, 0.5, 1.0, 2.0])
@@ -1882,19 +1954,11 @@ def _epstein_linear_model() -> dict[str, object]:
     }
 
 
-def _inertial_langevin_noise_model() -> dict[str, object]:
+def _inertial_langevin_noise_model(*, interval_tree_depth: int = 4) -> dict[str, object]:
     return {
         "model": "inertial_langevin_fdt",
-        "revision": "inertial_langevin_fdt_epstein_linear_frozen_start_v1",
-        "interval_tree_depth": 4,
-    }
-
-
-def _rz_inertial_langevin_noise_model() -> dict[str, object]:
-    return {
-        "model": "inertial_langevin_fdt",
-        "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1",
-        "interval_tree_depth": 3,
+        "revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2",
+        "interval_tree_depth": interval_tree_depth,
     }
 
 

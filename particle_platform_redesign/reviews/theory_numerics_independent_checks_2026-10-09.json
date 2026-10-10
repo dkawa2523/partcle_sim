@@ -1,0 +1,209 @@
+{
+  "review_date": "2026-10-09",
+  "artifact_kind": "Reproducible limited numerical review calculations",
+  "environment": {
+    "python": "3.12.13",
+    "numpy": "2.5.3"
+  },
+  "execution": "uv run --locked python ../reviews/theory_numerics_independent_checks_2026-10-09.py",
+  "ou_covariance": {
+    "scope": "Linear no-wall system dx=v dt, dv=-gamma(t)v dt+sqrt(2*Theta*gamma(t)) dW; zero deterministic initial state; gamma(t)=1.7*(1+0.8*t), Theta=0.7, t=1. Nonzero stochastic covariance is propagated analytically; no sampled ensemble, public workflow, spatially varying coefficients, charge or first passage is tested.",
+    "reference_method": "Nested Gauss-Legendre integration of independent Green kernels",
+    "reference_quadrature_orders": [
+      96,
+      192
+    ],
+    "reference_covariance": [
+      [
+        0.2390434562249012,
+        0.21345352155262784
+      ],
+      [
+        0.21345352155262784,
+        0.6940040734217462
+      ]
+    ],
+    "reference_max_abs_difference_96_192": 2.098321516541546e-14,
+    "candidate": "Midpoint-frozen transition with current joint_ou_covariance",
+    "rows": [
+      {
+        "interval_count": 4,
+        "covariance": [
+          [
+            0.24080303339834,
+            0.21534526729694287
+          ],
+          [
+            0.21534526729694287,
+            0.6940040734217513
+          ]
+        ],
+        "max_abs_error": 0.0018917457443150265
+      },
+      {
+        "interval_count": 8,
+        "covariance": [
+          [
+            0.2394870991124039,
+            0.2139281359019433
+          ],
+          [
+            0.2139281359019433,
+            0.6940040734217512
+          ]
+        ],
+        "max_abs_error": 0.00047461434931544977
+      },
+      {
+        "interval_count": 16,
+        "covariance": [
+          [
+            0.23915459995436683,
+            0.21357228257925348
+          ],
+          [
+            0.2135722825792535,
+            0.6940040734217512
+          ]
+        ],
+        "max_abs_error": 0.0001187610266256689
+      },
+      {
+        "interval_count": 32,
+        "covariance": [
+          [
+            0.2390712566993169,
+            0.21348321856553393
+          ],
+          [
+            0.21348321856553387,
+            0.6940040734217514
+          ]
+        ],
+        "max_abs_error": 2.969701290608806e-05
+      },
+      {
+        "interval_count": 64,
+        "covariance": [
+          [
+            0.23905040725205268,
+            0.21346094622876954
+          ],
+          [
+            0.21346094622876946,
+            0.6940040734217513
+          ]
+        ],
+        "max_abs_error": 7.424676141704056e-06
+      }
+    ],
+    "observed_orders": [
+      1.9948905754221329,
+      1.9986942492823128,
+      1.9996717408290032,
+      1.9999178206561723
+    ],
+    "current_code": "solver/src/chamber_particles/stochastic.py:34",
+    "primary_source": "https://doi.org/10.1103/PhysRevE.54.2084"
+  },
+  "philox_known_answers": {
+    "scope": "Three official Philox4x32-10 known-answer vectors; no statistical battery",
+    "current_code": "solver/src/chamber_particles/rng.py:233",
+    "primary_source": "https://raw.githubusercontent.com/DEShawResearch/random123/main/tests/kat_vectors",
+    "rows": [
+      {
+        "counter": [
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x0"
+        ],
+        "key": [
+          "0x0",
+          "0x0"
+        ],
+        "expected": [
+          "0x6627e8d5",
+          "0xe169c58d",
+          "0xbc57ac4c",
+          "0x9b00dbd8"
+        ],
+        "actual": [
+          "0x6627e8d5",
+          "0xe169c58d",
+          "0xbc57ac4c",
+          "0x9b00dbd8"
+        ],
+        "exact_match": true
+      },
+      {
+        "counter": [
+          "0xffffffff",
+          "0xffffffff",
+          "0xffffffff",
+          "0xffffffff"
+        ],
+        "key": [
+          "0xffffffff",
+          "0xffffffff"
+        ],
+        "expected": [
+          "0x408f276d",
+          "0x41c83b0e",
+          "0xa20bc7c6",
+          "0x6d5451fd"
+        ],
+        "actual": [
+          "0x408f276d",
+          "0x41c83b0e",
+          "0xa20bc7c6",
+          "0x6d5451fd"
+        ],
+        "exact_match": true
+      },
+      {
+        "counter": [
+          "0x243f6a88",
+          "0x85a308d3",
+          "0x13198a2e",
+          "0x3707344"
+        ],
+        "key": [
+          "0xa4093822",
+          "0x299f31d0"
+        ],
+        "expected": [
+          "0xd16cfe09",
+          "0x94fdcceb",
+          "0x5001e420",
+          "0x24126ea1"
+        ],
+        "actual": [
+          "0xd16cfe09",
+          "0x94fdcceb",
+          "0x5001e420",
+          "0x24126ea1"
+        ],
+        "exact_match": true
+      }
+    ],
+    "all_exact_match": true
+  },
+  "rk4_dense_semantics": {
+    "scope": "One harmonic-oscillator RK4 proposal x''=-x; x(0)=1,v(0)=0; h=0.2,theta=0.37",
+    "current_code": "solver/src/chamber_particles/integrators.py:3545",
+    "primary_source": "https://www.dgp.toronto.edu/~karan/courses/csc418/fall_2002/notes/curves.html",
+    "dense_position": 0.9972596270666666,
+    "dense_velocity": -0.07393246266666667,
+    "analytic_derivative_of_endpoint_Hermite_position": -0.07397286666666722,
+    "kinematic_interior_difference": 4.0404000000549e-05,
+    "true_harmonic_velocity": -0.07393248115597774,
+    "interpretation": "Position uses endpoint position/velocity Hermite cubic; velocity uses a separate first/fourth-stage-rate cubic. Interior dx/dt need not equal dense velocity exactly. This confirms interpolation semantics, not a new production bug or general error order."
+  },
+  "existing_tests_not_executed_by_this_script": [
+    "solver/tests/verification/test_stochastic.py:333 (Green-kernel conditional oracle)",
+    "solver/tests/verification/test_integrators.py:1622 (coupled RK4 analytic convergence)",
+    "solver/tests/verification/test_integrators.py:3127 (dense charge local convergence)",
+    "solver/tests/scenarios/test_brownian_run.py:814 (finite-depth first-passage stabilization)"
+  ]
+}

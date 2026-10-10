@@ -3,12 +3,15 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 
-import h5py
 import numpy as np
 from tools.vv.comsol.normalize_m3c3_caseP_three_current import normalize
-from tools.vv.comsol.prepare_m3c3_caseP_reference_tables import EXPORTS, Export, prepare
+from tools.vv.comsol.prepare_m3c3_caseP_reference_tables import prepare
+from tools.vv.comsol.tests.common_p1_fixture import write_manufactured_common_p1
+
+from chamber_particles.case_format import RealizedTableSource, read_with_info, write
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -54,38 +57,19 @@ def _write_release(path: Path) -> None:
 
 
 def _write_canonical(path: Path) -> None:
-    text = h5py.string_dtype(encoding="utf-8")
-    with h5py.File(path, "w") as output:
-        meta = output.create_group("meta")
-        meta.create_dataset("content_hash", data="sha256:test", dtype=text)
-        layout = output.create_group("layouts/plasma/unstructured")
-        layout.create_dataset("nodes_m", data=[[0.0, 0.0], [0.01, 0.0], [0.0, 0.01]])
-        layout.create_dataset("connectivity", data=[[0, 1, 2]])
-        layout.create_dataset("cell_support", data=[1])
-        fields = output.create_group("fields")
-        by_field: dict[str, list[Export]] = {}
-        for export in EXPORTS:
-            by_field.setdefault(export.field, []).append(export)
-        for field_name, exports in by_field.items():
-            components = [export.component for export in exports]
-            group = fields.create_group(field_name)
-            group.create_dataset("association", data="node", dtype=text)
-            group.create_dataset("components", data=components, dtype=text)
-            group.create_dataset("layout", data="plasma", dtype=text)
-            group.create_dataset(
-                "stored_basis",
-                data="scalar" if components == ["value"] else "axisymmetric_rz",
-                dtype=text,
-            )
-            group.create_dataset("unit", data=exports[0].unit, dtype=text)
-            group.create_dataset("values", data=np.ones((3, len(components))))
-        source = output.create_group("sources/particles")
-        release = np.asarray(_release_rows())
-        source.create_dataset("particle_id", data=release[:, 0].astype(np.int64))
-        source.create_dataset("release_time_s", data=release[:, 1])
-        source.create_dataset("position_m", data=release[:, 2:4])
-        source.create_dataset("velocity_m_s", data=release[:, 4:6])
-        source.create_dataset("charge_number", data=release[:, 6])
+    fixture = path.with_name("manufactured_primitive_source.h5")
+    write_manufactured_common_p1(fixture, negative_ions=True)
+    data, _info = read_with_info(fixture)
+    source = data.sources[0]
+    assert isinstance(source, RealizedTableSource)
+    release = np.asarray(_release_rows())
+    shared = replace(
+        source,
+        position_m=release[:, 2:4].copy(),
+        velocity_m_s=release[:, 4:6].copy(),
+        charge_number=release[:, 6].copy(),
+    )
+    write(path, replace(data, sources=(shared,)))
 
 
 def test_reference_table_preparer_preserves_shared_three_current_z0(tmp_path: Path) -> None:
@@ -99,7 +83,7 @@ def test_reference_table_preparer_preserves_shared_three_current_z0(tmp_path: Pa
 
     assert receipt["status"] == "PASS"
     assert receipt["component_count"] == 27
-    assert len(receipt["artifacts"]) == 31  # type: ignore[arg-type]
+    assert len(receipt["artifacts"]) == 32  # type: ignore[arg-type]
     assert (output / "m3c3_nn_sectionwise.txt").is_file()
     z0 = np.loadtxt(output / "m3c1_Z0.txt")
     np.testing.assert_array_equal(z0[:, 2], np.full(287, -500.0))
@@ -296,7 +280,7 @@ def test_java_and_powershell_fix_the_casep_campaign_without_core_dispatch() -> N
             'physics.feature("df1").active(false)',
             'private static final String EPSTEIN_TAG = "m3c3Epstein"',
             'physics.create(EPSTEIN_TAG, "Force", 2)',
-            "1.3534291735288517",
+            "CommonP1Epstein.force(PHYSICS)",
             '"idf"',
             '"ef1"',
             '"liftfm"',

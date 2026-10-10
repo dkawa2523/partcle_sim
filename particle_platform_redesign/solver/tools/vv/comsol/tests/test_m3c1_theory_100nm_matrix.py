@@ -298,7 +298,7 @@ def _prepared_matrix(tmp_path: Path) -> Path:
         cases: dict[str, object] = {}
         for label, dt_s in matrix._step_rows(workflow_name):
             case = root / f"candidate_{label}.yaml"
-            case.write_text("format_version: 2\n", encoding="utf-8")
+            case.write_text("format_version: 3\n", encoding="utf-8")
             cases[label] = {"path": case.name, "dt_s": dt_s}
         workflows[workflow_name] = {
             "input_content_hash": f"sha256:{workflow_name}",

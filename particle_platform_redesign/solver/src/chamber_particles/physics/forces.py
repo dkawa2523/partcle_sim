@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -32,6 +33,11 @@ IMAGE_ION_DRAG_ELECTRIC_FIELD_SQUARE_FLOOR_V2_M2 = 1.0
 WALDMANN_GALLIS_MIN_MEAN_FREE_PATH_OVER_RADIUS = 10.0
 WALDMANN_GALLIS_MAX_SPEED_OVER_MEAN_THERMAL = 0.1
 RAREFIED_VORTICITY_LIFT_MIN_MEAN_FREE_PATH_OVER_RADIUS = 10.0
+SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS = 0.1
+SAFFMAN_MAX_SLIP_REYNOLDS = 0.1
+SAFFMAN_MAX_SHEAR_REYNOLDS = 0.1
+SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS = 0.1
+SAFFMAN_LIFT_COEFFICIENT = 6.46
 _ALLEN_RAABE_A1 = 1.142
 _ALLEN_RAABE_A2 = 0.558
 _ALLEN_RAABE_A3 = 0.999
@@ -127,6 +133,46 @@ class WaldmannGallisThermophoresisGlobalBounds:
 
 
 @dataclass(frozen=True, slots=True)
+class TalbotThermophoresisEvaluation:
+    """Local acceleration and dimensionless groups for Talbot thermophoresis."""
+
+    acceleration_m_s2: FloatArray
+    knudsen_radius: FloatArray
+    conductivity_ratio: FloatArray
+    applicable: BoolArray
+
+
+@dataclass(frozen=True, slots=True)
+class TalbotThermophoresisGlobalBounds:
+    """Prepared component acceleration bound for the wide-Knudsen Talbot model."""
+
+    acceleration_abs_upper_m_s2: FloatArray
+    static_applicable: BoolArray
+
+
+@dataclass(frozen=True, slots=True)
+class SaffmanLiftEvaluation:
+    """Local Saffman acceleration and radius-based applicability groups."""
+
+    acceleration_m_s2: FloatArray
+    slip_reynolds_radius: FloatArray
+    shear_reynolds_radius: FloatArray
+    mean_free_path_over_radius: FloatArray
+    applicable: BoolArray
+
+
+@dataclass(frozen=True, slots=True)
+class SaffmanLiftGlobalBounds:
+    """Prepared acceleration coupling and static continuum/shear certificate."""
+
+    coupling_rate_abs_upper_s_inv: FloatArray
+    gas_velocity_abs_upper_m_s: FloatArray
+    shear_reynolds_lower: FloatArray
+    shear_reynolds_upper: FloatArray
+    static_applicable: BoolArray
+
+
+@dataclass(frozen=True, slots=True)
 class RarefiedVorticityLiftEvaluation:
     """Local acceleration and applicability of the RZ lift sensitivity model."""
 
@@ -143,6 +189,485 @@ class RarefiedVorticityLiftGlobalBounds:
     coupling_rate_abs_upper_s_inv: FloatArray
     gas_velocity_abs_upper_m_s: FloatArray
     static_applicable: BoolArray
+
+
+def talbot_thermophoresis(
+    *,
+    mass_kg: FloatArray,
+    drag_diameter_m: FloatArray,
+    gas_temperature_K: FloatArray,
+    gas_temperature_gradient_K_m: FloatArray,
+    gas_dynamic_viscosity_Pa_s: FloatArray,
+    gas_density_kg_m3: FloatArray,
+    gas_thermal_conductivity_W_m_K: FloatArray,
+    gas_mean_free_path_m: FloatArray,
+    particle_thermal_conductivity_W_m_K: float,
+    thermal_slip_coefficient: float,
+    momentum_exchange_coefficient: float,
+    thermal_exchange_coefficient: float,
+) -> TalbotThermophoresisEvaluation:
+    """Evaluate Talbot's cross-regime force with Kn = lambda / (drag diameter / 2)."""
+
+    count = _common_count(
+        mass_kg,
+        drag_diameter_m,
+        gas_temperature_K,
+        gas_dynamic_viscosity_Pa_s,
+        gas_density_kg_m3,
+        gas_thermal_conductivity_W_m_K,
+        gas_mean_free_path_m,
+    )
+    if gas_temperature_gradient_K_m.shape != (count, 2):
+        raise PhysicsEvaluationError("Talbot temperature gradient must have shape [N, 2]")
+    for value, name in (
+        (mass_kg, "mass_kg"),
+        (drag_diameter_m, "drag_diameter_m"),
+        (gas_temperature_K, "gas_temperature"),
+        (gas_dynamic_viscosity_Pa_s, "gas_dynamic_viscosity"),
+        (gas_density_kg_m3, "gas_density"),
+        (gas_thermal_conductivity_W_m_K, "gas_thermal_conductivity"),
+        (gas_mean_free_path_m, "gas_mean_free_path"),
+    ):
+        _require_positive(value, name)
+    _require_finite(gas_temperature_gradient_K_m, "gas_temperature_gradient")
+    particle_conductivity = _finite_positive_scalar(
+        particle_thermal_conductivity_W_m_K,
+        "particle_thermal_conductivity_W_m_K",
+    )
+    thermal_slip = _finite_positive_scalar(
+        thermal_slip_coefficient,
+        "thermal_slip_coefficient",
+    )
+    momentum_exchange = _finite_positive_scalar(
+        momentum_exchange_coefficient,
+        "momentum_exchange_coefficient",
+    )
+    thermal_exchange = _finite_positive_scalar(
+        thermal_exchange_coefficient,
+        "thermal_exchange_coefficient",
+    )
+
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        knudsen_radius = 2.0 * (gas_mean_free_path_m / drag_diameter_m)
+        conductivity_ratio = gas_thermal_conductivity_W_m_K / particle_conductivity
+        correction = thermal_slip * (conductivity_ratio + thermal_exchange * knudsen_radius)
+        correction /= (1.0 + 3.0 * momentum_exchange * knudsen_radius) * (
+            1.0 + 2.0 * conductivity_ratio + 2.0 * thermal_exchange * knudsen_radius
+        )
+        acceleration_factor = (
+            6.0
+            * math.pi
+            * drag_diameter_m
+            * gas_dynamic_viscosity_Pa_s**2
+            * correction
+            / (mass_kg * gas_density_kg_m3 * gas_temperature_K)
+        )
+        acceleration = -acceleration_factor[:, None] * gas_temperature_gradient_K_m
+    if not bool(
+        np.isfinite(knudsen_radius).all()
+        and np.isfinite(conductivity_ratio).all()
+        and np.isfinite(acceleration).all()
+    ):
+        raise PhysicsEvaluationError("Talbot thermophoresis produced a non-finite value")
+    return TalbotThermophoresisEvaluation(
+        acceleration,
+        knudsen_radius,
+        conductivity_ratio,
+        np.ones(count, dtype=np.bool_),
+    )
+
+
+def talbot_thermophoresis_global_bounds(
+    *,
+    mass_kg: FloatArray,
+    drag_diameter_m: FloatArray,
+    gas_temperature_lower_K: float,
+    gas_temperature_gradient_abs_upper_K_m: FloatArray,
+    gas_dynamic_viscosity_upper_Pa_s: float,
+    gas_density_lower_kg_m3: float,
+    gas_thermal_conductivity_lower_W_m_K: float,
+    gas_thermal_conductivity_upper_W_m_K: float,
+    gas_mean_free_path_lower_m: float,
+    gas_mean_free_path_upper_m: float,
+    particle_thermal_conductivity_W_m_K: float,
+    thermal_slip_coefficient: float,
+    momentum_exchange_coefficient: float,
+    thermal_exchange_coefficient: float,
+) -> TalbotThermophoresisGlobalBounds:
+    """Enclose Talbot acceleration over independent primitive field bounds."""
+
+    count = _common_count(mass_kg, drag_diameter_m)
+    _require_positive(mass_kg, "mass_kg")
+    _require_positive(drag_diameter_m, "drag_diameter_m")
+    gradient = _component_abs_upper(
+        gas_temperature_gradient_abs_upper_K_m,
+        "gas_temperature_gradient_abs_upper_K_m",
+    )
+    temperature_lower = _finite_positive_scalar(
+        gas_temperature_lower_K,
+        "gas_temperature_lower_K",
+    )
+    viscosity_upper = _finite_positive_scalar(
+        gas_dynamic_viscosity_upper_Pa_s,
+        "gas_dynamic_viscosity_upper_Pa_s",
+    )
+    density_lower = _finite_positive_scalar(
+        gas_density_lower_kg_m3,
+        "gas_density_lower_kg_m3",
+    )
+    conductivity_lower = _finite_positive_scalar(
+        gas_thermal_conductivity_lower_W_m_K,
+        "gas_thermal_conductivity_lower_W_m_K",
+    )
+    conductivity_upper = _finite_positive_scalar(
+        gas_thermal_conductivity_upper_W_m_K,
+        "gas_thermal_conductivity_upper_W_m_K",
+    )
+    mean_free_path_lower = _finite_positive_scalar(
+        gas_mean_free_path_lower_m,
+        "gas_mean_free_path_lower_m",
+    )
+    mean_free_path_upper = _finite_positive_scalar(
+        gas_mean_free_path_upper_m,
+        "gas_mean_free_path_upper_m",
+    )
+    if conductivity_lower > conductivity_upper or mean_free_path_lower > mean_free_path_upper:
+        raise PhysicsEvaluationError("Talbot primitive bounds are reversed")
+    particle_conductivity = _finite_positive_scalar(
+        particle_thermal_conductivity_W_m_K,
+        "particle_thermal_conductivity_W_m_K",
+    )
+    thermal_slip = _finite_positive_scalar(
+        thermal_slip_coefficient,
+        "thermal_slip_coefficient",
+    )
+    momentum_exchange = _finite_positive_scalar(
+        momentum_exchange_coefficient,
+        "momentum_exchange_coefficient",
+    )
+    thermal_exchange = _finite_positive_scalar(
+        thermal_exchange_coefficient,
+        "thermal_exchange_coefficient",
+    )
+
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        knudsen_radius_lower = 2.0 * (mean_free_path_lower / drag_diameter_m)
+        knudsen_radius_upper = 2.0 * (mean_free_path_upper / drag_diameter_m)
+        ratio_lower = conductivity_lower / particle_conductivity
+        ratio_upper = conductivity_upper / particle_conductivity
+        correction_upper = thermal_slip * (ratio_upper + thermal_exchange * knudsen_radius_upper)
+        correction_upper /= (1.0 + 3.0 * momentum_exchange * knudsen_radius_lower) * (
+            1.0 + 2.0 * ratio_lower + 2.0 * thermal_exchange * knudsen_radius_lower
+        )
+        factor_upper = (
+            6.0
+            * math.pi
+            * drag_diameter_m
+            * viscosity_upper**2
+            * correction_upper
+            / (mass_kg * density_lower * temperature_lower)
+        )
+        acceleration_upper = factor_upper[:, None] * gradient[None, :]
+    acceleration_bound = _outward_abs_upper(
+        acceleration_upper,
+        "Talbot thermophoresis acceleration bound",
+    )
+    return TalbotThermophoresisGlobalBounds(
+        acceleration_bound,
+        np.ones(count, dtype=np.bool_),
+    )
+
+
+def saffman_lift(
+    *,
+    mass_kg: FloatArray,
+    drag_diameter_m: FloatArray,
+    velocity_m_s: FloatArray,
+    gas_velocity_m_s: FloatArray,
+    gas_density_kg_m3: FloatArray,
+    gas_dynamic_viscosity_Pa_s: FloatArray,
+    gas_mean_free_path_m: FloatArray,
+    out_of_plane_gas_vorticity_s_inv: FloatArray,
+    coordinate_system: Literal["cartesian_xy", "axisymmetric_rz"],
+) -> SaffmanLiftEvaluation:
+    """Evaluate COMSOL's two-dimensional Saffman expression without a zero division."""
+
+    count = _common_count(
+        mass_kg,
+        drag_diameter_m,
+        gas_density_kg_m3,
+        gas_dynamic_viscosity_Pa_s,
+        gas_mean_free_path_m,
+        out_of_plane_gas_vorticity_s_inv,
+    )
+    if velocity_m_s.shape != (count, 2) or gas_velocity_m_s.shape != (count, 2):
+        raise PhysicsEvaluationError("Saffman lift vectors must have shape [N, 2]")
+    for value, name in (
+        (mass_kg, "mass_kg"),
+        (drag_diameter_m, "drag_diameter_m"),
+        (gas_density_kg_m3, "gas_density"),
+        (gas_dynamic_viscosity_Pa_s, "gas_dynamic_viscosity"),
+        (gas_mean_free_path_m, "gas_mean_free_path"),
+    ):
+        _require_positive(value, name)
+    _require_finite(out_of_plane_gas_vorticity_s_inv, "out_of_plane_gas_vorticity")
+    if not bool(np.isfinite(velocity_m_s).all() and np.isfinite(gas_velocity_m_s).all()):
+        raise PhysicsEvaluationError("Saffman lift velocities must be finite")
+    if coordinate_system not in ("cartesian_xy", "axisymmetric_rz"):
+        raise PhysicsEvaluationError("unsupported Saffman coordinate system")
+
+    radius_m = 0.5 * drag_diameter_m
+    relative_velocity = gas_velocity_m_s - velocity_m_s
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        vorticity_abs = np.abs(out_of_plane_gas_vorticity_s_inv)
+        coupling_rate = (
+            SAFFMAN_LIFT_COEFFICIENT
+            * radius_m**2
+            * np.sqrt(gas_dynamic_viscosity_Pa_s * gas_density_kg_m3 * vorticity_abs)
+            / mass_kg
+        )
+        signed_coupling = np.sign(out_of_plane_gas_vorticity_s_inv) * coupling_rate
+        acceleration = np.empty((count, 2), dtype=np.float64)
+        if coordinate_system == "cartesian_xy":
+            acceleration[:, 0] = signed_coupling * relative_velocity[:, 1]
+            acceleration[:, 1] = -signed_coupling * relative_velocity[:, 0]
+        else:
+            acceleration[:, 0] = -signed_coupling * relative_velocity[:, 1]
+            acceleration[:, 1] = signed_coupling * relative_velocity[:, 0]
+        relative_speed = np.hypot(relative_velocity[:, 0], relative_velocity[:, 1])
+        slip_reynolds = gas_density_kg_m3 * radius_m * relative_speed
+        slip_reynolds /= gas_dynamic_viscosity_Pa_s
+        shear_reynolds = gas_density_kg_m3 * radius_m**2 * vorticity_abs
+        shear_reynolds /= gas_dynamic_viscosity_Pa_s
+        mean_free_path_over_radius = gas_mean_free_path_m / radius_m
+    if not bool(
+        np.isfinite(acceleration).all()
+        and np.isfinite(slip_reynolds).all()
+        and np.isfinite(shear_reynolds).all()
+        and np.isfinite(mean_free_path_over_radius).all()
+    ):
+        raise PhysicsEvaluationError("Saffman lift produced a non-finite value")
+    applicable = (
+        (mean_free_path_over_radius <= SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS)
+        & (slip_reynolds <= SAFFMAN_MAX_SLIP_REYNOLDS)
+        & (shear_reynolds <= SAFFMAN_MAX_SHEAR_REYNOLDS)
+        & (
+            (vorticity_abs == 0.0)
+            | (slip_reynolds <= SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS * np.sqrt(shear_reynolds))
+        )
+    )
+    return SaffmanLiftEvaluation(
+        acceleration,
+        slip_reynolds,
+        shear_reynolds,
+        mean_free_path_over_radius,
+        applicable,
+    )
+
+
+def saffman_lift_global_bounds(
+    *,
+    mass_kg: FloatArray,
+    drag_diameter_m: FloatArray,
+    gas_density_lower_kg_m3: float,
+    gas_density_upper_kg_m3: float,
+    gas_dynamic_viscosity_lower_Pa_s: float,
+    gas_dynamic_viscosity_upper_Pa_s: float,
+    gas_mean_free_path_upper_m: float,
+    out_of_plane_gas_vorticity_abs_lower_s_inv: float,
+    out_of_plane_gas_vorticity_abs_upper_s_inv: float,
+    gas_velocity_abs_upper_m_s: FloatArray,
+) -> SaffmanLiftGlobalBounds:
+    """Prepare the Saffman coupling bound and velocity-independent certificate."""
+
+    _common_count(mass_kg, drag_diameter_m)
+    _require_positive(mass_kg, "mass_kg")
+    _require_positive(drag_diameter_m, "drag_diameter_m")
+    density_lower = _finite_positive_scalar(
+        gas_density_lower_kg_m3,
+        "gas_density_lower_kg_m3",
+    )
+    density_upper = _finite_positive_scalar(
+        gas_density_upper_kg_m3,
+        "gas_density_upper_kg_m3",
+    )
+    if density_lower > density_upper:
+        raise PhysicsEvaluationError("gas density bounds are reversed")
+    viscosity_lower = _finite_positive_scalar(
+        gas_dynamic_viscosity_lower_Pa_s,
+        "gas_dynamic_viscosity_lower_Pa_s",
+    )
+    viscosity_upper = _finite_positive_scalar(
+        gas_dynamic_viscosity_upper_Pa_s,
+        "gas_dynamic_viscosity_upper_Pa_s",
+    )
+    if viscosity_lower > viscosity_upper:
+        raise PhysicsEvaluationError("gas dynamic-viscosity bounds are reversed")
+    mean_free_path_upper = _finite_positive_scalar(
+        gas_mean_free_path_upper_m,
+        "gas_mean_free_path_upper_m",
+    )
+    vorticity_lower = _finite_nonnegative_scalar(
+        out_of_plane_gas_vorticity_abs_lower_s_inv,
+        "out_of_plane_gas_vorticity_abs_lower_s_inv",
+    )
+    vorticity_upper = _finite_nonnegative_scalar(
+        out_of_plane_gas_vorticity_abs_upper_s_inv,
+        "out_of_plane_gas_vorticity_abs_upper_s_inv",
+    )
+    if vorticity_lower > vorticity_upper:
+        raise PhysicsEvaluationError("gas-vorticity absolute bounds are reversed")
+    gas_velocity_upper = _component_abs_upper(
+        gas_velocity_abs_upper_m_s,
+        "gas_velocity_abs_upper_m_s",
+    )
+
+    radius_m = 0.5 * drag_diameter_m
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        coupling_upper = (
+            SAFFMAN_LIFT_COEFFICIENT
+            * radius_m**2
+            * np.sqrt(viscosity_upper * density_upper * vorticity_upper)
+            / mass_kg
+        )
+        mean_free_path_over_radius_upper = mean_free_path_upper / radius_m
+        shear_reynolds_upper = density_upper * radius_m**2 * vorticity_upper
+        shear_reynolds_upper /= viscosity_lower
+        shear_reynolds_lower = density_lower * radius_m**2 * vorticity_lower
+        shear_reynolds_lower /= viscosity_upper
+        shear_reynolds_lower = np.nextafter(
+            shear_reynolds_lower / _BOUND_ROUNDOFF_FACTOR,
+            0.0,
+        )
+    coupling_bound = _outward_abs_upper(coupling_upper, "Saffman coupling-rate bound")
+    if not bool(
+        np.isfinite(mean_free_path_over_radius_upper).all()
+        and np.isfinite(shear_reynolds_upper).all()
+        and np.isfinite(shear_reynolds_lower).all()
+    ):
+        raise PhysicsEvaluationError("Saffman applicability bound is not finite")
+    static_applicable = (
+        mean_free_path_over_radius_upper <= SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS
+    ) & (shear_reynolds_upper <= SAFFMAN_MAX_SHEAR_REYNOLDS)
+    return SaffmanLiftGlobalBounds(
+        coupling_bound,
+        gas_velocity_upper,
+        shear_reynolds_lower,
+        shear_reynolds_upper,
+        static_applicable,
+    )
+
+
+def saffman_lift_acceleration_abs_upper(
+    *,
+    coupling_rate_abs_upper_s_inv: FloatArray,
+    gas_velocity_abs_upper_m_s: FloatArray,
+    velocity_abs_upper_m_s: FloatArray,
+) -> FloatArray:
+    """Bound either two-dimensional Saffman orientation over a velocity box."""
+
+    result, status = saffman_lift_acceleration_abs_upper_batch(
+        coupling_rate_abs_upper_s_inv=coupling_rate_abs_upper_s_inv,
+        gas_velocity_abs_upper_m_s=gas_velocity_abs_upper_m_s,
+        velocity_abs_upper_m_s=velocity_abs_upper_m_s,
+    )
+    if bool(np.any(status != NUMERICAL_STATUS_OK)):
+        raise PhysicsEvaluationError("Saffman lift bound is not finite")
+    return result
+
+
+def saffman_lift_acceleration_abs_upper_batch(
+    *,
+    coupling_rate_abs_upper_s_inv: FloatArray,
+    gas_velocity_abs_upper_m_s: FloatArray,
+    velocity_abs_upper_m_s: FloatArray,
+    numerical_status: UInt8Array | None = None,
+) -> tuple[FloatArray, UInt8Array]:
+    """Bound Saffman cross-slip acceleration while localizing row failures."""
+
+    count = _common_count(coupling_rate_abs_upper_s_inv)
+    _require_nonnegative(coupling_rate_abs_upper_s_inv, "coupling_rate_abs_upper_s_inv")
+    gas_velocity = _component_abs_upper(
+        gas_velocity_abs_upper_m_s,
+        "gas_velocity_abs_upper_m_s",
+    )
+    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    status = _force_numerical_status(numerical_status, count)
+    status[(status == NUMERICAL_STATUS_OK) & ~finite_velocity] = PHYSICS_NUMERICAL_FAILURE
+    safe_velocity = velocity.copy()
+    safe_velocity[status != NUMERICAL_STATUS_OK] = 0.0
+    with np.errstate(over="ignore", invalid="ignore"):
+        relative_component = np.nextafter(gas_velocity[None, :] + safe_velocity, np.inf)
+        result = np.empty((count, 2), dtype=np.float64)
+        result[:, 0] = coupling_rate_abs_upper_s_inv * relative_component[:, 1]
+        result[:, 1] = coupling_rate_abs_upper_s_inv * relative_component[:, 0]
+        result = np.nextafter(result * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    finite_result = np.isfinite(result).all(axis=1)
+    status[(status == NUMERICAL_STATUS_OK) & ~finite_result] = PHYSICS_NUMERICAL_FAILURE
+    result[status != NUMERICAL_STATUS_OK] = 0.0
+    return result, status
+
+
+def saffman_lift_continuous_applicability_batch(
+    *,
+    static_applicable: BoolArray,
+    drag_diameter_m: FloatArray,
+    velocity_abs_upper_m_s: FloatArray,
+    gas_velocity_abs_upper_m_s: FloatArray,
+    gas_density_upper_kg_m3: float,
+    gas_dynamic_viscosity_lower_Pa_s: float,
+    shear_reynolds_lower: FloatArray,
+    shear_reynolds_upper: FloatArray,
+) -> tuple[BoolArray, UInt8Array]:
+    """Certify the radius-based Saffman slip-Reynolds gate over a path box."""
+
+    static = np.asarray(static_applicable, dtype=np.bool_)
+    count = _common_count(drag_diameter_m)
+    if static.shape != (count,):
+        raise PhysicsEvaluationError("Saffman static applicability must have shape [N]")
+    _require_positive(drag_diameter_m, "drag_diameter_m")
+    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    gas_velocity = _component_abs_upper(
+        gas_velocity_abs_upper_m_s,
+        "gas_velocity_abs_upper_m_s",
+    )
+    density_upper = _finite_positive_scalar(
+        gas_density_upper_kg_m3,
+        "gas_density_upper_kg_m3",
+    )
+    viscosity_lower = _finite_positive_scalar(
+        gas_dynamic_viscosity_lower_Pa_s,
+        "gas_dynamic_viscosity_lower_Pa_s",
+    )
+    shear_lower = np.asarray(shear_reynolds_lower, dtype=np.float64)
+    shear_upper = np.asarray(shear_reynolds_upper, dtype=np.float64)
+    if shear_lower.shape != (count,):
+        raise PhysicsEvaluationError("Saffman shear-Reynolds lower bound must have shape [N]")
+    if shear_upper.shape != (count,):
+        raise PhysicsEvaluationError("Saffman shear-Reynolds upper bound must have shape [N]")
+    _require_nonnegative(shear_lower, "shear_reynolds_lower")
+    _require_nonnegative(shear_upper, "shear_reynolds_upper")
+    status = np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8)
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        relative_component = np.nextafter(velocity + gas_velocity[None, :], np.inf)
+        relative_speed = np.nextafter(
+            np.hypot(relative_component[:, 0], relative_component[:, 1]),
+            np.inf,
+        )
+        slip_reynolds_upper = density_upper * (0.5 * drag_diameter_m) * relative_speed
+        slip_reynolds_upper /= viscosity_lower
+        slip_reynolds_upper = np.nextafter(
+            slip_reynolds_upper * _BOUND_ROUNDOFF_FACTOR,
+            np.inf,
+        )
+    numerical_ok = finite_velocity & np.isfinite(slip_reynolds_upper)
+    status[~numerical_ok] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+    applicable = static & numerical_ok
+    applicable &= slip_reynolds_upper <= SAFFMAN_MAX_SLIP_REYNOLDS
+    applicable &= (shear_upper == 0.0) | (
+        slip_reynolds_upper <= SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS * np.sqrt(shear_lower)
+    )
+    return applicable, status
 
 
 def rarefied_vorticity_lift(

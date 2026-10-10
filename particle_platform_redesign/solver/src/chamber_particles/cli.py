@@ -68,7 +68,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="chamber-particles",
-        description="Run and inspect deterministic chamber-particle simulations.",
+        description="Run and inspect chamber-particle simulations.",
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -86,6 +86,6 @@ def _parser() -> argparse.ArgumentParser:
 
 def _write_json(payload: object, *, stream: TextIO = sys.stdout) -> None:
     print(
-        json.dumps(payload, allow_nan=False, ensure_ascii=False, sort_keys=True),
+        json.dumps(payload, allow_nan=False, ensure_ascii=True, sort_keys=True),
         file=stream,
     )

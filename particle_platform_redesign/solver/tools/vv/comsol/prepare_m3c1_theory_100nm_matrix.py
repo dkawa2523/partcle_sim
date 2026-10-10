@@ -32,7 +32,7 @@ from chamber_particles.case_format import (
     write,
 )
 
-TOOL_REVISION: Final = "m3c1_theory_consistent_100nm_30ms_candidate_v2"
+TOOL_REVISION: Final = "m3c1_theory_consistent_100nm_30ms_candidate_v3"
 MANIFEST_RECOVERY_REVISION: Final = "m3c1_completed_cell_manifest_recovery_v1"
 CONFIG_COPY: Final = "m3c1_theory_100nm_30ms_v2.json"
 PREPARE_REPORT: Final = "prepare_report.json"
@@ -445,7 +445,7 @@ def _export_fields(
         1.0e-14,
     )
     ordered = provider[matched]
-    fields = _scalar_fields(ordered, index, scalars, layout_name)
+    fields, scalar_projections = _scalar_fields(ordered, index, scalars, nodes_m, layout_name)
     vectors, projections = _vector_fields(ordered, index, nodes_m, layout_name)
     fields.extend(vectors)
     heat_flux, heat_flux_projection = _heat_flux_field(ordered, index, nodes_m, layout_name)
@@ -459,6 +459,7 @@ def _export_fields(
         "maximum_coordinate_match_distance_m": maximum_distance,
         "screening_length_source_column": screening_column,
         "axis_radial_projection": projections,
+        "axis_odd_scalar_projection": scalar_projections,
         "heat_flux_formation": {
             "formula": "q_effective=-thermal_conductivity*grad(gas_temperature)",
             "classification": "external_producer_transformation",
@@ -476,20 +477,35 @@ def _scalar_fields(
     values: np.ndarray,
     index: Mapping[str, int],
     scalars: Sequence[tuple[str, str, str]],
+    nodes_m: np.ndarray,
     layout_name: str,
-) -> list[FieldData]:
-    return [
-        FieldData(
-            name,
-            layout_name,
-            "node",
-            ("value",),
-            "scalar",
-            np.ascontiguousarray(values[:, [index[column]]], dtype="<f8"),
-            unit,
+) -> tuple[list[FieldData], dict[str, object]]:
+    fields: list[FieldData] = []
+    projections: dict[str, object] = {}
+    axis = nodes_m[:, 0] == 0.0
+    for name, column, unit in scalars:
+        scalar = np.ascontiguousarray(values[:, [index[column]]], dtype="<f8")
+        if name == "azimuthal_gas_vorticity":
+            original = scalar[axis, 0].copy()
+            scalar[axis, 0] = 0.0
+            projections[name] = {
+                "rule": "azimuthal_gas_vorticity(r=0)=+0.0",
+                "corrected_node_count": int(np.count_nonzero(original)),
+                "maximum_correction_per_s": float(np.max(np.abs(original), initial=0.0)),
+                "reason": "canonical_axisymmetric_odd_scalar_regularity",
+            }
+        fields.append(
+            FieldData(
+                name,
+                layout_name,
+                "node",
+                ("value",),
+                "scalar",
+                scalar,
+                unit,
+            )
         )
-        for name, column, unit in scalars
-    ]
+    return fields, projections
 
 
 def _vector_fields(
@@ -584,6 +600,7 @@ def _release_source(package: Path) -> tuple[RealizedTableSource, dict[str, objec
         charge_number=vector("charge_number_e"),
         mass_kg=mass,
         drag_diameter_m=diameter,
+        contact_radius_m=np.zeros(PARTICLE_COUNT, dtype="<f8"),
         electrostatic_radius_m=radius,
         displaced_volume_m3=(math.pi * diameter**3 / 6.0).astype("<f8"),
         model_weight=np.ones(PARTICLE_COUNT, dtype="<f8"),
@@ -714,7 +731,7 @@ def _case_document(
     maximum_speed_ratio = float(cast(Any, workflow["maximum_neutral_speed_ratio"]))
     ion_speed_limit = float(cast(Any, parameters["maximum_relative_ion_speed_m_s"]))
     return {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": f"m3c1_theory_100nm_30ms_{workflow_name}_{dt_s:.9g}",
             "data_path": "candidate_input.h5",

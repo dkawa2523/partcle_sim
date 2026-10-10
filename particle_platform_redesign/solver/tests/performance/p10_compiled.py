@@ -37,15 +37,15 @@ from tests.performance.p09_memory import (
 _SCENARIOS = ("field", "event")
 _MODES = ("cold", "warm")
 _EXPECTED_REVISIONS = {
-    "engine_algorithm_revision": "particle_engine_v37",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v18",
-    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v20",
+    "engine_algorithm_revision": "particle_engine_v46",
+    "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
     "step_proposal_revision": "coupled_fixed_step_proposal_v10",
     "field_location_revision": "field_location_v4",
-    "event_algorithm_revision": "line_quadratic_rk4_axis_first_hit_v16",
-    "result_algorithm_revision": "durable_segmented_result_v5",
+    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "result_algorithm_revision": "durable_segmented_result_v6",
 }
-_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v14"
+_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v16"
 _EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_serial_slab_v6"
 
 

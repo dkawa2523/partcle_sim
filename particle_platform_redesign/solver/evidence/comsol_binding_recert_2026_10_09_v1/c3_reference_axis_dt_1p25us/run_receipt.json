@@ -1,0 +1,207 @@
+{
+  "actual_run_readback": {
+    "assembly_rhs": "NOT_TESTED",
+    "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+    "canonical_boundary_meaning": {
+      "canonical_content_hash": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+      "sha256": "57b178132fc0b507154eda495741f2c7a5ad028b765854d71421b7444dd2c419"
+    },
+    "observation": "EXPORTED",
+    "path": "actual_binding_receipt.json",
+    "sha256": "a0281483feb82854fc649c1c9541c6838d5065c905b0f4f7aed9996e4c9a834b",
+    "terminal_boundary_probe": {
+      "path": "terminal_boundary_raw.csv",
+      "sha256": "0cf398213f522ede29da95ef41e4a3038bc62edfb1bf65f7e30a0e3819b3ff75"
+    }
+  },
+  "case_id": "caseP_100nm_three_current",
+  "configuration": {
+    "background_solution": "sol2",
+    "background_step": "ftper",
+    "background_study": "std2",
+    "boundary_35": "disappear_escape",
+    "boundary_37": "freeze_hold",
+    "boundary_material": "stick",
+    "brownian_active": "false",
+    "case": "caseP_100nm_three_current",
+    "charge_revision": "aggregate_relative_drift_regularized_three_current_v1",
+    "drag_implementation": "explicit_custom_force",
+    "drag_revision": "epstein_linear_effective_gas_sensitivity_v1",
+    "dynamic_charge_active": "true",
+    "field_source": "canonical_exact_connectivity_P1_sectionwise",
+    "integrator": "classical_rk4",
+    "integrator_order": "4",
+    "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+    "maximum_relative_ion_speed_m_s": "1e6",
+    "model_saved": "false",
+    "output_times": "121",
+    "particle_rows": "287",
+    "physics": "fpt",
+    "relative_tolerance": "1e-8",
+    "release_source": "shared_three_current_release_table",
+    "saffman_active": "false",
+    "source_model": "source_copy.mph",
+    "step_s": "1.25e-6",
+    "time_end_s": "0.03"
+  },
+  "execution_inputs": {
+    "path": "execution_inputs.json",
+    "record": {
+      "artifacts": [
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\model_dataset\\cf4_o2_etch_caseA_nonlinear_sass\\model\\icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+          "role": "source_mph",
+          "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_prepared_axis_normalized\\candidate_input_three_current_z0.h5",
+          "role": "canonical_three_current_input",
+          "sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc"
+        },
+        {
+          "path": "reference_run_config.json",
+          "role": "reference_run_config",
+          "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d"
+        },
+        {
+          "path": "primitive_receipt.json",
+          "role": "primitive_receipt",
+          "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab"
+        },
+        {
+          "path": "three_current_release_receipt.json",
+          "role": "release_receipt",
+          "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2"
+        },
+        {
+          "path": "three_current_release_state.csv",
+          "role": "release_state",
+          "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+        },
+        {
+          "path": "m3c3_table_receipt.json",
+          "role": "table_receipt",
+          "sha256": "9d3cfeb2eca511f4956b41961f9c6ccaf110128f015a89d9d28c53d2dcf9509d"
+        },
+        {
+          "path": "RunM3C3CasePThreeCurrent.java",
+          "role": "java_runner",
+          "sha256": "0d817441f2f7a5dce5f233b1f63f28882dedf050cbe1b711985ee5e67754dc7f"
+        },
+        {
+          "path": "actual_binding_receipt.json",
+          "role": "actual_run_readback",
+          "sha256": "a0281483feb82854fc649c1c9541c6838d5065c905b0f4f7aed9996e4c9a834b"
+        },
+        {
+          "path": "ParticleRunReadback.java",
+          "role": "readback_java",
+          "sha256": "aca2adb2173a97cea51c81e3af26d4ecdda1307588146cd8ff1cf61000c138a7"
+        },
+        {
+          "path": "CommonP1Epstein.java",
+          "role": "coefficient_java",
+          "sha256": "64546639d4a615e27a53d5e36359d2c088a1434f821d3fe67f1c75c9e1324395"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\actual_run_receipt.py",
+          "role": "actual_receipt_reader",
+          "sha256": "a8530e34986a07bf8997e6258c2cd6aa4ebbc6131dda1a9f9e05222a44b57c08"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\boundary_response_mapping.py",
+          "role": "boundary_response_mapping",
+          "sha256": "f135916727d8f776602104496572bdf51265bb57a0f304773061e04e41f2591a"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\run_m3c3_caseP_three_current.ps1",
+          "role": "powershell_runner",
+          "sha256": "1ccb0940b7152a05d2a5685eb8688e5a8fb228de5e8997e39097ec913895b40b"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\prepare_m3c3_caseP_reference_tables.py",
+          "role": "table_preparer",
+          "sha256": "e15b0d527d21d44cefe41ecf0b65d9dc36d20022ed3e0bac18b3da52c5b2f37e"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\normalize_m3c3_caseP_three_current.py",
+          "role": "normalizer",
+          "sha256": "87ae3e8aae7bab77e87b104d58423e1af510c922170dbfa8d4cf5e6c8c61849a"
+        },
+        {
+          "path": "RunM3C3CasePThreeCurrentDiagnostic.java",
+          "role": "diagnostic_java_runner",
+          "sha256": "34af3048946015176595a3ce2ed21441579d0a798791836840e82b50afce5da2"
+        },
+        {
+          "path": "diagnostic_state_raw_wide.csv",
+          "role": "diagnostic_state_raw",
+          "sha256": "ac77f4251a00e80f5fe522e8910dabcf69d8c246e617f19d6a374be5fcbc4fcc"
+        },
+        {
+          "path": "diagnostic_force_raw_wide.csv",
+          "role": "diagnostic_force_raw",
+          "sha256": "e3f59443fc8b5748b7219ef737b190525523501f18548f71b90adfd08dcd213d"
+        },
+        {
+          "path": "comsol_process.log",
+          "role": "diagnostic_configuration_log",
+          "sha256": "15f4624ab045d318ec3a736ea0c31ca226dabf40d0d2d475c1ac21a20d0776f8"
+        }
+      ],
+      "case_id": "caseP_100nm_three_current",
+      "expected_source_mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "numerical_run": {
+        "base_config_fixed_rk4_step_s": 1e-05,
+        "comparison_scope": "active_rows_only",
+        "diagnostic_force_export": true,
+        "fixed_rk4_step_s": 1.25e-06,
+        "role": "time_step_refinement"
+      },
+      "reference_run_config_sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d",
+      "schema_version": 1,
+      "source_mph_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "source_mph_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "status": "LOCKED_FOR_EXECUTION"
+    },
+    "sha256": "d7f6019d04446484382f4a57f269dfd0430b4cb91c6e84c10df1c8d6de368f72"
+  },
+  "normalization_summary": {
+    "path": "normalization_summary.json",
+    "sha256": "82302f6e876b2c6d1350c1f79c3c84a3e73af4593f83e31f92d57e3ec45d23ed"
+  },
+  "process_metrics": {
+    "batch_completion": {
+      "class_status_authority": "non_authoritative_for_6_4_class_input_verified_by_controls",
+      "class_status_raw": "1791557196597\r\nError",
+      "completion_authority": "native_process_log_and_registered_native_artifacts",
+      "expected_completion_record": "M3C3_CASEP|diagnostic_run_pass|case=caseP_100nm_three_current|step_s=1.25e-6|state=diagnostic_state_raw_wide.csv|force=diagnostic_force_raw_wide.csv|model_saved=false",
+      "native_error_record_absent": true,
+      "status": "COMPLETE"
+    },
+    "diagnostic_force_export": true,
+    "exit_code": 0,
+    "fixed_rk4_step_s": 1.25e-06,
+    "numerical_run_role": "time_step_refinement",
+    "peak_rss_bytes": 3375067136,
+    "process_count": 1,
+    "schema_version": 1,
+    "wall_time_s": 560.7666189
+  },
+  "reference_run_config_sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d",
+  "run": {
+    "case": "caseP_100nm_three_current",
+    "model_saved": "false",
+    "output_times": "121",
+    "particles": "287",
+    "step_s": "1.25e-6",
+    "time_end_s": "0.03"
+  },
+  "schema_version": 1,
+  "solve": {
+    "base_solution": "sol36",
+    "seconds": "523.103",
+    "step_s": "1.25e-6"
+  },
+  "status": "PASS"
+}

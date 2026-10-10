@@ -9,7 +9,14 @@ import pytest
 import yaml
 
 from chamber_particles import SimulationError, load_case, open_result, simulate
+from chamber_particles.boundaries import half_range_maxwell_flux_velocity
 from chamber_particles.case_format import BoundaryData, write
+from chamber_particles.rng import (
+    WALL_MAXWELL_NORMAL_STREAM,
+    WALL_MAXWELL_TANGENTIAL_STREAM,
+    wall_standard_normal_batch,
+    wall_uniform_open_batch,
+)
 from tests.verification.microcases import materialize_microcase
 
 
@@ -59,12 +66,11 @@ def test_c07_stick_event_and_terminal_state_are_published_by_public_api(
     np.testing.assert_array_equal(final.kinematics_valid, [1])
     assert result.manifest["counts"]["boundary_events"] == 1
     assert result.manifest["lifecycle_counts"]["stuck"] == 1
-    assert (
-        result.manifest["geometry_algorithm_revision"]
-        == "line_boundary_stackless_volume_cell_bvh_v5"
+    assert result.manifest["geometry_algorithm_revision"] == "line_boundary_capsule_contact_bvh_v7"
+    assert result.manifest["event_algorithm_revision"] == (
+        "line_quadratic_curved_capsule_periodic_first_hit_v22"
     )
-    assert result.manifest["event_algorithm_revision"] == "line_quadratic_rk4_axis_first_hit_v16"
-    assert result.manifest["boundary_algorithm_revision"] == "point_wall_laws_v5"
+    assert result.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v7"
     memory_plan = result.manifest["memory_plan"]
     assert isinstance(memory_plan, dict)
     assert memory_plan["geometry_preparation_transient_bytes"] > 0
@@ -136,6 +142,84 @@ def test_escape_is_right_continuous_and_independent_of_trajectory_output(
     np.testing.assert_array_equal(scheduled_final.kinematics_valid, [0])
     assert np.isfinite(scheduled_final.position_m).all()
     assert scheduled.manifest["lifecycle_counts"]["escaped"] == 1
+
+
+def test_maxwell_thermal_reflection_is_output_schedule_independent(
+    tmp_path: Path,
+) -> None:
+    scheduled_paths = materialize_microcase("C07", tmp_path / "scheduled-maxwell-case")
+    disabled_paths = materialize_microcase("C07", tmp_path / "disabled-maxwell-case")
+    _set_maxwell_case(scheduled_paths.case_path, frame_times=[1.0, 1.5, 2.0])
+    _set_maxwell_case(disabled_paths.case_path, frame_times=None)
+
+    scheduled_output = tmp_path / "scheduled-maxwell-result"
+    disabled_output = tmp_path / "disabled-maxwell-result"
+    scheduled_case = load_case(scheduled_paths.case_path)
+    disabled_case = load_case(disabled_paths.case_path)
+    simulate(scheduled_case, scheduled_output)
+    simulate(disabled_case, disabled_output)
+    scheduled = open_result(scheduled_output)
+    disabled = open_result(disabled_output)
+
+    event = scheduled.read_boundary_events()
+    disabled_event = disabled.read_boundary_events()
+    np.testing.assert_array_equal(event.law_id, ["maxwell_thermal"])
+    np.testing.assert_array_equal(event.outcome, ["reflected"])
+    np.testing.assert_array_equal(event.normal, [[1.0, 0.0]])
+    for name in (
+        "time_s",
+        "particle_id",
+        "event_ordinal",
+        "position_m",
+        "normal",
+        "velocity_pre_m_s",
+        "velocity_post_m_s",
+        "law_id",
+        "outcome",
+    ):
+        np.testing.assert_array_equal(getattr(event, name), getattr(disabled_event, name))
+
+    particle_id = np.asarray([701], dtype="<u8")
+    event_ordinal = np.asarray([0], dtype="<u8")
+    normal_draw = wall_uniform_open_batch(
+        0,
+        particle_id,
+        event_ordinal,
+        WALL_MAXWELL_NORMAL_STREAM,
+    )[0]
+    tangent_draw = wall_standard_normal_batch(
+        0,
+        particle_id,
+        event_ordinal,
+        WALL_MAXWELL_TANGENTIAL_STREAM,
+    )[0]
+    expected_velocity = half_range_maxwell_flux_velocity(
+        300.0,
+        float(scheduled_case.data.sources[0].mass_kg[0]),
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        float(normal_draw),
+        float(tangent_draw),
+    )
+    np.testing.assert_array_equal(event.velocity_post_m_s[0], expected_velocity)
+    expected_final_position = event.position_m[0] + 0.5 * np.asarray(expected_velocity)
+    np.testing.assert_allclose(
+        scheduled.read_final().position_m[0],
+        expected_final_position,
+        rtol=0.0,
+        atol=5.0e-16,
+    )
+    np.testing.assert_array_equal(
+        scheduled.read_final().velocity_m_s,
+        disabled.read_final().velocity_m_s,
+    )
+    assert scheduled.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v7"
+    assert scheduled.manifest["rng_algorithm_revision"] == "philox4x32_10_v2"
+    assert scheduled.manifest["random_draw_kinds"]["wall_maxwell_normal"] == (
+        WALL_MAXWELL_NORMAL_STREAM
+    )
 
 
 def test_hold_retains_impact_payload_and_is_independent_of_trajectory_output(
@@ -255,6 +339,7 @@ def test_table_start_validation_preserves_row_order_and_particle_id(
         mass_kg=np.repeat(original.mass_kg, 2),
         drag_diameter_m=np.repeat(original.drag_diameter_m, 2),
         electrostatic_radius_m=np.repeat(original.electrostatic_radius_m, 2),
+        contact_radius_m=np.repeat(original.contact_radius_m, 2),
         displaced_volume_m3=np.repeat(original.displaced_volume_m3, 2),
         model_weight=np.repeat(original.model_weight, 2),
         material_id=np.repeat(original.material_id, 2),
@@ -335,6 +420,26 @@ def test_result_validation_rejects_corrupt_boundary_offsets_and_validity(
 def _set_terminal_case(path: Path, *, law: str, frame_times: list[float] | None) -> None:
     document = yaml.safe_load(path.read_text(encoding="utf-8"))
     document["boundaries"][0]["law"] = law
+    if frame_times is None:
+        document["output"]["trajectories"] = None
+    else:
+        document["output"]["trajectories"] = {
+            "selection": "all",
+            "schedule": {"explicit_times_s": frame_times},
+        }
+    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+
+def _set_maxwell_case(path: Path, *, frame_times: list[float] | None) -> None:
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    document["boundaries"][0] = {
+        "boundary_group": "wall",
+        "priority": 10,
+        "law": "maxwell_thermal",
+        "wall_temperature_K": 300.0,
+        "diffuse_reflection_fraction": 1.0,
+        "wall_velocity_m_s": [0.0, 0.0],
+    }
     if frame_times is None:
         document["output"]["trajectories"] = None
     else:

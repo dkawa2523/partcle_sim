@@ -67,6 +67,10 @@ $PrimitiveReceiptPath = Join-Path $PreparedRoot "primitive_receipt.json"
 $JavaSource = Join-Path $PSScriptRoot "comsol\RunM3C3CasePThreeCurrent.java"
 $DiagnosticJavaSource = Join-Path `
     $PSScriptRoot "comsol\RunM3C3CasePThreeCurrentDiagnostic.java"
+$ReadbackJavaSource = Join-Path $PSScriptRoot "comsol\ParticleRunReadback.java"
+$CoefficientJavaSource = Join-Path $PSScriptRoot "comsol\CommonP1Epstein.java"
+$ActualReceiptReader = Join-Path $PSScriptRoot "actual_run_receipt.py"
+$BoundaryResponseMapping = Join-Path $PSScriptRoot "boundary_response_mapping.py"
 $Preparer = Join-Path $PSScriptRoot "prepare_m3c3_caseP_reference_tables.py"
 $Normalizer = Join-Path $PSScriptRoot "normalize_m3c3_caseP_three_current.py"
 $Compiler = Join-Path $ComsolRoot "bin\win64\comsolcompile.exe"
@@ -80,14 +84,17 @@ $RequiredInputs = @(
         $ReleaseReceiptPath,
         $PrimitiveReceiptPath,
         $JavaSource,
+        $ReadbackJavaSource,
+        $CoefficientJavaSource,
+        $ActualReceiptReader,
+        $BoundaryResponseMapping,
         $Preparer,
+        $Normalizer,
         $Compiler,
         $Batch
     )
 if ($DiagnosticForceExport) {
     $RequiredInputs += $DiagnosticJavaSource
-} else {
-    $RequiredInputs += $Normalizer
 }
 foreach ($Required in $RequiredInputs) {
     if (-not (Test-Path -LiteralPath $Required -PathType Leaf)) {
@@ -102,7 +109,10 @@ $Reference = Get-Content -LiteralPath $ReferenceConfigPath -Raw | ConvertFrom-Js
 $Campaign = Get-Content -LiteralPath $CampaignConfigPath -Raw | ConvertFrom-Json
 $ReleaseReceipt = Get-Content -LiteralPath $ReleaseReceiptPath -Raw | ConvertFrom-Json
 $ExpectedSourceHash = "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
-$ExpectedPrimitiveHash = "f14efc8bd453505baaa9fc1ddf71f91e5145fb07cb8bdeecd1955d40cec8d124"
+$ExpectedPrimitiveHash = [string]$Campaign.primitive_input.sha256
+if ($ExpectedPrimitiveHash -notmatch '^[0-9a-f]{64}$') {
+    throw "Campaign must register an explicit canonical primitive input SHA256"
+}
 $ExpectedChargeRevision = "aggregate_relative_drift_regularized_three_current_v1"
 $ExpectedIonDragRevision = "relative_flow_screened_collection_orbital_aggregate_ion_v1"
 
@@ -191,7 +201,7 @@ if ($SourceHashBefore -cne $ExpectedSourceHash) {
 
 Push-Location $SolverRoot
 try {
-    & uv run --locked python $Preparer $CandidateInput $ReleaseState $OutputDirectory `
+    & uv run --locked python -m tools.vv.comsol.prepare_m3c3_caseP_reference_tables $CandidateInput $ReleaseState $OutputDirectory `
         --expected-content-hash ([string]$Reference.canonical_input.content_hash)
     if ($LASTEXITCODE -ne 0) {
         throw "M3-C3 reference table preparation failed with exit code $LASTEXITCODE"
@@ -202,6 +212,8 @@ try {
 
 $SourceCopy = Join-Path $OutputDirectory "source_copy.mph"
 $StagedJava = Join-Path $OutputDirectory "RunM3C3CasePThreeCurrent.java"
+$StagedReadbackJava = Join-Path $OutputDirectory "ParticleRunReadback.java"
+$StagedCoefficientJava = Join-Path $OutputDirectory "CommonP1Epstein.java"
 $StagedDiagnosticJava = Join-Path `
     $OutputDirectory "RunM3C3CasePThreeCurrentDiagnostic.java"
 $FormalClassFile = Join-Path $OutputDirectory "RunM3C3CasePThreeCurrent.class"
@@ -209,7 +221,9 @@ $DiagnosticClassFile = Join-Path $OutputDirectory "RunM3C3CasePThreeCurrentDiagn
 $ClassFile = $(
     if ($DiagnosticForceExport) { $DiagnosticClassFile } else { $FormalClassFile }
 )
-$CompiledClassFiles = @($FormalClassFile)
+$CompiledClassFiles = @($FormalClassFile,
+    (Join-Path $OutputDirectory "ParticleRunReadback.class"),
+    (Join-Path $OutputDirectory "CommonP1Epstein.class"))
 if ($DiagnosticForceExport) {
     $CompiledClassFiles += $DiagnosticClassFile
 }
@@ -225,9 +239,17 @@ $ProcessMetricsPath = Join-Path $OutputDirectory "comsol_process_metrics.json"
 $ExecutionInputsPath = Join-Path $OutputDirectory "execution_inputs.json"
 $PreferencesDirectory = Join-Path $OutputDirectory ".comsol_preferences"
 $Succeeded = $false
+$ReadbackProducerLocks = @(
+    @($ReadbackJavaSource, (Get-FileHash -Algorithm SHA256 -LiteralPath $ReadbackJavaSource).Hash.ToLowerInvariant()),
+    @($CoefficientJavaSource, (Get-FileHash -Algorithm SHA256 -LiteralPath $CoefficientJavaSource).Hash.ToLowerInvariant()),
+    @($ActualReceiptReader, (Get-FileHash -Algorithm SHA256 -LiteralPath $ActualReceiptReader).Hash.ToLowerInvariant()),
+    @($BoundaryResponseMapping, (Get-FileHash -Algorithm SHA256 -LiteralPath $BoundaryResponseMapping).Hash.ToLowerInvariant())
+)
 try {
     Copy-Item -LiteralPath $SourceModel -Destination $SourceCopy
     Copy-Item -LiteralPath $JavaSource -Destination $StagedJava
+    Copy-Item -LiteralPath $ReadbackJavaSource -Destination $StagedReadbackJava
+    Copy-Item -LiteralPath $CoefficientJavaSource -Destination $StagedCoefficientJava
     if ($DiagnosticForceExport) {
         Copy-Item -LiteralPath $DiagnosticJavaSource -Destination $StagedDiagnosticJava
     }
@@ -258,7 +280,11 @@ try {
 
     Push-Location $OutputDirectory
     try {
-        & $Compiler $StagedJava
+        & $Compiler $StagedCoefficientJava
+        if ($LASTEXITCODE -ne 0) { throw "Common-P1 coefficient Java compilation failed" }
+        & $Compiler -classpathadd $OutputDirectory $StagedReadbackJava
+        if ($LASTEXITCODE -ne 0) { throw "Actual readback Java compilation failed" }
+        & $Compiler -classpathadd $OutputDirectory $StagedJava
         if ($LASTEXITCODE -ne 0 -or
             -not (Test-Path -LiteralPath $FormalClassFile -PathType Leaf)) {
             throw "COMSOL M3-C3 Java compilation failed with exit code $LASTEXITCODE"
@@ -325,14 +351,37 @@ try {
     }
     $CompletionMarker = $(
         if ($DiagnosticForceExport) {
-            "M3C3_CASEP|diagnostic_run_pass|"
+            "M3C3_CASEP|diagnostic_run_pass|case=caseP_100nm_three_current|step_s=$FixedStepText|state=diagnostic_state_raw_wide.csv|force=diagnostic_force_raw_wide.csv|model_saved=false"
         } else {
-            "M3C3_CASEP|run_pass|"
+            "M3C3_CASEP|run_pass|case=caseP_100nm_three_current|step_s=$FixedStepText|time_end_s=0.03|output_times=121|particles=287|model_saved=false"
         }
     )
-    if (-not (Select-String -LiteralPath $ProcessLog -SimpleMatch $CompletionMarker)) {
+    if (@(Select-String -LiteralPath $ProcessLog -SimpleMatch $CompletionMarker).Count -ne 1) {
         throw "COMSOL M3-C3 runner did not emit its completion receipt"
     }
+    if (Select-String -LiteralPath $ProcessLog, $BatchLog, $ProcessErrorLog -Pattern `
+            'M3C3_CASEP\|fatal\||Error running java class\.|/\*+Error\*+/') {
+        throw "COMSOL M3-C3 native log contains an execution error"
+    }
+    $NativeClassStatusPath = "$ClassFile.status"
+    $NativeClassStatus = $(
+        if (Test-Path -LiteralPath $NativeClassStatusPath) {
+            (Get-Content -LiteralPath $NativeClassStatusPath -Raw).Trim()
+        } else { "not emitted" }
+    )
+    $ProcessMetrics["batch_completion"] = [ordered]@{
+        status = "COMPLETE"
+        expected_completion_record = $CompletionMarker
+        native_error_record_absent = $true
+        class_status_raw = $NativeClassStatus
+        class_status_authority = "non_authoritative_for_6_4_class_input_verified_by_controls"
+        completion_authority = "native_process_log_and_registered_native_artifacts"
+    }
+    [IO.File]::WriteAllText(
+        $ProcessMetricsPath,
+        (($ProcessMetrics | ConvertTo-Json -Depth 8) + "`n"),
+        [Text.UTF8Encoding]::new($false)
+    )
     if (-not (Test-Path -LiteralPath (Join-Path $OutputDirectory "trajectory_raw_wide.csv"))) {
         throw "COMSOL M3-C3 runner did not export trajectory_raw_wide.csv"
     }
@@ -354,7 +403,23 @@ try {
     if ($SourceHashAfter -cne $SourceHashBefore) {
         throw "Locked source MPH changed during M3-C3 execution"
     }
+    foreach ($Lock in $ReadbackProducerLocks) {
+        if ((Get-FileHash -Algorithm SHA256 -LiteralPath $Lock[0]).Hash.ToLowerInvariant() -cne $Lock[1]) {
+            throw "A readback producer changed during M3-C3 execution"
+        }
+    }
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $StagedReadbackJava).Hash.ToLowerInvariant() -cne $ReadbackProducerLocks[0][1] -or
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $StagedCoefficientJava).Hash.ToLowerInvariant() -cne $ReadbackProducerLocks[1][1]) {
+        throw "A staged readback producer differs from its source"
+    }
 
+    Push-Location $SolverRoot
+    try {
+        & uv run --locked python -m tools.vv.comsol.actual_run_receipt $OutputDirectory
+        if ($LASTEXITCODE -ne 0) { throw "COMSOL actual readback materialization failed" }
+    } finally {
+        Pop-Location
+    }
     $Artifacts = @(
         [ordered]@{ role = "source_mph"; path = $SourceModel; sha256 = $SourceHashBefore },
         [ordered]@{
@@ -397,6 +462,31 @@ try {
             sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $StagedJava).Hash.ToLowerInvariant()
         },
         [ordered]@{
+            role = "actual_run_readback"
+            path = "actual_binding_receipt.json"
+            sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $OutputDirectory "actual_binding_receipt.json")).Hash.ToLowerInvariant()
+        },
+        [ordered]@{
+            role = "readback_java"
+            path = "ParticleRunReadback.java"
+            sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $StagedReadbackJava).Hash.ToLowerInvariant()
+        },
+        [ordered]@{
+            role = "coefficient_java"
+            path = "CommonP1Epstein.java"
+            sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $StagedCoefficientJava).Hash.ToLowerInvariant()
+        },
+        [ordered]@{
+            role = "actual_receipt_reader"
+            path = $ActualReceiptReader
+            sha256 = $ReadbackProducerLocks[2][1]
+        },
+        [ordered]@{
+            role = "boundary_response_mapping"
+            path = $BoundaryResponseMapping
+            sha256 = $ReadbackProducerLocks[3][1]
+        },
+        [ordered]@{
             role = "powershell_runner"
             path = $PSCommandPath
             sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $PSCommandPath).Hash.ToLowerInvariant()
@@ -407,12 +497,10 @@ try {
             sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $Preparer).Hash.ToLowerInvariant()
         }
     )
-    if (-not $DiagnosticForceExport) {
-        $Artifacts += [ordered]@{
+    $Artifacts += [ordered]@{
             role = "normalizer"
             path = $Normalizer
             sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $Normalizer).Hash.ToLowerInvariant()
-        }
     }
     if ($DiagnosticForceExport) {
         $Artifacts += @(
@@ -474,10 +562,11 @@ try {
         [Text.UTF8Encoding]::new($false)
     )
 
-    if (-not $DiagnosticForceExport) {
-        Push-Location $SolverRoot
+    # Every invocation exports and normalizes the same complete trajectory.
+    # DiagnosticForceExport only adds observations after the identical solve.
+    Push-Location $SolverRoot
         try {
-            & uv run --locked python $Normalizer $OutputDirectory
+            & uv run --locked python -m tools.vv.comsol.normalize_m3c3_caseP_three_current $OutputDirectory
             if ($LASTEXITCODE -ne 0) {
                 throw "M3-C3 reference normalization failed with exit code $LASTEXITCODE"
             }
@@ -492,7 +581,6 @@ try {
             [double]$Summary.fixed_rk4_step_s -ne $FixedStepS) {
             throw "M3-C3 normalized reference did not pass its structural checks"
         }
-    }
     $Succeeded = $true
 } finally {
     $CleanupTargets = @($SourceCopy) + $CompiledClassFiles + $ClassStatusFiles

@@ -34,14 +34,18 @@ caseとcandidate自身の`h,h/2,h/4`自己収束である。candidateの刻み�
 固定集合を使う。native COMSOL有限要素場とexported P1場の差はfield representationの評価であり、trajectory coreの不具合に
 しない。solver同士の互換性は両側へ同じcanonical fieldを与えて判定し、native-field精度はadapter/field producerの別statusとする。
 
-現状の100 nm Case-A/Case-P common-P1 anchorは、初期意味、同一場での全決定論力・動的電荷を含む境界前軌道、Brownian
+以下は当時の登録revisionに対するcloseout履歴であり、現行codeの再認証へ流用しない。
+現行の実使用getter、SI単位、有限algorithmの登録比較と未認証scopeは§11と
+[現行比較manifest](solver/evidence/comsol_binding_recert_2026_10_09_v1/comparison_manifest.json)が所有する。
+
+当時の100 nm Case-A/Case-P common-P1 anchorは、初期意味、同一場での全決定論力・動的電荷を含む境界前軌道、Brownian
 ensembleについて合格している。隔離したFreeze/Disappear意味とCase-A最初のwafer hitも確認済みである。さらにP21/M3-C3の
 critical boundary microcaseは、一つの2D axisymmetric rectangleで表面接触からの離脱、specular reflectionと同step残時間、
 R-Z軸通過をCOMSOL/public API/解析解で比較し、3刻み・132/132 gateをPASSした。最大solver間位置差は
 `1.61339e-17 m`で、authorityは
 [`solver/evidence/m3c0/critical_boundaries_v1/`](solver/evidence/m3c0/critical_boundaries_v1/README.md)である。
 
-aggregate three-current production revisionはcatalog v17 / runtime v19 / tile v18で同じsingle engineへ統合され、標準
+aggregate three-currentの初回production revisionはcatalog v17 / runtime v19 / tile v18で同じsingle engineへ統合され、標準
 verification/scenario suiteと品質gateを通過した。Case-P派生companionのpriority 3はproducer-owned one-sided cacheにより
 common-P1全1987節点のfiniteな負イオン5 primitive authorityを生成し、入力blockerを解消した。priority 4の共有three-current `Z0`を用いた
 common-P1、Brownian-off、100 nm、287粒子、30 msの外部比較は、candidateと明示drag COMSOL referenceの各3刻み収束、
@@ -220,6 +224,38 @@ tolerance緩和、hidden clampを追加してはならない。
 
 ハッシュまたは設定が異なる場合は「計算誤差」ではなく「入力差」として終了する。自動的な既定値補完、単位推測、欠損列からの代用は禁止する。
 
+未知のMPHまたは新しいexporterでは、数値比較前に
+`solver/tools/vv/comsol/meaning_preflight.py`へproducer-neutralな意味inventoryを渡す。
+inventoryは座標/自由度、粒子定式化、field表現・owner・recovery、source、boundary、model、積分を別layerとして記録し、
+各項目を`SUPPORTED / ADAPTER_REQUIRED / NOT_APPLICABLE / AMBIGUOUS`のいずれかへfail-closedに分類する。
+COMSOL tag名、式名、plot、欠損値だけから意味を推定しない。未記載layerは`AMBIGUOUS`であり、機能が無効または範囲外と
+確認した項目だけを`NOT_APPLICABLE`にできる。
+
+現行inventory v2はrequired/direct項目にhash付きexpected/observed JSON artifactとpointerのbindingを必須にする。
+値とJSON型の厳密一致を検査し、欠損、不一致、非有限値、nested wrapperを含む判定宣言だけの証拠を拒否する。
+文字列のevidenceと宣言のみの旧inventory v1は実観測の代用にしない。artifact照合はproducerのnative getterの
+真正性や数値probeの合否を単独で証明しないため、その評価は各producer/evaluatorが所有する。
+現行consumerは評価直前にもinventoryと選択artifactを再読込みし、対象source model SHA、canonical field identity、
+実run readback SHA集合との対応を検査する。別caseのSUPPORTED inventory、旧normalizer revisionへの書換え、
+古いsummaryのハッシュ不一致を新規認証へ流用しない。
+
+機械可読な比較条件とsummaryは、次の二問を同じerrorへ畳み込まず別々に保持する。
+
+- `same_canonical_field_solver_parity`：両solverが同一identityのcanonical fieldを使う。field生成、import、recovery誤差を含めない。
+- `native_fe_end_to_end_reproduction`：COMSOLはnative FE field、candidateは明示adapter lineageを持つcanonical fieldを使う。
+  field表現、生成、import、recovery誤差を結論へ含める。
+
+前者のconditionは`field_representation_owner_recovery` layerを評価対象から外し、同一canonical field identityを別途必須にする。
+後者は七layerすべてを含む。CLIの成否もglobal inventoryではなく、要求された各問が`SUPPORTED`かで決める。
+各問は独立したcondition classification、`PASS / FAIL / NOT_TESTED / NOT_APPLICABLE` outcome、evidence、claim scopeを持つ。
+conditionが`SUPPORTED`でない問へ`PASS`または`FAIL`を記録しない。
+
+terminalのboundary意味はactual boundary IDとlive response設定から解決する。IDが未観測なら、他のterminal原因を
+除外した上で、完全なactual response mapに同じactionのsemantic groupが一つの場合だけgroupまでを対応付ける。
+未知応答・未観測selection・overlapを除いた部分mapから一意groupを推定しない。異なるgroupが同じFreezeを
+持つ場合、unknown ID、action不一致、消失原因未除外は`AMBIGUOUS`とする。lifecycle codeだけでaxis hitをwallへ
+変換しない。観測のないID・event count・assembled ODE RHSは`NOT_TESTED`のまま保存する。
+
 ### 3.2 粒子対応
 
 粒子は表の行順ではなく、不変な `particle_id` または `release_id` で対応させる。IDが再採番される場合は、放出面ID、面内座標、放出時刻、位置、速度、径、質量、初期電荷、乱数キーを含む一意キーをエクスポート時に生成する。
@@ -393,13 +429,13 @@ e_{x,i}(t)=\|\mathbf{x}_{i,\mathrm{new}}(t)-
 
 最初に、イベント種類・境界ID・順序の完全一致率と混同行列を評価する。一致したイベントについて時刻差、位置差、法線角度差、前後速度差を評価する。イベント種類または境界が異なった粒子では、それ以後の点ごとの差を「積分精度誤差」として集計しない。最初のイベント分岐を原因として記録し、その後は状態分布・生存率などの集団比較へ切り替える。
 
-接線接触、角・稜線、同時に複数境界へ到達するケースでは、優先規則を仕様化する。軸対称モデルの \(r=0\) は座標の継ぎ目であり、物理壁として扱わない。COMSOLの壁条件と境界精度設定は公式ガイドおよび [Wall Accuracy Order](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.43.html) に照らしてケースごとに記録する。
+接線接触、角・稜線、同時に複数境界へ到達するケースでは、優先規則を仕様化する。軸対称モデルの \(r=0\) は座標の継ぎ目であり、物理壁として扱わない。COMSOLの壁条件と境界精度設定は公式ガイドおよび [Wall Accuracy Order](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_math.06.02.html) に照らしてケースごとに記録する。
 
 ### Gate 6：確率過程と確率境界
 
 **目的**：単一軌道一致ではなく、正しい確率法則を確認する。
 
-Brownian運動は時間刻みと乱数系列に依存する。COMSOLと同じ乱数生成器、粒子・成分・ステップへの割当て、内部刻みを再現できる場合だけpathwise比較を行う。それ以外は単一粒子軌道を一致判定に使わない。COMSOLのBrownian forceの定義と時間刻み依存性は [Brownian Force](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.08.html) と [Brownian Motion example](https://doc.comsol.com/6.4/doc/com.comsol.help.models.particle.brownian_motion/brownian_motion.html)、乱数引数と`UserDefined` modeは [Sampling Random Number Distributions](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_modeling.05.13.html) を基準に確認する。
+Brownian運動は時間刻みと乱数系列に依存する。COMSOLと同じ乱数生成器、粒子・成分・ステップへの割当て、内部刻みを再現できる場合だけpathwise比較を行う。それ以外は単一粒子軌道を一致判定に使わない。COMSOLのBrownian forceの定義と時間刻み依存性は [Brownian Force](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.43.html) と [Brownian Motion example](https://doc.comsol.com/6.4/doc/com.comsol.help.models.particle.brownian_motion/brownian_motion.html)、乱数引数と`UserDefined` modeは [Sampling Random Number Distributions](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_modeling.05.13.html) を基準に確認する。
 
 現在の保存済み100 nm・30 ms Case A/PはBrownian-on、candidate v3はBrownian-offなのでpathwise gateは不成立である。
 保存COMSOLの運動状態はout-of-plane無効のR-Z 2自由度であり、Brownian表の`r/phi/z`列や非零`Fbphi`は第3運動自由度を
@@ -418,8 +454,16 @@ meaningを揃えたsame-form比較であり、species-resolved物理または後
 - 初回到達時間分布と信頼区間
 - seed間分散、粒子数増加に対する信頼区間幅の縮小
 
-chamber anchorではseedを独立cluster、同一seed内の287粒子をcluster内sampleとして扱う。粒子行bootstrapは使わず、
-whole-seed resamplingで区間を作る。同じ整数seedを両solverへ渡してもRNG割当てが異なる限りpaired pathとは扱わない。
+探索的・履歴のdescriptive bootstrapではseedを独立clusterとし、whole-seed resamplingを使う。
+現行C2 policy 4のconfirmatory gateはこれと異なり、固定source、一方向背景、粒子間feedbackなし、
+COMSOLのpidx/time/component/UserDefined seedとcandidateのparticle-key streamの分離が実設定・登録hashに結合された時だけ、
+標準PRNG sampling assumptionの下でseed×固定source粒子を独立unitとするHoeffding/TV濃度境界を用いる。
+32×287の9184 unitに対し121保存時刻はunion boundの対象であり、独立sample数へ乗算しない。
+Case A/P全体のfamily alpha 0.05を各anchor 0.025、その終端曲線と83区分RZ/fateへ各0.0125と事前配分する。
+4-seed pilotはconfiguration screeningであり、連続SDEのbias上限や収束次数を証明しない。
+finalの対象は登録した有限刻み・path depthの人口observableである。上限が同等性幅を超えた場合は
+「登録同等性を立証できず」とし、真の物理model差の証明としない。結果後のseed、bin、alpha、同等性幅の変更は禁止する。
+同じ整数seedを両solverへ渡してもRNG割当てが異なる限りpaired pathとは扱わない。
 まず本比較と分離したpilot seedで両実装それぞれのstep/tolerance系列を評価し、同じ固定刻みを要求せず、共通出力時刻の
 observableに対するfine-pair数値不確かさとMonte Carlo confidence budgetから
 同値幅を結果を見る前に固定する。有意差が見つからないことだけを同値性の根拠にしない。
@@ -444,9 +488,10 @@ cacheの系列は外部producer固有の別statusにする。
 
 出力時刻を細かくしただけで内部解が変わっていないかも確認する。保存間隔、内部時間刻み、場メッシュ解像度を混同しない。
 
-candidate合否はcandidateの自己収束と独立referenceで決める。COMSOLとの差を合否に使えるのは、式、field値と補間、boundary、
+candidate合否はcandidateの自己収束と独立referenceで決める。決定論のCOMSOL差を合否に使えるのは、式、field値と補間、boundary、
 stochastic意味が同じで、両側の自己収束を別々に確認した場合だけである。その場合も最細解の推定離散化誤差区間または
 事前設定した合成不確かさで判定し、参照解自体の未収束をcandidateの不具合としない。
+有限算法を対象にするstochastic population比較は上記の登録scopeと濃度境界を用い、screeningを連続SDEのaccuracy認証へ昇格しない。
 
 ### Gate 8：性能とスケーラビリティ
 
@@ -624,7 +669,7 @@ V01～V05はBrownian offで先に完成させる。V04の確率付着は同一�
 | P15-F/F01/F02（完了） | collisionless Barnes ion drag、reduced electrostatic builder/provider adapter | impact-parameter oracle、F01解析・nested-mesh収束、F02同一node記述比較。F02独立mesh収束は未検証 |
 | M3-C0 / Stage 3 | comparison reference lock | 式・parameter・derived-field意味、ion-drag以外のvariant同一性、admissible刻み系列、seed cohort。力なしnormal-impactのFreeze/Disappear正例は完了 |
 | P18-C/I/D/L/R完了 | reference charge、二つのion drag、DEP、RZ lift、effective-gas drag/thermophoresis closure | formula parity、独立oracle、model applicability、compiled parity、無効時同一性。P18-R closeout時の判断を維持し、後続M3-C1の最小PPR補足でfrozen saved-state producer-form replayだけを8/8閉じた |
-| P19-L（完了） | localized continuous-path applicability certificate | integrator-owned dense RK4 pathとlocal cell rangeで元のfixed-step endpointを変えずに証明する。actual `model_applicability`と`indeterminate_applicability_certificate`を分離した。M3-C1 event v14はsupport/applicability/reintegration authorityをglobalに維持したまま`rk4_dense` event queryだけcurrent dense boundへ狭めた。event v15は同じauthorityと意味論を維持してroundoff認証を強化し、現行event v16はRK4位置Bernstein制御点のfacet half-space内包を証明できる候補だけをclearする |
+| P19-L（完了） | localized continuous-path applicability certificate | integrator-owned dense RK4 pathとlocal cell rangeで元のfixed-step endpointを変えずに証明する。actual `model_applicability`と`indeterminate_applicability_certificate`を分離した。M3-C1 event v14はsupport/applicability/reintegration authorityをglobalに維持したまま`rk4_dense` event queryだけcurrent dense boundへ狭めた。event v15は同じauthorityと意味論を維持してroundoff認証を強化し、event v16はRK4位置Bernstein制御点のfacet half-space内包を証明できる候補だけをclearした。現行event v22はこのcertificateを維持し、有限半径material contact・同時incident facet集合・periodic center crossingを同一のfirst-event順序で扱う |
 | M3-C1（Case-A 100 nm anchor完了） | 12 Brownian-off deterministic companion | frozen saved-state 8/8、cross-representation 6/6 FAIL、common-P1 pre-event 9/9 PASS、field表現差局在化、first material-stick 20/20＋prefix 9/9 PASSを別statusで完了。v14 solver-only 3刻みは自己収束PASS、全3量`ORDER_EVALUATED`。限定anchorをnative-field parity・物理妥当性へ昇格しない |
 | M3-C1（100 nm・30 ms candidate-first characterization完了） | Case A/P Brownian-off candidate v3 | candidate固有の`h,h/2,h/4`自己収束を主要gateとして両case PASS。保存COMSOLはfixed RK4 10 us・Brownian-on・native-fieldの単一runなので`CHARACTERIZED`だけとし、刻み模倣やpathwise合否に使わない |
 | P18-H（完了） | producer-neutral terminal hold | 解析・resume・Brownianを含む公開回帰をPASS。既存hash固定Freeze referenceへのcandidateはCOMSOL再実行なしで15/15 PASS。力なしnormal-impact意味だけを認定し、full physicsやgrazing/cornerへ一般化しない |
@@ -662,8 +707,14 @@ stochastic caseでは独立seed ensembleへ進む。
 各該当gateの前提である。
 
 B03 coreの受入はCOMSOL再実行に依存せず、定数係数OUのmean/full covariance、noise-offの2次収束、
-manufactured charge-electricのweak mean観測次数`>=0.9`、RZ axis restart、tree-depth first-passage、
+manufactured charge-electricのnoise-zero決定論極限の観測次数`>=0.9`、RZ axis restart、tree-depth first-passage、
 slab/output/checkpoint identityで閉じる。一般state-dependent SDEのstrong orderやweak 2次を主張しない。
+noise-zero coupling試験は平均方程式の決定論極限を検証する。noise振幅やnoiseにより変位した位置での
+field評価を独立に認証する証拠ではない。公開定係数OU scenarioの期待共分散はproduction式を使わず、
+既存Green-kernel quadrature oracleを共用する。D1では時間線形γ(t),u(t)と位置依存u_x=-3xの公開実noise計算を
+各16,000粒子・32 macroで独立mean/full covarianceへ照合した。noise変位をfield評価へ使わない誤りを統計幅で
+識別するが、この固定resolutionの精度を一般可変係数SDEの弱収束次数へ昇格させない。
+連続first-arrival CDFも別の検証scopeである。
 これらを完了してB03をcloseした。将来COMSOLのstochastic比較を再実行する場合は、charge-stable couplingとdurable I/O
 cadenceを先に閉じ、同じ物理・field・確率意味を持つ独立seed cohortまたは事前登録した同等confidence budgetを作る。
 単一seed軌道をB03 coreの正解にしない。
@@ -810,16 +861,43 @@ accepted RK stage、Freeze/Disappear、Brownianを認定しない。
 
 通常の一比較で残す成果物は次の四つに限定する。
 
-- `comparison_manifest.json`：入力hash、model revision、field表現、許容帯、四つの必須判断と適用範囲
+- `comparison_manifest.json`：入力hash、model revision、field表現、比較質問、許容帯、四つの必須判断と適用範囲
 - `critical_probes.parquet`：固定した少数点の初期条件、原始場、各力、電荷右辺
 - `trajectory_events.parquet`：共通出力時刻の状態、最初のboundary event、自己収束結果
-- `comparison_summary.json`：合否、最初の不一致、認定範囲、`NOT_TESTED/NOT_APPLICABLE`項目
+- `comparison_summary.json`：質問別の合否、最初の不一致、認定範囲、`NOT_TESTED/NOT_APPLICABLE`項目
 
 Brownianを比較する時だけ`ensemble_metrics.parquet`を追加する。最初の不一致をこの情報だけで所有moduleへ局在化できない場合だけ、
 該当粒子のstage probeまたは詳細field probeを一時生成する。性能成果物、全粒子full trace、巨大診断reportはこの比較成果物へ
 含めない。R-Z軌道図は説明用に生成できるが、図の重なりをPASS authorityにしない。
 
 ## 11. 完了条件
+
+以下のanchor closeoutは、その時点の登録revisionと保存referenceに限定した履歴である。2026-10-09のC2/C3 binding改修後に新しく比較する場合は、現行consumerがsource model、canonical field、実receipt集合に結び付くschema-2 preflightを再検査する。履歴PASSを、新しい共通β・軸設定のensemble認証へ引き継がない。
+
+今回の[現行RZ境界microcase](solver/evidence/m3c0/critical_axis_native_2026_10_09_v1/README.md)は、force-freeのsurface departure、単一specular hitと残時間、axis passageについて132/132 gateを合格した。
+[初期Case-P限定probe](solver/evidence/m3c2/actual_binding_probe_2026_10_09_v1/scoped_probe_receipt.json)の単位/wrapper未解決は、
+後続の[現行native closeout](solver/evidence/comsol_binding_recert_2026_10_09_v1/native_unit_and_completion_closeout.json)で別scopeとして解消した。
+実controlはInterpolation.importDataによるargument unit消去を観測し、import後のunit再設定でβ kg/sとμ kg/(m*s)を確認した。
+正常なkeep/remove/return-model controlでも.class.statusがErrorになるprofileでは、この値を正常完了のauthorityにしない。
+実native controlが正しいrun_passを出力後throwしてexit0となる場合にも、現行wrapperはfatal logで拒否する。
+成功した各campaignは一意completion record、native成果物、設定/入力/source hash、正規化を追加検証する。
+source MPHはloadCopy/-nosaveでhash不変である。
+
+現行C3は明示axis-odd Ω補正後の共通P1、共有Z0、Brownian-off、100 nm・287粒子・30 msで、両実装3刻み収束と141 stick eventを
+[固定条件評価](solver/evidence/comsol_binding_recert_2026_10_09_v1/c3_axis_normalized_after_projection_evaluation.json)でPASSした。
+元のcandidate event semantic欠落によるBLOCKEDとraw結果は保持し、ID8→grounded_wallのreporting-only再projection receiptを別途結合した。
+状態の直接差の一部は絶対floorだけでは不合格であり、合格は事前登録した4×fine-pairの経験的数値感度幅を使う。これは厳密誤差上限ではない。
+同一fine solveの保存common-active stateではnative named total Ftr/FtzをN単位で実観測し、独立成分和とrelL2 7.83e-17で一致した。
+configured formula診断とは別証拠であり、個別native force、auxq RHS、全内部stageのassembly認証はNOT_TESTEDのままである。
+Freeze/Stickの保持終端IDはcontrolで観測できるが、Disappear ID/原因とescapedの意味境界event一致は未認証である。
+現行C2は独立監査済みpilot screeningとpost-pilot設定選択を経て、両anchorで未使用native32+candidate32seedを完了した。
+[Case-A final](solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_final_evaluation/evaluation_manifest.json)と
+[Case-P final](solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_final_evaluation/evaluation_manifest.json)は登録人口gateをPASSした。
+終端曲線の同時信頼上限はA/P `0.040128262937/0.035010667118`（上限0.05）、RZ/fate TVは`0.130735400519/0.129537665328`（上限0.15）である。
+alpha/seed/bin/許容幅は結果後に変更せず、独立監査は128 CSV・4,445,056行の人口再集計と3,904 expected/observed bindingを確認した。
+全64 native replicaの実numeric seed、20 µs step、SI time unit、UserDefined getterを確認した。これは固定source・一方向背景・粒子間非相互作用と標準PRNG sampling条件付きの有限algorithm人口同等性である。
+121保存時刻をsample数に乗算しない。Case-Pは全9184 unitがactiveなのでwall lawは未試験、Case-AのDisappearは観測status/time人口だけで原因・IDを認証しない。
+continuous SDE bias、OU noise time-law、pathwise一致、個別native contribution/auxq assembled RHS、native FE/物理真値へ拡張しない。
 
 2D比較の終了判断は§1.1の四つの必須判断と五つの終了条件だけで行う。現在の100 nm common-P1
 Case-A/Case-P anchorは、その限定scopeについて`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。aggregate three-current productionと
@@ -828,6 +906,11 @@ critical boundary microcaseも完了した。Case-P派生三電流比較はcommo
 共通有限stateの`r,z,Z`、共通active stateの`v`、141 event/fate identityをすべてPASSした。
 元Case-P二電流anchorとは異なる任意物理なので終了条件から分離し、普遍的COMSOL同等性や物理model validationへ拡張しない。
 したがってP21と明示scopeの2D benchmarkは`CLOSED_ACCEPTED_WITH_LIMITATIONS`、`2D_CRITICAL_VV_COMPLETE`である。
+
+追加のM3-XY closeoutでは、COMSOL 6.4で七つの独立Cartesian XY意味caseを各3刻み、計21 run実行し、
+ballistic、定電場、線形drag、surface departure、specular、Stick、Freeze/holdについて定式化・場・境界/初期条件・軌道を
+すべてPASSした。別のline2円近似ではfirst-hit時刻/点が約2次、法線/反射速度が約1次で収束した。
+これは基礎意味とstraight-facet近似の収束を閉じる証拠であり、native FEや任意COMSOLモデルの一般同等性へ拡張しない。
 
 性能、全12 package、追加粒径、第2 ion-drag、native-field、3D、時間依存場はこの終了条件に含めない。詳細Gate、内部step probe、
 多数の統計表は、四つの必須判断のどこで差が始まるか不明な場合だけ使用し、通常比較の常設要件やsolver coreの依存物にしない。

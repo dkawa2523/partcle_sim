@@ -236,6 +236,7 @@ def _repeat_source(source: RealizedTableSource, count: int) -> RealizedTableSour
         charge_number=scalar(source.charge_number),
         mass_kg=scalar(source.mass_kg),
         drag_diameter_m=scalar(source.drag_diameter_m),
+        contact_radius_m=scalar(source.contact_radius_m),
         electrostatic_radius_m=scalar(source.electrostatic_radius_m),
         displaced_volume_m3=scalar(source.displaced_volume_m3),
         model_weight=scalar(source.model_weight),

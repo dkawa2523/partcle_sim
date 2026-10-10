@@ -10,12 +10,14 @@ COMSOL_ROOT = Path(__file__).resolve().parents[1]
 SOLVER_ROOT = Path(__file__).resolve().parents[4]
 CONFIG_PATH = COMSOL_ROOT / "cases" / "m3c_critical_boundaries_v1.json"
 EVIDENCE_ROOT = SOLVER_ROOT / "evidence" / "m3c0" / "critical_boundaries_v1"
-REGISTERED_SOURCES = {
+UNCHANGED_REGISTERED_SOURCES = {
     "config": CONFIG_PATH,
-    "evaluator": COMSOL_ROOT / "evaluate_m3c_critical_boundaries.py",
     "java": COMSOL_ROOT / "comsol" / "RunM3CCriticalBoundaries.java",
     "runner": COMSOL_ROOT / "run_m3c_critical_boundaries.ps1",
 }
+# The accepted v1 artifact records the staged pre-schema-v2 evaluator. The
+# current v2 reproducer is tested independently and must not rewrite that proof.
+HISTORICAL_EVALUATOR_SHA256 = "6e217a55132817b014b4a7154584304424af4b4cb48e4e48765fbdb82361addc"
 
 
 def _sha256(path: Path) -> str:
@@ -28,7 +30,10 @@ def test_compact_evidence_is_bound_to_registered_sources_and_gates() -> None:
     with (EVIDENCE_ROOT / "gates.csv").open(newline="", encoding="utf-8") as stream:
         gates = list(csv.DictReader(stream))
 
-    source_hashes = {name: _sha256(path) for name, path in REGISTERED_SOURCES.items()}
+    source_hashes = {
+        **{name: _sha256(path) for name, path in UNCHANGED_REGISTERED_SOURCES.items()},
+        "evaluator": HISTORICAL_EVALUATOR_SHA256,
+    }
     assert manifest["comsol_provenance"]["staged_sources"] == source_hashes
     assert manifest["configuration_sha256"] == source_hashes["config"]
     assert manifest["evaluation_id"] == config["evaluation_id"]

@@ -151,8 +151,8 @@ select = [
 標準commandは次である。
 
 ```console
-uv run --locked ruff format --check src tests tools
-uv run --locked ruff check src tests tools
+uv run --locked ruff format --check src tests tools scripts examples
+uv run --locked ruff check src tests tools scripts examples
 ```
 
 開発者がformatを適用する時だけ次を使う。
@@ -303,8 +303,8 @@ Radon CLIには本方針の数値thresholdをそのままexit codeへする機�
 
 ```console
 uv lock --check
-uv run --locked ruff format --check src tests tools
-uv run --locked ruff check src tests tools
+uv run --locked ruff format --check src tests tools scripts examples
+uv run --locked ruff check src tests tools scripts examples
 uv run --locked pyrefly check --summarize-errors
 uv run --locked lint-imports
 uv run --locked python scripts/check_complexity.py
@@ -312,12 +312,19 @@ uv run --locked pytest tests/verification tests/scenarios -q
 ```
 
 このcommand列を包む独自runnerは作らない。CI jobにそのまま記載し、開発者も同じcommandを使う。
+PowerShellの各gate stepは一つのnative commandで終了させる。複数commandをまとめて後続成功で
+失敗exit codeを上書きしない。Quick Start、wheel build、clean runtime同期・install・smokeもstepを分離する。
 
 ### 7.2 main/release
 
 - `solver-release.yml`：Windows/Linuxで上記標準gate、warm P14 smoke、wheel、runtime-only clean install、三公開API smoke。
+- license・外部dataset不要のadapter、builder、field preprocessor、meaning/boundary照合、曲面収束、F02製造入力試験も
+  同じCIで検査する。全COMSOL tools試験は履歴assetを保持するlocal gateとし、asset不在をskipで成功へ変えない。
+- 0.2.0のclean installは`uv run --locked python -m tests.release_smoke --wheel <wheel> --json <receipt>`で、
+  全production sourceのsource/wheel/installed SHA-256、README本文とwheel/installed METADATAの一致、runtime-only環境、三公開API、console/module CLIを照合する。
+  wheel SHAとlock SHAをreceiptへ保存し、両OSの既存workflow artifactへ結合する。ローカルWSL/Linux検証とremote CI実行は別の証拠である。
 - release/manual：cold JIT、failure injection、10^4/10^5/10^6粒子の正式証跡。共有runnerの通常CIへ重いmatrixを重複させない。
-- COMSOL比較：`tools/vv/comsol`の外部V&V。core PRの常時gateにはしない。
+- 実COMSOL比較：`tools/vv/comsol`の外部V&V。licenseを要する実solveはcore PRの常時gateにはしない。
 
 性能は共有runnerの絶対秒数だけでfailさせない。同一hardware、同一case、複数回median、peak memory、
 event/result identityを記録する。

@@ -62,16 +62,104 @@ uv run --locked python tools/vv/comsol/evaluate_dataset.py `
   --model-audit-log evidence\m3v\comsol_model_inventory.jsonl
 ```
 
-The small formula-replay and reduced-field comparison tests are external-tool
-tests and are deliberately excluded from the core solver PR suite:
+The complete external-tool suite includes formula checks, synthetic canonical
+fixtures, and historical evidence audits. Run it locally with the reference
+assets required by the case configurations:
 
 ```powershell
 uv run --locked python -m pytest tools/vv/comsol/tests -q
 ```
 
-Run them when this evaluator, its configuration, or the reference formula
-replay changes. They use synthetic arrays and do not require COMSOL or
-`model_dataset/`.
+Run the relevant modules when an evaluator, configuration, or reference
+formula replay changes. No test in this command performs a licensed COMSOL
+solve. Several modules nevertheless require historical metadata, templates,
+or tables in `model_dataset/` and local `evidence/`; these assets are not all
+tracked in Git. The complete suite is therefore an asset-dependent local
+gate. The portable CI subset uses synthetic temporary inputs and tracked
+source/configuration files; see [the external-tools index](../README.md).
+Neither suite certifies native-model agreement.
+
+## Generic meaning preflight
+
+Run `meaning_preflight.py` before writing a case-specific exporter or comparing
+numbers from an unfamiliar MPH. It consumes a producer-neutral JSON inventory;
+it does not infer physics from COMSOL feature tags, import COMSOL, or import the
+solver core:
+
+```powershell
+uv run --locked python tools/vv/comsol/meaning_preflight.py `
+  path\to\semantic_inventory.json `
+  --output path\to\new_preflight_directory
+```
+
+`source` must identify the model SHA-256, exact COMSOL version, component,
+study, solution, and dataset. Producer-specific extra provenance may remain in
+that mapping.
+
+Current inventories use `schema_version: 2`; declaration-only version 1 cannot
+certify a current comparison. The `layers` mapping has seven fixed keys: `coordinate_dof`, `formulation`,
+`field_representation_owner_recovery`, `source`, `boundaries`, `models`, and
+`integration`. Each selected inventory item records an `id`, `scope`
+(`required`, `excluded`, or `unresolved`), its source and canonical meanings,
+its `mapping` (`direct`, `adapter`, `unsupported`, or `unresolved`), an optional
+adapter action, evidence, a `binding` list, and a reason. Each binding contains
+`expected` and `observed` references with `path`, `sha256`, and an RFC 6901 JSON
+`pointer`. Paths resolve relative to the inventory. The checker reads both
+artifacts, verifies their hashes, and compares the selected values and JSON
+types exactly. Evidence strings are annotations; an empty binding cannot make
+a required direct mapping supported. Missing files, mismatches, nonfinite JSON,
+and status declarations, including nested wrappers, stop before publication.
+The tool derives only these four
+classifications:
+
+- `SUPPORTED`: the required meaning is canonical and its selected artifact
+  values match the locked expectation;
+- `ADAPTER_REQUIRED`: the meaning is explicit but an external conversion,
+  realization, or recovery step remains;
+- `NOT_APPLICABLE`: the item is excluded from the registered scope or a
+  required feature has no supported canonical counterpart;
+- `AMBIGUOUS`: ownership, meaning, or evidence is unresolved. A missing layer
+  is ambiguous, never silently irrelevant.
+
+The output directory is no-clobber and contains `comparison_conditions.json`
+and `comparison_summary.json`. Both always keep two questions separate:
+
+1. `same_canonical_field_solver_parity` requires the reference and candidate
+   to name the identical canonical field identity. It excludes field
+   production, import, and recovery error.
+2. `native_fe_end_to_end_reproduction` requires a COMSOL-native FE reference,
+   a canonical candidate field, and explicit adapter lineage. Its result
+   includes field representation and import/recovery error.
+
+The first question excludes the `field_representation_owner_recovery` layer
+and instead requires identical canonical field identities. The second question
+includes all seven layers.
+
+Each question has its own `classification`, `outcome`, evidence, and allowed
+claim. A `PASS` or `FAIL` outcome is rejected unless that question's condition
+is `SUPPORTED`; the two questions cannot share one aggregate error number.
+Exit code zero means every requested question is independently `SUPPORTED`;
+an unrequested question does not block it. Other requested-question states
+return code 2 after writing the reports.
+
+Hash and value equality establish artifact binding. The producer owns native
+readback authenticity, and the scientific evaluator owns numerical probes and
+tolerances. This checker does not turn a declared `PASS` into an observation or
+certify an unexecuted trajectory, force assembly, or physical model.
+Current comparison consumers call `require_supported_comparison` on a
+hash-bound inventory reference. It reopens the inventory and selected artifacts
+and requires the named question to be supported, rather than trusting a saved
+summary. Current candidate execution cannot gain a new parity verdict merely
+by pairing with a historical COMSOL participant.
+
+Terminal boundary semantics use `boundary_response_mapping.py`. Actual native
+boundary IDs and response settings are preferred. With no observed IDs, a
+terminal action can identify only a unique matching semantic group, after other
+terminal causes have been excluded and the actual response map is complete.
+A partial map cannot establish uniqueness by dropping unknown or overlapping
+features. Mixed groups, unknown IDs, action mismatch,
+or unexcluded causes remain `AMBIGUOUS`; the axis is not inferred to be a wall
+from a lifecycle code.
 
 ## Deterministic matched-case trajectory slice
 
@@ -100,12 +188,11 @@ The first matched companion is deliberately narrower:
 This does not redefine the production physics catalog. It isolates the first
 layer at which the two independently implemented calculations diverge.
 
-Two questions are kept separate:
-
-1. **native-input reproduction** asks whether an independently exported field
-   bundle reproduces COMSOL's native finite-element field; and
-2. **integrator/physics parity** asks whether both solvers advance the same
-   field interpolant and force law with the same RK4 step.
+Two questions are kept separate. `same_canonical_field_solver_parity` asks
+whether both solvers advance the identical canonical field and matched model
+meaning. `native_fe_end_to_end_reproduction` keeps COMSOL's native
+finite-element field and therefore includes field production/import/recovery
+error. A metric from one question is never reported as the answer to the other.
 
 The native-field companion is reproducibly generated by:
 
@@ -329,7 +416,7 @@ artifacts.” COMSOL and candidate time-step convergence, field/export
 uncertainty, and boundary-event convergence remain separate accuracy evidence;
 absent evidence stays `NOT_TESTED`.
 
-## F02 field-production closeout
+## F02 historical field-production closeout and schema-v2 fixture
 
 F02 is a separate external integration track. It converts one provider-specific
 mixed-mesh CSV package to canonical P1, runs the first-party reduced
@@ -339,7 +426,9 @@ solver. Neither the adapter nor this comparison module is imported by the
 solver core.
 
 After running the adapter and builder commands documented in their READMEs,
-run the descriptive field comparison from the solver directory:
+the following is the regeneration workflow from the solver directory. All
+output and report paths must be absent; the tools do not overwrite artifacts.
+Executing the schema-v2 commands does not by itself promote a new F02 closeout.
 
 ```powershell
 $reference = "../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction"
@@ -349,28 +438,42 @@ uv run --locked python tools/vv/comsol/compare_reduced_fields.py `
   "$reference/config/background_field_column_dictionary.csv" `
   _out_f02_acceptance/field_comparison.json `
   --coordinate-tolerance-m 1.5e-14
+uv run --locked python tools/vv/comsol/prepare_f02_fixed_electric_case.py `
+  _out_f02_acceptance/case_a_fields.h5 `
+  _out_f02_acceptance/case_a_fields_with_source_v2.h5 `
+  --report _out_f02_acceptance/source_report_schema_v2.json
 uv run --locked chamber-particles check tools/vv/comsol/cases/f02_fixed_electric.yaml
 uv run --locked chamber-particles run tools/vv/comsol/cases/f02_fixed_electric.yaml `
   -o _out_f02_acceptance/fixed_electric_result
 uv run --locked chamber-particles inspect _out_f02_acceptance/fixed_electric_result
 ```
 
-The accepted representative run has 1,987 nodes and 3,779 P1 cells. The
-builder used 1,826 free nodes, 2,821 total linear iterations, final relative
-residual `1.8441e-13`, and charge-balance error `5.8498e-21 C`. The trajectory
-smoke released 32 particles from the wafer, completed 10 macro steps and three
-frames (96 rows), and produced no wall or failure event.
+The historical `f02_closeout_v1` representative run used 1,987 nodes and 3,779
+P1 cells. Its builder used 1,826 free nodes, 2,821 total linear iterations,
+final relative residual `1.8441e-13`, and charge-balance error `5.8498e-21 C`.
+That historical trajectory smoke used the former schema/source path, completed
+10 macro steps and three frames (96 rows), and produced no wall or failure
+event.
+
+The schema-v2 fixture now writes 32 explicit equal-revolved-area wafer rows,
+including each facet, strict-interior facet coordinate, velocity, release time,
+and particle properties, to a new canonical HDF5 file. The fixture owns new
+provenance linking the input content/provenance hashes and realization policy.
+Fixture generation and `chamber-particles check` have been exercised, but the
+schema-v2 trajectory has not received a formal F02 rerun or closeout. It must
+not inherit the v1 trajectory result or acceptance status.
 
 Field norms use `2 pi r` axisymmetric lumped P1 volume weights. Shared boundary
 corners are reported separately from exclusive group nodes. This is a
 same-exported-node descriptive comparison, not a pass/fail fit to COMSOL;
 independent mesh convergence remains `NOT_TESTED_SINGLE_REFERENCE_MESH`.
 Trajectory parity and COMSOL `Freeze` parity are not established. In
-particular, the unexercised `gas_inlet: escape` law in the smoke case is not a
-translation of COMSOL `Freeze`. Durable hashes and the explicit coverage
-matrix are in `evidence/f02/f02_closeout_v1.json`.
+particular, the unexercised `gas_inlet: escape` law in the historical smoke case
+is not a translation of COMSOL `Freeze`. The immutable historical hashes and
+coverage matrix are in `evidence/f02/f02_closeout_v1.json`; they certify only
+the v1 artifacts named there, not the schema-v2 fixture.
 
-The complete focused external-tool gate is:
+The focused external-tool test gate is:
 
 ```powershell
 uv run --locked python -m pytest `
@@ -981,12 +1084,70 @@ current status by the completed final campaign below.
 
 ## M3-C2 Case-A 100 nm final campaign
 
+The numerical closeouts below are immutable historical evidence. New current
+comparisons require the hash-bound source/model/field/actual-receipt association
+described in Generic meaning preflight. Current recertification is recorded in
+[`../../../evidence/comsol_binding_recert_2026_10_09_v1/`](../../../evidence/comsol_binding_recert_2026_10_09_v1/README.md).
+Historical scientific PASS does not certify a changed producer, axis recovery,
+or post-interpolation drag/Brownian coefficient.
+
 The validated runners now execute the common-P1 companion without changing the
 production solver core. COMSOL uses `ModelUtil.loadCopy`, `-nosave`, `-error on`,
 an isolated preference directory, one process, `UserDefined` Brownian mode, and
 `bf1.i` as the replica-seed authority. Every final replica is checked to ensure
 that only `fptas` is enabled in the particle study. The candidate runner uses the
-production B03 engine and rejects legacy or unregistered final settings.
+production Brownian engine and rejects legacy or unregistered final settings.
+Runner v6 treats the recipe's `physics.noise_revision` as execution authority
+and accepts only `inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`. It
+checks that field before reading the locked contract/input or creating output,
+then copies the same value into generated cases and preparation/final manifests.
+The checked-in M3-C2 recipe JSON files remain immutable historical v1 snapshots;
+they are not executable inputs to runner v6 and must not be edited in place. A
+future run needs a new recipe file that explicitly declares v2 and uses current
+case-format-3 inputs and a format-3 template. The evaluator
+binds historical runner v4 to the historical RZ revision and runners v5/v6 to v2,
+while rejecting a mismatched or mixed cohort. Historical runner-v4 campaigns
+retain evaluator revision v5 only in their immutable evidence. Every new
+revision-5-policy evaluation emits evaluator revision v6, including a rerun of
+a historical cohort, so the changed acceptance contract cannot reuse a
+hash-locked historical tool identity. Historical recipe JSON and evidence
+hashes are not rewritten.
+
+For a current candidate replay, `execution.expected_executor` records exactly
+`source_sha256`, `uv_lock_sha256`, `python_version`, and `distribution_version`.
+The supported execution form is the installed uv source project. The source
+digest covers the sorted relative names and raw bytes of all package `.py`
+files, including uncommitted edits; package version or Git HEAD alone is
+insufficient. Print that record before registering a new recipe:
+
+```powershell
+uv run --locked python tools/vv/comsol/run_m3c2_candidate_pilot.py executor-identity
+```
+
+`execution.expected_revisions` names case/result schema and result, engine,
+compiled tile, physics catalog/runtime, RNG, boundary, Brownian RNG, joint OU,
+OU split, Brownian composition, charge-dense, and tree-policy revisions.
+`prepare` verifies input hashes, strict YAML syntax, current template format,
+the installed identity, and static loading of the template and generated
+level settings before creating its output directory. YAML duplicate keys at
+any depth and merge keys are rejected by the core `yaml_input.parse_document`
+owner. `run-cell` accepts only a v6 preparation and rechecks the installed
+identity before execution and after opening the result. Its receipt records
+the actual manifest revisions after the ordinary
+`load_case -> simulate -> open_result` path and rejects a mismatch before
+writing derived projections.
+
+`recover-cell` and `renormalize-cell` do not run the solver and do not require
+the current source digest to equal the original executor. They use the
+original prepared lock and saved manifest identity/revisions, current reader
+compatibility, and projection rules. Renormalization verifies the original
+artifact hashes and preserves them in the supersession record. New receipts
+name runner v6 and retain `source_runner_tool_revision`. Historical input and
+normalized evidence remain hash-audit material; their old canonical schema is
+not passed to the current input reader, and historical preparations never
+authorize a new `simulate`. Unsupported saved-result schemas still fail in
+the current result reader. These checks establish replay integrity, not a
+COMSOL or physical-accuracy certification.
 
 Policy revision 3 treats the disjoint pilot seeds only as configuration
 screening. It selected COMSOL classical RK4 at 20 us and candidate 20 us with
@@ -1071,6 +1232,12 @@ checks against the analytic piecewise trajectories. The largest direct
 COMSOL/API position difference was `1.61339e-17 m`. The durable authority is
 [`../../../evidence/m3c0/critical_boundaries_v1/`](../../../evidence/m3c0/critical_boundaries_v1/README.md).
 
+That v1 evidence remains an immutable historical snapshot. The current
+reproducer writes the surface-start particle as a canonical realized surface
+row (`facet_id` plus a strict-interior facet parameter); its YAML contains only
+the standard `type: surface` / `table:` reference. A rerun must use new output
+and evidence destinations and does not rewrite the v1 artifact.
+
 This result does not cover grazing or corners, multiple material hits,
 probabilistic laws, finite-radius contact, forces, fields, or native-field
 equivalence. It is the single boundary artifact for this closeout, not the
@@ -1108,3 +1275,109 @@ the explicitly scoped two-current common-P1 2-D benchmark are
 not certify native FE equivalence, Brownian pathwise agreement, species-resolved
 physics, arbitrary geometries/conditions, physical-model validity, or universal
 COMSOL equivalence.
+
+## Current native binding and batch completion
+
+`CommonP1Epstein.java` forms the single coefficient from interpolated density
+and temperature. The native metadata control observed that `importData()` clears
+previous argument units. C2/C3 set function and argument units after import,
+then preserve actual API getter values and independently evaluate initial
+coefficient/FDT numbers. SI metadata and numerical agreement are separate facts.
+
+For the registered COMSOL 6.4 class-input profile, `.class.status=Error` also
+appears for successful empty-model keep/remove and returning-model controls.
+It remains raw evidence. The wrapper requires process completion, no fatal
+native log, exactly one registered completion record, the expected native
+artifacts, unchanged source/request/producer hashes, and successful normalization.
+A real adversarial class printed a valid completion record and then threw;
+COMSOL returned exit 0, and the current fatal-log guard rejected it. The
+[compact native closure](../../../evidence/comsol_binding_recert_2026_10_09_v1/native_unit_and_completion_closeout.json)
+binds the controls and successful source-preserving campaigns. This does not
+infer COMSOL's internal class-status implementation.
+
+Actual boundary response and canonical geometry meaning remain separate.
+Retained Freeze/Stick entities can be exported with `bndenv(dom)`; the native
+Disappear control loses that ID. A `terminal_status` row may therefore have
+an empty semantic group. The population evaluator consumes its observed
+status/time without assigning an inlet/pump cause; `terminal_boundary` rows
+still require their semantic group. Population gates do not certify semantic
+boundary-event parity.
+
+Choose canonical `contact_geometry` from the actual comparison profile. Its
+`center` option preserves body/drag/electrostatic radius and changes the contact
+detector only. Do not infer this choice from Stick/Freeze/Bounce. Current C2/C3
+canonical sources have zero contact radius, so their frozen existing settings
+are equivalent and are not modified during the campaign.
+
+Current C3 candidate event writing uses actual boundary ID plus the canonical
+group map. `reproject-events` repairs only saved reporting metadata and writes
+a separate raw-result/input/original-receipt/producer hash receipt; it never
+claims that the original executor used repaired code. Its evaluator verifies
+that receipt before selecting the repaired CSV. Native total Ftr/Ftz from the
+same fine solve is separate from configured per-force reconstruction and does
+not certify individual contributions, auxiliary-charge assembly, or all stages.
+
+Current C2 policies use fresh independent pilot/final seed arms. Four-seed
+screening selects the first passing macro level in the registered descending
+step order. Final Hoeffding/TV gates assume standard PRNG sampling, particle
+stream separation, a fixed source, and one-way noninteracting dynamics. They
+count 32×287 units and apply a union bound across 121 times. The two anchors
+share alpha 0.05; each receives 0.025, split equally between terminal curves
+and the 83-category RZ/fate gate. A failed upper-bound gate means registered
+equivalence was not established. Continuous OU noise time-law and continuous
+discretization bias remain separate, unproved scopes.
+
+The current registered CaseA and CaseP confirmation completed all 128 fresh
+final seed runs. Both fixed population gates passed: terminal simultaneous
+bounds are 0.040128262937 / 0.035010667118 against 0.05, and RZ/fate TV bounds
+are 0.130735400519 / 0.129537665328 against 0.15. Independent aggregation of
+128 CSV files agrees with the public evaluator. Every native replica has a
+unique actual readback with the requested seed, 20 microsecond SI timestep,
+and UserDefined RNG getter. The
+[current evidence](../../../evidence/comsol_binding_recert_2026_10_09_v1/README.md)
+preserves original metadata views and hash tables alongside explicit meaning
+attachment receipts. CaseP has no observed terminal events; CaseA Disappear
+is only a population status/time observation. No boundary cause is inferred.
+
+## Cartesian XY meaning suite and curved-wall line2 convergence
+
+`run_xy_minimal_suite.ps1` creates seven fresh, unsaved COMSOL 6.4 models and
+compares them with public-API candidate runs and independent analytic motion.
+The cases isolate ballistic motion, constant electric acceleration, linear
+drag, exact surface-origin departure, specular reflection, Stick, and
+Freeze/`hold`.  Each case runs fixed RK4 steps of 20, 10, and 5 ms.  The runner
+binds all raw CSV hashes to the registered Java, evaluator, runner, compiled
+class, COMSOL version, and 21 configuration records before a scientific PASS
+can be issued.
+
+```powershell
+uv sync --locked
+.\tools\vv\comsol\run_xy_minimal_suite.ps1 `
+  -OutputDirectory <fresh-output-directory>
+```
+
+The checked run is
+[`../../../evidence/xy/cartesian_minimal_suite_v1/`](../../../evidence/xy/cartesian_minimal_suite_v1/evaluation/README.md).
+All four meaning judgments pass.  The linear-drag candidate errors converge at
+observed order 4.02 for position and 4.94 for velocity; at 5 ms the direct
+COMSOL/candidate differences are below `3.0e-15 m` and `1.0e-15 m/s`.
+COMSOL's event-coincident state export and the candidate frame use opposite
+velocity continuity at exactly 0.25 s, so that single velocity row is excluded;
+pre/post trajectory rows, terminal tails, and the candidate event payload are
+still gated.
+
+`evaluate_curved_wall_line2_convergence.py` separately compares first-hit time,
+point, normal, and reflected velocity with an analytic unit circle for
+16/32/64/128 inscribed line2 facets:
+
+```powershell
+uv run --locked python tools/vv/comsol/evaluate_curved_wall_line2_convergence.py `
+  <fresh-output-directory>
+```
+
+The checked result is
+[`../../../evidence/xy/curved_wall_line2_v1/`](../../../evidence/xy/curved_wall_line2_v1/README.md).
+Time/point converge at order 2.003, normal at 0.998, and reflected velocity at
+0.997.  These two workflows do not certify COMSOL event-table values, native
+curved elements, finite-radius contact, grazing/corner/multiple-hit cases, or
+arbitrary COMSOL models.

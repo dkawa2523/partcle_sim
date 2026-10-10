@@ -1,0 +1,59 @@
+{
+  "artifact": "v0_2_release_indexed_checkout_quality_v1",
+  "status": "PASS",
+  "recorded_at_utc": "2026-10-10T04:52:34.009Z",
+  "project_export": "solver/.artifacts/release-index-20261010/particle_platform_redesign/solver",
+  "indexed_tree_before_final_scientific_receipts": "535aaf7f6a4456be86e9aed16cd5d274192817f4",
+  "scope": "Indexed source/config/tests/tools only; no model_dataset, working-tree raw evidence or archived package.",
+  "source_normalization": {
+    "path": "reviews/v0_2_release_source_normalization_2026-10-10.json",
+    "sha256": "3f34172016ad6b60ade36dfc31b7378f327b824b3e6ea559ba330e35780710b7"
+  },
+  "static_gates": [
+    {
+      "command": "uv lock --check",
+      "exit_code": 0,
+      "output": "Resolved 24 packages in 1ms\n"
+    },
+    {
+      "command": "uv run --locked ruff format --check src tests tools examples scripts",
+      "exit_code": 0,
+      "output": "238 files already formatted\n"
+    },
+    {
+      "command": "uv run --locked ruff check src tests tools examples scripts",
+      "exit_code": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": "uv run --locked pyrefly check --summarize-errors",
+      "exit_code": 0,
+      "output": " INFO Checking project configured at `C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\release-index-20261010\\particle_platform_redesign\\solver\\pyproject.toml`\n=== Error Summary ===\nNo errors found!\n INFO 0 errors (61 suppressed, 247 warnings not shown)\n"
+    },
+    {
+      "command": "uv run --locked lint-imports",
+      "exit_code": 0,
+      "output": "=============\r\nImport Linter\r\n=============\r\n\r\n\r\n---------\r\nContracts\r\n---------\r\n\r\nAnalyzed 27 files, 50 dependencies.\r\n-----------------------------------\r\n\r\nLow-level numerics stay independent of orchestration and I/O KEPT\r\nIntegrator proposals stay independent of geometry and wall response KEPT\r\nPhysics models consume sampled primitives only KEPT\r\n\r\nContracts: 3 kept, 0 broken.\r\n"
+    },
+    {
+      "command": "uv run --locked python scripts/check_complexity.py",
+      "exit_code": 0,
+      "output": "Complexity gate passed: every function and method has CC < 16.\r\n"
+    }
+  ],
+  "portable_tools": {
+    "command": "$env:NUMBA_CACHE_DIR = 'C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/.artifacts/idxcache'; uv run --locked python -m pytest tools/comsol_adapter/tests tools/electrostatic_builder/tests tools/field_preprocessor/tests tools/vv/comsol/tests/test_meaning_preflight.py tools/vv/comsol/tests/test_boundary_response_mapping.py tools/vv/comsol/tests/test_curved_wall_line2_convergence.py tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py -q",
+    "exit_code": 0,
+    "passed": 120,
+    "output": "..................... [ 60%]\r\n................................................                         [100%]\r\n120 passed in 23.59s\r\n"
+  },
+  "first_portable_attempt": {
+    "exit_code": 1,
+    "passed": 119,
+    "failed": 1,
+    "cause": "Windows maximum path length in Numba temporary cache file under nested index export; not a numerical assertion failure.",
+    "resolution": "Same source/test/dependencies and all 120 cases rerun with shorter private NUMBA_CACHE_DIR; no production changes."
+  },
+  "core_full_suite": "Existing same-AST v46 local Windows/Linux core 847 PASS retained as historical receipt; final exact-commit Windows/Linux CI must independently pass full core suite.",
+  "publication": "NOT_YET_PUBLISHED"
+}

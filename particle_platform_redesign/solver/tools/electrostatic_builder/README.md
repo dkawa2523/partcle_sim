@@ -5,9 +5,13 @@
 engineとは独立しており、COMSOLや`model_dataset/`へ依存しません。旧workflowの`Case A`はこの利用形態を
 調べる参照名であり、設定やsolver分岐の名前ではありません。
 
-## v1の範囲
+## v2の範囲
 
-`reduced_electrostatic_builder_v1`は意図的に次へ限定します。
+`reduced_electrostatic_builder_v2`は意図的に次へ限定します。
+
+設定は`format_version: 2`を要求します。共通YAML parserは全階層の重複keyとmerge key（`<<`）を拒否するため、
+mergeを使った設定はkeyを明記して移行します。通常のaliasは利用でき、元のUTF-8 bytesのhashを保存します。
+この変更は設定解釈を一意にするもので、closureとfield semanticsの物理revisionは維持します。
 
 - `axisymmetric_rz`
 - 静的、単一gas domain
@@ -76,7 +80,7 @@ provenanceへ保存されます。
 設定は小さいstrict YAMLです。未知key、暗黙単位、既定modelは受理しません。次は全keyを示す例です。
 
 ```yaml
-format_version: 1
+format_version: 2
 input:
   data_path: thermal_flow_case.h5
   layout: plasma

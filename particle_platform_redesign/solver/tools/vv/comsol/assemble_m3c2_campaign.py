@@ -21,6 +21,8 @@ from typing import Any, Final, Literal, cast
 import numpy as np
 
 from chamber_particles.case_format import read_with_info
+from tools.vv.comsol.actual_run_receipt import observed_receipt_sha256
+from tools.vv.comsol.meaning_preflight import require_supported_comparison
 from tools.vv.comsol.normalize_m3c2_comsol_pilot import _output_times
 
 TOOL_REVISION: Final = "m3c2_campaign_assembler_v2"
@@ -47,8 +49,14 @@ LEGACY_CAMPAIGN_IDENTITY: Final = {
 }
 LEGACY_COMSOL_TOOL_REVISION: Final = "m3c2_caseA_100nm_comsol_normalizer_v2"
 LEGACY_CANDIDATE_TOOL_REVISION: Final = "m3c2_caseA_100nm_candidate_campaign_runner_v3"
-COMSOL_TOOL_REVISION: Final = "m3c2_comsol_campaign_normalizer_v4"
+COMSOL_TOOL_REVISION: Final = "m3c2_comsol_campaign_normalizer_v5"
+HISTORICAL_COMSOL_TOOL_REVISION: Final = "m3c2_comsol_campaign_normalizer_v4"
 CANDIDATE_TOOL_REVISION: Final = "m3c2_candidate_campaign_runner_v4"
+SUPPORTED_CANDIDATE_TOOL_REVISIONS: Final = {
+    CANDIDATE_TOOL_REVISION,
+    "m3c2_candidate_campaign_runner_v5",
+    "m3c2_candidate_campaign_runner_v6",
+}
 PARTICLE_IDS: Final = tuple(range(1, 288))
 PARTICLE_COUNT: Final = len(PARTICLE_IDS)
 OUTPUT_TIMES_S: Final = tuple(_output_times())
@@ -145,9 +153,9 @@ def _participant_campaign_identity(
         return dict(LEGACY_CAMPAIGN_IDENTITY)
     if comsol_value is None or candidate_value is None:
         raise ValueError("campaign identity must be present on both participant manifests")
-    if comsol.get("tool_revision") != COMSOL_TOOL_REVISION:
+    if comsol.get("tool_revision") not in {COMSOL_TOOL_REVISION, HISTORICAL_COMSOL_TOOL_REVISION}:
         raise ValueError("COMSOL participant tool revision is not supported")
-    if candidate.get("tool_revision") != CANDIDATE_TOOL_REVISION:
+    if candidate.get("tool_revision") not in SUPPORTED_CANDIDATE_TOOL_REVISIONS:
         raise ValueError("candidate participant tool revision is not supported")
     comsol_identity = _campaign_identity_record(comsol_value, "COMSOL campaign identity")
     candidate_identity = _campaign_identity_record(candidate_value, "candidate campaign identity")
@@ -651,6 +659,35 @@ def _render_participants(
     return rendered
 
 
+def require_participant_meaning(
+    comsol: dict[str, Any], candidate: dict[str, Any], comsol_root: Path
+) -> None:
+    """Bind new certification to this campaign's model, input, and actual runs."""
+    if (
+        comsol.get("tool_revision") != COMSOL_TOOL_REVISION
+        and candidate.get("tool_revision") != "m3c2_candidate_campaign_runner_v6"
+    ):
+        return
+    binding = _participant_campaign_binding(comsol, candidate)
+    model_digest = comsol.get("source_model_sha256")
+    if not isinstance(model_digest, str) or len(model_digest) != 64:
+        raise ValueError("meaning_preflight_inventory requires this run's source model SHA-256")
+    if binding is None:
+        raise ValueError("meaning_preflight_inventory requires canonical campaign binding")
+    observed = frozenset(
+        observed_receipt_sha256(replica.get("actual_run_readback"), comsol_root)
+        for level in _sequence(comsol.get("levels"), "COMSOL levels")
+        for replica in _sequence(_mapping(level, "COMSOL level").get("replicas"), "replicas")
+    )
+    require_supported_comparison(
+        comsol.get("meaning_preflight_inventory"),
+        comsol_root,
+        expected_model_sha256=model_digest,
+        expected_field_identity=binding["input_content_hash"],
+        required_observed_sha256=observed,
+    )
+
+
 def _participant_manifest_projection(
     comsol: dict[str, Any],
     candidate: dict[str, Any],
@@ -675,6 +712,7 @@ def _participant_manifest_projection(
         raise ValueError("candidate participant manifest is not complete")
     campaign_identity = _participant_campaign_identity(comsol, candidate)
     campaign_binding = _participant_campaign_binding(comsol, candidate)
+    require_participant_meaning(comsol, candidate, comsol_root)
     evaluation_policy_sha256 = _candidate_evaluation_policy_sha256(candidate, campaign_identity)
     pilot_authorization = _participant_pilot_authorization(
         comsol, candidate, campaign_identity, purpose

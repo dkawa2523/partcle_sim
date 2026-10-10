@@ -5,12 +5,15 @@ import hashlib
 import json
 import shutil
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 import yaml
+from tools.vv.comsol import run_m3c3_casep_three_current_candidate as candidate_module
 from tools.vv.comsol.evaluate_m3c3_casep_three_current import (
     COMSOL_REFERENCE_LEVELS,
+    _candidate_events_path,
     evaluate,
 )
 from tools.vv.comsol.run_m3c3_casep_three_current_candidate import (
@@ -21,11 +24,17 @@ from tools.vv.comsol.run_m3c3_casep_three_current_candidate import (
     TRAJECTORY_HEADER,
     prepare,
 )
+from tools.vv.comsol.tests.common_p1_fixture import (
+    write_current_common_p1_template,
+    write_manufactured_common_p1,
+    write_synthetic_meaning_inventory,
+)
 
 from chamber_particles import load_case
 from chamber_particles.case_format import read_with_info
 
 CONFIG = Path(__file__).resolve().parents[1] / "cases" / "m3c3_caseP_100nm_three_current_v1.json"
+SOLVER_ROOT = Path(__file__).resolve().parents[4]
 
 
 def _sha256(path: Path) -> str:
@@ -102,9 +111,47 @@ def _write_json(path: Path, value: object) -> None:
 
 
 @pytest.fixture
-def prepared_campaign(tmp_path: Path) -> Path:
+def current_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    config = json.loads(CONFIG.read_text(encoding="utf-8"))
+    repository = tmp_path / "repository"
+    solver = repository / "particle_platform_redesign" / "solver"
+    solver.mkdir(parents=True)
+    input_path = solver / "input.h5"
+    info = write_manufactured_common_p1(input_path, negative_ions=True)
+    template = solver / "template.yaml"
+    write_current_common_p1_template(
+        SOLVER_ROOT / config["candidate_template"]["solver_relative_path"],
+        template,
+        info.content_hash,
+    )
+    receipt = solver / "primitive_receipt.json"
+    _write_json(
+        receipt, {"scope": "manufactured_fixture_not_COMSOL_export", "comsol_executed": False}
+    )
+    source = repository / "identity_only_source.mph"
+    source.write_bytes(b"manufactured source identity fixture; never opened by COMSOL")
+    config["primitive_input"] = {
+        "solver_relative_path": input_path.name,
+        "sha256": _sha256(input_path),
+        "content_hash": info.content_hash,
+    }
+    config["primitive_receipt"] = {"solver_relative_path": receipt.name, "sha256": _sha256(receipt)}
+    config["candidate_template"] = {
+        "solver_relative_path": template.name,
+        "sha256": _sha256(template),
+    }
+    config["source_mph"] = {"repository_relative_path": source.name, "sha256": _sha256(source)}
+    path = solver / "campaign.json"
+    _write_json(path, config)
+    monkeypatch.setattr(candidate_module, "_solver_root", lambda: solver)
+    monkeypatch.setattr(candidate_module, "_repository_root", lambda: repository)
+    return path
+
+
+@pytest.fixture
+def prepared_campaign(tmp_path: Path, current_configuration: Path) -> Path:
     prepared = tmp_path / "prepared"
-    prepare(CONFIG, prepared)
+    prepare(current_configuration, prepared)
     return prepared
 
 
@@ -172,9 +219,56 @@ def test_evaluate_rejects_post_prepare_gate_change(prepared_campaign: Path) -> N
         )
 
 
-def test_evaluate_applies_predeclared_order_and_direct_gates(tmp_path: Path) -> None:
+def _graft_reference(root: Path, graft: str) -> None:
+    summary_path = root / "normalization_summary.json"
+    summary = json.loads(summary_path.read_text())
+    if graft in {"unknown_revision", "summary_hash"}:
+        summary["tool_revision"] = (
+            "unrecognized_revision"
+            if graft == "unknown_revision"
+            else "m3c3_caseP_three_current_comsol_normalizer_v3"
+        )
+    if graft in {"model", "field"}:
+        inventory, _ = write_synthetic_meaning_inventory(
+            root,
+            "2" * 64 if graft == "model" else summary["source_model_sha256"],
+            "sha256:" + "c" * 64 if graft == "field" else summary["canonical_input_content_hash"],
+        )
+        summary["meaning_preflight_inventory"] = inventory
+    if graft == "receipt":
+        actual = json.loads((root / "actual_binding_receipt.json").read_text())
+        actual["unrelated_run"] = True
+        _write_json(root / "actual_binding_receipt.json", actual)
+    if graft == "config_summary":
+        summary["reference_run_config_sha256"] = "0" * 64
+    _write_json(summary_path, summary)
+    if graft != "summary_hash":
+        receipt_path = root / "run_receipt.json"
+        receipt = json.loads(receipt_path.read_text())
+        if graft == "config_receipt":
+            receipt["reference_run_config_sha256"] = "0" * 64
+        receipt["normalization_summary"]["sha256"] = _sha256(summary_path)
+        _write_json(receipt_path, receipt)
+
+
+@pytest.mark.parametrize(
+    "graft",
+    [
+        None,
+        "unknown_revision",
+        "summary_hash",
+        "model",
+        "field",
+        "receipt",
+        "config_summary",
+        "config_receipt",
+    ],
+)
+def test_evaluate_applies_predeclared_order_and_direct_gates(
+    tmp_path: Path, current_configuration: Path, graft: str | None
+) -> None:
     prepared = tmp_path / "prepared"
-    prepare(CONFIG, prepared)
+    prepare(current_configuration, prepared)
     prepare_report = json.loads((prepared / "prepare_report.json").read_text())
     errors = {level: 4.0e-9 / (2**index) for index, (level, _dt_s) in enumerate(LEVELS)}
     event_errors = {level: 4.0e-7 / (2**index) for index, (level, _dt_s) in enumerate(LEVELS)}
@@ -222,6 +316,24 @@ def test_evaluate_applies_predeclared_order_and_direct_gates(tmp_path: Path) -> 
         _write_json(
             reference / "normalization_summary.json",
             {
+                "tool_revision": "m3c3_caseP_three_current_comsol_normalizer_v4",
+                "reference_run_config_sha256": prepare_report["reference_config_sha256"],
+                "source_model_sha256": json.loads(
+                    (prepared / "reference_run_config.json").read_text()
+                )["source_mph"]["sha256"],
+                "canonical_input_content_hash": prepare_report["derived_input_content_hash"],
+                "meaning_preflight_inventory": write_synthetic_meaning_inventory(
+                    reference,
+                    json.loads((prepared / "reference_run_config.json").read_text())["source_mph"][
+                        "sha256"
+                    ],
+                    prepare_report["derived_input_content_hash"],
+                )[0],
+                "actual_run_readback": {
+                    "path": "actual_binding_receipt.json",
+                    "sha256": _sha256(reference / "actual_binding_receipt.json"),
+                    "observation": "EXPORTED",
+                },
                 "status": "COMPLETE_NORMALIZED_NOT_EVALUATED",
                 "case_id": "caseP_100nm_three_current",
                 "particle_count": PARTICLE_COUNT,
@@ -237,10 +349,24 @@ def test_evaluate_applies_predeclared_order_and_direct_gates(tmp_path: Path) -> 
         )
         _write_json(
             reference / "run_receipt.json",
-            {"status": "PASS", "case_id": "caseP_100nm_three_current"},
+            {
+                "status": "PASS",
+                "case_id": "caseP_100nm_three_current",
+                "reference_run_config_sha256": prepare_report["reference_config_sha256"],
+                "normalization_summary": {
+                    "path": "normalization_summary.json",
+                    "sha256": _sha256(reference / "normalization_summary.json"),
+                },
+            },
         )
 
     output = tmp_path / "evaluation.json"
+    if graft is not None:
+        _graft_reference(references[0], graft)
+        with pytest.raises(ValueError):
+            evaluate(prepared, tuple(references), output)
+        assert not output.exists()
+        return
     evaluate(prepared, tuple(references), output)
     report = json.loads(output.read_text())
     expected_values = (
@@ -262,3 +388,70 @@ def test_evaluate_applies_predeclared_order_and_direct_gates(tmp_path: Path) -> 
     assert report["boundary_events_fine_vs_comsol"]["identity_exact_required"] is True
     assert report["candidate_fine_vs_comsol"]["lifecycle_exact"] is True
     assert report["observed_particle_speed_m_s"]["preparation_envelope_is_not_runtime_gate"]
+
+
+def test_event_projection_keeps_observed_id_groups_and_rejects_unknown_ids(tmp_path: Path) -> None:
+    meaning = tmp_path / "boundary_meaning.json"
+    _write_json(meaning, {"boundary_groups": {"8": "grounded_wall", "6": "wafer"}})
+    events = SimpleNamespace(
+        particle_id=np.array([1, 2]),
+        boundary_id=np.array([8, 6]),
+        outcome=np.array(["stuck", "stuck"]),
+        time_s=np.array([0.001, 0.002]),
+    )
+    result = SimpleNamespace(read_boundary_events=lambda: events)
+    path = tmp_path / "events.csv"
+    assert candidate_module._write_events(path, result, meaning) == 2
+    with path.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    assert [row["boundary_semantic"] for row in rows] == ["grounded_wall", "wafer"]
+    events.boundary_id[1] = 999
+    with pytest.raises(ValueError, match="no canonical semantic group"):
+        candidate_module._write_events(tmp_path / "unknown.csv", result, meaning)
+
+
+def test_reporting_reprojection_preserves_execution_and_binds_repaired_rows(
+    prepared_campaign: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    level = LEVELS[0][0]
+    cell = prepared_campaign / "candidate" / level
+    result_path = cell / "result"
+    result_path.mkdir()
+    _write_json(result_path / "run.json", {"fixture": "manufactured_not_simulated"})
+    data, _info = read_with_info(prepared_campaign / "candidate_input_three_current_z0.h5")
+    boundary_id = int(data.geometry.boundary.boundary_id[0])
+    group = data.geometry.group_names[int(data.geometry.boundary.group_id[0])]
+    events = SimpleNamespace(
+        particle_id=np.array([1]),
+        boundary_id=np.array([boundary_id]),
+        outcome=np.array(["stuck"]),
+        time_s=np.array([0.001]),
+    )
+    monkeypatch.setattr(
+        candidate_module,
+        "open_result",
+        lambda _path: SimpleNamespace(read_boundary_events=lambda: events),
+    )
+    old_events = cell / "events.csv"
+    _write_events(old_events, 0.001)
+    receipt: dict[str, object] = {
+        "status": "PASS",
+        "case_sha256": _sha256(cell / "case.yaml"),
+        "events_sha256": _sha256(old_events),
+        "event_rows": 1,
+        "result_manifest_sha256": _sha256(result_path / "run.json"),
+        "derived_input_sha256": _sha256(prepared_campaign / "candidate_input_three_current_z0.h5"),
+    }
+    receipt_path = cell / "run_receipt.json"
+    _write_json(receipt_path, receipt)
+    original_bytes = receipt_path.read_bytes(), old_events.read_bytes()
+    repair = candidate_module.reproject_events(prepared_campaign, level)
+    assert (receipt_path.read_bytes(), old_events.read_bytes()) == original_bytes
+    assert repair["candidate_simulated"] is False
+    corrected = _candidate_events_path(cell, receipt, prepared_campaign)
+    with corrected.open(newline="", encoding="utf-8") as stream:
+        assert next(iter(csv.DictReader(stream)))["boundary_semantic"] == group
+    repair["result_manifest_sha256"] = "0" * 64
+    _write_json(cell / "event_projection_receipt.json", repair)
+    with pytest.raises(ValueError, match="immutable execution"):
+        _candidate_events_path(cell, receipt, prepared_campaign)

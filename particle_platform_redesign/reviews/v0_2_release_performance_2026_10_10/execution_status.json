@@ -1,0 +1,22 @@
+{
+  "active_batch": null,
+  "active_observation": null,
+  "completed_batches": [
+    "p14_release",
+    "b03_release",
+    "p14u_release"
+  ],
+  "completion_summary_path": "completion_summary.json",
+  "completion_summary_sha256": "b52e4c38d70b490a11e59871fd5baa02d8ca4641d323b5e6a52914221e999091",
+  "coordination_note": "All three registered processes ended with exit 0 and their existing hard checks passed; raw source and recipes verified before normalization. Root actual LF source confirmation is still required before scientific requalification.",
+  "expected_performance_observations": 18,
+  "informational_only": true,
+  "last_published_at_utc": "2026-10-10T04:22:08.2351938Z",
+  "last_published_observation": "n-1000000-sample-r2",
+  "published_performance_observations": 18,
+  "separate_profile_pending": false,
+  "source_mutations_by_this_agent": 0,
+  "status": "COMPLETE_MEASURED_ENGINEERING_ONLY",
+  "timing_note": "The first 1M published output followed the last 100k output by 1255.43 seconds. This interval includes launch/warmup; precise public simulate timing is held in the driver and is not available before the final report.",
+  "updated_at_utc": "2026-10-10T04:45:45.790087+00:00"
+}

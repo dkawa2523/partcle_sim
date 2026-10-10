@@ -30,6 +30,45 @@ _DRAG_REVISION = "epstein_linear_effective_gas_sensitivity_v1"
 _THERMOPHORESIS_REVISION = "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
 
 
+def test_number_weighted_pseudogas_is_not_a_species_sum_even_at_equal_temperature() -> None:
+    number_density = 1.0e20
+    first_mass = _ARGON_MASS_KG
+    second_mass = 9.0 * first_mass
+    common = _formula_inputs(np.zeros((1, 2)))
+    common["gas_molecular_mass_kg"] = 0.5 * (first_mass + second_mass)
+    aggregate = epstein_linear_relaxation(
+        **common,
+        gas_density_kg_m3=np.asarray([number_density * (first_mass + second_mass)]),
+        delta=1.0,
+    )
+    radius = 1.0e-7
+    species_sum_beta = (
+        (4.0 * math.pi / 3.0)
+        * radius**2
+        * number_density
+        * sum(
+            mass * math.sqrt(8.0 * BOLTZMANN_J_K * 300.0 / (math.pi * mass))
+            for mass in (first_mass, second_mass)
+        )
+    )
+    aggregate_beta = aggregate.rate_s_inv[0] * 2.0e-15
+    assert aggregate_beta / species_sum_beta == pytest.approx(math.sqrt(5.0) / 2.0, rel=3.0e-15)
+    common["gas_molecular_mass_kg"] = first_mass
+    single = epstein_linear_relaxation(
+        **common,
+        gas_density_kg_m3=np.asarray([number_density * first_mass]),
+        delta=1.0,
+    )
+    exact_single_beta = (
+        (4.0 * math.pi / 3.0)
+        * radius**2
+        * number_density
+        * first_mass
+        * math.sqrt(8.0 * BOLTZMANN_J_K * 300.0 / (math.pi * first_mass))
+    )
+    assert single.rate_s_inv[0] * 2.0e-15 == pytest.approx(exact_single_beta, rel=3.0e-15)
+
+
 def test_existing_linear_drag_and_single_species_thermophoresis_stay_at_point_one() -> None:
     plan = resolve_physics_plan(
         {
@@ -92,7 +131,9 @@ def test_effective_gas_revisions_require_the_explicit_speed_ratio(
         resolve_physics_plan({"charge": {"model": "fixed"}, category: model}, "cartesian_xy")
 
 
-def test_existing_revisions_reject_a_sensitivity_limit_and_b02_rejects_effective_drag() -> None:
+def test_existing_revisions_reject_a_sensitivity_limit_and_brownian_accepts_effective_drag() -> (
+    None
+):
     old_drag = _linear_drag_model("epstein_linear_v1")
     old_drag["maximum_speed_ratio"] = 0.5
     with pytest.raises(PhysicsConfigurationError, match="keys do not match"):
@@ -108,19 +149,71 @@ def test_existing_revisions_reject_a_sensitivity_limit_and_b02_rejects_effective
             "cartesian_xy",
         )
 
-    with pytest.raises(PhysicsConfigurationError, match="epstein_linear_v1"):
+    plan = resolve_physics_plan(
+        {
+            "charge": {"model": "fixed"},
+            "drag": _effective_drag_model(),
+            "noise": {
+                "model": "inertial_langevin_fdt",
+                "revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2",
+                "interval_tree_depth": 4,
+            },
+        },
+        "cartesian_xy",
+    )
+    assert plan.resolved_models()["drag"]["revision"] == (
+        "epstein_linear_effective_gas_sensitivity_v1"
+    )
+
+
+@pytest.mark.parametrize(
+    ("effective_drag", "effective_thermophoresis"),
+    [(False, True), (True, False)],
+)
+def test_linear_drag_and_waldmann_cannot_mix_native_and_effective_backgrounds(
+    effective_drag: bool,
+    effective_thermophoresis: bool,
+) -> None:
+    drag = _effective_drag_model() if effective_drag else _linear_drag_model("epstein_linear_v1")
+    thermophoresis = (
+        _effective_thermophoresis_model()
+        if effective_thermophoresis
+        else _thermophoresis_model("waldmann_gallis_free_molecular_single_species_heat_flux_v1")
+    )
+
+    with pytest.raises(PhysicsConfigurationError, match="cannot mix single-species"):
         resolve_physics_plan(
             {
                 "charge": {"model": "fixed"},
-                "drag": _effective_drag_model(),
-                "noise": {
-                    "model": "inertial_langevin_fdt",
-                    "revision": "inertial_langevin_fdt_epstein_linear_frozen_start_v1",
-                    "interval_tree_depth": 4,
-                },
+                "drag": drag,
+                "thermophoresis": thermophoresis,
             },
             "cartesian_xy",
         )
+
+
+@pytest.mark.parametrize("category", ["drag", "thermophoresis"])
+def test_neutral_density_authority_is_shared_with_gravity_without_lift(category: str) -> None:
+    models: dict[str, dict[str, object]] = {
+        "charge": {"model": "fixed"},
+        "gravity_buoyancy": {
+            "model": "standard",
+            "revision": "gravity_buoyancy_standard_v1",
+            "gas_density_field": "other_density",
+            "gravity_m_s2": [0.0, -9.81],
+        },
+    }
+    models[category] = (
+        _linear_drag_model("epstein_linear_v1")
+        if category == "drag"
+        else _talbot_thermophoresis_model()
+    )
+
+    with pytest.raises(
+        PhysicsConfigurationError,
+        match=r"same neutral-gas background.*gas_density_field",
+    ):
+        resolve_physics_plan(models, "cartesian_xy")
 
 
 def test_effective_gas_limits_drive_compiled_row_and_continuous_path_gates() -> None:
@@ -275,6 +368,24 @@ def _effective_thermophoresis_model(
     return {
         **_thermophoresis_model(_THERMOPHORESIS_REVISION),
         "maximum_speed_ratio": maximum_speed_ratio,
+    }
+
+
+def _talbot_thermophoresis_model() -> dict[str, object]:
+    return {
+        "model": "talbot",
+        "revision": "talbot_cross_regime_radius_knudsen_v1",
+        "gas_temperature_field": "tg",
+        "gas_temperature_gradient_field": "grad_tg",
+        "gas_density_field": "rho",
+        "gas_dynamic_viscosity_field": "mu",
+        "gas_thermal_conductivity_field": "k_g",
+        "gas_mean_free_path_field": "mfp",
+        "particle_thermal_conductivity_W_m_K": 0.2,
+        "thermal_slip_coefficient": 1.17,
+        "momentum_exchange_coefficient": 1.146,
+        "thermal_exchange_coefficient": 2.2,
+        "applicability": "error",
     }
 
 

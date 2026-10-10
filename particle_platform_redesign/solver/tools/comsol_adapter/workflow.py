@@ -18,8 +18,6 @@ from pathlib import Path
 from typing import Final, cast
 
 import numpy as np
-import yaml
-from yaml.nodes import MappingNode
 
 from chamber_particles.case_format import (
     BoundaryData,
@@ -29,12 +27,13 @@ from chamber_particles.case_format import (
     P1TriLayout,
     write,
 )
+from chamber_particles.yaml_input import parse_document
 
 type _BoundaryOwner = tuple[int, tuple[int, int]]
 type _BoundaryRow = tuple[int, int, int, int, int, int]
 
-ADAPTER_FORMAT_VERSION: Final = 1
-ADAPTER_REVISION: Final = "comsol_axisymmetric_csv_adapter_v1"
+ADAPTER_FORMAT_VERSION: Final = 2
+ADAPTER_REVISION: Final = "comsol_axisymmetric_csv_adapter_v2"
 FIELD_SEMANTICS_REVISION: Final = "axisymmetric_thermal_flow_primitives_v1"
 PRODUCER_VERSION: Final = version("chamber-particles")
 _FINITE_NUMBER_TOKEN: Final = re.compile(r"[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?")
@@ -46,24 +45,6 @@ _EXPECTED_SOURCE_KEYS: Final = {
     "field_values_path",
     "field_columns_path",
 }
-
-
-class _UniqueKeyLoader(yaml.SafeLoader):
-    """Safe YAML loader that rejects duplicate mapping keys."""
-
-    def construct_mapping(self, node: MappingNode, deep: bool = False) -> dict[object, object]:
-        self.flatten_mapping(node)
-        result: dict[object, object] = {}
-        for key_node, value_node in node.value:
-            key = self.construct_object(key_node, deep=deep)
-            try:
-                duplicate = key in result
-            except TypeError as error:
-                raise ValueError("YAML mapping keys must be hashable") from error
-            if duplicate:
-                raise ValueError(f"duplicate YAML mapping key: {key!r}")
-            result[key] = self.construct_object(value_node, deep=deep)
-        return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -236,9 +217,9 @@ def parse_configuration(raw: bytes, *, base_directory: Path) -> AdapterSpecifica
     """Parse the strict provider-specific adapter configuration."""
 
     try:
-        document = yaml.load(raw.decode("utf-8"), Loader=_UniqueKeyLoader)
-    except (UnicodeDecodeError, yaml.YAMLError) as error:
-        raise ValueError("adapter configuration is not valid UTF-8 YAML") from error
+        document = parse_document(raw)
+    except ValueError as error:
+        raise ValueError(f"invalid adapter configuration: {error}") from error
     root = _mapping(document, "configuration")
     _exact_keys(
         root,
@@ -1177,7 +1158,10 @@ def _name_pair(value: object, label: str) -> tuple[str, str]:
 def _number(value: object, label: str) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float):
         raise ValueError(f"{label} must be numeric")
-    result = float(value)
+    try:
+        result = float(value)
+    except OverflowError as error:
+        raise ValueError(f"{label} must be finite") from error
     if not math.isfinite(result):
         raise ValueError(f"{label} must be finite")
     return result

@@ -22,18 +22,28 @@ import math
 import os
 import shutil
 import sys
+import tempfile
 import time
 from collections.abc import Mapping
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Final, Literal, cast
 
 import yaml
 
 from chamber_particles import load_case, open_result, simulate
+from chamber_particles.case import CASE_FORMAT_VERSION
 from chamber_particles.case_format import read_with_info
+from chamber_particles.yaml_input import parse_document
 
-TOOL_REVISION: Final = "m3c2_candidate_campaign_runner_v4"
+TOOL_REVISION: Final = "m3c2_candidate_campaign_runner_v6"
+PREVIOUS_TOOL_REVISION: Final = "m3c2_candidate_campaign_runner_v5"
+HISTORICAL_TOOL_REVISION: Final = "m3c2_candidate_campaign_runner_v4"
 LEGACY_TOOL_REVISION: Final = "m3c2_caseA_100nm_candidate_campaign_runner_v3"
+BROWNIAN_NOISE_REVISION: Final = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
+HISTORICAL_BROWNIAN_NOISE_REVISION: Final = (
+    "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+)
 TRAJECTORY_NORMALIZATION_REVISION: Final = "dense_schedule_escape_nan_suffix_v1"
 BLOCKED_TRAJECTORY_REVISION: Final = "observed_rows_only_failed_run_v1"
 RECIPE_COPY: Final = "candidate_pilot_recipe.json"
@@ -49,6 +59,8 @@ FINAL_REGISTRATION_KIND: Final = "m3c2_caseA_100nm_final_campaign"
 FINAL_AUTHORIZATION_KIND: Final = "m3c2_post_pilot_final_authorization"
 FINAL_EVALUATION_POLICY_REVISION: Final = 3
 SUPPORTED_EVALUATION_POLICY_REVISIONS: Final = {3, 4, 5}
+EVALUATOR_REVISION_V4: Final = "m3c2_stochastic_ensemble_evaluator_v4"
+EVALUATOR_REVISION_V6: Final = "m3c2_stochastic_ensemble_evaluator_v6"
 CASE_ID: Final = "formal_iondrag_theory_consistent/caseA_100nm"
 EVALUATION_CASE_ID: Final = "M3-C2A_caseA_100nm_common-P1"
 CASEP_EVENT_TOLERANCE_RECIPE_ID: Final = "M3-C2A-caseP-100nm-event-tolerance-pre-final"
@@ -61,6 +73,29 @@ CAMPAIGN_IDENTITY_KEYS: Final = {
     "output_slug",
     "final_registration_kind",
     "candidate_case_name_prefix",
+}
+_EXECUTOR_IDENTITY_KEYS: Final = {
+    "source_sha256",
+    "uv_lock_sha256",
+    "python_version",
+    "distribution_version",
+}
+_EXECUTOR_REVISION_KEYS: Final = {
+    "case_schema_version",
+    "result_schema_version",
+    "result_algorithm_revision",
+    "engine_algorithm_revision",
+    "compiled_cpu_tile_revision",
+    "physics_catalog_revision",
+    "physics_runtime_revision",
+    "rng_algorithm_revision",
+    "boundary_algorithm_revision",
+    "brownian_rng_revision",
+    "joint_ou_revision",
+    "joint_ou_split_revision",
+    "brownian_composition_revision",
+    "brownian_charge_dense_revision",
+    "brownian_tree_policy_revision",
 }
 LEGACY_CAMPAIGN_IDENTITY: Final = {
     "case_id": CASE_ID,
@@ -88,6 +123,18 @@ _TRAJECTORY_HEADER: Final = (
     "charge_number_e",
     "lifecycle",
 )
+
+
+def _evaluator_revision_for_runner(policy_revision: object, runner_revision: object) -> str:
+    if policy_revision not in SUPPORTED_EVALUATION_POLICY_REVISIONS:
+        raise ValueError("evaluation policy revision is unsupported")
+    if runner_revision in {TOOL_REVISION, PREVIOUS_TOOL_REVISION}:
+        return EVALUATOR_REVISION_V6 if policy_revision == 5 else EVALUATOR_REVISION_V4
+    if runner_revision in {HISTORICAL_TOOL_REVISION, LEGACY_TOOL_REVISION}:
+        return f"m3c2_stochastic_ensemble_evaluator_v{policy_revision}"
+    raise ValueError("candidate runner revision is unsupported")
+
+
 _EVENT_HEADER: Final = (
     "particle_id",
     "event_ordinal",
@@ -236,6 +283,63 @@ def _recipe_candidate_seeds(recipe: dict[str, Any], contract: dict[str, Any]) ->
 
 def _solver_project_root() -> Path:
     return Path(__file__).resolve().parents[3]
+
+
+def installed_executor_identity() -> dict[str, str]:
+    """Fingerprint this source-project executor, including uncommitted Python changes."""
+    installed = Path(sys.modules["chamber_particles"].__file__ or "").resolve().parent
+    project = installed.parents[1]
+    package = project / "src" / "chamber_particles"
+    if installed != package.resolve() or not (project / "uv.lock").is_file():
+        raise ValueError("candidate execution requires the locked source-project installation")
+    digest = hashlib.sha256()
+    for path in sorted(package.rglob("*.py")):
+        relative = path.relative_to(package).as_posix().encode("utf-8")
+        raw = path.read_bytes()
+        digest.update(len(relative).to_bytes(8, "big") + relative)
+        digest.update(len(raw).to_bytes(8, "big") + raw)
+    return {
+        "source_sha256": digest.hexdigest(),
+        "uv_lock_sha256": _sha256(project / "uv.lock"),
+        "python_version": ".".join(str(part) for part in sys.version_info[:3]),
+        "distribution_version": version("chamber-particles"),
+    }
+
+
+def _recipe_executor(recipe: dict[str, Any]) -> dict[str, Any]:
+    execution = _mapping(recipe.get("execution"), "recipe execution")
+    expected = _mapping(execution.get("expected_executor"), "expected executor")
+    if set(expected) != _EXECUTOR_IDENTITY_KEYS or any(
+        not isinstance(value, str) or not value for value in expected.values()
+    ):
+        raise ValueError("expected executor identity is incomplete")
+    revisions = _mapping(execution.get("expected_revisions"), "expected executor revisions")
+    if set(revisions) != _EXECUTOR_REVISION_KEYS:
+        raise ValueError("expected executor revisions are incomplete")
+    return {"identity": expected, "revisions": revisions}
+
+
+def _require_installed_executor(executor: dict[str, Any]) -> None:
+    if executor["identity"] != installed_executor_identity():
+        raise ValueError("installed candidate executor differs from the locked recipe")
+
+
+def _validate_result_executor(
+    planned: Mapping[str, object], manifest: dict[str, Any]
+) -> dict[str, object]:
+    executor = planned.get("_executor")
+    if executor is None:
+        return {}
+    locked = _mapping(executor, "prepared executor")
+    revisions = _mapping(locked.get("revisions"), "prepared executor revisions")
+    actual = {name: manifest.get(name) for name in revisions}
+    if actual != revisions:
+        raise ValueError("result executor revisions differ from the locked recipe")
+    if manifest.get("case_file_hash") != planned.get("case_file_hash") or manifest.get(
+        "data_content_hash"
+    ) != planned.get("_input_content_hash"):
+        raise ValueError("result case or input identity differs from the prepared cell")
+    return {"identity": locked["identity"], "actual_revisions": actual}
 
 
 def _registration_artifact(
@@ -640,7 +744,7 @@ def _final_authority_documents(
     ):
         required = " or ".join(str(value) for value in sorted(required_revisions))
         raise ValueError(f"final campaign requires M3-C2 ensemble policy revision {required}")
-    evaluator_revision = f"m3c2_stochastic_ensemble_evaluator_v{policy_revision}"
+    evaluator_revision = _evaluator_revision_for_runner(policy_revision, TOOL_REVISION)
     pilot = _load_json(artifacts["pilot_evaluation"], "pilot evaluation")
     if (
         pilot.get("schema_version") != policy_revision
@@ -789,7 +893,7 @@ def _configured_level_name(value: object, index: int) -> str:
         raise ValueError("configured candidate pilot level is invalid")
     if not purpose:
         raise ValueError("configured candidate pilot level is invalid")
-    dt_s = float(cast(Any, level.get("dt_s", math.nan)))
+    dt_s = _finite_recipe_float(level.get("dt_s"), "configured candidate dt_s")
     if not math.isfinite(dt_s) or dt_s <= 0.0:
         raise ValueError("configured candidate pilot level is invalid")
     depth = level.get("brownian_interval_tree_depth")
@@ -798,15 +902,25 @@ def _configured_level_name(value: object, index: int) -> str:
     if not 0 <= depth <= 10:
         raise ValueError("configured candidate pilot level is invalid")
     if "geometry_rtol" in level:
-        geometry_rtol = float(cast(Any, level["geometry_rtol"]))
+        geometry_rtol = _finite_recipe_float(level["geometry_rtol"], "configured geometry_rtol")
         if not math.isfinite(geometry_rtol) or geometry_rtol <= 0.0:
             raise ValueError("configured candidate geometry_rtol must be positive")
     return name
 
 
+def _finite_recipe_float(value: object, location: str) -> float:
+    try:
+        number = float(cast(Any, value))
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError(f"{location} must be a finite number") from error
+    if isinstance(value, bool) or not math.isfinite(number):
+        raise ValueError(f"{location} must be a finite number")
+    return number
+
+
 def _validate_configured_execution(recipe: dict[str, Any]) -> None:
     execution = _mapping(recipe.get("execution"), "execution")
-    if float(execution.get("time_end_s", math.nan)) != END_TIME_S:
+    if _finite_recipe_float(execution.get("time_end_s"), "execution time_end_s") != END_TIME_S:
         raise ValueError("configured candidate execution scope differs from this runner")
     if int(execution.get("output_count", -1)) != OUTPUT_COUNT:
         raise ValueError("configured candidate execution scope differs from this runner")
@@ -835,17 +949,31 @@ def _validate_configured_recipe(
     _validate_configured_execution(recipe)
 
 
+def _recipe_brownian_noise_revision(recipe: dict[str, Any]) -> str:
+    physics = _mapping(recipe.get("physics"), "recipe physics")
+    if physics.get("noise_model") != "inertial_langevin_fdt":
+        raise ValueError("candidate recipe Brownian noise model differs from this runner")
+    revision = physics.get("noise_revision")
+    if revision != BROWNIAN_NOISE_REVISION:
+        raise ValueError(
+            "candidate recipe Brownian noise revision differs from this runner; "
+            "historical recipes are immutable and require a new recipe declaring "
+            f"{BROWNIAN_NOISE_REVISION}"
+        )
+    return cast(str, revision)
+
+
 def _validate_recipe(
     recipe: dict[str, Any],
     *,
     explicit_campaign_identity: bool = False,
     resolved_candidate_seeds: list[int] | None = None,
-) -> None:
+) -> str:
     if recipe.get("schema_version") != 1:
         raise ValueError("unsupported candidate pilot recipe revision")
     if explicit_campaign_identity or recipe.get("campaign") is not None:
         _validate_configured_recipe(recipe, resolved_candidate_seeds)
-        return
+        return _recipe_brownian_noise_revision(recipe)
     revision = int(recipe.get("recipe_revision", -1))
     identities = {
         1: "M3-C2A-caseA-100nm-candidate-pilot",
@@ -907,6 +1035,7 @@ def _validate_recipe(
         ]
         if geometry_rtols != expected_rtols:
             raise ValueError("event-tolerance diagnostic geometry_rtol differs")
+    return _recipe_brownian_noise_revision(recipe)
 
 
 def _validate_v2_evidence(recipe: dict[str, Any], root: Path, superseded: Path) -> list[Path]:
@@ -1157,6 +1286,8 @@ def _validate_contract(
 
 
 def _validate_template(document: dict[str, Any]) -> None:
+    if document.get("format_version") != CASE_FORMAT_VERSION:
+        raise ValueError("deterministic template format differs from the current case format")
     physics = _mapping(document.get("physics"), "template physics")
     expected_models = {
         "charge",
@@ -1197,6 +1328,7 @@ def _case_document(
     level: Mapping[str, object],
     seed: int,
     case_name_prefix: str,
+    brownian_noise_revision: str,
 ) -> dict[str, Any]:
     document = copy.deepcopy(template)
     level_name = str(level["name"])
@@ -1220,7 +1352,7 @@ def _case_document(
     physics = _mapping(document["physics"], "physics")
     physics["noise"] = {
         "model": "inertial_langevin_fdt",
-        "revision": "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1",
+        "revision": brownian_noise_revision,
         "interval_tree_depth": int(cast(Any, level["brownian_interval_tree_depth"])),
     }
     document["resources"] = {"memory_limit_mb": 512}
@@ -1234,6 +1366,32 @@ def _case_cell(output: Path, level_name: str, seed: int) -> Path:
     return output / "levels" / level_name / f"seed_{seed}"
 
 
+def _preflight_case_documents(
+    template: dict[str, Any],
+    input_path: Path,
+    content_hash: str,
+    campaign: Mapping[str, object],
+    case_name_prefix: str,
+    noise_revision: str,
+) -> None:
+    seeds = _sequence(campaign["candidate_seeds"], "seeds")
+    with tempfile.TemporaryDirectory(prefix="chamber-candidate-preflight-") as directory:
+        path = Path(directory) / "case.yaml"
+        source_document = copy.deepcopy(template)
+        source_document["case"]["data_path"] = str(input_path.resolve())
+        source_document["case"]["expected_content_hash"] = content_hash
+        path.write_text(yaml.safe_dump(source_document, sort_keys=False), encoding="utf-8")
+        load_case(path)
+        for level_value in _sequence(campaign["levels"], "levels"):
+            level = _mapping(level_value, "level")
+            document = _case_document(
+                template, content_hash, level, int(seeds[0]), case_name_prefix, noise_revision
+            )
+            document["case"]["data_path"] = str(input_path.resolve())
+            path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+            load_case(path)
+
+
 def prepare(
     recipe_path: Path,
     output: Path,
@@ -1242,6 +1400,7 @@ def prepare(
     if output.exists():
         raise FileExistsError(f"candidate campaign output already exists: {output}")
     recipe = _load_json(recipe_path, "candidate pilot recipe")
+    _recipe_brownian_noise_revision(recipe)
     root = _repository_root()
     (
         contract_path,
@@ -1253,7 +1412,7 @@ def prepare(
         candidate_seeds,
         pilot_authorization,
     ) = _validate_contract(recipe, root)
-    _validate_recipe(
+    brownian_noise_revision = _validate_recipe(
         recipe,
         explicit_campaign_identity=explicit_campaign_identity,
         resolved_candidate_seeds=candidate_seeds,
@@ -1283,8 +1442,18 @@ def prepare(
             explicit_campaign_identity=explicit_campaign_identity,
         )
         campaign = {"candidate_seeds": seeds, "levels": [level]}
-    template = _mapping(yaml.safe_load(template_path.read_text(encoding="utf-8")), "template")
+    template = _mapping(parse_document(template_path.read_bytes()), "template")
     _validate_template(template)
+    executor = _recipe_executor(recipe)
+    _require_installed_executor(executor)
+    _preflight_case_documents(
+        template,
+        input_path,
+        read_with_info(input_path)[1].content_hash,
+        campaign,
+        campaign_identity["candidate_case_name_prefix"],
+        brownian_noise_revision,
+    )
     output.mkdir(parents=True)
     shutil.copyfile(recipe_path, output / RECIPE_COPY)
     if registration_path is not None:
@@ -1309,6 +1478,7 @@ def prepare(
                 level,
                 seed,
                 campaign_identity["candidate_case_name_prefix"],
+                brownian_noise_revision,
             )
             case_path.write_text(
                 yaml.safe_dump(
@@ -1323,6 +1493,7 @@ def prepare(
                 "seed": seed,
                 "dt_s": level["dt_s"],
                 "brownian_interval_tree_depth": level["brownian_interval_tree_depth"],
+                "brownian_noise_revision": brownian_noise_revision,
                 "purpose": level["purpose"],
                 "geometry_rtol": _mapping(case_document["solver"], "solver")["event"][
                     "geometry_rtol"
@@ -1341,6 +1512,8 @@ def prepare(
         "final_report": FINAL_REPORT if purpose == "pilot" else FINAL_CAMPAIGN_REPORT,
         "campaign": campaign,
         "campaign_identity": campaign_identity,
+        "brownian_noise_revision": brownian_noise_revision,
+        "executor": executor,
         **(
             {"evaluation_policy_sha256": evaluation_policy_sha256}
             if evaluation_policy_sha256 is not None
@@ -1351,7 +1524,7 @@ def prepare(
         "contract_receipt_sha256": _sha256(receipt_path),
         "contingency_evidence": [
             {
-                "path": str(path.relative_to(root)).replace("\\", "/"),
+                "path": os.path.relpath(path, root).replace("\\", "/"),
                 "sha256": _sha256(path),
             }
             for path in contingency_paths
@@ -1629,7 +1802,7 @@ def _validate_prepared_registration(
                 set(authority) != {"evaluation_policy_revision", "pilot_evaluator_revision"}
                 or revision not in SUPPORTED_EVALUATION_POLICY_REVISIONS
                 or authority.get("pilot_evaluator_revision")
-                != f"m3c2_stochastic_ensemble_evaluator_v{revision}"
+                != _evaluator_revision_for_runner(revision, report.get("tool_revision"))
             ):
                 raise ValueError("prepared evaluation authority is invalid")
     elif registration is not None:
@@ -1652,8 +1825,34 @@ def _prepared_evaluation_policy_sha256(
     return evaluation_policy_sha256
 
 
+def _validate_prepared_brownian_authority(recipe: dict[str, Any], report: dict[str, Any]) -> None:
+    tool_revision = report.get("tool_revision")
+    if not isinstance(tool_revision, str):
+        raise ValueError("prepared campaign runner revision is invalid")
+    expected_revision = {
+        TOOL_REVISION: BROWNIAN_NOISE_REVISION,
+        PREVIOUS_TOOL_REVISION: BROWNIAN_NOISE_REVISION,
+        HISTORICAL_TOOL_REVISION: HISTORICAL_BROWNIAN_NOISE_REVISION,
+        LEGACY_TOOL_REVISION: HISTORICAL_BROWNIAN_NOISE_REVISION,
+    }.get(tool_revision)
+    if expected_revision is None:
+        raise ValueError("prepared campaign runner revision is unsupported")
+    physics = _mapping(recipe.get("physics"), "prepared recipe physics")
+    if (
+        physics.get("noise_model") != "inertial_langevin_fdt"
+        or physics.get("noise_revision") != expected_revision
+    ):
+        raise ValueError("prepared recipe Brownian revision differs from its runner revision")
+    recorded_revision = report.get("brownian_noise_revision")
+    if tool_revision == TOOL_REVISION and recorded_revision != expected_revision:
+        raise ValueError("prepared campaign Brownian revision is missing or differs")
+    if recorded_revision is not None and recorded_revision != expected_revision:
+        raise ValueError("prepared campaign Brownian revision differs from its runner revision")
+
+
 def _validate_prepared_campaign_authority(prepared: Path, report: dict[str, Any]) -> str | None:
     recipe = _load_json(prepared / RECIPE_COPY, "prepared candidate recipe")
+    _validate_prepared_brownian_authority(recipe, report)
     repository_root = _repository_root()
     contract_path = _locked_path(repository_root, recipe.get("contract"), "prepared contract")
     contract = _load_json(contract_path, "prepared M3-C2 contract")
@@ -1676,9 +1875,6 @@ def _validate_prepared_campaign_authority(prepared: Path, report: dict[str, Any]
         raise ValueError("prepared campaign input identity differs from the locked contract")
     if report.get("input_content_hash") != common_input.get("content_hash"):
         raise ValueError("prepared campaign input content differs from the locked contract")
-    input_info = read_with_info(prepared / "candidate_input.h5")[1]
-    if report.get("input_content_hash") != input_info.content_hash:
-        raise ValueError("prepared campaign input logical content differs")
     if explicit_identity:
         status, source = _configured_authorization(recipe, repository_root, campaign_identity)
         if status not in {"AUTHORIZED", "AUTHORIZED_BY_EXPLICIT_USER_DIRECTION"}:
@@ -1697,6 +1893,8 @@ def _load_prepared(prepared: Path) -> dict[str, Any]:
     report = _load_json(report_path, "prepare report")
     if report.get("status") != "PREPARED" or report.get("tool_revision") not in {
         TOOL_REVISION,
+        PREVIOUS_TOOL_REVISION,
+        HISTORICAL_TOOL_REVISION,
         LEGACY_TOOL_REVISION,
     }:
         raise ValueError("prepared candidate campaign does not belong to this runner")
@@ -1716,6 +1914,10 @@ def _load_prepared(prepared: Path) -> dict[str, Any]:
     evaluation_policy_sha256 = _validate_prepared_campaign_authority(prepared, report)
     if evaluation_policy_sha256 is not None:
         report["evaluation_policy_sha256"] = evaluation_policy_sha256
+    if report["tool_revision"] == TOOL_REVISION:
+        recipe = _load_json(prepared / RECIPE_COPY, "prepared recipe")
+        if report.get("executor") != _recipe_executor(recipe):
+            raise ValueError("prepared executor differs from the locked recipe")
     return report
 
 
@@ -1729,6 +1931,8 @@ def _cell_context(
         raise ValueError(f"candidate campaign cell is not locked: {key}")
     planned = dict(_mapping(cells[key], f"cell {key}"))
     planned["_runner_tool_revision"] = report["tool_revision"]
+    planned["_executor"] = report.get("executor")
+    planned["_input_content_hash"] = report.get("input_content_hash")
     cell = _case_cell(prepared, level, seed)
     paths = {
         "result": cell / "result",
@@ -1795,7 +1999,9 @@ def _cell_receipt(
     )
     return {
         "status": "COMPLETE" if complete else "BLOCKED",
-        "tool_revision": planned.get("_runner_tool_revision", TOOL_REVISION),
+        "tool_revision": TOOL_REVISION,
+        "source_runner_tool_revision": planned.get("_runner_tool_revision", TOOL_REVISION),
+        "executor": _validate_result_executor(planned, dict(manifest)),
         "participant": "candidate",
         "level": level,
         "seed": seed,
@@ -1832,6 +2038,9 @@ def _cell_receipt(
 
 def run_cell(prepared: Path, level: str, seed: int) -> dict[str, object]:
     planned, case_path, paths = _cell_context(prepared, level, seed)
+    if planned["_runner_tool_revision"] != TOOL_REVISION:
+        raise ValueError("historical prepared campaigns cannot authorize a new solver run")
+    _require_installed_executor(_mapping(planned["_executor"], "prepared executor"))
     existing = [str(path) for path in paths.values() if path.exists()]
     if existing:
         raise FileExistsError(f"candidate campaign cell output already exists: {existing}")
@@ -1844,6 +2053,8 @@ def run_cell(prepared: Path, level: str, seed: int) -> dict[str, object]:
     peak_rss_bytes = _peak_rss_bytes()
     result = open_result(paths["result"])
     manifest = _mapping(result.manifest, "result manifest")
+    _validate_result_executor(planned, manifest)
+    _require_installed_executor(_mapping(planned["_executor"], "prepared executor"))
     counts = _mapping(manifest.get("counts"), "result counts")
     projection_paths = dict(paths)
     normalization_revision = TRAJECTORY_NORMALIZATION_REVISION
@@ -1893,6 +2104,7 @@ def recover_cell(prepared: Path, level: str, seed: int) -> dict[str, object]:
         raise FileExistsError("candidate cell receipt or performance record already exists")
     result = open_result(paths["result"])
     manifest = _mapping(result.manifest, "result manifest")
+    _validate_result_executor(planned, manifest)
     counts = _mapping(manifest.get("counts"), "result counts")
     if int(counts.get("failure_events", -1)) > 0:
         blocked_trajectory = paths["trajectory"].with_name("trajectory.blocked.csv")
@@ -1964,11 +2176,16 @@ def renormalize_cell(prepared: Path, level: str, seed: int) -> dict[str, object]
         raise ValueError("only a completed candidate cell may be renormalized")
     if old_receipt.get("trajectory_normalization_revision") is not None:
         raise ValueError("candidate cell already uses the dense trajectory normalization")
+    for name in ("trajectory", "events", "failures", "performance"):
+        _validate_receipt_artifact(old_receipt, prepared, name, f"{name}_sha256", paths[name])
     old_performance = _load_json(paths["performance"], "old performance")
     elapsed = old_performance.get("elapsed_public_api_s")
     wall_time_s = None if elapsed is None else float(elapsed)
     result = open_result(paths["result"])
     manifest = _mapping(result.manifest, "result manifest")
+    _validate_result_executor(planned, manifest)
+    if old_receipt.get("result_manifest_sha256") != _sha256(paths["result"] / "run.json"):
+        raise ValueError("saved result manifest differs from the original cell receipt")
     replacement = paths["trajectory"].with_suffix(".csv.replacement")
     if replacement.exists():
         raise FileExistsError(f"stale trajectory replacement exists: {replacement}")
@@ -2117,7 +2334,11 @@ def _validate_receipt_plan(
 ) -> None:
     expected = {
         "status": "COMPLETE",
-        "tool_revision": report["tool_revision"],
+        "tool_revision": (
+            TOOL_REVISION
+            if receipt.get("source_runner_tool_revision") == report["tool_revision"]
+            else report["tool_revision"]
+        ),
         "participant": "candidate",
         "level": level,
         "seed": seed,
@@ -2127,6 +2348,12 @@ def _validate_receipt_plan(
         "case": planned["case"],
         "case_sha256": planned["case_sha256"],
     }
+    if report.get("executor") is not None:
+        executor = _mapping(report["executor"], "prepared executor")
+        expected["executor"] = {
+            "identity": executor["identity"],
+            "actual_revisions": executor["revisions"],
+        }
     differing = [field for field, value in expected.items() if receipt.get(field) != value]
     if differing:
         raise ValueError(
@@ -2203,7 +2430,9 @@ def finalize(prepared: Path) -> dict[str, object]:
         }
     final: dict[str, object] = {
         "status": "COMPLETE",
-        "tool_revision": report["tool_revision"],
+        "tool_revision": TOOL_REVISION,
+        "source_runner_tool_revision": report["tool_revision"],
+        **({"executor": report["executor"]} if report.get("executor") is not None else {}),
         "participant": "candidate",
         "purpose": purpose,
         **(
@@ -2229,13 +2458,19 @@ def finalize(prepared: Path) -> dict[str, object]:
                     "input_content_hash": report["input_content_hash"],
                 }
             }
-            if report.get("tool_revision") == TOOL_REVISION
+            if report.get("tool_revision")
+            in {TOOL_REVISION, PREVIOUS_TOOL_REVISION, HISTORICAL_TOOL_REVISION}
             else {}
         ),
         "prepare_report": PREPARE_REPORT,
         "prepare_report_sha256": _sha256(prepared / PREPARE_REPORT),
         "input_sha256": report["input_sha256"],
         "input_content_hash": report["input_content_hash"],
+        **(
+            {"brownian_noise_revision": report["brownian_noise_revision"]}
+            if report.get("brownian_noise_revision") is not None
+            else {}
+        ),
         "particle_count": PARTICLE_COUNT,
         "output_count": OUTPUT_COUNT,
         "time_end_s": END_TIME_S,
@@ -2251,13 +2486,14 @@ def finalize(prepared: Path) -> dict[str, object]:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers.add_parser("executor-identity", help="print the installed source-project identity")
     prepare_parser = subparsers.add_parser("prepare")
     prepare_parser.add_argument("recipe", type=Path)
     prepare_parser.add_argument("output", type=Path)
     prepare_parser.add_argument(
         "--registration",
         type=Path,
-        help="post-pilot final registration; omit it to prepare the historical pilot",
+        help="post-pilot final registration; omit it to prepare a current pilot",
     )
     run_parser = subparsers.add_parser("run-cell")
     run_parser.add_argument("prepared", type=Path)
@@ -2282,7 +2518,9 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     arguments = _parser().parse_args()
-    if arguments.command == "prepare":
+    if arguments.command == "executor-identity":
+        result = {"status": "COMPLETE", "expected_executor": installed_executor_identity()}
+    elif arguments.command == "prepare":
         result = prepare(
             arguments.recipe.resolve(),
             arguments.output.resolve(),

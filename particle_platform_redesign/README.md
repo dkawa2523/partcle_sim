@@ -14,7 +14,7 @@ solver coreの依存先ではありません。旧ソルバーと旧環境は内
   単一責務、最小設定、command、CI適用方針。
 - [`product_specification.md`](product_specification.md) — 製品目的、物理・帯電・発生源・境界理論、
   数値基盤、最小API、入力・出力、高速化、複雑化防止、段階的実装を固定する**主仕様書**。
-- [`solver/docs/support_and_errors.md`](solver/docs/support_and_errors.md) — 静的2-D v0.1の対応範囲、
+- [`solver/docs/support_and_errors.md`](solver/docs/support_and_errors.md) — `0.2.0`の対応範囲、用途別の検証保証、
   明示的な非対応組合せ、公開例外、粒子単位failure、schema互換方針をまとめた利用者向け入口。
 - [`architecture_proposal.md`](architecture_proposal.md) — Canonical DataBundle、実行計画、backend、
   詳細な責務境界を扱うarchitecture authority。文書間の優先順位は一律ではなく、
@@ -56,9 +56,9 @@ solver coreの依存先ではありません。旧ソルバーと旧環境は内
 P00～P05が完了し、`particle_platform_redesign/solver/`は独立uv projectとして作成済みです。P03では
 large-offset・高aspect要素で再現したpoint-location defectを`field_location_v2`で置換し、物理空間の
 包含判定、conditioning gate、最近傍supported provisional、非有限failureを一経路へ統一しました。現在は
-locked環境、品質gate、三公開APIのimport境界に加え、producer-neutralなYAML schema v2/HDF5 schema v1、論理hash、
-厳格な`load_case`、C01～C10の独立analytic microcase、XY/RZ coordinate規則、static regular/P1/Q1
-single-point field samplingを提供します。P04では複数table source、release原点からの厳密ballistic、
+locked環境、品質gate、三公開APIのimport境界に加え、producer-neutralなYAML schema v2/HDF5 schema v2、論理hash、
+厳格な`load_case`、C01～C10の独立analytic microcase、XY/RZ coordinate規則、staticおよび固定topology時間依存の
+regular/P1/Q1 field samplingを提供します。P04では複数table source、release原点からの厳密ballistic、
 必須release/final、明示時刻frame、atomic no-clobber result、最小lazy `ResultView`を一つのproduction経路へ
 追加しました。P05では大域topology監査、line BVH、ballistic exact first hit、parameterなしの
 stick/escape、boundary event、terminal lifecycleを同じengineへ追加しました。P06 revision 1では
@@ -101,7 +101,7 @@ geometryまたはboundaryless regular supportから一度だけ決めるaxis acc
 acceptanceで検査します。standard gravityのRZ radial成分はaxis accessibilityに関係なく0だけを許し、
 axis-accessible fieldのradial vector成分も軸上0を要求します。Epstein解析解の4次収束、frame不変性、
 away-axis XY退化一致、axis/wall順序で検証済みです。このRZ追加時点ではcase/result schemaを変更していません。
-現行はYAML case schema v2、canonical HDF5 data schema v1、result/checkpoint schema v2です。
+現行はYAML/canonical HDF5 case schema v3、result schema v3、checkpoint schema v2です。
 P06-Sでは明示air revisionのStokes–CunninghamをXY/RZへ追加し、P08ではparticle-local failure、
 lifecycle series、明示state probe、三公開APIだけを使う薄いCLIを追加してStage 1Aをcloseしました。
 P09はYAML/resourceの先行parseとHDF5 metadata memory gate、sourceの直接schedule scatter、固定ID対応の
@@ -156,6 +156,10 @@ P18-Rは既存式ownerを再利用するoptionalな
 既存`epstein_linear_v1`と単一気体P16の上限`0.1`は変更しません。熱泳動の`q_eff`はproducer所有の
 有効並進伝導熱流束であり、coreは温度gradientやspecies配列を回復せず、species-resolved mixture truthや
 COMSOL専用branchとも呼びません。
+P22は`talbot_cross_regime_diameter_knudsen_v1`と`saffman_unbounded_creeping_shear_v1`を既存categoryの
+明示optionとして追加しました。temperature gradientとsigned面外vorticityはproducerが供給し、coreは微分しません。
+Talbot/WaldmannやSaffman/高Kn liftの自動blendは行わず、Saffmanの連続体・低Re・漸近階層を全pathでfail-closedに
+検査します。解析・manufactured・公開API検証は完了し、保存COMSOL datasetでの両model比較は`NOT_TESTED`です。
 P18-Dはproducerが形成した`grad(mean_E_squared)`を入力とする
 `quasistatic_spherical_gradient_e2_v1`を追加しました。球形準静的dipoleの明示加速度を同じstage passで評価し、
 point-dipole半径上限をprepareで検査します。DC/RF平均とgradient recoveryはproducer、COMSOL比較は外部V&Vが所有し、
@@ -172,7 +176,8 @@ Brownian数値基盤B01に続き、B02はCartesian XY・fixed charge・Epstein l
 checkpoint/resumeへ統合しています。壁lawはterminalな`stick`/`escape`だけです。engine v30はOU covariance、split、
 mean更新がfloat64で表現不能なrowだけを`nonfinite_physics`にし、同一batchの正常粒子を継続します。有限depthの
 Hermite pathを認証するもので、連続OU trajectoryのexact first-passageは主張しません。
-boundaryless unstructured、richer source distribution、moving wallは未解禁です。
+boundaryless unstructuredとmoving wallは未解禁です。任意のsource分布はsolver外で粒子ごとの
+internal/surface scheduleへrealizeし、coreにはdistribution selectorやsource RNGを置きません。
 
 B03は、RZ meridional投影とfixed/continuous charge、native/effective-gas線形Epstein、
 既存additive forceを一つの`ou_langevin` proposalへ合成して完了しました。
@@ -180,13 +185,20 @@ root始点からのnoise-free predictorでmidpointを決め、`gamma,u,T,a,G=dZ/
 `J<=0`を要求するmidpoint-frozen affine exponential chargeと`u_eff=u+a/gamma`のjoint exact OUを
 同じroot proposalで進めます。これはstateを前後half-stepでcommitする
 Strang/K-O-K分割ではありません。axis hitはaccepted prefixをfoldし、残時間を新しいstochastic rootで
-再開します。B02はbitwise不変、terminal wallは`stick`/`escape`/`hold`に限定します。これはr/zへ投影した
+再開します。B02はbitwise不変です。B03初回closeoutのwallは`stick`/`escape`/`hold`に限定しましたが、
+現行B04は同じprefix/fresh-root原則へactive wallを統合しています。これはr/zへ投影した
 2自由度closureであり、等方3-D Brownianや一般state-dependent SDEのstrong order・weak 2次は主張しません。
-現行revisionはengine v37、proposal v10、catalog v17、event v16、runtime v20、compiled tile v18、memory plan v14です。
+現行revisionはengine v46、proposal v10、catalog v23、event v22、runtime v22、compiled tile v21、memory plan v16です。
+B05では`interval_tree_depth`を全rootへ一様に適用する精度authorityとし、wall、RZ axis、または
+証明不能候補だけを`adaptive_max_depth`まで条件付き分割します。base=maxは従来固定depthへ退化します。
+有限depth numerical pathであり、連続OUのexact first-passage、zero miss probability、uniform max-depthと同じ
+global解像度は主張しません。memory plan v16は候補率でなくmax depthからtree workを計画します。
 event v15で導入した物理budget＋roundoff budgetとroot-relative TwoDiffを維持し、event v16はvalidなRK4 dense rowの
 position Bernstein control enclosureをfacet half-spaceへ射影します。全4制御点の外向き上限が既存budgetの負側に
 厳密に入る候補だけをconvex-hull性からclearし、証明不能、不正なcontrol、exponential・scalar経路は引き続き
 split/fail-closedです。monotone-approach clearもcubic Hermiteのderivative-Bernstein enclosureだけがopt-inします。
+event v22はevent v18の最初hit・同時incident facet集合を維持し、exact、一般RK4、
+exponential、Brownianでgroup別のsurface/center material contactとperiodic center crossingを同一のfirst-event順序で解決します。
 B03 path arrayの静的な保守上限は一slab rowあたり`648 B`で、受入上限`2048 B`内です。正式characterizationは
 2,000/20,000粒子×4構成×3反復の24/24実行を全粒子active・failure 0で完了しました。20,000粒子の
 machine-local medianはB02 fixed `5.7722 s`、B03 fixed `11.7142 s`、continuous charge＋gravity `11.8427 s`、
@@ -215,8 +227,8 @@ P13の固定64 cadenceは後続sliceで置換済みです。現行は累積work
 `T=max(2^20,128N)`をengineが計算し、accepted macro barrierで`W-W_epoch>=T`または最終macroの時だけ
 commitを決定します。cadence revision・resolved threshold・components・barrierはmanifestとresume identityに入り、
 output scheduleとslab幅には依存しません。`output.py`の同期single-owner writerだけがsegment、inactive A/B checkpoint、
-`LATEST`のatomic persistenceを所有します。現行result algorithmは`durable_segmented_result_v5`、
-result/checkpoint schemaは2、memory planはv13です。
+`LATEST`のatomic persistenceを所有します。現行result algorithmは`durable_segmented_result_v6`、
+result schemaは3、checkpoint schemaは2、memory planはv16です。
 最初の`LATEST`以前の初期状態からの再実行、segment/checkpoint/`LATEST`と最終公開の各境界、確率wall RNG ordinal、
 破損・orphanを含むfailure injectionを検証し、verification/scenario 322件が合格しました。容量1 queueは
 bounded memoryとbackpressureの意味論でありI/Oを重ねなかったため、P14-Pで同期single-owner writerへ単純化しました。power-loss耐性、remote
@@ -257,8 +269,10 @@ P14-Uは同じ直列engineにXY surface release、Epstein drag、非affine電場
 T03 analysis/visualizationは完了しました。P14-Rはcurrent evidence保存に加え、receipt固定のtested head/lockについて
 remote Windows/Linuxで620件、性能smoke 7行（cold 1＋warm 6）、wheel、runtime-only clean install、
 三公開API smokeまで合格し、`0.1.0.dev0`開発baselineの配布可能性closureを完了しました。このbaselineと
-同じsingle-engineへ受理済みのstatic 2-D機能を正式版`0.1.0`として固定し、tagのWindows/Linux gate成功後だけ
-検証済みwheelをGitHub Releaseへ公開します。
+同じsingle-engineへ受理済みのstatic 2-D機能は正式版`0.1.0`として固定され、tagのWindows/Linux gateを通した
+検証済みwheelがGitHub Releaseで公開済みです。canonical HDF5 schema v2、fixed-topology time field、
+Maxwell thermal wall、realized internal/surface schedule、Brownian active-wall continuationはこの公開版を遡及変更せず、
+未公開`0.2.0` candidateに属します。
 このCI成功はCOMSOL V&Vまたはportable性能の追加認定ではありません。P15は旧着手blockerをユーザーの明示指示で
 解除し、RK4-firstと、その受入後のexplicit midpoint chargeまで完了しました。続く外部M3-V評価、canonical
 RZ/P1 field builder F01、provider adapterと代表統合を担うF02も完了しました。F02はmixed meshのP1化、代表規模
@@ -269,9 +283,11 @@ P15-F、Waldmann--Gallis thermophoresisはP16、集約二電流continuous charge
 P18-I、quasistatic spherical DEPはP18-D、RZ rarefied-vorticity lift sensitivityはP18-L、effective-gas drag / thermophoresis
 sensitivityはP18-R、上記Brownian縦切りはB02、局所continuous-path applicability certificateはP19-L、aggregateな
 単一価負イオン収集を加えるthree-current chargeはP21 priority 1で完了しました。
-現行revisionはengine v37、compiled tile v18、proposal v10、event v16、boundary v5、result algorithm v5、
-result/checkpoint schema v2、field location v4、memory plan v14、physics catalog v17、
-physics runtime v20、RK4 enclosure v2、dense path v3、charge-stable exponential midpoint v3 / enclosure v4です。dense path v3は
+現行revisionはengine v46、compiled tile v21、proposal v10、event v22、boundary v7、result algorithm v6、
+result schema 3、checkpoint schema 2、canonical data schema 3、field location v4、field time v2、required field v6、
+geometry v7、memory plan v16、physics catalog v23、source schedule `realized_internal_surface_contact_schedule_v5`、
+physics runtime v22、topology `translation_periodic_xy_v1`、RK4 enclosure v2、dense path v3、
+charge-stable exponential midpoint v3 / enclosure v4です。dense path v3は
 始点相対のBernstein enclosureとTwoDiff残差を使い、world座標への戻しを外向きに丸めることで、
 座標原点に依存してevent certificateが閉じない問題を解消しました。このdense-path変更当時はendpoint、path、
 engine v32、event v14、RK4 global enclosure v2を変更しておらず、保存済みM3-C1証跡もその履歴revisionを維持します。本体を凍結した外部M3-Vの
@@ -399,7 +415,8 @@ optional aggregate three-currentのproduction実装はP21 priority 1で完了し
 普遍的COMSOL同等性の認定ではありません。authorityは
 [`solver/evidence/m3c3/caseP_three_current_companion_v1/`](solver/evidence/m3c3/caseP_three_current_companion_v1/README.md)です。
 旧M3-C0 umbrellaに残る全12 package総当たり、完全derived-field provenance、RK probeは
-`DEFERRED_NOT_RELEASE_BLOCKING`です。現行v0.1の完了条件へ含めず、科学revisionまたは明示的なcoverage拡張時だけ
+`DEFERRED_NOT_RELEASE_BLOCKING`です。公開済みv0.1にも未公開`0.2.0` candidateにも完了条件として含めず、
+科学revisionまたは明示的なcoverage拡張時だけ
 独立work packageとして再開します。
 
 本体coreへCOMSOL分岐や比較用toleranceを追加していません。final計時は

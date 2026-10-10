@@ -1,0 +1,778 @@
+{
+  "purpose": "F0 hotspot selection; not an accuracy or SLA certification",
+  "reuses": "tests.performance.p14_matrix public-run presets and measurements",
+  "rows": [
+    {
+      "row_id": "event-h0-n10000",
+      "profiled_public_observation": {
+        "row_id": "event-h0-n10000",
+        "science_key": "event/regular/initial/n=10000/cells=1/hits=0",
+        "mode": "warm",
+        "particle_count": 10000,
+        "layout": "regular",
+        "motion": "initial",
+        "hit_count_per_particle": 0,
+        "output_mode": "none",
+        "field_time": "static",
+        "execution_mode": "serial",
+        "cell_count": 1,
+        "macro_step_count": 1,
+        "boundary_event_count": 0,
+        "frame_count": 0,
+        "frame_row_count": 0,
+        "probe_count": 0,
+        "probe_row_count": 0,
+        "timing_s": {
+          "load_case": 0.01185829984024167,
+          "simulate": 0.3904318001586944,
+          "open_result": 0.007327399915084243,
+          "public_end_to_end": 0.4096196999307722
+        },
+        "throughput": {
+          "particles_per_simulate_s": 25612.667810192237,
+          "particle_macro_steps_per_simulate_s": 25612.667810192237,
+          "events_per_simulate_s": 0.0,
+          "effective_result_artifact_bytes_per_simulate_s": 6815733.244367855
+        },
+        "memory": {
+          "measurement_source": "Windows GetProcessMemoryInfo",
+          "peak_rss_before_measured_scope_bytes": 275824640,
+          "peak_rss_after_measured_scope_bytes": 277680128,
+          "additional_process_high_water_bytes": 1855488,
+          "rss_before_measured_scope_bytes": 256675840,
+          "rss_after_measured_scope_bytes": 257900544,
+          "solver_memory_plan": {
+            "certificate_work_bytes_per_particle": 0,
+            "components": {
+              "active_index": 90000,
+              "canonical_data": 1080256,
+              "field_runtime": 0,
+              "geometry_query_scratch": 33554432,
+              "output_buffer": 90000,
+              "particle_schedule": 1280000,
+              "physics_runtime": 160000,
+              "prepared_geometry": 536,
+              "probe_index": 0,
+              "replay_work": 0,
+              "resident_state": 1010000,
+              "safety_margin": 10023523,
+              "slab_certificate_work": 0,
+              "slab_dense_path": 0,
+              "slab_event_staging": 23017232,
+              "slab_event_work": 11760000,
+              "slab_failure_staging": 520000,
+              "slab_proposal_scratch": 3840000,
+              "slab_release_work": 640000,
+              "slab_stochastic_tree_work": 0,
+              "writer_reserve": 3145728
+            },
+            "dense_path_bytes_per_particle": 0,
+            "event_candidate_capacity": 1048576,
+            "event_staging_bytes_per_row": 624,
+            "event_staging_capacity": 524288,
+            "event_staging_fixed_bytes": 16777232,
+            "event_work_bytes_per_particle": 1176,
+            "failure_staging_bytes_per_particle": 52,
+            "field_preparation_transient_bytes": 0,
+            "geometry_preparation_transient_bytes": 11024,
+            "limit_bytes": 8589934592,
+            "phase_peaks": {
+              "load_case": 1215288,
+              "prepare": 4288293,
+              "run": 90211707
+            },
+            "planned_bytes": 90211707,
+            "release_work_bytes_per_particle": 64,
+            "replay_work_bytes": 0,
+            "revision": "solver_owned_memory_plan_v15",
+            "runtime_layout_revision": "resident_soa_serial_slab_v6",
+            "scratch_bytes_per_particle": 384,
+            "semantics": "predicted peak of solver-owned arrays; not process RSS",
+            "slab_particles": 10000,
+            "stochastic_tree_work_bytes_per_particle": 0
+          },
+          "planned_field_runtime_bytes": 0
+        },
+        "event_work": null,
+        "algorithm_revisions": {
+          "brownian_charge_dense_revision": null,
+          "brownian_composition_revision": null,
+          "brownian_rng_revision": null,
+          "brownian_tree_policy_revision": null,
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+          "engine_algorithm_revision": "particle_engine_v44",
+          "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v20",
+          "field_location_revision": "field_location_v4",
+          "field_time_revision": "fixed_topology_linear_time_v2",
+          "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v6",
+          "joint_ou_revision": null,
+          "joint_ou_split_revision": null,
+          "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+          "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+          "required_field_revision": "required_field_time_linear_v6",
+          "result_algorithm_revision": "durable_segmented_result_v6",
+          "rng_algorithm_revision": "philox4x32_10_v2",
+          "source_algorithm_revision": "realized_internal_surface_contact_schedule_v4",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+          "topology_algorithm_revision": null
+        },
+        "conditional_algorithm_revisions": {
+          "boundary_algorithm_revision": "contact_wall_laws_v7",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "rk4_dense_path_revision": null,
+          "rk4_enclosure_revision": null
+        },
+        "resolved_path_kind": "linear_exact",
+        "compiled_execution": {
+          "physics_tile_signature_count": 0,
+          "numba_disable_jit": "0",
+          "numba_num_threads": "1"
+        },
+        "case_identity": {
+          "case_file_hash": "sha256:6f7384d1c10999fbbbe79a43ca9ff8e7dd9a15546fc5634e3bc461b5a16135af",
+          "data_content_hash": "sha256:cdeafe5f36ac80babc9849075ad26cf243cd0a5295f43b63f731f2b55bd9e700"
+        },
+        "core_payload_sha256": "sha256:bb4ccc64f177074832ff3e1ce900ce50241ebd759c5b5bfbe00783337f31a10c",
+        "full_payload_sha256": "sha256:bb4ccc64f177074832ff3e1ce900ce50241ebd759c5b5bfbe00783337f31a10c",
+        "case_artifact_bytes": 1105288,
+        "result_artifact_bytes": 2661079,
+        "result_bytes_per_particle": 266.1079
+      },
+      "profiled_scope_includes_post_timing_scientific_digest": true,
+      "staging_allocations": [
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9143,
+          "function": "_allocate_boundary_event_buffer",
+          "primitive_calls": 1,
+          "calls": 1,
+          "own_s": 6.7e-06,
+          "cumulative_s": 6.900000000000001e-05
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9196,
+          "function": "_allocate_failure_event_buffer",
+          "primitive_calls": 1,
+          "calls": 1,
+          "own_s": 2.8000000000000003e-06,
+          "cumulative_s": 9.2e-06
+        }
+      ],
+      "largest_own_time": [
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+          "primitive_calls": 110265,
+          "calls": 110265,
+          "own_s": 0.0357117,
+          "cumulative_s": 0.0357117
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\geometry.py",
+          "line": 1494,
+          "function": "_finite_point",
+          "primitive_calls": 50000,
+          "calls": 50000,
+          "own_s": 0.030939,
+          "cumulative_s": 0.0684464
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\geometry.py",
+          "line": 177,
+          "function": "query_segment_candidates",
+          "primitive_calls": 10000,
+          "calls": 10000,
+          "own_s": 0.030778100000000003,
+          "cumulative_s": 0.1311671
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 303,
+          "function": "resolve_event_budget",
+          "primitive_calls": 10000,
+          "calls": 10000,
+          "own_s": 0.0293254,
+          "cumulative_s": 0.0934267
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\geometry.py",
+          "line": 197,
+          "function": "query_aabb_candidates",
+          "primitive_calls": 10000,
+          "calls": 10000,
+          "own_s": 0.024892300000000003,
+          "cumulative_s": 0.0594987
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'all' of 'numpy.ndarray' objects>",
+          "primitive_calls": 90103,
+          "calls": 90103,
+          "own_s": 0.0171853,
+          "cumulative_s": 0.058794400000000004
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 10122,
+          "function": "_finite_point",
+          "primitive_calls": 20000,
+          "calls": 20000,
+          "own_s": 0.013788900000000002,
+          "cumulative_s": 0.0293914
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\numpy\\_core\\_methods.py",
+          "line": 64,
+          "function": "_all",
+          "primitive_calls": 90103,
+          "calls": 90103,
+          "own_s": 0.013205000000000001,
+          "cumulative_s": 0.0416091
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.max>",
+          "primitive_calls": 80042,
+          "calls": 80042,
+          "own_s": 0.012527900000000002,
+          "cumulative_s": 0.021066400000000002
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 7433,
+          "function": "_validate_table_starts",
+          "primitive_calls": 1,
+          "calls": 1,
+          "own_s": 0.0121886,
+          "cumulative_s": 0.3267626
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 8206,
+          "function": "_commit_exact_clear_rows",
+          "primitive_calls": 1,
+          "calls": 1,
+          "own_s": 0.011351400000000001,
+          "cumulative_s": 0.012294900000000001
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 9476,
+          "function": "_conservative_path_padding",
+          "primitive_calls": 10000,
+          "calls": 10000,
+          "own_s": 0.0090314,
+          "cumulative_s": 0.1314611
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\geometry.py",
+          "line": 648,
+          "function": "classify_point",
+          "primitive_calls": 10000,
+          "calls": 10000,
+          "own_s": 0.0089966,
+          "cumulative_s": 0.15606450000000002
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 361,
+          "function": "_validate_event_budget_inputs",
+          "primitive_calls": 10000,
+          "calls": 10000,
+          "own_s": 0.008917300000000001,
+          "cumulative_s": 0.0437598
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 383,
+          "function": "<genexpr>",
+          "primitive_calls": 70000,
+          "calls": 70000,
+          "own_s": 0.008605,
+          "cumulative_s": 0.0121697
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 8087,
+          "function": "classify_event_point",
+          "primitive_calls": 10000,
+          "calls": 10000,
+          "own_s": 0.0082526,
+          "cumulative_s": 0.312294
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method nt.fsync>",
+          "primitive_calls": 7,
+          "calls": 7,
+          "own_s": 0.0081615,
+          "cumulative_s": 0.0081615
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method numpy.asarray>",
+          "primitive_calls": 70310,
+          "calls": 70310,
+          "own_s": 0.0078794,
+          "cumulative_s": 0.0078794
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 9490,
+          "function": "<lambda>",
+          "primitive_calls": 20000,
+          "calls": 20000,
+          "own_s": 0.006861000000000001,
+          "cumulative_s": 0.008538500000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method math.isfinite>",
+          "primitive_calls": 100019,
+          "calls": 100019,
+          "own_s": 0.0063135000000000005,
+          "cumulative_s": 0.0063135000000000005
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\numpy\\_core\\fromnumeric.py",
+          "line": 66,
+          "function": "_wrapreduction",
+          "primitive_calls": 10011,
+          "calls": 10011,
+          "own_s": 0.006184800000000001,
+          "cumulative_s": 0.0114058
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.all>",
+          "primitive_calls": 10002,
+          "calls": 10002,
+          "own_s": 0.0061489000000000005,
+          "cumulative_s": 0.018328200000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method math.ulp>",
+          "primitive_calls": 60005,
+          "calls": 60005,
+          "own_s": 0.005254,
+          "cumulative_s": 0.005254
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\h5py\\_hl\\group.py",
+          "line": 409,
+          "function": "_get",
+          "primitive_calls": 450,
+          "calls": 450,
+          "own_s": 0.0050533,
+          "cumulative_s": 0.011447800000000001
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 3980,
+          "function": "_prepare_exact_path_batch",
+          "primitive_calls": 2,
+          "calls": 2,
+          "own_s": 0.0049936,
+          "cumulative_s": 0.0052386
+        }
+      ]
+    },
+    {
+      "row_id": "event-h20-n10000",
+      "profiled_public_observation": {
+        "row_id": "event-h20-n10000",
+        "science_key": "event/regular/initial/n=10000/cells=1/hits=20",
+        "mode": "warm",
+        "particle_count": 10000,
+        "layout": "regular",
+        "motion": "initial",
+        "hit_count_per_particle": 20,
+        "output_mode": "none",
+        "field_time": "static",
+        "execution_mode": "serial",
+        "cell_count": 1,
+        "macro_step_count": 1,
+        "boundary_event_count": 200000,
+        "frame_count": 0,
+        "frame_row_count": 0,
+        "probe_count": 0,
+        "probe_row_count": 0,
+        "timing_s": {
+          "load_case": 0.01732430001720786,
+          "simulate": 7.299606000073254,
+          "open_result": 0.2842659999150783,
+          "public_end_to_end": 7.60119799990207
+        },
+        "throughput": {
+          "particles_per_simulate_s": 1369.9369527478123,
+          "particle_macro_steps_per_simulate_s": 1369.9369527478123,
+          "events_per_simulate_s": 27398.739054956244,
+          "effective_result_artifact_bytes_per_simulate_s": 9272097.562432928
+        },
+        "memory": {
+          "measurement_source": "Windows GetProcessMemoryInfo",
+          "peak_rss_before_measured_scope_bytes": 341065728,
+          "peak_rss_after_measured_scope_bytes": 341065728,
+          "additional_process_high_water_bytes": 0,
+          "rss_before_measured_scope_bytes": 305934336,
+          "rss_after_measured_scope_bytes": 305602560,
+          "solver_memory_plan": {
+            "certificate_work_bytes_per_particle": 0,
+            "components": {
+              "active_index": 90000,
+              "canonical_data": 1080256,
+              "field_runtime": 0,
+              "geometry_query_scratch": 33554432,
+              "output_buffer": 90000,
+              "particle_schedule": 1280000,
+              "physics_runtime": 160000,
+              "prepared_geometry": 536,
+              "probe_index": 0,
+              "replay_work": 0,
+              "resident_state": 1010000,
+              "safety_margin": 10023523,
+              "slab_certificate_work": 0,
+              "slab_dense_path": 0,
+              "slab_event_staging": 23017232,
+              "slab_event_work": 11760000,
+              "slab_failure_staging": 520000,
+              "slab_proposal_scratch": 3840000,
+              "slab_release_work": 640000,
+              "slab_stochastic_tree_work": 0,
+              "writer_reserve": 3145728
+            },
+            "dense_path_bytes_per_particle": 0,
+            "event_candidate_capacity": 1048576,
+            "event_staging_bytes_per_row": 624,
+            "event_staging_capacity": 524288,
+            "event_staging_fixed_bytes": 16777232,
+            "event_work_bytes_per_particle": 1176,
+            "failure_staging_bytes_per_particle": 52,
+            "field_preparation_transient_bytes": 0,
+            "geometry_preparation_transient_bytes": 11024,
+            "limit_bytes": 8589934592,
+            "phase_peaks": {
+              "load_case": 1215288,
+              "prepare": 4288293,
+              "run": 90211707
+            },
+            "planned_bytes": 90211707,
+            "release_work_bytes_per_particle": 64,
+            "replay_work_bytes": 0,
+            "revision": "solver_owned_memory_plan_v15",
+            "runtime_layout_revision": "resident_soa_serial_slab_v6",
+            "scratch_bytes_per_particle": 384,
+            "semantics": "predicted peak of solver-owned arrays; not process RSS",
+            "slab_particles": 10000,
+            "stochastic_tree_work_bytes_per_particle": 0
+          },
+          "planned_field_runtime_bytes": 0
+        },
+        "event_work": null,
+        "algorithm_revisions": {
+          "brownian_charge_dense_revision": null,
+          "brownian_composition_revision": null,
+          "brownian_rng_revision": null,
+          "brownian_tree_policy_revision": null,
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+          "engine_algorithm_revision": "particle_engine_v44",
+          "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v20",
+          "field_location_revision": "field_location_v4",
+          "field_time_revision": "fixed_topology_linear_time_v2",
+          "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v6",
+          "joint_ou_revision": null,
+          "joint_ou_split_revision": null,
+          "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+          "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+          "required_field_revision": "required_field_time_linear_v6",
+          "result_algorithm_revision": "durable_segmented_result_v6",
+          "rng_algorithm_revision": "philox4x32_10_v2",
+          "source_algorithm_revision": "realized_internal_surface_contact_schedule_v4",
+          "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+          "topology_algorithm_revision": null
+        },
+        "conditional_algorithm_revisions": {
+          "boundary_algorithm_revision": "contact_wall_laws_v7",
+          "exponential_midpoint_enclosure_revision": null,
+          "exponential_midpoint_revision": null,
+          "rk4_dense_path_revision": null,
+          "rk4_enclosure_revision": null
+        },
+        "resolved_path_kind": "linear_exact",
+        "compiled_execution": {
+          "physics_tile_signature_count": 0,
+          "numba_disable_jit": "0",
+          "numba_num_threads": "1"
+        },
+        "case_identity": {
+          "case_file_hash": "sha256:ad1c3f6d43f7affa89390b162eea3857d7ad845c70c66f6e16f6d185bfaecebc",
+          "data_content_hash": "sha256:cdeafe5f36ac80babc9849075ad26cf243cd0a5295f43b63f731f2b55bd9e700"
+        },
+        "core_payload_sha256": "sha256:6c1d670bc30d13f417f3fda04b2104f3c0c5218262c1f26e1ebce24d8bfbbff6",
+        "full_payload_sha256": "sha256:6c1d670bc30d13f417f3fda04b2104f3c0c5218262c1f26e1ebce24d8bfbbff6",
+        "case_artifact_bytes": 1105289,
+        "result_artifact_bytes": 67682659,
+        "result_bytes_per_particle": 6768.2659
+      },
+      "profiled_scope_includes_post_timing_scientific_digest": true,
+      "staging_allocations": [
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9143,
+          "function": "_allocate_boundary_event_buffer",
+          "primitive_calls": 1,
+          "calls": 1,
+          "own_s": 7.8e-06,
+          "cumulative_s": 8.450000000000001e-05
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9196,
+          "function": "_allocate_failure_event_buffer",
+          "primitive_calls": 1,
+          "calls": 1,
+          "own_s": 3.4e-06,
+          "cumulative_s": 1.2600000000000001e-05
+        }
+      ],
+      "largest_own_time": [
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 8977,
+          "function": "_commit_exact_wall_response",
+          "primitive_calls": 200000,
+          "calls": 200000,
+          "own_s": 1.2165076000000001,
+          "cumulative_s": 4.8044322
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 7284,
+          "function": "_point_contact_hit_position",
+          "primitive_calls": 200000,
+          "calls": 200000,
+          "own_s": 0.8295114,
+          "cumulative_s": 0.9888817000000001
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 8506,
+          "function": "_commit_exact_wall_rows",
+          "primitive_calls": 23,
+          "calls": 23,
+          "own_s": 0.5781126000000001,
+          "cumulative_s": 5.9601649000000005
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9207,
+          "function": "_append_boundary_event",
+          "primitive_calls": 200000,
+          "calls": 200000,
+          "own_s": 0.3930828,
+          "cumulative_s": 0.9934801000000001
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\h5py\\_hl\\dataset.py",
+          "line": 853,
+          "function": "__getitem__",
+          "primitive_calls": 3005,
+          "calls": 3005,
+          "own_s": 0.34791750000000005,
+          "cumulative_s": 0.416628
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 8953,
+          "function": "_select_event_candidate_rows",
+          "primitive_calls": 40,
+          "calls": 40,
+          "own_s": 0.3079544,
+          "cumulative_s": 0.3081342
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'searchsorted' of 'numpy.ndarray' objects>",
+          "primitive_calls": 400002,
+          "calls": 400002,
+          "own_s": 0.22501110000000002,
+          "cumulative_s": 0.22501110000000002
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\numpy\\_core\\numeric.py",
+          "line": 2471,
+          "function": "array_equal",
+          "primitive_calls": 200070,
+          "calls": 200070,
+          "own_s": 0.20182150000000001,
+          "cumulative_s": 0.42927770000000004
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 748,
+          "function": "locate_exact_first_event_batch",
+          "primitive_calls": 23,
+          "calls": 23,
+          "own_s": 0.19598390000000002,
+          "cumulative_s": 0.3119021
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9546,
+          "function": "_record_replay_jump",
+          "primitive_calls": 200000,
+          "calls": 200000,
+          "own_s": 0.178843,
+          "cumulative_s": 0.7056424
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\h5py\\_hl\\dataset.py",
+          "line": 295,
+          "function": "__getitem__",
+          "primitive_calls": 445,
+          "calls": 445,
+          "own_s": 0.1551199,
+          "cumulative_s": 0.6288489
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'copy' of 'numpy.ndarray' objects>",
+          "primitive_calls": 600276,
+          "calls": 600276,
+          "own_s": 0.15282510000000002,
+          "cumulative_s": 0.15282510000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'decode' of 'bytes' objects>",
+          "primitive_calls": 1800090,
+          "calls": 1800090,
+          "own_s": 0.1462417,
+          "cumulative_s": 0.1462417
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9263,
+          "function": "_canonical_boundary_event_post",
+          "primitive_calls": 200000,
+          "calls": 200000,
+          "own_s": 0.13969310000000001,
+          "cumulative_s": 0.5846623000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+          "primitive_calls": 313225,
+          "calls": 313225,
+          "own_s": 0.1356272,
+          "cumulative_s": 0.1356272
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method numpy.asarray>",
+          "primitive_calls": 474984,
+          "calls": 474984,
+          "own_s": 0.1350191,
+          "cumulative_s": 0.1350191
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\h5py\\_hl\\dataset.py",
+          "line": 962,
+          "function": "__setitem__",
+          "primitive_calls": 494,
+          "calls": 494,
+          "own_s": 0.13124650000000002,
+          "cumulative_s": 0.14747580000000002
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\numpy\\_core\\getlimits.py",
+          "line": 399,
+          "function": "__init__",
+          "primitive_calls": 400001,
+          "calls": 400001,
+          "own_s": 0.13061230000000001,
+          "cumulative_s": 0.13061230000000001
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\numpy\\_core\\fromnumeric.py",
+          "line": 48,
+          "function": "_wrapfunc",
+          "primitive_calls": 400312,
+          "calls": 400312,
+          "own_s": 0.1230499,
+          "cumulative_s": 0.39236570000000004
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 8732,
+          "function": "<genexpr>",
+          "primitive_calls": 400000,
+          "calls": 400000,
+          "own_s": 0.12101170000000001,
+          "cumulative_s": 0.12101170000000001
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 9438,
+          "function": "_ordered_candidate_table",
+          "primitive_calls": 20,
+          "calls": 20,
+          "own_s": 0.117731,
+          "cumulative_s": 0.1179077
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\boundaries.py",
+          "line": 401,
+          "function": "resolve_boundary_responses_batch",
+          "primitive_calls": 20,
+          "calls": 20,
+          "own_s": 0.1152519,
+          "cumulative_s": 0.1170936
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Lib\\site-packages\\numpy\\_core\\fromnumeric.py",
+          "line": 1459,
+          "function": "searchsorted",
+          "primitive_calls": 400002,
+          "calls": 400002,
+          "own_s": 0.11286850000000001,
+          "cumulative_s": 0.49962890000000004
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\events.py",
+          "line": 3980,
+          "function": "_prepare_exact_path_batch",
+          "primitive_calls": 46,
+          "calls": 46,
+          "own_s": 0.10601830000000001,
+          "cumulative_s": 0.11222960000000001
+        },
+        {
+          "file": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+          "line": 7321,
+          "function": "_canonical_hit_position",
+          "primitive_calls": 200000,
+          "calls": 200000,
+          "own_s": 0.09141460000000001,
+          "cumulative_s": 1.0996777
+        }
+      ]
+    }
+  ]
+}

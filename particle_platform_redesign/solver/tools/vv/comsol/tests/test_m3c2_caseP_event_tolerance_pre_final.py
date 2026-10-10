@@ -63,6 +63,7 @@ def _final(position_offset: float = 0.0) -> FinalParticles:
         failure_reason_code=np.zeros(PARTICLE_COUNT, dtype=np.uint16),
         mass_kg=np.ones(PARTICLE_COUNT, dtype=np.float64),
         drag_diameter_m=np.full(PARTICLE_COUNT, 1.0e-7),
+        contact_radius_m=np.zeros(PARTICLE_COUNT, dtype=np.float64),
         electrostatic_radius_m=np.full(PARTICLE_COUNT, 5.0e-8),
         displaced_volume_m3=np.ones(PARTICLE_COUNT, dtype=np.float64),
         model_weight=np.ones(PARTICLE_COUNT, dtype=np.float64),

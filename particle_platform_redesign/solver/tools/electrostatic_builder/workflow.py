@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Final, Literal, cast
 
 import numpy as np
-import yaml
 
 from chamber_particles.case_format import (
     DataBundle,
@@ -21,6 +20,7 @@ from chamber_particles.case_format import (
     read_with_info,
     write,
 )
+from chamber_particles.yaml_input import parse_document
 
 from .numerics import (
     ClosureParameters,
@@ -31,8 +31,8 @@ from .numerics import (
 
 type PotentialProfile = ConstantPotential | RadialExponentialPotential
 
-BUILDER_FORMAT_VERSION: Final = 1
-BUILDER_REVISION: Final = "reduced_electrostatic_builder_v1"
+BUILDER_FORMAT_VERSION: Final = 2
+BUILDER_REVISION: Final = "reduced_electrostatic_builder_v2"
 MODEL_REVISION: Final = "boltzmann_bohm_sheath_c2_v1"
 FIELD_SEMANTICS_REVISION: Final = "reduced_electrostatic_fields_v1"
 PRODUCER_VERSION: Final = version("chamber-particles")
@@ -138,9 +138,9 @@ def parse_configuration(raw: bytes, *, base_directory: Path) -> BuilderSpecifica
     """Parse the small strict YAML document used by the builder."""
 
     try:
-        document = yaml.safe_load(raw.decode("utf-8"))
-    except (UnicodeDecodeError, yaml.YAMLError) as error:
-        raise ValueError("builder configuration is not valid UTF-8 YAML") from error
+        document = parse_document(raw)
+    except ValueError as error:
+        raise ValueError(f"invalid builder configuration: {error}") from error
     root = _mapping(document, "configuration")
     _exact_keys(
         root,
@@ -788,7 +788,10 @@ def _name(value: object, label: str) -> str:
 def _number(value: object, label: str) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float):
         raise ValueError(f"{label} must be a finite number")
-    result = float(value)
+    try:
+        result = float(value)
+    except OverflowError as error:
+        raise ValueError(f"{label} must be a finite number") from error
     if not math.isfinite(result):
         raise ValueError(f"{label} must be a finite number")
     return result

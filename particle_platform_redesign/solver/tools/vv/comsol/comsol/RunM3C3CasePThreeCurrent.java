@@ -174,9 +174,10 @@ public final class RunM3C3CasePThreeCurrent {
       function.set("funcs", new String[][] {{P1_NAMES[index], "1"}});
       function.set("interp", "linear");
       function.set("extrap", "const");
+      function.importData();
+      // importData resets argument-unit metadata for the imported table.
       function.set("argunit", new String[] {"m", "m"});
       function.set("fununit", P1_UNITS[index]);
-      function.importData();
     }
     for (int index = 0; index < RELEASE_NAMES.length; index++) {
       String tag = "m3c3ReleaseF" + index;
@@ -188,9 +189,9 @@ public final class RunM3C3CasePThreeCurrent {
       function.set("funcs", new String[][] {{RELEASE_NAMES[index], "1"}});
       function.set("interp", "linear");
       function.set("extrap", "const");
+      function.importData();
       function.set("argunit", new String[] {"m", "m"});
       function.set("fununit", RELEASE_UNITS[index]);
-      function.importData();
     }
   }
 
@@ -278,15 +279,7 @@ public final class RunM3C3CasePThreeCurrent {
   }
 
   private static String[] epsteinDrag() {
-    String meanSpeed =
-        "sqrt(8*k_B_const*m3c1_Tg(r,z)/(pi*1.2753471408396638e-25[kg]))";
-    String coefficient = "(4*pi/3)*(d0/2)^2*m3c1_rhog(r,z)*(" + meanSpeed
-        + ")*1.3534291735288517";
-    return new String[] {
-      coefficient + "*(m3c1_ugr(r,z)-" + PHYSICS + ".vr)",
-      "0[N]",
-      coefficient + "*(m3c1_ugz(r,z)-" + PHYSICS + ".vz)"
-    };
+    return CommonP1Epstein.force(PHYSICS);
   }
 
   private static String[] lift() {
@@ -327,6 +320,7 @@ public final class RunM3C3CasePThreeCurrent {
     }
 
     model.param().set("d0", "100[nm]");
+    CommonP1Epstein.bind(model);
     physics.feature("relg1").set(
         "v0", new String[] {"m3c1_vr0(r,z)", "0[m/s]", "m3c1_vz0(r,z)"});
     physics.feature("relg1").set("aux0_auxq", "m3c1_Z0(r,z)");
@@ -338,6 +332,7 @@ public final class RunM3C3CasePThreeCurrent {
     configureForce(physics.feature("idf"), "M3-C3 relative-flow aggregate ion drag", ionDrag());
     physics.feature("ef1").set(
         "E", new String[] {"m3c1_Er(r,z)", "0[V/m]", "m3c1_Ez(r,z)"});
+    physics.feature("ef1").set("E_src", "userdef");
     physics.feature("ef1").set("StudyStep", STUDY + "/time");
 
     require(!has(physics.feature().tags(), EPSTEIN_TAG), "Epstein force tag exists");
@@ -351,12 +346,15 @@ public final class RunM3C3CasePThreeCurrent {
     configureForce(physics.feature(THERMO_TAG), "M3-C3 Waldmann heat-flux force",
         thermophoresis());
     physics.feature("gf1").set("rho", "m3c1_rhog(r,z)");
+    physics.feature("gf1").set("rho_mat", "userdef");
+    physics.feature("gf1").set("minput_temperature_src", "userdef");
     physics.feature("gf1").set("minput_temperature", "m3c1_Tg(r,z)");
     physics.feature("gf1").set("StudyStep", STUDY + "/time");
 
     physics.feature("wall1").set("WallCondition", "Stick");
     physics.feature("outin").set("WallCondition", "Freeze");
     physics.feature("outpump").set("WallCondition", "Disappear");
+    physics.feature("axi1").set("WallCondition", "Bounce");
     for (String tag : new String[] {"wall1", "outin", "outpump", "axi1", "relg1", "pp1"}) {
       physics.feature(tag).set("StudyStep", STUDY + "/time");
     }
@@ -375,6 +373,8 @@ public final class RunM3C3CasePThreeCurrent {
         "Gas inlet is not Freeze/hold");
     require("Disappear".equals(physics.feature("outpump").getString("WallCondition")),
         "Pump outlet is not Disappear/escape");
+    require("Bounce".equals(physics.feature("axi1").getString("WallCondition")),
+        "The companion axis must use the registered meridional-fold mapping");
     require(physics.prop("StoreParticleStatusData").getBoolean("StoreParticleStatusData"),
         "Particle status storage is disabled");
     require(!physics.prop("StoreExtra").getBoolean("StoreExtra"),
@@ -413,7 +413,7 @@ public final class RunM3C3CasePThreeCurrent {
     return base;
   }
 
-  private static String runStudy(Model model, String fixedStepSeconds) {
+  private static String runStudy(Model model, String fixedStepSeconds, String sourceReadback) throws Exception {
     model.study().create(STUDY);
     model.study(STUDY).label("M3-C3 Case-P 100 nm aggregate three-current");
     model.study(STUDY).create("time", "Transient");
@@ -440,6 +440,8 @@ public final class RunM3C3CasePThreeCurrent {
     transientSolver.set("erkorder", 4);
     transientSolver.set("rktimestep", fixedStepSeconds + "[s]");
     transientSolver.set("rtol", "1e-8");
+    ParticleRunReadback.write(model, ".", sourceReadback,
+        ParticleRunReadback.snapshot(model, PHYSICS, transientSolver, STUDY));
 
     long started = System.nanoTime();
     model.study(STUDY).run();
@@ -609,8 +611,9 @@ public final class RunM3C3CasePThreeCurrent {
     try {
       model = ModelUtil.loadCopy("M3C3CasePThreeCurrent", SOURCE);
       validateSource(model);
+      String sourceReadback = ParticleRunReadback.snapshot(model, PHYSICS, null, null);
       createFunctions(model);
-      String solution = runStudy(model, fixedStepSeconds);
+      String solution = runStudy(model, fixedStepSeconds, sourceReadback);
       createDataset(model, solution);
       double[] times = model.sol(solution).getPVals();
       require(times.length == EXPECTED_TIMES,
@@ -622,8 +625,13 @@ public final class RunM3C3CasePThreeCurrent {
       require(particles == EXPECTED_PARTICLES,
           "Expected 287 particles, got " + particles);
       exportHistory(model);
+      ParticleRunReadback.exportRetainedTerminalBoundaries(model, "partM3C3", PHYSICS, ".");
       if (diagnostic) {
         exportDiagnostics(model);
+        exportDiagnosticTable(model, "m3c3AssembledForce", "diagnostic_assembled_force_raw_wide.csv",
+            new String[] {PHYSICS + ".pidx", "t", PHYSICS + ".Ftr", PHYSICS + ".Ftz"},
+            new String[] {"1", "s", "N", "N"},
+            new String[] {"particle_id", "time_s", "native_total_force_r_N", "native_total_force_z_N"});
       }
       emit("configuration", "case", "caseP_100nm_three_current", "step_s",
           fixedStepSeconds,
@@ -642,6 +650,8 @@ public final class RunM3C3CasePThreeCurrent {
           "release_source", "shared_three_current_release_table", "boundary_material", "stick",
           "boundary_37", "freeze_hold", "boundary_35", "disappear_escape",
           "source_model", SOURCE, "model_saved", "false");
+      emit("run_pass", "case", "caseP_100nm_three_current", "step_s", fixedStepSeconds,
+          "time_end_s", "0.03", "output_times", "121", "particles", "287", "model_saved", "false");
     } finally {
       if (model != null) ModelUtil.remove(model.tag());
     }
@@ -665,10 +675,6 @@ public final class RunM3C3CasePThreeCurrent {
       emit("launch", "case", "caseP_100nm_three_current", "source", SOURCE,
           "step_s", fixedStepSeconds);
       run(fixedStepSeconds);
-      emit("run_pass", "case", "caseP_100nm_three_current", "step_s",
-          fixedStepSeconds,
-          "time_end_s", "0.03", "output_times", "121", "particles", "287",
-          "model_saved", "false");
     } catch (Throwable failure) {
       emit("fatal", "exception", failure.getClass().getName(), "message",
           String.valueOf(failure.getMessage()));

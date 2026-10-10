@@ -1,11 +1,11 @@
-# Result format v2
+# Result format v3
 
-この文書は現行engine v37、result algorithm v5、checkpoint schema 2の永続resultと
+この文書はresult schema 3、現行engine v45、result algorithm v6、checkpoint schema 2の永続resultと
 `ResultView`の契約です。軌道計算の入力契約は
-[`case_format_v2.md`](case_format_v2.md)が所有し、集計、可視化、COMSOL比較はこのresultを読むcore外の
+[`case_format_v3.md`](case_format_v3.md)が所有し、集計、可視化、COMSOL比較はこのresultを読むcore外の
 toolが所有します。
 
-## v2成果物の物理配置
+## v3成果物の物理配置
 
 正常終了したresultは次のdurable layoutを持ちます。segment数はengineがaccepted macro barrierで判定する
 `cumulative_solver_work_v1` cadenceと最終macroから決まります。
@@ -43,7 +43,7 @@ root attributeは次のとおりです。
 
 | attribute | 値 |
 |---|---|
-| `result_schema_version` | integer `2` |
+| `result_schema_version` | integer `3` |
 | `segment_index` | zero-based integer `N` |
 | `closed` | uint8 `1` |
 
@@ -57,10 +57,12 @@ release eventは物理時刻、次に`particle_id`の順で格納します。P04
 /events/release/source_id       int32   [E]
 ```
 
-boundary eventは、局在した材料境界到達と適用済みlawを一行に保存します。releaseが
-`event_ordinal=0`なので、同じ粒子のboundary eventは1から連続します。行の物理的identityは
+boundary eventは、局在した材料壁interactionまたはperiodic topology transferを一行に保存します。releaseが
+`event_ordinal=0`なので、同じ粒子のwall/periodic logical interactionは1から連続します。行の物理的identityは
 `(particle_id,event_ordinal)`、一括readerの公開canonical順は`(time_s,particle_id,event_ordinal)`であり、file行順を
-意味論のauthorityにしません。同時hit candidateは各event内でfacet ID順です。`candidate_count[i]`は重複列を持たず、
+意味論のauthorityにしません。同時hit candidateは各event内でfacet ID順です。event v21はevent v19 / v18と同じくexact、一般RK4、
+exponential midpoint、Brownianの最初のhitと局在budget内で同時なincident facet集合をここへ保持し、
+primary facetだけへ潰しません。`candidate_count[i]`は重複列を持たず、
 `candidate_offset[i+1]-candidate_offset[i]`です。hold eventは`law_id=hold`、`outcome=held`で、
 `position_m`とpre/postの速度・電荷はhit時payloadを表します。
 
@@ -68,10 +70,14 @@ boundary eventは、局在した材料境界到達と適用済みlawを一行に
 /events/boundary/time_s                    float64 [B]
 /events/boundary/particle_id               int64   [B]
 /events/boundary/event_ordinal             uint32  [B]
+/events/boundary/interaction_kind          UTF-8   [B]
 /events/boundary/primary_facet_id          int64   [B]
+/events/boundary/destination_facet_id      int64   [B]
 /events/boundary/boundary_id               int32   [B]
 /events/boundary/material_id               int32   [B]
+/events/boundary/contact_radius_m           float64 [B]
 /events/boundary/position_m                float64 [B,2]
+/events/boundary/position_post_m           float64 [B,2]
 /events/boundary/normal                    float64 [B,2]
 /events/boundary/velocity_pre_m_s          float64 [B,2]
 /events/boundary/velocity_post_m_s         float64 [B,2]
@@ -86,6 +92,13 @@ boundary eventは、局在した材料境界到達と適用済みlawを一行に
 /events/boundary/candidate_offset           int64   [B+1]
 /events/boundary/candidate_facet_id         int64   [C]
 ```
+
+`interaction_kind`のcanonical値は`wall`または`periodic_translation`だけです。`wall`行は
+`destination_facet_id=-1`かつ`position_post_m=position_m`で、従来どおり`law_id`/`outcome`が材料応答を表します。
+`periodic_translation`行は`primary_facet_id`を出発面、`destination_facet_id>=0`を対応面、`position_m`を出発面上の
+局在位置、`position_post_m`をtranslation後の位置として保存し、`law_id=""`、`outcome="transferred"`です。
+速度、電荷、model weightはtransferで変えず、材料wall lawとwall RNGは呼びません。この三列を省いた旧encodingや
+列値からinteraction種別を推測するcompatibility readerは持ちません。
 
 粒子単位で局在できる数値不能はrun全体を捨てず、failure eventとして保存します。行順は
 `(time_s, particle_id, event_ordinal)`のstable順で、reason codeはmanifestのversioned mappingがauthorityです。
@@ -204,9 +217,16 @@ manifest、`final.h5`を検査して読みます。
 
 ## `final.h5`
 
-rootの`result_schema_version` attributeは2です。`/particles`は常に全resident粒子を`particle_id`順で
+rootの`result_schema_version` attributeは3です。`/particles`は常に全resident粒子を`particle_id`順で
 格納します。`time_s`はrun-end snapshotの時刻として全行でrun終端です。escaped/failedの物理terminal時刻は
 対応するboundary/failure eventが所有します。
+
+finalの行数はprepare済みの粒子容量、およびcomplete manifestの`counts.particles`と一致しなければなりません。
+粒子IDは非negative・厳密昇順で、一意ですが、連番である必要はありません。publish前、完成resultのopen時、
+`read_final()`が実際に開いたhandleで同じ検査を行います。IDと既存のcontact radius、validity、
+lifecycle/reasonの値検査は固定長row blockで行い、検査用の全粒子配列を追加しません。
+manifestの粒子数・macro-step数も非negative integerを要求します。この検査は列構造・容量・ID順序の整合を
+保証するもので、sourceへのexact ID membership、全event/frameの参照整合や任意改変の検出は追加しません。
 
 ```text
 /particles/particle_id                   int64   [N]
@@ -219,6 +239,7 @@ rootの`result_schema_version` attributeは2です。`/particles`は常に全res
 /particles/lifecycle                     uint8   [N]
 /particles/mass_kg                       float64 [N]
 /particles/drag_diameter_m               float64 [N]
+/particles/contact_radius_m               float64 [N]
 /particles/electrostatic_radius_m        float64 [N]
 /particles/displaced_volume_m3           float64 [N]
 /particles/model_weight                  float64 [N]
@@ -227,6 +248,10 @@ rootの`result_schema_version` attributeは2です。`/particles`は常に全res
 ```
 
 粒子propertyは入力の独立authorityをそのまま保持し、質量や半径から別propertyを再構成しません。
+`contact_radius_m`は有限かつ非負で、0はpoint particleです。boundary eventの`position_m`は接触時の粒子中心を表し、
+同じ行の`contact_radius_m`が粒子の独立した物理接触半径を保持します。groupの`particle_center`判定でも
+この値を0に書き換えません。方式はmanifestの`resolved.boundary_laws[].contact_geometry`で識別します。
+省略時の入力は`particle_surface`として解決し、case hashとgeometry/event/source/engine revisionをresume identityに保持します。
 active/stuck/heldの`kinematics_valid`は1です。heldはhit位置・hit時速度・hit時電荷を保持するinactiveな
 非deposition終端で、以後の物理更新を行いません。escaped/failedは0で、有限なposition/velocity payloadには最後のhitまたは
 局在できたfailure状態を保持しますが科学値として使用できません。NaNをlogical nullやfailure sentinelとして
@@ -245,14 +270,15 @@ manifestは少なくとも次を記録します。
   `segment_count`、`latest_commit_id`、strictな`resume_identity`とそのSHA-256
 - case名、raw YAMLの`case_file_hash`、canonical HDF5の`data_content_hash`、case schema version
 - data coordinate system、particle motion mode
-- engine、compiled tile、step-proposal、選択methodのRK4またはexponential enclosure、一般RK4で使うdense path、physics catalog/runtime、field-location、required-field、geometry、event、boundaryのalgorithm revision
-- source/RNG algorithm revisionとsource facet/source position/probabilistic wallのdraw kind
-- B02ではBrownian RNG、joint OU、conditional splitのrevision、interval-tree depth、root/split draw kind、
+- engine、compiled tile、step-proposal、選択methodのRK4またはexponential enclosure、一般RK4で使うdense path、physics catalog/runtime、field-location、required-field、geometry、event、boundary、topologyのalgorithm revision
+- source/RNG algorithm revision。sourceはrealized rowだけでdraw kindを持たず、RNG draw kindはprobabilistic/
+  Maxwell wallとBrownian root/splitに限定する
+- BrownianではRNG、joint OU、conditional split、tree policyのrevision、base/max depth、root/split draw kind、
   macro-root coefficient policy
 - requested/resolved integrator、backend、seed、path kind、`maximum_dt_charge_lipschitz`、
   physics model revision、required field binding
 - source ID/name/type、解決済みboundary law・priority・fallback law・反発係数・付着確率
-- start/end/dt、YAML順の`source_id_to_name`
+- start/end/dt、field snapshotによる追加macro split時刻、YAML順の`source_id_to_name`
 - resolved event設定。一般RK4材料boundary経路ではaccepted particle-piece、candidate query、refinement、最大深さの集約
 - wall event、residual split、RZ axis crossingの集約
 - solver-owned memory plan revision、semantics、limit/planned bytes、slab幅、phase peak、component内訳
@@ -262,41 +288,55 @@ manifestは少なくとも次を記録します。
 P06 revision 3bの数値pathはengine `coupled_rk4_engine_v6`で確立した。現行algorithm revisionは次である。
 
 ```text
-engine          particle_engine_v37
-compiled tile   compiled_cpu_tile_v18
+engine          particle_engine_v45
+compiled tile   compiled_cpu_tile_v21
 runtime layout  resident_soa_serial_slab_v6
-memory plan     solver_owned_memory_plan_v14
+memory plan     solver_owned_memory_plan_v16
 step proposal   coupled_fixed_step_proposal_v10
 RK4 enclosure   rk4_global_abs_enclosure_v2
 RK4 dense path  rk4_position_hermite_state_extension_v3
 exponential     charge_stable_exponential_midpoint_v3
 exp enclosure   exponential_midpoint_local_stage_enclosure_v4
-event           line_quadratic_rk4_axis_first_hit_v16
-boundary        point_wall_laws_v5
-physics catalog inertial_langevin_rz_catalog_v17
-physics runtime signed_ion_compiled_physics_runtime_v20
-required field  required_field_rz_axis_domain_regular_v3
+event           line_quadratic_curved_capsule_periodic_first_hit_v21
+boundary        contact_wall_laws_v7
+topology        translation_periodic_xy_v1
+source          realized_internal_surface_contact_schedule_v5
+physics catalog inertial_langevin_2d_catalog_v23
+physics runtime signed_ion_compiled_physics_runtime_v22
+required field  required_field_time_linear_v6
 field location  field_location_v4
-geometry        line_boundary_stackless_volume_cell_bvh_v5
-result          durable_segmented_result_v5
+field time      fixed_topology_linear_time_v2
+geometry        line_boundary_capsule_contact_bvh_v7
+result          durable_segmented_result_v6
 checkpoint      schema version 2
 ```
 
 `rk4_enclosure_revision`と`rk4_dense_path_revision`は一般stage RK4を実際に使うrunだけに記録し、ballistic、
 `quadratic_exact`、exponential midpoint、OUへ実行していないrevisionを付けません。
+`field_time_revision`はcanonical data schema v3の固定topology・線形snapshot契約を識別する。
+required field entryは`time_interpolation`、snapshot数・範囲を、time sectionは固定`dt_s` gridへ追加した
+`field_snapshot_splits_s`を記録する。静的場だけなら追加splitは空で、result dataset/schemaは増えない。
+resume identityにもfield time revisionとsplit時刻を含めるため、異なる時間partitionのpartialを再開しない。
 
-`point_wall_laws_v5`では`specular`はparameterなしの完全鏡面で、`restitution`だけが法線・接線の反発係数を持つ。
-`probabilistic_stick`のfallbackはparameterなしの`specular`または両係数を持つ`restitution`である。eventの`law_id`は
-選択されたtop-level lawを保持し、compound lawの実現分岐は既存の`outcome`とdraw referenceで表す。v5はparameterなしの
-`hold`と`held` outcomeを追加する。event列は増やさず、lifecycle seriesへ`held`を一列追加したためresult/checkpoint schemaを
+`contact_wall_laws_v7`では`specular`はparameterなしの完全鏡面で、`restitution`だけが法線・接線の反発係数を持つ。
+`maxwell_thermal`はwall temperature、Maxwell拡散混合率、接線wall-frame velocityをmanifestへ記録する。
+`probabilistic_stick`のfallbackはparameterなしの`specular`、両係数を持つ`restitution`、または完全なparameterを持つ
+`maxwell_thermal`である。eventの`law_id`は選択されたtop-level lawを保持し、compound lawの実現分岐は既存の
+`outcome`とdraw referenceで表す。v5はparameterなしの`hold`と`held` outcomeを追加し、v6は既存event列を変えず
+Maxwell thermal反射を追加した。lifecycle seriesへ`held`を一列追加したためresult/checkpoint schemaを
 2、result algorithmをv4へ一度だけ更新した。case schema v2は不変で、v1 result/checkpointの互換readerやmigration shimは
-持たない。`inertial_langevin_rz_catalog_v17`は`gravity_buoyancy_standard_v1`のmodel revisionを維持しつつ、annular domainを
+持たない。`realized_internal_surface_schedule_v3`ではinternal tableは`position_m`、surface tableは`facet_id`と
+strict interiorの`facet_parameter`を持ち、両者が粒子ごとのvelocity、release時刻、物性を保持する。
+source分布のselectorやsource RNGはresult/manifestへ持ち込まない。
+`inertial_langevin_rz_catalog_v19`は`gravity_buoyancy_standard_v1`のmodel revisionを維持しつつ、annular domainを
 含む全RZ caseでradial gravityを0へ限定する。Cartesian XYの第一成分はこの制約を受けない。
 P15-Fのion dragも既存のresolved physics-model mapping、required-field binding、particle-local failureへ収まり、
 result datasetまたはschemaを追加しない。
 P16のthermophoresisも同じmapping/binding/failureを使い、`waldmann_gallis_free_molecular_single_species_heat_flux_v1`
 をmanifestのresolved modelへ記録するだけである。force traceやheat-flux datasetをresultへ複製せず、result schema v1、
 checkpoint schema 1、durable result algorithm v3を維持する。
+P22のTalbot熱泳動とSaffman liftも既存の`resolved_physics_models`、`required_fields`、failure vocabularyを
+そのまま使う。model別のresult datasetやschemaは追加しない。
 P18-Iの二つのaggregate ion-drag revisionも同じresolved mappingと既存failureを使う。manifestは選択した
 model/revisionを記録するだけで、stage force、producer固有速度、比較残差をresultへ追加しない。外部frozen-force比較は
 `evidence/p18i/`が所有し、result/checkpoint schema 1は不変である。
@@ -358,8 +398,8 @@ runtime v5、RK4 enclosure v2、exponential midpoint/enclosure v2、memory plan 
 既存の`charge_number` state、frame/probe、boundary event、checkpoint列を再利用するため、case/result/checkpoint/event
 schemaとdatasetは変更していない。P14-R remote CIはこのruntime変更とは別のrelease trackである。
 
-engine v29 / proposal v7はB02の`ou_langevin`とcubic Hermite proposalを同じengine/event/output経路へ追加した。
-physics modelはCartesian XY、fixed charge、`epstein_linear_v1`、noise model `inertial_langevin_fdt`のrevision
+engine v29 / proposal v7はB02の`ou_langevin`とcubic Hermite proposalを同じengine/event/output経路へ追加した履歴revisionである。
+当時のphysics modelはCartesian XY、fixed charge、`epstein_linear_v1`、noise model `inertial_langevin_fdt`のrevision
 `inertial_langevin_fdt_epstein_linear_frozen_start_v1`だけを許し、P18-H以前はterminal `stick`/`escape`以外を拒否した。
 catalog v10、runtime v9、runtime layout v6、memory plan v12へ更新したが、compiled tile v11、event v11、geometry v5、
 boundary v4、result algorithm v3、case schema v2、result/checkpoint schema 1と既存logical datasetは変更していない。
@@ -376,7 +416,8 @@ dense path `rk4_position_hermite_state_extension_v2`で、global-firstの
 applicability認証にbounded local fallbackを追加した。P19-L完了時点では`rk4_global_abs_enclosure_v2`をsupport/event
 authorityとして維持し、
 result/checkpoint schema 1とlogical datasetを変えていない。runtime v16はP19-L性能snapshot、v17はDEP上限の
-1 ULP外向き境界だけを変更した後続revisionである。現行v18はcharge Jacobianをstage payloadへ追加する。
+1 ULP外向き境界だけを変更した後続revisionである。runtime v18はcharge Jacobianをstage payloadへ追加し、
+現行runtime v22はそのpayload意味を維持する。
 
 後続M3-C1のevent v14はresult/checkpoint schema 1、logical dataset、event/final/frame payloadを変更しない。
 manifestのevent revisionだけが`line_quadratic_rk4_axis_first_hit_v14`を記録する。global enclosureはshortened-stage、
@@ -399,50 +440,73 @@ case/result/checkpoint schemaとlogical datasetを変更しない。P19-L証拠�
 
 Brownian resultのtop-level manifestは`brownian_rng_revision=philox4x32_10_brownian_interval_tree_v1`、
 `joint_ou_revision=inertial_joint_ou_v1`、`joint_ou_split_revision=conditional_gaussian_half_split_v1`、
-`brownian_interval_tree_depth`を持つ。`random_draw_kinds`は`brownian_root_normal`と`brownian_split_normal`、
-`resolved`は`brownian_coefficient_policy=macro_root_frozen_start_v1`、noise model/revision、
-`path_kind=cubic_hermite`を記録する。resume identityはBrownian RNG/OU/split revision、coefficient policy、depth、
+`brownian_tree_policy_revision=conditional_boundary_refinement_v1`、`brownian_interval_tree_depth`、
+`brownian_adaptive_max_depth`を持つ。`random_draw_kinds`は`brownian_root_normal`と`brownian_split_normal`、
+`resolved`は`brownian_coefficient_policy=macro_root_frozen_midpoint_v1`、noise model/revision、
+`path_kind=cubic_hermite`を記録する。resume identityはBrownian RNG/OU/split/tree-policy revision、coefficient policy、base/max depth、
 resolved noise model/revisionを含むため、不一致partialを再利用しない。root/split stream IDとpath kindはmanifest provenanceであり、
 resume identityに同名keyを重複させない。checkpointは既存macro countと粒子stateを使い、mutable RNG cursorや新しい
 Brownian datasetを追加しない。
 
-B03はresult/checkpoint schemaを変更せず、noise revision
-`inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1`、coefficient policy
-`macro_root_frozen_midpoint_v1`、composition method `stochastic_exponential_midpoint_v1`を既存のresolved
+現行Brownianはresult/checkpoint schemaを変更せず、noise revision
+`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`、coefficient policy
+`macro_root_frozen_midpoint_v1`、composition method `stochastic_exponential_midpoint_v1`をXY/RZ共通のresolved
 model/algorithm provenanceとresume identityで識別する。現行proposal v10の`state_at()`はmidpoint-frozen
 `G,J<=0`のaffine exponential chargeをroot始点から再評価し、保存済み始終点を厳密に戻す。
 prepare済みinvariantを証明できない場合はfail-closedとする。別のcharge trace datasetは作らない。
 axis hitではaccepted prefixの既存axis counterに加え、残時間の新しい`root_stochastic_interval`が
 従来のBrownian RNG identityに反映される。mutable RNG cursorやaxis専用datasetは追加しない。
-B02は`macro_root_frozen_start_v1`を維持し、旧resultの意味とpayloadを変更しない。
-B03の初回closeoutはcatalog v16 / engine v34 / proposal v9 / event v15 / runtime v17 / compiled tile v16 /
-memory plan v13で完了した。現行supersessionはengine v37 / proposal v10 / event v16 / catalog v17 / runtime v20 /
-compiled tile v18 / memory plan v14である。
+fixed chargeは同じaffine式の`G=J=0`へ退化する。旧XY frozen-start / 旧RZ projected revisionは現行入力として
+受理せず、履歴resultがそれらを記録することだけが正しい。現行supersessionはengine v45 / proposal v10 / event v21 /
+catalog v23 / runtime v22 / compiled tile v21 / memory plan v16である。
 CPU layoutはv6のままで、B03 path arrayの静的な保守上限は`648 B/row`、受入上限は`2048 B/row`である。
 正式characterizationは24/24実行を全粒子active・failure 0で完了した。計時とprocess RSSはmachine-localな
 外部performance証跡[`evidence/b03/`](../evidence/b03/README.md)が所有し、portable result契約や合否閾値へ格上げしない。
 
-result v5はlogical datasetとschema 2を変えず、固定64 macro cadenceだけを置換した。engineが
+B04のBrownian active wallは新しいdatasetやschemaを追加しない。`/events/boundary/*`は決定論runと
+同じ`law_id`/`outcome`、hit時刻・位置、incident/response速度、charge、logical/physical ordinalを持つ。
+terminal lawは既存lifecycle/terminal timeを更新し、active lawはhit位置とresponse速度から粒子を継続する。
+wall counter RNGはphysical boundary ordinalで再構成でき、active hit後の残時間は次の
+`root_stochastic_interval`ordinalがBrownian root RNG identityへ反映される。元rootの未使用cubic tailは永続化しない。
+restart ordinalやstochastic treeの中間値をcheckpoint/resultの追加cursorとして保存せず、accepted macro barrierの
+既存particle stateから再構成するため、checkpoint/resumeは通常runと全公開payloadが一致する。
+B02初回sliceとB03初回closeoutの履歴resultの意味、数値payload、schema versionは変更しない。
+
+result v5導入時はlogical datasetとschema 2を変えず、固定64 macro cadenceだけを置換した。有限半径接触は
+同じdurability algorithmを維持したままfinal粒子とboundary eventへ`contact_radius_m`を追加し、result schemaを3へ
+更新した。checkpointは接触半径を変更しないruntime authorityから再構成するためschema 2のままである。engineが
 `W=macro_step_count+accepted_particle_pieces+candidate_queries+refinements`と
 `T=max(2^20,128N)`（`N`はscheduled particle count）を所有し、accepted macro barrierでepoch開始時との差が
 `T`以上、または最終macroならcommitを決める。
 同じcadence objectをtop-level manifestとresume identityへ含めるため、異なるthreshold/revisionのpartialを再利用しない。
 output schedule、frame/probe、slab幅は`W/T`へ入らない。`output.py`の同期single-owner writerはengineの決定後に
 segment→inactive A/B checkpoint→`LATEST`をatomic順で永続化するだけで、cadenceを再決定しない。
+現行result v6はresult schema 3のcanonical encodingとして`interaction_kind`、`destination_facet_id`、
+`position_post_m`を全boundary eventへ必須化する。checkpoint schemaは2のままで、これらの列を欠く旧resultを
+同じschema番号の別variantとして推測読込しない。
 
 このdurability契約は同一local volume上でatomic replace/renameが働くprocess failure後の再実行を対象とします。
 power lossに対するfsync durability、remote filesystemのatomicity、同じOUTへ書く複数process間の排他は保証しません。
 
-`philox4x32_10_v1`のwall drawはmanifestのrequested seed、`particle_id`、zero-based physical boundary ordinal、
-`random_draw_kinds.wall_probabilistic_stick`から再構成する。現行schemaではrelease ordinalが0でboundary ordinalが
-1から連続するため、physical boundary ordinalは`event_ordinal-1`である。局在refinement、residual split、
-trajectory scheduleはこのordinalを進めない。draw専用datasetやmutable RNG stateをresultへ追加しない。
+`philox4x32_10_v2`のwall drawはmanifestのrequested seed、`particle_id`、zero-based physical boundary ordinal、
+`random_draw_kinds`の`wall_probabilistic_stick`、`wall_maxwell_diffuse`、`wall_maxwell_normal`、
+`wall_maxwell_tangential`から再構成する。logical `event_ordinal`はrelease後のwallとperiodic transferの両方で進むが、
+physical boundary ordinalは材料wallだけで進み、periodic transferはwall RNG drawを消費しない。したがって外部readerが
+event列から再構成する場合は、同じparticleについて先行する`interaction_kind == "wall"`行の件数を使い、
+`event_ordinal-1`を使わない。局在refinement、residual split、trajectory scheduleもphysical ordinalを進めない。
+法線thermal drawはopen uniform、接線thermal drawはstandard normalである。draw専用datasetやmutable RNG stateを
+resultへ追加しない。
+
+sourceはcanonical HDF5の粒子rowから再構成する。surface rowの`facet_id`と`facet_parameter`から位置を一度導出し、
+保存済みvelocity、release時刻、物性を変更しない。確率分布を使う入力作成はsolver外で完了させるため、manifestに
+source draw kindやsource RNG identityは存在せず、source用draw datasetも追加しない。
 
 `resolved.path_kind`は無力場の`linear_exact`、証明済み一定加速度の`quadratic_exact`、一般
-`rk4_reintegrated`、`exponential_midpoint_reintegrated`、B02の`cubic_hermite`を区別します。
-`cubic_hermite`は固定depth `0..10`のOU interval treeの各leafについて、OU endpoint位置・速度から定まる
-numerical pathです。材料eventとframe/probeは同じleaf pathを読みますが、連続OU trajectoryのexact first-passageを
-意味しません。
+`rk4_reintegrated`、`exponential_midpoint_reintegrated`、Brownianの`cubic_hermite`を区別します。
+`cubic_hermite`はbase depth `0..10`のOU interval treeを全rootへ一様に生成し、wall、RZ axis、または
+証明不能候補だけをoptional max depthまで条件付き分割した各leafについて、OU endpoint位置・速度から定まる
+numerical pathです。base=maxは従来固定depthへ退化します。材料eventとframe/probeは同じleaf pathを読みますが、
+連続OU trajectoryのexact first-passage、zero miss probability、またはuniform max-depth pathを意味しません。
 `quadratic_exact`はtopology-completeな材料boundaryと併用するcaseだけでなく、fully-supported regular field
 box内のboundaryless caseにも使います。`rk4_reintegrated`は、証明済みのXY/RZ・fixed chargeまたはP15 continuous charge・
 fully-supported `RegularLayout` caseに現れ、revision 3b/P06-RZではtopology-completeな材料boundaryとterminal
@@ -450,8 +514,8 @@ stick/escapeを組み合わせられ、engine v11では厳密内向きinterior-f
 この意味論はengine v30でも不変です。
 P06-Uは材料domain meshと完全一致するfully-supported P1/Q1にもこの組合せを
 許可します。これらは利用者が選ぶ第二integratorではなく、同じ`rk4_fixed` engine内のpath意味論です。
-boundaryless unstructuredはStage 1Aでも含めません。YAML case schemaはv2、canonical HDF5 data schemaはv1、
-result schemaはv2で、上記の小さい
+boundaryless unstructuredはStage 1Aでも含めません。YAML case schemaはv3、canonical HDF5 data schemaはv3、
+result schemaはv3で、上記の小さい
 failure/series/probe datasetだけを追加し、diagnostic treeは作りません。`exponential_midpoint_reintegrated`は
 利用者が選ぶintegratorであり、fixed chargeに加えてP15 continuous chargeを扱い、同じ`StepProposal.state_at()`と
 event loopで材料wall/residual/RZ axisを扱います。engine v30はstage-evaluated RZ meridional pathもaxisでfoldし、
@@ -473,7 +537,7 @@ manifestの`maximum_dt_charge_lipschitz`はfixed chargeでは0、continuous char
 `dt * L_Z`上限であり、選択methodにかかわらず0.5以下を要求する。
 `memory_plan` mappingは次を持ちます。
 
-- `revision: solver_owned_memory_plan_v14`と`runtime_layout_revision: resident_soa_serial_slab_v6`
+- `revision: solver_owned_memory_plan_v16`と`runtime_layout_revision: resident_soa_serial_slab_v6`
 - `semantics`、`limit_bytes`、`planned_bytes`
 - `geometry_preparation_transient_bytes`、`field_preparation_transient_bytes`
 - `slab_particles`、`scratch_bytes_per_particle`、`event_work_bytes_per_particle`、
@@ -488,13 +552,18 @@ manifestの`maximum_dt_charge_lipschitz`はfixed chargeでは0、continuous char
   `slab_stochastic_tree_work`、`slab_dense_path`、`slab_certificate_work`、
   `slab_release_work`、`slab_event_staging`、`slab_failure_staging`、safety marginの`components`
 
+memory plan v16の`stochastic_tree_work_bytes_per_particle`は、実際に境界候補になったrow数ではなく
+`brownian_adaptive_max_depth`から`128*(D_max+4)`として解決する。従ってadaptive runでも予測peakは
+到達可能な最深treeを保守的に含み、観測された候補率で過小評価しない。active wall/axis後のfresh-root stateは
+同じslab幅のbounded SoA waveだけに保持し、前rootのgenerator/tree/proposalを解放してから次waveを進めるため、
+反射回数分のroot scratchを同時保持しない。
+
 このplanはsolverが所有する配列の予測peakであり、Python、HDF5、native library、allocatorを含む
 OS process RSSのhard capではありません。最小slabが収まらなければ開始前に
 拒否します。writerのbounded raw-chunk cacheとreserveはplanへ含みます。event/failureは固定容量SoA/CSR stagingを
 各waveでcanonical順にflushし、総event数に比例するmacro-wide object stagingを持ちません。frame/probeは要求slotへ
 direct columnar replayします。
-`event_work_bytes_per_particle`は `24 * (max_refinements + 1)` で、deferred target/depth/interactionの
-三つのint64列を表します。depth依存容量をproposal scratchへ隠さず、slab幅のfit判定へ明示的に含めます。
+`event_work_bytes_per_particle`はdeferred target/depth/interactionのint64 stack三列と、point/surface arbitrationの行別workを表します。periodicまたはparticle_centerのpoint viewでは後者も計画します。depth依存容量をproposal scratchへ隠さず、slab幅のfit判定へ含めます。byte式はengine/cpuのmemory-plan ownerとmanifestが所有します。
 P19-Lを使う一般RK4では`dense_path_bytes_per_particle=176`です。`certificate_work_bytes_per_particle`は共有する
 event split budgetで決まるinterval stackと、最大64 cellの候補arenaを含みます。split budget 2の現観測では
 72 B/row + 544 B/row = 616 B/rowです。
@@ -544,8 +613,9 @@ P06-Sは小さいphysics runtimeと明示Stokes--Cunninghamを完成し、P08は
 薄いCLIでStage 1Aをcloseした。P09はmemory/runtime layoutとphase memory plan、P10は同じproduction engineの
 compiled field/physics/RK4 passを完了した。P11は同じengineへexponential midpointを追加し、P12は同じengineの
 event-heavy workをworker-localに分配して完了した。P13は同じlogical event/frame/final意味論をmulti-segment、
-checkpoint、recoveryへ拡張して完了した。P14の全performance matrixは別packageであり、richer source distributionと
-moving wallも別の後続gateに残る。P14はそのmatrixを完了したが、result schema/datasetを変更していない。
+checkpoint、recoveryへ拡張して完了した。P14の全performance matrixは別packageである。moving wallは後続gateに残る。
+現在は任意分布をsolver外でrealizeしたinternal/surface tableを受け入れるが、
+core内distribution engineは持たない。P14はそのmatrixを完了したが、result schema/datasetを変更していない。
 P13/P14は未実装dataset、互換reader、migration frameworkをschema v1へ追加していない。
 P15も既存のZ state/result/checkpoint列を再利用し、新しいdataset、reader、schema、migration frameworkを追加していない。
 P18-Hは`held`をdeposition/escapeと分離するためresult/checkpoint schemaを2へ一度だけ更新し、旧schema用の

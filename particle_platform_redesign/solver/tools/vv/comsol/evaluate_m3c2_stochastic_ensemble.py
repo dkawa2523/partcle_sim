@@ -31,10 +31,15 @@ from typing import Any, Final, Literal, cast
 
 import numpy as np
 
-from tools.vv.comsol.assemble_m3c2_campaign import _participant_manifest_projection
+from tools.vv.comsol.assemble_m3c2_campaign import (
+    _participant_manifest_projection,
+    require_participant_meaning,
+)
+from tools.vv.comsol.meaning_preflight import load_inventory
 
 TOOL_REVISION: Final = "m3c2_stochastic_ensemble_evaluator_v4"
-TOOL_REVISION_V5: Final = "m3c2_stochastic_ensemble_evaluator_v5"
+HISTORICAL_TOOL_REVISION_V5: Final = "m3c2_stochastic_ensemble_evaluator_v5"
+TOOL_REVISION_V6: Final = "m3c2_stochastic_ensemble_evaluator_v6"
 PARTICIPANTS: Final = ("comsol", "candidate")
 FATES: Final = ("active", "stuck", "held", "escaped")
 TERMINAL_CURVES: Final = ("stuck", "held", "escaped", "any_terminal")
@@ -103,6 +108,18 @@ CASEP_STUDY_PHYSICS_TAGS: Final = frozenset(
 )
 CASEP_STUDY_MULTIPHYSICS_TAGS: Final = frozenset({"nipfptp1", "pccptp1", "ehsptp1"})
 CASEP_RNG_REVISION: Final = "philox4x32_10_brownian_interval_tree_v1"
+CASEP_HISTORICAL_NOISE_REVISION: Final = (
+    "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+)
+CASEP_CURRENT_NOISE_REVISION: Final = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
+CASEP_ACCEPTED_NOISE_REVISIONS: Final = frozenset(
+    {CASEP_HISTORICAL_NOISE_REVISION, CASEP_CURRENT_NOISE_REVISION}
+)
+CASEP_CANDIDATE_TOOL_NOISE_REVISIONS: Final = {
+    "m3c2_candidate_campaign_runner_v4": CASEP_HISTORICAL_NOISE_REVISION,
+    "m3c2_candidate_campaign_runner_v5": CASEP_CURRENT_NOISE_REVISION,
+    "m3c2_candidate_campaign_runner_v6": CASEP_CURRENT_NOISE_REVISION,
+}
 CASEP_PROJECTION_REASON: Final = "final前のscope/hash検証補強"
 type Purpose = Literal["pilot", "final"]
 
@@ -206,6 +223,7 @@ class Campaign:
     participant_manifests: dict[str, dict[str, str]] | None
     campaign_binding: dict[str, str] | None
     evaluation_policy_sha256: str | None
+    candidate_tool_revision: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -1227,7 +1245,9 @@ def _read_events(
                 raise ValueError(f"{path}:{line}: duplicate terminal event")
             if not math.isfinite(event_time) or not 0.0 <= event_time <= float(times_s[-1]):
                 raise ValueError(f"{path}:{line}: terminal-event time is outside the run")
-            if not row["boundary_semantic"].strip():
+            # Population gates use observed terminal status/time, not boundary identity.
+            # Disappear can erase its native entity ID; retain that explicit absence.
+            if not row["boundary_semantic"].strip() and row.get("event_type") != "terminal_status":
                 raise ValueError(f"{path}:{line}: boundary_semantic is empty")
             arrivals[particle] = event_time
             fates[particle] = outcome
@@ -1490,24 +1510,33 @@ def _casep_comsol_participant(raw: dict[str, Any], purpose: Purpose) -> None:
         raise ValueError("Case-P COMSOL participant contains no replicas")
 
 
-def _validate_casep_candidate_identity(raw: dict[str, Any], purpose: Purpose) -> None:
+def _validate_casep_candidate_identity(raw: dict[str, Any], purpose: Purpose) -> str:
     identity = _mapping(raw.get("campaign_identity"), "candidate campaign identity")
+    tool_revision = raw.get("tool_revision")
     if (
-        raw.get("tool_revision"),
         raw.get("status"),
         raw.get("participant"),
         raw.get("purpose"),
         identity.get("case_id"),
         identity.get("evaluation_case_id"),
     ) != (
-        "m3c2_candidate_campaign_runner_v4",
         "COMPLETE",
         "candidate",
         purpose,
         CASEP_SOURCE_CASE_ID,
         CASEP_EVALUATION_CASE_ID,
-    ):
+    ) or tool_revision not in CASEP_CANDIDATE_TOOL_NOISE_REVISIONS:
         raise ValueError("Case-P candidate participant manifest identity differs")
+    expected_revision = CASEP_CANDIDATE_TOOL_NOISE_REVISIONS[cast(str, tool_revision)]
+    recorded_revision = raw.get("brownian_noise_revision")
+    if tool_revision in {
+        "m3c2_candidate_campaign_runner_v5",
+        "m3c2_candidate_campaign_runner_v6",
+    } and (recorded_revision != expected_revision):
+        raise ValueError("Case-P candidate Brownian provenance is missing or differs")
+    if recorded_revision is not None and recorded_revision != expected_revision:
+        raise ValueError("Case-P candidate runner and Brownian model revisions differ")
+    return expected_revision
 
 
 def _validate_casep_candidate_binding(raw: dict[str, Any]) -> None:
@@ -1522,11 +1551,12 @@ def _validate_casep_candidate_binding(raw: dict[str, Any]) -> None:
     _validate_sha256_digest(policy_sha256, "Case-P candidate participant policy hash")
 
 
-def _casep_candidate_participant(raw: dict[str, Any], purpose: Purpose) -> None:
-    _validate_casep_candidate_identity(raw, purpose)
+def _casep_candidate_participant(raw: dict[str, Any], purpose: Purpose) -> str:
+    expected_noise_revision = _validate_casep_candidate_identity(raw, purpose)
     _validate_casep_candidate_binding(raw)
     levels = _mapping(raw.get("levels"), "candidate participant levels")
     replica_count = 0
+    noise_revisions: set[str] = set()
     for level_name, level_value in levels.items():
         level = _mapping(level_value, f"candidate level {level_name}")
         for replica_index, replica_value in enumerate(
@@ -1540,18 +1570,23 @@ def _casep_candidate_participant(raw: dict[str, Any], purpose: Purpose) -> None:
             if (
                 replica.get("status") != "COMPLETE"
                 or replica.get("brownian_rng_revision") != CASEP_RNG_REVISION
-                or noise.get("revision")
-                != "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+                or noise.get("revision") not in CASEP_ACCEPTED_NOISE_REVISIONS
             ):
                 raise ValueError("Case-P candidate RNG authority differs")
+            noise_revisions.add(cast(str, noise["revision"]))
             replica_count += 1
     if replica_count == 0:
         raise ValueError("Case-P candidate participant contains no replicas")
+    if len(noise_revisions) != 1:
+        raise ValueError("Case-P candidate participant mixes Brownian model revisions")
+    if noise_revisions != {expected_noise_revision}:
+        raise ValueError("Case-P candidate runner and Brownian model revisions differ")
+    return cast(str, raw["tool_revision"])
 
 
 def _validate_casep_participant_manifests(
     records: dict[str, Any], root: Path, purpose: Purpose
-) -> None:
+) -> str:
     paths = {
         participant: _resolve_artifact(
             records[participant], root, f"{participant} participant manifest"
@@ -1559,7 +1594,7 @@ def _validate_casep_participant_manifests(
         for participant in PARTICIPANTS
     }
     _casep_comsol_participant(_json(paths["comsol"], "COMSOL participant"), purpose)
-    _casep_candidate_participant(_json(paths["candidate"], "candidate participant"), purpose)
+    return _casep_candidate_participant(_json(paths["candidate"], "candidate participant"), purpose)
 
 
 def _embedded_candidate_path_reference(
@@ -1714,15 +1749,19 @@ def _campaign_identity(
     dict[str, dict[str, str]] | None,
     dict[str, str] | None,
     str | None,
+    str | None,
 ]:
     case_id = str(raw.get("case_id", "")).strip() or None
     participant_manifests = None
+    candidate_tool_revision = None
     if raw.get("participant_manifests") is not None:
         manifest_records = _mapping(raw.get("participant_manifests"), "participant manifests")
         if set(manifest_records) != set(PARTICIPANTS):
             raise ValueError("participant manifests must contain exactly COMSOL and candidate")
         if policy.revision >= 5:
-            _validate_casep_participant_manifests(manifest_records, root, purpose)
+            candidate_tool_revision = _validate_casep_participant_manifests(
+                manifest_records, root, purpose
+            )
         participant_manifests = {
             participant: _scope_artifact(
                 manifest_records[participant], root, f"{participant} participant manifest"
@@ -1762,6 +1801,7 @@ def _campaign_identity(
         participant_manifests,
         _campaign_binding(raw, canonical_input, policy),
         _campaign_evaluation_policy_sha256(raw, policy),
+        candidate_tool_revision,
     )
 
 
@@ -1781,6 +1821,7 @@ def _load_campaign(path: Path, policy: Policy) -> Campaign:
         participant_manifests,
         campaign_binding,
         evaluation_policy_sha256,
+        candidate_tool_revision,
     ) = _campaign_identity(
         raw,
         scope,
@@ -1793,6 +1834,13 @@ def _load_campaign(path: Path, policy: Policy) -> Campaign:
     participant_records = _mapping(raw.get("participants"), "participants")
     if set(participant_records) != set(PARTICIPANTS):
         raise ValueError("campaign must contain exactly COMSOL and candidate")
+    if participant_manifests is not None:
+        reference = participant_manifests["comsol"]
+        comsol_path = (root / reference["path"]).resolve()
+        comsol = load_inventory(comsol_path)
+        candidate_path = (root / participant_manifests["candidate"]["path"]).resolve()
+        candidate_manifest = load_inventory(candidate_path)
+        require_participant_meaning(comsol, candidate_manifest, comsol_path.parent)
     if case_id == CASEP_EVALUATION_CASE_ID:
         _validate_participant_manifest_projection(
             _mapping(raw.get("participant_manifests"), "participant manifests"),
@@ -1826,6 +1874,7 @@ def _load_campaign(path: Path, policy: Policy) -> Campaign:
         participant_manifests=participant_manifests,
         campaign_binding=campaign_binding,
         evaluation_policy_sha256=evaluation_policy_sha256,
+        candidate_tool_revision=candidate_tool_revision,
     )
 
 
@@ -3558,11 +3607,23 @@ def _evaluation_manifest_metadata(
         "bootstrap_interpretation": bootstrap_interpretation,
         "independence_evidence": independence_evidence,
         "performance_classification": "SEPARATE_FROM_ACCURACY_DECISION",
+        "claim_policy": {
+            "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+            "disappear_boundary_identity": "NOT_TESTED",
+            "escape_boundary_cause_identity": "NOT_TESTED",
+            "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES",
+            "continuous_noise_time_law": "NOT_TESTED",
+            "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+        },
     }
 
 
-def _tool_revision(policy: Policy) -> str:
-    return TOOL_REVISION_V5 if policy.revision >= 5 else TOOL_REVISION
+def _tool_revision(policy: Policy, campaign: Campaign) -> str:
+    if policy.revision < 5:
+        return TOOL_REVISION
+    if campaign.candidate_tool_revision not in CASEP_CANDIDATE_TOOL_NOISE_REVISIONS:
+        raise ValueError("evaluator revision requires a recognized candidate runner revision")
+    return TOOL_REVISION_V6
 
 
 def evaluate(
@@ -3605,7 +3666,7 @@ def evaluate(
     metadata = _evaluation_manifest_metadata(policy, campaign, scope_fingerprint, source_identity)
     manifest: dict[str, object] = {
         "schema_version": policy.revision,
-        "tool_revision": _tool_revision(policy),
+        "tool_revision": _tool_revision(policy, campaign),
         "phase": campaign.purpose,
         "status": status,
         "policy": {
@@ -3711,7 +3772,7 @@ def _final_decision(
     pilot_report = _json(resolved_pilot, "M3-C2 pilot report")
     if (
         pilot_report.get("schema_version") != policy.revision
-        or pilot_report.get("tool_revision") != _tool_revision(policy)
+        or pilot_report.get("tool_revision") != _tool_revision(policy, campaign)
         or pilot_report.get("phase") != "pilot"
         or pilot_report.get("status") != "PASS"
     ):

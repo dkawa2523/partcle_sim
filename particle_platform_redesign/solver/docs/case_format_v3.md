@@ -1,22 +1,25 @@
-# Canonical case format v2
+# Canonical case format v3
 
 この文書は、外部producerとsolverの間で受け渡す`case.yaml`と`case.h5`の実装契約です。
 COMSOL固有の列名、study、selectionはここへ持ち込まず、adapterがSIとcanonical semanticsへ変換します。
 
-現記載は現行engine `particle_engine_v37`、compiled CPU tile v18、proposal v10、event v16、physics catalog
-`inertial_langevin_rz_catalog_v17`、physics runtime `signed_ion_compiled_physics_runtime_v20`、
-RK4 enclosure v2、dense path `rk4_position_hermite_state_extension_v3`、charge-stable exponential midpoint v3 / enclosure v4、
-field location v4、runtime layout v6、memory plan v14、boundary algorithm `point_wall_laws_v5`までの実装契約である。case schema v2は実測で製品価値を示せなかった粒子内multithreading設定を削除し、
-`resources`をmemory budgetだけへ戻した。cumulative solver workで決めるdurable epoch、checkpoint、resume identity、
+現記載はcase/canonical data schema v3とsource algorithm
+`realized_internal_surface_contact_schedule_v5`の入力契約である。完全な現行algorithm rosterは
+[`implementation_plan.md`](../../implementation_plan.md)と実行manifestをauthorityとし、ここへ複製しない。
+case schema v2は実測で製品価値を示せなかった粒子内multithreading設定を削除し、`resources`をmemory budgetだけへ
+戻した。schema v3は固定meshの時間依存field、canonical realized surface table、drag径・静電半径から独立した
+`contact_radius_m`、static Cartesian XYのpure-translation periodic topologyを一つの現行形式へ統合する。
+cumulative solver workで決めるdurable epoch、checkpoint、resume identity、
 同期single-owner writerはsolver内部とresult formatの責務であり、YAML/HDF5へcheckpoint cadenceやresume modeの
 設定keyを追加しない。format v1は未releaseの試作schemaとして拒否し、過去の`resources.threads`を受ける
 compatibility aliasや二重parserは作らない。
 
 engine v7以降の一般曲線材料壁refinement batchとengine v8のaccepted replay保持選択は内部work partitionであり、
-YAMLに選択子を追加しない。現行event v16のtransverse/start-contact/axis certificateとrow-local statusも内部数値判定であり、`case.yaml`、`case.h5`、
-case schema v2を変更しない。
+YAMLに選択子を追加しない。現行event `line_quadratic_curved_capsule_periodic_first_hit_v22`の
+transverse/start-contact/finite-contact-set departure/axis/corner/capsule/periodic certificateとrow-local statusも内部数値判定であり、`case.yaml`、`case.h5`、
+case schema v3へcertificate専用keyを要求しない。groupごとの接触位置は、後述の`contact_geometry`で明示する。
 P19-Lのglobal-first/local-fallback applicability certificate、64-cell候補上限、dense path、failure code 9、
-`solver.event.maximum_refinements`を共有する分割budgetも内部数値判定である。producerが局所認証方式、cell上限、第二の
+`solver.event.max_refinements`を共有する分割budgetも内部数値判定である。producerが局所認証方式、cell上限、第二の
 refinement設定を選ぶYAML/HDF5 keyは追加しない。
 event v16のquery authorityも内部実装である。global enclosureはshortened-stage、field support、applicability、acceptance
 safetyを所有し、global supportを独立に証明済みのvalid `rk4_dense` rowだけcurrent dense Bernstein boundでevent broad-phase
@@ -24,7 +27,9 @@ queryを行う。Hermite pathでは物理position budgetとroundoff budgetを加
 root-relative TwoDiffを使う。validなRK4 dense rowのposition Bernstein control enclosureがfacetの既存budget込みinside
 half-spaceへ全4点で厳密に入る時だけ候補をclearし、証明不能なら保持してsplitする。このcertificateをproducerが選ぶ
 YAML/HDF5 keyは追加しない。monotone clearはcubic Hermite derivative-Bernstein enclosureの明示opt-inだけとし、一般
-RK4/exponential/scalarは証明不能時にfail-closedとする。この選択をcase入力へ公開しない。
+RK4/exponential/scalarは証明不能時にfail-closedとする。この選択をcase入力へ公開しない。event v22は
+event v19 / v18の曲線pathにおける最初のhitと局在budget内の同時incident facet集合を維持し、材料facetならexact pathと同じ
+`corner_policy`へ渡す。周期facetならwall lawを使わず対応facetへtransferする。candidate順で一面へ丸める設定keyは追加しない。
 dense path v3の原点相対Bernstein enclosure、TwoDiff残差、方向付き外向き座標変換も内部丸め規則であり、
 endpoint・path・event意味やcase keyを増やさない。
 P10/P14のregular compiled locator、P1/Q1 previous-cell strict-interior hint、supported-containment BVHと
@@ -40,8 +45,11 @@ drag係数をHDF5へ追加しない。
   realized particle table、producer provenanceを所有する。
 - `case.yaml`は`SimulationSpec`、HDF5への相対または絶対path、期待logical content hashを所有する。
 - 同じ座標系、単位、boundary group、field定義を両方へ重複記載しない。
-- `case_format.py`だけがHDF5 schemaのread/write/hashを所有し、`case.py`だけがYAMLと二ファイル間の
-  参照整合を所有する。
+- `case_format.py`だけがHDF5 schemaのread/write/hashを所有し、`case.py`だけがcase YAMLのdomain検査と
+  二ファイル間の参照整合を所有する。`yaml_input.parse_document`はUTF-8 bytesからobjectへの文法解析だけを所有し、
+  file I/O、hash、domain検査を持たない。全階層の重複keyとmerge key（`<<`）は拒否する。
+  通常のaliasはdomain検査へ渡し、入力hashは再dumpせず元のbytesから計算する。
+  float64へ表現できない巨大整数も、非finite値と同じく`CaseError`として返す。
 - `read()`は検証済みDataBundle、`read_with_info()`は同じ単一読込経路からDataBundleと
   `CaseFileInfo(schema_version, content_hash)`を返す。`load_case`は後者を使い、大規模配列のschema検査を
   hash照合のために重複実行しない。
@@ -75,16 +83,20 @@ drag係数をHDF5へ追加しない。
   P1/Q1にもCartesian XYの同じ一般RK4経路を許可する。P06-RZはregular fieldおよびtopology-completeな材料domainで
   RZ一般RK4を同じ経路へ追加する。boundaryless一般RK4は引き続きregular support boxを必須とする。model固有mappingは
   [`physics_models.md`](physics_models.md)が所有する。
-   B01の数値primitiveをproductionへ接続したB02は、`physics.noise`と`solver.integrator: ou_langevin`を
-   同時に選ぶ場合だけ受理する。組合せはCartesian XY、Epstein linear drag-only、fixed-charge state、terminal
-  `stick`/`escape`に限定し、continuous charge、他の力、反射、RZはfail-closedとする。固定depth interval treeの
-   各leafはcubic Hermite numerical pathとしてevent/replayへ渡すが、連続OU first-passageの厳密解とは扱わない。
-  B03の完了revisionは同じ`physics.noise` categoryと`ou_langevin`を使い、別integratorまたは
-  COMSOL専用case keyを追加しない。`inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1`だけが
-  `axisymmetric_rz_meridional`、native/effective-gas線形Epstein、fixed/continuous charge、既存additive forceを
-  受理する。terminal boundaryは`stick`/`escape`/`hold`に限り、反射・確率wallはfail-closedのままとする。
-  係数評価policy、root内線形charge、axis hit後の新root ordinalはengine/proposal/RNGの内部数値契約であり、
-  YAML/HDF5へ選択keyを追加しない。B02 revisionの受理範囲とpayloadは変更しない。
+   B01の数値primitiveをproductionへ接続したBrownian経路は、`physics.noise`と
+  `solver.integrator: ou_langevin`を同時に選ぶ場合だけ受理する。現行revision
+  `inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`はCartesian XYとRZ meridional、native/effective-gas
+  線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを一つのengineで扱う。一様base-depth
+  interval treeの各leafはcubic Hermite numerical pathとしてevent/replayへ渡すが、連続OU first-passageの厳密解とは
+  扱わない。係数はdeterministic half-stepで得たroot midpointだけで評価し、support/applicabilityをRNG draw前に
+  fail-closedで確定する。B04はこのnoise revisionへ既存terminal `stick`/`escape`/`hold`とactiveな
+  `specular`/`restitution`/`maxwell_thermal`/`probabilistic_stick`を接続する。active hitでは認証済みprefixだけを
+  commitし、post-wall stateからmacro残時間を新しい`root_stochastic_interval`として再開する。元rootのcubic tailを
+  fold/restrictせず、連続OU exact first-passageを主張しない。
+  B05では一様base depthを全rootの精度authorityとして維持し、wall、RZ axis、証明不能候補だけを
+  `adaptive_max_depth`まで条件付き二分する。base=maxは従来固定depthへ退化し、continuous OU exact first-passageや
+  uniform max-depthと同じglobal解像度は主張しない。係数評価policy、root内線形charge、axis hit後の新root ordinalはengine/proposal/RNGの内部数値契約であり、
+  YAML/HDF5へ選択keyを追加しない。旧XY frozen-start / 旧RZ projected revisionは現行入力として受理しない。
    再利用可能なDataBundleに未参照のlayout/fieldが含まれることは許すが、有効なphysicsや未対応modelを
   黙って無視しない。P07の静止壁lawはforce-freeな`linear_exact`、証明済み一定加速度の`quadratic_exact`、
   およびXY/RZの一般`rk4_reintegrated`で利用できる。一般RK4のsingle-facet active応答はhit後stateから
@@ -111,6 +123,8 @@ drag係数をHDF5へ追加しない。
   RZの両端`r=0`のaxis seamは材料壁ではなく`line2`へ登録しない。boundary rowを0件とした
   collision-free解析caseも同じengineのno-hit profileとして許可するが、stage評価が必要なら上記regular-box
   certificateを必須とする。
+- `translation_periodic_xy_v1`のpaired groupはgeometryの外周facetとして残すが材料wallではないため、
+  `boundaries`へlawを設定しない。その他の全boundary groupには従来どおりlawをちょうど一つ設定する。
 - 材料boundaryを持つtable sourceの初期位置はstrict interiorに限る。surface sourceだけが境界上releaseを
   明示し、位置とcanonical facet IDをrealized scheduleへ保持する。ownerと法線はprepared geometryが所有する。
   固定距離nudgeやresident local-coordinate authorityは作らない。
@@ -125,10 +139,10 @@ drag係数をHDF5へ追加しない。
 
 ## `case.yaml`
 
-top-levelは次の10 keyを必須とし、未知keyとdefault補完を許可しません。
+top-levelは次の10 keyを必須とし、未知keyとdefault補完を許可しません。`topology`だけは後述の形式で省略可能です。
 
 ```yaml
-format_version: 2
+format_version: 3
 case:
   name: example
   data_path: case.h5
@@ -164,9 +178,39 @@ output:
   probes: null
 ```
 
-B02 inertial Brownianを選ぶ最小mappingは次です。`noise`は独自の温度fieldを持たず、FDT温度は
-`drag.gas_temperature_field`が唯一のauthorityです。`interval_tree_depth`は数値pathを定める必須整数で、
-既定値を持ちません。
+### Static Cartesian XYのpure-translation periodic topology
+
+周期接続が必要なcaseだけ、top-levelへ次を追加します。`first_to_second_m`はfirst groupの各facetを
+second groupへ写すSIの方向付き平行移動で、逆向き写像はsolverがその負値として一意に構成します。
+
+```yaml
+topology:
+  model: translation_periodic_xy_v1
+  field_match_rtol: 1.0e-12
+  pairs:
+    - first_boundary_group: periodic_left
+      second_boundary_group: periodic_right
+      first_to_second_m: [0.01, 0.0]
+```
+
+このrevisionの制約は次です。
+
+- `motion.mode`とcanonical dataのcoordinate systemはともに`cartesian_xy`で、geometryとrequired fieldは静的です。
+  RZ、3-D、moving topology、rotation、reflection、scaleは受理しません。
+- 一つのboundary groupは一組だけに属します。paired groupは同数のline facetを持ち、指定translation後の端点・長さが
+  一対一に一致し、外向き法線は反対でなければなりません。
+- 周期groupは材料`boundaries`から除外します。transferはstick/reflect/thermal law、wall RNG、physical wall ordinalを
+  消費せず、位置だけを対応面へ平行移動して速度・電荷・残時間を維持します。
+- 選択済みrequired fieldは静的なnodal fieldに限り、全componentがpaired seamで`field_match_rtol`内に一致する必要があります。
+  regular fieldでは周期面が一つのaxisに沿うsupport boxの向かい合う面でなければなりません。
+- surface sourceは周期面からreleaseできません。table sourceは従来どおりstrict interiorを要求し、固定nudgeでseamを
+  回避しません。材料facetと周期facetが同時候補になるcorner、または異なるtranslationが同時候補になるcornerは
+  任意の一方を選ばずfail-closedにします。
+
+2-D inertial Brownianを選ぶ最小mappingは次です。`noise`は独自の温度fieldを持たず、FDT温度は
+`drag.gas_temperature_field`が唯一のauthorityです。`interval_tree_depth`は必ず生成する一様精度depthを定める
+必須整数で、既定値を持ちません。`adaptive_max_depth`は壁・axis候補だけを条件付き二分する上限で、省略時は
+`interval_tree_depth`と同値です。
 
 ```yaml
 motion:
@@ -191,16 +235,20 @@ physics:
     applicability: error
   noise:
     model: inertial_langevin_fdt
-    revision: inertial_langevin_fdt_epstein_linear_frozen_start_v1
+    revision: inertial_langevin_fdt_epstein_linear_midpoint_2d_v2
     interval_tree_depth: 6
+    adaptive_max_depth: 9
 ```
 
-この組合せでは`interval_tree_depth`を`0..10`とし、prepareした最大Epstein rateについて`gamma*dt<=1e6`、
-実行中の各macro-rootについて有限な`0<gamma*h<=1e6`を要求します。係数はmacro-root開始stateで凍結します。
-depth、noise revision、Brownian RNG/OU/split revision、coefficient policyはresult/checkpoint resume identityへ
+この組合せでは`interval_tree_depth`を`0..10`、`adaptive_max_depth`を`interval_tree_depth..10`とし、
+prepareした最大Epstein rateについて`gamma*dt<=1e6`、
+実行中の各macro-rootについて有限な`0<gamma*h<=1e6`を要求します。係数はdeterministic half-stepで得た
+macro-root midpointで凍結し、固定電荷は連続帯電のaffine式で`G=J=0`へ厳密に退化します。
+base/max depth、noise revision、Brownian RNG/OU/split/tree-policy revision、coefficient policyはresult/checkpoint resume identityへ
 必要なprovenanceとして使われます。
 
-P18-R effective-gas linear EpsteinはB02 noiseと組み合わせず、次の正確なmappingを使います。
+P18-R effective-gas linear Epsteinは次の正確なmappingを使います。上記noiseとの併用も、全field authorityと
+model applicabilityが一致する場合に同じmidpoint経路で受理します。
 
 ```yaml
 physics:
@@ -365,7 +413,8 @@ producerが認証する値です。
 
 DC/RF区分、solution/frequency、peak/RMSと時間平均の規約、gradient recovery、元field hash、半径上限の認証法と誤差基準は
 `case.h5`のproducer provenanceへ保存します。これらはcanonical fieldの意味を説明するproducer情報であり、solver coreは
-Eからgradientを再構成せず、YAMLへCOMSOL tagや回復optionを重複記載しません。B02の`noise` modelとの併用は拒否します。
+Eからgradientを再構成せず、YAMLへCOMSOL tagや回復optionを重複記載しません。現行Brownian revisionとの併用は、
+線形EpsteinとDEPのfield authority / applicabilityが一致する場合に受理します。
 
 P18-L liftはRZ/no-swirl専用の独立categoryとして、次の正確なmappingを使います。
 
@@ -392,8 +441,39 @@ gas densityは正scalar `kg/m^3`、mean free pathは正scalar `m`、azimuthal vo
 
 このrevisionは`motion.mode=axisymmetric_rz_meridional`だけを受理する。drag併用時はgas velocity/density/mean-free-path、
 thermophoresis併用時はvelocity/mean-free-path、gravity併用時はdensityのfield名を完全一致させる。
-Stokes--Cunningham、B02 `physics.noise`、Cartesian/3-Dとの併用は拒否する。resolved result manifestのlift entryには
+Stokes--Cunningham、Cartesian/3-Dとの併用は拒否する。現行Brownian revisionとはRZ、線形Epstein、同じgas authority、
+全model applicabilityが同時に成立する場合に併用できる。resolved result manifestのlift entryには
 model/revision、各field bindingと明示`lift_coefficient`を保存する。
+
+P22 Saffman liftは同じ`lift` categoryで、次のmappingを明示的に選びます。
+
+```yaml
+physics:
+  charge:
+    model: fixed
+  lift:
+    model: saffman
+    revision: saffman_unbounded_creeping_shear_v1
+    gas_velocity_field: gas_velocity
+    gas_density_field: gas_density
+    gas_dynamic_viscosity_field: gas_dynamic_viscosity
+    gas_mean_free_path_field: gas_mean_free_path
+    out_of_plane_gas_vorticity_field: gas_vorticity_z
+    applicability: error
+```
+
+`out_of_plane_gas_vorticity_field`はunit `1/s`のsigned scalarで、XYでは
+`omega_z=d(u_y)/dx-d(u_x)/dy`、RZでは`omega_phi=d(u_r)/dz-d(u_z)/dr`です。producerが同じ
+gas-velocity solutionと回復規則から形成し、coreは微分しません。ほかのfieldはそれぞれvector `m/s`、正scalar
+`kg/m^3`、`Pa*s`、`m`です。Stokes--Cunninghamまたはdragなしとだけ組み合わせ、全pathで連続体・低Re・
+Saffman hierarchyをfail-closedに検査します。半径基準で`Kn_a<=0.1`、`Re_s<=0.1`、`Re_G<=0.1`、
+かつ`omega==0 or Re_s<=0.1*sqrt(Re_G)`を必須とします。near-wall lawや別liftへのfallbackはありません。
+
+Stokes--Cunninghamと併用する場合は`gas_velocity/density/dynamic_viscosity/mean_free_path`、Talbotと併用する
+場合は`density/dynamic_viscosity/mean_free_path`、gravity/buoyancyと併用する場合は`density`のfield名を
+完全一致させます。Epstein drag、Waldmann--Gallis、既存の高Kn liftとの併用は拒否します。
+現行Brownian revisionはlinear Epstein必須なので、Stokes--Cunninghamまたはdragなしを要求するこのSaffman revisionとは
+併用できません。
 
 P15-F ion dragはcharge categoryと独立に明示する。`charge: fixed`と併用する場合も各粒子の実際の
 `charge_number`を使う。P15/P15-Dのcontinuous chargeと併用する場合は、両mappingのdensity、temperature、positive-ion velocity、
@@ -474,6 +554,41 @@ fluxではない。producerはone-effective-Maxwellian/pseudogas reductionをpro
 species配列、mixture ruleを回復しない。`maximum_speed_ratio`は有限正値かつ`<=1`で省略不可、P16 single-species
 revisionはこのkeyを受けず上限`0.1`を維持する。両effective-gas revisionは`lambda/a>=10`も全stage/pathで要求する。
 
+P22 Talbot thermophoresisは同じ`thermophoresis` categoryで、次のmappingを選びます。
+
+```yaml
+physics:
+  charge:
+    model: fixed
+  thermophoresis:
+    model: talbot
+    revision: talbot_cross_regime_diameter_knudsen_v1
+    gas_temperature_field: gas_temperature
+    gas_temperature_gradient_field: gas_temperature_gradient
+    gas_density_field: gas_density
+    gas_dynamic_viscosity_field: gas_dynamic_viscosity
+    gas_thermal_conductivity_field: gas_thermal_conductivity
+    gas_mean_free_path_field: gas_mean_free_path
+    particle_thermal_conductivity_W_m_K: 0.2
+    thermal_slip_coefficient: 1.17
+    momentum_exchange_coefficient: 1.146
+    thermal_exchange_coefficient: 2.2
+    applicability: error
+```
+
+temperature、gradient、density、viscosity、gas conductivity、mean free pathのunitは順に`K`、`K/m`、
+`kg/m^3`、`Pa*s`、`W/(m*K)`、`m`です。gradientはcase座標basisの2成分vector、他はscalarです。
+particle conductivityと三係数は有限正値を省略せず明示します。COMSOL 6.4相当の係数を使う場合も暗黙defaultにはせず、
+resolved manifestへ保存します。Knudsen数は`gas_mean_free_path/drag_diameter_m`で、Waldmannとの自動blendは行いません。
+v1は正の有限primitive以外を拒否しますが、`Kn_d`の数値cutoffは持ちません。これは別modelへの自動切替えを
+避けた明示的なmodel-form契約であり、任意のKnで物理検証済みであることを意味しません。
+
+Stokes--Cunninghamと併用する場合は`density/dynamic_viscosity/mean_free_path`、Epsteinと併用する場合は
+`density/temperature/mean_free_path`のfield名を完全一致させます。Saffmanと併用する場合は
+`density/dynamic_viscosity/mean_free_path`を一致させます。現行Brownian revisionでのTalbot併用はlinear Epsteinと
+上記field authorityが一致する構成だけをcatalogが受理します。これはXY/RZ共通のmidpoint合成経路で検証し、
+P22の単独受入試験だけからBrownian coverageを推論しません。
+
 単一正イオン種の有限相対driftを扱うP15-D revisionは、同じfield契約に明示的なrun-wide drift上限を一つだけ
 追加します。この値は
 `|positive_ion_velocity-particle_velocity| / sqrt(8*k_B*T_i/(pi*m_i))`の上限であり、速度を変更する
@@ -516,26 +631,14 @@ output:
       explicit_times_s: [0.0, 0.25, 1.0]
 ```
 
-P07で実装済みのsurface sourceとwall lawの最小例は次である。
+surface sourceも内部sourceと同様にHDF5へ粒子ごとの条件を実体化する。YAMLは分布を生成せず、
+canonical tableを一度だけ選択する。
 
 ```yaml
 sources:
   - name: wall_release
     type: surface
-    boundary_group: source_wall
-    count: 100
-    particle_id_start: 1000
-    particle:
-      charge_number: 0.0
-      mass_kg: 1.0e-18
-      drag_diameter_m: 1.0e-7
-      electrostatic_radius_m: 5.0e-8
-      displaced_volume_m3: 0.0
-      model_weight: 1.0
-      material_id: 0
-    position: {model: uniform, measure: line_length}
-    velocity: {model: normal, direction: into_domain, speed_m_s: 1.0}
-    release: {model: fixed, time_s: 0.0}
+    table: wall_particles
 boundaries:
   - boundary_group: mirror
     priority: 10
@@ -550,10 +653,8 @@ boundaries:
       tangential_restitution: 0.6
 ```
 
-RZのuniform位置では`measure`を`meridional_length`または`revolved_area`とする。3-D回転面上の一様fluxは
-`revolved_area`を使い、`meridional_length`は2-D断面上の一様分布である。単一facet上の決定論的な
-verificationには`position: {model: edge_fraction, fraction: 0.5}`も使える。固定vector速度は
-`velocity: {model: fixed, value_m_s: [v0, v1]}`で表す。
+一様面積、粒径、角度、Maxwellian、時刻分布などは外部source builderが粒子列へ実体化する。
+coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度、時刻、物性をそのまま実行する。
 
 共通構造の規則は次のとおりです。
 
@@ -573,14 +674,16 @@ verificationには`position: {model: edge_fraction, fraction: 0.5}`も使える�
   既存proposal/enclosureへ統合するが、現revisionはmodel固有の時間step設定を追加しない。利用caseは`dt`系列で
   trajectory収束を確認し、適用域違反をstep subdivision、floor、scaleで隠さない。
 - seedはunsigned 64-bit範囲、memory上限は正の整数である。最小slabがmemory planへ収まらないcaseは
-  `simulate`のprepareで運動開始前に拒否する。schema v2は粒子内thread数を入力契約にせず、旧
+  `simulate`のprepareで運動開始前に拒否する。現行schema v3は粒子内thread数を入力契約にせず、旧
   `resources.threads`を未知keyとして拒否する。独立caseのprocess並列はsolver外の運用で行う。
   `memory_limit_mb`はsolver-owned predicted peakの上限であり、OS process RSSのhard capではない。`load_case`はcanonical
   numeric bytesだけをearly gateに使い、geometry/source/physics/outputを含む完全なplanは`simulate`のprepareが解決する。
 - `solver.event`はscale-awareなgeometry相対許容差、float64丸めのULP係数、event-drivenな局在・残時間
-  再分割のrefinement上限、各residual-work intervalを再分割するまでの境界interaction閾値、corner policy
-  revisionを明示する。子intervalではinteraction countを0へ戻すがrefinement depthを引き継ぐため、
-  `max_interactions_per_step`はmacro step全体のhard hit総数ではない。絶対的な長さ・時間budgetは
+  再分割のrefinement上限、method別の境界interaction閾値、corner policy revisionを明示する。
+  決定論exact/RK4/exponentialでは各residual-work intervalの再分割triggerであり、子intervalではinteraction countを
+  0へ戻すがrefinement depthを引き継ぐため、`max_interactions_per_step`はmacro step全体のhard hit総数ではない。
+  Brownianではmacro内のfresh-root restartを累積して上限判定する。詳細は[`numerics.md`](numerics.md#222-b04-brownian-active-wall-restart完了)の22.2節に従う。
+  絶対的な長さ・時間budgetは
   後続の単一numerics resolverがgeometry、速度、時刻scaleから導く。`geometry_rtol`は局所facet長に対する
   相対値であり、例の`1e-12`は製品defaultではない。scale選定は[`numerics.md`](numerics.md)の第5節に従う。
 - `0 < geometry_rtol < 1`とし、`roundoff_ulps`、`max_refinements`、
@@ -593,14 +696,19 @@ verificationには`position: {model: edge_fraction, fraction: 0.5}`も使える�
 - P18-Rの二revisionだけが`maximum_speed_ratio`を必須とし、有限正値かつ`<=1`を要求する。既存linear/P16 mappingへ
   このkeyを追加して上限`0.1`を変更することも、省略時の既定値も許可しない。producer-certified pseudogasは入力provenanceで
   あり、solver caseへspecies array、gradient recovery option、COMSOL profileを追加しない。
-- `ou_langevin`と`physics.noise`は必ず同時に指定する。noise mappingは正確に`model`、`revision`、
-  `interval_tree_depth`だけを持ち、modelは`inertial_langevin_fdt`、depthは整数`0..10`とする。
-  `inertial_langevin_fdt_epstein_linear_frozen_start_v1`は`motion.mode=cartesian_xy`、fixed charge、
-  `epstein_linear_v1`だけを許し、noise以外のoptional physics categoryを設定しない。
-  `inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1`は`axisymmetric_rz_meridional`、対応する
-  native/effective-gas線形Epstein、fixed/continuous charge、既存additive forceを許す。どちらも全boundary groupは
-  parameterなしの`stick`、`escape`、`hold`だけを許す。FDT温度はdragの`gas_temperature_field`から
-  `theta=k_B*T_g/mass_kg`として導き、noise側の温度、反射・確率wallへのfallbackを許可しない。
+- 有効なdrag、thermophoresis、lift、gravity/buoyancyが共通に宣言する中性気体primitiveは、同じfield名または
+  同じ`gas_molecular_mass_kg`を使う。liftの有無にかかわらず照合し、重複authorityを異なる名前へ分けない。
+  linear EpsteinとWaldmann--Gallisの組合せはnative single-species同士またはeffective-gas sensitivity同士だけを
+  受理する。有限速度Epsteinとeffective-gas heat-flux revisionの既存組合せは、一つのproducer認証済みpseudogasを
+  全bindingとprovenanceで共有する場合に限る。
+- `ou_langevin`と`physics.noise`は必ず同時に指定する。noise mappingは`model`、`revision`、
+  `interval_tree_depth`とoptional `adaptive_max_depth`だけを持つ。modelは`inertial_langevin_fdt`、base depthは
+  整数`0..10`、max depthは省略時base、指定時は整数`base..10`とする。
+  revisionは`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`だけを受理し、Cartesian XY / RZ meridional、
+  native/effective-gas線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを許す。B04により、全boundary
+  groupへ`stick`、`escape`、`hold`、`specular`、`restitution`、`maxwell_thermal`、または
+  `probabilistic_stick`を設定できる。各law parameterとfallbackは下記の通常boundary契約をそのまま使う。
+  FDT温度はdragの`gas_temperature_field`から`theta=k_B*T_g/mass_kg`として導き、noise側の第二温度を許可しない。
 - continuous chargeは上記いずれかの正確なmappingだけを許し、`model=plasma_continuous`、対応する明示
   `revision`、`applicability=error`を必須とする。shifted-Maxwellian revisionだけが正かつfiniteな
   `maximum_ion_drift_ratio`を必須とし、stationary revisionへこのkeyを追加することも、省略時の既定値も許可しない。
@@ -614,20 +722,21 @@ verificationには`position: {model: edge_fraction, fraction: 0.5}`も使える�
   aggregate revisionだけは、2本のdensity fieldに加えてthermal voltage `V`、有効正イオン質量`kg`、screening長`m`の
   正値scalar fieldと、正かつfiniteな`maximum_relative_ion_speed_m_s`を必須とする。P15用のtemperature key、scalar mass
   parameter、drift-ratio keyを混在させず、全stage/pathで宣言相対速度以下であることを要求する。
-- 各physics category、surface sourceのposition/velocity/releaseは非空の`model`を持つmapping。
-  model固有parameterは後続の`engine.prepare`が一度だけ解釈する。
+- 各physics categoryは非空の`model`を持つmapping。source分布modelはsolver設定へ置かない。
 - sourceは少なくとも1件必要で、source名は一意。
-- table sourceはHDF5のrealized tableを一度だけ参照する。
-- surface sourceは`boundary_group`、正の`count`、非負の`particle_id_start`、particle authority、
-  position、velocity、releaseを持つ。生成IDは
-  `[particle_id_start, particle_id_start + count)`の連続したsigned-int64範囲で、table sourceおよび他の
-  surface sourceと重複させない。
-- table sourceの初期電荷はHDF5の`charge_number`、surface sourceの初期電荷は
-  `particle.charge_number`だけが所有する。
+- `type: table`はHDF5の`position_m`を持つ内部realized table、`type: surface`は
+  `facet_id`と`facet_parameter`を持つsurface realized tableを一度だけ参照する。宣言typeとcanonical
+  table種別が異なる入力は拒否する。
+- 初期位置またはfacet内座標、速度、release時刻、電荷、質量、各半径、体積、weight、materialは
+  HDF5の各粒子rowだけが所有する。全realized tableを通してparticle IDは一意とする。
 - particleの`mass_kg`、`drag_diameter_m`、`model_weight`は正、`charge_number`はfinite、`electrostatic_radius_m`と
   `displaced_volume_m3`は非負、`material_id`は非負整数。
 - boundary lawはHDF5に存在する全groupへちょうど一つ割り当て、非負の`priority`を明示し、
   未知groupを許可しない。priorityの数値が小さいgroupほどcornerで優先する。
+- `boundaries[].contact_geometry`はoptionalな共通幾何設定で、未指定は`particle_surface`。
+  `particle_surface`は独立した`contact_radius_m`による接触、`particle_center`は半径を保持した中心通過を判定する。
+  lawから方式を推測しない。有限半径の材料壁と仮想開口を同じgeometryへ指定できるが、方式間のfirst-hit順序が
+  局在budget内で曖昧な同時候補はfail-closedにする。この設定はwall response parameterではない。
 - `boundaries[].law`は入力model selectorである。PreparedRunの非公開dense codeや結果schemaの列名ではない。
   eventには選択されたtop-level lawの安定semantic IDを`law_id`として保存し、compound lawの分岐結果は
   `outcome`と必要なdraw referenceで表す。`law_name`はv1 schemaに設けない。
@@ -636,13 +745,29 @@ verificationには`position: {model: edge_fraction, fraction: 0.5}`も使える�
   `specular`は法線係数・接線係数がともに1の完全鏡面を意味し、反発係数を指定した入力は拒否する。
   `restitution`は`normal_restitution`を`(0,1]`、`tangential_restitution`を`[0,1]`でともに必須とし、
   それ以外のparameterを持たない。
+  `maxwell_thermal`は正かつfiniteな`wall_temperature_K`、`[0,1]`の
+  `diffuse_reflection_fraction`、finiteな2成分`wall_velocity_m_s`をすべて必須とし、それ以外のparameterを
+  持たない。拡散率は完全熱適応したhalf-range Maxwell flux再放出と壁frame鏡面反射の混合確率であり、
+  一般のenergy accommodation係数ではない。静的geometryではwall velocityがgroup内の全facetへ接線方向で
+  なければならず、法線成分を持つmoving wallは拒否する。
   `probabilistic_stick`は定数`probability`を`[0,1]`で必須とし、これと`otherwise`以外のparameterを持たない。
-  `otherwise`はparameterなしの`{law: specular}`、または上記二つの反発係数をともに持つ
-  `{law: restitution, ...}`だけを受理する。moving wall、diffuse law、速度依存確率は未対応である。
-- P07のsurface positionは`edge_fraction`または`uniform`だけである。XYのuniform measureは
-  `line_length`、RZは`meridional_length | revolved_area`。velocityは`fixed` vectorまたは
-  `normal + into_domain + speed_m_s`、releaseは`fixed + time_s`だけを受理する。角度・速度・時刻分布は
-  対応modelを追加するまで拒否する。
+  `otherwise`はparameterなしの`{law: specular}`、上記二つの反発係数をともに持つ
+  `{law: restitution, ...}`、または上記3 parameterを持つ`{law: maxwell_thermal, ...}`だけを受理する。
+  速度・温度依存付着確率とmoving geometryは未対応である。
+
+  ```yaml
+  - boundary_group: chamber_wall
+    priority: 20
+    law: maxwell_thermal
+    wall_temperature_K: 300.0
+    diffuse_reflection_fraction: 0.8
+    wall_velocity_m_s: [0.0, 0.0]
+  ```
+- surface tableの`facet_parameter`は線分始点から終点への係数で、全rowについて厳密に`0<t<1`とする。
+  facet端点・cornerを暗黙に一面へ帰属させず、範囲外facet IDとfloat64補間で端点へ潰れる位置は拒否する。
+  `ou_langevin`のsurface releaseは初速度の外向き法線成分の絶対値がroundoff幅を越えなければならない。
+  明確な負値はdeparture、明確な正値はzero-time impactである。zero/tangentを加速度やnudgeで補わず拒否し、
+  壁からの熱放出速度も外部で実体化する。
 - surface releaseは外向き法線`n`に対する`v·n`を先に分類する。roundoff budgetより明確な負値はdeparture、
   明確な正値はzero-time impactとする。budget内でも非零なら曖昧として拒否し、float64で厳密に0の時だけ、
   証明済み一定加速度pathの`a·n`を同じscale-aware規則で判定する。負ならsource facetからのdeparture、正なら
@@ -664,12 +789,12 @@ verificationには`position: {model: edge_fraction, fraction: 0.5}`も使える�
 
 ## `case.h5`
 
-v1のdata表現は2D Cartesian XY（`cartesian_xy`）と軸対称RZ（`axisymmetric_rz`）を対象にします。
+v3のdata表現は2D Cartesian XY（`cartesian_xy`）と軸対称RZ（`axisymmetric_rz`）を対象にします。
 粒子のmotion modeはYAMLが別に所有します。数値datasetのdtypeは
 little-endian固定、文字列は可変長UTF-8です。
 
 ```text
-/meta/schema_version                         int32 scalar = 1
+/meta/schema_version                         int32 scalar = 3
 /meta/coordinate_system                      UTF-8 scalar
 /meta/coordinate_units                       UTF-8 scalar = "m"
 /meta/provenance_json                        canonical UTF-8 JSON scalar
@@ -702,16 +827,20 @@ little-endian固定、文字列は可変長UTF-8です。
 /fields/<name>/association                   UTF-8 scalar: node|cell
 /fields/<name>/components                    UTF-8 [C]
 /fields/<name>/stored_basis                  UTF-8 scalar
-/fields/<name>/values                        float64 [N,C]
+/fields/<name>/values                        float64 [N,C] or [T,N,C]
+/fields/<name>/time_s                        float64 [T] optional
 /fields/<name>/unit                          UTF-8 scalar
 
 /sources/<name>/particle_id                  int64 [N]
 /sources/<name>/release_time_s               float64 [N]
-/sources/<name>/position_m                    float64 [N,2]
+/sources/<name>/position_m                    float64 [N,2], internal table only
+/sources/<name>/facet_id                      int64 [N], surface table only
+/sources/<name>/facet_parameter               float64 [N], surface table only
 /sources/<name>/velocity_m_s                  float64 [N,2]
 /sources/<name>/charge_number                 float64 [N]
 /sources/<name>/mass_kg                       float64 [N]
 /sources/<name>/drag_diameter_m               float64 [N]
+/sources/<name>/contact_radius_m               float64 [N]
 /sources/<name>/electrostatic_radius_m        float64 [N]
 /sources/<name>/displaced_volume_m3           float64 [N]
 /sources/<name>/model_weight                  float64 [N]
@@ -719,7 +848,7 @@ little-endian固定、文字列は可変長UTF-8です。
 ```
 
 geometryは`tri3`または`quad4`を少なくとも一要素持ちます。tri3はCCW、quad4はQ1参照節点
-`(-1,-1),(+1,-1),(+1,+1),(-1,+1)`に対応する非反転順です。v1の全cellは粒子が移動できる
+`(-1,-1),(+1,-1),(+1,+1),(-1,+1)`に対応する非反転順です。v3の全cellは粒子が移動できる
 domainであり、solid volumeを混在させません。wallなし解析ケースのためboundaryは0件を許可します。
 
 `owner_cell_type`は1=tri3、2=quad4です。`orientation=+1`は`line2`がownerのCCW edge順、
@@ -733,13 +862,28 @@ regular axisはstrictly increasingで、field rowはC-order flattenです。supp
 共有面はsample可能で、候補中の最小supported cell IDを決定論的なownerとします。候補がすべてmaskedなら
 support外です。layoutとfieldはballistic caseでは0件を許可します。
 fieldは既存layoutを参照し、成分数とnode/cell associationに対応するshapeを持ちます。
+`time_s`がなければ`values`は従来どおり`[N,C]`の静的場です。`time_s`があれば`values`は
+`[T,N,C]`で、各snapshotは同じlayout、association、component、basis、unitを共有します。`T>=2`、
+時刻はfiniteかつ狭義単調増加でなければなりません。stage時刻では既存regular/P1/Q1/cellの空間ownerと
+重みを一度求め、時刻を挟む二snapshotを同じ重みでsampleして線形補間します。snapshot端点は閉区間として
+受理しますが、端点外の外挿やclampは行わずfield numerical failureにします。requiredな時間依存fieldは
+prepare時にrunの`[start_s,end_s]`全体を覆わなければなりません。
+
+線形区間をまたぐ一つの積分stepを作らないため、run内部にあるrequired fieldのsnapshot時刻を全fieldで和集合にし、
+固定`dt_s` gridへmacro境界として併合します。gridと一致するsnapshot時刻は重複境界を作りません。この分割は
+stage timeでの線形補間を置き換えるものではなく、係数の傾きが変わるknotを積分区間の端に置く規則です。
+静的場だけのcaseは追加境界を持たず、既存のmacro countとsample経路を維持します。
 required vector fieldのcanonical metadataはXYで`["x","y"] / cartesian_xy`、RZで
 `["r","z"] / axisymmetric_rz`です。scalarは両座標で`["value"] / scalar`です。P06-RZはこの既存field datasetを
 使い、schema versionやRZ専用datasetを追加しません。
 
 realized tableは空を許可せず、`particle_id`を全tableを通して一意な非負signed-int64整数とします。
-実行caseでは、参照されたtable IDとYAML surface sourceが予約するID範囲も相互に一意とします。
-`mass_kg`、`drag_diameter_m`、`model_weight`は正、`electrostatic_radius_m`、
+`position_m`を持つ内部tableと、`facet_id + facet_parameter`を持つsurface tableは相互排他的です。
+surfaceのfacet IDはcanonical `line2` rowを参照し、parameterは厳密な開区間`(0,1)`に入ります。
+surface tableのfacet上の点は粒子の接触点を表し、release時の中心はその点から外向き法線と逆向きへ
+`particle_surface` groupでは`contact_radius_m`だけoffsetします。`particle_center` groupではoffsetせず、
+物理的な`contact_radius_m`を保持します。`contact_radius_m=0`は両方式ともpoint contactです。
+`mass_kg`、`drag_diameter_m`、`model_weight`は正、`contact_radius_m`、`electrostatic_radius_m`、
 `displaced_volume_m3`、`material_id`は非負です。全実数値はfiniteでなければなりません。producerにNaNで
 表現された材料側値がある場合、adapterは明示supportを先に確定し、masked-only DOFだけを決定論的な
 有限placeholderへ正規化して方法と件数をprovenanceへ残します。NaN自体からsupportを推測せず、supported
@@ -764,7 +908,7 @@ layout、field、sourceの名称は`[A-Za-z][A-Za-z0-9_]*`です。
 
 hashはHDF5のchunk、compression、object address、作成順序に依存しません。
 
-1. SHA-256へdomain header `chamber-particles-case\0v1\0`を投入する。
+1. SHA-256へdomain header `chamber-particles-case\0v3\0`を投入する。
 2. 全dataset recordをabsolute pathのUTF-8 byte順でsortする。
 3. 各recordについて、pathとlogical dtypeを`uint64 little-endian byte length + bytes`で投入する。
 4. `uint64 rank`、続いて各dimensionを`uint64`で投入する。
@@ -781,8 +925,11 @@ canonical表現にしてからhashします。tupleの入力順ではなくdatas
 確定pathへ作成し、一時名を削除します。既存pathは上書きしません。hard linkを提供しないfilesystemでは
 非atomicな代替処理を行わず失敗します。成功時はschema versionとlogical content hashを返します。
 
-## v1の範囲外
+## v3の範囲外と互換性
 
-時間依存field、revolved fieldを使うCartesian 3D軌道、完全3D geometry、tet4、surface triangleは
-後続schemaで追加します。v1 readerへ未知datasetを先行投入せず、意味が変わる変更はschema versionを
-更新します。
+時間依存fieldは固定topology・線形snapshot補間だけを扱います。zero-order hold、discontinuity metadata、
+時間ごとのlayout/topology/geometry、streaming/double-buffer fieldはこのrevisionでは非対応です。revolved fieldを使う
+Cartesian 3D軌道、完全3D geometry、tet4、surface triangle、field preprocessorも別workstreamです。
+
+canonical data schema v1/v2のHDF5はv3 readerで読めません。coreへcompatibility readerやmigration shimを持たせず、
+checked-in example、test fixture、adapter writerはcanonical v3 writerから再生成します。

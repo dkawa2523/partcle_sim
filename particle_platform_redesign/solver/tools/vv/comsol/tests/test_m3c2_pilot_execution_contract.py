@@ -11,6 +11,7 @@ from typing import Any, cast
 
 import pytest
 from tools.vv.comsol.lock_m3c2_caseA_100nm_pilot_contract import lock_contract
+from tools.vv.comsol.tests.common_p1_fixture import rematerialize_saved_localization_input
 
 CONFIG = Path(__file__).parents[1] / "cases/m3c2_caseA_100nm_stochastic_pilot_v1.json"
 CASE_P_CONFIG = Path(__file__).parents[1] / "cases/m3c2_caseP_100nm_stochastic_pilot_v1.json"
@@ -33,12 +34,53 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _current_contract(directory: Path, source_config: Path) -> Path:
+    """Rebind test-only copies to identical saved arrays written by the current writer."""
+    contract = json.loads(source_config.read_text(encoding="utf-8"))
+    directory.mkdir()
+    record = contract["common_p1_input"]
+    input_path = directory / "current_input.h5"
+    info = rematerialize_saved_localization_input(REPOSITORY_ROOT / record["path"], input_path)
+    input_hash = _sha256(input_path)
+    record.update(path=str(input_path), file_sha256=input_hash, content_hash=info.content_hash)
+    artifacts = {row["role"]: row for row in contract["input_artifacts"]}
+    artifacts["common_p1_input"].update(
+        path=str(input_path), size_bytes=input_path.stat().st_size, sha256=input_hash
+    )
+    evidence = {
+        "status": "PREPARED",
+        "fixture_scope": "identical saved arrays; current writer and preparation binding only; no COMSOL execution or old scientific PASS reuse",
+        "workflows": {
+            contract["scope"]["workflow"]: {
+                "status": "PREPARED",
+                "input_sha256": input_hash,
+                "input_content_hash": info.content_hash,
+                "output_count": 121,
+                "preparation_receipt": {
+                    "source": {"particle_count": 287, "particle_id_min": 1, "particle_id_max": 287}
+                },
+            }
+        },
+    }
+    evidence_path = directory / "binding_evidence.json"
+    evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+    artifacts["common_p1_evidence"].update(
+        path=str(evidence_path),
+        size_bytes=evidence_path.stat().st_size,
+        sha256=_sha256(evidence_path),
+    )
+    config_path = directory / "contract.json"
+    config_path.write_text(json.dumps(contract), encoding="utf-8")
+    return config_path
+
+
 @pytest.fixture(scope="module")
 def locked_receipt(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> tuple[dict[str, object], Path]:
     output = tmp_path_factory.mktemp("m3c2_contract") / "receipt"
-    return lock_contract(CONFIG, REPOSITORY_ROOT, output), output
+    config = _current_contract(output.parent / "inputs", CONFIG)
+    return lock_contract(config, REPOSITORY_ROOT, output), output
 
 
 @pytest.fixture(scope="module")
@@ -46,7 +88,8 @@ def case_p_locked_receipt(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> tuple[dict[str, object], Path]:
     output = tmp_path_factory.mktemp("m3c2_case_p_contract") / "receipt"
-    return lock_contract(CASE_P_CONFIG, REPOSITORY_ROOT, output), output
+    config = _current_contract(output.parent / "inputs", CASE_P_CONFIG)
+    return lock_contract(config, REPOSITORY_ROOT, output), output
 
 
 def test_contract_receipt_does_not_authorize_or_claim_accuracy(

@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 
-from chamber_particles.case_format import DataBundle, P1TriLayout, read
+from chamber_particles.case_format import DataBundle, P1TriLayout, RealizedTableSource, read
 from chamber_particles.fields import (
     PreparedFieldSet,
     RequiredFieldMetadata,
@@ -141,6 +141,8 @@ def prepare(candidate_h5: Path, output: Path) -> None:
     if len(data.sources) != 1:
         raise ValueError("matched candidate must contain one realized table source")
     source = data.sources[0]
+    if not isinstance(source, RealizedTableSource):
+        raise ValueError("matched candidate release probes must be an internal table")
     if source.particle_id.size != 287:
         raise ValueError(f"expected 287 release probes, got {source.particle_id.size}")
     positions = np.asarray(source.position_m, dtype=np.float64)

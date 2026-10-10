@@ -1,4 +1,4 @@
-"""Single-point location and interpolation for canonical static fields."""
+"""Spatial location and stage-time interpolation for canonical fields."""
 
 from __future__ import annotations
 
@@ -21,7 +21,9 @@ from .case_format import (
     Q1QuadLayout,
     RegularLayout,
 )
+from .geometry import PreparedGeometry
 from .numerical_status import FIELD_NUMERICAL_FAILURE, NUMERICAL_STATUS_OK
+from .topology import PreparedPeriodicTopology
 
 type FloatArray = NDArray[np.float64]
 type Int64Array = NDArray[np.int64]
@@ -29,7 +31,9 @@ type OutsideReason = Literal["outside_layout", "masked_cell"]
 type Weights = tuple[float, ...]
 
 FIELD_LOCATION_REVISION = "field_location_v4"
-REQUIRED_FIELD_REVISION = "required_field_rz_axis_domain_regular_v3"
+FIELD_TIME_REVISION = "fixed_topology_linear_time_v2"
+FIELD_SPATIAL_GRADIENT_REVISION = "static_nodal_p1_regular_q1_gradient_v2"
+REQUIRED_FIELD_REVISION = "required_field_time_linear_v6"
 FIELD_LOCATION_ULPS = 64.0
 FIELD_CELL_BVH_LEAF_SIZE = 8
 # Local path certificates deliberately keep a bounded cell arena.  A wider
@@ -53,6 +57,7 @@ _FIELD_KERNEL_ERRORS = (
     "layout has no supported field cells",
     "field inverse mapping failed",
     "field interpolation produced a non-finite sampled value",
+    "stage time lies outside the field snapshot range",
 )
 
 
@@ -86,6 +91,7 @@ class RequiredFieldMetadata:
     components: tuple[str, ...]
     stored_basis: str
     positive: bool
+    zero_on_rz_axis: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -192,6 +198,14 @@ class PreparedFieldSet:
     fields: Mapping[str, FieldData]
     axis_accessible: bool = False
     cell_index: _FieldCellIndex | None = None
+    has_time_dependent_fields: bool = False
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "has_time_dependent_fields",
+            any(field.time_s is not None for field in self.fields.values()),
+        )
 
     @property
     def uses_cell_hint(self) -> bool:
@@ -234,11 +248,12 @@ class PreparedFieldSet:
         return lower, upper
 
     def constant_value(self, name: str) -> FloatArray | None:
-        """Return a field value only when every canonical node stores it exactly."""
+        """Return a value only when every spatial node and snapshot stores it exactly."""
 
         values = self.fields[name].values
-        value = values[0].copy()
-        if not bool(np.array_equal(values, np.broadcast_to(value, values.shape))):
+        flattened = values.reshape(-1, values.shape[-1])
+        value = flattened[0].copy()
+        if not bool(np.array_equal(flattened, np.broadcast_to(value, flattened.shape))):
             return None
         value.setflags(write=False)
         return value
@@ -253,8 +268,9 @@ class PreparedFieldSet:
         """
 
         values = self.fields[name].values
-        lower = np.min(values, axis=0)
-        upper = np.max(values, axis=0)
+        reduction_axes = tuple(range(values.ndim - 1))
+        lower = np.min(values, axis=reduction_axes)
+        upper = np.max(values, axis=reduction_axes)
         scale = np.maximum(np.abs(lower), np.abs(upper))
         expansion = FIELD_LOCATION_ULPS * _FLOAT_EPS * scale
         with np.errstate(over="ignore", invalid="ignore"):
@@ -266,22 +282,47 @@ class PreparedFieldSet:
         upper.setflags(write=False)
         return lower, upper
 
+    def time_knots_s(self) -> tuple[float, ...]:
+        """Return the sorted union of snapshot knots used by required fields."""
+
+        return tuple(
+            sorted(
+                {
+                    float(time_s)
+                    for field in self.fields.values()
+                    if field.time_s is not None
+                    for time_s in field.time_s
+                }
+            )
+        )
+
     def local_component_bounds(
         self,
         position_lower_m: FloatArray,
         position_upper_m: FloatArray,
+        *,
+        time_lower_s: FloatArray | None = None,
+        time_upper_s: FloatArray | None = None,
     ) -> LocalFieldRangeBatch:
-        """Bound primitives over cells overlapping each position AABB.
+        """Bound primitives over cells and snapshots overlapping each path box.
 
         P1, Q1, and regular nodal bases use nonnegative
         partition-of-unity weights.  Nodal extrema over every conservative
-        cell candidate therefore contain the interpolated value everywhere in
-        the in-support part of the query box.  This method deliberately makes
-        no claim that the full query box is covered by those cells.
+        cell candidate and every snapshot that brackets the requested time
+        interval therefore contain the interpolated value everywhere in the
+        in-support part of the query box.  Omitting both time arrays retains
+        the run-global all-snapshot bound for callers without a path interval.
+        This method deliberately makes no claim that the full spatial query
+        box is covered by those cells.
         """
 
         lower_m, upper_m = _validated_local_range_boxes(position_lower_m, position_upper_m)
         count = int(lower_m.shape[0])
+        lower_time_s, upper_time_s = _validated_local_time_intervals(
+            time_lower_s,
+            time_upper_s,
+            count,
+        )
         if self.layout is None:
             if self.fields:
                 raise FieldLocationError("constant field catalog unexpectedly owns no layout")
@@ -324,27 +365,58 @@ class PreparedFieldSet:
         for name, field in self.fields.items():
             if field.association != "node":
                 raise FieldLocationError(f"local bounds require node-associated field {name!r}")
-            field_lower = np.empty((count, field.values.shape[1]), dtype=np.float64)
+            field_lower = np.empty((count, field.values.shape[-1]), dtype=np.float64)
             field_upper = np.empty_like(field_lower)
+            snapshot_begin, snapshot_end = _local_snapshot_ranges(
+                field,
+                lower_time_s,
+                upper_time_s,
+                count,
+            )
             if isinstance(self.layout, RegularLayout):
-                _local_regular_nodal_bounds(
-                    int(self.layout.axis1_m.size) - 1,
-                    int(self.layout.axis1_m.size),
-                    offsets,
-                    candidates,
-                    field.values,
-                    field_lower,
-                    field_upper,
-                )
+                if field.time_s is None:
+                    _local_regular_nodal_bounds(
+                        int(self.layout.axis1_m.size) - 1,
+                        int(self.layout.axis1_m.size),
+                        offsets,
+                        candidates,
+                        field.values,
+                        field_lower,
+                        field_upper,
+                    )
+                else:
+                    _local_regular_snapshot_bounds(
+                        int(self.layout.axis1_m.size) - 1,
+                        int(self.layout.axis1_m.size),
+                        offsets,
+                        candidates,
+                        field.values,
+                        snapshot_begin,
+                        snapshot_end,
+                        field_lower,
+                        field_upper,
+                    )
             else:
-                _local_unstructured_nodal_bounds(
-                    self.layout.connectivity,
-                    offsets,
-                    candidates,
-                    field.values,
-                    field_lower,
-                    field_upper,
-                )
+                if field.time_s is None:
+                    _local_unstructured_nodal_bounds(
+                        self.layout.connectivity,
+                        offsets,
+                        candidates,
+                        field.values,
+                        field_lower,
+                        field_upper,
+                    )
+                else:
+                    _local_unstructured_snapshot_bounds(
+                        self.layout.connectivity,
+                        offsets,
+                        candidates,
+                        field.values,
+                        snapshot_begin,
+                        snapshot_end,
+                        field_lower,
+                        field_upper,
+                    )
             _expand_local_component_bounds(
                 field_lower,
                 field_upper,
@@ -373,14 +445,21 @@ class PreparedFieldSet:
         position_m: FloatArray,
         cell_hint: Int64Array | None = None,
         workspace: FieldWorkspace | None = None,
+        *,
+        time_s: FloatArray | None = None,
     ) -> FieldBatch:
-        """Locate one stage in compiled code, then sample every required field."""
+        """Locate one stage, then sample every required field at its stage time."""
 
         positions = np.asarray(position_m)
         stage_workspace = workspace
         if stage_workspace is None and positions.ndim == 2:
             stage_workspace = self.allocate_workspace(int(positions.shape[0]))
-        batch, numerical_status = self.sample_batch(position_m, cell_hint, stage_workspace)
+        batch, numerical_status = self.sample_batch(
+            position_m,
+            cell_hint,
+            stage_workspace,
+            time_s=time_s,
+        )
         failed = np.flatnonzero(numerical_status != NUMERICAL_STATUS_OK)
         if failed.size:
             row = int(failed[0])
@@ -394,6 +473,8 @@ class PreparedFieldSet:
         position_m: FloatArray,
         cell_hint: Int64Array | None = None,
         workspace: FieldWorkspace | None = None,
+        *,
+        time_s: FloatArray | None = None,
     ) -> tuple[FieldBatch, NDArray[np.uint8]]:
         """Sample rows while returning locator/interpolation failures as row status."""
 
@@ -401,6 +482,7 @@ class PreparedFieldSet:
         if positions.ndim != 2 or positions.shape[1:] != (2,):
             raise ValueError("stage positions must have shape [N, 2]")
         count = int(positions.shape[0])
+        stage_times = _prepare_stage_times(time_s, count, self.has_time_dependent_fields)
         cell_count = 0 if self.layout is None else _cell_count(self.layout)
         hints = _prepare_cell_hints(cell_hint, count, cell_count)
         stage_workspace = self.allocate_workspace(count) if workspace is None else workspace
@@ -444,6 +526,7 @@ class PreparedFieldSet:
                 self.layout,
                 field,
                 positions,
+                stage_times,
                 cell_id,
                 weights,
                 zero_axis_radial,
@@ -453,9 +536,80 @@ class PreparedFieldSet:
         _field_numerical_status(row_status, numerical_status)
         return batch, numerical_status
 
+    def spatial_gradient(self, name: str, workspace: FieldWorkspace, output: FloatArray) -> None:
+        """Differentiate a static nodal field at an already sampled stage.
+
+        This opt-in operation consumes the same cell IDs and basis weights as
+        ``sample``. It neither locates again nor adds production-stage scratch.
+        Derivatives refer to stored components in the canonical two coordinates.
+        """
+
+        field = self.fields[name]
+        if field.time_s is not None or field.association != "node":
+            raise ValueError("spatial gradients require a static nodal field")
+        if not isinstance(self.layout, P1TriLayout | RegularLayout | Q1QuadLayout):
+            raise ValueError("spatial gradients require a supported field layout")
+        count = int(output.shape[0])
+        if output.shape != (count, len(field.components), 2):
+            raise ValueError("spatial gradient output must have shape [N, C, 2]")
+        if output.dtype != np.float64 or not output.flags.c_contiguous:
+            raise ValueError("spatial gradient output must be contiguous float64")
+        if workspace.field_names != tuple(self.fields) or count > workspace.capacity:
+            raise ValueError("spatial gradient workspace does not match the sampled stage")
+        if not bool(workspace.support_inside[:count].all()):
+            raise ValueError("spatial gradients require supported sampled rows")
+        status = workspace.row_status[:count]
+        if isinstance(self.layout, P1TriLayout):
+            cpu_backend.sample_p1_nodal_gradient(
+                self.layout.nodes_m,
+                self.layout.connectivity,
+                workspace.cell_id[:count],
+                field.values,
+                output,
+                status,
+            )
+        elif isinstance(self.layout, Q1QuadLayout):
+            cpu_backend.sample_q1_nodal_gradient(
+                self.layout.nodes_m,
+                self.layout.connectivity,
+                workspace.cell_id[:count],
+                workspace.weights[:count],
+                field.values,
+                output,
+                status,
+            )
+        else:
+            cpu_backend.sample_regular_nodal_gradient(
+                self.layout.axis0_m,
+                self.layout.axis1_m,
+                workspace.cell_id[:count],
+                workspace.weights[:count],
+                field.values,
+                output,
+                status,
+            )
+        failed = np.flatnonzero(status != cpu_backend.FIELD_KERNEL_OK)
+        if failed.size:
+            _raise_kernel_error(int(status[int(failed[0])]), int(failed[0]), "field gradient")
+
 
 class FieldLocationError(RuntimeError):
     """A field location could not be computed from a numerically valid basis."""
+
+
+def _prepare_stage_times(
+    time_s: FloatArray | None,
+    count: int,
+    required: bool,
+) -> FloatArray | None:
+    if not required:
+        return None
+    if time_s is None:
+        raise ValueError("stage times are required for time-dependent fields")
+    times = np.ascontiguousarray(np.asarray(time_s, dtype=np.float64))
+    if times.shape != (count,):
+        raise ValueError("stage times must have shape [N]")
+    return times
 
 
 def _prepare_cell_hints(
@@ -484,6 +638,56 @@ def _validated_local_range_boxes(
     if bool((lower > upper).any()):
         raise ValueError("position range lower bounds exceed upper bounds")
     return lower, upper
+
+
+def _validated_local_time_intervals(
+    lower_s: FloatArray | None,
+    upper_s: FloatArray | None,
+    count: int,
+) -> tuple[FloatArray | None, FloatArray | None]:
+    if lower_s is None and upper_s is None:
+        return None, None
+    if lower_s is None or upper_s is None:
+        raise ValueError("local field bounds require both time interval arrays")
+    lower = np.ascontiguousarray(np.asarray(lower_s, dtype=np.float64))
+    upper = np.ascontiguousarray(np.asarray(upper_s, dtype=np.float64))
+    if lower.shape != (count,) or upper.shape != (count,):
+        raise ValueError("time interval bounds must have matching shape [N]")
+    if not bool(np.isfinite(lower).all() and np.isfinite(upper).all()):
+        raise ValueError("time interval bounds must contain only finite values")
+    if bool((lower > upper).any()):
+        raise ValueError("time interval lower bounds exceed upper bounds")
+    return lower, upper
+
+
+def _local_snapshot_ranges(
+    field: FieldData,
+    lower_time_s: FloatArray | None,
+    upper_time_s: FloatArray | None,
+    count: int,
+) -> tuple[Int64Array, Int64Array]:
+    """Return half-open snapshot ranges that enclose linear time interpolation."""
+
+    snapshot_time_s = field.time_s
+    if snapshot_time_s is None:
+        empty = np.empty(0, dtype="<i8")
+        return empty, empty
+    if lower_time_s is None or upper_time_s is None:
+        return (
+            np.zeros(count, dtype="<i8"),
+            np.full(count, snapshot_time_s.size, dtype="<i8"),
+        )
+    if bool(
+        (lower_time_s < snapshot_time_s[0]).any() or (upper_time_s > snapshot_time_s[-1]).any()
+    ):
+        raise FieldLocationError(
+            f"field {field.name!r} cannot bound time outside its snapshot range"
+        )
+    begin = np.searchsorted(snapshot_time_s, lower_time_s, side="right") - 1
+    begin = np.clip(begin, 0, snapshot_time_s.size - 2).astype("<i8", copy=False)
+    end = np.searchsorted(snapshot_time_s, upper_time_s, side="left") + 1
+    end = np.clip(end, begin + 2, snapshot_time_s.size).astype("<i8", copy=False)
+    return np.ascontiguousarray(begin), np.ascontiguousarray(end)
 
 
 def _expand_local_component_bounds(
@@ -657,6 +861,47 @@ def _local_regular_nodal_bounds(
                         result_lower[row, component] = min(result_lower[row, component], value)
                         result_upper[row, component] = max(result_upper[row, component], value)
                 initialized = True
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _local_regular_snapshot_bounds(
+    axis1_cell_count: int,
+    axis1_size: int,
+    offsets: Int64Array,
+    candidates: Int64Array,
+    values: FloatArray,
+    snapshot_begin: Int64Array,
+    snapshot_end: Int64Array,
+    result_lower: FloatArray,
+    result_upper: FloatArray,
+) -> None:
+    """Reduce extrema over spatial candidates and row-local snapshots."""
+
+    result_lower.fill(0.0)
+    result_upper.fill(0.0)
+    for row in range(offsets.size - 1):
+        initialized = False
+        for offset in range(offsets[row], offsets[row + 1]):
+            cell_id = candidates[offset]
+            index0 = cell_id // axis1_cell_count
+            index1 = cell_id - index0 * axis1_cell_count
+            node_ids = (
+                index0 * axis1_size + index1,
+                (index0 + 1) * axis1_size + index1,
+                (index0 + 1) * axis1_size + index1 + 1,
+                index0 * axis1_size + index1 + 1,
+            )
+            for snapshot in range(snapshot_begin[row], snapshot_end[row]):
+                for node_id in node_ids:
+                    for component in range(values.shape[2]):
+                        value = values[snapshot, node_id, component]
+                        if not initialized:
+                            result_lower[row, component] = value
+                            result_upper[row, component] = value
+                        else:
+                            result_lower[row, component] = min(result_lower[row, component], value)
+                            result_upper[row, component] = max(result_upper[row, component], value)
+                    initialized = True
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -861,6 +1106,37 @@ def _local_unstructured_nodal_bounds(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _local_unstructured_snapshot_bounds(
+    connectivity: Int64Array,
+    offsets: Int64Array,
+    candidates: Int64Array,
+    values: FloatArray,
+    snapshot_begin: Int64Array,
+    snapshot_end: Int64Array,
+    result_lower: FloatArray,
+    result_upper: FloatArray,
+) -> None:
+    """Reduce P1/Q1 extrema over candidates and row-local snapshots."""
+
+    result_lower.fill(0.0)
+    result_upper.fill(0.0)
+    for row in range(offsets.size - 1):
+        initialized = False
+        for offset in range(offsets[row], offsets[row + 1]):
+            for snapshot in range(snapshot_begin[row], snapshot_end[row]):
+                for node_id in connectivity[candidates[offset]]:
+                    for component in range(values.shape[2]):
+                        value = values[snapshot, node_id, component]
+                        if not initialized:
+                            result_lower[row, component] = value
+                            result_upper[row, component] = value
+                        else:
+                            result_lower[row, component] = min(result_lower[row, component], value)
+                            result_upper[row, component] = max(result_upper[row, component], value)
+                    initialized = True
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _padded_unstructured_cell_box(
     nodes_m: FloatArray,
     node_ids: Int64Array,
@@ -1014,6 +1290,7 @@ def _sample_compiled_field(
     layout: Layout,
     field: FieldData,
     positions: FloatArray,
+    time_s: FloatArray | None,
     cell_id: Int64Array,
     weights: FloatArray,
     zero_axis_radial: bool,
@@ -1026,6 +1303,7 @@ def _sample_compiled_field(
             layout,
             field,
             positions,
+            time_s,
             cell_id,
             weights,
             zero_axis_radial,
@@ -1039,10 +1317,12 @@ def _sample_compiled_field(
         return
     active_sampled = np.empty((active.size, sampled.shape[1]), dtype=np.float64)
     active_status = np.empty(active.size, dtype=np.uint8)
+    active_time_s = None if time_s is None else np.ascontiguousarray(time_s[active])
     _sample_compiled_rows(
         layout,
         field,
         np.ascontiguousarray(positions[active]),
+        active_time_s,
         np.ascontiguousarray(cell_id[active]),
         np.ascontiguousarray(weights[active]),
         zero_axis_radial,
@@ -1058,12 +1338,56 @@ def _sample_compiled_rows(
     layout: Layout,
     field: FieldData,
     positions: FloatArray,
+    time_s: FloatArray | None,
     cell_id: Int64Array,
     weights: FloatArray,
     zero_axis_radial: bool,
     sampled: FloatArray,
     row_status: NDArray[np.uint8],
 ) -> None:
+    if field.time_s is not None:
+        if time_s is None:
+            raise ValueError("stage times are required for time-dependent fields")
+        if field.association == "cell":
+            cpu_backend.sample_cell_time_field(
+                positions,
+                time_s,
+                cell_id,
+                field.time_s,
+                field.values,
+                zero_axis_radial,
+                sampled,
+                row_status,
+            )
+        elif isinstance(layout, RegularLayout):
+            cpu_backend.sample_regular_nodal_time_field(
+                int(layout.axis1_m.size),
+                positions,
+                time_s,
+                cell_id,
+                weights,
+                field.time_s,
+                field.values,
+                zero_axis_radial,
+                sampled,
+                row_status,
+            )
+        else:
+            node_count = 3 if isinstance(layout, P1TriLayout) else 4
+            cpu_backend.sample_unstructured_nodal_time_field(
+                node_count,
+                layout.connectivity,
+                positions,
+                time_s,
+                cell_id,
+                weights,
+                field.time_s,
+                field.values,
+                zero_axis_radial,
+                sampled,
+                row_status,
+            )
+        return
     if field.association == "cell":
         cpu_backend.sample_cell_field(
             positions, cell_id, field.values, zero_axis_radial, sampled, row_status
@@ -1121,7 +1445,10 @@ class _Candidate:
 
 
 def prepare_required_fields(
-    data: DataBundle, requirements: Mapping[str, RequiredFieldMetadata]
+    data: DataBundle,
+    requirements: Mapping[str, RequiredFieldMetadata],
+    *,
+    time_interval_s: tuple[float, float] | None = None,
 ) -> PreparedFieldSet:
     """Bind exact field metadata and certify the supported particle domain."""
 
@@ -1151,6 +1478,7 @@ def prepare_required_fields(
             )
         if requirement.positive and bool((field.values <= 0.0).any()):
             raise FieldLocationError(f"required field {name!r} must be positive at every node")
+        _certify_field_time_interval(field, time_interval_s)
         if layout_name is None:
             layout_name = field.layout
         elif field.layout != layout_name:
@@ -1161,16 +1489,199 @@ def prepare_required_fields(
     layout = available_layouts[layout_name]
     _certify_particle_domain_coverage(data, layout)
     _certify_layout_numerics(layout)
-    axis_accessible = _rz_axis_accessible(data, layout)
-    _certify_rz_axis_regularity(
+    axis_accessible = rz_axis_accessible(data, layout)
+    certify_rz_axis_field_regularity(
         data.coordinate_system,
         layout,
         selected,
-        requirements,
         axis_accessible,
+        requirements,
     )
     cell_index = _build_field_cell_index(layout)
     return PreparedFieldSet(layout, MappingProxyType(selected), axis_accessible, cell_index)
+
+
+def validate_periodic_field_seams(
+    prepared: PreparedFieldSet,
+    topology: PreparedPeriodicTopology | None,
+    geometry: PreparedGeometry,
+) -> None:
+    """Require every selected static primitive to be continuous across a seam.
+
+    Pure translations preserve stored Cartesian components.  P1 and Q1 fields
+    share the geometry mesh, so equality at paired edge nodes proves equality
+    along their linear boundary traces.  A regular field is accepted only for
+    an axis-aligned pair of opposite support-box faces.
+    """
+
+    if topology is None or not prepared.fields:
+        return
+    if prepared.has_time_dependent_fields:
+        raise FieldLocationError(
+            "translation_periodic_xy_v1 does not support time-dependent required fields"
+        )
+    if any(field.association != "node" for field in prepared.fields.values()):
+        raise FieldLocationError(
+            "translation_periodic_xy_v1 requires nodal required fields for seam matching"
+        )
+    layout = prepared.layout
+    if layout is None:
+        raise FieldLocationError("periodic required fields unexpectedly have no layout")
+    if isinstance(layout, RegularLayout):
+        _validate_regular_periodic_seams(prepared, topology, geometry, layout)
+        return
+    _validate_unstructured_periodic_seams(prepared, topology, geometry)
+
+
+def _validate_unstructured_periodic_seams(
+    prepared: PreparedFieldSet,
+    topology: PreparedPeriodicTopology,
+    geometry: PreparedGeometry,
+) -> None:
+    for facet_id in topology.periodic_facet_id:
+        facet = int(facet_id)
+        peer = int(topology.peer_facet_id[facet])
+        if facet > peer:
+            continue
+        source_node_ids = geometry.facet_node_ids[facet]
+        peer_node_ids = topology.peer_node_ids[facet]
+        for name, field in prepared.fields.items():
+            _require_periodic_values_match(
+                name,
+                field.values[source_node_ids],
+                field.values[peer_node_ids],
+                field.values,
+                topology.field_match_rtol,
+            )
+
+
+def _validate_regular_periodic_seams(
+    prepared: PreparedFieldSet,
+    topology: PreparedPeriodicTopology,
+    geometry: PreparedGeometry,
+    layout: RegularLayout,
+) -> None:
+    checked_pairs: set[int] = set()
+    for facet_id in topology.periodic_facet_id:
+        facet = int(facet_id)
+        seam_pair_id = int(topology.pair_id[facet])
+        if seam_pair_id in checked_pairs:
+            continue
+        checked_pairs.add(seam_pair_id)
+        translation = topology.translation_m[facet]
+        axis = _regular_periodic_axis(layout, translation, topology.position_tolerance_m)
+        _require_facets_on_regular_support_faces(
+            geometry,
+            topology,
+            seam_pair_id,
+            facet,
+            layout,
+            axis,
+        )
+        for name, field in prepared.fields.items():
+            values = field.values.reshape(
+                layout.axis0_m.size,
+                layout.axis1_m.size,
+                field.values.shape[-1],
+            )
+            first = values[0, :, :] if axis == 0 else values[:, 0, :]
+            second = values[-1, :, :] if axis == 0 else values[:, -1, :]
+            _require_periodic_values_match(
+                name,
+                first,
+                second,
+                field.values,
+                topology.field_match_rtol,
+            )
+
+
+def _regular_periodic_axis(
+    layout: RegularLayout, translation_m: FloatArray, tolerance_m: float
+) -> int:
+    spans = np.asarray(
+        [layout.axis0_m[-1] - layout.axis0_m[0], layout.axis1_m[-1] - layout.axis1_m[0]],
+        dtype=np.float64,
+    )
+    candidates = [
+        axis
+        for axis in (0, 1)
+        if abs(float(translation_m[1 - axis])) <= tolerance_m
+        and abs(abs(float(translation_m[axis])) - float(spans[axis])) <= tolerance_m
+    ]
+    if len(candidates) != 1:
+        raise FieldLocationError(
+            "regular periodic fields require one axis-aligned support-box translation"
+        )
+    return candidates[0]
+
+
+def _require_facets_on_regular_support_faces(
+    geometry: PreparedGeometry,
+    topology: PreparedPeriodicTopology,
+    seam_pair_id: int,
+    facet: int,
+    layout: RegularLayout,
+    axis: int,
+) -> None:
+    translation = topology.translation_m[facet]
+    if float(translation[axis]) > 0.0:
+        source_coordinate = float((layout.axis0_m if axis == 0 else layout.axis1_m)[0])
+        peer_coordinate = float((layout.axis0_m if axis == 0 else layout.axis1_m)[-1])
+    else:
+        source_coordinate = float((layout.axis0_m if axis == 0 else layout.axis1_m)[-1])
+        peer_coordinate = float((layout.axis0_m if axis == 0 else layout.axis1_m)[0])
+    pair_facets = topology.periodic_facet_id[
+        topology.pair_id[topology.periodic_facet_id] == seam_pair_id
+    ]
+    source_facets = pair_facets[topology.translation_m[pair_facets, axis] * translation[axis] > 0.0]
+    peer_facets = pair_facets[topology.translation_m[pair_facets, axis] * translation[axis] < 0.0]
+    if source_facets.size == 0 or peer_facets.size == 0:
+        raise FieldLocationError("regular periodic seam has an incomplete reciprocal facet map")
+    source_points = np.concatenate(
+        (geometry.facet_start_m[source_facets, axis], geometry.facet_end_m[source_facets, axis])
+    )
+    peer_points = np.concatenate(
+        (geometry.facet_start_m[peer_facets, axis], geometry.facet_end_m[peer_facets, axis])
+    )
+    tolerance_m = topology.position_tolerance_m
+    if bool((np.abs(source_points - source_coordinate) > tolerance_m).any()) or bool(
+        (np.abs(peer_points - peer_coordinate) > tolerance_m).any()
+    ):
+        raise FieldLocationError(
+            "regular periodic facets must lie on opposite field support-box faces"
+        )
+
+
+def _require_periodic_values_match(
+    name: str,
+    first: FloatArray,
+    second: FloatArray,
+    all_values: FloatArray,
+    relative_tolerance: float,
+) -> None:
+    if first.shape != second.shape:
+        raise FieldLocationError(f"required field {name!r} has unmatched periodic seam nodes")
+    component_scale = np.max(np.abs(all_values), axis=tuple(range(all_values.ndim - 1)))
+    error = np.abs(first - second)
+    tolerance = relative_tolerance * component_scale
+    matches = np.where(component_scale == 0.0, error == 0.0, error <= tolerance)
+    if not bool(matches.all()):
+        raise FieldLocationError(f"required field {name!r} is discontinuous across a periodic seam")
+
+
+def _certify_field_time_interval(
+    field: FieldData,
+    time_interval_s: tuple[float, float] | None,
+) -> None:
+    if field.time_s is None or time_interval_s is None:
+        return
+    start_s, end_s = time_interval_s
+    if not math.isfinite(start_s) or not math.isfinite(end_s) or end_s < start_s:
+        raise ValueError("required-field time interval must be finite and ordered")
+    if start_s < float(field.time_s[0]) or end_s > float(field.time_s[-1]):
+        raise FieldLocationError(
+            f"required field {field.name!r} snapshot range does not cover the run interval"
+        )
 
 
 def _build_field_cell_index(layout: Layout) -> _FieldCellIndex | None:
@@ -1310,7 +1821,7 @@ def _certify_regular_axis_numerics(axis: FloatArray, name: str) -> None:
         )
 
 
-def _rz_axis_accessible(data: DataBundle, layout: Layout) -> bool:
+def rz_axis_accessible(data: DataBundle, layout: Layout) -> bool:
     """Return whether the certified particle domain includes the RZ axis."""
 
     if data.coordinate_system != "axisymmetric_rz":
@@ -1324,14 +1835,14 @@ def _rz_axis_accessible(data: DataBundle, layout: Layout) -> bool:
     )
 
 
-def _certify_rz_axis_regularity(
+def certify_rz_axis_field_regularity(
     coordinate_system: str,
     layout: Layout,
     selected: Mapping[str, FieldData],
-    requirements: Mapping[str, RequiredFieldMetadata],
     axis_accessible: bool,
+    requirements: Mapping[str, RequiredFieldMetadata] | None = None,
 ) -> None:
-    """Require an exactly zero radial component wherever the domain reaches the axis."""
+    """Require axis-odd primitive components to vanish on an accessible RZ axis."""
 
     if coordinate_system != "axisymmetric_rz" or not axis_accessible:
         return
@@ -1343,15 +1854,24 @@ def _certify_rz_axis_regularity(
         axis_node_ids = np.flatnonzero(layout.nodes_m[:, 0] == 0.0)
 
     for name, field in selected.items():
-        requirement = requirements[name]
+        axis_values = (
+            field.values[axis_node_ids] if field.time_s is None else field.values[:, axis_node_ids]
+        )
         if (
-            requirement.components == ("r", "z")
-            and requirement.stored_basis == "axisymmetric_rz"
-            and not bool((field.values[axis_node_ids, 0] == 0.0).all())
+            field.components == ("r", "z")
+            and field.stored_basis == "axisymmetric_rz"
+            and not bool((axis_values[..., 0] == 0.0).all())
         ):
             raise FieldLocationError(
                 f"required RZ vector field {name!r} must have zero radial component on the axis"
             )
+        requirement = None if requirements is None else requirements.get(name)
+        if (
+            requirement is not None
+            and requirement.zero_on_rz_axis
+            and not bool((axis_values == 0.0).all())
+        ):
+            raise FieldLocationError(f"required RZ scalar field {name!r} must be zero on the axis")
 
 
 def _certify_particle_domain_coverage(data: DataBundle, layout: Layout) -> None:
@@ -1409,20 +1929,30 @@ def locate_field_cell(
     return _locate_q1(layout, position, cell_hint)
 
 
-def sample_field(field: FieldData, location: FieldLocation) -> SampleResult:
+def sample_field(
+    field: FieldData,
+    location: FieldLocation,
+    *,
+    time_s: float | None = None,
+) -> SampleResult:
     """Evaluate one canonical field at a location produced for its layout."""
 
     if field.layout != location.layout_name:
         raise ValueError(
             f"field {field.name} uses layout {field.layout}, not {location.layout_name}"
         )
+    values = field.values
+    if field.time_s is not None:
+        if time_s is None:
+            raise ValueError("time_s is required for a time-dependent field")
+        values = _interpolate_snapshot_values(field, time_s)
     with np.errstate(over="ignore", invalid="ignore"):
         if field.association == "node":
             node_ids = np.asarray(location.node_ids, dtype=np.int64)
             weights = np.asarray(location.weights, dtype=np.float64)
-            value = weights @ field.values[node_ids]
+            value = weights @ values[node_ids]
         else:
-            value = field.values[location.cell_id].copy()
+            value = values[location.cell_id].copy()
     sampled = np.asarray(value, dtype=np.float64)
     if not bool(np.isfinite(sampled).all()):
         raise FieldLocationError(f"field {field.name!r} produced a non-finite sampled value")
@@ -1432,6 +1962,31 @@ def sample_field(field: FieldData, location: FieldLocation) -> SampleResult:
         cell_id=location.cell_id,
         outside_reason=location.outside_reason,
     )
+
+
+def _interpolate_snapshot_values(field: FieldData, time_s: float) -> FloatArray:
+    snapshot_time_s = field.time_s
+    if snapshot_time_s is None:
+        return field.values
+    query = float(time_s)
+    if (
+        not math.isfinite(query)
+        or query < float(snapshot_time_s[0])
+        or query > float(snapshot_time_s[-1])
+    ):
+        raise FieldLocationError(
+            f"field {field.name!r} cannot sample time outside its snapshot range"
+        )
+    lower = int(np.searchsorted(snapshot_time_s, query, side="right")) - 1
+    lower = min(max(lower, 0), int(snapshot_time_s.size) - 2)
+    weight = (query - float(snapshot_time_s[lower])) / float(
+        snapshot_time_s[lower + 1] - snapshot_time_s[lower]
+    )
+    with np.errstate(over="ignore", invalid="ignore"):
+        result = (1.0 - weight) * field.values[lower] + weight * field.values[lower + 1]
+    if not bool(np.isfinite(result).all()):
+        raise FieldLocationError(f"field {field.name!r} produced a non-finite sampled value")
+    return np.asarray(result, dtype=np.float64)
 
 
 def _finite_position(position_m: FloatArray) -> FloatArray:

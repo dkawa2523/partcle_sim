@@ -1,0 +1,184 @@
+{
+  "tool_revision": "readonly_comsol_coefficient_review_v1",
+  "date": "2026-10-09",
+  "scope": "historical accepted P1 inputs; declared C2 Brownian coefficient versus canonical Epstein coefficient",
+  "comsol_solve_performed": false,
+  "trajectory_simulation_performed": false,
+  "production_files_modified": false,
+  "status": "DECLARED_COEFFICIENTS_DIFFER_INSIDE_P1_CELLS",
+  "parameters": {
+    "gas_molecular_mass_kg": 1.2753471408396638e-25,
+    "boltzmann_J_K": 1.380649e-23,
+    "drag_diameter_m": 1e-07,
+    "accommodation_coefficient": 0.9
+  },
+  "equations": {
+    "mu_B": "mu_P1*(8+pi*sigma)*d/(36*lambda_P1)",
+    "beta_B": "3*pi*d*mu_B",
+    "beta_canonical": "pi*d^2/3*rho_P1*sqrt(8*kB*T_P1/(pi*m_g))*(1+pi*sigma/8)",
+    "ratio": "(mu_P1/lambda_P1)/(rho_P1*sqrt(2*kB*T_P1/(pi*m_g)))"
+  },
+  "evidence": {
+    "comsol_C2_formula": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/comsol/RunM3C2StochasticCampaign.java",
+      "lines": [
+        192,
+        203,
+        214,
+        338,
+        345
+      ]
+    },
+    "canonical_formula": {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/forces.py",
+      "lines": [
+        1099,
+        1122,
+        1133
+      ]
+    },
+    "caseP_source_axis": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseP_100nm/external_reproduction/config/particle_physics_feature_settings.csv",
+      "line": 6,
+      "condition": "Freeze"
+    },
+    "caseA_source_axis": {
+      "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/config/particle_physics_feature_settings.csv",
+      "line": 6,
+      "condition": "Freeze"
+    },
+    "C2_contract_axis": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseP_100nm_stochastic_pilot_v1.json",
+      "line": 62,
+      "meaning": "coordinate_crossing_not_material_event"
+    },
+    "critical_microcase_axis": {
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/comsol/RunM3CCriticalBoundaries.java",
+      "line": 155,
+      "condition": "Bounce"
+    }
+  },
+  "official_primary_urls": {
+    "brownian_theory": "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.43.html",
+    "rarefied_drag": "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.37.html",
+    "axial_symmetry": "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_math.06.18.html",
+    "wall": "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_math.06.04.html",
+    "wall_accuracy_and_status": "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_math.06.02.html",
+    "time_solver_api": "https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/comsol_api_solver.51.51.html",
+    "talbot_documentation": "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.48.html"
+  },
+  "inputs": [
+    {
+      "case": "caseP_100nm",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c1\\theory_100nm_30ms_candidate_v3\\caseP\\candidate_input.h5",
+      "sha256": "c54b4b658213230e82307ca89018538c0240bfcc83e793206d5093f4f08908e9",
+      "hash_verified": true,
+      "nodal": {
+        "rows": 1987,
+        "beta_brownian_over_beta_canonical_min": 0.9999999999999992,
+        "beta_brownian_over_beta_canonical_max": 1.0000000000000007,
+        "maximum_absolute_relative_difference": 7.771561172376096e-16,
+        "unweighted_rms_relative_difference": 2.3280508609106945e-16,
+        "meaning": "coefficient audit; neither trajectory error nor an area-integrated norm"
+      },
+      "triangle_centroids": {
+        "rows": 3779,
+        "beta_brownian_over_beta_canonical_min": 0.9953912682963564,
+        "beta_brownian_over_beta_canonical_max": 0.9999999994753843,
+        "maximum_absolute_relative_difference": 0.00460873170364362,
+        "unweighted_rms_relative_difference": 0.0005990991252797414,
+        "meaning": "coefficient audit; neither trajectory error nor an area-integrated norm"
+      },
+      "realized_release_positions": {
+        "rows": 287,
+        "beta_brownian_over_beta_canonical_min": 0.9994644629882561,
+        "beta_brownian_over_beta_canonical_max": 0.9999994639836958,
+        "maximum_absolute_relative_difference": 0.000535537011743914,
+        "unweighted_rms_relative_difference": 0.00017484412160889058,
+        "meaning": "coefficient audit; neither trajectory error nor an area-integrated norm"
+      },
+      "worst_centroid": {
+        "zero_based_cell": 1042,
+        "zero_based_nodes": [
+          1170,
+          1233,
+          1171
+        ],
+        "position_m": [
+          0.0020365383510549803,
+          0.11481238543267935
+        ],
+        "cell_support": 1,
+        "primitives": {
+          "gas_density": 4.297625705310682e-05,
+          "gas_dynamic_viscosity": 2.3222109709650394e-05,
+          "gas_temperature": 431.92140240631016,
+          "gas_mean_free_path": 0.0031463671450850106
+        },
+        "comsol_declared_effective_viscosity_Pa_s": 2.2198073949807257e-10,
+        "brownian_equivalent_beta_kg_s": 2.0921191813367232e-16,
+        "canonical_epstein_beta_kg_s": 2.1018058405489645e-16,
+        "force_standard_deviation_ratio": 0.9976929729612996
+      }
+    },
+    {
+      "case": "caseA_100nm",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\_out_m3c1\\caseA_100nm_exported_p1_v4\\candidate_input.h5",
+      "sha256": "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1",
+      "hash_verified": true,
+      "nodal": {
+        "rows": 1987,
+        "beta_brownian_over_beta_canonical_min": 0.9999999999999992,
+        "beta_brownian_over_beta_canonical_max": 1.0000000000000009,
+        "maximum_absolute_relative_difference": 8.881784197001252e-16,
+        "unweighted_rms_relative_difference": 2.303944760711849e-16,
+        "meaning": "coefficient audit; neither trajectory error nor an area-integrated norm"
+      },
+      "triangle_centroids": {
+        "rows": 3779,
+        "beta_brownian_over_beta_canonical_min": 0.9953912682963566,
+        "beta_brownian_over_beta_canonical_max": 0.9999999994753843,
+        "maximum_absolute_relative_difference": 0.004608731703643398,
+        "unweighted_rms_relative_difference": 0.0005990991252797431,
+        "meaning": "coefficient audit; neither trajectory error nor an area-integrated norm"
+      },
+      "realized_release_positions": {
+        "rows": 287,
+        "beta_brownian_over_beta_canonical_min": 0.9994644629882563,
+        "beta_brownian_over_beta_canonical_max": 0.9999994639836958,
+        "maximum_absolute_relative_difference": 0.000535537011743692,
+        "unweighted_rms_relative_difference": 0.00017484412160890685,
+        "meaning": "coefficient audit; neither trajectory error nor an area-integrated norm"
+      },
+      "worst_centroid": {
+        "zero_based_cell": 1042,
+        "zero_based_nodes": [
+          1170,
+          1233,
+          1171
+        ],
+        "position_m": [
+          0.0020365383510549803,
+          0.11481238543267935
+        ],
+        "cell_support": 1,
+        "primitives": {
+          "gas_density": 4.297625705310681e-05,
+          "gas_dynamic_viscosity": 2.3222109709650394e-05,
+          "gas_temperature": 431.92140240631016,
+          "gas_mean_free_path": 0.0031463671450850106
+        },
+        "comsol_declared_effective_viscosity_Pa_s": 2.2198073949807257e-10,
+        "brownian_equivalent_beta_kg_s": 2.0921191813367232e-16,
+        "canonical_epstein_beta_kg_s": 2.101805840548964e-16,
+        "force_standard_deviation_ratio": 0.9976929729612997
+      }
+    }
+  ],
+  "interpretation": {
+    "proven": "Nonlinear gas closure holds at source nodes but independent P1 interpolation breaks equality of the two declared coefficient expressions inside cells.",
+    "not_proven": "Actual COMSOL assembly, trajectory or ensemble effect, and invalidation of a historical population gate.",
+    "suggested_binding": "Derive Brownian effective viscosity from the same canonical drag beta: mu_B=beta_canonical/(3*pi*d).",
+    "axis_scope": "Source Freeze and candidate coordinate seam have different semantics; a separate Bounce microcase does not certify the chamber source axis."
+  }
+}

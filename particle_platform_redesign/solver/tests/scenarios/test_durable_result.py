@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import shutil
 from dataclasses import fields as dataclass_fields
 from dataclasses import replace
 from pathlib import Path
@@ -151,6 +152,65 @@ def test_default_commit_work_floor_is_resolved_and_final_epoch_is_forced(
     assert result.manifest["durable_commit_cadence"]["work_threshold"] == 1 << 20
     assert result.manifest["segment_count"] == 1
     assert _segment_macro_counts(result) == [130]
+
+
+@pytest.mark.parametrize("damage", ("shortened", "negative", "duplicate", "reversed"))
+def test_completed_result_rejects_final_count_and_particle_identity_corruption(
+    tmp_path: Path, damage: str
+) -> None:
+    case = _materialize_durable_case(tmp_path / "case")
+    original = tmp_path / "original"
+    simulate(case, original)
+    output = tmp_path / damage
+    shutil.copytree(original, output)
+    opened = open_result(output)
+    with h5py.File(output / "final.h5", "r+") as handle:
+        particles = handle["particles"]
+        if damage == "shortened":
+            for name in tuple(particles):
+                values = particles[name][:-1]
+                del particles[name]
+                particles.create_dataset(name, data=values)
+        elif damage == "negative":
+            particles["particle_id"][0] = -1
+        elif damage == "duplicate":
+            particles["particle_id"][1] = particles["particle_id"][0]
+        else:
+            particles["particle_id"][...] = particles["particle_id"][...][::-1]
+    with pytest.raises(SimulationError):
+        open_result(output)
+    with pytest.raises(output_module.ResultOpenError):
+        opened.read_final()
+
+
+def test_completed_result_rejects_duplicate_id_across_a_large_final_table(tmp_path: Path) -> None:
+    case, _ = _materialize_cadence_identity_cases(tmp_path / "case")
+    output = tmp_path / "large-final"
+    simulate(case, output)
+    with h5py.File(output / "final.h5", "r+") as handle:
+        ids = handle["particles/particle_id"]
+        assert ids.shape == (5_000,)
+        ids[4096] = ids[4095]
+    with pytest.raises(SimulationError):
+        open_result(output)
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    (("particles", True), ("particles", -1), ("macro_steps", 130.0), ("macro_steps", -1)),
+)
+def test_completed_result_requires_integer_nonnegative_manifest_counts(
+    tmp_path: Path, name: str, value: bool | int | float
+) -> None:
+    case = _materialize_durable_case(tmp_path / "case")
+    output = tmp_path / "invalid-count"
+    simulate(case, output)
+    manifest_path = output / "run.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["counts"][name] = value
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(SimulationError):
+        open_result(output)
 
 
 def test_commit_cadence_is_output_schedule_and_slab_independent(tmp_path: Path) -> None:
@@ -326,6 +386,27 @@ def test_probabilistic_wall_rng_is_identical_after_resume(
     _assert_public_result_identity(open_result(uninterrupted_path), resumed)
 
 
+def test_maxwell_wall_rng_is_identical_after_resume(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    case = _materialize_maxwell_resume_case(tmp_path / "maxwell-case")
+    uninterrupted_path = tmp_path / "maxwell-uninterrupted"
+    interrupted_path = tmp_path / "maxwell-interrupted"
+    simulate(case, uninterrupted_path)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(output_module.os, "replace", _replace_failure_after_second_commit("latest"))
+        with pytest.raises(SimulationError):
+            simulate(case, interrupted_path)
+
+    recovered = open_result(interrupted_path, recovery=True)
+    np.testing.assert_array_equal(recovered.read_boundary_events().law_id, ["maxwell_thermal"])
+    simulate(case, interrupted_path)
+    resumed = open_result(interrupted_path)
+    _assert_public_result_identity(open_result(uninterrupted_path), resumed)
+
+
 def test_held_checkpoint_resumes_without_reactivating_particle(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -426,6 +507,7 @@ def _materialize_durable_case(
             "displaced_volume_m3",
             "model_weight",
             "material_id",
+            "contact_radius_m",
         )
     }
     particles = source_type(
@@ -488,6 +570,7 @@ def _materialize_cadence_identity_cases(directory: Path) -> tuple[Any, Any]:
             "displaced_volume_m3",
             "model_weight",
             "material_id",
+            "contact_radius_m",
         )
     }
     particles = replace(
@@ -541,6 +624,35 @@ def _materialize_probabilistic_resume_case(directory: Path) -> Any:
             boundary["law"] = "probabilistic_stick"
             boundary["probability"] = 0.5
             boundary["otherwise"] = {"law": "specular"}
+
+    directory.mkdir(parents=True, exist_ok=False)
+    data_path = directory / "case.h5"
+    info = write(data_path, definition.data)
+    spec["case"]["data_path"] = data_path.name
+    spec["case"]["expected_content_hash"] = info.content_hash
+    case_path = directory / "case.yaml"
+    case_path.write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    return load_case(case_path)
+
+
+def _materialize_maxwell_resume_case(directory: Path) -> Any:
+    definition = build_microcase("C08")
+    spec = copy.deepcopy(definition.spec)
+    spec["case"]["name"] = "Maxwell thermal checkpoint resume"
+    spec["time"] = {"start_s": 0.0, "end_s": 2.25, "dt_s": 0.01}
+    for boundary in spec["boundaries"]:
+        if boundary["boundary_group"] == "mirror":
+            boundary.clear()
+            boundary.update(
+                {
+                    "boundary_group": "mirror",
+                    "priority": 20,
+                    "law": "maxwell_thermal",
+                    "wall_temperature_K": 300.0,
+                    "diffuse_reflection_fraction": 1.0,
+                    "wall_velocity_m_s": [0.0, 0.0],
+                }
+            )
 
     directory.mkdir(parents=True, exist_ok=False)
     data_path = directory / "case.h5"

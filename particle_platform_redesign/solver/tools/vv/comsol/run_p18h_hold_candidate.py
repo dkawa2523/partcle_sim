@@ -163,6 +163,7 @@ def _candidate_bundle(config: dict[str, Any], config_hash: str) -> DataBundle:
         charge_number=np.asarray([case["source_charge_number_e"]], dtype="<f8"),
         mass_kg=np.asarray([case["particle_mass_kg"]], dtype="<f8"),
         drag_diameter_m=np.asarray([diameter], dtype="<f8"),
+        contact_radius_m=np.asarray([0.0], dtype="<f8"),
         electrostatic_radius_m=np.asarray([0.5 * diameter], dtype="<f8"),
         displaced_volume_m3=np.asarray([math.pi * diameter**3 / 6.0], dtype="<f8"),
         model_weight=np.asarray([1.0], dtype="<f8"),
@@ -184,7 +185,7 @@ def _case_document(config: dict[str, Any], content_hash: str) -> dict[str, objec
     case = _mapping(config["case"], "case")
     times = np.linspace(0.0, float(case["time_end_s"]), int(case["output_frames"])).tolist()
     return {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": "p18h_hold_freeze_force_free",
             "data_path": DATA_FILENAME,

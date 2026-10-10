@@ -88,7 +88,7 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 | `coordinates.py` | XY/RZ/3D基底とaxis規則 | field locate、wall law |
 | `geometry.py` | containment、BVH、first-hit query | 付着、反射、field値 |
 | `fields.py` | locate、補間、support | mesh修復、cache生成 |
-| `sources.py` | table/surface release、時刻、weight | lifecycle、再飛散 |
+| `sources.py` | canonical internal/surface scheduleのrelease、位置解決、時刻、weight | 分布sampling、source RNG、lifecycle、再飛散 |
 | `rng.py` | counter key、uniform/normal、stream ID | source/wall policy |
 | `physics/` | sample済みprimitiveからrate/加速度 | mesh探索、I/O、lifecycle |
 | `integrators.py` | stage積分、`StepProposal` | BVH、boundary law、出力 |
@@ -141,11 +141,17 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 - 粒子IDは固定し、compact配列のindexをidentityにしない。
 - output frameはaccepted `StepProposal.state_at()`から評価し、resident stateを出力時刻へcommitしたり
   production stepを分割したりしない。曲線pathの`state_at()`はproposal始点から同じintegrator規則で再評価する。
-- wall eventは最初のhitだけを応答へ渡す。corner policyは明示する。
+- wall eventは最初のhit時刻だけを応答へ渡し、その局在budget内で同時なincident facet集合を保持する。
+  exact、一般RK4、exponential、Brownianで同じ候補集合、corner policy、combined normalを使う。
 - zero-time surface departureを位置nudgeで解決しない。
 - RNGはparticle ID、model stream、物理的draw ordinalから決める。
 - tile幅、出力頻度、checkpoint/resumeでdrawとeventを変えない。
 - stochastic stepを分割する場合、独立乱数を引き直さず条件付き分割を使う。
+- Brownianの`interval_tree_depth`は全rootへ一様に適用する数値path精度のauthorityとする。
+  `adaptive_max_depth`はそのpathがwall、RZ axis、または証明不能区間の候補になった時だけ条件付き分割する上限であり、
+  base depthを置き換えない。両者が同じなら従来の固定depth pathへ退化する。
+- 有限depthのcubic Hermite pathはsampleしていない連続OU軌道のexact first-passage、zero miss probability、
+  またはbase depth不足の自動補償を主張しない。
 
 ## 9. 性能実装
 
@@ -161,6 +167,8 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
   bounded bufferへ書く。
 - scratch容量はtile幅から決めて一度確保し再利用する。workerごとの全量proposal/event buffer、thread IDに依存する
   private APIを導入しない。
+- Brownian stochastic-tree scratchは実行時に到達し得る`adaptive_max_depth`から保守的に計画し、
+  実際にrefineしたrow数が少ないことを根拠にmemory planを過小評価しない。
 - event、failure、frame、probe、finalはparticle ID・時刻・物理ordinalによるstable orderで出力し、tile幅、
   実行順でbitwise payloadとRNG drawを変えない。
 - 最適化前後でtrajectory/event identity、時間、peak memoryを同じcaseで測る。

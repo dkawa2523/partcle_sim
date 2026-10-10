@@ -28,8 +28,9 @@ from chamber_particles.case_format import (
     read_with_info,
 )
 from chamber_particles.fields import FieldBatch, RequiredFieldMetadata, prepare_required_fields
+from tools.vv.comsol.actual_run_receipt import write_boundary_meaning
 
-TOOL_REVISION: Final = "m3c1_full_physics_common_p1_tables_v1"
+TOOL_REVISION: Final = "m3c1_full_physics_common_p1_tables_v2"
 EXPECTED_RELEASE_COUNT: Final = 287
 
 
@@ -243,25 +244,18 @@ def _format_row(values: tuple[object, ...]) -> tuple[object, ...]:
     return tuple(format(value, ".17g") if isinstance(value, float) else value for value in values)
 
 
-def _load_candidate(candidate_h5: Path) -> _CommonInput:
-    data, info = read_with_info(candidate_h5)
-    if data.coordinate_system != "axisymmetric_rz" or len(data.layouts) != 1:
-        raise ValueError("candidate must have one axisymmetric RZ layout")
-    layout = data.layouts[0]
-    if not isinstance(layout, P1TriLayout) or layout.connectivity.shape[1] != 3:
-        raise ValueError("candidate must use one triangular P1 layout")
-    if not bool((layout.cell_support == 1).all()):
-        raise ValueError("common-field export requires every P1 cell to be supported")
-    fields = _validate_fields(data, layout)
+def _validate_candidate_source(data: DataBundle) -> tuple[RealizedTableSource, dict[str, int]]:
+    """Return the one ordered internal release grid required by this V&V fixture."""
+
     if len(data.sources) != 1:
         raise ValueError("candidate must contain one realized table source")
     source = data.sources[0]
+    if not isinstance(source, RealizedTableSource):
+        raise ValueError("candidate release probes must be an internal table")
     if source.particle_id.size != EXPECTED_RELEASE_COUNT:
         raise ValueError(f"expected {EXPECTED_RELEASE_COUNT} release probes")
-    if not np.array_equal(
-        source.particle_id,
-        np.arange(1, EXPECTED_RELEASE_COUNT + 1, dtype=np.int64),
-    ):
+    expected_ids = np.arange(1, EXPECTED_RELEASE_COUNT + 1, dtype=np.int64)
+    if not np.array_equal(source.particle_id, expected_ids):
         raise ValueError("release particle IDs must be the ordered contiguous range 1..287")
     if not bool((source.release_time_s == 0.0).all()):
         raise ValueError("the M3-C1 common-field diagnostic requires release at t=0")
@@ -273,6 +267,20 @@ def _load_candidate(candidate_h5: Path) -> _CommonInput:
     release_order, release_grid = _release_grid(source)
     if not np.array_equal(release_order, np.arange(EXPECTED_RELEASE_COUNT)):
         raise ValueError("release source must be ordered lexicographically by r then z")
+    return source, release_grid
+
+
+def _load_candidate(candidate_h5: Path) -> _CommonInput:
+    data, info = read_with_info(candidate_h5)
+    if data.coordinate_system != "axisymmetric_rz" or len(data.layouts) != 1:
+        raise ValueError("candidate must have one axisymmetric RZ layout")
+    layout = data.layouts[0]
+    if not isinstance(layout, P1TriLayout) or layout.connectivity.shape[1] != 3:
+        raise ValueError("candidate must use one triangular P1 layout")
+    if not bool((layout.cell_support == 1).all()):
+        raise ValueError("common-field export requires every P1 cell to be supported")
+    fields = _validate_fields(data, layout)
+    source, release_grid = _validate_candidate_source(data)
 
     requirements = {
         name: RequiredFieldMetadata(
@@ -469,6 +477,7 @@ def prepare(candidate_h5: Path, output: Path) -> None:
 
     output.mkdir(parents=True, exist_ok=False)
     artifact_paths, component_records = _write_field_tables(output, common)
+    artifact_paths.append(write_boundary_meaning(candidate_h5, output))
     artifact_paths.extend(_write_release_tables(output, common.source))
     probe_path = _write_probe_table(output, common)
     artifact_paths.append(probe_path)

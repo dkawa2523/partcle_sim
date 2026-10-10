@@ -22,7 +22,13 @@ import numpy as np
 import yaml
 
 from chamber_particles import load_case, open_result, simulate
-from chamber_particles.case_format import DataBundle, read_with_info, write
+from chamber_particles.case import CASE_FORMAT_VERSION
+from chamber_particles.case_format import (
+    DataBundle,
+    RealizedTableSource,
+    read_with_info,
+    write,
+)
 from chamber_particles.fields import RequiredFieldMetadata, prepare_required_fields
 from chamber_particles.physics.charge import (
     AggregateThreeCurrentChargeEvaluation,
@@ -30,6 +36,9 @@ from chamber_particles.physics.charge import (
     aggregate_relative_drift_three_current_global_bounds,
 )
 from chamber_particles.physics.forces import BOLTZMANN_J_K
+from chamber_particles.yaml_input import parse_document
+from tools.vv.comsol.actual_run_receipt import write_boundary_meaning
+from tools.vv.comsol.meaning_preflight import load_inventory
 
 TOOL_REVISION: Final = "m3c3_casep_three_current_candidate_v5"
 CASE_ID: Final = "caseP_100nm_three_current"
@@ -65,11 +74,8 @@ EVENT_HEADER: Final = (
     "outcome",
     "boundary_semantic",
 )
-BOUNDARY_SEMANTIC: Final = {
-    "held": "gas_inlet_hold",
-    "stuck": "material_stick_boundary_unspecified",
-    "escaped": "pump_outlet_escape",
-}
+TERMINAL_OUTCOMES: Final = frozenset({"held", "stuck", "escaped"})
+EVENT_PROJECTION_REVISION: Final = "canonical_boundary_id_group_v1"
 RELEASE_HEADER: Final = (
     "particle_id",
     "release_time_s",
@@ -376,6 +382,8 @@ def _equilibrium_release(
     if len(data.sources) != 1:
         raise ValueError("M3-C3 input must contain exactly one particle source")
     source = data.sources[0]
+    if not isinstance(source, RealizedTableSource):
+        raise ValueError("M3-C3 release probes must be an internal table")
     if source.particle_id.size != PARTICLE_COUNT or not np.array_equal(
         source.particle_id, np.arange(1, PARTICLE_COUNT + 1)
     ):
@@ -577,9 +585,11 @@ def prepare(config_path: Path, output: Path) -> dict[str, object]:
     roots, numerical_receipt = _equilibrium_release(data)
     derived = _derived_bundle(data, roots, input_info.content_hash)
     template = _mapping(
-        yaml.safe_load(paths["candidate_template"].read_text(encoding="utf-8")),
+        parse_document(paths["candidate_template"].read_bytes()),
         "candidate template",
     )
+    if template.get("format_version") != CASE_FORMAT_VERSION:
+        raise ValueError("candidate template must use the current case format")
     output.mkdir(parents=True, exist_ok=False)
     shutil.copyfile(paths["primitive_receipt"], output / "primitive_receipt.json")
     input_path = output / "candidate_input_three_current_z0.h5"
@@ -685,23 +695,28 @@ def _write_trajectory(path: Path, result: Any) -> tuple[int, float]:
     return rows, maximum_speed_m_s
 
 
-def _write_events(path: Path, result: Any) -> int:
+def _write_events(path: Path, result: Any, boundary_meaning: Path) -> int:
+    groups = _mapping(load_inventory(boundary_meaning).get("boundary_groups"), "boundary groups")
     events = result.read_boundary_events()
     rows: list[tuple[int, float, str, str, str]] = []
     seen: set[int] = set()
     for index, particle_id_value in enumerate(events.particle_id):
         particle_id = int(particle_id_value)
         outcome = str(events.outcome[index])
-        if particle_id in seen or outcome not in BOUNDARY_SEMANTIC:
+        if particle_id in seen or outcome not in TERMINAL_OUTCOMES:
             raise ValueError("M3-C3 requires at most one recognized terminal event per particle")
         seen.add(particle_id)
+        boundary_id = str(int(events.boundary_id[index]))
+        group = groups.get(boundary_id)
+        if not isinstance(group, str) or not group:
+            raise ValueError("terminal boundary ID has no canonical semantic group")
         rows.append(
             (
                 particle_id,
                 float(events.time_s[index]),
                 "terminal_boundary",
                 outcome,
-                BOUNDARY_SEMANTIC[outcome],
+                group,
             )
         )
     with path.open("x", encoding="utf-8", newline="") as stream:
@@ -735,7 +750,10 @@ def run_cell(prepared_root: Path, level: str) -> dict[str, object]:
     simulate(load_case(case_path), result_path)
     result = open_result(result_path)
     rows, maximum_speed_m_s = _write_trajectory(trajectory_path, result)
-    event_rows = _write_events(events_path, result)
+    meaning_path = write_boundary_meaning(
+        prepared_root / "candidate_input_three_current_z0.h5", cell
+    )
+    event_rows = _write_events(events_path, result, meaning_path)
     counts = _mapping(result.manifest.get("counts"), "result counts")
     status = (
         "PASS"
@@ -761,6 +779,8 @@ def run_cell(prepared_root: Path, level: str) -> dict[str, object]:
         "trajectory_rows": rows,
         "events_sha256": _sha256(events_path),
         "event_rows": event_rows,
+        "event_projection_revision": EVENT_PROJECTION_REVISION,
+        "canonical_boundary_meaning_sha256": _sha256(meaning_path),
         "maximum_observed_particle_speed_m_s": maximum_speed_m_s,
         "preparation_particle_speed_envelope_m_s": PARTICLE_SPEED_ENVELOPE_M_S,
         "preparation_envelope_exceeded": maximum_speed_m_s > PARTICLE_SPEED_ENVELOPE_M_S,
@@ -774,6 +794,55 @@ def run_cell(prepared_root: Path, level: str) -> dict[str, object]:
     return receipt
 
 
+def reproject_events(prepared_root: Path, level: str) -> dict[str, object]:
+    """Correct event reporting from an immutable completed result without simulating."""
+    if level not in dict(LEVELS):
+        raise ValueError(f"unknown M3-C3 candidate level: {level}")
+    prepared_root = prepared_root.resolve()
+    cell = prepared_root / "candidate" / level
+    receipt_path = cell / "run_receipt.json"
+    receipt = load_inventory(receipt_path)
+    result_path = cell / "result"
+    old_events = cell / "events.csv"
+    if (
+        receipt.get("status") != "PASS"
+        or receipt.get("result_manifest_sha256") != _sha256(result_path / "run.json")
+        or receipt.get("events_sha256") != _sha256(old_events)
+        or receipt.get("case_sha256") != _sha256(cell / "case.yaml")
+    ):
+        raise ValueError("immutable executed result or original projection identity differs")
+    candidate_input = prepared_root / "candidate_input_three_current_z0.h5"
+    if receipt.get("derived_input_sha256") != _sha256(candidate_input):
+        raise ValueError("event projection must use the executed canonical input")
+    meaning_path = write_boundary_meaning(candidate_input, cell)
+    projected = cell / "events.canonical.csv"
+    result = open_result(result_path)
+    count = _write_events(projected, result, meaning_path)
+    if count != receipt.get("event_rows"):
+        raise ValueError("corrected event population differs from the executed result")
+    producer_path = cell / "event_projection_producer.py"
+    shutil.copyfile(Path(__file__), producer_path)
+    repair: dict[str, object] = {
+        "schema_version": 1,
+        "projection_revision": EVENT_PROJECTION_REVISION,
+        "status": "COMPLETE_REPORTING_REPROJECTION_NO_SIMULATION",
+        "level": level,
+        "original_run_receipt_sha256": _sha256(receipt_path),
+        "original_events_sha256": _sha256(old_events),
+        "result_manifest_sha256": _sha256(result_path / "run.json"),
+        "canonical_input_sha256": _sha256(candidate_input),
+        "canonical_boundary_meaning_sha256": _sha256(meaning_path),
+        "producer_sha256": _sha256(producer_path),
+        "events": {"path": projected.name, "sha256": _sha256(projected), "rows": count},
+        "change": "preserve observed boundary ID and canonical group; remove outcome-to-group inference",
+        "comsol_executed": False,
+        "candidate_simulated": False,
+        "original_execution_receipt_modified": False,
+    }
+    _write_json(cell / "event_projection_receipt.json", repair)
+    return repair
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -783,11 +852,16 @@ def main() -> None:
     run_parser = commands.add_parser("run-cell")
     run_parser.add_argument("prepared_root", type=Path)
     run_parser.add_argument("level", choices=[name for name, _ in LEVELS])
+    projection_parser = commands.add_parser("reproject-events")
+    projection_parser.add_argument("prepared_root", type=Path)
+    projection_parser.add_argument("level", choices=[name for name, _ in LEVELS])
     arguments = parser.parse_args()
     if arguments.command == "prepare":
         prepare(arguments.config, arguments.output)
-    else:
+    elif arguments.command == "run-cell":
         run_cell(arguments.prepared_root, arguments.level)
+    else:
+        reproject_events(arguments.prepared_root, arguments.level)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,178 @@
+{
+  "artifact": "v0_2_release_actual_lf_source_normalization_v1",
+  "change": "CRLF to LF only; Python AST identical; no scientific source edit",
+  "changed_files": [
+    "src/chamber_particles/engine.py"
+  ],
+  "executor_source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+  "performance_completed_before_normalization_sha256": "b52e4c38d70b490a11e59871fd5baa02d8ca4641d323b5e6a52914221e999091",
+  "prior_index_witness_sha256": "1a56482f45cec3286d19fd67419d2912f3cd08cbfa238d75cd81b931a4097788",
+  "recorded_at_utc": "2026-10-10T04:49:50.490895+00:00",
+  "source_count": 27,
+  "source_entries": {
+    "src/chamber_particles/__init__.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "sha256": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a"
+    },
+    "src/chamber_particles/__main__.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+      "sha256": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e"
+    },
+    "src/chamber_particles/api.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+      "sha256": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0"
+    },
+    "src/chamber_particles/boundaries.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+      "sha256": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892"
+    },
+    "src/chamber_particles/case.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "sha256": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797"
+    },
+    "src/chamber_particles/case_format.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "sha256": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c"
+    },
+    "src/chamber_particles/cli.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+      "sha256": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7"
+    },
+    "src/chamber_particles/coordinates.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+      "sha256": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27"
+    },
+    "src/chamber_particles/cpu.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+      "sha256": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9"
+    },
+    "src/chamber_particles/engine.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "230f2784b87c4d76155cc0a7525a3edbc8ab812c9e022511a9e4b74d83cae309",
+      "sha256": "230f2784b87c4d76155cc0a7525a3edbc8ab812c9e022511a9e4b74d83cae309"
+    },
+    "src/chamber_particles/events.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+      "sha256": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16"
+    },
+    "src/chamber_particles/fields.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+      "sha256": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254"
+    },
+    "src/chamber_particles/geometry.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+      "sha256": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee"
+    },
+    "src/chamber_particles/integrators.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+      "sha256": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1"
+    },
+    "src/chamber_particles/numerical_status.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "sha256": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf"
+    },
+    "src/chamber_particles/output.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "sha256": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d"
+    },
+    "src/chamber_particles/physics/__init__.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "sha256": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539"
+    },
+    "src/chamber_particles/physics/catalog.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "sha256": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5"
+    },
+    "src/chamber_particles/physics/charge.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "sha256": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405"
+    },
+    "src/chamber_particles/physics/compiled.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "sha256": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358"
+    },
+    "src/chamber_particles/physics/forces.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+      "sha256": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b"
+    },
+    "src/chamber_particles/physics/runtime.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+      "sha256": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2"
+    },
+    "src/chamber_particles/rng.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+      "sha256": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6"
+    },
+    "src/chamber_particles/sources.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "sha256": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193"
+    },
+    "src/chamber_particles/stochastic.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+      "sha256": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac"
+    },
+    "src/chamber_particles/topology.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "sha256": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861"
+    },
+    "src/chamber_particles/yaml_input.py": {
+      "ast_identical_to_preregistered_working_source": true,
+      "byte_identical_to_index": true,
+      "index_sha256": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+      "sha256": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+    }
+  },
+  "status": "COMPLETE_ACTUAL_SOURCE_EQUALS_STAGED_SOURCE",
+  "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+}

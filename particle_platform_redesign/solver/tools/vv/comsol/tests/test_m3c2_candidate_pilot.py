@@ -15,6 +15,15 @@ import yaml
 from tools.vv.comsol import run_m3c2_candidate_pilot as candidate
 
 from chamber_particles import load_case
+from chamber_particles.case_format import (
+    BoundaryData,
+    DataBundle,
+    FieldData,
+    GeometryData,
+    P1TriLayout,
+    RealizedTableSource,
+    write,
+)
 
 RECIPE = Path(__file__).parents[1] / "cases/m3c2_caseA_100nm_candidate_pilot_v1.json"
 DIAGNOSTIC_RECIPE = Path(__file__).parents[1] / "cases/m3c2_caseA_100nm_candidate_pilot_v2.json"
@@ -52,8 +61,253 @@ def _mapping(value: object) -> dict[str, Any]:
     return value
 
 
+def test_new_candidate_case_uses_current_brownian_revision() -> None:
+    template = {
+        "solver": {"event": {}},
+        "physics": {},
+        "output": {"trajectories": {"schedule": {}}},
+    }
+    level = {"name": "coarse", "dt_s": 2.0e-5, "brownian_interval_tree_depth": 3}
+
+    document = candidate._case_document(
+        template,
+        "a" * 64,
+        level,
+        7,
+        "candidate",
+        candidate.BROWNIAN_NOISE_REVISION,
+    )
+
+    assert document["physics"]["noise"]["revision"] == candidate.BROWNIAN_NOISE_REVISION
+
+
 def _write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _current_recipe_copy(tmp_path: Path, source: Path) -> Path:
+    recipe = json.loads(source.read_text(encoding="utf-8"))
+    recipe["physics"]["noise_revision"] = candidate.BROWNIAN_NOISE_REVISION
+    _bind_current_inputs(recipe, tmp_path / source.stem)
+    path = tmp_path / f"current-{source.name}"
+    _write_json(path, recipe)
+    return path
+
+
+def _current_input(directory: Path) -> tuple[Path, str]:
+    directory.mkdir(parents=True, exist_ok=True)
+    nodes = np.asarray(
+        [[0.05, 0.0], [0.525, 0.0], [1.0, 0.0], [1.0, 1.0], [0.525, 1.0], [0.05, 1.0]], dtype="<f8"
+    )
+    triangles = np.asarray([[0, 1, 4], [0, 4, 5], [1, 2, 3], [1, 3, 4]], dtype="<i8")
+    boundary = BoundaryData(
+        line2=np.asarray([[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0]], dtype="<i8"),
+        boundary_id=np.arange(1, 7, dtype="<i4"),
+        group_id=np.arange(6, dtype="<i4"),
+        material_id=np.zeros(6, dtype="<i4"),
+        owner_cell_type=np.ones(6, dtype="<u1"),
+        owner_cell_local_index=np.asarray([0, 2, 2, 3, 1, 1], dtype="<i8"),
+        orientation=np.ones(6, dtype="<i1"),
+    )
+    geometry = GeometryData(
+        nodes_m=nodes,
+        boundary=boundary,
+        group_names=(
+            "wafer",
+            "grounded_wall",
+            "focus_transition",
+            "outer_dielectric",
+            "gas_inlet",
+            "pump_outlet",
+        ),
+        tri3=triangles,
+        tri3_domain_id=np.ones(4, dtype="<i4"),
+    )
+    layout = P1TriLayout("common_p1", nodes, triangles, np.ones(4, dtype="<u1"))
+    primitives = (
+        ("gas_density", ("value",), "kg/m^3", [1.0e-12]),
+        ("gas_temperature", ("value",), "K", [300.0]),
+        ("gas_mean_free_path", ("value",), "m", [1.0e-3]),
+        ("gas_velocity", ("r", "z"), "m/s", [0.0, 0.0]),
+        ("gas_dynamic_viscosity", ("value",), "Pa*s", [1.0e-5]),
+        ("electron_number_density", ("value",), "1/m^3", [1.0e6]),
+        ("positive_ion_number_density", ("value",), "1/m^3", [1.0e6]),
+        ("electron_thermal_voltage", ("value",), "V", [3.0]),
+        ("positive_ion_thermal_voltage", ("value",), "V", [0.1]),
+        ("effective_positive_ion_mass", ("value",), "kg", [6.6335209e-26]),
+        ("screening_length", ("value",), "m", [1.0e-3]),
+        ("ion_neutral_mean_free_path", ("value",), "m", [1.0e-3]),
+        ("azimuthal_gas_vorticity", ("value",), "1/s", [0.0]),
+        ("positive_ion_velocity", ("r", "z"), "m/s", [0.0, 0.0]),
+        ("electric_field", ("r", "z"), "V/m", [0.0, 0.0]),
+        ("gas_translational_heat_flux", ("r", "z"), "W/m^2", [0.0, 0.0]),
+        ("gradient_mean_e_squared", ("r", "z"), "V^2/m^3", [0.0, 0.0]),
+    )
+    fields = tuple(
+        FieldData(
+            name=name,
+            layout=layout.name,
+            association="node",
+            components=components,
+            stored_basis="scalar" if len(components) == 1 else "axisymmetric_rz",
+            values=np.broadcast_to(values, (6, len(components))).copy(),
+            unit=unit,
+        )
+        for name, components, unit, values in primitives
+    )
+    count = candidate.PARTICLE_COUNT
+    source = RealizedTableSource(
+        name="particles",
+        particle_id=np.arange(1, count + 1, dtype="<i8"),
+        release_time_s=np.zeros(count),
+        position_m=np.tile([0.3, 0.4], (count, 1)),
+        velocity_m_s=np.zeros((count, 2)),
+        charge_number=np.zeros(count),
+        mass_kg=np.full(count, 4.0e-15),
+        drag_diameter_m=np.full(count, 1.0e-7),
+        contact_radius_m=np.zeros(count),
+        electrostatic_radius_m=np.full(count, 5.0e-8),
+        displaced_volume_m3=np.zeros(count),
+        model_weight=np.ones(count),
+        material_id=np.zeros(count, dtype="<i4"),
+    )
+    provenance = json.dumps(
+        {
+            "source_sha256": "sha256:" + "0" * 64,
+            "producer": "manufactured_vv_fixture",
+            "producer_version": "1",
+            "producer_metadata": {"scope": "current_runner_contract"},
+            "field_semantics_revision": "constant_primitives_v1",
+        }
+    )
+    path = directory / "input.h5"
+    info = write(
+        path, DataBundle("axisymmetric_rz", provenance, geometry, (layout,), fields, (source,))
+    )
+    return path, info.content_hash
+
+
+def _current_template(directory: Path, content_hash: str) -> Path:
+    original = json.loads(RECIPE.read_text(encoding="utf-8"))
+    template_path = candidate._repository_root() / original["deterministic_case_template"]["path"]
+    physics = yaml.safe_load(template_path.read_text(encoding="utf-8"))["physics"]
+    physics["charge"] = {"model": "fixed"}
+    physics["gravity_buoyancy"]["gravity_m_s2"] = [0.0, 0.0]
+    document = {
+        "format_version": 3,
+        "case": {
+            "name": "current-manufactured-p1",
+            "data_path": "input.h5",
+            "expected_content_hash": content_hash,
+        },
+        "time": {"start_s": 0.0, "end_s": candidate.END_TIME_S, "dt_s": 2.0e-5},
+        "solver": {
+            "integrator": "rk4_fixed",
+            "backend": "cpu",
+            "seed": 1,
+            "event": {
+                "geometry_rtol": 1.0e-8,
+                "roundoff_ulps": 32,
+                "max_refinements": 32,
+                "max_interactions_per_step": 8,
+                "corner_policy": "priority_then_combined_normal_v1",
+            },
+        },
+        "resources": {"memory_limit_mb": 512},
+        "motion": {"mode": "axisymmetric_rz_meridional"},
+        "physics": physics,
+        "boundaries": [
+            {"boundary_group": name, "priority": 0, "law": law}
+            for name, law in (
+                ("wafer", "stick"),
+                ("grounded_wall", "stick"),
+                ("focus_transition", "stick"),
+                ("outer_dielectric", "stick"),
+                ("gas_inlet", "hold"),
+                ("pump_outlet", "escape"),
+            )
+        ],
+        "sources": [{"name": "release", "type": "table", "table": "particles"}],
+        "output": {
+            "trajectories": {
+                "selection": "all",
+                "schedule": {"explicit_times_s": candidate._output_times()},
+            }
+        },
+    }
+    path = directory / "template.yaml"
+    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    return path
+
+
+def _current_revisions() -> dict[str, object]:
+    return {
+        "case_schema_version": 3,
+        "result_schema_version": 3,
+        "result_algorithm_revision": "durable_segmented_result_v6",
+        "engine_algorithm_revision": "particle_engine_v46",
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+        "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+        "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+        "rng_algorithm_revision": "philox4x32_10_v2",
+        "boundary_algorithm_revision": "contact_wall_laws_v7",
+        "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+        "joint_ou_revision": "inertial_joint_ou_v1",
+        "joint_ou_split_revision": "conditional_gaussian_half_split_v1",
+        "brownian_composition_revision": "stochastic_exponential_midpoint_v1",
+        "brownian_charge_dense_revision": "macro_root_affine_exponential_v2",
+        "brownian_tree_policy_revision": "conditional_boundary_refinement_v1",
+    }
+
+
+def _bind_current_inputs(recipe: dict[str, Any], directory: Path) -> None:
+    input_path, content_hash = _current_input(directory)
+    template_path = _current_template(directory, content_hash)
+    root = candidate._repository_root()
+    contract = json.loads((root / recipe["contract"]["path"]).read_text(encoding="utf-8"))
+    common = contract["common_p1_input"]
+    common.update(
+        {
+            "path": str(input_path),
+            "file_sha256": candidate._sha256(input_path),
+            "content_hash": content_hash,
+        }
+    )
+    common["geometry"].update({"nodes": 6, "triangles": 4, "boundary_lines": 6})
+    contract_path = directory / "contract.json"
+    _write_json(contract_path, contract)
+    receipt = json.loads((root / recipe["contract_receipt"]["path"]).read_text(encoding="utf-8"))
+    receipt["contract_sha256"] = candidate._sha256(contract_path)
+    receipt["common_p1_input"] = candidate._contract_common_input_receipt(contract, input_path)
+    receipt_path = directory / "receipt.json"
+    _write_json(receipt_path, receipt)
+    recipe["contract"] = {"path": str(contract_path), "sha256": candidate._sha256(contract_path)}
+    recipe["contract_receipt"] = {
+        "path": str(receipt_path),
+        "sha256": candidate._sha256(receipt_path),
+    }
+    recipe["canonical_input"] = {
+        "path": str(input_path),
+        "sha256": candidate._sha256(input_path),
+        "content_hash": content_hash,
+    }
+    recipe["deterministic_case_template"] = {
+        "path": str(template_path),
+        "sha256": candidate._sha256(template_path),
+    }
+    if "seed_source" in recipe["pilot"]:
+        recipe["pilot"]["seed_source"].update(recipe["contract"])
+    authorization = recipe.get("execution_authorization", {})
+    if "path" in authorization:
+        document = json.loads((root / authorization["path"]).read_text(encoding="utf-8"))
+        document.update(
+            {"contract": recipe["contract"], "contract_receipt": recipe["contract_receipt"]}
+        )
+        path = directory / "authorization.json"
+        _write_json(path, document)
+        recipe["execution_authorization"] = {"path": str(path), "sha256": candidate._sha256(path)}
+    recipe["execution"]["expected_executor"] = candidate.installed_executor_identity()
+    recipe["execution"]["expected_revisions"] = _current_revisions()
 
 
 def _final_registration_fixture(
@@ -93,7 +347,9 @@ def _final_registration_fixture(
         pilot,
         {
             "schema_version": policy_revision,
-            "tool_revision": f"m3c2_stochastic_ensemble_evaluator_v{policy_revision}",
+            "tool_revision": candidate._evaluator_revision_for_runner(
+                policy_revision, candidate.TOOL_REVISION
+            ),
             "phase": "pilot",
             "status": "PASS",
             "policy": {"sha256": candidate._sha256(policy), "revision": policy_revision},
@@ -237,6 +493,7 @@ def _configured_recipe_fixture(
     _write_json(contract_path, contract)
 
     recipe = json.loads(QUALIFIED_MACRO_RECIPE.read_text(encoding="utf-8"))
+    recipe["physics"]["noise_revision"] = candidate.BROWNIAN_NOISE_REVISION
     recipe["recipe_id"] = "M3-C2A-caseP-100nm-qualified-macro-pilot"
     recipe["recipe_revision"] = recipe_revision
     if campaign_in_recipe:
@@ -293,6 +550,7 @@ def _configured_recipe_fixture(
     for key in ("canonical_input", "deterministic_case_template"):
         record = recipe[key]
         record["path"] = str((repository_root / record["path"]).resolve())
+    _bind_current_inputs(recipe, tmp_path / "current-input")
     recipe_path = tmp_path / "configured_recipe.json"
     _write_json(recipe_path, recipe)
     return recipe_path
@@ -326,6 +584,10 @@ def _write_complete_receipts(output: Path, cells: dict[str, Any]) -> None:
                 "geometry_rtol": planned["geometry_rtol"],
                 "case": planned["case"],
                 "case_sha256": planned["case_sha256"],
+                "executor": {
+                    "identity": report["executor"]["identity"],
+                    "actual_revisions": report["executor"]["revisions"],
+                },
                 "result": relative(result),
                 "result_manifest_sha256": candidate._sha256(result / "run.json"),
                 "trajectory": relative(cell / "trajectory.csv"),
@@ -341,7 +603,7 @@ def _write_complete_receipts(output: Path, cells: dict[str, Any]) -> None:
 
 
 def _assert_prepared_final_campaign(report: dict[str, object], output: Path) -> dict[str, Any]:
-    assert report["tool_revision"] == "m3c2_candidate_campaign_runner_v4"
+    assert report["tool_revision"] == candidate.TOOL_REVISION
     assert report["purpose"] == "final"
     assert report["final_report"] == candidate.FINAL_CAMPAIGN_REPORT
     cells = _mapping(report["cells"])
@@ -353,6 +615,7 @@ def _assert_prepared_final_campaign(report: dict[str, object], output: Path) -> 
     case = yaml.safe_load((output / str(first["case"])).read_text(encoding="utf-8"))
     assert case["solver"]["seed"] == FINAL_CANDIDATE_SEEDS[0]
     assert case["physics"]["noise"]["interval_tree_depth"] == 3
+    assert case["physics"]["noise"]["revision"] == candidate.BROWNIAN_NOISE_REVISION
     assert candidate._load_prepared(output)["purpose"] == "final"
     return cells
 
@@ -365,10 +628,15 @@ def _assert_final_campaign_manifest(manifest: dict[str, object], output: Path) -
     assert not (output / candidate.FINAL_REPORT).exists()
 
 
-def test_recipe_separates_macro_step_and_path_depth_sensitivity() -> None:
+def test_historical_recipe_is_not_silently_reinterpreted(tmp_path: Path) -> None:
     recipe = json.loads(RECIPE.read_text(encoding="utf-8"))
 
-    candidate._validate_recipe(recipe)
+    with pytest.raises(ValueError, match="historical recipes are immutable"):
+        candidate._validate_recipe(recipe)
+    output = tmp_path / "historical-recipe"
+    with pytest.raises(ValueError, match="historical recipes are immutable"):
+        candidate.prepare(RECIPE.resolve(), output)
+    assert not output.exists()
 
     levels = recipe["pilot"]["levels"]
     assert [(level["dt_s"], level["brownian_interval_tree_depth"]) for level in levels] == [
@@ -381,17 +649,56 @@ def test_recipe_separates_macro_step_and_path_depth_sensitivity() -> None:
     assert candidate._output_times()[-1] == 0.03
 
 
+def test_runner_revision_binds_prepared_brownian_revision() -> None:
+    historical_recipe = {
+        "physics": {
+            "noise_model": "inertial_langevin_fdt",
+            "noise_revision": candidate.HISTORICAL_BROWNIAN_NOISE_REVISION,
+        }
+    }
+    current_recipe = {
+        "physics": {
+            "noise_model": "inertial_langevin_fdt",
+            "noise_revision": candidate.BROWNIAN_NOISE_REVISION,
+        }
+    }
+
+    candidate._validate_prepared_brownian_authority(
+        historical_recipe, {"tool_revision": candidate.HISTORICAL_TOOL_REVISION}
+    )
+    candidate._validate_prepared_brownian_authority(
+        current_recipe,
+        {
+            "tool_revision": candidate.TOOL_REVISION,
+            "brownian_noise_revision": candidate.BROWNIAN_NOISE_REVISION,
+        },
+    )
+    with pytest.raises(ValueError, match="runner revision"):
+        candidate._validate_prepared_brownian_authority(
+            current_recipe, {"tool_revision": candidate.HISTORICAL_TOOL_REVISION}
+        )
+
+    assert (
+        candidate._evaluator_revision_for_runner(5, candidate.TOOL_REVISION)
+        == candidate.EVALUATOR_REVISION_V6
+    )
+    assert (
+        candidate._evaluator_revision_for_runner(5, candidate.HISTORICAL_TOOL_REVISION)
+        == "m3c2_stochastic_ensemble_evaluator_v5"
+    )
+
+
 def test_prepare_uses_the_locked_common_input_and_public_case_schema(tmp_path: Path) -> None:
     output = tmp_path / "candidate-pilot"
+    recipe_path = _current_recipe_copy(tmp_path, RECIPE)
 
-    report = candidate.prepare(RECIPE.resolve(), output)
+    report = candidate.prepare(recipe_path, output)
 
     cells = _mapping(report["cells"])
     assert report["campaign_identity"] == candidate.LEGACY_CAMPAIGN_IDENTITY
     assert len(cells) == 16
-    assert report["input_content_hash"] == (
-        "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c"
-    )
+    recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
+    assert report["input_content_hash"] == recipe["canonical_input"]["content_hash"]
     coarse_path = output / str(_mapping(cells["macro_coarse/918164"])["case"])
     path_fine = output / str(_mapping(cells["path_fine/918164"])["case"])
     coarse = yaml.safe_load(coarse_path.read_text(encoding="utf-8"))
@@ -414,11 +721,11 @@ def test_v2_predeclares_one_scale_adequate_event_tolerance_diagnostic(
     tmp_path: Path,
 ) -> None:
     recipe = json.loads(DIAGNOSTIC_RECIPE.read_text(encoding="utf-8"))
-    candidate._validate_recipe(recipe)
     assert recipe["claim_policy"]["comsol_fit"] is False
     output = tmp_path / "candidate-diagnostic"
+    recipe_path = _current_recipe_copy(tmp_path, DIAGNOSTIC_RECIPE)
 
-    report = candidate.prepare(DIAGNOSTIC_RECIPE.resolve(), output)
+    report = candidate.prepare(recipe_path, output)
 
     cells = _mapping(report["cells"])
     assert list(cells) == ["event_tolerance_diagnostic/918164"]
@@ -435,8 +742,8 @@ def test_v2_predeclares_one_scale_adequate_event_tolerance_diagnostic(
 def test_v3_gate_is_frozen_before_tolerance_sensitivity_execution(tmp_path: Path) -> None:
     recipe = json.loads(SENSITIVITY_RECIPE.read_text(encoding="utf-8"))
 
-    candidate._validate_recipe(recipe)
-    report = candidate.prepare(SENSITIVITY_RECIPE.resolve(), tmp_path / "sensitivity")
+    recipe_path = _current_recipe_copy(tmp_path, SENSITIVITY_RECIPE)
+    report = candidate.prepare(recipe_path, tmp_path / "sensitivity")
 
     gate = recipe["acceptance_gate"]
     cell = _mapping(_mapping(report["cells"])["event_tolerance_sensitivity/918164"])
@@ -458,8 +765,8 @@ def test_v3_gate_is_frozen_before_tolerance_sensitivity_execution(tmp_path: Path
 def test_v4_uses_unseen_seed_and_two_predeclared_cross_band_cells(tmp_path: Path) -> None:
     recipe = json.loads(CROSS_BAND_RECIPE.read_text(encoding="utf-8"))
 
-    candidate._validate_recipe(recipe)
-    report = candidate.prepare(CROSS_BAND_RECIPE.resolve(), tmp_path / "cross-band")
+    recipe_path = _current_recipe_copy(tmp_path, CROSS_BAND_RECIPE)
+    report = candidate.prepare(recipe_path, tmp_path / "cross-band")
 
     cells = _mapping(report["cells"])
     assert list(cells) == [
@@ -479,8 +786,8 @@ def test_v4_uses_unseen_seed_and_two_predeclared_cross_band_cells(tmp_path: Path
 def test_v5_qualified_macro_recipe_prepares_sixteen_cells(tmp_path: Path) -> None:
     recipe = json.loads(QUALIFIED_MACRO_RECIPE.read_text(encoding="utf-8"))
 
-    candidate._validate_recipe(recipe)
-    report = candidate.prepare(QUALIFIED_MACRO_RECIPE.resolve(), tmp_path / "macro-v5")
+    recipe_path = _current_recipe_copy(tmp_path, QUALIFIED_MACRO_RECIPE)
+    report = candidate.prepare(recipe_path, tmp_path / "macro-v5")
 
     cells = _mapping(report["cells"])
     assert len(cells) == 16
@@ -494,12 +801,13 @@ def test_v5_qualified_macro_recipe_prepares_sixteen_cells(tmp_path: Path) -> Non
 def test_casep_pre_final_event_tolerance_recipe_prepares_exact_two_cells(
     tmp_path: Path, recipe_revision: int
 ) -> None:
-    recipe_path = CASE_P_EVENT_TOLERANCE_RECIPE.resolve()
+    recipe = json.loads(CASE_P_EVENT_TOLERANCE_RECIPE.read_text(encoding="utf-8"))
+    recipe["physics"]["noise_revision"] = candidate.BROWNIAN_NOISE_REVISION
+    _bind_current_inputs(recipe, tmp_path / "current-input")
     if recipe_revision == 2:
-        recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
         recipe["recipe_revision"] = 2
-        recipe_path = tmp_path / "casep-event-tolerance-v2.json"
-        _write_json(recipe_path, recipe)
+    recipe_path = tmp_path / f"casep-event-tolerance-v{recipe_revision}.json"
+    _write_json(recipe_path, recipe)
     report = candidate.prepare(recipe_path, tmp_path / "casep-event-tolerance")
 
     cells = _mapping(report["cells"])
@@ -523,6 +831,8 @@ def test_casep_pre_final_event_tolerance_recipe_prepares_exact_two_cells(
 )
 def test_casep_pre_final_seed_exception_is_exact(tmp_path: Path, damage: str) -> None:
     recipe = json.loads(CASE_P_EVENT_TOLERANCE_RECIPE.read_text(encoding="utf-8"))
+    recipe["physics"]["noise_revision"] = candidate.BROWNIAN_NOISE_REVISION
+    _bind_current_inputs(recipe, tmp_path / "current-input")
     pilot = _mapping(recipe["pilot"])
     levels = pilot["levels"]
     assert isinstance(levels, list)
@@ -558,7 +868,8 @@ def test_finalize_rechecks_completed_receipt_against_planned_cell(
     tmp_path: Path, damage: str
 ) -> None:
     output = tmp_path / "candidate-pilot"
-    report = candidate.prepare(QUALIFIED_MACRO_RECIPE.resolve(), output)
+    recipe_path = _current_recipe_copy(tmp_path, QUALIFIED_MACRO_RECIPE)
+    report = candidate.prepare(recipe_path, output)
     cells = _mapping(report["cells"])
     _write_complete_receipts(output, cells)
     planned = _mapping(next(iter(cells.values())))
@@ -616,15 +927,16 @@ def test_configured_campaign_identity_can_be_recipe_or_contract_driven(
 
 def test_registered_case_p_recipe_prepares_contract_driven_pilot(tmp_path: Path) -> None:
     output = tmp_path / "case-p-pilot"
+    recipe_path = _current_recipe_copy(tmp_path, CASE_P_RECIPE)
 
-    report = candidate.prepare(CASE_P_RECIPE.resolve(), output)
+    report = candidate.prepare(recipe_path, output)
 
     assert report["tool_revision"] == candidate.TOOL_REVISION
     assert report["campaign_identity"] == CASE_P_CAMPAIGN
     assert report["evaluation_policy_sha256"] == candidate._sha256(CASE_P_POLICY)
     assert (
         report["pilot_authorization"]
-        == json.loads(CASE_P_RECIPE.read_text(encoding="utf-8"))["execution_authorization"]
+        == json.loads(recipe_path.read_text(encoding="utf-8"))["execution_authorization"]
     )
     assert _mapping(report["campaign"])["candidate_seeds"] == CASE_P_PILOT_CANDIDATE_SEEDS
     cells = _mapping(report["cells"])
@@ -643,7 +955,8 @@ def test_registered_case_p_v2_recipe_uses_v5_policy_without_case_a_contingency(
     tmp_path: Path,
 ) -> None:
     output = tmp_path / "case-p-v2-pilot"
-    report = candidate.prepare(CASE_P_RECIPE_V2.resolve(), output)
+    recipe_path = _current_recipe_copy(tmp_path, CASE_P_RECIPE_V2)
+    report = candidate.prepare(recipe_path, output)
 
     assert report["evaluation_policy_sha256"] == candidate._sha256(CASE_P_POLICY_V5)
     assert len(_mapping(report["cells"])) == 16
@@ -671,8 +984,8 @@ def test_configured_recipe_rejects_evaluation_policy_hash_drift(tmp_path: Path) 
 
 
 def test_registered_case_p_recipe_requires_locked_authorization_before_run(tmp_path: Path) -> None:
-    recipe_path = tmp_path / "not-authorized.json"
-    recipe = json.loads(CASE_P_RECIPE.read_text(encoding="utf-8"))
+    recipe_path = _current_recipe_copy(tmp_path, CASE_P_RECIPE)
+    recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
     recipe["execution_authorization"] = {
         "status": "NOT_AUTHORIZED",
         "required_before_execution": ["lock_shared_pilot_authorization"],
@@ -690,7 +1003,8 @@ def test_registered_case_p_preparation_rechecks_locked_authority(
     tmp_path: Path, damage: str
 ) -> None:
     output = tmp_path / "case-p-pilot"
-    candidate.prepare(CASE_P_RECIPE.resolve(), output)
+    recipe_path = _current_recipe_copy(tmp_path, CASE_P_RECIPE)
+    candidate.prepare(recipe_path, output)
     report_path = output / candidate.PREPARE_REPORT
     report = json.loads(report_path.read_text(encoding="utf-8"))
     if damage == "campaign":
@@ -744,7 +1058,9 @@ def test_configured_final_registration_uses_campaign_kind_and_case_id(
     assert report["campaign_identity"] == CASE_P_CAMPAIGN
     assert _mapping(report["final_registration"])["evaluation_authority"] == {
         "evaluation_policy_revision": policy_revision,
-        "pilot_evaluator_revision": f"m3c2_stochastic_ensemble_evaluator_v{policy_revision}",
+        "pilot_evaluator_revision": candidate._evaluator_revision_for_runner(
+            policy_revision, candidate.TOOL_REVISION
+        ),
     }
     cells = _mapping(report["cells"])
     first = _mapping(cells[f"macro_coarse/{CASE_P_FINAL_CANDIDATE_SEEDS[0]}"])
@@ -794,8 +1110,9 @@ def test_registered_final_prepares_one_selected_level_and_32_independent_seeds(
     registration, _ = _final_registration_fixture(tmp_path)
     monkeypatch.setattr(candidate, "_solver_project_root", lambda: tmp_path.resolve())
     output = tmp_path / "candidate-final"
+    recipe_path = _current_recipe_copy(tmp_path, QUALIFIED_MACRO_RECIPE)
 
-    report = candidate.prepare(QUALIFIED_MACRO_RECIPE.resolve(), output, registration)
+    report = candidate.prepare(recipe_path, output, registration)
 
     cells = _assert_prepared_final_campaign(report, output)
 
@@ -807,23 +1124,20 @@ def test_registered_final_prepares_one_selected_level_and_32_independent_seeds(
 def test_final_registration_rejects_overlap_and_changed_selection(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    recipe_path = _current_recipe_copy(tmp_path, QUALIFIED_MACRO_RECIPE)
     registration, selection = _final_registration_fixture(tmp_path)
     monkeypatch.setattr(candidate, "_solver_project_root", lambda: tmp_path.resolve())
     document = json.loads(registration.read_text(encoding="utf-8"))
     document["participant_seed_sets"]["candidate"][0] = FINAL_COMSOL_SEEDS[0]
     _write_json(registration, document)
     with pytest.raises(ValueError, match="seed sets must be disjoint"):
-        candidate.prepare(
-            QUALIFIED_MACRO_RECIPE.resolve(), tmp_path / "overlap-output", registration
-        )
+        candidate.prepare(recipe_path, tmp_path / "overlap-output", registration)
 
     registration, selection = _final_registration_fixture(tmp_path / "changed")
     monkeypatch.setattr(candidate, "_solver_project_root", lambda: selection.parent.resolve())
     selection.write_text("changed\n", encoding="utf-8")
     with pytest.raises(ValueError, match="registered SHA-256"):
-        candidate.prepare(
-            QUALIFIED_MACRO_RECIPE.resolve(), tmp_path / "changed-output", registration
-        )
+        candidate.prepare(recipe_path, tmp_path / "changed-output", registration)
 
     registration, _ = _final_registration_fixture(tmp_path / "policy-mismatch")
     pilot = registration.parent / "pilot_evaluation.json"
@@ -837,9 +1151,7 @@ def test_final_registration_rejects_overlap_and_changed_selection(
     _write_json(registration, registration_document)
     monkeypatch.setattr(candidate, "_solver_project_root", lambda: pilot.parent.resolve())
     with pytest.raises(ValueError, match="another ensemble policy"):
-        candidate.prepare(
-            QUALIFIED_MACRO_RECIPE.resolve(), tmp_path / "policy-output", registration
-        )
+        candidate.prepare(recipe_path, tmp_path / "policy-output", registration)
 
 
 @pytest.mark.parametrize(
@@ -856,6 +1168,7 @@ def test_final_registration_rejects_obsolete_pilot_screening_schema(
     legacy_form: str,
     message: str,
 ) -> None:
+    recipe_path = _current_recipe_copy(tmp_path, QUALIFIED_MACRO_RECIPE)
     registration, selection = _final_registration_fixture(tmp_path)
     pilot = registration.parent / "pilot_evaluation.json"
     pilot_document = json.loads(pilot.read_text(encoding="utf-8"))
@@ -884,9 +1197,7 @@ def test_final_registration_rejects_obsolete_pilot_screening_schema(
 
     monkeypatch.setattr(candidate, "_solver_project_root", lambda: tmp_path.resolve())
     with pytest.raises(ValueError, match=message):
-        candidate.prepare(
-            QUALIFIED_MACRO_RECIPE.resolve(), tmp_path / "nested-output", registration
-        )
+        candidate.prepare(recipe_path, tmp_path / "nested-output", registration)
 
 
 def test_read_only_result_manifest_is_accepted_and_performance_recovery_is_explicit(
@@ -982,3 +1293,136 @@ def test_failed_run_projection_is_sparse_and_explicit(tmp_path: Path) -> None:
         rows = list(csv.DictReader(stream))
     assert [row["lifecycle"] for row in rows] == ["active", "failed"]
     assert candidate.BLOCKED_TRAJECTORY_REVISION == "observed_rows_only_failed_run_v1"
+
+
+@pytest.mark.parametrize("damage", ["format", "duplicate", "merge", "overflow", "executor"])
+def test_current_prepare_rejects_invalid_template_or_executor_before_output(
+    tmp_path: Path, damage: str
+) -> None:
+    recipe_path = _configured_recipe_fixture(tmp_path / "configuration")
+    recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
+    template_path = Path(recipe["deterministic_case_template"]["path"])
+    raw = template_path.read_text(encoding="utf-8")
+    if damage == "format":
+        raw = raw.replace("format_version: 3", "format_version: 2")
+    elif damage == "duplicate":
+        raw = raw.replace("memory_limit_mb: 512", "memory_limit_mb: 512\n  memory_limit_mb: 1024")
+    elif damage == "merge":
+        raw = raw.replace("memory_limit_mb: 512", "<<: {memory_limit_mb: 512}")
+    elif damage == "overflow":
+        raw = raw.replace("start_s: 0.0", f"start_s: {10**400}")
+    else:
+        recipe["execution"]["expected_executor"]["source_sha256"] = "0" * 64
+    template_path.write_text(raw, encoding="utf-8")
+    recipe["deterministic_case_template"]["sha256"] = candidate._sha256(template_path)
+    _write_json(recipe_path, recipe)
+    output = tmp_path / "must-not-exist"
+
+    with pytest.raises(ValueError):
+        candidate.prepare(recipe_path, output)
+    assert not output.exists()
+
+
+def test_current_recipe_overflow_is_a_domain_error_before_output(tmp_path: Path) -> None:
+    recipe_path = _configured_recipe_fixture(tmp_path / "configuration")
+    recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
+    recipe["pilot"]["levels"][0]["dt_s"] = 10**400
+    _write_json(recipe_path, recipe)
+    output = tmp_path / "must-not-exist"
+
+    with pytest.raises(ValueError, match="finite number"):
+        candidate.prepare(recipe_path, output)
+    assert not output.exists()
+
+
+@pytest.fixture
+def current_completed_replay(tmp_path: Path) -> tuple[dict, dict, dict, Path, Path]:
+    recipe_path = _configured_recipe_fixture(tmp_path / "configuration")
+    recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
+    recipe["pilot"]["levels"] = [
+        {
+            "name": "endpoint",
+            "dt_s": candidate.END_TIME_S,
+            "brownian_interval_tree_depth": 0,
+            "geometry_rtol": 1.0e-8,
+            "purpose": "current_public_api_replay",
+        }
+    ]
+    _write_json(recipe_path, recipe)
+    output = tmp_path / "prepared"
+    report = candidate.prepare(recipe_path, output)
+    seed = CASE_P_PILOT_CANDIDATE_SEEDS[0]
+    receipt = candidate.run_cell(output, "endpoint", seed)
+    cell = output / "levels" / "endpoint" / f"seed_{seed}"
+    return recipe, report, receipt, cell, output
+
+
+def test_current_run_records_actual_revisions_and_rejects_executor_drift(
+    current_completed_replay: tuple[dict, dict, dict, Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recipe, report, receipt, _cell, output = current_completed_replay
+    assert receipt["status"] == "COMPLETE"
+    assert receipt["tool_revision"] == candidate.TOOL_REVISION
+    executor = _mapping(receipt["executor"])
+    assert executor["identity"] == _mapping(report["executor"])["identity"]
+    assert executor["actual_revisions"] == recipe["execution"]["expected_revisions"]
+    prepare_path = output / candidate.PREPARE_REPORT
+    historical = {**report, "tool_revision": candidate.PREVIOUS_TOOL_REVISION}
+    _write_json(prepare_path, historical)
+    with pytest.raises(ValueError, match="historical prepared campaigns"):
+        candidate.run_cell(output, "endpoint", CASE_P_PILOT_CANDIDATE_SEEDS[1])
+    _write_json(prepare_path, report)
+    drifted = {**candidate.installed_executor_identity(), "source_sha256": "0" * 64}
+    monkeypatch.setattr(candidate, "installed_executor_identity", lambda: drifted)
+
+    with pytest.raises(ValueError, match="installed candidate executor"):
+        candidate.run_cell(output, "endpoint", CASE_P_PILOT_CANDIDATE_SEEDS[1])
+    assert not (
+        output / "levels" / "endpoint" / f"seed_{CASE_P_PILOT_CANDIDATE_SEEDS[1]}" / "result"
+    ).exists()
+
+
+def test_current_recovery_and_renormalization_follow_original_executor_lock(
+    current_completed_replay: tuple[dict, dict, dict, Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _recipe, _report, receipt, cell, output = current_completed_replay
+    seed = CASE_P_PILOT_CANDIDATE_SEEDS[0]
+    old_hash = candidate._sha256(cell / "result" / "run.json")
+    (cell / "run_receipt.json").unlink()
+    (cell / "performance.json").unlink()
+    drifted = {**candidate.installed_executor_identity(), "source_sha256": "0" * 64}
+    monkeypatch.setattr(candidate, "installed_executor_identity", lambda: drifted)
+    manifest_path = cell / "result" / "run.json"
+    original_manifest = manifest_path.read_bytes()
+    changed_manifest = json.loads(original_manifest)
+    changed_manifest["physics_runtime_revision"] = "unregistered_runtime"
+    _write_json(manifest_path, changed_manifest)
+    with pytest.raises(ValueError, match="result executor revisions"):
+        candidate.recover_cell(output, "endpoint", seed)
+    assert not (cell / "performance.json").exists()
+    manifest_path.write_bytes(original_manifest)
+    recovered = candidate.recover_cell(output, "endpoint", seed)
+    assert recovered["status"] == "COMPLETE"
+    assert recovered["recovered_after_postprocess_failure"] is True
+    assert recovered["executor"] == receipt["executor"]
+    assert candidate._sha256(cell / "result" / "run.json") == old_hash
+    trajectory_path = cell / "trajectory.csv"
+    sparse = trajectory_path.read_text(encoding="utf-8").splitlines(keepends=True)[:-1]
+    trajectory_path.write_text("".join(sparse), encoding="utf-8")
+    recovered.pop("trajectory_normalization_revision")
+    recovered["trajectory_rows"] = len(sparse) - 1
+    recovered["trajectory_sha256"] = candidate._sha256(trajectory_path)
+    _write_json(cell / "run_receipt.json", recovered)
+    prior_receipt_hash = candidate._sha256(cell / "run_receipt.json")
+    renormalized = candidate.renormalize_cell(output, "endpoint", seed)
+    assert renormalized["status"] == "COMPLETE"
+    assert renormalized["trajectory_rows"] == candidate.PARTICLE_COUNT * candidate.OUTPUT_COUNT
+    assert renormalized["executor"] == receipt["executor"]
+    supersession = json.loads(
+        (cell / "normalization_supersession.json").read_text(encoding="utf-8")
+    )
+    assert supersession["superseded"]["receipt_sha256"] == prior_receipt_hash
+    assert supersession["superseded"]["trajectory_sha256"] == recovered["trajectory_sha256"]
+    assert supersession["result_manifest_sha256"] == old_hash

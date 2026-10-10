@@ -95,6 +95,7 @@ def _bundle() -> DataBundle:
         charge_number=np.full(count, -1.0, dtype="<f8"),
         mass_kg=np.full(count, 1.0e-18, dtype="<f8"),
         drag_diameter_m=np.full(count, 1.0e-7, dtype="<f8"),
+        contact_radius_m=np.zeros(count, dtype="<f8"),
         electrostatic_radius_m=np.full(count, 5.0e-8, dtype="<f8"),
         displaced_volume_m3=np.full(count, 5.0e-22, dtype="<f8"),
         model_weight=np.ones(count, dtype="<f8"),
@@ -173,10 +174,19 @@ def test_full_mapping_connectivity_and_receipt_are_locked(
         "m3c1_vz0.txt",
         "m3c1_Z0.txt",
         "common_p1_release_probes.csv",
+        "boundary_meaning.json",
     }
     for name, record in receipt["artifacts"].items():
         assert record["sha256"] == _sha256(output / name)
         assert record["size_bytes"] == (output / name).stat().st_size
+
+    meaning = json.loads((output / "boundary_meaning.json").read_text(encoding="utf-8"))
+    assert meaning == {
+        "canonical_input_sha256": _sha256(candidate),
+        "canonical_content_hash": content_hash(bundle),
+        "boundary_groups": {"10": "wall", "11": "wall", "12": "wall", "13": "wall"},
+        "authority": "canonical_geometry_boundary_ids_and_groups",
+    }
 
     sections = _sections(output / "m3c1_Ez_sectionwise.txt")
     layout = bundle.layouts[0]
@@ -211,6 +221,7 @@ def test_release_probe_and_initial_state_tables_preserve_candidate_values(
     first = np.asarray(rows[1][1:], dtype=np.float64)
     np.testing.assert_allclose(first[5:], np.arange(1.0, 23.0) + 0.1 + 2.0 * 0.1)
     source = bundle.sources[0]
+    assert isinstance(source, RealizedTableSource)
     np.testing.assert_array_equal(
         np.loadtxt(output / "m3c1_vr0.txt")[0],
         np.asarray([*source.position_m[0], source.velocity_m_s[0, 0]]),

@@ -119,8 +119,15 @@ def _validate_campaign_identity(contract: dict[str, Any], workflow: str) -> None
     campaign = _mapping(raw, "campaign")
     if set(campaign) != CAMPAIGN_KEYS:
         raise ValueError("campaign must contain exactly the five registered identity keys")
-    if workflow != "caseP" or campaign != CASE_P_CAMPAIGN:
-        raise ValueError("campaign identity differs from the supported Case-P registration")
+    expected = {
+        "case_id": f"formal_iondrag_theory_consistent/{workflow}_100nm",
+        "evaluation_case_id": f"M3-C2A_{workflow}_100nm_common-P1",
+        "output_slug": f"{workflow}_100nm",
+        "final_registration_kind": f"m3c2_{workflow}_100nm_final_campaign",
+        "candidate_case_name_prefix": f"m3c2_{workflow}_100nm",
+    }
+    if campaign != expected:
+        raise ValueError("campaign identity differs from the registered workflow")
 
 
 def _lock_artifacts(
@@ -319,10 +326,7 @@ def _validate_common_p1_input(
         raise ValueError("common-P1 geometry shape differs from the contract")
     evidence = _load_json(artifacts["common_p1_evidence"].resolved, "common-P1 evidence")
     workflow = str(_mapping(contract.get("scope"), "scope").get("workflow"))
-    if workflow == "caseA":
-        _validate_case_a_common_p1_evidence(evidence, artifact, info.content_hash)
-    else:
-        _validate_case_p_common_p1_preparation(evidence, artifact, info.content_hash)
+    _validate_common_p1_preparation(evidence, artifact, info.content_hash, workflow)
     return {
         "file_sha256": artifact.sha256,
         "content_hash": info.content_hash,
@@ -334,32 +338,12 @@ def _validate_common_p1_input(
     }
 
 
-def _validate_case_a_common_p1_evidence(
-    evidence: dict[str, Any], artifact: LockedArtifact, content_hash: str
-) -> None:
-    canonical = _mapping(
-        _mapping(
-            _mapping(evidence.get("source_artifacts"), "source_artifacts").get("candidate"),
-            "candidate evidence",
-        ).get("canonical_input"),
-        "canonical input evidence",
-    )
-    if canonical.get("file_sha256") != artifact.sha256:
-        raise ValueError("common-P1 evidence file hash differs")
-    if canonical.get("recomputed_content_hash") != content_hash:
-        raise ValueError("common-P1 evidence content hash differs")
-    if evidence.get("overall_decision") != (
-        "PASS_LOCKED_SAME_FIELD_COMMON_CANONICAL_P1_CASE_AND_WINDOW"
-    ):
-        raise ValueError("common-P1 prerequisite evidence did not pass")
-
-
-def _validate_case_p_common_p1_preparation(
-    evidence: dict[str, Any], artifact: LockedArtifact, content_hash: str
+def _validate_common_p1_preparation(
+    evidence: dict[str, Any], artifact: LockedArtifact, content_hash: str, workflow_name: str
 ) -> None:
     workflow = _mapping(
-        _mapping(evidence.get("workflows"), "prepared workflows").get("caseP"),
-        "prepared Case-P workflow",
+        _mapping(evidence.get("workflows"), "prepared workflows").get(workflow_name),
+        "prepared common-P1 workflow",
     )
     source = _mapping(
         _mapping(workflow.get("preparation_receipt"), "preparation receipt").get("source"),
@@ -386,7 +370,7 @@ def _validate_case_p_common_p1_preparation(
         287,
     )
     if identity != expected:
-        raise ValueError("Case-P common-P1 preparation evidence differs")
+        raise ValueError("common-P1 preparation evidence differs")
 
 
 def _validate_stochastic_semantics(
@@ -563,11 +547,18 @@ def _audited_existing_seeds(allocation: dict[str, Any], repository_root: Path) -
             raise ValueError("seed-audit authority identity differs")
         if path.suffix.lower() == ".csv":
             rows = _read_csv(path)
-            existing.update(int(row["seed"]) for row in rows)
+            column = authority.get("seed_column", "seed")
+            if not isinstance(column, str) or not rows or column not in rows[0]:
+                raise ValueError("CSV seed audit must name an observed seed column")
+            existing.update(int(row[column]) for row in rows)
             continue
         document = _load_json(path, "seed-audit authority")
         for pointer in _list(authority.get("json_pointers"), "seed authority pointers"):
-            existing.update(_seed_values(document, str(pointer), "audited seed values"))
+            value = _json_pointer(document, str(pointer))
+            if type(value) is int:
+                existing.add(value)
+            else:
+                existing.update(_seed_values(document, str(pointer), "audited seed values"))
     return existing
 
 
@@ -794,8 +785,9 @@ def lock_contract(config_path: Path, repository_root: Path, output: Path) -> dic
         ).get("required_before_execution"),
         "gates": gates,
     }
-    if applicability is not None:
+    if contract.get("campaign") is not None:
         receipt["campaign"] = _mapping(contract.get("campaign"), "campaign")
+    if applicability is not None:
         receipt["physical_applicability"] = applicability
     output.mkdir(parents=True, exist_ok=False)
     with (output / "artifact_hashes.csv").open("x", encoding="utf-8", newline="") as stream:

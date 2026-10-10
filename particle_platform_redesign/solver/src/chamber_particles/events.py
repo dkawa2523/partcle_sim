@@ -24,9 +24,10 @@ from .integrators import curved_chord_deviation_bound, curved_chord_deviation_co
 
 type FloatArray = NDArray[np.float64]
 type Int64Array = NDArray[np.int64]
+type Int32Array = NDArray[np.int32]
 type UInt8Array = NDArray[np.uint8]
 
-EVENT_ALGORITHM_REVISION = "line_quadratic_rk4_axis_first_hit_v16"
+EVENT_ALGORITHM_REVISION = "line_quadratic_curved_capsule_periodic_first_hit_v22"
 _FLOAT64_EPS = np.finfo(np.float64).eps
 _MAX_FLOAT64_INTEGER = int(np.finfo(np.float64).max)
 _MAX_INT64 = int(np.iinfo(np.int64).max)
@@ -42,12 +43,16 @@ EXACT_STATUS_FAILURE = np.uint8(4)
 EXACT_FAILURE_NONE = np.uint8(0)
 EXACT_FAILURE_INDETERMINATE_EVENT = np.uint8(1)
 
+EXACT_DEPARTURE_NONE = np.int64(-1)
+EXACT_DEPARTURE_FINITE_CONTACT_SET = np.int64(-2)
+
 CURVED_STATUS_CLEAR = np.uint8(1)
 CURVED_STATUS_SPLIT = np.uint8(2)
 CURVED_STATUS_WALL = np.uint8(3)
 CURVED_STATUS_AXIS = np.uint8(4)
 CURVED_STATUS_FAILURE = np.uint8(5)
 
+CURVED_FAILURE_NONE = np.uint8(0)
 CURVED_FAILURE_INDETERMINATE_EVENT = np.uint8(1)
 
 SURFACE_STATE_PENDING = np.uint8(0)
@@ -390,12 +395,53 @@ def _validate_event_budget_inputs(
     return position, float(roundoff_ulps) * _FLOAT64_EPS
 
 
+def _contact_radii(value: FloatArray, row_count: int) -> FloatArray:
+    radii = np.asarray(value, dtype=np.float64)
+    if radii.shape != (row_count,):
+        raise ValueError("contact_radius_m must align with event rows")
+    if not bool(np.isfinite(radii).all()) or bool((radii < 0.0).any()):
+        raise ValueError("contact_radius_m must be finite and nonnegative")
+    return radii
+
+
+def _finite_contact_mask(
+    geometry: PreparedGeometry,
+    value: NDArray[np.bool_] | None,
+) -> tuple[NDArray[np.bool_], bool]:
+    """Resolve the material-capsule subset of the point-event facet mask."""
+
+    if value is None:
+        return geometry.facet_contact_enabled, False
+    mask = np.asarray(value)
+    if mask.dtype != np.dtype(np.bool_) or mask.shape != (geometry.facet_count,):
+        raise ValueError("finite_contact_enabled must be a boolean array with shape [facet]")
+    if bool((mask & ~geometry.facet_contact_enabled).any()):
+        raise ValueError("finite contact facets must be a subset of point-event facets")
+    return mask, not bool(np.array_equal(mask, geometry.facet_contact_enabled))
+
+
+def _contact_query_bounds(
+    lower_m: FloatArray,
+    upper_m: FloatArray,
+    contact_radius_m: FloatArray,
+) -> tuple[FloatArray, FloatArray]:
+    if not bool((contact_radius_m > 0.0).any()):
+        return lower_m, upper_m
+    with np.errstate(over="ignore", invalid="ignore"):
+        lower = lower_m - contact_radius_m[:, None]
+        upper = upper_m + contact_radius_m[:, None]
+    if not bool(np.isfinite(lower).all() and np.isfinite(upper).all()):
+        raise EventLocationError("contact-radius event AABB exceeds finite float64 range")
+    return lower, upper
+
+
 def classify_surface_release_batch(
     geometry: PreparedGeometry,
     release_state: UInt8Array,
     source_facet_id: Int64Array,
     position_m: FloatArray,
     velocity_m_s: FloatArray,
+    contact_radius_m: FloatArray,
     acceleration_m_s2: FloatArray | None,
     start_time_s: FloatArray,
     *,
@@ -410,6 +456,7 @@ def classify_surface_release_batch(
     facets = np.asarray(source_facet_id, dtype=np.int64)
     positions = np.asarray(position_m, dtype=np.float64)
     velocities = np.asarray(velocity_m_s, dtype=np.float64)
+    contact_radii = np.asarray(contact_radius_m, dtype=np.float64)
     times = np.asarray(start_time_s, dtype=np.float64)
     row_count = states.size
     actual_shapes = (
@@ -417,6 +464,7 @@ def classify_surface_release_batch(
         facets.shape,
         positions.shape,
         velocities.shape,
+        contact_radii.shape,
         times.shape,
     )
     expected_shapes = (
@@ -424,6 +472,7 @@ def classify_surface_release_batch(
         (row_count,),
         (row_count, 2),
         (row_count, 2),
+        (row_count,),
         (row_count,),
     )
     if actual_shapes != expected_shapes:
@@ -440,6 +489,8 @@ def classify_surface_release_batch(
         raise ValueError("surface source facet ID is outside the prepared geometry")
     if not bool(np.isfinite(positions).all() and np.isfinite(velocities).all()):
         raise ValueError("surface-release position and velocity must be finite")
+    if not bool(np.isfinite(contact_radii).all()) or bool((contact_radii < 0.0).any()):
+        raise ValueError("surface-release contact radius must be finite and nonnegative")
     if not bool(np.isfinite(times).all()) or not math.isfinite(interval_s) or interval_s <= 0.0:
         raise ValueError("surface-release times must be finite with a positive interval")
     _validate_exact_tolerances(geometry, geometry_rtol, roundoff_ulps)
@@ -462,6 +513,7 @@ def classify_surface_release_batch(
         facets,
         positions,
         velocities,
+        contact_radii,
         acceleration,
         has_acceleration,
         times,
@@ -469,6 +521,7 @@ def classify_surface_release_batch(
         curved_event_path,
         geometry.bbox_diagonal_m,
         geometry.facet_normal,
+        geometry.facet_contact_enabled,
         geometry.facet_length_m,
         geometry_rtol,
         roundoff_ulps,
@@ -657,6 +710,7 @@ def count_exact_event_candidates(
     *,
     start_time_s: FloatArray,
     target_time_s: FloatArray,
+    contact_radius_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
     certified_departing_facet_id: Int64Array | None = None,
@@ -668,6 +722,7 @@ def count_exact_event_candidates(
     :func:`locate_exact_first_event_batch` for each bounded row interval.
     """
 
+    radii = _contact_radii(contact_radius_m, np.asarray(start_time_s).size)
     prepared = _prepare_exact_path_batch(
         geometry,
         path_kind,
@@ -679,11 +734,15 @@ def count_exact_event_candidates(
         geometry_rtol,
         roundoff_ulps,
         certified_departing_facet_id,
+        radii,
+    )
+    query_lower, query_upper = _contact_query_bounds(
+        prepared.query_lower_m, prepared.query_upper_m, radii
     )
     return count_aabb_candidates(
         geometry,
-        prepared.query_lower_m,
-        prepared.query_upper_m,
+        query_lower,
+        query_upper,
     )
 
 
@@ -696,10 +755,12 @@ def locate_exact_first_event_batch(
     *,
     start_time_s: FloatArray,
     target_time_s: FloatArray,
+    contact_radius_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
     candidate_capacity: int,
     certified_departing_facet_id: Int64Array | None = None,
+    finite_contact_enabled: NDArray[np.bool_] | None = None,
 ) -> ExactEventBatch:
     """Locate exact first events without exceeding broad-candidate capacity.
 
@@ -710,6 +771,11 @@ def locate_exact_first_event_batch(
     """
 
     _validate_exact_candidate_capacity(candidate_capacity)
+    radii = _contact_radii(contact_radius_m, np.asarray(start_time_s).size)
+    finite_mask, separate_finite_mask = _finite_contact_mask(
+        geometry,
+        finite_contact_enabled,
+    )
     prepared = _prepare_exact_path_batch(
         geometry,
         path_kind,
@@ -721,11 +787,15 @@ def locate_exact_first_event_batch(
         geometry_rtol,
         roundoff_ulps,
         certified_departing_facet_id,
+        radii,
+    )
+    query_lower, query_upper = _contact_query_bounds(
+        prepared.query_lower_m, prepared.query_upper_m, radii
     )
     broad_counts = count_aabb_candidates(
         geometry,
-        prepared.query_lower_m,
-        prepared.query_upper_m,
+        query_lower,
+        query_upper,
     )
     broad_candidate_count = _require_exact_candidate_capacity(
         broad_counts,
@@ -738,8 +808,8 @@ def locate_exact_first_event_batch(
     broad_candidates = np.empty(broad_candidate_count, dtype=np.int64)
     fill_aabb_candidates_csr(
         geometry,
-        prepared.query_lower_m,
-        prepared.query_upper_m,
+        query_lower,
+        query_upper,
         broad_offsets,
         broad_candidates,
     )
@@ -789,6 +859,7 @@ def locate_exact_first_event_batch(
         geometry.facet_normal,
         geometry.facet_length_m,
         geometry.facet_node_ids,
+        geometry.facet_contact_enabled,
         geometry_rtol,
         roundoff_ulps,
         status,
@@ -804,10 +875,11 @@ def locate_exact_first_event_batch(
         first_time_budget,
         simultaneous_count,
     )
-    candidate_offsets = np.empty(row_count + 1, dtype=np.int64)
-    candidate_offsets[0] = 0
-    np.cumsum(simultaneous_count, out=candidate_offsets[1:])
-    candidates = np.full(int(candidate_offsets[-1]), -1, dtype=np.int64)
+    point_counts = simultaneous_count.copy()
+    point_offsets = np.empty(row_count + 1, dtype=np.int64)
+    point_offsets[0] = 0
+    np.cumsum(point_counts, out=point_offsets[1:])
+    point_candidates = np.full(int(point_offsets[-1]), -1, dtype=np.int64)
     _fill_exact_event_candidates_kernel(
         kinds,
         position,
@@ -825,6 +897,7 @@ def locate_exact_first_event_batch(
         geometry.facet_start_m,
         geometry.facet_end_m,
         geometry.facet_length_m,
+        geometry.facet_contact_enabled,
         geometry_rtol,
         roundoff_ulps,
         status,
@@ -832,9 +905,121 @@ def locate_exact_first_event_batch(
         hit_position,
         first_position_budget,
         first_time_budget,
-        candidate_offsets,
-        candidates,
+        point_offsets,
+        point_candidates,
     )
+    selected_candidates = broad_candidates.copy()
+    use_point_candidates = (
+        np.zeros(row_count, dtype=np.bool_) if separate_finite_mask else np.empty(0, dtype=np.bool_)
+    )
+    if bool((radii > 0.0).any()):
+        point_state = None
+        if separate_finite_mask:
+            point_state = (
+                status.copy(),
+                failure_reason.copy(),
+                event_time.copy(),
+                hit_position.copy(),
+                primary_facet.copy(),
+                normal.copy(),
+                position_budget.copy(),
+                time_budget.copy(),
+                residual.copy(),
+                simultaneous_count.copy(),
+            )
+        _locate_finite_exact_events_kernel(
+            geometry.coordinate_system == "axisymmetric_rz",
+            radii,
+            kinds,
+            position,
+            velocity,
+            start_time,
+            target_time,
+            departing,
+            linear_displacement,
+            quadratic_displacement,
+            speed,
+            ready,
+            broad_offsets,
+            broad_candidates,
+            selected_candidates,
+            geometry.bbox_diagonal_m,
+            geometry.facet_start_m,
+            geometry.facet_end_m,
+            geometry.facet_normal,
+            geometry.facet_length_m,
+            finite_mask,
+            geometry_rtol,
+            roundoff_ulps,
+            status,
+            failure_reason,
+            event_time,
+            hit_position,
+            primary_facet,
+            normal,
+            position_budget,
+            time_budget,
+            residual,
+            simultaneous_count,
+        )
+        if separate_finite_mask:
+            if point_state is None:
+                raise EventLocationError("periodic exact-event state was not retained")
+            _arbitrate_exact_topology_events_kernel(
+                radii,
+                finite_mask,
+                point_offsets,
+                point_candidates,
+                point_state[0],
+                point_state[1],
+                point_state[2],
+                point_state[3],
+                point_state[4],
+                point_state[5],
+                point_state[6],
+                point_state[7],
+                point_state[8],
+                point_state[9],
+                status,
+                failure_reason,
+                event_time,
+                hit_position,
+                primary_facet,
+                normal,
+                position_budget,
+                time_budget,
+                residual,
+                simultaneous_count,
+                use_point_candidates,
+            )
+    candidate_offsets = np.empty(row_count + 1, dtype=np.int64)
+    candidate_offsets[0] = 0
+    np.cumsum(simultaneous_count, out=candidate_offsets[1:])
+    candidates = np.full(int(candidate_offsets[-1]), -1, dtype=np.int64)
+    if bool((radii > 0.0).any()):
+        if separate_finite_mask:
+            _merge_exact_topology_contact_candidates_kernel(
+                radii,
+                use_point_candidates,
+                point_offsets,
+                point_candidates,
+                broad_offsets,
+                selected_candidates,
+                candidate_offsets,
+                candidates,
+            )
+        else:
+            _merge_exact_contact_candidates_kernel(
+                radii,
+                point_offsets,
+                point_candidates,
+                broad_offsets,
+                selected_candidates,
+                candidate_offsets,
+                candidates,
+            )
+    else:
+        candidates[:] = point_candidates
     if bool((candidates < 0).any()):
         raise EventLocationError("compiled exact-event candidate packing is incomplete")
     return ExactEventBatch(
@@ -866,6 +1051,7 @@ def count_curved_event_candidates(
     start_time_s: FloatArray,
     target_time_s: FloatArray,
     root_interval_s: FloatArray,
+    contact_radius_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
     certify_start_contact_departure: NDArray[np.bool_] | None = None,
@@ -896,10 +1082,14 @@ def count_curved_event_candidates(
         certify_start_contact_departure,
         chord_deviation_bound_m,
     )
+    radii = _contact_radii(contact_radius_m, prepared.start_time_s.size)
+    query_lower, query_upper = _contact_query_bounds(
+        prepared.query_lower_m, prepared.query_upper_m, radii
+    )
     return count_aabb_candidates(
         geometry,
-        prepared.query_lower_m,
-        prepared.query_upper_m,
+        query_lower,
+        query_upper,
     )
 
 
@@ -917,6 +1107,7 @@ def locate_curved_first_event_batch(
     start_time_s: FloatArray,
     target_time_s: FloatArray,
     root_interval_s: FloatArray,
+    contact_radius_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
     candidate_capacity: int,
@@ -927,6 +1118,7 @@ def locate_curved_first_event_batch(
     position_control_origin_m: FloatArray | None = None,
     relative_position_control_lower_m: FloatArray | None = None,
     relative_position_control_upper_m: FloatArray | None = None,
+    finite_contact_enabled: NDArray[np.bool_] | None = None,
 ) -> CurvedEventBatch:
     """Classify curved first events in independent compiled rows.
 
@@ -969,10 +1161,18 @@ def locate_curved_first_event_batch(
         use_position_controls,
         prepared.start_time_s.size,
     )
+    radii = _contact_radii(contact_radius_m, prepared.start_time_s.size)
+    finite_mask, separate_finite_mask = _finite_contact_mask(
+        geometry,
+        finite_contact_enabled,
+    )
+    query_lower, query_upper = _contact_query_bounds(
+        prepared.query_lower_m, prepared.query_upper_m, radii
+    )
     broad_counts = count_aabb_candidates(
         geometry,
-        prepared.query_lower_m,
-        prepared.query_upper_m,
+        query_lower,
+        query_upper,
     )
     broad_candidate_count = _require_curved_candidate_capacity(
         broad_counts,
@@ -982,14 +1182,15 @@ def locate_curved_first_event_batch(
     broad_offsets = np.empty(row_count + 1, dtype=np.int64)
     broad_offsets[0] = 0
     np.cumsum(broad_counts, out=broad_offsets[1:])
-    broad_candidates = np.empty(broad_candidate_count, dtype=np.int64)
+    broad_candidate_ids = np.empty(broad_candidate_count, dtype=np.int64)
     fill_aabb_candidates_csr(
         geometry,
-        prepared.query_lower_m,
-        prepared.query_upper_m,
+        query_lower,
+        query_upper,
         broad_offsets,
-        broad_candidates,
+        broad_candidate_ids,
     )
+    selected_candidates = broad_candidate_ids.copy()
     volume_inside = points_inside_volume(geometry, prepared.end_position_m)
     status = np.full(row_count, CURVED_STATUS_CLEAR, dtype=np.uint8)
     failure_reason = prepared.failure_reason.copy()
@@ -1027,12 +1228,15 @@ def locate_curved_first_event_batch(
         prepared.ready,
         volume_inside,
         broad_offsets,
-        broad_candidates,
+        broad_candidate_ids,
+        selected_candidates,
         geometry.bbox_diagonal_m,
         geometry.facet_start_m,
         geometry.facet_end_m,
         geometry.facet_normal,
         geometry.facet_length_m,
+        geometry.facet_node_ids,
+        geometry.facet_contact_enabled,
         geometry_rtol,
         roundoff_ulps,
         status,
@@ -1047,16 +1251,125 @@ def locate_curved_first_event_batch(
         residual,
         event_candidate_count,
     )
+    point_state = None
+    if separate_finite_mask:
+        point_state = (
+            status.copy(),
+            failure_reason.copy(),
+            departure_certified.copy(),
+            event_time.copy(),
+            hit_position.copy(),
+            primary_facet.copy(),
+            normal.copy(),
+            position_budget.copy(),
+            time_budget.copy(),
+            residual.copy(),
+            event_candidate_count.copy(),
+            selected_candidates.copy(),
+        )
+    _locate_finite_curved_events_kernel(
+        geometry.coordinate_system == "axisymmetric_rz",
+        radii,
+        prepared.start_position_m,
+        prepared.start_velocity_m_s,
+        prepared.end_position_m,
+        prepared.end_velocity_m_s,
+        prepared.position_lower_m,
+        prepared.position_upper_m,
+        prepared.velocity_lower_m_s,
+        prepared.velocity_upper_m_s,
+        prepared.start_time_s,
+        prepared.target_time_s,
+        prepared.root_interval_s,
+        prepared.certify_start_contact_departure,
+        prepared.chord_deviation_m,
+        prepared.chord_deviation_valid,
+        prepared.speed_upper_m_s,
+        prepared.ready,
+        broad_offsets,
+        broad_candidate_ids,
+        selected_candidates,
+        geometry.bbox_diagonal_m,
+        geometry.facet_start_m,
+        geometry.facet_end_m,
+        geometry.facet_normal,
+        geometry.facet_length_m,
+        finite_mask,
+        geometry_rtol,
+        roundoff_ulps,
+        status,
+        failure_reason,
+        departure_certified,
+        event_time,
+        hit_position,
+        primary_facet,
+        normal,
+        position_budget,
+        time_budget,
+        residual,
+        event_candidate_count,
+    )
+    use_point_candidates = (
+        np.zeros(row_count, dtype=np.bool_) if separate_finite_mask else np.empty(0, dtype=np.bool_)
+    )
+    point_candidates = np.empty(0, dtype=np.int64)
+    if separate_finite_mask:
+        if point_state is None:
+            raise EventLocationError("periodic curved-event state was not retained")
+        point_candidates = point_state[11]
+        _arbitrate_curved_topology_events_kernel(
+            radii,
+            finite_mask,
+            broad_offsets,
+            point_candidates,
+            point_state[0],
+            point_state[1],
+            point_state[2],
+            point_state[3],
+            point_state[4],
+            point_state[5],
+            point_state[6],
+            point_state[7],
+            point_state[8],
+            point_state[9],
+            point_state[10],
+            status,
+            failure_reason,
+            departure_certified,
+            event_time,
+            hit_position,
+            primary_facet,
+            normal,
+            position_budget,
+            time_budget,
+            residual,
+            event_candidate_count,
+            use_point_candidates,
+        )
     candidate_offsets = np.empty(row_count + 1, dtype=np.int64)
     candidate_offsets[0] = 0
     np.cumsum(event_candidate_count, out=candidate_offsets[1:])
-    event_candidates = np.empty(int(candidate_offsets[-1]), dtype=np.int64)
-    _fill_curved_event_candidates_kernel(
-        status,
-        primary_facet,
-        candidate_offsets,
-        event_candidates,
-    )
+    event_candidates = np.full(int(candidate_offsets[-1]), -1, dtype=np.int64)
+    if separate_finite_mask:
+        _fill_curved_topology_event_candidates_kernel(
+            status,
+            broad_offsets,
+            point_candidates,
+            selected_candidates,
+            use_point_candidates,
+            candidate_offsets,
+            event_candidates,
+        )
+    else:
+        _fill_curved_event_candidates_kernel(
+            status,
+            broad_offsets,
+            selected_candidates,
+            candidate_offsets,
+            event_candidates,
+        )
+    if bool((event_candidates < 0).any()):
+        raise EventLocationError("compiled curved-event candidate packing is incomplete")
     return CurvedEventBatch(
         status,
         failure_reason,
@@ -1966,7 +2279,7 @@ def _curved_monotone_approach_is_clear(
 ) -> bool:
     normal_x = facet_normal[facet_id, 0]
     normal_y = facet_normal[facet_id, 1]
-    valid, budget, _ = _curved_event_budget(
+    valid, _, _ = _curved_event_budget(
         facet_length_m[facet_id],
         geometry_bbox_diagonal_m,
         end_position_m[row, 0],
@@ -1988,7 +2301,9 @@ def _curved_monotone_approach_is_clear(
         normal_y,
         roundoff_ulps,
     )
-    if not math.isfinite(signed_upper) or signed_upper >= -budget:
+    # Strictly inward endpoints and positive normal velocity certify the whole
+    # monotone path. The localization budget is not a physical wall thickness.
+    if not math.isfinite(signed_upper) or signed_upper >= 0.0:
         return False
     velocity_x = velocity_lower_m_s[row, 0] if normal_x >= 0.0 else velocity_upper_m_s[row, 0]
     velocity_y = velocity_lower_m_s[row, 1] if normal_y >= 0.0 else velocity_upper_m_s[row, 1]
@@ -2050,6 +2365,8 @@ def _curved_endpoint_is_boundary(
 ) -> bool:
     for offset in range(broad_begin, broad_end):
         facet_id = broad_candidates[offset]
+        if facet_id < 0:
+            continue
         valid, budget, _ = _curved_event_budget(
             facet_length_m[facet_id],
             geometry_bbox_diagonal_m,
@@ -2327,8 +2644,9 @@ def _curved_transverse_residual(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _curved_wall_candidate(  # pyrefly: ignore [bad-return]
+def _curved_wall_facet_is_retained(
     row: int,
+    facet_id: int,
     start_position_m: FloatArray,
     end_position_m: FloatArray,
     position_lower_m: FloatArray,
@@ -2345,8 +2663,6 @@ def _curved_wall_candidate(  # pyrefly: ignore [bad-return]
     relative_position_control_lower_m: FloatArray,
     relative_position_control_upper_m: FloatArray,
     speed_upper_m_s: FloatArray,
-    broad_offsets: Int64Array,
-    broad_candidates: Int64Array,
     geometry_bbox_diagonal_m: float,
     facet_start_m: FloatArray,
     facet_end_m: FloatArray,
@@ -2354,92 +2670,81 @@ def _curved_wall_candidate(  # pyrefly: ignore [bad-return]
     facet_length_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
-) -> tuple[int, int, bool]:
-    retained_count = 0
-    retained_facet = -1
-    departure_certified = False
-    for offset in range(broad_offsets[row], broad_offsets[row + 1]):
-        facet_id = broad_candidates[offset]
-        if use_position_controls[row] and _curved_bernstein_controls_are_inside(
-            row,
-            facet_id,
-            position_lower_m,
-            position_upper_m,
-            speed_upper_m_s,
-            start_time_s,
-            target_time_s,
-            root_interval_s,
-            position_control_origin_m,
-            relative_position_control_lower_m,
-            relative_position_control_upper_m,
-            geometry_bbox_diagonal_m,
-            facet_start_m,
-            facet_normal,
-            facet_length_m,
-            geometry_rtol,
-            roundoff_ulps,
-        ):
-            continue
-        if certify_monotone_approach and _curved_monotone_approach_is_clear(
-            row,
-            facet_id,
-            end_position_m,
-            velocity_lower_m_s,
-            velocity_upper_m_s,
-            speed_upper_m_s,
-            target_time_s,
-            root_interval_s,
-            geometry_bbox_diagonal_m,
-            facet_start_m,
-            facet_normal,
-            facet_length_m,
-            geometry_rtol,
-            roundoff_ulps,
-        ):
-            continue
-        reachable = _curved_tube_may_reach_supporting_line(
-            row,
-            facet_id,
-            position_lower_m,
-            position_upper_m,
-            speed_upper_m_s,
-            start_time_s,
-            target_time_s,
-            root_interval_s,
-            geometry_bbox_diagonal_m,
-            facet_start_m,
-            facet_normal,
-            facet_length_m,
-            geometry_rtol,
-            roundoff_ulps,
-        )
-        if not reachable:
-            continue
-        departing = certify_start_contact_departure[row] and _curved_departure_is_certified(
-            row,
-            facet_id,
-            start_position_m,
-            position_lower_m,
-            position_upper_m,
-            velocity_lower_m_s,
-            velocity_upper_m_s,
-            speed_upper_m_s,
-            start_time_s,
-            root_interval_s,
-            geometry_bbox_diagonal_m,
-            facet_start_m,
-            facet_end_m,
-            facet_normal,
-            facet_length_m,
-            geometry_rtol,
-            roundoff_ulps,
-        )
-        if departing:
-            departure_certified = True
-        else:
-            retained_count += 1
-            retained_facet = facet_id
-    return retained_count, retained_facet, departure_certified
+) -> tuple[bool, bool]:
+    if use_position_controls[row] and _curved_bernstein_controls_are_inside(
+        row,
+        facet_id,
+        position_lower_m,
+        position_upper_m,
+        speed_upper_m_s,
+        start_time_s,
+        target_time_s,
+        root_interval_s,
+        position_control_origin_m,
+        relative_position_control_lower_m,
+        relative_position_control_upper_m,
+        geometry_bbox_diagonal_m,
+        facet_start_m,
+        facet_normal,
+        facet_length_m,
+        geometry_rtol,
+        roundoff_ulps,
+    ):
+        return False, False
+    if certify_monotone_approach and _curved_monotone_approach_is_clear(
+        row,
+        facet_id,
+        end_position_m,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        speed_upper_m_s,
+        target_time_s,
+        root_interval_s,
+        geometry_bbox_diagonal_m,
+        facet_start_m,
+        facet_normal,
+        facet_length_m,
+        geometry_rtol,
+        roundoff_ulps,
+    ):
+        return False, False
+    if not _curved_tube_may_reach_supporting_line(
+        row,
+        facet_id,
+        position_lower_m,
+        position_upper_m,
+        speed_upper_m_s,
+        start_time_s,
+        target_time_s,
+        root_interval_s,
+        geometry_bbox_diagonal_m,
+        facet_start_m,
+        facet_normal,
+        facet_length_m,
+        geometry_rtol,
+        roundoff_ulps,
+    ):
+        return False, False
+    departing = certify_start_contact_departure[row] and _curved_departure_is_certified(
+        row,
+        facet_id,
+        start_position_m,
+        position_lower_m,
+        position_upper_m,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        speed_upper_m_s,
+        start_time_s,
+        root_interval_s,
+        geometry_bbox_diagonal_m,
+        facet_start_m,
+        facet_end_m,
+        facet_normal,
+        facet_length_m,
+        geometry_rtol,
+        roundoff_ulps,
+    )
+    return not departing, departing
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -2506,8 +2811,6 @@ def _curved_wall_localization(  # pyrefly: ignore [bad-return]
         geometry_rtol,
         roundoff_ulps,
     )
-    if line[0]:
-        return CURVED_STATUS_SPLIT, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     if line[1]:
         hit_time, hit_x, hit_y, hit_residual = line[2], line[3], line[4], line[7]
     else:
@@ -2548,23 +2851,16 @@ def _curved_wall_localization(  # pyrefly: ignore [bad-return]
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _curved_wall_decision(
+def _certify_curved_wall_facet_hit(
     row: int,
+    facet_id: int,
     start_position_m: FloatArray,
     end_position_m: FloatArray,
     position_lower_m: FloatArray,
     position_upper_m: FloatArray,
-    velocity_lower_m_s: FloatArray,
-    velocity_upper_m_s: FloatArray,
     start_time_s: FloatArray,
     target_time_s: FloatArray,
     root_interval_s: FloatArray,
-    certify_start_contact_departure: NDArray[np.bool_],
-    certify_monotone_approach: bool,
-    use_position_controls: NDArray[np.bool_],
-    position_control_origin_m: FloatArray,
-    relative_position_control_lower_m: FloatArray,
-    relative_position_control_upper_m: FloatArray,
     chord_deviation_m: FloatArray,
     chord_deviation_valid: NDArray[np.bool_],
     speed_upper_m_s: FloatArray,
@@ -2578,42 +2874,10 @@ def _curved_wall_decision(
     facet_length_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
-) -> tuple[np.uint8, bool, int, float, float, float, float, float, float]:
-    retained_count, retained_facet, departure_certified = _curved_wall_candidate(
-        row,
-        start_position_m,
-        end_position_m,
-        position_lower_m,
-        position_upper_m,
-        velocity_lower_m_s,
-        velocity_upper_m_s,
-        start_time_s,
-        target_time_s,
-        root_interval_s,
-        certify_start_contact_departure,
-        certify_monotone_approach,
-        use_position_controls,
-        position_control_origin_m,
-        relative_position_control_lower_m,
-        relative_position_control_upper_m,
-        speed_upper_m_s,
-        broad_offsets,
-        broad_candidates,
-        geometry_bbox_diagonal_m,
-        facet_start_m,
-        facet_end_m,
-        facet_normal,
-        facet_length_m,
-        geometry_rtol,
-        roundoff_ulps,
-    )
-    if retained_count == 0:
-        return CURVED_STATUS_CLEAR, departure_certified, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-    if retained_count != 1:
-        return CURVED_STATUS_SPLIT, departure_certified, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+) -> tuple[np.uint8, float, float, float, float, float, float]:
     if chord_deviation_valid[row] and _curved_piece_is_certified_split(
         row,
-        retained_facet,
+        facet_id,
         position_lower_m,
         position_upper_m,
         chord_deviation_m,
@@ -2626,10 +2890,10 @@ def _curved_wall_decision(
         geometry_rtol,
         roundoff_ulps,
     ):
-        return CURVED_STATUS_SPLIT, departure_certified, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        return CURVED_STATUS_SPLIT, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     localized = _curved_wall_localization(
         row,
-        retained_facet,
+        facet_id,
         start_position_m,
         end_position_m,
         start_time_s,
@@ -2647,14 +2911,14 @@ def _curved_wall_decision(
         roundoff_ulps,
     )
     if localized[0] != CURVED_STATUS_WALL:
-        return CURVED_STATUS_SPLIT, departure_certified, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        return CURVED_STATUS_SPLIT, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     hit_time, hit_x, hit_y = localized[1], localized[2], localized[3]
     position_budget, time_budget, hit_residual = localized[4], localized[5], localized[6]
     chord = _curved_chord(row, start_position_m, end_position_m, start_time_s, target_time_s)
     if chord_deviation_valid[row]:
         transverse, transverse_residual = _curved_transverse_residual(
             row,
-            retained_facet,
+            facet_id,
             hit_time,
             hit_x,
             hit_y,
@@ -2678,8 +2942,6 @@ def _curved_wall_decision(
         if transverse:
             return (
                 CURVED_STATUS_WALL,
-                departure_certified,
-                retained_facet,
                 hit_time,
                 hit_x,
                 hit_y,
@@ -2692,17 +2954,536 @@ def _curved_wall_decision(
     tube_diameter = np.nextafter(_curved_hypot2(span_x, span_y), np.inf)
     interval_s = target_time_s[row] - start_time_s[row]
     if interval_s > time_budget or tube_diameter > position_budget:
-        return CURVED_STATUS_SPLIT, departure_certified, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        return CURVED_STATUS_SPLIT, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     return (
         CURVED_STATUS_WALL,
-        departure_certified,
-        retained_facet,
         hit_time,
         hit_x,
         hit_y,
         position_budget,
         time_budget,
         max(hit_residual, tube_diameter),
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _find_first_curved_wall_hit(  # pyrefly: ignore [bad-return]
+    row: int,
+    start_position_m: FloatArray,
+    end_position_m: FloatArray,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    root_interval_s: FloatArray,
+    certify_start_contact_departure: NDArray[np.bool_],
+    certify_monotone_approach: bool,
+    use_position_controls: NDArray[np.bool_],
+    position_control_origin_m: FloatArray,
+    relative_position_control_lower_m: FloatArray,
+    relative_position_control_upper_m: FloatArray,
+    chord_deviation_m: FloatArray,
+    chord_deviation_valid: NDArray[np.bool_],
+    speed_upper_m_s: FloatArray,
+    volume_inside: NDArray[np.bool_],
+    broad_offsets: Int64Array,
+    broad_candidate_ids: Int64Array,
+    selected_candidates: Int64Array,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> tuple[np.uint8, bool, int, float, float, float, float, float, float]:
+    departure_certified = False
+    primary_facet = -1
+    first_time = 0.0
+    first_x = 0.0
+    first_y = 0.0
+    first_position_budget = 0.0
+    first_time_budget = 0.0
+    first_residual = 0.0
+    for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+        facet_id = broad_candidate_ids[offset]
+        if not facet_contact_enabled[facet_id]:
+            selected_candidates[offset] = -1
+            continue
+        retained, departing = _curved_wall_facet_is_retained(
+            row,
+            facet_id,
+            start_position_m,
+            end_position_m,
+            position_lower_m,
+            position_upper_m,
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            start_time_s,
+            target_time_s,
+            root_interval_s,
+            certify_start_contact_departure,
+            certify_monotone_approach,
+            use_position_controls,
+            position_control_origin_m,
+            relative_position_control_lower_m,
+            relative_position_control_upper_m,
+            speed_upper_m_s,
+            geometry_bbox_diagonal_m,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            geometry_rtol,
+            roundoff_ulps,
+        )
+        departure_certified |= departing
+        if not retained:
+            selected_candidates[offset] = -1
+            continue
+        candidate = _certify_curved_wall_facet_hit(
+            row,
+            facet_id,
+            start_position_m,
+            end_position_m,
+            position_lower_m,
+            position_upper_m,
+            start_time_s,
+            target_time_s,
+            root_interval_s,
+            chord_deviation_m,
+            chord_deviation_valid,
+            speed_upper_m_s,
+            volume_inside,
+            broad_offsets,
+            broad_candidate_ids,
+            geometry_bbox_diagonal_m,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            geometry_rtol,
+            roundoff_ulps,
+        )
+        if candidate[0] != CURVED_STATUS_WALL:
+            return CURVED_STATUS_SPLIT, departure_certified, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        if (
+            primary_facet < 0
+            or candidate[1] < first_time
+            or (candidate[1] == first_time and facet_id < primary_facet)
+        ):
+            primary_facet = facet_id
+            first_time = candidate[1]
+            first_x = candidate[2]
+            first_y = candidate[3]
+            first_position_budget = candidate[4]
+            first_time_budget = candidate[5]
+            first_residual = candidate[6]
+    if primary_facet < 0:
+        return CURVED_STATUS_CLEAR, departure_certified, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    return (
+        CURVED_STATUS_WALL,
+        departure_certified,
+        primary_facet,
+        first_time,
+        first_x,
+        first_y,
+        first_position_budget,
+        first_time_budget,
+        first_residual,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _curved_shared_node_coordinates(
+    first_facet_id: int,
+    candidate_facet_id: int,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_node_ids: Int64Array,
+) -> tuple[bool, float, float]:
+    if candidate_facet_id == first_facet_id:
+        return False, 0.0, 0.0
+    first_node0 = facet_node_ids[first_facet_id, 0]
+    first_node1 = facet_node_ids[first_facet_id, 1]
+    candidate_node0 = facet_node_ids[candidate_facet_id, 0]
+    candidate_node1 = facet_node_ids[candidate_facet_id, 1]
+    if first_node0 == candidate_node0 or first_node0 == candidate_node1:
+        node_x = facet_start_m[first_facet_id, 0]
+        node_y = facet_start_m[first_facet_id, 1]
+    elif first_node1 == candidate_node0 or first_node1 == candidate_node1:
+        node_x = facet_end_m[first_facet_id, 0]
+        node_y = facet_end_m[first_facet_id, 1]
+    else:
+        return False, 0.0, 0.0
+    return True, node_x, node_y
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _curved_velocity_targets_node(
+    row: int,
+    node_x: float,
+    node_y: float,
+    first_position_budget: float,
+    start_position_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    chord_deviation_m: FloatArray,
+    roundoff_ulps: int,
+) -> bool:
+    velocity_x = 0.5 * (velocity_lower_m_s[row, 0] + velocity_upper_m_s[row, 0])
+    velocity_y = 0.5 * (velocity_lower_m_s[row, 1] + velocity_upper_m_s[row, 1])
+    speed_squared = _exact_sum2(velocity_x * velocity_x, velocity_y * velocity_y)
+    if not math.isfinite(speed_squared) or speed_squared <= 0.0:
+        return False
+    offset_x = node_x - start_position_m[row, 0]
+    offset_y = node_y - start_position_m[row, 1]
+    time_offset = (
+        _exact_sum2(
+            offset_x * velocity_x,
+            offset_y * velocity_y,
+        )
+        / speed_squared
+    )
+    if not math.isfinite(time_offset) or time_offset < 0.0:
+        return False
+    speed = _curved_hypot2(velocity_x, velocity_y)
+    path_length = time_offset * speed
+    interval_s = target_time_s[row] - start_time_s[row]
+    extension = max(time_offset - interval_s, 0.0) * speed
+    if not math.isfinite(extension) or extension > _curved_upper_product(
+        2.0,
+        first_position_budget,
+    ):
+        return False
+    projected_x = start_position_m[row, 0] + time_offset * velocity_x
+    projected_y = start_position_m[row, 1] + time_offset * velocity_y
+    transverse_residual = _curved_hypot2(projected_x - node_x, projected_y - node_y)
+    velocity_radius = 0.5 * _curved_hypot2(
+        velocity_upper_m_s[row, 0] - velocity_lower_m_s[row, 0],
+        velocity_upper_m_s[row, 1] - velocity_lower_m_s[row, 1],
+    )
+    chord_radius = _curved_hypot2(
+        chord_deviation_m[row, 0],
+        chord_deviation_m[row, 1],
+    )
+    scale = max(
+        path_length,
+        abs(node_x),
+        abs(node_y),
+        abs(projected_x),
+        abs(projected_y),
+    )
+    path_radius = _curved_upper_sum(
+        chord_radius,
+        _curved_upper_sum(
+            _curved_upper_product(time_offset, velocity_radius),
+            _curved_roundoff_margin(scale, roundoff_ulps),
+        ),
+    )
+    return math.isfinite(transverse_residual) and transverse_residual <= path_radius
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _curved_shared_node_is_path_ambiguous(
+    row: int,
+    first_facet_id: int,
+    candidate_facet_id: int,
+    first_x: float,
+    first_y: float,
+    first_position_budget: float,
+    start_position_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    chord_deviation_m: FloatArray,
+    chord_deviation_valid: NDArray[np.bool_],
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_node_ids: Int64Array,
+    roundoff_ulps: int,
+) -> tuple[bool, float]:
+    shared = _curved_shared_node_coordinates(
+        first_facet_id,
+        candidate_facet_id,
+        facet_start_m,
+        facet_end_m,
+        facet_node_ids,
+    )
+    if not shared[0] or not chord_deviation_valid[row]:
+        return False, 0.0
+    node_distance = _curved_hypot2(first_x - shared[1], first_y - shared[2])
+    if not math.isfinite(node_distance) or node_distance > first_position_budget:
+        return False, 0.0
+    if not _curved_velocity_targets_node(
+        row,
+        shared[1],
+        shared[2],
+        first_position_budget,
+        start_position_m,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        start_time_s,
+        target_time_s,
+        chord_deviation_m,
+        roundoff_ulps,
+    ):
+        return False, 0.0
+    return True, node_distance
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _collect_simultaneous_curved_hits(  # pyrefly: ignore [bad-return]
+    row: int,
+    first_facet_id: int,
+    first_time: float,
+    first_x: float,
+    first_y: float,
+    first_position_budget: float,
+    first_time_budget: float,
+    first_residual: float,
+    start_position_m: FloatArray,
+    end_position_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    root_interval_s: FloatArray,
+    chord_deviation_m: FloatArray,
+    chord_deviation_valid: NDArray[np.bool_],
+    speed_upper_m_s: FloatArray,
+    volume_inside: NDArray[np.bool_],
+    broad_offsets: Int64Array,
+    broad_candidate_ids: Int64Array,
+    selected_candidates: Int64Array,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_node_ids: Int64Array,
+    facet_contact_enabled: NDArray[np.bool_],
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> tuple[bool, int, float, float, float]:
+    count = 0
+    position_budget = first_position_budget
+    time_budget = first_time_budget
+    residual = first_residual
+    common_node0 = facet_node_ids[first_facet_id, 0]
+    common_node1 = facet_node_ids[first_facet_id, 1]
+    for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+        facet_id = broad_candidate_ids[offset]
+        if not facet_contact_enabled[facet_id]:
+            selected_candidates[offset] = -1
+            continue
+        candidate = _certify_curved_wall_facet_hit(
+            row,
+            facet_id,
+            start_position_m,
+            end_position_m,
+            position_lower_m,
+            position_upper_m,
+            start_time_s,
+            target_time_s,
+            root_interval_s,
+            chord_deviation_m,
+            chord_deviation_valid,
+            speed_upper_m_s,
+            volume_inside,
+            broad_offsets,
+            broad_candidate_ids,
+            geometry_bbox_diagonal_m,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            geometry_rtol,
+            roundoff_ulps,
+        )
+        candidate_node0 = facet_node_ids[facet_id, 0]
+        candidate_node1 = facet_node_ids[facet_id, 1]
+        node_ambiguity = _curved_shared_node_is_path_ambiguous(
+            row,
+            first_facet_id,
+            facet_id,
+            first_x,
+            first_y,
+            first_position_budget,
+            start_position_m,
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            start_time_s,
+            target_time_s,
+            chord_deviation_m,
+            chord_deviation_valid,
+            facet_start_m,
+            facet_end_m,
+            facet_node_ids,
+            roundoff_ulps,
+        )
+        node_ambiguous = node_ambiguity[0]
+        simultaneous = node_ambiguous or (
+            candidate[0] == CURVED_STATUS_WALL
+            and _hits_are_simultaneous(
+                candidate[1],
+                candidate[2],
+                candidate[3],
+                candidate[4],
+                candidate[5],
+                first_time,
+                first_x,
+                first_y,
+                first_position_budget,
+                first_time_budget,
+            )
+        )
+        if not simultaneous:
+            selected_candidates[offset] = -1
+            continue
+        selected_candidates[offset] = facet_id
+        if common_node0 != candidate_node0 and common_node0 != candidate_node1:
+            common_node0 = -1
+        if common_node1 != candidate_node0 and common_node1 != candidate_node1:
+            common_node1 = -1
+        if common_node0 < 0 and common_node1 < 0:
+            return False, 0, 0.0, 0.0, 0.0
+        count += 1
+        if node_ambiguous:
+            position_budget = max(position_budget, node_ambiguity[1])
+        if candidate[0] == CURVED_STATUS_WALL:
+            position_budget = max(position_budget, candidate[4])
+            time_budget = max(time_budget, candidate[5])
+            residual = max(residual, candidate[6])
+    return count > 0, count, position_budget, time_budget, residual
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _curved_wall_decision(
+    row: int,
+    start_position_m: FloatArray,
+    end_position_m: FloatArray,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    root_interval_s: FloatArray,
+    certify_start_contact_departure: NDArray[np.bool_],
+    certify_monotone_approach: bool,
+    use_position_controls: NDArray[np.bool_],
+    position_control_origin_m: FloatArray,
+    relative_position_control_lower_m: FloatArray,
+    relative_position_control_upper_m: FloatArray,
+    chord_deviation_m: FloatArray,
+    chord_deviation_valid: NDArray[np.bool_],
+    speed_upper_m_s: FloatArray,
+    volume_inside: NDArray[np.bool_],
+    broad_offsets: Int64Array,
+    broad_candidate_ids: Int64Array,
+    selected_candidates: Int64Array,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_node_ids: Int64Array,
+    facet_contact_enabled: NDArray[np.bool_],
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> tuple[np.uint8, bool, int, float, float, float, float, float, float, int]:
+    first = _find_first_curved_wall_hit(
+        row,
+        start_position_m,
+        end_position_m,
+        position_lower_m,
+        position_upper_m,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        start_time_s,
+        target_time_s,
+        root_interval_s,
+        certify_start_contact_departure,
+        certify_monotone_approach,
+        use_position_controls,
+        position_control_origin_m,
+        relative_position_control_lower_m,
+        relative_position_control_upper_m,
+        chord_deviation_m,
+        chord_deviation_valid,
+        speed_upper_m_s,
+        volume_inside,
+        broad_offsets,
+        broad_candidate_ids,
+        selected_candidates,
+        geometry_bbox_diagonal_m,
+        facet_start_m,
+        facet_end_m,
+        facet_normal,
+        facet_length_m,
+        facet_contact_enabled,
+        geometry_rtol,
+        roundoff_ulps,
+    )
+    if first[0] != CURVED_STATUS_WALL:
+        return (*first, 0)
+    simultaneous = _collect_simultaneous_curved_hits(
+        row,
+        first[2],
+        first[3],
+        first[4],
+        first[5],
+        first[6],
+        first[7],
+        first[8],
+        start_position_m,
+        end_position_m,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        position_lower_m,
+        position_upper_m,
+        start_time_s,
+        target_time_s,
+        root_interval_s,
+        chord_deviation_m,
+        chord_deviation_valid,
+        speed_upper_m_s,
+        volume_inside,
+        broad_offsets,
+        broad_candidate_ids,
+        selected_candidates,
+        geometry_bbox_diagonal_m,
+        facet_start_m,
+        facet_end_m,
+        facet_normal,
+        facet_length_m,
+        facet_node_ids,
+        facet_contact_enabled,
+        geometry_rtol,
+        roundoff_ulps,
+    )
+    if not simultaneous[0]:
+        return CURVED_STATUS_SPLIT, first[1], -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
+    return (
+        CURVED_STATUS_WALL,
+        first[1],
+        first[2],
+        first[3],
+        first[4],
+        first[5],
+        simultaneous[2],
+        simultaneous[3],
+        simultaneous[4],
+        simultaneous[1],
     )
 
 
@@ -2919,12 +3700,15 @@ def _locate_curved_events_kernel(
     ready: NDArray[np.bool_],
     volume_inside: NDArray[np.bool_],
     broad_offsets: Int64Array,
-    broad_candidates: Int64Array,
+    broad_candidate_ids: Int64Array,
+    selected_candidates: Int64Array,
     geometry_bbox_diagonal_m: float,
     facet_start_m: FloatArray,
     facet_end_m: FloatArray,
     facet_normal: FloatArray,
     facet_length_m: FloatArray,
+    facet_node_ids: Int64Array,
+    facet_contact_enabled: NDArray[np.bool_],
     geometry_rtol: float,
     roundoff_ulps: int,
     status: UInt8Array,
@@ -2966,12 +3750,15 @@ def _locate_curved_events_kernel(
             speed_upper_m_s,
             volume_inside,
             broad_offsets,
-            broad_candidates,
+            broad_candidate_ids,
+            selected_candidates,
             geometry_bbox_diagonal_m,
             facet_start_m,
             facet_end_m,
             facet_normal,
             facet_length_m,
+            facet_node_ids,
+            facet_contact_enabled,
             geometry_rtol,
             roundoff_ulps,
         )
@@ -3019,7 +3806,7 @@ def _locate_curved_events_kernel(
             localization_residual_m[row] = wall[8]
             normal[row, 0] = facet_normal[wall[2], 0]
             normal[row, 1] = facet_normal[wall[2], 1]
-            event_candidate_count[row] = 1
+            event_candidate_count[row] = wall[9]
         elif axis_hit:
             status[row] = CURVED_STATUS_AXIS
             event_time_s[row] = axis[1]
@@ -3033,15 +3820,164 @@ def _locate_curved_events_kernel(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _fill_curved_event_candidates_kernel(
+def _has_topology_candidate(
+    row: int,
+    offsets: Int64Array,
+    candidates: Int64Array,
+    finite_contact_enabled: NDArray[np.bool_],
+) -> bool:
+    for offset in range(offsets[row], offsets[row + 1]):
+        facet_id = candidates[offset]
+        if facet_id >= 0 and not finite_contact_enabled[facet_id]:
+            return True
+    return False
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _event_interval_precedence(
+    point_time_s: float,
+    point_budget_s: float,
+    current_time_s: float,
+    current_budget_s: float,
+) -> int:
+    """Return -1 for point first, +1 for current first, and zero if ambiguous."""
+
+    if point_time_s + point_budget_s < current_time_s - current_budget_s:
+        return -1
+    if current_time_s + current_budget_s < point_time_s - point_budget_s:
+        return 1
+    return 0
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _arbitrate_curved_topology_events_kernel(
+    contact_radius_m: FloatArray,
+    finite_contact_enabled: NDArray[np.bool_],
+    broad_offsets: Int64Array,
+    point_selected_candidates: Int64Array,
+    point_status: UInt8Array,
+    point_failure_reason: UInt8Array,
+    point_departure_certified: NDArray[np.bool_],
+    point_time_s: FloatArray,
+    point_position_m: FloatArray,
+    point_primary_facet_id: Int64Array,
+    point_normal: FloatArray,
+    point_position_budget_m: FloatArray,
+    point_time_budget_s: FloatArray,
+    point_residual_m: FloatArray,
+    point_candidate_count: Int64Array,
     status: UInt8Array,
+    failure_reason: UInt8Array,
+    departure_certified: NDArray[np.bool_],
+    event_time_s: FloatArray,
+    hit_position_m: FloatArray,
     primary_facet_id: Int64Array,
+    normal: FloatArray,
+    position_budget_m: FloatArray,
+    time_budget_s: FloatArray,
+    localization_residual_m: FloatArray,
+    candidate_count: Int64Array,
+    use_point_candidates: NDArray[np.bool_],
+) -> None:
+    """Choose material-capsule or topology-centre curved first events."""
+
+    for row in range(contact_radius_m.size):
+        if contact_radius_m[row] <= 0.0:
+            continue
+        if point_status[row] in (CURVED_STATUS_FAILURE, CURVED_STATUS_SPLIT):
+            status[row] = point_status[row]
+            failure_reason[row] = point_failure_reason[row]
+            departure_certified[row] = point_departure_certified[row]
+            primary_facet_id[row] = -1
+            candidate_count[row] = 0
+            continue
+        if point_status[row] != CURVED_STATUS_WALL:
+            continue
+        if not _has_topology_candidate(
+            row,
+            broad_offsets,
+            point_selected_candidates,
+            finite_contact_enabled,
+        ):
+            continue
+        choose_point = False
+        precedence = 1
+        if status[row] == CURVED_STATUS_CLEAR:
+            choose_point = True
+        elif status[row] in (CURVED_STATUS_FAILURE, CURVED_STATUS_SPLIT):
+            continue
+        else:
+            precedence = _event_interval_precedence(
+                point_time_s[row],
+                point_time_budget_s[row],
+                event_time_s[row],
+                time_budget_s[row],
+            )
+            choose_point = precedence < 0
+        if not choose_point and precedence == 0:
+            status[row] = CURVED_STATUS_SPLIT
+            failure_reason[row] = CURVED_FAILURE_NONE
+            departure_certified[row] = False
+            primary_facet_id[row] = -1
+            candidate_count[row] = 0
+            continue
+        if not choose_point:
+            continue
+        status[row] = point_status[row]
+        failure_reason[row] = point_failure_reason[row]
+        departure_certified[row] = point_departure_certified[row]
+        event_time_s[row] = point_time_s[row]
+        hit_position_m[row, 0] = point_position_m[row, 0]
+        hit_position_m[row, 1] = point_position_m[row, 1]
+        primary_facet_id[row] = point_primary_facet_id[row]
+        normal[row, 0] = point_normal[row, 0]
+        normal[row, 1] = point_normal[row, 1]
+        position_budget_m[row] = point_position_budget_m[row]
+        time_budget_s[row] = point_time_budget_s[row]
+        localization_residual_m[row] = point_residual_m[row]
+        candidate_count[row] = point_candidate_count[row]
+        use_point_candidates[row] = True
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _fill_curved_topology_event_candidates_kernel(
+    status: UInt8Array,
+    broad_offsets: Int64Array,
+    point_candidates: Int64Array,
+    finite_candidates: Int64Array,
+    use_point_candidates: NDArray[np.bool_],
     candidate_offsets: Int64Array,
     candidate_facet_ids: Int64Array,
 ) -> None:
     for row in range(status.size):
-        if status[row] == CURVED_STATUS_WALL:
-            candidate_facet_ids[candidate_offsets[row]] = primary_facet_id[row]
+        if status[row] != CURVED_STATUS_WALL:
+            continue
+        source = point_candidates if use_point_candidates[row] else finite_candidates
+        write = candidate_offsets[row]
+        for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+            facet_id = source[offset]
+            if facet_id >= 0:
+                candidate_facet_ids[write] = facet_id
+                write += 1
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _fill_curved_event_candidates_kernel(
+    status: UInt8Array,
+    broad_offsets: Int64Array,
+    broad_candidates: Int64Array,
+    candidate_offsets: Int64Array,
+    candidate_facet_ids: Int64Array,
+) -> None:
+    for row in range(status.size):
+        if status[row] != CURVED_STATUS_WALL:
+            continue
+        write = candidate_offsets[row]
+        for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+            facet_id = broad_candidates[offset]
+            if facet_id >= 0:
+                candidate_facet_ids[write] = facet_id
+                write += 1
 
 
 def _prepare_exact_path_batch(
@@ -3055,6 +3991,7 @@ def _prepare_exact_path_batch(
     geometry_rtol: float,
     roundoff_ulps: int,
     certified_departing_facet_id: Int64Array | None,
+    contact_radius_m: FloatArray,
 ) -> _PreparedExactPathBatch:
     kinds = np.asarray(path_kind, dtype=np.uint8)
     position = np.asarray(start_position_m, dtype=np.float64)
@@ -3078,6 +4015,7 @@ def _prepare_exact_path_batch(
         kinds,
         acceleration,
         certified_departing_facet_id,
+        contact_radius_m,
         row_count,
     )
     query_lower = np.empty((row_count, 2), dtype=np.float64)
@@ -3102,6 +4040,7 @@ def _prepare_exact_path_batch(
         geometry.facet_end_m,
         geometry.facet_normal,
         geometry.facet_length_m,
+        geometry.group_id,
         geometry_rtol,
         roundoff_ulps,
         query_lower,
@@ -3251,6 +4190,7 @@ def _exact_departing_facets(
     path_kind: UInt8Array,
     acceleration_m_s2: FloatArray,
     value: Int64Array | None,
+    contact_radius_m: FloatArray,
     row_count: int,
 ) -> Int64Array:
     if value is None:
@@ -3258,12 +4198,16 @@ def _exact_departing_facets(
     departing = np.asarray(value, dtype=np.int64)
     if departing.shape != (row_count,):
         raise ValueError("certified departing facet IDs must align with exact path rows")
-    if bool(((departing < -1) | (departing >= geometry.facet_count)).any()):
+    if bool(
+        (
+            (departing < EXACT_DEPARTURE_FINITE_CONTACT_SET) | (departing >= geometry.facet_count)
+        ).any()
+    ):
         raise ValueError("certified departing facet ID is outside the geometry")
-    if bool(((departing >= 0) & (path_kind != EXACT_PATH_QUADRATIC)).any()):
-        raise ValueError("a certified acceleration departure requires a quadratic path")
+    if bool(((departing == EXACT_DEPARTURE_FINITE_CONTACT_SET) & (contact_radius_m <= 0.0)).any()):
+        raise ValueError("a finite contact-set departure requires a positive contact radius")
     zero_acceleration = np.equal(acceleration_m_s2, 0.0).all(axis=1)
-    if bool(((departing >= 0) & zero_acceleration).any()):
+    if bool(((departing >= 0) & (path_kind == EXACT_PATH_QUADRATIC) & zero_acceleration).any()):
         raise ValueError("a certified quadratic departure requires nonzero acceleration")
     return departing
 
@@ -3322,11 +4266,29 @@ def _surface_departure_direction(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _surface_inward_departure_action(
+    curved_event_path: bool,
+    contact_radius_m: float,
+    facet_id: int = -1,
+) -> tuple[np.uint8, np.int64]:
+    """Choose the one departure token consumed by the selected event path."""
+
+    if curved_event_path:
+        return SURFACE_ACTION_CURVED_DEPARTURE, EXACT_DEPARTURE_NONE
+    if contact_radius_m > 0.0:
+        return SURFACE_ACTION_EXACT_DEPARTURE, EXACT_DEPARTURE_FINITE_CONTACT_SET
+    if facet_id >= 0:
+        return SURFACE_ACTION_EXACT_DEPARTURE, np.int64(facet_id)
+    return SURFACE_ACTION_RESOLVED, EXACT_DEPARTURE_NONE
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _classify_surface_release_kernel(
     release_state: UInt8Array,
     source_facet_id: Int64Array,
     position_m: FloatArray,
     velocity_m_s: FloatArray,
+    contact_radius_m: FloatArray,
     acceleration_m_s2: FloatArray,
     has_acceleration: bool,
     start_time_s: FloatArray,
@@ -3334,6 +4296,7 @@ def _classify_surface_release_kernel(
     curved_event_path: bool,
     geometry_bbox_diagonal_m: float,
     facet_normal: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
     facet_length_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
@@ -3346,17 +4309,22 @@ def _classify_surface_release_kernel(
     for row in range(release_state.size):
         state = release_state[row]
         facet_id = source_facet_id[row]
-        if state == SURFACE_STATE_RESOLVED or facet_id < 0:
+        if state == SURFACE_STATE_RESOLVED:
             action[row] = SURFACE_ACTION_RESOLVED
             continue
         if state == SURFACE_STATE_DEPARTURE:
-            if curved_event_path:
-                action[row] = SURFACE_ACTION_CURVED_DEPARTURE
-            else:
-                action[row] = SURFACE_ACTION_EXACT_DEPARTURE
-                departure_facet_id[row] = facet_id
+            # Internal-source reflections retain the analytic contact origin
+            # across macro steps, while their source facet remains -1.  The
+            # finite contact-set token belongs to that origin and must survive
+            # a clear prefix before the next target time.
+            action[row], departure_facet_id[row] = _surface_inward_departure_action(
+                curved_event_path, contact_radius_m[row], facet_id
+            )
             continue
-
+        if facet_id < 0:
+            action[row] = SURFACE_ACTION_RESOLVED
+            continue
+        radius = contact_radius_m[row] * facet_contact_enabled[facet_id]
         acceleration_x = 0.0
         acceleration_y = 0.0
         if has_acceleration:
@@ -3373,13 +4341,18 @@ def _classify_surface_release_kernel(
             roundoff_ulps,
         )
         if direction == _SURFACE_DIRECTION_VELOCITY_INWARD:
-            action[row] = (
-                SURFACE_ACTION_CURVED_DEPARTURE if curved_event_path else SURFACE_ACTION_RESOLVED
+            row_action, departure_reference = _surface_inward_departure_action(
+                curved_event_path,
+                radius,
             )
+            action[row] = row_action
+            departure_facet_id[row] = departure_reference
             continue
         if direction == _SURFACE_DIRECTION_ACCELERATION_INWARD:
             action[row] = SURFACE_ACTION_EXACT_DEPARTURE
-            departure_facet_id[row] = facet_id
+            departure_facet_id[row] = (
+                EXACT_DEPARTURE_FINITE_CONTACT_SET if radius > 0.0 else facet_id
+            )
             continue
         if direction == _SURFACE_DIRECTION_INDETERMINATE:
             status[row] = SURFACE_STATUS_INDETERMINATE_DIRECTION
@@ -3501,6 +4474,7 @@ def _exact_departure_is_certified(
     facet_end_m: FloatArray,
     facet_normal: FloatArray,
     facet_length_m: FloatArray,
+    facet_group_id: Int32Array,
     geometry_rtol: float,
     roundoff_ulps: int,
 ) -> bool:
@@ -3533,19 +4507,36 @@ def _exact_departure_is_certified(
         roundoff_ulps,
     )
     endpoint_margin = position_budget / length
-    if not valid or not math.isfinite(signed_distance) or signed_distance > position_budget:
+    if _departure_projection_is_invalid(valid, signed_distance, position_budget):
         return False
-    if abs(signed_distance) <= position_budget and (
-        not math.isfinite(parameter)
-        or line_residual > position_budget
-        or parameter <= endpoint_margin
-        or parameter >= 1.0 - endpoint_margin
+    if _departure_line_projection_is_invalid(
+        signed_distance,
+        position_budget,
+        parameter,
+        line_residual,
+    ):
+        return False
+    endpoint_contact = _departure_is_endpoint_contact(
+        signed_distance,
+        position_budget,
+        parameter,
+        endpoint_margin,
+    )
+    if endpoint_contact and not _same_group_support_continues_through_node(
+        facet_id,
+        start_x,
+        start_y,
+        facet_start_m,
+        facet_end_m,
+        facet_group_id,
     ):
         return False
     normal_speed = _exact_sum2(velocity_x * normal_x, velocity_y * normal_y)
     velocity_margin = float(roundoff_ulps) * _FLOAT64_EPS * math.hypot(velocity_x, velocity_y)
     if normal_speed != 0.0 and normal_speed >= -velocity_margin:
         return False
+    if acceleration_x == 0.0 and acceleration_y == 0.0:
+        return normal_speed < -velocity_margin
     normal_acceleration = _exact_sum2(
         acceleration_x * normal_x,
         acceleration_y * normal_y,
@@ -3554,6 +4545,77 @@ def _exact_departure_is_certified(
         float(roundoff_ulps) * _FLOAT64_EPS * math.hypot(acceleration_x, acceleration_y)
     )
     return normal_acceleration < -acceleration_margin
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _departure_projection_is_invalid(
+    valid: bool,
+    signed_distance: float,
+    position_budget: float,
+) -> bool:
+    return not valid or not math.isfinite(signed_distance) or signed_distance > position_budget
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _departure_line_projection_is_invalid(
+    signed_distance: float,
+    position_budget: float,
+    parameter: float,
+    line_residual: float,
+) -> bool:
+    if abs(signed_distance) > position_budget:
+        return False
+    return not math.isfinite(parameter) or line_residual > position_budget
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _departure_is_endpoint_contact(
+    signed_distance: float,
+    position_budget: float,
+    parameter: float,
+    endpoint_margin: float,
+) -> bool:
+    if abs(signed_distance) > position_budget:
+        return False
+    return parameter <= endpoint_margin or parameter >= 1.0 - endpoint_margin
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _same_group_support_continues_through_node(
+    facet_id: int,
+    start_x: float,
+    start_y: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_group_id: Int32Array,
+) -> bool:
+    """Prove a split facet continues collinearly beyond its shared node."""
+
+    if facet_start_m[facet_id, 0] == start_x and facet_start_m[facet_id, 1] == start_y:
+        direction_x = facet_end_m[facet_id, 0] - start_x
+        direction_y = facet_end_m[facet_id, 1] - start_y
+    elif facet_end_m[facet_id, 0] == start_x and facet_end_m[facet_id, 1] == start_y:
+        direction_x = facet_start_m[facet_id, 0] - start_x
+        direction_y = facet_start_m[facet_id, 1] - start_y
+    else:
+        return False
+    group_id = facet_group_id[facet_id]
+    for candidate in range(facet_group_id.size):
+        if candidate == facet_id or facet_group_id[candidate] != group_id:
+            continue
+        if facet_start_m[candidate, 0] == start_x and facet_start_m[candidate, 1] == start_y:
+            other_x = facet_end_m[candidate, 0] - start_x
+            other_y = facet_end_m[candidate, 1] - start_y
+        elif facet_end_m[candidate, 0] == start_x and facet_end_m[candidate, 1] == start_y:
+            other_x = facet_start_m[candidate, 0] - start_x
+            other_y = facet_start_m[candidate, 1] - start_y
+        else:
+            continue
+        cross = direction_x * other_y - direction_y * other_x
+        dot = direction_x * other_x + direction_y * other_y
+        if cross == 0.0 and dot < 0.0:
+            return True
+    return False
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -3705,6 +4767,7 @@ def _prepare_exact_path_row(
     facet_end_m: FloatArray,
     facet_normal: FloatArray,
     facet_length_m: FloatArray,
+    facet_group_id: Int32Array,
     maximum_facet_length_m: float,
     geometry_rtol: float,
     roundoff_ulps: int,
@@ -3773,10 +4836,11 @@ def _prepare_exact_path_row(
         facet_end_m,
         facet_normal,
         facet_length_m,
+        facet_group_id,
         geometry_rtol,
         roundoff_ulps,
     )
-    if path_kind[row] == EXACT_PATH_QUADRATIC and not departure_valid:
+    if departing_facet_id[row] >= 0 and not departure_valid:
         return False, False
     if parameter_speed == 0.0:
         return True, False
@@ -3828,6 +4892,7 @@ def _prepare_exact_paths_kernel(
     facet_end_m: FloatArray,
     facet_normal: FloatArray,
     facet_length_m: FloatArray,
+    facet_group_id: Int32Array,
     geometry_rtol: float,
     roundoff_ulps: int,
     query_lower_m: FloatArray,
@@ -3864,6 +4929,7 @@ def _prepare_exact_paths_kernel(
             facet_end_m,
             facet_normal,
             facet_length_m,
+            facet_group_id,
             maximum_facet_length_m,
             geometry_rtol,
             roundoff_ulps,
@@ -4557,6 +5623,40 @@ def _exact_axis_hit(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _is_same_departing_support(
+    facet_id: int,
+    departing_facet_id: int,
+    start_x: float,
+    start_y: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+) -> bool:
+    """Recognize collinear split facets sharing the certified departure node."""
+
+    if departing_facet_id < 0:
+        return False
+    if facet_id == departing_facet_id:
+        return True
+    departing_touches = (
+        (facet_start_m[departing_facet_id, 0] == start_x)
+        and (facet_start_m[departing_facet_id, 1] == start_y)
+    ) or (
+        (facet_end_m[departing_facet_id, 0] == start_x)
+        and (facet_end_m[departing_facet_id, 1] == start_y)
+    )
+    candidate_touches = (
+        (facet_start_m[facet_id, 0] == start_x) and (facet_start_m[facet_id, 1] == start_y)
+    ) or ((facet_end_m[facet_id, 0] == start_x) and (facet_end_m[facet_id, 1] == start_y))
+    if not departing_touches or not candidate_touches:
+        return False
+    departing_x = facet_end_m[departing_facet_id, 0] - facet_start_m[departing_facet_id, 0]
+    departing_y = facet_end_m[departing_facet_id, 1] - facet_start_m[departing_facet_id, 1]
+    candidate_x = facet_end_m[facet_id, 0] - facet_start_m[facet_id, 0]
+    candidate_y = facet_end_m[facet_id, 1] - facet_start_m[facet_id, 1]
+    return departing_x * candidate_y == departing_y * candidate_x
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _find_first_exact_wall(
     path_kind: np.uint8,
     start_x: float,
@@ -4579,6 +5679,7 @@ def _find_first_exact_wall(
     facet_start_m: FloatArray,
     facet_end_m: FloatArray,
     facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
     geometry_rtol: float,
     roundoff_ulps: int,
 ) -> tuple[bool, bool, int, float, float, float, float, float, float]:
@@ -4592,7 +5693,17 @@ def _find_first_exact_wall(
     selected_residual = 0.0
     for offset in range(broad_begin, broad_end):
         facet_id = broad_candidates[offset]
-        if facet_id == departing_facet_id:
+        if (
+            _is_same_departing_support(
+                facet_id,
+                departing_facet_id,
+                start_x,
+                start_y,
+                facet_start_m,
+                facet_end_m,
+            )
+            or not facet_contact_enabled[facet_id]
+        ):
             continue
         candidate = _exact_facet_hit(
             path_kind,
@@ -4645,7 +5756,7 @@ def _find_first_exact_wall(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _is_simultaneous_exact_hit(
+def _hits_are_simultaneous(
     candidate_time: float,
     candidate_x: float,
     candidate_y: float,
@@ -4694,6 +5805,7 @@ def _reduce_simultaneous_exact_hits(
     facet_end_m: FloatArray,
     facet_length_m: FloatArray,
     facet_node_ids: Int64Array,
+    facet_contact_enabled: NDArray[np.bool_],
     geometry_rtol: float,
     roundoff_ulps: int,
 ) -> tuple[bool, int, float, float, float]:
@@ -4705,7 +5817,17 @@ def _reduce_simultaneous_exact_hits(
     common_node1 = facet_node_ids[first_facet_id, 1]
     for offset in range(broad_begin, broad_end):
         facet_id = broad_candidates[offset]
-        if facet_id == departing_facet_id:
+        if (
+            _is_same_departing_support(
+                facet_id,
+                departing_facet_id,
+                start_x,
+                start_y,
+                facet_start_m,
+                facet_end_m,
+            )
+            or not facet_contact_enabled[facet_id]
+        ):
             continue
         candidate = _exact_facet_hit(
             path_kind,
@@ -4731,7 +5853,7 @@ def _reduce_simultaneous_exact_hits(
         )
         if candidate[0]:
             return True, 0, 0.0, 0.0, 0.0
-        if candidate[1] and _is_simultaneous_exact_hit(
+        if candidate[1] and _hits_are_simultaneous(
             candidate[2],
             candidate[3],
             candidate[4],
@@ -4785,6 +5907,7 @@ def _locate_exact_event_row(
     facet_end_m: FloatArray,
     facet_length_m: FloatArray,
     facet_node_ids: Int64Array,
+    facet_contact_enabled: NDArray[np.bool_],
     geometry_rtol: float,
     roundoff_ulps: int,
 ) -> tuple[np.uint8, int, float, float, float, float, float, float, float, float, int]:
@@ -4811,6 +5934,7 @@ def _locate_exact_event_row(
         facet_start_m,
         facet_end_m,
         facet_length_m,
+        facet_contact_enabled,
         geometry_rtol,
         roundoff_ulps,
     )
@@ -4852,6 +5976,7 @@ def _locate_exact_event_row(
             facet_end_m,
             facet_length_m,
             facet_node_ids,
+            facet_contact_enabled,
             geometry_rtol,
             roundoff_ulps,
         )
@@ -4906,6 +6031,1767 @@ def _locate_exact_event_row(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_point_aabb_distance(
+    point_x: float,
+    point_y: float,
+    lower_x: float,
+    lower_y: float,
+    upper_x: float,
+    upper_y: float,
+) -> float:
+    dx = max(lower_x - point_x, 0.0, point_x - upper_x)
+    dy = max(lower_y - point_y, 0.0, point_y - upper_y)
+    return math.hypot(dx, dy)
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_segment_intersects_aabb(
+    start_x: float,
+    start_y: float,
+    end_x: float,
+    end_y: float,
+    lower_x: float,
+    lower_y: float,
+    upper_x: float,
+    upper_y: float,
+) -> bool:
+    low = 0.0
+    high = 1.0
+    delta_x = end_x - start_x
+    delta_y = end_y - start_y
+    for origin, delta, lower, upper in (
+        (start_x, delta_x, lower_x, upper_x),
+        (start_y, delta_y, lower_y, upper_y),
+    ):
+        if delta == 0.0:
+            if origin < lower or origin > upper:
+                return False
+            continue
+        first = (lower - origin) / delta
+        second = (upper - origin) / delta
+        if first > second:
+            first, second = second, first
+        low = max(low, first)
+        high = min(high, second)
+        if low > high:
+            return False
+    return True
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_segment_aabb_distance(
+    start_x: float,
+    start_y: float,
+    end_x: float,
+    end_y: float,
+    lower_x: float,
+    lower_y: float,
+    upper_x: float,
+    upper_y: float,
+) -> float:
+    if _finite_segment_intersects_aabb(
+        start_x, start_y, end_x, end_y, lower_x, lower_y, upper_x, upper_y
+    ):
+        return 0.0
+    minimum = min(
+        _finite_point_aabb_distance(start_x, start_y, lower_x, lower_y, upper_x, upper_y),
+        _finite_point_aabb_distance(end_x, end_y, lower_x, lower_y, upper_x, upper_y),
+    )
+    edge_x = end_x - start_x
+    edge_y = end_y - start_y
+    length = math.hypot(edge_x, edge_y)
+    for corner_x, corner_y in (
+        (lower_x, lower_y),
+        (lower_x, upper_y),
+        (upper_x, lower_y),
+        (upper_x, upper_y),
+    ):
+        along = ((corner_x - start_x) * edge_x + (corner_y - start_y) * edge_y) / (length * length)
+        parameter = min(max(along, 0.0), 1.0)
+        projected_x = start_x + parameter * edge_x
+        projected_y = start_y + parameter * edge_y
+        minimum = min(minimum, math.hypot(corner_x - projected_x, corner_y - projected_y))
+    return minimum
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_quadratic_position(
+    parameter: float,
+    start_x: float,
+    start_y: float,
+    linear_x: float,
+    linear_y: float,
+    quadratic_x: float,
+    quadratic_y: float,
+) -> tuple[float, float]:
+    return (
+        start_x + parameter * linear_x + parameter * parameter * quadratic_x,
+        start_y + parameter * linear_y + parameter * parameter * quadratic_y,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_quadratic_interval_bounds(
+    lower: float,
+    upper: float,
+    start_x: float,
+    start_y: float,
+    linear_x: float,
+    linear_y: float,
+    quadratic_x: float,
+    quadratic_y: float,
+) -> tuple[float, float, float, float]:
+    lower_x, lower_y = _finite_quadratic_position(
+        lower, start_x, start_y, linear_x, linear_y, quadratic_x, quadratic_y
+    )
+    upper_x, upper_y = _finite_quadratic_position(
+        upper, start_x, start_y, linear_x, linear_y, quadratic_x, quadratic_y
+    )
+    minimum_x = min(lower_x, upper_x)
+    maximum_x = max(lower_x, upper_x)
+    minimum_y = min(lower_y, upper_y)
+    maximum_y = max(lower_y, upper_y)
+    if quadratic_x != 0.0:
+        stationary_x = -linear_x / (2.0 * quadratic_x)
+        if lower < stationary_x < upper:
+            value_x, _ = _finite_quadratic_position(
+                stationary_x,
+                start_x,
+                start_y,
+                linear_x,
+                linear_y,
+                quadratic_x,
+                quadratic_y,
+            )
+            minimum_x = min(minimum_x, value_x)
+            maximum_x = max(maximum_x, value_x)
+    if quadratic_y != 0.0:
+        stationary_y = -linear_y / (2.0 * quadratic_y)
+        if lower < stationary_y < upper:
+            _, value_y = _finite_quadratic_position(
+                stationary_y,
+                start_x,
+                start_y,
+                linear_x,
+                linear_y,
+                quadratic_x,
+                quadratic_y,
+            )
+            minimum_y = min(minimum_y, value_y)
+            maximum_y = max(maximum_y, value_y)
+    return minimum_x, minimum_y, maximum_x, maximum_y
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_line_circle_root(
+    start_x: float,
+    start_y: float,
+    displacement_x: float,
+    displacement_y: float,
+    center_x: float,
+    center_y: float,
+    radius: float,
+    skip_start: bool,
+    start_tolerance: float,
+) -> float:
+    offset_x = start_x - center_x
+    offset_y = start_y - center_y
+    coefficient_a = displacement_x * displacement_x + displacement_y * displacement_y
+    if coefficient_a == 0.0:
+        return math.inf
+    coefficient_b = 2.0 * (offset_x * displacement_x + offset_y * displacement_y)
+    coefficient_c = offset_x * offset_x + offset_y * offset_y - radius * radius
+    discriminant = coefficient_b * coefficient_b - 4.0 * coefficient_a * coefficient_c
+    if discriminant < 0.0 or not math.isfinite(discriminant):
+        return math.inf
+    root = math.sqrt(max(discriminant, 0.0))
+    first = (-coefficient_b - root) / (2.0 * coefficient_a)
+    second = (-coefficient_b + root) / (2.0 * coefficient_a)
+    best = math.inf
+    for candidate in (first, second):
+        if candidate < 0.0 or candidate > 1.0:
+            continue
+        if skip_start and candidate <= start_tolerance:
+            continue
+        best = min(best, candidate)
+    return best
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_line_capsule_first_parameter(
+    start_x: float,
+    start_y: float,
+    displacement_x: float,
+    displacement_y: float,
+    facet_start_x: float,
+    facet_start_y: float,
+    facet_end_x: float,
+    facet_end_y: float,
+    facet_normal_x: float,
+    facet_normal_y: float,
+    facet_length: float,
+    radius: float,
+    skip_start: bool,
+    start_tolerance: float,
+) -> float:
+    edge_x = facet_end_x - facet_start_x
+    edge_y = facet_end_y - facet_start_y
+    tangent_x = edge_x / facet_length
+    tangent_y = edge_y / facet_length
+    offset_x = start_x - facet_start_x
+    offset_y = start_y - facet_start_y
+    signed_start = offset_x * facet_normal_x + offset_y * facet_normal_y
+    signed_delta = displacement_x * facet_normal_x + displacement_y * facet_normal_y
+    best = math.inf
+    if signed_delta != 0.0:
+        for signed_target in (-radius, radius):
+            candidate = (signed_target - signed_start) / signed_delta
+            if candidate < 0.0 or candidate > 1.0:
+                continue
+            if skip_start and candidate <= start_tolerance:
+                continue
+            hit_x = start_x + candidate * displacement_x
+            hit_y = start_y + candidate * displacement_y
+            along = (hit_x - facet_start_x) * tangent_x + (hit_y - facet_start_y) * tangent_y
+            if 0.0 <= along <= facet_length:
+                best = min(best, candidate)
+    best = min(
+        best,
+        _finite_line_circle_root(
+            start_x,
+            start_y,
+            displacement_x,
+            displacement_y,
+            facet_start_x,
+            facet_start_y,
+            radius,
+            skip_start,
+            start_tolerance,
+        ),
+        _finite_line_circle_root(
+            start_x,
+            start_y,
+            displacement_x,
+            displacement_y,
+            facet_end_x,
+            facet_end_y,
+            radius,
+            skip_start,
+            start_tolerance,
+        ),
+    )
+    return best
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_quadratic_capsule_value(
+    parameter: float,
+    start_x: float,
+    start_y: float,
+    linear_x: float,
+    linear_y: float,
+    quadratic_x: float,
+    quadratic_y: float,
+    facet_start_x: float,
+    facet_start_y: float,
+    facet_end_x: float,
+    facet_end_y: float,
+    facet_length: float,
+    radius: float,
+) -> float:
+    position = _finite_quadratic_position(
+        parameter,
+        start_x,
+        start_y,
+        linear_x,
+        linear_y,
+        quadratic_x,
+        quadratic_y,
+    )
+    return (
+        _finite_point_segment_distance_values(
+            position[0],
+            position[1],
+            facet_start_x,
+            facet_start_y,
+            facet_end_x,
+            facet_end_y,
+            facet_length,
+        )
+        - radius
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_bisect_quadratic_capsule_entry(
+    outside_parameter: float,
+    inside_parameter: float,
+    start_x: float,
+    start_y: float,
+    linear_x: float,
+    linear_y: float,
+    quadratic_x: float,
+    quadratic_y: float,
+    facet_start_x: float,
+    facet_start_y: float,
+    facet_end_x: float,
+    facet_end_y: float,
+    facet_length: float,
+    radius: float,
+    time_parameter_budget: float,
+) -> float:
+    for _ in range(64):
+        if inside_parameter - outside_parameter <= time_parameter_budget:
+            break
+        trial = 0.5 * (outside_parameter + inside_parameter)
+        trial_value = _finite_quadratic_capsule_value(
+            trial,
+            start_x,
+            start_y,
+            linear_x,
+            linear_y,
+            quadratic_x,
+            quadratic_y,
+            facet_start_x,
+            facet_start_y,
+            facet_end_x,
+            facet_end_y,
+            facet_length,
+            radius,
+        )
+        if trial_value <= 0.0:
+            inside_parameter = trial
+        else:
+            outside_parameter = trial
+    return inside_parameter
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_quadratic_bracketed_entry(
+    lower: float,
+    midpoint: float,
+    upper: float,
+    lower_value: float,
+    midpoint_value: float,
+    upper_value: float,
+    start_x: float,
+    start_y: float,
+    linear_x: float,
+    linear_y: float,
+    quadratic_x: float,
+    quadratic_y: float,
+    facet_start_x: float,
+    facet_start_y: float,
+    facet_end_x: float,
+    facet_end_y: float,
+    facet_length: float,
+    radius: float,
+    position_budget: float,
+    time_parameter_budget: float,
+) -> float:
+    inside_parameter = midpoint if midpoint_value <= position_budget else math.inf
+    bracket_lower = lower
+    if not math.isfinite(inside_parameter) and upper_value <= position_budget:
+        inside_parameter = upper
+        bracket_lower = midpoint
+    if not math.isfinite(inside_parameter):
+        return math.inf
+    outside_value = _finite_quadratic_capsule_value(
+        bracket_lower,
+        start_x,
+        start_y,
+        linear_x,
+        linear_y,
+        quadratic_x,
+        quadratic_y,
+        facet_start_x,
+        facet_start_y,
+        facet_end_x,
+        facet_end_y,
+        facet_length,
+        radius,
+    )
+    if lower_value <= position_budget and outside_value <= position_budget:
+        return math.inf
+    return _finite_bisect_quadratic_capsule_entry(
+        bracket_lower,
+        inside_parameter,
+        start_x,
+        start_y,
+        linear_x,
+        linear_y,
+        quadratic_x,
+        quadratic_y,
+        facet_start_x,
+        facet_start_y,
+        facet_end_x,
+        facet_end_y,
+        facet_length,
+        radius,
+        time_parameter_budget,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_quadratic_capsule_interval(
+    lower: float,
+    upper: float,
+    start_x: float,
+    start_y: float,
+    linear_x: float,
+    linear_y: float,
+    quadratic_x: float,
+    quadratic_y: float,
+    facet_start_x: float,
+    facet_start_y: float,
+    facet_end_x: float,
+    facet_end_y: float,
+    facet_length: float,
+    radius: float,
+    position_budget: float,
+    time_parameter_budget: float,
+    skip_start: bool,
+) -> tuple[int, float]:
+    bounds = _finite_quadratic_interval_bounds(
+        lower, upper, start_x, start_y, linear_x, linear_y, quadratic_x, quadratic_y
+    )
+    lower_distance = _finite_segment_aabb_distance(
+        facet_start_x,
+        facet_start_y,
+        facet_end_x,
+        facet_end_y,
+        bounds[0],
+        bounds[1],
+        bounds[2],
+        bounds[3],
+    )
+    if lower_distance > radius + position_budget:
+        return 0, 0.0
+    midpoint = 0.5 * (lower + upper)
+    lower_value = _finite_quadratic_capsule_value(
+        lower,
+        start_x,
+        start_y,
+        linear_x,
+        linear_y,
+        quadratic_x,
+        quadratic_y,
+        facet_start_x,
+        facet_start_y,
+        facet_end_x,
+        facet_end_y,
+        facet_length,
+        radius,
+    )
+    if lower_value <= position_budget and not (skip_start and lower <= time_parameter_budget):
+        return 1, lower
+    midpoint_value = _finite_quadratic_capsule_value(
+        midpoint,
+        start_x,
+        start_y,
+        linear_x,
+        linear_y,
+        quadratic_x,
+        quadratic_y,
+        facet_start_x,
+        facet_start_y,
+        facet_end_x,
+        facet_end_y,
+        facet_length,
+        radius,
+    )
+    upper_value = _finite_quadratic_capsule_value(
+        upper,
+        start_x,
+        start_y,
+        linear_x,
+        linear_y,
+        quadratic_x,
+        quadratic_y,
+        facet_start_x,
+        facet_start_y,
+        facet_end_x,
+        facet_end_y,
+        facet_length,
+        radius,
+    )
+    entry = _finite_quadratic_bracketed_entry(
+        lower,
+        midpoint,
+        upper,
+        lower_value,
+        midpoint_value,
+        upper_value,
+        start_x,
+        start_y,
+        linear_x,
+        linear_y,
+        quadratic_x,
+        quadratic_y,
+        facet_start_x,
+        facet_start_y,
+        facet_end_x,
+        facet_end_y,
+        facet_length,
+        radius,
+        position_budget,
+        time_parameter_budget,
+    )
+    if math.isfinite(entry) and not (skip_start and entry <= time_parameter_budget):
+        return 1, entry
+    span = math.hypot(bounds[2] - bounds[0], bounds[3] - bounds[1])
+    resolved = upper - lower <= time_parameter_budget or span <= position_budget
+    if resolved:
+        return (0, 0.0) if skip_start and lower <= time_parameter_budget else (-1, 0.0)
+    return 2, midpoint
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_quadratic_capsule_first_parameter(
+    start_x: float,
+    start_y: float,
+    linear_x: float,
+    linear_y: float,
+    quadratic_x: float,
+    quadratic_y: float,
+    facet_start_x: float,
+    facet_start_y: float,
+    facet_end_x: float,
+    facet_end_y: float,
+    facet_length: float,
+    radius: float,
+    position_budget: float,
+    time_parameter_budget: float,
+    skip_start: bool,
+) -> tuple[int, float]:
+    stack_lower = np.empty(80, dtype=np.float64)
+    stack_upper = np.empty(80, dtype=np.float64)
+    stack_lower[0] = 0.0
+    stack_upper[0] = 1.0
+    top = 0
+    work = 0
+    while top >= 0:
+        lower = stack_lower[top]
+        upper = stack_upper[top]
+        top -= 1
+        work += 1
+        if work > 8192:
+            return -1, 0.0
+        decision, parameter = _finite_quadratic_capsule_interval(
+            lower,
+            upper,
+            start_x,
+            start_y,
+            linear_x,
+            linear_y,
+            quadratic_x,
+            quadratic_y,
+            facet_start_x,
+            facet_start_y,
+            facet_end_x,
+            facet_end_y,
+            facet_length,
+            radius,
+            position_budget,
+            time_parameter_budget,
+            skip_start,
+        )
+        if decision < 0:
+            return -1, 0.0
+        if decision == 1:
+            return 1, parameter
+        if decision == 0:
+            continue
+        if top + 2 >= stack_lower.size:
+            return -1, 0.0
+        top += 1
+        stack_lower[top] = parameter
+        stack_upper[top] = upper
+        top += 1
+        stack_lower[top] = lower
+        stack_upper[top] = parameter
+    return 0, 0.0
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_point_segment_distance_values(
+    point_x: float,
+    point_y: float,
+    start_x: float,
+    start_y: float,
+    end_x: float,
+    end_y: float,
+    length: float,
+) -> float:
+    edge_x = end_x - start_x
+    edge_y = end_y - start_y
+    along = ((point_x - start_x) * edge_x + (point_y - start_y) * edge_y) / length
+    parameter = min(max(along / length, 0.0), 1.0)
+    projected_x = start_x + parameter * edge_x
+    projected_y = start_y + parameter * edge_y
+    return math.hypot(point_x - projected_x, point_y - projected_y)
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_segments_intersect(
+    first_start_x: float,
+    first_start_y: float,
+    first_end_x: float,
+    first_end_y: float,
+    second_start_x: float,
+    second_start_y: float,
+    second_end_x: float,
+    second_end_y: float,
+) -> bool:
+    first_x = first_end_x - first_start_x
+    first_y = first_end_y - first_start_y
+    second_x = second_end_x - second_start_x
+    second_y = second_end_y - second_start_y
+    offset_x = second_start_x - first_start_x
+    offset_y = second_start_y - first_start_y
+    denominator = first_x * second_y - first_y * second_x
+    if denominator == 0.0:
+        return False
+    first_parameter = (offset_x * second_y - offset_y * second_x) / denominator
+    second_parameter = (offset_x * first_y - offset_y * first_x) / denominator
+    return 0.0 <= first_parameter <= 1.0 and 0.0 <= second_parameter <= 1.0
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_segment_segment_distance(
+    first_start_x: float,
+    first_start_y: float,
+    first_end_x: float,
+    first_end_y: float,
+    second_start_x: float,
+    second_start_y: float,
+    second_end_x: float,
+    second_end_y: float,
+    second_length: float,
+) -> float:
+    first_length = math.hypot(first_end_x - first_start_x, first_end_y - first_start_y)
+    if _finite_segments_intersect(
+        first_start_x,
+        first_start_y,
+        first_end_x,
+        first_end_y,
+        second_start_x,
+        second_start_y,
+        second_end_x,
+        second_end_y,
+    ):
+        return 0.0
+    return min(
+        _finite_point_segment_distance_values(
+            first_start_x,
+            first_start_y,
+            second_start_x,
+            second_start_y,
+            second_end_x,
+            second_end_y,
+            second_length,
+        ),
+        _finite_point_segment_distance_values(
+            first_end_x,
+            first_end_y,
+            second_start_x,
+            second_start_y,
+            second_end_x,
+            second_end_y,
+            second_length,
+        ),
+        _finite_point_segment_distance_values(
+            second_start_x,
+            second_start_y,
+            first_start_x,
+            first_start_y,
+            first_end_x,
+            first_end_y,
+            first_length,
+        ),
+        _finite_point_segment_distance_values(
+            second_end_x,
+            second_end_y,
+            first_start_x,
+            first_start_y,
+            first_end_x,
+            first_end_y,
+            first_length,
+        ),
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_contact_departure_is_certified(
+    row: int,
+    facet_id: int,
+    radius: float,
+    position_budget: float,
+    start_position_m: FloatArray,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_length_m: FloatArray,
+    roundoff_ulps: int,
+) -> bool:
+    start_x = start_position_m[row, 0]
+    start_y = start_position_m[row, 1]
+    edge_x = facet_end_m[facet_id, 0] - facet_start_m[facet_id, 0]
+    edge_y = facet_end_m[facet_id, 1] - facet_start_m[facet_id, 1]
+    length = facet_length_m[facet_id]
+    tangent_x = edge_x / length
+    tangent_y = edge_y / length
+    along_lower = (
+        (position_lower_m[row, 0] if tangent_x >= 0.0 else position_upper_m[row, 0])
+        - facet_start_m[facet_id, 0]
+    ) * tangent_x + (
+        (position_lower_m[row, 1] if tangent_y >= 0.0 else position_upper_m[row, 1])
+        - facet_start_m[facet_id, 1]
+    ) * tangent_y
+    along_upper = (
+        (position_upper_m[row, 0] if tangent_x >= 0.0 else position_lower_m[row, 0])
+        - facet_start_m[facet_id, 0]
+    ) * tangent_x + (
+        (position_upper_m[row, 1] if tangent_y >= 0.0 else position_lower_m[row, 1])
+        - facet_start_m[facet_id, 1]
+    ) * tangent_y
+    if along_lower <= position_budget or along_upper >= length - position_budget:
+        return False
+    along = (
+        (start_x - facet_start_m[facet_id, 0]) * edge_x
+        + (start_y - facet_start_m[facet_id, 1]) * edge_y
+    ) / (length * length)
+    along = min(max(along, 0.0), 1.0)
+    closest_x = facet_start_m[facet_id, 0] + along * edge_x
+    closest_y = facet_start_m[facet_id, 1] + along * edge_y
+    normal_x = closest_x - start_x
+    normal_y = closest_y - start_y
+    distance = math.hypot(normal_x, normal_y)
+    if distance == 0.0 or abs(distance - radius) > position_budget:
+        return False
+    normal_x /= distance
+    normal_y /= distance
+    maximum_outward_speed = (
+        velocity_upper_m_s[row, 0] if normal_x >= 0.0 else velocity_lower_m_s[row, 0]
+    ) * normal_x + (
+        velocity_upper_m_s[row, 1] if normal_y >= 0.0 else velocity_lower_m_s[row, 1]
+    ) * normal_y
+    speed_scale = max(
+        abs(velocity_lower_m_s[row, 0]),
+        abs(velocity_lower_m_s[row, 1]),
+        abs(velocity_upper_m_s[row, 0]),
+        abs(velocity_upper_m_s[row, 1]),
+    )
+    margin = float(roundoff_ulps) * _FLOAT64_EPS * max(speed_scale, _FLOAT64_EPS)
+    return maximum_outward_speed < -margin
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_curved_facet_decision(
+    row: int,
+    facet_id: int,
+    radius: float,
+    interval_s: float,
+    displacement_x: float,
+    displacement_y: float,
+    chord_deviation: float,
+    start_position_m: FloatArray,
+    end_position_m: FloatArray,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    start_time_s: FloatArray,
+    root_interval_s: FloatArray,
+    certify_start_contact_departure: NDArray[np.bool_],
+    chord_deviation_valid: NDArray[np.bool_],
+    speed_upper_m_s: FloatArray,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> tuple[int, float, float, float, bool]:
+    valid_budget, position_budget, time_budget = _curved_event_budget(
+        facet_length_m[facet_id],
+        geometry_bbox_diagonal_m,
+        start_position_m[row, 0],
+        start_position_m[row, 1],
+        speed_upper_m_s[row],
+        root_interval_s[row],
+        start_time_s[row],
+        geometry_rtol,
+        roundoff_ulps,
+    )
+    if not valid_budget:
+        return -1, 0.0, 0.0, 0.0, False
+    enclosure_distance = _finite_segment_aabb_distance(
+        facet_start_m[facet_id, 0],
+        facet_start_m[facet_id, 1],
+        facet_end_m[facet_id, 0],
+        facet_end_m[facet_id, 1],
+        position_lower_m[row, 0],
+        position_lower_m[row, 1],
+        position_upper_m[row, 0],
+        position_upper_m[row, 1],
+    )
+    if enclosure_distance > radius + position_budget:
+        return 0, 0.0, position_budget, time_budget, False
+    start_distance = _finite_point_segment_distance_values(
+        start_position_m[row, 0],
+        start_position_m[row, 1],
+        facet_start_m[facet_id, 0],
+        facet_start_m[facet_id, 1],
+        facet_end_m[facet_id, 0],
+        facet_end_m[facet_id, 1],
+        facet_length_m[facet_id],
+    )
+    if start_distance < radius - position_budget:
+        return -2, 0.0, position_budget, time_budget, False
+    departing = certify_start_contact_departure[row] and _finite_contact_departure_is_certified(
+        row,
+        facet_id,
+        radius,
+        position_budget,
+        start_position_m,
+        position_lower_m,
+        position_upper_m,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        facet_start_m,
+        facet_end_m,
+        facet_length_m,
+        roundoff_ulps,
+    )
+    if departing:
+        return 0, 0.0, position_budget, time_budget, True
+    if abs(start_distance - radius) <= position_budget:
+        candidate_parameter = 0.0
+    else:
+        candidate_parameter = _finite_line_capsule_first_parameter(
+            start_position_m[row, 0],
+            start_position_m[row, 1],
+            displacement_x,
+            displacement_y,
+            facet_start_m[facet_id, 0],
+            facet_start_m[facet_id, 1],
+            facet_end_m[facet_id, 0],
+            facet_end_m[facet_id, 1],
+            facet_normal[facet_id, 0],
+            facet_normal[facet_id, 1],
+            facet_length_m[facet_id],
+            radius,
+            False,
+            min(time_budget / interval_s, 0.5),
+        )
+    if math.isfinite(candidate_parameter):
+        resolved = chord_deviation_valid[row] and chord_deviation <= position_budget
+        return (1 if resolved else -1), candidate_parameter, position_budget, time_budget, False
+    if not chord_deviation_valid[row]:
+        return -1, 0.0, position_budget, time_budget, False
+    chord_distance = _finite_segment_segment_distance(
+        start_position_m[row, 0],
+        start_position_m[row, 1],
+        end_position_m[row, 0],
+        end_position_m[row, 1],
+        facet_start_m[facet_id, 0],
+        facet_start_m[facet_id, 1],
+        facet_end_m[facet_id, 0],
+        facet_end_m[facet_id, 1],
+        facet_length_m[facet_id],
+    )
+    decision = -1 if chord_distance <= radius + chord_deviation + position_budget else 0
+    return decision, 0.0, position_budget, time_budget, False
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _find_finite_curved_hit(
+    row: int,
+    radius: float,
+    interval_s: float,
+    displacement_x: float,
+    displacement_y: float,
+    chord_deviation: float,
+    start_position_m: FloatArray,
+    end_position_m: FloatArray,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    start_time_s: FloatArray,
+    root_interval_s: FloatArray,
+    certify_start_contact_departure: NDArray[np.bool_],
+    chord_deviation_valid: NDArray[np.bool_],
+    speed_upper_m_s: FloatArray,
+    broad_offsets: Int64Array,
+    broad_candidates: Int64Array,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> tuple[int, bool, float, int, float, float]:
+    best_parameter = math.inf
+    best_facet = -1
+    best_position_budget = 0.0
+    best_time_budget = 0.0
+    need_split = False
+    departing_any = False
+    for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+        facet_id = broad_candidates[offset]
+        if not facet_contact_enabled[facet_id]:
+            continue
+        candidate = _finite_curved_facet_decision(
+            row,
+            facet_id,
+            radius,
+            interval_s,
+            displacement_x,
+            displacement_y,
+            chord_deviation,
+            start_position_m,
+            end_position_m,
+            position_lower_m,
+            position_upper_m,
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            start_time_s,
+            root_interval_s,
+            certify_start_contact_departure,
+            chord_deviation_valid,
+            speed_upper_m_s,
+            geometry_bbox_diagonal_m,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            geometry_rtol,
+            roundoff_ulps,
+        )
+        if candidate[0] == -2:
+            return -2, departing_any, 0.0, -1, 0.0, 0.0
+        if candidate[0] < 0:
+            need_split = True
+        departing_any = departing_any or candidate[4]
+        earlier = candidate[1] < best_parameter or (
+            candidate[1] == best_parameter and facet_id < best_facet
+        )
+        if candidate[0] > 0 and earlier:
+            best_parameter = candidate[1]
+            best_facet = facet_id
+            best_position_budget = candidate[2]
+            best_time_budget = candidate[3]
+    if need_split:
+        return -1, departing_any, 0.0, -1, 0.0, 0.0
+    return (
+        1 if best_facet >= 0 else 0,
+        departing_any,
+        best_parameter,
+        best_facet,
+        best_position_budget,
+        best_time_budget,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _commit_finite_curved_hit(
+    row: int,
+    radius: float,
+    wall_time: float,
+    hit_x: float,
+    hit_y: float,
+    best_facet: int,
+    position_budget: float,
+    time_budget: float,
+    chord_deviation: float,
+    broad_offsets: Int64Array,
+    broad_candidates: Int64Array,
+    selected_candidates: Int64Array,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    status: UInt8Array,
+    failure_reason: UInt8Array,
+    event_time_s: FloatArray,
+    hit_position_m: FloatArray,
+    primary_facet_id: Int64Array,
+    normal: FloatArray,
+    position_budget_m: FloatArray,
+    time_budget_s: FloatArray,
+    localization_residual_m: FloatArray,
+) -> int:
+    status[row] = CURVED_STATUS_WALL
+    failure_reason[row] = CURVED_FAILURE_NONE
+    event_time_s[row] = wall_time
+    hit_position_m[row, 0] = hit_x
+    hit_position_m[row, 1] = hit_y
+    primary_facet_id[row] = best_facet
+    normal[row, 0] = facet_normal[best_facet, 0]
+    normal[row, 1] = facet_normal[best_facet, 1]
+    position_budget_m[row] = position_budget
+    time_budget_s[row] = time_budget
+    primary_distance = _finite_point_segment_distance_values(
+        hit_x,
+        hit_y,
+        facet_start_m[best_facet, 0],
+        facet_start_m[best_facet, 1],
+        facet_end_m[best_facet, 0],
+        facet_end_m[best_facet, 1],
+        facet_length_m[best_facet],
+    )
+    localization_residual_m[row] = max(abs(primary_distance - radius), chord_deviation)
+    count = 0
+    for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+        facet_id = broad_candidates[offset]
+        if facet_contact_enabled[facet_id]:
+            distance = _finite_point_segment_distance_values(
+                hit_x,
+                hit_y,
+                facet_start_m[facet_id, 0],
+                facet_start_m[facet_id, 1],
+                facet_end_m[facet_id, 0],
+                facet_end_m[facet_id, 1],
+                facet_length_m[facet_id],
+            )
+            if abs(distance - radius) <= position_budget + chord_deviation:
+                selected_candidates[offset] = facet_id
+                count += 1
+                continue
+        selected_candidates[offset] = -1
+    return count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _locate_finite_curved_events_kernel(
+    axisymmetric_rz: bool,
+    contact_radius_m: FloatArray,
+    start_position_m: FloatArray,
+    start_velocity_m_s: FloatArray,
+    end_position_m: FloatArray,
+    end_velocity_m_s: FloatArray,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    root_interval_s: FloatArray,
+    certify_start_contact_departure: NDArray[np.bool_],
+    chord_deviation_m: FloatArray,
+    chord_deviation_valid: NDArray[np.bool_],
+    speed_upper_m_s: FloatArray,
+    ready: NDArray[np.bool_],
+    broad_offsets: Int64Array,
+    broad_candidates: Int64Array,
+    selected_candidates: Int64Array,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    geometry_rtol: float,
+    roundoff_ulps: int,
+    status: UInt8Array,
+    failure_reason: UInt8Array,
+    departure_certified: NDArray[np.bool_],
+    event_time_s: FloatArray,
+    hit_position_m: FloatArray,
+    primary_facet_id: Int64Array,
+    normal: FloatArray,
+    position_budget_m: FloatArray,
+    time_budget_s: FloatArray,
+    localization_residual_m: FloatArray,
+    event_candidate_count: Int64Array,
+) -> None:
+    for row in range(contact_radius_m.size):
+        radius = contact_radius_m[row]
+        if radius <= 0.0:
+            continue
+        for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+            selected_candidates[offset] = -1
+        event_candidate_count[row] = 0
+        departure_certified[row] = False
+        if not ready[row]:
+            status[row] = CURVED_STATUS_FAILURE
+            failure_reason[row] = CURVED_FAILURE_INDETERMINATE_EVENT
+            continue
+
+        axis = (CURVED_STATUS_CLEAR, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        if axisymmetric_rz:
+            axis = _curved_axis_decision(
+                row,
+                start_position_m,
+                start_velocity_m_s,
+                end_position_m,
+                end_velocity_m_s,
+                position_lower_m,
+                position_upper_m,
+                velocity_lower_m_s,
+                velocity_upper_m_s,
+                start_time_s,
+                target_time_s,
+                root_interval_s,
+                chord_deviation_m,
+                chord_deviation_valid,
+                speed_upper_m_s,
+                geometry_bbox_diagonal_m,
+                geometry_rtol,
+                roundoff_ulps,
+            )
+        if axis[0] == CURVED_STATUS_FAILURE:
+            status[row] = CURVED_STATUS_FAILURE
+            failure_reason[row] = CURVED_FAILURE_INDETERMINATE_EVENT
+            continue
+        if axis[0] == CURVED_STATUS_SPLIT:
+            status[row] = CURVED_STATUS_SPLIT
+            failure_reason[row] = CURVED_FAILURE_NONE
+            continue
+
+        interval_s = target_time_s[row] - start_time_s[row]
+        displacement_x = end_position_m[row, 0] - start_position_m[row, 0]
+        displacement_y = end_position_m[row, 1] - start_position_m[row, 1]
+        chord_deviation = _curved_hypot2(chord_deviation_m[row, 0], chord_deviation_m[row, 1])
+        hit = _find_finite_curved_hit(
+            row,
+            radius,
+            interval_s,
+            displacement_x,
+            displacement_y,
+            chord_deviation,
+            start_position_m,
+            end_position_m,
+            position_lower_m,
+            position_upper_m,
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            start_time_s,
+            root_interval_s,
+            certify_start_contact_departure,
+            chord_deviation_valid,
+            speed_upper_m_s,
+            broad_offsets,
+            broad_candidates,
+            geometry_bbox_diagonal_m,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            facet_contact_enabled,
+            geometry_rtol,
+            roundoff_ulps,
+        )
+        departure_certified[row] = hit[1]
+        if hit[0] == -2:
+            status[row] = CURVED_STATUS_FAILURE
+            failure_reason[row] = CURVED_FAILURE_INDETERMINATE_EVENT
+            continue
+        if hit[0] < 0:
+            status[row] = CURVED_STATUS_SPLIT
+            failure_reason[row] = CURVED_FAILURE_NONE
+            continue
+        wall_hit = hit[0] > 0
+        axis_hit = axis[0] == CURVED_STATUS_AXIS
+        wall_time = start_time_s[row] + hit[2] * interval_s if wall_hit else math.inf
+        choose_wall = wall_hit and (not axis_hit or wall_time - hit[5] <= axis[1] + axis[5])
+        if choose_wall:
+            hit_x = start_position_m[row, 0] + hit[2] * displacement_x
+            hit_y = start_position_m[row, 1] + hit[2] * displacement_y
+            event_candidate_count[row] = _commit_finite_curved_hit(
+                row,
+                radius,
+                wall_time,
+                hit_x,
+                hit_y,
+                hit[3],
+                hit[4],
+                hit[5],
+                chord_deviation,
+                broad_offsets,
+                broad_candidates,
+                selected_candidates,
+                facet_start_m,
+                facet_end_m,
+                facet_normal,
+                facet_length_m,
+                facet_contact_enabled,
+                status,
+                failure_reason,
+                event_time_s,
+                hit_position_m,
+                primary_facet_id,
+                normal,
+                position_budget_m,
+                time_budget_s,
+                localization_residual_m,
+            )
+        elif axis_hit:
+            status[row] = CURVED_STATUS_AXIS
+            failure_reason[row] = CURVED_FAILURE_NONE
+            event_time_s[row] = axis[1]
+            hit_position_m[row, 0] = axis[2]
+            hit_position_m[row, 1] = axis[3]
+            position_budget_m[row] = axis[4]
+            time_budget_s[row] = axis[5]
+            localization_residual_m[row] = axis[6]
+        else:
+            status[row] = CURVED_STATUS_CLEAR
+            failure_reason[row] = CURVED_FAILURE_NONE
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_exact_contact_departure_is_certified(
+    row: int,
+    facet_id: int,
+    radius: float,
+    position_budget: float,
+    start_position_m: FloatArray,
+    linear_displacement_m: FloatArray,
+    quadratic_displacement_m: FloatArray,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_length_m: FloatArray,
+    roundoff_ulps: int,
+) -> bool:
+    """Prove one start-contact capsule is left throughout this exact interval."""
+
+    start_x = start_position_m[row, 0]
+    start_y = start_position_m[row, 1]
+    linear_x = linear_displacement_m[row, 0]
+    linear_y = linear_displacement_m[row, 1]
+    quadratic_x = quadratic_displacement_m[row, 0]
+    quadratic_y = quadratic_displacement_m[row, 1]
+    edge_x = facet_end_m[facet_id, 0] - facet_start_m[facet_id, 0]
+    edge_y = facet_end_m[facet_id, 1] - facet_start_m[facet_id, 1]
+    length = facet_length_m[facet_id]
+    along = (
+        (start_x - facet_start_m[facet_id, 0]) * edge_x
+        + (start_y - facet_start_m[facet_id, 1]) * edge_y
+    ) / (length * length)
+    # A capsule is convex.  Its closest-point normal defines a supporting
+    # plane for both the segment interior and either spherical end cap.
+    # Strict motion away from that plane throughout the quadratic interval
+    # certifies departure without suppressing a later approach to another
+    # facet.  Restricting this proof to interior projections incorrectly
+    # repeated a just-committed end-cap contact at zero residual time.
+    along = min(1.0, max(0.0, along))
+    closest_x = facet_start_m[facet_id, 0] + along * edge_x
+    closest_y = facet_start_m[facet_id, 1] + along * edge_y
+    normal_x = closest_x - start_x
+    normal_y = closest_y - start_y
+    distance = math.hypot(normal_x, normal_y)
+    if distance == 0.0 or abs(distance - radius) > position_budget:
+        return False
+    normal_x /= distance
+    normal_y /= distance
+
+    start_normal_motion = linear_x * normal_x + linear_y * normal_y
+    end_normal_motion = (linear_x + 2.0 * quadratic_x) * normal_x + (
+        linear_y + 2.0 * quadratic_y
+    ) * normal_y
+    motion_scale = max(
+        math.hypot(linear_x, linear_y),
+        math.hypot(linear_x + 2.0 * quadratic_x, linear_y + 2.0 * quadratic_y),
+    )
+    margin = float(roundoff_ulps) * _FLOAT64_EPS * max(motion_scale, _FLOAT64_EPS)
+    if max(start_normal_motion, end_normal_motion) < -margin:
+        return True
+    return start_normal_motion == 0.0 and end_normal_motion <= 0.0
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _finite_exact_facet_hit_parameter(
+    row: int,
+    facet_id: int,
+    radius: float,
+    interval_s: float,
+    path_kind: UInt8Array,
+    start_position_m: FloatArray,
+    start_time_s: FloatArray,
+    departing_facet_id: Int64Array,
+    linear_displacement_m: FloatArray,
+    quadratic_displacement_m: FloatArray,
+    speed_m_s: FloatArray,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> tuple[int, float, float, float]:
+    valid_budget, budget, time_budget = _exact_event_budget(
+        facet_length_m[facet_id],
+        geometry_bbox_diagonal_m,
+        start_position_m[row, 0],
+        start_position_m[row, 1],
+        speed_m_s[row],
+        interval_s,
+        start_time_s[row],
+        geometry_rtol,
+        roundoff_ulps,
+    )
+    if not valid_budget:
+        return -1, 0.0, 0.0, 0.0
+    parameter_budget = min(time_budget / interval_s, 0.5)
+    departure_reference = departing_facet_id[row]
+    skip_start = departure_reference == facet_id
+    if departure_reference == EXACT_DEPARTURE_FINITE_CONTACT_SET:
+        contact_departure_is_certified = _finite_exact_contact_departure_is_certified(
+            row,
+            facet_id,
+            radius,
+            budget,
+            start_position_m,
+            linear_displacement_m,
+            quadratic_displacement_m,
+            facet_start_m,
+            facet_end_m,
+            facet_length_m,
+            roundoff_ulps,
+        )
+        if contact_departure_is_certified:
+            return 0, 0.0, budget, time_budget
+    if path_kind[row] == EXACT_PATH_LINEAR:
+        parameter = _finite_line_capsule_first_parameter(
+            start_position_m[row, 0],
+            start_position_m[row, 1],
+            linear_displacement_m[row, 0],
+            linear_displacement_m[row, 1],
+            facet_start_m[facet_id, 0],
+            facet_start_m[facet_id, 1],
+            facet_end_m[facet_id, 0],
+            facet_end_m[facet_id, 1],
+            facet_normal[facet_id, 0],
+            facet_normal[facet_id, 1],
+            facet_length_m[facet_id],
+            radius,
+            skip_start,
+            parameter_budget,
+        )
+        return (1 if math.isfinite(parameter) else 0), parameter, budget, time_budget
+    status, parameter = _finite_quadratic_capsule_first_parameter(
+        start_position_m[row, 0],
+        start_position_m[row, 1],
+        linear_displacement_m[row, 0],
+        linear_displacement_m[row, 1],
+        quadratic_displacement_m[row, 0],
+        quadratic_displacement_m[row, 1],
+        facet_start_m[facet_id, 0],
+        facet_start_m[facet_id, 1],
+        facet_end_m[facet_id, 0],
+        facet_end_m[facet_id, 1],
+        facet_length_m[facet_id],
+        radius,
+        budget,
+        parameter_budget,
+        skip_start,
+    )
+    return status, parameter, budget, time_budget
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _find_finite_exact_hit(
+    row: int,
+    radius: float,
+    interval_s: float,
+    path_kind: UInt8Array,
+    start_position_m: FloatArray,
+    start_time_s: FloatArray,
+    departing_facet_id: Int64Array,
+    linear_displacement_m: FloatArray,
+    quadratic_displacement_m: FloatArray,
+    speed_m_s: FloatArray,
+    broad_offsets: Int64Array,
+    broad_candidates: Int64Array,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> tuple[int, float, int, float, float]:
+    best_parameter = math.inf
+    best_facet = -1
+    best_position_budget = 0.0
+    best_time_budget = 0.0
+    for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+        facet_id = broad_candidates[offset]
+        if not facet_contact_enabled[facet_id]:
+            continue
+        candidate = _finite_exact_facet_hit_parameter(
+            row,
+            facet_id,
+            radius,
+            interval_s,
+            path_kind,
+            start_position_m,
+            start_time_s,
+            departing_facet_id,
+            linear_displacement_m,
+            quadratic_displacement_m,
+            speed_m_s,
+            geometry_bbox_diagonal_m,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            geometry_rtol,
+            roundoff_ulps,
+        )
+        if candidate[0] < 0:
+            return -1, 0.0, -1, 0.0, 0.0
+        earlier = candidate[1] < best_parameter or (
+            candidate[1] == best_parameter and facet_id < best_facet
+        )
+        if candidate[0] > 0 and earlier:
+            best_parameter = candidate[1]
+            best_facet = facet_id
+            best_position_budget = candidate[2]
+            best_time_budget = candidate[3]
+    return (
+        (1 if best_facet >= 0 else 0),
+        best_parameter,
+        best_facet,
+        best_position_budget,
+        best_time_budget,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _commit_finite_exact_hit(
+    row: int,
+    radius: float,
+    contact_time: float,
+    hit_x: float,
+    hit_y: float,
+    best_facet: int,
+    position_budget: float,
+    time_budget: float,
+    broad_offsets: Int64Array,
+    broad_candidates: Int64Array,
+    selected_candidates: Int64Array,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    status: UInt8Array,
+    failure_reason: UInt8Array,
+    event_time_s: FloatArray,
+    hit_position_m: FloatArray,
+    primary_facet_id: Int64Array,
+    normal: FloatArray,
+    position_budget_m: FloatArray,
+    time_budget_s: FloatArray,
+    localization_residual_m: FloatArray,
+) -> int:
+    status[row] = EXACT_STATUS_WALL
+    failure_reason[row] = EXACT_FAILURE_NONE
+    event_time_s[row] = contact_time
+    hit_position_m[row, 0] = hit_x
+    hit_position_m[row, 1] = hit_y
+    primary_facet_id[row] = best_facet
+    normal[row, 0] = facet_normal[best_facet, 0]
+    normal[row, 1] = facet_normal[best_facet, 1]
+    position_budget_m[row] = position_budget
+    time_budget_s[row] = time_budget
+    primary_distance = _finite_point_segment_distance_values(
+        hit_x,
+        hit_y,
+        facet_start_m[best_facet, 0],
+        facet_start_m[best_facet, 1],
+        facet_end_m[best_facet, 0],
+        facet_end_m[best_facet, 1],
+        facet_length_m[best_facet],
+    )
+    localization_residual_m[row] = abs(primary_distance - radius)
+    count = 0
+    for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+        facet_id = broad_candidates[offset]
+        if facet_contact_enabled[facet_id]:
+            distance = _finite_point_segment_distance_values(
+                hit_x,
+                hit_y,
+                facet_start_m[facet_id, 0],
+                facet_start_m[facet_id, 1],
+                facet_end_m[facet_id, 0],
+                facet_end_m[facet_id, 1],
+                facet_length_m[facet_id],
+            )
+            if abs(distance - radius) <= position_budget:
+                selected_candidates[offset] = facet_id
+                count += 1
+                continue
+        selected_candidates[offset] = -1
+    return count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _locate_finite_exact_events_kernel(
+    axisymmetric_rz: bool,
+    contact_radius_m: FloatArray,
+    path_kind: UInt8Array,
+    start_position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    departing_facet_id: Int64Array,
+    linear_displacement_m: FloatArray,
+    quadratic_displacement_m: FloatArray,
+    speed_m_s: FloatArray,
+    ready: NDArray[np.bool_],
+    broad_offsets: Int64Array,
+    broad_candidates: Int64Array,
+    selected_candidates: Int64Array,
+    geometry_bbox_diagonal_m: float,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    geometry_rtol: float,
+    roundoff_ulps: int,
+    status: UInt8Array,
+    failure_reason: UInt8Array,
+    event_time_s: FloatArray,
+    hit_position_m: FloatArray,
+    primary_facet_id: Int64Array,
+    normal: FloatArray,
+    position_budget_m: FloatArray,
+    time_budget_s: FloatArray,
+    localization_residual_m: FloatArray,
+    simultaneous_count: Int64Array,
+) -> None:
+    for row in range(contact_radius_m.size):
+        radius = contact_radius_m[row]
+        if radius <= 0.0:
+            continue
+        for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+            selected_candidates[offset] = -1
+        simultaneous_count[row] = 0
+        if not ready[row]:
+            status[row] = EXACT_STATUS_FAILURE
+            continue
+        interval_s = target_time_s[row] - start_time_s[row]
+        hit = _find_finite_exact_hit(
+            row,
+            radius,
+            interval_s,
+            path_kind,
+            start_position_m,
+            start_time_s,
+            departing_facet_id,
+            linear_displacement_m,
+            quadratic_displacement_m,
+            speed_m_s,
+            broad_offsets,
+            broad_candidates,
+            geometry_bbox_diagonal_m,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            facet_contact_enabled,
+            geometry_rtol,
+            roundoff_ulps,
+        )
+        if hit[0] < 0:
+            status[row] = EXACT_STATUS_FAILURE
+            failure_reason[row] = EXACT_FAILURE_INDETERMINATE_EVENT
+            continue
+        existing_axis = status[row] == EXACT_STATUS_AXIS
+        if hit[0] == 0:
+            if not existing_axis:
+                status[row] = EXACT_STATUS_CLEAR
+                failure_reason[row] = EXACT_FAILURE_NONE
+            continue
+        contact_time = start_time_s[row] + hit[1] * interval_s
+        if existing_axis and event_time_s[row] + time_budget_s[row] < contact_time:
+            continue
+        hit_x, hit_y = _finite_quadratic_position(
+            hit[1],
+            start_position_m[row, 0],
+            start_position_m[row, 1],
+            linear_displacement_m[row, 0],
+            linear_displacement_m[row, 1],
+            quadratic_displacement_m[row, 0],
+            quadratic_displacement_m[row, 1],
+        )
+        simultaneous_count[row] = _commit_finite_exact_hit(
+            row,
+            radius,
+            contact_time,
+            hit_x,
+            hit_y,
+            hit[2],
+            hit[3],
+            hit[4],
+            broad_offsets,
+            broad_candidates,
+            selected_candidates,
+            facet_start_m,
+            facet_end_m,
+            facet_normal,
+            facet_length_m,
+            facet_contact_enabled,
+            status,
+            failure_reason,
+            event_time_s,
+            hit_position_m,
+            primary_facet_id,
+            normal,
+            position_budget_m,
+            time_budget_s,
+            localization_residual_m,
+        )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _arbitrate_exact_topology_events_kernel(
+    contact_radius_m: FloatArray,
+    finite_contact_enabled: NDArray[np.bool_],
+    point_offsets: Int64Array,
+    point_candidates: Int64Array,
+    point_status: UInt8Array,
+    point_failure_reason: UInt8Array,
+    point_time_s: FloatArray,
+    point_position_m: FloatArray,
+    point_primary_facet_id: Int64Array,
+    point_normal: FloatArray,
+    point_position_budget_m: FloatArray,
+    point_time_budget_s: FloatArray,
+    point_residual_m: FloatArray,
+    point_candidate_count: Int64Array,
+    status: UInt8Array,
+    failure_reason: UInt8Array,
+    event_time_s: FloatArray,
+    hit_position_m: FloatArray,
+    primary_facet_id: Int64Array,
+    normal: FloatArray,
+    position_budget_m: FloatArray,
+    time_budget_s: FloatArray,
+    localization_residual_m: FloatArray,
+    candidate_count: Int64Array,
+    use_point_candidates: NDArray[np.bool_],
+) -> None:
+    """Choose material-capsule or topology-centre first events per row."""
+
+    for row in range(contact_radius_m.size):
+        if contact_radius_m[row] <= 0.0:
+            continue
+        point_has_topology = _has_topology_candidate(
+            row,
+            point_offsets,
+            point_candidates,
+            finite_contact_enabled,
+        )
+        if point_status[row] == EXACT_STATUS_FAILURE:
+            status[row] = EXACT_STATUS_FAILURE
+            failure_reason[row] = point_failure_reason[row]
+            candidate_count[row] = 0
+            continue
+        if point_status[row] != EXACT_STATUS_WALL or not point_has_topology:
+            continue
+        choose_point = False
+        precedence = 1
+        if status[row] == EXACT_STATUS_CLEAR:
+            choose_point = True
+        elif status[row] == EXACT_STATUS_FAILURE:
+            continue
+        else:
+            precedence = _event_interval_precedence(
+                point_time_s[row],
+                point_time_budget_s[row],
+                event_time_s[row],
+                time_budget_s[row],
+            )
+            choose_point = precedence < 0
+        if not choose_point and precedence == 0:
+            status[row] = EXACT_STATUS_FAILURE
+            failure_reason[row] = EXACT_FAILURE_INDETERMINATE_EVENT
+            primary_facet_id[row] = -1
+            candidate_count[row] = 0
+            continue
+        if not choose_point:
+            continue
+        status[row] = point_status[row]
+        failure_reason[row] = point_failure_reason[row]
+        event_time_s[row] = point_time_s[row]
+        hit_position_m[row, 0] = point_position_m[row, 0]
+        hit_position_m[row, 1] = point_position_m[row, 1]
+        primary_facet_id[row] = point_primary_facet_id[row]
+        normal[row, 0] = point_normal[row, 0]
+        normal[row, 1] = point_normal[row, 1]
+        position_budget_m[row] = point_position_budget_m[row]
+        time_budget_s[row] = point_time_budget_s[row]
+        localization_residual_m[row] = point_residual_m[row]
+        candidate_count[row] = point_candidate_count[row]
+        use_point_candidates[row] = True
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _merge_exact_topology_contact_candidates_kernel(
+    contact_radius_m: FloatArray,
+    use_point_candidates: NDArray[np.bool_],
+    point_offsets: Int64Array,
+    point_candidates: Int64Array,
+    broad_offsets: Int64Array,
+    selected_candidates: Int64Array,
+    output_offsets: Int64Array,
+    output_candidates: Int64Array,
+) -> None:
+    for row in range(contact_radius_m.size):
+        write = output_offsets[row]
+        if contact_radius_m[row] == 0.0 or use_point_candidates[row]:
+            for offset in range(point_offsets[row], point_offsets[row + 1]):
+                output_candidates[write] = point_candidates[offset]
+                write += 1
+        else:
+            for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+                if selected_candidates[offset] >= 0:
+                    output_candidates[write] = selected_candidates[offset]
+                    write += 1
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _merge_exact_contact_candidates_kernel(
+    contact_radius_m: FloatArray,
+    point_offsets: Int64Array,
+    point_candidates: Int64Array,
+    broad_offsets: Int64Array,
+    selected_candidates: Int64Array,
+    output_offsets: Int64Array,
+    output_candidates: Int64Array,
+) -> None:
+    """Preserve the allocation-free no-topology candidate packing path."""
+
+    for row in range(contact_radius_m.size):
+        write = output_offsets[row]
+        if contact_radius_m[row] == 0.0:
+            for offset in range(point_offsets[row], point_offsets[row + 1]):
+                output_candidates[write] = point_candidates[offset]
+                write += 1
+        else:
+            for offset in range(broad_offsets[row], broad_offsets[row + 1]):
+                if selected_candidates[offset] >= 0:
+                    output_candidates[write] = selected_candidates[offset]
+                    write += 1
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _locate_exact_events_kernel(
     axisymmetric_rz: bool,
     path_kind: UInt8Array,
@@ -4928,6 +7814,7 @@ def _locate_exact_events_kernel(
     facet_normal: FloatArray,
     facet_length_m: FloatArray,
     facet_node_ids: Int64Array,
+    facet_contact_enabled: NDArray[np.bool_],
     geometry_rtol: float,
     roundoff_ulps: int,
     status: UInt8Array,
@@ -4992,6 +7879,7 @@ def _locate_exact_events_kernel(
             facet_end_m,
             facet_length_m,
             facet_node_ids,
+            facet_contact_enabled,
             geometry_rtol,
             roundoff_ulps,
         )
@@ -5031,6 +7919,7 @@ def _fill_exact_event_candidates_kernel(
     facet_start_m: FloatArray,
     facet_end_m: FloatArray,
     facet_length_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
     geometry_rtol: float,
     roundoff_ulps: int,
     status: UInt8Array,
@@ -5048,7 +7937,17 @@ def _fill_exact_event_candidates_kernel(
         interval_s = target_time_s[row] - start_time_s[row]
         for offset in range(broad_offsets[row], broad_offsets[row + 1]):
             facet_id = broad_candidates[offset]
-            if facet_id == departing_facet_id[row]:
+            if (
+                _is_same_departing_support(
+                    facet_id,
+                    departing_facet_id[row],
+                    start_position_m[row, 0],
+                    start_position_m[row, 1],
+                    facet_start_m,
+                    facet_end_m,
+                )
+                or not facet_contact_enabled[facet_id]
+            ):
                 continue
             hit = _exact_facet_hit(
                 path_kind[row],
@@ -5072,7 +7971,7 @@ def _fill_exact_event_candidates_kernel(
                 geometry_rtol,
                 roundoff_ulps,
             )
-            if hit[1] and _is_simultaneous_exact_hit(
+            if hit[1] and _hits_are_simultaneous(
                 hit[2],
                 hit[3],
                 hit[4],

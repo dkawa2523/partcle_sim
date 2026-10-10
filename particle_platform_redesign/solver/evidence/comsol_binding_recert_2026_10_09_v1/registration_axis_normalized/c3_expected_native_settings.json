@@ -1,0 +1,79 @@
+{
+  "coordinate_dof": {
+    "IncludeOutOfPlane": "0"
+  },
+  "formulation": {
+    "Formulation": [
+      "NewtonianFirstOrder"
+    ]
+  },
+  "source": {
+    "diameter_m": 1e-07
+  },
+  "units": {
+    "resolved_beta_unit": "kg/s",
+    "resolved_viscosity_unit": "kg/(m*s)"
+  },
+  "boundaries": {
+    "axi1": {
+      "boundary_ids": [
+        5
+      ],
+      "WallCondition": "Bounce"
+    },
+    "outin": {
+      "boundary_ids": [
+        37
+      ],
+      "WallCondition": "Freeze"
+    },
+    "outpump": {
+      "boundary_ids": [
+        35
+      ],
+      "WallCondition": "Disappear"
+    },
+    "wall1": {
+      "boundary_ids": [
+        6,
+        8,
+        28,
+        29,
+        32,
+        33,
+        34,
+        36,
+        38,
+        40,
+        41,
+        45,
+        46,
+        47
+      ],
+      "WallCondition": "Stick"
+    }
+  },
+  "models": {
+    "df1": false,
+    "bf1": false,
+    "lf1": false,
+    "thpf1": false,
+    "auxq": true,
+    "idf": true,
+    "ef1": true,
+    "m3c3Epstein": true,
+    "liftfm": true,
+    "depf": true,
+    "gf1": true,
+    "m3c3HeatFlux": true
+  },
+  "integration": {
+    "odesolvertype": "explicit",
+    "timemethodexp": "erk",
+    "erkorder": 4,
+    "rtol": 1e-08,
+    "WallAccuracyOrder": "1",
+    "StoreExtra": "0",
+    "StoreParticleStatusData": "1"
+  }
+}

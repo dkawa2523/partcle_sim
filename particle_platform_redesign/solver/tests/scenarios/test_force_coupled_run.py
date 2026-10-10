@@ -21,6 +21,7 @@ from chamber_particles.case_format import (
     GeometryData,
     P1TriLayout,
     Q1QuadLayout,
+    RealizedSurfaceSource,
     RegularLayout,
     write,
 )
@@ -39,6 +40,8 @@ _SIGNED_AGGREGATE_CHARGE_REVISION = "aggregate_relative_drift_regularized_three_
 _BARNES_ION_DRAG_REVISION = (
     "barnes_collisionless_effective_speed_single_positive_ion_negative_debye_huckel_v1"
 )
+_CURVED_CORNER_HIT_TIME_S = 0.75
+_CURVED_CORNER_ACCELERATION_X_M_S2 = np.asarray([-1.0, -1.0], dtype="<f8")
 
 
 @pytest.mark.parametrize(
@@ -98,7 +101,7 @@ def test_force_coupled_microcases_match_analytic_time_series(
     np.testing.assert_array_equal(final.charge_number, expected["charge_number"][-1])
     assert result.read_boundary_events().particle_id.size == 0
     assert result.manifest["field_location_revision"] == "field_location_v4"
-    assert result.manifest["required_field_revision"] == "required_field_rz_axis_domain_regular_v3"
+    assert result.manifest["required_field_revision"] == "required_field_time_linear_v6"
     expected_enclosure_revision = (
         "rk4_global_abs_enclosure_v2" if path_kind == "rk4_dense" else None
     )
@@ -635,7 +638,7 @@ def test_exponential_midpoint_uses_local_enclosure_for_unused_extreme_cell(
     assert np.isfinite(final.velocity_m_s).all()
     assert np.isfinite(final.charge_number).all()
     memory_plan = result.manifest["memory_plan"]
-    assert memory_plan["revision"] == "solver_owned_memory_plan_v14"
+    assert memory_plan["revision"] == "solver_owned_memory_plan_v16"
     assert memory_plan["certificate_work_bytes_per_particle"] == 544
     assert memory_plan["components"]["slab_certificate_work"] == (
         544 * memory_plan["slab_particles"]
@@ -916,6 +919,7 @@ def test_safe_nonuniform_regular_field_uses_general_rk4_enclosure(tmp_path: Path
         charge_number=original.charge_number[:1].copy(),
         mass_kg=original.mass_kg[:1].copy(),
         drag_diameter_m=original.drag_diameter_m[:1].copy(),
+        contact_radius_m=original.contact_radius_m[:1].copy(),
         electrostatic_radius_m=original.electrostatic_radius_m[:1].copy(),
         displaced_volume_m3=original.displaced_volume_m3[:1].copy(),
         model_weight=original.model_weight[:1].copy(),
@@ -1658,6 +1662,149 @@ def test_general_rk4_residual_cap_splits_only_when_another_hit_exists(
     assert outputs[1].manifest["boundary_interactions"]["residual_splits"] > 0
 
 
+@pytest.mark.parametrize(
+    ("integrator", "path_kind"),
+    [
+        ("rk4_fixed", "rk4_dense"),
+        ("exponential_midpoint", "exponential_midpoint_reintegrated"),
+    ],
+)
+def test_curved_integrators_preserve_corner_candidates_for_boundary_resolution(
+    tmp_path: Path,
+    integrator: str,
+    path_kind: str,
+) -> None:
+    case_path = _curved_c10_case(tmp_path / integrator, integrator=integrator)
+    output = tmp_path / f"c10-{integrator}"
+
+    simulate(load_case(case_path), output)
+    result = open_result(output)
+    events = result.read_boundary_events()
+    frames = list(result.iter_frames())
+
+    hit_time_s = _CURVED_CORNER_HIT_TIME_S
+    acceleration_x_m_s2 = _CURVED_CORNER_ACCELERATION_X_M_S2
+    initial_velocity_x_m_s = -0.5 * acceleration_x_m_s2 * hit_time_s
+    midpoint_s = 0.5 * hit_time_s
+    midpoint_displacement_m = (
+        initial_velocity_x_m_s * midpoint_s + 0.5 * acceleration_x_m_s2 * midpoint_s * midpoint_s
+    )
+    midpoint_velocity_x_m_s = initial_velocity_x_m_s + acceleration_x_m_s2 * midpoint_s
+    hit_displacement_m = (
+        initial_velocity_x_m_s * hit_time_s + 0.5 * acceleration_x_m_s2 * hit_time_s * hit_time_s
+    )
+    hit_velocity_x_m_s = initial_velocity_x_m_s + acceleration_x_m_s2 * hit_time_s
+
+    # The constant acceleration sampled in both disconnected domains produces
+    # genuinely curved paths that return to both apexes at t=0.75 s. The field
+    # remains spatially nonuniform in the geometry-free gap between them.
+    np.testing.assert_allclose(midpoint_displacement_m, [0.0703125, 0.0703125])
+    np.testing.assert_array_equal(acceleration_x_m_s2, [-1.0, -1.0])
+    np.testing.assert_allclose(hit_displacement_m, 0.0, rtol=0.0, atol=0.0)
+    assert len(frames) == 1
+    np.testing.assert_allclose(frames[0].time_s, midpoint_s, rtol=0.0, atol=0.0)
+    np.testing.assert_allclose(
+        frames[0].position_m,
+        [
+            [1.0 + midpoint_displacement_m[0], 0.25 + midpoint_s],
+            [5.0 + midpoint_displacement_m[1], 0.25 + midpoint_s],
+        ],
+        rtol=0.0,
+        atol=2.0e-13,
+    )
+    np.testing.assert_allclose(
+        frames[0].velocity_m_s,
+        [[midpoint_velocity_x_m_s[0], 1.0], [midpoint_velocity_x_m_s[1], 1.0]],
+        rtol=0.0,
+        atol=2.0e-13,
+    )
+
+    np.testing.assert_array_equal(events.candidate_offset, [0, 2, 4])
+    np.testing.assert_array_equal(events.candidate_facet_id, [1, 2, 4, 5])
+    np.testing.assert_array_equal(events.primary_facet_id, [1, 4])
+    np.testing.assert_array_equal(events.law_id, ["hold", "stick"])
+    np.testing.assert_array_equal(events.outcome, ["held", "stuck"])
+    np.testing.assert_allclose(events.time_s, hit_time_s, rtol=0.0, atol=5.0e-12)
+    np.testing.assert_allclose(
+        events.position_m,
+        [[1.0, 1.0], [5.0, 1.0]],
+        rtol=0.0,
+        atol=5.0e-12,
+    )
+    np.testing.assert_allclose(
+        events.velocity_pre_m_s,
+        [[hit_velocity_x_m_s[0], 1.0], [hit_velocity_x_m_s[1], 1.0]],
+        rtol=0.0,
+        atol=5.0e-12,
+    )
+    priority_normal = np.asarray([1.0, 2.0], dtype="<f8") / math.sqrt(5.0)
+    np.testing.assert_allclose(
+        events.normal,
+        [priority_normal, priority_normal],
+        rtol=0.0,
+        atol=2.0e-13,
+    )
+    np.testing.assert_allclose(
+        events.velocity_post_m_s,
+        [[hit_velocity_x_m_s[0], 1.0], [0.0, 0.0]],
+        rtol=0.0,
+        atol=5.0e-12,
+    )
+    final = result.read_final()
+    np.testing.assert_allclose(
+        final.position_m,
+        [[1.0, 1.0], [5.0, 1.0]],
+        rtol=0.0,
+        atol=1.0e-11,
+    )
+    np.testing.assert_allclose(
+        final.velocity_m_s,
+        [[hit_velocity_x_m_s[0], 1.0], [0.0, 0.0]],
+        rtol=0.0,
+        atol=5.0e-12,
+    )
+    np.testing.assert_array_equal(final.lifecycle, [5, 2])
+    np.testing.assert_array_equal(final.failure_reason_code, [0, 0])
+    resolved = result.manifest["resolved"]
+    assert isinstance(resolved, dict)
+    assert resolved["path_kind"] == path_kind
+
+
+@pytest.mark.parametrize("integrator", ["rk4_fixed", "exponential_midpoint"])
+def test_finite_radius_curved_integrators_stop_at_center_clearance(
+    tmp_path: Path,
+    integrator: str,
+) -> None:
+    radius_m = 0.2
+    case_path = _harmonic_electric_case(
+        tmp_path / f"finite-radius-{integrator}",
+        step_s=0.125,
+        end_time_s=0.25,
+        angular_frequency_s_inv=2.0,
+        initial_position_m=np.asarray([0.5, 0.5]),
+        initial_velocity_m_s=np.asarray([2.0, 0.0]),
+        frame_times=None,
+        material_wall=True,
+        contact_radius_m=radius_m,
+    )
+    document = yaml.safe_load(case_path.read_text(encoding="utf-8"))
+    document["solver"]["integrator"] = integrator
+    case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    output = tmp_path / f"finite-radius-result-{integrator}"
+
+    simulate(load_case(case_path), output)
+    result = open_result(output)
+    event = result.read_boundary_events()
+    final = result.read_final()
+
+    assert event.particle_id.size == 1
+    np.testing.assert_allclose(event.position_m, [[1.0 - radius_m, 0.5]], atol=3.0e-10)
+    np.testing.assert_array_equal(event.contact_radius_m, [radius_m])
+    np.testing.assert_array_equal(event.outcome, ["stuck"])
+    np.testing.assert_array_equal(final.contact_radius_m, [radius_m])
+    np.testing.assert_array_equal(final.lifecycle, [2])
+
+
 def test_general_rk4_material_batch_matches_single_particle(tmp_path: Path) -> None:
     """Work partitioning must not change any particle's public result."""
 
@@ -1833,7 +1980,7 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
         assert plan["event_work_bytes_per_particle"] == expected_event_work
         assert plan["event_staging_capacity"] == plan["event_candidate_capacity"] // 2
         assert plan["slab_particles"] <= plan["event_staging_capacity"]
-        assert plan["event_staging_bytes_per_row"] == 490
+        assert plan["event_staging_bytes_per_row"] == 624
         assert plan["event_staging_fixed_bytes"] == (
             2 * plan["event_candidate_capacity"] * np.dtype("<i8").itemsize + 16
         )
@@ -1846,17 +1993,17 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
             plan["slab_particles"] * plan["failure_staging_bytes_per_particle"]
         )
         assert components["geometry_query_scratch"] == (
-            3 * plan["event_candidate_capacity"] * np.dtype("<i8").itemsize
+            4 * plan["event_candidate_capacity"] * np.dtype("<i8").itemsize
         )
         assert plan["planned_bytes"] <= plan["limit_bytes"]
 
     reference = results[1]
-    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v37"
-    assert reference.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
+    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v46"
+    assert reference.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
     assert reference.manifest["geometry_algorithm_revision"] == (
-        "line_boundary_stackless_volume_cell_bvh_v5"
+        "line_boundary_capsule_contact_bvh_v7"
     )
-    assert plans[1]["revision"] == "solver_owned_memory_plan_v14"
+    assert plans[1]["revision"] == "solver_owned_memory_plan_v16"
     assert plans[1]["runtime_layout_revision"] == "resident_soa_serial_slab_v6"
     assert reference.manifest["resolved"]["physics_models"]["electric"]["model"] == "coulomb"
     reference_boundary = reference.read_boundary_events()
@@ -2002,6 +2149,7 @@ def test_continuous_epstein_applicability_is_output_schedule_independent(
         charge_number=np.repeat(original.charge_number, 2),
         mass_kg=np.repeat(original.mass_kg, 2),
         drag_diameter_m=np.repeat(original.drag_diameter_m, 2),
+        contact_radius_m=np.repeat(original.contact_radius_m, 2),
         electrostatic_radius_m=np.repeat(original.electrostatic_radius_m, 2),
         displaced_volume_m3=np.repeat(original.displaced_volume_m3, 2),
         model_weight=np.repeat(original.model_weight, 2),
@@ -2057,6 +2205,7 @@ def test_boundaryless_quadratic_excursion_is_local_failure_with_or_without_frame
         charge_number=original.charge_number[:1].copy(),
         mass_kg=original.mass_kg[:1].copy(),
         drag_diameter_m=original.drag_diameter_m[:1].copy(),
+        contact_radius_m=original.contact_radius_m[:1].copy(),
         electrostatic_radius_m=original.electrostatic_radius_m[:1].copy(),
         displaced_volume_m3=np.asarray([0.0], dtype="<f8"),
         model_weight=original.model_weight[:1].copy(),
@@ -2103,6 +2252,7 @@ def test_boundaryless_quadratic_overflow_does_not_poison_normal_neighbor(
         charge_number=np.repeat(original.charge_number[:1], 2),
         mass_kg=np.repeat(original.mass_kg[:1], 2),
         drag_diameter_m=np.repeat(original.drag_diameter_m[:1], 2),
+        contact_radius_m=np.repeat(original.contact_radius_m[:1], 2),
         electrostatic_radius_m=np.repeat(original.electrostatic_radius_m[:1], 2),
         displaced_volume_m3=np.zeros(2, dtype="<f8"),
         model_weight=np.repeat(original.model_weight[:1], 2),
@@ -2158,6 +2308,7 @@ def test_regular_nonuniform_excursion_is_local_failure_independent_of_output_sch
         charge_number=original.charge_number[:1].copy(),
         mass_kg=original.mass_kg[:1].copy(),
         drag_diameter_m=original.drag_diameter_m[:1].copy(),
+        contact_radius_m=original.contact_radius_m[:1].copy(),
         electrostatic_radius_m=original.electrostatic_radius_m[:1].copy(),
         displaced_volume_m3=original.displaced_volume_m3[:1].copy(),
         model_weight=original.model_weight[:1].copy(),
@@ -2342,9 +2493,11 @@ def test_constant_acceleration_surface_uses_the_first_nonzero_normal_derivative(
         [frame.velocity_m_s[0] for frame in frames],
         [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]],
     )
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v37"
-    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
-    assert result.manifest["event_algorithm_revision"] == "line_quadratic_rk4_axis_first_hit_v16"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v46"
+    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
+    assert result.manifest["event_algorithm_revision"] == (
+        "line_quadratic_curved_capsule_periodic_first_hit_v22"
+    )
     assert result.manifest["resolved"]["path_kind"] == "quadratic_exact"
 
 
@@ -2563,7 +2716,7 @@ def test_force_coupled_axisymmetric_rz_matches_cartesian_away_from_axis(
     )
     np.testing.assert_array_equal(rz.read_final().charge_number, xy.read_final().charge_number)
     assert rz.manifest["resolved"]["path_kind"] == "rk4_dense"
-    assert rz.manifest["physics_catalog_revision"] == "inertial_langevin_rz_catalog_v17"
+    assert rz.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
 
 
 def test_epstein_rz_axis_crossing_folds_and_continues_the_residual_time(tmp_path: Path) -> None:
@@ -2803,6 +2956,7 @@ def test_rz_skewed_p1_axis_state_is_invariant_away_from_slanted_walls(tmp_path: 
         charge_number=original.charge_number[:1].copy(),
         mass_kg=original.mass_kg[:1].copy(),
         drag_diameter_m=original.drag_diameter_m[:1].copy(),
+        contact_radius_m=original.contact_radius_m[:1].copy(),
         electrostatic_radius_m=original.electrostatic_radius_m[:1].copy(),
         displaced_volume_m3=original.displaced_volume_m3[:1].copy(),
         model_weight=original.model_weight[:1].copy(),
@@ -3277,6 +3431,7 @@ def _constant_gravity_wall_case(
         charge_number=original.charge_number[:1].copy(),
         mass_kg=original.mass_kg[:1].copy(),
         drag_diameter_m=original.drag_diameter_m[:1].copy(),
+        contact_radius_m=original.contact_radius_m[:1].copy(),
         electrostatic_radius_m=original.electrostatic_radius_m[:1].copy(),
         displaced_volume_m3=np.asarray([0.0], dtype="<f8"),
         model_weight=original.model_weight[:1].copy(),
@@ -3332,9 +3487,26 @@ def _constant_acceleration_surface_case(
         charge_number=particle.charge_number[:1].copy(),
         mass_kg=particle.mass_kg[:1].copy(),
         drag_diameter_m=particle.drag_diameter_m[:1].copy(),
+        contact_radius_m=particle.contact_radius_m[:1].copy(),
         electrostatic_radius_m=particle.electrostatic_radius_m[:1].copy(),
         displaced_volume_m3=np.zeros(1, dtype="<f8"),
         model_weight=particle.model_weight[:1].copy(),
+        material_id=particle.material_id[:1].copy(),
+    )
+    surface = RealizedSurfaceSource(
+        name="surface_particles",
+        particle_id=np.asarray([1101], dtype="<i8"),
+        release_time_s=np.asarray([release_time_s], dtype="<f8"),
+        facet_id=np.asarray([3], dtype="<i8"),
+        facet_parameter=np.asarray([0.5], dtype="<f8"),
+        velocity_m_s=np.asarray([initial_velocity_m_s], dtype="<f8"),
+        charge_number=np.asarray([0.0], dtype="<f8"),
+        mass_kg=particle.mass_kg[:1].copy(),
+        drag_diameter_m=particle.drag_diameter_m[:1].copy(),
+        contact_radius_m=particle.contact_radius_m[:1].copy(),
+        electrostatic_radius_m=particle.electrostatic_radius_m[:1].copy(),
+        displaced_volume_m3=np.zeros(1, dtype="<f8"),
+        model_weight=np.ones(1, dtype="<f8"),
         material_id=particle.material_id[:1].copy(),
     )
     data_path = force_paths.case_path.with_name("surface-force.h5")
@@ -3343,7 +3515,7 @@ def _constant_acceleration_surface_case(
         replace(
             force_case.data,
             geometry=wall_case.data.geometry,
-            sources=(companion,) if include_companion else force_case.data.sources,
+            sources=(surface, companion) if include_companion else (surface,),
         ),
     )
     document = yaml.safe_load(force_paths.case_path.read_text(encoding="utf-8"))
@@ -3355,21 +3527,7 @@ def _constant_acceleration_surface_case(
         {
             "name": "surface_release",
             "type": "surface",
-            "boundary_group": "collector",
-            "count": 1,
-            "particle_id_start": 1101,
-            "particle": {
-                "charge_number": 0.0,
-                "mass_kg": float(particle.mass_kg[0]),
-                "drag_diameter_m": float(particle.drag_diameter_m[0]),
-                "electrostatic_radius_m": float(particle.electrostatic_radius_m[0]),
-                "displaced_volume_m3": 0.0,
-                "model_weight": 1.0,
-                "material_id": int(particle.material_id[0]),
-            },
-            "position": {"model": "edge_fraction", "fraction": 0.5},
-            "velocity": {"model": "fixed", "value_m_s": initial_velocity_m_s},
-            "release": {"model": "fixed", "time_s": release_time_s},
+            "table": surface.name,
         }
     ]
     if include_companion:
@@ -3420,12 +3578,29 @@ def _general_rk4_surface_case(
     force_case = load_case(force_path)
     wall_case = load_case(wall_paths.case_path)
     particle = force_case.data.sources[0]
+    surface = RealizedSurfaceSource(
+        name="general_surface_particles",
+        particle_id=np.asarray([1201], dtype="<i8"),
+        release_time_s=np.asarray([release_time_s], dtype="<f8"),
+        facet_id=np.asarray([3], dtype="<i8"),
+        facet_parameter=np.asarray([0.5], dtype="<f8"),
+        velocity_m_s=np.asarray([initial_velocity_m_s], dtype="<f8"),
+        charge_number=particle.charge_number[:1].copy(),
+        mass_kg=particle.mass_kg[:1].copy(),
+        drag_diameter_m=particle.drag_diameter_m[:1].copy(),
+        contact_radius_m=particle.contact_radius_m[:1].copy(),
+        electrostatic_radius_m=particle.electrostatic_radius_m[:1].copy(),
+        displaced_volume_m3=particle.displaced_volume_m3[:1].copy(),
+        model_weight=np.ones(1, dtype="<f8"),
+        material_id=particle.material_id[:1].copy(),
+    )
     data_path = force_path.with_name("general-surface.h5")
     info = write(
         data_path,
         replace(
             force_case.data,
             geometry=wall_case.data.geometry,
+            sources=(surface,),
         ),
     )
     document = yaml.safe_load(force_path.read_text(encoding="utf-8"))
@@ -3436,21 +3611,7 @@ def _general_rk4_surface_case(
         {
             "name": "general_surface_release",
             "type": "surface",
-            "boundary_group": "collector",
-            "count": 1,
-            "particle_id_start": 1201,
-            "particle": {
-                "charge_number": float(particle.charge_number[0]),
-                "mass_kg": float(particle.mass_kg[0]),
-                "drag_diameter_m": float(particle.drag_diameter_m[0]),
-                "electrostatic_radius_m": float(particle.electrostatic_radius_m[0]),
-                "displaced_volume_m3": float(particle.displaced_volume_m3[0]),
-                "model_weight": 1.0,
-                "material_id": int(particle.material_id[0]),
-            },
-            "position": {"model": "edge_fraction", "fraction": 0.5},
-            "velocity": {"model": "fixed", "value_m_s": initial_velocity_m_s},
-            "release": {"model": "fixed", "time_s": release_time_s},
+            "table": surface.name,
         }
     ]
     document["boundaries"] = [
@@ -3545,6 +3706,77 @@ def _general_rk4_c09_case(
     return case_path
 
 
+def _curved_c10_case(directory: Path, *, integrator: str) -> Path:
+    c10_paths = materialize_microcase("C10", directory / "wall")
+    field_paths = materialize_microcase("C04", directory / "field")
+    c10_case = load_case(c10_paths.case_path)
+    field_case = load_case(field_paths.case_path)
+    layout = RegularLayout(
+        "corner",
+        np.asarray([0.0, 3.0, 3.5, 4.0, 7.0], dtype="<f8"),
+        np.asarray([0.0, 1.0], dtype="<f8"),
+        np.ones((4, 1), dtype="u1"),
+    )
+    source = c10_case.data.sources[0]
+    charge_number = -5.0
+    initial_velocity_x_m_s = -0.5 * _CURVED_CORNER_ACCELERATION_X_M_S2 * _CURVED_CORNER_HIT_TIME_S
+    source = replace(
+        source,
+        velocity_m_s=np.column_stack((initial_velocity_x_m_s, np.ones(2, dtype="<f8"))),
+        charge_number=np.full(2, charge_number, dtype="<f8"),
+    )
+    charge_to_acceleration = charge_number * ELEMENTARY_CHARGE_C / float(source.mass_kg[0])
+    acceleration_at_axis_nodes = np.repeat(
+        np.asarray([-1.0, -1.0, 1.0, -1.0, -1.0], dtype="<f8"),
+        2,
+    )
+    electric_values = np.column_stack(
+        (
+            acceleration_at_axis_nodes / charge_to_acceleration,
+            np.zeros(10, dtype="<f8"),
+        )
+    )
+    fields = tuple(
+        replace(field, layout=layout.name, values=electric_values)
+        if field.name == "electric_field"
+        else field
+        for field in field_case.data.fields
+    )
+    data_path = directory / "curved-c10.h5"
+    info = write(
+        data_path,
+        replace(
+            c10_case.data,
+            layouts=(layout,),
+            fields=fields,
+            sources=(source,),
+        ),
+    )
+    document = yaml.safe_load(c10_paths.case_path.read_text(encoding="utf-8"))
+    document["case"]["data_path"] = data_path.name
+    document["case"]["expected_content_hash"] = info.content_hash
+    document["time"] = {
+        "start_s": 0.0,
+        "end_s": _CURVED_CORNER_HIT_TIME_S,
+        "dt_s": _CURVED_CORNER_HIT_TIME_S,
+    }
+    document["solver"]["integrator"] = integrator
+    document["physics"] = {
+        "charge": {"model": "fixed"},
+        "electric": dict(field_case.spec.physics.models["electric"]),
+    }
+    for boundary in document["boundaries"]:
+        if boundary["boundary_group"] == "corner_mirror":
+            boundary["law"] = "hold"
+    document["output"]["trajectories"] = {
+        "selection": "all",
+        "schedule": {"explicit_times_s": [0.5 * _CURVED_CORNER_HIT_TIME_S]},
+    }
+    case_path = directory / "curved-c10.yaml"
+    case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    return case_path
+
+
 def _harmonic_electric_case(
     directory: Path,
     *,
@@ -3557,6 +3789,7 @@ def _harmonic_electric_case(
     material_wall: bool = False,
     particle_count: int = 1,
     field_layout_kind: str = "regular",
+    contact_radius_m: float = 0.0,
 ) -> Path:
     paths = materialize_microcase("C04", directory)
     case = load_case(paths.case_path)
@@ -3595,6 +3828,7 @@ def _harmonic_electric_case(
         charge_number=repeated(original.charge_number),
         mass_kg=repeated(original.mass_kg),
         drag_diameter_m=repeated(original.drag_diameter_m),
+        contact_radius_m=np.full(particle_count, contact_radius_m, dtype="<f8"),
         electrostatic_radius_m=repeated(original.electrostatic_radius_m),
         displaced_volume_m3=repeated(original.displaced_volume_m3),
         model_weight=repeated(original.model_weight),
@@ -3861,11 +4095,11 @@ def test_barnes_ion_drag_constant_field_time_convergence(
         "model": "barnes_collisionless",
         "revision": _BARNES_ION_DRAG_REVISION,
     }
-    assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
-    assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_rz_catalog_v17"
+    assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
+    assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
     assert (
         last_result.manifest["physics_runtime_revision"]
-        == "signed_ion_compiled_physics_runtime_v20"
+        == "signed_ion_compiled_physics_runtime_v22"
     )
 
 

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import math
-from collections.abc import Iterator
+from bisect import bisect_right
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, replace
 from os import PathLike
 
@@ -23,6 +24,7 @@ from .boundaries import (
     prepare_boundary_rule,
     prepare_boundary_rules,
     resolve_boundary_responses_batch,
+    validate_boundary_rule_frames,
 )
 from .case import CASE_FORMAT_VERSION, SimulationCase, TimeSpec
 from .case_format import resident_array_bytes
@@ -47,6 +49,8 @@ from .events import (
     CURVED_STATUS_SPLIT,
     CURVED_STATUS_WALL,
     EVENT_ALGORITHM_REVISION,
+    EXACT_DEPARTURE_FINITE_CONTACT_SET,
+    EXACT_DEPARTURE_NONE,
     EXACT_PATH_LINEAR,
     EXACT_PATH_QUADRATIC,
     EXACT_STATUS_AXIS,
@@ -76,6 +80,7 @@ from .events import (
 )
 from .fields import (
     FIELD_LOCATION_REVISION,
+    FIELD_TIME_REVISION,
     LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW,
     REQUIRED_FIELD_REVISION,
     FieldBatch,
@@ -84,11 +89,14 @@ from .fields import (
     PreparedFieldSet,
     RequiredFieldMetadata,
     prepare_required_fields,
+    validate_periodic_field_seams,
 )
 from .geometry import (
     GEOMETRY_ALGORITHM_REVISION,
     GeometryPreparationError,
     PreparedGeometry,
+    centers_respect_contact_radius,
+    contact_normals_for_candidates,
     points_inside_volume,
     prepare_geometry,
 )
@@ -140,8 +148,7 @@ from .output import (
     TrajectoryFrame,
 )
 from .physics.catalog import (
-    BROWNIAN_FROZEN_START_REVISION,
-    BROWNIAN_RZ_MIDPOINT_REVISION,
+    BROWNIAN_MIDPOINT_2D_REVISION,
     PHYSICS_CATALOG_REVISION,
     PhysicsConfigurationError,
     PhysicsPlan,
@@ -166,11 +173,14 @@ from .rng import (
     BROWNIAN_ROOT_NORMAL_STREAM,
     BROWNIAN_SPLIT_NORMAL_STREAM,
     RNG_ALGORITHM_REVISION,
-    SOURCE_FACET_DRAW,
-    SOURCE_POSITION_DRAW,
+    WALL_MAXWELL_DIFFUSE_STREAM,
+    WALL_MAXWELL_NORMAL_STREAM,
+    WALL_MAXWELL_TANGENTIAL_STREAM,
     WALL_PROBABILISTIC_STICK_STREAM,
     brownian_normal_pair_batch,
+    wall_standard_normal_batch,
     wall_uniform_batch,
+    wall_uniform_open_batch,
 )
 from .sources import (
     SOURCE_ALGORITHM_REVISION,
@@ -187,22 +197,35 @@ from .stochastic import (
     joint_ou_increment,
     split_joint_ou_increment_half,
 )
+from .topology import (
+    TOPOLOGY_ALGORITHM_REVISION,
+    TOPOLOGY_CANDIDATE_INVALID,
+    TOPOLOGY_CANDIDATE_MATERIAL,
+    TOPOLOGY_CANDIDATE_PERIODIC,
+    PreparedPeriodicTopology,
+    TopologyPreparationError,
+    TranslationPairRequest,
+    classify_periodic_candidate_rows,
+    prepare_periodic_topology,
+)
 
 type _PathInput = str | PathLike[str]
 
-ENGINE_ALGORITHM_REVISION = "particle_engine_v37"
-COMPILED_CPU_TILE_REVISION = "compiled_cpu_tile_v18"
+ENGINE_ALGORITHM_REVISION = "particle_engine_v46"
+COMPILED_CPU_TILE_REVISION = "compiled_cpu_tile_v21"
 DURABLE_COMMIT_CADENCE_REVISION = "cumulative_solver_work_v1"
+BROWNIAN_TREE_POLICY_REVISION = "conditional_boundary_refinement_v1"
 
 _PREPARE_SCAN_BATCH_SIZE = 65_536
+_MAX_EVENT_ORDINAL = int(np.iinfo(np.uint32).max)
 _TIME_GRID_ROUNDOFF_ULPS = 8.0
 _DURABLE_COMMIT_MINIMUM_WORK = 1 << 20
 _DURABLE_COMMIT_WORK_PER_PARTICLE = 128
 # Numeric event staging plus the canonical payload simultaneously handed to
-# the synchronous writer: raw row 134 B + stable order 8 B + payload 348 B.
+# the synchronous writer, including topology kind/destination/post-position.
 # The pack-only int64 row gather is intentionally owned by the memory plan's
 # 12.5% safety margin instead of being retained as another named component.
-_EVENT_STAGING_BYTES_PER_ROW = 490
+_EVENT_STAGING_BYTES_PER_ROW = 624
 # Raw and canonical candidate columns coexist while the writer consumes one
 # wave; each has int64 entries and each ragged offset table has one sentinel.
 _EVENT_STAGING_BYTES_PER_CANDIDATE = 16
@@ -244,13 +267,29 @@ _FAILURE_REASON_NAMES = {
 }
 
 _BOUNDARY_LAW_OUTPUT = np.asarray(
-    ("", "stick", "escape", "specular", "restitution", "probabilistic_stick", "hold"),
+    (
+        "",
+        "stick",
+        "escape",
+        "specular",
+        "restitution",
+        "probabilistic_stick",
+        "hold",
+        "maxwell_thermal",
+    ),
     dtype="<U32",
 )
 _BOUNDARY_OUTCOME_OUTPUT = np.asarray(
-    ("", "stuck", "escaped", "reflected", "held"),
+    ("", "stuck", "escaped", "reflected", "held", "transferred"),
     dtype="<U16",
 )
+_BOUNDARY_INTERACTION_OUTPUT = np.asarray(
+    ("", "wall", "periodic_translation"),
+    dtype="<U24",
+)
+_INTERACTION_WALL = np.uint8(1)
+_INTERACTION_PERIODIC = np.uint8(2)
+_OUTCOME_TRANSFERRED = np.uint8(5)
 
 
 class EngineError(RuntimeError):
@@ -291,10 +330,13 @@ class _PreparedRun:
     probe_times_s: tuple[float, ...]
     probe_particle_index: np.ndarray
     geometry: PreparedGeometry
+    event_geometry: PreparedGeometry
+    topology: PreparedPeriodicTopology | None
     boundary_rules: tuple[BoundaryRule, ...]
     compiled_boundary_rules: PreparedBoundaryRules
     physics: PhysicsPlan
     fields: PreparedFieldSet
+    field_time_split_s: tuple[float, ...]
     dynamics: _StageDynamics
     constant_acceleration_m_s2: np.ndarray | None
     maximum_dt_over_tau: float
@@ -312,7 +354,10 @@ class _BoundaryEventBuffer:
     time_s: np.ndarray
     event_ordinal: np.ndarray
     primary_facet_id: np.ndarray
+    interaction_code: np.ndarray
+    destination_facet_id: np.ndarray
     position_m: np.ndarray
+    position_post_m: np.ndarray
     normal: np.ndarray
     velocity_pre_m_s: np.ndarray
     velocity_post_m_s: np.ndarray
@@ -404,6 +449,46 @@ class _LangevinRootBatch:
     drag_rate_s_inv: np.ndarray
     thermal_velocity_variance_m2_s2: np.ndarray
     equilibrium_velocity_m_s: np.ndarray
+
+
+@dataclass(frozen=True, slots=True)
+class _BrownianSlabRuntime:
+    """One conditional OU root and the mutable solver state it may commit."""
+
+    prepared: _PreparedRun
+    batch: _LangevinRootBatch
+    particle_ids: np.ndarray
+    macro_interval: int
+    root_interval: np.ndarray
+    stochastic_event_restart_count: np.ndarray
+    guard_restart_count: np.ndarray
+    position_m: np.ndarray
+    velocity_m_s: np.ndarray
+    charge_number: np.ndarray
+    active: np.ndarray
+    lifecycle: np.ndarray
+    terminal_time_s: np.ndarray
+    event_ordinal: np.ndarray
+    physical_boundary_event_ordinal: np.ndarray
+    exact_origin_time_s: np.ndarray
+    exact_origin_position_m: np.ndarray
+    exact_origin_velocity_m_s: np.ndarray
+    start_contact_state: np.ndarray
+    replay: _ReplayBuffer
+    statistics: _EventStatistics
+    failure_reason_code: np.ndarray
+    writer: ResultWriter
+    event_buffer: _BoundaryEventBuffer
+    failure_buffer: _FailureEventBuffer
+    root_continuing: np.ndarray
+    pending_particle_index: np.ndarray
+    pending_start_time_s: np.ndarray
+    pending_start_position_m: np.ndarray
+    pending_start_velocity_m_s: np.ndarray
+    pending_root_interval: np.ndarray
+    pending_stochastic_event_restart_count: np.ndarray
+    pending_guard_restart_count: np.ndarray
+    pending_count: np.ndarray
 
 
 @dataclass(slots=True)
@@ -515,6 +600,12 @@ class _StageDynamics:
     field_workspaces: tuple[FieldWorkspace, ...]
     physics_workspaces: tuple[PhysicsRuntimeWorkspace, ...]
     physics_workspace_cursor: int = 0
+
+    def invalidate_field_cell(self, particle_index: np.ndarray) -> None:
+        """Discard location hints after a discontinuous topology transfer."""
+
+        if self.last_field_cell is not None:
+            self.last_field_cell[particle_index] = -1
 
     def __call__(
         self,
@@ -663,6 +754,7 @@ class _StageDynamics:
             stage_position_m,
             cell_hint=cell_hint,
             workspace=self.field_workspaces[slot],
+            time_s=time_s,
         )
         workspace = self.physics_workspaces[slot]
         self.physics_workspace_cursor = (self.physics_workspace_cursor + 1) % len(
@@ -753,6 +845,8 @@ class _StageDynamics:
     def local_continuous_applicability_batch(
         self,
         particle_index: np.ndarray,
+        time_lower_s: np.ndarray,
+        time_upper_s: np.ndarray,
         position_lower_m: np.ndarray,
         position_upper_m: np.ndarray,
         velocity_lower_m_s: np.ndarray,
@@ -779,7 +873,12 @@ class _StageDynamics:
                 velocity_lower,
                 velocity_upper,
             )
-        local_fields = self.fields.local_component_bounds(position_lower, position_upper)
+        local_fields = self.fields.local_component_bounds(
+            position_lower,
+            position_upper,
+            time_lower_s=time_lower_s,
+            time_upper_s=time_upper_s,
+        )
         range_available = local_fields.range_available
         if not self.fields.fields:
             range_available = np.ones(particle_index.size, dtype=np.bool_)
@@ -815,6 +914,8 @@ class _StageDynamics:
     def local_additive_acceleration_abs_upper_batch(
         self,
         particle_index: np.ndarray,
+        time_lower_s: np.ndarray,
+        time_upper_s: np.ndarray,
         position_lower_m: np.ndarray,
         position_upper_m: np.ndarray,
         velocity_lower_m_s: np.ndarray,
@@ -841,7 +942,12 @@ class _StageDynamics:
                 velocity_lower,
                 velocity_upper,
             )
-        local_fields = self.fields.local_component_bounds(position_lower, position_upper)
+        local_fields = self.fields.local_component_bounds(
+            position_lower,
+            position_upper,
+            time_lower_s=time_lower_s,
+            time_upper_s=time_upper_s,
+        )
         range_available = local_fields.range_available
         count = int(particle_index.size)
         bound = np.zeros((count, 2), dtype="<f8")
@@ -946,6 +1052,8 @@ def run_simulation(case: SimulationCase, output: _PathInput) -> RunSummary:
                 macro_end = _macro_step_end(
                     case.spec.time,
                     state.macro_step_count,
+                    macro_start_s=macro_start,
+                    split_times_s=prepared.field_time_split_s,
                 )
                 if macro_end <= macro_start:
                     raise EngineError("macro-step time no longer advances at float64 precision")
@@ -1112,24 +1220,53 @@ def _durable_commit_cadence(particle_count: int) -> dict[str, object]:
     }
 
 
-def _macro_step_end(time: TimeSpec, completed_steps: int) -> float:
+def _macro_step_end(
+    time: TimeSpec,
+    completed_steps: int,
+    *,
+    macro_start_s: float | None = None,
+    split_times_s: tuple[float, ...] = (),
+) -> float:
     """Return the indexed macro-grid boundary, snapping only roundoff to the end.
 
     Repeatedly adding ``dt_s`` can leave a one-ULP tail at an intended decimal
     endpoint (for example 0.02 s repeated ten times toward 0.2 s).  Such a tail
     is not a physical integration interval and may be too short to represent a
-    midpoint.  The step index avoids accumulated drift; the final comparison
-    covers only the float64 construction error of ``start + n * dt``.
+    midpoint.  Time-dependent field knots are merged into the same ordered
+    interval sequence without changing the fixed grid on either side.
     """
 
-    step_number = completed_steps + 1
+    crossed_splits = 0
+    if split_times_s:
+        if macro_start_s is None:
+            raise EngineError("field-time split scheduling requires the current macro time")
+        crossed_splits = bisect_right(split_times_s, macro_start_s)
+    regular_completed_steps = completed_steps - crossed_splits
+    if regular_completed_steps < 0:
+        raise EngineError("field-time split schedule disagrees with the macro-step count")
+    step_number = regular_completed_steps + 1
+    nominal_end_s, construction_roundoff_s = _time_grid_boundary(time, step_number)
+    if not math.isfinite(nominal_end_s) or nominal_end_s >= time.end_s:
+        nominal_end_s = time.end_s
+    elif time.end_s - nominal_end_s <= construction_roundoff_s:
+        nominal_end_s = time.end_s
+    if crossed_splits < len(split_times_s):
+        field_knot_s = split_times_s[crossed_splits]
+        if field_knot_s < nominal_end_s:
+            return field_knot_s
+    return nominal_end_s
+
+
+def _time_grid_boundary(time: TimeSpec, step_number: int) -> tuple[float, float]:
+    """Construct one fixed-grid boundary and its binary64 roundoff budget."""
+
     nominal_offset_s, offset_residual_s = _time_grid_product(
         float(step_number),
         time.dt_s,
     )
     nominal_end_s = math.fsum((time.start_s, nominal_offset_s, offset_residual_s))
-    if not math.isfinite(nominal_end_s) or nominal_end_s >= time.end_s:
-        return time.end_s
+    if not math.isfinite(nominal_end_s):
+        return nominal_end_s, 0.0
     construction_roundoff_s = _TIME_GRID_ROUNDOFF_ULPS * max(
         math.ulp(time.start_s),
         math.ulp(time.end_s),
@@ -1137,9 +1274,7 @@ def _macro_step_end(time: TimeSpec, completed_steps: int) -> float:
         math.ulp(nominal_offset_s),
         math.ulp(nominal_end_s),
     )
-    if time.end_s - nominal_end_s <= construction_roundoff_s:
-        return time.end_s
-    return nominal_end_s
+    return nominal_end_s, construction_roundoff_s
 
 
 def _time_grid_product(left: float, right: float) -> tuple[float, float]:
@@ -1168,6 +1303,27 @@ def _time_grid_product(left: float, right: float) -> tuple[float, float]:
     )
 
 
+def _field_time_split_times(
+    time: TimeSpec,
+    fields: PreparedFieldSet,
+) -> tuple[float, ...]:
+    """Return non-grid snapshot knots that must split production intervals."""
+
+    result: list[float] = []
+    for knot_s in fields.time_knots_s():
+        if knot_s <= time.start_s or knot_s >= time.end_s:
+            continue
+        relative_step = (knot_s - time.start_s) / time.dt_s
+        nearest_step = round(relative_step)
+        aligned = False
+        if nearest_step >= 1:
+            grid_s, roundoff_s = _time_grid_boundary(time, nearest_step)
+            aligned = abs(knot_s - grid_s) <= roundoff_s
+        if not aligned:
+            result.append(knot_s)
+    return tuple(result)
+
+
 def _brownian_provenance(physics: PhysicsPlan) -> dict[str, object]:
     """Return the single manifest/checkpoint description of stochastic motion."""
 
@@ -1179,25 +1335,22 @@ def _brownian_provenance(physics: PhysicsPlan) -> dict[str, object]:
             "coefficient_policy": None,
             "composition_revision": None,
             "charge_dense_revision": None,
+            "tree_policy_revision": None,
             "interval_tree_depth": None,
+            "adaptive_max_depth": None,
             "root_normal_stream": None,
             "split_normal_stream": None,
         }
-    midpoint_revision = physics.noise.revision == BROWNIAN_RZ_MIDPOINT_REVISION
     return {
         "rng_revision": BROWNIAN_RNG_REVISION,
         "ou_revision": JOINT_OU_REVISION,
         "split_revision": JOINT_OU_SPLIT_REVISION,
-        "coefficient_policy": (
-            "macro_root_frozen_midpoint_v1" if midpoint_revision else "macro_root_frozen_start_v1"
-        ),
-        "composition_revision": (
-            "stochastic_exponential_midpoint_v1" if midpoint_revision else "joint_ou_only_v1"
-        ),
-        "charge_dense_revision": (
-            "macro_root_affine_exponential_v2" if midpoint_revision else "fixed_charge_v1"
-        ),
+        "coefficient_policy": "macro_root_frozen_midpoint_v1",
+        "composition_revision": "stochastic_exponential_midpoint_v1",
+        "charge_dense_revision": "macro_root_affine_exponential_v2",
+        "tree_policy_revision": BROWNIAN_TREE_POLICY_REVISION,
         "interval_tree_depth": physics.noise.interval_tree_depth,
+        "adaptive_max_depth": physics.noise.adaptive_max_depth,
         "root_normal_stream": BROWNIAN_ROOT_NORMAL_STREAM,
         "split_normal_stream": BROWNIAN_SPLIT_NORMAL_STREAM,
     }
@@ -1241,9 +1394,12 @@ def _resume_identity(prepared: _PreparedRun) -> dict[str, object]:
         "physics_catalog_revision": PHYSICS_CATALOG_REVISION,
         "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
         "field_location_revision": FIELD_LOCATION_REVISION,
+        "field_time_revision": FIELD_TIME_REVISION,
+        "field_time_split_s": list(prepared.field_time_split_s),
         "required_field_revision": REQUIRED_FIELD_REVISION,
         "geometry_algorithm_revision": GEOMETRY_ALGORITHM_REVISION,
         "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
+        "topology_algorithm_revision": _topology_algorithm_revision(prepared),
         "boundary_algorithm_revision": (
             BOUNDARY_ALGORITHM_REVISION if prepared.boundary_rules else None
         ),
@@ -1255,7 +1411,9 @@ def _resume_identity(prepared: _PreparedRun) -> dict[str, object]:
         "brownian_coefficient_policy": brownian["coefficient_policy"],
         "brownian_composition_revision": brownian["composition_revision"],
         "brownian_charge_dense_revision": brownian["charge_dense_revision"],
+        "brownian_tree_policy_revision": brownian["tree_policy_revision"],
         "brownian_interval_tree_depth": brownian["interval_tree_depth"],
+        "brownian_adaptive_max_depth": brownian["adaptive_max_depth"],
         "coordinate_system": case.data.coordinate_system,
         "motion_mode": case.spec.motion.mode,
         "resolved_integrator": integrator,
@@ -1653,18 +1811,8 @@ def _langevin_root_coefficients(
     noise = prepared.physics.noise
     if noise is None:
         raise EngineError("Langevin coefficients require a resolved noise model")
-    if noise.revision == BROWNIAN_FROZEN_START_REVISION:
-        return _LangevinRoot(
-            prepared.dynamics.evaluate_langevin_coefficients(
-                particle_index,
-                start_time_s,
-                start_position_m,
-                start_velocity_m_s,
-                start_charge_number,
-            ),
-            duration_s.copy(),
-            np.zeros(particle_index.size, dtype="<u2"),
-        )
+    if noise.revision != BROWNIAN_MIDPOINT_2D_REVISION:
+        raise EngineError("Langevin coefficients require the resolved 2-D midpoint revision")
     guarded_duration_s, predictor, guard_valid, guard_failure = _guard_langevin_root_duration(
         prepared,
         particle_index,
@@ -1894,7 +2042,7 @@ def _prepare_langevin_root_batch(
     event_ordinal: np.ndarray,
     failure_reason_code: np.ndarray,
     failure_buffer: _FailureEventBuffer,
-) -> _LangevinRootBatch | None:
+) -> tuple[_LangevinRootBatch | None, np.ndarray]:
     """Resolve and validate all coefficients before addressing Brownian RNG."""
 
     try:
@@ -1919,9 +2067,6 @@ def _prepare_langevin_root_batch(
         raise EngineError("Brownian root preparation lost its noise model")
     coefficients = root.coefficients
     duration_s = root.duration_s
-    if noise.revision == BROWNIAN_FROZEN_START_REVISION and coefficients.field_cell_id is not None:
-        prepared.dynamics.commit_field_cell(particles, coefficients.field_cell_id)
-
     numerical_status = coefficients.numerical_status.copy()
     with np.errstate(over="ignore", under="ignore", invalid="ignore"):
         relaxation_argument = coefficients.drag_rate_s_inv * duration_s
@@ -1934,14 +2079,11 @@ def _prepare_langevin_root_batch(
     valid &= coefficients.support_inside
     valid &= coefficients.applicability_inside
     valid &= root.failure_reason_code == 0
-    if noise.revision == BROWNIAN_FROZEN_START_REVISION:
-        effective_equilibrium = coefficients.equilibrium_velocity_m_s
-    else:
-        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-            effective_equilibrium = (
-                coefficients.equilibrium_velocity_m_s
-                + coefficients.additive_acceleration_m_s2 / coefficients.drag_rate_s_inv[:, None]
-            )
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        effective_equilibrium = (
+            coefficients.equilibrium_velocity_m_s
+            + coefficients.additive_acceleration_m_s2 / coefficients.drag_rate_s_inv[:, None]
+        )
     finite_equilibrium = np.isfinite(effective_equilibrium).all(axis=1)
     numerical_status[(numerical_status == NUMERICAL_STATUS_OK) & ~finite_equilibrium] = (
         PHYSICS_NUMERICAL_FAILURE
@@ -1951,22 +2093,6 @@ def _prepare_langevin_root_batch(
     safe_rate = np.where(valid, coefficients.drag_rate_s_inv, 1.0)
     safe_thermal = np.where(valid, coefficients.thermal_velocity_variance_m2_s2, 0.0)
     safe_equilibrium = np.where(valid[:, None], effective_equilibrium, 0.0)
-    if noise.revision != BROWNIAN_RZ_MIDPOINT_REVISION:
-        return _LangevinRootBatch(
-            particles,
-            starts_s,
-            duration_s,
-            requested_duration_s,
-            start_position_m,
-            start_velocity_m_s,
-            start_charge_number,
-            coefficients,
-            numerical_status,
-            safe_rate,
-            safe_thermal,
-            safe_equilibrium,
-        )
-
     _mark_langevin_root_failures(
         valid,
         particles,
@@ -1989,20 +2115,23 @@ def _prepare_langevin_root_batch(
     )
     rows = np.flatnonzero(valid).astype("<i8", copy=False)
     if not rows.size:
-        return None
-    return _LangevinRootBatch(
-        particles[rows],
-        starts_s[rows],
-        duration_s[rows],
-        requested_duration_s[rows],
-        start_position_m[rows],
-        start_velocity_m_s[rows],
-        start_charge_number[rows],
-        _subset_langevin_coefficients(coefficients, rows),
-        numerical_status[rows],
-        safe_rate[rows],
-        safe_thermal[rows],
-        safe_equilibrium[rows],
+        return None, rows
+    return (
+        _LangevinRootBatch(
+            particles[rows],
+            starts_s[rows],
+            duration_s[rows],
+            requested_duration_s[rows],
+            start_position_m[rows],
+            start_velocity_m_s[rows],
+            start_charge_number[rows],
+            _subset_langevin_coefficients(coefficients, rows),
+            numerical_status[rows],
+            safe_rate[rows],
+            safe_thermal[rows],
+            safe_equilibrium[rows],
+        ),
+        rows,
     )
 
 
@@ -2021,7 +2150,7 @@ def _fail_langevin_root_budget(
     event_ordinal: np.ndarray,
     failure_reason_code: np.ndarray,
     failure_buffer: _FailureEventBuffer,
-    reason_code: np.uint16,
+    reason_code: np.ndarray,
 ) -> None:
     """Fail a root cohort that exhausted its bounded stochastic restarts."""
 
@@ -2030,7 +2159,7 @@ def _fail_langevin_root_budget(
         _mark_particle_failed(
             particle,
             _ParticleFailure(
-                reason_code,
+                reason_code[local_row],
                 float(starts_s[local_row]),
                 start_position_m[local_row],
                 start_velocity_m_s[local_row],
@@ -2048,71 +2177,21 @@ def _fail_langevin_root_budget(
         )
 
 
-def _initialize_zero_duration_brownian_rows(
+def _langevin_restart_failure_reasons(
     prepared: _PreparedRun,
-    particle_index: np.ndarray,
-    zero_rows: np.ndarray,
-    root_start_time_s: np.ndarray,
-    root_start_position_m: np.ndarray,
-    root_start_velocity_m_s: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    start_contact_state: np.ndarray,
-    replay: _ReplayBuffer,
-    statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
-    writer: ResultWriter,
-    event_buffer: _BoundaryEventBuffer,
-    failure_buffer: _FailureEventBuffer,
-) -> None:
-    """Resolve release contact when a stochastic root has no positive duration."""
-
-    if not zero_rows.size:
-        return
-    particles = particle_index[zero_rows]
-    _initialize_surface_releases(
-        prepared,
-        particles,
-        root_start_time_s[zero_rows],
-        root_start_position_m[zero_rows],
-        root_start_velocity_m_s[zero_rows],
-        charge_number[particles].copy(),
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        start_contact_state,
-        event_buffer,
-        failure_buffer,
-        replay,
-        statistics,
-        failure_reason_code,
-    )
-    _flush_boundary_event_wave(writer, prepared, event_buffer)
-
-
-def _langevin_restart_failure_reason(
-    prepared: _PreparedRun,
-    axis_restart_count: int,
-    guard_restart_count: int,
-) -> np.uint16:
+    stochastic_event_restart_count: np.ndarray,
+    guard_restart_count: np.ndarray,
+) -> np.ndarray:
     """Map independent bounded-restart exhaustion to its owned failure class."""
 
-    if axis_restart_count > prepared.case.spec.solver.event.max_interactions_per_step:
-        return _FAILURE_NUMERICAL_EVENT_BUDGET
-    if guard_restart_count > prepared.case.spec.solver.event.max_refinements:
-        return _FAILURE_INTEGRATOR_ACCURACY
-    return np.uint16(0)
+    reasons = np.zeros(stochastic_event_restart_count.size, dtype="<u2")
+    event_exhausted = (
+        stochastic_event_restart_count > prepared.case.spec.solver.event.max_interactions_per_step
+    )
+    reasons[event_exhausted] = _FAILURE_NUMERICAL_EVENT_BUDGET
+    guard_exhausted = guard_restart_count > prepared.case.spec.solver.event.max_refinements
+    reasons[(reasons == 0) & guard_exhausted] = _FAILURE_INTEGRATOR_ACCURACY
+    return reasons
 
 
 def _advance_brownian_slab(
@@ -2141,42 +2220,175 @@ def _advance_brownian_slab(
     writer: ResultWriter,
     event_buffer: _BoundaryEventBuffer,
     failure_buffer: _FailureEventBuffer,
-    *,
-    root_interval: int = 0,
-    axis_restart_count: int = 0,
-    guard_restart_count: int = 0,
 ) -> None:
-    """Advance one slab over a fixed-depth, conditionally split OU tree."""
+    """Advance fresh OU roots iteratively with one bounded pending row wave."""
 
     noise = prepared.physics.noise
     if noise is None:
         raise EngineError("Brownian slab requires a resolved noise model")
+    capacity = int(particle_index.size)
+    pending_particle_index = particle_index
+    pending_start_time_s = root_start_time_s
+    pending_start_position_m = root_start_position_m
+    pending_start_velocity_m_s = root_start_velocity_m_s
+    pending_root_interval = np.zeros(capacity, dtype="<i8")
+    pending_stochastic_event_restart_count = np.zeros(capacity, dtype="<i8")
+    pending_guard_restart_count = np.zeros(capacity, dtype="<i8")
+    pending_count = capacity
+    initial_interactions = np.zeros(capacity, dtype="<i8")
+    release_rows = np.flatnonzero(
+        start_contact_state[pending_particle_index] == SURFACE_STATE_PENDING
+    ).astype("<i8", copy=False)
+    if release_rows.size:
+        release_particles = pending_particle_index[release_rows]
+        release_interactions, _ = _initialize_surface_releases(
+            prepared,
+            release_particles,
+            pending_start_time_s[release_rows],
+            pending_start_position_m[release_rows],
+            pending_start_velocity_m_s[release_rows],
+            charge_number[release_particles].copy(),
+            position_m,
+            velocity_m_s,
+            charge_number,
+            active,
+            lifecycle,
+            terminal_time_s,
+            event_ordinal,
+            physical_boundary_event_ordinal,
+            start_contact_state,
+            event_buffer,
+            failure_buffer,
+            replay,
+            statistics,
+            failure_reason_code,
+        )
+        initial_interactions[release_rows] = release_interactions
+        _flush_boundary_event_wave(writer, prepared, event_buffer)
+    responded = (initial_interactions != 0) & active[pending_particle_index]
+    if bool(responded.any()):
+        pending_start_position_m = pending_start_position_m.copy()
+        pending_start_velocity_m_s = pending_start_velocity_m_s.copy()
+        pending_start_position_m[responded] = position_m[pending_particle_index[responded]]
+        pending_start_velocity_m_s[responded] = velocity_m_s[pending_particle_index[responded]]
+        pending_root_interval[responded] += initial_interactions[responded]
+        pending_stochastic_event_restart_count[responded] += initial_interactions[responded]
+    del particle_index
+    del root_start_time_s
+    del root_start_position_m
+    del root_start_velocity_m_s
+
+    while pending_count:
+        next_particle_index = np.empty(capacity, dtype="<i8")
+        next_start_time_s = np.empty(capacity, dtype="<f8")
+        next_start_position_m = np.empty((capacity, 2), dtype="<f8")
+        next_start_velocity_m_s = np.empty((capacity, 2), dtype="<f8")
+        next_root_interval = np.empty(capacity, dtype="<i8")
+        next_stochastic_event_restart_count = np.empty(capacity, dtype="<i8")
+        next_guard_restart_count = np.empty(capacity, dtype="<i8")
+        next_count = np.zeros(1, dtype="<i8")
+        _advance_brownian_root_wave(
+            prepared,
+            pending_particle_index[:pending_count],
+            macro_interval,
+            macro_end_s,
+            pending_start_time_s[:pending_count],
+            pending_start_position_m[:pending_count],
+            pending_start_velocity_m_s[:pending_count],
+            pending_root_interval[:pending_count],
+            pending_stochastic_event_restart_count[:pending_count],
+            pending_guard_restart_count[:pending_count],
+            position_m,
+            velocity_m_s,
+            charge_number,
+            active,
+            lifecycle,
+            terminal_time_s,
+            event_ordinal,
+            physical_boundary_event_ordinal,
+            exact_origin_time_s,
+            exact_origin_position_m,
+            exact_origin_velocity_m_s,
+            start_contact_state,
+            replay,
+            statistics,
+            failure_reason_code,
+            writer,
+            event_buffer,
+            failure_buffer,
+            next_particle_index,
+            next_start_time_s,
+            next_start_position_m,
+            next_start_velocity_m_s,
+            next_root_interval,
+            next_stochastic_event_restart_count,
+            next_guard_restart_count,
+            next_count,
+        )
+        pending_count = int(next_count[0])
+        del pending_particle_index
+        del pending_start_time_s
+        del pending_start_position_m
+        del pending_start_velocity_m_s
+        del pending_root_interval
+        del pending_stochastic_event_restart_count
+        del pending_guard_restart_count
+        pending_particle_index = next_particle_index
+        pending_start_time_s = next_start_time_s
+        pending_start_position_m = next_start_position_m
+        pending_start_velocity_m_s = next_start_velocity_m_s
+        pending_root_interval = next_root_interval
+        pending_stochastic_event_restart_count = next_stochastic_event_restart_count
+        pending_guard_restart_count = next_guard_restart_count
+
+
+def _advance_brownian_root_wave(
+    prepared: _PreparedRun,
+    particle_index: np.ndarray,
+    macro_interval: int,
+    macro_end_s: float,
+    root_start_time_s: np.ndarray,
+    root_start_position_m: np.ndarray,
+    root_start_velocity_m_s: np.ndarray,
+    root_interval: np.ndarray,
+    stochastic_event_restart_count: np.ndarray,
+    guard_restart_count: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    active: np.ndarray,
+    lifecycle: np.ndarray,
+    terminal_time_s: np.ndarray,
+    event_ordinal: np.ndarray,
+    physical_boundary_event_ordinal: np.ndarray,
+    exact_origin_time_s: np.ndarray,
+    exact_origin_position_m: np.ndarray,
+    exact_origin_velocity_m_s: np.ndarray,
+    start_contact_state: np.ndarray,
+    replay: _ReplayBuffer,
+    statistics: _EventStatistics,
+    failure_reason_code: np.ndarray,
+    writer: ResultWriter,
+    event_buffer: _BoundaryEventBuffer,
+    failure_buffer: _FailureEventBuffer,
+    pending_particle_index: np.ndarray,
+    pending_start_time_s: np.ndarray,
+    pending_start_position_m: np.ndarray,
+    pending_start_velocity_m_s: np.ndarray,
+    pending_root_interval: np.ndarray,
+    pending_stochastic_event_restart_count: np.ndarray,
+    pending_guard_restart_count: np.ndarray,
+    pending_count: np.ndarray,
+) -> None:
+    """Consume one fresh-root wave and leave only minimal restart state live."""
+
+    noise = prepared.physics.noise
+    if noise is None:
+        raise EngineError("Brownian root wave requires a resolved noise model")
     root_duration_s = macro_end_s - root_start_time_s
-    zero_rows = np.flatnonzero(root_duration_s == 0.0).astype("<i8", copy=False)
-    _initialize_zero_duration_brownian_rows(
-        prepared,
-        particle_index,
-        zero_rows,
-        root_start_time_s,
-        root_start_position_m,
-        root_start_velocity_m_s,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        start_contact_state,
-        replay,
-        statistics,
-        failure_reason_code,
-        writer,
-        event_buffer,
-        failure_buffer,
+    moving_rows = np.flatnonzero((root_duration_s > 0.0) & active[particle_index]).astype(
+        "<i8", copy=False
     )
-    moving_rows = np.flatnonzero(root_duration_s > 0.0).astype("<i8", copy=False)
     if not moving_rows.size:
         return
     particles = particle_index[moving_rows]
@@ -2184,19 +2396,23 @@ def _advance_brownian_slab(
     requested_durations = root_duration_s[moving_rows]
     start_positions = root_start_position_m[moving_rows]
     start_velocities = root_start_velocity_m_s[moving_rows]
+    root_intervals = root_interval[moving_rows]
+    event_restart_counts = stochastic_event_restart_count[moving_rows]
+    guard_restart_counts = guard_restart_count[moving_rows]
     start_charges = charge_number[particles].copy()
-    restart_failure = _langevin_restart_failure_reason(
+    restart_failure = _langevin_restart_failure_reasons(
         prepared,
-        axis_restart_count,
-        guard_restart_count,
+        event_restart_counts,
+        guard_restart_counts,
     )
-    if restart_failure != 0:
+    failed_budget = restart_failure != 0
+    if bool(failed_budget.any()):
         _fail_langevin_root_budget(
-            particles,
-            starts,
-            start_positions,
-            start_velocities,
-            start_charges,
+            particles[failed_budget],
+            starts[failed_budget],
+            start_positions[failed_budget],
+            start_velocities[failed_budget],
+            start_charges[failed_budget],
             position_m,
             velocity_m_s,
             charge_number,
@@ -2206,10 +2422,21 @@ def _advance_brownian_slab(
             event_ordinal,
             failure_reason_code,
             failure_buffer,
-            restart_failure,
+            restart_failure[failed_budget],
         )
+    within_budget = ~failed_budget
+    if not bool(within_budget.any()):
         return
-    batch = _prepare_langevin_root_batch(
+    particles = particles[within_budget]
+    starts = starts[within_budget]
+    requested_durations = requested_durations[within_budget]
+    start_positions = start_positions[within_budget]
+    start_velocities = start_velocities[within_budget]
+    start_charges = start_charges[within_budget]
+    root_intervals = root_intervals[within_budget]
+    event_restart_counts = event_restart_counts[within_budget]
+    guard_restart_counts = guard_restart_counts[within_budget]
+    batch, source_rows = _prepare_langevin_root_batch(
         prepared,
         particles,
         starts,
@@ -2233,18 +2460,20 @@ def _advance_brownian_slab(
     starts = batch.starts_s
     durations = batch.duration_s
     requested_durations = batch.requested_duration_s
-    coefficients = batch.coefficients
     numerical_status = batch.numerical_status
     safe_rate = batch.drag_rate_s_inv
     safe_thermal = batch.thermal_velocity_variance_m2_s2
-    safe_equilibrium = batch.equilibrium_velocity_m_s
+    root_intervals = root_intervals[source_rows]
+    event_restart_counts = event_restart_counts[source_rows]
+    guard_restart_counts = guard_restart_counts[source_rows]
+    del source_rows
     leaf_count = 1 << noise.interval_tree_depth
     particle_ids = prepared.schedule.particle_id[particles].astype(np.uint64, copy=False)
     increments = _brownian_leaf_increments(
         seed=prepared.case.spec.solver.seed,
         particle_id=particle_ids,
         macro_interval=macro_interval,
-        root_interval=root_interval,
+        root_interval=root_intervals,
         drag_rate_s_inv=safe_rate,
         thermal_velocity_variance_m2_s2=safe_thermal,
         root_duration_s=durations,
@@ -2252,225 +2481,58 @@ def _advance_brownian_slab(
         numerically_valid=numerical_status == NUMERICAL_STATUS_OK,
     )
     root_continuing = np.ones(particles.size, dtype=np.bool_)
+    runtime = _BrownianSlabRuntime(
+        prepared=prepared,
+        batch=batch,
+        particle_ids=particle_ids,
+        macro_interval=macro_interval,
+        root_interval=root_intervals,
+        stochastic_event_restart_count=event_restart_counts,
+        guard_restart_count=guard_restart_counts,
+        position_m=position_m,
+        velocity_m_s=velocity_m_s,
+        charge_number=charge_number,
+        active=active,
+        lifecycle=lifecycle,
+        terminal_time_s=terminal_time_s,
+        event_ordinal=event_ordinal,
+        physical_boundary_event_ordinal=physical_boundary_event_ordinal,
+        exact_origin_time_s=exact_origin_time_s,
+        exact_origin_position_m=exact_origin_position_m,
+        exact_origin_velocity_m_s=exact_origin_velocity_m_s,
+        start_contact_state=start_contact_state,
+        replay=replay,
+        statistics=statistics,
+        failure_reason_code=failure_reason_code,
+        writer=writer,
+        event_buffer=event_buffer,
+        failure_buffer=failure_buffer,
+        root_continuing=root_continuing,
+        pending_particle_index=pending_particle_index,
+        pending_start_time_s=pending_start_time_s,
+        pending_start_position_m=pending_start_position_m,
+        pending_start_velocity_m_s=pending_start_velocity_m_s,
+        pending_root_interval=pending_root_interval,
+        pending_stochastic_event_restart_count=pending_stochastic_event_restart_count,
+        pending_guard_restart_count=pending_guard_restart_count,
+        pending_count=pending_count,
+    )
     for leaf_index in range(leaf_count):
         increment, increment_valid = _next_brownian_increment(increments)
         local_active = active[particles] & root_continuing
         selected = np.flatnonzero(local_active).astype("<i8", copy=False)
         if not selected.size:
             break
-        leaf_start_s = starts[selected] + durations[selected] * (leaf_index / leaf_count)
-        leaf_target_s = starts[selected] + durations[selected] * ((leaf_index + 1) / leaf_count)
-        selected_particles = particles[selected]
-        current_position = position_m[selected_particles].copy()
-        current_velocity = velocity_m_s[selected_particles].copy()
-        current_charge = charge_number[selected_particles].copy()
-        resolved_time = leaf_target_s > leaf_start_s
-        for local_row_value in np.flatnonzero(~resolved_time):
-            local_row = int(local_row_value)
-            particle = int(selected_particles[local_row])
-            _mark_particle_failed(
-                particle,
-                _ParticleFailure(
-                    _FAILURE_INTEGRATOR_ACCURACY,
-                    float(leaf_start_s[local_row]),
-                    current_position[local_row],
-                    current_velocity[local_row],
-                    float(current_charge[local_row]),
-                ),
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                failure_reason_code,
-                failure_buffer,
-            )
-        selected = selected[resolved_time]
-        if not selected.size:
-            continue
-        leaf_start_s = leaf_start_s[resolved_time]
-        leaf_target_s = leaf_target_s[resolved_time]
-        selected_particles = selected_particles[resolved_time]
-        current_position = current_position[resolved_time]
-        current_velocity = current_velocity[resolved_time]
-        current_charge = current_charge[resolved_time]
-        leaf_valid = increment_valid[selected]
-        _mark_brownian_numerical_failures(
-            leaf_valid,
-            selected_particles,
-            leaf_start_s,
-            current_position,
-            current_velocity,
-            current_charge,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
-            failure_buffer,
-        )
-        selected = selected[leaf_valid]
-        if not selected.size:
-            continue
-        leaf_start_s = leaf_start_s[leaf_valid]
-        leaf_target_s = leaf_target_s[leaf_valid]
-        selected_particles = selected_particles[leaf_valid]
-        current_position = current_position[leaf_valid]
-        current_velocity = current_velocity[leaf_valid]
-        current_charge = current_charge[leaf_valid]
-        end_position, end_velocity, advance_valid = _advance_langevin_leaf_endpoint(
-            current_position,
-            current_velocity,
-            safe_equilibrium[selected],
-            safe_rate[selected],
-            durations[selected] / leaf_count,
+        _advance_brownian_tree_node(
+            runtime,
+            selected,
             increment,
             selected,
+            increment_valid,
+            noise.interval_tree_depth,
+            leaf_index,
         )
-        _mark_brownian_numerical_failures(
-            advance_valid,
-            selected_particles,
-            leaf_start_s,
-            current_position,
-            current_velocity,
-            current_charge,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
-            failure_buffer,
-        )
-        if not bool(advance_valid.any()):
-            continue
-        selected = selected[advance_valid]
-        leaf_start_s = leaf_start_s[advance_valid]
-        leaf_target_s = leaf_target_s[advance_valid]
-        selected_particles = selected_particles[advance_valid]
-        current_position = current_position[advance_valid]
-        current_velocity = current_velocity[advance_valid]
-        current_charge = current_charge[advance_valid]
-        end_position = end_position[advance_valid]
-        end_velocity = end_velocity[advance_valid]
-        end_charge = _advance_langevin_leaf_charge(
-            noise.revision,
-            current_charge,
-            batch.start_charge_number[selected],
-            leaf_target_s - starts[selected],
-            coefficients.charge_affine_rate_number_s[selected],
-            coefficients.charge_rate_derivative_s_inv[selected],
-        )
-        charge_valid = np.isfinite(end_charge)
-        _mark_brownian_numerical_failures(
-            charge_valid,
-            selected_particles,
-            leaf_start_s,
-            current_position,
-            current_velocity,
-            current_charge,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
-            failure_buffer,
-        )
-        if not bool(charge_valid.any()):
-            continue
-        selected = selected[charge_valid]
-        leaf_start_s = leaf_start_s[charge_valid]
-        leaf_target_s = leaf_target_s[charge_valid]
-        selected_particles = selected_particles[charge_valid]
-        current_position = current_position[charge_valid]
-        current_velocity = current_velocity[charge_valid]
-        current_charge = current_charge[charge_valid]
-        end_position = end_position[charge_valid]
-        end_velocity = end_velocity[charge_valid]
-        end_charge = end_charge[charge_valid]
-        proposal = _build_langevin_leaf_proposal(
-            selected_particles,
-            leaf_start_s,
-            leaf_target_s,
-            current_position,
-            current_velocity,
-            current_charge,
-            end_position,
-            end_velocity,
-            end_charge,
-            starts[selected],
-            batch.start_charge_number[selected],
-            coefficients.charge_affine_rate_number_s[selected],
-            coefficients.charge_rate_derivative_s_inv[selected],
-            coefficients.support_inside[selected],
-            coefficients.applicability_inside[selected],
-            numerical_status[selected],
-        )
-        restart_time_s = _advance_macro_proposal(
-            prepared,
-            proposal,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            exact_origin_time_s,
-            exact_origin_position_m,
-            exact_origin_velocity_m_s,
-            start_contact_state,
-            replay,
-            statistics,
-            failure_reason_code,
-            writer,
-            event_buffer,
-            failure_buffer,
-        )
-        restart_selected = _restart_langevin_axis_rows(
-            restart_time_s,
-            selected,
-            selected_particles,
-            prepared,
-            macro_interval,
-            macro_end_s,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            exact_origin_time_s,
-            exact_origin_position_m,
-            exact_origin_velocity_m_s,
-            start_contact_state,
-            replay,
-            statistics,
-            failure_reason_code,
-            writer,
-            event_buffer,
-            failure_buffer,
-            root_interval,
-            axis_restart_count,
-            guard_restart_count,
-        )
-        root_continuing[restart_selected] = False
 
-    if noise.revision != BROWNIAN_RZ_MIDPOINT_REVISION:
-        return
     root_target_s = starts + durations
     shortened = durations < requested_durations
     residual_rows = np.flatnonzero(
@@ -2479,36 +2541,410 @@ def _advance_brownian_slab(
     if not residual_rows.size:
         return
     residual_particles = particles[residual_rows]
-    _advance_brownian_slab(
-        prepared,
+    _queue_langevin_roots(
+        runtime,
+        residual_rows,
         residual_particles,
-        macro_interval,
-        macro_end_s,
         root_target_s[residual_rows],
-        position_m[residual_particles].copy(),
-        velocity_m_s[residual_particles].copy(),
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
-        start_contact_state,
-        replay,
-        statistics,
-        failure_reason_code,
-        writer,
-        event_buffer,
-        failure_buffer,
-        root_interval=root_interval + 1,
-        axis_restart_count=axis_restart_count,
-        guard_restart_count=guard_restart_count + 1,
+        event_restart_increment=0,
+        guard_restart_increment=1,
     )
+
+
+def _advance_brownian_tree_node(
+    runtime: _BrownianSlabRuntime,
+    root_rows: np.ndarray,
+    increment: JointOuIncrement,
+    increment_rows: np.ndarray,
+    increment_valid: np.ndarray,
+    tree_level: int,
+    tree_index: int,
+) -> None:
+    """Advance or conditionally split one particle-local OU tree node."""
+
+    batch = runtime.batch
+    particles = batch.particles[root_rows]
+    continuing = runtime.active[particles] & runtime.root_continuing[root_rows]
+    root_rows = root_rows[continuing]
+    increment_rows = increment_rows[continuing]
+    if not root_rows.size:
+        return
+
+    node_count = 1 << tree_level
+    start_time_s = batch.starts_s[root_rows] + batch.duration_s[root_rows] * (
+        tree_index / node_count
+    )
+    target_time_s = batch.starts_s[root_rows] + batch.duration_s[root_rows] * (
+        (tree_index + 1) / node_count
+    )
+    particles = batch.particles[root_rows]
+    current_position = runtime.position_m[particles].copy()
+    current_velocity = runtime.velocity_m_s[particles].copy()
+    current_charge = runtime.charge_number[particles].copy()
+    resolved_time = target_time_s > start_time_s
+    for local_row_value in np.flatnonzero(~resolved_time):
+        local_row = int(local_row_value)
+        particle = int(particles[local_row])
+        _mark_particle_failed(
+            particle,
+            _ParticleFailure(
+                _FAILURE_INTEGRATOR_ACCURACY,
+                float(start_time_s[local_row]),
+                current_position[local_row],
+                current_velocity[local_row],
+                float(current_charge[local_row]),
+            ),
+            runtime.position_m,
+            runtime.velocity_m_s,
+            runtime.charge_number,
+            runtime.active,
+            runtime.lifecycle,
+            runtime.terminal_time_s,
+            runtime.event_ordinal,
+            runtime.failure_reason_code,
+            runtime.failure_buffer,
+        )
+    root_rows = root_rows[resolved_time]
+    increment_rows = increment_rows[resolved_time]
+    if not root_rows.size:
+        return
+    start_time_s = start_time_s[resolved_time]
+    target_time_s = target_time_s[resolved_time]
+    particles = particles[resolved_time]
+    current_position = current_position[resolved_time]
+    current_velocity = current_velocity[resolved_time]
+    current_charge = current_charge[resolved_time]
+
+    node_valid = increment_valid[increment_rows]
+    _mark_brownian_numerical_failures(
+        node_valid,
+        particles,
+        start_time_s,
+        current_position,
+        current_velocity,
+        current_charge,
+        runtime.position_m,
+        runtime.velocity_m_s,
+        runtime.charge_number,
+        runtime.active,
+        runtime.lifecycle,
+        runtime.terminal_time_s,
+        runtime.event_ordinal,
+        runtime.failure_reason_code,
+        runtime.failure_buffer,
+    )
+    root_rows = root_rows[node_valid]
+    increment_rows = increment_rows[node_valid]
+    if not root_rows.size:
+        return
+    start_time_s = start_time_s[node_valid]
+    target_time_s = target_time_s[node_valid]
+    particles = particles[node_valid]
+    current_position = current_position[node_valid]
+    current_velocity = current_velocity[node_valid]
+    current_charge = current_charge[node_valid]
+
+    duration_s = batch.duration_s[root_rows] / node_count
+    end_position, end_velocity, advance_valid = _advance_langevin_leaf_endpoint(
+        current_position,
+        current_velocity,
+        batch.equilibrium_velocity_m_s[root_rows],
+        batch.drag_rate_s_inv[root_rows],
+        duration_s,
+        increment,
+        increment_rows,
+    )
+    _mark_brownian_numerical_failures(
+        advance_valid,
+        particles,
+        start_time_s,
+        current_position,
+        current_velocity,
+        current_charge,
+        runtime.position_m,
+        runtime.velocity_m_s,
+        runtime.charge_number,
+        runtime.active,
+        runtime.lifecycle,
+        runtime.terminal_time_s,
+        runtime.event_ordinal,
+        runtime.failure_reason_code,
+        runtime.failure_buffer,
+    )
+    root_rows = root_rows[advance_valid]
+    increment_rows = increment_rows[advance_valid]
+    if not root_rows.size:
+        return
+    start_time_s = start_time_s[advance_valid]
+    target_time_s = target_time_s[advance_valid]
+    particles = particles[advance_valid]
+    current_position = current_position[advance_valid]
+    current_velocity = current_velocity[advance_valid]
+    current_charge = current_charge[advance_valid]
+    end_position = end_position[advance_valid]
+    end_velocity = end_velocity[advance_valid]
+
+    coefficients = batch.coefficients
+    noise = runtime.prepared.physics.noise
+    if noise is None:
+        raise EngineError("Brownian tree lost its resolved noise model")
+    end_charge = _advance_langevin_leaf_charge(
+        batch.start_charge_number[root_rows],
+        target_time_s - batch.starts_s[root_rows],
+        coefficients.charge_affine_rate_number_s[root_rows],
+        coefficients.charge_rate_derivative_s_inv[root_rows],
+    )
+    charge_valid = np.isfinite(end_charge)
+    _mark_brownian_numerical_failures(
+        charge_valid,
+        particles,
+        start_time_s,
+        current_position,
+        current_velocity,
+        current_charge,
+        runtime.position_m,
+        runtime.velocity_m_s,
+        runtime.charge_number,
+        runtime.active,
+        runtime.lifecycle,
+        runtime.terminal_time_s,
+        runtime.event_ordinal,
+        runtime.failure_reason_code,
+        runtime.failure_buffer,
+    )
+    root_rows = root_rows[charge_valid]
+    increment_rows = increment_rows[charge_valid]
+    if not root_rows.size:
+        return
+    start_time_s = start_time_s[charge_valid]
+    target_time_s = target_time_s[charge_valid]
+    particles = particles[charge_valid]
+    current_position = current_position[charge_valid]
+    current_velocity = current_velocity[charge_valid]
+    current_charge = current_charge[charge_valid]
+    end_position = end_position[charge_valid]
+    end_velocity = end_velocity[charge_valid]
+    end_charge = end_charge[charge_valid]
+
+    proposal = _build_langevin_leaf_proposal(
+        particles,
+        start_time_s,
+        target_time_s,
+        current_position,
+        current_velocity,
+        current_charge,
+        end_position,
+        end_velocity,
+        end_charge,
+        batch.starts_s[root_rows],
+        batch.start_charge_number[root_rows],
+        coefficients.charge_affine_rate_number_s[root_rows],
+        coefficients.charge_rate_derivative_s_inv[root_rows],
+        coefficients.support_inside[root_rows],
+        coefficients.applicability_inside[root_rows],
+        batch.numerical_status[root_rows],
+    )
+    if tree_level >= noise.adaptive_max_depth:
+        _commit_brownian_tree_proposal(runtime, proposal, root_rows)
+        return
+
+    clear = _brownian_certified_clear_rows(runtime, proposal)
+    clear_rows = np.flatnonzero(clear).astype("<i8", copy=False)
+    if clear_rows.size:
+        clear_proposal = _subset_brownian_tree_proposal(
+            runtime,
+            proposal,
+            root_rows,
+            clear_rows,
+        )
+        _commit_brownian_tree_proposal(runtime, clear_proposal, root_rows[clear_rows])
+        del clear_proposal
+
+    refine_rows = np.flatnonzero(~clear).astype("<i8", copy=False)
+    if not refine_rows.size:
+        return
+    refine_root_rows = root_rows[refine_rows]
+    refine_increment_rows = increment_rows[refine_rows]
+    parent = JointOuIncrement(
+        increment.position_m[refine_increment_rows],
+        increment.velocity_m_s[refine_increment_rows],
+    )
+    left, right, child_valid = _split_joint_ou_increment_particle_local(
+        parent,
+        batch.drag_rate_s_inv[refine_root_rows],
+        batch.thermal_velocity_variance_m2_s2[refine_root_rows],
+        batch.duration_s[refine_root_rows] / node_count,
+        _brownian_normal_tensor(
+            runtime.prepared.case.spec.solver.seed,
+            runtime.particle_ids[refine_root_rows],
+            runtime.macro_interval,
+            root_interval=runtime.root_interval[refine_root_rows],
+            tree_level=tree_level,
+            tree_index=tree_index,
+            draw_kind=BROWNIAN_SPLIT_NORMAL_STREAM,
+        ),
+        increment_valid[refine_increment_rows],
+    )
+    runtime.statistics.refinements += int(refine_root_rows.size)
+    runtime.statistics.maximum_refinement_depth = max(
+        runtime.statistics.maximum_refinement_depth,
+        tree_level + 1,
+    )
+    child_rows = np.arange(refine_root_rows.size, dtype="<i8")
+    # Only the two conditional children and their row identity may remain live
+    # across recursion.  Releasing the proposal and endpoint temporaries keeps
+    # the depth-dependent storage equal to the memory-plan accounting instead
+    # of retaining a complete Hermite proposal in every Python frame.
+    del parent
+    del proposal
+    del increment
+    del increment_rows
+    del increment_valid
+    del root_rows
+    del particles
+    del start_time_s
+    del target_time_s
+    del current_position
+    del current_velocity
+    del current_charge
+    del duration_s
+    del end_position
+    del end_velocity
+    del end_charge
+    del clear
+    del clear_rows
+    del refine_rows
+    del refine_increment_rows
+    _advance_brownian_tree_node(
+        runtime,
+        refine_root_rows,
+        left,
+        child_rows,
+        child_valid,
+        tree_level + 1,
+        2 * tree_index,
+    )
+    del left
+    _advance_brownian_tree_node(
+        runtime,
+        refine_root_rows,
+        right,
+        child_rows,
+        child_valid,
+        tree_level + 1,
+        2 * tree_index + 1,
+    )
+
+
+def _brownian_certified_clear_rows(
+    runtime: _BrownianSlabRuntime,
+    proposal: StepProposal,
+) -> np.ndarray:
+    """Return rows whose represented cubic interval is continuously clear."""
+
+    eligible = proposal.numerical_status == NUMERICAL_STATUS_OK
+    eligible &= proposal.support_inside
+    eligible &= proposal.applicability_inside
+    particle_contact = runtime.start_contact_state[proposal.particle_index]
+    eligible &= particle_contact != SURFACE_STATE_PENDING
+    if not _uses_curved_event_path(runtime.prepared):
+        return eligible
+
+    clear = np.zeros(proposal.particle_index.size, dtype=np.bool_)
+    query_rows = np.flatnonzero(eligible).astype("<i8", copy=False)
+    if not query_rows.size:
+        return clear
+    runtime.statistics.candidate_queries += int(query_rows.size)
+    duration_s = proposal.target_time_s[query_rows] - proposal.start_time_s[query_rows]
+    certify_departure = particle_contact[query_rows] == SURFACE_STATE_DEPARTURE
+    for begin, end, event in _locate_curved_proposal_batches(
+        runtime.prepared,
+        proposal,
+        query_rows,
+        proposal.start_time_s[query_rows],
+        proposal.target_time_s[query_rows],
+        duration_s,
+        certify_departure,
+    ):
+        bounded_rows = query_rows[begin:end]
+        failure_codes = _curved_row_failure_codes(
+            runtime.prepared,
+            proposal,
+            bounded_rows,
+            start_contact_certified=event.start_contact_departure_certified,
+        )
+        clear[bounded_rows] = (event.status == CURVED_STATUS_CLEAR) & (failure_codes == 0)
+    return clear
+
+
+def _subset_brownian_tree_proposal(
+    runtime: _BrownianSlabRuntime,
+    proposal: StepProposal,
+    root_rows: np.ndarray,
+    local_rows: np.ndarray,
+) -> StepProposal:
+    """Select adaptive clear rows without exposing integrator-private path state."""
+
+    if local_rows.size == proposal.particle_index.size:
+        return proposal
+    selected = root_rows[local_rows]
+    coefficients = runtime.batch.coefficients
+    return _build_langevin_leaf_proposal(
+        proposal.particle_index[local_rows],
+        proposal.start_time_s[local_rows],
+        proposal.target_time_s[local_rows],
+        proposal.start_position_m[local_rows],
+        proposal.start_velocity_m_s[local_rows],
+        proposal.start_charge_number[local_rows],
+        proposal.end_position_m[local_rows],
+        proposal.end_velocity_m_s[local_rows],
+        proposal.end_charge_number[local_rows],
+        runtime.batch.starts_s[selected],
+        runtime.batch.start_charge_number[selected],
+        coefficients.charge_affine_rate_number_s[selected],
+        coefficients.charge_rate_derivative_s_inv[selected],
+        proposal.support_inside[local_rows],
+        proposal.applicability_inside[local_rows],
+        proposal.numerical_status[local_rows],
+    )
+
+
+def _commit_brownian_tree_proposal(
+    runtime: _BrownianSlabRuntime,
+    proposal: StepProposal,
+    root_rows: np.ndarray,
+) -> None:
+    """Commit one accepted node through the existing event/replay owner."""
+
+    restart_time_s = _advance_macro_proposal(
+        runtime.prepared,
+        proposal,
+        runtime.position_m,
+        runtime.velocity_m_s,
+        runtime.charge_number,
+        runtime.active,
+        runtime.lifecycle,
+        runtime.terminal_time_s,
+        runtime.event_ordinal,
+        runtime.physical_boundary_event_ordinal,
+        runtime.exact_origin_time_s,
+        runtime.exact_origin_position_m,
+        runtime.exact_origin_velocity_m_s,
+        runtime.start_contact_state,
+        runtime.replay,
+        runtime.statistics,
+        runtime.failure_reason_code,
+        runtime.writer,
+        runtime.event_buffer,
+        runtime.failure_buffer,
+    )
+    restart_rows = _queue_langevin_event_rows(
+        runtime,
+        restart_time_s,
+        root_rows,
+        proposal.particle_index,
+    )
+    runtime.root_continuing[restart_rows] = False
 
 
 def _next_brownian_increment(
@@ -2551,17 +2987,13 @@ def _advance_langevin_leaf_endpoint(
 
 
 def _advance_langevin_leaf_charge(
-    noise_revision: str,
-    current_charge_number: np.ndarray,
     root_charge_number: np.ndarray,
     elapsed_from_root_s: np.ndarray,
     charge_affine_rate_number_s: np.ndarray,
     charge_rate_derivative_s_inv: np.ndarray,
 ) -> np.ndarray:
-    """Advance the selected revision's root-owned charge representation."""
+    """Advance the unified midpoint revision's root-owned charge representation."""
 
-    if noise_revision == BROWNIAN_FROZEN_START_REVISION:
-        return current_charge_number.copy()
     return affine_exponential_charge(
         root_charge_number,
         elapsed_from_root_s,
@@ -2613,36 +3045,45 @@ def _build_langevin_leaf_proposal(
         raise EngineError("Brownian leaf proposal could not be constructed") from error
 
 
-def _restart_langevin_axis_rows(
+def _queue_langevin_roots(
+    runtime: _BrownianSlabRuntime,
+    root_rows: np.ndarray,
+    particles: np.ndarray,
+    start_time_s: np.ndarray,
+    *,
+    event_restart_increment: int,
+    guard_restart_increment: int,
+) -> None:
+    """Append one disjoint fresh-root subset to the slab's bounded SoA wave."""
+
+    count = int(root_rows.size)
+    if not count:
+        return
+    begin = int(runtime.pending_count[0])
+    end = begin + count
+    if end > runtime.pending_particle_index.size:
+        raise EngineError("Brownian pending fresh-root wave exceeded its slab capacity")
+    runtime.pending_particle_index[begin:end] = particles
+    runtime.pending_start_time_s[begin:end] = start_time_s
+    runtime.pending_start_position_m[begin:end] = runtime.position_m[particles]
+    runtime.pending_start_velocity_m_s[begin:end] = runtime.velocity_m_s[particles]
+    runtime.pending_root_interval[begin:end] = runtime.root_interval[root_rows] + 1
+    runtime.pending_stochastic_event_restart_count[begin:end] = (
+        runtime.stochastic_event_restart_count[root_rows] + event_restart_increment
+    )
+    runtime.pending_guard_restart_count[begin:end] = (
+        runtime.guard_restart_count[root_rows] + guard_restart_increment
+    )
+    runtime.pending_count[0] = end
+
+
+def _queue_langevin_event_rows(
+    runtime: _BrownianSlabRuntime,
     restart_time_s: np.ndarray | None,
     selected: np.ndarray,
     selected_particles: np.ndarray,
-    prepared: _PreparedRun,
-    macro_interval: int,
-    macro_end_s: float,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    start_contact_state: np.ndarray,
-    replay: _ReplayBuffer,
-    statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
-    writer: ResultWriter,
-    event_buffer: _BoundaryEventBuffer,
-    failure_buffer: _FailureEventBuffer,
-    root_interval: int,
-    axis_restart_count: int,
-    guard_restart_count: int,
 ) -> np.ndarray:
-    """Restart only rows whose accepted cubic prefix reached the RZ axis."""
+    """Queue rows whose accepted cubic prefix reached an axis or active wall."""
 
     if restart_time_s is None:
         return np.empty(0, dtype="<i8")
@@ -2650,37 +3091,16 @@ def _restart_langevin_axis_rows(
     if not restart_rows.size:
         return np.empty(0, dtype="<i8")
     restart_particles = selected_particles[restart_rows]
-    _advance_brownian_slab(
-        prepared,
+    selected_root_rows = selected[restart_rows]
+    _queue_langevin_roots(
+        runtime,
+        selected_root_rows,
         restart_particles,
-        macro_interval,
-        macro_end_s,
         restart_time_s[restart_rows],
-        position_m[restart_particles].copy(),
-        velocity_m_s[restart_particles].copy(),
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
-        start_contact_state,
-        replay,
-        statistics,
-        failure_reason_code,
-        writer,
-        event_buffer,
-        failure_buffer,
-        root_interval=root_interval + 1,
-        axis_restart_count=axis_restart_count + 1,
-        guard_restart_count=guard_restart_count,
+        event_restart_increment=1,
+        guard_restart_increment=0,
     )
-    return selected[restart_rows]
+    return selected_root_rows
 
 
 def _mark_langevin_root_failures(
@@ -2788,7 +3208,7 @@ def _brownian_leaf_increments(
     seed: int,
     particle_id: np.ndarray,
     macro_interval: int,
-    root_interval: int,
+    root_interval: np.ndarray,
     drag_rate_s_inv: np.ndarray,
     thermal_velocity_variance_m2_s2: np.ndarray,
     root_duration_s: np.ndarray,
@@ -3063,7 +3483,7 @@ def _brownian_normal_tensor(
     particle_id: np.ndarray,
     macro_interval: int,
     *,
-    root_interval: int,
+    root_interval: int | np.ndarray,
     tree_level: int,
     tree_index: int,
     draw_kind: int,
@@ -3071,17 +3491,37 @@ def _brownian_normal_tensor(
     """Return the two independent normal pairs needed by the 2-D OU update."""
 
     result = np.empty((particle_id.size, 2, 2), dtype="<f8")
-    for component in range(2):
-        result[:, component] = brownian_normal_pair_batch(
-            seed,
-            particle_id,
-            macro_interval,
-            root_interval,
-            tree_level=tree_level,
-            tree_index=tree_index,
-            component=component,
-            draw_kind=draw_kind,
-        )
+    intervals = np.asarray(root_interval, dtype="<i8")
+    if intervals.ndim == 0:
+        intervals = np.full(particle_id.size, intervals.item(), dtype="<i8")
+    if intervals.shape != particle_id.shape:
+        raise EngineError("Brownian root ordinals do not align with particle rows")
+    if intervals.size and bool((intervals == intervals[0]).all()):
+        for component in range(2):
+            result[:, component] = brownian_normal_pair_batch(
+                seed,
+                particle_id,
+                macro_interval,
+                int(intervals[0]),
+                tree_level=tree_level,
+                tree_index=tree_index,
+                component=component,
+                draw_kind=draw_kind,
+            )
+        return result
+    for interval_value in np.unique(intervals):
+        rows = np.flatnonzero(intervals == interval_value)
+        for component in range(2):
+            result[rows, component] = brownian_normal_pair_batch(
+                seed,
+                particle_id[rows],
+                macro_interval,
+                int(interval_value),
+                tree_level=tree_level,
+                tree_index=tree_index,
+                component=component,
+                draw_kind=draw_kind,
+            )
     return result
 
 
@@ -3195,21 +3635,31 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
             raise EngineError(
                 "predicted minimum solver footprint exceeds resources.memory_limit_mb"
             )
-        geometry = prepare_geometry(case.data.geometry, case.data.coordinate_system)
+        base_geometry = prepare_geometry(case.data.geometry, case.data.coordinate_system)
+        topology = _prepare_periodic_topology(case, base_geometry)
+        geometry, event_geometry = _prepare_contact_views(case, base_geometry, topology)
         schedule = realize_sources(case, geometry)
         if schedule.particle_count != expected_particle_count:
             raise EngineError("source realization changed the preflight particle count")
         _validate_source_facets(schedule, geometry)
+        _validate_brownian_surface_departures(schedule, geometry, physics)
         requirements = {
             item.name: RequiredFieldMetadata(
                 item.unit,
                 item.components,
                 item.stored_basis,
                 item.positive,
+                item.zero_on_rz_axis,
             )
             for item in physics.required_fields
         }
-        fields = prepare_required_fields(case.data, requirements)
+        fields = prepare_required_fields(
+            case.data,
+            requirements,
+            time_interval_s=(spec.time.start_s, spec.time.end_s),
+        )
+        validate_periodic_field_seams(fields, topology, base_geometry)
+        field_time_split_s = _field_time_split_times(spec.time, fields)
         primitive_ranges = {
             item.name: PrimitiveRange(
                 *fields.component_bounds(item.name),
@@ -3254,6 +3704,7 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
         EventLocationError,
         PhysicsConfigurationError,
         PhysicsEvaluationError,
+        TopologyPreparationError,
         ValueError,
     ) as error:
         raise EngineError(str(error)) from error
@@ -3266,6 +3717,8 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
         case,
         schedule,
         geometry,
+        event_geometry,
+        topology,
         fields,
         runtime,
         physics,
@@ -3287,6 +3740,16 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
         memory_plan.slab_particles if dense_certificate else 0,
         spec.solver.event.max_refinements,
     )
+    compiled_rules = prepare_boundary_rules(
+        rules,
+        group_count=(len(case.data.geometry.group_names) if topology is not None else None),
+    )
+    validate_boundary_rule_frames(
+        compiled_rules,
+        geometry.group_id,
+        geometry.facet_normal,
+        roundoff_ulps=spec.solver.event.roundoff_ulps,
+    )
     return _PreparedRun(
         case,
         schedule,
@@ -3294,10 +3757,13 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
         probe_times,
         probe_particle_index,
         geometry,
+        event_geometry,
+        topology,
         rules,
-        prepare_boundary_rules(rules),
+        compiled_rules,
         physics,
         fields,
+        field_time_split_s,
         dynamics,
         constant_acceleration,
         maximum_dt_over_tau,
@@ -3312,6 +3778,8 @@ def _prepare_memory_plan(
     case: SimulationCase,
     schedule: ParticleSchedule,
     geometry: PreparedGeometry,
+    event_geometry: PreparedGeometry,
+    topology: PreparedPeriodicTopology | None,
     fields: PreparedFieldSet,
     runtime: PhysicsRuntime,
     physics: PhysicsPlan,
@@ -3330,12 +3798,6 @@ def _prepare_memory_plan(
         resident_array_bytes(case.data),
     )
     event_paths = geometry.facet_count > 0 or case.data.coordinate_system == "axisymmetric_rz"
-    event_candidate_capacity = _event_candidate_capacity(
-        geometry,
-        memory_limit_bytes,
-        enabled=event_paths,
-    )
-    event_staging_capacity = event_candidate_capacity // 2
     dense_certificate = _uses_rk4_dense_certificate(
         case,
         physics,
@@ -3346,72 +3808,90 @@ def _prepare_memory_plan(
         and physics.requires_stage_evaluation
         and runtime.constant_acceleration_m_s2 is None
     )
-    memory_plan = plan_cpu_memory(
-        limit_bytes=memory_limit_bytes,
-        particle_count=schedule.particle_count,
-        canonical_data_bytes=canonical_data_bytes,
-        prepared_geometry_bytes=_geometry_memory_bytes(geometry),
-        particle_schedule_bytes=_schedule_memory_bytes(schedule),
-        physics_runtime_bytes=runtime.bound_array_nbytes,
-        field_runtime_bytes=fields.prepared_nbytes + field_cell_hint_bytes,
-        geometry_preparation_transient_bytes=(
-            geometry.volume_bvh_build_transient_nbytes
-            + (
-                min(schedule.particle_count, _PREPARE_SCAN_BATCH_SIZE) * np.dtype(np.bool_).itemsize
-                if geometry.facet_count
-                else 0
-            )
-        ),
-        field_preparation_transient_bytes=fields.preparation_transient_nbytes,
-        probe_index_bytes=probe_particle_index.nbytes,
-        output_buffer_bytes=_output_buffer_bytes(
-            schedule,
-            frame_times_s,
-            probe_times_s,
-            probe_particle_index,
-        ),
-        replay_work_bytes=_replay_work_bytes(
-            case,
-            schedule,
-            frame_times_s,
-            probe_times_s,
-            probe_particle_index,
-        ),
-        writer_reserve_bytes=RESULT_WRITER_RESERVE_BYTES,
-        requires_stage_evaluation=physics.requires_stage_evaluation,
-        # A yielded locator result remains live while the next broad-phase
-        # columns and the synchronously packed output candidate column coexist.
-        geometry_query_scratch_bytes=(3 * event_candidate_capacity * np.dtype("<i8").itemsize),
-        dense_path_bytes_per_particle=(176 if dense_certificate else 0),
-        stochastic_tree_work_bytes_per_particle=(_stochastic_tree_work_bytes_per_particle(physics)),
-        event_work_bytes_per_particle=_event_work_bytes_per_particle(
-            case,
-            event_paths=event_paths,
-        ),
-        certificate_work_bytes_per_particle=_certificate_work_bytes_per_particle(
-            case,
-            dense_enabled=dense_certificate,
-            local_range_enabled=local_range_certificate,
-        ),
-        release_work_bytes_per_particle=_surface_release_work_bytes_per_particle(
-            schedule,
-            event_paths=event_paths,
-        ),
-        event_candidate_capacity=event_candidate_capacity,
-        event_staging_capacity=event_staging_capacity,
-        event_staging_bytes_per_row=(_EVENT_STAGING_BYTES_PER_ROW if event_staging_capacity else 0),
-        event_staging_fixed_bytes=(
-            event_candidate_capacity * _EVENT_STAGING_BYTES_PER_CANDIDATE
-            + _EVENT_STAGING_FIXED_BYTES
-            if event_staging_capacity
-            else 0
-        ),
-        failure_staging_bytes_per_particle=_FAILURE_STAGING_BYTES_PER_PARTICLE,
+    prepared_geometry_bytes = _geometry_memory_bytes(geometry) + _topology_memory_bytes(topology)
+    if topology is None and event_geometry is not geometry:
+        prepared_geometry_bytes += event_geometry.facet_contact_enabled.nbytes
+    particle_schedule_bytes = _schedule_memory_bytes(schedule)
+    geometry_preparation_transient_bytes = geometry.volume_bvh_build_transient_nbytes + (
+        min(schedule.particle_count, _PREPARE_SCAN_BATCH_SIZE) * np.dtype(np.bool_).itemsize
+        if geometry.facet_count
+        else 0
     )
-    if memory_plan.planned_bytes > memory_limit_bytes or (
-        schedule.particle_count and memory_plan.slab_particles < 1
-    ):
-        raise EngineError("predicted solver memory exceeds resources.memory_limit_mb")
+    output_buffer_bytes = _output_buffer_bytes(
+        schedule,
+        frame_times_s,
+        probe_times_s,
+        probe_particle_index,
+    )
+    replay_work_bytes = _replay_work_bytes(
+        case,
+        schedule,
+        frame_times_s,
+        probe_times_s,
+        probe_particle_index,
+    )
+    stochastic_tree_work_bytes = _stochastic_tree_work_bytes_per_particle(physics)
+    event_work_bytes = _event_work_bytes_per_particle(case, event_paths=event_paths)
+    certificate_work_bytes = _certificate_work_bytes_per_particle(
+        case,
+        dense_enabled=dense_certificate,
+        local_range_enabled=local_range_certificate,
+    )
+    release_work_bytes = _surface_release_work_bytes_per_particle(
+        schedule,
+        event_paths=event_paths,
+    )
+
+    def plan_for_capacity(event_candidate_capacity: int) -> CpuMemoryPlan:
+        event_staging_capacity = event_candidate_capacity // 2
+        return plan_cpu_memory(
+            limit_bytes=memory_limit_bytes,
+            particle_count=schedule.particle_count,
+            canonical_data_bytes=canonical_data_bytes,
+            prepared_geometry_bytes=prepared_geometry_bytes,
+            particle_schedule_bytes=particle_schedule_bytes,
+            physics_runtime_bytes=runtime.bound_array_nbytes,
+            field_runtime_bytes=fields.prepared_nbytes + field_cell_hint_bytes,
+            geometry_preparation_transient_bytes=geometry_preparation_transient_bytes,
+            field_preparation_transient_bytes=fields.preparation_transient_nbytes,
+            probe_index_bytes=probe_particle_index.nbytes,
+            output_buffer_bytes=output_buffer_bytes,
+            replay_work_bytes=replay_work_bytes,
+            writer_reserve_bytes=RESULT_WRITER_RESERVE_BYTES,
+            requires_stage_evaluation=physics.requires_stage_evaluation,
+            # A yielded locator result remains live while the next broad-phase
+            # columns, its selected-candidate mask, and the synchronously packed
+            # output candidate column coexist.
+            geometry_query_scratch_bytes=(
+                (5 if event_geometry is not geometry else 4)
+                * event_candidate_capacity
+                * np.dtype("<i8").itemsize
+            ),
+            dense_path_bytes_per_particle=(176 if dense_certificate else 0),
+            stochastic_tree_work_bytes_per_particle=stochastic_tree_work_bytes,
+            event_work_bytes_per_particle=event_work_bytes,
+            certificate_work_bytes_per_particle=certificate_work_bytes,
+            release_work_bytes_per_particle=release_work_bytes,
+            event_candidate_capacity=event_candidate_capacity,
+            event_staging_capacity=event_staging_capacity,
+            event_staging_bytes_per_row=(
+                _EVENT_STAGING_BYTES_PER_ROW if event_staging_capacity else 0
+            ),
+            event_staging_fixed_bytes=(
+                event_candidate_capacity * _EVENT_STAGING_BYTES_PER_CANDIDATE
+                + _EVENT_STAGING_FIXED_BYTES
+                if event_staging_capacity
+                else 0
+            ),
+            failure_staging_bytes_per_particle=_FAILURE_STAGING_BYTES_PER_PARTICLE,
+        )
+
+    event_candidate_capacity, memory_plan = _event_candidate_capacity(
+        geometry,
+        memory_limit_bytes,
+        enabled=event_paths,
+        plan_for_capacity=plan_for_capacity,
+    )
     return memory_plan, field_cell_hint_bytes, event_candidate_capacity
 
 
@@ -3470,7 +3950,7 @@ def _validate_configuration(case: SimulationCase) -> None:
 
 
 def _validate_langevin_configuration(case: SimulationCase, physics: PhysicsPlan) -> None:
-    """Keep the first Brownian slice narrow enough to have one clear meaning."""
+    """Validate the coupled Langevin integrator and noise-model selection."""
 
     selected = physics.noise is not None
     if (case.spec.solver.integrator == "ou_langevin") != selected:
@@ -3480,14 +3960,35 @@ def _validate_langevin_configuration(case: SimulationCase, physics: PhysicsPlan)
         )
     if not selected:
         return
-    unsupported = sorted(
-        boundary.boundary_group
-        for boundary in case.spec.boundaries
-        if boundary.law not in {"stick", "escape", "hold"}
+
+
+def _validate_brownian_surface_departures(
+    schedule: ParticleSchedule,
+    geometry: PreparedGeometry,
+    physics: PhysicsPlan,
+) -> None:
+    """Reject Brownian wall starts whose incoming half-space is undefined."""
+
+    if physics.noise is None:
+        return
+    rows = np.flatnonzero(schedule.source_facet_id >= 0)
+    if not rows.size:
+        return
+    normals = geometry.facet_normal[schedule.source_facet_id[rows]]
+    normal_velocity = np.sum(schedule.velocity_m_s[rows] * normals, axis=1)
+    speed = np.linalg.norm(schedule.velocity_m_s[rows], axis=1)
+    margin = (
+        128.0
+        * np.finfo(np.float64).eps
+        * np.maximum(
+            speed,
+            np.finfo(np.float64).tiny,
+        )
     )
-    if unsupported:
+    if bool((np.abs(normal_velocity) <= margin).any()):
         raise EngineError(
-            f"inertial Langevin supports terminal stick/escape/hold boundaries only: {unsupported}"
+            "Brownian surface release cannot start with zero or tangential normal speed; "
+            "provide a realized velocity with an unambiguous finite normal component"
         )
 
 
@@ -3653,6 +4154,8 @@ def _tighten_exponential_midpoint_enclosure(
         local_bound, local_applicable, local_status, range_available = (
             prepared.dynamics.local_additive_acceleration_abs_upper_batch(
                 particle_index[selected],
+                start_time_s[selected],
+                target_time_s[selected],
                 predictor_position_lower,
                 predictor_position_upper,
                 predictor_velocity_lower,
@@ -4142,6 +4645,8 @@ def _rk4_dense_certificate_failure_codes(
             eligible_proposal_rows,
             dense,
             eligible_offsets,
+            eligible_start,
+            eligible_target,
             continuous_support,
         )
         proven_rows = eligible_certificate_rows[range_certified]
@@ -4176,6 +4681,8 @@ def _rk4_dense_interval_range_certificate(
     proposal_rows: np.ndarray,
     dense: Rk4DenseEnclosure,
     dense_rows: np.ndarray,
+    interval_start_s: np.ndarray,
+    interval_target_s: np.ndarray,
     continuous_support: np.ndarray,
 ) -> np.ndarray:
     """Use the cheap global proof before constructing local field ranges."""
@@ -4209,6 +4716,8 @@ def _rk4_dense_interval_range_certificate(
         certified, local_status, range_available = (
             prepared.dynamics.local_continuous_applicability_batch(
                 proposal.particle_index[proposal_rows[local_rows]],
+                interval_start_s[local_rows],
+                interval_target_s[local_rows],
                 dense.position_lower_m[dense_rows[local_rows]],
                 dense.position_upper_m[dense_rows[local_rows]],
                 dense.velocity_lower_m_s[dense_rows[local_rows]],
@@ -4388,6 +4897,8 @@ def _continuous_applicability_verdicts(
                 local, local_status, range_available = (
                     prepared.dynamics.local_continuous_applicability_batch(
                         indices[local_rows],
+                        proposal.start_time_s[selected[local_rows]],
+                        proposal.target_time_s[selected[local_rows]],
                         enclosure.position_lower_m[selected[local_rows]],
                         enclosure.position_upper_m[selected[local_rows]],
                         velocity_lower[local_rows],
@@ -4823,12 +5334,7 @@ def _allocate_curved_wavefront(
     stack_capacity = prepared.case.spec.solver.event.max_refinements + 1
     restart_time_s = (
         np.full(row_count, np.nan, dtype="<f8")
-        if (
-            proposal.path_kind == "cubic_hermite"
-            and prepared.physics.noise is not None
-            and prepared.physics.noise.revision == BROWNIAN_RZ_MIDPOINT_REVISION
-            and prepared.case.data.coordinate_system == "axisymmetric_rz"
-        )
+        if proposal.path_kind == "cubic_hermite" and prepared.physics.noise is not None
         else None
     )
     return _CurvedWavefront(
@@ -4846,6 +5352,20 @@ def _allocate_curved_wavefront(
         np.full(row_count, -1, dtype="<i8"),
         restart_time_s,
     )
+
+
+def _schedule_stochastic_restarts(
+    state: _CurvedWavefront,
+    rows: np.ndarray,
+    time_s: float | np.ndarray,
+) -> np.ndarray:
+    """End accepted OU intervals so active rows restart from committed state."""
+
+    if state.stochastic_restart_time_s is None or not rows.size:
+        return np.empty(0, dtype="<i8")
+    state.stochastic_restart_time_s[rows] = time_s
+    state.stack_top[rows] = -1
+    return rows
 
 
 def _initialize_curved_wavefront(
@@ -4901,13 +5421,22 @@ def _initialize_curved_wavefront(
     state.certify_departure[:] = (
         start_contact_state[proposal.particle_index] == SURFACE_STATE_DEPARTURE
     )
-    eligible = np.flatnonzero(local_active).astype("<i8", copy=False)
+    positive = state.current_time_s < proposal.target_time_s
+    active_response = local_active & (interactions != 0) & positive
+    response_rows = np.flatnonzero(active_response).astype("<i8", copy=False)
+    restart_rows = _schedule_stochastic_restarts(
+        state,
+        response_rows,
+        state.current_time_s[response_rows],
+    )
+    continue_root = local_active.copy()
+    continue_root[restart_rows] = False
+    eligible = np.flatnonzero(continue_root).astype("<i8", copy=False)
     state.stack_top[eligible] = 0
     state.stack_target_s[eligible, 0] = proposal.target_time_s[eligible]
     state.stack_depth[eligible, 0] = 0
     state.stack_interaction_reset[eligible, 0] = -1
     reuse_root = local_active & (interactions == 0)
-    positive = state.current_time_s < proposal.target_time_s
     root_rows = np.flatnonzero(reuse_root & positive).astype("<i8", copy=False)
     zero_rows = np.flatnonzero(reuse_root & ~positive).astype("<i8", copy=False)
     inactive_zero = np.flatnonzero((~reuse_root) & ~positive).astype("<i8", copy=False)
@@ -4942,17 +5471,18 @@ def _next_curved_wave_rows(
         state.stack_top[rows[exhausted]] -= 1
 
 
-def _locate_curved_wave_batches(
+def _locate_curved_proposal_batches(
     prepared: _PreparedRun,
     proposal: StepProposal,
     proposal_rows: np.ndarray,
-    wave_rows: np.ndarray,
+    start_time_s: np.ndarray,
     target_time_s: np.ndarray,
-    state: _CurvedWavefront,
-) -> Iterator[tuple[np.ndarray, np.ndarray, np.ndarray, CurvedEventBatch]]:
-    """Locate one logical curved query in stable capacity-bounded row prefixes."""
+    root_interval_s: np.ndarray,
+    certify_departure: np.ndarray,
+) -> Iterator[tuple[int, int, CurvedEventBatch]]:
+    """Locate one curved proposal in stable capacity-bounded row prefixes."""
 
-    if not wave_rows.size:
+    if not proposal_rows.size:
         return
     enclosure = proposal.path_enclosure
     if enclosure is None:
@@ -4961,7 +5491,7 @@ def _locate_curved_wave_batches(
     chord = _proposal_chord_deviation_bounds(
         proposal,
         proposal_rows,
-        state.current_time_s[wave_rows],
+        start_time_s,
         target_time_s,
     )
     (
@@ -4978,12 +5508,12 @@ def _locate_curved_wave_batches(
         prepared,
         proposal,
         proposal_rows,
-        state.current_time_s[wave_rows],
+        start_time_s,
         target_time_s,
     )
     try:
         candidate_count = count_curved_event_candidates(
-            prepared.geometry,
+            prepared.event_geometry,
             proposal.start_position_m[proposal_rows],
             proposal.start_velocity_m_s[proposal_rows],
             proposal.end_position_m[proposal_rows],
@@ -4994,10 +5524,13 @@ def _locate_curved_wave_batches(
             event_velocity_upper_m_s,
             start_time_s=proposal.start_time_s[proposal_rows],
             target_time_s=proposal.target_time_s[proposal_rows],
-            root_interval_s=state.root_interval_s[wave_rows],
+            root_interval_s=root_interval_s,
+            contact_radius_m=prepared.schedule.contact_radius_m[
+                proposal.particle_index[proposal_rows]
+            ],
             geometry_rtol=event.geometry_rtol,
             roundoff_ulps=event.roundoff_ulps,
-            certify_start_contact_departure=state.certify_departure[wave_rows],
+            certify_start_contact_departure=certify_departure,
             chord_deviation_bound_m=chord,
         )
     except (EventLocationError, GeometryPreparationError, ValueError) as error:
@@ -5008,15 +5541,13 @@ def _locate_curved_wave_batches(
         ) from error
     capacity = prepared.event_candidate_capacity
     begin = 0
-    while begin < wave_rows.size:
+    while begin < proposal_rows.size:
         end = _bounded_event_row_stop(candidate_count, begin, capacity)
-        bounded_rows = wave_rows[begin:end]
         bounded_proposal_rows = proposal_rows[begin:end]
-        bounded_targets = target_time_s[begin:end]
         bounded_chord = None if chord is None else chord[begin:end]
         try:
             result = locate_curved_first_event_batch(
-                prepared.geometry,
+                prepared.event_geometry,
                 proposal.start_position_m[bounded_proposal_rows],
                 proposal.start_velocity_m_s[bounded_proposal_rows],
                 proposal.end_position_m[bounded_proposal_rows],
@@ -5027,11 +5558,14 @@ def _locate_curved_wave_batches(
                 event_velocity_upper_m_s[begin:end],
                 start_time_s=proposal.start_time_s[bounded_proposal_rows],
                 target_time_s=proposal.target_time_s[bounded_proposal_rows],
-                root_interval_s=state.root_interval_s[bounded_rows],
+                root_interval_s=root_interval_s[begin:end],
+                contact_radius_m=prepared.schedule.contact_radius_m[
+                    proposal.particle_index[bounded_proposal_rows]
+                ],
                 geometry_rtol=event.geometry_rtol,
                 roundoff_ulps=event.roundoff_ulps,
                 candidate_capacity=capacity,
-                certify_start_contact_departure=state.certify_departure[bounded_rows],
+                certify_start_contact_departure=certify_departure[begin:end],
                 chord_deviation_bound_m=bounded_chord,
                 certify_monotone_approach=proposal.path_kind == "cubic_hermite",
                 use_position_controls=(
@@ -5052,12 +5586,46 @@ def _locate_curved_wave_batches(
                     if relative_position_control_upper_m is None
                     else relative_position_control_upper_m[begin:end]
                 ),
+                finite_contact_enabled=(
+                    prepared.geometry.facet_contact_enabled
+                    if prepared.geometry is not prepared.event_geometry
+                    else None
+                ),
             )
         except (EventLocationError, GeometryPreparationError, ValueError) as error:
             raise EngineError("bounded curved event batch violated its capacity") from error
         result.status[force_split[begin:end]] = CURVED_STATUS_SPLIT
-        yield bounded_rows, bounded_proposal_rows, bounded_targets, result
+        yield begin, end, result
         begin = end
+
+
+def _locate_curved_wave_batches(
+    prepared: _PreparedRun,
+    proposal: StepProposal,
+    proposal_rows: np.ndarray,
+    wave_rows: np.ndarray,
+    target_time_s: np.ndarray,
+    state: _CurvedWavefront,
+) -> Iterator[tuple[np.ndarray, np.ndarray, np.ndarray, CurvedEventBatch]]:
+    """Locate one logical curved query in stable capacity-bounded row prefixes."""
+
+    if not wave_rows.size:
+        return
+    for begin, end, result in _locate_curved_proposal_batches(
+        prepared,
+        proposal,
+        proposal_rows,
+        state.current_time_s[wave_rows],
+        target_time_s,
+        state.root_interval_s[wave_rows],
+        state.certify_departure[wave_rows],
+    ):
+        yield (
+            wave_rows[begin:end],
+            proposal_rows[begin:end],
+            target_time_s[begin:end],
+            result,
+        )
 
 
 def _proposal_event_bounds(
@@ -5670,9 +6238,11 @@ def _commit_curved_axis_wave(
             axis_charge,
         )
         statistics.axis_crossings += 1
-        if state.stochastic_restart_time_s is not None:
-            state.stochastic_restart_time_s[row] = time_s
-            state.stack_top[row] = -1
+        _schedule_stochastic_restarts(
+            state,
+            np.asarray([row], dtype="<i8"),
+            time_s,
+        )
 
 
 def _commit_curved_wall_wave(
@@ -5709,7 +6279,104 @@ def _commit_curved_wall_wave(
     prefix_rows = prefix_by_event[event_rows]
     particles = particle_index[rows]
     offsets, candidates = _select_event_candidate_rows(event, event_rows)
-    draws = wall_uniform_batch(
+    material_rows = np.arange(event_rows.size, dtype="<i8")
+    if prepared.topology is not None:
+        classification = classify_periodic_candidate_rows(
+            prepared.topology,
+            offsets,
+            candidates,
+        )
+        invalid = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_INVALID).astype(
+            "<i8", copy=False
+        )
+        _commit_curved_topology_failures(
+            particle_index,
+            rows,
+            prefix_rows,
+            event_rows,
+            invalid,
+            event,
+            prefix,
+            state.stack_top,
+            position_m,
+            velocity_m_s,
+            charge_number,
+            active,
+            lifecycle,
+            terminal_time_s,
+            event_ordinal,
+            failure_reason_code,
+            failures,
+        )
+        periodic_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_PERIODIC).astype(
+            "<i8", copy=False
+        )
+        for classified_value in periodic_rows:
+            classified_row = int(classified_value)
+            row = int(rows[classified_row])
+            event_row = int(event_rows[classified_row])
+            prefix_row = int(prefix_rows[classified_row])
+            particle = int(particles[classified_row])
+            begin = int(offsets[classified_row])
+            end = int(offsets[classified_row + 1])
+            committed = _commit_curved_periodic_row(
+                prepared,
+                row,
+                particle,
+                event_row,
+                event,
+                tuple(int(value) for value in candidates[begin:end]),
+                int(classification.primary_periodic_facet_id[classified_row]),
+                prefix.end_velocity_m_s[prefix_row],
+                float(prefix.end_charge_number[prefix_row]),
+                state,
+                position_m,
+                velocity_m_s,
+                charge_number,
+                event_ordinal,
+                start_contact_state,
+                pending,
+                replay,
+            )
+            if not committed:
+                _commit_curved_topology_failures(
+                    particle_index,
+                    rows,
+                    prefix_rows,
+                    event_rows,
+                    np.asarray([classified_row], dtype="<i8"),
+                    event,
+                    prefix,
+                    state.stack_top,
+                    position_m,
+                    velocity_m_s,
+                    charge_number,
+                    active,
+                    lifecycle,
+                    terminal_time_s,
+                    event_ordinal,
+                    failure_reason_code,
+                    failures,
+                )
+        material_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_MATERIAL).astype(
+            "<i8", copy=False
+        )
+    if not material_rows.size:
+        return
+    event_rows = event_rows[material_rows]
+    rows = rows[material_rows]
+    prefix_rows = prefix_rows[material_rows]
+    particles = particles[material_rows]
+    offsets, candidates = _select_event_candidate_rows(event, event_rows)
+    contact_radius = prepared.schedule.contact_radius_m[particles]
+    contact_normal = contact_normals_for_candidates(
+        prepared.geometry,
+        prefix.end_position_m[prefix_rows],
+        contact_radius,
+        offsets,
+        candidates,
+    )
+    law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
         prepared.case.spec.solver.seed,
         prepared.schedule.particle_id[particles],
         physical_boundary_event_ordinal[particles],
@@ -5720,9 +6387,13 @@ def _commit_curved_wall_wave(
         candidates,
         prepared.geometry.boundary_id,
         prepared.geometry.group_id,
-        prepared.geometry.facet_normal,
+        contact_normal,
         prefix.end_velocity_m_s[prefix_rows],
-        draws,
+        prepared.schedule.mass_kg[particles],
+        law_draws,
+        diffuse_draws,
+        thermal_normal_draws,
+        thermal_tangent_draws,
         roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
     )
     for response_row, event_value in enumerate(event_rows):
@@ -5787,6 +6458,180 @@ def _commit_curved_wall_wave(
         )
 
 
+def _commit_curved_topology_failures(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    prefix_rows: np.ndarray,
+    event_rows: np.ndarray,
+    classified_rows: np.ndarray,
+    event: CurvedEventBatch,
+    prefix: StepProposal,
+    stack_top: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    active: np.ndarray,
+    lifecycle: np.ndarray,
+    terminal_time_s: np.ndarray,
+    event_ordinal: np.ndarray,
+    failure_reason_code: np.ndarray,
+    failures: _FailureEventBuffer,
+) -> None:
+    """Fail only ambiguous or invalid topology rows in one curved wave."""
+
+    proposal_failures: list[tuple[int, _ParticleFailure]] = []
+    for classified_value in classified_rows:
+        classified_row = int(classified_value)
+        row = int(rows[classified_row])
+        prefix_row = int(prefix_rows[classified_row])
+        event_row = int(event_rows[classified_row])
+        proposal_failures.append(
+            (
+                row,
+                _ParticleFailure(
+                    _FAILURE_INDETERMINATE_BOUNDARY_POLICY,
+                    float(event.time_s[event_row]),
+                    event.position_m[event_row],
+                    prefix.end_velocity_m_s[prefix_row],
+                    float(prefix.end_charge_number[prefix_row]),
+                ),
+            )
+        )
+    _commit_event_proposal_failures(
+        particle_index,
+        proposal_failures,
+        stack_top,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        lifecycle,
+        terminal_time_s,
+        event_ordinal,
+        failure_reason_code,
+        failures,
+    )
+
+
+def _commit_curved_periodic_row(
+    prepared: _PreparedRun,
+    row: int,
+    particle: int,
+    event_row: int,
+    event: CurvedEventBatch,
+    candidate_facet_ids: tuple[int, ...],
+    primary_facet_id: int,
+    velocity_m_s_value: np.ndarray,
+    charge_number_value: float,
+    state: _CurvedWavefront,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    event_ordinal: np.ndarray,
+    start_contact_state: np.ndarray,
+    pending: _BoundaryEventBuffer,
+    replay: _ReplayBuffer,
+) -> bool:
+    """Commit one curved pure-translation transfer and restart its OU root."""
+
+    topology = prepared.topology
+    if topology is None or int(event_ordinal[particle]) >= _MAX_EVENT_ORDINAL:
+        raise EngineError("periodic transfer lost topology or exhausted its logical ordinal")
+    source_hit = BoundaryHit(
+        float(event.time_s[event_row]),
+        event.position_m[event_row].copy(),
+        primary_facet_id,
+        candidate_facet_ids,
+        prepared.event_geometry.facet_normal[primary_facet_id].copy(),
+        float(event.position_budget_m[event_row]),
+        float(event.time_budget_s[event_row]),
+        float(event.localization_residual_m[event_row]),
+    )
+    source_position, source_residual = _canonical_hit_position(
+        prepared.event_geometry,
+        source_hit,
+        primary_facet_id,
+        0.0,
+    )
+    destination_facet = int(topology.peer_facet_id[primary_facet_id])
+    destination_hit = BoundaryHit(
+        source_hit.time_s,
+        source_position + topology.translation_m[primary_facet_id],
+        destination_facet,
+        (destination_facet,),
+        prepared.event_geometry.facet_normal[destination_facet].copy(),
+        source_hit.position_budget_m,
+        source_hit.time_budget_s,
+        source_hit.localization_residual_m,
+    )
+    destination_position, destination_residual = _canonical_hit_position(
+        prepared.event_geometry,
+        destination_hit,
+        destination_facet,
+        0.0,
+    )
+    radius = float(prepared.schedule.contact_radius_m[particle])
+    valid_clearance = centers_respect_contact_radius(
+        prepared.geometry,
+        destination_position[None, :],
+        np.asarray([radius], dtype="<f8"),
+        tolerance_m=source_hit.position_budget_m,
+        allow_contact=False,
+    )
+    if not bool(valid_clearance[0]):
+        return False
+    resolved_hit = BoundaryHit(
+        source_hit.time_s,
+        source_position,
+        primary_facet_id,
+        candidate_facet_ids,
+        source_hit.normal,
+        source_hit.position_budget_m,
+        source_hit.time_budget_s,
+        max(source_hit.localization_residual_m, source_residual, destination_residual),
+    )
+    position_m[particle] = destination_position
+    velocity_m_s[particle] = velocity_m_s_value
+    charge_number[particle] = charge_number_value
+    event_ordinal[particle] += np.uint32(1)
+    _append_boundary_event(
+        pending,
+        particle,
+        resolved_hit,
+        0,
+        int(_OUTCOME_TRANSFERRED),
+        velocity_m_s_value,
+        velocity_m_s_value,
+        charge_number_value,
+        int(event_ordinal[particle]),
+        interaction_code=int(_INTERACTION_PERIODIC),
+        destination_facet_id=destination_facet,
+        position_post_m=destination_position,
+    )
+    state.current_time_s[row] = resolved_hit.time_s
+    state.current_position_m[row] = destination_position
+    state.current_velocity_m_s[row] = velocity_m_s_value
+    state.current_charge_number[row] = charge_number_value
+    state.interaction_count[row] += 1
+    state.certify_departure[row] = True
+    start_contact_state[particle] = SURFACE_STATE_DEPARTURE
+    prepared.dynamics.invalidate_field_cell(np.asarray([particle], dtype="<i8"))
+    _record_replay_jump(
+        replay,
+        particle,
+        resolved_hit.time_s,
+        destination_position,
+        velocity_m_s_value,
+        charge_number_value,
+    )
+    _schedule_stochastic_restarts(
+        state,
+        np.asarray([row], dtype="<i8"),
+        resolved_hit.time_s,
+    )
+    return True
+
+
 def _commit_curved_wall_row(
     prepared: _PreparedRun,
     row: int,
@@ -5819,15 +6664,19 @@ def _commit_curved_wall_row(
 ) -> None:
     """Commit one compiled curved response after its prefix was accepted."""
 
-    if int(event_ordinal[particle]) >= np.iinfo(np.uint32).max:
+    if int(event_ordinal[particle]) >= _MAX_EVENT_ORDINAL:
         raise EngineError("logical event ordinal exhausted uint32")
-    if int(physical_boundary_event_ordinal[particle]) >= np.iinfo(np.uint32).max:
+    if int(physical_boundary_event_ordinal[particle]) >= _MAX_EVENT_ORDINAL:
         raise EngineError("physical boundary event ordinal exhausted uint32")
     separation = endpoint_position_m - event.position_m[event_row]
     state_residual = math.hypot(float(separation[0]), float(separation[1]))
+    contact_radius = float(prepared.schedule.contact_radius_m[particle])
+    event_position = (
+        endpoint_position_m.copy() if contact_radius > 0.0 else event.position_m[event_row].copy()
+    )
     raw_hit = BoundaryHit(
         float(event.time_s[event_row]),
-        event.position_m[event_row].copy(),
+        event_position,
         int(event.primary_facet_id[event_row]),
         candidate_facet_ids,
         event.normal[event_row].copy(),
@@ -5839,6 +6688,7 @@ def _commit_curved_wall_row(
         prepared.geometry,
         raw_hit,
         primary_facet_id,
+        contact_radius,
     )
     resolved_hit = BoundaryHit(
         raw_hit.time_s,
@@ -5895,6 +6745,11 @@ def _commit_curved_wall_row(
         resolved_position,
         velocity_post_m_s,
         charge_pre_number,
+    )
+    _schedule_stochastic_restarts(
+        state,
+        np.asarray([row], dtype="<i8"),
+        resolved_hit.time_s,
     )
 
 
@@ -6030,6 +6885,7 @@ def _initialize_surface_releases(
         facets,
         local_position_m,
         local_velocity_m_s,
+        prepared.schedule.contact_radius_m[particle_index],
         None if acceleration is None else acceleration[particle_index],
         time_s,
         interval_s=prepared.case.spec.time.dt_s,
@@ -6133,7 +6989,7 @@ def _commit_surface_release_responses(
     if not rows.size:
         return
     particles = particle_index[rows]
-    ordinal_limit = np.iinfo(np.uint32).max
+    ordinal_limit = _MAX_EVENT_ORDINAL
     if bool((event_ordinal[particles] >= ordinal_limit).any()):
         raise EngineError("logical event ordinal exhausted uint32")
     if bool((physical_boundary_event_ordinal[particles] >= ordinal_limit).any()):
@@ -6142,21 +6998,32 @@ def _commit_surface_release_responses(
     candidates = source_facet_id[rows].astype("<i8", copy=False)
     particle_ids = prepared.schedule.particle_id[particles].astype("<u8", copy=False)
     physical_ordinals = physical_boundary_event_ordinal[particles].astype("<u8", copy=False)
-    draws = wall_uniform_batch(
+    law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
         prepared.case.spec.solver.seed,
         particle_ids,
         physical_ordinals,
     )
     velocity_pre = local_velocity_m_s[rows]
+    contact_normal = contact_normals_for_candidates(
+        prepared.geometry,
+        local_position_m[rows],
+        prepared.schedule.contact_radius_m[particles],
+        offsets,
+        candidates,
+    )
     responses = resolve_boundary_responses_batch(
         prepared.compiled_boundary_rules,
         offsets,
         candidates,
         prepared.geometry.boundary_id,
         prepared.geometry.group_id,
-        prepared.geometry.facet_normal,
+        contact_normal,
         velocity_pre,
-        draws,
+        prepared.schedule.mass_kg[particles],
+        law_draws,
+        diffuse_draws,
+        thermal_normal_draws,
+        thermal_tangent_draws,
         roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
     )
     post_release: SurfaceReleaseBatch | None = None
@@ -6173,6 +7040,7 @@ def _commit_surface_release_responses(
                 source_facet_id[post_rows],
                 local_position_m[post_rows],
                 responses.velocity_post_m_s[post_response_rows],
+                prepared.schedule.contact_radius_m[particles[post_response_rows]],
                 None,
                 time_s[post_rows],
                 interval_s=prepared.case.spec.time.dt_s,
@@ -6215,6 +7083,22 @@ def _commit_surface_release_responses(
             statistics,
             failure_reason_code,
         )
+
+
+def _post_response_surface_state(
+    prepared: _PreparedRun, particle: int, facet_id: int, remains_active: bool
+) -> np.uint8:
+    """Retain departure proof for a curved path or a finite material origin."""
+
+    if remains_active and (
+        _uses_curved_event_path(prepared)
+        or (
+            prepared.schedule.contact_radius_m[particle] > 0.0
+            and prepared.geometry.facet_contact_enabled[facet_id]
+        )
+    ):
+        return SURFACE_STATE_DEPARTURE
+    return SURFACE_STATE_RESOLVED
 
 
 def _commit_surface_release_response_row(
@@ -6292,6 +7176,7 @@ def _commit_surface_release_response_row(
         prepared.geometry,
         raw_hit,
         primary_facet_id,
+        float(prepared.schedule.contact_radius_m[particle]),
     )
     effective_normal = responses.effective_normal[response_row].copy()
     resolved_hit = BoundaryHit(
@@ -6365,10 +7250,8 @@ def _commit_surface_release_response_row(
             failures,
         )
         return
-    surface_release_state[particle] = (
-        SURFACE_STATE_DEPARTURE
-        if remains_active and _uses_curved_event_path(prepared)
-        else SURFACE_STATE_RESOLVED
+    surface_release_state[particle] = _post_response_surface_state(
+        prepared, particle, facet_id, remains_active
     )
     if not remains_active:
         return
@@ -6382,12 +7265,47 @@ def _commit_surface_release_response_row(
     )
 
 
-def _canonical_hit_position(
+def _finite_contact_hit_position(
+    geometry: PreparedGeometry,
+    hit: BoundaryHit,
+    primary_facet_id: int,
+    contact_radius_m: float,
+) -> tuple[np.ndarray, float]:
+    if primary_facet_id not in hit.candidate_facet_ids:
+        raise EngineError("primary finite-radius contact is absent from its candidate set")
+    residual = 0.0
+    for facet_id in hit.candidate_facet_ids:
+        start = geometry.facet_start_m[facet_id]
+        edge = geometry.facet_end_m[facet_id] - start
+        edge_squared = math.fsum((float(edge[0]) ** 2, float(edge[1]) ** 2))
+        offset = hit.position_m - start
+        parameter = min(
+            max(
+                math.fsum((float(offset[0]) * float(edge[0]), float(offset[1]) * float(edge[1])))
+                / edge_squared,
+                0.0,
+            ),
+            1.0,
+        )
+        closest = start + parameter * edge
+        separation = closest - hit.position_m
+        contact_residual = abs(
+            math.hypot(float(separation[0]), float(separation[1]))
+            - (contact_radius_m if geometry.facet_contact_enabled[facet_id] else 0.0)
+        )
+        residual = max(residual, contact_residual)
+    if not math.isfinite(residual) or residual > hit.position_budget_m:
+        raise EngineError("finite-radius boundary state exceeds its localization budget")
+    position = hit.position_m.copy()
+    position.flags.writeable = False
+    return position, residual
+
+
+def _point_contact_hit_position(
     geometry: PreparedGeometry,
     hit: BoundaryHit,
     primary_facet_id: int,
 ) -> tuple[np.ndarray, float]:
-    """Place accepted wall state on its canonical facet or shared corner."""
 
     common_nodes: set[int] = set()
     if len(hit.candidate_facet_ids) > 1:
@@ -6420,13 +7338,120 @@ def _canonical_hit_position(
     return position, residual
 
 
+def _canonical_hit_position(
+    geometry: PreparedGeometry,
+    hit: BoundaryHit,
+    primary_facet_id: int,
+    contact_radius_m: float,
+) -> tuple[np.ndarray, float]:
+    """Return a point hit on its wall or a finite-radius centre at first contact."""
+
+    if not math.isfinite(contact_radius_m) or contact_radius_m < 0.0:
+        raise EngineError("contact radius must be finite and nonnegative")
+    if contact_radius_m > 0.0 and any(
+        geometry.facet_contact_enabled[facet] for facet in hit.candidate_facet_ids
+    ):
+        return _finite_contact_hit_position(
+            geometry,
+            hit,
+            primary_facet_id,
+            contact_radius_m,
+        )
+    return _point_contact_hit_position(geometry, hit, primary_facet_id)
+
+
+def _prepare_periodic_topology(
+    case: SimulationCase,
+    geometry: PreparedGeometry,
+) -> PreparedPeriodicTopology | None:
+    """Resolve YAML group names into one geometry-owned topology map."""
+
+    spec = case.spec.topology
+    if spec is None:
+        return None
+    group_id = {name: index for index, name in enumerate(case.data.geometry.group_names)}
+    requests = tuple(
+        TranslationPairRequest(
+            group_id[pair.first_boundary_group],
+            group_id[pair.second_boundary_group],
+            pair.first_to_second_m,
+        )
+        for pair in spec.pairs
+    )
+    event = case.spec.solver.event
+    return prepare_periodic_topology(
+        geometry,
+        requests,
+        field_match_rtol=spec.field_match_rtol,
+        geometry_rtol=event.geometry_rtol,
+        roundoff_ulps=event.roundoff_ulps,
+    )
+
+
+def _prepare_contact_views(
+    case: SimulationCase,
+    geometry: PreparedGeometry,
+    topology: PreparedPeriodicTopology | None,
+) -> tuple[PreparedGeometry, PreparedGeometry]:
+    """Resolve group surface modes once and reuse the same mesh/BVH for centres."""
+
+    group_surface = np.ones(len(case.data.geometry.group_names), dtype=np.bool_)
+    group_id = {name: index for index, name in enumerate(case.data.geometry.group_names)}
+    for rule in case.spec.boundaries:
+        group_surface[group_id[rule.boundary_group]] = rule.contact_geometry == "particle_surface"
+    surface_contact = group_surface[geometry.group_id]
+    if topology is not None:
+        surface_contact &= ~topology.facet_is_periodic
+    if bool(surface_contact.all()):
+        return geometry, geometry
+    surface_contact.setflags(write=False)
+    return replace(geometry, facet_contact_enabled=surface_contact), geometry
+
+
 def _prepare_boundary_rules(case: SimulationCase) -> tuple[BoundaryRule, ...]:
     configured = {rule.boundary_group: rule for rule in case.spec.boundaries}
     result = []
     for group_id, name in enumerate(case.data.geometry.group_names):
-        rule = configured[name]
+        rule = configured.get(name)
+        if rule is None:
+            continue
         result.append(prepare_boundary_rule(group_id, rule.priority, rule.law, rule.parameters))
     return tuple(result)
+
+
+def _wall_response_draws(
+    seed: int,
+    particle_id: np.ndarray,
+    physical_boundary_event_ordinal: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Resolve independent wall-policy streams from physical event identity."""
+
+    return (
+        wall_uniform_batch(
+            seed,
+            particle_id,
+            physical_boundary_event_ordinal,
+            WALL_PROBABILISTIC_STICK_STREAM,
+        ),
+        wall_uniform_batch(
+            seed,
+            particle_id,
+            physical_boundary_event_ordinal,
+            WALL_MAXWELL_DIFFUSE_STREAM,
+        ),
+        wall_uniform_open_batch(
+            seed,
+            particle_id,
+            physical_boundary_event_ordinal,
+            WALL_MAXWELL_NORMAL_STREAM,
+        ),
+        wall_standard_normal_batch(
+            seed,
+            particle_id,
+            physical_boundary_event_ordinal,
+            WALL_MAXWELL_TANGENTIAL_STREAM,
+        ),
+    )
 
 
 def _validate_table_starts(
@@ -6435,9 +7460,56 @@ def _validate_table_starts(
     geometry: PreparedGeometry,
 ) -> None:
     event = case.spec.solver.event
+    geometry_scale = geometry.bbox_diagonal_m
+    clearance_tolerance = math.fsum(
+        (
+            event.geometry_rtol * geometry_scale,
+            float(event.roundoff_ulps) * np.finfo(np.float64).eps * geometry_scale,
+        )
+    )
     for begin in range(0, schedule.particle_count, _PREPARE_SCAN_BATCH_SIZE):
         end = min(begin + _PREPARE_SCAN_BATCH_SIZE, schedule.particle_count)
-        volume_containment = points_inside_volume(geometry, schedule.position_m[begin:end])
+        positions = schedule.position_m[begin:end]
+        radii = schedule.contact_radius_m[begin:end]
+        source_facets = schedule.source_facet_id[begin:end]
+        finite_rows = np.flatnonzero(radii > 0.0)
+        if finite_rows.size:
+            nonpenetrating = centers_respect_contact_radius(
+                geometry,
+                positions[finite_rows],
+                radii[finite_rows],
+                tolerance_m=clearance_tolerance,
+            )
+            if not bool(nonpenetrating.all()):
+                local = int(finite_rows[int(np.flatnonzero(~nonpenetrating)[0])])
+                particle_id = int(schedule.particle_id[begin + local])
+                raise EngineError(
+                    f"particle {particle_id} contact radius overlaps a material boundary at release"
+                )
+        if case.data.coordinate_system == "axisymmetric_rz":
+            invalid_radial = positions[:, 0] < -clearance_tolerance
+            if bool(invalid_radial.any()):
+                local = int(np.flatnonzero(invalid_radial)[0])
+                particle_id = int(schedule.particle_id[begin + local])
+                raise EngineError(
+                    f"particle {particle_id} centre has negative R in axisymmetric_rz"
+                )
+        table_rows = np.flatnonzero((source_facets < 0) & (radii > 0.0))
+        if table_rows.size:
+            strict = centers_respect_contact_radius(
+                geometry,
+                positions[table_rows],
+                radii[table_rows],
+                tolerance_m=clearance_tolerance,
+                allow_contact=False,
+            )
+            if not bool(strict.all()):
+                local = int(table_rows[int(np.flatnonzero(~strict)[0])])
+                particle_id = int(schedule.particle_id[begin + local])
+                raise EngineError(
+                    f"table particle {particle_id} contact body must start strictly inside the domain"
+                )
+        volume_containment = points_inside_volume(geometry, positions)
         for index in range(begin, end):
             if int(schedule.source_facet_id[index]) >= 0:
                 continue
@@ -6661,7 +7733,6 @@ def _advance_exact_paths(
             acceleration,
             departing_facet,
         ):
-            departing_facet[bounded_rows] = -1
             _consume_exact_wave(
                 prepared,
                 root_proposal.particle_index,
@@ -6672,6 +7743,7 @@ def _advance_exact_paths(
                 current_position,
                 current_velocity,
                 current_charge,
+                departing_facet,
                 stack_target,
                 stack_depth,
                 stack_interactions,
@@ -6694,6 +7766,27 @@ def _advance_exact_paths(
                 statistics,
                 failure_reason_code,
             )
+            committed_finite_wall = (
+                (event.status == EXACT_STATUS_WALL)
+                & active[root_proposal.particle_index[bounded_rows]]
+                & (
+                    prepared.schedule.contact_radius_m[root_proposal.particle_index[bounded_rows]]
+                    > 0.0
+                )
+                & (current_time[bounded_rows] == event.time_s)
+            )
+            if prepared.geometry is not prepared.event_geometry:
+                event_primary = event.primary_facet_id
+                valid_primary = event_primary >= 0
+                surface_primary = np.zeros(event_primary.size, dtype=np.bool_)
+                surface_primary[valid_primary] = prepared.geometry.facet_contact_enabled[
+                    event_primary[valid_primary]
+                ]
+                committed_finite_wall &= surface_primary
+            if bool(committed_finite_wall.any()):
+                departing_facet[bounded_rows[committed_finite_wall]] = (
+                    EXACT_DEPARTURE_FINITE_CONTACT_SET
+                )
             _flush_boundary_event_wave(writer, prepared, pending)
     return
 
@@ -6807,13 +7900,14 @@ def _locate_exact_wave_batches(
     try:
         path_kind = np.full(wave_rows.size, path_code, dtype="<u1")
         candidate_count = count_exact_event_candidates(
-            prepared.geometry,
+            prepared.event_geometry,
             path_kind,
             current_position_m[wave_rows],
             current_velocity_m_s[wave_rows],
             acceleration_m_s2[wave_rows],
             start_time_s=current_time_s[wave_rows],
             target_time_s=target_time_s,
+            contact_radius_m=prepared.schedule.contact_radius_m[particle_index[wave_rows]],
             geometry_rtol=event.geometry_rtol,
             roundoff_ulps=event.roundoff_ulps,
             certified_departing_facet_id=departing_facet_id[wave_rows],
@@ -6832,17 +7926,23 @@ def _locate_exact_wave_batches(
         bounded_targets = target_time_s[begin:end]
         try:
             result = locate_exact_first_event_batch(
-                prepared.geometry,
+                prepared.event_geometry,
                 path_kind[begin:end],
                 current_position_m[bounded_rows],
                 current_velocity_m_s[bounded_rows],
                 acceleration_m_s2[bounded_rows],
                 start_time_s=current_time_s[bounded_rows],
                 target_time_s=bounded_targets,
+                contact_radius_m=prepared.schedule.contact_radius_m[particle_index[bounded_rows]],
                 geometry_rtol=event.geometry_rtol,
                 roundoff_ulps=event.roundoff_ulps,
                 candidate_capacity=capacity,
                 certified_departing_facet_id=departing_facet_id[bounded_rows],
+                finite_contact_enabled=(
+                    prepared.geometry.facet_contact_enabled
+                    if prepared.geometry is not prepared.event_geometry
+                    else None
+                ),
             )
         except (EventLocationError, GeometryPreparationError, ValueError) as error:
             raise EngineError("bounded exact event batch violated its capacity") from error
@@ -6883,6 +7983,7 @@ def _consume_exact_wave(
     current_position_m: np.ndarray,
     current_velocity_m_s: np.ndarray,
     current_charge_number: np.ndarray,
+    departing_facet_id: np.ndarray,
     stack_target_s: np.ndarray,
     stack_depth: np.ndarray,
     stack_interactions: np.ndarray,
@@ -6929,6 +8030,7 @@ def _consume_exact_wave(
     wave_top = stack_top[wave_rows]
     interaction_count = stack_interactions[wave_rows, np.maximum(wave_top, 0)]
     split_mask &= interaction_count >= prepared.case.spec.solver.event.max_interactions_per_step
+    departing_facet_id[wave_rows[~split_mask]] = EXACT_DEPARTURE_NONE
     split_rows = wave_rows[split_mask]
     _split_exact_wave_rows(
         prepared,
@@ -7016,6 +8118,7 @@ def _consume_exact_wave(
         current_position_m,
         current_velocity_m_s,
         current_charge_number,
+        departing_facet_id,
         stack_interactions,
         stack_top,
         position_m,
@@ -7434,6 +8537,7 @@ def _commit_exact_wall_rows(
     current_position_m: np.ndarray,
     current_velocity_m_s: np.ndarray,
     current_charge_number: np.ndarray,
+    departing_facet_id: np.ndarray,
     stack_interactions: np.ndarray,
     stack_top: np.ndarray,
     position_m: np.ndarray,
@@ -7488,9 +8592,112 @@ def _commit_exact_wall_rows(
         return
     selected_wave_rows = wall_wave_rows[valid]
     offsets, candidates = _select_event_candidate_rows(event, selected_wave_rows)
-    selected_rows = rows[valid]
+    material_rows = np.arange(valid.size, dtype="<i8")
+    if prepared.topology is not None:
+        classification = classify_periodic_candidate_rows(
+            prepared.topology,
+            offsets,
+            candidates,
+        )
+        invalid = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_INVALID).astype(
+            "<i8", copy=False
+        )
+        _commit_exact_topology_failures(
+            particle_index,
+            rows,
+            wall_wave_rows,
+            valid,
+            invalid,
+            event,
+            endpoint,
+            stack_top,
+            position_m,
+            velocity_m_s,
+            charge_number,
+            active,
+            lifecycle,
+            terminal_time_s,
+            event_ordinal,
+            failure_reason_code,
+            failures,
+        )
+        periodic_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_PERIODIC).astype(
+            "<i8", copy=False
+        )
+        for classified_value in periodic_rows:
+            classified_row = int(classified_value)
+            endpoint_row = int(valid[classified_row])
+            row = int(rows[endpoint_row])
+            event_row = int(wall_wave_rows[endpoint_row])
+            begin = int(offsets[classified_row])
+            end = int(offsets[classified_row + 1])
+            committed = _commit_exact_periodic_response(
+                prepared,
+                row,
+                int(particle_index[row]),
+                event_row,
+                event,
+                tuple(int(value) for value in candidates[begin:end]),
+                int(classification.primary_periodic_facet_id[classified_row]),
+                endpoint.velocity_m_s[endpoint_row],
+                float(endpoint.charge_number[endpoint_row]),
+                current_time_s,
+                current_position_m,
+                current_velocity_m_s,
+                current_charge_number,
+                departing_facet_id,
+                stack_interactions,
+                stack_top,
+                position_m,
+                velocity_m_s,
+                charge_number,
+                event_ordinal,
+                exact_origin_time_s,
+                exact_origin_position_m,
+                exact_origin_velocity_m_s,
+                surface_release_state,
+                pending,
+                replay,
+            )
+            if not committed:
+                _commit_exact_topology_failures(
+                    particle_index,
+                    rows,
+                    wall_wave_rows,
+                    valid,
+                    np.asarray([classified_row], dtype="<i8"),
+                    event,
+                    endpoint,
+                    stack_top,
+                    position_m,
+                    velocity_m_s,
+                    charge_number,
+                    active,
+                    lifecycle,
+                    terminal_time_s,
+                    event_ordinal,
+                    failure_reason_code,
+                    failures,
+                )
+        material_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_MATERIAL).astype(
+            "<i8", copy=False
+        )
+    if not material_rows.size:
+        return
+    material_valid = valid[material_rows]
+    selected_wave_rows = wall_wave_rows[material_valid]
+    offsets, candidates = _select_event_candidate_rows(event, selected_wave_rows)
+    selected_rows = rows[material_valid]
     particles = particle_index[selected_rows]
-    draws = wall_uniform_batch(
+    contact_radius = prepared.schedule.contact_radius_m[particles]
+    contact_normal = contact_normals_for_candidates(
+        prepared.geometry,
+        event.position_m[selected_wave_rows],
+        contact_radius,
+        offsets,
+        candidates,
+    )
+    law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
         prepared.case.spec.solver.seed,
         prepared.schedule.particle_id[particles],
         physical_boundary_event_ordinal[particles],
@@ -7501,12 +8708,16 @@ def _commit_exact_wall_rows(
         candidates,
         prepared.geometry.boundary_id,
         prepared.geometry.group_id,
-        prepared.geometry.facet_normal,
-        endpoint.velocity_m_s[valid],
-        draws,
+        contact_normal,
+        endpoint.velocity_m_s[material_valid],
+        prepared.schedule.mass_kg[particles],
+        law_draws,
+        diffuse_draws,
+        thermal_normal_draws,
+        thermal_tangent_draws,
         roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
     )
-    for response_row, selected_value in enumerate(valid):
+    for response_row, selected_value in enumerate(material_valid):
         endpoint_row = int(selected_value)
         row = int(rows[endpoint_row])
         event_row = int(wall_wave_rows[endpoint_row])
@@ -7575,6 +8786,194 @@ def _commit_exact_wall_rows(
         )
 
 
+def _commit_exact_topology_failures(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    wall_wave_rows: np.ndarray,
+    valid: np.ndarray,
+    classified_rows: np.ndarray,
+    event: ExactEventBatch,
+    endpoint: _ExactEndpointBatch,
+    stack_top: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    active: np.ndarray,
+    lifecycle: np.ndarray,
+    terminal_time_s: np.ndarray,
+    event_ordinal: np.ndarray,
+    failure_reason_code: np.ndarray,
+    failures: _FailureEventBuffer,
+) -> None:
+    """Fail only ambiguous or invalid topology rows in one exact wave."""
+
+    proposal_failures: list[tuple[int, _ParticleFailure]] = []
+    for classified_value in classified_rows:
+        endpoint_row = int(valid[int(classified_value)])
+        row = int(rows[endpoint_row])
+        event_row = int(wall_wave_rows[endpoint_row])
+        proposal_failures.append(
+            (
+                row,
+                _ParticleFailure(
+                    _FAILURE_INDETERMINATE_BOUNDARY_POLICY,
+                    float(event.time_s[event_row]),
+                    event.position_m[event_row],
+                    endpoint.velocity_m_s[endpoint_row],
+                    float(endpoint.charge_number[endpoint_row]),
+                ),
+            )
+        )
+    _commit_event_proposal_failures(
+        particle_index,
+        proposal_failures,
+        stack_top,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        lifecycle,
+        terminal_time_s,
+        event_ordinal,
+        failure_reason_code,
+        failures,
+    )
+
+
+def _commit_exact_periodic_response(
+    prepared: _PreparedRun,
+    row: int,
+    particle: int,
+    event_row: int,
+    event: ExactEventBatch,
+    candidate_facet_ids: tuple[int, ...],
+    primary_facet_id: int,
+    velocity_m_s_value: np.ndarray,
+    charge_number_value: float,
+    current_time_s: np.ndarray,
+    current_position_m: np.ndarray,
+    current_velocity_m_s: np.ndarray,
+    current_charge_number: np.ndarray,
+    departing_facet_id: np.ndarray,
+    stack_interactions: np.ndarray,
+    stack_top: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    event_ordinal: np.ndarray,
+    exact_origin_time_s: np.ndarray,
+    exact_origin_position_m: np.ndarray,
+    exact_origin_velocity_m_s: np.ndarray,
+    surface_release_state: np.ndarray,
+    pending: _BoundaryEventBuffer,
+    replay: _ReplayBuffer,
+) -> bool:
+    """Commit one exact pure-translation transfer without wall RNG identity."""
+
+    topology = prepared.topology
+    if topology is None or int(event_ordinal[particle]) >= _MAX_EVENT_ORDINAL:
+        raise EngineError("periodic transfer lost topology or exhausted its logical ordinal")
+    source_hit = BoundaryHit(
+        float(event.time_s[event_row]),
+        event.position_m[event_row].copy(),
+        primary_facet_id,
+        candidate_facet_ids,
+        prepared.event_geometry.facet_normal[primary_facet_id].copy(),
+        float(event.position_budget_m[event_row]),
+        float(event.time_budget_s[event_row]),
+        float(event.localization_residual_m[event_row]),
+    )
+    source_position, source_residual = _canonical_hit_position(
+        prepared.event_geometry,
+        source_hit,
+        primary_facet_id,
+        0.0,
+    )
+    destination_facet = int(topology.peer_facet_id[primary_facet_id])
+    translated = source_position + topology.translation_m[primary_facet_id]
+    destination_hit = BoundaryHit(
+        source_hit.time_s,
+        translated,
+        destination_facet,
+        (destination_facet,),
+        prepared.event_geometry.facet_normal[destination_facet].copy(),
+        source_hit.position_budget_m,
+        source_hit.time_budget_s,
+        source_hit.localization_residual_m,
+    )
+    destination_position, destination_residual = _canonical_hit_position(
+        prepared.event_geometry,
+        destination_hit,
+        destination_facet,
+        0.0,
+    )
+    radius = float(prepared.schedule.contact_radius_m[particle])
+    valid_clearance = centers_respect_contact_radius(
+        prepared.geometry,
+        destination_position[None, :],
+        np.asarray([radius], dtype="<f8"),
+        tolerance_m=source_hit.position_budget_m,
+        allow_contact=False,
+    )
+    if not bool(valid_clearance[0]):
+        return False
+    resolved_hit = BoundaryHit(
+        source_hit.time_s,
+        source_position,
+        primary_facet_id,
+        candidate_facet_ids,
+        source_hit.normal,
+        source_hit.position_budget_m,
+        source_hit.time_budget_s,
+        max(source_hit.localization_residual_m, source_residual, destination_residual),
+    )
+    position_m[particle] = destination_position
+    velocity_m_s[particle] = velocity_m_s_value
+    charge_number[particle] = charge_number_value
+    event_ordinal[particle] += np.uint32(1)
+    _append_boundary_event(
+        pending,
+        particle,
+        resolved_hit,
+        0,
+        int(_OUTCOME_TRANSFERRED),
+        velocity_m_s_value,
+        velocity_m_s_value,
+        charge_number_value,
+        int(event_ordinal[particle]),
+        interaction_code=int(_INTERACTION_PERIODIC),
+        destination_facet_id=destination_facet,
+        position_post_m=destination_position,
+    )
+    current_time_s[row] = resolved_hit.time_s
+    current_position_m[row] = destination_position
+    current_velocity_m_s[row] = velocity_m_s_value
+    current_charge_number[row] = charge_number_value
+    top = int(stack_top[row])
+    stack_interactions[row, top] += 1
+    departing_facet_id[row] = destination_facet
+    surface_release_state[particle] = SURFACE_STATE_RESOLVED
+    prepared.dynamics.invalidate_field_cell(np.asarray([particle], dtype="<i8"))
+    _set_exact_origin(
+        particle,
+        resolved_hit.time_s,
+        destination_position,
+        velocity_m_s_value,
+        exact_origin_time_s,
+        exact_origin_position_m,
+        exact_origin_velocity_m_s,
+    )
+    _record_replay_jump(
+        replay,
+        particle,
+        resolved_hit.time_s,
+        destination_position,
+        velocity_m_s_value,
+        charge_number_value,
+    )
+    return True
+
+
 def _select_event_candidate_rows(
     event: ExactEventBatch | CurvedEventBatch,
     event_rows: np.ndarray,
@@ -7636,9 +9035,9 @@ def _commit_exact_wall_response(
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
 ) -> None:
-    if int(event_ordinal[particle_index]) >= np.iinfo(np.uint32).max:
+    if int(event_ordinal[particle_index]) >= _MAX_EVENT_ORDINAL:
         raise EngineError("logical event ordinal exhausted uint32")
-    if int(physical_boundary_event_ordinal[particle_index]) >= np.iinfo(np.uint32).max:
+    if int(physical_boundary_event_ordinal[particle_index]) >= _MAX_EVENT_ORDINAL:
         raise EngineError("physical boundary event ordinal exhausted uint32")
     raw_hit = BoundaryHit(
         float(event.time_s[event_row]),
@@ -7654,6 +9053,7 @@ def _commit_exact_wall_response(
         prepared.geometry,
         raw_hit,
         primary_facet_id,
+        float(prepared.schedule.contact_radius_m[particle_index]),
     )
     resolved_hit = BoundaryHit(
         raw_hit.time_s,
@@ -7691,7 +9091,9 @@ def _commit_exact_wall_response(
         charge_pre_number,
         logical_ordinal,
     )
-    surface_release_state[particle_index] = SURFACE_STATE_RESOLVED
+    surface_release_state[particle_index] = _post_response_surface_state(
+        prepared, particle_index, primary_facet_id, remains_active
+    )
     statistics.wall_interactions += 1
     current_time_s[row] = resolved_hit.time_s
     if not remains_active:
@@ -7776,6 +9178,9 @@ def _allocate_boundary_event_buffer(
             np.empty(0, dtype="<f8"),
             np.empty(0, dtype="<u4"),
             np.empty(0, dtype="<i8"),
+            np.empty(0, dtype="<u1"),
+            np.empty(0, dtype="<i8"),
+            np.empty((0, 2), dtype="<f8"),
             np.empty((0, 2), dtype="<f8"),
             np.empty((0, 2), dtype="<f8"),
             np.empty((0, 2), dtype="<f8"),
@@ -7795,6 +9200,9 @@ def _allocate_boundary_event_buffer(
         np.empty(row_capacity, dtype="<f8"),
         np.empty(row_capacity, dtype="<u4"),
         np.empty(row_capacity, dtype="<i8"),
+        np.empty(row_capacity, dtype="<u1"),
+        np.empty(row_capacity, dtype="<i8"),
+        np.empty((row_capacity, 2), dtype="<f8"),
         np.empty((row_capacity, 2), dtype="<f8"),
         np.empty((row_capacity, 2), dtype="<f8"),
         np.empty((row_capacity, 2), dtype="<f8"),
@@ -7832,6 +9240,10 @@ def _append_boundary_event(
     velocity_post_m_s: np.ndarray,
     charge_pre_number: float,
     event_ordinal: int,
+    *,
+    interaction_code: int = int(_INTERACTION_WALL),
+    destination_facet_id: int = -1,
+    position_post_m: np.ndarray | None = None,
 ) -> None:
     """Append one event to the shared row/candidate capacity arena."""
 
@@ -7842,15 +9254,22 @@ def _append_boundary_event(
         raise EngineError("boundary-event row buffer exhausted")
     if row + 1 + candidate_end > pending.arena_capacity:
         raise EngineError("boundary-event candidate arena exhausted")
-    if not (0 < law_code < _BOUNDARY_LAW_OUTPUT.size):
-        raise EngineError("compiled boundary response returned an unknown law code")
-    if not (0 < outcome_code < _BOUNDARY_OUTCOME_OUTPUT.size):
-        raise EngineError("compiled boundary response returned an unknown outcome code")
+    post = _canonical_boundary_event_post(
+        hit,
+        interaction_code,
+        law_code,
+        outcome_code,
+        destination_facet_id,
+        position_post_m,
+    )
     pending.particle_index[row] = particle_index
     pending.time_s[row] = hit.time_s
     pending.event_ordinal[row] = event_ordinal
     pending.primary_facet_id[row] = hit.facet_id
+    pending.interaction_code[row] = interaction_code
+    pending.destination_facet_id[row] = destination_facet_id
     pending.position_m[row] = hit.position_m
+    pending.position_post_m[row] = post
     pending.normal[row] = hit.normal
     pending.velocity_pre_m_s[row] = velocity_pre_m_s
     pending.velocity_post_m_s[row] = velocity_post_m_s
@@ -7865,6 +9284,38 @@ def _append_boundary_event(
     pending.candidate_offset[row + 1] = candidate_end
     pending.row_count = row + 1
     pending.candidate_count = candidate_end
+
+
+def _canonical_boundary_event_post(
+    hit: BoundaryHit,
+    interaction_code: int,
+    law_code: int,
+    outcome_code: int,
+    destination_facet_id: int,
+    position_post_m: np.ndarray | None,
+) -> np.ndarray:
+    """Validate the two canonical event encodings and return post-position."""
+
+    post = hit.position_m if position_post_m is None else position_post_m
+    if interaction_code == int(_INTERACTION_WALL):
+        if (
+            not (0 < law_code < _BOUNDARY_LAW_OUTPUT.size)
+            or not (0 < outcome_code < int(_OUTCOME_TRANSFERRED))
+            or destination_facet_id != -1
+            or not bool(np.array_equal(post, hit.position_m))
+        ):
+            raise EngineError("wall event has an invalid canonical encoding")
+        return post
+    if interaction_code == int(_INTERACTION_PERIODIC):
+        if (
+            law_code != 0
+            or outcome_code != int(_OUTCOME_TRANSFERRED)
+            or destination_facet_id < 0
+            or not bool(np.isfinite(post).all())
+        ):
+            raise EngineError("periodic event has an invalid canonical encoding")
+        return post
+    raise EngineError("boundary-event interaction code is unknown")
 
 
 def _append_failure_event(
@@ -7943,7 +9394,7 @@ def _mark_particle_failed(
 ) -> None:
     """Commit one particle-local failure without changing wall RNG identity."""
 
-    if int(event_ordinal[particle_index]) >= np.iinfo(np.uint32).max:
+    if int(event_ordinal[particle_index]) >= _MAX_EVENT_ORDINAL:
         raise EngineError("logical event ordinal exhausted uint32")
     if not bool(
         math.isfinite(failure.time_s)
@@ -7986,15 +9437,19 @@ def _pack_boundary_events(
         time_s=pending.time_s[:count][order],
         particle_id=schedule.particle_id[rows],
         event_ordinal=pending.event_ordinal[:count][order],
+        interaction_kind=_BOUNDARY_INTERACTION_OUTPUT[pending.interaction_code[:count][order]],
         primary_facet_id=primary,
+        destination_facet_id=pending.destination_facet_id[:count][order],
         boundary_id=geometry.boundary_id[primary],
         material_id=geometry.material_id[primary],
         position_m=pending.position_m[:count][order],
+        position_post_m=pending.position_post_m[:count][order],
         normal=pending.normal[:count][order],
         velocity_pre_m_s=pending.velocity_pre_m_s[:count][order],
         velocity_post_m_s=pending.velocity_post_m_s[:count][order],
         charge_number_pre=pending.charge_pre_number[:count][order],
         charge_number_post=pending.charge_pre_number[:count][order],
+        contact_radius_m=schedule.contact_radius_m[rows],
         model_weight=schedule.model_weight[rows],
         law_id=_BOUNDARY_LAW_OUTPUT[pending.law_code[:count][order]],
         outcome=_BOUNDARY_OUTCOME_OUTPUT[pending.outcome_code[:count][order]],
@@ -8124,10 +9579,12 @@ def _record_replay_jump(
 ) -> None:
     """Overlay one right-continuous zero-time state in canonical event order."""
 
+    if not replay.time_s.size or not replay.particle_index.size:
+        return
     time_row = int(np.searchsorted(replay.time_s, time_s))
-    particle_row = int(np.searchsorted(replay.particle_index, particle_index))
     if time_row >= replay.time_s.size or replay.time_s[time_row] != time_s:
         return
+    particle_row = int(np.searchsorted(replay.particle_index, particle_index))
     if (
         particle_row >= replay.particle_index.size
         or int(replay.particle_index[particle_row]) != particle_index
@@ -8250,6 +9707,7 @@ def _schedule_memory_bytes(schedule: ParticleSchedule) -> int:
         schedule.mass_kg,
         schedule.drag_diameter_m,
         schedule.electrostatic_radius_m,
+        schedule.contact_radius_m,
         schedule.displaced_volume_m3,
         schedule.model_weight,
         schedule.material_id,
@@ -8330,7 +9788,14 @@ def _event_work_bytes_per_particle(
     if not event_paths:
         return 0
     stack_capacity = case.spec.solver.event.max_refinements + 1
-    return 3 * np.dtype("<i8").itemsize * stack_capacity
+    stack_bytes = 3 * np.dtype("<i8").itemsize * stack_capacity
+    has_point_view = case.spec.topology is not None or any(
+        rule.contact_geometry == "particle_center" for rule in case.spec.boundaries
+    )
+    # The point/surface arbitration holds a second row-aligned event result;
+    # its candidate arena is accounted separately in the geometry plan.
+    point_arbitration_bytes = 96 if has_point_view else 0
+    return stack_bytes + point_arbitration_bytes
 
 
 def _uses_rk4_dense_certificate(
@@ -8380,9 +9845,14 @@ def _stochastic_tree_work_bytes_per_particle(physics: PhysicsPlan) -> int:
 
     if physics.noise is None:
         return 0
-    # One right-child (position and velocity) per depth plus the live root,
-    # split children, and normal-pair workspace.  All arrays are float64 2-D.
-    return 32 * (physics.noise.interval_tree_depth + 4)
+    # After a split the engine releases its Hermite proposal and endpoint
+    # temporaries before descending.  Each live level can still retain two
+    # 32-byte OU children, two int64 row maps, and one validity byte.  Round
+    # that 81-byte named-array set to 128 bytes, then reserve four equivalent
+    # rows for the live root, split/normal workspace, and the two alternating
+    # 72-byte pending-root SoA waves.  A pending root starts only after the
+    # preceding generator, tree, and proposal frames have unwound.
+    return 128 * (physics.noise.adaptive_max_depth + 4)
 
 
 def _surface_release_work_bytes_per_particle(
@@ -8415,16 +9885,26 @@ def _event_candidate_capacity(
     memory_limit_bytes: int,
     *,
     enabled: bool,
-) -> int:
-    """Reserve a bounded CSR facet budget that can always hold one query row."""
+    plan_for_capacity: Callable[[int], CpuMemoryPlan],
+) -> tuple[int, CpuMemoryPlan]:
+    """Choose a bounded CSR facet budget that leaves one slab row runnable."""
 
-    if not enabled or geometry.facet_count == 0:
-        return 0
+    minimum_capacity = geometry.facet_count + 1 if enabled and geometry.facet_count else 0
     minimum_bytes = 64 * 1024
     maximum_bytes = 8 * 1024 * 1024
     target_bytes = min(maximum_bytes, max(minimum_bytes, memory_limit_bytes // 64))
     target_capacity = target_bytes // np.dtype("<i8").itemsize
-    return max(geometry.facet_count + 1, target_capacity)
+    capacity = max(minimum_capacity, target_capacity) if minimum_capacity else 0
+    while True:
+        memory_plan = plan_for_capacity(capacity)
+        fits = memory_plan.planned_bytes <= memory_limit_bytes and (
+            memory_plan.particle_count == 0 or memory_plan.slab_particles >= 1
+        )
+        if fits:
+            return capacity, memory_plan
+        if capacity == minimum_capacity:
+            raise EngineError("predicted solver memory exceeds resources.memory_limit_mb")
+        capacity = max(minimum_capacity, capacity // 2)
 
 
 def _maximum_replay_times_per_macro(
@@ -8481,6 +9961,23 @@ def _geometry_memory_bytes(geometry: PreparedGeometry) -> int:
     return sum(array.nbytes for array in arrays)
 
 
+def _topology_memory_bytes(topology: PreparedPeriodicTopology | None) -> int:
+    """Account the topology map plus its material/event contact masks."""
+
+    if topology is None:
+        return 0
+    arrays = (
+        topology.peer_facet_id,
+        topology.peer_node_ids,
+        topology.translation_m,
+        topology.pair_id,
+        topology.facet_is_periodic,
+        topology.periodic_facet_id,
+    )
+    mask_bytes = 2 * topology.facet_is_periodic.nbytes
+    return sum(array.nbytes for array in arrays) + mask_bytes
+
+
 def _final_particles(
     schedule: ParticleSchedule,
     position_m: np.ndarray,
@@ -8508,6 +10005,7 @@ def _final_particles(
         mass_kg=schedule.mass_kg,
         drag_diameter_m=schedule.drag_diameter_m,
         electrostatic_radius_m=schedule.electrostatic_radius_m,
+        contact_radius_m=schedule.contact_radius_m,
         displaced_volume_m3=schedule.displaced_volume_m3,
         model_weight=schedule.model_weight,
         material_id=schedule.material_id,
@@ -8526,6 +10024,29 @@ def _resolved_path_kind(prepared: _PreparedRun) -> str:
     if prepared.case.spec.solver.integrator == "exponential_midpoint":
         return "exponential_midpoint_reintegrated"
     return "rk4_dense"
+
+
+def _resolved_boundary_laws(prepared: _PreparedRun) -> list[dict[str, object]]:
+    """Describe the resolved response and geometric meaning of each boundary."""
+
+    case = prepared.case
+    contact_by_group = {rule.boundary_group: rule.contact_geometry for rule in case.spec.boundaries}
+    return [
+        {
+            "group": case.data.geometry.group_names[rule.group_id],
+            "contact_geometry": contact_by_group[case.data.geometry.group_names[rule.group_id]],
+            "priority": rule.priority,
+            "law": rule.law_id,
+            "normal_restitution": rule.normal_restitution,
+            "tangential_restitution": rule.tangential_restitution,
+            "stick_probability": rule.stick_probability,
+            "otherwise_law": rule.otherwise_law_id,
+            "wall_temperature_K": rule.wall_temperature_K,
+            "diffuse_reflection_fraction": rule.diffuse_reflection_fraction,
+            "wall_velocity_m_s": rule.wall_velocity_m_s,
+        }
+        for rule in prepared.boundary_rules
+    ]
 
 
 def _manifest(
@@ -8580,9 +10101,11 @@ def _manifest(
         "physics_catalog_revision": PHYSICS_CATALOG_REVISION,
         "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
         "field_location_revision": FIELD_LOCATION_REVISION,
+        "field_time_revision": FIELD_TIME_REVISION,
         "required_field_revision": REQUIRED_FIELD_REVISION,
         "geometry_algorithm_revision": (GEOMETRY_ALGORITHM_REVISION),
         "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
+        "topology_algorithm_revision": _topology_algorithm_revision(prepared),
         "boundary_algorithm_revision": (
             BOUNDARY_ALGORITHM_REVISION if prepared.boundary_rules else None
         ),
@@ -8593,11 +10116,14 @@ def _manifest(
         "joint_ou_split_revision": brownian["split_revision"],
         "brownian_composition_revision": brownian["composition_revision"],
         "brownian_charge_dense_revision": brownian["charge_dense_revision"],
+        "brownian_tree_policy_revision": brownian["tree_policy_revision"],
         "brownian_interval_tree_depth": brownian["interval_tree_depth"],
+        "brownian_adaptive_max_depth": brownian["adaptive_max_depth"],
         "random_draw_kinds": {
-            "source_facet": SOURCE_FACET_DRAW,
-            "source_position": SOURCE_POSITION_DRAW,
             "wall_probabilistic_stick": WALL_PROBABILISTIC_STICK_STREAM,
+            "wall_maxwell_diffuse": WALL_MAXWELL_DIFFUSE_STREAM,
+            "wall_maxwell_normal": WALL_MAXWELL_NORMAL_STREAM,
+            "wall_maxwell_tangential": WALL_MAXWELL_TANGENTIAL_STREAM,
             "brownian_root_normal": brownian["root_normal_stream"],
             "brownian_split_normal": brownian["split_normal_stream"],
         },
@@ -8616,18 +10142,7 @@ def _manifest(
                 {"source_id": index, "name": source.name, "type": source.kind}
                 for index, source in enumerate(spec.sources)
             ],
-            "boundary_laws": [
-                {
-                    "group": case.data.geometry.group_names[rule.group_id],
-                    "priority": rule.priority,
-                    "law": rule.law_id,
-                    "normal_restitution": rule.normal_restitution,
-                    "tangential_restitution": rule.tangential_restitution,
-                    "stick_probability": rule.stick_probability,
-                    "otherwise_law": rule.otherwise_law_id,
-                }
-                for rule in prepared.boundary_rules
-            ],
+            "boundary_laws": _resolved_boundary_laws(prepared),
             "required_fields": [
                 {
                     "name": name,
@@ -8635,6 +10150,13 @@ def _manifest(
                     "unit": field.unit,
                     "components": list(field.components),
                     "stored_basis": field.stored_basis,
+                    "time_interpolation": "static" if field.time_s is None else "linear",
+                    "snapshot_count": 1 if field.time_s is None else int(field.time_s.size),
+                    "snapshot_range_s": (
+                        None
+                        if field.time_s is None
+                        else [float(field.time_s[0]), float(field.time_s[-1])]
+                    ),
                 }
                 for name, field in prepared.fields.fields.items()
             ],
@@ -8643,6 +10165,7 @@ def _manifest(
             "start_s": spec.time.start_s,
             "end_s": spec.time.end_s,
             "dt_s": spec.time.dt_s,
+            "field_snapshot_splits_s": list(prepared.field_time_split_s),
         },
         "event": {
             "geometry_rtol": spec.solver.event.geometry_rtol,
@@ -8674,3 +10197,11 @@ def _manifest(
         "maximum_dt_charge_lipschitz": prepared.maximum_dt_charge_lipschitz,
         "memory_plan": prepared.memory_plan.as_manifest(),
     }
+
+
+def _topology_algorithm_revision(prepared: _PreparedRun) -> str | None:
+    """Return the active topology revision without adding manifest branching."""
+
+    if prepared.topology is None:
+        return None
+    return TOPOLOGY_ALGORITHM_REVISION

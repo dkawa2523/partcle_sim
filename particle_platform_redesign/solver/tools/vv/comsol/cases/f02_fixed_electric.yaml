@@ -1,8 +1,8 @@
-format_version: 2
+format_version: 3
 case:
   name: f02_case_a_fixed_electric_integration
-  data_path: ../../../../_out_f02_acceptance/case_a_fields.h5
-  expected_content_hash: sha256:b8bf3e55037f37cd0ffaef92d83a7d8a8a2d4d09351922db2e67933c1f9e8788
+  data_path: ../../../../_out_f02_acceptance/case_a_fields_with_source_v2.h5
+  expected_content_hash: sha256:3164c4c2dc506daae80fb9c3ee6600d31b3f033ab59adbf6d1054c1b5cfbf841
 motion:
   mode: axisymmetric_rz_meridional
 time:
@@ -31,20 +31,7 @@ physics:
 sources:
   - name: wafer_surface_release
     type: surface
-    boundary_group: wafer
-    count: 32
-    particle_id_start: 1000
-    particle:
-      charge_number: -1.0
-      mass_kg: 1.1519173063162574e-18
-      drag_diameter_m: 1.0e-7
-      electrostatic_radius_m: 5.0e-8
-      displaced_volume_m3: 5.235987755982988e-22
-      model_weight: 1.0
-      material_id: 0
-    position: {model: uniform, measure: revolved_area}
-    velocity: {model: normal, direction: into_domain, speed_m_s: 1.0}
-    release: {model: fixed, time_s: 0.0}
+    table: wafer_surface_particles
 boundaries:
   - {boundary_group: wafer, priority: 10, law: stick}
   - {boundary_group: grounded_wall, priority: 10, law: stick}

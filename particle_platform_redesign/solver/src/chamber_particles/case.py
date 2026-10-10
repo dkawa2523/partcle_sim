@@ -12,15 +12,21 @@ from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
 
-import yaml
-
-from .case_format import CanonicalDataFootprint, DataBundle, RealizedTableSource, read_with_info
+from .case_format import (
+    CanonicalDataFootprint,
+    DataBundle,
+    RealizedSource,
+    RealizedSurfaceSource,
+    RealizedTableSource,
+    read_with_info,
+)
+from .yaml_input import parse_document
 
 type _PathInput = str | PathLike[str]
 
 _CONTENT_HASH = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _INT64_MAX = 2**63 - 1
-CASE_FORMAT_VERSION = 2
+CASE_FORMAT_VERSION = 3
 _PHYSICS_CATEGORIES = frozenset(
     {
         "charge",
@@ -81,25 +87,11 @@ class ResourceSpec:
 
 
 @dataclass(frozen=True, slots=True)
-class ParticleProperties:
-    """Independent authoritative particle properties used by a surface source."""
-
-    charge_number: float
-    mass_kg: float
-    drag_diameter_m: float
-    electrostatic_radius_m: float
-    displaced_volume_m3: float
-    model_weight: float
-    material_id: int
-
-
-@dataclass(frozen=True, slots=True)
 class SourceSpec:
-    """One named table or surface release configuration."""
+    """One named reference to an internal or surface realized schedule."""
 
     name: str
     kind: str
-    particle: ParticleProperties | None
     parameters: Mapping[str, object]
 
 
@@ -118,6 +110,25 @@ class BoundarySpec:
     priority: int
     law: str
     parameters: Mapping[str, object]
+    contact_geometry: str
+
+
+@dataclass(frozen=True, slots=True)
+class PeriodicTranslationPairSpec:
+    """One directed description of a reciprocal translational seam pair."""
+
+    first_boundary_group: str
+    second_boundary_group: str
+    first_to_second_m: tuple[float, float]
+
+
+@dataclass(frozen=True, slots=True)
+class PeriodicTopologySpec:
+    """Static Cartesian-XY pure-translation topology configuration."""
+
+    model: str
+    field_match_rtol: float
+    pairs: tuple[PeriodicTranslationPairSpec, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -156,6 +167,7 @@ class SimulationSpec:
     physics: PhysicsSpec
     sources: tuple[SourceSpec, ...]
     boundaries: tuple[BoundarySpec, ...]
+    topology: PeriodicTopologySpec | None
     output: OutputSpec
 
 
@@ -172,32 +184,8 @@ class SimulationCase:
     data_footprint: CanonicalDataFootprint
 
 
-class _UniqueKeyLoader(yaml.SafeLoader):
-    """Safe YAML loader that rejects duplicate mapping keys."""
-
-
-def _construct_unique_mapping(
-    loader: _UniqueKeyLoader, node: yaml.MappingNode, deep: bool = False
-) -> dict[object, object]:
-    mapping: dict[object, object] = {}
-    for key_node, value_node in node.value:
-        key = loader.construct_object(key_node, deep=deep)
-        try:
-            if key in mapping:
-                raise ValueError(f"duplicate YAML key: {key!r}")
-            mapping[key] = loader.construct_object(value_node, deep=deep)
-        except TypeError as error:
-            raise ValueError("YAML mapping keys must be scalar values") from error
-    return mapping
-
-
-_UniqueKeyLoader.add_constructor(
-    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _construct_unique_mapping
-)
-
-
 def load_case(path: _PathInput) -> SimulationCase:
-    """Read one strict v2 YAML file and its referenced canonical HDF5 bundle."""
+    """Read one strict v3 YAML file and its referenced canonical HDF5 bundle."""
     case_path = Path(path).expanduser().resolve()
     document, case_file_hash = _read_yaml(case_path)
     root = _mapping(document, "document")
@@ -216,6 +204,7 @@ def load_case(path: _PathInput) -> SimulationCase:
             "output",
         },
         "document",
+        optional={"topology"},
     )
     if _integer(root["format_version"], "format_version") != CASE_FORMAT_VERSION:
         raise ValueError("unsupported YAML format_version")
@@ -232,6 +221,7 @@ def load_case(path: _PathInput) -> SimulationCase:
         physics=_parse_physics(root["physics"]),
         sources=_parse_sources(root["sources"]),
         boundaries=_parse_boundaries(root["boundaries"]),
+        topology=(None if "topology" not in root else _parse_periodic_topology(root["topology"])),
         output=_parse_output(root["output"], time),
     )
     memory_limit_bytes = resources.memory_limit_mb * 1024 * 1024
@@ -253,16 +243,12 @@ def load_case(path: _PathInput) -> SimulationCase:
 
 
 def _read_yaml(path: Path) -> tuple[object, str]:
+    raw = path.read_bytes()
     try:
-        raw = path.read_bytes()
-        text = raw.decode("utf-8")
-        document = yaml.load(text, Loader=_UniqueKeyLoader)
-        digest = hashlib.sha256(raw).hexdigest()
-        return document, f"sha256:{digest}"
-    except UnicodeDecodeError as exc:
-        raise ValueError(f"case YAML is not valid UTF-8: {path}") from exc
-    except yaml.YAMLError as exc:
-        raise ValueError(f"invalid YAML in {path}") from exc
+        document = parse_document(raw)
+    except ValueError as error:
+        raise ValueError(f"invalid case YAML in {path}: {error}") from error
+    return document, f"sha256:{hashlib.sha256(raw).hexdigest()}"
 
 
 def _parse_case_reference(value: object, case_path: Path) -> tuple[str, Path, str]:
@@ -352,33 +338,6 @@ def _parse_resources(value: object) -> ResourceSpec:
     return ResourceSpec(memory_limit_mb)
 
 
-def _parse_particle(value: object, location: str) -> ParticleProperties:
-    section = _mapping(value, location)
-    required = {
-        "charge_number",
-        "mass_kg",
-        "drag_diameter_m",
-        "electrostatic_radius_m",
-        "displaced_volume_m3",
-        "model_weight",
-        "material_id",
-    }
-    _exact_keys(section, required, location)
-    return ParticleProperties(
-        charge_number=_number(section["charge_number"], f"{location}.charge_number"),
-        mass_kg=_positive_number(section["mass_kg"], f"{location}.mass_kg"),
-        drag_diameter_m=_positive_number(section["drag_diameter_m"], f"{location}.drag_diameter_m"),
-        electrostatic_radius_m=_nonnegative_number(
-            section["electrostatic_radius_m"], f"{location}.electrostatic_radius_m"
-        ),
-        displaced_volume_m3=_nonnegative_number(
-            section["displaced_volume_m3"], f"{location}.displaced_volume_m3"
-        ),
-        model_weight=_positive_number(section["model_weight"], f"{location}.model_weight"),
-        material_id=_nonnegative_integer(section["material_id"], f"{location}.material_id"),
-    )
-
-
 def _parse_sources(value: object) -> tuple[SourceSpec, ...]:
     items = _sequence(value, "sources")
     if not items:
@@ -393,43 +352,10 @@ def _parse_sources(value: object) -> tuple[SourceSpec, ...]:
         if name in names:
             raise ValueError(f"duplicate source name: {name}")
         names.add(name)
-        if kind == "table":
+        if kind in {"table", "surface"}:
             _exact_keys(section, {"name", "type", "table"}, location)
             parameters = MappingProxyType({"table": _text(section["table"], f"{location}.table")})
-            sources.append(SourceSpec(name, kind, None, parameters))
-        elif kind == "surface":
-            required = {
-                "name",
-                "type",
-                "boundary_group",
-                "count",
-                "particle_id_start",
-                "particle",
-                "position",
-                "velocity",
-                "release",
-            }
-            _exact_keys(section, required, location)
-            count = _positive_integer(section["count"], f"{location}.count")
-            particle_id_start = _nonnegative_integer(
-                section["particle_id_start"], f"{location}.particle_id_start"
-            )
-            if particle_id_start > _INT64_MAX - count + 1:
-                raise ValueError(f"{location} particle ID range exceeds signed int64")
-            parameters = MappingProxyType(
-                {
-                    "boundary_group": _text(
-                        section["boundary_group"], f"{location}.boundary_group"
-                    ),
-                    "count": count,
-                    "particle_id_start": particle_id_start,
-                    "position": _model_mapping(section["position"], f"{location}.position"),
-                    "velocity": _model_mapping(section["velocity"], f"{location}.velocity"),
-                    "release": _model_mapping(section["release"], f"{location}.release"),
-                }
-            )
-            particle = _parse_particle(section["particle"], f"{location}.particle")
-            sources.append(SourceSpec(name, kind, particle, parameters))
+            sources.append(SourceSpec(name, kind, parameters))
         else:
             raise ValueError(f"{location}.type must be 'table' or 'surface'")
     return tuple(sources)
@@ -471,6 +397,13 @@ def _parse_boundaries(value: object) -> tuple[BoundarySpec, ...]:
         group = _text(section["boundary_group"], f"{location}.boundary_group")
         priority = _nonnegative_integer(section["priority"], f"{location}.priority")
         law = _text(section["law"], f"{location}.law")
+        contact_geometry = _text(
+            section.get("contact_geometry", "particle_surface"), f"{location}.contact_geometry"
+        )
+        if contact_geometry not in {"particle_surface", "particle_center"}:
+            raise ValueError(
+                f"{location}.contact_geometry must be particle_surface or particle_center"
+            )
         if group in groups:
             raise ValueError(f"duplicate boundary law for group: {group}")
         groups.add(group)
@@ -478,12 +411,60 @@ def _parse_boundaries(value: object) -> tuple[BoundarySpec, ...]:
             {
                 key: item_value
                 for key, item_value in section.items()
-                if key not in {"boundary_group", "priority", "law"}
+                if key not in {"boundary_group", "priority", "law", "contact_geometry"}
             },
             location,
         )
-        boundaries.append(BoundarySpec(group, priority, law, parameters))
+        boundaries.append(BoundarySpec(group, priority, law, parameters, contact_geometry))
     return tuple(boundaries)
+
+
+def _parse_periodic_topology(value: object) -> PeriodicTopologySpec:
+    section = _mapping(value, "topology")
+    _exact_keys(section, {"model", "field_match_rtol", "pairs"}, "topology")
+    model = _text(section["model"], "topology.model")
+    if model != "translation_periodic_xy_v1":
+        raise ValueError("topology.model must be 'translation_periodic_xy_v1'")
+    field_match_rtol = _positive_number(section["field_match_rtol"], "topology.field_match_rtol")
+    if field_match_rtol >= 1.0:
+        raise ValueError("topology.field_match_rtol must be less than one")
+
+    items = _sequence(section["pairs"], "topology.pairs")
+    if not items:
+        raise ValueError("topology.pairs must contain at least one periodic pair")
+    pairs: list[PeriodicTranslationPairSpec] = []
+    used_groups: set[str] = set()
+    for index, item in enumerate(items):
+        location = f"topology.pairs[{index}]"
+        pair = _mapping(item, location)
+        _exact_keys(
+            pair,
+            {
+                "first_boundary_group",
+                "second_boundary_group",
+                "first_to_second_m",
+            },
+            location,
+        )
+        first = _text(pair["first_boundary_group"], f"{location}.first_boundary_group")
+        second = _text(pair["second_boundary_group"], f"{location}.second_boundary_group")
+        if first == second:
+            raise ValueError(f"{location} must reference two different boundary groups")
+        for group in (first, second):
+            if group in used_groups:
+                raise ValueError(f"periodic boundary group is used more than once: {group}")
+            used_groups.add(group)
+        raw_translation = _sequence(pair["first_to_second_m"], f"{location}.first_to_second_m")
+        if len(raw_translation) != 2:
+            raise ValueError(f"{location}.first_to_second_m must have length two")
+        translation = (
+            _number(raw_translation[0], f"{location}.first_to_second_m[0]"),
+            _number(raw_translation[1], f"{location}.first_to_second_m[1]"),
+        )
+        if translation == (0.0, 0.0):
+            raise ValueError(f"{location}.first_to_second_m must be nonzero")
+        pairs.append(PeriodicTranslationPairSpec(first, second, translation))
+    return PeriodicTopologySpec(model, field_match_rtol, tuple(pairs))
 
 
 def _parse_output(value: object, time: TimeSpec) -> OutputSpec:
@@ -552,12 +533,34 @@ def _parse_output_times(value: object, location: str, time: TimeSpec) -> tuple[f
 
 
 def _validate_cross_references(spec: SimulationSpec, data: DataBundle) -> None:
+    _validate_topology_references(spec, data)
     _validate_boundary_references(spec, data)
     _validate_source_references(spec, data)
 
 
+def _periodic_boundary_groups(spec: SimulationSpec) -> set[str]:
+    if spec.topology is None:
+        return set()
+    return {
+        group
+        for pair in spec.topology.pairs
+        for group in (pair.first_boundary_group, pair.second_boundary_group)
+    }
+
+
+def _validate_topology_references(spec: SimulationSpec, data: DataBundle) -> None:
+    if spec.topology is None:
+        return
+    if spec.motion.mode != "cartesian_xy" or data.coordinate_system != "cartesian_xy":
+        raise ValueError("translation_periodic_xy_v1 requires Cartesian XY motion and data")
+    known_groups = set(data.geometry.group_names)
+    unknown = sorted(_periodic_boundary_groups(spec) - known_groups)
+    if unknown:
+        raise ValueError(f"periodic topology references unknown boundary groups: {unknown}")
+
+
 def _validate_boundary_references(spec: SimulationSpec, data: DataBundle) -> None:
-    expected_groups = set(data.geometry.group_names)
+    expected_groups = set(data.geometry.group_names) - _periodic_boundary_groups(spec)
     configured_groups = {boundary.boundary_group for boundary in spec.boundaries}
     if configured_groups != expected_groups:
         missing = sorted(expected_groups - configured_groups)
@@ -568,67 +571,45 @@ def _validate_boundary_references(spec: SimulationSpec, data: DataBundle) -> Non
 
 
 def _validate_source_references(spec: SimulationSpec, data: DataBundle) -> None:
-    expected_groups = set(data.geometry.group_names)
-    table_sources = {source.name: source for source in data.sources}
+    realized_sources = {source.name: source for source in data.sources}
     used_tables: set[str] = set()
-    active_tables: list[RealizedTableSource] = []
-    surface_id_ranges: list[tuple[int, int, str]] = []
     for source in spec.sources:
-        if source.kind == "table":
-            active_tables.append(
-                _validate_table_source_reference(source, table_sources, used_tables, spec.time)
-            )
-        else:
-            _validate_surface_source_reference(source, expected_groups)
-            start = source.parameters["particle_id_start"]
-            count = source.parameters["count"]
-            if not isinstance(start, int) or not isinstance(count, int):
-                raise TypeError("validated surface particle identity must be integer")
-            surface_id_ranges.append((start, start + count, source.name))
-    _validate_surface_particle_ids(surface_id_ranges, active_tables)
+        _validate_source_reference(source, realized_sources, used_tables, spec, data)
 
 
-def _validate_table_source_reference(
+def _validate_source_reference(
     source: SourceSpec,
-    table_sources: Mapping[str, RealizedTableSource],
+    realized_sources: Mapping[str, RealizedSource],
     used_tables: set[str],
-    time: TimeSpec,
-) -> RealizedTableSource:
+    spec: SimulationSpec,
+    data: DataBundle,
+) -> None:
     table_name = source.parameters["table"]
-    if not isinstance(table_name, str) or table_name not in table_sources:
+    if not isinstance(table_name, str) or table_name not in realized_sources:
         raise ValueError(f"source {source.name} references an unknown table")
     if table_name in used_tables:
         raise ValueError(f"source table {table_name} is referenced more than once")
     used_tables.add(table_name)
-    table = table_sources[table_name]
+    table = realized_sources[table_name]
+    expected_type = RealizedTableSource if source.kind == "table" else RealizedSurfaceSource
+    if not isinstance(table, expected_type):
+        raise ValueError(f"source {source.name} type does not match canonical table {table_name}")
     release_times = table.release_time_s
-    if float(release_times.min()) < time.start_s or float(release_times.max()) > time.end_s:
+    if (
+        float(release_times.min()) < spec.time.start_s
+        or float(release_times.max()) > spec.time.end_s
+    ):
         raise ValueError(f"source {source.name} has release times outside the run interval")
-    return table
-
-
-def _validate_surface_source_reference(source: SourceSpec, expected_groups: set[str]) -> None:
-    group = source.parameters["boundary_group"]
-    if not isinstance(group, str) or group not in expected_groups:
-        raise ValueError(f"source {source.name} references an unknown boundary group")
-
-
-def _validate_surface_particle_ids(
-    ranges: list[tuple[int, int, str]], tables: list[RealizedTableSource]
-) -> None:
-    ordered = sorted(ranges)
-    for previous, current in pairwise(ordered):
-        if current[0] < previous[1]:
-            raise ValueError(
-                f"surface source particle ID ranges overlap: {previous[2]} and {current[2]}"
-            )
-    for start, stop, source_name in ordered:
-        for table in tables:
-            ids = table.particle_id
-            if bool(((ids >= start) & (ids < stop)).any()):
-                raise ValueError(
-                    f"surface source {source_name} particle IDs overlap table {table.name}"
-                )
+    if isinstance(table, RealizedSurfaceSource) and spec.topology is not None:
+        periodic_names = _periodic_boundary_groups(spec)
+        periodic_group_ids = {
+            group_id
+            for group_id, name in enumerate(data.geometry.group_names)
+            if name in periodic_names
+        }
+        source_group_ids = data.geometry.boundary.group_id[table.facet_id]
+        if any(int(group_id) in periodic_group_ids for group_id in source_group_ids):
+            raise ValueError(f"surface source {source.name} cannot release from a periodic seam")
 
 
 def _model_mapping(value: object, location: str) -> Mapping[str, object]:
@@ -676,9 +657,15 @@ def _sequence(value: object, location: str) -> Sequence[object]:
     return value
 
 
-def _exact_keys(section: Mapping[str, object], required: set[str], location: str) -> None:
+def _exact_keys(
+    section: Mapping[str, object],
+    required: set[str],
+    location: str,
+    *,
+    optional: set[str] | None = None,
+) -> None:
     missing = required - set(section)
-    unexpected = set(section) - required
+    unexpected = set(section) - required - (set() if optional is None else optional)
     if missing or unexpected:
         raise ValueError(
             f"{location} keys are invalid; missing={sorted(missing)}, unexpected={sorted(unexpected)}"
@@ -694,7 +681,10 @@ def _text(value: object, location: str) -> str:
 def _number(value: object, location: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{location} must be a number")
-    result = float(value)
+    try:
+        result = float(value)
+    except OverflowError as error:
+        raise ValueError(f"{location} must be finite") from error
     if not math.isfinite(result):
         raise ValueError(f"{location} must be finite")
     return result

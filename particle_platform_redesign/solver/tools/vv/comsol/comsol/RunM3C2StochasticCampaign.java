@@ -164,9 +164,10 @@ public final class RunM3C2StochasticCampaign {
       function.set("funcs", new String[][] {{P1_NAMES[index], "1"}});
       function.set("interp", "linear");
       function.set("extrap", "const");
+      function.importData();
+      // importData resets argument-unit metadata for the imported table.
       function.set("argunit", new String[] {"m", "m"});
       function.set("fununit", P1_UNITS[index]);
-      function.importData();
     }
   }
 
@@ -182,9 +183,9 @@ public final class RunM3C2StochasticCampaign {
       function.set("funcs", new String[][] {{RELEASE_NAMES[index], "1"}});
       function.set("interp", "linear");
       function.set("extrap", "const");
+      function.importData();
       function.set("argunit", new String[] {"m", "m"});
       function.set("fununit", RELEASE_UNITS[index]);
-      function.importData();
     }
   }
 
@@ -200,7 +201,8 @@ public final class RunM3C2StochasticCampaign {
       {"AS_uiz", "m3c1_uiz(r,z)"},
       {"AS_Ge0", "pi*(d0/2)^2*m3c1_ne(r,z)*sqrt(8*e_const*m3c1_Te(r,z)/(pi*me_const))"},
       {"AS_phi1", "e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))"},
-      {"AS_pabs", RunM3C2StochasticRequest.pressureExpression()}
+      {"AS_pabs", RunM3C2StochasticRequest.pressureExpression()},
+      {"AS_muB", "m3c_muB"}
     };
     String[][] casePBindings = {
       {"rho_g_d", "m3c1_rhog(r,z)"}, {"mu_g_d", "m3c1_mug(r,z)"},
@@ -211,7 +213,7 @@ public final class RunM3C2StochasticCampaign {
       {"uir_d", "m3c1_uir(r,z)"}, {"uiz_d", "m3c1_uiz(r,z)"},
       {"Ge0_d", "pi*(d0/2)^2*m3c1_ne(r,z)*sqrt(8*e_const*m3c1_Te(r,z)/(pi*me_const))"},
       {"phi1_d", "e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))"},
-      {"muB_d", "m3c1_mug(r,z)/(36*(m3c1_lambdag(r,z)/d0)/(8+pi*sigmaR_p))"}
+      {"muB_d", "m3c_muB"}
     };
     String[][] bindings = RunM3C2StochasticRequest.isCaseP() ? casePBindings : caseABindings;
     String variableTag = RunM3C2StochasticRequest.sharedVariableTag();
@@ -308,7 +310,8 @@ public final class RunM3C2StochasticCampaign {
     physics.feature("bf1").active(true);
     physics.feature("lf1").active(false);
     physics.feature("thpf1").active(false);
-    for (String tag : new String[] {"auxq", "idf", "ef1", "df1", "liftfm", "depf", "gf1"}) {
+    physics.feature("df1").active(false);
+    for (String tag : new String[] {"auxq", "idf", "ef1", "liftfm", "depf", "gf1"}) {
       physics.feature(tag).active(true);
     }
 
@@ -316,6 +319,7 @@ public final class RunM3C2StochasticCampaign {
     bindProducerFormulas(physics);
     model.param().set("d0", "100[nm]");
     model.param().set("sigmaR_p", "0.9");
+    CommonP1Epstein.bind(model);
     model.param().set(RunM3C2StochasticRequest.seedParameter(), Integer.toString(seed));
 
     physics.feature("relg1").set("v0", new String[] {"m3c1_vr0(r,z)", "0[m/s]", "m3c1_vz0(r,z)"});
@@ -324,15 +328,15 @@ public final class RunM3C2StochasticCampaign {
     physics.feature("pp1").set("Z", RunM3C2StochasticRequest.chargeStateExpression());
 
     physics.feature("ef1").set("E", new String[] {"m3c1_Er(r,z)", "0[V/m]", "m3c1_Ez(r,z)"});
-    physics.feature("df1").set("u", new String[] {"m3c1_ugr(r,z)", "0[m/s]", "m3c1_ugz(r,z)"});
-    physics.feature("df1").set("rho", "m3c1_rhog(r,z)");
-    physics.feature("df1").set("mu", "m3c1_mug(r,z)");
-    physics.feature("df1").set("minput_temperature", "m3c1_Tg(r,z)");
-    physics.feature("df1").set("pA", RunM3C2StochasticRequest.pressureExpression());
-    physics.feature("df1").set("minput_pressure", RunM3C2StochasticRequest.pressureExpression());
-    physics.feature("df1").set("S", "1.0");
-    physics.feature("df1").set("sigmaR", "sigmaR_p");
+    physics.feature("ef1").set("E_src", "userdef");
+    String dragTag = "m3c2Epstein";
+    require(!has(physics.feature().tags(), dragTag), "M3-C2 drag force tag already exists");
+    physics.create(dragTag, "Force", 2);
+    String[] drag = CommonP1Epstein.force(PHYSICS);
+    configureCustomForce(physics.feature(dragTag), "M3-C2 post-interpolation Epstein drag", drag[0], drag[2], study);
     physics.feature("gf1").set("rho", "m3c1_rhog(r,z)");
+    physics.feature("gf1").set("rho_mat", "userdef");
+    physics.feature("gf1").set("minput_temperature_src", "userdef");
     physics.feature("gf1").set("minput_temperature", "m3c1_Tg(r,z)");
 
     PhysicsFeature brownian = physics.feature("bf1");
@@ -357,6 +361,10 @@ public final class RunM3C2StochasticCampaign {
     physics.feature("wall1").set("WallCondition", "Stick");
     physics.feature("outin").set("WallCondition", "Freeze");
     physics.feature("outpump").set("WallCondition", "Disappear");
+    physics.feature("axi1").set("WallCondition", "Bounce");
+    for (String tag : new String[] {"wall1", "outin", "outpump", "axi1"}) {
+      physics.feature(tag).set("StudyStep", study + "/time");
+    }
 
     require("UserDefined".equals(physics.prop("RandomNumberArgs").getString("RandomNumberArgs")),
         "COMSOL random-number mode is not UserDefined");
@@ -366,8 +374,11 @@ public final class RunM3C2StochasticCampaign {
         "bf1 viscosity changed");
     require(brownian.isActive(), "Brownian force remained inactive");
     require(!physics.feature("lf1").isActive(), "Saffman force must remain inactive");
+    require(!physics.feature("df1").isActive(), "Native drag must remain inactive");
+    require("Bounce".equals(physics.feature("axi1").getString("WallCondition")),
+        "The companion axis must use the registered meridional-fold mapping");
     for (String tag : new String[] {
-        "auxq", "idf", "ef1", "df1", "liftfm", "depf", "gf1", thermoTag,
+        "auxq", "idf", "ef1", dragTag, "liftfm", "depf", "gf1", thermoTag,
         "relg1", "wall1", "outin", "outpump", "axi1"
     }) require(physics.feature(tag).isActive(), "Required feature inactive: " + tag);
     require(physics.prop("StoreParticleStatusData").getBoolean("StoreParticleStatusData"),
@@ -434,7 +445,7 @@ public final class RunM3C2StochasticCampaign {
     return base;
   }
 
-  private static String[] createAndRunStudy(Model model, String[] request) {
+  private static String[] createAndRunStudy(Model model, String[] request, String sourceReadback) throws Exception {
     String study = "stdM3C2";
     model.param().set("M3C2_dt", stepExpression(stepNs(request)));
     model.study().create(study);
@@ -465,6 +476,8 @@ public final class RunM3C2StochasticCampaign {
     transientSolver.set("erkorder", 4);
     transientSolver.set("rktimestep", "M3C2_dt");
     transientSolver.set("rtol", "1e-2");
+    ParticleRunReadback.write(model, directory(request), sourceReadback,
+        ParticleRunReadback.snapshot(model, PHYSICS, transientSolver, study));
 
     long started = System.nanoTime();
     model.study(study).run();
@@ -521,6 +534,32 @@ public final class RunM3C2StochasticCampaign {
     export.run();
   }
 
+  private static void exportFdtProbe(Model model, String[] request) {
+    PhysicsFeature brownian = model.component("comp1").physics(PHYSICS).feature("bf1");
+    require("userdef".equals(brownian.getString("mu_mat")), "FDT probe requires actual user-defined viscosity");
+    require("userdef".equals(brownian.getString("minput_temperature_src")), "FDT probe requires actual user-defined temperature");
+    model.result().export().create("m3c2FdtProbe", "Data");
+    ExportFeature export = model.result().export("m3c2FdtProbe");
+    export.set("data", "partM3C2");
+    export.set("expr", new String[] {
+      PHYSICS + ".pidx", "t", RunM3C2StochasticRequest.positionRExpression(),
+      RunM3C2StochasticRequest.positionZExpression(), "m3c1_rhog(r,z)", "m3c1_Tg(r,z)",
+      "m3c_beta", "3*pi*d0*(" + brownian.getString("mu") + ")",
+      "2*k_B_const*(" + brownian.getString("minput_temperature") + ")*3*pi*d0*(" + brownian.getString("mu") + ")"
+    });
+    export.set("unit", new String[] {"1", "s", "m", "m", "kg/m^3", "K", "kg/s", "kg/s", "N^2*s"});
+    export.set("descr", new String[] {"particle_id", "time_s", "r_m", "z_m", "gas_density_kg_per_m3",
+      "gas_temperature_K", "drag_beta_kg_per_s", "brownian_beta_kg_per_s", "force_noise_covariance_N2_s"});
+    export.set("filename", directory(request) + "/fdt_probe_raw.csv");
+    export.set("header", true);
+    export.set("fullprec", true);
+    export.set("includecoords", false);
+    export.set("includenan", true);
+    export.set("struct", "spreadsheet");
+    export.set("innerinput", "first");
+    export.run();
+  }
+
   private static int particleRows(Model model) {
     String tag = "m3c2ParticleCount";
     try {
@@ -542,9 +581,10 @@ public final class RunM3C2StochasticCampaign {
     Model model = null;
     try {
       model = ModelUtil.loadCopy("M3C2" + seed(request) + "Dt" + stepNs(request), SOURCE);
+      String sourceReadback = ParticleRunReadback.snapshot(model, PHYSICS, null, null);
       createSectionwiseFunctions(model);
       createReleaseFunctions(model);
-      String[] studyRun = createAndRunStudy(model, request);
+      String[] studyRun = createAndRunStudy(model, request, sourceReadback);
       createParticleDataset(model, studyRun[0]);
       double[] times = model.sol(studyRun[0]).getPVals();
       require(times.length == EXPECTED_OUTPUT_TIMES,
@@ -555,6 +595,8 @@ public final class RunM3C2StochasticCampaign {
       require(particles == EXPECTED_PARTICLES,
           "Expected " + EXPECTED_PARTICLES + " particles, got " + particles);
       exportHistory(model, request);
+      exportFdtProbe(model, request);
+      ParticleRunReadback.exportRetainedTerminalBoundaries(model, "partM3C2", PHYSICS, directory(request));
       emit("configuration", "seed", Integer.toString(seed(request)), "step_s", stepSeconds(stepNs(request)),
           "random_number_args", "UserDefined", "seed_authority",
           PHYSICS + ".bf1.i", "brownian_seed_expression",

@@ -185,6 +185,33 @@ def _unstructured_strip(
 
 _DENSITY_REQUIREMENT = RequiredFieldMetadata("kg/m^3", ("value",), "scalar", True)
 _RZ_VECTOR_REQUIREMENT = RequiredFieldMetadata("m/s", ("r", "z"), "axisymmetric_rz", False)
+_RZ_AXIS_ODD_SCALAR_REQUIREMENT = RequiredFieldMetadata("1/s", ("value",), "scalar", False, True)
+
+
+def test_required_snapshot_field_must_cover_the_complete_run_interval() -> None:
+    layout = _regular_layout()
+    static = _scalar_field()
+    field = replace(
+        static,
+        values=np.stack((static.values, 2.0 * static.values)),
+        time_s=np.asarray([0.25, 0.75], dtype="<f8"),
+    )
+    data = _bundle(_quad_geometry(), (layout,), (field,))
+
+    prepared = prepare_required_fields(
+        data,
+        {"gas_density": _DENSITY_REQUIREMENT},
+        time_interval_s=(0.25, 0.75),
+    )
+    assert prepared.has_time_dependent_fields
+    assert prepared.time_knots_s() == (0.25, 0.75)
+
+    with pytest.raises(FieldLocationError, match="does not cover the run interval"):
+        prepare_required_fields(
+            data,
+            {"gas_density": _DENSITY_REQUIREMENT},
+            time_interval_s=(0.0, 0.75),
+        )
 
 
 @pytest.mark.parametrize("kind", ["regular", "p1", "q1"])
@@ -355,6 +382,41 @@ def test_required_rz_vector_checks_a_boundaryless_regular_support_axis() -> None
 
     with pytest.raises(FieldLocationError, match="zero radial component on the axis"):
         prepare_required_fields(data, {"gas_velocity": _RZ_VECTOR_REQUIREMENT})
+
+
+def test_required_rz_axis_odd_scalar_must_vanish_on_accessible_axis() -> None:
+    layout = _regular_layout()
+    values = np.asarray([[1.0], [0.0], [1.0], [0.0]], dtype="<f8")
+    field = FieldData(
+        "azimuthal_vorticity",
+        layout.name,
+        "node",
+        ("value",),
+        "scalar",
+        values,
+        "1/s",
+    )
+    data = _bundle(
+        _quad_geometry(),
+        (layout,),
+        (field,),
+        coordinate_system="axisymmetric_rz",
+    )
+
+    with pytest.raises(FieldLocationError, match="must be zero on the axis"):
+        prepare_required_fields(
+            data,
+            {"azimuthal_vorticity": _RZ_AXIS_ODD_SCALAR_REQUIREMENT},
+        )
+
+    zero_axis = values.copy()
+    zero_axis[[0, 1], 0] = 0.0
+    valid = replace(field, values=zero_axis)
+    prepared = prepare_required_fields(
+        replace(data, fields=(valid,)),
+        {"azimuthal_vorticity": _RZ_AXIS_ODD_SCALAR_REQUIREMENT},
+    )
+    assert prepared.layout is layout
 
 
 @pytest.mark.parametrize(

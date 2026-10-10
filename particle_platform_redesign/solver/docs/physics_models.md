@@ -3,11 +3,16 @@
 この文書はproductionで実装したversioned modelを扱う。model選択とfield参照はYAMLへ明示し、field名の自動探索、
 適用域外での別modelへの自動切替、backend固有の係数を認めない。runtime contributionはdragを、stageで
 凍結した正の`linear_relaxation(rate, target_velocity)`、その他の力を`explicit_acceleration`として返す。
-現行physics catalog revisionは`inertial_langevin_rz_catalog_v17`、physics runtime revisionは
-`signed_ion_compiled_physics_runtime_v20`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
+現行physics catalog revisionは`inertial_langevin_2d_catalog_v23`、physics runtime revisionは
+`signed_ion_compiled_physics_runtime_v22`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
 v17はDEP認証上限の直列化丸めを一つのfloat64 successorまで外向きに扱い、v18は各charge stageへ
 `charge_rate_derivative_s_inv=J`を追加し、v19はoptional aggregate three-currentを同じstage payloadへ統合した。
 v20はrelative-flow ion dragの局所interval上界とprepared charge invariantを同じruntime ownerへ追加した。
+catalog v18/runtime v21/compiled tile v19は、Talbot熱泳動とSaffman liftを既存の一つのstage passへ追加した。
+catalog v19はBrownianの必須base depthとoptional adaptive max depthを解決し、物理式とruntime v21は変更しない。
+catalog v20で、同時に選択した中性気体modelの重複primitive authorityとnative/effective-gas意味を
+prepare時に一度だけ照合する。力式、runtime、case schemaは変更しない。
+catalog v23/runtime v22/compiled tile v21で、Talbotの原著bindingを半径Knへ修正し、pure/boundの暗黙係数を削除する。
 continuous modelはfiniteな`J<=0`、fixed chargeは`J=0`を返す。
 
 ## Particle authority
@@ -16,8 +21,22 @@ continuous modelはfiniteな`J<=0`、fixed chargeは`J=0`を返す。
 - dragは`drag_diameter_m`、電気的な有限寸法は`electrostatic_radius_m`、浮力は
   `displaced_volume_m3`を使い、相互に再構成しない。
 - Barnes ion dragの粒子半径も`electrostatic_radius_m`だけを使い、drag径から再構成しない。
-- 初期電荷数`Z0`はtableの`charge_number`またはsurfaceの`particle.charge_number`だけが所有する。
+- 初期電荷数`Z0`はrealized internal/surface tableの粒子rowにある`charge_number`だけが所有する。
 - `charge: {model: fixed}`は`dZ/dt=0`だけを意味する。電荷Coulomb値は常に`q=Z*e`から求める。
+
+## Neutral-gas background authority
+
+drag、thermophoresis、lift、gravity/buoyancyを同時に選ぶ場合、二つ以上のmodelが宣言する同じ
+中性気体primitiveは一つのcanonical authorityを共有する。`gas_velocity_field`、`gas_density_field`、
+`gas_temperature_field`、`gas_dynamic_viscosity_field`、`gas_mean_free_path_field`はfield名を、
+`gas_molecular_mass_kg`は値を完全一致させる。liftを選ばない場合もこの規則を適用し、例えばdragと
+gravity/buoyancyが異なるdensity fieldを参照するcaseを受理しない。modelが使わないprimitiveを新たに要求せず、
+同じfield名で異なるproducer意味を隠すことも許可しない。
+
+linear EpsteinとWaldmann--Gallisを併用する場合は、native single-species同士またはeffective-gas sensitivity同士に
+限定する。field名が同じでもnative/effectiveを混在させない。有限速度Epsteinは一つの局所Maxwellianを入力とするため、
+single-speciesまたはproducer認証済みpseudogasのどちらとも組み合わせられるが、選択したWaldmann revisionと同じ
+背景へのfield bindingとprovenanceが必要である。coreはspecies配列やmixture closureを推測しない。
 
 ## Coordinate basis and RZ regularity
 
@@ -88,6 +107,10 @@ Stokes–Cunninghamへ黙って切り替えない。`count` policyはaccepted pr
 である。同論文はMaxwell分布の分子による基本係数と、表面反射条件により係数が変わることを示す。
 
 ## `epstein_linear_effective_gas_sensitivity_v1`
+
+単一の平均質量からspecies sumを回復できるとは限らない。等温・等数密度で質量比1:9、同じaccommodationなら、
+number-weighted平均質量を使うpseudogasのdrag係数はspecies別Epstein和の`√5/2 ≈ 1.118`倍になる。
+単一species極限では一致する。この製造例は平均化規約の差を示すもので、実混合気体の普遍補正係数ではない。
 
 P18-Rのoptional reference/sensitivity revisionである。式、`delta`、field単位、粒子authorityは
 `epstein_linear_v1`と同じだが、producerが混合気体を一つの有効Maxwellian/pseudogasへ畳み込み、その近似を
@@ -360,7 +383,9 @@ revisionの前提である。sheath内の強いdrift、collisional charging、�
 複数イオン種、離散捕獲は別revisionとする。適用域を緩めるための暗黙の相関切替は行わない。
 
 XYではion velocityを`(x,y)/cartesian_xy`、RZでは`(r,z)/axisymmetric_rz`として読む。axisへ到達可能な
-RZ domainではaxis nodeの \(u_{i,r}=0\) を既存vector regularityで認証する。signed radial chartの変換は
+RZ domainではaxis nodeの \(u_{i,r}=0\) を既存vector regularityで認証する。さらに、Saffmanおよび
+rarefied-vorticity liftが使う方位角渦度は軸上で厳密に0でなければならず、選択されたvorticity fieldを
+required-field preparationで認証する。signed radial chartの変換は
 \(|\boldsymbol u_i-\boldsymbol v|\) とscalar charge rateを変えない。
 
 ### 単調性、平衡、有限invariant
@@ -603,6 +628,10 @@ actual stageと連続pathのいずれかが超過すればfail-closedにする�
 rate/derivative bound、`h*L_Z <= 0.5`も既存continuous-charge数値契約のまま要求する。
 
 この式は電子と全正イオンを一つの有効密度・速度・質量・thermal voltageへ集約した平均二電流modelである。
+stationary Maxwellianのattractive collectionに対して、trace-electron・zero-driftかつenergy floor外の
+独立極限では、現行ion-current増分の比は`(π/4)/√(1+v_reg²/c̄_i²)`となる。
+regularizationが無視できる極限でも`π/4`であり、species-resolved OMLの厳密解とは一致しない。
+係数を自動補正せず、reference/sensitivity modelとしての適用scopeへこの差を含める。
 species-resolved OML、負イオン収集、放出、離散電荷、collisional/magnetized sheathを表さず、普遍的な推奨modelとは
 しない。Case P/AやCOMSOL名をcoreへ持ち込まず、uniform producerも有効質量を定数fieldとして書く。既存の
 単一正イオンBarnes ion dragとは背景species authorityが異なるため併用を拒否し、次節のaggregate ion dragだけが
@@ -797,7 +826,7 @@ recovery、元field hash、point-dipole認証法と誤差基準はproducer prove
 
 初回適用域は球形、線形・等方・一様媒質、準静的dipole、dilute one-way粒子、実数CM factorである。複素・周波数依存CM、
 travelling-wave DEP、非球形、多極子、粒子間相互作用は別revisionとする。B02のBrownian subsetは追加決定論力を受理しないため、
-DEPとの併用をprepareで拒否する。
+この履歴上の制約は現行2-D midpoint Brownianでは置換され、線形EpsteinとDEP双方の適用域を満たす時だけ合成する。
 
 component-wise global boundはfield extrema、`abs(K_CM)`、`epsilon_r`、`a^3/m`から外向きに丸めて作り、既存の
 support/event enclosureへ加える。Cartesian XYでgradientが厳密定数かつ他の力も既存条件を満たす場合は
@@ -828,8 +857,8 @@ catalogで完全一致させる。
 
 適用域は球形、dilute one-way、RZ meridional、no-swirl、`lambda_g/a>=10`で、`applicability: error`だけを許す。
 static lower boundと各actual stageでfail-closedに検査し、別lift、continuum blend、zero-force fallbackへ切り替えない。
-Stokes--Cunninghamとは適用域が重ならず、B02 Brownianは追加決定論力を受理しないため、いずれもplan解決時に併用を
-拒否する。Cartesian XY、Cartesian 3-D、方位粒子速度は別revisionである。
+Stokes--Cunninghamとは適用域が重ならないため併用を拒否する。現行2-D midpoint Brownianとは、RZ、線形Epstein、
+上記free-molecular適用域を同時に満たす時だけ合成する。Cartesian XY、Cartesian 3-D、方位粒子速度は別revisionである。
 
 liftは速度へ直交結合するため、固定external-acceleration配列へ入れない。prepared global extremaから粒子別coupling-rate
 上界、二成分gas-velocity上界、static applicabilityを作り、runtimeはcomponent-wise particle-velocity上界を受ける
@@ -842,6 +871,45 @@ explicit midpoint 1.8次以上で収束し、指数法の全短縮stateもenclos
 runtime v13、compiled tile v15、exponential enclosure v3で、integrator v2、engine v30、proposal v7、resident state、
 memory plan、case/result/checkpoint schemaは不変である。resolved result manifestはfield bindingと明示`lift_coefficient`を
 保存する。COMSOL pointwise式parityと軌道一致はM3-C1まで`NOT_TESTED`である。
+
+## `saffman_unbounded_creeping_shear_v1`
+
+壁から十分離れた、球形・非回転・表面no-slip粒子の低Re連続体shearを対象とするoptional lift revisionである。
+相対速度を`w=u_g-v`、流体vorticityを`omega=curl(u_g)`、`L=w cross omega`とすると、
+
+\[
+\boldsymbol F_L=6.46a^2\boldsymbol L
+\sqrt{\frac{\mu\rho_g|\boldsymbol w|}{|\boldsymbol L|}},
+\qquad a=\frac{\texttt{drag\_diameter\_m}}2
+\]
+
+で評価する。ゼロslipまたはゼロvorticityではepsilonで除算せず、連続極限の厳密なゼロを返す。平面問題では
+`C=6.46*a^2*sqrt(mu*rho_g*abs(omega))/mass_kg`として、Cartesian XYは
+`a=(C*w_y*sign(omega_z), -C*w_x*sign(omega_z))`、RZ no-swirlは
+`omega_phi=d(u_r)/dz-d(u_z)/dr`に対して
+`a=(-C*w_z*sign(omega_phi), C*w_r*sign(omega_phi))`である。
+
+必須fieldはgas velocity `[m/s]`、density `[kg/m^3]`、dynamic viscosity `[Pa*s]`、mean free path `[m]`、
+signed面外vorticity `[1/s]`である。vorticityはproducerが同じvelocity solutionと明示した回復規則から形成し、
+coreは速度を微分しない。XYでは`omega_z`、RZでは上記`omega_phi`を供給する。Stokes--Cunninghamまたはdragなしとだけ
+組み合わせ、Waldmann--Gallis、高Kn lift、Epstein dragとは適用域不一致として拒否する。
+
+半径基準で`Kn_a=lambda/a`、`Re_s=rho*a*|w|/mu`、`Re_G=rho*a^2*|omega|/mu`とし、全stage/pathで
+
+```text
+Kn_a <= 0.1
+Re_s <= 0.1
+Re_G <= 0.1
+omega == 0 or Re_s <= 0.1*sqrt(Re_G)
+```
+
+をfail-closedに要求する。最後の`0.1`は原式の`Re_s << sqrt(Re_G)`を実行可能にした保守的revision policyであり、
+変更時はmodel revisionを上げる。区間vorticityがゼロを跨ぎ、非ゼロslip上界を持つ場合は階層を証明できないため、
+局所細分化しても閉じなければ受理しない。near-wall lift、粒子回転、finite-Re補正へfallbackしない。
+
+3-D cross-product oracle、XY/RZ符号、zero条件、半径scaling、hierarchyを含む適用域、pure/compiled parity、
+線形回転解析解へのRK4収束、公開API fail-closedを検証した。保存済みCOMSOL datasetはこのmodelを選択していないため、
+COMSOL実行値とのpoint-force/軌道parityは`NOT_TESTED`である。
 
 ## `barnes_collisionless_effective_speed_single_positive_ion_negative_debye_huckel_v1`
 
@@ -894,6 +962,9 @@ global bound、compiled/reference parity、fixed/continuous chargeの同一stage
 runtime v7、compiled tile v10、engine v28であり、proposal、event、memory plan、case/result/checkpoint schemaは変更していない。
 
 collection＋orbital formは[Barnes et al. (1992)](https://doi.org/10.1103/PhysRevLett.68.313)を出発点とする。
+このrevisionのeffective-speed collectionはshifted Maxwellianの速度積分そのものではない。
+neutral sphere・weak driftの独立極限では、厳密Maxwellian係数`(4/3)c̄_i`に対して現行係数は`c̄_i`で、
+力の比は`3/4`へ近づく。これは限定したcollectionのmodel-form差であり、orbital項や全域へ乗じる補正を意味しない。
 Barnes型screeningの適用限界は[Khrapak et al. (2002)](https://doi.org/10.1103/PhysRevE.66.046414)、
 collisional sheathが別modelを要することは[Ono et al. (2020)](https://doi.org/10.1103/PhysRevE.102.063212)を参照する。
 
@@ -960,6 +1031,45 @@ integrator v2、resident state、memory plan、case/result/checkpoint schemaは�
 replayだけが約`1.1e-15`でPASSし、既存P15-E/P16 applicabilityは12/12 `NOT_APPLICABLE`、PPRに`q_eff`が無いため
 本revisionのpointwise replayは`NOT_TESTED`である。COMSOL studyは再実行しておらず、設定可能性はmixture truthを意味しない。
 
+## `talbot_cross_regime_radius_knudsen_v1`
+
+広いKn範囲を一つの明示式で扱うoptional thermophoresis revisionである。原著の半径基準に合わせ、
+`a=d_drag/2`、`Kn_R=lambda/a=2*lambda/d_drag`、`Lambda=k_g/k_p`とし、
+
+\[
+\boldsymbol F_{th}=-\frac{12\pi a\mu^2}{\rho_g}
+\frac{C_s(\Lambda+C_tKn_R)}
+{(1+3C_mKn_R)(1+2\Lambda+2C_tKn_R)}
+\frac{\nabla T_g}{T_g},
+\qquad \boldsymbol a_{th}=\frac{\boldsymbol F_{th}}{m_p}
+\]
+
+を使う。[Talbot et al. 著者preprint Eq. (15)](https://escholarship.org/content/qt22f5r6cz/qt22f5r6cz.pdf)が
+式・半径Kn・係数の根拠であり、原著の推奨値は`Cs=1.17`、`Cm=1.14`、`Ct=2.18`である。
+caseは三係数を必ず明示し、manifestへ保存する。pure evaluator、boundにもdefaultやpresetを持たせない。
+COMSOL記載の`1.17,1.146,2.2`を選ぶ場合はcoefficient variantとして扱い、原著の推奨値と同一とは呼ばない。
+径Knで同じ式を表すには`Cm_d=2*Cm_R`、`Ct_d=2*Ct_R`が必要だが、productionは半径Knの一経路だけを持つ。
+旧径Kn revisionは拒否し、自動変換や旧checkpointの再解釈はしない。
+
+原著のmean free pathは粘性基準`lambda=2*mu/(rho*c_bar)`である。producerはこの定義に対応するprimitiveを
+用意する。coreはsample済みlambdaを変更せず、Knを計算する。prefactorの`12*pi*a`は`6*pi*d_drag`と同値で、
+mass、electrostatic半径、contact半径をdrag径から再構成しない。
+
+必須fieldはtemperature `[K]`、temperature gradient `[K/m]`、density `[kg/m^3]`、dynamic viscosity `[Pa*s]`、
+gas thermal conductivity `[W/(m*K)]`、mean free path `[m]`で、particle thermal conductivity
+`[W/(m*K)]`はcase scalarである。gradientはproducerが同じ温度solutionと明示した回復規則から形成し、coreは温度を
+微分しない。gradientは有限値、scalar primitiveと係数は有限正値に限定し、XY/RZ basisのgradientを
+stage位置・時刻でsampleする。
+
+本revisionは正の有限scalar primitiveに対してTalbot式を評価し、`Kn_R`の数値cutoffを設けない。これは広いKn範囲の
+model-formを明示選択する契約であり、任意のKnで実験的に検証済みとは主張しない。near-wall、negative
+thermophoresis、粒子内温度偏り、photophoresis、混合気体closureを認定せず、WaldmannとのblendやKnによる
+自動切替はしない。categoryで一つだけを明示選択する。
+原著の半径式によるscalar oracle、径式への同値係数変換、連続体/自由分子漸近、zero gradientと符号、point boundと
+wide-Kn乱択bound、非default係数の設定伝播、XY/RZのpure/compiled parityを検証した。公開APIではTalbot＋Stokes＋
+Saffmanのcompositionとmanifest係数に加え、affine温度場のTalbot単独運動を独立解析解と照合した。
+保存済みCOMSOL datasetはTalbotを選択していないため、COMSOL実行値とのpoint-force/軌道parityは`NOT_TESTED`である。
+
 ## Brownian numerical foundation（B01履歴）
 
 B01は線形Langevin系の数値primitiveだけを実装した。`stochastic.py`が局所固定係数のjoint `(x,v)` OU更新と
@@ -967,22 +1077,25 @@ conditional half-split、`rng.py`が物理interval-tree Philox normalを所有�
 `noise` modelを登録せず、既存dragのfluctuation--dissipation対応、field sampling、event、output、checkpointへも
 接続していなかった。production接続は次節のB02が所有する。
 
-B01の平均更新はdrag-onlyであり、任意の`F_other/m`を含まない。この制約はB02でも維持し、他の力を黙って
+B01の平均更新はdrag-onlyであり、任意の`F_other/m`を含まなかった。初回B02はこの制約を維持し、B03で
+midpoint-frozen additive forceを導入した。現行2-D revisionは後述の一つの意味へ統合し、他の力を黙って
 落としたり、別のdragへ自動切替したりしない。
 
 B01はfinite-speed非線形drag、RZ meridional、overdamped近似、材料wall first-passageを対応済みとは扱わない。
 
-## `inertial_langevin_fdt_epstein_linear_frozen_start_v1`（B02）
+## `inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`
 
-B02の`physics.noise`はmodel `inertial_langevin_fdt`、revision
-`inertial_langevin_fdt_epstein_linear_frozen_start_v1`である。Cartesian XY、fixed charge、
-`epstein_linear_v1`だけを受理し、electric、gravity/buoyancy、ion drag、thermophoresis、DEP、liftなどの追加力、
-continuous charge、finite-speed Epstein、Stokes--Cunningham、RZをprepare時に拒否する。材料lawもterminalな
-`stick`と`escape`だけで、specular、restitution、probabilistic stickを含む反射経路へ接続しない。
+初回B02のCartesian XY frozen-start revisionと、初回B03のRZ midpoint revisionは履歴上の段階的sliceである。
+現行catalogは両方を受理せず、一つの2-D midpoint revisionだけを受理する。対応座標はCartesian XYと
+axisymmetric RZ meridionalで、RZは従来どおりr/zへ投影した2自由度であり、方位自由度を持たない。
+native/effective-gas線形Epstein、fixed/continuous charge、および選択した線形Epsteinと他のcatalog制約を同時に
+満たすadditive forceを一つの`ou_langevin` proposalへ合成する。finite-speed Epstein、Stokes--Cunningham、
+適用域が交わらないSaffman等はprepare時にfail-closedとなる。
 
-各macro-rootの開始位置・速度・時刻でEpstein rate `gamma`と平衡速度`u_g`を評価し、そのroot内で固定する。
-fluctuation--dissipationの温度authorityは同じEpstein mappingが参照する`gas_temperature_field`だけであり、
-noise mappingに第二の温度fieldを持たない。粒子慣性は従来どおりsourceの`mass_kg`で、各成分を
+各macro-rootのnoise-free predictorでmidpointを作り、そこでEpstein rate `gamma`、平衡速度`u_g`、温度`T_g`、
+全additive acceleration `a`、`G=dZ/dt`、`J=dG/dZ`を一度評価して固定する。fluctuation--dissipationの温度authorityは
+同じEpstein mappingが参照する`gas_temperature_field`だけであり、noise mappingに第二の温度fieldを持たない。
+粒子慣性はsourceの`mass_kg`で、各成分を
 
 \[
 d v=-\gamma(v-u_g)\,dt+\sqrt{2\gamma\theta}\,dW,
@@ -990,38 +1103,64 @@ d v=-\gamma(v-u_g)\,dt+\sqrt{2\gamma\theta}\,dW,
 \qquad \theta=\frac{k_B T_g}{m_p}
 \]
 
-として進める。`interval_tree_depth`は整数`0..10`、prepare時に`gamma*dt<=1e6`、全macro-rootで有限な
+として進める。決定論平均は`u_eff=u_g+a/gamma`を使用する。continuous chargeはmidpoint-frozen affine lawを
+root基準の`macro_root_affine_exponential_v2`で進め、fixed chargeは同じ式の`G=J=0`極限である。
+`J<=0`とprepared charge invariantを要求し、逸脱または証明不能をfail-closedにする。
+
+`interval_tree_depth`は整数`0..10`、prepare時に`gamma*dt<=1e6`、全macro-rootで有限な
 `0<gamma*h<=1e6`を要求する。OU endpointは
 凍結係数に対してjointに厳密だが、各leafのevent/replay pathはそのendpoint位置・速度から構成するcubic Hermite
 numerical pathである。この有限depth path上のfirst hitを認証するのであり、連続OU trajectoryのexact first-passage、
 overdamped Brownian limit、miss probability 0を主張しない。
 
-resolved modelにはnoise model/revisionを記録し、manifestにはBrownian RNG、joint OU、conditional splitの各revision、
-tree depth、root/split draw stream、`macro_root_frozen_start_v1`、`path_kind=cubic_hermite`を残す。checkpoint resume
-identityはRNG/OU/split revision、coefficient policy、depth、resolved modelを含み、mutable RNG cursorを保存しない。
-B02の上記model/revisionとpayloadは現行engine v37でもbitwise不変である。現行全体revisionはengine v37、proposal v10、
-catalog v17、runtime v20、runtime layout v6、memory plan v14である。
+resolved modelにはnoise model/revisionを記録し、manifestにはBrownian RNG、joint OU、conditional split、tree policyの各revision、
+base/max depth、root/split draw stream、`macro_root_frozen_midpoint_v1`、`stochastic_exponential_midpoint_v1`、
+`path_kind=cubic_hermite`を残す。checkpoint resume
+identityはRNG/OU/split/tree-policy revision、coefficient policy、base/max depth、resolved modelを含み、mutable RNG cursorを保存しない。
+現行全体revisionはengine v46、proposal v10、event v22、catalog v23、runtime v22、runtime layout v6、memory plan v16である。
 root covariance、conditional split、mean updateがfloat64で表現不能なrowは`nonfinite_physics`となり、同一batchの
 正常rowは継続する。`gamma*h`上限をこの実表現可能性検査の代用にはしない。
 COMSOLまたは`model_dataset`との比較は物理式のauthorityでなく、core外のV&Vだけが所有する。
 
-## `inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1`（B03）
+conditional OU treeはrootの凍結係数とendpointを保つ。RZ axis hit、periodic transfer、またはactive wall hitでは
+accepted prefixをcommitし、post-event stateから残時間をfresh `root_stochastic_interval`として再評価・独立drawで
+再開する。surface sourceのzero-time responseも係数midpointを作る前に解決する。元root remainderは
+fold/restrictしない。等方3-D Brownianでも一般state-dependent SDEのstrong order/weak 2次でもない。
 
-B03はaxisymmetric RZ meridionalのr/zへ投影した2自由度revisionである。native/effective-gas線形Epstein、fixed/continuous
-charge、既存additive forceを一つの`ou_langevin` proposalへ合成する。root始点からのnoise-free predictorでmidpointを作り、
-そこで`gamma,u,T,a,G=dZ/dt,J=dG/dZ`を一度評価して`macro_root_frozen_midpoint_v1`として凍結する。
-`J<=0`を要求し、`u_eff=u+a/gamma`のjoint exact OUと`macro_root_affine_exponential_v2`のdense chargeを
-同じproposalが所有する。root基準のrateは`G_mid+J(Z_root-Z_mid)`であり、各leaf charge intervalをprepared invariantへ
-照合して逸脱・証明不能をfail-closedにする。
+初回B03 characterizationの計時とRSSは[`evidence/b03/`](../evidence/b03/README.md)に属する履歴上の
+machine-local・non-gating観測であり、統合後engineの性能値や物理妥当性の証拠ではない。
 
-conditional OU treeはrootの凍結係数とendpointを保つ。axis hitではaccepted prefixをcommitしてradial stateをfoldし、残時間を
-fresh `root_stochastic_interval`として再評価・独立drawで再開する。元root remainderはfold/restrictしない。terminal lawは
-`stick`/`escape`/`hold`だけである。等方3-D Brownianでも一般state-dependent SDEのstrong order/weak 2次でもない。
-COMSOL再実行なしに解析・manufactured・identity gateを閉じ、現行revisionはengine v37 / proposal v10 / catalog v17 /
-event v16 / runtime v20 / compiled tile v18 / memory plan v14である。正式characterizationは24/24実行を全粒子active・
-failure 0で完了し、静的なB03 path-array上限`648 B/row`が`2048 B/row`以内であることも確認した。計時とRSSは
-[`evidence/b03/`](../evidence/b03/README.md)の初回closeout（engine v34 / proposal v9 / runtime v17 / tile v16）に
-属するmachine-local・non-gating観測であり、物理妥当性の証拠ではない。
+## B04 Brownian active-wall restart
+
+B04で導入したactive-wall規則は、現行2-D midpoint revisionのOU endpoint、conditional tree、cubic Hermite numerical pathを変更せず、既存first-hitと
+`contact_wall_laws_v7`を接続する。terminal `stick`/`escape`/`hold`に加え、activeな`specular`、`restitution`、
+`maxwell_thermal`と`probabilistic_stick`の明示fallbackをXY/RZで受理する。wall lawの温度、係数、確率、counter
+identityは決定論runと同じownerを使い、Brownian専用の反射式やmutable RNG cursorを作らない。
+
+active hitでは現在のHermite leafをhitまでだけcommitし、post-wall position/velocity/chargeからmacro残時間をfresh
+`root_stochastic_interval`として係数再評価・独立root drawで開始する。元rootの未使用cubic tailを反射、fold、restrict
+またはBrownian bridgeとして再利用しない。axis hitも同じprefix-commit/fresh-root規則を使い、axisとwallが連続する時も
+一つのengine/event順序を維持する。active restart回数は`max_interactions_per_step`、数値guard restartは
+`max_refinements`で別々にboundedとし、超過をstick等の物理結果へ変換しない。
+
+受入はXY/RZの低noise multiple-reflection解析極限、restitution、確率fallback、Maxwell鏡面branch、continuous
+charge＋additive force、axis→wall、実noise平面包含、tree-depth安定性、slab幅・output schedule identityで行う。
+surface Brownian releaseのzero/tangent初速度はnudgeせず拒否し、入力でrealize済みのstrict-inward初速度を使う。
+これは有限depth Hermite numerical pathのactive-wall意味論であり、連続OU trajectoryのexact
+first-passage、任意force/非線形dragの解禁、等方3-D Brownian、一般SDEのstrong order/weak 2次を主張しない。
+case/result/checkpoint schema、noise model revision、resident state、event列は不変である。
+
+## B05 conditional Brownian boundary refinement
+
+B05は物理modelやFDT係数を増やさない。`interval_tree_depth`を全rootへ一様に適用する有限depth pathの
+accuracy authorityとし、wall、RZ axis、surface contact、またはgeometry certificateがclearにできない区間だけを
+`adaptive_max_depth`まで既存conditional OU splitで細分する。base=maxは従来固定depthへ退化し、RNG key、
+coefficient policy、wall/axis fresh-root意味論を変えない。tree policyは
+`conditional_boundary_refinement_v1`である。
+
+この局所分割は連続OU軌道のexact crossingを解くmodelでも、RMS/probability thresholdによるclearでもない。
+zero miss probabilityやuniform max-depthと同じglobal解像度は主張せず、base depthの収束を物理・数値精度の
+判定に使う。memory plan v16は実際の候補率でなくmax depthからtree workを保守的に解決する。
 
 ## Stage gate
 

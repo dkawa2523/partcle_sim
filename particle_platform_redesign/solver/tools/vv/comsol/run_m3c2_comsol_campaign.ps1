@@ -16,12 +16,12 @@ function Confirm-PreparedTableArtifacts {
 
     $Receipt = Get-Content -LiteralPath $ReceiptPath -Raw | ConvertFrom-Json
     if ([int]$Receipt.schema_version -ne 1 -or
-        [string]$Receipt.tool_revision -ne "m3c1_full_physics_common_p1_tables_v1") {
+        [string]$Receipt.tool_revision -ne "m3c1_full_physics_common_p1_tables_v2") {
         throw "Prepared-table receipt schema or tool revision is not supported"
     }
     $Entries = @($Receipt.artifacts.PSObject.Properties)
-    if ($Entries.Count -ne 26) {
-        throw "Prepared-table receipt must bind exactly 26 common-P1 artifacts"
+    if ($Entries.Count -ne 27) {
+        throw "Prepared-table receipt must bind exactly 27 common-P1 artifacts"
     }
     [long]$TotalSize = 0
     $Verified = @()
@@ -71,6 +71,8 @@ $ContractPath = $(
 $JavaSource = Join-Path $PSScriptRoot "comsol\RunM3C2StochasticCampaign.java"
 $ValidationJavaSource = Join-Path $PSScriptRoot `
     "comsol\RunM3C2StochasticRunnerValidation.java"
+$ReadbackJavaSource = Join-Path $PSScriptRoot "comsol\ParticleRunReadback.java"
+$CoefficientJavaSource = Join-Path $PSScriptRoot "comsol\CommonP1Epstein.java"
 $Preparer = Join-Path $PSScriptRoot "prepare_m3c1_common_p1_tables.py"
 $Normalizer = Join-Path $PSScriptRoot "normalize_m3c2_comsol_pilot.py"
 $Compiler = Join-Path $ComsolRoot "bin\win64\comsolcompile.exe"
@@ -80,6 +82,8 @@ foreach ($Required in @(
         $ContractPath,
         $JavaSource,
         $ValidationJavaSource,
+        $ReadbackJavaSource,
+        $CoefficientJavaSource,
         $Preparer,
         $Normalizer,
         $Compiler,
@@ -283,6 +287,12 @@ $ValidationJavaHash = (
 ).Hash.ToLowerInvariant()
 $PreparerHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Preparer).Hash.ToLowerInvariant()
 $NormalizerHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Normalizer).Hash.ToLowerInvariant()
+$ReadbackJavaHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $ReadbackJavaSource).Hash.ToLowerInvariant()
+$CoefficientJavaHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $CoefficientJavaSource).Hash.ToLowerInvariant()
+$ActualReceiptReader = Join-Path $PSScriptRoot "actual_run_receipt.py"
+$BoundaryResponseMapping = Join-Path $PSScriptRoot "boundary_response_mapping.py"
+$ActualReceiptReaderHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $ActualReceiptReader).Hash.ToLowerInvariant()
+$BoundaryResponseMappingHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $BoundaryResponseMapping).Hash.ToLowerInvariant()
 $RunnerHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $PSCommandPath).Hash.ToLowerInvariant()
 $RegistrationHash = $(
     if ($Mode -eq "FinalCampaign") {
@@ -297,7 +307,7 @@ $PilotAuthorizationHash = $(
 
 Push-Location $SolverRoot
 try {
-    & uv run --locked python $Preparer $CandidateInput $OutputDirectory
+    & uv run --locked python -m tools.vv.comsol.prepare_m3c1_common_p1_tables $CandidateInput $OutputDirectory
     if ($LASTEXITCODE -ne 0) {
         throw "M3-C2A common-P1 table preparation failed with exit code $LASTEXITCODE"
     }
@@ -312,7 +322,7 @@ $ExecutionRequestPath = Join-Path $OutputDirectory "m3c2_execution_request.json"
 Push-Location $SolverRoot
 try {
     $PrepareArguments = @(
-        $Normalizer,
+        "-m", "tools.vv.comsol.normalize_m3c2_comsol_pilot",
         "prepare-request",
         $OutputDirectory,
         "--mode",
@@ -401,6 +411,8 @@ $StagedValidationJava = Join-Path $OutputDirectory `
     "RunM3C2StochasticRunnerValidation.java"
 $StagedRequestJava = Join-Path $OutputDirectory `
     "RunM3C2StochasticRequest.java"
+$StagedReadbackJava = Join-Path $OutputDirectory "ParticleRunReadback.java"
+$StagedCoefficientJava = Join-Path $OutputDirectory "CommonP1Epstein.java"
 $StagedContract = Join-Path $OutputDirectory ([IO.Path]::GetFileName($ContractPath))
 $StagedPreparer = Join-Path $OutputDirectory ([IO.Path]::GetFileName($Preparer))
 $StagedNormalizer = Join-Path $OutputDirectory ([IO.Path]::GetFileName($Normalizer))
@@ -424,7 +436,9 @@ $ValidationClassFile = Join-Path $OutputDirectory `
 $RequestClassFile = Join-Path $OutputDirectory "RunM3C2StochasticRequest.class"
 $ClassFile = $(if ($Mode -eq "RunnerValidation") { $ValidationClassFile } else { $FullClassFile })
 $ClassStatus = "$ClassFile.status"
-$CompiledClassFiles = @($FullClassFile, $ValidationClassFile, $RequestClassFile)
+$CompiledClassFiles = @($FullClassFile, $ValidationClassFile, $RequestClassFile,
+    (Join-Path $OutputDirectory "ParticleRunReadback.class"),
+    (Join-Path $OutputDirectory "CommonP1Epstein.class"))
 $ProcessLog = Join-Path $OutputDirectory "comsol_process.log"
 $ProcessErrorLog = Join-Path $OutputDirectory "comsol_process_error.log"
 $ProcessMetricsPath = Join-Path $OutputDirectory "comsol_process_metrics.json"
@@ -444,6 +458,8 @@ try {
     }
     Copy-Item -LiteralPath $JavaSource -Destination $StagedJava
     Copy-Item -LiteralPath $ValidationJavaSource -Destination $StagedValidationJava
+    Copy-Item -LiteralPath $ReadbackJavaSource -Destination $StagedReadbackJava
+    Copy-Item -LiteralPath $CoefficientJavaSource -Destination $StagedCoefficientJava
     Copy-Item -LiteralPath $ContractPath -Destination $StagedContract
     Copy-Item -LiteralPath $Preparer -Destination $StagedPreparer
     Copy-Item -LiteralPath $Normalizer -Destination $StagedNormalizer
@@ -458,7 +474,9 @@ try {
             @($StagedValidationJava, $ValidationJavaHash),
             @($StagedContract, $ContractHash),
             @($StagedPreparer, $PreparerHash),
-            @($StagedNormalizer, $NormalizerHash)
+            @($StagedNormalizer, $NormalizerHash),
+            @($StagedReadbackJava, $ReadbackJavaHash),
+            @($StagedCoefficientJava, $CoefficientJavaHash)
         )
     if ($Mode -eq "FinalCampaign") {
         $StagedLocks += , @($StagedRegistration, $RegistrationHash)
@@ -519,6 +537,10 @@ $RequestRowsJava
 
     Push-Location $OutputDirectory
     try {
+        & $Compiler $StagedCoefficientJava
+        if ($LASTEXITCODE -ne 0) { throw "Common-P1 coefficient Java compilation failed" }
+        & $Compiler -classpathadd $OutputDirectory $StagedReadbackJava
+        if ($LASTEXITCODE -ne 0) { throw "Actual readback Java compilation failed" }
         & $Compiler $StagedRequestJava
         if ($LASTEXITCODE -ne 0 -or
             -not (Test-Path -LiteralPath $RequestClassFile -PathType Leaf)) {
@@ -611,8 +633,13 @@ $RequestRowsJava
         (Get-Item -LiteralPath $ProcessLog).Length -eq 0) {
         throw "COMSOL returned without a nonempty M3-C2A process log; class status: $ClassStatusText"
     }
-    if (Select-String -LiteralPath $ProcessLog -SimpleMatch "M3C2_COMSOL|fatal|") {
+    if (Select-String -LiteralPath $ProcessLog, $BatchLog, $ProcessErrorLog -Pattern `
+            'M3C2_COMSOL\|fatal\||Error running java class\.|/\*+Error\*+/') {
         throw "COMSOL Java program reported a fatal M3-C2A exception"
+    }
+    $ExpectedCompletion = "M3C2_COMSOL|run_pass|case=$($Campaign.output_slug)|requests=$($RequestRows.Count)|mode=$Mode|time_end_s=0.03|output_times=121|model_saved=false"
+    if (@(Select-String -LiteralPath $ProcessLog -SimpleMatch $ExpectedCompletion).Count -ne 1) {
+        throw "COMSOL did not emit the unique registered execution completion record"
     }
     foreach ($Request in $RequestRows) {
         $Raw = Join-Path (Join-Path $OutputDirectory $Request.relative_directory) `
@@ -635,6 +662,14 @@ $RequestRowsJava
     if ($SourceHashAfter -ne $SourceHashBefore) {
         throw "The audited source MPH changed during the loadCopy/no-save run"
     }
+    foreach ($Lock in @($StagedLocks) + @(
+        @($ActualReceiptReader, $ActualReceiptReaderHash),
+        @($BoundaryResponseMapping, $BoundaryResponseMappingHash)
+    )) {
+        if ((Get-FileHash -Algorithm SHA256 -LiteralPath $Lock[0]).Hash.ToLowerInvariant() -ne $Lock[1]) {
+            throw "A readback or execution producer changed during the run"
+        }
+    }
     $TableValidationAfter = Confirm-PreparedTableArtifacts $TableReceipt $OutputDirectory
     if ($TableValidationBefore.receipt_sha256 -ne $TableValidationAfter.receipt_sha256 -or
         $TableValidationBefore.total_size_bytes -ne $TableValidationAfter.total_size_bytes) {
@@ -650,7 +685,7 @@ $RequestRowsJava
 
     Push-Location $SolverRoot
     try {
-        & uv run --locked python $StagedNormalizer normalize $OutputDirectory
+        & uv run --locked python -m tools.vv.comsol.normalize_m3c2_comsol_pilot normalize $OutputDirectory
         if ($LASTEXITCODE -ne 0) {
             throw "M3-C2A COMSOL normalization failed with exit code $LASTEXITCODE"
         }
@@ -664,7 +699,7 @@ $RequestRowsJava
 
     [ordered]@{
         schema_version = 1
-        tool_revision = "m3c2_comsol_campaign_runner_v4"
+        tool_revision = "m3c2_comsol_campaign_runner_v5"
         status = $(
             if ($Mode -eq "FullPilot") { "COMPLETE_FULL_PILOT_NOT_EVALUATED" }
             elseif ($Mode -eq "FinalCampaign") { "COMPLETE_FINAL_CAMPAIGN_NOT_EVALUATED" }
@@ -695,6 +730,20 @@ $RequestRowsJava
         generated_request_java_sha256 = $RequestJavaHash
         preparer_sha256 = $PreparerHash
         normalizer_sha256 = $NormalizerHash
+        readback_java_sha256 = $ReadbackJavaHash
+        coefficient_java_sha256 = $CoefficientJavaHash
+        actual_receipt_reader_sha256 = $ActualReceiptReaderHash
+        boundary_response_mapping_sha256 = $BoundaryResponseMappingHash
+        actual_binding_artifacts = @(
+            foreach ($Request in $RequestRows) {
+                foreach ($Name in @("actual_binding_receipt.json", "fdt_probe_raw.csv")) {
+                    $ArtifactRelativePath = Join-Path $Request.relative_directory $Name
+                    [ordered]@{ path = $ArtifactRelativePath; sha256 = (
+                        Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $OutputDirectory $ArtifactRelativePath)
+                    ).Hash.ToLowerInvariant() }
+                }
+            }
+        )
         execution_request_sha256 = $ExecutionRequestHash
         request_csv_sha256 = $RequestHash
         campaign_registration = $(
@@ -714,6 +763,15 @@ $RequestRowsJava
             } else { $null }
         )
         comsol_version = $VersionText
+        batch_completion = [ordered]@{
+            status = "COMPLETE"
+            process_exit_code = $BatchProcess.ExitCode
+            expected_completion_record = $ExpectedCompletion
+            native_error_record_absent = $true
+            class_status_raw = $ClassStatusText
+            class_status_authority = "non_authoritative_for_6_4_class_input_verified_by_controls"
+            completion_authority = "process_log_and_registered_artifacts_and_normalization"
+        }
         seeds = $Seeds
         fixed_rk4_steps_s = @($StepsNs | ForEach-Object { $_ * 1.0e-9 })
         output_schedule = $Contract.scope.output_schedule_segments

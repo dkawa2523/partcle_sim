@@ -75,6 +75,25 @@ def test_barnes_zero_limits_and_positive_charge_fail_closed_without_a_floor() ->
     np.testing.assert_array_equal(evaluation.acceleration_m_s2[2], np.zeros(2))
 
 
+def test_barnes_effective_speed_has_documented_weak_drift_model_form_gap() -> None:
+    # For a 3-D shifted Maxwellian, d E[|c|c_x] / d u_x at u=0
+    # equals E[|c| + c_x**2/|c|] = (4/3)*mean_speed by isotropy.
+    mean_speed = math.sqrt(8.0 * 1.380649e-23 * 300.0 / (math.pi * _ION_MASS_KG))
+    drift = 1.0e-6 * mean_speed
+    evaluation = _evaluate(
+        charge_number=np.asarray([0.0]),
+        velocity_m_s=np.zeros((1, 2)),
+        ion_velocity_m_s=np.asarray([[drift, 0.0]]),
+    )
+    exact_weak_drift_acceleration = (
+        1.0e14 * _ION_MASS_KG * math.pi * (1.0e-7) ** 2 * (4.0 / 3.0) * mean_speed * drift / 1.0e-15
+    )
+    assert evaluation.applicable.tolist() == [True]
+    assert evaluation.acceleration_m_s2[0, 0] / exact_weak_drift_acceleration == pytest.approx(
+        0.75, rel=2.0e-12
+    )
+
+
 def test_barnes_global_bound_and_continuous_drift_gate_cover_sampled_domain() -> None:
     masses = np.asarray([8.0e-16, 1.2e-15])
     radii = np.asarray([6.0e-8, 1.0e-7])

@@ -16,6 +16,7 @@ from chamber_particles.fields import (
     locate_field_cell,
     sample_field,
 )
+from chamber_particles.numerical_status import FIELD_NUMERICAL_FAILURE, NUMERICAL_STATUS_OK
 from tests.verification.microcases import materialize_microcase
 
 
@@ -63,6 +64,148 @@ def test_regular_bilinear_sampling_keeps_value_and_support_separate() -> None:
     assert not outside.support_inside
     assert outside.outside_reason == "outside_layout"
     assert np.isfinite(outside.value).all()
+
+
+@pytest.mark.parametrize("layout_kind", ["regular", "p1", "q1"])
+def test_snapshot_fields_reuse_spatial_interpolation_at_each_stage_time(
+    layout_kind: str,
+) -> None:
+    if layout_kind == "regular":
+        nodes = np.asarray([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
+        layout: RegularLayout | P1TriLayout | Q1QuadLayout = RegularLayout(
+            "layout",
+            np.asarray([0.0, 1.0]),
+            np.asarray([0.0, 1.0]),
+            np.ones((1, 1), dtype="<u1"),
+        )
+        point = np.asarray([0.25, 0.5])
+    elif layout_kind == "p1":
+        nodes = np.asarray([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
+        layout = P1TriLayout(
+            "layout",
+            nodes,
+            np.asarray([[0, 1, 2]], dtype="<i8"),
+            np.ones(1, dtype="<u1"),
+        )
+        point = np.asarray([0.25, 0.5])
+    else:
+        nodes = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+        layout = Q1QuadLayout(
+            "layout",
+            nodes,
+            np.asarray([[0, 1, 2, 3]], dtype="<i8"),
+            np.ones(1, dtype="<u1"),
+        )
+        point = np.asarray([0.25, 0.5])
+    base = (nodes[:, 0] + 2.0 * nodes[:, 1])[:, None]
+    field = FieldData(
+        "snapshot",
+        layout.name,
+        "node",
+        ("value",),
+        "scalar",
+        np.stack((base, base + 4.0)),
+        "1",
+        time_s=np.asarray([0.0, 2.0]),
+    )
+    prepared = PreparedFieldSet(layout, MappingProxyType({field.name: field}))
+    positions = np.repeat(point[None, :], 2, axis=0)
+
+    sampled, status = prepared.sample_batch(
+        positions,
+        time_s=np.asarray([0.5, 1.5]),
+    )
+
+    np.testing.assert_array_equal(status, [NUMERICAL_STATUS_OK, NUMERICAL_STATUS_OK])
+    np.testing.assert_allclose(sampled.values[field.name][:, 0], [2.25, 4.25], atol=2.0e-15)
+    direct = sample_field(field, locate_field_cell(layout, point), time_s=0.5)
+    np.testing.assert_allclose(direct.value, [2.25], atol=2.0e-15)
+    lower, upper = prepared.component_bounds(field.name)
+    assert lower[0] < float(np.min(field.values))
+    assert upper[0] > float(np.max(field.values))
+    local = prepared.local_component_bounds(
+        (point - 0.01)[None, :],
+        (point + 0.01)[None, :],
+    )
+    assert local.range_available[0]
+    assert local.lower[field.name][0, 0] < float(np.min(field.values))
+    assert local.upper[field.name][0, 0] > float(np.max(field.values))
+
+    failed, failed_status = prepared.sample_batch(
+        positions,
+        time_s=np.asarray([-np.finfo(np.float64).eps, 2.0]),
+    )
+    np.testing.assert_array_equal(
+        failed_status,
+        [FIELD_NUMERICAL_FAILURE, NUMERICAL_STATUS_OK],
+    )
+    np.testing.assert_array_equal(failed.values[field.name][0], [0.0])
+    with pytest.raises(FieldLocationError, match="snapshot range"):
+        sample_field(field, locate_field_cell(layout, point), time_s=2.1)
+
+
+@pytest.mark.parametrize("layout_kind", ["regular", "p1", "q1"])
+def test_local_snapshot_bounds_only_visit_the_bracketing_time_interval(
+    layout_kind: str,
+) -> None:
+    if layout_kind == "regular":
+        nodes = np.asarray([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
+        layout: RegularLayout | P1TriLayout | Q1QuadLayout = RegularLayout(
+            "layout",
+            np.asarray([0.0, 1.0]),
+            np.asarray([0.0, 1.0]),
+            np.ones((1, 1), dtype="<u1"),
+        )
+    elif layout_kind == "p1":
+        nodes = np.asarray([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
+        layout = P1TriLayout(
+            "layout",
+            nodes,
+            np.asarray([[0, 1, 2]], dtype="<i8"),
+            np.ones(1, dtype="<u1"),
+        )
+    else:
+        nodes = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+        layout = Q1QuadLayout(
+            "layout",
+            nodes,
+            np.asarray([[0, 1, 2, 3]], dtype="<i8"),
+            np.ones(1, dtype="<u1"),
+        )
+    snapshot_values = np.asarray([0.0, 1.0, 100.0, -100.0, 0.0], dtype="<f8")
+    values = np.broadcast_to(snapshot_values[:, None, None], (5, nodes.shape[0], 1)).copy()
+    field = FieldData(
+        "snapshot",
+        layout.name,
+        "node",
+        ("value",),
+        "scalar",
+        values,
+        "1",
+        time_s=np.arange(5, dtype="<f8"),
+    )
+    prepared = PreparedFieldSet(layout, MappingProxyType({field.name: field}))
+    point = np.asarray([[0.2, 0.2]], dtype="<f8")
+
+    global_local = prepared.local_component_bounds(point, point)
+    interval_local = prepared.local_component_bounds(
+        point,
+        point,
+        time_lower_s=np.asarray([0.2]),
+        time_upper_s=np.asarray([0.8]),
+    )
+
+    assert global_local.lower[field.name][0, 0] < -100.0
+    assert global_local.upper[field.name][0, 0] > 100.0
+    assert -1.0e-12 < interval_local.lower[field.name][0, 0] <= 0.0
+    assert 1.0 <= interval_local.upper[field.name][0, 0] < 1.0 + 1.0e-12
+    with pytest.raises(FieldLocationError, match="outside its snapshot range"):
+        prepared.local_component_bounds(
+            point,
+            point,
+            time_lower_s=np.asarray([-0.1]),
+            time_upper_s=np.asarray([0.8]),
+        )
 
 
 def test_component_bounds_conservatively_contain_supported_interpolation() -> None:
@@ -653,3 +796,77 @@ def test_q1_inverse_mapping_failure_is_not_hidden_by_a_fallback() -> None:
 
     with pytest.raises(FieldLocationError, match="inverse mapping failed"):
         locate_field_cell(layout, np.asarray([0.5, 0.25]))
+
+
+@pytest.mark.parametrize("kind", ["p1", "regular", "q1"])
+def test_opt_in_spatial_gradient_uses_sampled_basis_and_preserves_values(kind: str) -> None:
+    nodes = np.asarray([[0.0, 0.0], [0.0, 3.0], [2.0, 0.0], [2.0, 3.0]], dtype="<f8")
+    points = np.asarray([[0.2, 0.3], [1.7, 2.4]], dtype="<f8")
+    if kind == "p1":
+        layout: P1TriLayout | RegularLayout | Q1QuadLayout = P1TriLayout(
+            "gradient",
+            nodes,
+            np.asarray([[0, 2, 3], [0, 3, 1]], dtype="<i8"),
+            np.ones(2, dtype="<u1"),
+        )
+        value = 2.0 + 3.0 * nodes[:, 0] - 4.0 * nodes[:, 1]
+        expected = np.broadcast_to(np.asarray([3.0, -4.0]), (points.shape[0], 2))
+    else:
+        layout = RegularLayout(
+            "gradient", np.asarray([0.0, 2.0]), np.asarray([0.0, 3.0]), np.ones((1, 1), dtype="<u1")
+        )
+        value = 1.0 + 2.0 * nodes[:, 0] + 3.0 * nodes[:, 1] + 4.0 * nodes[:, 0] * nodes[:, 1]
+        expected = np.column_stack((2.0 + 4.0 * points[:, 1], 3.0 + 4.0 * points[:, 0]))
+        if kind == "q1":
+            layout = Q1QuadLayout(
+                "gradient", nodes, np.asarray([[0, 2, 3, 1]], dtype="<i8"), np.ones(1, dtype="<u1")
+            )
+    field = FieldData(
+        "velocity",
+        layout.name,
+        "node",
+        ("x", "y"),
+        "cartesian_xy",
+        np.column_stack((value, -2.0 * value)),
+        "m/s",
+    )
+    prepared = PreparedFieldSet(layout, MappingProxyType({field.name: field}))
+    workspace = prepared.allocate_workspace(4)
+    batch = prepared.sample(points, workspace=workspace)
+    sampled = batch.values[field.name].copy()
+    gradient = np.empty((points.shape[0], 2, 2), dtype="<f8")
+    prepared.spatial_gradient(field.name, workspace, gradient)
+    np.testing.assert_allclose(gradient[:, 0], expected, rtol=0.0, atol=2e-14)
+    np.testing.assert_allclose(gradient[:, 1], -2.0 * expected, rtol=0.0, atol=4e-14)
+    np.testing.assert_array_equal(batch.values[field.name], sampled)
+
+
+def test_q1_spatial_gradient_matches_warped_mapping_chain_rule() -> None:
+    # x=(2+v/2)u, y=3v and field=u*v; independent physical chain rule.
+    nodes = np.asarray([[0.0, 0.0], [2.0, 0.0], [2.5, 3.0], [0.0, 3.0]])
+    layout = Q1QuadLayout(
+        "warped_gradient", nodes, np.asarray([[0, 1, 2, 3]], dtype="<i8"), np.ones(1, dtype="<u1")
+    )
+    reference = np.asarray([[0.2, 0.3], [0.7, 0.8]])
+    u, v = reference[:, 0], reference[:, 1]
+    points = np.column_stack(((2 + v / 2) * u, 3 * v))
+    field = FieldData(
+        "value",
+        layout.name,
+        "node",
+        ("value",),
+        "scalar",
+        np.asarray([[0.0], [0.0], [1.0], [0.0]]),
+        "1",
+    )
+    prepared = PreparedFieldSet(layout, MappingProxyType({field.name: field}))
+    workspace = prepared.allocate_workspace(2)
+    prepared.sample(points, workspace=workspace)
+    gradient = np.empty((2, 1, 2))
+    prepared.spatial_gradient(field.name, workspace, gradient)
+    np.testing.assert_allclose(
+        gradient[:, 0],
+        np.column_stack((v / (2 + v / 2), 2 * u / (3 * (2 + v / 2)))),
+        rtol=0,
+        atol=3e-14,
+    )

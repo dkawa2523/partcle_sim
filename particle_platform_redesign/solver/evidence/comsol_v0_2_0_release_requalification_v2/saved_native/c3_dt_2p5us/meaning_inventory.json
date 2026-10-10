@@ -1,0 +1,1069 @@
+{
+  "comparison_conditions": {
+    "native_fe_end_to_end_reproduction": {
+      "adapter_lineage": [
+        "registered current canonical P1 tables; explicit axis-odd recovery; immutable MPH loadCopy"
+      ],
+      "candidate_field": {
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+        "representation": "canonical"
+      },
+      "outcome": {
+        "evidence": [],
+        "status": "NOT_APPLICABLE",
+        "summary": "Numeric verdict remains with registered trajectory/event evaluator; binding agreement alone is not physical proof."
+      },
+      "reference_field": {
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+        "representation": "canonical"
+      },
+      "requested": false
+    },
+    "same_canonical_field_solver_parity": {
+      "adapter_lineage": [
+        "registered current canonical P1 tables; explicit axis-odd recovery; immutable MPH loadCopy"
+      ],
+      "candidate_field": {
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+        "representation": "canonical"
+      },
+      "outcome": {
+        "evidence": [],
+        "status": "NOT_TESTED",
+        "summary": "Numeric verdict remains with registered trajectory/event evaluator; binding agreement alone is not physical proof."
+      },
+      "reference_field": {
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+        "representation": "canonical"
+      },
+      "requested": true
+    }
+  },
+  "inventory_id": "C3-current-axis-normalized-2p5us",
+  "layers": {
+    "boundaries": [
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/axi1/boundary_ids",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/axi1/boundary_ids",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/axi1/WallCondition",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/axi1/properties/WallCondition/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.boundary.axi1",
+        "mapping": "direct",
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality.",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/wall1/boundary_ids",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/wall1/boundary_ids",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/wall1/WallCondition",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/wall1/properties/WallCondition/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.boundary.wall1",
+        "mapping": "direct",
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality.",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/outin/boundary_ids",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/outin/boundary_ids",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/outin/WallCondition",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/outin/properties/WallCondition/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.boundary.outin",
+        "mapping": "direct",
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality.",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/outpump/boundary_ids",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/outpump/boundary_ids",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/boundaries/outpump/WallCondition",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/boundary_features/outpump/properties/WallCondition/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.boundary.outpump",
+        "mapping": "direct",
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality.",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/axis_source_law",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/source/boundary_features/axi1/properties/WallCondition/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Source Freeze axis changed explicitly to companion meridional Bounce fold",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.source_axis",
+        "mapping": "direct",
+        "reason": "Source and companion meanings are distinct; source-free native critical axis microcase supports companion fold semantics only.",
+        "scope": "required",
+        "source_meaning": "Source Freeze axis changed explicitly to companion meridional Bounce fold"
+      }
+    ],
+    "coordinate_dof": [
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/coordinate_dof/IncludeOutOfPlane",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/physics_properties/IncludeOutOfPlane/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "RZ meridional particle components without azimuthal DOF",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.coordinate",
+        "mapping": "direct",
+        "reason": "Companion API getter; axis fold is bound separately. Finite-radius wall contact is not inferred from force law; canonical source contact radii are zero.",
+        "scope": "required",
+        "source_meaning": "RZ meridional particle components without azimuthal DOF"
+      }
+    ],
+    "field_representation_owner_recovery": [
+      {
+        "adapter_action": null,
+        "binding": [],
+        "canonical_meaning": null,
+        "evidence": [
+          "axis-normalized canonical input receipt"
+        ],
+        "id": "c3.native_field",
+        "mapping": null,
+        "reason": "Only same canonical P1 field parity requested; explicit odd azimuthal-vorticity axis recovery is a new field, not native FE/curl(u) validation.",
+        "scope": "excluded",
+        "source_meaning": "native FE background"
+      }
+    ],
+    "formulation": [
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/formulation/Formulation/0",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/physics_properties/Formulation/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/auxq",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/auxq/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Newtonian first-order position/velocity with dynamic auxiliary charge",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.formulation",
+        "mapping": "direct",
+        "reason": "This proves selected formulation and active auxiliary field, not assembled auxiliary-charge RHS at all stages.",
+        "scope": "required",
+        "source_meaning": "Newtonian first-order position/velocity with dynamic auxiliary charge"
+      }
+    ],
+    "integration": [
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/integration/odesolvertype",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/solver_properties/odesolvertype/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.integration.odesolvertype",
+        "mapping": "direct",
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof.",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/integration/timemethodexp",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/solver_properties/timemethodexp/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.integration.timemethodexp",
+        "mapping": "direct",
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof.",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/integration/erkorder",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/solver_properties/erkorder/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.integration.erkorder",
+        "mapping": "direct",
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof.",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/integration/rtol",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/solver_properties/rtol/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.integration.rtol",
+        "mapping": "direct",
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof.",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/integration/WallAccuracyOrder",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/physics_properties/WallAccuracyOrder/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered wall and particle-history setting",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.history.WallAccuracyOrder",
+        "mapping": "direct",
+        "reason": "Saved output cadence is distinct from actual rktimestep and boundary-event stopping times.",
+        "scope": "required",
+        "source_meaning": "Registered wall and particle-history setting"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/integration/StoreExtra",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/physics_properties/StoreExtra/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered wall and particle-history setting",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.history.StoreExtra",
+        "mapping": "direct",
+        "reason": "Saved output cadence is distinct from actual rktimestep and boundary-event stopping times.",
+        "scope": "required",
+        "source_meaning": "Registered wall and particle-history setting"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/integration/StoreParticleStatusData",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/physics_properties/StoreParticleStatusData/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered wall and particle-history setting",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.history.StoreParticleStatusData",
+        "mapping": "direct",
+        "reason": "Saved output cadence is distinct from actual rktimestep and boundary-event stopping times.",
+        "scope": "required",
+        "source_meaning": "Registered wall and particle-history setting"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/steps/2p5us",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/solver_properties/rktimestep/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered actual RK4 internal fixed step",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.step",
+        "mapping": "direct",
+        "reason": "The 121 output times do not imply 121 integration steps.",
+        "scope": "required",
+        "source_meaning": "Registered actual RK4 internal fixed step"
+      }
+    ],
+    "models": [
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/df1",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/df1/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.df1",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/bf1",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/bf1/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.bf1",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/auxq",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/auxq/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.auxq",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/idf",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/idf/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.idf",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/ef1",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/ef1/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.ef1",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/m3c3Epstein",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/m3c3Epstein/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.m3c3Epstein",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/liftfm",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/liftfm/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.liftfm",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/depf",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/depf/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.depf",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/gf1",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/gf1/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.gf1",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/models/m3c3HeatFlux",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/m3c3HeatFlux/active",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.model.m3c3HeatFlux",
+        "mapping": "direct",
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED.",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/electric_field",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/ef1/properties/E/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/epstein_force",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/force_features/m3c3Epstein/properties/F/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/beta_expression",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/beta_expression",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "User-defined electric source and single explicit Epstein force owner",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.selectors",
+        "mapping": "direct",
+        "reason": "Actual selected expressions; common-P1 numeric formula/total-force diagnostics are separate numerical evidence.",
+        "scope": "required",
+        "source_meaning": "User-defined electric source and single explicit Epstein force owner"
+      },
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/unit_system",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/model_base_unit_system",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/unit_system",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/component_base_unit_system",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/updates_disabled",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/variable_updates_disabled",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/argument_units",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/rho_function_argument_units/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/argument_units",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/temperature_function_argument_units/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/rho_unit",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/rho_function_units/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/temperature_unit",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/temperature_function_units/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/units/resolved_beta_unit",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/resolved_beta_unit",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json",
+              "pointer": "/units/resolved_viscosity_unit",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/epstein_parameters/resolved_viscosity_unit",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "SI primitive function and Epstein coefficient unit formation",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.units",
+        "mapping": "direct",
+        "reason": "Unit resolution and source expression getter only; numeric formation is separately compared to canonical primitives.",
+        "scope": "required",
+        "source_meaning": "SI primitive function and Epstein coefficient unit formation"
+      }
+    ],
+    "source": [
+      {
+        "adapter_action": null,
+        "binding": [
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/dp_expression",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/particle_properties/dp/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/rho_expression",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/particle_properties/rhop/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          },
+          {
+            "expected": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json",
+              "pointer": "/charge_expression",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+            },
+            "observed": {
+              "path": "../../../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json",
+              "pointer": "/companion/particle_properties/Z/observed_value",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+            }
+          }
+        ],
+        "canonical_meaning": "287 fixed canonical source particles, candidate-owned three-current initial charge",
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "id": "c3.source",
+        "mapping": "direct",
+        "reason": "Public normalizer separately verifies all initial states and shared release file SHA. Native evaluated diameter differs by one representational ULP; source numerical comparison uses the registered roundoff check, not an invented exact-float equality.",
+        "scope": "required",
+        "source_meaning": "287 fixed canonical source particles, candidate-owned three-current initial charge"
+      }
+    ]
+  },
+  "schema_version": 2,
+  "source": {
+    "component": "comp1",
+    "comsol_version": "6.4.0.429",
+    "dataset": "partM3C3",
+    "model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "solution": "solM3C3",
+    "study": "stdM3C3"
+  }
+}

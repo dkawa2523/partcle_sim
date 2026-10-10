@@ -23,6 +23,8 @@ from chamber_particles.case_format import (
     GeometryData,
     P1TriLayout,
     Q1QuadLayout,
+    RealizedSource,
+    RealizedSurfaceSource,
     RealizedTableSource,
     RegularLayout,
     write,
@@ -519,25 +521,26 @@ def _c08() -> MicrocaseDefinition:
         ("caps", "mirror", "collector"),
         (0, 1, 0, 2),
     )
-    particle = {
-        "charge_number": 0.0,
-        "mass_kg": _COMMON_MASS_KG,
-        "drag_diameter_m": _COMMON_DRAG_DIAMETER_M,
-        "electrostatic_radius_m": _COMMON_ELECTROSTATIC_RADIUS_M,
-        "displaced_volume_m3": 0.0,
-        "model_weight": 1.0,
-        "material_id": 0,
-    }
+    source = RealizedSurfaceSource(
+        name="surface_particles",
+        particle_id=_i8([801]),
+        release_time_s=_f8([0.0]),
+        facet_id=_i8([3]),
+        facet_parameter=_f8([0.5]),
+        velocity_m_s=_f8([[1.0, 0.0]]),
+        charge_number=_f8([0.0]),
+        mass_kg=_f8([_COMMON_MASS_KG]),
+        drag_diameter_m=_f8([_COMMON_DRAG_DIAMETER_M]),
+        contact_radius_m=_f8([0.0]),
+        electrostatic_radius_m=_f8([_COMMON_ELECTROSTATIC_RADIUS_M]),
+        displaced_volume_m3=_f8([0.0]),
+        model_weight=_f8([1.0]),
+        material_id=_i4([0]),
+    )
     source_spec = {
         "name": "surface_release",
         "type": "surface",
-        "boundary_group": "collector",
-        "count": 1,
-        "particle_id_start": 801,
-        "particle": particle,
-        "position": {"model": "edge_fraction", "fraction": 0.5},
-        "velocity": {"model": "fixed", "value_m_s": [1.0, 0.0]},
-        "release": {"model": "fixed", "time_s": 0.0},
+        "table": "surface_particles",
     }
     expected = _event_expected(
         "C08",
@@ -586,7 +589,7 @@ def _c08() -> MicrocaseDefinition:
     )
     expected["zero_time_departure_event_count"] = 0
     return MicrocaseDefinition(
-        _bundle("C08", geometry),
+        _bundle("C08", geometry, sources=(source,)),
         _spec(
             "C08",
             2.25,
@@ -854,7 +857,7 @@ def _spec(
             "schedule": {"explicit_times_s": output_times},
         }
     return {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": case_id,
             "data_path": "case.h5",
@@ -888,7 +891,7 @@ def _bundle(
     *,
     layouts: tuple[RegularLayout | P1TriLayout | Q1QuadLayout, ...] = (),
     fields: tuple[FieldData, ...] = (),
-    sources: tuple[RealizedTableSource, ...] = (),
+    sources: tuple[RealizedSource, ...] = (),
 ) -> DataBundle:
     provenance = json.dumps(
         {
@@ -1056,6 +1059,7 @@ def _table_source(
         charge_number=_f8(charge_numbers),
         mass_kg=_f8(masses_kg),
         drag_diameter_m=_f8([_COMMON_DRAG_DIAMETER_M] * count),
+        contact_radius_m=_f8([0.0] * count),
         electrostatic_radius_m=_f8([_COMMON_ELECTROSTATIC_RADIUS_M] * count),
         displaced_volume_m3=_f8(displaced_volumes_m3),
         model_weight=_f8([1.0] * count),

@@ -652,6 +652,8 @@ def _assert_normalized_events_and_performance(path: Path) -> None:
         events = list(csv.DictReader(stream))
     performance = json.loads((path / "performance.json").read_text(encoding="utf-8"))
     assert [row["particle_id"] for row in events] == ["1"]
+    assert events[0]["boundary_semantic"] == ""
+    assert events[0]["event_type"] == "terminal_status"
     assert {
         "wall_time_s": performance["wall_time_s"],
         "peak_rss_bytes": performance["peak_rss_bytes"],

@@ -3124,7 +3124,91 @@ def test_rk4_dense_chord_deviation_contains_random_subinterval_paths() -> None:
     assert bool((narrow < 0.3 * wide).all())
 
 
-def test_rk4_dense_charge_has_cubic_local_order() -> None:
+@pytest.mark.parametrize("theta", [0.37, 0.61])
+@pytest.mark.parametrize("scope", ["exact_start_one_step", "fixed_final_time"])
+def test_rk4_dense_harmonic_position_and_velocity_have_fourth_order_error(
+    theta: float, scope: str
+) -> None:
+    frequency = np.asarray([1.7, 0.8])
+    initial_position = np.asarray([0.7, -0.2])
+    initial_velocity = np.asarray([-0.4, 0.9])
+
+    def evaluate(
+        particle_index: np.ndarray,
+        time_s: np.ndarray,
+        position_m: np.ndarray,
+        velocity_m_s: np.ndarray,
+        charge_number: np.ndarray,
+    ) -> DynamicsEvaluation:
+        del time_s, velocity_m_s
+        return DynamicsEvaluation(
+            -(frequency**2) * position_m,
+            np.zeros_like(charge_number),
+            np.ones(particle_index.size, dtype=np.bool_),
+            np.ones(particle_index.size, dtype=np.bool_),
+            np.zeros(particle_index.size, dtype=np.uint8),
+        )
+
+    errors = []
+    step_sizes = []
+    refinements = (4, 8, 16, 32) if scope == "exact_start_one_step" else (8, 16, 32, 64)
+    for refinement in refinements:
+        if scope == "exact_start_one_step":
+            step_s = 0.8 / refinement
+            accepted_steps = 0
+            query_s = theta * step_s
+        else:
+            # The query is the same physical time at every refinement, while
+            # remaining at phase theta inside its last step.
+            query_s = 0.7
+            accepted_steps = refinement
+            step_s = query_s / (accepted_steps + theta)
+        position = initial_position[None, :].copy()
+        velocity = initial_velocity[None, :].copy()
+        charge = np.zeros(1, dtype="<f8")
+        for index in range(accepted_steps + 1):
+            proposal = rk4_step(
+                np.asarray([0], dtype="<i8"),
+                np.asarray([index * step_s]),
+                np.asarray([(index + 1) * step_s]),
+                position,
+                velocity,
+                charge,
+                requires_stage_evaluation=True,
+                evaluator=evaluate,
+            )
+            position = proposal.end_position()
+            velocity = proposal.end_velocity()
+        sample = proposal.rk4_dense_state_at_rows(
+            np.asarray([0], dtype="<i8"), np.asarray([query_s])
+        )
+        phase = frequency * query_s
+        exact_position = (
+            initial_position * np.cos(phase) + initial_velocity * np.sin(phase) / frequency
+        )
+        exact_velocity = initial_velocity * np.cos(phase) - frequency * initial_position * np.sin(
+            phase
+        )
+        errors.append(
+            [
+                float(np.max(np.abs(sample.position_m[0] - exact_position))),
+                float(np.max(np.abs(sample.velocity_m_s[0] - exact_velocity))),
+            ]
+        )
+        step_sizes.append(step_s)
+
+    error_array = np.asarray(errors)
+    assert np.all(error_array[:-1] > error_array[1:])
+    observed = (
+        np.log(error_array[1:-1] / error_array[2:])
+        / np.log(np.asarray(step_sizes[1:-1]) / np.asarray(step_sizes[2:]))[:, None]
+    )
+    # Exact-start interior local O(h^4) is separate from endpoint local O(h^5).
+    # Fixed-final-time O(h^4) includes accumulated accepted-endpoint errors.
+    assert np.all((observed > 3.7) & (observed < 4.3))
+
+
+def test_rk4_dense_charge_has_fourth_order_one_step_interior_error() -> None:
     def evaluate(
         particle_index: np.ndarray,
         time_s: np.ndarray,

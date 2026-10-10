@@ -28,6 +28,40 @@ _ION_ENERGY_FLOOR_V = Decimal("0.01")
 _REVISION = "aggregate_relative_drift_regularized_two_current_v1"
 
 
+def test_aggregate_attractive_increment_has_documented_stationary_maxwellian_gap() -> None:
+    radius = 5.0e-8
+    screening = 2.0e-4
+    ion_voltage = 1.0
+    density = 1.5e15
+    potential = -0.01
+    capacitance = 4.0 * math.pi * _EPSILON_0 * radius * (1.0 + radius / screening)
+    evaluation = _evaluate(
+        charge_number=np.asarray([0.0, potential * capacitance / _E]),
+        radius_m=np.full(2, radius),
+        electron_density_m3=np.full(2, 1.0e-100),
+        ion_density_m3=np.full(2, density),
+        electron_voltage_V=np.full(2, 3.0),
+        ion_voltage_V=np.full(2, ion_voltage),
+        particle_velocity_m_s=np.zeros((2, 2)),
+        ion_velocity_m_s=np.zeros((2, 2)),
+        ion_mass_kg=np.full(2, _ION_MASS_KG),
+        screening_length_m=np.full(2, screening),
+    )
+    # Take the trace-electron limit while retaining the model's positive-density domain.
+    # Integrating v*pi*a²*(1 - 2e*phi/(m*v²)) against a stationary
+    # 3-D Maxwellian gives pi*a²*n*mean_speed*(1 - phi/T_i[V]).
+    mean_speed = math.sqrt(8.0 * _E * ion_voltage / (math.pi * _ION_MASS_KG))
+    exact_increment = math.pi * radius**2 * density * mean_speed * (-potential / ion_voltage)
+    actual_increment = evaluation.charge_rate_number_s[1] - evaluation.charge_rate_number_s[0]
+    expected_ratio_with_declared_regularization = (math.pi / 4.0) / math.sqrt(
+        1.0 + 1.0 / mean_speed**2
+    )
+    assert evaluation.applicable.tolist() == [True, True]
+    assert actual_increment / exact_increment == pytest.approx(
+        expected_ratio_with_declared_regularization, rel=1.0e-12
+    )
+
+
 def _charge_model(maximum_relative_speed_m_s: float = 200.0) -> dict[str, object]:
     return {
         "model": "plasma_continuous",

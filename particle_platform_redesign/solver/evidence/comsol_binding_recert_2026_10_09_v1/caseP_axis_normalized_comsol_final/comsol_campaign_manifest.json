@@ -1,0 +1,2552 @@
+{
+  "campaign_binding": {
+    "contract_sha256": "868f1d55716e9fe152fb112f79c304a63019a58c1d0eda0f5a0b0841c86f1be0",
+    "input_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+    "input_sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+  },
+  "campaign_identity": {
+    "candidate_case_name_prefix": "m3c2_caseP_100nm",
+    "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+    "evaluation_case_id": "M3-C2A_caseP_100nm_common-P1",
+    "final_registration_kind": "m3c2_caseP_100nm_final_campaign",
+    "output_slug": "caseP_100nm"
+  },
+  "case_id": "M3-C2A_caseP_100nm_common-P1",
+  "claim_policy": {
+    "comsol_golden_truth": false,
+    "pathwise_comparison": false,
+    "solver_accuracy": "NOT_EVALUATED",
+    "step_convergence": "NOT_EVALUATED"
+  },
+  "common_observation_times": [
+    0.0,
+    1e-05,
+    2e-05,
+    3.0000000000000004e-05,
+    4e-05,
+    5e-05,
+    6.000000000000001e-05,
+    7.000000000000001e-05,
+    8e-05,
+    9e-05,
+    0.0001,
+    0.00011,
+    0.00012000000000000002,
+    0.00013000000000000002,
+    0.00014000000000000001,
+    0.00015000000000000001,
+    0.00016,
+    0.00017,
+    0.00018,
+    0.00019,
+    0.0002,
+    0.00021,
+    0.00022,
+    0.00023,
+    0.00024000000000000003,
+    0.00025,
+    0.00026000000000000003,
+    0.00027,
+    0.00028000000000000003,
+    0.00029,
+    0.00030000000000000003,
+    0.00031,
+    0.00032,
+    0.00033000000000000005,
+    0.00034,
+    0.00035000000000000005,
+    0.00036,
+    0.00037000000000000005,
+    0.00038,
+    0.00039000000000000005,
+    0.0004,
+    0.00041000000000000005,
+    0.00042,
+    0.00043000000000000004,
+    0.00044,
+    0.00045000000000000004,
+    0.00046,
+    0.00047000000000000004,
+    0.00048000000000000007,
+    0.0004900000000000001,
+    0.0005,
+    0.0006,
+    0.0007,
+    0.0007999999999999999,
+    0.0009,
+    0.001,
+    0.0010999999999999998,
+    0.0012000000000000001,
+    0.0013,
+    0.0014,
+    0.0015,
+    0.0015999999999999999,
+    0.0017000000000000001,
+    0.0018,
+    0.0019000000000000002,
+    0.002,
+    0.0021,
+    0.0022,
+    0.0023,
+    0.0024000000000000002,
+    0.0025,
+    0.0026,
+    0.0027,
+    0.0028,
+    0.0029,
+    0.003,
+    0.0031,
+    0.0032,
+    0.0033,
+    0.0034,
+    0.0035,
+    0.0036,
+    0.0037,
+    0.0038,
+    0.0039,
+    0.004,
+    0.0041,
+    0.004200000000000001,
+    0.0043,
+    0.0044,
+    0.0045000000000000005,
+    0.0046,
+    0.0047,
+    0.0048000000000000004,
+    0.0049,
+    0.005,
+    0.006,
+    0.007,
+    0.008,
+    0.009000000000000001,
+    0.01,
+    0.011,
+    0.012,
+    0.013000000000000001,
+    0.014,
+    0.015000000000000001,
+    0.016,
+    0.017,
+    0.018000000000000002,
+    0.019000000000000003,
+    0.02,
+    0.020999999999999998,
+    0.022,
+    0.023,
+    0.024,
+    0.025,
+    0.026000000000000002,
+    0.027000000000000003,
+    0.027999999999999997,
+    0.028999999999999998,
+    0.03
+  ],
+  "coordinate_system": "axisymmetric_rz_no_swirl",
+  "execution_mode": "FinalCampaign",
+  "execution_request": {
+    "path": "m3c2_execution_request.json",
+    "registration": {
+      "authorization_artifacts": {
+        "evaluation_policy": {
+          "path": "m3c2_caseP_100nm_axis_normalized_population_policy.json",
+          "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+        },
+        "pilot_evaluation": {
+          "path": "../caseP_axis_normalized_pilot_evaluation/evaluation_manifest.json",
+          "sha256": "d66478e0096f88fd53acb8a4bea27377dce12e0ea3a56ab701ed8a741648e13f"
+        },
+        "selection_receipt": {
+          "path": "m3c2_caseP_100nm_axis_normalized_final_selection.json",
+          "sha256": "01a4a09992a8bf98c16a01de56a62f87381e4be9d1458847b065963ebaf74bcc"
+        }
+      },
+      "filename": "m3c2_caseP_100nm_axis_normalized_final_registration.json",
+      "kind": "m3c2_caseP_100nm_final_campaign",
+      "sha256": "6aa7ce55b95aeb6b874e02a7a637ede3c3daf15230b834489cdf5f36b32aebfe"
+    },
+    "seed_isolation": {
+      "excluded_pilot_seeds": [
+        929200,
+        929201,
+        929202,
+        929203,
+        929204,
+        929205,
+        929206,
+        929207
+      ],
+      "other_participant_seeds": [
+        939032,
+        939033,
+        939034,
+        939035,
+        939036,
+        939037,
+        939038,
+        939039,
+        939040,
+        939041,
+        939042,
+        939043,
+        939044,
+        939045,
+        939046,
+        939047,
+        939048,
+        939049,
+        939050,
+        939051,
+        939052,
+        939053,
+        939054,
+        939055,
+        939056,
+        939057,
+        939058,
+        939059,
+        939060,
+        939061,
+        939062,
+        939063
+      ],
+      "participant_seed_sets_disjoint": true
+    },
+    "sha256": "a4f1895e064d266a271e26d713a89e95ee66df2e0c53ac51c8aae99d0f007aae"
+  },
+  "levels": [
+    {
+      "level_id": "dt_20us",
+      "numerical_setting": {
+        "fixed_step_s": 2e-05,
+        "integrator": "classical_rk4",
+        "purpose": "accepted_final"
+      },
+      "ordinal": 0,
+      "replicas": [
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939000/actual_binding_receipt.json",
+            "sha256": "c777d46565d759d891587acc1944a45ad3ae0d3f2ce8a0db5cd500512c7532d7",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "b036e466eea06220a9e0793b486d0762321aa44f5d14c839b086446138ed6219"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939000/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939000/performance.json",
+            "sha256": "d82025bdcc931572c954d2bd92395b8941634aa565cbd355fed360a4fcb5d1ea"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939000/trajectory_raw_wide.csv",
+            "sha256": "573e81f1f6638537e08bb83fa6affc77123311dc498bb03b5ad80f15cc64e4a1"
+          },
+          "seed": 939000,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939000/trajectory.csv",
+            "sha256": "bb56159fc4423f967bbd0c8ae3af492efd7a0dbb2f28bbfb0a9fac9122f3bbcf"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939001/actual_binding_receipt.json",
+            "sha256": "891d8b32ff515d96e915f4f9974b67a75b3e3975b7bb2865cb7e4cafebc09603",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "e3fa059d32ab4a1c3ed6a9d6edf70d921531309257192882dd812b87f591f0ff"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939001/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939001/performance.json",
+            "sha256": "7422452cf93d6d9e1d2006fff089c9ba6662b9aff911d9b8074bae741e377b0f"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939001/trajectory_raw_wide.csv",
+            "sha256": "f015442bfa46cae890ccea7138a8a9b513c0c5d69f45c32446f371a67dbddd3b"
+          },
+          "seed": 939001,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939001/trajectory.csv",
+            "sha256": "c1abbd6245dd8a240966efa238b2a4bd48e0c1f7ce43bd867b3ea8605bc12b5a"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939002/actual_binding_receipt.json",
+            "sha256": "3a09e589cc3ef66072d8bbcf13942a877549e4ca699c5183ff6265595e5eef9f",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "82fc5e222e7101a33d3af8677641db37cd9a197c41a81a4530134663f4432806"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939002/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939002/performance.json",
+            "sha256": "ed2e73ea895860f2f77361144b02d2db16c3aebef01b501a83d857c4766e3240"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939002/trajectory_raw_wide.csv",
+            "sha256": "6c4f03ba45a721496c1af9928eabfdd3cb22d63dcf4f0e62053395e267e323a5"
+          },
+          "seed": 939002,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939002/trajectory.csv",
+            "sha256": "c09deb07eec58c6fecd5ae7b76b0ff64877352510e5fb4178af36175bcd06fa5"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939003/actual_binding_receipt.json",
+            "sha256": "c6a9167a5fccb8b1dce5685d6a5c00ac351c4aa89c3ede2bc4d351657deab062",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "fb53ad5f0ee5a5d3be965961f7877de8fd35e9e075f05c9b3097096c7209b3f6"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939003/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939003/performance.json",
+            "sha256": "92e92c49612a4bc2ba2e68527beafb9f25e3bec3a0ef1a77ed181959820c426a"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939003/trajectory_raw_wide.csv",
+            "sha256": "c0fca859a1ecb19a63c90f762dd6582430762ee1b291ff6bb964fc3245045010"
+          },
+          "seed": 939003,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939003/trajectory.csv",
+            "sha256": "a05913d53ac03e13d77bde440012c2352326f6651fcd89b02cfa1d4240c618b2"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939004/actual_binding_receipt.json",
+            "sha256": "3bd234903fe20ce8faf072d90d015814afbea5117bc1e31fc77235c24640f947",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "f00a193af0ddcdb45e0984ddfe4b2268f7fb2a79e3c83f1950871ce468602d4f"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939004/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939004/performance.json",
+            "sha256": "b0e4f38796150947e9f6103e2e1f340c8c4fd79b8126656c4c910588f31a7415"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939004/trajectory_raw_wide.csv",
+            "sha256": "28226e4ae9fc4ab2ded15aa791909d60d58291f44314fada2f362f4ec3730a6c"
+          },
+          "seed": 939004,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939004/trajectory.csv",
+            "sha256": "adb872289e51cfd94d9dbc98c2537f2e6656db1a594d5768f239e3210a6504fe"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939005/actual_binding_receipt.json",
+            "sha256": "2f999c56b0518bd63b3c27a654e5641fd9b52eb8b14f4e76bb5f0d922fa49474",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "3e273c8c1aa5174dcae186f9fc9176456d053bd085f2b7d13f95446a4df435e1"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939005/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939005/performance.json",
+            "sha256": "d038054547601e2bf59cb5befd86ae75affadc22a2ccfe9218832c515998698f"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939005/trajectory_raw_wide.csv",
+            "sha256": "c4efd54fe91c2e8c369a9039fa42d36b4874c46ebcc7c527a7807c52a12adb81"
+          },
+          "seed": 939005,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939005/trajectory.csv",
+            "sha256": "d40200875798e4f288576e2c96c7d6bd692bc3691797c72d2270db219182822e"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939006/actual_binding_receipt.json",
+            "sha256": "93d58c118d252d81b12314538a5c42055c994359317e614cfcb5a4fb13bc7965",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "4b13ba7fba74085632ebcb68bd593d652a030332c26ebc151dd1c3b6577b3035"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939006/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939006/performance.json",
+            "sha256": "a8eb12808adbdd6e6ee352706f7bd181f2879fcb19a057771092423ec61d1f89"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939006/trajectory_raw_wide.csv",
+            "sha256": "c6dcbdd5d6563f47c840158d0be7e6e2c378ff4fbe2e345c38425b78cb600153"
+          },
+          "seed": 939006,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939006/trajectory.csv",
+            "sha256": "5470ea29c9f6c0619285e7cbe5b4ff1ac3c86d3d62d6eae9799a7897cb3bd7c0"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939007/actual_binding_receipt.json",
+            "sha256": "93fa14a56730d82d15f1bac7d8aad3c5f25ece587dd670b42abdd791dd5293ed",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "9e1c43adee08ff9e625832ec6fc82705efe6e98ce20bc3a3d137a536413cf82b"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939007/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939007/performance.json",
+            "sha256": "c05ea2718201774d110a47a45f59eb768ce2005b56968a0d15606f7160cc385d"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939007/trajectory_raw_wide.csv",
+            "sha256": "8e6e9908894260f0211ce6380494cfc56ec37125448c60bb4901ad9aa6d4bdce"
+          },
+          "seed": 939007,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939007/trajectory.csv",
+            "sha256": "f6e2433f3adf059fd0a86f4fb026f5af72e30b8c1f98e0f9151ae36884cf27f0"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939008/actual_binding_receipt.json",
+            "sha256": "deadfa6f5b8b20c9d29e2a61c2e1cbc3b8f9f5b1cc978cfcea46088a7624f2c7",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "66c27745a34fe799d5152691295b2ef48ba99009a7b362051676846bdc208b5b"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939008/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939008/performance.json",
+            "sha256": "378fbd8d1f8a366608d16ac7a3f952a44670971179c890c86afa5ab4c01e8af7"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939008/trajectory_raw_wide.csv",
+            "sha256": "5be3b48a2b04c505fd4aa5ab8d34d0478b3cdf677adef14c50e2424d392ca16e"
+          },
+          "seed": 939008,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939008/trajectory.csv",
+            "sha256": "e90722d6b4a9603346589e16bbcfecc6370ce8cd49411af86f759d7fe52f2ded"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939009/actual_binding_receipt.json",
+            "sha256": "0122006e1b81a540b7dcdba5d71dd1a49bbcab2081c631514502bdbdba8d7e35",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "bed77fb280559f84d7a14c2a69d046c3e6d9b8cf8f1dd32f2753bb1990da244d"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939009/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939009/performance.json",
+            "sha256": "2eb9861f786b056dda3dd194bc04bc4713d68bd0d22343896959b55630f7c1d2"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939009/trajectory_raw_wide.csv",
+            "sha256": "da84a36f573fb706f6a64473a5800d9f61406f1a9b5f4420ecd49a62b368b6b2"
+          },
+          "seed": 939009,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939009/trajectory.csv",
+            "sha256": "214b49383711b3be13405b1560d5f31ceafa56f592422490105d45037c33a906"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939010/actual_binding_receipt.json",
+            "sha256": "9ece990f3d618408dce9031738c877f710a692dc7ecacb8593311640c5623950",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "9b83cfaea09064b672ec165d15e3fd461c8022a614116954ada35d878ff797ae"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939010/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939010/performance.json",
+            "sha256": "fa0a49ecb9f83409e38ebae9b7659717b24467e9077d927139effa81ff6f2c86"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939010/trajectory_raw_wide.csv",
+            "sha256": "9f88dd0cb9579b7d0b9a35b986fe6b8f00bd4c16e5d492570a702cfb42b303df"
+          },
+          "seed": 939010,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939010/trajectory.csv",
+            "sha256": "ad5310e4ca4a0946529ddef11b684b733030810e954bfd7592f702e9849b870c"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939011/actual_binding_receipt.json",
+            "sha256": "7ac209c59b16b09ad8e9588d35d48822425c434ea909d4955f09657e9734ef32",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "1c5438daf06fb753cb7339419bda6382b163a71b733cbefd4189f322a8dfb440"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939011/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939011/performance.json",
+            "sha256": "28c81b904eb32baad78eb09355e1d74999c87dd6a9ea5dcb062554dddd6378eb"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939011/trajectory_raw_wide.csv",
+            "sha256": "620f106d48272275843ac55466741b39e91fc8d124aec9f3ab2620ad88f076db"
+          },
+          "seed": 939011,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939011/trajectory.csv",
+            "sha256": "b42f93435a1452e6acbe94503a5e4db8224487bcca4db1f27499e5b8d753eafe"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939012/actual_binding_receipt.json",
+            "sha256": "29a6ba1daa1d310c55ade33b662052a1938fbbdb9012c120b67bbbd04b7643d3",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "d3c8ca01e1e3cdd03f00d69ed532208a5a7dfe9dd8ddca49acb2b3a807bc8a42"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939012/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939012/performance.json",
+            "sha256": "72ab95821a5ff35667568c8c8f2c25960ae2fa961d0f4950b870ac7d06f0e549"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939012/trajectory_raw_wide.csv",
+            "sha256": "158bc77a79cc32427c46e4b6d4445c339dc42283888a859f69006f226a4a98c5"
+          },
+          "seed": 939012,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939012/trajectory.csv",
+            "sha256": "8d16f13aebe3438921920a91e74dc9209e029dfcb976f6279d0417d3a82b1d61"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939013/actual_binding_receipt.json",
+            "sha256": "0c0578a0be4c957aae9d047e6884adaf71d14624f7d8c26daf9c598883a4974d",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "d3c8ca01e1e3cdd03f00d69ed532208a5a7dfe9dd8ddca49acb2b3a807bc8a42"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939013/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939013/performance.json",
+            "sha256": "a651b1bf4c8dc18543ecedf0396c2300e427c54989bae7b66e4d7c6b7375cbf0"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939013/trajectory_raw_wide.csv",
+            "sha256": "f3e63e6fa8ef5fd56abf64659909812fb5bdd04da38ef1e387428e1057999af9"
+          },
+          "seed": 939013,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939013/trajectory.csv",
+            "sha256": "f7a7ea01ca4e613499744a5c41bdbf727be0f93c3af2fba4d3bb7d2d0b1786b5"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939014/actual_binding_receipt.json",
+            "sha256": "970ac4f6c3e529a164eef7e17cb0bd8b5cc4b9d23275f07406296f2a7482eadd",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "e1a14b961426822eff17dfd5c1db67060b3d059db6c64c20147d9d0535bcdf1e"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939014/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939014/performance.json",
+            "sha256": "932e1000cd9330c12281186c36e267de51b2759068b9e16ea7302944354f0064"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939014/trajectory_raw_wide.csv",
+            "sha256": "0768c15e47140deacc8431efbfac0fc25602b46cb5922c66c72150e6e0fb0884"
+          },
+          "seed": 939014,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939014/trajectory.csv",
+            "sha256": "9adb7ff2518a65812c9c093b82ef6c10328cf2a423ecdeb84e2a6cc11ed7152e"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939015/actual_binding_receipt.json",
+            "sha256": "1728a18d7c3078365d5b3010c28f90d7ab599d041654c32c0fd94fc721b13e36",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "b56ff379e756eff39f332b3937371cd5744edf76d35b31b906a2e6203b7edcb9"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939015/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939015/performance.json",
+            "sha256": "7a7c5ae9e244c722c7dac0eca817d71c662a0340b34add39b04785e9573745ad"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939015/trajectory_raw_wide.csv",
+            "sha256": "fd75f6e7c957efd3c605b4d70a16ee18aa5f3010364082725c3d3b8d1a264fe0"
+          },
+          "seed": 939015,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939015/trajectory.csv",
+            "sha256": "ae094b7f7b272fc66adcbb933f53ec22d371ef4208abd0f5112e35c73640e00b"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939016/actual_binding_receipt.json",
+            "sha256": "9eb2e7db14349a20d9f54ca2f8272506518612b927ce6cb31026862a1fd7c787",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "4917a132195399f475753e2990bb1b1851ef45bd64d4f61a0790b16578dc6821"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939016/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939016/performance.json",
+            "sha256": "b50e72f9710fd62e14e3c7c19c7cf99b68c9b7a62ad259d54de9a95cb0c974fa"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939016/trajectory_raw_wide.csv",
+            "sha256": "df94b8e20e5e569a2a5cf540bd8f70622091704f951266430d0d955fb429ded2"
+          },
+          "seed": 939016,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939016/trajectory.csv",
+            "sha256": "27d6ab3c47f3defcde0647376c51d8efd98dae4ee36ac440d9827b76a1f4230f"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939017/actual_binding_receipt.json",
+            "sha256": "45e0d3828fcbf0b4373796822e16ca74984fdbbaec85fbb591ddb9b94f52321e",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "995254691e2027b04af50cc47c2093b95bbb6c75060807a94812ebac0021757e"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939017/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939017/performance.json",
+            "sha256": "dee65abccd462d1e3fbdfdd98e11e3d2174214e2673fac71649a507191b2e18f"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939017/trajectory_raw_wide.csv",
+            "sha256": "7ed8795f99550e114999b16ceb16c76d8aa6fb00c3cf312a9a37ed774130fccf"
+          },
+          "seed": 939017,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939017/trajectory.csv",
+            "sha256": "448e67ad7653d46ccdadb871f2e3563bee07139211ec9c16b5accb6dc7eefeea"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939018/actual_binding_receipt.json",
+            "sha256": "2cd840c69c7c39d9c2e64e1e4f12d5b8c1efec6c1f5abad3e673f7374607a86b",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "2cb29934c95da1879a01cfa65d11d00824d14ffca67a17c38e5369b87f637e63"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939018/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939018/performance.json",
+            "sha256": "fafe91e4cc0a1a0158cfa2bb35df287bf2d10170368ec18a40c47052cd23bb83"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939018/trajectory_raw_wide.csv",
+            "sha256": "90e7d7e5ad854381672592f52c4641462ebee1bd81dcf314724569b5b9138761"
+          },
+          "seed": 939018,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939018/trajectory.csv",
+            "sha256": "d70f6b6ada248d02b630e50835d0c5043139f6b9347fbaf2647db007f681e74e"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939019/actual_binding_receipt.json",
+            "sha256": "dd358711b4a2339fe73a3fced573ab50eb9ba40a0ed1936aaeca1043bd516888",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "134b725e7304067a46bc35bc8e4f4fc808f0534ff822b0a5e4115e17d195bcfb"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939019/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939019/performance.json",
+            "sha256": "d5c0a681f23c1818b45796411346dc3fb3803f6f693f05f6530b177eef66dd77"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939019/trajectory_raw_wide.csv",
+            "sha256": "e47b4a57a16782926a9639a2d030fa9d4c204a1c6fca8e8805850349a4330128"
+          },
+          "seed": 939019,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939019/trajectory.csv",
+            "sha256": "2673c38423901947e0628a563d05155c0812be9839d12d4d55bb825d0b46a128"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939020/actual_binding_receipt.json",
+            "sha256": "9c34b564dd5efcc31e1eeedc189ba42b3ee2778f80a3a381c11327b389ec31ab",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "b2a6813a0b821355768429c21d7df1997e84eccb393b412e62dd2e1b9038e292"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939020/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939020/performance.json",
+            "sha256": "7168de889fb68713d76d270ae9acfa8870edeb2e165b3058284b3d0c80af8323"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939020/trajectory_raw_wide.csv",
+            "sha256": "8136993f140e5841f428e637078d3720dbe06f4e5ba90af2447a1fe6328f8432"
+          },
+          "seed": 939020,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939020/trajectory.csv",
+            "sha256": "7f6b5f7020930b8cdc5067dfb0b642f29af60646d4d94c9c0e5174585acaad0c"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939021/actual_binding_receipt.json",
+            "sha256": "c1f00ab1654060f4fd0f5dc4c5560af40623754dd1d8fef9b834e11d10b24199",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "9e8847a155aac696dbb2a808be0d306b5f8750e248ec37b218bdb7719e0927f5"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939021/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939021/performance.json",
+            "sha256": "2f2bbc195ebe29e0aaa0e6bdece00896ed50b6924c34555d15e6d428cf379e3a"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939021/trajectory_raw_wide.csv",
+            "sha256": "a8afb8366a860abb9dc0affda335eba851fc6f041744ef553f0ca047ad35d5af"
+          },
+          "seed": 939021,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939021/trajectory.csv",
+            "sha256": "7ccb5460059053de344524062c7c49ac1d24c98cfc77fee9c23348932a79bebf"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939022/actual_binding_receipt.json",
+            "sha256": "851c84c68e71ed30dadaf87597d603f7c09c2be98dc26400bba61252a2e10b15",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "f63fa256c941253c22329b0dc6ee56e88058ff5fa182b7137e46e67fd26d1e12"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939022/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939022/performance.json",
+            "sha256": "14a253e6c47473fcc09ded4bca001fc34e8f6fd6eb40d844b758c9f05216743f"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939022/trajectory_raw_wide.csv",
+            "sha256": "1f14f975c708f70719d1ee23e58eae3727d22263ea3127b08d2fe803f3e773f0"
+          },
+          "seed": 939022,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939022/trajectory.csv",
+            "sha256": "d64ac3f1fbfcef9892475e6456cc482ed4a3653d12458f36f2e9d8cb7393c2d3"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939023/actual_binding_receipt.json",
+            "sha256": "127c9bd57ebd9dab040b8570c543939e4c5b9bf30989c4fd84a0db2dfd43d571",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "3a26e8eb54da85d07207671b56c618c46837eec72bbc80190d42c3bca4691d87"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939023/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939023/performance.json",
+            "sha256": "b261a4e443162c8d66f8e1b18ab6f774a59331249adda8c705e206235484d940"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939023/trajectory_raw_wide.csv",
+            "sha256": "2cdaee93ac8a83b9b0c4f4e79ef3dc5dc503b05b12ea05bdad13456531667f25"
+          },
+          "seed": 939023,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939023/trajectory.csv",
+            "sha256": "6b00657ba1988e2504caf8b01fc1628c72159c64e9bc75f8c5038a4bb8ad99ca"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939024/actual_binding_receipt.json",
+            "sha256": "24e83741fcef47ef9e93db13d6e4faa42660a56b21bac7b4d8e20bb71a5c0286",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "1d9e6309b484c4e3971df2f57b4c6a9d481b3608f2fbe4d22367d332b3b78837"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939024/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939024/performance.json",
+            "sha256": "8249158d16398cce0096cc5993ad0ee88f82bc2f22b90da0ed8e4c596fe98e01"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939024/trajectory_raw_wide.csv",
+            "sha256": "a875fbff63ae0d1a7cbae7ec130a2dc354c2d1ee5b4b6d6fccfade3a2570008f"
+          },
+          "seed": 939024,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939024/trajectory.csv",
+            "sha256": "fb4772827675b838421dcc9fbf8ddf2851b0bf7195820342796d944c4782c638"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939025/actual_binding_receipt.json",
+            "sha256": "3d4ac87206f0af142eafe8d700454d4b73701eb81e8e06901ca8533d9f6a8d2d",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "87cb992b535b450f17a60c00d28466e012e70224582a22ce8990121bb0b8dfc4"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939025/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939025/performance.json",
+            "sha256": "fda4ecddbf87bb7c38ce7c4beb6111c4cd33be60f74cf33484cfc06a3a9b6568"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939025/trajectory_raw_wide.csv",
+            "sha256": "844d5e4ef63fb3f9fff38ca199541b4cfcfac816dd6e582bd4a81a3c13ee229e"
+          },
+          "seed": 939025,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939025/trajectory.csv",
+            "sha256": "9c23ba2fc37da07bbb8ceee8ef589a0fa1a04c8f50f3897fb3aad970dd6a1493"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939026/actual_binding_receipt.json",
+            "sha256": "559c21803fe1f7056c8ab1049c99475a5a177adae449eddb0654026b4a6eaec1",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "21f7d710eb85c0371e5b39cfa1e661aaa35fd4feabde95f261dc04aaf93ace91"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939026/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939026/performance.json",
+            "sha256": "8b76a1b5b06eeaf7bae6b272b97b8367693243b8da0499c2a08c05d773c144ee"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939026/trajectory_raw_wide.csv",
+            "sha256": "e6f02907797041e0bc64adfb438ddd424a4efdfa0c6a14cdf3830b2ee1804429"
+          },
+          "seed": 939026,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939026/trajectory.csv",
+            "sha256": "e67e6b535d85e8c95cce5d1e635f98c0e733ec9ee30ffbb71e9111500e247773"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939027/actual_binding_receipt.json",
+            "sha256": "a92df4eab06322142ecb54d6c66d2d5899f76d3a8b9c65de3b4e8d8af780dfae",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "21f7d710eb85c0371e5b39cfa1e661aaa35fd4feabde95f261dc04aaf93ace91"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939027/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939027/performance.json",
+            "sha256": "f63afa4b3e2bb00b7e037f6a38c8f021aee57f7f29b7139578b493c6af388b00"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939027/trajectory_raw_wide.csv",
+            "sha256": "5be489a150ac50badaf84ad247966399684f4f61e3cb8ce2b62ca6df0737d8b2"
+          },
+          "seed": 939027,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939027/trajectory.csv",
+            "sha256": "9ad3aca72a3cf4ba7dd7288647e4d735ac29606034054e164bbfad168d02224b"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939028/actual_binding_receipt.json",
+            "sha256": "f0d35d2bdb0058db63f94cb5ef0fcad5dbce4c02730f9ea97fec730a1757c6bf",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "44c9571d0a7bd08d561a17eb0cd34fe4bfaeb1f0ce76c81fabf26b4adcc3f1eb"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939028/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939028/performance.json",
+            "sha256": "86f34d553aedddb132581f51de36ed2f97eb22a2a9361871cbcf9cb874f27714"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939028/trajectory_raw_wide.csv",
+            "sha256": "9d485065291031ce437ea2f4384ad261e9f9f3744594a4ae165fcbe67fae2b98"
+          },
+          "seed": 939028,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939028/trajectory.csv",
+            "sha256": "b7966842ff0e774057a3ddabe366f8f4ad929fd1185c8a069ebab6173a379fd7"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939029/actual_binding_receipt.json",
+            "sha256": "f73a89ed80b7afc7e806e7d5a6391eaa7c5e2e04939254ad4414773ab8216ab0",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "7d29a0755f98afca140dfe7aae2401e876ca79090e6e910e3b6ef061df7baa8d"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939029/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939029/performance.json",
+            "sha256": "f7fc25cb55dfd4f55a1a69e2b6a77134de6292906566d388406797536362ef95"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939029/trajectory_raw_wide.csv",
+            "sha256": "5098f41e062d307fa74c26d8db0c176ca17f89f2cb9d1753fb5dcf18e868f84e"
+          },
+          "seed": 939029,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939029/trajectory.csv",
+            "sha256": "3bd554f68aa940160edc17828f5202fd313728907afb68ce195ae6ed5d026ec8"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939030/actual_binding_receipt.json",
+            "sha256": "ca3518ab0defe119555dd896bd395f9381ffdb684196c0d809973c2a66558004",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "63c0b43b20eed7c666658848be439246c6e86debaa09791f106ba9811d65fdee"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939030/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939030/performance.json",
+            "sha256": "5e248909c78ecd632604c36d1f2f6ad94e5251f5b6b9f4d26b25f133a0b5c74e"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939030/trajectory_raw_wide.csv",
+            "sha256": "7261697542c8375261860d119a5bdeb53aafb6d8a16f38c369b898a419000eb7"
+          },
+          "seed": 939030,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939030/trajectory.csv",
+            "sha256": "83896c66cc5231dae319df5a1812bf4cf5f0a2ebb6733cc926cd13df61be2738"
+          },
+          "trajectory_rows": 34727
+        },
+        {
+          "actual_run_readback": {
+            "assembly_rhs": "NOT_TESTED",
+            "boundary_event_export": "NATIVE_BOUNDARY_ID_FOR_RETAINED_TERMINALS_ONLY",
+            "canonical_boundary_meaning": {
+              "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+              "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4"
+            },
+            "observation": "EXPORTED",
+            "path": "levels/dt_20us/replicas/seed_939031/actual_binding_receipt.json",
+            "sha256": "7ccb2e9553a6dd82981730f1d7d57d3d5a606c424418bfdd599d537fbefb9f78",
+            "terminal_boundary_probe": {
+              "path": "terminal_boundary_raw.csv",
+              "sha256": "c7ba5f4634367b4deedf708627c80201043df9c1261dabd3c7baf6b580f6beb5"
+            }
+          },
+          "boundary_behavior": "NOT_TESTED",
+          "event_count": 0,
+          "events": {
+            "path": "levels/dt_20us/replicas/seed_939031/events.csv",
+            "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+          },
+          "final_lifecycle_counts": {
+            "active": 287
+          },
+          "performance": {
+            "path": "levels/dt_20us/replicas/seed_939031/performance.json",
+            "sha256": "56358393b8d323707d83bb6910402096b75f2f037ab1bbcda749ee14b6917a52"
+          },
+          "raw": {
+            "path": "levels/dt_20us/replicas/seed_939031/trajectory_raw_wide.csv",
+            "sha256": "fbfeb57c44fca668220461964670cfdc1f4d182f3b5f66c27de15dc51cf40969"
+          },
+          "seed": 939031,
+          "status": "COMPLETE",
+          "study_isolation": {
+            "enabled_multiphysics": [],
+            "enabled_physics": [
+              "fpt"
+            ],
+            "multiphysics_solve_for": {
+              "ehsptp1": false,
+              "nipfptp1": false,
+              "pccptp1": false
+            },
+            "physics_solve_for": {
+              "esass": false,
+              "fpt": true,
+              "fptas": false,
+              "ht": false,
+              "mf": false,
+              "pce2": false,
+              "pcgr": false,
+              "pcgz": false,
+              "pcmi": false,
+              "pcne": false,
+              "pcni": false,
+              "pcnm": false,
+              "pcte": false,
+              "pcv": false,
+              "ptp": false,
+              "spf": false
+            },
+            "status": "PASS"
+          },
+          "terminal_boundary_evidence": [],
+          "trajectory": {
+            "path": "levels/dt_20us/replicas/seed_939031/trajectory.csv",
+            "sha256": "442e8257fe86da292f773fd0b29cba497231f62cb397a42534ace65521514f06"
+          },
+          "trajectory_rows": 34727
+        }
+      ]
+    }
+  ],
+  "manifest_kind": "m3c2_participant",
+  "meaning_preflight_inventory": {
+    "path": "meaning_inventory.json",
+    "sha256": "98d02693cafbcfd814c14af51cea824cfa6a7de6fb79366bf0219703a9e29959"
+  },
+  "participant": "comsol",
+  "purpose": "final",
+  "schema_version": 1,
+  "source_model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "status": "COMPLETE_NORMALIZED_NOT_EVALUATED",
+  "study_isolation": {
+    "required_enabled_multiphysics": [],
+    "required_enabled_physics": [
+      "fpt"
+    ],
+    "status": "PASS",
+    "validated_for_every_replica": true
+  },
+  "tool_revision": "m3c2_comsol_campaign_normalizer_v5"
+}

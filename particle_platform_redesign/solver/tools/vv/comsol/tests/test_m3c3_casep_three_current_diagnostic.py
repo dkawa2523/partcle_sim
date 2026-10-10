@@ -93,7 +93,7 @@ def test_reference_uses_one_explicit_p1_epstein_force_owner() -> None:
     assert 'physics.feature("df1").active(false)' in shared
     assert 'physics.create(EPSTEIN_TAG, "Force", 2)' in shared
     assert "configureForce(physics.feature(EPSTEIN_TAG)" in shared
-    assert "1.3534291735288517" in shared
+    assert "CommonP1Epstein.force(PHYSICS)" in shared
     assert '"drag_implementation", "explicit_custom_force"' in shared
     assert "emitDiagnosticDragConfiguration" not in shared
 
@@ -118,6 +118,8 @@ def test_formal_powershell_has_isolated_external_vv_diagnostic_option() -> None:
             '$NumericalRun["comparison_scope"] = "active_rows_only"',
             "diagnostic_state_raw_wide.csv",
             "diagnostic_force_raw_wide.csv",
-            "if (-not $DiagnosticForceExport)",
+            "tools.vv.comsol.normalize_m3c3_caseP_three_current $OutputDirectory",
+            "M3-C3 normalized reference did not pass its structural checks",
         ),
+        absent=("if (-not $DiagnosticForceExport)",),
     )

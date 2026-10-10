@@ -7,14 +7,28 @@ from typing import Any
 
 import pytest
 from tools.vv.comsol import evaluate_m3c1_field_localization as localization
+from tools.vv.comsol.tests.common_p1_fixture import rematerialize_saved_localization_input, sha256
 
 SOLVER_ROOT = Path(__file__).resolve().parents[4]
 CASE = Path(__file__).resolve().parents[1] / "cases" / "m3c1_caseA_100nm_field_localization_v1.json"
 
 
 @pytest.fixture(scope="module")
-def locked_report() -> dict[str, Any]:
-    return localization.evaluate(SOLVER_ROOT, CASE)
+def current_configuration(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    directory = tmp_path_factory.mktemp("localization-current-writer")
+    payload = json.loads(CASE.read_text(encoding="utf-8"))
+    record = payload["artifacts"]["candidate_input"]
+    input_path = directory / "candidate_input.h5"
+    info = rematerialize_saved_localization_input(SOLVER_ROOT / record["path"], input_path)
+    record.update(path=str(input_path), sha256=sha256(input_path), content_hash=info.content_hash)
+    config_path = directory / "localization.json"
+    config_path.write_text(json.dumps(payload), encoding="utf-8")
+    return config_path
+
+
+@pytest.fixture(scope="module")
+def locked_report(current_configuration: Path) -> dict[str, Any]:
+    return localization.evaluate(SOLVER_ROOT, current_configuration)
 
 
 def _relative_l2(rows: list[dict[str, Any]], scope: str, quantity_key: str, quantity: str) -> float:
@@ -55,8 +69,10 @@ def test_locked_slice_localizes_the_first_difference_before_integration(
     assert ppr["after_axis_policy_relative_l2"] <= 1.0e-12
 
 
-def test_configuration_rejects_result_tuned_acceptance(tmp_path: Path) -> None:
-    payload = json.loads(CASE.read_text(encoding="utf-8"))
+def test_configuration_rejects_result_tuned_acceptance(
+    tmp_path: Path, current_configuration: Path
+) -> None:
+    payload = json.loads(current_configuration.read_text(encoding="utf-8"))
     payload["acceptance"]["roundoff_relative_l2"] = 1.0
     path = tmp_path / "result_tuned.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
@@ -65,8 +81,10 @@ def test_configuration_rejects_result_tuned_acceptance(tmp_path: Path) -> None:
         localization.evaluate(SOLVER_ROOT, path)
 
 
-def test_configuration_rejects_changed_locked_artifact(tmp_path: Path) -> None:
-    payload = json.loads(CASE.read_text(encoding="utf-8"))
+def test_configuration_rejects_changed_locked_artifact(
+    tmp_path: Path, current_configuration: Path
+) -> None:
+    payload = json.loads(current_configuration.read_text(encoding="utf-8"))
     payload["artifacts"]["candidate_input"]["sha256"] = "0" * 64
     path = tmp_path / "changed_hash.json"
     path.write_text(json.dumps(payload), encoding="utf-8")

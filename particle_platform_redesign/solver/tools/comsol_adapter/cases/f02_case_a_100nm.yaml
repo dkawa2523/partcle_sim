@@ -1,4 +1,4 @@
-format_version: 1
+format_version: 2
 source:
   vertices_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/mesh_vertices_si.csv
   triangles_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/domain_triangles.csv

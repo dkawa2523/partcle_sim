@@ -67,11 +67,10 @@ RZ swirlでは`v_theta`を加え、円柱座標の幾何項を含む別kernelが
 basis変換をwall reflectionと混同しない。
 
 2D軸対称surfaceから3Dの粒子fluxを復元するとき、線素`ds`は回転面積`2πr ds`を表す。
-一様surface releaseは2D edgeを等確率に選ぶのではなく、この面積で重み付けし、方位角を
-一様に生成する。現行v0.1 schemaは単一facet上の`edge_fraction`と、XYの`line_length`またはRZの
-`meridional_length | revolved_area`を明示した`uniform`を持つ。P14-Uで実測した分布品質はXY
-`line_length`だけである。RZ回転面の妥当性を同じ証拠から主張しない。現時点で
-`realized_surface_table`を追加せず、これらで表せない代表用途が確認された時だけ再検討する。
+一様surface releaseを外部でrealizeする場合、2D edgeを等確率に選ぶのではなく、この面積で重み付けし、
+必要なら方位角も一様に生成する。現行schemaは結果を粒子ごとのfacet ID、strict interiorのfacet内座標、速度、
+release時刻、物性としてcanonical surface tableへ保存する。P14-Uの旧generator evidenceはXY line-length分布だけであり、
+RZ回転面の分布品質を同じ証拠から主張しない。
 
 ---
 
@@ -115,6 +114,11 @@ P18-Rの`epstein_linear_effective_gas_sensitivity_v1`は既存線形式と同じ
 `0 < maximum_speed_ratio <= 1`を明示し、`lambda/a>=10`とともにactual stageと既存runtime enclosureによる連続pathで
 fail-closedに認証する。これは速度をclipするparameterでなく、species-resolved mixture truthでもない。
 `epstein_linear_v1`の保守的上限`0.1`は変更しない。
+
+複数の中性気体modelを合成する時、各modelが重複して宣言する速度、密度、温度、粘度、平均自由行程、分子質量は
+一つの背景authorityへ一致させる。linear EpsteinとWaldmann--Gallisを組み合わせる場合、native single-species同士または
+effective-gas sensitivity同士だけを許し、同名fieldによる意味の混在を認めない。有限速度Epsteinは一つの局所Maxwellianを
+仮定するため、producerが同じsingle-speciesまたはpseudogas背景を認証したWaldmann revisionと組み合わせられる。
 
 #### finite-speed free-molecular sphere
 
@@ -270,9 +274,39 @@ axisymmetric RZ、no-swirl、球形、dilute one-way、free-molecular範囲だ�
 明示する。zero-vorticity、comoving、符号、`rho lambda a^2/m` scaling、解析的shearと3-D cross-productの独立oracleで
 検証する。この式はreferenceのmodel-form感度であって、一般liftまたは実験的真値ではない。
 
+P22は適用域が異なる二つのmodelを、既存categoryの明示optionとして追加する。Talbotは原著の半径Kn規約へ
+修正した`talbot_cross_regime_radius_knudsen_v1`を使う。`a=d_drag/2`、`Kn_R=lambda/a=2*lambda/d_drag`、
+`Lambda=k_g/k_p`として、
+
+```text
+F_th = -(12*pi*a*mu^2/rho)
+       * Cs*(Lambda + Ct*Kn_R)
+       / ((1 + 3*Cm*Kn_R)*(1 + 2*Lambda + 2*Ct*Kn_R))
+       * grad(T)/T
+```
+
+とする。これは`6*pi*d_drag`をprefactorに使う形と同値であり、慣性mass、electrostatic半径、contact半径は
+再構成しない。原著のmean free pathは粘性基準`lambda=2*mu/(rho*c_bar)`であり、producerのprimitiveはこの定義に
+対応する必要がある。coreはlambdaを二倍に加工せず、sample済み値をそのまま半径Knへ使用する。
+`Cs,Cm,Ct`はcase必須で、pure evaluatorにもdefaultを持たせない。原著の推奨値は`1.17,1.14,2.18`である。
+`1.17,1.146,2.2`はCOMSOL記載のcoefficient variantとして選択できるが、原著の推奨値と同一とは呼ばない。
+producerが同じ温度solutionから`grad(T)`を形成する。v1は有限gradientと正の有限scalar primitive・係数を要求し、
+`Kn_R`の数値cutoffは設けない。これはcross-regime model-formの明示選択であり、任意のKnでの物理検証を
+主張するものではない。旧径Kn revisionの自動変換や再解釈は行わない。
+Saffmanは`w=u-v`、`omega=curl(u)`、`L=w cross omega`として
+`F_L=6.46*a^2*L*sqrt(mu*rho*|w|/|L|)`を平面XY/RZへ射影する。ゼロ`L`は極限のゼロである。
+原式の連続体・creeping-flow階層を実行時に明確化し、`Kn_a<=0.1`、`Re_s<=0.1`、`Re_G<=0.1`に加え、
+非ゼロshearでは`Re_s<=0.1*sqrt(Re_G)`を要求する。vorticity intervalがゼロを跨ぐ場合、非ゼロslip pathは
+証明済みと扱わない。gradient/vorticity回復、far-wall・非回転・no-slip仮定の妥当性はproducer/case責務であり、
+coreは微分、blend、near-wall補正を行わない。
+
 Waldmannの自由分子式は[Waldmann (1959)](https://doi.org/10.1515/zna-1959-0701)、局所熱流束形と低圧・
 壁近傍への一般化の背景は[Gallis, Rader, and Torczynski (2004)](https://doi.org/10.1080/02786820490490001)
-を参照する。入力不足または適用域外で別modelへ黙って切り替えない。
+を参照する。Talbotの式と半径Knは[Talbot et al. 著者preprint, Eq. (15)](https://escholarship.org/content/qt22f5r6cz/qt22f5r6cz.pdf)
+をauthorityとする。[COMSOL Thermophoretic Force](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.48.html)
+は係数variantの参考であり、説明図だけから実行RHSとのparityを主張しない。Saffmanは
+[COMSOL Particle Motion in a Shear Flow](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.42.html)
+および原論文を参照する。入力不足または適用域外で別modelへ黙って切り替えない。
 
 ### 3.5 ion drag
 
@@ -568,8 +602,15 @@ OU速度とその時間積分を任意step幅で同時にexact simulationでき�
 壁へ接続する最初のrevisionは、geometryやoutput要求で乱数pathが変わらない固定depthのdyadic node集合を作り、
 nodeの位置・速度から各leafのcubic Hermite numerical pathを一意に定める。この有限解像度pathのfirst hitを
 既存event interfaceで求め、depthを増やした時のfirst-passage分布収束を検証する。単なる`stochastic RMS`距離を
-決定論的clear certificateとして使わない。後にadaptive clearを導入する場合は、Gaussian bridgeのcrossing確率から
-全runのmiss-probability budgetを明示的に配分できる時だけ別revisionとする。
+決定論的clear certificateとして使わない。
+
+B05の`conditional_boundary_refinement_v1`では、`interval_tree_depth`を全rootへ一様に適用する
+numerical-path精度のauthorityとして残す。そこまで生成した有限depth pathについて、wall、RZ axis、または
+geometry certificateがclearにできない区間だけを、保存済み親endpointのconditional Gaussian half-splitで
+`adaptive_max_depth`まで細分する。base=maxは従来の固定depth経路へ退化し、乱数identity、tile、output、resumeから
+独立である。これはprobability thresholdによるclearではなく、base depth不足を自動補償する仕組みでもない。
+従ってsampleしていない連続OU軌道のexact first-passage、zero miss probability、またはuniform max-depthと同じ
+global path解像度を主張しない。精度はbase depthの収束で、追加計算量は境界候補率と到達depthで別々に評価する。
 
 counter-based RNGのstatelessなkey/counter構造は
 [Random123 official documentation](https://random123.com/releases/docs/)を参照する。
@@ -589,7 +630,7 @@ root-owned affine exponential Z(t), using G_mid + J*(Z_root-Z_mid)
 
 予測子は係数評価点を作るためだけで、stateを先にhalf-step commitするoperator splittingではない。
 nativeとeffective-gas sensitivityの線形Epsteinだけを受理し、既存の加算加速度を同じmidpointで一度だけ
-評価する。固定深度のconditional treeはrootと同じ凍結係数で分割し、root endpointを保存する。
+評価する。conditional treeはrootと同じ凍結係数で分割し、root endpointを保存する。
 Zはfixed、またはroot内で上記の一つのaffine-exponential dense stateとし、chargeだけのsubcycleを作らない。
 
 RZ axis hitは壁反射ではない。cubic pathのaccepted prefixをhitまでcommitしてradial stateをfoldし、
@@ -598,23 +639,30 @@ macro-stepの残時間は次の`root_stochastic_interval`として係数を再�
 conditional splitし、geometryやoutput要求で引き直さない。
 
 受入で主張するのは、凍結した定数係数に対するmeanとfull covarianceのexactness、noise-off決定論極限の
-2次収束、manufactured charge-electric caseのweak mean観測次数`>=0.9`、tree-depth first-passage収束である。
-一般のstate-dependent SDEのstrong orderまたはweak 2次は主張しない。terminal boundaryは
-`stick`/`escape`/`hold`だけとし、反射や確率壁は独立な数値契約が完了するまで解禁しない。
+2次収束、manufactured charge-electric caseのnoise-zero決定論極限の観測次数`>=0.9`、tree-depth first-passage収束である。
+一般のstate-dependent SDEのstrong orderまたはweak 2次は主張しない。初回B03 closeoutのterminal boundaryは
+`stick`/`escape`/`hold`だけだったが、現行B04は同じprefix commit/fresh-root則へactive wallを統合済みである。
+
+2026-10-09のD1では、公開定係数OUの期待共分散を独立Green-kernel quadratureへ統一した。
+時間線形γ(t),u(t)の非自律caseと、一定γ,T・u_x=-3x,u_y=0の位置依存manufactured XY caseを
+実noise付き16,000粒子・32 macroで独立mean/full covarianceへ照合した。後者のoracleは2×2行列指数と
+Green積分を用い、登録した統計幅でnoise変位をfield評価に使わない誤りを識別する。両caseは各固定resolutionの
+精度を示す。一般weak/strong次数、連続first-passage、背景流体の物理validationは認証しない。
 
 現在のCOMSOL RZ比較向けrevisionはr/zへ投影した2自由度SDEで、等方3-D過程ではない。P17後のCartesian 3-D revisionを
 物理的なisotropic Brownianの経路とし、RZ projectedの合格を3-Dの根拠にしない。pathwise再現が証明できない比較は、
 12 packageごとの独立seed ensembleでmean、covariance、MSD、occupancy、fate、first-arrival分布を評価する。
 
 このB03 compositionの初回closeoutはengine v34 / proposal v9 / catalog v16 / event v15 / runtime v17 / compiled tile v16 /
-memory plan v13としてcore受入を完了した。現行supersessionはengine v37 / proposal v10 / catalog v17 /
-event v16 / runtime v20 / compiled tile v18 / memory plan v14である。COMSOL再実行はcore受入に不要だった。
-P20 performance closeoutとmeaning-matched common-P1 Case-A/Case-P 100 nm external V&V/M3-C2は完了した。Case-Pは
+memory plan v13としてcore受入を完了した。現行supersessionはengine v46 / proposal v10 / catalog v23 /
+event v22 / runtime v22 / compiled tile v21 / memory plan v16である。COMSOL再実行はcore受入に不要だった。
+P20 performance closeoutと以前のmeaning-matched common-P1 Case-A/Case-P 100 nm external V&V/M3-C2は完了した。Case-Pは
 元COMSOL `auxq`どおりの二電流same-form比較であり、後続three-currentまたはspecies-resolved物理を認定しない。受理済みCase-P seed 3件の
 287粒子owner discoveryも、受理済み科学payload・work・case identity・revisionの完全一致を保って完了した。支配ownerは
 3 seedとも`integrators`（自己時間比42.58--42.86%）だったが、事前登録済みbounded ownerではないため最適化は未承認である。
-M3-C2A anchorは`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。10,000粒子以上の性能は製品SLAを先に定義した
-独立work packageだけで評価し、COMSOL fittingは行わない。
+以前のM3-C2A anchorは`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。現行の工学的性能測定は
+[受入記録](reviews/product_performance_acceptance_2026-10-09.json)へ分離し、製品SLA認定は用途基準の定義後に行う。
+COMSOL fittingは行わず、以前の比較結果を現行revisionの再認証へ流用しない。
 後続のbounded follow-upでは、この発見をchord算術一箇所へ限定してserial compiled batch化し、accepted science/work identityを
 保ったままend-to-end中央値を12.29%短縮した。追加の数値model、診断、runtimeは導入せず、次ownerへ進まず終了した。
 正式characterizationは
@@ -665,22 +713,41 @@ COMSOL結果exportのsmoothing/recoveryは
 
 ### 6.3 高速cache
 
-規則格子への再meshは高速化cacheであり、reference fieldではない。生成時に次を測る。
+規則格子への再meshは高速化cacheであり、reference fieldではない。現行field preprocessorのproducerはv4、validation/support
+algorithmはv3、入力config formatはv2である。staticと固定topologyのlinear-time nodal P1/regular/exact affine Q1から、
+全cellが元supportで覆われるregular格子を認証する。sourceとtarget cellのcommon partitionを作り、
+XYではdx dy、RZでは2πr dr dzで値と実際の補間basisの座標gradientの
+relative L2を積分する。support境界の値誤差はdsまたは2πr dsで測り、RZ axisの測度は0とする。
+これはcomponentごとの座標gradientであり、3Dの共変vector derivativeではない。
+bilinear gradientの座標丸めは混合二階差による変化もallowanceへ含める。大きい座標原点でこの項を
+落とすとtight budgetへ誤ってpublishできる反例を、独立なgradient norm sqrt(1/3)で検証・拒否した。
 
-- scalar/vectorのL-infinity、L2、分位誤差
-- gradient誤差
-- wall/sheath近傍の誤差
-- supportのfalse-positive/false-negative
-- 軌道・eventへの誤差伝播
+sample absolute maximumは記録するが、連続L-infinity上限とは呼ばない。正の微小patch、coverageの穴・
+重複をepsilonで消さず、float演算で解像できないpatchはunresolvedとして公開しない。warped Q1 source、
+部分supportのtarget、coverage不足、未解決reference下界は公開しない。validationのmemory上限、workspace row数、
+patch work上限を事前指定し、超過時にも公開しない。solidを跨ぐ補間やNaN fillは禁止する。
+coreのgradient v2はstatic nodal fieldだけを扱い、値と同じcell/basis/Jacobianを使う。
+外部preprocessorは各snapshotを同じownerのstatic viewとして評価し、時間Gramを外部で構成する。
+時間区間の二乗error/reference normはquadraticとなるため、丸めを囲ったBernstein係数で正の分母下界と
+比の上界を認証する。未解決区間は内部52段または資源budgetまで分割し、解決できなければ公開しない。
+stationary pointはreport-onlyであり、合否gateを持たない。第二locatorや時間gradient engineは追加しない。
 
-solidを跨ぐ補間やNaN fillは禁止する。cache cellは元element/supportへ追跡できるようにする。
+cacheの用途採用には、これらのfield指標とは別に、壁/sheath近傍、代表軌道・eventへの誤差伝播と
+実測費用を評価する。field normだけで到達・付着精度やspeedupを認証しない。
 
 ### 6.4 時間依存場
 
-時刻knots、補間規則、範囲外policy、discontinuity、mesh固定/移動を明示する。実行時は前後2時刻の
-fieldだけをdouble bufferへ置き、discontinuity/knotでstepを分ける。各integrator stageの実時刻で
-空間・時間を同時評価する。時間範囲外を無条件に端点clampしない。snapshot自体の不足はparticle
-stepで修復できないため、外部preprocessorが間引き検証やsecond differenceで解像度を評価する。
+現行revisionは固定topology、線形補間、範囲外errorに限定する。全snapshotをresident保持し、knotで
+macro stepを分け、各integrator stageの実時刻で空間・時間を同時評価する。時間範囲外を端点clampしない。
+snapshot自体の不足はparticle stepで修復できない。外部preprocessor v4は明示指定
+`--source-time-diagnostic`でinterior knot omissionの感度をreportする。3点以上のsource snapshotについて、
+各内部knotを除いた隣接時刻の不均一時間線形補間と元の値・gradient・support境界traceを、同じruntime samplerと
+XY/RZ物理測度で比較する。2点はINSUFFICIENT、静的場はNOT_APPLICABLE、未指定はNOT_REQUESTEDである。
+計算は既存資源budget内のreport-onlyであり、cache認証を先に完了する。診断の資源不足で適格cacheを拒否しない。
+source knot間に未観測のpulseがあるかはNOT_TESTEDで、この感度から連続原場の時間adequacyを自動認証しない。
+現行のtime cache認証は既存snapshot間の線形場に対する空間cache誤差を全区間で判定するものであり、
+元データのsnapshot不足を認証・修復しない。hold/discontinuity、streaming/double buffer、moving topologyは
+利用caseと独立referenceを揃えた別revisionとする。
 
 ---
 
@@ -705,29 +772,80 @@ supported-containment BVHで候補を絞る。outside/masked provisionalだけ�
 現行経路へneighbor cell-walkを重ねない。toleranceはgeometry scale、facet scale、速度、dt、float ULPから
 一度解決する。固定mのepsilonで位置を内側へずらすrepairは、collision時刻とrelease位置を変えるため用いない。
 
-v0.1はpoint-particle衝突であり、粒子中心が境界へ達した時をeventとする。有限半径offset surfaceを
-geometry toleranceで代用しない。`axisymmetric_field_cartesian3d`ではCartesian pathを
+現行は粒子ごとの独立`contact_radius_m`を持ち、0なら粒子中心のpoint contact、正なら静的2-D XYのdiskまたは
+RZのsphere中心とmaterial `line2` segmentのcapsule first contactをeventとする。半径をgeometry tolerance、
+drag径、静電半径で代用しない。finite-radius broad phaseはpath enclosureを半径だけ膨張し、narrow phaseは
+segment本体と端capの最初の接触を求める。接触法線は中心からcandidate segmentの最近点への方向であり、cornerの
+同時candidateを保持する。`axisymmetric_field_cartesian3d`ではCartesian pathを
 `(r(t),z(t))`へ写した曲線とRZ断面境界を交差させ、RZ法線を衝突点thetaでCartesianへ戻す。
 
-壁物理はintersectionから分離する。現行revisionは`point_wall_laws_v5`である。
+現行2-D/RZではgroupの`contact_geometry=particle_center`を明示した境界だけ中心通過で判定する。
+physical contact radiusをゼロへ置換せず、材料端capと中心開口のfirst-hitを同じ候補/BVHで比較する。
+exact linear/quadraticの接触起点では、convex capsuleの最近点（segmentへclamp）から得るsupporting-plane normalを使い、
+quadratic normal displacementの導関数が区間両端で非正なら全区間の離脱を証明できる。これを一facetごとに適用し、
+別facetの後続impactを抑制しない。反射後の解析originと有限contact-set離脱状態をmacro/checkpoint間で保持する。
+曲線法の認証は従来の包絡に限定し、このexact証明で連続OUのfirst-passageや全curved endcapの離脱を認定しない。
+
+壁物理はintersectionから分離する。現行revisionは`contact_wall_laws_v7`である。
 
 - stick/absorb
 - escape
 - parameterを持たない非deposition terminal `hold`
 - parameterを持たない完全鏡面`specular`
 - 法線・接線反発係数を持つ`restitution`
-- 定数確率の`probabilistic_stick`と、`otherwise`へ明示する`specular | restitution` fallback
+- 壁温度、拡散混合率、接線wall frameを持つ`maxwell_thermal`
+- 定数確率の`probabilistic_stick`と、`otherwise`へ明示する
+  `specular | restitution | maxwell_thermal` fallback
 
-以上をv0.1対象とする。`hold`はhit位置、hit時速度、hit時電荷を保持するinactiveな`held` lifecycleであり、
-その後の力、電荷、kinematicsを時間発展させない。paused/restart/resuspensionを意味しない。diffuse reflection、
-速度依存rebound、resuspensionは後続catalogである。
+`point_wall_laws_v5`までのwall subsetは公開済み`0.1.0`に固定し、v6の`maxwell_thermal`、
+realized surface schedule、B04 active-wall continuationは未公開`0.2.0` candidateとする。`hold`はhit位置、hit時速度、hit時電荷を保持するinactiveな`held` lifecycleであり、
+その後の力、電荷、kinematicsを時間発展させない。paused/restart/resuspensionを意味しない。速度依存reboundと
+resuspensionは後続catalogである。
 `specular`は係数入力を受けず、法線成分を厳密に反転して接線成分を保存する。`restitution`は
 `normal_restitution`と`tangential_restitution`をともに必須とし、確率lawの非stick側もdefaultで補わない。
+`maxwell_thermal`はMaxwellの鏡面／完全熱適応拡散混合を瞬時wall responseとして実装し、有限半径でも
+candidate固有接触法線を使う。rolling/slidingや持続接触を意味しない。
+外向きunit normalを\(\boldsymbol n\)、\(\boldsymbol t=(-n_y,n_x)\)、
+\(\sigma^2=k_B T_w/m\)とすると、拡散branchは独立な\(U_n\in(0,1)\)、\(Z_t\sim N(0,1)\)から
+
+\[
+c_n=\sigma\sqrt{-2\log U_n},\qquad c_t=\sigma Z_t,\qquad
+\boldsymbol v'=\boldsymbol v_w-c_n\boldsymbol n+c_t\boldsymbol t
+\]
+
+を得る。従って\(p(c_n)=c_n\sigma^{-2}\exp[-c_n^2/(2\sigma^2)]\)、\(c_n>0\)で、接線は
+Gaussianである。`diffuse_reflection_fraction`はこのbranchを選ぶ確率であり、一般のenergy accommodation係数ではない。
+残りは同じwall frameで鏡面反射する。静的geometryでは`wall_velocity_m_s`をgroup内全facetへ接線方向だけに
+制限し、法線wall motionをmoving geometryなしに偽装しない。XYとRZ meridionalの既存2成分stateを扱い、RZ則を
+完全3-D方位Maxwell分布とは解釈しない。
+
+wall RNGは`philox4x32_10_v2`で、付着、混合branch、open-uniform法線、standard-normal接線を独立streamへ
+分け、`seed, particle_id, physical_boundary_event_ordinal, stream`から再構成する。scalar変換
+`half_range_maxwell_flux_velocity`とNumba batch変換`half_range_maxwell_flux_velocity_batch`はstream選択policyを
+持たない。surface sourceは粒子ごとのfacet、facet内座標、初速度、release時刻、物性をcanonical HDF5へ
+realizeして与え、coreでsource RNGを引かない。入力作成側は同じpolicy-free変換を利用できる。
+
+Maxwell混合則の原典はJ. C. Maxwell,
+[On Stresses in Rarified Gases Arising from Inequalities of Temperature](https://doi.org/10.1098/rstl.1879.0067)
+である。熱再放出と壁frame速度の比較対象はCOMSOL 6.4公式
+[Thermal Reemission](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_math.06.05.html)とするが、
+COMSOL bitwise parityや非公開sampling algorithmの一致は主張しない。Boltzmann定数はNIST CODATAの
+[exact value](https://physics.nist.gov/cgi-bin/cuu/Value?k%7Csearch_for=Boltzmann)を使う。
+
+有限半径接触はgeometry/event v6/v18として即時反射lawから分離して実装済みである。surface chargingはwall electrical
+stateとcharge-transfer event、resuspensionはwall-resident lifecycle/dwell/adhesion/release schedulerを必要とするため、
+この即時反射lawへplaceholderを置かない。各後続revisionはstate/output/checkpoint ownerと独立referenceを先に固定する。
 COMSOL固有のfreeze/disappearは外部adapterがraw stateを保持する。boundary 37/35へ確実に到達する正例microcaseで、
 実際に出力されたhit後位置、速度、保存statusを確認して外部manifestの対応を定める。現referenceには
 電荷列がないためCOMSOL電荷保持は認定せず、generic `hold`の非零電荷保持は解析・公開scenarioで独立に検証する。Freezeをstuckへ写像せず、
 製品利用caseにも必要な非deposition終端はprovider非依存の`hold/held`として実装し、material deposition、escapeと
 統計を分ける。COMSOL名やraw status codeはwall lawへ入れない。
+
+境界応答は「最初のhit時刻」と「その時刻にincidentなfacet集合」を分けて扱う。各facetを同じpathと
+scale-awareな局在budgetで独立に認証し、最初のhitと同時で共有nodeへ接続するfacetを全て保持する。
+exact linear/quadratic、一般RK4、exponential midpoint、Brownian cubic Hermiteで同じcandidate tableと
+priority/combined-normal則を用いる。曲線pathだけ最初に列挙された一面へ丸めず、候補の認証が閉じなければ
+分割し、budgetを使い切った時はfail-closedとする。
 
 event logは時刻、点、boundary ID、法線、pre/post速度、電荷、結果、乱数counter、局在残差を
 保存する。保存時刻のstatus変化からeventを推測しない。
@@ -833,7 +951,8 @@ facetはdeterministicなcount/prefix/fillで保持する。これによりscratc
 P15/P15-Dのcontinuous chargeもこの実行原理を使い、時間依存場、3-Dへ同じ原理を拡張できる。
 deferred event depthのworst-caseは一般scratchへ隠さず、P14-P時点のmemory plan v10で
 `event_work_bytes_per_particle = 24 * (max_refinements + 1)`、component `slab_event_work`として計上する。
-現行memory plan v14もこのevent-work計上を維持する。
+現行memory plan v16もこのevent-work計上を維持し、Brownian tree workは観測候補率でなく
+`adaptive_max_depth`から保守的に解決する。
 候補、event/failure staging、surface release、direct replayはnamed componentへ分離し、pack時だけのgatherは12.5%
 safety marginが所有する。正確なbyte式は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)が所有する。
@@ -879,8 +998,8 @@ segmentへchunked streamする。閉じたsegmentをatomic commitし、checkpoin
 現行cadenceは`W=macro_step_count+accepted_particle_pieces+candidate_queries+refinements`、
 `T=max(2^20,128N)`で、engineがaccepted macro barrierでcommit要否を決める。cadenceはmanifest/resume identityへ入り、
 output scheduleとslab幅には依存しない。output ownerは同期single-writerとしてsegment、A/B checkpoint、`LATEST`の
-atomic persistenceだけを行う。cadence revisionは`cumulative_solver_work_v1`、resultは
-`durable_segmented_result_v5`で、result/checkpoint schema 2は不変である。threadingや第二writerは再導入しない。
+atomic persistenceだけを行う。cadence revisionは`cumulative_solver_work_v1`、現行resultは
+`durable_segmented_result_v6`で、result schema 3、checkpoint schema 2である。threadingや第二writerは再導入しない。
 HDF5のchunked/resizable datasetは
 [h5py dataset documentation](https://docs.h5py.org/en/stable/high/dataset.html)を参照する。
 

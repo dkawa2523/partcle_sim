@@ -44,11 +44,14 @@ _B03_CONTINUOUS = "b03_rz_effective_drag_continuous_charge_gravity"
 _B03_AXIS = "b03_rz_fixed_drag_axis_restart"
 _SCENARIOS = (_B02, _B03_FIXED, _B03_CONTINUOUS, _B03_AXIS)
 
-_B02_NOISE_REVISION = "inertial_langevin_fdt_epstein_linear_frozen_start_v1"
-_B03_NOISE_REVISION = "inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1"
+_NOISE_REVISION = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
 _NATIVE_DRAG_REVISION = "epstein_linear_v1"
 _EFFECTIVE_DRAG_REVISION = "epstein_linear_effective_gas_sensitivity_v1"
 _CONTINUOUS_CHARGE_REVISION = "oml_stationary_maxwellian_debye_huckel_v1"
+_ENGINE_REVISION = "particle_engine_v46"
+_EVENT_REVISION = "line_quadratic_curved_capsule_periodic_first_hit_v22"
+_TREE_POLICY_REVISION = "conditional_boundary_refinement_v1"
+_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v16"
 
 _DEFAULT_PARTICLES = (2_000, 20_000)
 _DEFAULT_REPEATS = 3
@@ -101,6 +104,11 @@ def _arguments(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--end-s", type=_positive_float, default=_DEFAULT_END_S)
     parser.add_argument("--dt-s", type=_positive_float, default=_DEFAULT_DT_S)
     parser.add_argument("--tree-depth", type=_tree_depth, default=_DEFAULT_TREE_DEPTH)
+    parser.add_argument(
+        "--adaptive-max-depth",
+        type=_tree_depth,
+        help="maximum conditional refinement depth; defaults to --tree-depth",
+    )
     parser.add_argument("--json", dest="json_path", type=Path)
     parser.add_argument("--worker-case", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--worker-output", type=Path, help=argparse.SUPPRESS)
@@ -136,6 +144,13 @@ def _driver(arguments: argparse.Namespace) -> None:
     particle_counts = tuple(dict.fromkeys(arguments.particles))
     if len(particle_counts) < 2:
         raise SystemExit("B03 characterization requires a small and representative particle count")
+    adaptive_max_depth = (
+        arguments.tree_depth
+        if arguments.adaptive_max_depth is None
+        else arguments.adaptive_max_depth
+    )
+    if adaptive_max_depth < arguments.tree_depth:
+        raise SystemExit("--adaptive-max-depth must be at least --tree-depth")
     macro_steps = _macro_step_count(arguments.end_s, arguments.dt_s)
     with tempfile.TemporaryDirectory(prefix="chamber-particles-b03-") as temporary:
         root = Path(temporary)
@@ -147,6 +162,7 @@ def _driver(arguments: argparse.Namespace) -> None:
                 arguments.end_s,
                 arguments.dt_s,
                 arguments.tree_depth,
+                adaptive_max_depth,
             )
             for count in particle_counts
         }
@@ -176,6 +192,7 @@ def _driver(arguments: argparse.Namespace) -> None:
             particle_counts,
             arguments.repeats,
             arguments.tree_depth,
+            adaptive_max_depth,
         )
         paired = _paired_characterization(outputs, particle_counts, arguments.repeats)
         summaries = _summaries(observations)
@@ -200,7 +217,9 @@ def _driver(arguments: argparse.Namespace) -> None:
                     "result manifest."
                 ),
                 "brownian_interval_tree_depth": arguments.tree_depth,
-                "declared_leaves_per_root": 1 << arguments.tree_depth,
+                "brownian_adaptive_max_depth": adaptive_max_depth,
+                "uniform_leaves_per_root": 1 << arguments.tree_depth,
+                "maximum_leaves_per_root": 1 << adaptive_max_depth,
                 "case_materialization_in_measured_scope": False,
                 "output_schedule": "none for every row",
                 "seed": _SEED,
@@ -265,6 +284,7 @@ def _materialize_cases(
     end_s: float,
     dt_s: float,
     tree_depth: int,
+    adaptive_max_depth: int,
 ) -> dict[str, Path]:
     b02 = _brownian_case(
         directory / _B02,
@@ -274,7 +294,13 @@ def _materialize_cases(
         tree_depth=tree_depth,
         frame_times=None,
     )
-    _patch_case(b02, _B02, memory_limit_mb, effective_drag=False)
+    _patch_case(
+        b02,
+        _B02,
+        memory_limit_mb,
+        adaptive_max_depth=adaptive_max_depth,
+        effective_drag=False,
+    )
 
     b03_fixed = _brownian_rz_case(
         directory / _B03_FIXED,
@@ -291,7 +317,13 @@ def _materialize_cases(
         memory_limit_mb=memory_limit_mb,
         initial_charge_number=0.0,
     )
-    _patch_case(b03_fixed, _B03_FIXED, memory_limit_mb, effective_drag=False)
+    _patch_case(
+        b03_fixed,
+        _B03_FIXED,
+        memory_limit_mb,
+        adaptive_max_depth=adaptive_max_depth,
+        effective_drag=False,
+    )
 
     b03_continuous = _brownian_rz_case(
         directory / _B03_CONTINUOUS,
@@ -309,7 +341,13 @@ def _materialize_cases(
         initial_charge_number=0.0,
         continuous_charge=True,
     )
-    _patch_case(b03_continuous, _B03_CONTINUOUS, memory_limit_mb, effective_drag=True)
+    _patch_case(
+        b03_continuous,
+        _B03_CONTINUOUS,
+        memory_limit_mb,
+        adaptive_max_depth=adaptive_max_depth,
+        effective_drag=True,
+    )
 
     b03_axis = _brownian_rz_case(
         directory / _B03_AXIS,
@@ -326,7 +364,13 @@ def _materialize_cases(
         memory_limit_mb=memory_limit_mb,
         initial_charge_number=0.0,
     )
-    _patch_case(b03_axis, _B03_AXIS, memory_limit_mb, effective_drag=False)
+    _patch_case(
+        b03_axis,
+        _B03_AXIS,
+        memory_limit_mb,
+        adaptive_max_depth=adaptive_max_depth,
+        effective_drag=False,
+    )
     return {
         _B02: b02,
         _B03_FIXED: b03_fixed,
@@ -335,11 +379,19 @@ def _materialize_cases(
     }
 
 
-def _patch_case(path: Path, scenario: str, memory_limit_mb: int, *, effective_drag: bool) -> None:
+def _patch_case(
+    path: Path,
+    scenario: str,
+    memory_limit_mb: int,
+    *,
+    adaptive_max_depth: int,
+    effective_drag: bool,
+) -> None:
     document = yaml.safe_load(path.read_text(encoding="utf-8"))
     document["case"]["name"] = scenario
     document["resources"]["memory_limit_mb"] = memory_limit_mb
     document["solver"]["seed"] = _SEED
+    document["physics"]["noise"]["adaptive_max_depth"] = adaptive_max_depth
     if effective_drag:
         document["physics"]["drag"]["revision"] = _EFFECTIVE_DRAG_REVISION
         document["physics"]["drag"]["maximum_speed_ratio"] = 0.6
@@ -499,6 +551,7 @@ def _observation(
     boundary = _mapping(manifest, "boundary_interactions")
     axis_crossings = int(boundary["axis_crossings"])
     depth = int(manifest["brownian_interval_tree_depth"])
+    adaptive_max_depth = int(manifest["brownian_adaptive_max_depth"])
     macro_steps = _macro_step_count(
         float(manifest["time"]["end_s"]),
         float(manifest["time"]["dt_s"]),
@@ -527,8 +580,10 @@ def _observation(
             "full_plan": memory_plan,
         },
         "stochastic_work": {
-            "tree_depth": depth,
-            "leaves_per_root": 1 << depth,
+            "uniform_tree_depth": depth,
+            "adaptive_max_depth": adaptive_max_depth,
+            "uniform_leaves_per_root": 1 << depth,
+            "maximum_leaves_per_root": 1 << adaptive_max_depth,
             "macro_steps": macro_steps,
             "derived_nominal_leaf_visits_without_restarts": declared_leaf_visits,
             "manifest_accepted_particle_pieces": accepted,
@@ -572,6 +627,7 @@ def _revisions(manifest: Mapping[str, object]) -> dict[str, object]:
         "field_location_revision",
         "geometry_algorithm_revision",
         "result_algorithm_revision",
+        "brownian_tree_policy_revision",
     )
     result = {name: manifest.get(name) for name in names}
     result["memory_plan_revision"] = manifest["memory_plan"]["revision"]
@@ -584,11 +640,12 @@ def _validate_observations(
     particle_counts: tuple[int, ...],
     repeats: int,
     tree_depth: int,
+    adaptive_max_depth: int,
 ) -> None:
     expected_rows = len(particle_counts) * len(_SCENARIOS) * repeats
     if len(observations) != expected_rows:
         raise RuntimeError(f"B03 expected {expected_rows} observations, got {len(observations)}")
-    expected_tree_bytes = 32 * (tree_depth + 4)
+    expected_tree_bytes = 128 * (adaptive_max_depth + 4)
     for count in particle_counts:
         for scenario in _SCENARIOS:
             selected = [
@@ -606,16 +663,30 @@ def _validate_observations(
             if len(plans) != 1 or len(work) != 1:
                 raise RuntimeError(f"B03 manifest memory/work changed for {scenario}/{count}")
             representative = selected[0]
+            work_record = representative["stochastic_work"]
+            if (
+                work_record["uniform_tree_depth"] != tree_depth
+                or work_record["adaptive_max_depth"] != adaptive_max_depth
+            ):
+                raise RuntimeError("B03 Brownian base/max depth differs from the request")
             memory = representative["memory"]
             if memory["scratch_bytes_per_particle"] != 2_048:
                 raise RuntimeError("B03 stage scratch changed from the v13 2048-byte allowance")
             if memory["stochastic_tree_work_bytes_per_particle"] != expected_tree_bytes:
                 raise RuntimeError("B03 stochastic-tree plan does not match the declared depth")
-            if (
-                representative["revisions"]["memory_plan_revision"]
-                != "solver_owned_memory_plan_v13"
-            ):
+            if representative["revisions"]["memory_plan_revision"] != _MEMORY_PLAN_REVISION:
                 raise RuntimeError("B03 characterization unexpectedly changed memory-plan revision")
+            expected_revisions = {
+                "engine_algorithm_revision": _ENGINE_REVISION,
+                "event_algorithm_revision": _EVENT_REVISION,
+                "brownian_tree_policy_revision": _TREE_POLICY_REVISION,
+            }
+            for name, expected in expected_revisions.items():
+                if representative["revisions"][name] != expected:
+                    raise RuntimeError(
+                        f"B03 expected {name}={expected!r}, got "
+                        f"{representative['revisions'][name]!r}"
+                    )
             lifecycle = representative["lifecycle_counts"]
             if lifecycle["active"] != count or any(
                 lifecycle[name] != 0 for name in ("pending", "stuck", "held", "escaped", "failed")
@@ -638,10 +709,10 @@ def _validate_scenario_contract(observation: Mapping[str, object]) -> None:
         raise RuntimeError(f"B03 {scenario} did not resolve the stochastic Hermite path")
     if scenario == _B02:
         expected = (
-            "macro_root_frozen_start_v1",
-            "joint_ou_only_v1",
-            "fixed_charge_v1",
-            _B02_NOISE_REVISION,
+            "macro_root_frozen_midpoint_v1",
+            "stochastic_exponential_midpoint_v1",
+            "macro_root_affine_exponential_v2",
+            _NOISE_REVISION,
             _NATIVE_DRAG_REVISION,
         )
         actual = (
@@ -651,14 +722,14 @@ def _validate_scenario_contract(observation: Mapping[str, object]) -> None:
             models["noise"]["revision"],
             models["drag"]["revision"],
         )
-        if actual != expected or work["manifest_accepted_particle_pieces"] is not None:
-            raise RuntimeError(f"B02 frozen-start control changed: {actual}")
+        if actual != expected:
+            raise RuntimeError(f"XY midpoint control changed: {actual}")
         return
     expected = (
         "macro_root_frozen_midpoint_v1",
         "stochastic_exponential_midpoint_v1",
         "macro_root_affine_exponential_v2",
-        _B03_NOISE_REVISION,
+        _NOISE_REVISION,
     )
     actual = (
         resolved["brownian_coefficient_policy"],
@@ -666,7 +737,7 @@ def _validate_scenario_contract(observation: Mapping[str, object]) -> None:
         resolved["brownian_charge_dense_revision"],
         models["noise"]["revision"],
     )
-    if actual != expected or work["manifest_accepted_particle_pieces"] is None:
+    if actual != expected:
         raise RuntimeError(f"B03 resolved contract changed: {actual}")
     if scenario == _B03_CONTINUOUS:
         if models["drag"]["revision"] != _EFFECTIVE_DRAG_REVISION:
@@ -838,8 +909,9 @@ def _array_accounting(observations: Sequence[Mapping[str, object]]) -> dict[str,
         # Includes restart rows/particles/result selection, accepted time,
         # position/velocity copies, and one 2-vector advanced-index transient.
         "axis_restart_selected_copies": {"float64": 7, "int64": 3},
-        # The counter-based RNG root ordinal is a scalar recursion argument.
-        "root_interval_ordinal_per_particle": {},
+        # Per-row root/event/guard ordinals and the pending fresh-root wave are
+        # owned by the separately reported stochastic-tree reserve.
+        "fresh_root_wave_metadata": {},
     }
     item_sizes = {"float64": 8, "int64": 8, "uint16": 2, "byte": 1}
     groups = {
@@ -861,8 +933,8 @@ def _array_accounting(observations: Sequence[Mapping[str, object]]) -> dict[str,
     scratch = next(iter(scratch_values))
     checks = {
         "conservative_named_array_bound_fits_stage_scratch": rounded <= scratch,
-        "all_rows_use_memory_plan_v13": all(
-            item["revisions"]["memory_plan_revision"] == "solver_owned_memory_plan_v13"
+        "all_rows_use_memory_plan_v16": all(
+            item["revisions"]["memory_plan_revision"] == _MEMORY_PLAN_REVISION
             for item in observations
         ),
         "all_rows_keep_2048_bytes_per_particle": scratch == 2_048,
@@ -890,8 +962,9 @@ def _array_accounting(observations: Sequence[Mapping[str, object]]) -> dict[str,
             "in the established general stage allowance."
         ),
         "root_ordinal_note": (
-            "root_interval is a scalar cohort argument to counter-based RNG addressing, not a "
-            "resident or per-row array"
+            "root_interval and restart counters are per-row counter-addressing state; their "
+            "current and pending waves are included in stochastic_tree_work_bytes_per_particle, "
+            "not this general stage-scratch subtotal"
         ),
         "checks": checks,
         "measurement_note": (

@@ -1,0 +1,554 @@
+{
+  "artifact": "v0_2_release_use_case_acceptance_v1",
+  "status": "ACCEPTANCE_FIXED_BEFORE_NEW_REPEAT_OBSERVATIONS",
+  "path_base": "particle_platform_redesign",
+  "author": "physics_review",
+  "approval_basis": "Root accepted the A/B/C/D scope proposal on 2026-10-10. This is an engineering release qualification of prescribed mathematical cases; no user-specific SLA or experimental prediction accuracy was supplied or approved.",
+  "temporal_scope": "Existing outcomes are known and explicitly reused. Consolidating their criteria is not a retrospective preregistration. The B01/B02/B03 repeat recipe and unchanged criteria are fixed before new repeat observations; the same previously observed seed is a version reproducibility check, not a fresh unseen cohort.",
+  "acceptance_contract": {
+    "version": "0.2.0",
+    "engine_revision": "particle_engine_v46",
+    "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "coordinate_scope": "Cartesian XY and two-degree-of-freedom RZ meridional; no azimuthal state or three-dimensional radial Brownian law.",
+    "general_conditions": [
+      "Only the prescribed equations, initial states, fields, walls and listed resolutions are qualified. A smaller h, greater depth, rescaled geometry or additional force does not acquire qualification by implication.",
+      "Mass is the explicit canonical inertia authority. Drag diameter, electrostatic radius and contact radius are distinct inputs.",
+      "Complete expected particle population, finite accepted state, zero safety failures in qualified physical runs, and result/input/revision identity are required. Accuracy qualification and safe failure remain separate.",
+      "Manufactured uniform, affine or time-linear fields are exactly represented by their prescribed field layout. This does not validate a measured or COMSOL-generated background field, its mesh/time resolution, source distribution or material adhesion law.",
+      "Existing output/tile/resume invariance and boundary response tests are release regression evidence, not an independent physical validation of wall parameters."
+    ],
+    "profiles": [
+      {
+        "id": "A01_HARMONIC",
+        "description_ja": "一定電荷・位置依存電場による調和運動の絶対位置／速度精度",
+        "scope": "Prescribed deterministic P14 regular preset; one independent analytic particle with the same physical data and h as the repeated-source performance preset.",
+        "inputs": {
+          "equation": "x''=-0.5*(x+2), y''=0",
+          "position_m": [
+            0.3,
+            -0.2
+          ],
+          "velocity_m_s": [
+            -0.1,
+            0.4
+          ],
+          "end_s": 0.5,
+          "h_s": 0.125,
+          "integrator": "rk4_fixed",
+          "charge": "fixed",
+          "walls": "no impact"
+        },
+        "reference": "Closed-form harmonic position and velocity, omega=sqrt(0.5); ballistic y.",
+        "criteria": {
+          "position_linf_error_m": 1e-06,
+          "velocity_linf_error_m_s": 1e-06
+        },
+        "evidence_owner": "reviews/product_performance_acceptance_2026-10-09.json analytic_budgets and new root-owned release P14 receipt",
+        "nonclaims": "No chamber-specific absolute trajectory accuracy or general nonlinear-force bound."
+      },
+      {
+        "id": "A02_SPECULAR20",
+        "description_ja": "平面間の20回鏡面反射の到達時刻／最終状態精度",
+        "inputs": {
+          "gap_m": 0.0009765625,
+          "end_s": 0.019287109375,
+          "h_s": 0.019287109375,
+          "normal_speed_m_s": 1.0,
+          "initial_normal_position": "gap/2",
+          "integrator": "exact force-free proposal",
+          "walls": "two planar specular walls",
+          "contact": "point"
+        },
+        "reference": "t_k=(k+0.5)*gap for k=0..19; alternating facets; final x=gap/4 and vx=+1.",
+        "criteria": {
+          "event_time_linf_error_s": 1e-15,
+          "position_linf_error_m": 5e-14,
+          "velocity_linf_error_m_s": 1e-13,
+          "hits_per_particle": 20
+        },
+        "evidence_owner": "reviews/product_performance_acceptance_2026-10-09.json analytic_budgets and new root-owned release P14 receipt",
+        "nonclaims": "No diffuse, restitution, probabilistic, curved-wall or finite-size statistical accuracy guarantee."
+      },
+      {
+        "id": "B01_TIME_LINEAR_OU",
+        "description_ja": "時間に線形なdrag／gas flowの実noise運動平均・共分散",
+        "inputs": {
+          "N": 16000,
+          "seed": 1741,
+          "end_s": 0.2,
+          "h_s": 0.00625,
+          "base_depth": 0,
+          "max_depth": 0,
+          "gamma_s_inv": "2*(1+3*t)",
+          "flow_m_s": "[0.1,-0.05]+t*[0.2,-0.1]",
+          "charge": "fixed zero",
+          "walls": "no impact"
+        },
+        "reference": "Independent nonautonomous OU Green integrals, quadrature orders 32/64.",
+        "criteria": {
+          "reference_refinement_rtol": 2e-13,
+          "reference_refinement_atol": 1e-17,
+          "mean": "abs(sample_mean-reference)<=7*sqrt(diag(C)/N)+[1e-6 m,1e-6 m/s] per Cartesian component",
+          "covariance": "biased sample covariance allclose(C,rtol=.05,atol=2e-9), entries have their respective SI squared/product units"
+        },
+        "test_node": "solver/tests/scenarios/test_brownian_run.py::test_brownian_time_linear_drag_and_flow_match_independent_green_kernel"
+      },
+      {
+        "id": "B02_SPATIAL_AFFINE_OU",
+        "description_ja": "位置に線形なgas flowの実noise運動平均・共分散",
+        "inputs": {
+          "N": 16000,
+          "seed": 1741,
+          "end_s": 0.4,
+          "h_s": 0.0125,
+          "base_depth": 0,
+          "max_depth": 0,
+          "gamma_s_inv": 2.0,
+          "flow_m_s": "[-3*x,0]",
+          "charge": "fixed zero",
+          "walls": "no impact"
+        },
+        "reference": "Independent 2x2 matrix exponential and Green covariance, quadrature orders 32/64; y independently reduces to constant OU.",
+        "criteria": {
+          "reference_refinement_rtol": 2e-13,
+          "reference_refinement_atol": 1e-17,
+          "mean": "abs(sample_mean-reference)<=7*sqrt(diag(C)/N)+[1e-5 m,3e-5 m/s]",
+          "covariance": "abs(unbiased_sample_cov-C)<=7*sqrt((C_ij^2+C_ii*C_jj)/(N-1))+.003*sqrt(C_ii*C_jj)"
+        },
+        "test_node": "solver/tests/scenarios/test_brownian_run.py::test_brownian_spatial_affine_flow_matches_independent_linear_sde"
+      },
+      {
+        "id": "B03_STATIONARY_OML_COULOMB_OU",
+        "description_ja": "一様stationary OML電荷とCoulomb力を連成した実noise運動",
+        "inputs": {
+          "N": 12000,
+          "seed": 1741,
+          "end_s": 0.1,
+          "h_s": 0.003125,
+          "base_depth": 0,
+          "max_depth": 0,
+          "gamma_s_inv": 2.0,
+          "flow_m_s": [
+            0.1,
+            -0.05
+          ],
+          "electric_field_V_m": [
+            10.0,
+            0.0
+          ],
+          "initial_charge_number": -17.25,
+          "electron_and_ion_density_m3": 100000000.0,
+          "electron_temperature_K": 20000.0,
+          "ion_temperature_K": 300.0,
+          "ion_velocity_m_s": [
+            0.0,
+            0.0
+          ],
+          "ion_mass_kg": 6.6335209e-26,
+          "walls": "no impact"
+        },
+        "reference": "Independently coded scalar stationary OML ODE and OU Green convolution, 2048/4096 intervals; independent constant-OU covariance.",
+        "criteria": {
+          "reference_refinement_rtol": 2e-12,
+          "reference_refinement_atol": 2e-12,
+          "charge_absolute_error_in_elementary_charges": 0.0002,
+          "negative_charge_branch": true,
+          "mean": "abs(sample_mean-reference)<=7*sqrt(diag(C)/N)+[2e-8 m,5e-7 m/s]",
+          "covariance": "abs(unbiased_sample_cov-C)<=7*sqrt((C_ij^2+C_ii*C_jj)/(N-1))"
+        },
+        "test_node": "solver/tests/scenarios/test_brownian_run.py::test_brownian_stationary_oml_and_coulomb_match_scalar_ode_and_green_kernel"
+      },
+      {
+        "id": "C01_PLANAR_TERMINAL_OU",
+        "description_ja": "一定OUの平面吸収壁へのfirst-arrival CDF",
+        "inputs": {
+          "N": 16000,
+          "seed": 53619,
+          "initial_normal_position_in_thermal_length": -0.5,
+          "initial_normal_velocity_in_thermal_speed": 0.0,
+          "end_gamma_t": 1.2,
+          "gamma_h_depth_profiles": [
+            [
+              1.2,
+              2
+            ],
+            [
+              1.2,
+              4
+            ],
+            [
+              0.6,
+              4
+            ],
+            [
+              0.3,
+              4
+            ]
+          ],
+          "wall": "plane at zero, absorbing point contact",
+          "artificial_far_wall_in_thermal_length": -4.0,
+          "observation_gamma_t": [
+            0.4,
+            0.6,
+            0.8,
+            1.0,
+            1.2
+          ]
+        },
+        "reference": "Independent test-only Kramers FV, single absorbing barrier; empirical dx/dv/dt/domain refinement, positivity, conserved mass and flux checks.",
+        "criteria": {
+          "max_CDF_gap_plus_MC_plus_empirical_reference_allowance": 0.03,
+          "reference_allowance": 0.005,
+          "MC_formula": "sqrt(log(2*5/.001)/(2*16000))",
+          "family_alpha": 0.001
+        },
+        "evidence_owner": "reviews/d2_kramers_first_arrival_2026-10-09.json historical receipt plus current v46 full core regression",
+        "test_node": "solver/tests/scenarios/test_brownian_run.py::test_brownian_planar_arrival_cdf_matches_refined_independent_kramers"
+      },
+      {
+        "id": "C02_REPEATED_SPECULAR_OU",
+        "description_ja": "一定OUの反復平面鏡面反射後の位置／位置速度分布",
+        "inputs": {
+          "N": 16000,
+          "seed": 53629,
+          "initial_position_in_thermal_length": 0.15,
+          "initial_velocity_in_thermal_speed": -0.5,
+          "end_gamma_t": 2.4,
+          "gamma_h_depth_profiles": [
+            [
+              0.6,
+              2
+            ],
+            [
+              0.6,
+              4
+            ],
+            [
+              0.3,
+              4
+            ]
+          ],
+          "artificial_outer_wall_in_thermal_length": 12.0,
+          "wall": "planar specular point contact"
+        },
+        "reference": "Folded joint Gaussian law (abs(X),sign(X)*V) from independent continuous-OU Green covariance, 5 position and 6 joint CDF observables.",
+        "criteria": {
+          "max_probability_gap_plus_MC_plus_reference_and_domain_allowance": 0.03,
+          "MC_width": 0.01942794320851114,
+          "family_alpha": 0.0005,
+          "quadrature_allowance": 1e-12,
+          "artificial_outer_wall_probability_allowance": 8.676041020847487e-09
+        },
+        "observed_upper_by_profile": [
+          0.028950223467830632,
+          0.025825223467830588,
+          0.026095763824608237
+        ],
+        "evidence_owner": "reviews/brownian_wall_accuracy_extension_2026-10-10.json corrected_results, original failures retained"
+      },
+      {
+        "id": "C03_RZ_MERIDIONAL_ARRIVAL_OU",
+        "description_ja": "RZ meridional axis crossingと外半径吸収へのfirst-arrival CDF",
+        "inputs": {
+          "N": 16000,
+          "seed": 53639,
+          "initial_radius_in_thermal_length": 0.25,
+          "initial_radial_velocity_in_thermal_speed": 0.0,
+          "outer_radius_in_thermal_length": 0.75,
+          "end_gamma_t": 1.2,
+          "gamma_h_depth_profiles": [
+            [
+              1.2,
+              4
+            ],
+            [
+              0.6,
+              4
+            ],
+            [
+              0.3,
+              4
+            ]
+          ],
+          "observation_gamma_t": [
+            0.4,
+            0.6,
+            0.8,
+            1.0,
+            1.2
+          ]
+        },
+        "reference": "Signed meridional OU folded at axis; independent Kramers on [-.75,.75] with both physical ends absorbing. This is not a 3D radial process.",
+        "criteria": {
+          "max_CDF_gap_plus_MC_plus_empirical_reference_allowance": 0.03,
+          "MC_width": 0.017592156946115333,
+          "reference_allowance": 0.005,
+          "family_alpha": 0.0005
+        },
+        "observed_upper_by_profile": [
+          0.027449620067351382,
+          0.025853256462471864,
+          0.024876761859504555
+        ],
+        "selection": "D4 scope selected after observation using the original simultaneous family confidence bound; original all D>=2 requirement remains NOT_MET.",
+        "evidence_owner": "reviews/brownian_wall_accuracy_extension_2026-10-10.json"
+      },
+      {
+        "id": "C04_RZ_D2_HELD_OUT_FOLLOWUP",
+        "description_ja": "RZ D2の独立seed・増粒子数による別登録追試",
+        "inputs": {
+          "N": 64000,
+          "seed": 53649,
+          "gamma_h": 1.2,
+          "depth": 2,
+          "other_inputs": "Identical to C03; same independent finest Kramers reference"
+        },
+        "criteria": {
+          "max_CDF_gap_plus_MC_plus_empirical_reference_allowance": 0.03,
+          "MC_width": 0.008049674702327859,
+          "reference_allowance": 0.005,
+          "family_alpha": 0.0005
+        },
+        "observed": {
+          "max_CDF_difference": 0.006059145086610762,
+          "upper": 0.019108819788938622,
+          "safety_failures": 0,
+          "status": "PASS"
+        },
+        "selection": "Separate follow-up registered after original outcomes but before this new seed's outcomes. Its separate alpha is not silently included in the original .001 family and its PASS does not cancel original NOT_MET.",
+        "evidence_owner": "reviews/brownian_wall_accuracy_extension_2026-10-10.json held_out_rz_d2_followup"
+      },
+      {
+        "id": "D01_TALBOT_SAFFMAN",
+        "description_ja": "原著半径Kn Talbot式と低Re Saffman式の式・適用域・独立運動解",
+        "Talbot": {
+          "revision": "talbot_cross_regime_radius_knudsen_v1",
+          "binding": "a=d_drag/2; Kn_R=lambda/a; Cs=1.17,Cm=1.14,Ct=2.18 (nondefault coefficients separately tested); diameter-form equivalence requires Cm_d=2*Cm_R,Ct_d=2*Ct_R",
+          "pure_oracle_rtol": 3e-15,
+          "tested_radius_Kn": [
+            0.0001,
+            0.1,
+            1.0,
+            10.0,
+            10000.0
+          ],
+          "affine_temperature_K": "300+10*x",
+          "affine_motion_end_s": 1.0,
+          "public_motion_profiles": [
+            {
+              "integrator": "rk4_fixed",
+              "h_s": 0.05,
+              "position_absolute_error_m": 2e-12,
+              "velocity_absolute_error_m_s": 2e-12
+            },
+            {
+              "integrator": "exponential_midpoint",
+              "h_s": 0.01,
+              "position_absolute_error_m": 2e-09,
+              "velocity_absolute_error_m_s": 2e-09
+            }
+          ]
+        },
+        "Saffman": {
+          "revision": "saffman_unbounded_creeping_shear_v1",
+          "runtime_domain": "Kn_a<=.1, Re_s<=.1, Re_G<=.1, omega==0 or Re_s<=.1*sqrt(Re_G); producer unbounded creeping shear assumptions",
+          "public_motion_profile": "Independent linear rotation at end .1s; slip .001m/s, radius1e-4m, viscosity1e-3Pa*s, density1kg/m3, omega100/s, mass1e-8kg; h .02/.01s; fine error < coarse/10; hierarchy violation safely rejected"
+        },
+        "test_files": [
+          "solver/tests/verification/test_talbot_saffman.py",
+          "solver/tests/scenarios/test_talbot_saffman_run.py"
+        ],
+        "nonclaims": "Formula binding and finite-resolution mathematical trajectories; no near-wall lift, experimentally calibrated thermophoresis, or arbitrary-Kn physical prediction validation."
+      },
+      {
+        "id": "D02_MODEL_APPLICABILITY_SENSITIVITY",
+        "description_ja": "drag／charge／ion drag等の明示適用条件とモデル近似差の検証",
+        "scope": "Existing physics verification of formulas, bounds, pure/compiled consistency, fail-closed numeric applicability and independent limiting counterexamples. No additional chamber KPI is introduced.",
+        "model_difference_oracles": [
+          {
+            "model": "Barnes neutral weak-drift collection",
+            "quantity": "production/exact stationary Maxwellian momentum coefficient",
+            "expected": 0.75,
+            "rtol": 2e-12
+          },
+          {
+            "model": "aggregate attractive ion-current increment at zero drift",
+            "quantity": "aggregate/exact stationary OML increment",
+            "expected_formula": "(pi/4)/sqrt(1+1/cbar^2) in the prescribed regularized test units",
+            "rtol": 1e-12
+          },
+          {
+            "model": "number-weighted effective gas, equal-density masses m and 9m at common T",
+            "quantity": "pseudogas beta/species-sum beta",
+            "expected_formula": "sqrt(5)/2",
+            "rtol": 3e-15
+          }
+        ],
+        "test_files": [
+          "solver/tests/verification/test_physics.py",
+          "solver/tests/verification/test_ion_drag.py",
+          "solver/tests/verification/test_aggregate_charge.py",
+          "solver/tests/verification/test_effective_gas_sensitivity.py"
+        ],
+        "producer_obligations": "Single/effective Maxwellian closure, mean-free-path definition, collisionless unmagnetized absorbing OML sphere assumptions, screening/ion distributions, heat-flux meaning and reconstructed vorticity are producer premises. Numeric gates do not establish them experimentally.",
+        "nonclaims": "Barnes3/4, aggregatepi/4 and pseudogas gap are verified model-form differences, not corrected numerical bugs or a certified downstream deposition error budget. Rarefied lift and effective-gas heat flux remain explicit sensitivity models."
+      }
+    ],
+    "B_common_inputs": {
+      "coordinates": "XY Cartesian",
+      "integrator": "ou_langevin",
+      "noise_revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2",
+      "drag_revision": "epstein_linear_v1",
+      "mass_kg": 4e-15,
+      "temperature_K": 300.0,
+      "gas_molecular_mass_kg": 4.65e-26,
+      "drag_diameter_m": 2e-06,
+      "electrostatic_radius_m": 1e-06,
+      "contact_radius_m": 0.0,
+      "initial_position_m": [
+        0.0,
+        0.0
+      ],
+      "initial_velocity_m_s": [
+        0.2,
+        -0.1
+      ],
+      "delta": 1.0,
+      "density": "C02 primitive density derives gamma0=2/s independently from Epstein coefficient",
+      "field_layout": "exact uniform/affine regular Cartesian XY field"
+    },
+    "B_statistical_interpretation": "The inherited seven-standard-error Gaussian/Wishart criteria and fixed finite-resolution allowances are engineering stochastic regression criteria. They are not a newly claimed exact joint family-confidence bound, certified weak/strong convergence order, or application-level prediction tolerance.",
+    "C_common_inputs": {
+      "mass_kg": 4e-15,
+      "temperature_K": 300.0,
+      "gamma_s_inv": 2.0,
+      "normal_flow_and_external_force": "zero",
+      "drag": "native linear Epstein",
+      "charge": "fixed zero",
+      "thermal_speed_m_s": "sqrt(k_B*T/m)",
+      "thermal_length_m": "thermal_speed/gamma",
+      "contact_radius_m": 0.0,
+      "reference_interpretation": "Kramers measured refinement allowance is operational, not a rigorous PDE-error upper bound. Conditional finite-depth Hermite path first-hit is compared to continuous references within the listed probability budgets."
+    },
+    "original_Brownian_requirement": {
+      "original_registration_sha256": "6faf238d07caefb3966e325c563807f16180e7188d8f62d7d7f319ddad0c6ee2",
+      "corrected_v46_all_D_ge_2_requirement": "NOT_MET",
+      "RZ_D2_N16000_upper": 0.031120052032726116,
+      "budget": 0.03,
+      "meaning": "Confidence criterion not met; not proof that true discretization bias exceeds .03. D4 post-observation qualification and separately preregistered held-out D2 PASS remain distinct."
+    },
+    "unmeasured_physical_predictions": [
+      "Experimentally validated chamber deposition or contamination KPI",
+      "Measured particle source populations and release distributions",
+      "Material sticking/restitution/re-emission probabilities and calibrated adhesion parameters",
+      "Original background-field fidelity and all unseen dynamics between supplied field snapshots",
+      "Model-form uncertainty propagation into an unspecified downstream product KPI"
+    ],
+    "not_claimed": [
+      "Exact continuous OU first passage or zero-miss probability",
+      "General SDE strong/weak order for arbitrary time/state-dependent coefficients and charge",
+      "Three-dimensional or general cylindrical radial Brownian law",
+      "All model/geometry/wall combinations or all h/depth values",
+      "User-specific accuracy, latency, throughput or RSS SLA"
+    ],
+    "C_reference_observable_scope": "Arrival CDF accuracy is evaluated at the five listed times; repeated-specular position and joint CDF accuracy is evaluated at the eleven registered probes at final time. MC simultaneous bands do not promote unmeasured reference values to a whole-time or whole-state accuracy claim.",
+    "D_numeric_applicability": {
+      "Epstein_linear": "lambda/a>=10 and slip/cbar<=.1; delta in [1,13/9]",
+      "Stokes_Cunningham_Allen_Raabe": "radius Kn in [.03,7.2], particle Re<=.1; producer mean-free-path convention",
+      "stationary_OML": "a/lambda_D<=.1, declared stationary drift ratio<=.1 and per-step h*L_Z<=.5; collisionless/unmagnetized/isolated absorbing equipotential sphere is a producer premise",
+      "Saffman": "D01 numeric hierarchy, unbounded creeping shear premise; near-wall applicability not established",
+      "Barnes": "Z<=0; a/lambda_D,b90/lambda_D,bc/lambda_D<=.1; ion-neutral mean-free-path/lambda_D>=10; positive Coulomb log and declared drift envelope",
+      "Waldmann": "lambda/a>=10, slip/cbar<=.1; q means translational gas heat flux; Fourier form lambda*abs(gradT)/T<=.01",
+      "Talbot": "Original radius-Kn binding and positive primitives/coefficient inputs; no arbitrary production Kn cutoff is claimed to establish experimental validity",
+      "effective_gas_and_rarefied_lift": "Explicit sensitivity revisions and producer closure/coefficient premises; no generic physical validation certificate"
+    }
+  },
+  "repeat_plan": {
+    "purpose": "Durable current-final-source raw evidence for A01/A02 and B01/B02/B03 using unchanged prescribed physical setups and thresholds.",
+    "source_or_test_changes": "NONE",
+    "nodes": [
+      "tests/scenarios/test_brownian_run.py::test_brownian_time_linear_drag_and_flow_match_independent_green_kernel",
+      "tests/scenarios/test_brownian_run.py::test_brownian_spatial_affine_flow_matches_independent_linear_sde",
+      "tests/scenarios/test_brownian_run.py::test_brownian_stationary_oml_and_coulomb_match_scalar_ode_and_green_kernel"
+    ],
+    "command": "uv run --locked pytest <the three listed nodes> -q --basetemp evidence/v0_2_release_use_case_2026_10_10",
+    "scheduling": "Wait for root performance completion and final LF source clearance. Three B scenarios estimated20-45s plus JIT/startup; two one-particle A cases only small incremental cost. No new large Kramers/reference or wall cohort rerun.",
+    "result_recording": "Retain canonical YAML/HDF5 and raw public result files with SHA256; independently recompute mean/covariance/charge error, MC standard errors, allowances and criterion decisions; compare source27 and test/oracle hashes before/after.",
+    "existing_evidence_reuse": "Current full v46 core gates already include A/B/C/D scenarios and physics formula/application gates. A current performance/analytic release receipt and external COMSOL version requalification are separate root/sibling owners. Repeating B gives durable metrics, not new unknown-seed statistical confirmation.",
+    "additional_analytic_public_runs": [
+      {
+        "id": "A01_HARMONIC",
+        "recipe": "Canonical one-particle P14 regular material: C04 first source row, existing P14 affine electric field E_x=x+2,E_y=0, constant Z=-5 and mass1.602176634e-18kg; public load_case/simulate/open_result; end .5s,h .125s; compare closed-form harmonic x and ballistic y with registered 1e-6m/1e-6m/s thresholds."
+      },
+      {
+        "id": "A02_SPECULAR20",
+        "recipe": "Canonical C09 one-particle thin-gap material, unchanged two specular side walls/caps, gap2^-10m, initial x=gap/2,vx=1m/s; time=end=h=(20-.25)*gap; public load_case/simulate/open_result; compare all20 event times and final state with registered thresholds."
+      }
+    ],
+    "source_normalization": "Root plans engine.py CRLF-to-Git-index-LF normalization after performance. Record the final raw source27 hashes before new runs, prove LF-normalized content equality against contract fixation, and retain both original raw snapshots."
+  },
+  "provenance": {
+    "fixed_at_utc": "2026-10-10T01:26:11.607854+00:00",
+    "prior_evidence_sha256": {
+      "reviews/v0_2_candidate_verification_2026-10-10.json": "ea4823101ac045bd490f4074145753c3a60a519201c5115f3fe23cba496bce0b",
+      "reviews/product_performance_acceptance_2026-10-09.json": "d3428b653d65011111e42697d0b6dc67fc9428f9c16cfcf7434d0d779f507051",
+      "reviews/brownian_wall_accuracy_extension_2026-10-10.json": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8",
+      "reviews/d2_kramers_first_arrival_2026-10-09.json": "ed03ee3d1029e334d29e434a6ee5d85ceaa420f47aff26a67521d87097b09f00"
+    },
+    "core_source_sha256_at_contract_fixation": {
+      "src/chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "src/chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+      "src/chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+      "src/chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+      "src/chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "src/chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+      "src/chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+      "src/chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+      "src/chamber_particles/engine.py": "566a6de8e52ff8bebe5ed1d16361cdef09576244021251b37b31f879f54a9eca",
+      "src/chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+      "src/chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+      "src/chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+      "src/chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+      "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "src/chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "src/chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "src/chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "src/chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+      "src/chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+      "src/chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+      "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "src/chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+      "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+    },
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+    "tests_oracles_sha256_at_contract_fixation": {
+      "solver/tests/scenarios/test_brownian_run.py": "70d83fdc1361fa20aa041865bfabf6be8abe457a5eb8a5a72a893803de860f9a",
+      "solver/tests/scenarios/test_force_coupled_run.py": "26c80134253a4655661b55f1df2e5d322c0cff14cfbdfb05fdb8a9ea50479ad0",
+      "solver/tests/scenarios/test_talbot_saffman_run.py": "1426e4cb8c96a9b204a75428ad2097e0b81376580a65c54ea5b0a8718095a6ef",
+      "solver/tests/verification/ou_reference.py": "2f59fde8a5fbb4fc0e44d37b31c1052e6514f66b8fc1b3ec5710f1c0b7573d48",
+      "solver/tests/verification/kramers_reference.py": "5d4f595e642de3e881ab9d6b4fd18d4abd398a6399a5c5147b6c83de162603be",
+      "solver/tests/verification/test_kramers_reference.py": "5847b3bfbe1be2b16b02564ab4c21f8a21addc2d4e2509243279c9e5abe4478e",
+      "solver/tests/verification/test_integrators.py": "245c7ba0edd6840d0d56b100b4e56d2d13ffba3382a233a72512d8124bec5fec",
+      "solver/tests/verification/microcases.py": "03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644",
+      "solver/tests/verification/test_talbot_saffman.py": "f940c9dd67a2075f3ceea6938077cdca6ea5369c2997c83e63233473f6cff125",
+      "solver/tests/verification/test_physics.py": "17c41e218b7fe3aab0ea43526c70929eef1390a6767bca461a43b8ab880a13f5",
+      "solver/tests/verification/test_ion_drag.py": "787f6bb83e140b43c612cbd5ce3e19c4d1197b7197413b25db4667b31f053360",
+      "solver/tests/verification/test_aggregate_charge.py": "884cfe09175e2927364ebb488638cd76a2b63e3857ffb447dae22679f6e1495f",
+      "solver/tests/verification/test_effective_gas_sensitivity.py": "f7c33a19a917e2a50b721590b29ae4d03fdb57ee156350575e3cd8205935587a"
+    },
+    "authority_docs": "solver/docs/physics_models.md and solver/docs/numerics.md; root owns current release scope documentation",
+    "line_ending_policy": "Historical raw hashes are preserved. If Git later normalizes CRLF/LF only, the root-owned release correspondence receipt must prove normalized-content equality; a different raw hash is not silently presented as identical."
+  },
+  "repeat_results": "NOT_RUN; awaiting serial scheduling clearance",
+  "acceptance_contract_sha256": "2fd577b2c2771d2619b5221e911289ac4f45bd10a51141513837bbc316bd2260",
+  "profile_observation_status": {
+    "A01_A02": "PENDING_CURRENT_FINAL_SOURCE_ANALYTIC_RUN; historical v45 analytic receipt is prior evidence only",
+    "B01_B02_B03": "PENDING_CURRENT_FINAL_SOURCE_DURABLE_REPEAT; already passed in current v46 full core gate",
+    "C01_C02_C03_C04": "QUALIFIED_ONLY_AS_STATED_FROM_FROZEN_RECEIPTS_AND_CURRENT_V46_REGRESSION; original all D>=2 NOT_MET retained",
+    "D01_D02": "EXISTING_CURRENT_V46_FORMULA_APPLICABILITY_AND_SCOPED_SENSITIVITY_VERIFICATION; experimental prediction NOT_TESTED"
+  }
+}

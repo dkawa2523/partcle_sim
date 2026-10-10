@@ -1,0 +1,437 @@
+{
+  "authority": "Frozen current contract/canonical groups and staged Java settings. Source formulas are derived from the prior immutable-MPH source getter with the staged Java replacement table, never from the current companion observation.",
+  "original_source_getter": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\caseA_runner_validation\\levels\\dt_20us\\replicas\\seed_929100\\actual_binding_receipt.json",
+    "sha256": "24d0f230d6d1f5ba00546b83e2378f4238d4954dde6d077837d77594d200a7e2",
+    "pointer": "/source"
+  },
+  "staged_producer_sha256": "79f14d760908922cd72094793558caf07deafb59bd09dcb8ae5f1920b571f7dd",
+  "physics": {
+    "Formulation": "NewtonianFirstOrder",
+    "IncludeOutOfPlane": "0",
+    "WallAccuracyOrder": "1",
+    "StoreExtra": "0",
+    "StoreParticleStatusData": "1",
+    "RandomNumberArgs": "UserDefined"
+  },
+  "solver": {
+    "odesolvertype": "explicit",
+    "timemethodexp": "erk",
+    "erkorder": 4,
+    "rktimestep": "M3C2_dt",
+    "rtol": 0.01,
+    "tout": "tlist"
+  },
+  "units": {
+    "model_base_unit_system": "SI",
+    "component_base_unit_system": "SI",
+    "variable_updates_disabled": false,
+    "resolved_beta_unit": "kg/s",
+    "resolved_viscosity_unit": "kg/(m*s)"
+  },
+  "primitive_units": {
+    "rho_function_units": [
+      "kg/m^3"
+    ],
+    "temperature_function_units": [
+      "K"
+    ],
+    "rho_function_argument_units": [
+      "m",
+      "m"
+    ],
+    "temperature_function_argument_units": [
+      "m",
+      "m"
+    ]
+  },
+  "particle": {
+    "ParticlePropertySpec": "SpecifyDensityAndDiameter",
+    "dp": "d0",
+    "rhop_mat": "userdef",
+    "rhop": "rho_p",
+    "ChargeSpecification": "UserDefined",
+    "Z": "ZAS"
+  },
+  "models": {
+    "df1": false,
+    "bf1": true,
+    "auxq": true,
+    "idf": true,
+    "ef1": true,
+    "m3c2Epstein": true,
+    "liftfm": true,
+    "depf": true,
+    "gf1": true,
+    "m3c2HeatFlux": true
+  },
+  "selectors": {
+    "ef1": {
+      "E_src": "userdef",
+      "E": [
+        "m3c1_Er(r,z)",
+        "0[V/m]",
+        "m3c1_Ez(r,z)"
+      ]
+    },
+    "bf1": {
+      "mu_mat": "userdef",
+      "mu": "root.comp1.AS_muB",
+      "i": "AS_brownian_seed",
+      "minput_temperature_src": "userdef",
+      "minput_temperature": "root.comp1.AS_Tg",
+      "minput_pressure_src": "userdef",
+      "minput_pressure": "m3c1_rhog(r,z)*k_B_const*m3c1_Tg(r,z)/1.2753471408396638e-25[kg]"
+    },
+    "m3c2Epstein": {
+      "F": [
+        "m3c_beta*(m3c1_ugr(r,z)-fptas.vr)",
+        "0[N]",
+        "m3c_beta*(m3c1_ugz(r,z)-fptas.vz)"
+      ]
+    },
+    "auxq": {
+      "R": "((pi*(d0/2)^2*m3c1_ni(r,z)*sqrt((((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))*if((ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))<=0[V],1-(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/(max(m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2)/(2*e_const),Ti_floor)),exp(max(-50,min(50,-(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/(max(m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2)/(2*e_const),Ti_floor)))))))-((pi*(d0/2)^2*m3c1_ne(r,z)*sqrt(8*e_const*m3c1_Te(r,z)/(pi*me_const)))*if((ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))<=0[V],exp(max(-50,min(50,(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/m3c1_Te(r,z)))),1+(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/m3c1_Te(r,z))))"
+    },
+    "idf": {
+      "F": [
+        "((AS_iondrag_scale*(pi*min((max(d0/2,min(m3c1_lambdaD(r,z),m3c1_lambdaIn(r,z))))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/(m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))+4*pi*((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))^2*(max(0,0.5*log(((max(d0/2,min(m3c1_lambdaD(r,z),m3c1_lambdaIn(r,z))))^2+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))^2)/(min((max(d0/2,min(m3c1_lambdaD(r,z),m3c1_lambdaIn(r,z))))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/(m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))^2)))))*m3c1_ni(r,z)*m3c1_mi(r,z)*sqrt((((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2)))*(m3c1_uir(r,z)-fptas.vr))",
+        "0[N]",
+        "((AS_iondrag_scale*(pi*min((max(d0/2,min(m3c1_lambdaD(r,z),m3c1_lambdaIn(r,z))))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/(m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))+4*pi*((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))^2*(max(0,0.5*log(((max(d0/2,min(m3c1_lambdaD(r,z),m3c1_lambdaIn(r,z))))^2+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))^2)/(min((max(d0/2,min(m3c1_lambdaD(r,z),m3c1_lambdaIn(r,z))))^2,(d0/2)^2*max(0,1-2*e_const*(ZAS*(e_const/(4*pi*epsilon0_const*(d0/2)*(1+(d0/2)/m3c1_lambdaD(r,z)))))/(m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))+((sqrt(ZAS^2+1e-20)*e_const^2/(4*pi*epsilon0_const*m3c1_mi(r,z)*(((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2))))^2)))))*m3c1_ni(r,z)*m3c1_mi(r,z)*sqrt((((m3c1_uir(r,z)-fptas.vr)^2+(m3c1_uiz(r,z)-fptas.vz)^2)+(8*e_const*m3c1_TiV(r,z)/(pi*m3c1_mi(r,z)))+u_eps^2)))*(m3c1_uiz(r,z)-fptas.vz))"
+      ]
+    }
+  },
+  "boundaries": {
+    "axi1": {
+      "boundary_ids": [
+        5
+      ],
+      "WallCondition": "Bounce"
+    },
+    "wall1": {
+      "boundary_ids": [
+        6,
+        8,
+        28,
+        29,
+        32,
+        33,
+        34,
+        36,
+        38,
+        40,
+        41,
+        45,
+        46,
+        47
+      ],
+      "WallCondition": "Stick"
+    },
+    "outin": {
+      "boundary_ids": [
+        37
+      ],
+      "WallCondition": "Freeze"
+    },
+    "outpump": {
+      "boundary_ids": [
+        35
+      ],
+      "WallCondition": "Disappear"
+    }
+  },
+  "source_axis_law": "Freeze",
+  "random_number_args": "UserDefined",
+  "replica_requests": [
+    {
+      "directory": "levels/dt_20us/replicas/seed_939100",
+      "seed": 939100,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939101",
+      "seed": 939101,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939102",
+      "seed": 939102,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939103",
+      "seed": 939103,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939104",
+      "seed": 939104,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939105",
+      "seed": 939105,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939106",
+      "seed": 939106,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939107",
+      "seed": 939107,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939108",
+      "seed": 939108,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939109",
+      "seed": 939109,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939110",
+      "seed": 939110,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939111",
+      "seed": 939111,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939112",
+      "seed": 939112,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939113",
+      "seed": 939113,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939114",
+      "seed": 939114,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939115",
+      "seed": 939115,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939116",
+      "seed": 939116,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939117",
+      "seed": 939117,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939118",
+      "seed": 939118,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939119",
+      "seed": 939119,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939120",
+      "seed": 939120,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939121",
+      "seed": 939121,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939122",
+      "seed": 939122,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939123",
+      "seed": 939123,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939124",
+      "seed": 939124,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939125",
+      "seed": 939125,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939126",
+      "seed": 939126,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939127",
+      "seed": 939127,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939128",
+      "seed": 939128,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939129",
+      "seed": 939129,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939130",
+      "seed": 939130,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939131",
+      "seed": 939131,
+      "step_ns": 20000
+    }
+  ],
+  "numeric_parameters": [
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939100.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939101.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939102.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939103.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939104.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939105.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939106.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939107.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939108.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939109.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939110.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939111.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939112.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939113.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939114.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939115.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939116.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939117.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939118.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939119.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939120.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939121.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939122.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939123.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939124.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939125.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939126.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939127.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939128.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939129.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939130.0
+    },
+    {
+      "fixed_step_s": 2e-05,
+      "brownian_seed": 939131.0
+    }
+  ]
+}

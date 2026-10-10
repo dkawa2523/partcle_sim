@@ -1,0 +1,585 @@
+{
+  "schema_version": 1,
+  "kind": "D2_bounded_independent_Kramers_and_D1_scoped_evidence",
+  "recorded_utc": "2026-10-09T13:42:33.662444+00:00",
+  "production_code_changed_by_this_work": false,
+  "source_snapshot_at_evidence_creation_sha256": {
+    "tests/verification/kramers_reference.py": "362707856dd4869486f566179851252c23ceee25fca6d3c6a976db09557a1a16",
+    "tests/verification/test_kramers_reference.py": "9203283e926dd5a57cee0e1be44cefb6dac8891ab19b3bc67d66f1b26c8780c3",
+    "tests/verification/ou_reference.py": "de34c213808d9fdb13f23afe68513b5453afacd864ff8ff0fef99c3fc1dc9319",
+    "tests/verification/test_stochastic.py": "5a0866ca7f028baa6b27582852e9b5ee516b2b0963c7ffa13cbe8789faf9d183",
+    "tests/scenarios/test_brownian_run.py": "79eee67d5289da025b30d5938387258c76a3eb69b3c7b0d596ec50af2a84b074"
+  },
+  "D2_test_recipe_sha256": "bacdef05fe15a188007c35938ea22bd6219bffbf2bfe0d1449605650839a78cc",
+  "claim_scope": {
+    "SDE": "dX=V dt; dV=-V dt+sqrt(2)dW",
+    "initial_state": [
+      -0.5,
+      0
+    ],
+    "absorbing_plane": 0,
+    "observation_gamma_t": [
+      0.4,
+      0.6,
+      0.8,
+      1.0,
+      1.2
+    ],
+    "reference_type": "independent positive conservative finite-volume Kramers, empirical refinement",
+    "continuous_first_passage_zero_miss": "NOT_CLAIMED",
+    "general_SDE_order": "NOT_CLAIMED",
+    "active_wall_RZ_time_dependent_first_arrival": "NOT_TESTED",
+    "h_depth_observed_order": "NOT_RESOLVED_MC_WIDTH_EXCEEDS_DIFFERENCES"
+  },
+  "registration": {
+    "candidate_configurations_gamma_h_depth": [
+      [
+        1.2,
+        0
+      ],
+      [
+        1.2,
+        2
+      ],
+      [
+        1.2,
+        4
+      ],
+      [
+        0.6,
+        4
+      ],
+      [
+        0.3,
+        4
+      ]
+    ],
+    "sample_count_each": 16000,
+    "seed": 53619,
+    "family_error_alpha": 0.001,
+    "sequential_sample_expansion": false,
+    "reference_allowance": 0.005,
+    "probability_bias_budget": 0.03,
+    "depth0": "coarse observation, not certified"
+  },
+  "reference": {
+    "settings_order_nx_nv_dt_length_velocity_limit": {
+      "x128": [
+        128,
+        256,
+        0.0005,
+        4,
+        6
+      ],
+      "x256": [
+        256,
+        256,
+        0.0005,
+        4,
+        6
+      ],
+      "x512": [
+        512,
+        256,
+        0.0005,
+        4,
+        6
+      ],
+      "time_coarse": [
+        256,
+        256,
+        0.001,
+        4,
+        6
+      ],
+      "velocity_fine": [
+        256,
+        512,
+        0.0005,
+        4,
+        6
+      ],
+      "position_domain": [
+        512,
+        256,
+        0.0005,
+        8,
+        6
+      ],
+      "velocity_domain": [
+        256,
+        384,
+        0.0005,
+        4,
+        9
+      ]
+    },
+    "series": {
+      "x128": {
+        "arrival_cdf": [
+          0.007840760841300127,
+          0.06014904501130082,
+          0.13394074917401794,
+          0.1999804324416876,
+          0.2535596523467021
+        ],
+        "surviving_mass": [
+          0.9921592391586699,
+          0.939850954987351,
+          0.8660592507682057,
+          0.8000195296189088,
+          0.7464369842482697
+        ],
+        "position_leak": [
+          4.7282681431952607e-32,
+          4.512558061120815e-18,
+          1.4834229299504665e-11,
+          3.761621601535942e-08,
+          3.3623199147569578e-06
+        ],
+        "velocity_leak": [
+          1.0694046929326509e-15,
+          1.2972208151496734e-12,
+          4.286948979525145e-11,
+          3.230987763082257e-10,
+          1.0849997278868448e-09
+        ],
+        "minimum_cell_mass": 0.0,
+        "maximum_mass_error": 1.192379528447418e-13
+      },
+      "x256": {
+        "arrival_cdf": [
+          0.00507610590474668,
+          0.056008650454841206,
+          0.13196208997942718,
+          0.19925653421553233,
+          0.2532737718903493
+        ],
+        "surviving_mass": [
+          0.9949238940952183,
+          0.9439913495437979,
+          0.8680379099773032,
+          0.8007434585086148,
+          0.7467247868778841
+        ],
+        "position_leak": [
+          3.6613624706666627e-47,
+          7.449653674235753e-23,
+          3.064313824992988e-13,
+          6.950328690312964e-09,
+          1.440126882852881e-06
+        ],
+        "velocity_leak": [
+          1.068795922940235e-15,
+          1.2972160194071747e-12,
+          4.2875730200802186e-11,
+          3.2541586597335406e-10,
+          1.1047611455017296e-09
+        ],
+        "minimum_cell_mass": 0.0,
+        "maximum_mass_error": 1.3944401189291966e-13
+      },
+      "x512": {
+        "arrival_cdf": [
+          0.00375876138709448,
+          0.05381107545085736,
+          0.13098055027339822,
+          0.1989111840585945,
+          0.2531213979686632
+        ],
+        "surviving_mass": [
+          0.996241238612896,
+          0.9461889245478309,
+          0.8690194496836725,
+          0.8010888133351926,
+          0.7468777410658162
+        ],
+        "position_leak": [
+          4.120460019426967e-80,
+          1.1295898919064108e-29,
+          1.1828804458020706e-14,
+          2.2797710135457486e-09,
+          8.598497219274823e-07
+        ],
+        "velocity_leak": [
+          1.068778968534289e-15,
+          1.2972159498924151e-12,
+          4.287617029168493e-11,
+          3.2637731480372555e-10,
+          1.1157135037430545e-09
+        ],
+        "minimum_cell_mass": 0.0,
+        "maximum_mass_error": 9.126033262418787e-14
+      },
+      "time_coarse": {
+        "arrival_cdf": [
+          0.004981994895159328,
+          0.05591447137643374,
+          0.13194882571293687,
+          0.19927424326486926,
+          0.2532990323086017
+        ],
+        "surviving_mass": [
+          0.9950180051048844,
+          0.9440855286222785,
+          0.8680511742435371,
+          0.8007257508563096,
+          0.7466996518667949
+        ],
+        "position_leak": [
+          2.3955231903246118e-54,
+          2.915128030129661e-24,
+          1.5097783585245442e-13,
+          5.551331956563951e-09,
+          1.3147141842150916e-06
+        ],
+        "velocity_leak": [
+          1.2129159781798905e-15,
+          1.3439496012963808e-12,
+          4.344554427823637e-11,
+          3.275599178184207e-10,
+          1.1105012180404955e-09
+        ],
+        "minimum_cell_mass": 0.0,
+        "maximum_mass_error": 8.43769498715119e-14
+      },
+      "velocity_fine": {
+        "arrival_cdf": [
+          0.005049064392859888,
+          0.055959516786857,
+          0.13192446186532195,
+          0.1992281148085814,
+          0.2532509672813869
+        ],
+        "surviving_mass": [
+          0.9949509356071207,
+          0.9440404832117398,
+          0.8680755380882564,
+          0.800771878053998,
+          0.7467476045253458
+        ],
+        "position_leak": [
+          1.0359541430096187e-47,
+          5.367540813111879e-23,
+          2.8261713612047385e-13,
+          6.786528028378097e-09,
+          1.4270002768430851e-06
+        ],
+        "velocity_leak": [
+          1.0375117586198991e-15,
+          1.3728293390796209e-12,
+          4.608158638547772e-11,
+          3.508080685522677e-10,
+          1.1928783348413847e-09
+        ],
+        "minimum_cell_mass": 0.0,
+        "maximum_mass_error": 1.2079226507921703e-13
+      },
+      "position_domain": {
+        "arrival_cdf": [
+          0.00507610590474668,
+          0.056008650454841206,
+          0.13196208997942718,
+          0.19925653421553233,
+          0.2532737718903493
+        ],
+        "surviving_mass": [
+          0.9949238940952183,
+          0.9439913495437979,
+          0.8680379099776092,
+          0.8007434654565322,
+          0.7467262268984911
+        ],
+        "position_leak": [
+          7.933420629297587e-212,
+          1.8744233887485406e-117,
+          5.0306269844938365e-70,
+          2.3878343465108472e-43,
+          5.4264760627192045e-28
+        ],
+        "velocity_leak": [
+          1.068795922940235e-15,
+          1.297216019407423e-12,
+          4.287620246522037e-11,
+          3.2782532515281206e-10,
+          1.2110322115804347e-09
+        ],
+        "minimum_cell_mass": 0.0,
+        "maximum_mass_error": 1.4666046155298318e-13
+      },
+      "velocity_domain": {
+        "arrival_cdf": [
+          0.00507610590474668,
+          0.056008650454841206,
+          0.13196208997942718,
+          0.19925653421553233,
+          0.2532737718903493
+        ],
+        "surviving_mass": [
+          0.9949238940952194,
+          0.9439913495450951,
+          0.8680379100201372,
+          0.8007434587924336,
+          0.746724787434834
+        ],
+        "position_leak": [
+          1.1818576250966014e-44,
+          3.085705799085836e-22,
+          3.4828856869141276e-13,
+          6.991926011798908e-09,
+          1.4406746943141445e-06
+        ],
+        "velocity_leak": [
+          4.1560725762310744e-33,
+          1.2164257695521547e-26,
+          1.4095183631185676e-23,
+          2.338742968299292e-22,
+          6.361449725752601e-22
+        ],
+        "minimum_cell_mass": 0.0,
+        "maximum_mass_error": 1.3944401189291966e-13
+      }
+    },
+    "maximum_spatial_change_coarse": 0.004140394556459613,
+    "maximum_spatial_change_fine": 0.002197575003983848,
+    "independent_axis_changes": {
+      "time_coarse": 9.417907840746781e-05,
+      "velocity_fine": 4.913366798420943e-05,
+      "position_domain": 0.0,
+      "velocity_domain": 0.0
+    },
+    "empirical_indicator_not_rigorous_bound": 0.004539323719794805,
+    "indicator_registration": 0.005,
+    "grid_refinement_and_conservation": "PASS",
+    "recalculation_elapsed_seconds_non_authoritative": 18.885242799995467,
+    "largest_mass_and_work_cells_each": 131072,
+    "mass_and_work_bytes": 2097152,
+    "boundary_primary_source": "https://arxiv.org/pdf/1311.4635"
+  },
+  "candidate": {
+    "observations_source": "aggregate integer counts from passed public pytest execution stdout; complete particle histories are not embedded",
+    "runs": [
+      {
+        "macro_gamma_h": 1.2,
+        "base_depth": 0,
+        "adaptive_max_depth": 0,
+        "N": 16000,
+        "seed": 53619,
+        "cumulative_arrival_counts": [
+          4,
+          568,
+          1941,
+          3119,
+          3971
+        ],
+        "arrival_cdf": [
+          0.00025,
+          0.0355,
+          0.1213125,
+          0.1949375,
+          0.2481875
+        ],
+        "final_fate_counts": {
+          "stuck": 3971,
+          "active": 12029
+        },
+        "failure_count": 0,
+        "maximum_absolute_cdf_difference": 0.01831107545085736,
+        "simultaneous_mc_width": 0.01696535106103778,
+        "empirical_reference_allowance": 0.005,
+        "registered_probability_bias_budget": 0.03,
+        "classification": "COARSE_OBSERVATION_NOT_CERTIFIED",
+        "candidate_bias_upper_given_empirical_reference_allowance": 0.040276426511895135
+      },
+      {
+        "macro_gamma_h": 1.2,
+        "base_depth": 2,
+        "adaptive_max_depth": 2,
+        "N": 16000,
+        "seed": 53619,
+        "cumulative_arrival_counts": [
+          36,
+          825,
+          2055,
+          3194,
+          4048
+        ],
+        "arrival_cdf": [
+          0.00225,
+          0.0515625,
+          0.1284375,
+          0.199625,
+          0.253
+        ],
+        "final_fate_counts": {
+          "stuck": 4048,
+          "active": 11952
+        },
+        "failure_count": 0,
+        "maximum_absolute_cdf_difference": 0.002543050273398212,
+        "simultaneous_mc_width": 0.01696535106103778,
+        "empirical_reference_allowance": 0.005,
+        "registered_probability_bias_budget": 0.03,
+        "classification": "PASS_SCOPED_EMPIRICAL_REFERENCE",
+        "candidate_bias_upper_given_empirical_reference_allowance": 0.024508401334435992
+      },
+      {
+        "macro_gamma_h": 1.2,
+        "base_depth": 4,
+        "adaptive_max_depth": 4,
+        "N": 16000,
+        "seed": 53619,
+        "cumulative_arrival_counts": [
+          39,
+          826,
+          2068,
+          3198,
+          4051
+        ],
+        "arrival_cdf": [
+          0.0024375,
+          0.051625,
+          0.12925,
+          0.199875,
+          0.2531875
+        ],
+        "final_fate_counts": {
+          "stuck": 4051,
+          "active": 11949
+        },
+        "failure_count": 0,
+        "maximum_absolute_cdf_difference": 0.002186075450857361,
+        "simultaneous_mc_width": 0.01696535106103778,
+        "empirical_reference_allowance": 0.005,
+        "registered_probability_bias_budget": 0.03,
+        "classification": "PASS_SCOPED_EMPIRICAL_REFERENCE",
+        "candidate_bias_upper_given_empirical_reference_allowance": 0.02415142651189514
+      },
+      {
+        "macro_gamma_h": 0.6,
+        "base_depth": 4,
+        "adaptive_max_depth": 4,
+        "N": 16000,
+        "seed": 53619,
+        "cumulative_arrival_counts": [
+          44,
+          833,
+          2081,
+          3212,
+          4074
+        ],
+        "arrival_cdf": [
+          0.00275,
+          0.0520625,
+          0.1300625,
+          0.20075,
+          0.254625
+        ],
+        "final_fate_counts": {
+          "stuck": 4074,
+          "active": 11926
+        },
+        "failure_count": 0,
+        "maximum_absolute_cdf_difference": 0.0018388159414055028,
+        "simultaneous_mc_width": 0.01696535106103778,
+        "empirical_reference_allowance": 0.005,
+        "registered_probability_bias_budget": 0.03,
+        "classification": "PASS_SCOPED_EMPIRICAL_REFERENCE",
+        "candidate_bias_upper_given_empirical_reference_allowance": 0.023804167002443283
+      },
+      {
+        "macro_gamma_h": 0.3,
+        "base_depth": 4,
+        "adaptive_max_depth": 4,
+        "N": 16000,
+        "seed": 53619,
+        "cumulative_arrival_counts": [
+          49,
+          815,
+          2047,
+          3140,
+          4026
+        ],
+        "arrival_cdf": [
+          0.0030625,
+          0.0509375,
+          0.1279375,
+          0.19625,
+          0.251625
+        ],
+        "final_fate_counts": {
+          "stuck": 4026,
+          "active": 11974
+        },
+        "failure_count": 0,
+        "maximum_absolute_cdf_difference": 0.0030430502733982123,
+        "simultaneous_mc_width": 0.01696535106103778,
+        "empirical_reference_allowance": 0.005,
+        "registered_probability_bias_budget": 0.03,
+        "classification": "PASS_SCOPED_EMPIRICAL_REFERENCE",
+        "candidate_bias_upper_given_empirical_reference_allowance": 0.025008401334435992
+      }
+    ],
+    "registered_D_ge_2_accuracy": "PASS_SCOPED_EMPIRICAL_REFERENCE",
+    "first_passage_order": "NOT_RESOLVED"
+  },
+  "D1_followup": {
+    "non_dyadic_frame_finite_Hermite_law": "3 public depth cases PASS, 12000 particles each, two phases, family error .001",
+    "non_dyadic_continuous_OU_covariance_relative_errors": {
+      "0.37": {
+        "0": 0.2805072386191504,
+        "2": 0.048931821387553254,
+        "4": 0.01119069094287417
+      },
+      "0.61": {
+        "0": 0.1393090439360728,
+        "2": 0.03327917328659391,
+        "4": 0.010693390059463348
+      }
+    },
+    "RZ_scope": "zero radial flow/force meridional 2DOF folded signed OU; 12000 particles, 20 macro, D2; CDF + DKW <= .025; PASS",
+    "charge_scope": "stationary negative-branch OML scalar RK4 2048/4096 + Simpson OU Green, uniform plasma; 12000 particles, 32 macro, D0; charge/Coulomb mean/covariance PASS; frozen-charge counterexample independently resolvable",
+    "H2_center_geometry": "64 particles radius 0 versus 1e-4 m, all particle_center; final/event path bitwise identity PASS, contact-radius event metadata preserved"
+  },
+  "verification_commands": [
+    {
+      "command": "uv run --locked pytest tests/verification/test_kramers_reference.py tests/scenarios/test_brownian_run.py -k 'kramers or non_dyadic_frames' -q -s",
+      "result": "5 passed, 46 deselected",
+      "elapsed_seconds": 78.72
+    },
+    {
+      "command": "uv run --locked pytest tests/scenarios/test_brownian_run.py -k 'stationary_oml_and_coulomb or folded_signed_ou or center_crossing_keeps_path' -q -s",
+      "result": "3 passed, 50 deselected",
+      "elapsed_seconds": 13.18
+    },
+    {
+      "command": "uv run --locked pytest tests/verification/test_stochastic.py -q",
+      "result": "10 passed",
+      "elapsed_seconds": 0.98
+    },
+    {
+      "command": "uv run --locked pytest tests/verification/test_stochastic.py tests/verification/test_kramers_reference.py tests/scenarios/test_brownian_run.py -q",
+      "result": "64 passed",
+      "elapsed_seconds": 139.04
+    },
+    {
+      "command": "uv run --locked pytest tests/verification/test_kramers_reference.py -q",
+      "result": "1 passed after fixture refinement gate and independent endpoint-tail check",
+      "elapsed_seconds": 18.17
+    },
+    {
+      "command": "uv run --locked pytest tests/scenarios/test_brownian_run.py -k center_crossing_keeps_path -q",
+      "result": "1 passed, 52 deselected; nonempty boundary events required",
+      "elapsed_seconds": 1.47
+    }
+  ],
+  "last_verified_utc": "2026-10-09T13:48:42.167943+00:00",
+  "quality": {
+    "uv_lock_check": "PASS",
+    "ruff_format_and_check_owned_files": "PASS",
+    "pyrefly_project": "0 errors",
+    "import_linter": "3 kept, 0 broken; standard CLI called via locked Python because Windows App Control blocked console launcher",
+    "reference_advance_radon_CC": 14,
+    "production_complexity_gate": "parent-owned H2/normalizer changes were under active repair; no production change in this work"
+  }
+}

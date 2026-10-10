@@ -26,6 +26,30 @@ from chamber_particles.stochastic import (
     joint_ou_increment,
     split_joint_ou_increment_half,
 )
+from tests.verification.ou_reference import (
+    covariance_matrix as _covariance_matrix,
+)
+from tests.verification.ou_reference import (
+    folded_gaussian_joint_cdf,
+    hermite_ou_frame_moments,
+)
+from tests.verification.ou_reference import (
+    quadrature_covariance as _quadrature_covariance,
+)
+
+
+def test_specular_gaussian_mirror_oracle_has_independent_normal_limit() -> None:
+    position = np.asarray([0.2, 0.8, 2.0, 5.0])
+    velocity = np.asarray([-1.0, 0.0, 0.7, 2.0])
+    covariance = np.diag([0.7**2, 1.3**2])
+    expected = np.asarray(
+        [
+            math.erf(x / (math.sqrt(2.0) * 0.7)) * 0.5 * math.erfc(-v / (math.sqrt(2.0) * 1.3))
+            for x, v in zip(position, velocity, strict=True)
+        ]
+    )
+    observed = folded_gaussian_joint_cdf(position, velocity, np.zeros(2), covariance)
+    np.testing.assert_allclose(observed, expected, rtol=0.0, atol=2.0e-14)
 
 
 def test_stochastic_exponential_midpoint_has_second_order_noise_free_limit() -> None:
@@ -110,7 +134,7 @@ def test_stochastic_exponential_midpoint_has_second_order_noise_free_limit() -> 
     assert min(observed_orders) > 1.8
 
 
-def test_charge_electric_stochastic_midpoint_weak_mean_is_at_least_first_order() -> None:
+def test_charge_electric_midpoint_zero_noise_limit_is_at_least_first_order() -> None:
     rate = 1.7
     electric_coupling = 0.8
     charge_rate = -0.35
@@ -330,6 +354,32 @@ def test_joint_ou_declared_relaxation_limit_remains_representable() -> None:
     np.testing.assert_allclose(recomposed.velocity_m_s, parent.velocity_m_s, rtol=0.0, atol=1.0e-15)
 
 
+def test_non_dyadic_hermite_frame_law_approaches_continuous_ou_law() -> None:
+    rate = 2.0
+    macro = 0.2
+    thermal = 0.7
+    initial = np.asarray([0.0, 0.2])
+    for phase in (0.37, 0.61):
+        query = phase * macro
+        decay = math.exp(-rate * query)
+        truth_mean = np.asarray([0.1 * query + 0.1 * (1.0 - decay) / rate, 0.1 + 0.1 * decay])
+        truth_covariance = _covariance_matrix(_quadrature_covariance(rate * query, thermal, rate))
+        errors = []
+        for depth in (0, 2, 4):
+            mean, covariance = hermite_ou_frame_moments(
+                rate, thermal, macro, query, depth, initial, 0.1
+            )
+            assert float(np.linalg.eigvalsh(covariance).min()) > 0.0
+            errors.append(float(np.max(np.abs(covariance / truth_covariance - 1.0))))
+            if depth == 4:
+                np.testing.assert_allclose(mean, truth_mean, rtol=0.0, atol=2.0e-8)
+        # These registered phases happen to decrease; arbitrary phase/depth
+        # sequences need not be monotone. This measures finite-path law bias.
+        assert errors[1] < 0.25 * errors[0]
+        assert errors[2] < errors[1]
+        assert errors[2] < 0.012
+
+
 def test_joint_ou_covariance_and_half_conditioning_match_independent_oracles() -> None:
     for argument in (
         1.0e-12,
@@ -454,11 +504,9 @@ def test_joint_ou_ensemble_matches_mean_and_full_covariance() -> None:
         position0[0] + equilibrium[0] * duration[0] + (velocity0[0] - equilibrium[0]) * displacement
     )
     expected_velocity = equilibrium[0] + decay * (velocity0[0] - equilibrium[0])
-    variance_x, covariance_xv, variance_v = joint_ou_covariance(
-        rate[:1],
-        thermal[:1],
-        duration[:1],
-    )
+    variance_x, covariance_xv, variance_v = _quadrature_covariance(
+        float(argument), float(thermal[0]), float(rate[0])
+    ).reshape(3, 1)
     expected_covariance = np.asarray(
         [[variance_x[0], covariance_xv[0]], [covariance_xv[0], variance_v[0]]]
     )
@@ -653,46 +701,6 @@ def _normal_tensor(
             draw_kind=draw_kind,
         )
     return result
-
-
-def _quadrature_covariance(
-    argument: float,
-    thermal_velocity_variance: float,
-    rate: float,
-) -> np.ndarray:
-    """Integrate the OU Green-function kernel without production formulas."""
-
-    nodes, weights = np.polynomial.legendre.leggauss(16)
-    segment_count = max(1, math.ceil(argument / 0.25))
-    edges = np.linspace(0.0, argument, segment_count + 1)
-    integrals = np.zeros(3, dtype=np.float64)
-    for lower, upper in pairwise(edges):
-        midpoint = 0.5 * (lower + upper)
-        half_width = 0.5 * (upper - lower)
-        sample = midpoint + half_width * nodes
-        decay = np.exp(-sample)
-        displacement = -np.expm1(-sample)
-        integrals += half_width * np.asarray(
-            [
-                np.dot(weights, 2.0 * displacement * displacement),
-                np.dot(weights, 2.0 * displacement * decay),
-                np.dot(weights, 2.0 * decay * decay),
-            ]
-        )
-    return np.asarray(
-        [
-            thermal_velocity_variance * integrals[0] / rate**2,
-            thermal_velocity_variance * integrals[1] / rate,
-            thermal_velocity_variance * integrals[2],
-        ]
-    )
-
-
-def _covariance_matrix(components: np.ndarray) -> np.ndarray:
-    return np.asarray(
-        [[components[0], components[1]], [components[1], components[2]]],
-        dtype=np.float64,
-    )
 
 
 def _one_component_increment(value: np.ndarray) -> JointOuIncrement:

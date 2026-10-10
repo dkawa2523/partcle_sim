@@ -215,10 +215,10 @@ St=\frac{\tau_p U}{L}
 閾値を跨いだから別相関へ黙って切り替えない。広い適用域を持つ単一相関を選ぶか、利用者が
 明示したblend modelだけが連続的に遷移する。
 
-適用域外では次のいずれかを設定で選ぶ。
-
-- `error`：実行を拒否する。正式計算の標準。
-- `count`：感度解析用。継続するが、model別の範囲外件数・割合と未検証使用の印をresultへ必ず残す。
+現行production revisionの適用域policyは `error` だけとし、適用域外の実行を
+fail-closedで拒否する。適用域外を数えながら計算を続けるmodeは、物理的に無効な
+軌道を正式resultへ混在させるため実装しない。感度解析が必要な場合は、明示的に適用域を
+持つ別model revisionか、solver外のparameter sweepとして扱う。
 
 数値安定化のためのclampと、物理モデル適用域の逸脱を同じ処理にしない。
 
@@ -294,6 +294,10 @@ P18-Rの`epstein_linear_effective_gas_sensitivity_v1`は上の線形Epstein式�
 `0 < maximum_speed_ratio <= 1`を明示し、全stage・連続pathで(lambda/age10)とともにfail-closedに検査する。
 既存`epstein_linear_v1`の速度比上限`0.1`は維持し、このrevisionをspecies-resolved mixture truthやCOMSOL branchとは呼ばない。
 
+drag、thermophoresis、lift、gravity/buoyancyを合成する場合、各modelが重複して宣言する中性気体fieldと分子質量は
+一つの背景authorityへ一致させる。linear EpsteinとWaldmann--Gallisはnative single-species同士または
+effective-gas sensitivity同士だけを受理する。liftが無い場合もdensity照合を省略しない。
+
 ### 4.3 重力と浮力
 
 \[
@@ -360,6 +364,15 @@ one-effective-Maxwellian/pseudogasへ適用するoptional reference/sensitivity 
 全stage・連続pathで(lambda/age10)かつcase明示の`0 < maximum_speed_ratio <= 1`を要求し、P16単一気体revisionの
 上限`0.1`を変更しない。設定可能であることはspecies-resolved mixture truthまたはCOMSOL一致の認定ではない。
 
+P22では`talbot_cross_regime_radius_knudsen_v1`を別のoptional revisionとして使う。producer提供の`T`、
+`grad(T)`、`rho`、`mu`、`k_g`、`lambda`と、case明示の`k_p,Cs,Cm,Ct`を使い、COMSOLと同じ
+Talbot原著の半径基準`Kn_T=lambda/(drag_diameter_m/2)=2*Kn_p`でcross-regime Talbot式を評価する。
+dragの`Kn_p=lambda/drag_diameter_m`とは式ごとに区別する。係数`Cs,Cm,Ct`は全て明示し、
+直径基準の変数を使う場合は三係数とCunningham項を一括変換した代数同値式だけを認める。
+v1は正の有限primitiveを要求するが
+Knの数値cutoffを持たず、任意のKnの物理検証を主張しない。coreは温度を微分せず、Waldmannとの自動blend、
+Knによるfallback、near-wall/negative thermophoresisを行わない。
+
 ### 4.7 Brownian運動
 
 慣性を保持するLangevin形式は
@@ -386,8 +399,10 @@ accepted-step番号、粒子の並べ替え、thread数、chunkサイズによ�
 B01でjoint OU更新、interval-tree Philox、conditional half-splitを固定し、B02でcase選択、材料first hit、
 trajectory replay、checkpoint/resumeへ接続した。各leafはOU endpoint位置・速度から作るcubic Hermite numerical
 pathであり、連続OU first-passageの厳密解ではない。B01/B02の平均更新は線形dragだけを厳密化したもので、
-`F_other`を黙って落とさない。B02 production revisionはEpstein linear drag、fixed charge、Cartesian XY、terminal
-stick/escapeに限定し、その意味とpayloadをB03で変更しない。
+`F_other`を黙って落とさない。B02 production revisionはEpstein linear drag、fixed charge、Cartesian XYに限定する。
+B04ではこの数値pathを変えず、terminal `stick/escape/hold`に加えてactiveな`specular/restitution/maxwell_thermal`と
+`probabilistic_stick` fallbackを同じfirst-hit経路へ接続した。active hitで使用済みrootの残余を流用せず、hit prefixを
+確定してpost-wall stateから残時間を新しいstochastic rootとして開始する。既存B02 caseのpayloadはbitwise不変である。
 root covariance、conditional split、mean更新がfloat64で表現不能な粒子は最後のaccepted stateで
 `nonfinite_physics`となり、同一batchの正常粒子は継続する。
 
@@ -396,8 +411,9 @@ root始点からのnoise-free midpoint predictorで線形Epstein/FDT係数、全
 `G=dZ/dt,J=dG/dZ<=0`を一度凍結し、`u_eff=u+a/gamma`のjoint exact OUとroot内affine exponential
 chargeで進める。これはstateを二つの
 half-stepでcommitする対称operator splittingではない。native/effective-gasの線形Epstein、fixed/continuous charge、
-既存additive forceを扱い、terminal wallは`stick`/`escape`/`hold`に限る。axis hit後はaccepted prefixをfoldし、
-残時間を新しいstochastic rootとして再開する。`macro_root_affine_exponential_v2`の全leaf intervalはprepared invariantへ照合し、
+既存additive forceを扱い、terminal wallとB04のactive wall lawを受理する。axis hitまたはactive wall hit後はaccepted prefixを
+commitし、必要なaxis foldまたはwall応答の後に残時間を新しいstochastic rootとして再開する。
+`macro_root_affine_exponential_v2`の全leaf intervalはprepared invariantへ照合し、
 逸脱または数値的に証明不能ならfail-closedにする。これは等方3-D Brownianの代用ではない。製品標準の3-D確率運動は
 P17後のCartesian 3-D revisionで扱い、単一seedの軌道一致を合否にしない。
 B03 path arrayの静的な保守上限は一slab rowあたり`648 B`で、受入上限`2048 B`を満たす。正式characterizationは
@@ -450,6 +466,12 @@ Saffman lift、圧力勾配力、付加質量、Basset履歴力は、連続体�
 coreは速度場を微分しない。gas velocity `[m/s]`、density `[kg/m^3]`、mean free path `[m]`とともに、
 `lambda_g/a>=10`を全stage/pathでfail-closedに要求する。B02 Brownianとの同時利用は拒否する。これを一般的なliftや
 Saffman liftとは呼ばず、物理的なdefaultにも自動選択にも使わない。
+
+P22の`saffman_unbounded_creeping_shear_v1`はこれと別のoptional revisionである。XYまたはno-swirl RZの
+signed面外vorticityをproducerから受け、壁から十分離れた球形・非回転・表面no-slip粒子にCOMSOL theoryと同じ
+Saffman式を適用する。Stokes--Cunninghamまたはdragなしとだけ組み合わせ、半径基準で`lambda/a<=0.1`、
+`Re_s<=0.1`、`Re_G<=0.1`、かつゼロshear以外は`Re_s<=0.1*sqrt(Re_G)`を全stage/pathでfail-closedに要求する。
+最後の係数は`<<`を保守的に固定したrevision policyである。near-wall lift、粒子回転、finite-Re式へ自動切替しない。
 
 ### 4.10 後続候補
 
@@ -555,7 +577,8 @@ solver optionとして置換可能とせず、異なるモデルとして結果�
 初期製品は次の二つだけを持つ。
 
 1. `table`：粒子ID、位置、速度、径、質量、電荷、発生時刻を明示する。
-2. `surface`：選択した境界面上から分布に従って発生させる。
+2. `surface`：canonical facet ID、strict interiorのfacet内座標、速度、径、質量、電荷、発生時刻を
+   粒子rowごとに明示する。
 
 volume、line、time series injectionは、実ケースが必要になった段階で追加する。
 P05 production profileは粒子表と固定電荷の意味論を確定するためtable sourceだけを受理した。
@@ -563,15 +586,15 @@ P07 exact-path sliceはsurface sourceと境界上departureを同じengineへ導�
 
 ### 6.2 surface source
 
-surface sourceは本製品の主要機能である。v0.1が直接設定できる範囲は、境界group/ID、連続particle ID、
-count、一定particle property、`uniform | edge_fraction`位置、`fixed | normal`速度、fixed release timeである。
-任意のrealized interior位置・速度・粒径・電荷・時刻はtable sourceで与えられる。ただし材料boundary上のtable
-startはstrict interior規則で拒否されるため、任意分布を外部生成したboundary-start ensembleは現行v0.1では
-直接表せない。v0.1の代表surface releaseは、単一facet上の`edge_fraction`、またはXYの`line_length`と
-RZの`meridional_length | revolved_area`を明示した`uniform`で表せるため、`realized_surface_table`は追加しない。
-これらで表せない代表用途が後続で確認された場合は、その時点で独立したversioned source形式を検討する。
+surface sourceは本製品の主要機能である。現行`realized_internal_surface_contact_schedule_v5`は粒子ごとの
+`particle_id`、canonical facet ID、strict interiorのfacet内座標、速度、release時刻、粒子物性、独立
+`contact_radius_m`をHDF5へ保持する。有限半径中心はfacetから内向きへ半径だけoffsetする。
+YAMLはsource名、`type: surface`、table名だけを結び、分布を生成しない。内部sourceは同じ共通列と
+`position_m`を持つ。任意の分布や熱速度は外部入力作成側で一度realizeし、solver coreにdistribution engineや
+source RNGを置かない。
 
-次はsurface sourceの後続catalog候補であり、現行v0.1で対応済みとはみなさない。
+次はfirst-party外部producerの後続catalog候補であり、`0.2.0`でも生成機能を
+対応済みとはみなさない。外部でrealize済みの結果をcanonical rowとして受け取る能力とは区別する。
 
 - 物理的発生率からmodel particle count/weightを作る規則
 - 面上の重み場、明示的な離散点分布
@@ -588,19 +611,16 @@ dA=2\pi r\,ds
 \]
 
 で重み付けする。\(r=0\) 付近を同じ粒子密度で過剰sampleしない。
-`revolved_area`が3-D回転面上の一様fluxに対応し、`meridional_length`は2-D断面上の診断・manufactured case用である。
-利用例で両者を同じ物理分布として扱わない。
-
-source乱数は`seed, source_id, source_particle_ordinal, draw_kind`をkeyとする独立streamにする。vector成分が
-必要なmodelは成分ごとに重複しないdraw kindを割り当てる。
-thread、tile、他sourceの粒子数で位置・速度・径・release-time drawが変わらない。Poisson scheduleも
-source内ordinalで識別し、global sequential RNGを使わない。
+回転面上の一様fluxを外部でrealizeする場合は`2πr ds`、2-D断面上の診断分布なら`ds`を使い、
+両者を同じ物理分布として扱わない。生成結果はcanonical surface tableへ粒子ごとに固定する。
+source乱数はsolver coreに持たず、thread、tile、output scheduleで初期条件が変わらない入力artifactとする。
 
 ### 6.3 境界上の初期位置
 
-粒子を固定距離だけ流体側へ移動して開始しない。realized scheduleは位置とcanonical source facet IDを
-保持し、owner cellと表面法線はprepared geometryを唯一のauthorityとする。resident local-coordinateを
-第二のauthorityとして保持しない。最初の速度が流体側ならdeparture、壁側なら即時impactとして扱う。必要な数値許容差は
+粒子を固定距離だけ流体側へ移動して開始しない。canonical surface rowはfacet IDとstrict interiorの
+facet内座標を保持し、`sources.py`がprepared geometryからruntime位置を一度導出する。runtime scheduleは
+その位置とcanonical source facet IDを保持し、owner cellと表面法線はprepared geometryを唯一のauthorityとする。
+第二のresident local-coordinate authorityは持たない。最初の速度が流体側ならdeparture、壁側なら即時impactとして扱う。必要な数値許容差は
 ジオメトリーscaleとfloat64精度から一度だけ決める。
 P05で材料boundaryを使うtable sourceはstrict interiorだけを受理し、境界上の初期点を
 epsilon nudgeで修復しない。
@@ -619,6 +639,14 @@ source facetも通常検索へ戻す。外向き加速度はzero-time impactで�
 ### 7.1 first-hit原則
 
 境界判定はstep終端のinside/outside比較ではなく、trial path上で最初に交差する境界を求める。
+
+boundary groupごとの`contact_geometry`は未指定時`particle_surface`とし、粒子の独立した
+`contact_radius_m`による材料接触を判定する。明示した`particle_center`は同じ粒子の中心通過を判定し、
+仮想的な開口・検出面を材料壁と混在させられる。lawから方式を推測せず、escapeにもどちらの方式を指定できる。
+物理radius、drag径、電荷半径、質量は保持する。一つのmesh/BVH上で候補ごとに有効接触半径、法線、残差を解決し、
+材料端部のcapへ先に接触した場合は開口通過よりそのeventを優先する。表面sourceのoffsetとrelease/transferの
+clearanceも同じgroup方式を使う。中心通過と材料接触の時刻順を局在budget内で証明できない同時候補は、
+推測したpriorityや位置nudgeで応答せずfail-closedにする。XY/RZの既存2自由度と各既存integratorのscopeを維持する。
 
 ```text
 step開始状態
@@ -672,10 +700,14 @@ applicability、hit時刻までの短縮RK4再積分のauthorityとして維持�
 保持してsplitし、required supportをglobalに証明できないcaseではevent queryもglobal boundへ戻す。したがって、
 これはbroad-phase candidate生成の精密化であり、first-hit順序、wall law、endpoint、schemaを変更しなかった。
 event v15はこのauthorityを維持し、物理position budgetとroundoff budgetを加算した。facet-local offset dotは
-補償演算、Hermite評価・包絡はroot-relative TwoDiffを使う。現行event v16はvalidなRK4 dense rowに限り、position
+補償演算、Hermite評価・包絡はroot-relative TwoDiffを使う。event v16はvalidなRK4 dense rowに限り、position
 Bernstein control enclosureの全4点がfacetの既存budget込みinside half-spaceにあることをinterval算術で証明できた候補を
 convex-hull性からclearする。証明できない候補、非有限・不整合なcontrol、exponential・scalar pathは従来どおり
 split/fail-closedとする。monotone-approach clearもcubic Hermiteのderivative-Bernstein enclosureだけが明示opt-inする。
+現行event v22は最初のhit時刻を局在した後、そのbudget内で同時かつ共有nodeへincidentなfacetを集合として保持する。
+exact、一般RK4、exponential midpoint、Brownianの全経路が同じpriority/combined-normal応答へその集合を渡す。
+有限半径material contactとperiodic center crossingを同一のfirst-event順序で比較し、証明不能なcornerや
+material/periodic混在は任意の一面へ丸めずsplit/fail-closedする。
 
 support外のprovisional値はtrial生成にだけ使え、support外stageを含むstepをそのまま受理しない。v0.1の
 required fieldはparticle domain全体を覆う。ただしdomain coverageだけでは有限個のRK評価点間にある連続曲線の
@@ -692,15 +724,19 @@ productionを同時に解禁しない。RZ basis、continuous charge、時間依
 event-freeな残区間は追加depthなしで受理する。splitする場合は
 子intervalのinteraction countを0へ戻し、refinement depthを引き継いで前半から再試行する。
 明示depth budgetを超えたときだけ`failed:numerical_event_budget`とする。位置を動かして回避せず、物理的な
-stick/escape数にも加えない。v0.1の衝突はpoint-particle、すなわち粒子中心が境界へ到達したeventで
-ある。有限半径offset surfaceや接触運動は後続modelとする。
+stick/escape数にも加えない。現行の静的2-D XY/RZ境界は、粒子ごとに独立した
+`contact_radius_m`を持つ。0は従来のpoint particle、正値はXY断面のdiskまたはRZ断面のsphere中心と
+`line2` material facetのcapsule first contactである。drag径や静電半径から推定せず、接触時の中心を壁へ
+snapしない。linear/quadratic exact、RK4、exponential midpoint、Brownianの全経路が同じfirst-event意味を
+使い、有限半径で局在不能な区間をclearへ丸めずsplit/fail-closedする。
 
 ### 7.2 初期boundary law
 
 P05 production profileはparameterを持たない`stick`と`escape`だけを受理した。
 P07 exact-path sliceはspecular、probabilistic stick、複数candidateのcorner応答を追加した。
-現行`point_wall_laws_v5`は、parameterを持たない完全鏡面`specular`、係数付き`restitution`、
-明示した反射fallbackを持つ`probabilistic_stick`、非deposition終端の`hold`を別の意味として受理する。
+現行`contact_wall_laws_v7`は、parameterを持たない完全鏡面`specular`、係数付き`restitution`、
+壁frameの鏡面／完全熱適応half-range Maxwell flux混合`maxwell_thermal`、明示した反射fallbackを持つ
+`probabilistic_stick`、非deposition終端の`hold`を別の意味として受理する。
 
 #### Stick / deposit
 
@@ -739,8 +775,26 @@ final/frame/probeのkinematicsは有効であるが、hit後の位置、速度�
 `specular`はparameterを持たず、常に\(e_n=e_t=1\)の完全鏡面反射である。反発係数を入力すると拒否する。
 `restitution`は`normal_restitution = e_n`を`(0,1]`、`tangential_restitution = e_t`を`[0,1]`で
 ともに必須とする。係数をruntimeでclampせずload時に検査し、二つのlawを同じselectorへ畳み込まない。
-法線は粒子domainから外向き、impactは`(v-v_w)·n > 0`と定義する。現行v0.1は静止壁`v_w=0`だけを扱い、
-moving wallは対応modelまで拒否する。
+法線は粒子domainから外向き、impactは`(v-v_w)·n > 0`と定義する。`specular`と`restitution`は静止壁だけを
+扱う。`maxwell_thermal`の`wall_velocity_m_s`はscattering frameを定めるが、静的geometryと整合するよう
+group内の全facetへ接線方向でなければならない。法線方向へ移動する壁はmoving geometry対応まで拒否する。
+
+#### Maxwell thermal reflection
+
+`maxwell_thermal`は正の`wall_temperature_K=T_w`、`diffuse_reflection_fraction=alpha`を`[0,1]`、
+finiteな2成分`wall_velocity_m_s=v_w`として必須にする。`alpha`は一般のenergy accommodation係数ではなく、
+完全熱適応した拡散再放出を選ぶMaxwell混合確率である。残り`1-alpha`は壁frameの完全鏡面反射とする。
+外向きunit normalを`n`、固定tangentを`t=(-n_y,n_x)`、`sigma^2=k_B T_w/m`とすると拡散branchは
+
+\[
+c_n=\sigma\sqrt{-2\log U_n}>0,\qquad c_t=\sigma Z_t,\qquad
+\boldsymbol v'=\boldsymbol v_w-c_n\boldsymbol n+c_t\boldsymbol t,
+\]
+
+とする。`U_n`はopen uniform、`Z_t`は独立standard normalである。この法線分布
+`p(c_n)=c_n/sigma^2 exp(-c_n^2/(2 sigma^2))`は入射数fluxで重み付けしたhalf-range Maxwell分布で、
+固定zero速度を法線nudgeで通すものではない。RZ meridional modeでは既存2自由度の射影則であり、
+3-D方位速度をサンプルした完全3-D cosine lawとは主張しない。
 
 #### Probabilistic stick
 
@@ -748,23 +802,34 @@ moving wallは対応modelまで拒否する。
 U<p_{stick}, \qquad 0\le p_{stick}\le 1
 \]
 
-なら付着し、それ以外は必須の`otherwise`へ明示したparameterなし`specular`、または係数付き`restitution`を
-適用する。fallbackをdefaultで補わない。現行v0.1が扱うのはboundary lawごとの定数付着率だけであり、
+なら付着し、それ以外は必須の`otherwise`へ明示したparameterなし`specular`、係数付き`restitution`、または
+完全なparameterを持つ`maxwell_thermal`を適用する。fallbackをdefaultで補わない。`0.2.0`が扱うのは
+boundary lawごとの定数付着率だけであり、
 境界material tableは未実装である。material、入射energy/angle、壁温度、電荷等へ依存する付着率は、入力変数と
 適用範囲を宣言したversioned modelとして後から追加する。
 
 wall-law乱数は`seed, particle_id, physical_boundary_event_ordinal, law_stream`をkeyにする。数値的な
-path refinement、thread、tileはphysical event ordinalを進めず、付着drawを変えない。source、wall、
-Brownian、将来のcharge jumpはstream IDを分離する。
+path refinement、thread、tileはphysical event ordinalを進めず、付着・混合・熱速度drawを変えない。
+付着、Maxwell branch、法線速度、接線速度とsource、Brownian、将来のcharge jumpはstream IDを分離する。
 
 ### 7.3 後続boundary law
 
-- cosine lawによるdiffuse reflection
-- 壁温度とaccommodationに基づくthermal re-emission
-- specular/diffuse mixture
-- 表面滞在時間を持つdesorption
-- 入射エネルギー・角度・材料によるerosionまたは再飛散
-- surface chargeとの相互作用
+`maxwell_thermal`を含む瞬時wall lawはpoint/finite-radiusで同じ応答catalogを使う。有限半径で変わるのは
+first-contact geometryとcandidateごとの接触法線であり、law selectorを複製しない。次は同じpatchへplaceholderを
+入れず、別revisionでstateとgeometryのownerを明示して実装する。
+
+- finite-radius contactの現行範囲：静的2-D XY/RZのdisk/sphere対`line2` capsule first contact、surface sourceの
+  inward center offset、table sourceのstrict clearance、candidate固有法線までを実装する。接触後のrolling/sliding、
+  粒子間衝突、3-D surface offset、moving geometryは含めない。
+- surface charging：wall material/electrical state、粒子charge transfer、保存event payloadと保存則を
+  boundary/physics/output/checkpointの共同revisionで定義する。現行のstatic scalar law parameterに押し込まない。
+- resuspension/desorption：wall-resident lifecycle、滞在時間、adhesion、接線stress、release ordinalと再開schedulerを
+  source/lifecycle revisionとして定義する。terminal `stuck`/`held` rowを暗黙に再活性化しない。
+- 入射energy・angle・materialに依存する付着／erosionは入力primitive、適用域、独立referenceを持つ別catalogとする。
+
+入力作成側はwallと同じpolicy-free half-range Maxwell変換を使ってsurfaceの明示velocity rowを作れる。
+solverはその速度を再標本化しない。Brownian surface releaseは外向き法線成分の絶対値がroundoff幅を越えることを
+要求し、負ならdeparture、正ならzero-time impactとする。zero/tangent normal speedは位置nudgeせずprepareで拒否する。
 
 contact slidingを標準の粒子軌道へ入れない。必要なら壁上運動という別問題として導入する。
 
@@ -808,7 +873,7 @@ P05はreleaseを粒子ごとのevent ordinal 0、最初のboundary eventをordin
 final payloadからhitを推定せず、このboundary eventを最後の有効なkinematicsと壁統計のauthorityにする。
 物理配置v1はnullableな統合tableを作らず、`/events/release`と`/events/boundary`へ分け、group名が
 `event_type`を表す。candidateはboundary groupのragged offsetで保持する。P05で常に確定済みの
-`geometry_status`や未実装failure groupは保存せず、実装済み列の権威は`solver/docs/result_format_v2.md`とする。
+`geometry_status`や未実装failure groupは保存せず、実装済み列の権威は`solver/docs/result_format_v3.md`とする。
 
 ---
 
@@ -949,16 +1014,26 @@ cacheには元field hash、格子仕様、connected domain、support mask、fiel
 障害時のsilent fallbackではない。cache生成や品質診断をsolver hot pathへ入れず、support誤分類、
 壁近傍誤差、representative trajectory/event、実測speedupの受入条件を満たす時だけ採用する。
 
+現行preprocessor v4はnodal P1/regular/exact affine Q1からfull-support regularへのstatic/linear-time変換を認証する。
+common partition上のvalue/stored-component gradient/support境界のrelative L2をXY/RZ物理測度で評価する。
+全隣接snapshot区間の二次error/reference norm比をBernstein上界とroundoff allowanceで判定し、時間途中の相殺を
+endpoint samplingで見逃さない。sample最大値やstationary root推定を連続保証に使わない。coverageの穴・重複、
+解像不能patch、reference下界不足、資源上限超過を拒否する。warped Q1と部分targetは認証対象外で公開しない。
+validationのmemory、workspace rows、patch work上限は必須入力とする。cache誤差の認証と利用用途のtrajectory/event
+精度・speedupは別に判定し、このgateだけで場snapshot自体の時間解像度が十分だとは認定しない。
+
 ### 9.5 時間依存場
 
-fieldは将来、\(F(\boldsymbol{x},t)\) を同じinterfaceで扱う。Stage 4Aはfixed spatial topologyの
-`hold`または`linear`だけとし、時間範囲外をclampしない。field knotと明示discontinuityをstepの必須
-分割点にし、各RK/ETD stageの実時刻で補間する。runtimeは前後2 snapshotだけをdouble bufferする。
-moving meshや時刻ごとに異なるtopologyは初期非対応とする。
+Stage 4Aの現行revisionはfixed spatial topologyの \(F(\boldsymbol{x},t)\) を同じfield interfaceで扱う。
+canonical fieldは`time_s[T]`と`values[T,N,C]`を持ち、隣接snapshot間を各RK/指数法stageの実時刻で
+線形補間する。全required fieldのtime knot和集合をmacro intervalの必須分割点とし、時間範囲外をclampしない。
+現revisionは全snapshotをresident保持する。`hold`、periodic、明示discontinuity、streaming/double buffer、
+moving mesh、時刻ごとに異なるtopologyは未対応であり、同じselectorへ未実装分岐を置かない。
 
-入力snapshot自体がunder-resolvedならsolver stepを細かくしても修復できない。外部preprocessorが
-間引き検証、temporal second difference、gradient/interface情報で空間・時間解像度を評価し、
-`warn/error`を記録する。不連続面を跨いで補間しない。
+入力snapshot自体がunder-resolvedならsolver stepを細かくしても修復できない。producerは
+snapshot別の空間誤差や3 snapshot以上のleave-one-snapshot-out時間誤差で解像度を判断する。
+現行preprocessor v4は指定された線形snapshot補間に対するcache誤差を全時間区間で認証する。明示指定のinterior knot omission診断はreport-onlyであり、元snapshotの時間adequacyを自動認証しない。診断の資源不足は適格cacheの公開を妨げない。
+時間adequacyの採否はproducerと利用caseが所有し、不連続面を跨ぐ補間は現revisionの入力として受理しない。
 
 ### 9.6 急峻な空間分布
 
@@ -1050,8 +1125,9 @@ failed reasonは小さな整数codeとする。
 決定論integratorにrandom force callbackを差し込まない。一般曲面でのinertial OU first passageを
 exactとは主張せず、geometry/outputから独立した固定depth dyadic nodeとcubic Hermite leaf pathを数値pathとする。
 平面解析case、depth収束、弱収束、到達時刻統計で品質を規定する。最初のrevisionはCartesian XY、Epstein linear
-drag-only、fixed-charge state、terminal stick/escapeだけを受理した。P18-Hは同じB02 terminal subsetへ
-parameterなしのholdを追加済みであり、反射や任意forceを解禁しない。
+drag-only、fixed-charge state、terminal stick/escapeだけを最初に受理した。P18-Hは同じB02 terminal subsetへ
+parameterなしのholdを追加し、B04は既存first-hitとwall responseを使ってactive reflectionを追加した。B04は任意force、
+非線形drag、3-D Brownianを解禁せず、各active hitでold stochastic tailを終了してpost-hit stateからfresh rootを開始する。
 
 RNGはcounter-basedとし、identityを`seed, particle_id, macro_interval, root_stochastic_interval,
 tree_level, tree_index, component, stream`から作る。accepted-step番号やthread順へ依存させない。
@@ -1315,27 +1391,7 @@ physics:
 sources:
   - name: source_parts_release
     type: surface
-    boundary_group: source_parts
-    count: 100000
-    particle_id_start: 1000000
-    particle:
-      mass_kg: 3.1101767271e-20
-      charge_number: -20
-      drag_diameter_m: 3.0e-8
-      electrostatic_radius_m: 1.5e-8
-      displaced_volume_m3: 1.4137166941e-23
-      model_weight: 1.0
-      material_id: 0
-    position:
-      model: uniform
-      measure: revolved_area
-    velocity:
-      model: normal
-      direction: into_domain
-      speed_m_s: 0.5
-    release:
-      model: fixed
-      time_s: 0.0
+    table: source_parts_particles
 
 boundaries:
   - boundary_group: wafer
@@ -1367,8 +1423,8 @@ canonical particleは`mass_kg`、各相当径、`displaced_volume_m3`、`model_w
 YAML loaderは密度と径から再構成しない。球形の簡便入力は外部case builderが一度だけ展開する。
 `charge_number`はfinite、`mass_kg`、`drag_diameter_m`、`model_weight`は正値、`electrostatic_radius_m`と
 `displaced_volume_m3`は、その物理を使わない計算粒子を表せるよう非負値とする。realized tableの
-`particle_id`とsurface sourceが`particle_id_start/count`で予約する範囲は全sourceを通して一意な
-非負signed-int64整数とし、thread数やtile分割に依存しないRNG・結果identityの権威にする。
+各realized source rowの`particle_id`は全sourceを通して一意な非負signed-int64整数とし、
+実行partitionに依存しないRNG・結果identityの権威にする。
 tableのrelease timeはfiniteなSI時刻で、計算閉区間`[time.start_s,time.end_s]`内ならよい。時刻原点に
 物理的な意味を強制せず、0以上という追加制約を置かない。
 SIを標準とし、入力単位がSIでない場合はadapterで一度変換する。通常利用者へtile/chunkを公開せず、
@@ -1590,7 +1646,7 @@ raw identityで一致させ、segment/checkpoint/LATEST境界のfailure injectio
 検証した。最初の`LATEST`前、最終公開の全境界、確率wall RNG ordinalを含むverification/scenario 322件が合格した。
 製品規模thread scalingとdurable I/O throughputはP14で判断した。現行milestoneとalgorithm revisionは
 `implementation_plan.md`と実行manifestが所有する。本仕様はsingle-thread compiled engine、bounded memory、
-YAML case schema v2、canonical HDF5 data schema v1、result/checkpoint schema v2という製品境界だけを所有する。
+YAML/canonical HDF5 case schema v3、result schema v3、checkpoint schema v2という製品境界だけを所有する。
 
 P14の結果ではouter ThreadPoolがregular 1M以外へ十分な効果を示さず、event-heavyでは遅化し、worker数に比例する
 scratchも増えた。この方式は履歴としてP12/P14の記録に残すが、製品runtimeとして維持しない。P14-Pでは
@@ -1600,10 +1656,11 @@ regular 1Mの4-thread speedupが0.923xで事前gateに届かなかったため�
 code/testを削除し、compiled single-thread engineを唯一のproduction経路とした。詳細な測定と採否条件は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を権威とする。
 
-現行v37はouter pool、future wave、worker別scratch、内部thread teamを持たず、thread非依存slab、
+現行v46はouter pool、future wave、worker別scratch、内部thread teamを持たず、thread非依存slab、
 field/physics/integrator workspace、stackless boundary BVH、同期single-owner writerへ統一している。
 memory plan v11はdeferred event depthを `event_work_bytes_per_particle = 24 * (max_refinements + 1)` として
 `slab_event_work`へ独立計上し、depth依存容量を一般proposal scratchへ隠さない。
+現行memory plan v16もこのowner分離を維持する。
 候補、event/failure staging、surface release、direct replayをnamed componentへ分離し、pack時だけのgatherは12.5%
 safety marginが所有する。正確なbyte式は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)が所有する。
@@ -1728,7 +1785,7 @@ Stage 0～1Aで固定するcore microcase packは次の`C01`～`C10`の10件と�
 | C09 | thin gapと複数反射 | residual time、boundary event ordinal、interaction budget failure |
 | C10 | corner同時hit | candidate facet set、effective response normal、priority、曖昧policy failure |
 
-現行`particle_engine_v37`ではC04/C05が証明済み`quadratic_exact`経路、C02/C03が一般
+現行`particle_engine_v46`ではC04/C05が証明済み`quadratic_exact`経路、C02/C03が一般
 `rk4_reintegrated`経路の公開API scenarioとして有効である。後者はfully-supported common
 `RegularLayout`、fixed charge、既存のEpstein/electric/gravity、連続support/applicability enclosureを満たす
 XY/RZ caseを扱う。revision 3b/P06-RZでは同じsubsetをtopology-completeな材料boundaryと連成し、terminal
@@ -1747,8 +1804,9 @@ P11はC03の`exponential_midpoint_reintegrated`を一定係数の全要求frame�
 smooth可変係数で次数1.8以上として検査する。Stokes--Cunningham一定primitiveの閉形式、output schedule identity、
 Cartesian材料event/residual、surface departure後の同面再衝突、RZ axis→wallも同じproposal/event経路の公開scenarioで検査する。
 
-後続stageの3D、時間依存のverificationは、対応機能を実装するstageで追加する。chargeと限定OUは実装済みで、これらと
-外部V&VのIDを`C01`～`C10`へ混在させない。
+時間依存fieldのverificationは、static退化、各stage実時刻、解析的piecewise-linear forcing、非grid knot分割、
+grid一致knotの非重複、全layoutの補間、範囲外拒否まで追加済みである。3DはP17/Stage 4Bで別に追加する。
+chargeと限定OUの既存検証および外部V&VのIDを`C01`～`C10`へ混在させない。
 
 - ballistic、一定加速度
 - linear dragの解析解
@@ -1790,7 +1848,7 @@ P14が所有し、23行×3観測matrixで完了した。target-useの結合判�
 製品性能完了を意味しなかった。P14で支配的と確認し、field-owned BVHでsupported containmentだけをindex化した。
 outside/masked provisionalはO(cell数) full scanを維持し、T04 cache/remeshは後続profile条件付きとする。
 同じmatrixの3観測medianでregular 100k/1Mは20 workerが1 worker比1.8796x/4.7965xだったが、
-event 10k×20 hitは0.8882xだった。P14-Pの内部parallel試行もregular 1Mで0.923xだったため、現行v37は
+event 10k×20 hitは0.8882xだった。P14-Pの内部parallel試行もregular 1Mで0.923xだったため、現行v46は
 single-thread compiled runtimeだけを提供する。artifact byte rateは
 public workflow全体のeffective rateで、writer単体帯域ではない。table startのvolume全走査もgeometry v4のBVHへ
 置換し、局所的にfloat64で解像不能なcellはprepareで拒否する。memory plan v6は両index residentとfield
@@ -1812,7 +1870,7 @@ E_q=\frac{|q-q_{ref}|}{atol_q+rtol_q\max(|q|,|q_{ref}|)}
 | first-hit | 時刻bracket・facet距離がbudget内、step/mesh半減でtime/point/facet集合が収束 |
 | specular | parameterなしで相対法線速度が厳密に反転し、接線速度が不変 |
 | restitution | 相対法線速度が`-e_n`倍、接線速度が`e_t`倍 |
-| surface source | RZ sample密度が`2πr ds`に一致 |
+| external surface producer | RZでrealizeしたsample密度が`2πr ds`に一致し、結果をcanonical rowへ固定 |
 | continuous charge | 平衡、残差、coupled軌道が設定次数で収束 |
 | axisymmetric 3D | 方位角回転に対して軌道・eventが共変 |
 | OU | B01/B02のjoint平均・共分散・MSD・平面first-passageが統計区間内。B03は定数係数mean/full covariance exact、noise-off 2次、manufactured weak mean観測次数`>=0.9`。一般SDEのstrong/weak 2次は主張しない |
@@ -1966,7 +2024,7 @@ field builderのテストはPoisson解析解、電荷保存、mesh収束で行�
 v26でworker wave、future merge、worker別scratch、object event/replayを削除し、内部thread team、slab、
 stackless BVH、同期writer、exact/curved wavefront、row status、batch release、direct replay、bounded stagingまで
 統合した。しかしregular 1Mでも4-thread speedupが0.923xだったため、製品gate未達としてcase schema v2から
-thread設定と内部thread teamを削除した。現行v37は`fastmath=False, parallel=False`のsingle-thread compiled
+thread設定と内部thread teamを削除した。現行v46は`fastmath=False, parallel=False`のsingle-thread compiled
 production engine一つである。第二schedulerやexperimental flagは残さない。判断根拠は
 [`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を権威とする。
 
@@ -1975,14 +2033,13 @@ production engine一つである。第二schedulerやexperimental flagは残さ�
 - surface release＋非一様場＋材料wall＋多数macro stepを一つのcaseで実行
 - `h,h/2,h/4`とregular/P1/Q1 mesh系列の軌道・hit収束
 - global enclosure、event refinement/failure、serial throughput、memory/outputの同時評価
-- P14-P後の単一runtime上でlocal bound、限定的step controlの要否を判定。P14-Uの実測sourceはXY
-  `line_length`の`edge_fraction`/`uniform`に限定し、RZ `revolved_area`の分布品質まで検証済みとしない。
-  このgateだけを理由に`realized_surface_table`は追加しない
+- P14-P後の単一runtime上でlocal bound、限定的step controlの要否を判定。P14-Uの履歴generator evidenceは
+  XY line-length分布に限定し、RZ回転面分布まで検証済みとしない。現行runtimeはcanonical realized surface tableを使う
 
 これはCOMSOL一致を正解にするgateではなく、現行数値coreが目的用途を精度・速度・入力表現の三面で解けるかを
 判定するgateである。常設diagnostic frameworkや第二engineは作らない。正式releaseはXY時間/mesh収束、RZ収束/parity、
 失敗0、出力utilityとidentityを満たした。profile費用はevents 28.7%、fields 26.8%ほかへ分散し、単一owner支配を
-示さないため現行productionはengine v37のsingle-thread compiled経路一つを維持する。秒数はmachine-localな
+示さないため現行productionはengine v46のsingle-thread compiled経路一つを維持する。秒数はmachine-localな
 非gating値であり、COMSOL比やportable性能ではない。T03とP14-Rのlocal gate/evidenceに加え、receipt固定の
 remote Windows/Linux workflowも完了し、`0.1.0.dev0`開発baselineの配布可能性closureを満たした。これは正式版packageの
 公開を意味しない。P15着手をそれまで禁止していた順序はユーザーの明示指示で解除した。
@@ -2019,10 +2076,15 @@ golden truthにはしない。
 ### Stage 2B：確率過程
 
 - Brownian数値基盤B01とproduction縦切りB02は完了した。P17のstate-dimension変更とは分離する。
-- inertial Langevin/OU joint update、counter RNG、joint conditional splitを固定depth treeとしてproduction接続済み
-- Cartesian XY・Epstein linear drag-only・fixed-charge state・terminal stick/escapeに限定し、cubic Hermite leafを
-  既存event/replay/checkpointへ接続した
-- 一般wallは有限depth numerical pathのfirst-passage分布収束で規定し、RMS距離をclear certificateにしない
+- inertial Langevin/OU joint update、counter RNG、joint conditional splitを一つのtree経路としてproduction接続済み
+- Cartesian XY・Epstein linear drag-only・fixed-charge stateのB02 cubic Hermite leafを既存event/replay/checkpointへ
+  接続し、B04でterminal/active wallを同じ経路へ統合した
+- active wall/axis hitはprefixだけをcommitし、post-event stateから残時間をfresh stochastic rootとして再開する。
+  surface sourceはrealize済み速度を明示し、zero/tangent速度をnudgeしない
+- B05では`interval_tree_depth`を全rootへ一様なnumerical-path精度として必須にし、wall、RZ axis、または
+  証明不能候補だけを`adaptive_max_depth`まで条件付き分割する。base=maxは従来固定depthへ退化し、RMS距離を
+  clear certificateにしない。連続OUのexact first-passageやzero miss probabilityは主張しない。memory planは
+  観測候補率でなくmax depthからtree workを保守的に解決する
 - ensemble validationとrow-local float64 failureを受入済み。決定論exact-P1 trajectoryの外部M3-Vは完了したが、BrownianのCOMSOL照合はmulti-seed外部gateとして残す
 
 ### 独立field-production track
@@ -2109,9 +2171,11 @@ accepted 3 seedの科学payload/work/revisionを完全一致させ、end-to-end�
 これは製品scaleまたはCOMSOL速度比の認定ではない。authorityは
 [`solver/evidence/m3c2/caseP_100nm_chord_optimization_v1/`](solver/evidence/m3c2/caseP_100nm_chord_optimization_v1/README.md)である。
 この外部進捗は製品solverの目的・公開API・dependency方向を変更しない。
-現行revisionはengine v37、compiled tile v18、proposal v10、event v16、boundary v5、result algorithm v5、
-result/checkpoint schema v2、field location v4、memory plan v14、physics catalog v17、physics runtime v20、
-RK4 enclosure v2、dense path v3、charge-stable exponential midpoint v3 / enclosure v4である。dense path v3は座標原点相対の
+現行revisionはengine v46、compiled tile v21、proposal v10、event v22、boundary v7、result algorithm v6、
+result schema 3、checkpoint schema 2、canonical data schema 3、field location v4、field time v2、required field v6、
+geometry v7、memory plan v16、physics catalog v23、physics runtime v22、source schedule `realized_internal_surface_contact_schedule_v5`、
+topology `translation_periodic_xy_v1`、RK4 enclosure v2、dense path v3、
+charge-stable exponential midpoint v3 / enclosure v4である。dense path v3は座標原点相対の
 Bernstein enclosure、TwoDiff残差、world座標への方向付き外向き丸めを使う。dense位置評価も相対制御点と残差から
 作り、始終点では保存済みendpointを厳密に戻す。公開chord-deviation boundだけはworld座標評価を覆う狭い
 `8*eps`絶対座標termを含むが、物理的な曲率とenclosureは原点相対である。v3は、v2の広いpaddingにより
@@ -2125,8 +2189,8 @@ common-fieldでのtime-discretization parityと、各producer固有fieldを含�
 
 同じreleaseへまとめず、次の二つを順番に独立milestoneとして実施する。
 
-- Stage 4A：時間依存2D field、time-knotでのstep split、snapshot cache
-- Stage 4B：tet4/tri3の3D geometryとfield、3D surface source、boundary BVH
+- Stage 4A（完了）：固定topologyの時間依存2D field、線形補間、time-knotでのstep split。全snapshot resident
+- Stage 4B（未着手）：tet4/tri3の3D geometryとfield、3D surface source、boundary BVH
 - 各milestone後に大規模caseでCPU設計を再評価
 
 ### Stage 5：GPUと製品化
@@ -2140,10 +2204,20 @@ common-fieldでのtime-discretization parityと、各producer固有fieldを含�
 
 ---
 
-## 21. 正式公開版`0.1.0`の採用状態
+## 21. `0.1.0`と`0.2.0`の採用状態
 
-この表はP14-R baselineに、その後同じ単一engineへ受理した機能を加えた`0.1.0`のrelease scopeである。
-各機能の受入時点と証拠は維持し、初期baselineと後続stageを同一時点の検証結果として扱わない。
+公開済み`0.1.0`はstatic 2-D、canonical HDF5 data schema v1、engine v37 / compiled tile v18 / boundary v5 /
+physics catalog v17 / runtime v20のtag時点で固定する。次表は、その後同じ単一engineへ受理した機能を含む
+`0.2.0`のscopeである。特にcanonical data schema v3、fixed-topology time field、Maxwell thermal
+wall/source、Brownian active-wall continuation、finite-radius contactを`0.1.0`へ遡及して含めない。各機能の受入時点と証拠は維持し、
+初期baselineと後続stageを同一時点の検証結果として扱わない。
+
+2026-10-10の追加改良はengine v46 / event v22とproducer v4を使う。単調なHermite壁接近のroundoff判定、
+任意のsource snapshot時間感度、Unicode CLI、source/wheel/install一致と両OS配布検証を追加した。
+反復鏡面壁とRZ到達の数値資格は登録済み誤差基準を満たすprofileへ限定し、不適格profileも保存する。
+候補段階の結果は[候補検証記録](reviews/v0_2_candidate_verification_2026-10-10.json)として保持する。
+正式版の用途別保証は、[対応・保証範囲](solver/docs/support_and_errors.md)に示す登録条件と判定基準に限定する。
+実験的予測精度、未指定の利用者accuracy/SLA、native FE場・全modelの同等性は保証に含めない。
 
 | 項目 | 採用 | 後続・不採用理由 |
 |---|---|---|
@@ -2155,14 +2229,15 @@ common-fieldでのtime-discretization parityと、各producer固有fieldを含�
 | Epstein linear、finite-speed Epstein、Stokes–Cunningham | 条件付き採用 | 各revisionの明示適用域だけ。air相関をCF4/O2へ流用せず、finite-speed revisionも自由分子・等温Maxwell混合の範囲に限定 |
 | electric、gravity | 採用 | 基本決定論力 |
 | continuous charge | 採用（charge-stable slice完了） | RK4はexplicit `hL_Z<=0.5`を維持。native exponential/B03はmidpoint-frozen affine exponential `J<=0` root。clip・charge-only subcycle・第二engineなし |
-| Brownian | B02/B03 production | B02の限定能力を維持し、B03でRZ projected force/charge連成を追加済み。単一seedを正解にせずM3-C2でmulti-seed分布を独立検証 |
+| Brownian | B02/B03/B04 production | B02の限定能力を維持し、B03でRZ projected force/charge連成、B04でactive-wall後のfresh-root continuationを追加済み。単一seedを正解にせずM3-C2でmulti-seed分布を独立検証 |
 | ion drag | P15-F production、P18-I optional | Barnesは維持し、比較対象二式は別sensitivity revision。blend・fallback・Case分岐なし |
 | DEP | P18-D Stage 3（完了） | producer提供`grad(mean_E_squared)`を使い、gradient生成・回復不確かさをmodel不確かさと分離。Case-A 100 nm common-P1複合sliceはM3-C1でPASSしたが、DEP単独・native-field parityと物理妥当性は未認定 |
 | free-molecular lift sensitivity | P18-L Stage 3（完了） | RZ no-swirl限定option。producer提供signed方位vorticity、正の明示係数、`lambda/a>=10`を要求し、一般lift/defaultとはしない。Case-A 100 nm common-P1複合sliceはM3-C1でPASSしたが、lift単独・native-field parityと物理妥当性は未認定 |
 | benchmark-reference charge | P18-C Stage 3 | 保存式の全branchをversion化するが、production OML revisionを置換しない |
 | neutral drag / mixture thermophoresis | P18-R Stage 3（完了） | producer認証済みone-effective-Maxwellian/pseudogas用の二つのsensitivity revision。`maximum_speed_ratio<=1`、`lambda/a>=10`、gate緩和なし。mixture truthやCOMSOL branchではない |
 | terminal hold | P18-H Stage 3（完了） | generic `hold/held`の解析・resume・Brownian回帰と既存Freeze候補15/15を完了。COMSOL固有分岐、paused particle、再飛散は含まない |
-| specular・restitution・確率stick | 採用 | `point_wall_laws_v5`の主用途壁挙動 |
+| contact wall reflection | 採用 | `contact_wall_laws_v7`のspecular、restitution、Maxwell thermal鏡面／拡散混合、確率stick。point/finite-radiusは同じlawをcandidate固有接触法線で使う。surface charging、resuspensionは別revision |
+| fixed-topology time field | Stage 4A（完了） | canonical schema v2、線形時間補間、stage実時刻評価、knot分割、範囲外拒否。hold/discontinuity、moving topology、streamingは別revision |
 | runtime plugin framework | 不採用 | 実例が揃ってから |
 | automatic model fallback | 不採用 | 適用域を隠すため |
 | JAX/GPU-first | 不採用 | dynamic eventとfloat64をCPUで確立 |
@@ -2212,16 +2287,17 @@ boundaryless median 0.0471402 s、比13.6840である。event v4の0.9666176 s�
 同じrevisionでexact-mesh P1/Q1 material domainをP06-Uとして追加した。
 engine v9はtable/surfaceを単一scheduleへ統合し、Philox4x32-10、fixed-time surface release、
 静止壁のstick/escape/specular/probabilistic stick、priority/combined-normal corner、exact linear/quadratic pathの
-reflection residual、C09のcap-driven split、ballistic RZ axis foldを追加した。source位置は
-`edge_fraction`または明示measureのuniform、速度はfixed vectorまたはfixed-speed inward normalに限る。
-manifestはseed、RNG/source/law revision、draw kind、resolved lawとwall/residual/axis集計を記録する。
+reflection residual、C09のcap-driven split、ballistic RZ axis foldを追加した。現行source位置・速度・時刻・物性は
+canonical realized tableで粒子ごとに明示する。manifestはseed、source/law revision、wall draw kind、resolved lawと
+wall/residual/axis集計を記録する。
 engine v10 / event v6はCartesian XYの証明済み一定加速度surfaceへ拡張し、velocity優先のone-sided分類と
 source-facet start-contact certificateを追加した。engine v11 / event v7はCartesian XY一般RK4の厳密内向き
 surface departureとsingle-facet active-boundary residualを追加した。tangent、facet端点/corner、その他証明不能な
 start-contactはfail-closedである。engine v12 / event v8でforce-coupled RZのsigned stage basis、axis event、
-残時間継続を同じwork loopへ追加し、現行engine v37もその意味論を維持する。P11の指数法も
-同じmaterial/RZ event loopを利用する。richer distribution、moving wallは
-後続gateまで明示拒否する。
+残時間継続を同じwork loopへ追加し、現行engineもその意味論を維持する。P11の指数法も
+同じmaterial/RZ event loopを利用する。現行event v22はevent v18の最初hitと同時incident facet集合を維持し、
+finite-radius material contactとperiodic center crossingを同一のfirst-event順序で解決する。surface sourceは現行v5でcanonical realized scheduleへ置換し、
+source selector/RNGをcoreから削除した。moving geometryは後続gateまで明示拒否する。
 未使用機能の値を先にdefault化せず、次をowner packageの
 着手条件とする。状態と詳細の権威は`solver/docs/decisions.md`である。
 
@@ -2232,8 +2308,9 @@ start-contactはfail-closedである。engine v12 / event v8でforce-coupled RZ�
    boundaryless XY regular support/applicability enclosure、revision 3bのsequential RK4材料boundary tubeは完了。
    engine v7のwavefront batching、event v5、accepted-path memory checkpointまで完了
 5. P06-U：exact-mesh P1/Q1 material-domain一般RK4（完了）
-6. P07：counter RNG、surface source、wall law、RZ measure/axis path split、C09 residual規則
-   （engine v11 / event v7まで実装。分布拡張、moving wallは未完了）
+6. P07：wall counter RNG、realized surface source、wall law、RZ axis path split、C09 residual規則
+   （engine v11 / event v7まで実装。P07-TのMaxwell thermalはboundary v6 / RNG v2、P07-Fのfinite-radius
+   contactはcase/result schema 3、geometry v6 / event v18 / source v4へ統合。moving geometryは独立revision）
 7. P06-RZ：P07のaxis意味論を用いるforce-coupled RZ（engine v12 / event v8として完了）
 8. P06-S：physics runtime集約後のStokes–Cunningham schema/applicability/oracle（完了）
 9. P08：particle-local failure、series/probe、薄いCLIによるStage 1A closure（完了）
@@ -2297,6 +2374,11 @@ start-contactはfail-closedである。engine v12 / event v8でforce-coupled RZ�
     catalog v15 / runtime v14 / compiled tile v16とし、engine v30、proposal v7、integrator v2、schemaを維持した。
     保存auditはEpstein replay PASS、既存model applicability 12/12 `NOT_APPLICABLE`、thermophoresis replay
     `NOT_TESTED`で、COMSOL studyは再実行していない
+29. P22（完了、Talbot規約修正）：`talbot_cross_regime_radius_knudsen_v1`と
+    `saffman_unbounded_creeping_shear_v1`を既存categoryの明示optionとして追加した。producer提供のgradient/vorticity、
+    strict field authority、stage/path applicability、pure/compiled parity、Talbot非default係数、Saffman解析回転収束と
+    public fail-closedを検証した。catalog v18 / runtime v21 / compiled tile v19とし、engine/state/schemaを維持した。
+    保存COMSOL datasetで両modelは未選択のため外部parityは`NOT_TESTED`である
 
 未確定値をfallbackや空interfaceへせず、対応するsample caseと独立referenceを伴って確定する。
 

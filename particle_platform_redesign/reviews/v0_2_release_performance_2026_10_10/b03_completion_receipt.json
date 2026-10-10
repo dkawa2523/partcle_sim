@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "existing_hard_checks_passed": "counts, lifecycle, zero failures, revisions, event work, memory/repeat and separate untimed-trace scientific identity",
+  "report_sha256": "8606c1c5dc4b61fb988fce7e8267068086832ad2127e05567647e936097bae49",
+  "raw_log_sha256": "8606c1c5dc4b61fb988fce7e8267068086832ad2127e05567647e936097bae49",
+  "scope": "Warm Brownian public-API engineering characterization of the registered four recipes at 2k/20k, three repeats. Machine-local non-SLA; two-DOF meridional RZ. No general state-dependent SDE or first-passage accuracy claim.",
+  "process": {
+    "finished_at_utc": "2026-10-10T01:56:08.6457006Z",
+    "started_at_utc": "2026-10-10T01:50:27.0484282Z",
+    "batch": "b03_release",
+    "exit_code": 0,
+    "elapsed_s": 341.5991248
+  },
+  "source_and_recipes_unchanged": true,
+  "observations": 24,
+  "registration_sha256": "e7e2c14b89606d84a8747ced0d8b6a86abb3026f7c488fceff5f077ffa1f1ec0",
+  "scenario_particle_rows": 8
+}

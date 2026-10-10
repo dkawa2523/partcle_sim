@@ -1,0 +1,14 @@
+{
+  "platform": "win32",
+  "python": "3.12.13 (main, May 10 2026, 19:35:37) [MSC v.1944 64 bit (AMD64)]",
+  "wheel_sha256": "13070487ab93bc0724061baa13eff3a196c2ed83c22a6a84d727ebdd68c2e20b",
+  "source_readme_raw_sha256": "e03a93cd3940303d74e150209c3cdfb4299b9b1b141a2edeff7fb35af309a3bb",
+  "wheel_body_raw_sha256": "e03a93cd3940303d74e150209c3cdfb4299b9b1b141a2edeff7fb35af309a3bb",
+  "installed_body_raw_sha256": "e03a93cd3940303d74e150209c3cdfb4299b9b1b141a2edeff7fb35af309a3bb",
+  "wheel_metadata_raw_sha256": "575da588a032ee2365be6dc9579ba08e87708121a80444443ebb9415a534e1ad",
+  "installed_metadata_raw_sha256": "575da588a032ee2365be6dc9579ba08e87708121a80444443ebb9415a534e1ad",
+  "readme_raw_bytes_identical": true,
+  "body_utf8_decoded": true,
+  "raw_readme_bytes": 57211,
+  "raw_metadata_bytes_identical": true
+}

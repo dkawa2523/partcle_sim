@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "policy_kind": "m3c2_stochastic_ensemble",
+  "policy_id": "M3-C2-caseA-100nm-axis-normalized-population-policy",
+  "policy_revision": 4,
+  "classification": "preregistered_current_binding_terminal_and_rz_distribution_equivalence",
+  "bootstrap": {
+    "confidence": 0.95,
+    "resamples": 2000,
+    "seed": 42026018,
+    "resampling_unit": "whole_seed_cluster",
+    "role": "legacy_reporting_parameters_not_executed_by_policy_revision_4_or_5"
+  },
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "occupancy": {
+    "radial_bins": 10,
+    "axial_bins": 8,
+    "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes",
+    "role": "registered_full_population_rz_fate_distribution_gate"
+  },
+  "pilot": {
+    "replicas_per_participant": 4,
+    "minimum_levels": 3,
+    "numerical_margin_fraction": 0.25,
+    "path_sensitivity_margin_fraction": 0.25,
+    "maximum_fine_to_coarse_ratio": 0.8,
+    "maximum_fine_to_coarse_ratio_role": "legacy_reported_diagnostic_not_a_revision_4_gate",
+    "role": "noninferential_configuration_screening_not_convergence_or_accuracy",
+    "selection_method": "direct_each_macro_level_to_registered_finest_population_summary",
+    "gating_observables": [
+      "stuck",
+      "held",
+      "escaped",
+      "any_terminal",
+      "full_population_rz_fate_partition_tv"
+    ],
+    "descriptive_non_gating_observables": [
+      "population_mean_position",
+      "population_covariance",
+      "population_registered_quantiles",
+      "adjacent_terminal_difference_ratio"
+    ],
+    "terminal_screening_margin": 0.0125,
+    "rz_distribution_screening_margin": 0.0375,
+    "margin_adjustment_from_pilot_outcomes": "forbidden",
+    "screening_margins": {
+      "mean_position": 0.002,
+      "covariance": 2.5e-05,
+      "quantile": 0.005,
+      "occupancy_tv": 0.0375,
+      "fate_probability": 0.0125,
+      "first_arrival_cdf": 0.0125
+    },
+    "macro_level_purpose": "macro_step_convergence",
+    "registered_finest_reference": "last_macro_level_by_ordinal",
+    "candidate_path_level_purpose": "brownian_first_passage_path_depth_sensitivity",
+    "candidate_path_reference": "registered_finest_macro_level",
+    "full_population_partition": {
+      "active_position_bins": 80,
+      "terminal_categories": [
+        "stuck",
+        "held",
+        "escaped"
+      ],
+      "category_count": 83,
+      "conditioning": "none_every_fixed_source_trajectory_has_exactly_one_category_per_time"
+    }
+  },
+  "final": {
+    "replicas_per_participant": 32,
+    "participant_seed_relationship": "independent_disjoint_unpaired",
+    "fixed_design": {
+      "case_id": "M3-C2A_caseA_100nm_common-P1",
+      "particle_count": 287,
+      "output_time_count": 121
+    },
+    "familywise_error_control": {
+      "overall_alpha": 0.025,
+      "allocation": {
+        "terminal_population": 0.0125,
+        "rz_distribution": 0.0125
+      },
+      "decision_rule": "all_registered_gates_must_pass"
+    },
+    "terminal_population_gate": {
+      "method": "two_sample_union_hoeffding",
+      "independent_unit": "seed_x_fixed_source_particle_trajectory",
+      "curves": [
+        "stuck",
+        "held",
+        "escaped",
+        "any_terminal"
+      ],
+      "active_curve": "derived_as_one_minus_any_terminal_and_not_counted_again",
+      "first_arrival_curve": "represented_once_as_any_terminal",
+      "familywise_alpha": 0.0125,
+      "margin": 0.05,
+      "simultaneous_endpoint_count": 484,
+      "observations_per_participant": 9184,
+      "registered_critical_radius": 0.03501066711816651,
+      "maximum_point_difference_that_can_pass": 0.014989332881833496
+    },
+    "rz_distribution_gate": {
+      "method": "two_sample_union_multinomial_l1",
+      "observable": "full_population_fixed_geometry_rz_fate_partition",
+      "independent_unit": "seed_x_fixed_source_particle_trajectory",
+      "within_unit_dependence": "time_dependence_retained",
+      "active_position_bins": {
+        "radial_bins": 10,
+        "axial_bins": 8,
+        "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes"
+      },
+      "terminal_categories": [
+        "stuck",
+        "held",
+        "escaped"
+      ],
+      "category_count": 83,
+      "output_time_count": 121,
+      "participant_union_count": 2,
+      "observations_per_participant_per_time": 9184,
+      "familywise_alpha": 0.0125,
+      "one_sample_critical_radius_formula": "sqrt((K*ln(2)+ln(2*T/alpha))/(2*N))",
+      "one_sample_critical_radius": 0.06057675949310276,
+      "two_sample_critical_radius": 0.12115351898620552,
+      "margin_total_variation": 0.15,
+      "maximum_empirical_tv_that_can_pass": 0.028846481013794473
+    },
+    "descriptive_only": [
+      "population_mean_position_point_summary",
+      "population_covariance_point_summary",
+      "population_position_quantile_point_summary"
+    ],
+    "seed_allocation": {
+      "path": "m3c2_caseA_100nm_axis_normalized_final_seed_allocation.json",
+      "sha256": "00614598e44775c1ccf0bed5feb1e321a6012b42716201b35b1e66e4be841965",
+      "json_pointers": {
+        "comsol": "/participant_seed_sets/comsol",
+        "candidate": "/participant_seed_sets/candidate"
+      }
+    },
+    "authorization": "post_pilot_receipt_must_bind_policy_pilot_scope_common_design_selected_settings_and_seed_allocation"
+  },
+  "independence_evidence": {
+    "path": "caseA/rng_noninteraction_v2/evidence_manifest.json",
+    "sha256": "dd1176e5f80d32b2b8de32589eb7839bc1bc0bf8172ca24bd410e7444f3d53c5"
+  },
+  "physical_applicability": {
+    "status": "NOT_CERTIFIED_EFFECTIVE_GAS_AND_AGGREGATE_MODEL_FORM",
+    "comparison_scope": "locked_same_form_numerical_sensitivity_only"
+  },
+  "claim_policy": {
+    "permitted_if_final_passes": "registered finite-algorithm terminal fractions and fixed R-Z/fate bins agree within declared margins for the locked caseA source population; no continuous-path or physical-model certification",
+    "physical_applicability": "NOT_CERTIFIED_EFFECTIVE_GAS_AND_AGGREGATE_MODEL_FORM",
+    "pathwise_rng_equality": false,
+    "continuous_weak_convergence_from_pilot": false,
+    "continuous_trajectory_equivalence": false,
+    "comsol_golden_truth": false,
+    "universal_comsol_equivalence": false,
+    "threshold_adjustment_after_pilot": "forbidden_without_new_policy_revision_and_new_unseen_final_cohort"
+  },
+  "registration": {
+    "author_role": "physics_review",
+    "registered_at_utc": "2026-10-09T14:20:30.704488+00:00",
+    "source_policy": {
+      "solver_relative_path": "tools/vv/comsol/cases/m3c2_caseP_100nm_ensemble_evaluation_v4.json",
+      "sha256": "6388084a526053144550a5914a8000cae3a6f1a2899d784cc1cb875a30050eae"
+    },
+    "new_outcomes_inspected": false,
+    "old_history_overwritten": false,
+    "execution_readiness": "DOCUMENT_BINDINGS_FIXED_PENDING_INDEPENDENT_REVIEW_AND_ACTUAL_COMPANION_MEANING_GATE",
+    "overall_two_anchor_familywise_alpha": 0.05,
+    "anchor_familywise_alpha": 0.025,
+    "anchor_family_contains": [
+      "terminal_population",
+      "rz_distribution"
+    ],
+    "numerical_error_scope": "Pilot differences are noninferential numerical sensitivity, not an additive confidence bound for continuous-SDE bias."
+  }
+}

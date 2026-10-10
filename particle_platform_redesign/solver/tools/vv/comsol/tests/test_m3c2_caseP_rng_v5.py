@@ -38,18 +38,73 @@ def _json(path: Path) -> dict[str, Any]:
     return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
-def test_casep_candidate_manifest_uses_current_campaign_identity_schema() -> None:
+@pytest.mark.parametrize(
+    "current_runner", ["m3c2_candidate_campaign_runner_v5", "m3c2_candidate_campaign_runner_v6"]
+)
+def test_casep_candidate_manifest_uses_current_campaign_identity_schema(
+    current_runner: str,
+) -> None:
     root = _solver_root()
     manifest = _json(
         root / "_out_m3c2" / "caseP_100nm_candidate_pilot_v2" / "candidate_pilot_manifest.json"
     )
 
-    evaluator._casep_candidate_participant(manifest, "pilot")
+    assert (
+        evaluator._casep_candidate_participant(manifest, "pilot")
+        == "m3c2_candidate_campaign_runner_v4"
+    )
 
     changed = copy.deepcopy(manifest)
     changed["campaign_identity"]["evaluation_case_id"] = "another-case"
     with pytest.raises(ValueError, match="identity differs"):
         evaluator._casep_candidate_participant(changed, "pilot")
+
+    current = copy.deepcopy(manifest)
+    current["tool_revision"] = current_runner
+    current["brownian_noise_revision"] = evaluator.CASEP_CURRENT_NOISE_REVISION
+    replicas = [replica for level in current["levels"].values() for replica in level["replicas"]]
+    for replica in replicas:
+        replica["resolved_physics_models"]["noise"]["revision"] = (
+            evaluator.CASEP_CURRENT_NOISE_REVISION
+        )
+    assert evaluator._casep_candidate_participant(current, "pilot") == current_runner
+
+    mismatched = copy.deepcopy(manifest)
+    mismatched_replicas = [
+        replica for level in mismatched["levels"].values() for replica in level["replicas"]
+    ]
+    for replica in mismatched_replicas:
+        replica["resolved_physics_models"]["noise"]["revision"] = (
+            evaluator.CASEP_CURRENT_NOISE_REVISION
+        )
+    with pytest.raises(ValueError, match="runner and Brownian model revisions differ"):
+        evaluator._casep_candidate_participant(mismatched, "pilot")
+
+    replicas[0]["resolved_physics_models"]["noise"]["revision"] = (
+        evaluator.CASEP_HISTORICAL_NOISE_REVISION
+    )
+    with pytest.raises(ValueError, match="mixes Brownian model revisions"):
+        evaluator._casep_candidate_participant(current, "pilot")
+
+
+def test_changed_evaluator_uses_v6_and_rejects_unknown_runner() -> None:
+    policy = cast(evaluator.Policy, SimpleNamespace(revision=5))
+    historical = cast(
+        evaluator.Campaign,
+        SimpleNamespace(candidate_tool_revision="m3c2_candidate_campaign_runner_v4"),
+    )
+    current = cast(
+        evaluator.Campaign,
+        SimpleNamespace(candidate_tool_revision="m3c2_candidate_campaign_runner_v5"),
+    )
+
+    assert evaluator.HISTORICAL_TOOL_REVISION_V5 == "m3c2_stochastic_ensemble_evaluator_v5"
+    assert evaluator._tool_revision(policy, historical) == evaluator.TOOL_REVISION_V6
+    assert evaluator._tool_revision(policy, current) == evaluator.TOOL_REVISION_V6
+
+    unknown = cast(evaluator.Campaign, SimpleNamespace(candidate_tool_revision=None))
+    with pytest.raises(ValueError, match="recognized candidate runner revision"):
+        evaluator._tool_revision(policy, unknown)
 
 
 def test_casep_v5_projection_has_one_strict_policy_only_transition() -> None:

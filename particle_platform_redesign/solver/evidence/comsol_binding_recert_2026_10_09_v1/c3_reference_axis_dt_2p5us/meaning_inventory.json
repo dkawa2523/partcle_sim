@@ -1,0 +1,1069 @@
+{
+  "schema_version": 2,
+  "inventory_id": "C3-current-axis-normalized-2p5us",
+  "source": {
+    "model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+    "comsol_version": "6.4.0.429",
+    "component": "comp1",
+    "study": "stdM3C3",
+    "solution": "solM3C3",
+    "dataset": "partM3C3"
+  },
+  "layers": {
+    "coordinate_dof": [
+      {
+        "id": "c3.coordinate",
+        "scope": "required",
+        "source_meaning": "RZ meridional particle components without azimuthal DOF",
+        "canonical_meaning": "RZ meridional particle components without azimuthal DOF",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/coordinate_dof/IncludeOutOfPlane"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/physics_properties/IncludeOutOfPlane/observed_value"
+            }
+          }
+        ],
+        "reason": "Companion API getter; axis fold is bound separately. Finite-radius wall contact is not inferred from force law; canonical source contact radii are zero."
+      }
+    ],
+    "formulation": [
+      {
+        "id": "c3.formulation",
+        "scope": "required",
+        "source_meaning": "Newtonian first-order position/velocity with dynamic auxiliary charge",
+        "canonical_meaning": "Newtonian first-order position/velocity with dynamic auxiliary charge",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/formulation/Formulation/0"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/physics_properties/Formulation/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/auxq"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/auxq/active"
+            }
+          }
+        ],
+        "reason": "This proves selected formulation and active auxiliary field, not assembled auxiliary-charge RHS at all stages."
+      }
+    ],
+    "field_representation_owner_recovery": [
+      {
+        "id": "c3.native_field",
+        "scope": "excluded",
+        "source_meaning": "native FE background",
+        "canonical_meaning": null,
+        "mapping": null,
+        "adapter_action": null,
+        "evidence": [
+          "axis-normalized canonical input receipt"
+        ],
+        "binding": [],
+        "reason": "Only same canonical P1 field parity requested; explicit odd azimuthal-vorticity axis recovery is a new field, not native FE/curl(u) validation."
+      }
+    ],
+    "source": [
+      {
+        "id": "c3.source",
+        "scope": "required",
+        "source_meaning": "287 fixed canonical source particles, candidate-owned three-current initial charge",
+        "canonical_meaning": "287 fixed canonical source particles, candidate-owned three-current initial charge",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/dp_expression"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/particle_properties/dp/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/rho_expression"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/particle_properties/rhop/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/charge_expression"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/particle_properties/Z/observed_value"
+            }
+          }
+        ],
+        "reason": "Public normalizer separately verifies all initial states and shared release file SHA. Native evaluated diameter differs by one representational ULP; source numerical comparison uses the registered roundoff check, not an invented exact-float equality."
+      }
+    ],
+    "boundaries": [
+      {
+        "id": "c3.boundary.axi1",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law",
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/axi1/boundary_ids"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/axi1/boundary_ids"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/axi1/WallCondition"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/axi1/properties/WallCondition/observed_value"
+            }
+          }
+        ],
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality."
+      },
+      {
+        "id": "c3.boundary.wall1",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law",
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/wall1/boundary_ids"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/wall1/boundary_ids"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/wall1/WallCondition"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/wall1/properties/WallCondition/observed_value"
+            }
+          }
+        ],
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality."
+      },
+      {
+        "id": "c3.boundary.outin",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law",
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/outin/boundary_ids"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/outin/boundary_ids"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/outin/WallCondition"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/outin/properties/WallCondition/observed_value"
+            }
+          }
+        ],
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality."
+      },
+      {
+        "id": "c3.boundary.outpump",
+        "scope": "required",
+        "source_meaning": "Companion selected native entity IDs and effective response law",
+        "canonical_meaning": "Companion selected native entity IDs and effective response law",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/outpump/boundary_ids"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/outpump/boundary_ids"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/boundaries/outpump/WallCondition"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/boundary_features/outpump/properties/WallCondition/observed_value"
+            }
+          }
+        ],
+        "reason": "Same native entity IDs map to canonical geometry groups. Retained Freeze/Stick event IDs require bndenv(dom) evidence; Disappear IDs remain unobserved and cannot certify semantic event equality."
+      },
+      {
+        "id": "c3.source_axis",
+        "scope": "required",
+        "source_meaning": "Source Freeze axis changed explicitly to companion meridional Bounce fold",
+        "canonical_meaning": "Source Freeze axis changed explicitly to companion meridional Bounce fold",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/axis_source_law"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/source/boundary_features/axi1/properties/WallCondition/observed_value"
+            }
+          }
+        ],
+        "reason": "Source and companion meanings are distinct; source-free native critical axis microcase supports companion fold semantics only."
+      }
+    ],
+    "models": [
+      {
+        "id": "c3.model.df1",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/df1"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/df1/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.bf1",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/bf1"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/bf1/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.auxq",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/auxq"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/auxq/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.idf",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/idf"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/idf/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.ef1",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/ef1"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/ef1/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.m3c3Epstein",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/m3c3Epstein"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/m3c3Epstein/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.liftfm",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/liftfm"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/liftfm/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.depf",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/depf"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/depf/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.gf1",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/gf1"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/gf1/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.model.m3c3HeatFlux",
+        "scope": "required",
+        "source_meaning": "Registered configured common-P1 deterministic model active state",
+        "canonical_meaning": "Registered configured common-P1 deterministic model active state",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/models/m3c3HeatFlux"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/m3c3HeatFlux/active"
+            }
+          }
+        ],
+        "reason": "Native feature active getter. Staged Java also asserts original Saffman/thermophoresis disabled. Formula diagnostic independently compares configured getter expressions to production formulas; native total force is separately observed, individual native contributions and auxq assembled RHS remain NOT_TESTED."
+      },
+      {
+        "id": "c3.selectors",
+        "scope": "required",
+        "source_meaning": "User-defined electric source and single explicit Epstein force owner",
+        "canonical_meaning": "User-defined electric source and single explicit Epstein force owner",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/electric_field"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/ef1/properties/E/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/epstein_force"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/force_features/m3c3Epstein/properties/F/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/beta_expression"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/beta_expression"
+            }
+          }
+        ],
+        "reason": "Actual selected expressions; common-P1 numeric formula/total-force diagnostics are separate numerical evidence."
+      },
+      {
+        "id": "c3.units",
+        "scope": "required",
+        "source_meaning": "SI primitive function and Epstein coefficient unit formation",
+        "canonical_meaning": "SI primitive function and Epstein coefficient unit formation",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/unit_system"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/model_base_unit_system"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/unit_system"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/component_base_unit_system"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/updates_disabled"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/variable_updates_disabled"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/argument_units"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/rho_function_argument_units/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/argument_units"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/temperature_function_argument_units/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/rho_unit"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/rho_function_units/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/temperature_unit"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/temperature_function_units/observed_value"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/units/resolved_beta_unit"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/resolved_beta_unit"
+            }
+          },
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/units/resolved_viscosity_unit"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/epstein_parameters/resolved_viscosity_unit"
+            }
+          }
+        ],
+        "reason": "Unit resolution and source expression getter only; numeric formation is separately compared to canonical primitives."
+      }
+    ],
+    "integration": [
+      {
+        "id": "c3.integration.odesolvertype",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting",
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/integration/odesolvertype"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/solver_properties/odesolvertype/observed_value"
+            }
+          }
+        ],
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof."
+      },
+      {
+        "id": "c3.integration.timemethodexp",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting",
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/integration/timemethodexp"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/solver_properties/timemethodexp/observed_value"
+            }
+          }
+        ],
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof."
+      },
+      {
+        "id": "c3.integration.erkorder",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting",
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/integration/erkorder"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/solver_properties/erkorder/observed_value"
+            }
+          }
+        ],
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof."
+      },
+      {
+        "id": "c3.integration.rtol",
+        "scope": "required",
+        "source_meaning": "Registered explicit classical RK4 numerical setting",
+        "canonical_meaning": "Registered explicit classical RK4 numerical setting",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/integration/rtol"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/solver_properties/rtol/observed_value"
+            }
+          }
+        ],
+        "reason": "Actual solver property, no continuous truncation or internal-stage convergence proof."
+      },
+      {
+        "id": "c3.history.WallAccuracyOrder",
+        "scope": "required",
+        "source_meaning": "Registered wall and particle-history setting",
+        "canonical_meaning": "Registered wall and particle-history setting",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/integration/WallAccuracyOrder"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/physics_properties/WallAccuracyOrder/observed_value"
+            }
+          }
+        ],
+        "reason": "Saved output cadence is distinct from actual rktimestep and boundary-event stopping times."
+      },
+      {
+        "id": "c3.history.StoreExtra",
+        "scope": "required",
+        "source_meaning": "Registered wall and particle-history setting",
+        "canonical_meaning": "Registered wall and particle-history setting",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/integration/StoreExtra"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/physics_properties/StoreExtra/observed_value"
+            }
+          }
+        ],
+        "reason": "Saved output cadence is distinct from actual rktimestep and boundary-event stopping times."
+      },
+      {
+        "id": "c3.history.StoreParticleStatusData",
+        "scope": "required",
+        "source_meaning": "Registered wall and particle-history setting",
+        "canonical_meaning": "Registered wall and particle-history setting",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_native_settings.json",
+              "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17",
+              "pointer": "/integration/StoreParticleStatusData"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/physics_properties/StoreParticleStatusData/observed_value"
+            }
+          }
+        ],
+        "reason": "Saved output cadence is distinct from actual rktimestep and boundary-event stopping times."
+      },
+      {
+        "id": "c3.step",
+        "scope": "required",
+        "source_meaning": "Registered actual RK4 internal fixed step",
+        "canonical_meaning": "Registered actual RK4 internal fixed step",
+        "mapping": "direct",
+        "adapter_action": null,
+        "evidence": [
+          "actual_binding_receipt.json",
+          "registered source/producer/input hashes",
+          "c3_frozen_formula_diagnostic.json and independent native total-force audit support only saved common-active states"
+        ],
+        "binding": [
+          {
+            "expected": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\registration_axis_normalized\\c3_expected_binding_values.json",
+              "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01",
+              "pointer": "/steps/2p5us"
+            },
+            "observed": {
+              "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_2p5us\\actual_binding_receipt.json",
+              "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+              "pointer": "/companion/solver_properties/rktimestep/observed_value"
+            }
+          }
+        ],
+        "reason": "The 121 output times do not imply 121 integration steps."
+      }
+    ]
+  },
+  "comparison_conditions": {
+    "same_canonical_field_solver_parity": {
+      "requested": true,
+      "reference_field": {
+        "representation": "canonical",
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93"
+      },
+      "candidate_field": {
+        "representation": "canonical",
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93"
+      },
+      "adapter_lineage": [
+        "registered current canonical P1 tables; explicit axis-odd recovery; immutable MPH loadCopy"
+      ],
+      "outcome": {
+        "status": "NOT_TESTED",
+        "summary": "Numeric verdict remains with registered trajectory/event evaluator; binding agreement alone is not physical proof.",
+        "evidence": []
+      }
+    },
+    "native_fe_end_to_end_reproduction": {
+      "requested": false,
+      "reference_field": {
+        "representation": "canonical",
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93"
+      },
+      "candidate_field": {
+        "representation": "canonical",
+        "identity": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93"
+      },
+      "adapter_lineage": [
+        "registered current canonical P1 tables; explicit axis-odd recovery; immutable MPH loadCopy"
+      ],
+      "outcome": {
+        "status": "NOT_APPLICABLE",
+        "summary": "Numeric verdict remains with registered trajectory/event evaluator; binding agreement alone is not physical proof.",
+        "evidence": []
+      }
+    }
+  }
+}

@@ -10,7 +10,7 @@ import numpy as np
 from numba import njit
 
 CPU_RUNTIME_LAYOUT_REVISION = "resident_soa_serial_slab_v6"
-MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v14"
+MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v16"
 
 _MAX_SLAB_PARTICLES = 65_536
 _MINIMUM_SAFETY_MARGIN_BYTES = 64 * 1024
@@ -21,6 +21,7 @@ FIELD_KERNEL_UNRESOLVED_CELL = 2
 FIELD_KERNEL_NO_SUPPORTED_CELL = 3
 FIELD_KERNEL_INVERSE_MAPPING = 4
 FIELD_KERNEL_NONFINITE_SAMPLE = 5
+FIELD_KERNEL_TIME_OUTSIDE = 6
 
 _FIELD_LOCATION_ULPS = 64.0
 _FIELD_FLOAT_EPS = np.finfo(np.float64).eps
@@ -1304,6 +1305,115 @@ def sample_unstructured_nodal_field(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_p1_nodal_gradient(
+    nodes_m: np.ndarray,
+    connectivity: np.ndarray,
+    cell_id: np.ndarray,
+    canonical_values: np.ndarray,
+    sampled_gradient: np.ndarray,
+    row_status: np.ndarray,
+) -> None:
+    """Differentiate P1 basis using the previously located cell."""
+
+    for row in range(cell_id.size):
+        node0, node1, node2 = connectivity[cell_id[row]]
+        dx1 = nodes_m[node1, 0] - nodes_m[node0, 0]
+        dy1 = nodes_m[node1, 1] - nodes_m[node0, 1]
+        dx2 = nodes_m[node2, 0] - nodes_m[node0, 0]
+        dy2 = nodes_m[node2, 1] - nodes_m[node0, 1]
+        determinant = dx1 * dy2 - dx2 * dy1
+        for component in range(canonical_values.shape[1]):
+            difference1 = canonical_values[node1, component] - canonical_values[node0, component]
+            difference2 = canonical_values[node2, component] - canonical_values[node0, component]
+            gradient0 = (dy2 * difference1 - dy1 * difference2) / determinant
+            gradient1 = (dx1 * difference2 - dx2 * difference1) / determinant
+            sampled_gradient[row, component, 0] = gradient0
+            sampled_gradient[row, component, 1] = gradient1
+            if not np.isfinite(gradient0) or not np.isfinite(gradient1):
+                row_status[row] = FIELD_KERNEL_NONFINITE_SAMPLE
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_q1_nodal_gradient(
+    nodes_m: np.ndarray,
+    connectivity: np.ndarray,
+    cell_id: np.ndarray,
+    weights: np.ndarray,
+    canonical_values: np.ndarray,
+    sampled_gradient: np.ndarray,
+    row_status: np.ndarray,
+) -> None:
+    """Use sampled Q1 coordinates and the locator's Jacobian, without locating."""
+
+    for row in range(cell_id.size):
+        xi = 2.0 * (weights[row, 1] + weights[row, 2]) - 1.0
+        eta = 2.0 * (weights[row, 2] + weights[row, 3]) - 1.0
+        status, j00, j01, j10, j11 = _field_q1_jacobian(
+            nodes_m, connectivity, cell_id[row], xi, eta
+        )
+        if status == FIELD_KERNEL_OK:
+            status, _, _ = _field_jacobian_metrics(j00, j01, j10, j11)
+        if status != FIELD_KERNEL_OK:
+            row_status[row] = status
+            continue
+        determinant = j00 * j11 - j01 * j10
+        node0, node1, node2, node3 = connectivity[cell_id[row]]
+        for component in range(canonical_values.shape[1]):
+            difference1 = canonical_values[node1, component] - canonical_values[node0, component]
+            difference2 = canonical_values[node2, component] - canonical_values[node0, component]
+            difference3 = canonical_values[node3, component] - canonical_values[node0, component]
+            du_xi = 0.25 * ((1.0 - eta) * difference1 + (1.0 + eta) * (difference2 - difference3))
+            du_eta = 0.25 * ((1.0 - xi) * difference3 + (1.0 + xi) * (difference2 - difference1))
+            gradient0 = (j11 * du_xi - j10 * du_eta) / determinant
+            gradient1 = (j00 * du_eta - j01 * du_xi) / determinant
+            sampled_gradient[row, component, 0] = gradient0
+            sampled_gradient[row, component, 1] = gradient1
+            if not np.isfinite(gradient0) or not np.isfinite(gradient1):
+                row_status[row] = FIELD_KERNEL_NONFINITE_SAMPLE
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_regular_nodal_gradient(
+    axis0_m: np.ndarray,
+    axis1_m: np.ndarray,
+    cell_id: np.ndarray,
+    weights: np.ndarray,
+    canonical_values: np.ndarray,
+    sampled_gradient: np.ndarray,
+    row_status: np.ndarray,
+) -> None:
+    """Differentiate the bilinear basis using the sampled stage weights."""
+
+    axis1_size = axis1_m.size
+    for row in range(cell_id.size):
+        index0 = cell_id[row] // (axis1_size - 1)
+        index1 = cell_id[row] - index0 * (axis1_size - 1)
+        node0 = index0 * axis1_size + index1
+        node1 = node0 + axis1_size
+        node2 = node1 + 1
+        node3 = node0 + 1
+        fraction0 = weights[row, 1] + weights[row, 2]
+        fraction1 = weights[row, 2] + weights[row, 3]
+        width0 = axis0_m[index0 + 1] - axis0_m[index0]
+        width1 = axis1_m[index1 + 1] - axis1_m[index1]
+        for component in range(canonical_values.shape[1]):
+            value0 = canonical_values[node0, component]
+            value1 = canonical_values[node1, component]
+            value2 = canonical_values[node2, component]
+            value3 = canonical_values[node3, component]
+            gradient0 = (
+                (1.0 - fraction1) * (value1 - value0) + fraction1 * (value2 - value3)
+            ) / width0
+            gradient1 = (
+                (1.0 - fraction0) * (value3 - value0) + fraction0 * (value2 - value1)
+            ) / width1
+            sampled_gradient[row, component, 0] = gradient0
+            sampled_gradient[row, component, 1] = gradient1
+            if not np.isfinite(gradient0) or not np.isfinite(gradient1):
+                row_status[row] = FIELD_KERNEL_NONFINITE_SAMPLE
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def sample_cell_field(
     position_m: np.ndarray,
     cell_id: np.ndarray,
@@ -1319,6 +1429,158 @@ def sample_cell_field(
         status = FIELD_KERNEL_OK
         for component in range(canonical_values.shape[1]):
             value = canonical_values[owner, component]
+            if not np.isfinite(value):
+                status = FIELD_KERNEL_NONFINITE_SAMPLE
+            sampled_values[row, component] = value
+        if zero_axis_radial and position_m[row, 0] == 0.0:
+            sampled_values[row, 0] = 0.0
+        row_status[row] = status
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _field_time_bracket(snapshot_time_s: np.ndarray, query_time_s: float) -> tuple[int, int, float]:
+    """Return one inclusive linear bracket or a fail-closed row status."""
+
+    if (
+        not np.isfinite(query_time_s)
+        or query_time_s < snapshot_time_s[0]
+        or query_time_s > snapshot_time_s[-1]
+    ):
+        return FIELD_KERNEL_TIME_OUTSIDE, 0, 0.0
+    lower = 0
+    upper = snapshot_time_s.size - 1
+    while upper - lower > 1:
+        middle = (lower + upper) // 2
+        if snapshot_time_s[middle] <= query_time_s:
+            lower = middle
+        else:
+            upper = middle
+    width = snapshot_time_s[lower + 1] - snapshot_time_s[lower]
+    weight = (query_time_s - snapshot_time_s[lower]) / width
+    if not np.isfinite(weight) or weight < 0.0 or weight > 1.0:
+        return FIELD_KERNEL_TIME_OUTSIDE, 0, 0.0
+    return FIELD_KERNEL_OK, lower, weight
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _field_linear_time_value(lower: float, upper: float, upper_weight: float) -> float:
+    return _field_two_term_sum((1.0 - upper_weight) * lower, upper_weight * upper)
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_regular_nodal_time_field(
+    axis1_size: int,
+    position_m: np.ndarray,
+    time_s: np.ndarray,
+    cell_id: np.ndarray,
+    weights: np.ndarray,
+    snapshot_time_s: np.ndarray,
+    canonical_values: np.ndarray,
+    zero_axis_radial: bool,
+    sampled_values: np.ndarray,
+    row_status: np.ndarray,
+) -> None:
+    """Interpolate fixed-grid snapshots in space, then linearly in stage time."""
+
+    axis1_cell_count = axis1_size - 1
+    for row in range(position_m.shape[0]):
+        status, snapshot, time_weight = _field_time_bracket(snapshot_time_s, time_s[row])
+        if status != FIELD_KERNEL_OK:
+            row_status[row] = status
+            continue
+        index0 = cell_id[row] // axis1_cell_count
+        index1 = cell_id[row] - index0 * axis1_cell_count
+        node0 = index0 * axis1_size + index1
+        node1 = (index0 + 1) * axis1_size + index1
+        node2 = node1 + 1
+        node3 = node0 + 1
+        for component in range(canonical_values.shape[2]):
+            lower = (
+                weights[row, 0] * canonical_values[snapshot, node0, component]
+                + weights[row, 1] * canonical_values[snapshot, node1, component]
+                + weights[row, 2] * canonical_values[snapshot, node2, component]
+                + weights[row, 3] * canonical_values[snapshot, node3, component]
+            )
+            upper = (
+                weights[row, 0] * canonical_values[snapshot + 1, node0, component]
+                + weights[row, 1] * canonical_values[snapshot + 1, node1, component]
+                + weights[row, 2] * canonical_values[snapshot + 1, node2, component]
+                + weights[row, 3] * canonical_values[snapshot + 1, node3, component]
+            )
+            value = _field_linear_time_value(lower, upper, time_weight)
+            if not np.isfinite(value):
+                status = FIELD_KERNEL_NONFINITE_SAMPLE
+            sampled_values[row, component] = value
+        if zero_axis_radial and position_m[row, 0] == 0.0:
+            sampled_values[row, 0] = 0.0
+        row_status[row] = status
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_unstructured_nodal_time_field(
+    element_node_count: int,
+    connectivity: np.ndarray,
+    position_m: np.ndarray,
+    time_s: np.ndarray,
+    cell_id: np.ndarray,
+    weights: np.ndarray,
+    snapshot_time_s: np.ndarray,
+    canonical_values: np.ndarray,
+    zero_axis_radial: bool,
+    sampled_values: np.ndarray,
+    row_status: np.ndarray,
+) -> None:
+    """Interpolate P1/Q1 snapshots in space, then linearly in stage time."""
+
+    for row in range(position_m.shape[0]):
+        status, snapshot, time_weight = _field_time_bracket(snapshot_time_s, time_s[row])
+        if status != FIELD_KERNEL_OK:
+            row_status[row] = status
+            continue
+        owner = cell_id[row]
+        for component in range(canonical_values.shape[2]):
+            lower = 0.0
+            upper = 0.0
+            for local_node in range(element_node_count):
+                node_id = connectivity[owner, local_node]
+                lower += weights[row, local_node] * canonical_values[snapshot, node_id, component]
+                upper += (
+                    weights[row, local_node] * canonical_values[snapshot + 1, node_id, component]
+                )
+            value = _field_linear_time_value(lower, upper, time_weight)
+            if not np.isfinite(value):
+                status = FIELD_KERNEL_NONFINITE_SAMPLE
+            sampled_values[row, component] = value
+        if zero_axis_radial and position_m[row, 0] == 0.0:
+            sampled_values[row, 0] = 0.0
+        row_status[row] = status
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_cell_time_field(
+    position_m: np.ndarray,
+    time_s: np.ndarray,
+    cell_id: np.ndarray,
+    snapshot_time_s: np.ndarray,
+    canonical_values: np.ndarray,
+    zero_axis_radial: bool,
+    sampled_values: np.ndarray,
+    row_status: np.ndarray,
+) -> None:
+    """Select one cell value from each bracketing snapshot and interpolate it."""
+
+    for row in range(position_m.shape[0]):
+        status, snapshot, time_weight = _field_time_bracket(snapshot_time_s, time_s[row])
+        if status != FIELD_KERNEL_OK:
+            row_status[row] = status
+            continue
+        owner = cell_id[row]
+        for component in range(canonical_values.shape[2]):
+            value = _field_linear_time_value(
+                canonical_values[snapshot, owner, component],
+                canonical_values[snapshot + 1, owner, component],
+                time_weight,
+            )
             if not np.isfinite(value):
                 status = FIELD_KERNEL_NONFINITE_SAMPLE
             sampled_values[row, component] = value
@@ -1458,7 +1720,7 @@ def early_memory_requirement_bytes(
     """Return a phase-separated lower bound before source realization."""
 
     _require_nonnegative(canonical_data_bytes, particle_count, writer_reserve_bytes)
-    schedule_bytes = particle_count * 120
+    schedule_bytes = particle_count * 128
     resident_state_bytes = particle_count * 101
     active_index_bytes = particle_count * 9
     # The early gate runs before model-specific runtime arrays exist, so it

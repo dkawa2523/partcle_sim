@@ -1,6 +1,9 @@
 param(
     [string]$ComsolRoot = "C:\Program Files\COMSOL\COMSOL64\Multiphysics_copy1",
     [string]$CandidateInput = "",
+    [Parameter(Mandatory=$true)]
+    [ValidatePattern('^[0-9a-fA-F]{64}$')]
+    [string]$ExpectedCandidateSha256,
     [string]$OutputDirectory = ""
 )
 
@@ -32,7 +35,6 @@ $SourceModel = Join-Path $RepositoryRoot (
     "formal_iondrag_theory_consistent_10_30_100nm.mph"
 )
 $ExpectedSourceSha256 = "3BBF08E3469758313EAC5DE473A7A0DD4CC9A6F72C9722393229F0B856E9B524"
-$ExpectedCandidateSha256 = "C54B4B658213230E82307CA89018538C0240BFCC83E793206D5093F4F08908E9"
 $ExpectedComsolVersion = "COMSOL Multiphysics 6.4.0.429"
 
 foreach ($Required in @(
@@ -89,6 +91,10 @@ try {
     if (-not (Select-String -LiteralPath $ProcessLog -SimpleMatch "M3C3_PRIMITIVE_EXPORT|pass|")) {
         throw "M3-C3 primitive exporter did not emit its completion record"
     }
+    if (Select-String -LiteralPath $ProcessLog, $BatchLog -Pattern `
+            'Error running java class\.|/\*+Error\*+/') {
+        throw "COMSOL primitive exporter reported a native execution error"
+    }
     foreach ($Csv in @($DomainCsv, $BoundaryCsv)) {
         if (-not (Test-Path -LiteralPath $Csv -PathType Leaf)) {
             throw "M3-C3 primitive exporter did not create $Csv"
@@ -102,8 +108,9 @@ try {
 
     Push-Location $SolverRoot
     try {
-        & uv run --locked python $Normalizer `
+        & uv run --locked python -m tools.vv.comsol.normalize_m3c3_negative_ion_primitives `
             --canonical-input $CandidateInput `
+            --expected-input-sha256 $ExpectedCandidateSha256.ToLowerInvariant() `
             --domain-csv $DomainCsv `
             --boundary-csv $BoundaryCsv `
             --source-mph $SourceModel `

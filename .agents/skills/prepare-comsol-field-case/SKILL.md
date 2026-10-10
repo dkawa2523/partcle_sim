@@ -14,7 +14,7 @@ solver core.
 1. Read the repository `AGENTS.md`, `particle_platform_redesign/AGENTS.md`,
    `particle_platform_redesign/solver/docs/physics_models.md`,
    `particle_platform_redesign/solver/docs/support_and_errors.md`, and the
-   relevant part of `particle_platform_redesign/solver/docs/case_format_v2.md`.
+   relevant part of `particle_platform_redesign/solver/docs/case_format_v3.md`.
 2. List the particle models the user intends to enable. Derive the smallest
    set of required canonical primitive fields from those models. Prefer gas,
    thermal, electric, magnetic, and plasma primitives over particle-size-
@@ -53,6 +53,15 @@ If model access or licensing is unavailable, or no stored solution exists and
 re-solving is not authorized, state the exact missing export instead of
 fabricating it.
 
+Before writing or changing an adapter, map the selected scope into the seven
+producer-neutral layers documented under **Generic meaning preflight** in
+`particle_platform_redesign/solver/tools/vv/comsol/README.md`, then run
+`tools/vv/comsol/meaning_preflight.py`. For a field-only source, mark both
+trajectory comparison questions as unrequested and `NOT_APPLICABLE`; use the
+layer classifications to decide whether direct conversion is supported, an
+adapter is needed, or the source meaning is still ambiguous. Do not treat a
+successful preflight as field-accuracy or trajectory evidence.
+
 ## Build the canonical case
 
 Run commands from `particle_platform_redesign/solver/` with its locked uv
@@ -83,7 +92,7 @@ release conditions, or wall laws from an MPH that contains no particles. Ask
 the user only when an unresolved choice changes the physical problem.
 
 The adapter and builder write HDF5/reports, not the solver YAML. Author the YAML
-explicitly from `particle_platform_redesign/solver/docs/case_format_v2.md` and
+explicitly from `particle_platform_redesign/solver/docs/case_format_v3.md` and
 `particle_platform_redesign/solver/examples/quickstart/create_case.py`; do not
 hide physical choices in an adapter default.
 

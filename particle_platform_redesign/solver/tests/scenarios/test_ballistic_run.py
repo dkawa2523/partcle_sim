@@ -117,19 +117,19 @@ def test_c01_runs_through_all_three_public_operations(tmp_path: Path) -> None:
         + lifecycle.failed
     )
     np.testing.assert_array_equal(population, np.full(summary.macro_step_count, 1, dtype="<u8"))
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v37"
-    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v46"
+    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
     assert result.manifest["step_proposal_revision"] == "coupled_fixed_step_proposal_v10"
     assert result.manifest["rk4_enclosure_revision"] is None
     assert result.manifest["rk4_dense_path_revision"] is None
     assert result.manifest["field_location_revision"] == "field_location_v4"
-    assert (
-        result.manifest["geometry_algorithm_revision"]
-        == "line_boundary_stackless_volume_cell_bvh_v5"
+    assert result.manifest["geometry_algorithm_revision"] == "line_boundary_capsule_contact_bvh_v7"
+    assert result.manifest["topology_algorithm_revision"] is None
+    assert result.manifest["event_algorithm_revision"] == (
+        "line_quadratic_curved_capsule_periodic_first_hit_v22"
     )
-    assert result.manifest["event_algorithm_revision"] == "line_quadratic_rk4_axis_first_hit_v16"
     assert result.manifest["boundary_algorithm_revision"] is None
-    assert result.manifest["result_algorithm_revision"] == "durable_segmented_result_v5"
+    assert result.manifest["result_algorithm_revision"] == "durable_segmented_result_v6"
     assert result.manifest["counts"] == {
         "particles": summary.particle_count,
         "release_events": summary.release_event_count,
@@ -335,6 +335,89 @@ def test_staggered_sources_and_terminal_compaction_preserve_particle_identity(
             + lifecycle.failed
         )
         np.testing.assert_array_equal(population, np.full(population.size, 5, dtype="<u8"))
+
+
+def test_finite_radius_public_run_records_center_contact_without_wall_snapping(
+    tmp_path: Path,
+) -> None:
+    paths = materialize_microcase("C07", tmp_path / "finite-radius")
+    case = load_case(paths.case_path)
+    source = case.data.sources[0]
+    assert isinstance(source, RealizedTableSource)
+    finite_source = replace(
+        source,
+        position_m=np.asarray([[0.25, 0.5]], dtype="<f8"),
+        velocity_m_s=np.asarray([[1.0, 0.0]], dtype="<f8"),
+        contact_radius_m=np.asarray([0.2], dtype="<f8"),
+    )
+    data_path = paths.case_path.parent / "finite-radius.h5"
+    info = write(data_path, replace(case.data, sources=(finite_source,)))
+    document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+    document["case"]["data_path"] = data_path.name
+    document["case"]["expected_content_hash"] = info.content_hash
+    paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    output = tmp_path / "finite-radius-result"
+
+    simulate(load_case(paths.case_path), output)
+    result = open_result(output)
+    events = result.read_boundary_events()
+    final = result.read_final()
+
+    np.testing.assert_array_equal(events.particle_id, [701])
+    np.testing.assert_allclose(events.time_s, [0.55], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_allclose(events.position_m, [[0.8, 0.5]], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_array_equal(events.contact_radius_m, [0.2])
+    np.testing.assert_array_equal(final.contact_radius_m, [0.2])
+    np.testing.assert_allclose(final.position_m, [[0.8, 0.5]], rtol=0.0, atol=2.0e-12)
+
+
+def test_finite_radius_corner_reflection_continues_through_the_residual_interval(
+    tmp_path: Path,
+) -> None:
+    paths = materialize_microcase("C07", tmp_path / "finite-radius-corner")
+    case = load_case(paths.case_path)
+    source = case.data.sources[0]
+    assert isinstance(source, RealizedTableSource)
+    finite_source = replace(
+        source,
+        position_m=np.asarray([[0.5, 0.5]], dtype="<f8"),
+        velocity_m_s=np.asarray([[1.0, 1.0]], dtype="<f8"),
+        contact_radius_m=np.asarray([0.1], dtype="<f8"),
+    )
+    data_path = paths.case_path.parent / "finite-radius-corner.h5"
+    info = write(data_path, replace(case.data, sources=(finite_source,)))
+    document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+    document["case"]["data_path"] = data_path.name
+    document["case"]["expected_content_hash"] = info.content_hash
+    document["time"] = {"start_s": 0.0, "end_s": 0.6, "dt_s": 0.6}
+    document["boundaries"][0]["law"] = "specular"
+    paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    output = tmp_path / "finite-radius-corner-result"
+
+    simulate(load_case(paths.case_path), output)
+    result = open_result(output)
+    events = result.read_boundary_events()
+    final = result.read_final()
+
+    np.testing.assert_allclose(events.time_s, [0.4], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_allclose(events.position_m, [[0.9, 0.9]], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_array_equal(events.candidate_offset, [0, 2])
+    np.testing.assert_array_equal(events.candidate_facet_id, [1, 2])
+    np.testing.assert_allclose(
+        events.velocity_post_m_s,
+        [[-1.0, -1.0]],
+        rtol=0.0,
+        atol=8.0e-16,
+    )
+    np.testing.assert_allclose(final.position_m, [[0.7, 0.7]], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_allclose(
+        final.velocity_m_s,
+        [[-1.0, -1.0]],
+        rtol=0.0,
+        atol=8.0e-16,
+    )
+    np.testing.assert_array_equal(final.lifecycle, [1])
+    assert result.read_failure_events().particle_id.size == 0
 
 
 def test_result_publication_is_no_clobber_and_completed_recovery_open_is_valid(
@@ -663,6 +746,7 @@ def _table(
         charge_number=np.zeros(count, dtype="<f8"),
         mass_kg=np.full(count, 1.0e-15, dtype="<f8"),
         drag_diameter_m=np.full(count, 1.0e-6, dtype="<f8"),
+        contact_radius_m=np.zeros(count, dtype="<f8"),
         electrostatic_radius_m=np.full(count, 5.0e-7, dtype="<f8"),
         displaced_volume_m3=np.zeros(count, dtype="<f8"),
         model_weight=np.ones(count, dtype="<f8"),
@@ -679,7 +763,7 @@ def _write_case(
     frame_times: list[float],
 ) -> Path:
     document = {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": path.stem,
             "data_path": data_path,
@@ -721,7 +805,7 @@ def _write_single_source_case(
     path: Path, data_path: str, content_hash: str, *, motion: str
 ) -> Path:
     document = {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": path.stem,
             "data_path": data_path,

@@ -9,6 +9,7 @@ promoted to fields or copied into the canonical input.
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
 import hashlib
 import json
@@ -23,6 +24,7 @@ import numpy as np
 import yaml
 
 from chamber_particles import load_case, open_result, simulate
+from chamber_particles.case import CASE_FORMAT_VERSION
 from chamber_particles.case_format import (
     DataBundle,
     RealizedTableSource,
@@ -30,6 +32,7 @@ from chamber_particles.case_format import (
     read_with_info,
     write,
 )
+from chamber_particles.yaml_input import parse_document
 from tools.vv.comsol.prepare_m3c1_common_p1_tables import COMPONENT_EXPORTS
 from tools.vv.comsol.prepare_m3c1_common_p1_tables import prepare as prepare_p1
 
@@ -293,6 +296,7 @@ def _read_release(case: CampaignCase) -> tuple[RealizedTableSource, dict[str, ob
         charge_number=values[:, 7].astype("<f8"),
         mass_kg=mass,
         drag_diameter_m=diameter,
+        contact_radius_m=np.zeros(PARTICLE_COUNT, dtype="<f8"),
         electrostatic_radius_m=radius,
         displaced_volume_m3=(math.pi * diameter**3 / 6.0).astype("<f8"),
         model_weight=np.ones(PARTICLE_COUNT, dtype="<f8"),
@@ -376,7 +380,7 @@ def _candidate_document(
     step_label: str,
     dt_s: float,
 ) -> dict[str, Any]:
-    document = cast(dict[str, Any], yaml.safe_load(yaml.safe_dump(dict(template))))
+    document = copy.deepcopy(dict(template))
     document["case"] = {
         "name": f"m3c_{case.case_id}_{step_label}",
         "data_path": Path(os.path.relpath(input_path, case_directory)).as_posix(),
@@ -489,11 +493,11 @@ def _write_json(path: Path, value: object) -> None:
     )
 
 
-def prepare(config_path: Path, output: Path) -> dict[str, object]:
-    """Materialize three no-clobber candidate/common-P1 case directories."""
+def _load_shared_field_input(
+    root: Path, campaign: Mapping[str, object]
+) -> tuple[Mapping[str, object], Path, DataBundle, str]:
+    """Authenticate the single primitive-field authority before materialization."""
 
-    campaign, cases = _load_configuration(config_path.resolve())
-    root = _repository_root()
     field_record = _mapping(campaign["shared_field_input"], "shared_field_input")
     if set(field_record) != {"relative_path", "sha256", "content_hash"}:
         raise ValueError("shared_field_input keys differ")
@@ -509,8 +513,21 @@ def prepare(config_path: Path, output: Path) -> dict[str, object]:
     expected_fields = {item.field for item in COMPONENT_EXPORTS}
     if {field.name for field in base.fields} != expected_fields:
         raise ValueError("shared input contains a derived or missing particle field")
+    return field_record, shared_field_path, base, shared_field_content_hash
+
+
+def prepare(config_path: Path, output: Path) -> dict[str, object]:
+    """Materialize three no-clobber candidate/common-P1 case directories."""
+
+    campaign, cases = _load_configuration(config_path.resolve())
+    root = _repository_root()
+    field_record, shared_field_path, base, shared_field_content_hash = _load_shared_field_input(
+        root, campaign
+    )
     template_path, _ = _locked_file(root, campaign["candidate_template"], "candidate_template")
-    template = _mapping(yaml.safe_load(template_path.read_text(encoding="utf-8")), "template")
+    template = _mapping(parse_document(template_path.read_bytes()), "template")
+    if template.get("format_version") != CASE_FORMAT_VERSION:
+        raise ValueError("candidate template must use the current case format")
     source_models = _mapping(campaign["source_models"], "source_models")
     if set(source_models) != {"theory_common"}:
         raise ValueError("source_models must contain only the theory common-field source")

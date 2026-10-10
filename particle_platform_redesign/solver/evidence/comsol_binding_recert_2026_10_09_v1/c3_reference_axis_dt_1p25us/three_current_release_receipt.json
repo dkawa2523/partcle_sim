@@ -1,0 +1,131 @@
+{
+  "bracket": {
+    "global_charge_number_bracket": [
+      -246488964103072.44,
+      26853900.688522927
+    ],
+    "global_charge_rate_abs_upper_number_s": 7.026460428064329e+22,
+    "global_charge_rate_derivative_abs_upper_s_inv": 521301417.0704125,
+    "primitive_component_ranges": {
+      "effective_negative_ion_mass": [
+        2.9042913461892433e-26,
+        3.086164654228976e-26
+      ],
+      "effective_positive_ion_mass": [
+        9.09312234378034e-26,
+        1.032616366252283e-25
+      ],
+      "electron_number_density": [
+        752501507128.4563,
+        7652525834585453.0
+      ],
+      "electron_thermal_voltage": [
+        2.4103276124341853,
+        14.83070579193951
+      ],
+      "negative_ion_number_density": [
+        30058239787.04432,
+        3.331483450730321e+16
+      ],
+      "negative_ion_thermal_voltage": [
+        0.02524701281396239,
+        0.04728284958371717
+      ],
+      "positive_ion_number_density": [
+        7671131664287.961,
+        4.051747262133e+16
+      ],
+      "positive_ion_thermal_voltage": [
+        0.02524701281396239,
+        0.04728284958371717
+      ],
+      "screening_length": [
+        7.959820278929472e-06,
+        0.00042581876630931815
+      ]
+    }
+  },
+  "case_id": "caseP_100nm_three_current",
+  "comsol_recomputes_equilibrium": false,
+  "derived_input": {
+    "content_hash": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+    "file_sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc",
+    "path": "candidate_input_three_current_z0.h5"
+  },
+  "effective_gas_speed_ratio": {
+    "classification": "producer_effective_gas_sensitivity_not_physical_certification",
+    "clipping": false,
+    "configured_maximum_speed_ratio": 1.0,
+    "initial_release_maximum_speed_ratio": 0.0014665428365538409,
+    "model_revisions": [
+      "epstein_linear_effective_gas_sensitivity_v1",
+      "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+    ],
+    "runtime_owner": "continuous model-applicability gate"
+  },
+  "formula_revision": "aggregate_relative_drift_regularized_three_current_v1",
+  "primitive_input": {
+    "content_hash": "sha256:8cd98a85af39ff60ecfcdfe3ed6a66d17f4a56a3f153a1d870b21e754c1b5f06",
+    "file_sha256": "18679c0f68234d8bfd3c0bf1d7782204bbcc949b2bc0ef8621226d3afb0b1b10",
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\negative_primitives_axis_normalized\\candidate_input_three_current.h5"
+  },
+  "release_state": {
+    "path": "three_current_release_state.csv",
+    "rows": 287,
+    "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+  },
+  "root_solution": {
+    "all_model_applicable": true,
+    "charge_number_range": [
+      -1706.0974460363186,
+      -377.8828175299344
+    ],
+    "converged": true,
+    "iterations": 128,
+    "maximum_abs_newton_correction_charge_number": 4.2809844697485477e-13,
+    "maximum_abs_rate_residual_number_s": 2.7853275241795927e-11,
+    "maximum_final_bracket_width_charge_number": 2.2737367544323206e-13,
+    "method": "monotone_bisection_float64"
+  },
+  "schema_version": 1,
+  "single_charge_authority": true,
+  "speed_envelope": {
+    "derivation": "canonical nodal component extrema plus 1 km/s particle-speed envelope",
+    "negative_ion": {
+      "clipping": false,
+      "component_lower_m_s": [
+        -202126.20260443696,
+        -307013.1476242762
+      ],
+      "component_upper_m_s": [
+        446511.2185485352,
+        725060.2710684292
+      ],
+      "configured_maximum_relative_speed_m_s": 1000000.0,
+      "ion_component_box_speed_bound_m_s": 851519.0338280888,
+      "particle_speed_envelope_m_s": 1000.0,
+      "passed": true,
+      "relative_speed_bound_m_s": 852519.0338280889
+    },
+    "positive_ion": {
+      "clipping": false,
+      "component_lower_m_s": [
+        -11610.53389432044,
+        -19385.101644109356
+      ],
+      "component_upper_m_s": [
+        8505.622903172434,
+        10440.424012700563
+      ],
+      "configured_maximum_relative_speed_m_s": 1000000.0,
+      "ion_component_box_speed_bound_m_s": 22596.164786609585,
+      "particle_speed_envelope_m_s": 1000.0,
+      "passed": true,
+      "relative_speed_bound_m_s": 23596.16478660959
+    },
+    "release_particle_speed_max_m_s": 0.24781924391696866,
+    "runtime_clipping": false
+  },
+  "status": "PASS",
+  "tool_revision": "m3c3_casep_three_current_candidate_v5"
+}

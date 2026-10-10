@@ -10,7 +10,9 @@ from chamber_particles import load_case
 from chamber_particles.case_format import BoundaryData, GeometryData
 from chamber_particles.geometry import (
     GeometryPreparationError,
+    centers_respect_contact_radius,
     classify_point,
+    contact_normals_for_candidates,
     count_aabb_candidates,
     fill_aabb_candidates_csr,
     points_inside_volume,
@@ -81,6 +83,52 @@ def test_c07_square_has_outward_normals_and_queryable_physical_boundary(
             facet_position_budget_m=budget,
         )
         == "outside"
+    )
+
+
+def test_finite_radius_clearance_and_candidate_normals_use_segment_distance(
+    tmp_path: Path,
+) -> None:
+    paths = materialize_microcase("C07", tmp_path / "C07-finite-contact")
+    case = load_case(paths.case_path)
+    geometry = prepare_geometry(case.data.geometry, case.data.coordinate_system)
+
+    positions = np.asarray([[0.5, 0.5], [0.8, 0.5], [0.9, 0.5]], dtype="<f8")
+    radii = np.full(3, 0.2, dtype="<f8")
+    np.testing.assert_array_equal(
+        centers_respect_contact_radius(
+            geometry,
+            positions,
+            radii,
+            tolerance_m=1.0e-12,
+            allow_contact=True,
+        ),
+        [True, True, False],
+    )
+    np.testing.assert_array_equal(
+        centers_respect_contact_radius(
+            geometry,
+            positions,
+            radii,
+            tolerance_m=1.0e-12,
+            allow_contact=False,
+        ),
+        [True, False, False],
+    )
+
+    endpoint_position = np.asarray([[0.8, 1.1]], dtype="<f8")
+    normal = contact_normals_for_candidates(
+        geometry,
+        endpoint_position,
+        np.asarray([math.hypot(0.2, 0.1)], dtype="<f8"),
+        np.asarray([0, 1], dtype="<i8"),
+        np.asarray([1], dtype="<i8"),
+    )
+    np.testing.assert_allclose(
+        normal,
+        [[2.0 / math.sqrt(5.0), -1.0 / math.sqrt(5.0)]],
+        rtol=2.0e-15,
+        atol=2.0e-15,
     )
 
 

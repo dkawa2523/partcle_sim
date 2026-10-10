@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import replace
 from pathlib import Path
@@ -14,6 +15,7 @@ from chamber_particles.case_format import (
     BoundaryData,
     DataBundle,
     GeometryData,
+    RealizedSurfaceSource,
     RealizedTableSource,
     write,
 )
@@ -45,6 +47,7 @@ def _bundle() -> DataBundle:
         charge_number=np.asarray([0.0], dtype="<f8"),
         mass_kg=np.asarray([1.0e-18], dtype="<f8"),
         drag_diameter_m=np.asarray([1.0e-7], dtype="<f8"),
+        contact_radius_m=np.asarray([0.0], dtype="<f8"),
         electrostatic_radius_m=np.asarray([5.0e-8], dtype="<f8"),
         displaced_volume_m3=np.asarray([5.0e-22], dtype="<f8"),
         model_weight=np.asarray([1.0], dtype="<f8"),
@@ -69,7 +72,7 @@ def _case_yaml(data_path: str, expected_hash: str, *, complete_boundaries: bool 
         else ""
     )
     return f"""\
-format_version: 2
+format_version: 3
 case:
   name: public_load_case
   data_path: {data_path}
@@ -158,8 +161,161 @@ def test_load_case_resolves_data_relative_to_yaml(
     assert case.data_footprint.numeric_array_bytes > 0
 
 
+@pytest.mark.parametrize(
+    ("replacement", "error"),
+    [
+        ("  start_s: 0.0\n  start_s: 0.1", "duplicate YAML key"),
+        ("  <<: {start_s: 0.0}\n  start_s: 0.0", "merge keys"),
+        (f"  start_s: {10**400}", "time.start_s must be finite"),
+    ],
+)
+def test_load_case_rejects_ambiguous_or_unrepresentable_yaml(
+    tmp_path: Path, replacement: str, error: str
+) -> None:
+    yaml_path = tmp_path / "invalid.yaml"
+    yaml_path.write_text(
+        _case_yaml("missing.h5", f"sha256:{'0' * 64}").replace("  start_s: 0.0", replacement),
+        encoding="utf-8",
+    )
+    with pytest.raises(CaseError, match=error):
+        load_case(yaml_path)
+
+
+def test_load_case_accepts_scalar_aliases_and_hashes_original_yaml(tmp_path: Path) -> None:
+    data_path = tmp_path / "case.h5"
+    info = write(data_path, _bundle())
+    document = (
+        _case_yaml("case.h5", info.content_hash)
+        .replace("  start_s: 0.0", "  start_s: &origin 0.0")
+        .replace("  dt_s: 0.1", "  dt_s: *origin")
+    )
+    # A valid alias still receives the domain's positive time-step validation.
+    yaml_path = tmp_path / "aliased.yaml"
+    yaml_path.write_text(document, encoding="utf-8")
+    with pytest.raises(CaseError, match=r"time\.dt_s must be positive"):
+        load_case(yaml_path)
+    yaml_path.write_text(document.replace("&origin 0.0", "&origin 0.1"), encoding="utf-8")
+    case = load_case(yaml_path)
+    assert case.spec.time.start_s == case.spec.time.dt_s == 0.1
+    assert case.case_file_hash == "sha256:" + hashlib.sha256(yaml_path.read_bytes()).hexdigest()
+
+
+def test_load_case_reports_invalid_utf8_as_case_error(tmp_path: Path) -> None:
+    yaml_path = tmp_path / "invalid-encoding.yaml"
+    yaml_path.write_bytes(b"format_version: 3\ncase: \xff")
+    with pytest.raises(CaseError, match="not valid UTF-8"):
+        load_case(yaml_path)
+
+
+def test_load_case_separates_periodic_topology_from_material_wall_laws(tmp_path: Path) -> None:
+    data_path = tmp_path / "case.h5"
+    info = write(data_path, _bundle())
+    document = yaml.safe_load(_case_yaml("case.h5", info.content_hash))
+    document["boundaries"] = []
+    document["topology"] = {
+        "model": "translation_periodic_xy_v1",
+        "field_match_rtol": 1.0e-12,
+        "pairs": [
+            {
+                "first_boundary_group": "wall",
+                "second_boundary_group": "outlet",
+                "first_to_second_m": [1.0, 0.0],
+            }
+        ],
+    }
+    yaml_path = tmp_path / "periodic.yaml"
+    yaml_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+    case = load_case(yaml_path)
+
+    assert case.spec.topology is not None
+    assert case.spec.topology.model == "translation_periodic_xy_v1"
+    assert case.spec.topology.pairs[0].first_to_second_m == (1.0, 0.0)
+    assert case.spec.boundaries == ()
+
+    document["boundaries"] = [{"boundary_group": "wall", "priority": 10, "law": "stick"}]
+    conflict_path = tmp_path / "periodic-wall-conflict.yaml"
+    conflict_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    with pytest.raises(CaseError, match="boundary laws do not match data groups"):
+        load_case(conflict_path)
+
+
+def test_load_case_rejects_unsupported_periodic_coordinates_and_reused_groups(
+    tmp_path: Path,
+) -> None:
+    data_path = tmp_path / "case.h5"
+    info = write(data_path, _bundle())
+    document = yaml.safe_load(_case_yaml("case.h5", info.content_hash))
+    document["boundaries"] = []
+    pair = {
+        "first_boundary_group": "wall",
+        "second_boundary_group": "outlet",
+        "first_to_second_m": [1.0, 0.0],
+    }
+    document["topology"] = {
+        "model": "translation_periodic_xy_v1",
+        "field_match_rtol": 1.0e-12,
+        "pairs": [pair],
+    }
+    document["motion"]["mode"] = "axisymmetric_rz_meridional"
+    coordinate_path = tmp_path / "periodic-rz.yaml"
+    coordinate_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    with pytest.raises(CaseError, match="requires Cartesian XY"):
+        load_case(coordinate_path)
+
+    document["motion"]["mode"] = "cartesian_xy"
+    document["topology"]["pairs"] = [pair, pair]
+    duplicate_path = tmp_path / "periodic-duplicate.yaml"
+    duplicate_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    with pytest.raises(CaseError, match="used more than once"):
+        load_case(duplicate_path)
+
+
+def test_load_case_rejects_surface_release_from_periodic_seam(tmp_path: Path) -> None:
+    bundle = _bundle()
+    table = bundle.sources[0]
+    assert isinstance(table, RealizedTableSource)
+    surface = RealizedSurfaceSource(
+        name="releases",
+        particle_id=table.particle_id,
+        release_time_s=table.release_time_s,
+        facet_id=np.asarray([0], dtype="<i8"),
+        facet_parameter=np.asarray([0.5], dtype="<f8"),
+        velocity_m_s=table.velocity_m_s,
+        charge_number=table.charge_number,
+        mass_kg=table.mass_kg,
+        drag_diameter_m=table.drag_diameter_m,
+        contact_radius_m=table.contact_radius_m,
+        electrostatic_radius_m=table.electrostatic_radius_m,
+        displaced_volume_m3=table.displaced_volume_m3,
+        model_weight=table.model_weight,
+        material_id=table.material_id,
+    )
+    data_path = tmp_path / "case.h5"
+    info = write(data_path, replace(bundle, sources=(surface,)))
+    document = yaml.safe_load(_case_yaml("case.h5", info.content_hash))
+    document["sources"][0]["type"] = "surface"
+    document["boundaries"] = []
+    document["topology"] = {
+        "model": "translation_periodic_xy_v1",
+        "field_match_rtol": 1.0e-12,
+        "pairs": [
+            {
+                "first_boundary_group": "wall",
+                "second_boundary_group": "outlet",
+                "first_to_second_m": [1.0, 0.0],
+            }
+        ],
+    }
+    yaml_path = tmp_path / "periodic-surface-source.yaml"
+    yaml_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+    with pytest.raises(CaseError, match="cannot release from a periodic seam"):
+        load_case(yaml_path)
+
+
 def test_load_case_rejects_retired_v1_thread_configuration(tmp_path: Path) -> None:
-    """The serial v2 schema must not silently accept the removed thread API."""
+    """The serial v3 schema must not silently accept the removed thread API."""
 
     data_path = tmp_path / "case.h5"
     info = write(data_path, _bundle())
@@ -167,7 +323,7 @@ def test_load_case_rejects_retired_v1_thread_configuration(tmp_path: Path) -> No
 
     v1_path = tmp_path / "v1.yaml"
     v1_path.write_text(
-        canonical.replace("format_version: 2", "format_version: 1"), encoding="utf-8"
+        canonical.replace("format_version: 3", "format_version: 1"), encoding="utf-8"
     )
     with pytest.raises(CaseError, match="unsupported YAML format_version"):
         load_case(v1_path)
@@ -412,7 +568,7 @@ def test_negative_release_time_is_valid_inside_a_negative_run_interval(tmp_path:
     np.testing.assert_array_equal(case.data.sources[0].release_time_s, [-0.25])
 
 
-def test_surface_particle_ids_must_not_overlap_table_ids(tmp_path: Path) -> None:
+def test_retired_surface_distribution_keys_are_rejected(tmp_path: Path) -> None:
     data_path = tmp_path / "case.h5"
     info = write(data_path, _bundle())
     table_source = """\
@@ -421,45 +577,52 @@ sources:
     type: table
     table: releases
 """
-    surface_source = table_source + _surface_source_yaml("wall_release", 42, 1)
+    surface_source = "sources:\n" + _surface_source_yaml("wall_release", 42, 1)
     yaml_path = tmp_path / "run.yaml"
     document = _case_yaml("case.h5", info.content_hash).replace(table_source, surface_source)
     yaml_path.write_text(document, encoding="utf-8")
 
-    with pytest.raises(CaseError):
+    with pytest.raises(CaseError, match=r"sources\[0\] keys are invalid"):
         load_case(yaml_path)
 
 
 @pytest.mark.parametrize(
-    ("second_start", "expect_error"),
-    [(102, True), (103, False)],
-    ids=("overlap-rejected", "adjacency-accepted"),
+    "declared_type",
+    ["table", "surface"],
 )
-def test_surface_particle_id_ranges_reject_overlap_and_allow_adjacency(
-    tmp_path: Path, second_start: int, expect_error: bool
-) -> None:
+def test_source_type_must_match_the_canonical_schedule(tmp_path: Path, declared_type: str) -> None:
+    bundle = _bundle()
+    internal = bundle.sources[0]
+    if declared_type == "surface":
+        actual = internal
+    else:
+        actual = RealizedSurfaceSource(
+            name="releases",
+            particle_id=internal.particle_id.copy(),
+            release_time_s=internal.release_time_s.copy(),
+            facet_id=np.asarray([0], dtype="<i8"),
+            facet_parameter=np.asarray([0.5], dtype="<f8"),
+            velocity_m_s=internal.velocity_m_s.copy(),
+            charge_number=internal.charge_number.copy(),
+            mass_kg=internal.mass_kg.copy(),
+            drag_diameter_m=internal.drag_diameter_m.copy(),
+            contact_radius_m=internal.contact_radius_m.copy(),
+            electrostatic_radius_m=internal.electrostatic_radius_m.copy(),
+            displaced_volume_m3=internal.displaced_volume_m3.copy(),
+            model_weight=internal.model_weight.copy(),
+            material_id=internal.material_id.copy(),
+        )
     data_path = tmp_path / "case.h5"
-    info = write(data_path, _bundle())
-    table_source = """\
-sources:
+    info = write(data_path, replace(bundle, sources=(actual,)))
+    table_source = """sources:
   - name: input_particles
     type: table
     table: releases
 """
-    surface_sources = (
-        "sources:\n"
-        + _surface_source_yaml("first_wall_release", 100, 3)
-        + _surface_source_yaml("second_wall_release", second_start, 2)
-    )
+    declared = table_source.replace("type: table", f"type: {declared_type}")
     yaml_path = tmp_path / "run.yaml"
-    document = _case_yaml("case.h5", info.content_hash).replace(table_source, surface_sources)
+    document = _case_yaml("case.h5", info.content_hash).replace(table_source, declared)
     yaml_path.write_text(document, encoding="utf-8")
 
-    if expect_error:
-        with pytest.raises(CaseError):
-            load_case(yaml_path)
-        return
-
-    case = load_case(yaml_path)
-    assert [source.parameters["particle_id_start"] for source in case.spec.sources] == [100, 103]
-    assert [source.parameters["count"] for source in case.spec.sources] == [3, 2]
+    with pytest.raises(CaseError, match="type does not match canonical table"):
+        load_case(yaml_path)

@@ -1,0 +1,7 @@
+{
+  "cache_directory": "C:\\Users\\user\\AppData\\Local\\Temp\\chamber-particles-v02-release-b03-campaign-cache-20261010-e7e2c14b",
+  "started_at_utc": "2026-10-10T01:50:27.0484282Z",
+  "batch": "b03_release",
+  "command": "uv run --locked python -m tests.performance.b03_characterization --particles 2000 20000 --repeats 3 --warmups 1 --memory-limit-mb 512 --end-s 0.2 --dt-s 0.02 --tree-depth 3 --adaptive-max-depth 3 --json ../reviews/v0_2_release_performance_2026_10_10/b03_release_v46.json",
+  "registration_sha256": "e7e2c14b89606d84a8747ced0d8b6a86abb3026f7c488fceff5f077ffa1f1ec0"
+}

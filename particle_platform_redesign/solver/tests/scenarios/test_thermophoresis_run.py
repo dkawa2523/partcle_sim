@@ -59,11 +59,11 @@ def test_waldmann_affine_heat_flux_time_convergence(
         "model": "waldmann_gallis",
         "revision": _REVISION,
     }
-    assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v18"
-    assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_rz_catalog_v17"
+    assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
+    assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
     assert (
         last_result.manifest["physics_runtime_revision"]
-        == "signed_ion_compiled_physics_runtime_v20"
+        == "signed_ion_compiled_physics_runtime_v22"
     )
 
 

@@ -27,13 +27,14 @@ type UInt8Array = NDArray[np.uint8]
 type StringArray = NDArray[np.str_]
 type _PathInput = str | PathLike[str]
 
-RESULT_SCHEMA_VERSION: Final = 2
-RESULT_ALGORITHM_REVISION: Final = "durable_segmented_result_v5"
+RESULT_SCHEMA_VERSION: Final = 3
+RESULT_ALGORITHM_REVISION: Final = "durable_segmented_result_v6"
 CHECKPOINT_SCHEMA_VERSION: Final = 2
 RESULT_WRITER_RESERVE_BYTES: Final = 3 * 1024 * 1024
 
 _RAW_CHUNK_CACHE_BYTES: Final = 64 * 1024
 _DEFAULT_BOUNDARY_BATCH_ROWS: Final = 4096
+_FINAL_VALIDATION_BLOCK_ROWS: Final = 4096
 
 _LATEST_FORMAT_VERSION: Final = 1
 _SEGMENT_DIRECTORY: Final = Path("segments")
@@ -161,6 +162,7 @@ class FinalParticles:
     failure_reason_code: UInt16Array
     mass_kg: FloatArray
     drag_diameter_m: FloatArray
+    contact_radius_m: FloatArray
     electrostatic_radius_m: FloatArray
     displaced_volume_m3: FloatArray
     model_weight: FloatArray
@@ -179,15 +181,19 @@ class ReleaseEvents:
 
 @dataclass(frozen=True, slots=True)
 class BoundaryEvents:
-    """Localized wall-event rows and their ragged simultaneous-facet candidates."""
+    """Localized boundary-interaction rows and simultaneous source facets."""
 
     time_s: FloatArray
     particle_id: Int64Array
     event_ordinal: UInt32Array
+    interaction_kind: StringArray
     primary_facet_id: Int64Array
+    destination_facet_id: Int64Array
     boundary_id: Int32Array
     material_id: Int32Array
+    contact_radius_m: FloatArray
     position_m: FloatArray
+    position_post_m: FloatArray
     normal: FloatArray
     velocity_pre_m_s: FloatArray
     velocity_post_m_s: FloatArray
@@ -277,13 +283,25 @@ class _SegmentSink:
         self._boundary_time = self._resizable("events/boundary/time_s", "<f8", chunk_rows)
         self._boundary_particle = self._resizable("events/boundary/particle_id", "<i8", chunk_rows)
         self._boundary_ordinal = self._resizable("events/boundary/event_ordinal", "<u4", chunk_rows)
+        self._boundary_interaction_kind = self._resizable_string(
+            "events/boundary/interaction_kind", chunk_rows
+        )
         self._boundary_primary_facet = self._resizable(
             "events/boundary/primary_facet_id", "<i8", chunk_rows
         )
+        self._boundary_destination_facet = self._resizable(
+            "events/boundary/destination_facet_id", "<i8", chunk_rows
+        )
         self._boundary_id = self._resizable("events/boundary/boundary_id", "<i4", chunk_rows)
         self._boundary_material = self._resizable("events/boundary/material_id", "<i4", chunk_rows)
+        self._boundary_contact_radius = self._resizable(
+            "events/boundary/contact_radius_m", "<f8", chunk_rows
+        )
         self._boundary_position = self._resizable_2d(
             "events/boundary/position_m", "<f8", chunk_rows, width=2
+        )
+        self._boundary_position_post = self._resizable_2d(
+            "events/boundary/position_post_m", "<f8", chunk_rows, width=2
         )
         self._boundary_normal = self._resizable_2d(
             "events/boundary/normal", "<f8", chunk_rows, width=2
@@ -420,8 +438,10 @@ class _SegmentSink:
             (self._boundary_particle, events.particle_id),
             (self._boundary_ordinal, events.event_ordinal),
             (self._boundary_primary_facet, events.primary_facet_id),
+            (self._boundary_destination_facet, events.destination_facet_id),
             (self._boundary_id, events.boundary_id),
             (self._boundary_material, events.material_id),
+            (self._boundary_contact_radius, events.contact_radius_m),
             (self._boundary_charge_pre, events.charge_number_pre),
             (self._boundary_charge_post, events.charge_number_post),
             (self._boundary_weight, events.model_weight),
@@ -431,12 +451,14 @@ class _SegmentSink:
         )
         vector_columns = (
             (self._boundary_position, events.position_m),
+            (self._boundary_position_post, events.position_post_m),
             (self._boundary_normal, events.normal),
             (self._boundary_velocity_pre, events.velocity_pre_m_s),
             (self._boundary_velocity_post, events.velocity_post_m_s),
         )
         for dataset, values in scalar_columns + vector_columns:
             self._append(dataset, values)
+        self._append_string(self._boundary_interaction_kind, events.interaction_kind)
         self._append_string(self._boundary_law, events.law_id)
         self._append_string(self._boundary_outcome, events.outcome)
         self._append(self._boundary_candidate_facet, events.candidate_facet_id)
@@ -715,7 +737,9 @@ class ResultWriter:
         self._require_running()
         if macro_step_count < 0:
             raise ResultWriteError("macro-step count must be nonnegative")
-        particle_count = int(final.particle_id.size)
+        particle_count = self._particle_capacity
+        if final.particle_id.size != particle_count:
+            raise ResultWriteError("final particle count does not match the prepared capacity")
         _validate_final_shapes(final, particle_count)
         try:
             latest = _read_latest(self.partial_path)
@@ -727,6 +751,11 @@ class ResultWriter:
             raise ResultWriteError("final checkpoint does not match the completed macro-step count")
         final_temp = self.partial_path / "final.tmp.h5"
         _write_final(final_temp, final)
+        try:
+            with h5py.File(final_temp, "r", rdcc_nbytes=_RAW_CHUNK_CACHE_BYTES) as handle:
+                _validate_final_file(handle, particle_count)
+        except (ResultOpenError, OSError, KeyError) as error:
+            raise ResultWriteError(f"final result artifact is inconsistent: {error}") from error
         _sync_file(final_temp)
         os.replace(final_temp, self.partial_path / "final.h5")
         complete_manifest = dict(manifest)
@@ -856,10 +885,10 @@ class ResultView:
     def read_final(self) -> FinalParticles:
         if not self.complete:
             raise ResultOpenError("an incomplete recovery result has no authoritative final state")
+        particle_count = _summary_from_manifest(self.path, self.manifest).particle_count
         with h5py.File(self.path / "final.h5", "r") as handle:
+            _validate_final_file(handle, particle_count)
             group = handle["particles"]
-            if not isinstance(group, h5py.Group):
-                raise ResultOpenError("final particles group is missing")
             return FinalParticles(
                 particle_id=_read_only(group["particle_id"][...]),
                 source_id=_read_only(group["source_id"][...]),
@@ -872,6 +901,7 @@ class ResultView:
                 failure_reason_code=_read_only(group["failure_reason_code"][...]),
                 mass_kg=_read_only(group["mass_kg"][...]),
                 drag_diameter_m=_read_only(group["drag_diameter_m"][...]),
+                contact_radius_m=_read_only(group["contact_radius_m"][...]),
                 electrostatic_radius_m=_read_only(group["electrostatic_radius_m"][...]),
                 displaced_volume_m3=_read_only(group["displaced_volume_m3"][...]),
                 model_weight=_read_only(group["model_weight"][...]),
@@ -1449,6 +1479,7 @@ def _open_completed_path(path: Path) -> ResultView:
         raise ResultOpenError("unsupported result schema version")
     if manifest.get("result_algorithm_revision") != RESULT_ALGORITHM_REVISION:
         raise ResultOpenError("unsupported result algorithm revision")
+    summary = _summary_from_manifest(path, manifest)
     latest = _read_latest(path)
     if latest is None:
         raise ResultOpenError("completed result has no LATEST commit")
@@ -1467,7 +1498,7 @@ def _open_completed_path(path: Path) -> ResultView:
             raise ResultOpenError("completed manifest counts do not match segments")
     try:
         with h5py.File(path / "final.h5", "r") as final:
-            _validate_final_file(final)
+            _validate_final_file(final, summary.particle_count)
     except (OSError, KeyError) as error:
         raise ResultOpenError("final result artifact cannot be read") from error
     return ResultView(path, MappingProxyType(manifest), paths, True)
@@ -1540,9 +1571,12 @@ def _read_boundary_batches(batches: Iterator[BoundaryEvents]) -> BoundaryEvents:
             "particle_id",
             "event_ordinal",
             "primary_facet_id",
+            "destination_facet_id",
             "boundary_id",
             "material_id",
+            "contact_radius_m",
             "position_m",
+            "position_post_m",
             "normal",
             "velocity_pre_m_s",
             "velocity_post_m_s",
@@ -1554,6 +1588,7 @@ def _read_boundary_batches(batches: Iterator[BoundaryEvents]) -> BoundaryEvents:
             "time_budget_s",
         )
     }
+    interaction_kinds: list[np.ndarray] = []
     laws: list[np.ndarray] = []
     outcomes: list[np.ndarray] = []
     candidate_lengths: list[np.ndarray] = []
@@ -1561,11 +1596,13 @@ def _read_boundary_batches(batches: Iterator[BoundaryEvents]) -> BoundaryEvents:
     for events in batches:
         for name in numeric:
             numeric[name].append(getattr(events, name))
+        interaction_kinds.append(events.interaction_kind)
         laws.append(events.law_id)
         outcomes.append(events.outcome)
         candidate_lengths.append(np.diff(events.candidate_offset))
         candidate_chunks.append(events.candidate_facet_id)
     values = _join_boundary_numeric(numeric)
+    interaction_kind_values = _join_strings(interaction_kinds)
     law_values = _join_strings(laws)
     outcome_values = _join_strings(outcomes)
     order = np.lexsort((values["event_ordinal"], values["particle_id"], values["time_s"]))
@@ -1576,10 +1613,14 @@ def _read_boundary_batches(batches: Iterator[BoundaryEvents]) -> BoundaryEvents:
         time_s=_read_only(values["time_s"][order]),
         particle_id=_read_only(values["particle_id"][order]),
         event_ordinal=_read_only(values["event_ordinal"][order]),
+        interaction_kind=_read_only(interaction_kind_values[order]),
         primary_facet_id=_read_only(values["primary_facet_id"][order]),
+        destination_facet_id=_read_only(values["destination_facet_id"][order]),
         boundary_id=_read_only(values["boundary_id"][order]),
         material_id=_read_only(values["material_id"][order]),
+        contact_radius_m=_read_only(values["contact_radius_m"][order]),
         position_m=_read_only(values["position_m"][order]),
+        position_post_m=_read_only(values["position_post_m"][order]),
         normal=_read_only(values["normal"][order]),
         velocity_pre_m_s=_read_only(values["velocity_pre_m_s"][order]),
         velocity_post_m_s=_read_only(values["velocity_post_m_s"][order]),
@@ -1609,10 +1650,16 @@ def _iter_boundary_event_batches(path: Path, batch_rows: int) -> Iterator[Bounda
                 time_s=_read_only(group["time_s"][start:stop]),
                 particle_id=_read_only(group["particle_id"][start:stop]),
                 event_ordinal=_read_only(group["event_ordinal"][start:stop]),
+                interaction_kind=_read_only(
+                    np.asarray(group["interaction_kind"].asstr()[start:stop], dtype=np.str_)
+                ),
                 primary_facet_id=_read_only(group["primary_facet_id"][start:stop]),
+                destination_facet_id=_read_only(group["destination_facet_id"][start:stop]),
                 boundary_id=_read_only(group["boundary_id"][start:stop]),
                 material_id=_read_only(group["material_id"][start:stop]),
+                contact_radius_m=_read_only(group["contact_radius_m"][start:stop]),
                 position_m=_read_only(group["position_m"][start:stop]),
+                position_post_m=_read_only(group["position_post_m"][start:stop]),
                 normal=_read_only(group["normal"][start:stop]),
                 velocity_pre_m_s=_read_only(group["velocity_pre_m_s"][start:stop]),
                 velocity_post_m_s=_read_only(group["velocity_post_m_s"][start:stop]),
@@ -1654,9 +1701,12 @@ def _join_boundary_numeric(chunks: Mapping[str, list[np.ndarray]]) -> dict[str, 
         "particle_id": "<i8",
         "event_ordinal": "<u4",
         "primary_facet_id": "<i8",
+        "destination_facet_id": "<i8",
         "boundary_id": "<i4",
         "material_id": "<i4",
+        "contact_radius_m": "<f8",
         "position_m": "<f8",
+        "position_post_m": "<f8",
         "normal": "<f8",
         "velocity_pre_m_s": "<f8",
         "velocity_post_m_s": "<f8",
@@ -1667,7 +1717,13 @@ def _join_boundary_numeric(chunks: Mapping[str, list[np.ndarray]]) -> dict[str, 
         "position_budget_m": "<f8",
         "time_budget_s": "<f8",
     }
-    vectors = {"position_m", "normal", "velocity_pre_m_s", "velocity_post_m_s"}
+    vectors = {
+        "position_m",
+        "position_post_m",
+        "normal",
+        "velocity_pre_m_s",
+        "velocity_post_m_s",
+    }
     return {
         name: _join_arrays(values, dtypes[name], (2,) if name in vectors else ())
         for name, values in chunks.items()
@@ -1787,6 +1843,7 @@ def _write_final(path: Path, final: FinalParticles) -> None:
             ("failure_reason_code", "<u2"),
             ("mass_kg", "<f8"),
             ("drag_diameter_m", "<f8"),
+            ("contact_radius_m", "<f8"),
             ("electrostatic_radius_m", "<f8"),
             ("displaced_volume_m3", "<f8"),
             ("model_weight", "<f8"),
@@ -1799,6 +1856,7 @@ def _write_final(path: Path, final: FinalParticles) -> None:
 def _validate_final_shapes(final: FinalParticles, count: int) -> None:
     vectors = (final.position_m, final.velocity_m_s)
     scalars = (
+        final.particle_id,
         final.source_id,
         final.time_s,
         final.charge_number,
@@ -1807,6 +1865,7 @@ def _validate_final_shapes(final: FinalParticles, count: int) -> None:
         final.failure_reason_code,
         final.mass_kg,
         final.drag_diameter_m,
+        final.contact_radius_m,
         final.electrostatic_radius_m,
         final.displaced_volume_m3,
         final.model_weight,
@@ -1832,12 +1891,15 @@ def _validate_final_shapes(final: FinalParticles, count: int) -> None:
         final.charge_number,
         final.mass_kg,
         final.drag_diameter_m,
+        final.contact_radius_m,
         final.electrostatic_radius_m,
         final.displaced_volume_m3,
         final.model_weight,
     )
     if any(not bool(np.isfinite(array).all()) for array in finite_columns):
         raise ResultWriteError("final floating-point columns must be finite")
+    if bool((final.contact_radius_m < 0.0).any()):
+        raise ResultWriteError("final contact_radius_m must be nonnegative")
 
 
 def _validate_state_frame(
@@ -1862,6 +1924,7 @@ def _validate_state_frame(
 def _validate_boundary_event_shapes(events: BoundaryEvents, count: int) -> None:
     vectors = (
         events.position_m,
+        events.position_post_m,
         events.normal,
         events.velocity_pre_m_s,
         events.velocity_post_m_s,
@@ -1869,9 +1932,12 @@ def _validate_boundary_event_shapes(events: BoundaryEvents, count: int) -> None:
     scalars = (
         events.time_s,
         events.event_ordinal,
+        events.interaction_kind,
         events.primary_facet_id,
+        events.destination_facet_id,
         events.boundary_id,
         events.material_id,
+        events.contact_radius_m,
         events.charge_number_pre,
         events.charge_number_post,
         events.model_weight,
@@ -1887,8 +1953,18 @@ def _validate_boundary_event_shapes(events: BoundaryEvents, count: int) -> None:
         raise ResultWriteError("boundary-event scalar columns have inconsistent lengths")
     _validate_boundary_candidate_shapes(events, count)
     _validate_boundary_numeric_values(events)
-    if events.law_id.dtype.kind != "U" or events.outcome.dtype.kind != "U":
-        raise ResultWriteError("boundary-event law and outcome arrays must use Unicode dtype")
+    string_columns = (events.interaction_kind, events.law_id, events.outcome)
+    if any(array.dtype.kind != "U" for array in string_columns):
+        raise ResultWriteError("boundary-event string arrays must use Unicode dtype")
+    if not _boundary_interaction_rows_are_valid(
+        events.interaction_kind,
+        events.destination_facet_id,
+        events.position_m,
+        events.position_post_m,
+        events.law_id,
+        events.outcome,
+    ):
+        raise ResultWriteError("boundary-event interaction columns are inconsistent")
 
 
 def _validate_boundary_candidate_shapes(events: BoundaryEvents, count: int) -> None:
@@ -1914,9 +1990,11 @@ def _validate_boundary_numeric_values(events: BoundaryEvents) -> None:
     finite_columns = (
         events.time_s,
         events.position_m,
+        events.position_post_m,
         events.normal,
         events.velocity_pre_m_s,
         events.velocity_post_m_s,
+        events.contact_radius_m,
         events.charge_number_pre,
         events.charge_number_post,
         events.model_weight,
@@ -1926,6 +2004,8 @@ def _validate_boundary_numeric_values(events: BoundaryEvents) -> None:
     )
     if any(not bool(np.isfinite(array).all()) for array in finite_columns):
         raise ResultWriteError("boundary-event floating-point columns must be finite")
+    if bool((events.contact_radius_m < 0.0).any()):
+        raise ResultWriteError("boundary-event contact_radius_m must be nonnegative")
     if bool(
         (events.localization_residual_m < 0.0).any()
         or (events.position_budget_m <= 0.0).any()
@@ -2039,9 +2119,12 @@ def _validate_boundary_group(boundary: h5py.Group) -> None:
         "particle_id": ((row_count,), "<i8"),
         "event_ordinal": ((row_count,), "<u4"),
         "primary_facet_id": ((row_count,), "<i8"),
+        "destination_facet_id": ((row_count,), "<i8"),
         "boundary_id": ((row_count,), "<i4"),
         "material_id": ((row_count,), "<i4"),
+        "contact_radius_m": ((row_count,), "<f8"),
         "position_m": ((row_count, 2), "<f8"),
+        "position_post_m": ((row_count, 2), "<f8"),
         "normal": ((row_count, 2), "<f8"),
         "velocity_pre_m_s": ((row_count, 2), "<f8"),
         "velocity_post_m_s": ((row_count, 2), "<f8"),
@@ -2057,10 +2140,15 @@ def _validate_boundary_group(boundary: h5py.Group) -> None:
         for name, (shape, dtype) in expected_shapes.items()
     ):
         raise ResultOpenError("boundary-event columns have inconsistent shapes")
-    if not _has_utf8_layout(boundary, "law_id", row_count) or not _has_utf8_layout(
-        boundary, "outcome", row_count
-    ):
+    contact_radius = boundary["contact_radius_m"]
+    for start in range(0, row_count, _DEFAULT_BOUNDARY_BATCH_ROWS):
+        values = contact_radius[start : start + _DEFAULT_BOUNDARY_BATCH_ROWS]
+        if not bool(np.isfinite(values).all()) or bool((values < 0.0).any()):
+            raise ResultOpenError("boundary-event contact_radius_m must be finite and nonnegative")
+    string_columns = ("interaction_kind", "law_id", "outcome")
+    if any(not _has_utf8_layout(boundary, name, row_count) for name in string_columns):
         raise ResultOpenError("boundary-event string columns have invalid layouts")
+    _validate_boundary_interaction_group(boundary, row_count)
     offsets = boundary.get("candidate_offset")
     candidates = boundary.get("candidate_facet_id")
     if not isinstance(offsets, h5py.Dataset) or not isinstance(candidates, h5py.Dataset):
@@ -2091,6 +2179,43 @@ def _validate_boundary_candidates(boundary: h5py.Group, row_count: int) -> None:
             primary[start:stop],
         ):
             raise ResultOpenError("boundary-event candidates are inconsistent")
+
+
+def _validate_boundary_interaction_group(boundary: h5py.Group, row_count: int) -> None:
+    for start in range(0, row_count, _DEFAULT_BOUNDARY_BATCH_ROWS):
+        stop = min(start + _DEFAULT_BOUNDARY_BATCH_ROWS, row_count)
+        if not _boundary_interaction_rows_are_valid(
+            np.asarray(boundary["interaction_kind"].asstr()[start:stop], dtype=np.str_),
+            boundary["destination_facet_id"][start:stop],
+            boundary["position_m"][start:stop],
+            boundary["position_post_m"][start:stop],
+            np.asarray(boundary["law_id"].asstr()[start:stop], dtype=np.str_),
+            np.asarray(boundary["outcome"].asstr()[start:stop], dtype=np.str_),
+        ):
+            raise ResultOpenError("boundary-event interaction columns are inconsistent")
+
+
+def _boundary_interaction_rows_are_valid(
+    interaction_kind: NDArray[Any],
+    destination_facet_id: NDArray[Any],
+    position_m: NDArray[Any],
+    position_post_m: NDArray[Any],
+    law_id: NDArray[Any],
+    outcome: NDArray[Any],
+) -> bool:
+    if not bool(np.isfinite(position_m).all() and np.isfinite(position_post_m).all()):
+        return False
+    wall = interaction_kind == "wall"
+    periodic = interaction_kind == "periodic_translation"
+    if not bool((wall | periodic).all()):
+        return False
+    if bool((destination_facet_id[wall] != -1).any()):
+        return False
+    if bool((destination_facet_id[periodic] < 0).any()):
+        return False
+    if not bool(np.array_equal(position_m[wall], position_post_m[wall])):
+        return False
+    return bool(((law_id[periodic] == "") & (outcome[periodic] == "transferred")).all())
 
 
 def _validate_failure_group(failure: h5py.Group) -> None:
@@ -2161,13 +2286,15 @@ def _validate_ragged_state_group(group: h5py.Group, label: str) -> None:
         raise ResultOpenError(f"{label} columns have inconsistent shapes")
 
 
-def _validate_final_file(final: h5py.File) -> None:
+def _validate_final_file(final: h5py.File, expected_particle_count: int) -> None:
     if final.attrs.get("result_schema_version") != RESULT_SCHEMA_VERSION:
         raise ResultOpenError("final schema version is invalid")
     particles = final["particles"]
     if not isinstance(particles, h5py.Group):
         raise ResultOpenError("final particles group is invalid")
     particle_count = _one_dimensional_rows(particles, "particle_id", "<i8")
+    if particle_count != expected_particle_count:
+        raise ResultOpenError("final particle count does not match the completed manifest")
     expected_shapes = {
         "particle_id": ((particle_count,), "<i8"),
         "source_id": ((particle_count,), "<i4"),
@@ -2180,6 +2307,7 @@ def _validate_final_file(final: h5py.File) -> None:
         "failure_reason_code": ((particle_count,), "<u2"),
         "mass_kg": ((particle_count,), "<f8"),
         "drag_diameter_m": ((particle_count,), "<f8"),
+        "contact_radius_m": ((particle_count,), "<f8"),
         "electrostatic_radius_m": ((particle_count,), "<f8"),
         "displaced_volume_m3": ((particle_count,), "<f8"),
         "model_weight": ((particle_count,), "<f8"),
@@ -2190,14 +2318,32 @@ def _validate_final_file(final: h5py.File) -> None:
         for name, (shape, dtype) in expected_shapes.items()
     ):
         raise ResultOpenError("final particle columns have inconsistent shapes")
-    validity = particles["kinematics_valid"][...]
-    if bool(((validity != 0) & (validity != 1)).any()):
-        raise ResultOpenError("final kinematics_valid values must be 0 or 1")
-    lifecycle = particles["lifecycle"][...]
-    reasons = particles["failure_reason_code"][...]
-    failed = lifecycle == np.uint8(4)
-    if bool((reasons[failed] == 0).any()) or bool((reasons[~failed] != 0).any()):
-        raise ResultOpenError("final failure reason does not match lifecycle")
+    _validate_final_particle_blocks(particles, particle_count)
+
+
+def _validate_final_particle_blocks(particles: h5py.Group, particle_count: int) -> None:
+    """Check final row values without allocating a particle-sized validation array."""
+
+    previous_id = -1
+    for begin in range(0, particle_count, _FINAL_VALIDATION_BLOCK_ROWS):
+        end = min(begin + _FINAL_VALIDATION_BLOCK_ROWS, particle_count)
+        particle_ids = particles["particle_id"][begin:end]
+        if int(particle_ids[0]) <= previous_id or bool(
+            (particle_ids[1:] <= particle_ids[:-1]).any()
+        ):
+            raise ResultOpenError("final particle_id must be nonnegative and strictly increasing")
+        previous_id = int(particle_ids[-1])
+        contact_radius = particles["contact_radius_m"][begin:end]
+        if not bool(np.isfinite(contact_radius).all()) or bool((contact_radius < 0.0).any()):
+            raise ResultOpenError("final contact_radius_m must be finite and nonnegative")
+        validity = particles["kinematics_valid"][begin:end]
+        if bool(((validity != 0) & (validity != 1)).any()):
+            raise ResultOpenError("final kinematics_valid values must be 0 or 1")
+        lifecycle = particles["lifecycle"][begin:end]
+        reasons = particles["failure_reason_code"][begin:end]
+        failed = lifecycle == np.uint8(4)
+        if bool((reasons[failed] == 0).any()) or bool((reasons[~failed] != 0).any()):
+            raise ResultOpenError("final failure reason does not match lifecycle")
 
 
 def _one_dimensional_rows(group: h5py.Group, name: str, dtype: str) -> int:

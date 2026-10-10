@@ -927,6 +927,33 @@ def test_sparse_escaped_suffix_is_inferred_only_from_terminal_event(tmp_path: Pa
     assert report["status"] == "PASS"
 
 
+@pytest.mark.parametrize("event_type", ["terminal_status", "terminal_boundary"])
+def test_population_status_does_not_invent_unobserved_boundary_identity(
+    tmp_path: Path, event_type: str
+) -> None:
+    policy = _policy(tmp_path / "policy.json")
+    campaign = _campaign(tmp_path, purpose="pilot", seed_start=550)
+    _rewrite_sparse_escape(campaign)
+    raw = json.loads(campaign.read_text(encoding="utf-8"))
+    for participant in raw["participants"].values():
+        for level in participant["levels"]:
+            for replica in level["replicas"]:
+                events = campaign.parent / replica["events"]["path"]
+                events.write_text(
+                    "particle_id,event_time_s,event_type,outcome,boundary_semantic\n"
+                    f"3,0.25,{event_type},escaped,\n",
+                    encoding="utf-8",
+                )
+                replica["events"]["sha256"] = _sha256(events)
+    _write_json(campaign, raw)
+    if event_type == "terminal_boundary":
+        with pytest.raises(ValueError, match="boundary_semantic is empty"):
+            evaluator.evaluate(policy, campaign, tmp_path / "population")
+    else:
+        report = evaluator.evaluate(policy, campaign, tmp_path / "population")
+        assert report["status"] == "PASS"
+
+
 def test_missing_active_row_without_terminal_event_fails_closed(tmp_path: Path) -> None:
     policy = _policy(tmp_path / "policy.json")
     campaign = _campaign(tmp_path, purpose="pilot", seed_start=600)

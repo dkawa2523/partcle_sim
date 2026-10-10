@@ -253,6 +253,7 @@ def _repeat_source(source: RealizedTableSource, count: int) -> RealizedTableSour
         mass_kg=repeat("mass_kg"),
         drag_diameter_m=repeat("drag_diameter_m"),
         electrostatic_radius_m=repeat("electrostatic_radius_m"),
+        contact_radius_m=repeat("contact_radius_m"),
         displaced_volume_m3=repeat("displaced_volume_m3"),
         model_weight=repeat("model_weight"),
         material_id=repeat("material_id"),

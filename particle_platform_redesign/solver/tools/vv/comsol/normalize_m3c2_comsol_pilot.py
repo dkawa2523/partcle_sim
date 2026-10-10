@@ -19,7 +19,14 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Final, cast
 
-TOOL_REVISION: Final = "m3c2_comsol_campaign_normalizer_v4"
+from tools.vv.comsol.actual_run_receipt import (
+    inventory_artifact,
+    materialize_actual_run_receipts,
+    normalize_terminal_event,
+    read_actual_run_receipt,
+)
+
+TOOL_REVISION: Final = "m3c2_comsol_campaign_normalizer_v5"
 EXECUTION_REQUEST_REVISION: Final = "m3c2_comsol_execution_request_v3"
 LEGACY_CONTRACT_ID: Final = "M3-C2A-caseA-100nm-stochastic-pilot"
 PILOT_AUTHORIZATION_KIND: Final = "m3c2_pilot_execution_authorization"
@@ -88,11 +95,6 @@ EVENT_COLUMNS: Final = (
     "boundary_semantic",
 )
 STATUS: Final = {1: "active", 2: "held", 3: "stuck", 4: "escaped"}
-BOUNDARY: Final = {
-    "held": "gas_inlet_hold",
-    "stuck": "material_stick_boundary_unspecified",
-    "escaped": "pump_outlet_escape",
-}
 CONFIGURATION_PREFIX: Final = "M3C2_COMSOL|configuration|"
 SOLVE_PREFIX: Final = "M3C2_COMSOL|solve_pass|"
 TIME_END_S: Final = 0.03
@@ -1272,6 +1274,7 @@ def _normalize_replica(
     peak_rss_bytes: int,
     configuration: dict[str, str],
     physics_tag: str = "fptas",
+    boundary_meaning: Path | None = None,
 ) -> dict[str, Any]:
     raw_path = directory / "trajectory_raw_wide.csv"
     raw_rows = _raw_rows(raw_path)
@@ -1285,6 +1288,8 @@ def _normalize_replica(
     ids: set[int] = set()
     lifecycle_counts: Counter[str] = Counter()
     event_rows: list[tuple[object, ...]] = []
+    event_evidence: list[dict[str, Any]] = []
+    actual = read_actual_run_receipt(directory, boundary_meaning)
     trajectory_rows = 0
     with (directory / "trajectory.csv").open("x", newline="", encoding="utf-8") as trajectory:
         writer = csv.writer(trajectory, lineterminator="\n")
@@ -1316,15 +1321,9 @@ def _normalize_replica(
             lifecycle_counts[final_lifecycle] += 1
             if terminal is not None:
                 outcome, event_time = terminal
-                event_rows.append(
-                    (
-                        particle_id,
-                        event_time,
-                        "terminal_boundary",
-                        outcome,
-                        BOUNDARY[outcome],
-                    )
-                )
+                event, evidence = normalize_terminal_event(actual, particle_id, outcome, event_time)
+                event_rows.append(event)
+                event_evidence.append(evidence)
     if ids != set(range(1, EXPECTED_PARTICLES + 1)):
         raise ValueError(f"{raw_path}: particle IDs must be exactly 1..287")
     if trajectory_rows != EXPECTED_PARTICLES * EXPECTED_FRAMES:
@@ -1371,6 +1370,9 @@ def _normalize_replica(
             "sha256": _sha256(directory / "events.csv"),
         },
         "event_count": len(event_rows),
+        "actual_run_readback": actual.artifact,
+        "terminal_boundary_evidence": event_evidence,
+        "boundary_behavior": "NOT_TESTED" if not event_rows else "REQUIRES_MEANING_PREFLIGHT",
         "final_lifecycle_counts": dict(sorted(lifecycle_counts.items())),
         "performance": {
             "path": "performance.json",
@@ -1388,6 +1390,9 @@ def _prefix_artifact_paths(summary: dict[str, Any], directory: str) -> None:
     for name in ("trajectory", "events", "performance", "raw"):
         artifact = summary[name]
         artifact["path"] = (Path(directory) / artifact["path"]).as_posix()
+    if "path" in summary["actual_run_readback"]:
+        artifact = summary["actual_run_readback"]
+        artifact["path"] = (Path(directory) / artifact["path"]).as_posix()
 
 
 def normalize(root: Path) -> dict[str, Any]:
@@ -1398,6 +1403,7 @@ def normalize(root: Path) -> dict[str, Any]:
     physics_tag = str(comsol_semantics["physics_tag"])
     requests = _request_rows(root / REQUEST_FILE, execution["request_rows"])
     configurations, durations = _receipts(root / "comsol_process.log", comsol_semantics)
+    materialize_actual_run_receipts(root)
     process_metrics = json.loads(
         (root / "comsol_process_metrics.json").read_text(encoding="utf-8-sig")
     )
@@ -1423,6 +1429,7 @@ def normalize(root: Path) -> dict[str, Any]:
             peak_rss_bytes,
             configurations[key],
             physics_tag,
+            root / "boundary_meaning.json",
         )
         _prefix_artifact_paths(summary, request["directory"])
         replicas_by_step.setdefault(request["step_ns"], []).append(summary)
@@ -1451,6 +1458,10 @@ def normalize(root: Path) -> dict[str, Any]:
         "schema_version": 1,
         "manifest_kind": "m3c2_participant",
         "tool_revision": TOOL_REVISION,
+        "meaning_preflight_inventory": inventory_artifact(root),
+        "source_model_sha256": (
+            _sha256(root / "source_copy.mph") if (root / "source_copy.mph").is_file() else None
+        ),
         "status": "COMPLETE_NORMALIZED_NOT_EVALUATED",
         "participant": "comsol",
         "case_id": campaign["evaluation_case_id"],

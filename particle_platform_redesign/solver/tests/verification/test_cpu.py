@@ -12,7 +12,7 @@ def test_early_memory_gate_keeps_prepare_and_run_phase_peaks_separate() -> None:
     particle_count = 100_000
     limit_bytes = 50 * 1024 * 1024
     canonical_data_bytes = 10_000_104
-    schedule_bytes = particle_count * 120
+    schedule_bytes = particle_count * 128
     physics_runtime_bytes = particle_count * 16
 
     early_bytes = early_memory_requirement_bytes(
@@ -42,7 +42,7 @@ def test_stage_evaluated_early_gate_remains_a_lower_bound() -> None:
     """Model-specific runtime bytes belong to the authoritative final plan."""
 
     particle_count = 1_000_000
-    limit_bytes = 300 * 1024 * 1024
+    limit_bytes = 384 * 1024 * 1024
     canonical_data_bytes = 1_000_000
 
     early_bytes = early_memory_requirement_bytes(
@@ -56,7 +56,7 @@ def test_stage_evaluated_early_gate_remains_a_lower_bound() -> None:
         particle_count=particle_count,
         canonical_data_bytes=canonical_data_bytes,
         prepared_geometry_bytes=1_000,
-        particle_schedule_bytes=particle_count * 120,
+        particle_schedule_bytes=particle_count * 128,
         physics_runtime_bytes=particle_count * 32,
         probe_index_bytes=0,
         output_buffer_bytes=0,
@@ -80,7 +80,7 @@ def test_memory_plan_owns_one_bounded_slab() -> None:
         output_buffer_bytes=0,
         writer_reserve_bytes=3 * 1024 * 1024,
         requires_stage_evaluation=True,
-        geometry_query_scratch_bytes=3 * 256 * 8,
+        geometry_query_scratch_bytes=4 * 256 * 8,
         replay_work_bytes=2_048,
         dense_path_bytes_per_particle=176,
         event_work_bytes_per_particle=64,
@@ -127,7 +127,7 @@ def test_memory_plan_owns_one_bounded_slab() -> None:
     assert components["slab_failure_staging"] == (
         plan.slab_particles * plan.failure_staging_bytes_per_particle
     )
-    assert components["geometry_query_scratch"] == 3 * plan.event_candidate_capacity * 8
+    assert components["geometry_query_scratch"] == 4 * plan.event_candidate_capacity * 8
     assert plan.replay_work_bytes == components["replay_work"] == 2_048
     assert plan.run_peak_bytes == sum(components.values()) <= plan.limit_bytes
 
@@ -174,9 +174,9 @@ def test_memory_plan_counts_spatial_index_build_work_only_in_prepare_peak() -> N
     assert indexed.as_manifest()["field_preparation_transient_bytes"] == field_transient_bytes
 
 
-def test_memory_plan_reports_when_even_one_slab_row_does_not_fit() -> None:
+def test_memory_plan_reports_when_minimum_event_capacity_leaves_no_slab_row() -> None:
     arguments = {
-        "limit_bytes": 65_536,
+        "limit_bytes": 67_500,
         "particle_count": 10,
         "canonical_data_bytes": 0,
         "prepared_geometry_bytes": 0,
@@ -188,6 +188,17 @@ def test_memory_plan_reports_when_even_one_slab_row_does_not_fit() -> None:
         "requires_stage_evaluation": False,
     }
 
-    plan = plan_cpu_memory(**arguments)
+    baseline = plan_cpu_memory(**arguments)
+    plan = plan_cpu_memory(
+        **arguments,
+        geometry_query_scratch_bytes=4 * 5 * 8,
+        event_candidate_capacity=5,
+        event_staging_capacity=2,
+        event_staging_bytes_per_row=490,
+        event_staging_fixed_bytes=2 * 5 * 8 + 16,
+        failure_staging_bytes_per_particle=52,
+    )
 
+    assert baseline.slab_particles > 0
     assert plan.slab_particles == 0
+    assert plan.planned_bytes <= plan.limit_bytes

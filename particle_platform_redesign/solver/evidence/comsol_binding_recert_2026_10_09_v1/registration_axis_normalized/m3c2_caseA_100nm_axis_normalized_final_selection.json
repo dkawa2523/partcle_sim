@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "receipt_kind": "m3c2_post_pilot_final_authorization",
+  "status": "AUTHORIZED_FOR_CONFIRMATORY_FINAL",
+  "registered_at_utc": "2026-10-09T15:31:25.307529+00:00",
+  "final_outcomes_inspected": false,
+  "policy_sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f",
+  "pilot_report_sha256": "3e3274f96f5df1543b3f7e5251859477c273c6501c6913d2a1a86d287aab0bda",
+  "pilot_scope_sha256": "f824aad8e963c036280d0f88001fb2a941f752c088abe51cfe547226c473ab8e",
+  "common_design_sha256": "75f3b1f2db16d7cb041b01fff23eb2519f33efe58a47f6a7c4fe2e1d5bd12d8f",
+  "seed_plan_sha256": "5236abc27f5df24845b0a886ad2253c47bae327a9c108bfb8685a208622c99a0",
+  "selected_final_levels": {
+    "comsol": {
+      "level_id": "dt_20us",
+      "ordinal": 0,
+      "numerical_setting": {
+        "fixed_step_s": 2e-05,
+        "integrator": "classical_rk4",
+        "purpose": "accepted_final"
+      }
+    },
+    "candidate": {
+      "level_id": "macro_coarse",
+      "ordinal": 0,
+      "numerical_setting": {
+        "brownian_interval_tree_depth": 3,
+        "dt_s": 2e-05,
+        "geometry_rtol": 1e-09,
+        "purpose": "accepted_final"
+      }
+    }
+  },
+  "selection_rule": "First passing macro level in registered descending-step ordinal order; not measured runtime selection. Pilot raw results, policy, margins and seeds unchanged.",
+  "claim_scope": "Conditional finite-algorithm registered terminal-time/fate and full-population RZ/fate distributions. Disappear boundary ID/cause, semantic boundary-event parity, continuous noise time-law and continuous bias are not certified."
+}

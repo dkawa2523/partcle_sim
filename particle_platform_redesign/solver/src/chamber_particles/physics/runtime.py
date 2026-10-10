@@ -25,12 +25,16 @@ from .catalog import (
     EpsteinDragPlan,
     FiniteSpeedEpsteinDragPlan,
     IonDragPlan,
+    LiftPlan,
     PhysicsPlan,
     PlasmaContinuousChargePlan,
     QuasistaticSphericalDielectrophoresisPlan,
     RarefiedVorticityLiftPlan,
     RelativeFlowScreenedIonDragPlan,
+    SaffmanLiftPlan,
     StokesCunninghamDragPlan,
+    TalbotThermophoresisPlan,
+    ThermophoresisPlan,
     WaldmannGallisThermophoresisPlan,
 )
 from .charge import (
@@ -60,7 +64,10 @@ from .compiled import (
     ION_DRAG_RELATIVE_FLOW_SCREENED,
     LIFT_NONE,
     LIFT_RAREFIED_VORTICITY_RZ,
+    LIFT_SAFFMAN_RZ,
+    LIFT_SAFFMAN_XY,
     THERMOPHORESIS_NONE,
+    THERMOPHORESIS_TALBOT,
     THERMOPHORESIS_WALDMANN_GALLIS,
     evaluate_physics_tile_into,
 )
@@ -73,6 +80,10 @@ from .forces import (
     ION_DRAG_MAX_SCALE_OVER_DEBYE,
     ION_DRAG_MIN_MEAN_FREE_PATH_OVER_DEBYE,
     RAREFIED_VORTICITY_LIFT_MIN_MEAN_FREE_PATH_OVER_RADIUS,
+    SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS,
+    SAFFMAN_MAX_SHEAR_REYNOLDS,
+    SAFFMAN_MAX_SLIP_REYNOLDS,
+    SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS,
     STOKES_CUNNINGHAM_MAX_KNUDSEN_RADIUS,
     STOKES_CUNNINGHAM_MAX_REYNOLDS,
     STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS,
@@ -98,8 +109,12 @@ from .forces import (
     relative_flow_screened_continuous_applicability_batch,
     relative_flow_screened_ion_drag_global_bound,
     relative_flow_screened_ion_drag_local_bound,
+    saffman_lift_acceleration_abs_upper_batch,
+    saffman_lift_continuous_applicability_batch,
+    saffman_lift_global_bounds,
     stokes_cunningham_continuous_applicability_batch,
     stokes_cunningham_rate_upper_s_inv,
+    talbot_thermophoresis_global_bounds,
     waldmann_gallis_continuous_applicability_batch,
     waldmann_gallis_global_bounds,
 )
@@ -115,7 +130,7 @@ type UInt8Array = NDArray[np.uint8]
 # global-bound convention and is applied before the final directed rounding.
 _LOCAL_BOUND_ROUNDOFF_FACTOR = 1.0 + 64.0 * np.finfo(np.float64).eps
 
-PHYSICS_RUNTIME_REVISION = "signed_ion_compiled_physics_runtime_v20"
+PHYSICS_RUNTIME_REVISION = "signed_ion_compiled_physics_runtime_v22"
 
 _EMPTY_SCALAR = np.empty(0, dtype=np.float64)
 _EMPTY_VECTOR = np.empty((0, 2), dtype=np.float64)
@@ -321,12 +336,36 @@ class _WaldmannGallisBounds:
 
 
 @dataclass(frozen=True, slots=True)
+class _TalbotBounds:
+    static_applicable: BoolArray
+
+
+type _ThermophoresisRuntimeBounds = _WaldmannGallisBounds | _TalbotBounds
+
+
+@dataclass(frozen=True, slots=True)
 class _RarefiedVorticityLiftBounds:
     """Prepared high-Kn certificate and cross-velocity acceleration bound."""
 
     coupling_rate_abs_upper_s_inv: FloatArray
     gas_velocity_abs_upper_m_s: FloatArray
     static_applicable: BoolArray
+
+
+@dataclass(frozen=True, slots=True)
+class _SaffmanLiftBounds:
+    """Prepared coupling and continuum/creeping applicability bounds."""
+
+    coupling_rate_abs_upper_s_inv: FloatArray
+    gas_velocity_abs_upper_m_s: FloatArray
+    shear_reynolds_lower: FloatArray
+    shear_reynolds_upper: FloatArray
+    static_applicable: BoolArray
+    gas_density_upper_kg_m3: float
+    gas_dynamic_viscosity_lower_Pa_s: float
+
+
+type _LiftRuntimeBounds = _RarefiedVorticityLiftBounds | _SaffmanLiftBounds
 
 
 @dataclass(frozen=True, slots=True)
@@ -340,6 +379,14 @@ class _ThermophoresisStageInputs:
     gas_mean_free_path_m: FloatArray
     gas_molecular_mass_kg: float
     maximum_speed_ratio: float
+    gas_temperature_gradient_K_m: FloatArray
+    gas_density_kg_m3: FloatArray
+    gas_dynamic_viscosity_Pa_s: FloatArray
+    gas_thermal_conductivity_W_m_K: FloatArray
+    particle_thermal_conductivity_W_m_K: float
+    thermal_slip_coefficient: float
+    momentum_exchange_coefficient: float
+    thermal_exchange_coefficient: float
 
 
 _NO_THERMOPHORESIS_STAGE_INPUTS = _ThermophoresisStageInputs(
@@ -350,17 +397,26 @@ _NO_THERMOPHORESIS_STAGE_INPUTS = _ThermophoresisStageInputs(
     _EMPTY_SCALAR,
     1.0,
     1.0,
+    _EMPTY_VECTOR,
+    _EMPTY_SCALAR,
+    _EMPTY_SCALAR,
+    _EMPTY_SCALAR,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
 )
 
 
 @dataclass(frozen=True, slots=True)
 class _LiftStageInputs:
-    """Sampled neutral-gas inputs for the optional RZ lift sensitivity."""
+    """Sampled neutral-gas inputs for the selected lift revision."""
 
     code: int
     gas_velocity_m_s: FloatArray
     gas_density_kg_m3: FloatArray
     gas_mean_free_path_m: FloatArray
+    gas_dynamic_viscosity_Pa_s: FloatArray
     azimuthal_gas_vorticity_s_inv: FloatArray
     lift_coefficient: float
 
@@ -368,6 +424,7 @@ class _LiftStageInputs:
 _NO_LIFT_STAGE_INPUTS = _LiftStageInputs(
     LIFT_NONE,
     _EMPTY_VECTOR,
+    _EMPTY_SCALAR,
     _EMPTY_SCALAR,
     _EMPTY_SCALAR,
     _EMPTY_SCALAR,
@@ -426,9 +483,9 @@ class PhysicsRuntime:
     displaced_volume_m3: FloatArray
     charge_bounds: _ChargeRuntimeBounds | None
     drag_bounds: _DragBounds | None
-    thermophoresis_bounds: _WaldmannGallisBounds | None
+    thermophoresis_bounds: _ThermophoresisRuntimeBounds | None
     ion_drag_bounds: _IonDragRuntimeBounds | None
-    lift_bounds: _RarefiedVorticityLiftBounds | None
+    lift_bounds: _LiftRuntimeBounds | None
     external_acceleration_abs_upper_m_s2: FloatArray
     localizable_external_base_abs_upper_m_s2: FloatArray | None
     constant_acceleration_m_s2: FloatArray | None
@@ -610,7 +667,9 @@ class PhysicsRuntime:
             count,
             incoming_status,
             gas_velocity,
+            gas_density,
             gas_temperature,
+            gas_viscosity,
             gas_mean_free_path,
         )
 
@@ -661,6 +720,7 @@ class PhysicsRuntime:
             incoming_status,
             gas_velocity,
             gas_density,
+            gas_viscosity,
             gas_mean_free_path,
             thermophoresis_inputs,
         )
@@ -725,6 +785,14 @@ class PhysicsRuntime:
             thermophoresis_inputs.gas_mean_free_path_m,
             thermophoresis_inputs.gas_molecular_mass_kg,
             thermophoresis_inputs.maximum_speed_ratio,
+            thermophoresis_inputs.gas_temperature_gradient_K_m,
+            thermophoresis_inputs.gas_density_kg_m3,
+            thermophoresis_inputs.gas_dynamic_viscosity_Pa_s,
+            thermophoresis_inputs.gas_thermal_conductivity_W_m_K,
+            thermophoresis_inputs.particle_thermal_conductivity_W_m_K,
+            thermophoresis_inputs.thermal_slip_coefficient,
+            thermophoresis_inputs.momentum_exchange_coefficient,
+            thermophoresis_inputs.thermal_exchange_coefficient,
             ion_drag_inputs.code,
             ion_drag_inputs.electron_density_m3,
             ion_drag_inputs.positive_ion_density_m3,
@@ -748,6 +816,7 @@ class PhysicsRuntime:
             lift_inputs.gas_velocity_m_s,
             lift_inputs.gas_density_kg_m3,
             lift_inputs.gas_mean_free_path_m,
+            lift_inputs.gas_dynamic_viscosity_Pa_s,
             lift_inputs.azimuthal_gas_vorticity_s_inv,
             lift_inputs.lift_coefficient,
             electric is not None,
@@ -832,11 +901,11 @@ class PhysicsRuntime:
         result = self.external_acceleration_abs_upper_m_s2[indices].copy()
         lift_bounds = self.lift_bounds
         if lift_bounds is not None:
-            lift, status = rarefied_vorticity_lift_acceleration_abs_upper_batch(
-                coupling_rate_abs_upper_s_inv=(lift_bounds.coupling_rate_abs_upper_s_inv[indices]),
-                gas_velocity_abs_upper_m_s=lift_bounds.gas_velocity_abs_upper_m_s,
-                velocity_abs_upper_m_s=velocity,
-                numerical_status=status,
+            lift, status = _lift_acceleration_abs_upper_batch(
+                lift_bounds,
+                indices,
+                velocity,
+                status,
             )
             with np.errstate(over="ignore", invalid="ignore"):
                 result = np.nextafter(result + lift, np.inf)
@@ -981,11 +1050,11 @@ class PhysicsRuntime:
         lift_bounds = self.lift_bounds
         velocity_abs_upper = np.maximum(np.abs(velocity_lower), np.abs(velocity_upper))
         if lift_bounds is not None:
-            lift, lift_status = rarefied_vorticity_lift_acceleration_abs_upper_batch(
-                coupling_rate_abs_upper_s_inv=(lift_bounds.coupling_rate_abs_upper_s_inv[indices]),
-                gas_velocity_abs_upper_m_s=lift_bounds.gas_velocity_abs_upper_m_s,
-                velocity_abs_upper_m_s=velocity_abs_upper,
-                numerical_status=np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8),
+            lift, lift_status = _lift_acceleration_abs_upper_batch(
+                lift_bounds,
+                indices,
+                velocity_abs_upper,
+                np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8),
             )
             status[lift_status != NUMERICAL_STATUS_OK] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
             with np.errstate(over="ignore", invalid="ignore"):
@@ -1144,6 +1213,7 @@ class PhysicsRuntime:
             self.plan.lift,
             self.lift_bounds,
             indices,
+            self.drag_diameter_m[indices],
             velocity,
         )
         _merge_continuous_applicability(applicable, status, lift_result)
@@ -1285,6 +1355,8 @@ class PhysicsRuntime:
             _local_lift_applicability(
                 self.plan.lift,
                 self.drag_diameter_m[indices],
+                velocity_lower,
+                velocity_upper,
                 primitive_ranges,
             ),
         )
@@ -1344,8 +1416,9 @@ class PhysicsRuntime:
             total += 9 * np.dtype(np.float64).itemsize
         if self.thermophoresis_bounds is not None:
             total += int(self.thermophoresis_bounds.static_applicable.nbytes)
-            total += int(self.thermophoresis_bounds.gas_velocity_abs_upper_m_s.nbytes)
-            total += np.dtype(np.float64).itemsize
+            if isinstance(self.thermophoresis_bounds, _WaldmannGallisBounds):
+                total += int(self.thermophoresis_bounds.gas_velocity_abs_upper_m_s.nbytes)
+                total += np.dtype(np.float64).itemsize
         if self.ion_drag_bounds is not None:
             total += int(self.ion_drag_bounds.positive_ion_velocity_abs_upper_m_s.nbytes)
             if isinstance(self.ion_drag_bounds, _BarnesIonDragBounds):
@@ -1355,6 +1428,9 @@ class PhysicsRuntime:
             total += int(self.lift_bounds.coupling_rate_abs_upper_s_inv.nbytes)
             total += int(self.lift_bounds.gas_velocity_abs_upper_m_s.nbytes)
             total += int(self.lift_bounds.static_applicable.nbytes)
+            if isinstance(self.lift_bounds, _SaffmanLiftBounds):
+                total += int(self.lift_bounds.shear_reynolds_lower.nbytes)
+                total += int(self.lift_bounds.shear_reynolds_upper.nbytes)
         if self.constant_acceleration_m_s2 is not None:
             total += int(self.constant_acceleration_m_s2.nbytes)
         return total
@@ -1377,10 +1453,28 @@ def _merge_continuous_applicability(
     status[first_failure] = model_status[first_failure]
 
 
-def _lift_continuous_applicability(
-    plan: RarefiedVorticityLiftPlan | None,
-    bounds: _RarefiedVorticityLiftBounds | None,
+def _lift_acceleration_abs_upper_batch(
+    bounds: _LiftRuntimeBounds,
     particle_index: Int64Array,
+    velocity_abs_upper_m_s: FloatArray,
+    numerical_status: UInt8Array,
+) -> tuple[FloatArray, UInt8Array]:
+    arguments = {
+        "coupling_rate_abs_upper_s_inv": bounds.coupling_rate_abs_upper_s_inv[particle_index],
+        "gas_velocity_abs_upper_m_s": bounds.gas_velocity_abs_upper_m_s,
+        "velocity_abs_upper_m_s": velocity_abs_upper_m_s,
+        "numerical_status": numerical_status,
+    }
+    if isinstance(bounds, _SaffmanLiftBounds):
+        return saffman_lift_acceleration_abs_upper_batch(**arguments)
+    return rarefied_vorticity_lift_acceleration_abs_upper_batch(**arguments)
+
+
+def _lift_continuous_applicability(
+    plan: LiftPlan | None,
+    bounds: _LiftRuntimeBounds | None,
+    particle_index: Int64Array,
+    drag_diameter_m: FloatArray,
     velocity_abs_upper_m_s: FloatArray,
 ) -> tuple[BoolArray, UInt8Array] | None:
     """Certify the fixed high-Kn gate and a finite velocity enclosure."""
@@ -1388,6 +1482,21 @@ def _lift_continuous_applicability(
     if plan is None and bounds is None:
         return None
     if plan is None or bounds is None:
+        raise PhysicsEvaluationError("lift applicability bounds do not match the revision")
+    if isinstance(plan, SaffmanLiftPlan) and isinstance(bounds, _SaffmanLiftBounds):
+        return saffman_lift_continuous_applicability_batch(
+            static_applicable=bounds.static_applicable[particle_index],
+            drag_diameter_m=drag_diameter_m,
+            velocity_abs_upper_m_s=velocity_abs_upper_m_s,
+            gas_velocity_abs_upper_m_s=bounds.gas_velocity_abs_upper_m_s,
+            gas_density_upper_kg_m3=bounds.gas_density_upper_kg_m3,
+            gas_dynamic_viscosity_lower_Pa_s=bounds.gas_dynamic_viscosity_lower_Pa_s,
+            shear_reynolds_lower=bounds.shear_reynolds_lower[particle_index],
+            shear_reynolds_upper=bounds.shear_reynolds_upper[particle_index],
+        )
+    if not isinstance(plan, RarefiedVorticityLiftPlan) or not isinstance(
+        bounds, _RarefiedVorticityLiftBounds
+    ):
         raise PhysicsEvaluationError("lift applicability bounds do not match the revision")
     numerical_ok = np.isfinite(velocity_abs_upper_m_s).all(axis=1)
     numerical_ok &= (velocity_abs_upper_m_s >= 0.0).all(axis=1)
@@ -1547,19 +1656,33 @@ def _charge_stage_inputs(
 
 
 def _thermophoresis_stage_inputs(
-    plan: WaldmannGallisThermophoresisPlan | None,
+    plan: ThermophoresisPlan | None,
     drag_plan: DragPlan | None,
     sampled_values: Mapping[str, FloatArray],
     count: int,
     numerical_status: UInt8Array,
     drag_gas_velocity_m_s: FloatArray,
+    drag_gas_density_kg_m3: FloatArray,
     drag_gas_temperature_K: FloatArray,
+    drag_gas_dynamic_viscosity_Pa_s: FloatArray,
     drag_gas_mean_free_path_m: FloatArray,
 ) -> _ThermophoresisStageInputs:
     """Bind one stage's neutral background, reusing compatible drag samples."""
 
     if plan is None:
         return _NO_THERMOPHORESIS_STAGE_INPUTS
+    if isinstance(plan, TalbotThermophoresisPlan):
+        return _talbot_stage_inputs(
+            plan,
+            drag_plan,
+            sampled_values,
+            count,
+            numerical_status,
+            drag_gas_density_kg_m3,
+            drag_gas_temperature_K,
+            drag_gas_dynamic_viscosity_Pa_s,
+            drag_gas_mean_free_path_m,
+        )
     if isinstance(drag_plan, EpsteinDragPlan | FiniteSpeedEpsteinDragPlan):
         gas_velocity = drag_gas_velocity_m_s
         gas_temperature = drag_gas_temperature_K
@@ -1601,18 +1724,92 @@ def _thermophoresis_stage_inputs(
         mean_free_path,
         plan.gas_molecular_mass_kg,
         plan.maximum_speed_ratio,
+        _EMPTY_VECTOR,
+        _EMPTY_SCALAR,
+        _EMPTY_SCALAR,
+        _EMPTY_SCALAR,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+    )
+
+
+def _talbot_stage_inputs(
+    plan: TalbotThermophoresisPlan,
+    drag_plan: DragPlan | None,
+    sampled_values: Mapping[str, FloatArray],
+    count: int,
+    numerical_status: UInt8Array,
+    drag_gas_density_kg_m3: FloatArray,
+    drag_gas_temperature_K: FloatArray,
+    drag_gas_dynamic_viscosity_Pa_s: FloatArray,
+    drag_gas_mean_free_path_m: FloatArray,
+) -> _ThermophoresisStageInputs:
+    """Bind Talbot primitives and reuse matching drag samples."""
+
+    if isinstance(drag_plan, EpsteinDragPlan | FiniteSpeedEpsteinDragPlan):
+        density = drag_gas_density_kg_m3
+        temperature = drag_gas_temperature_K
+        viscosity = _sampled_positive_scalar_batch(
+            sampled_values, plan.gas_dynamic_viscosity_field, count, numerical_status
+        )
+        mean_free_path = drag_gas_mean_free_path_m
+    elif isinstance(drag_plan, StokesCunninghamDragPlan):
+        density = drag_gas_density_kg_m3
+        temperature = _sampled_positive_scalar_batch(
+            sampled_values, plan.gas_temperature_field, count, numerical_status
+        )
+        viscosity = drag_gas_dynamic_viscosity_Pa_s
+        mean_free_path = drag_gas_mean_free_path_m
+    else:
+        density = _sampled_positive_scalar_batch(
+            sampled_values, plan.gas_density_field, count, numerical_status
+        )
+        temperature = _sampled_positive_scalar_batch(
+            sampled_values, plan.gas_temperature_field, count, numerical_status
+        )
+        viscosity = _sampled_positive_scalar_batch(
+            sampled_values, plan.gas_dynamic_viscosity_field, count, numerical_status
+        )
+        mean_free_path = _sampled_positive_scalar_batch(
+            sampled_values, plan.gas_mean_free_path_field, count, numerical_status
+        )
+    gradient = _sampled_vector_batch(
+        sampled_values, plan.gas_temperature_gradient_field, count, numerical_status
+    )
+    conductivity = _sampled_positive_scalar_batch(
+        sampled_values, plan.gas_thermal_conductivity_field, count, numerical_status
+    )
+    return _ThermophoresisStageInputs(
+        THERMOPHORESIS_TALBOT,
+        _EMPTY_VECTOR,
+        temperature,
+        _EMPTY_VECTOR,
+        mean_free_path,
+        1.0,
+        1.0,
+        gradient,
+        density,
+        viscosity,
+        conductivity,
+        plan.particle_thermal_conductivity_W_m_K,
+        plan.thermal_slip_coefficient,
+        plan.momentum_exchange_coefficient,
+        plan.thermal_exchange_coefficient,
     )
 
 
 def _lift_stage_inputs(
-    plan: RarefiedVorticityLiftPlan | None,
+    plan: LiftPlan | None,
     drag_plan: DragPlan | None,
-    thermophoresis_plan: WaldmannGallisThermophoresisPlan | None,
+    thermophoresis_plan: ThermophoresisPlan | None,
     sampled_values: Mapping[str, FloatArray],
     count: int,
     numerical_status: UInt8Array,
     drag_gas_velocity_m_s: FloatArray,
     drag_gas_density_kg_m3: FloatArray,
+    drag_gas_dynamic_viscosity_Pa_s: FloatArray,
     drag_gas_mean_free_path_m: FloatArray,
     thermophoresis_inputs: _ThermophoresisStageInputs,
 ) -> _LiftStageInputs:
@@ -1620,6 +1817,20 @@ def _lift_stage_inputs(
 
     if plan is None:
         return _NO_LIFT_STAGE_INPUTS
+    if isinstance(plan, SaffmanLiftPlan):
+        return _saffman_stage_inputs(
+            plan,
+            drag_plan,
+            thermophoresis_plan,
+            sampled_values,
+            count,
+            numerical_status,
+            drag_gas_velocity_m_s,
+            drag_gas_density_kg_m3,
+            drag_gas_dynamic_viscosity_Pa_s,
+            drag_gas_mean_free_path_m,
+            thermophoresis_inputs,
+        )
     if drag_plan is not None:
         gas_velocity = drag_gas_velocity_m_s
         gas_density = drag_gas_density_kg_m3
@@ -1627,7 +1838,7 @@ def _lift_stage_inputs(
     else:
         gas_velocity = (
             thermophoresis_inputs.gas_velocity_m_s
-            if thermophoresis_plan is not None
+            if isinstance(thermophoresis_plan, WaldmannGallisThermophoresisPlan)
             else _sampled_vector_batch(
                 sampled_values,
                 plan.gas_velocity_field,
@@ -1637,7 +1848,7 @@ def _lift_stage_inputs(
         )
         mean_free_path = (
             thermophoresis_inputs.gas_mean_free_path_m
-            if thermophoresis_plan is not None
+            if isinstance(thermophoresis_plan, WaldmannGallisThermophoresisPlan)
             else _sampled_positive_scalar_batch(
                 sampled_values,
                 plan.gas_mean_free_path_field,
@@ -1662,8 +1873,65 @@ def _lift_stage_inputs(
         gas_velocity,
         gas_density,
         mean_free_path,
+        _EMPTY_SCALAR,
         vorticity,
         plan.lift_coefficient,
+    )
+
+
+def _saffman_stage_inputs(
+    plan: SaffmanLiftPlan,
+    drag_plan: DragPlan | None,
+    thermophoresis_plan: ThermophoresisPlan | None,
+    sampled_values: Mapping[str, FloatArray],
+    count: int,
+    numerical_status: UInt8Array,
+    drag_gas_velocity_m_s: FloatArray,
+    drag_gas_density_kg_m3: FloatArray,
+    drag_gas_dynamic_viscosity_Pa_s: FloatArray,
+    drag_gas_mean_free_path_m: FloatArray,
+    thermophoresis_inputs: _ThermophoresisStageInputs,
+) -> _LiftStageInputs:
+    """Bind Saffman primitives and reuse a matching continuum background."""
+
+    if isinstance(drag_plan, StokesCunninghamDragPlan):
+        gas_velocity = drag_gas_velocity_m_s
+        gas_density = drag_gas_density_kg_m3
+        viscosity = drag_gas_dynamic_viscosity_Pa_s
+        mean_free_path = drag_gas_mean_free_path_m
+    else:
+        gas_velocity = _sampled_vector_batch(
+            sampled_values, plan.gas_velocity_field, count, numerical_status
+        )
+        if isinstance(thermophoresis_plan, TalbotThermophoresisPlan):
+            gas_density = thermophoresis_inputs.gas_density_kg_m3
+            viscosity = thermophoresis_inputs.gas_dynamic_viscosity_Pa_s
+            mean_free_path = thermophoresis_inputs.gas_mean_free_path_m
+        else:
+            gas_density = _sampled_positive_scalar_batch(
+                sampled_values, plan.gas_density_field, count, numerical_status
+            )
+            viscosity = _sampled_positive_scalar_batch(
+                sampled_values, plan.gas_dynamic_viscosity_field, count, numerical_status
+            )
+            mean_free_path = _sampled_positive_scalar_batch(
+                sampled_values, plan.gas_mean_free_path_field, count, numerical_status
+            )
+    vorticity = _sampled_scalar_batch(
+        sampled_values,
+        plan.out_of_plane_gas_vorticity_field,
+        count,
+        numerical_status,
+    )
+    code = LIFT_SAFFMAN_XY if plan.coordinate_system == "cartesian_xy" else LIFT_SAFFMAN_RZ
+    return _LiftStageInputs(
+        code,
+        gas_velocity,
+        gas_density,
+        mean_free_path,
+        viscosity,
+        vorticity,
+        1.0,
     )
 
 
@@ -2171,7 +2439,7 @@ def _local_charge_applicability(
 
 
 def _local_thermophoresis_applicability(
-    plan: WaldmannGallisThermophoresisPlan | None,
+    plan: ThermophoresisPlan | None,
     drag_diameter_m: FloatArray,
     velocity_lower_m_s: FloatArray,
     velocity_upper_m_s: FloatArray,
@@ -2180,6 +2448,23 @@ def _local_thermophoresis_applicability(
     if plan is None:
         return None
     count = int(drag_diameter_m.size)
+    if isinstance(plan, TalbotThermophoresisPlan):
+        numerical_ok = np.ones(count, dtype=np.bool_)
+        for field_name in (
+            plan.gas_temperature_field,
+            plan.gas_density_field,
+            plan.gas_dynamic_viscosity_field,
+            plan.gas_thermal_conductivity_field,
+            plan.gas_mean_free_path_field,
+        ):
+            lower, upper = _local_positive_scalar_range(ranges, field_name, count)
+            numerical_ok &= np.isfinite(lower) & np.isfinite(upper)
+        gradient_lower, gradient_upper = _local_range(
+            ranges, plan.gas_temperature_gradient_field, count, 2
+        )
+        numerical_ok &= np.isfinite(gradient_lower).all(axis=1)
+        numerical_ok &= np.isfinite(gradient_upper).all(axis=1)
+        return _certificate_result(np.ones(count, dtype=np.bool_), numerical_ok)
     gas_lower, gas_upper = _local_range(ranges, plan.gas_velocity_field, count, 2)
     temperature_lower, _ = _local_positive_scalar_range(
         ranges,
@@ -2398,13 +2683,69 @@ def _local_barnes_static_applicability(
 
 
 def _local_lift_applicability(
-    plan: RarefiedVorticityLiftPlan | None,
+    plan: LiftPlan | None,
     drag_diameter_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
     ranges: Mapping[str, LocalPrimitiveRange],
 ) -> tuple[BoolArray, UInt8Array] | None:
     if plan is None:
         return None
     count = int(drag_diameter_m.size)
+    if isinstance(plan, SaffmanLiftPlan):
+        gas_lower, gas_upper = _local_range(ranges, plan.gas_velocity_field, count, 2)
+        density_lower, density_upper = _local_positive_scalar_range(
+            ranges, plan.gas_density_field, count
+        )
+        viscosity_lower, viscosity_upper = _local_positive_scalar_range(
+            ranges, plan.gas_dynamic_viscosity_field, count
+        )
+        _, mean_free_path_upper = _local_positive_scalar_range(
+            ranges, plan.gas_mean_free_path_field, count
+        )
+        vorticity_lower, vorticity_upper = _local_range(
+            ranges, plan.out_of_plane_gas_vorticity_field, count, 1
+        )
+        relative_speed, numerical_ok = _relative_speed_upper(
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            gas_lower,
+            gas_upper,
+        )
+        radius = 0.5 * drag_diameter_m
+        omega_abs_upper = np.maximum(np.abs(vorticity_lower[:, 0]), np.abs(vorticity_upper[:, 0]))
+        zero_shear = omega_abs_upper == 0.0
+        omega_abs_lower = np.where(
+            vorticity_lower[:, 0] > 0.0,
+            vorticity_lower[:, 0],
+            np.where(vorticity_upper[:, 0] < 0.0, -vorticity_upper[:, 0], 0.0),
+        )
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            knudsen_upper = _local_nonnegative_upper(mean_free_path_upper / radius)
+            slip_reynolds = _local_nonnegative_upper(
+                density_upper * radius * relative_speed / viscosity_lower
+            )
+            shear_reynolds_upper = _local_nonnegative_upper(
+                density_upper * radius**2 * omega_abs_upper / viscosity_lower
+            )
+            shear_reynolds_lower = np.nextafter(
+                density_lower
+                * radius**2
+                * omega_abs_lower
+                / viscosity_upper
+                / _LOCAL_BOUND_ROUNDOFF_FACTOR,
+                0.0,
+            )
+        numerical_ok &= np.isfinite(knudsen_upper)
+        numerical_ok &= np.isfinite(slip_reynolds)
+        numerical_ok &= np.isfinite(shear_reynolds_lower) & np.isfinite(shear_reynolds_upper)
+        certified = knudsen_upper <= SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS
+        certified &= slip_reynolds <= SAFFMAN_MAX_SLIP_REYNOLDS
+        certified &= shear_reynolds_upper <= SAFFMAN_MAX_SHEAR_REYNOLDS
+        certified &= zero_shear | (
+            slip_reynolds <= SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS * np.sqrt(shear_reynolds_lower)
+        )
+        return _certificate_result(certified, numerical_ok)
     mean_free_path_lower, _ = _local_positive_scalar_range(
         ranges,
         plan.gas_mean_free_path_field,
@@ -2503,8 +2844,8 @@ def _charge_continuous_applicability(
 
 
 def _thermophoresis_continuous_applicability(
-    plan: WaldmannGallisThermophoresisPlan | None,
-    bounds: _WaldmannGallisBounds | None,
+    plan: ThermophoresisPlan | None,
+    bounds: _ThermophoresisRuntimeBounds | None,
     particle_index: Int64Array,
     velocity_abs_upper_m_s: FloatArray,
 ) -> tuple[BoolArray, UInt8Array] | None:
@@ -2518,6 +2859,18 @@ def _thermophoresis_continuous_applicability(
         return None
     if bounds is None:
         raise PhysicsEvaluationError("thermophoresis applicability bounds were not prepared")
+    if isinstance(plan, TalbotThermophoresisPlan) and isinstance(bounds, _TalbotBounds):
+        count = int(particle_index.size)
+        return (
+            bounds.static_applicable[particle_index].copy(),
+            np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8),
+        )
+    if not isinstance(plan, WaldmannGallisThermophoresisPlan) or not isinstance(
+        bounds, _WaldmannGallisBounds
+    ):
+        raise PhysicsEvaluationError(
+            "thermophoresis applicability bounds do not match the resolved revision"
+        )
     return waldmann_gallis_continuous_applicability_batch(
         static_applicable=bounds.static_applicable[particle_index],
         velocity_abs_upper_m_s=velocity_abs_upper_m_s,
@@ -2895,10 +3248,40 @@ def _prepare_thermophoresis_bounds(
     mass_kg: FloatArray,
     drag_diameter_m: FloatArray,
     ranges: Mapping[str, PrimitiveRange],
-) -> tuple[_WaldmannGallisBounds | None, FloatArray | None]:
+) -> tuple[_ThermophoresisRuntimeBounds | None, FloatArray | None]:
     thermophoresis = plan.thermophoresis
     if thermophoresis is None:
         return None, None
+    if isinstance(thermophoresis, TalbotThermophoresisPlan):
+        temperature = _positive_scalar_range(ranges, thermophoresis.gas_temperature_field)
+        gradient = _primitive_range(ranges, thermophoresis.gas_temperature_gradient_field, 2)
+        density = _positive_scalar_range(ranges, thermophoresis.gas_density_field)
+        viscosity = _positive_scalar_range(ranges, thermophoresis.gas_dynamic_viscosity_field)
+        conductivity = _positive_scalar_range(ranges, thermophoresis.gas_thermal_conductivity_field)
+        mean_free_path = _positive_scalar_range(ranges, thermophoresis.gas_mean_free_path_field)
+        gradient_abs_upper = np.nextafter(
+            np.maximum(np.abs(gradient.lower), np.abs(gradient.upper)), np.inf
+        )
+        prepared = talbot_thermophoresis_global_bounds(
+            mass_kg=mass_kg,
+            drag_diameter_m=drag_diameter_m,
+            gas_temperature_lower_K=float(temperature.lower[0]),
+            gas_temperature_gradient_abs_upper_K_m=gradient_abs_upper,
+            gas_dynamic_viscosity_upper_Pa_s=float(viscosity.upper[0]),
+            gas_density_lower_kg_m3=float(density.lower[0]),
+            gas_thermal_conductivity_lower_W_m_K=float(conductivity.lower[0]),
+            gas_thermal_conductivity_upper_W_m_K=float(conductivity.upper[0]),
+            gas_mean_free_path_lower_m=float(mean_free_path.lower[0]),
+            gas_mean_free_path_upper_m=float(mean_free_path.upper[0]),
+            particle_thermal_conductivity_W_m_K=(
+                thermophoresis.particle_thermal_conductivity_W_m_K
+            ),
+            thermal_slip_coefficient=thermophoresis.thermal_slip_coefficient,
+            momentum_exchange_coefficient=thermophoresis.momentum_exchange_coefficient,
+            thermal_exchange_coefficient=thermophoresis.thermal_exchange_coefficient,
+        )
+        prepared.static_applicable.setflags(write=False)
+        return _TalbotBounds(prepared.static_applicable), prepared.acceleration_abs_upper_m_s2
     gas_velocity = _primitive_range(ranges, thermophoresis.gas_velocity_field, 2)
     temperature = _positive_scalar_range(ranges, thermophoresis.gas_temperature_field)
     heat_flux = _primitive_range(
@@ -3131,13 +3514,62 @@ def _prepare_dielectrophoresis_acceleration_bound(
 
 
 def _prepare_lift_bounds(
-    lift: RarefiedVorticityLiftPlan | None,
+    lift: LiftPlan | None,
     mass_kg: FloatArray,
     drag_diameter_m: FloatArray,
     ranges: Mapping[str, PrimitiveRange],
-) -> _RarefiedVorticityLiftBounds | None:
+) -> _LiftRuntimeBounds | None:
     if lift is None:
         return None
+    if isinstance(lift, SaffmanLiftPlan):
+        gas_velocity = _primitive_range(ranges, lift.gas_velocity_field, 2)
+        gas_density = _positive_scalar_range(ranges, lift.gas_density_field)
+        viscosity = _positive_scalar_range(ranges, lift.gas_dynamic_viscosity_field)
+        mean_free_path = _positive_scalar_range(ranges, lift.gas_mean_free_path_field)
+        vorticity = _primitive_range(ranges, lift.out_of_plane_gas_vorticity_field, 1)
+        gas_velocity_abs_upper = np.nextafter(
+            np.maximum(np.abs(gas_velocity.lower), np.abs(gas_velocity.upper)), np.inf
+        )
+        vorticity_abs_upper_raw = float(max(abs(vorticity.lower[0]), abs(vorticity.upper[0])))
+        vorticity_abs_upper = (
+            0.0
+            if vorticity_abs_upper_raw == 0.0
+            else math.nextafter(vorticity_abs_upper_raw, math.inf)
+        )
+        if vorticity.lower[0] > 0.0:
+            vorticity_abs_lower = math.nextafter(float(vorticity.lower[0]), 0.0)
+        elif vorticity.upper[0] < 0.0:
+            vorticity_abs_lower = math.nextafter(float(abs(vorticity.upper[0])), 0.0)
+        else:
+            vorticity_abs_lower = 0.0
+        prepared = saffman_lift_global_bounds(
+            mass_kg=mass_kg,
+            drag_diameter_m=drag_diameter_m,
+            gas_density_lower_kg_m3=float(gas_density.lower[0]),
+            gas_density_upper_kg_m3=float(gas_density.upper[0]),
+            gas_dynamic_viscosity_lower_Pa_s=float(viscosity.lower[0]),
+            gas_dynamic_viscosity_upper_Pa_s=float(viscosity.upper[0]),
+            gas_mean_free_path_upper_m=float(mean_free_path.upper[0]),
+            out_of_plane_gas_vorticity_abs_lower_s_inv=vorticity_abs_lower,
+            out_of_plane_gas_vorticity_abs_upper_s_inv=vorticity_abs_upper,
+            gas_velocity_abs_upper_m_s=gas_velocity_abs_upper,
+        )
+        _freeze(
+            prepared.coupling_rate_abs_upper_s_inv,
+            prepared.gas_velocity_abs_upper_m_s,
+            prepared.shear_reynolds_lower,
+            prepared.shear_reynolds_upper,
+        )
+        prepared.static_applicable.setflags(write=False)
+        return _SaffmanLiftBounds(
+            prepared.coupling_rate_abs_upper_s_inv,
+            prepared.gas_velocity_abs_upper_m_s,
+            prepared.shear_reynolds_lower,
+            prepared.shear_reynolds_upper,
+            prepared.static_applicable,
+            float(gas_density.upper[0]),
+            float(viscosity.lower[0]),
+        )
     gas_velocity = _primitive_range(ranges, lift.gas_velocity_field, 2)
     gas_density = _positive_scalar_range(ranges, lift.gas_density_field)
     mean_free_path = _positive_scalar_range(ranges, lift.gas_mean_free_path_field)

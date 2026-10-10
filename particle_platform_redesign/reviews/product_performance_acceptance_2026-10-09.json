@@ -1,0 +1,526 @@
+{
+  "analytic_budgets": [
+    {
+      "dt_s": 0.125,
+      "end_s": 0.5,
+      "equations": "x_ddot=-0.5*(x+2), y_ddot=0; fixed charge",
+      "formula": "x=-2+(x0+2)*cos(omega*t)+(vx0/omega)*sin(omega*t), vx=-(x0+2)*omega*sin(omega*t)+vx0*cos(omega*t), omega=sqrt(0.5); y=y0+vy0*t",
+      "initial_position_m": [
+        0.3,
+        -0.2
+      ],
+      "initial_velocity_m_s": [
+        -0.1,
+        0.4
+      ],
+      "position_absolute_error_limit_m": 1e-06,
+      "row_family": "regular",
+      "scope": "one particle with the same physical data and h as the repeated-source preset; not an application accuracy qualification",
+      "velocity_absolute_error_limit_m_s": 1e-06
+    },
+    {
+      "dt_s": 0.019287109375,
+      "end_s": 0.019287109375,
+      "event_time_absolute_error_limit_s": 1e-15,
+      "formula": "t_k=(k+0.5)*gap, right/left alternating for k=0..19; final x=gap/4, vx=+1",
+      "gap_m": 0.0009765625,
+      "position_absolute_error_limit_m": 5e-14,
+      "row_family": "event20",
+      "scope": "one particle with the same thin-gap data, root step and twenty specular hits as the repeated-source preset",
+      "velocity_absolute_error_limit_m_s": 1e-13
+    }
+  ],
+  "analytic_checks": [
+    {
+      "actual_position_m": [
+        0.10877648487454694,
+        -4.163336342344337e-17
+      ],
+      "actual_velocity_m_s": [
+        -0.6569100380990381,
+        0.4
+      ],
+      "alpha_s_inv2": -0.5,
+      "dt_s": 0.125,
+      "end_s": 0.5,
+      "expected_position_m": [
+        0.1087763461840148,
+        0.0
+      ],
+      "expected_velocity_m_s": [
+        -0.6569103141886248,
+        0.4
+      ],
+      "max_position_error_m": 1.3869053214210503e-07,
+      "max_velocity_error_m_s": 2.7608958663716265e-07,
+      "particle_count": 1,
+      "preset": "regular-n10000",
+      "reference": "closed-form shifted harmonic solution; independent of production integrator",
+      "scope": "small identical-physics repeated-source preset; no application accuracy or independent million-particle error check",
+      "status": "PASS"
+    },
+    {
+      "dt_s": 0.019287109375,
+      "end_s": 0.019287109375,
+      "errors": {
+        "max_event_position_error_m": 0.0,
+        "max_event_time_error_s": 0.0,
+        "max_final_position_error_m": 0.0,
+        "max_final_velocity_error_m_s": 0.0
+      },
+      "events": 20,
+      "expected_final_position_m": [
+        0.000244140625,
+        0.0625
+      ],
+      "expected_final_velocity_m_s": [
+        1.0,
+        0.0
+      ],
+      "particle_count": 1,
+      "preset": "event-h20-n10000",
+      "reference": "exact alternating specular thin-gap solution; independent of event detector",
+      "scope": "small identical-physics repeated-source preset; no finite-radius curved-wall or mixed-mode accuracy qualification",
+      "status": "PASS"
+    }
+  ],
+  "approval": {
+    "approved_product_performance_claim": false,
+    "user_supplied_application_accuracy_budget": null,
+    "user_supplied_wall_time_sla": null
+  },
+  "artifact": "machine_local_performance_engineering_acceptance_proposal_v1",
+  "baseline_comparison": [
+    {
+      "after_median_timing_s": {
+        "load_case": 0.007450900040566921,
+        "open_result": 0.19817960006184876,
+        "public_end_to_end": 4.791584899881855,
+        "simulate": 4.5859533997718245
+      },
+      "after_over_before_timing_ratio": {
+        "load_case": 0.9488328818169608,
+        "open_result": 1.0175736943112221,
+        "public_end_to_end": 1.084097678585338,
+        "simulate": 1.086859153834868
+      },
+      "after_owned_plan_B": 90211707,
+      "after_peak_rss_B": 341843968,
+      "after_simulate_range_s": [
+        4.309023899957538,
+        5.076115499949083
+      ],
+      "before_median_timing_s": {
+        "load_case": 0.00785270007327199,
+        "open_result": 0.19475700007751584,
+        "public_end_to_end": 4.419882999965921,
+        "simulate": 4.21945510013029
+      },
+      "before_owned_plan_B": 90211707,
+      "before_peak_rss_B": 342560768,
+      "before_simulate_range_s": [
+        4.191035799914971,
+        4.222877799998969
+      ],
+      "changed_global_revisions": {
+        "engine_algorithm_revision": {
+          "after": "particle_engine_v45",
+          "before": "particle_engine_v44"
+        },
+        "event_algorithm_revision": {
+          "after": "line_quadratic_curved_capsule_periodic_first_hit_v21",
+          "before": "line_quadratic_curved_capsule_periodic_first_hit_v20"
+        },
+        "geometry_algorithm_revision": {
+          "after": "line_boundary_capsule_contact_bvh_v7",
+          "before": "line_boundary_capsule_contact_bvh_v6"
+        },
+        "source_algorithm_revision": {
+          "after": "realized_internal_surface_contact_schedule_v5",
+          "before": "realized_internal_surface_contact_schedule_v4"
+        }
+      },
+      "changed_owned_plan_components": {},
+      "core_payload_sha256": "sha256:6c1d670bc30d13f417f3fda04b2104f3c0c5218262c1f26e1ebce24d8bfbbff6",
+      "memory_revision": {
+        "after": "solver_owned_memory_plan_v16",
+        "before": "solver_owned_memory_plan_v15"
+      },
+      "owned_plan_delta_B": 0,
+      "peak_rss_ratio": 0.9979075245417479,
+      "row_id": "event-h20-n10000",
+      "same_case_and_data_identity": true,
+      "same_scientific_core_and_full_payload": true,
+      "timing_status": "DESCRIPTIVE; no approved seconds or regression-ratio SLA"
+    },
+    {
+      "after_median_timing_s": {
+        "load_case": 0.008581100031733513,
+        "open_result": 0.005226300098001957,
+        "public_end_to_end": 0.4368190998211503,
+        "simulate": 0.422378099989146
+      },
+      "after_over_before_timing_ratio": {
+        "load_case": 1.0203084195532668,
+        "open_result": 1.0872495619985374,
+        "public_end_to_end": 1.043484253326137,
+        "simulate": 1.0413437880002234
+      },
+      "after_owned_plan_B": 48708029,
+      "after_peak_rss_B": 400764928,
+      "after_simulate_range_s": [
+        0.4067112000193447,
+        0.42669439991004765
+      ],
+      "before_median_timing_s": {
+        "load_case": 0.008410300128161907,
+        "open_result": 0.004806900164112449,
+        "public_end_to_end": 0.4186158999800682,
+        "simulate": 0.4056086998898536
+      },
+      "before_owned_plan_B": 48708029,
+      "before_peak_rss_B": 401047552,
+      "before_simulate_range_s": [
+        0.4038377997931093,
+        0.4262027000077069
+      ],
+      "changed_global_revisions": {
+        "engine_algorithm_revision": {
+          "after": "particle_engine_v45",
+          "before": "particle_engine_v44"
+        },
+        "event_algorithm_revision": {
+          "after": "line_quadratic_curved_capsule_periodic_first_hit_v21",
+          "before": "line_quadratic_curved_capsule_periodic_first_hit_v20"
+        },
+        "geometry_algorithm_revision": {
+          "after": "line_boundary_capsule_contact_bvh_v7",
+          "before": "line_boundary_capsule_contact_bvh_v6"
+        },
+        "source_algorithm_revision": {
+          "after": "realized_internal_surface_contact_schedule_v5",
+          "before": "realized_internal_surface_contact_schedule_v4"
+        }
+      },
+      "changed_owned_plan_components": {},
+      "core_payload_sha256": "sha256:e7ca255cdb1799eb345667009c0cf2d55fde584a7ea5dce73a64da7417198725",
+      "memory_revision": {
+        "after": "solver_owned_memory_plan_v16",
+        "before": "solver_owned_memory_plan_v15"
+      },
+      "owned_plan_delta_B": 0,
+      "peak_rss_ratio": 0.999295285562546,
+      "row_id": "regular-n10000",
+      "same_case_and_data_identity": true,
+      "same_scientific_core_and_full_payload": true,
+      "timing_status": "DESCRIPTIVE; no approved seconds or regression-ratio SLA"
+    }
+  ],
+  "claim_exclusions": [
+    "complete P14 release matrix",
+    "full coupled plasma/charge performance",
+    "Brownian first-arrival performance",
+    "COMSOL speed comparison",
+    "portable timing or RSS threshold",
+    "one million particle application accuracy/SLA"
+  ],
+  "completed_at_utc": "2026-10-09T14:15:30.157894+00:00",
+  "engineering_hard_condition_results": {
+    "baseline_immutable": "PASS baseline SHA unchanged",
+    "baseline_science_payload_identity": "PASS both default rows",
+    "current_mixed_analytic_oracle": "PASS all 10k rows across three repeats",
+    "harness_hard_checks": "PASS for all selected observations",
+    "memory_plan_limit": "PASS all selected observations; not process RSS bound",
+    "new_wall_time_or_accuracy_SLA": "NOT_DEFINED; no user-approved product qualification claimed",
+    "registered_small_analytic_budgets": "PASS two independent closed-form checks",
+    "same_baseline_case_identity": "PASS both default rows",
+    "source_and_harness_freeze": "PASS source and harness SHA unchanged across measurement"
+  },
+  "engineering_hard_conditions": [
+    "harness completion and expected counts/shapes without particle failures",
+    "pinned current scientific and memory revisions",
+    "solver-owned plan does not exceed configured 8192 MiB; this is not a process RSS cap",
+    "exact core payload identity across repeats and against the v44 baseline at the same case and h",
+    "independent small analytic checks of these deterministic preset equations"
+  ],
+  "execution_context": {
+    "measurement_started_at_utc": "2026-10-09T14:00:18.335788+00:00",
+    "possible_overlap_attempt": {
+      "artifact": "../reviews/contact_mode_after_possible_overlap_2026-10-09.json",
+      "source": "COMSOL agent reported starting a short external pytest subset after quiet-start notification",
+      "status": "POSSIBLE_CONCURRENT_PYTHON_TEST_LOAD; excluded from quiet comparison and preserved"
+    },
+    "quiet_measurement_finished_at_utc": "2026-10-09T14:13:51.294374+00:00",
+    "quiet_remeasurement_started_at_utc": "2026-10-09T14:03:22.298074+00:00",
+    "quiet_scope": "coordinated repository tests and native COMSOL jobs; other operating-system background activity is not excluded",
+    "quiet_window_coordination": {
+      "comsol_agent": "external pytest subset completed (70 passed, 26.84 s); no Python compute/tests or native solve until measurement-done notification",
+      "root": "838 core tests completed; no CPU-heavy checks during measurement"
+    },
+    "source_and_harness_files_before": {
+      "src/chamber_particles/__init__.py": "sha256:20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "src/chamber_particles/__main__.py": "sha256:fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+      "src/chamber_particles/api.py": "sha256:21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+      "src/chamber_particles/boundaries.py": "sha256:b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+      "src/chamber_particles/case.py": "sha256:22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "src/chamber_particles/case_format.py": "sha256:125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "src/chamber_particles/cli.py": "sha256:a98c1767f1a898e56d1460a54458b346961e55474329c34c8710e28d1428cd3f",
+      "src/chamber_particles/coordinates.py": "sha256:8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+      "src/chamber_particles/cpu.py": "sha256:4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+      "src/chamber_particles/engine.py": "sha256:77d2ca96d81c1f28532d5b72f74c13f120c04d2091dee2a6a637a14d141ed0e2",
+      "src/chamber_particles/events.py": "sha256:b6cc119699989065aac7e8479d6dd0f6b95385fa506096209cf954035fffa9f9",
+      "src/chamber_particles/fields.py": "sha256:50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+      "src/chamber_particles/geometry.py": "sha256:d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+      "src/chamber_particles/integrators.py": "sha256:47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+      "src/chamber_particles/numerical_status.py": "sha256:dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "src/chamber_particles/output.py": "sha256:1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "src/chamber_particles/physics/__init__.py": "sha256:6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "src/chamber_particles/physics/catalog.py": "sha256:32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "src/chamber_particles/physics/charge.py": "sha256:634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "src/chamber_particles/physics/compiled.py": "sha256:1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "src/chamber_particles/physics/forces.py": "sha256:58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+      "src/chamber_particles/physics/runtime.py": "sha256:3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+      "src/chamber_particles/rng.py": "sha256:f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+      "src/chamber_particles/sources.py": "sha256:6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "src/chamber_particles/stochastic.py": "sha256:9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+      "src/chamber_particles/topology.py": "sha256:ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "src/chamber_particles/yaml_input.py": "sha256:5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+      "tests/performance/p06_baseline.py": "sha256:11606775a50c15d29ea859ad25cc0e279fe9cd76b868a431850efe032ded8c82",
+      "tests/performance/p09_memory.py": "sha256:1ae7db635bece8512c232b0c3b362df26410aaaab7c1d039a07323b2df5eda75",
+      "tests/performance/p14_matrix.py": "sha256:5037ccfd5f8fc67e6c29b7821d5353b7471786a570c5bdb1cdbbe06f78e1f56e",
+      "tests/verification/microcases.py": "sha256:03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644",
+      "uv.lock": "sha256:b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+    },
+    "source_and_harness_identity_after": "sha256:7633e2e867e57b6379625ee7bce7cfb24458947efb9dbb8c6318a162a1aae8b6",
+    "source_and_harness_identity_before": "sha256:7633e2e867e57b6379625ee7bce7cfb24458947efb9dbb8c6318a162a1aae8b6",
+    "source_and_harness_unchanged_during_measurement": true
+  },
+  "limitations": [
+    "default comparison workloads use deterministic XY, fixed charge/linear electric field or zero-radius force-free specular wall events; these are not representative full coupled-plasma or Brownian workloads",
+    "larger regular rows have one observation each; one observation establishes run completion/plan fit, not a stable latency percentile or variance",
+    "scientific payload identity at the same h is a regression property, separate from application accuracy",
+    "small analytic checks use the same deterministic physical presets at one particle; no independent million-particle error scan was performed",
+    "new mixed-group row is current-only; its comparison row does not exist in v44 and no speedup is computed",
+    "Windows high-water RSS includes libraries, JIT and warmup history; solver plan tracks owned arrays and excludes general process overhead",
+    "coordinated root tests and native COMSOL jobs were paused during the retained quiet measurements; operating-system background activity, thermal state and earlier baseline conditions are not controlled",
+    "possible-overlap first attempt is retained for audit and excluded from quiet comparison",
+    "observed default median simulate increases of roughly 4.1% and 8.7% are descriptive; they neither prove a causal code regression nor certify a portable improvement",
+    "wall-time SLA, application accuracy budget, required physics/output cadence and accepted machine configuration require product requirements; none is invented or marked approved"
+  ],
+  "machine_comparison": {
+    "after": {
+      "chamber_particles": "0.2.0",
+      "h5py": "3.16.0",
+      "logical_cpu_count": 20,
+      "machine": "AMD64",
+      "numba": "0.67.0",
+      "numpy": "2.5.3",
+      "os_reported_logical_cpu_count": 20,
+      "peak_rss_source": "Windows GetProcessMemoryInfo",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+      "python": "3.12.13",
+      "uv_lock_sha256": "sha256:b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+    },
+    "before": {
+      "chamber_particles": "0.2.0",
+      "h5py": "3.16.0",
+      "logical_cpu_count": 20,
+      "machine": "AMD64",
+      "numba": "0.67.0",
+      "numpy": "2.5.3",
+      "os_reported_logical_cpu_count": 20,
+      "peak_rss_source": "Windows GetProcessMemoryInfo",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+      "python": "3.12.13",
+      "uv_lock_sha256": "sha256:b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+    },
+    "same_reported_machine_and_dependencies": true
+  },
+  "measurement_plan": {
+    "additional_current_only_profile": "mixed-center-opening-n10000; three isolated observations, one warmup each; no baseline for this capability",
+    "baseline_immutable": true,
+    "baseline_path": "../reviews/contact_mode_before_2026-10-09.json",
+    "baseline_sha256": "sha256:e90c0fd6a6c6c9121c8c8ced26f2db9d653a2c506be350a1dd61867e565b8483",
+    "comparison_repeats": 3,
+    "comparison_rows": [
+      "regular-n10000",
+      "event-h20-n10000"
+    ],
+    "harness": "tests.performance.p14_matrix",
+    "memory_limit_mb": 8192,
+    "representative_repeats": 1,
+    "representative_rows": [
+      "regular-n100000",
+      "regular-n1000000"
+    ],
+    "timed_scope": "load_case + simulate + open_result",
+    "warmups": 1
+  },
+  "new_mixed_profile": {
+    "all_repeat_analytic_oracles_pass": true,
+    "before_baseline": null,
+    "core_payload_sha256": "sha256:7c1641473a5f31a5c5a439ba8e29a1c5ced4ab4492b7f4f38021b0a801d58144",
+    "expected_event_time_s": 0.75,
+    "expected_fate": "escaped",
+    "expected_hits_per_particle": 1,
+    "median_throughput": {
+      "effective_result_artifact_bytes_per_simulate_s": 17732293.568473984,
+      "events_per_simulate_s": 27945.7628694616,
+      "particle_macro_steps_per_simulate_s": 27945.7628694616,
+      "particles_per_simulate_s": 27945.7628694616
+    },
+    "median_timing_s": {
+      "load_case": 0.006722999969497323,
+      "open_result": 0.015575800091028214,
+      "public_end_to_end": 0.38091050018556416,
+      "simulate": 0.3578359999228269
+    },
+    "observations": 3,
+    "owned_plan_B": 100728896,
+    "owned_plan_components": {
+      "active_index": 90000,
+      "canonical_data": 1080256,
+      "field_runtime": 0,
+      "geometry_query_scratch": 41943040,
+      "output_buffer": 90000,
+      "particle_schedule": 1280000,
+      "physics_runtime": 160000,
+      "prepared_geometry": 540,
+      "probe_index": 0,
+      "replay_work": 0,
+      "resident_state": 1010000,
+      "safety_margin": 11192100,
+      "slab_certificate_work": 0,
+      "slab_dense_path": 0,
+      "slab_event_staging": 23017232,
+      "slab_event_work": 12720000,
+      "slab_failure_staging": 520000,
+      "slab_proposal_scratch": 3840000,
+      "slab_release_work": 640000,
+      "slab_stochastic_tree_work": 0,
+      "writer_reserve": 3145728
+    },
+    "peak_rss_B": 371814400,
+    "retained_body_radii_m": [
+      0.05,
+      0.15
+    ],
+    "row_id": "mixed-center-opening-n10000",
+    "speedup_claim": false
+  },
+  "registered_at_utc": "2026-10-09T13:58:25.804095+00:00",
+  "regular_scaling": [
+    {
+      "core_payload_sha256": "sha256:e7ca255cdb1799eb345667009c0cf2d55fde584a7ea5dce73a64da7417198725",
+      "dt_s": 0.125,
+      "end_s": 0.5,
+      "macro_steps": 4,
+      "median_throughput": {
+        "effective_result_artifact_bytes_per_simulate_s": 6299850.773675005,
+        "events_per_simulate_s": 0.0,
+        "particle_macro_steps_per_simulate_s": 94701.87966901668,
+        "particles_per_simulate_s": 23675.46991725417
+      },
+      "median_timing_s": {
+        "load_case": 0.008581100031733513,
+        "open_result": 0.005226300098001957,
+        "public_end_to_end": 0.4368190998211503,
+        "simulate": 0.422378099989146
+      },
+      "observations": 3,
+      "owned_plan_B": 48708029,
+      "particle_count": 10000,
+      "peak_rss_B": 400764928,
+      "plan_fits_configured_limit": true,
+      "result_artifact_B": 2660919,
+      "row_id": "regular-n10000",
+      "sample_scope": "three repeats at 10k; one representative observation at 100k/1M, no timing distribution claimed",
+      "slab_particles": 10000
+    },
+    {
+      "core_payload_sha256": "sha256:d87eb6409b92e78bacdcd6d0d0b1bc3c284ea344419c6a8017ca3436c863d2d3",
+      "dt_s": 0.125,
+      "end_s": 0.5,
+      "macro_steps": 4,
+      "median_throughput": {
+        "effective_result_artifact_bytes_per_simulate_s": 5526514.379566325,
+        "events_per_simulate_s": 0.0,
+        "particle_macro_steps_per_simulate_s": 88482.17173840237,
+        "particles_per_simulate_s": 22120.54293460059
+      },
+      "median_timing_s": {
+        "load_case": 0.022450899938121438,
+        "open_result": 0.0101048001088202,
+        "public_end_to_end": 4.553241200046614,
+        "simulate": 4.520684699993581
+      },
+      "observations": 1,
+      "owned_plan_B": 314561963,
+      "particle_count": 100000,
+      "peak_rss_B": 542326784,
+      "plan_fits_configured_limit": true,
+      "result_artifact_B": 24983629,
+      "row_id": "regular-n100000",
+      "sample_scope": "three repeats at 10k; one representative observation at 100k/1M, no timing distribution claimed",
+      "slab_particles": 65536
+    },
+    {
+      "core_payload_sha256": "sha256:09afe6a91801b2c69cbe18bf5bd9deb0000b01a9b433e81376debe81d4605a32",
+      "dt_s": 0.125,
+      "end_s": 0.5,
+      "macro_steps": 4,
+      "median_throughput": {
+        "effective_result_artifact_bytes_per_simulate_s": 5376710.223174204,
+        "events_per_simulate_s": 0.0,
+        "particle_macro_steps_per_simulate_s": 86632.94692906979,
+        "particles_per_simulate_s": 21658.236732267447
+      },
+      "median_timing_s": {
+        "load_case": 0.33108539995737374,
+        "open_result": 0.052418800070881844,
+        "public_end_to_end": 46.555315900128335,
+        "simulate": 46.171810399973765
+      },
+      "observations": 1,
+      "owned_plan_B": 706399463,
+      "particle_count": 1000000,
+      "peak_rss_B": 874283008,
+      "plan_fits_configured_limit": true,
+      "result_artifact_B": 248252445,
+      "row_id": "regular-n1000000",
+      "sample_scope": "three repeats at 10k; one representative observation at 100k/1M, no timing distribution claimed",
+      "slab_particles": 65536
+    }
+  ],
+  "rough_data_key_schema": {
+    "harness_observations": "row_id/science_key; case_identity.{case_file_hash,data_content_hash}; core/full_payload_sha256; algorithm_revisions; timing_s.{load_case,simulate,open_result,public_end_to_end}; memory.{solver_memory_plan,peak_rss_before/after_measured_scope_bytes}; throughput; counts",
+    "harness_summaries": "per-row medians, maximum process high-water RSS, planned solver-owned components, scientific digests, revisions",
+    "processed_proposal": "baseline_comparison ratios and integrity, regular_scaling, new_mixed_profile, pre-registered analytic_budgets/observed checks, execution_context and source-report hashes"
+  },
+  "source_reports": {
+    "after": {
+      "path": "contact_mode_after_2026-10-09.json",
+      "sha256": "sha256:fc9e1623469c6e492a35bda1d30efd1ed217d5693614a6f2c79e333fb05aad1c"
+    },
+    "before": {
+      "path": "contact_mode_before_2026-10-09.json",
+      "sha256": "sha256:e90c0fd6a6c6c9121c8c8ced26f2db9d653a2c506be350a1dd61867e565b8483"
+    },
+    "mixed_current": {
+      "path": "contact_mode_mixed_current_2026-10-09.json",
+      "sha256": "sha256:62d79d890398948757618feb2fbaddba853235d541956d613691fbe61d4f3b26"
+    },
+    "possible_overlap_excluded": {
+      "path": "contact_mode_after_possible_overlap_2026-10-09.json",
+      "sha256": "sha256:de84623dd65c0148b9e229d49becc8121feb8edcdb74e0d4781302005358f8df"
+    },
+    "representative_scale": {
+      "path": "product_scale_current_2026-10-09.json",
+      "sha256": "sha256:929fb710e61ea08d511f6677ce31a7970ca4b5a3b7c133e0cd285a315533b4b4"
+    }
+  },
+  "status": "MEASURED_ENGINEERING_SCOPE_PASS; PRODUCT_ACCURACY_AND_SLA_NOT_DEFINED",
+  "timing_acceptance": "No new seconds, speedup, or regression-ratio SLA is approved. Timing, RSS, and scaling are descriptive machine-local observations; concurrent native COMSOL load is recorded if present."
+}

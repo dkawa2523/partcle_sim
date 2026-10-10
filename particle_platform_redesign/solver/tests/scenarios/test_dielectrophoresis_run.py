@@ -134,6 +134,7 @@ def _dep_case(
         mass_kg=np.asarray([_PARTICLE_MASS_KG]),
         drag_diameter_m=np.asarray([2.0 * _PARTICLE_RADIUS_M]),
         electrostatic_radius_m=np.asarray([_PARTICLE_RADIUS_M]),
+        contact_radius_m=original_source.contact_radius_m[:1],
         displaced_volume_m3=np.asarray([0.0]),
         model_weight=original_source.model_weight[:1],
         material_id=original_source.material_id[:1],

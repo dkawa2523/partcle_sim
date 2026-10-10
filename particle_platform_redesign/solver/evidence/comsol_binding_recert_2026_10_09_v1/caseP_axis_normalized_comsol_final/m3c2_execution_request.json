@@ -1,0 +1,319 @@
+{
+  "campaign_binding": {
+    "contract_sha256": "868f1d55716e9fe152fb112f79c304a63019a58c1d0eda0f5a0b0841c86f1be0",
+    "input_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+    "input_sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+  },
+  "campaign_identity": {
+    "candidate_case_name_prefix": "m3c2_caseP_100nm",
+    "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+    "evaluation_case_id": "M3-C2A_caseP_100nm_common-P1",
+    "final_registration_kind": "m3c2_caseP_100nm_final_campaign",
+    "output_slug": "caseP_100nm"
+  },
+  "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+  "comsol_semantics": {
+    "background_solution": "sol2",
+    "background_study": "std2",
+    "background_study_step": "ftper",
+    "charge_state_expression": "ZP",
+    "feature_kind": "built_in_brownian_force",
+    "feature_tag": "bf1",
+    "out_of_plane_degrees_of_freedom": false,
+    "particle_dataset": "part_P_100nm",
+    "particle_geometry": "pgeom_fpt",
+    "physics_tag": "fpt",
+    "position_expressions": [
+      "qr",
+      "qz"
+    ],
+    "pressure_expression": "m3c1_rhog(r,z)*k_B_const*m3c1_Tg(r,z)/1.2753471408396638e-25[kg]",
+    "random_number_args": "UserDefined",
+    "seed_parameter": "P_brownian_seed",
+    "shared_variable_tag": "varDustField",
+    "sole_seed_authority": "fpt.bf1.i",
+    "temperature_expression": "m3c1_Tg(r,z)",
+    "velocity_expressions": [
+      "fpt.vr",
+      "fpt.vz"
+    ],
+    "viscosity_expression": "root.comp1.muB_d",
+    "viscosity_meaning": "epstein_equivalent_effective_viscosity"
+  },
+  "execution_contract": {
+    "filename": "m3c2_caseP_100nm_current_binding_pilot.json",
+    "sha256": "868f1d55716e9fe152fb112f79c304a63019a58c1d0eda0f5a0b0841c86f1be0"
+  },
+  "expected_replicas_per_level": 32,
+  "mode": "FinalCampaign",
+  "normalized_manifest": "comsol_campaign_manifest.json",
+  "participant": "comsol",
+  "purpose": "final",
+  "registration": {
+    "authorization_artifacts": {
+      "evaluation_policy": {
+        "path": "m3c2_caseP_100nm_axis_normalized_population_policy.json",
+        "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+      },
+      "pilot_evaluation": {
+        "path": "../caseP_axis_normalized_pilot_evaluation/evaluation_manifest.json",
+        "sha256": "d66478e0096f88fd53acb8a4bea27377dce12e0ea3a56ab701ed8a741648e13f"
+      },
+      "selection_receipt": {
+        "path": "m3c2_caseP_100nm_axis_normalized_final_selection.json",
+        "sha256": "01a4a09992a8bf98c16a01de56a62f87381e4be9d1458847b065963ebaf74bcc"
+      }
+    },
+    "filename": "m3c2_caseP_100nm_axis_normalized_final_registration.json",
+    "kind": "m3c2_caseP_100nm_final_campaign",
+    "sha256": "6aa7ce55b95aeb6b874e02a7a637ede3c3daf15230b834489cdf5f36b32aebfe"
+  },
+  "request_rows": [
+    {
+      "directory": "levels/dt_20us/replicas/seed_939000",
+      "seed": 939000,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939001",
+      "seed": 939001,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939002",
+      "seed": 939002,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939003",
+      "seed": 939003,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939004",
+      "seed": 939004,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939005",
+      "seed": 939005,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939006",
+      "seed": 939006,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939007",
+      "seed": 939007,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939008",
+      "seed": 939008,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939009",
+      "seed": 939009,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939010",
+      "seed": 939010,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939011",
+      "seed": 939011,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939012",
+      "seed": 939012,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939013",
+      "seed": 939013,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939014",
+      "seed": 939014,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939015",
+      "seed": 939015,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939016",
+      "seed": 939016,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939017",
+      "seed": 939017,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939018",
+      "seed": 939018,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939019",
+      "seed": 939019,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939020",
+      "seed": 939020,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939021",
+      "seed": 939021,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939022",
+      "seed": 939022,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939023",
+      "seed": 939023,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939024",
+      "seed": 939024,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939025",
+      "seed": 939025,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939026",
+      "seed": 939026,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939027",
+      "seed": 939027,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939028",
+      "seed": 939028,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939029",
+      "seed": 939029,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939030",
+      "seed": 939030,
+      "step_ns": 20000
+    },
+    {
+      "directory": "levels/dt_20us/replicas/seed_939031",
+      "seed": 939031,
+      "step_ns": 20000
+    }
+  ],
+  "schema_version": 1,
+  "seed_isolation": {
+    "excluded_pilot_seeds": [
+      929200,
+      929201,
+      929202,
+      929203,
+      929204,
+      929205,
+      929206,
+      929207
+    ],
+    "other_participant_seeds": [
+      939032,
+      939033,
+      939034,
+      939035,
+      939036,
+      939037,
+      939038,
+      939039,
+      939040,
+      939041,
+      939042,
+      939043,
+      939044,
+      939045,
+      939046,
+      939047,
+      939048,
+      939049,
+      939050,
+      939051,
+      939052,
+      939053,
+      939054,
+      939055,
+      939056,
+      939057,
+      939058,
+      939059,
+      939060,
+      939061,
+      939062,
+      939063
+    ],
+    "participant_seed_sets_disjoint": true
+  },
+  "seeds": [
+    939000,
+    939001,
+    939002,
+    939003,
+    939004,
+    939005,
+    939006,
+    939007,
+    939008,
+    939009,
+    939010,
+    939011,
+    939012,
+    939013,
+    939014,
+    939015,
+    939016,
+    939017,
+    939018,
+    939019,
+    939020,
+    939021,
+    939022,
+    939023,
+    939024,
+    939025,
+    939026,
+    939027,
+    939028,
+    939029,
+    939030,
+    939031
+  ],
+  "steps_ns": [
+    20000
+  ],
+  "tool_revision": "m3c2_comsol_execution_request_v3"
+}

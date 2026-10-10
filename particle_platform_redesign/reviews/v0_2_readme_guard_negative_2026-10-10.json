@@ -1,0 +1,20 @@
+{
+  "status": "pass",
+  "scope": "Temporary checkout README-only change; supplied original wheel is valid against frozen source README",
+  "command": [
+    "C:\\Users\\user\\AppData\\Local\\Temp\\chamber-particles-v02-final-506d40154b3a4b32b30623e913440427\\runtime-readme-final\\Scripts\\python.exe",
+    "-m",
+    "tests.release_smoke",
+    "--wheel",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\dist\\chamber_particles-0.2.0-py3-none-any.whl"
+  ],
+  "cwd": "C:\\Users\\user\\AppData\\Local\\Temp\\chamber-particles-v02-final-506d40154b3a4b32b30623e913440427\\metadata-regression-checkout",
+  "exit_code": 1,
+  "observed_rejection": "wheel long description differs from the current source README",
+  "wheel_sha256": "13070487ab93bc0724061baa13eff3a196c2ed83c22a6a84d727ebdd68c2e20b",
+  "frozen_source_readme_sha256": "e03a93cd3940303d74e150209c3cdfb4299b9b1b141a2edeff7fb35af309a3bb",
+  "negative_fixture_readme_sha256": "0b78295c35d57f282dd14c7912e568284560f9ecf942867412a3646cee403760",
+  "source_python_unchanged": true,
+  "log": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\reviews\\v0_2_linux_portability_logs_2026-10-10\\metadata_readme_negative_confirmed.log",
+  "log_sha256": "bdcd8867951b7c8c915261c0e03d969a7e96a9228c816fd026a019e313473981"
+}

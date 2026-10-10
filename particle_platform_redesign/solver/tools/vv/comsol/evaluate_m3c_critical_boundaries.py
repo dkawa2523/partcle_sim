@@ -19,11 +19,12 @@ from chamber_particles.case_format import (
     BoundaryData,
     DataBundle,
     GeometryData,
+    RealizedSurfaceSource,
     RealizedTableSource,
     write,
 )
 
-TOOL_REVISION: Final = "m3c_critical_boundaries_evaluator_v1"
+TOOL_REVISION: Final = "m3c_critical_boundaries_evaluator_v2"
 RECEIPT_PREFIX: Final = "M3CCB|configuration|"
 ACTIVE_STATUS_CODE: Final = 1
 STATE_COLUMNS: Final = (
@@ -488,8 +489,47 @@ def _candidate_bundle(config: dict[str, Any], config_hash: str) -> DataBundle:
     table_particles = [
         particle for particle in _particles(config) if particle["source_kind"] == "table"
     ]
+    surface_particles = [
+        particle
+        for particle in _particles(config)
+        if particle["source_kind"] == "surface_edge_fraction"
+    ]
+    if len(surface_particles) != 1 or len(table_particles) != 2:
+        raise ValueError("critical-boundary source kinds differ")
+    lower_group_id = geometry.group_names.index("lower_surface")
+    lower_facets = np.flatnonzero(boundary.group_id == lower_group_id)
+    if lower_facets.size != 1:
+        raise ValueError("critical-boundary lower surface must resolve to one facet")
     diameter = float(config["case"]["particle_diameter_m"])
-    source = RealizedTableSource(
+    surface_source = RealizedSurfaceSource(
+        name="surface_particle",
+        particle_id=np.asarray([item["particle_id"] for item in surface_particles], dtype="<i8"),
+        release_time_s=np.zeros(len(surface_particles), dtype="<f8"),
+        facet_id=np.full(len(surface_particles), int(lower_facets[0]), dtype="<i8"),
+        facet_parameter=np.asarray(
+            [item["edge_fraction"] for item in surface_particles], dtype="<f8"
+        ),
+        velocity_m_s=np.asarray(
+            [item["source_velocity_m_per_s"] for item in surface_particles], dtype="<f8"
+        ),
+        charge_number=np.full(
+            len(surface_particles),
+            float(config["case"]["source_charge_number_e"]),
+            dtype="<f8",
+        ),
+        mass_kg=np.full(
+            len(surface_particles), float(config["case"]["particle_mass_kg"]), dtype="<f8"
+        ),
+        drag_diameter_m=np.full(len(surface_particles), diameter, dtype="<f8"),
+        contact_radius_m=np.zeros(len(surface_particles), dtype="<f8"),
+        electrostatic_radius_m=np.full(len(surface_particles), 0.5 * diameter, dtype="<f8"),
+        displaced_volume_m3=np.full(
+            len(surface_particles), math.pi * diameter**3 / 6.0, dtype="<f8"
+        ),
+        model_weight=np.ones(len(surface_particles), dtype="<f8"),
+        material_id=np.zeros(len(surface_particles), dtype="<i4"),
+    )
+    table_source = RealizedTableSource(
         name="table_particles",
         particle_id=np.asarray([item["particle_id"] for item in table_particles], dtype="<i8"),
         release_time_s=np.zeros(len(table_particles), dtype="<f8"),
@@ -504,6 +544,7 @@ def _candidate_bundle(config: dict[str, Any], config_hash: str) -> DataBundle:
             len(table_particles), float(config["case"]["particle_mass_kg"]), dtype="<f8"
         ),
         drag_diameter_m=np.full(len(table_particles), diameter, dtype="<f8"),
+        contact_radius_m=np.zeros(len(table_particles), dtype="<f8"),
         electrostatic_radius_m=np.full(len(table_particles), 0.5 * diameter, dtype="<f8"),
         displaced_volume_m3=np.full(len(table_particles), math.pi * diameter**3 / 6.0, dtype="<f8"),
         model_weight=np.ones(len(table_particles), dtype="<f8"),
@@ -518,32 +559,23 @@ def _candidate_bundle(config: dict[str, Any], config_hash: str) -> DataBundle:
             "producer_metadata": {"evaluation_id": config["evaluation_id"]},
         }
     )
-    return DataBundle("axisymmetric_rz", provenance, geometry, sources=(source,))
-
-
-def _particle_properties(config: dict[str, Any]) -> dict[str, Any]:
-    diameter = float(config["case"]["particle_diameter_m"])
-    return {
-        "charge_number": float(config["case"]["source_charge_number_e"]),
-        "mass_kg": float(config["case"]["particle_mass_kg"]),
-        "drag_diameter_m": diameter,
-        "electrostatic_radius_m": 0.5 * diameter,
-        "displaced_volume_m3": math.pi * diameter**3 / 6.0,
-        "model_weight": 1.0,
-        "material_id": 0,
-    }
+    return DataBundle(
+        "axisymmetric_rz",
+        provenance,
+        geometry,
+        sources=(surface_source, table_source),
+    )
 
 
 def _candidate_document(
     config: dict[str, Any], step: dict[str, Any], content_hash: str
 ) -> dict[str, Any]:
-    surface = _particles(config)[0]
     frames = int(config["case"]["output_frames"])
     times = (
         np.arange(frames, dtype=np.float64) * float(config["case"]["output_interval_s"])
     ).tolist()
     return {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": f"m3c_critical_boundaries_{step['label']}",
             "data_path": "candidate_input.h5",
@@ -570,23 +602,7 @@ def _candidate_document(
         "resources": {"memory_limit_mb": 128},
         "physics": {"charge": {"model": "fixed"}},
         "sources": [
-            {
-                "name": "surface_particle",
-                "type": "surface",
-                "boundary_group": "lower_surface",
-                "count": 1,
-                "particle_id_start": int(surface["particle_id"]),
-                "particle": _particle_properties(config),
-                "position": {
-                    "model": "edge_fraction",
-                    "fraction": float(surface["edge_fraction"]),
-                },
-                "velocity": {
-                    "model": "fixed",
-                    "value_m_s": surface["source_velocity_m_per_s"],
-                },
-                "release": {"model": "fixed", "time_s": 0.0},
-            },
+            {"name": "surface_particle", "type": "surface", "table": "surface_particle"},
             {"name": "table_particles", "type": "table", "table": "table_particles"},
         ],
         "boundaries": [

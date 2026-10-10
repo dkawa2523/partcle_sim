@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 from tools.vv.comsol import assemble_m3c2_campaign as assembler
 from tools.vv.comsol import evaluate_m3c2_stochastic_ensemble as evaluator
+from tools.vv.comsol.tests.common_p1_fixture import write_synthetic_meaning_inventory
 
 CASE_P_CAMPAIGN = {
     "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
@@ -173,7 +174,7 @@ def _inputs(
             ),
             "sha256": "d" * 64,
         }
-        comsol["tool_revision"] = assembler.COMSOL_TOOL_REVISION
+        comsol["tool_revision"] = assembler.HISTORICAL_COMSOL_TOOL_REVISION
         comsol["case_id"] = campaign_identity["evaluation_case_id"]
         comsol["campaign_identity"] = campaign_identity
         comsol["campaign_binding"] = campaign_binding
@@ -202,12 +203,46 @@ def _stub_canonical_reader(monkeypatch: pytest.MonkeyPatch) -> None:
         "read_with_info",
         lambda _: (data, SimpleNamespace(content_hash="sha256:" + "a" * 64)),
     )
-    monkeypatch.setattr(
-        assembler,
-        "_validate_trajectory_scope",
-        lambda *_: 287 * 121,
-    )
+    monkeypatch.setattr(assembler, "_validate_trajectory_scope", lambda *_: 287 * 121)
     monkeypatch.setattr(assembler, "_validate_event_scope", lambda *_: 0)
+
+
+@pytest.mark.parametrize("graft", [None, "model", "field", "receipt", "missing_receipt"])
+def test_current_comparison_binds_inventory_to_campaign_and_actual_runs(
+    tmp_path: Path, graft: str | None
+) -> None:
+    comsol_path, candidate_path, _ = _inputs(tmp_path / "inputs", campaign_identity=CASE_P_CAMPAIGN)
+    comsol = json.loads(comsol_path.read_text())
+    candidate = json.loads(candidate_path.read_text())
+    candidate["tool_revision"] = "m3c2_candidate_campaign_runner_v6"
+    model_digest = "1" * 64
+    field_identity = comsol["campaign_binding"]["input_content_hash"]
+    inventory, actual = write_synthetic_meaning_inventory(
+        comsol_path.parent, model_digest, field_identity
+    )
+    comsol["source_model_sha256"] = model_digest
+    comsol["meaning_preflight_inventory"] = inventory
+    for level in comsol["levels"]:
+        for replica in level["replicas"]:
+            replica["actual_run_readback"] = actual
+    if graft in {"model", "field"}:
+        replacement_model = "2" * 64 if graft == "model" else model_digest
+        replacement_field = "sha256:" + "c" * 64 if graft == "field" else field_identity
+        inventory, _ = write_synthetic_meaning_inventory(
+            comsol_path.parent, replacement_model, replacement_field
+        )
+        comsol["meaning_preflight_inventory"] = inventory
+    if graft == "receipt":
+        changed = json.loads((comsol_path.parent / actual["path"]).read_text())
+        changed["unrelated_run"] = True
+        _write_json(comsol_path.parent / actual["path"], changed)
+    if graft == "missing_receipt":
+        comsol["levels"][0]["replicas"][0].pop("actual_run_readback")
+    if graft is None:
+        assembler.require_participant_meaning(comsol, candidate, comsol_path.parent)
+    else:
+        with pytest.raises(ValueError):
+            assembler.require_participant_meaning(comsol, candidate, comsol_path.parent)
 
 
 def _all_replicas(campaign: dict[str, Any]) -> list[dict[str, Any]]:
@@ -328,11 +363,30 @@ def test_performance_is_all_or_none_when_every_cell_is_comparable(
     )
 
 
+@pytest.mark.parametrize(
+    "runner_revision", ["m3c2_candidate_campaign_runner_v4", "m3c2_candidate_campaign_runner_v6"]
+)
 def test_explicit_participant_identity_drives_evaluator_case_id(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, runner_revision: str
 ) -> None:
     comsol, candidate, canonical = _inputs(tmp_path / "inputs", campaign_identity=CASE_P_CAMPAIGN)
     _stub_canonical_reader(monkeypatch)
+    candidate_manifest = json.loads(candidate.read_text(encoding="utf-8"))
+    candidate_manifest["tool_revision"] = runner_revision
+    _write_json(candidate, candidate_manifest)
+
+    if runner_revision == "m3c2_candidate_campaign_runner_v6":
+        with pytest.raises(ValueError, match="meaning_preflight_inventory"):
+            assembler.assemble_campaign(
+                comsol,
+                candidate,
+                canonical,
+                "pilot",
+                tmp_path / "campaign.json",
+                candidate_path_reference_level_id="macro_fine",
+            )
+        assert not (tmp_path / "campaign.json").exists()
+        return
 
     campaign = assembler.assemble_campaign(
         comsol,

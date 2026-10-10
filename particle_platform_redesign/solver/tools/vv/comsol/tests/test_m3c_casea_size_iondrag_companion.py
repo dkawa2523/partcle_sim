@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
 import pytest
 import yaml
+from tools.vv.comsol import prepare_m3c_casea_companion as companion_module
 from tools.vv.comsol.prepare_m3c_casea_companion import prepare
+from tools.vv.comsol.tests.common_p1_fixture import (
+    sha256,
+    write_current_common_p1_template,
+    write_manufactured_common_p1,
+)
 
 from chamber_particles.case_format import read_with_info
 
@@ -15,6 +22,7 @@ SHARED_JAVA = TOOLS / "comsol" / "RunM3C1CaseA100CommonP1.java"
 SHARED_RUNNER = TOOLS / "run_m3c1_common_p1_reference.ps1"
 CAMPAIGN_RUNNER = TOOLS / "run_m3c_casea_size_iondrag_companion.ps1"
 CAMPAIGN_CONFIG = TOOLS / "cases" / "m3c_casea_size_iondrag_companion_v1.json"
+REPOSITORY_ROOT = Path(__file__).resolve().parents[6]
 
 
 def test_campaign_accepts_only_the_three_explicit_case_tuples() -> None:
@@ -101,24 +109,52 @@ def prepared_campaign(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> tuple[Path, dict[str, object]]:
     output = tmp_path_factory.mktemp("casea-companion") / "prepared"
-    return output, prepare(CAMPAIGN_CONFIG, output)
+    repository = output.parent / "repository"
+    repository.mkdir()
+    config = json.loads(CAMPAIGN_CONFIG.read_text(encoding="utf-8"))
+    input_path = repository / "input.h5"
+    info = write_manufactured_common_p1(input_path)
+    template = repository / "template.yaml"
+    write_current_common_p1_template(
+        REPOSITORY_ROOT / config["candidate_template"]["relative_path"], template, info.content_hash
+    )
+    source = repository / "identity_only_source.mph"
+    source.write_bytes(b"manufactured source identity fixture; never opened by COMSOL")
+    config["shared_field_input"] = {
+        "relative_path": input_path.name,
+        "sha256": sha256(input_path),
+        "content_hash": info.content_hash,
+    }
+    config["candidate_template"] = {"relative_path": template.name, "sha256": sha256(template)}
+    config["source_models"]["theory_common"] = {
+        "relative_path": source.name,
+        "sha256": sha256(source),
+    }
+    for case in config["cases"]:
+        release = case["release_table"]
+        release_path = repository / f"{case['case_id']}_release.csv"
+        shutil.copyfile(REPOSITORY_ROOT / release["relative_path"], release_path)
+        release.update(relative_path=release_path.name, sha256=sha256(release_path))
+    config_path = repository / "campaign.json"
+    config_path.write_text(json.dumps(config), encoding="utf-8")
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(companion_module, "_repository_root", lambda: repository)
+        report = prepare(config_path, output)
+    return output, report
 
 
 def test_python_preparer_records_one_primitive_field_authority(
     prepared_campaign: tuple[Path, dict[str, object]],
 ) -> None:
-    _output, report = prepared_campaign
+    output, report = prepared_campaign
 
     assert report["status"] == "PREPARED"
     assert report["background_field_tables"] == "NOT_READ"
     authority = report["shared_field_authority"]
     assert isinstance(authority, dict)
-    assert authority["sha256"] == (
-        "14cede2c85e7888368c04da000c5fcaf50cf2135c85be0497633b59d83febea1"
-    )
-    assert authority["content_hash"] == (
-        "sha256:d30e9048cf8e142c3689508f0de2f20c503e7e787c80809e9fbe1806c8b45a1c"
-    )
+    input_path = output.parent / "repository" / "input.h5"
+    assert authority["sha256"] == sha256(input_path)
+    assert authority["content_hash"] == read_with_info(input_path)[1].content_hash
     assert authority["field_count"] == 17
     assert authority["component_count"] == 22
 
@@ -172,8 +208,8 @@ def test_python_preparer_emits_one_owned_size_model_cell(
         "deterministic_contribution_name",
     ]
     reference = json.loads((case_root / "reference_run_config.json").read_text(encoding="utf-8"))
-    assert reference["source_model"]["sha256"] == (
-        "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+    assert reference["source_model"]["sha256"] == sha256(
+        output.parent / "repository" / "identity_only_source.mph"
     )
     assert reference["case"]["diameter_m"] == diameter_nm * 1.0e-9
     candidate = yaml.safe_load((case_root / "candidate_fine.yaml").read_text(encoding="utf-8"))

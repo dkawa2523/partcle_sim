@@ -50,6 +50,7 @@ def _bundle() -> DataBundle:
         charge_number=np.asarray([0.0], dtype="<f8"),
         mass_kg=np.asarray([1.0e-15], dtype="<f8"),
         drag_diameter_m=np.asarray([1.0e-6], dtype="<f8"),
+        contact_radius_m=np.asarray([0.0], dtype="<f8"),
         electrostatic_radius_m=np.asarray([5.0e-7], dtype="<f8"),
         displaced_volume_m3=np.asarray([5.235987755982988e-19], dtype="<f8"),
         model_weight=np.asarray([1.0], dtype="<f8"),
@@ -75,7 +76,7 @@ def _bundle() -> DataBundle:
 
 def _case_document(content_hash: str) -> dict[str, Any]:
     return {
-        "format_version": 2,
+        "format_version": 3,
         "case": {
             "name": "quickstart_ballistic_xy",
             "data_path": "case.h5",

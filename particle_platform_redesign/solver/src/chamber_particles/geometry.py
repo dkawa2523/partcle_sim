@@ -19,7 +19,7 @@ type Int64Array = NDArray[np.int64]
 type Int32Array = NDArray[np.int32]
 type PointClassification = Literal["inside", "boundary", "outside"]
 
-GEOMETRY_ALGORITHM_REVISION = "line_boundary_stackless_volume_cell_bvh_v5"
+GEOMETRY_ALGORITHM_REVISION = "line_boundary_capsule_contact_bvh_v7"
 BVH_LEAF_SIZE = 8
 _VOLUME_INDEX_ULPS = 64.0
 _VOLUME_INDEX_BUILD_WORK_BYTES_PER_CELL = 1024
@@ -51,6 +51,7 @@ class PreparedGeometry:
     facet_end_m: FloatArray
     facet_normal: FloatArray
     facet_length_m: FloatArray
+    facet_contact_enabled: NDArray[np.bool_]
     bbox_diagonal_m: float
     bvh_facet_id: Int64Array
     bvh_lower_m: FloatArray
@@ -151,6 +152,7 @@ def prepare_geometry(
         facet_end_m=_read_only(end),
         facet_normal=_read_only(normal),
         facet_length_m=_read_only(length.astype(np.float64, copy=False)),
+        facet_contact_enabled=_read_only(np.ones(length.size, dtype=np.bool_)),
         bbox_diagonal_m=bbox_diagonal,
         bvh_facet_id=_read_only(np.asarray(bvh.facet_id, dtype=np.int64)),
         bvh_lower_m=_read_only(np.asarray(bvh.lower_m, dtype=np.float64).reshape(-1, 2)),
@@ -283,6 +285,107 @@ def fill_aabb_candidates_csr(
         raise GeometryPreparationError(
             "candidate counts changed between AABB count and bounded CSR fill"
         )
+
+
+def contact_normals_for_candidates(
+    geometry: PreparedGeometry,
+    position_m: FloatArray,
+    contact_radius_m: FloatArray,
+    candidate_offsets: Int64Array,
+    candidate_facet_ids: Int64Array,
+) -> FloatArray:
+    """Return material-pointing normals aligned with ragged contact candidates.
+
+    A zero-radius row retains the oriented facet normal.  A finite-radius row
+    uses the direction from the particle centre to the closest point on the
+    candidate segment, which is also valid on capsule end caps.
+    """
+
+    positions = np.asarray(position_m, dtype=np.float64)
+    radii = np.asarray(contact_radius_m, dtype=np.float64)
+    offsets = np.asarray(candidate_offsets)
+    candidates = np.asarray(candidate_facet_ids)
+    row_count = positions.shape[0]
+    if positions.shape != (row_count, 2) or radii.shape != (row_count,):
+        raise ValueError("contact positions and radii must have shapes [N, 2] and [N]")
+    if offsets.dtype != np.dtype(np.int64) or offsets.shape != (row_count + 1,):
+        raise ValueError("contact candidate offsets must be int64 CSR row offsets")
+    if candidates.dtype != np.dtype(np.int64) or candidates.ndim != 1:
+        raise ValueError("contact candidate facet IDs must be a one-dimensional int64 array")
+    if (
+        int(offsets[0]) != 0
+        or int(offsets[-1]) != candidates.size
+        or bool((offsets[1:] < offsets[:-1]).any())
+    ):
+        raise ValueError("contact candidate offsets are inconsistent")
+    if not bool(np.isfinite(positions).all() and np.isfinite(radii).all()) or bool(
+        (radii < 0.0).any()
+    ):
+        raise ValueError("contact positions and radii must be finite and radii nonnegative")
+    if bool(((candidates < 0) | (candidates >= geometry.facet_count)).any()):
+        raise ValueError("contact candidate facet ID is outside the prepared geometry")
+    normals = np.empty((candidates.size, 2), dtype="<f8")
+    _contact_normals_kernel(
+        positions,
+        radii,
+        offsets,
+        candidates,
+        geometry.facet_start_m,
+        geometry.facet_end_m,
+        geometry.facet_normal,
+        geometry.facet_contact_enabled,
+        normals,
+    )
+    if not bool(np.isfinite(normals).all()):
+        raise GeometryPreparationError("finite-radius contact normal is indeterminate")
+    return normals
+
+
+def centers_respect_contact_radius(
+    geometry: PreparedGeometry,
+    position_m: FloatArray,
+    contact_radius_m: FloatArray,
+    *,
+    tolerance_m: float,
+    allow_contact: bool = True,
+) -> NDArray[np.bool_]:
+    """Check centre clearance from every enabled material-segment capsule."""
+
+    positions = np.asarray(position_m, dtype=np.float64)
+    radii = np.asarray(contact_radius_m, dtype=np.float64)
+    if positions.ndim != 2 or positions.shape[1] != 2 or radii.shape != (positions.shape[0],):
+        raise ValueError("contact positions and radii must have shapes [N, 2] and [N]")
+    if not bool(np.isfinite(positions).all() and np.isfinite(radii).all()):
+        raise ValueError("contact positions and radii must be finite")
+    if bool((radii < 0.0).any()) or not math.isfinite(tolerance_m) or tolerance_m < 0.0:
+        raise ValueError("contact radii and tolerance must be nonnegative")
+    if not isinstance(allow_contact, (bool, np.bool_)):
+        raise ValueError("allow_contact must be boolean")
+    reach = radii + tolerance_m
+    lower = positions - reach[:, None]
+    upper = positions + reach[:, None]
+    if not bool(np.isfinite(lower).all() and np.isfinite(upper).all()):
+        raise GeometryPreparationError("contact-radius query exceeds finite float64 range")
+    counts = count_aabb_candidates(geometry, lower, upper)
+    offsets = np.empty(positions.shape[0] + 1, dtype="<i8")
+    offsets[0] = 0
+    np.cumsum(counts, out=offsets[1:])
+    candidates = np.empty(int(offsets[-1]), dtype="<i8")
+    fill_aabb_candidates_csr(geometry, lower, upper, offsets, candidates)
+    valid = np.ones(positions.shape[0], dtype=np.bool_)
+    _contact_clearance_kernel(
+        positions,
+        radii,
+        tolerance_m,
+        offsets,
+        candidates,
+        geometry.facet_start_m,
+        geometry.facet_end_m,
+        geometry.facet_contact_enabled,
+        bool(allow_contact),
+        valid,
+    )
+    return valid
 
 
 def _validated_aabb_batch(
@@ -1266,6 +1369,98 @@ def _inside_volume_batch_kernel(
             invalid_geometry = True
         result[index] = status == 1
     return result, invalid_geometry
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _closest_segment_point_kernel(
+    point0: float,
+    point1: float,
+    start0: float,
+    start1: float,
+    end0: float,
+    end1: float,
+) -> tuple[float, float, float]:
+    edge0 = end0 - start0
+    edge1 = end1 - start1
+    length_squared = edge0 * edge0 + edge1 * edge1
+    parameter = ((point0 - start0) * edge0 + (point1 - start1) * edge1) / length_squared
+    parameter = min(max(parameter, 0.0), 1.0)
+    closest0 = start0 + parameter * edge0
+    closest1 = start1 + parameter * edge1
+    distance = math.hypot(point0 - closest0, point1 - closest1)
+    return closest0, closest1, distance
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _contact_normals_kernel(
+    position_m: FloatArray,
+    contact_radius_m: FloatArray,
+    candidate_offsets: Int64Array,
+    candidate_facet_ids: Int64Array,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_normal: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    normals: FloatArray,
+) -> None:
+    for row in range(position_m.shape[0]):
+        for offset in range(candidate_offsets[row], candidate_offsets[row + 1]):
+            facet_id = candidate_facet_ids[offset]
+            if contact_radius_m[row] == 0.0 or not facet_contact_enabled[facet_id]:
+                normals[offset, 0] = facet_normal[facet_id, 0]
+                normals[offset, 1] = facet_normal[facet_id, 1]
+                continue
+            closest0, closest1, distance = _closest_segment_point_kernel(
+                position_m[row, 0],
+                position_m[row, 1],
+                facet_start_m[facet_id, 0],
+                facet_start_m[facet_id, 1],
+                facet_end_m[facet_id, 0],
+                facet_end_m[facet_id, 1],
+            )
+            if not math.isfinite(distance) or distance <= 0.0:
+                normals[offset, 0] = np.nan
+                normals[offset, 1] = np.nan
+                continue
+            normals[offset, 0] = (closest0 - position_m[row, 0]) / distance
+            normals[offset, 1] = (closest1 - position_m[row, 1]) / distance
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _contact_clearance_kernel(
+    position_m: FloatArray,
+    contact_radius_m: FloatArray,
+    tolerance_m: float,
+    candidate_offsets: Int64Array,
+    candidate_facet_ids: Int64Array,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    allow_contact: bool,
+    valid: NDArray[np.bool_],
+) -> None:
+    for row in range(position_m.shape[0]):
+        minimum_allowed = (
+            max(0.0, contact_radius_m[row] - tolerance_m)
+            if allow_contact
+            else contact_radius_m[row] + tolerance_m
+        )
+        for offset in range(candidate_offsets[row], candidate_offsets[row + 1]):
+            facet_id = candidate_facet_ids[offset]
+            if not facet_contact_enabled[facet_id]:
+                continue
+            _, _, distance = _closest_segment_point_kernel(
+                position_m[row, 0],
+                position_m[row, 1],
+                facet_start_m[facet_id, 0],
+                facet_start_m[facet_id, 1],
+                facet_end_m[facet_id, 0],
+                facet_end_m[facet_id, 1],
+            )
+            invalid = distance < minimum_allowed if allow_contact else distance <= minimum_allowed
+            if not math.isfinite(distance) or invalid:
+                valid[row] = False
+                break
 
 
 def _point_segment_distance(point_m: FloatArray, start_m: FloatArray, end_m: FloatArray) -> float:

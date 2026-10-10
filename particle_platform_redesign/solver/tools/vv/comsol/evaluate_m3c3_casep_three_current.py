@@ -19,9 +19,12 @@ from typing import Any, Final, cast
 
 import numpy as np
 
+from tools.vv.comsol.actual_run_receipt import observed_receipt_sha256
+from tools.vv.comsol.meaning_preflight import load_inventory, require_supported_comparison
 from tools.vv.comsol.run_m3c3_casep_three_current_candidate import (
     CASE_ID,
     EVENT_HEADER,
+    EVENT_PROJECTION_REVISION,
     LEVELS,
     OUTPUT_COUNT,
     PARTICLE_COUNT,
@@ -552,6 +555,41 @@ def _event_direct_gate(
     }
 
 
+def _candidate_events_path(cell: Path, receipt: dict[str, object], prepared_root: Path) -> Path:
+    """Consume a separately recorded reporting repair without rewriting execution."""
+    original = cell / "events.csv"
+    repair_path = cell / "event_projection_receipt.json"
+    if not repair_path.exists():
+        return original
+    repair = load_inventory(repair_path)
+    projected = cell / "events.canonical.csv"
+    expected = {
+        "schema_version": 1,
+        "projection_revision": EVENT_PROJECTION_REVISION,
+        "status": "COMPLETE_REPORTING_REPROJECTION_NO_SIMULATION",
+        "level": cell.name,
+        "original_run_receipt_sha256": _sha256(cell / "run_receipt.json"),
+        "original_events_sha256": _sha256(original),
+        "result_manifest_sha256": receipt.get("result_manifest_sha256"),
+        "canonical_input_sha256": _sha256(prepared_root / "candidate_input_three_current_z0.h5"),
+        "canonical_boundary_meaning_sha256": _sha256(cell / "boundary_meaning.json"),
+        "producer_sha256": _sha256(cell / "event_projection_producer.py"),
+        "events": {
+            "path": projected.name,
+            "sha256": _sha256(projected),
+            "rows": receipt.get("event_rows"),
+        },
+        "comsol_executed": False,
+        "candidate_simulated": False,
+        "original_execution_receipt_modified": False,
+    }
+    if any(repair.get(key) != value for key, value in expected.items()):
+        raise ValueError("candidate reporting repair is not bound to its immutable execution")
+    if _sha256(cell / "result/run.json") != expected["result_manifest_sha256"]:
+        raise ValueError("candidate reporting repair result identity differs")
+    return projected
+
+
 def _candidate_artifacts(
     prepared_root: Path,
 ) -> tuple[dict[str, Trajectory], dict[str, BoundaryEvents]]:
@@ -596,28 +634,67 @@ def _candidate_artifacts(
         ):
             raise ValueError(f"{level} maximum-speed receipt differs from trajectory")
         trajectories[level] = trajectory
-        events[level] = _read_events(events_path)
+        events[level] = _read_events(_candidate_events_path(cell, receipt, prepared_root))
     return trajectories, events
+
+
+def _require_reference_meaning(
+    prepared_root: Path,
+    reference_root: Path,
+    report: dict[str, Any],
+    summary: dict[str, Any],
+    receipt: dict[str, Any],
+) -> None:
+    summary_path = reference_root / "normalization_summary.json"
+    if summary.get("tool_revision") not in {
+        "m3c3_caseP_three_current_comsol_normalizer_v3",
+        "m3c3_caseP_three_current_comsol_normalizer_v4",
+    }:
+        raise ValueError("COMSOL normalizer revision is not supported")
+    if receipt.get("normalization_summary") != {
+        "path": summary_path.name,
+        "sha256": _sha256(summary_path),
+    }:
+        raise ValueError("COMSOL normalization summary differs from its run receipt SHA-256")
+    config_path = prepared_root / "reference_run_config.json"
+    if _sha256(config_path) != report.get("reference_config_sha256"):
+        raise ValueError("prepared reference run configuration differs from its SHA-256")
+    if (
+        summary.get("reference_run_config_sha256") != report["reference_config_sha256"]
+        or receipt.get("reference_run_config_sha256") != report["reference_config_sha256"]
+    ):
+        raise ValueError("COMSOL reference did not consume this prepared run configuration")
+    config = load_inventory(config_path)
+    model_digest = _mapping(config.get("source_mph"), "source MPH")["sha256"]
+    field_identity = report["derived_input_content_hash"]
+    if (
+        summary.get("source_model_sha256") != model_digest
+        or summary.get("canonical_input_content_hash") != field_identity
+    ):
+        raise ValueError("COMSOL model or canonical field identity differs from this comparison")
+    require_supported_comparison(
+        summary.get("meaning_preflight_inventory"),
+        reference_root,
+        expected_model_sha256=model_digest,
+        expected_field_identity=field_identity,
+        required_observed_sha256=frozenset(
+            {observed_receipt_sha256(summary.get("actual_run_readback"), reference_root)}
+        ),
+    )
 
 
 def _reference_artifacts(
     prepared_root: Path, reference_root: Path, expected_step_s: float
 ) -> tuple[Trajectory, BoundaryEvents]:
-    report = _mapping(
-        json.loads((prepared_root / "prepare_report.json").read_text(encoding="utf-8")),
-        "prepare report",
-    )
+    report = load_inventory(prepared_root / "prepare_report.json")
     release = reference_root / "three_current_release_state.csv"
     if _sha256(release) != report["release_state_sha256"]:
         raise ValueError("COMSOL reference did not consume the candidate-owned Z0 release table")
     summary = _mapping(
-        json.loads((reference_root / "normalization_summary.json").read_text(encoding="utf-8")),
-        "normalization summary",
+        load_inventory(reference_root / "normalization_summary.json"), "normalization summary"
     )
-    receipt = _mapping(
-        json.loads((reference_root / "run_receipt.json").read_text(encoding="utf-8")),
-        "reference run receipt",
-    )
+    receipt = load_inventory(reference_root / "run_receipt.json")
+    _require_reference_meaning(prepared_root, reference_root, report, summary, receipt)
     trajectory_path = reference_root / "trajectory_reference.csv"
     events_path = reference_root / "events_reference.csv"
     artifacts = _mapping(summary.get("artifacts"), "reference artifacts")

@@ -1,4 +1,4 @@
-"""Canonical, producer-neutral ``case.h5`` schema v1.
+"""Canonical, producer-neutral ``case.h5`` schema v3.
 
 This module owns the durable representation of reusable geometry, fields, and
 realized particle sources.  It deliberately does not know about run settings,
@@ -22,8 +22,8 @@ import h5py
 import numpy as np
 from numpy.typing import NDArray
 
-SCHEMA_VERSION: Final = 1
-CONTENT_HASH_PREFIX: Final = b"chamber-particles-case\0v1\0"
+SCHEMA_VERSION: Final = 3
+CONTENT_HASH_PREFIX: Final = b"chamber-particles-case\0v3\0"
 
 _F8: Final = np.dtype("<f8")
 _I8: Final = np.dtype("<i8")
@@ -108,7 +108,7 @@ type Layout = RegularLayout | P1TriLayout | Q1QuadLayout
 
 @dataclass(frozen=True, slots=True)
 class FieldData:
-    """One static primitive field attached to a named layout."""
+    """One static or fixed-topology time-snapshot field on a named layout."""
 
     name: str
     layout: str
@@ -117,6 +117,7 @@ class FieldData:
     stored_basis: str
     values: FloatArray
     unit: str
+    time_s: FloatArray | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "components", tuple(self.components))
@@ -134,10 +135,34 @@ class RealizedTableSource:
     charge_number: FloatArray
     mass_kg: FloatArray
     drag_diameter_m: FloatArray
+    contact_radius_m: FloatArray
     electrostatic_radius_m: FloatArray
     displaced_volume_m3: FloatArray
     model_weight: FloatArray
     material_id: Int32Array
+
+
+@dataclass(frozen=True, slots=True)
+class RealizedSurfaceSource:
+    """Canonical particle rows keyed by facet and strict-interior parameter."""
+
+    name: str
+    particle_id: Int64Array
+    release_time_s: FloatArray
+    facet_id: Int64Array
+    facet_parameter: FloatArray
+    velocity_m_s: FloatArray
+    charge_number: FloatArray
+    mass_kg: FloatArray
+    drag_diameter_m: FloatArray
+    contact_radius_m: FloatArray
+    electrostatic_radius_m: FloatArray
+    displaced_volume_m3: FloatArray
+    model_weight: FloatArray
+    material_id: Int32Array
+
+
+type RealizedSource = RealizedTableSource | RealizedSurfaceSource
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,7 +174,7 @@ class DataBundle:
     geometry: GeometryData
     layouts: tuple[Layout, ...] = ()
     fields: tuple[FieldData, ...] = ()
-    sources: tuple[RealizedTableSource, ...] = ()
+    sources: tuple[RealizedSource, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "provenance_json", _canonical_provenance(self.provenance_json))
@@ -184,7 +209,7 @@ class _DatasetRecord:
 
 
 def content_hash(data: DataBundle) -> str:
-    """Return the schema-v1 logical SHA-256 for *data*.
+    """Return the schema-v3 logical SHA-256 for *data*.
 
     The digest is independent of HDF5 allocation, chunking, and creation order.
     Floating-point bytes are preserved exactly, including negative zero.
@@ -227,16 +252,20 @@ def resident_array_bytes(data: DataBundle) -> int:
         else:
             arrays.extend((layout.nodes_m, layout.connectivity, layout.cell_support))
     arrays.extend(field.values for field in data.fields)
+    arrays.extend(field.time_s for field in data.fields if field.time_s is not None)
     for source in data.sources:
+        arrays.extend((source.particle_id, source.release_time_s))
+        if isinstance(source, RealizedTableSource):
+            arrays.append(source.position_m)
+        else:
+            arrays.extend((source.facet_id, source.facet_parameter))
         arrays.extend(
             (
-                source.particle_id,
-                source.release_time_s,
-                source.position_m,
                 source.velocity_m_s,
                 source.charge_number,
                 source.mass_kg,
                 source.drag_diameter_m,
+                source.contact_radius_m,
                 source.electrostatic_radius_m,
                 source.displaced_volume_m3,
                 source.model_weight,
@@ -309,7 +338,7 @@ def write(path: str | os.PathLike[str], data: DataBundle) -> CaseFileInfo:
 
 
 def read(path: str | os.PathLike[str]) -> DataBundle:
-    """Read and strictly validate one canonical schema-v1 file."""
+    """Read and strictly validate one canonical schema-v3 file."""
 
     data, _footprint = _read_validated(path)
     return data
@@ -452,7 +481,7 @@ def _validate_bundle(data: DataBundle) -> None:
     _validate_geometry(data.geometry, data.coordinate_system)
     layouts = _validate_layouts(data.layouts, data.coordinate_system)
     _validate_fields(data.fields, layouts)
-    _validate_sources(data.sources, data.coordinate_system)
+    _validate_sources(data.sources, data.coordinate_system, data.geometry)
 
 
 def _validate_geometry(geometry: GeometryData, coordinate_system: CoordinateSystem) -> None:
@@ -718,11 +747,22 @@ def _validate_field(field: FieldData, layouts: Mapping[str, Layout]) -> None:
         _require_name(component, f"field {field.name} component {index}")
     _require_text(field.stored_basis, f"field {field.name} stored_basis")
     _require_text(field.unit, f"field {field.name} unit")
-    values = _require_array(field.values, _F8, 2, f"fields.{field.name}.values")
+    value_rank = 2 if field.time_s is None else 3
+    values = _require_array(field.values, _F8, value_rank, f"fields.{field.name}.values")
     expected_rows = _layout_value_count(layouts[field.layout], field.association)
-    if values.shape != (expected_rows, len(field.components)):
+    if values.shape[-2:] != (expected_rows, len(field.components)):
         raise ValueError(f"field {field.name} values shape does not match its layout/components")
     _require_finite(values, f"fields.{field.name}.values")
+    if field.time_s is None:
+        return
+    times = _require_array(field.time_s, _F8, 1, f"fields.{field.name}.time_s")
+    if times.size < 2 or values.shape[0] != times.size:
+        raise ValueError(
+            f"field {field.name} time_s must contain at least two snapshots matching values"
+        )
+    _require_finite(times, f"fields.{field.name}.time_s")
+    if bool((np.diff(times) <= 0.0).any()):
+        raise ValueError(f"field {field.name} time_s must be strictly increasing")
 
 
 def _layout_value_count(layout: Layout, association: str) -> int:
@@ -736,7 +776,9 @@ def _layout_value_count(layout: Layout, association: str) -> int:
 
 
 def _validate_sources(
-    sources: tuple[RealizedTableSource, ...], coordinate_system: CoordinateSystem
+    sources: tuple[RealizedSource, ...],
+    coordinate_system: CoordinateSystem,
+    geometry: GeometryData,
 ) -> None:
     names: set[str] = set()
     for source in sources:
@@ -744,11 +786,11 @@ def _validate_sources(
         if source.name in names:
             raise ValueError(f"duplicate source name: {source.name}")
         names.add(source.name)
-        _validate_source(source, coordinate_system)
+        _validate_source(source, coordinate_system, geometry)
     _validate_global_particle_ids(sources)
 
 
-def _validate_global_particle_ids(sources: tuple[RealizedTableSource, ...]) -> None:
+def _validate_global_particle_ids(sources: tuple[RealizedSource, ...]) -> None:
     if not sources:
         return
     particle_ids = (
@@ -760,7 +802,11 @@ def _validate_global_particle_ids(sources: tuple[RealizedTableSource, ...]) -> N
         raise ValueError("particle_id must be unique across all realized table sources")
 
 
-def _validate_source(source: RealizedTableSource, coordinate_system: CoordinateSystem) -> None:
+def _validate_source(
+    source: RealizedSource,
+    coordinate_system: CoordinateSystem,
+    geometry: GeometryData,
+) -> None:
     particle_id = _require_array(source.particle_id, _I8, 1, f"sources.{source.name}.particle_id")
     count = particle_id.size
     if count == 0 or bool((particle_id < 0).any()):
@@ -770,7 +816,7 @@ def _validate_source(source: RealizedTableSource, coordinate_system: CoordinateS
         raise ValueError("source material_id length does not match particle_id")
     if bool((material_id < 0).any()):
         raise ValueError("source material_id must be nonnegative")
-    position = _validate_source_vectors(source, count)
+    _validate_source_velocity(source, count)
     scalars = _source_scalar_arrays(source)
     for label, array in scalars:
         checked = _require_array(array, _F8, 1, f"sources.{source.name}.{label}")
@@ -778,37 +824,67 @@ def _validate_source(source: RealizedTableSource, coordinate_system: CoordinateS
             raise ValueError(f"source {label} length does not match particle_id")
         _require_finite(checked, f"sources.{source.name}.{label}")
     _validate_source_ranges(source)
-    if coordinate_system == "axisymmetric_rz" and bool((position[:, 0] < 0).any()):
-        raise ValueError("axisymmetric source positions require r >= 0")
+    if isinstance(source, RealizedTableSource):
+        position = _validate_table_source_positions(source, count)
+        if coordinate_system == "axisymmetric_rz" and bool((position[:, 0] < 0).any()):
+            raise ValueError("axisymmetric source positions require r >= 0")
+    else:
+        _validate_surface_source_locations(source, count, geometry)
 
 
-def _validate_source_vectors(source: RealizedTableSource, count: int) -> FloatArray:
-    position = _require_array(source.position_m, _F8, 2, f"sources.{source.name}.position_m")
+def _validate_source_velocity(source: RealizedSource, count: int) -> None:
     velocity = _require_array(source.velocity_m_s, _F8, 2, f"sources.{source.name}.velocity_m_s")
-    if position.shape != (count, 2) or velocity.shape != (count, 2):
-        raise ValueError("source position_m and velocity_m_s must have shape [N, 2]")
-    _require_finite(position, f"sources.{source.name}.position_m")
+    if velocity.shape != (count, 2):
+        raise ValueError("source velocity_m_s must have shape [N, 2]")
     _require_finite(velocity, f"sources.{source.name}.velocity_m_s")
+
+
+def _validate_table_source_positions(source: RealizedTableSource, count: int) -> FloatArray:
+    position = _require_array(source.position_m, _F8, 2, f"sources.{source.name}.position_m")
+    if position.shape != (count, 2):
+        raise ValueError("table source position_m must have shape [N, 2]")
+    _require_finite(position, f"sources.{source.name}.position_m")
     return position
 
 
-def _source_scalar_arrays(source: RealizedTableSource) -> tuple[tuple[str, FloatArray], ...]:
+def _validate_surface_source_locations(
+    source: RealizedSurfaceSource,
+    count: int,
+    geometry: GeometryData,
+) -> None:
+    facet_id = _require_array(source.facet_id, _I8, 1, f"sources.{source.name}.facet_id")
+    parameter = _require_array(
+        source.facet_parameter, _F8, 1, f"sources.{source.name}.facet_parameter"
+    )
+    if facet_id.shape != (count,) or parameter.shape != (count,):
+        raise ValueError("surface source facet_id and facet_parameter must have shape [N]")
+    if bool(((facet_id < 0) | (facet_id >= geometry.boundary.line2.shape[0])).any()):
+        raise ValueError("surface source facet_id is outside the canonical geometry")
+    _require_finite(parameter, f"sources.{source.name}.facet_parameter")
+    if bool(((parameter <= 0.0) | (parameter >= 1.0)).any()):
+        raise ValueError("surface source facet_parameter must be strictly inside (0, 1)")
+
+
+def _source_scalar_arrays(source: RealizedSource) -> tuple[tuple[str, FloatArray], ...]:
     return (
         ("release_time_s", source.release_time_s),
         ("charge_number", source.charge_number),
         ("mass_kg", source.mass_kg),
         ("drag_diameter_m", source.drag_diameter_m),
+        ("contact_radius_m", source.contact_radius_m),
         ("electrostatic_radius_m", source.electrostatic_radius_m),
         ("displaced_volume_m3", source.displaced_volume_m3),
         ("model_weight", source.model_weight),
     )
 
 
-def _validate_source_ranges(source: RealizedTableSource) -> None:
+def _validate_source_ranges(source: RealizedSource) -> None:
     if bool((source.mass_kg <= 0).any()) or bool((source.drag_diameter_m <= 0).any()):
         raise ValueError("source mass_kg and drag_diameter_m must be positive")
     if bool((source.electrostatic_radius_m < 0).any()):
         raise ValueError("source electrostatic_radius_m must be nonnegative")
+    if bool((source.contact_radius_m < 0).any()):
+        raise ValueError("source contact_radius_m must be nonnegative")
     if bool((source.displaced_volume_m3 < 0).any()) or bool((source.model_weight <= 0).any()):
         raise ValueError("source displaced_volume_m3 must be nonnegative and model_weight positive")
 
@@ -870,7 +946,7 @@ def _layout_records(layout: Layout) -> list[_DatasetRecord]:
 
 def _field_records(field: FieldData) -> list[_DatasetRecord]:
     root = f"/fields/{field.name}"
-    return [
+    records = [
         _string_record(f"{root}/layout", field.layout),
         _string_record(f"{root}/association", field.association),
         _string_record(f"{root}/components", field.components),
@@ -878,16 +954,27 @@ def _field_records(field: FieldData) -> list[_DatasetRecord]:
         _numeric_record(f"{root}/values", field.values),
         _string_record(f"{root}/unit", field.unit),
     ]
+    if field.time_s is not None:
+        records.append(_numeric_record(f"{root}/time_s", field.time_s))
+    return records
 
 
-def _source_records(source: RealizedTableSource) -> list[_DatasetRecord]:
+def _source_records(source: RealizedSource) -> list[_DatasetRecord]:
     root = f"/sources/{source.name}"
     records = [
         _numeric_record(f"{root}/particle_id", source.particle_id),
-        _numeric_record(f"{root}/position_m", source.position_m),
         _numeric_record(f"{root}/velocity_m_s", source.velocity_m_s),
         _numeric_record(f"{root}/material_id", source.material_id),
     ]
+    if isinstance(source, RealizedTableSource):
+        records.append(_numeric_record(f"{root}/position_m", source.position_m))
+    else:
+        records.extend(
+            (
+                _numeric_record(f"{root}/facet_id", source.facet_id),
+                _numeric_record(f"{root}/facet_parameter", source.facet_parameter),
+            )
+        )
     records.extend(
         _numeric_record(f"{root}/{label}", array) for label, array in _source_scalar_arrays(source)
     )
@@ -1006,12 +1093,18 @@ def _write_field(group: h5py.Group, field: FieldData) -> None:
     _write_string(group, "components", field.components)
     _write_string(group, "stored_basis", field.stored_basis)
     _write_numeric(group, "values", field.values)
+    if field.time_s is not None:
+        _write_numeric(group, "time_s", field.time_s)
     _write_string(group, "unit", field.unit)
 
 
-def _write_source(group: h5py.Group, source: RealizedTableSource) -> None:
+def _write_source(group: h5py.Group, source: RealizedSource) -> None:
     _write_numeric(group, "particle_id", source.particle_id)
-    _write_numeric(group, "position_m", source.position_m)
+    if isinstance(source, RealizedTableSource):
+        _write_numeric(group, "position_m", source.position_m)
+    else:
+        _write_numeric(group, "facet_id", source.facet_id)
+        _write_numeric(group, "facet_parameter", source.facet_parameter)
     _write_numeric(group, "velocity_m_s", source.velocity_m_s)
     _write_numeric(group, "material_id", source.material_id)
     for label, array in _source_scalar_arrays(source):
@@ -1061,7 +1154,7 @@ def _read_bundle(handle: h5py.File) -> DataBundle:
         raise ValueError(f"unsupported case schema version: {int(schema)}")
     coordinate_system = _read_string_scalar(meta, "coordinate_system")
     if _read_string_scalar(meta, "coordinate_units") != "m":
-        raise ValueError("schema v1 coordinate_units must be 'm'")
+        raise ValueError("schema v3 coordinate_units must be 'm'")
     provenance = _read_string_scalar(meta, "provenance_json")
     if _canonical_provenance(provenance) != provenance:
         raise ValueError("stored provenance_json is not canonical")
@@ -1250,7 +1343,8 @@ def _read_fields(group: h5py.Group) -> tuple[FieldData, ...]:
     for name in sorted(group.keys()):
         _require_name(name, "field name")
         field_group = _expect_group(group, name)
-        _expect_children(field_group, required)
+        _expect_children(field_group, required, {"time_s"})
+        time_s = cast(FloatArray | None, _read_optional_numeric(field_group, "time_s", _F8, 1))
         fields.append(
             FieldData(
                 name=name,
@@ -1260,23 +1354,27 @@ def _read_fields(group: h5py.Group) -> tuple[FieldData, ...]:
                 ),
                 components=_read_string_vector(field_group, "components"),
                 stored_basis=_read_string_scalar(field_group, "stored_basis"),
-                values=cast(FloatArray, _read_numeric(field_group, "values", _F8, 2)),
+                values=cast(
+                    FloatArray,
+                    _read_numeric(field_group, "values", _F8, 2 if time_s is None else 3),
+                ),
                 unit=_read_string_scalar(field_group, "unit"),
+                time_s=time_s,
             )
         )
     return tuple(fields)
 
 
-def _read_sources(group: h5py.Group) -> tuple[RealizedTableSource, ...]:
-    sources: list[RealizedTableSource] = []
-    required = {
+def _read_sources(group: h5py.Group) -> tuple[RealizedSource, ...]:
+    sources: list[RealizedSource] = []
+    common = {
         "particle_id",
         "release_time_s",
-        "position_m",
         "velocity_m_s",
         "charge_number",
         "mass_kg",
         "drag_diameter_m",
+        "contact_radius_m",
         "electrostatic_radius_m",
         "displaced_volume_m3",
         "model_weight",
@@ -1285,12 +1383,17 @@ def _read_sources(group: h5py.Group) -> tuple[RealizedTableSource, ...]:
     for name in sorted(group.keys()):
         _require_name(name, "source name")
         source_group = _expect_group(group, name)
-        _expect_children(source_group, required)
-        sources.append(_read_source(name, source_group))
+        children = set(source_group.keys())
+        if "position_m" in children:
+            _expect_children(source_group, common | {"position_m"})
+            sources.append(_read_table_source(name, source_group))
+        else:
+            _expect_children(source_group, common | {"facet_id", "facet_parameter"})
+            sources.append(_read_surface_source(name, source_group))
     return tuple(sources)
 
 
-def _read_source(name: str, group: h5py.Group) -> RealizedTableSource:
+def _read_table_source(name: str, group: h5py.Group) -> RealizedTableSource:
     return RealizedTableSource(
         name=name,
         particle_id=cast(Int64Array, _read_numeric(group, "particle_id", _I8, 1)),
@@ -1300,6 +1403,28 @@ def _read_source(name: str, group: h5py.Group) -> RealizedTableSource:
         charge_number=cast(FloatArray, _read_numeric(group, "charge_number", _F8, 1)),
         mass_kg=cast(FloatArray, _read_numeric(group, "mass_kg", _F8, 1)),
         drag_diameter_m=cast(FloatArray, _read_numeric(group, "drag_diameter_m", _F8, 1)),
+        contact_radius_m=cast(FloatArray, _read_numeric(group, "contact_radius_m", _F8, 1)),
+        electrostatic_radius_m=cast(
+            FloatArray, _read_numeric(group, "electrostatic_radius_m", _F8, 1)
+        ),
+        displaced_volume_m3=cast(FloatArray, _read_numeric(group, "displaced_volume_m3", _F8, 1)),
+        model_weight=cast(FloatArray, _read_numeric(group, "model_weight", _F8, 1)),
+        material_id=cast(Int32Array, _read_numeric(group, "material_id", _I4, 1)),
+    )
+
+
+def _read_surface_source(name: str, group: h5py.Group) -> RealizedSurfaceSource:
+    return RealizedSurfaceSource(
+        name=name,
+        particle_id=cast(Int64Array, _read_numeric(group, "particle_id", _I8, 1)),
+        release_time_s=cast(FloatArray, _read_numeric(group, "release_time_s", _F8, 1)),
+        facet_id=cast(Int64Array, _read_numeric(group, "facet_id", _I8, 1)),
+        facet_parameter=cast(FloatArray, _read_numeric(group, "facet_parameter", _F8, 1)),
+        velocity_m_s=cast(FloatArray, _read_numeric(group, "velocity_m_s", _F8, 2)),
+        charge_number=cast(FloatArray, _read_numeric(group, "charge_number", _F8, 1)),
+        mass_kg=cast(FloatArray, _read_numeric(group, "mass_kg", _F8, 1)),
+        drag_diameter_m=cast(FloatArray, _read_numeric(group, "drag_diameter_m", _F8, 1)),
+        contact_radius_m=cast(FloatArray, _read_numeric(group, "contact_radius_m", _F8, 1)),
         electrostatic_radius_m=cast(
             FloatArray, _read_numeric(group, "electrostatic_radius_m", _F8, 1)
         ),
@@ -1325,6 +1450,8 @@ __all__ = [
     "GeometryData",
     "P1TriLayout",
     "Q1QuadLayout",
+    "RealizedSource",
+    "RealizedSurfaceSource",
     "RealizedTableSource",
     "RegularLayout",
     "content_hash",

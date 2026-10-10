@@ -41,6 +41,7 @@ from chamber_particles.case_format import (
     GeometryData,
     P1TriLayout,
     Q1QuadLayout,
+    RealizedSurfaceSource,
     RegularLayout,
     write,
 )
@@ -929,38 +930,42 @@ def _xy_case_material(
             "V/m",
         ),
     )
-    particle = {
-        "charge_number": charge_number,
-        "mass_kg": mass_kg,
-        "drag_diameter_m": float(drag_particle.drag_diameter_m[0]),
-        "electrostatic_radius_m": float(drag_particle.electrostatic_radius_m[0]),
-        "displaced_volume_m3": 0.0,
-        "model_weight": 1.0,
-        "material_id": int(drag_particle.material_id[0]),
-    }
     source_index = math.floor(_XY_SOURCE_Y_M * ny)
-    position = (
-        {"model": "uniform", "measure": "line_length"}
+    facet_parameter = (
+        (np.arange(particle_count, dtype=np.float64) + 0.5) / particle_count
         if uniform_source
-        else {
-            "model": "edge_fraction",
-            "fraction": source_index + 1.0 - _XY_SOURCE_Y_M * ny,
-        }
+        else np.full(
+            particle_count,
+            source_index + 1.0 - _XY_SOURCE_Y_M * ny,
+            dtype=np.float64,
+        )
     )
-    source = {
-        "name": "part_surface_release",
-        "type": "surface",
-        "boundary_group": "source",
-        "count": particle_count,
-        "particle_id_start": 1,
-        "particle": particle,
-        "position": position,
-        "velocity": {"model": "fixed", "value_m_s": [0.2, 0.0]},
-        "release": {"model": "fixed", "time_s": 0.0},
-    }
+    source_facet = 2 * nx + ny + (ny - 1 - source_index)
+    source = RealizedSurfaceSource(
+        name="part_surface_particles",
+        particle_id=np.arange(1, particle_count + 1, dtype="<i8"),
+        release_time_s=np.zeros(particle_count, dtype="<f8"),
+        facet_id=np.full(particle_count, source_facet, dtype="<i8"),
+        facet_parameter=np.asarray(facet_parameter, dtype="<f8"),
+        velocity_m_s=np.broadcast_to(
+            np.asarray([0.2, 0.0], dtype="<f8"), (particle_count, 2)
+        ).copy(),
+        charge_number=np.full(particle_count, charge_number, dtype="<f8"),
+        mass_kg=np.full(particle_count, mass_kg, dtype="<f8"),
+        drag_diameter_m=np.full(particle_count, drag_particle.drag_diameter_m[0], dtype="<f8"),
+        contact_radius_m=np.zeros(particle_count, dtype="<f8"),
+        electrostatic_radius_m=np.full(
+            particle_count, drag_particle.electrostatic_radius_m[0], dtype="<f8"
+        ),
+        displaced_volume_m3=np.zeros(particle_count, dtype="<f8"),
+        model_weight=np.ones(particle_count, dtype="<f8"),
+        material_id=np.full(particle_count, drag_particle.material_id[0], dtype="<i4"),
+    )
     specification = copy.deepcopy(drag.spec)
     specification["motion"] = {"mode": "cartesian_xy"}
-    specification["sources"] = [source]
+    specification["sources"] = [
+        {"name": "part_surface_release", "type": "surface", "table": source.name}
+    ]
     specification["boundaries"] = [
         {"boundary_group": "caps", "priority": 10, "law": "escape"},
         {"boundary_group": "target", "priority": 10, "law": "stick"},
@@ -981,7 +986,7 @@ def _xy_case_material(
             geometry=geometry,
             layouts=(layout,),
             fields=fields,
-            sources=(),
+            sources=(source,),
         ),
         specification,
     )

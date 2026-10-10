@@ -33,6 +33,11 @@ from .forces import (
     ION_DRAG_MAX_SCALE_OVER_DEBYE,
     ION_DRAG_MIN_MEAN_FREE_PATH_OVER_DEBYE,
     RAREFIED_VORTICITY_LIFT_MIN_MEAN_FREE_PATH_OVER_RADIUS,
+    SAFFMAN_LIFT_COEFFICIENT,
+    SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS,
+    SAFFMAN_MAX_SHEAR_REYNOLDS,
+    SAFFMAN_MAX_SLIP_REYNOLDS,
+    SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS,
     STOKES_CUNNINGHAM_MAX_KNUDSEN_RADIUS,
     STOKES_CUNNINGHAM_MAX_REYNOLDS,
     STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS,
@@ -62,9 +67,12 @@ ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE = 3
 
 THERMOPHORESIS_NONE = 0
 THERMOPHORESIS_WALDMANN_GALLIS = 1
+THERMOPHORESIS_TALBOT = 2
 
 LIFT_NONE = 0
 LIFT_RAREFIED_VORTICITY_RZ = 1
+LIFT_SAFFMAN_XY = 2
+LIFT_SAFFMAN_RZ = 3
 
 ERROR_NONE = 0
 ERROR_RATE = 1
@@ -118,6 +126,14 @@ def evaluate_physics_tile_into(
     thermophoresis_gas_mean_free_path_m: FloatArray,
     thermophoresis_gas_molecular_mass_kg: float,
     thermophoresis_maximum_speed_ratio: float,
+    thermophoresis_gas_temperature_gradient_K_m: FloatArray,
+    thermophoresis_gas_density_kg_m3: FloatArray,
+    thermophoresis_gas_dynamic_viscosity_Pa_s: FloatArray,
+    thermophoresis_gas_thermal_conductivity_W_m_K: FloatArray,
+    thermophoresis_particle_thermal_conductivity_W_m_K: float,
+    thermophoresis_thermal_slip_coefficient: float,
+    thermophoresis_momentum_exchange_coefficient: float,
+    thermophoresis_thermal_exchange_coefficient: float,
     ion_drag_code: int,
     ion_drag_electron_number_density_m3: FloatArray,
     ion_drag_positive_ion_number_density_m3: FloatArray,
@@ -141,6 +157,7 @@ def evaluate_physics_tile_into(
     lift_gas_velocity_m_s: FloatArray,
     lift_gas_density_kg_m3: FloatArray,
     lift_gas_mean_free_path_m: FloatArray,
+    lift_gas_dynamic_viscosity_Pa_s: FloatArray,
     lift_azimuthal_gas_vorticity_s_inv: FloatArray,
     lift_coefficient: float,
     electric_enabled: bool,
@@ -258,6 +275,14 @@ def evaluate_physics_tile_into(
             thermophoresis_gas_mean_free_path_m,
             thermophoresis_gas_molecular_mass_kg,
             thermophoresis_maximum_speed_ratio,
+            thermophoresis_gas_temperature_gradient_K_m,
+            thermophoresis_gas_density_kg_m3,
+            thermophoresis_gas_dynamic_viscosity_Pa_s,
+            thermophoresis_gas_thermal_conductivity_W_m_K,
+            thermophoresis_particle_thermal_conductivity_W_m_K,
+            thermophoresis_thermal_slip_coefficient,
+            thermophoresis_momentum_exchange_coefficient,
+            thermophoresis_thermal_exchange_coefficient,
             row,
         )
         applicable[row] = applicable[row] and row_applicable
@@ -310,7 +335,7 @@ def evaluate_physics_tile_into(
         acceleration[row, 0] += dep_x
         acceleration[row, 1] += dep_y
 
-        lift_x, lift_y, row_applicable = _rarefied_vorticity_lift_row(
+        lift_x, lift_y, row_applicable = _lift_row(
             lift_code,
             mass,
             diameter,
@@ -319,6 +344,7 @@ def evaluate_physics_tile_into(
             lift_gas_velocity_m_s,
             lift_gas_density_kg_m3,
             lift_gas_mean_free_path_m,
+            lift_gas_dynamic_viscosity_Pa_s,
             lift_azimuthal_gas_vorticity_s_inv,
             lift_coefficient,
             row,
@@ -550,12 +576,36 @@ def _thermophoresis_row(
     gas_mean_free_path_m: FloatArray,
     gas_molecular_mass_kg: float,
     maximum_speed_ratio: float,
+    gas_temperature_gradient_K_m: FloatArray,
+    gas_density_kg_m3: FloatArray,
+    gas_dynamic_viscosity_Pa_s: FloatArray,
+    gas_thermal_conductivity_W_m_K: FloatArray,
+    particle_thermal_conductivity_W_m_K: float,
+    thermal_slip_coefficient: float,
+    momentum_exchange_coefficient: float,
+    thermal_exchange_coefficient: float,
     row: int,
 ) -> tuple[float, float, bool]:
     """Evaluate the selected thermophoresis revision for one stage row."""
 
     if thermophoresis_code == THERMOPHORESIS_NONE:
         return 0.0, 0.0, True
+    if thermophoresis_code == THERMOPHORESIS_TALBOT:
+        return _talbot_thermophoresis_row(
+            particle_mass_kg,
+            particle_diameter_m,
+            gas_temperature_K[row],
+            gas_temperature_gradient_K_m[row, 0],
+            gas_temperature_gradient_K_m[row, 1],
+            gas_density_kg_m3[row],
+            gas_dynamic_viscosity_Pa_s[row],
+            gas_thermal_conductivity_W_m_K[row],
+            gas_mean_free_path_m[row],
+            particle_thermal_conductivity_W_m_K,
+            thermal_slip_coefficient,
+            momentum_exchange_coefficient,
+            thermal_exchange_coefficient,
+        )
     if thermophoresis_code != THERMOPHORESIS_WALDMANN_GALLIS:
         return math.nan, math.nan, False
     radius_m = 0.5 * particle_diameter_m
@@ -589,6 +639,58 @@ def _thermophoresis_row(
 
 
 @njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _talbot_thermophoresis_row(
+    particle_mass_kg: float,
+    particle_diameter_m: float,
+    gas_temperature_K: float,
+    temperature_gradient_x_K_m: float,
+    temperature_gradient_y_K_m: float,
+    gas_density_kg_m3: float,
+    gas_dynamic_viscosity_Pa_s: float,
+    gas_thermal_conductivity_W_m_K: float,
+    gas_mean_free_path_m: float,
+    particle_thermal_conductivity_W_m_K: float,
+    thermal_slip_coefficient: float,
+    momentum_exchange_coefficient: float,
+    thermal_exchange_coefficient: float,
+) -> tuple[float, float, bool]:
+    """Evaluate the radius-Knudsen Talbot revision for one row."""
+
+    knudsen_radius = 2.0 * (gas_mean_free_path_m / particle_diameter_m)
+    conductivity_ratio = gas_thermal_conductivity_W_m_K / particle_thermal_conductivity_W_m_K
+    correction = (
+        thermal_slip_coefficient
+        * (conductivity_ratio + thermal_exchange_coefficient * knudsen_radius)
+        / (
+            (1.0 + 3.0 * momentum_exchange_coefficient * knudsen_radius)
+            * (1.0 + 2.0 * conductivity_ratio + 2.0 * thermal_exchange_coefficient * knudsen_radius)
+        )
+    )
+    factor = (
+        -6.0
+        * math.pi
+        * particle_diameter_m
+        * gas_dynamic_viscosity_Pa_s**2
+        * correction
+        / (particle_mass_kg * gas_density_kg_m3 * gas_temperature_K)
+    )
+    acceleration_x = factor * temperature_gradient_x_K_m
+    acceleration_y = factor * temperature_gradient_y_K_m
+    derived = (
+        knudsen_radius,
+        conductivity_ratio,
+        correction,
+        factor,
+        acceleration_x,
+        acceleration_y,
+    )
+    for value in derived:
+        if not math.isfinite(value):
+            return math.nan, math.nan, False
+    return acceleration_x, acceleration_y, True
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
 def _dielectrophoresis_row(
     enabled: bool,
     particle_mass_kg: float,
@@ -618,7 +720,7 @@ def _dielectrophoresis_row(
 
 
 @njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
-def _rarefied_vorticity_lift_row(
+def _lift_row(
     lift_code: int,
     particle_mass_kg: float,
     particle_diameter_m: float,
@@ -627,14 +729,29 @@ def _rarefied_vorticity_lift_row(
     gas_velocity_m_s: FloatArray,
     gas_density_kg_m3: FloatArray,
     gas_mean_free_path_m: FloatArray,
+    gas_dynamic_viscosity_Pa_s: FloatArray,
     azimuthal_gas_vorticity_s_inv: FloatArray,
     lift_coefficient: float,
     row: int,
 ) -> tuple[float, float, bool]:
-    """Evaluate the documented no-swirl RZ lift sensitivity for one row."""
+    """Evaluate the selected planar lift revision for one row."""
 
     if lift_code == LIFT_NONE:
         return 0.0, 0.0, True
+    if lift_code == LIFT_SAFFMAN_XY or lift_code == LIFT_SAFFMAN_RZ:
+        return _saffman_lift_row(
+            lift_code,
+            particle_mass_kg,
+            particle_diameter_m,
+            velocity_r_m_s,
+            velocity_z_m_s,
+            gas_velocity_m_s[row, 0],
+            gas_velocity_m_s[row, 1],
+            gas_density_kg_m3[row],
+            gas_dynamic_viscosity_Pa_s[row],
+            gas_mean_free_path_m[row],
+            azimuthal_gas_vorticity_s_inv[row],
+        )
     if lift_code != LIFT_RAREFIED_VORTICITY_RZ:
         return math.nan, math.nan, False
     radius_m = 0.5 * particle_diameter_m
@@ -667,6 +784,64 @@ def _rarefied_vorticity_lift_row(
         acceleration_z,
         mean_free_path_over_radius >= RAREFIED_VORTICITY_LIFT_MIN_MEAN_FREE_PATH_OVER_RADIUS,
     )
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _saffman_lift_row(
+    lift_code: int,
+    particle_mass_kg: float,
+    particle_diameter_m: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    gas_velocity_x_m_s: float,
+    gas_velocity_y_m_s: float,
+    gas_density_kg_m3: float,
+    gas_dynamic_viscosity_Pa_s: float,
+    gas_mean_free_path_m: float,
+    out_of_plane_gas_vorticity_s_inv: float,
+) -> tuple[float, float, bool]:
+    """Evaluate Saffman's unbounded creeping-flow formula without epsilon floors."""
+
+    radius_m = 0.5 * particle_diameter_m
+    slip_x = gas_velocity_x_m_s - velocity_x_m_s
+    slip_y = gas_velocity_y_m_s - velocity_y_m_s
+    slip_speed = math.hypot(slip_x, slip_y)
+    omega_abs = abs(out_of_plane_gas_vorticity_s_inv)
+    coupling_rate = (
+        SAFFMAN_LIFT_COEFFICIENT
+        * radius_m**2
+        * math.sqrt(gas_dynamic_viscosity_Pa_s * gas_density_kg_m3 * omega_abs)
+        / particle_mass_kg
+    )
+    signed_coupling = math.copysign(coupling_rate, out_of_plane_gas_vorticity_s_inv)
+    if lift_code == LIFT_SAFFMAN_XY:
+        acceleration_x = signed_coupling * slip_y
+        acceleration_y = -signed_coupling * slip_x
+    else:
+        acceleration_x = -signed_coupling * slip_y
+        acceleration_y = signed_coupling * slip_x
+    mean_free_path_over_radius = gas_mean_free_path_m / radius_m
+    slip_reynolds = gas_density_kg_m3 * radius_m * slip_speed / gas_dynamic_viscosity_Pa_s
+    shear_reynolds = gas_density_kg_m3 * radius_m**2 * omega_abs / gas_dynamic_viscosity_Pa_s
+    derived = (
+        coupling_rate,
+        acceleration_x,
+        acceleration_y,
+        mean_free_path_over_radius,
+        slip_reynolds,
+        shear_reynolds,
+    )
+    for value in derived:
+        if not math.isfinite(value):
+            return math.nan, math.nan, False
+    applicable = mean_free_path_over_radius <= SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS
+    applicable = applicable and slip_reynolds <= SAFFMAN_MAX_SLIP_REYNOLDS
+    applicable = applicable and shear_reynolds <= SAFFMAN_MAX_SHEAR_REYNOLDS
+    applicable = applicable and (
+        omega_abs == 0.0
+        or slip_reynolds <= SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS * math.sqrt(shear_reynolds)
+    )
+    return acceleration_x, acceleration_y, applicable
 
 
 @njit(inline="always", fastmath=False, parallel=False, error_model="numpy")

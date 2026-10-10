@@ -1,0 +1,36 @@
+{
+  "authority": "Registered producer configuration and canonical input; values are not copied from native observations. API Formulation binds the registered array's item0 to the actual String getter.",
+  "unit_system": "SI",
+  "updates_disabled": false,
+  "dp_expression": "d0",
+  "rho_expression": "rho_p",
+  "charge_expression": "ZP",
+  "beta_expression": "(4*pi/3)*(d0/2)^2*m3c1_rhog(r,z)*sqrt(8*k_B_const*m3c1_Tg(r,z)/(pi*m3c_mgas))*m3c_delta",
+  "rho_unit": [
+    "kg/m^3"
+  ],
+  "temperature_unit": [
+    "K"
+  ],
+  "argument_units": [
+    "m",
+    "m"
+  ],
+  "steps": {
+    "5us": "5e-6[s]",
+    "2p5us": "2.5e-6[s]",
+    "1p25us": "1.25e-6[s]"
+  },
+  "electric_field": [
+    "m3c1_Er(r,z)",
+    "0[V/m]",
+    "m3c1_Ez(r,z)"
+  ],
+  "epstein_force": [
+    "m3c_beta*(m3c1_ugr(r,z)-fpt.vr)",
+    "0[N]",
+    "m3c_beta*(m3c1_ugz(r,z)-fpt.vz)"
+  ],
+  "charge_selector": "UserDefined",
+  "axis_source_law": "Freeze"
+}

@@ -1,0 +1,297 @@
+{
+  "artifact": "remaining_plan_current_verification_record_v1",
+  "captured_at_utc": "2026-10-09T14:38:13.991732+00:00",
+  "status": "PASS_FOR_IMPLEMENTED_AND_REGISTERED_SCOPE",
+  "interpretation": "Observed local verification receipt, not a new gate runner or application accuracy/SLA approval.",
+  "core_source_sha256": {
+    "src/chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+    "src/chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+    "src/chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+    "src/chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+    "src/chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/cli.py": "a98c1767f1a898e56d1460a54458b346961e55474329c34c8710e28d1428cd3f",
+    "src/chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+    "src/chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+    "src/chamber_particles/engine.py": "77d2ca96d81c1f28532d5b72f74c13f120c04d2091dee2a6a637a14d141ed0e2",
+    "src/chamber_particles/events.py": "b6cc119699989065aac7e8479d6dd0f6b95385fa506096209cf954035fffa9f9",
+    "src/chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+    "src/chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+    "src/chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+    "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+    "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "src/chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+    "src/chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+    "src/chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+    "src/chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+    "src/chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+    "src/chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+    "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "src/chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+    "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+  },
+  "observed_local_gates": [
+    {
+      "target": "uv.lock freshness",
+      "status": "PASS"
+    },
+    {
+      "target": "Ruff format src/tests/tools/examples/scripts",
+      "status": "PASS",
+      "formatted_file_count": 238
+    },
+    {
+      "target": "Ruff lint src/tests/tools/examples/scripts",
+      "status": "PASS"
+    },
+    {
+      "target": "Pyrefly whole project",
+      "status": "PASS",
+      "errors": 0
+    },
+    {
+      "target": "import-linter",
+      "status": "PASS",
+      "contracts_kept": 3,
+      "entry": "Python CLI entry because OS application control rejected console launcher"
+    },
+    {
+      "target": "scripts/check_complexity.py",
+      "status": "PASS",
+      "criterion": "CC < 16"
+    },
+    {
+      "target": "tests/verification + tests/scenarios",
+      "status": "PASS",
+      "passed": 838,
+      "elapsed_s": 193.24
+    },
+    {
+      "target": "contact geometry public scenarios",
+      "status": "PASS",
+      "passed": 16,
+      "elapsed_s": 4.77
+    },
+    {
+      "target": "git diff --check",
+      "status": "PASS",
+      "scope": "Whitespace gate; line-ending conversion warnings are non-failing"
+    },
+    {
+      "target": "tools whole suite after final external producer/normalizer/test corrections",
+      "command": "uv run --locked python -m pytest tools -q",
+      "status": "PASS",
+      "passed": 486,
+      "elapsed_s": 70.82,
+      "scope": "Local external tools/fixtures; not486 native solves"
+    }
+  ],
+  "wheel": {
+    "path": "C:\\Users\\user\\AppData\\Local\\Temp\\chamber-particles-final-review-35307957506c4a97bf0a34514010dda4\\dist\\chamber_particles-0.2.0-py3-none-any.whl",
+    "sha256": "699fd19e88c78fe0d6f78a3118169eb38ed9ce1452822789cf820be4ea9bf808",
+    "production_python_files": 27,
+    "all_python_bytes_match_current_source": true
+  },
+  "clean_runtime": {
+    "status": "PASS",
+    "installation": "uv locked runtime-only environment plus wheel --no-deps via uv installer",
+    "public_api_smoke": "load_case/simulate/open_result",
+    "version": "0.2.0"
+  },
+  "quickstart": {
+    "status": "PASS",
+    "directory": "C:\\Users\\user\\AppData\\Local\\Temp\\chamber-particles-final-review-35307957506c4a97bf0a34514010dda4\\quickstart",
+    "operations": [
+      "generate",
+      "check",
+      "run",
+      "inspect",
+      "analysis",
+      "visualization"
+    ],
+    "particles": 1,
+    "macro_steps": 5,
+    "frames": 5,
+    "boundary_events": 2,
+    "failures": 0
+  },
+  "source_report_sha256": {
+    "final_current_smoke_2026-10-09.json": "96bc3ce5a82922833c4b8e6be08299e6def33910aeb3dd3c67f94d979755e5fe",
+    "product_performance_acceptance_2026-10-09.json": "d3428b653d65011111e42697d0b6dc67fc9428f9c16cfcf7434d0d779f507051",
+    "contact_mode_before_2026-10-09.json": "e90c0fd6a6c6c9121c8c8ced26f2db9d653a2c506be350a1dd61867e565b8483",
+    "contact_mode_after_2026-10-09.json": "fc9e1623469c6e492a35bda1d30efd1ed217d5693614a6f2c79e333fb05aad1c",
+    "product_scale_current_2026-10-09.json": "929fb710e61ea08d511f6677ce31a7970ca4b5a3b7c133e0cd285a315533b4b4",
+    "contact_mode_mixed_current_2026-10-09.json": "62d79d890398948757618feb2fbaddba853235d541956d613691fbe61d4f3b26",
+    "d2_kramers_first_arrival_2026-10-09.json": "ed03ee3d1029e334d29e434a6ee5d85ceaa420f47aff26a67521d87097b09f00",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_axis_normalized_after_projection_evaluation.json": "4b8b4697fed8f223d81a803d3f13bc494ca1984939a50b99a100730fcb12b7c3",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\native_unit_and_completion_closeout.json": "a9f0b46be61ee34d8bdbb5c04ad67c24eada08bb5cd7c3a2102beaa89e874fba",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\controls\\native_completion_negative_control_receipt.json": "9cb98cbf05f276cdf7f86a7b80dc5b5caf8f71d470280769ddbd728bbf218998",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\controls\\source_mass_identity_receipt.json": "34faea6a248948f1ece4b149532da6e704c206e51b880508c2aac7d443a77f7e",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\derived_c3\\visualization_receipt.json": "8351f7283d978206c27d068ef2e7a2eccb824a6c602d28fd3bb397ee57b98b9c",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\caseA_axis_normalized_final_evaluation\\evaluation_manifest.json": "63dcce0423e4034279ad0ea680809780c4e3dc77d4e2d9ab640fba5b556ac732",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\caseP_axis_normalized_final_evaluation\\evaluation_manifest.json": "6180722add8f813b1c21911de78b6124e8f158a1a82e362105da1542f7ee00f4",
+    "reviews\\comsol_recert_independent_review_2026-10-09.json": "399a5cdca8c662645d24050690a50180ffcb1d5d485dec947e6e6667286e4d63",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\comparison_manifest.json": "e1d507bb71344c4900478649383440ca992afc91e88573b7ba46b8b8a05044f2",
+    "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\comparison_summary.json": "f5edd11b6d85de562ec84441e64decd4ac17b077c37bdc8a639689b3566e4992"
+  },
+  "excluded_claims": [
+    "New remote Windows/Linux CI run",
+    "General3D motion or isotropic3D Brownian",
+    "WarpedQ1/partial-support cache certification",
+    "Continuous OU exact first-passage/zero-miss/general weak or strong order",
+    "Continuous native random-time law/discretization bias",
+    "Disappear cause/boundary identity or CaseP wall response from these population gates",
+    "Every internal native stage/per-force or auxiliary-charge assembled RHS",
+    "NativeFE/curl physical-field validation or experimental physical-model truth",
+    "All supported physics at million-particle application accuracy",
+    "User-approved product accuracy/SLA or generic speedup"
+  ],
+  "existing_pre_c3_source_witness_recheck": {
+    "observed_at_utc": "2026-10-09T14:51:49.507555+00:00",
+    "source_artifact": "product_performance_acceptance_2026-10-09.json",
+    "source_artifact_sha256": "d3428b653d65011111e42697d0b6dc67fc9428f9c16cfcf7434d0d779f507051",
+    "locked_files": 32,
+    "all_current_bytes_match": true,
+    "historical_record_completed_at_utc": "2026-10-09T14:15:30.157894+00:00",
+    "interpretation": "Read-only confirmation after C3 execution began of existing pre-execution source witness; no retrospective registration."
+  },
+  "latest_quality_checked_at_utc": "2026-10-09T15:59:51.093086+00:00",
+  "external_tool_gate_repair": {
+    "first_final_attempt": {
+      "passed": 484,
+      "failed": 2,
+      "elapsed_s": 75.39
+    },
+    "causes": [
+      "Obsolete diagnostic-option source assertion after same-trajectory diagnostic export",
+      "Receipt artifact-set expectation omitted the required canonical boundary_meaning.json"
+    ],
+    "repair": "Update existing assertions to actual output/identity contracts; no production scientific changes",
+    "rerun_passed": 486
+  },
+  "final_static_gates": {
+    "uv_lock": "PASS",
+    "ruff_format": "PASS (238 files)",
+    "ruff_lint": "PASS",
+    "pyrefly": "PASS (0 errors; existing61 suppressed/244 warnings)",
+    "import_linter": "PASS (3 contracts,27 files,50 dependencies)",
+    "complexity": "PASS (CC<16)"
+  },
+  "frozen_core_recheck": {
+    "observed_at_utc": "2026-10-09T15:59:51.093086+00:00",
+    "all27_sources_match_previous_full_core_gate": true,
+    "all27_wheel_python_bytes_match": true,
+    "subsequent_core_changes": "None; later focused contact16/D2-Brownian64 passes cover the final assertions without additional production changes"
+  },
+  "core_test_freeze_confirmation": {
+    "physics_agent": "No core test/fixture edits after13:59 UTC; latest owned test_brownian_run mtime13:55:32 UTC, Kramers fixture13:47:22",
+    "root_contact_scenarios": "Final focused16 PASS recorded separately; no later code edits"
+  },
+  "completed_at_utc": "2026-10-09T16:18:37.626345+00:00",
+  "implementation_scope": [
+    "B2 static/linear-time common-partition cache certificate for P1/regular/exact affine Q1 to full regular",
+    "H2 group-specific particle_surface/particle_center with retained physical radius and certified departure",
+    "D1/D2 independent OU/Kramers manufactured and finite-path first-arrival checks",
+    "F0/F1 measured engineering performance scope; E no unsupported workspace/backend expansion",
+    "Current native units/completion/meaning binding and preregistered deterministic/population external V&V"
+  ],
+  "current_revision": {
+    "package": "0.2.0",
+    "engine": 45,
+    "event": 21,
+    "geometry": 7,
+    "source": 5,
+    "memory_plan": 16,
+    "gradient": 2,
+    "catalog": 23,
+    "physics_runtime": 22,
+    "compiled_tile": 21,
+    "proposal": 10,
+    "case_data_result_schema": 3,
+    "checkpoint_schema": 2
+  },
+  "registered_native_comparisons": {
+    "status": "SCOPED_PASS",
+    "native_version": "COMSOL6.4.0.429",
+    "c3_deterministic": {
+      "status": "PASS",
+      "evaluation_sha256": "4b8b4697fed8f223d81a803d3f13bc494ca1984939a50b99a100730fcb12b7c3",
+      "interpretation": "Registered4x fine-pair empirical sensitivity allowance; absolute position/charge floors alone fail. Not rigorous continuous-error or physical-validation certificate.",
+      "native_total_force_observation": "25503 common active output rows; relL2 7.83448e-17 for total Ftr/Ftz vs independent7-force reconstruction, not internal stages or each contribution"
+    },
+    "c2_brownian_population": {
+      "status": "PASS_CONDITIONAL_REGISTERED_FINITE_ALGORITHM_POPULATION_COMPARISON",
+      "global_alpha": 0.05,
+      "alpha_each_anchor": 0.025,
+      "alpha_each_gate_each_anchor": 0.0125,
+      "final_runs": 128,
+      "seeds_each_participant_each_anchor": 32,
+      "selected_step_s": 2e-05,
+      "candidate_tree_depth": 3,
+      "raw_csv_files": 128,
+      "raw_rows_independently_counted": 4445056,
+      "native_actual_seed_dt_rng_receipts": 64,
+      "independently_verified_meaning_bindings": 3904,
+      "metadata_original_ledger_entries_unchanged": 808,
+      "sample_unit": "Independent noninteracting seed x fixed source particle trajectory; temporal dependence retained by union bounds",
+      "case_results": {
+        "caseA": {
+          "evaluation_path": "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\caseA_axis_normalized_final_evaluation\\evaluation_manifest.json",
+          "evaluation_sha256": "63dcce0423e4034279ad0ea680809780c4e3dc77d4e2d9ab640fba5b556ac732",
+          "status": "PASS",
+          "observations_each_arm": 9184,
+          "output_time_count": 121,
+          "terminal_empirical_maximum": 0.005117595818815324,
+          "terminal_simultaneous_bound": 0.04012826293698183,
+          "terminal_margin": 0.05,
+          "rz_fate_partition_categories": 83,
+          "rz_empirical_tv_maximum": 0.009581881533101043,
+          "rz_tv_simultaneous_bound": 0.13073540051930657,
+          "rz_tv_margin": 0.15,
+          "claim_policy": {
+            "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+            "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+            "continuous_noise_time_law": "NOT_TESTED",
+            "disappear_boundary_identity": "NOT_TESTED",
+            "escape_boundary_cause_identity": "NOT_TESTED",
+            "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+          }
+        },
+        "caseP": {
+          "evaluation_path": "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\caseP_axis_normalized_final_evaluation\\evaluation_manifest.json",
+          "evaluation_sha256": "6180722add8f813b1c21911de78b6124e8f158a1a82e362105da1542f7ee00f4",
+          "status": "PASS",
+          "observations_each_arm": 9184,
+          "output_time_count": 121,
+          "terminal_empirical_maximum": 0.0,
+          "terminal_simultaneous_bound": 0.03501066711816651,
+          "terminal_margin": 0.05,
+          "rz_fate_partition_categories": 83,
+          "rz_empirical_tv_maximum": 0.008384146341463419,
+          "rz_tv_simultaneous_bound": 0.12953766532766894,
+          "rz_tv_margin": 0.15,
+          "claim_policy": {
+            "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+            "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+            "continuous_noise_time_law": "NOT_TESTED",
+            "disappear_boundary_identity": "NOT_TESTED",
+            "escape_boundary_cause_identity": "NOT_TESTED",
+            "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+          }
+        }
+      },
+      "caseA_limit": "Native6904 and candidate6910 disappeared/escaped status outcomes; native boundary ID/cause unobserved",
+      "caseP_limit": "All9184 active for each arm; no wall response tested"
+    },
+    "independent_audit": {
+      "path": "reviews\\comsol_recert_independent_review_2026-10-09.json",
+      "sha256": "399a5cdca8c662645d24050690a50180ffcb1d5d485dec947e6e6667286e4d63",
+      "status": "COMPLETE_SCOPED_C3_EMPIRICAL_AND_C2_REGISTERED_FINITE_ALGORITHM_POPULATION_PASS"
+    },
+    "final_manifest_path": "solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\comparison_manifest.json",
+    "compact_scope_readonly_review": "Independent reviewer confirms all bounds/alpha/N/T/K, counts, observed units and explicit limitations match frozen audit; no scientific changes"
+  },
+  "final_documentation_checked_at_utc": "2026-10-09T16:24:25.800588+00:00"
+}

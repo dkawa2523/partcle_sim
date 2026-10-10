@@ -42,46 +42,97 @@ jobs:
           cache-dependency-glob: particle_platform_redesign/solver/uv.lock
       - name: Synchronize locked development environment
         run: uv sync --locked
-      - name: Run standard quality gates
+      - name: Check dependency lock
+        run: uv lock --check
+      - name: Check source formatting
+        run: uv run --locked ruff format --check src tests tools examples scripts
+      - name: Check source lint
+        run: uv run --locked ruff check src tests tools examples scripts
+      - name: Check types
+        run: uv run --locked pyrefly check --summarize-errors
+      - name: Check import boundaries
+        run: uv run --locked lint-imports
+      - name: Check numerical complexity
+        run: uv run --locked python scripts/check_complexity.py
+      - name: Verify core and public scenarios
+        run: uv run --locked python -m pytest tests/verification tests/scenarios -q
+      - name: Verify external workflows without COMSOL
+        run: >-
+          uv run --locked python -m pytest tools/comsol_adapter/tests tools/electrostatic_builder/tests tools/field_preprocessor/tests
+          tools/vv/comsol/tests/test_meaning_preflight.py tools/vv/comsol/tests/test_boundary_response_mapping.py
+          tools/vv/comsol/tests/test_curved_wall_line2_convergence.py tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py -q
+      - name: Generate producer-neutral Quick Start
         run: |
-          uv lock --check
-          uv run --locked ruff format --check src tests tools
-          uv run --locked ruff check src tests tools
-          uv run --locked pyrefly check --summarize-errors
-          uv run --locked lint-imports
-          uv run --locked python scripts/check_complexity.py
-          uv run --locked python -m pytest tests/verification tests/scenarios -q
+          $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
+          uv run --locked python examples/quickstart/create_case.py (Join-Path $quickstartRoot "input")
+      - name: Check producer-neutral Quick Start
+        run: |
+          $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
+          uv run --locked chamber-particles check (Join-Path $quickstartRoot "input/case.yaml")
       - name: Run producer-neutral Quick Start
         run: |
-          $root = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
-          uv run --locked ruff format --check examples
-          uv run --locked ruff check examples
-          uv run --locked python examples/quickstart/create_case.py (Join-Path $root "input")
-          uv run --locked chamber-particles check (Join-Path $root "input/case.yaml")
-          uv run --locked chamber-particles run (Join-Path $root "input/case.yaml") -o (Join-Path $root "result")
-          uv run --locked chamber-particles inspect (Join-Path $root "result")
-          uv run --locked python -m tools.analysis (Join-Path $root "result") --output (Join-Path $root "derived/summary.json")
-          uv run --locked python -m tools.visualization (Join-Path $root "result") --output-directory (Join-Path $root "derived/visualization")
+          $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
+          uv run --locked chamber-particles run (Join-Path $quickstartRoot "input/case.yaml") -o (Join-Path $quickstartRoot "result")
+      - name: Inspect producer-neutral Quick Start
+        run: |
+          $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
+          uv run --locked chamber-particles inspect (Join-Path $quickstartRoot "result")
+      - name: Analyze producer-neutral Quick Start
+        run: |
+          $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
+          uv run --locked python -m tools.analysis (Join-Path $quickstartRoot "result") --output (Join-Path $quickstartRoot "derived/summary.json")
+      - name: Visualize producer-neutral Quick Start
+        run: |
+          $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
+          uv run --locked python -m tools.visualization (Join-Path $quickstartRoot "result") --output-directory (Join-Path $quickstartRoot "derived/visualization")
       - name: Run warm performance smoke
         run: |
           $report = Join-Path "${{ runner.temp }}" "p14-smoke.json"
           uv run --locked python -m tests.performance.p14_matrix --suite smoke --json $report
-      - name: Build wheel and run clean-install public API smoke
+      - name: Build release wheel
         run: |
-          $dist = Join-Path "${{ runner.temp }}" "chamber-particles-dist"
-          $runtime = Join-Path "${{ runner.temp }}" "chamber-particles-runtime"
-          uv build --wheel --out-dir $dist
-          $env:UV_PROJECT_ENVIRONMENT = $runtime
+          $wheelDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-dist"
+          uv build --wheel --out-dir $wheelDirectory
+      - name: Prepare clean runtime dependencies
+        run: |
+          $runtimeDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-runtime"
+          $env:UV_PROJECT_ENVIRONMENT = $runtimeDirectory
           uv sync --locked --no-dev --no-install-project
+      - name: Install verified wheel into clean runtime
+        run: |
+          $wheelDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-dist"
+          $runtimeDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-runtime"
           $python = if ($IsWindows) {
-            Join-Path $runtime "Scripts/python.exe"
+            Join-Path $runtimeDirectory "Scripts/python.exe"
           } else {
-            Join-Path $runtime "bin/python"
+            Join-Path $runtimeDirectory "bin/python"
           }
-          $wheel = Get-ChildItem -LiteralPath $dist -Filter "*.whl" -File -ErrorAction Stop
+          $wheel = @(Get-ChildItem -LiteralPath $wheelDirectory -Filter "*.whl" -File -ErrorAction Stop)
           if ($wheel.Count -ne 1) { throw "expected exactly one wheel" }
-          uv pip install --python $python --no-deps $wheel.FullName
-          & $python -m tests.release_smoke
+          uv pip install --python $python --no-deps $wheel[0].FullName
+      - name: Verify clean-installed public API
+        run: |
+          $wheelDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-dist"
+          $wheel = @(Get-ChildItem -LiteralPath $wheelDirectory -Filter "*.whl" -File -ErrorAction Stop)
+          if ($wheel.Count -ne 1) { throw "expected exactly one verified wheel" }
+          $runtimeDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-runtime"
+          $python = if ($IsWindows) {
+            Join-Path $runtimeDirectory "Scripts/python.exe"
+          } else {
+            Join-Path $runtimeDirectory "bin/python"
+          }
+          $receipt = Join-Path "${{ runner.temp }}" "clean-wheel-smoke.json"
+          & $python -m tests.release_smoke --wheel $wheel[0].FullName --json $receipt
+      - name: Retain verification evidence
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: chamber-particles-verification-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/p14-smoke.json
+            ${{ runner.temp }}/clean-wheel-smoke.json
+            particle_platform_redesign/solver/uv.lock
+          if-no-files-found: error
+          retention-days: 90
       - name: Retain verified release wheel
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -151,3 +202,4 @@ jobs:
               --title "chamber-particles $tag" `
               --notes-file "particle_platform_redesign/solver/RELEASE_NOTES.md"
           }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

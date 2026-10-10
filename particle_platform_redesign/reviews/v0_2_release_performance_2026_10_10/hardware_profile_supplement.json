@@ -1,0 +1,12 @@
+{
+  "scope": "Descriptive hardware supplement captured after the registered performance window; no preregistered condition, threshold, or outcome was changed.",
+  "observed_at_utc": "2026-10-10T04:46:50.1245539Z",
+  "cpu_name": "Intel(R) Core(TM) Ultra 7 265KF",
+  "cpu_cores": 20,
+  "logical_cpu_count": 20,
+  "cim_reported_max_clock_mhz": 3900,
+  "clock_note": "CIM nominal property; not a measurement of frequency during benchmarks.",
+  "total_physical_memory_bytes": 68291252224,
+  "completion_summary_sha256": "b52e4c38d70b490a11e59871fd5baa02d8ca4641d323b5e6a52914221e999091",
+  "registration_sha256": "e7e2c14b89606d84a8747ced0d8b6a86abb3026f7c488fceff5f077ffa1f1ec0"
+}

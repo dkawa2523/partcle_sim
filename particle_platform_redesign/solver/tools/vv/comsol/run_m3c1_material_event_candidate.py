@@ -20,6 +20,8 @@ import numpy as np
 import yaml
 
 from chamber_particles import load_case, open_result, simulate
+from chamber_particles.case import CASE_FORMAT_VERSION
+from chamber_particles.yaml_input import parse_document
 
 TOOL_REVISION: Final = "m3c1_common_p1_material_event_candidate_v2"
 CASE_FILENAME: Final = "candidate_material_event.yaml"
@@ -195,7 +197,9 @@ def prepare(config_path: Path, output: Path) -> dict[str, object]:
     config_hash_before = _sha256(config_path)
     config = _load_config(config_path)
     locked = _locked_inputs(config)
-    parent = _mapping(yaml.safe_load(locked["case"].read_text(encoding="utf-8")), "case file")
+    parent = _mapping(parse_document(locked["case"].read_bytes()), "case file")
+    if parent.get("format_version") != CASE_FORMAT_VERSION:
+        raise ValueError("parent case must use the current case format")
     case = _mapping(parent.get("case"), "case file.case")
     time = _mapping(parent.get("time"), "case file.time")
     trajectories = _mapping(

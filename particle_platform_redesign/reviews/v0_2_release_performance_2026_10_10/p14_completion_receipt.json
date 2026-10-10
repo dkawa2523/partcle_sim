@@ -1,0 +1,19 @@
+{
+  "existing_hard_checks_passed": "completion, exact frame/probe shape and row counts, pinned revisions, memory-plan fit, field-path compiled-dispatcher evidence, and scientific identity",
+  "matrix_scope": "complete_preset",
+  "observations": 57,
+  "process": {
+    "batch": "p14_release",
+    "elapsed_s": 1508.0842032,
+    "exit_code": 0,
+    "finished_at_utc": "2026-10-10T01:49:33.5181394Z",
+    "started_at_utc": "2026-10-10T01:24:25.4355972Z"
+  },
+  "raw_log_sha256": "f832b9ea150f5708458ef95564b93549b21cf894ee02ad30d105633caa2f83aa",
+  "registration_sha256": "e7e2c14b89606d84a8747ced0d8b6a86abb3026f7c488fceff5f077ffa1f1ec0",
+  "report_sha256": "f832b9ea150f5708458ef95564b93549b21cf894ee02ad30d105633caa2f83aa",
+  "row_count": 19,
+  "scope": "Complete current deterministic orthogonal preset; 3 repeats. Machine-local measured engineering evidence, no SLA or universal scientific accuracy claim.",
+  "source_and_recipes_unchanged": true,
+  "status": "PASS"
+}

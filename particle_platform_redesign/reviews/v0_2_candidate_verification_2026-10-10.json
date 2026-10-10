@@ -1,0 +1,370 @@
+{
+  "status": "QUALIFIED_UNPUBLISHED_CANDIDATE_FOR_IMPLEMENTED_AND_TESTED_SCOPE",
+  "final_windows_static_observations": {
+    "uv_lock": {
+      "exit_code": 0,
+      "output": "Resolved 24 packages in 1ms\n"
+    },
+    "ruff_format": {
+      "exit_code": 0,
+      "output": "238 files already formatted\n"
+    },
+    "ruff_lint": {
+      "exit_code": 0,
+      "output": "All checks passed!\n"
+    },
+    "pyrefly": {
+      "exit_code": 0,
+      "output": " INFO Checking project configured at `C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\pyproject.toml`\n=== Error Summary ===\nNo errors found!\n INFO 0 errors (61 suppressed, 247 warnings not shown)\n"
+    },
+    "imports": {
+      "exit_code": 0,
+      "output": "=============\r\nImport Linter\r\n=============\r\n\r\n\r\n---------\r\nContracts\r\n---------\r\n\r\nAnalyzed 27 files, 50 dependencies.\r\n-----------------------------------\r\n\r\nLow-level numerics stay independent of orchestration and I/O KEPT\r\nIntegrator proposals stay independent of geometry and wall response KEPT\r\nPhysics models consume sampled primitives only KEPT\r\n\r\nContracts: 3 kept, 0 broken.\r\n"
+    },
+    "complexity": {
+      "exit_code": 0,
+      "output": "Complexity gate passed: every function and method has CC < 16.\r\n"
+    }
+  },
+  "package_version": "0.2.0",
+  "publication": "UNPUBLISHED_CANDIDATE",
+  "scope": "existing 2-D XY/RZ meridional production engine; no new 3-D/GPU/COMSOL core dependency",
+  "source_files_sha256": {
+    "src/chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+    "src/chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+    "src/chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+    "src/chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+    "src/chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+    "src/chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+    "src/chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+    "src/chamber_particles/engine.py": "566a6de8e52ff8bebe5ed1d16361cdef09576244021251b37b31f879f54a9eca",
+    "src/chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+    "src/chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+    "src/chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+    "src/chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+    "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+    "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "src/chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+    "src/chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+    "src/chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+    "src/chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+    "src/chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+    "src/chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+    "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "src/chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+    "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+  },
+  "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+  "scientific_revisions": {
+    "engine": "particle_engine_v46",
+    "event": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "field_producer": "canonical_field_preprocessor_v4",
+    "source_time_diagnostic": "interior_knot_omission_weighted_norm_v1"
+  },
+  "changes": [
+    "Strictly inward endpoint plus positive derivative enclosure certifies a whole monotone Hermite path; removes roundoff gap without nudge or tolerance expansion.",
+    "Empty replay search avoidance and cached event ordinal ceiling, preserving scientific outputs.",
+    "Independent Gaussian repeated specular wall and symmetric-absorbing Kramers RZ first-arrival references.",
+    "Optional report-only source time knot omission diagnostic using existing samplers and resource budget.",
+    "ASCII-compatible JSON CLI and source/wheel/installed-source equality plus public API/CLI release smoke."
+  ],
+  "quality_gates": {
+    "uv_lock_check": "PASS",
+    "ruff_format": "PASS (238 files)",
+    "ruff_lint": "PASS",
+    "pyrefly": "PASS (0 errors)",
+    "import_linter": "PASS (3 contracts)",
+    "complexity": "PASS (all functions CC < 16)",
+    "windows_core": "PASS (847 tests, 412.44 s)",
+    "windows_external_tools": "PASS (495 tests, 75.08 s)",
+    "linux_portable_gates": "PASS (6 final static gates, 847 core tests / exit 0, 120 portable external tests / exit 0, Quick Start 6 operations, P14 smoke 8 rows); local WSL Ubuntu",
+    "windows_clean_wheel": "PASS: final guard on same distribution wheel; runtime-only API/CLI/time-field/finite-contact smoke",
+    "linux_clean_wheel": "PASS: final guard on identical Windows distribution wheel; all 27 Python payloads and README body match",
+    "current_p14_smoke": "PASS (8 rows, 64 particles, exact payload/revision identity)",
+    "windows_quickstart": "PASS via module CLI; source console launcher blocked by host application control (4551), installed-wheel console independently PASS",
+    "final_readme_metadata_identity": "PASS: explicit UTF-8 metadata comparison on both OSs, source README/wheel body/installed body raw bytes identical; true temporary README-only modification rejected",
+    "current_scale_and_cold_jit": "PASS (5 selected current v46 rows: regular 10k/100k/1M, 10k cold JIT, 10k x 20 hits; one observation each; cold/warm scientific identity)",
+    "diff_whitespace": "PASS (git diff --check exit 0; normal repository line-ending warnings recorded)"
+  },
+  "engine_efficiency": {
+    "scope": "v45 before and after only pure work-elision changes, measured before the v46 numerical correction; machine-local non-gating timing",
+    "exact_payload_input_work_and_memory_identity": true,
+    "observations_each": 6,
+    "rows": [
+      {
+        "row_id": "event-h20-n10000",
+        "particle_count": 10000,
+        "hits_per_particle": 20,
+        "repeats_each": 3,
+        "before_simulate_median_s": 4.462008799891919,
+        "after_simulate_median_s": 3.8884497000835836,
+        "after_over_before": 0.8714572011103545,
+        "before_peak_rss_bytes": 341184512,
+        "after_peak_rss_bytes": 340885504,
+        "solver_memory_plan_identical": true
+      },
+      {
+        "row_id": "regular-n10000",
+        "particle_count": 10000,
+        "hits_per_particle": 0,
+        "repeats_each": 3,
+        "before_simulate_median_s": 0.4118010001257062,
+        "after_simulate_median_s": 0.45548459980636835,
+        "after_over_before": 1.1060793919085368,
+        "before_peak_rss_bytes": 400576512,
+        "after_peak_rss_bytes": 401252352,
+        "solver_memory_plan_identical": true
+      }
+    ],
+    "before_report": {
+      "path": "reviews/v0_2_engine_efficiency_before_2026-10-10.json",
+      "sha256": "956adc7807074bcfffb6a56af72ca9a596343a52d19afbf155c259e4519b5787"
+    },
+    "after_report": {
+      "path": "reviews/v0_2_engine_efficiency_after_2026-10-10.json",
+      "sha256": "da278bc028e5ea606a0c25098140951406d8cd50a872bc8f8264a07bd8787976"
+    },
+    "interpretation": "20-hit row median improves by 12.85%; regular row median is 10.61% slower in these observations. No universal speedup or SLA claim."
+  },
+  "numerical_accuracy_extension": {
+    "receipt": "reviews/brownian_wall_accuracy_extension_2026-10-10.json",
+    "original_failures_preserved": true,
+    "thresholds_widened_after_observation": false,
+    "corrected_candidate_status": "QUALIFIED_SELECTED_PROFILES_WITH_INDEPENDENT_HELD_OUT_RZ_D2",
+    "receipt_sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8",
+    "original_registered_all_D_ge_2_requirement": "NOT_MET (N=16000 RZ gamma*h=1.2 D2 confidence upper 0.031120052 > 0.03)",
+    "specular_corrected": "4 rows safety failure 0; all 3 registered D>=2 profiles meet fixed budget",
+    "radial_D4": "gamma*h 1.2/0.6/0.3 upper 0.027449620/0.025853256/0.024876762 < 0.03; selected after observation",
+    "independent_held_out_radial_D2": {
+      "role": "post-observation follow-up registered before new candidate observations; original result retained",
+      "N": 64000,
+      "seed": 53649,
+      "gamma_h": 1.2,
+      "depth": 2,
+      "family_alpha": 0.0005,
+      "max_CDF_difference": 0.006059145086610762,
+      "MC_width": 0.008049674702327859,
+      "empirical_reference_allowance": 0.005,
+      "probability_upper": 0.019108819788938622,
+      "budget": 0.03,
+      "safety_failures": 0,
+      "status": "PASS"
+    },
+    "root_independent_raw_audit": "PASS: all held-out input/result hashes, 64000 IDs, 21082 unique events, CDF counts and max difference exactly match retained raw results"
+  },
+  "historical_comsol": {
+    "revision": "particle_engine_v45 / event v21",
+    "manifest_path": "solver/evidence/comsol_binding_recert_2026_10_09_v1/comparison_manifest.json",
+    "manifest_sha256": "e1d507bb71344c4900478649383440ca992afc91e88573b7ba46b8b8a05044f2",
+    "status": "FROZEN HISTORICAL QUALIFIED COMPARISON; NOT A NEW v46 NATIVE RECERTIFICATION"
+  },
+  "limits": [
+    "User-specific absolute accuracy, timing and memory SLA remain undefined.",
+    "Finite Hermite paths do not certify exact continuous OU first passage, zero-miss probability or general SDE convergence order.",
+    "Source knot omission sensitivity does not certify unseen dynamics between source snapshots.",
+    "New remote CI, release tag and formal publication have not been performed."
+  ],
+  "wheel": {
+    "path": "solver/dist/chamber_particles-0.2.0-py3-none-any.whl",
+    "sha256": "13070487ab93bc0724061baa13eff3a196c2ed83c22a6a84d727ebdd68c2e20b",
+    "published": false
+  },
+  "platform_evidence": {
+    "windows_clean_wheel": {
+      "path": "reviews/v0_2_windows_clean_wheel_2026-10-10.json",
+      "sha256": "ecf6f69dd96a4ff211895be70c527a9784c2c9df3272bde22dc8c2c6a0706d41"
+    },
+    "windows_quickstart": {
+      "path": "reviews/v0_2_windows_quickstart_2026-10-10.json",
+      "sha256": "993c3b57b9579eef022f0627417e88520dd86a49122abbcdf02ee4926d991c96"
+    },
+    "windows_p14_smoke": {
+      "path": "reviews/v0_2_p14_smoke_2026-10-10.json",
+      "sha256": "0102676fc80a82bdc54f0888a7f6469288e0ca4ad38a210c9dfb146b16f2be43"
+    },
+    "linux_clean_wheel": {
+      "path": "reviews/v0_2_linux_clean_wheel_2026-10-10.json",
+      "sha256": "ada8054423d9ec17d5e39d1e1df923f4d2c73741c289f2c1896cbeeeabd1dd2f"
+    },
+    "linux_same_windows_wheel": {
+      "path": "reviews/v0_2_linux_windows_wheel_2026-10-10.json",
+      "sha256": "470e7c0a9f1ac41678449c83441ec24c988a82f7ced5df631e7e809222552676"
+    },
+    "linux_p14_smoke": {
+      "path": "reviews/v0_2_linux_p14_smoke_2026-10-10.json",
+      "sha256": "44bd1855a79d8197971dbc679f12aae9f7cc74e566660b22716b2138d77f2943"
+    },
+    "portability_snapshot": {
+      "path": "reviews/v0_2_portability_source_snapshot_2026-10-10.json",
+      "sha256": "b3b765bff622d723c12c741952ccc57d6225c86473177c44deafc6cbb311f048"
+    },
+    "linux_snapshot_verified": {
+      "path": "reviews/v0_2_linux_snapshot_verified_2026-10-10.json",
+      "sha256": "99137f0345226c0875f7bc22cefc035c32b4851269a9a720698fbb0001bdd625"
+    },
+    "final_local_portability": {
+      "path": "reviews/v0_2_local_portability_2026-10-10.json",
+      "sha256": "0560197277c3dbe273fede33280362efc3d08331a4668916bd0b7f9b0530c81a"
+    },
+    "final_windows_clean_wheel": {
+      "path": "reviews/v0_2_final_windows_clean_wheel_2026-10-10.json",
+      "sha256": "d4e41790ea80bd6857353b57b8adf1d83dd0903182e54170cf085a12de8c4f23"
+    },
+    "final_linux_same_windows_wheel": {
+      "path": "reviews/v0_2_final_linux_clean_wheel_2026-10-10.json",
+      "sha256": "e19a38ed60196172fcb15ab8d37fda5178e3aa47c3774e8999f38c79fe483165"
+    },
+    "readme_guard_negative": {
+      "path": "reviews/v0_2_readme_guard_negative_2026-10-10.json",
+      "sha256": "ec6b294f64990cb82787ffcf2be4c37b81d4d7c349e7611517330dcf7edcabd0"
+    }
+  },
+  "path_base": "particle_platform_redesign",
+  "source_files_base": "solver",
+  "external_producer_source_base": "solver",
+  "external_producer_source_sha256": {
+    "tools/field_preprocessor/__init__.py": "523906002167d1e03a32290cef5b6a838167ee1d9866c64d7e06c05d93288590",
+    "tools/field_preprocessor/__main__.py": "ceaf210c792d70cd7a63e35b558b7657f15429495f8114dca456aa1ebc4fe402",
+    "tools/field_preprocessor/numerics.py": "328eacec0067656227c75a8883156d7f2dfbb670715269a58bf18918acfe68d4",
+    "tools/field_preprocessor/workflow.py": "c262f8791d894d9bdf4cf4a3f7ff8eba613f4e38a53fba633f291b6940abc64c"
+  },
+  "windows_quality_logs": {
+    "core": {
+      "path": "reviews/v0_2_windows_quality_logs_2026-10-10/core_pytest.log",
+      "sha256": "2d7fc2c7f88267d52eff6b518e6d1f7a9d1644cd9d07d1f1a5afe201ead893f0",
+      "exit_code": 0,
+      "log_tail": [
+        ".......................................................                  [100%]",
+        "847 passed in 412.44s (0:06:52)"
+      ]
+    },
+    "external_tools": {
+      "path": "reviews/v0_2_windows_quality_logs_2026-10-10/external_tools_pytest.log",
+      "sha256": "d389997892516d22bd59fcdf2d1a1d2a12d1103c9d0f72f56858d8f420cd3870",
+      "exit_code": 0,
+      "log_tail": [
+        "...............................................................          [100%]",
+        "495 passed in 75.08s (0:01:15)"
+      ]
+    }
+  },
+  "package_document_identity": {
+    "readme_path": "solver/README.md",
+    "readme_sha256": "e03a93cd3940303d74e150209c3cdfb4299b9b1b141a2edeff7fb35af309a3bb",
+    "metadata_sha256": "575da588a032ee2365be6dc9579ba08e87708121a80444443ebb9415a534e1ad",
+    "release_smoke_path": "solver/tests/release_smoke.py",
+    "release_smoke_sha256": "263528e0b64e5e5e8963a14d24992e8235137308a78d772524edeeec9016ad48",
+    "policy": "RFC metadata body bytes explicitly decoded as UTF-8; LF-normalized text comparison ignores terminal newlines. Final observed artifact also has exact raw README/body equality on both OSs.",
+    "earlier_ascii_comparison": "False positive from implicit ASCII decoding; original wheel remained valid and was not rebuilt."
+  },
+  "root_independent_portability_audit": "PASS: 23 referenced evidence files hashed; source 27/lock/README/harness current; same final artifact and positive API/CLI/metadata checks on both OSs",
+  "final_document_scope_review": "PASS: independent read-only review found current v46/event22/producer4 consistent; original Brownian NOT_MET, historical native v45 and future 3-D scope retained",
+  "current_scale_and_cold_jit": {
+    "status": "PASS",
+    "exit_code": 0,
+    "report": {
+      "path": "reviews/v0_2_current_scale_2026-10-10.json",
+      "sha256": "72cdb6fe2645177a419c193e86e79ee05d74cdca48454a0c48704f58732eab04"
+    },
+    "log": {
+      "path": "reviews/v0_2_windows_quality_logs_2026-10-10/current_scale.log",
+      "sha256": "72cdb6fe2645177a419c193e86e79ee05d74cdca48454a0c48704f58732eab04"
+    },
+    "scope": "Selected deterministic P14 presets; one observation per row, fresh process/private empty Numba cache, warm rows have one unmeasured warm-up; not a complete release matrix, timing distribution, all-model accuracy or SLA",
+    "rows": [
+      {
+        "row_id": "event-h20-n10000",
+        "particle_count": 10000,
+        "mode": "warm",
+        "observations": 1,
+        "timing_s": {
+          "load_case": 0.0070154001004993916,
+          "open_result": 0.20020840037614107,
+          "public_end_to_end": 4.083285499829799,
+          "simulate": 3.876060700044036
+        },
+        "maximum_peak_rss_bytes": 341090304,
+        "solver_owned_planned_bytes": 90211707,
+        "boundary_event_count": 200000,
+        "core_payload_sha256": "sha256:6c1d670bc30d13f417f3fda04b2104f3c0c5218262c1f26e1ebce24d8bfbbff6"
+      },
+      {
+        "row_id": "regular-n10000",
+        "particle_count": 10000,
+        "mode": "warm",
+        "observations": 1,
+        "timing_s": {
+          "load_case": 0.008949600160121918,
+          "open_result": 0.006022400222718716,
+          "public_end_to_end": 0.430434700101614,
+          "simulate": 0.41546119982376695
+        },
+        "maximum_peak_rss_bytes": 399290368,
+        "solver_owned_planned_bytes": 48708029,
+        "boundary_event_count": 0,
+        "core_payload_sha256": "sha256:e7ca255cdb1799eb345667009c0cf2d55fde584a7ea5dce73a64da7417198725"
+      },
+      {
+        "row_id": "regular-n10000-cold",
+        "particle_count": 10000,
+        "mode": "cold",
+        "observations": 1,
+        "timing_s": {
+          "load_case": 0.012736499775201082,
+          "open_result": 0.005152300000190735,
+          "public_end_to_end": 9.355808699969202,
+          "simulate": 9.337918799836189
+        },
+        "maximum_peak_rss_bytes": 399884288,
+        "solver_owned_planned_bytes": 48708029,
+        "boundary_event_count": 0,
+        "core_payload_sha256": "sha256:e7ca255cdb1799eb345667009c0cf2d55fde584a7ea5dce73a64da7417198725"
+      },
+      {
+        "row_id": "regular-n100000",
+        "particle_count": 100000,
+        "mode": "warm",
+        "observations": 1,
+        "timing_s": {
+          "load_case": 0.024779600091278553,
+          "open_result": 0.01022849977016449,
+          "public_end_to_end": 4.635072099976242,
+          "simulate": 4.600062800105661
+        },
+        "maximum_peak_rss_bytes": 539807744,
+        "solver_owned_planned_bytes": 314561963,
+        "boundary_event_count": 0,
+        "core_payload_sha256": "sha256:d87eb6409b92e78bacdcd6d0d0b1bc3c284ea344419c6a8017ca3436c863d2d3"
+      },
+      {
+        "row_id": "regular-n1000000",
+        "particle_count": 1000000,
+        "mode": "warm",
+        "observations": 1,
+        "timing_s": {
+          "load_case": 0.29020959977060556,
+          "open_result": 0.053284399677067995,
+          "public_end_to_end": 46.53026199992746,
+          "simulate": 46.18676680000499
+        },
+        "maximum_peak_rss_bytes": 876662784,
+        "solver_owned_planned_bytes": 706399463,
+        "boundary_event_count": 0,
+        "core_payload_sha256": "sha256:09afe6a91801b2c69cbe18bf5bd9deb0000b01a9b433e81376debe81d4605a32"
+      }
+    ],
+    "cold_warm_10k_scientific_identity": true,
+    "failure_count": "0 for all runs, enforced by existing P14 public-result validation",
+    "repeat_identity_interpretation": "One measured observation per row does not establish across-repeat variability."
+  },
+  "diff_whitespace_log": {
+    "path": "reviews/v0_2_windows_quality_logs_2026-10-10/diff_check.log",
+    "sha256": "29c135176360d6296623abf5c73ef618dad6dcadf820e140e7766ae08722e869"
+  },
+  "captured_at_utc": "2026-10-10T00:27:30.211223+00:00",
+  "completion_scope": "0.2.0 candidate implementation and local Windows/WSL Linux verification complete for existing 2-D XY/RZ meridional capabilities and explicitly qualified numerical profiles."
+}

@@ -82,7 +82,7 @@ def _fixture(tmp_path: Path, *, axis_velocity: float = 1.0e-5) -> Path:
         writer = csv.writer(stream)
         writer.writerows(field_rows)
     configuration = {
-        "format_version": 1,
+        "format_version": 2,
         "source": {
             "vertices_path": "vertices.csv",
             "triangles_path": "triangles.csv",
@@ -204,9 +204,39 @@ def test_adapter_requires_exclusions_to_be_exact_axis_facets(tmp_path: Path) -> 
 def test_adapter_rejects_duplicate_yaml_keys(tmp_path: Path) -> None:
     configuration = _fixture(tmp_path)
     with configuration.open("a", encoding="utf-8") as stream:
-        stream.write("format_version: 1\n")
+        stream.write("format_version: 2\n")
 
-    with pytest.raises(ValueError, match="duplicate YAML mapping key"):
+    with pytest.raises(ValueError, match="duplicate YAML key"):
+        adapt_from_configuration(configuration, tmp_path / "case.h5")
+
+
+@pytest.mark.parametrize(
+    ("replacement", "error"),
+    [
+        ("  external_id: 3\n  external_id: 4", "duplicate YAML key"),
+        ("  <<: {external_id: 3}\n  external_id: 3", "merge keys"),
+    ],
+)
+def test_adapter_rejects_ambiguous_nested_configuration(
+    tmp_path: Path, replacement: str, error: str
+) -> None:
+    configuration = _fixture(tmp_path)
+    configuration.write_text(
+        configuration.read_text(encoding="utf-8").replace("  external_id: 3", replacement),
+        encoding="utf-8",
+    )
+    output = tmp_path / "case.h5"
+    with pytest.raises(ValueError, match=error):
+        adapt_from_configuration(configuration, output)
+    assert not output.exists()
+
+
+def test_adapter_reports_unrepresentable_numeric_setting_as_value_error(tmp_path: Path) -> None:
+    configuration = _fixture(tmp_path)
+    document = yaml.safe_load(configuration.read_text(encoding="utf-8"))
+    document["fields"]["coordinate_match_tolerance_m"] = 10**400
+    configuration.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    with pytest.raises(ValueError, match="coordinate_match_tolerance_m must be finite"):
         adapt_from_configuration(configuration, tmp_path / "case.h5")
 
 

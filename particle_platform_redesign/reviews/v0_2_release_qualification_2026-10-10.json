@@ -1,0 +1,101 @@
+{
+  "artifact": "chamber-particles 0.2.0 scoped engineering qualification",
+  "status": "VERIFICATION_IN_PROGRESS_NOT_A_PUBLICATION_RECEIPT",
+  "recorded_at_utc": "2026-10-10T02:11:52.964119+00:00",
+  "path_base": "particle_platform_redesign",
+  "version": "0.2.0",
+  "branch": "release/chamber-particles-0.2.0",
+  "scope": "Registered engineering profiles for Python 3.12 single-thread CPU, two-dimensional XY and two-DOF meridional RZ. Acceptance is limited to the listed inputs, numerical settings, metrics and budgets.",
+  "fixed_acceptance": {
+    "path": "reviews/v0_2_release_use_case_acceptance_2026-10-10.json",
+    "sha256": "fc72a48f548449c062d3073b815847c22c80684c96b29888929dec542dac7d8d"
+  },
+  "source_index_snapshot": {
+    "path": "reviews/v0_2_release_index_source_2026-10-10.json",
+    "sha256": "1a56482f45cec3286d19fd67419d2912f3cd08cbfa238d75cd81b931a4097788"
+  },
+  "prior_current_candidate_verification": {
+    "path": "reviews/v0_2_candidate_verification_2026-10-10.json",
+    "sha256": "ea4823101ac045bd490f4074145753c3a60a519201c5115f3fe23cba496bce0b"
+  },
+  "performance": {
+    "registration": {
+      "path": "reviews/v0_2_release_performance_registration_2026-10-10.json",
+      "sha256": "e7e2c14b89606d84a8747ced0d8b6a86abb3026f7c488fceff5f077ffa1f1ec0"
+    },
+    "p14": {
+      "status": "PASS",
+      "observations": 57,
+      "completion": {
+        "path": "reviews/v0_2_release_performance_2026_10_10/p14_completion_receipt.json",
+        "sha256": "607f57f7b5769dee3b30608d442fb2fd85ee1a1fbaaac6a9bbed917ee1d9d411"
+      },
+      "report": {
+        "path": "reviews/v0_2_release_performance_2026_10_10/p14_release_v46.json",
+        "sha256": "f832b9ea150f5708458ef95564b93549b21cf894ee02ad30d105633caa2f83aa"
+      }
+    },
+    "b03": {
+      "status": "PASS",
+      "observations": 24,
+      "completion": {
+        "path": "reviews/v0_2_release_performance_2026_10_10/b03_completion_receipt.json",
+        "sha256": "0265530c37dbe5e2dd666662bb559bf5d2f106ddcf3a50fd3a061c87090fe553"
+      },
+      "report": {
+        "path": "reviews/v0_2_release_performance_2026_10_10/b03_release_v46.json",
+        "sha256": "8606c1c5dc4b61fb988fce7e8267068086832ad2127e05567647e936097bae49"
+      }
+    },
+    "p14u": {
+      "status": "PASS",
+      "observations": 18,
+      "completion": {
+        "path": "reviews/v0_2_release_performance_2026_10_10/p14u_completion_receipt.json",
+        "sha256": "eec9504a36dc8e0451f9fa6d1a90b9ce5df7be9a283058b131d283cf2eacbeb6"
+      },
+      "report": {
+        "path": "reviews/v0_2_release_performance_2026_10_10/p14u_release_v46.json",
+        "sha256": "adfd213efd0b64ee341f8f46823497e1faa048e812ad2ca2f178e3e56a94e1e6"
+      },
+      "profile": "separate untimed 1M profile, excluded from timing medians"
+    },
+    "claim": "Machine-local measured performance and existing completion, memory-plan and identity checks; no user-approved SLA or all-workload speedup claim.",
+    "completion_summary": {
+      "path": "reviews/v0_2_release_performance_2026_10_10/completion_summary.json",
+      "sha256": "b52e4c38d70b490a11e59871fd5baa02d8ca4641d323b5e6a52914221e999091"
+    },
+    "hardware": {
+      "path": "reviews/v0_2_release_performance_2026_10_10/hardware_profile_supplement.json",
+      "sha256": "d82d8943e0e461b61b84f992a7978c3d22edb032e7e71bd176de3e87f6e58182"
+    },
+    "total_timed_observations": 99
+  },
+  "next_required_verification": [
+    "Record exact CRLF-to-LF source correspondence and execute fixed numeric repeats.",
+    "Register and execute v46 comparison with hash-locked saved native COMSOL references.",
+    "Verify a source checkout containing only indexed release inputs, commit and push.",
+    "Complete Windows/Linux CI on the release source and publish tagged wheel and checksum.",
+    "Verify downloaded public assets and record immutable tag/commit/run linkage."
+  ],
+  "retained_scope_limits": [
+    "Original N16k RZ D2 Brownian campaign remains NOT_MET; independently registered N64k follow-up PASS is separate.",
+    "Finite-depth Hermite stochastic paths do not establish exact continuous-OU first passage, zero miss probability or general state-dependent SDE order.",
+    "COMSOL comparisons reuse the original registered cohort; saved native references do not become new observations.",
+    "Case-A native Disappear cause/boundary ID and Case-P positive wall response are not observed by the population comparison.",
+    "C3 empirical fine-pair allowance is not an absolute numerical error bound; individual native forces, auxiliary charge RHS and all internal stages remain unobserved.",
+    "Formula and applicability verification does not establish experimental manufacturing prediction, general three-dimensional support, GPU support or unrestricted cache certification."
+  ],
+  "source_normalization": {
+    "path": "reviews/v0_2_release_source_normalization_2026-10-10.json",
+    "sha256": "3f34172016ad6b60ade36dfc31b7378f327b824b3e6ea559ba330e35780710b7"
+  },
+  "indexed_checkout_quality": {
+    "path": "reviews/v0_2_release_index_quality_2026-10-10.json",
+    "sha256": "f0f4129f2ba84572a1cdc0f82bf2d907ea0cec1576832a1f79e0a5a2fcf5ab13"
+  },
+  "indexed_checkout_clean_wheel": {
+    "path": "reviews/v0_2_release_index_clean_wheel_2026-10-10.json",
+    "sha256": "213404e659f7bb58701bf92ca9ebd37f0a0b97642d78c2eda37e5072e32318fc"
+  }
+}
