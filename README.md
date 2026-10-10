@@ -32,7 +32,7 @@ The ACL-protected legacy scratch directories have now been moved into
 `old_code/`; no legacy implementation directory remains active at the root.
 
 The published `0.1.0` release remains the static 2-D baseline with canonical
-HDF5 data schema 1. This checkout targets `0.2.0`: canonical
+HDF5 data schema 1. This checkout contains the published `0.2.0`: canonical
 case/data/result schema 3, checkpoint schema 2, fixed-topology linear time fields,
 finite-radius material contact, static Cartesian-XY translation-periodic topology,
 Maxwell thermal walls, realized internal/surface schedules, and Brownian
@@ -42,6 +42,8 @@ migrated by the schema-3 reader.
 The 0.2.0 qualification is limited to registered engineering uses. See the
 [use-case acceptance](particle_platform_redesign/reviews/v0_2_release_use_case_acceptance_2026-10-10.json)
 and [qualification record](particle_platform_redesign/reviews/v0_2_release_qualification_2026-10-10.json).
+The [publication receipt](particle_platform_redesign/reviews/v0_2_release_publication_2026-10-10.json)
+binds the tag, successful Windows/Linux CI and directly verified public assets.
 Release wheels and checksums are provided through the
 [`v0.2.0` release](https://github.com/dkawa2523/partcle_sim/releases/tag/v0.2.0).
 Experimental manufacturing prediction and user-specific runtime/RSS SLAs require

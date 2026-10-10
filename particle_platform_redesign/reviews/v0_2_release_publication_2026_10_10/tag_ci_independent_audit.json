@@ -1,0 +1,486 @@
+{
+  "status": "PASS_FINAL_TAG_CI_AND_COMMITTED_DISTRIBUTION_IDENTITY",
+  "commit": "ba70a2cdb2649c0d82c8d66b0808e62210b82154",
+  "tag": "v0.2.0",
+  "tag_annotation_sha": "c6948962ea27dcd4336a6f61332fc13e4db362b8",
+  "run_id": 38028090315,
+  "run_url": "https://github.com/dkawa2523/partcle_sim/actions/runs/38028090315",
+  "jobs": [
+    {
+      "name": "ubuntu-latest / Python 3.12",
+      "id": 114143125110,
+      "conclusion": "success",
+      "started_at": "2026-10-10T05:36:45Z",
+      "completed_at": "2026-10-10T05:54:46Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check out repository",
+          "conclusion": "success"
+        },
+        {
+          "name": "Set up Python 3.12",
+          "conclusion": "success"
+        },
+        {
+          "name": "Set up locked uv series",
+          "conclusion": "success"
+        },
+        {
+          "name": "Synchronize locked development environment",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check dependency lock",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check source formatting",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check source lint",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check types",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check import boundaries",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check numerical complexity",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify core and public scenarios",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify external workflows without COMSOL",
+          "conclusion": "success"
+        },
+        {
+          "name": "Generate producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Inspect producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Analyze producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Visualize producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run warm performance smoke",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build release wheel",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare clean runtime dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install verified wheel into clean runtime",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify clean-installed public API",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain verification evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain verified release wheel",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Set up locked uv series",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Set up Python 3.12",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Check out repository",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "windows-latest / Python 3.12",
+      "id": 114143125278,
+      "conclusion": "success",
+      "started_at": "2026-10-10T05:36:45Z",
+      "completed_at": "2026-10-10T05:58:22Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check out repository",
+          "conclusion": "success"
+        },
+        {
+          "name": "Set up Python 3.12",
+          "conclusion": "success"
+        },
+        {
+          "name": "Set up locked uv series",
+          "conclusion": "success"
+        },
+        {
+          "name": "Synchronize locked development environment",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check dependency lock",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check source formatting",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check source lint",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check types",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check import boundaries",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check numerical complexity",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify core and public scenarios",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify external workflows without COMSOL",
+          "conclusion": "success"
+        },
+        {
+          "name": "Generate producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Inspect producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Analyze producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Visualize producer-neutral Quick Start",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run warm performance smoke",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build release wheel",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare clean runtime dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install verified wheel into clean runtime",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify clean-installed public API",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain verification evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain verified release wheel",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Set up locked uv series",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Set up Python 3.12",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Check out repository",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "Publish GitHub release",
+      "id": 114146721331,
+      "conclusion": "success",
+      "started_at": "2026-10-10T05:58:24Z",
+      "completed_at": "2026-10-10T05:58:35Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check out tagged source",
+          "conclusion": "success"
+        },
+        {
+          "name": "Download verified wheel",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify release identity and prepare checksum",
+          "conclusion": "success"
+        },
+        {
+          "name": "Publish release assets",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Check out tagged source",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "source_count": 27,
+  "source_aggregate_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+  "source_aggregate_algorithm": "sorted package-relative posix UTF-8 name; uint64 big endian name byte length + name; uint64 big endian raw byte length + raw; SHA256",
+  "production_python_sha256": {
+    "chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+    "chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+    "chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+    "chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+    "chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+    "chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+    "chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+    "chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+    "chamber_particles/engine.py": "230f2784b87c4d76155cc0a7525a3edbc8ab812c9e022511a9e4b74d83cae309",
+    "chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+    "chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+    "chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+    "chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+    "chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+    "chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+    "chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+    "chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+    "chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+    "chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+    "chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+    "chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+    "chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+  },
+  "readme_sha256": "246c90d8c90a746709e5efe5257da17d9b2193a3fa375e4797b3ef5ef9022f56",
+  "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+  "release_notes_sha256": "a471cb64ec068f81f16a99b03afce6cfd09b38a23a2fee254656b0f390a16a42",
+  "wheel_name": "chamber_particles-0.2.0-py3-none-any.whl",
+  "wheel_sha256": "db654f537c023fa7e3e59e7e1774e551f958b31f9d33af4a4460d211d7dd34b9",
+  "wheel_bytes": 335324,
+  "wheel_metadata_sha256": "dd5878f52e3dc4c43e04a74b5a0e6cf1061bae75988fcee359c1ad35ff6c58df",
+  "wheel_members_match_tagged_source": true,
+  "wheel_metadata_utf8_body_bytes_equal_tagged_readme": true,
+  "artifacts": [
+    {
+      "id": 11661302573,
+      "name": "chamber-particles-wheel",
+      "archive_digest": "sha256:28b8f8f25473d3dec9da4a0e07fd5d230b601ae247d89b541cc0baff44fa4292"
+    },
+    {
+      "id": 11661172767,
+      "name": "chamber-particles-verification-Linux",
+      "archive_digest": "sha256:ca5d7b7c79f00f221dc5be6505a1a60650550e76d6426d4b6515374341e347c5"
+    },
+    {
+      "id": 11661147842,
+      "name": "chamber-particles-verification-Windows",
+      "archive_digest": "sha256:a4ca916b9fe028b3891dc79a6dacdb52475992b37642dc67bcd4d25521e0e92a"
+    }
+  ],
+  "operating_systems": {
+    "Linux": {
+      "pytest_summaries": [
+        {
+          "passed": 847,
+          "seconds": 773.06
+        },
+        {
+          "passed": 120,
+          "seconds": 7.52
+        }
+      ],
+      "smoke_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\tag_ci_independent_20261010\\verification-Linux\\_temp\\clean-wheel-smoke.json",
+      "smoke_sha256": "de3358c798077e14236883918793b4a8f4e1caf06f02575518ac51debe7b298e",
+      "p14_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\tag_ci_independent_20261010\\verification-Linux\\_temp\\p14-smoke.json",
+      "p14_sha256": "832ac0aeceb33371b48b5333f9f2617678fdd3e7496f4554c629ad003b2624d2",
+      "installed_27_source_and_metadata_match_wheel_and_tagged_source": true,
+      "p14_rows": 8,
+      "particles_per_row": 64,
+      "event20_boundary_events": 1280,
+      "cli": {
+        "console_script": "complete",
+        "module_entry": "complete",
+        "public_error_exit": 2
+      },
+      "time_field": {
+        "snapshot_splits_s": [
+          0.15
+        ],
+        "status": "complete"
+      },
+      "contact_geometry": [
+        {
+          "hit_time_s": 1.4,
+          "mode": "particle_surface",
+          "radius_m": 0.05,
+          "status": "complete"
+        },
+        {
+          "hit_time_s": 1.5,
+          "mode": "particle_center",
+          "radius_m": 0.05,
+          "status": "complete"
+        }
+      ]
+    },
+    "Windows": {
+      "pytest_summaries": [
+        {
+          "passed": 847,
+          "seconds": 912.33
+        },
+        {
+          "passed": 120,
+          "seconds": 10.1
+        }
+      ],
+      "smoke_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\tag_ci_independent_20261010\\verification-Windows\\_temp\\clean-wheel-smoke.json",
+      "smoke_sha256": "d97deb80cede07b595b5d489eb7fc184a4bb25833caaaeaaff2214893d5739f3",
+      "p14_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\tag_ci_independent_20261010\\verification-Windows\\_temp\\p14-smoke.json",
+      "p14_sha256": "d01cde735ae78687babd5baacd756cfca8f82544c90fc312b4740fa41d5c2e57",
+      "installed_27_source_and_metadata_match_wheel_and_tagged_source": true,
+      "p14_rows": 8,
+      "particles_per_row": 64,
+      "event20_boundary_events": 1280,
+      "cli": {
+        "console_script": "complete",
+        "module_entry": "complete",
+        "public_error_exit": 2
+      },
+      "time_field": {
+        "snapshot_splits_s": [
+          0.15
+        ],
+        "status": "complete"
+      },
+      "contact_geometry": [
+        {
+          "hit_time_s": 1.4,
+          "mode": "particle_surface",
+          "radius_m": 0.05,
+          "status": "complete"
+        },
+        {
+          "hit_time_s": 1.5,
+          "mode": "particle_center",
+          "radius_m": 0.05,
+          "status": "complete"
+        }
+      ]
+    }
+  },
+  "public_release": {
+    "id": 408705730,
+    "url": "https://github.com/dkawa2523/partcle_sim/releases/tag/v0.2.0",
+    "published_at": "2026-10-10T05:58:32Z",
+    "draft": false,
+    "prerelease": false,
+    "target_commitish_metadata": "sim_rev5",
+    "source_authority": "annotated tag peeled commit; target_commitish display is not source identity",
+    "assets": [
+      {
+        "id": 627147579,
+        "name": "chamber_particles-0.2.0-py3-none-any.whl",
+        "bytes": 335324,
+        "sha256": "db654f537c023fa7e3e59e7e1774e551f958b31f9d33af4a4460d211d7dd34b9",
+        "api_digest_matches_ci_wheel_or_exact_expected_checksum": true
+      },
+      {
+        "id": 627147580,
+        "name": "SHA256SUMS.txt",
+        "bytes": 107,
+        "sha256": "526b88949d98b0baf4410d31d43666cdfc4fbc4bde327ae655d4c7c77eba9f1a",
+        "api_digest_matches_ci_wheel_or_exact_expected_checksum": true
+      }
+    ],
+    "publication_branch_evidence": "New create: release absent in pre-run read-only query; successful Publish release assets step emitted the release URL. Both create/upload script branches are echoed as source, not interpreted as execution traces."
+  },
+  "p14_core_payloads_match_between_os": true,
+  "downloaded_public_asset_bytes_verified_by_this_audit": false,
+  "downloaded_public_asset_verification_owner": "root independently downloaded/clean installed public wheel; this audit checks release API digests against downloaded CI wheel and expected checksum bytes",
+  "downloaded_ci_wheel_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\tag_ci_independent_20261010\\wheel\\chamber_particles-0.2.0-py3-none-any.whl",
+  "downloaded_log_sha256": "135503bc849e033d1232df977695f35f2c2d6c0d904e8a0a0c1813a06319e1bc"
+}

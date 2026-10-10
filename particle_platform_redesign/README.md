@@ -6,6 +6,12 @@
 solver coreの依存先ではありません。旧ソルバーと旧環境は内容を実装へ流用せず、`../old_code/`へ
 参照用archiveとして移動しています。
 
+`0.2.0`は宣言した用途別の工学的検証とWindows/Linuxの配布gateを完了し、
+[GitHub Release](https://github.com/dkawa2523/partcle_sim/releases/tag/v0.2.0)へ正式公開済みです。
+[科学的検証記録](reviews/v0_2_release_qualification_2026-10-10.json)と
+[公開後の確認記録](reviews/v0_2_release_publication_2026-10-10.json)に、保証範囲、tag/commit/CI、実asset照合を保存しています。
+以下のstage別実装記録は、それぞれの時点のschema・revision・検証範囲を残した履歴です。
+
 ## 成果物
 
 - [`AGENTS.md`](AGENTS.md) — 今後のcoding agentが守るclean-room境界、数値不変条件、責務、
@@ -272,7 +278,7 @@ remote Windows/Linuxで620件、性能smoke 7行（cold 1＋warm 6）、wheel、
 同じsingle-engineへ受理済みのstatic 2-D機能は正式版`0.1.0`として固定され、tagのWindows/Linux gateを通した
 検証済みwheelがGitHub Releaseで公開済みです。canonical HDF5 schema v2、fixed-topology time field、
 Maxwell thermal wall、realized internal/surface schedule、Brownian active-wall continuationはこの公開版を遡及変更せず、
-未公開`0.2.0` candidateに属します。
+その後の`0.2.0`へ統合し、現在はcase/data/result schema 3で正式公開済みです。
 このCI成功はCOMSOL V&Vまたはportable性能の追加認定ではありません。P15は旧着手blockerをユーザーの明示指示で
 解除し、RK4-firstと、その受入後のexplicit midpoint chargeまで完了しました。続く外部M3-V評価、canonical
 RZ/P1 field builder F01、provider adapterと代表統合を担うF02も完了しました。F02はmixed meshのP1化、代表規模
@@ -415,7 +421,7 @@ optional aggregate three-currentのproduction実装はP21 priority 1で完了し
 普遍的COMSOL同等性の認定ではありません。authorityは
 [`solver/evidence/m3c3/caseP_three_current_companion_v1/`](solver/evidence/m3c3/caseP_three_current_companion_v1/README.md)です。
 旧M3-C0 umbrellaに残る全12 package総当たり、完全derived-field provenance、RK probeは
-`DEFERRED_NOT_RELEASE_BLOCKING`です。公開済みv0.1にも未公開`0.2.0` candidateにも完了条件として含めず、
+`DEFERRED_NOT_RELEASE_BLOCKING`です。公開済みv0.1にも正式`0.2.0`にも完了条件として含めず、
 科学revisionまたは明示的なcoverage拡張時だけ
 独立work packageとして再開します。
 

@@ -130,7 +130,7 @@ D1/D2へ反復鏡面壁の独立joint GaussianとRZ到達の独立Kramers参照�
 A1/P14-RはUnicode CLI、全sourceのwheel/install digest、三APIとCLIのclean runtime検証へ拡張する。
 実装・検証・配布候補のidentityは[0.2候補検証記録](reviews/v0_2_candidate_verification_2026-10-10.json)が所有する。
 2026-10-09のCOMSOL比較はengine v45の固定履歴として維持し、今回のevent v22に対するnative再認証へ流用しない。
-正式公開と用途別保証の工程は後続の0.2.0 releaseで閉じる。利用者未指定のaccuracy/SLAと、
+正式公開と用途別保証の工程は後続の0.2.0 releaseで完了した（§1.6）。利用者未指定のaccuracy/SLAと、
 条件付き3-D/GPU等は本候補の完了条件へ追加しない。
 
 ### 1.6 0.2.0の用途別保証と正式公開
@@ -148,8 +148,13 @@ Disappear原因/IDとCase-Pのwall未観測、元N16k RZ D2の登録未達は保
 
 数値・性能・外部比較の結果を[0.2.0検証記録](reviews/v0_2_release_qualification_2026-10-10.json)へ結合し、
 全科学資格を登録scope内で完了した。公開sourceをcommitへ固定し、測定sourceからGit正規化sourceへの差が改行のみであることを照合済みである。
-同じrelease commitのWindows/Linux CIを通し、version一致の`v0.2.0` tagで再度両OSの配布gateを検査した後、
-verified wheel・SHA256SUMS・Release NotesをGitHub Releaseへ公開する。公開後のreceiptはCI run/tag/asset hashへ結合する。
+資格commit `ba70a2cdb2649c0d82c8d66b0808e62210b82154`のbranch CI `38028083675`と、
+version一致の`v0.2.0` tag CI `38028090315`はWindows/Linuxとも合格した。tag CIでは各OSの847 core＋120 portable試験、
+全静的gate、Quick Start、性能smoke、wheel build・runtime-only install・三API/CLIを完了した。
+verified wheel・SHA256SUMS・Release Notesを[GitHub Release](https://github.com/dkawa2523/partcle_sim/releases/tag/v0.2.0)へ公開済みである。
+実downloadのchecksum・CI wheel・tag source 27件・UTF8 README/METADATAの一致と、公開wheelの追加API/module CLI確認は
+[公開後receipt](reviews/v0_2_release_publication_2026-10-10.json)へ結合した。ローカルconsoleのAppControl拒否4551は別scopeで保持し、policyは変更していない。
+0.2.0の宣言した用途別保証と正式公開の残件はない。tagは資格commitへ固定し、その後の公開記録は文書だけのfollow-upとする。
 生MPH/CSV/HDF5とCOMSOL個人設定・回復dataはGitへ配布せず、必要な外部入力と再現commandを明記する。
 
 ---

@@ -1,0 +1,230 @@
+{
+  "artifact": "chamber-particles 0.2.0 formal publication receipt",
+  "status": "PUBLISHED_AND_VERIFIED_FOR_DECLARED_ENGINEERING_SCOPE",
+  "recorded_at_utc": "2026-10-10T06:05:01.321666+00:00",
+  "path_base": "particle_platform_redesign",
+  "version": "0.2.0",
+  "branch": "release/chamber-particles-0.2.0",
+  "tag": "v0.2.0",
+  "tag_annotation_sha": "c6948962ea27dcd4336a6f61332fc13e4db362b8",
+  "tagged_commit": "ba70a2cdb2649c0d82c8d66b0808e62210b82154",
+  "source_identity": {
+    "production_file_count": 27,
+    "aggregate_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+    "aggregate_algorithm": "sorted package-relative posix UTF-8 name; uint64 big endian name byte length + name; uint64 big endian raw byte length + raw; SHA256",
+    "readme_tag_blob_sha256": "246c90d8c90a746709e5efe5257da17d9b2193a3fa375e4797b3ef5ef9022f56",
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+    "release_notes_tag_blob_sha256": "a471cb64ec068f81f16a99b03afce6cfd09b38a23a2fee254656b0f390a16a42"
+  },
+  "scientific_qualification": {
+    "path": "reviews/v0_2_release_qualification_2026-10-10.json",
+    "sha256": "ffaca36d1c53134adb86701033e8b34923f8af56a814c2f797ddf9834d23ed05",
+    "git_ref": "v0.2.0",
+    "interpretation": "Immutable qualification at the tagged commit. Its pending-publication field records the earlier registration state; this receipt owns the observed publication outcome.",
+    "scope": "Registered engineering profiles for Python 3.12 single-thread CPU, two-dimensional XY and two-DOF meridional RZ. Acceptance is limited to the listed inputs, numerical settings, metrics and budgets.",
+    "scientific_work_remaining": []
+  },
+  "tag_ci": {
+    "run_id": 38028090315,
+    "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/38028090315",
+    "head_sha": "ba70a2cdb2649c0d82c8d66b0808e62210b82154",
+    "event": "push",
+    "ref": "refs/tags/v0.2.0",
+    "conclusion": "success",
+    "operating_systems": {
+      "Linux": {
+        "core_tests": {
+          "passed": 847,
+          "seconds": 773.06
+        },
+        "portable_tool_tests": {
+          "passed": 120,
+          "seconds": 7.52
+        },
+        "quality_gates": "PASS",
+        "quick_start_operations": 6,
+        "p14_smoke_rows": 8,
+        "wheel_build_runtime_only_install_api_cli": "PASS"
+      },
+      "Windows": {
+        "core_tests": {
+          "passed": 847,
+          "seconds": 912.33
+        },
+        "portable_tool_tests": {
+          "passed": 120,
+          "seconds": 10.1
+        },
+        "quality_gates": "PASS",
+        "quick_start_operations": 6,
+        "p14_smoke_rows": 8,
+        "wheel_build_runtime_only_install_api_cli": "PASS"
+      }
+    },
+    "all_three_jobs_success": true,
+    "p14_eight_scientific_payloads_match_between_os": true,
+    "artifacts": [
+      {
+        "id": 11661302573,
+        "name": "chamber-particles-wheel",
+        "archive_digest": "sha256:28b8f8f25473d3dec9da4a0e07fd5d230b601ae247d89b541cc0baff44fa4292"
+      },
+      {
+        "id": 11661172767,
+        "name": "chamber-particles-verification-Linux",
+        "archive_digest": "sha256:ca5d7b7c79f00f221dc5be6505a1a60650550e76d6426d4b6515374341e347c5"
+      },
+      {
+        "id": 11661147842,
+        "name": "chamber-particles-verification-Windows",
+        "archive_digest": "sha256:a4ca916b9fe028b3891dc79a6dacdb52475992b37642dc67bcd4d25521e0e92a"
+      }
+    ]
+  },
+  "supplemental_branch_ci": {
+    "run_id": 38028083675,
+    "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/38028083675",
+    "head_sha": "ba70a2cdb2649c0d82c8d66b0808e62210b82154",
+    "conclusion": "success",
+    "publish_job": "skipped_as_expected_for_branch"
+  },
+  "public_release": {
+    "id": 408705730,
+    "url": "https://github.com/dkawa2523/partcle_sim/releases/tag/v0.2.0",
+    "published_at": "2026-10-10T05:58:32Z",
+    "draft": false,
+    "prerelease": false,
+    "latest_tag_verified": "v0.2.0",
+    "creation": "New GitHub release; absent before tag execution, actual successful publish stdout and API independently audited.",
+    "target_commitish_display_metadata": "sim_rev5",
+    "source_identity_authority": "Actual annotated tag and its peeled commit, independently verified against origin; target_commitish display metadata is not tag identity.",
+    "assets": [
+      {
+        "id": 627147579,
+        "name": "chamber_particles-0.2.0-py3-none-any.whl",
+        "bytes": 335324,
+        "download_url": "https://github.com/dkawa2523/partcle_sim/releases/download/v0.2.0/chamber_particles-0.2.0-py3-none-any.whl",
+        "sha256": "db654f537c023fa7e3e59e7e1774e551f958b31f9d33af4a4460d211d7dd34b9"
+      },
+      {
+        "id": 627147580,
+        "name": "SHA256SUMS.txt",
+        "bytes": 107,
+        "download_url": "https://github.com/dkawa2523/partcle_sim/releases/download/v0.2.0/SHA256SUMS.txt",
+        "sha256": "526b88949d98b0baf4410d31d43666cdfc4fbc4bde327ae655d4c7c77eba9f1a"
+      }
+    ]
+  },
+  "downloaded_public_assets": {
+    "status": "PASS_ACTUAL_PUBLIC_ASSET_VERIFICATION",
+    "checksum_and_github_digest_and_ci_wheel_match": true,
+    "all_27_source_bytes_and_utf8_readme_metadata_match_tag": true,
+    "wheel_metadata_sha256": "dd5878f52e3dc4c43e04a74b5a0e6cf1061bae75988fcee359c1ad35ff6c58df",
+    "release_notes_body_match": true
+  },
+  "downloaded_public_wheel_runtime": {
+    "status": "PASS_PUBLIC_API_MODULE_CLI_WITH_LOCAL_CONSOLE_APP_CONTROL_LIMIT",
+    "runtime_only_dependency_count": 5,
+    "public_api": "PASS",
+    "module_cli_check_run_inspect_domain_error": "PASS",
+    "time_field": "PASS",
+    "surface_and_center_contact": "PASS",
+    "local_console": "OS_REJECTED_BEFORE_CLI_EXECUTION_WINERROR_4551_APP_CONTROL",
+    "remote_console": "PASS_BOTH_OS_IN_EXACT_TAG_CI",
+    "policy_or_source_changed": false,
+    "local_worktree_readme_raw_sha256": "c522483ba80396b5867fc54f2159ee20846ae8ddd19d518436b0e12f27f86e57",
+    "local_readme_lf_bytes_match_tag": true
+  },
+  "retained_evidence": {
+    "tag_ci_linux_clean_wheel_smoke.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_ci_linux_clean_wheel_smoke.json",
+      "sha256": "de3358c798077e14236883918793b4a8f4e1caf06f02575518ac51debe7b298e",
+      "bytes": 4462
+    },
+    "tag_ci_linux_p14_smoke.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_ci_linux_p14_smoke.json",
+      "sha256": "832ac0aeceb33371b48b5333f9f2617678fdd3e7496f4554c629ad003b2624d2",
+      "bytes": 88012
+    },
+    "tag_ci_windows_clean_wheel_smoke.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_ci_windows_clean_wheel_smoke.json",
+      "sha256": "d97deb80cede07b595b5d489eb7fc184a4bb25833caaaeaaff2214893d5739f3",
+      "bytes": 4554
+    },
+    "tag_ci_windows_p14_smoke.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_ci_windows_p14_smoke.json",
+      "sha256": "d01cde735ae78687babd5baacd756cfca8f82544c90fc312b4740fa41d5c2e57",
+      "bytes": 90256
+    },
+    "tag_ci_independent_audit.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_ci_independent_audit.json",
+      "sha256": "3118e072e05f1c038d4608ff090b9db6701960cc2f071d1b82b12b92d03a0971",
+      "bytes": 17720
+    },
+    "tag_git_annotation.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_git_annotation.json",
+      "sha256": "4cc223fe650f8e5330800c577c68aea3c6cf7d39b33a2ff3e139e5b50c657edf",
+      "bytes": 745
+    },
+    "release_metadata.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/release_metadata.json",
+      "sha256": "6685229f671e60a88d486edb01ddd7c01f4306615f2d27be8a5b8c55716f1d62",
+      "bytes": 15090
+    },
+    "tag_run_metadata.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_run_metadata.json",
+      "sha256": "493ab8944bcb904f201330c0ba7adca4290d02b7b201d887b642e6e8b2a6cf4a",
+      "bytes": 12265
+    },
+    "tag_jobs_metadata.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_jobs_metadata.json",
+      "sha256": "fb194e4735722b5cec8248732c4183f5055b41c6390caf988e8226b27165dfc5",
+      "bytes": 14061
+    },
+    "tag_artifacts_metadata.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_artifacts_metadata.json",
+      "sha256": "5f248b8007d9b31cf10357b0afa4a9f2a5f5631c6fca43e857992d7bf4cf61ae",
+      "bytes": 2145
+    },
+    "branch_run_metadata.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/branch_run_metadata.json",
+      "sha256": "f82bc0681f64aeff7038c919be5975f4980c3443b5c646229de8e57cab1ce6af",
+      "bytes": 12289
+    },
+    "branch_jobs_metadata.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/branch_jobs_metadata.json",
+      "sha256": "c6072a4f0600c57a9562f9dced132d2f930afa495176769bd438aa3267069892",
+      "bytes": 12948
+    },
+    "public_asset_verification.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/public_asset_verification.json",
+      "sha256": "facb91308ef8d1b20ed4b87b0139b5ca8e83f99cfd5b6509c82193c847f7aa57",
+      "bytes": 3468
+    },
+    "downloaded_public_wheel_module_smoke.json": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/downloaded_public_wheel_module_smoke.json",
+      "sha256": "7c7a9dbeb80e59f1ab0b8050dc46b8d1d1c5e6b1e5f92886cb620b716a6373c4",
+      "bytes": 5345
+    },
+    "SHA256SUMS.txt": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/SHA256SUMS.txt",
+      "sha256": "526b88949d98b0baf4410d31d43666cdfc4fbc4bde327ae655d4c7c77eba9f1a",
+      "bytes": 107
+    },
+    "tag_ci_actual_pytest_summaries.txt": {
+      "path": "reviews/v0_2_release_publication_2026_10_10/tag_ci_actual_pytest_summaries.txt",
+      "sha256": "2b26abde0612f9bbf248ac35874d3ac485d7893a7a53e2f87d0a40c4b2e5a4f3",
+      "bytes": 391
+    }
+  },
+  "retained_scope_limits": [
+    "Original N16k RZ D2 Brownian campaign remains NOT_MET; independently registered N64k follow-up PASS is separate.",
+    "Finite-depth Hermite stochastic paths do not establish exact continuous-OU first passage, zero miss probability or general state-dependent SDE order.",
+    "COMSOL comparisons reuse the original registered cohort; saved native references do not become new observations.",
+    "Case-A native Disappear cause/boundary ID and Case-P positive wall response are not observed by the population comparison.",
+    "C3 empirical fine-pair allowance is not an absolute numerical error bound; individual native forces, auxiliary charge RHS and all internal stages remain unobserved.",
+    "Formula and applicability verification does not establish experimental manufacturing prediction, general three-dimensional support, GPU support or unrestricted cache certification."
+  ],
+  "release_work_remaining": [],
+  "post_publication_followup": "Documentation/receipt only on the release branch; v0.2.0 remains bound to the qualified commit. No production, packaging README, lock, test or acceptance changes."
+}
