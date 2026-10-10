@@ -1276,7 +1276,7 @@ not certify native FE equivalence, Brownian pathwise agreement, species-resolved
 physics, arbitrary geometries/conditions, physical-model validity, or universal
 COMSOL equivalence.
 
-## Current native binding and batch completion
+## Native binding and batch completion: 2026-10-09 v45 evidence
 
 `CommonP1Epstein.java` forms the single coefficient from interpolated density
 and temperature. The native metadata control observed that `importData()` clears
@@ -1317,7 +1317,7 @@ that receipt before selecting the repaired CSV. Native total Ftr/Ftz from the
 same fine solve is separate from configured per-force reconstruction and does
 not certify individual contributions, auxiliary-charge assembly, or all stages.
 
-Current C2 policies use fresh independent pilot/final seed arms. Four-seed
+The 2026-10-09 v45 C2 policies used fresh independent pilot/final seed arms. Four-seed
 screening selects the first passing macro level in the registered descending
 step order. Final Hoeffding/TV gates assume standard PRNG sampling, particle
 stream separation, a fixed source, and one-way noninteracting dynamics. They
@@ -1327,17 +1327,42 @@ and the 83-category RZ/fate gate. A failed upper-bound gate means registered
 equivalence was not established. Continuous OU noise time-law and continuous
 discretization bias remain separate, unproved scopes.
 
-The current registered CaseA and CaseP confirmation completed all 128 fresh
+That registered v45 CaseA and CaseP confirmation completed all 128 fresh
 final seed runs. Both fixed population gates passed: terminal simultaneous
 bounds are 0.040128262937 / 0.035010667118 against 0.05, and RZ/fate TV bounds
 are 0.130735400519 / 0.129537665328 against 0.15. Independent aggregation of
 128 CSV files agrees with the public evaluator. Every native replica has a
 unique actual readback with the requested seed, 20 microsecond SI timestep,
 and UserDefined RNG getter. The
-[current evidence](../../../evidence/comsol_binding_recert_2026_10_09_v1/README.md)
+[frozen v45 evidence](../../../evidence/comsol_binding_recert_2026_10_09_v1/README.md)
 preserves original metadata views and hash tables alongside explicit meaning
 attachment receipts. CaseP has no observed terminal events; CaseA Disappear
 is only a population status/time observation. No boundary cause is inferred.
+
+## Formal 0.2.0 v46 saved-reference requalification
+
+The [release registration](../../../evidence/comsol_v0_2_0_release_requalification_v2/registration/execution_preregistration.json)
+fixes the final LF source bytes of engine v46/event v22. The release reruns the
+three deterministic candidate steps and both 32-seed candidate arms against the
+unchanged saved COMSOL references. It reuses the previously observed cohorts,
+v45 numerical selection, alpha/margins/bins and statistical formula as version
+regression gates. It does not create a fresh unseen confirmation or a new
+confidence family, and performs no new native solve.
+
+Path-only saved-native views bind their original JSON, exact changed pointers
+and unchanged scientific payload. The registered saved-native publication
+closure remains immutable; the separate release closure adds candidate
+receipts, evaluations and reproducible source. Raw CSV/HDF5/MPH and result
+payloads are external hash-matched inputs rather than Git-distributed data.
+
+The release's four-evaluation summary distinguishes scoped initial/trajectory
+checks from incomplete full native RHS and boundary observations. Deterministic
+Stick ID/semantic/outcome/time comparison does not certify native first-hit
+location, pre/post velocity or remaining-substep response. CaseA Disappear
+remains population status/time only; CaseP's zero Brownian wall events do not
+certify wall behavior. The empirical fine-pair band does not certify continuous
+SDE bias, native FE truth, individual native forces, auxiliary-charge assembly,
+all internal stages, general 3D or experimental validity.
 
 ## Cartesian XY meaning suite and curved-wall line2 convergence
 

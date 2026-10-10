@@ -1,0 +1,83 @@
+{
+  "actual_c2_consumer_manifest_views": {
+    "A": {
+      "path": "../comsol_v0_2_0_release_caseA_consumer_manifest.json",
+      "sha256": "0f04c694fe173f8117112c84802ac739ae0cc01ca3aaad469ec04b51bcab02df"
+    },
+    "P": {
+      "path": "../comsol_v0_2_0_release_caseP_consumer_manifest.json",
+      "sha256": "c33158fa54e90c3bffd09bdbc9e5d9849ad4fe249f2dd91434e91782ee31c38b"
+    }
+  },
+  "c2_evaluations": {
+    "A": {
+      "path": "caseA_final_evaluation/evaluation_manifest.json",
+      "sha256": "0258b442e30ffccd6b25afaec58578aa4e0005c0fc2b0101fdb17737adfeff58"
+    },
+    "P": {
+      "path": "caseP_final_evaluation/evaluation_manifest.json",
+      "sha256": "00d0c90a695673b77b1d3bcef3c2cb883c906ac41101a315b42f6ae223fd72ee"
+    }
+  },
+  "c3_configured_rhs_diagnostic": {
+    "path": "c3_configured_rhs_diagnostic.json",
+    "sha256": "0bb1ea0e048eb36fc6a4e2354d30bea12e66dbbcc14795fba7848b61fba32e58"
+  },
+  "c3_evaluation": {
+    "path": "c3_version_requalification_evaluation.json",
+    "sha256": "4b8b4697fed8f223d81a803d3f13bc494ca1984939a50b99a100730fcb12b7c3"
+  },
+  "closeout_recipe": {
+    "path": "closeout_release_requalification.py",
+    "sha256": "45cb32b8567d6bfb2aecf233b205251c16350d566bea9db00222d346c488ea0a"
+  },
+  "comparison_summary": {
+    "path": "comparison_summary.json",
+    "sha256": "67950e790076a60342b96f60fd26cd2778c43faa18deb582279188b420c63def"
+  },
+  "consumer_manifest_projection_receipts": {
+    "A": {
+      "path": "caseA_consumer_manifest_projection_receipt.json",
+      "sha256": "33121389471580de6bbae760fc83ee4a283e3ff06348eff62f3e117b5dc1d4c7"
+    },
+    "P": {
+      "path": "caseP_consumer_manifest_projection_receipt.json",
+      "sha256": "e9b164a1cd7c1fce68412ac850c23104dab1e70872fcfe73daac0b76f6706220"
+    }
+  },
+  "entrypoint_note": "The first C3 direct-script command stopped before case load with ModuleNotFoundError; its unchanged log is retained externally. The canonical python -m tools.vv.comsol.run_m3c3_casep_three_current_candidate invocation executed all three registered cells. No numerical setting changed.",
+  "frozen_native_closure": {
+    "path": "publication_saved_native_closure.json",
+    "sha256": "dac2b4dd815619161c366979784ffb1b98f2445d8eca899d9b844ac6975664a8"
+  },
+  "frozen_native_projection": {
+    "path": "saved_native_projection_manifest.json",
+    "sha256": "e78ed4c2e757b295d11bf36e46e60acfa68d344334147ece77577258de0c2bc7"
+  },
+  "independent_pre_run_audit_snapshot": {
+    "path": "independent_pre_run_audit_snapshot.json",
+    "sha256": "dec685ffaf125892643f75f84083690c24fb6e8a93330a16dec3fc8769d32ec4"
+  },
+  "independent_result_review": {
+    "path": "../../../reviews/comsol_v0_2_release_post_run_independent_audit_2026-10-10.json",
+    "sha256": "dbc9ff7fd104c3f8d2d568dbdb585170949a11fee4e75c0e00b52ca730f54059"
+  },
+  "registered_acceptance_changed": false,
+  "registered_view_operational_rejection": {
+    "path": "consumer_manifest_containment_rejection.json",
+    "sha256": "c490658c52c1b8c685d4b5f778c96cc128e67cbf0676aeaacc92c3142a05573a"
+  },
+  "registration": {
+    "path": "registration/execution_preregistration.json",
+    "sha256": "323d3a68bf49cd46d853df7559a2305aab7d6fc91d166e117f25fa4957973d84"
+  },
+  "schema_version": 1,
+  "source_normalization": {
+    "path": "../../../reviews/v0_2_release_source_normalization_2026-10-10.json",
+    "sha256": "3f34172016ad6b60ade36dfc31b7378f327b824b3e6ea559ba330e35780710b7"
+  },
+  "spatial_visualization": {
+    "path": "derived_c3/visualization_receipt.json",
+    "sha256": "10bc84f99bb9d30709963f30a86b4c47bda3ddd833d7bf442c75aba75e89b572"
+  }
+}

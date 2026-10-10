@@ -1,0 +1,23 @@
+{
+  "authority": "canonical_geometry_boundary_ids_and_groups",
+  "boundary_groups": {
+    "28": "wafer",
+    "29": "wafer",
+    "32": "focus_transition",
+    "33": "focus_transition",
+    "34": "outer_dielectric",
+    "35": "pump_outlet",
+    "36": "grounded_wall",
+    "37": "gas_inlet",
+    "38": "grounded_wall",
+    "40": "grounded_wall",
+    "41": "grounded_wall",
+    "45": "focus_transition",
+    "46": "outer_dielectric",
+    "47": "grounded_wall",
+    "6": "wafer",
+    "8": "grounded_wall"
+  },
+  "canonical_content_hash": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+  "canonical_input_sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc"
+}

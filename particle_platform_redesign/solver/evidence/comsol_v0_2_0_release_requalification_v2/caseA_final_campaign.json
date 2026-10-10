@@ -1,0 +1,1184 @@
+{
+  "campaign_binding": {
+    "contract_sha256": "c3006414f56052bd5cf484d7443b0a9d4c4aeaaa812a5b718c0d8e3b06cfeef7",
+    "input_content_hash": "sha256:4e1739a4b7f39f5047506f30d7c453e9023c3c9ec8a411937968dbeaaf35b483",
+    "input_sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+  },
+  "case_id": "M3-C2A_caseA_100nm_common-P1",
+  "evaluation_policy_sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f",
+  "manifest_kind": "m3c2_campaign",
+  "participant_manifests": {
+    "candidate": {
+      "path": "caseA_candidate_final/candidate_campaign_manifest.json",
+      "sha256": "8f608673f829789a6fc1143fd81768ea7c41f3b227d1f1c5dfba5fdcc2e9507e"
+    },
+    "comsol": {
+      "path": "../comsol_v0_2_0_release_caseA_consumer_manifest.json",
+      "sha256": "0f04c694fe173f8117112c84802ac739ae0cc01ca3aaad469ec04b51bcab02df"
+    }
+  },
+  "participants": {
+    "candidate": {
+      "levels": [
+        {
+          "level_id": "macro_coarse",
+          "numerical_setting": {
+            "brownian_interval_tree_depth": 3,
+            "dt_s": 2e-05,
+            "geometry_rtol": 1e-09,
+            "purpose": "accepted_final"
+          },
+          "ordinal": 0,
+          "replicas": [
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939132/events.csv",
+                "sha256": "e6e5c75f8c9738a79dd2ad32042b09675ea036075f8f07d2422342d946499f21"
+              },
+              "seed": 939132,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939132/trajectory.csv",
+                "sha256": "e9e5798f789feb779ab9d2d4fb5ad06b334f852cf71c311a498657e990915dea"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939133/events.csv",
+                "sha256": "53819c23145edc8155b0d20141a1da14828a9d8628e60e00af578fdcbe2d7c5f"
+              },
+              "seed": 939133,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939133/trajectory.csv",
+                "sha256": "e8b8ed4317c4cdedf21282952d6bdba9228530045be8fe8e08c0381a8256f834"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939134/events.csv",
+                "sha256": "6faccd4d9b5cc370a0ff572f4e64a45ab9dfe341ee97564e8b144bcb42813899"
+              },
+              "seed": 939134,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939134/trajectory.csv",
+                "sha256": "6915faf766eace91a7c6911d969fa155294d5d99eb5477a55f897fde850467f8"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939135/events.csv",
+                "sha256": "cb350ad272f30dd53b419c310c01924c689b191c69a607fcd6017bfe40cd50be"
+              },
+              "seed": 939135,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939135/trajectory.csv",
+                "sha256": "135a45c35e41a6bd5922d99973f085095122dc4c95796796460b26b2b19067d5"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939136/events.csv",
+                "sha256": "ca18b137a58c33821d1b4c31309199d216599a1633bac5c6107d6f39d155b12c"
+              },
+              "seed": 939136,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939136/trajectory.csv",
+                "sha256": "31578a8eee078b022919c9d050e54c5aa6bca0de453f3e5b6730fcf7325356d1"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939137/events.csv",
+                "sha256": "32877a1a7f522d115cd1ebdf755f48121159f4c7dfd4b659cbb6a661c582cc76"
+              },
+              "seed": 939137,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939137/trajectory.csv",
+                "sha256": "5b57d50a62831335b42e45227aa64de6c2c3f1274c4c7928c73d106cca8895bd"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939138/events.csv",
+                "sha256": "9ca0fb2c2a9a621f25a12ceee31bb392c74e2c3ad23c893f8f03e133c35983cf"
+              },
+              "seed": 939138,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939138/trajectory.csv",
+                "sha256": "fc468476d9d29633cdf437b9e81d067f175a05074f13985f36a68608064f6b92"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939139/events.csv",
+                "sha256": "03095b7435df9066f73d5755e80ca6c12c4af6d83f66c98f8241495cce76930a"
+              },
+              "seed": 939139,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939139/trajectory.csv",
+                "sha256": "ac675f8feeec5e10169221816dfbc3f3652d828193285f65a69536a383f64a95"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939140/events.csv",
+                "sha256": "42270217bf9e3b9a36ed090c8e4a822b62458a41e18563b9448e9b2fd5f0068a"
+              },
+              "seed": 939140,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939140/trajectory.csv",
+                "sha256": "ff701895ee992cb698be17bcc6fbfae6c1cd279b2d800b35965120eb13eab842"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939141/events.csv",
+                "sha256": "c9a01c35428e6e352150526d7c15874cc9a42565b35fa6dce929c6b177e34154"
+              },
+              "seed": 939141,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939141/trajectory.csv",
+                "sha256": "d841b2eba52f8ab0654c3163e9570063e0b4725914bb7dc2f3cd20c3e68f1112"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939142/events.csv",
+                "sha256": "2bed39e65608618d52bfe295eabb4d7df4cb9ff7cfa48ab11875440e40408213"
+              },
+              "seed": 939142,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939142/trajectory.csv",
+                "sha256": "8f40578e92527d9d525ea3fb829590527bc26869a2b5daddaa900de43a338a2a"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939143/events.csv",
+                "sha256": "00f3efa42a9a1168932659deb687c98518d15480f8ab157944035e5b34af05de"
+              },
+              "seed": 939143,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939143/trajectory.csv",
+                "sha256": "4a0ebd378456a9a0291bbd4af314b1f9cfb411d707496eadfe27c2bc600d4336"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939144/events.csv",
+                "sha256": "012fb36e1fc77638579acb81d400d9415d5b9258c4f24aa77059ef6473e27240"
+              },
+              "seed": 939144,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939144/trajectory.csv",
+                "sha256": "9dadb338bf3907d9463d7196fa5c56042325982cec161f2a90ff2f9761678699"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939145/events.csv",
+                "sha256": "8dee28f4b08ba9fb9ea9cae64c4208ce661dfb8579c08c293dd79f3f9a49a400"
+              },
+              "seed": 939145,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939145/trajectory.csv",
+                "sha256": "24efdb665d90780f68cdc52d0c1e84e92e04b9320349009cd5488b1318649a3f"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939146/events.csv",
+                "sha256": "8c91d121a67f81155f7f99798f9d139a97f2fc82bdd9688ce3a0d27adda1b363"
+              },
+              "seed": 939146,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939146/trajectory.csv",
+                "sha256": "13d5d7a93b3eb6a477f660a14d6f848b6e9b3f94835d73574cc06855404642d6"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939147/events.csv",
+                "sha256": "2e0013792a3358d516ae72b95d221812b0e13c997936c9718a8927b0601e23e1"
+              },
+              "seed": 939147,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939147/trajectory.csv",
+                "sha256": "8d2a9d8b3c7f68b7a68cec517d45c1b9686c8df85b727a973687fc594f2d54c0"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939148/events.csv",
+                "sha256": "61b75b44161bca3a7333f6fc0bd502468d202b50174a2ad0845371cdd698574c"
+              },
+              "seed": 939148,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939148/trajectory.csv",
+                "sha256": "a46be3eeb4773a82b35255164be4dbea19b02293340eb73b5700a034520899b0"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939149/events.csv",
+                "sha256": "c36c084027b3027fe2ef4e1c32be9a306f5ac213a2daa38cb79824fecab44183"
+              },
+              "seed": 939149,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939149/trajectory.csv",
+                "sha256": "4452c61f12d1a7d6f019d90f89b76e2dbf5f0b74a1884474bd3d1aef7346f073"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939150/events.csv",
+                "sha256": "37b59283c6beda3d6408dd15fadbb6d7a2d89717aaf2a4bef50e4ececd92669d"
+              },
+              "seed": 939150,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939150/trajectory.csv",
+                "sha256": "0fd638d0a1892b15e1bd0e5ec8bd05f91faf3b32a5e5cfee4709e6bf3e18e3c7"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939151/events.csv",
+                "sha256": "7b194d1851fd7a912f33f015efad18d1085591ecd6c13f9ba9d17a7df1f8a8a5"
+              },
+              "seed": 939151,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939151/trajectory.csv",
+                "sha256": "e9daef1c99c1ae89a6d563802ed90f3a7fd1da50bca6e8aabca195bf8fa9446a"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939152/events.csv",
+                "sha256": "7ec8a286795b573ce6370d8c630ff15006e04e0686c3b4358bea7c4b8cfbf100"
+              },
+              "seed": 939152,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939152/trajectory.csv",
+                "sha256": "d995ef47bc339b018a8bff6802f6dba46249286915534dd1b2fa5c142da2cf3a"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939153/events.csv",
+                "sha256": "b732c631d5eab94fd072e5a865998aef77c65bbd673ce5a15db28d27c4825908"
+              },
+              "seed": 939153,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939153/trajectory.csv",
+                "sha256": "b0c04ce010d17d685575287483f2a27bacbfc9ff80ef2a52837bd66b1b31e82b"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939154/events.csv",
+                "sha256": "66970fd33de8cda2bd6216f3ba306ee163b9c38c662e45f7feb3a3d7ccb7f09a"
+              },
+              "seed": 939154,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939154/trajectory.csv",
+                "sha256": "d668dcd96ae964b59d68dc4e4799f128f56b4c311b8dc86d0b8277f4d030fdbf"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939155/events.csv",
+                "sha256": "1585f89dc5fda4f57e26fac427310e6492cbba540f6b55b96a83cb6f08d32a10"
+              },
+              "seed": 939155,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939155/trajectory.csv",
+                "sha256": "7f407cdbbfbde5871101710026fc6ae062bb39eccc117955994f284ec99f8901"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939156/events.csv",
+                "sha256": "7ea7bbc8fd3882e0e4a1233db20cfa6adcec62fe2064eb69470731a186bb4626"
+              },
+              "seed": 939156,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939156/trajectory.csv",
+                "sha256": "cefdd3f795374498d1be4a77d8e9019ff05b552b119058f197b60b1d6ac0d615"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939157/events.csv",
+                "sha256": "8c2a6c874794c70a2681ed22bf923f753e7ef8d5cbf119415b872fa514e41cd5"
+              },
+              "seed": 939157,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939157/trajectory.csv",
+                "sha256": "a14d6265a1a8e7e5661bb1b49fcc094bfa3fdf0f69a630043da54b9ed274a270"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939158/events.csv",
+                "sha256": "ac492cc6a7487ab652154bec828c49dca879e2b5a4ab7f1499ace2fb9c92a9fc"
+              },
+              "seed": 939158,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939158/trajectory.csv",
+                "sha256": "1eb653e73f9f172fa3f6f2022dc6dfef6cc3ceaa0dfd957a147255dc3dc440ec"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939159/events.csv",
+                "sha256": "d2fe894f39e83efbc7b9444fe84d65e683844c654959ff0737af97630ea06170"
+              },
+              "seed": 939159,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939159/trajectory.csv",
+                "sha256": "9bb72ff270ef55abe5538e58604318e4aa6463390ec886fe8315e87b59ffb707"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939160/events.csv",
+                "sha256": "8084f4943c6c7bf1d81fe24a2ae9215526c925d0577694c4550b9fef893a12aa"
+              },
+              "seed": 939160,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939160/trajectory.csv",
+                "sha256": "a83784e460e920833a7221646293455b3905528c3de6d0f2ac6cea852259c9b7"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939161/events.csv",
+                "sha256": "3b4d5ee159c7aafae5ccd2fdf5ffecbe59e0facebb0716e33155b0a131093065"
+              },
+              "seed": 939161,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939161/trajectory.csv",
+                "sha256": "a068071b144da006d67f170898e066202fb8d0c2ee6fb4ea25c9999c99b0e887"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939162/events.csv",
+                "sha256": "be2ea0bfea192a7745e8b452b560aeedc6022777880bd7155db5290123a1686e"
+              },
+              "seed": 939162,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939162/trajectory.csv",
+                "sha256": "b8636f38ae92d50621bdce433c14b04889bd7a62b4590cc4301e008092851e6a"
+              }
+            },
+            {
+              "events": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939163/events.csv",
+                "sha256": "5f07c9b032403be4e6774487fd4f09bd8598a0b2c32813cb5eaaa89d812eee44"
+              },
+              "seed": 939163,
+              "trajectory": {
+                "path": "caseA_candidate_final/levels/macro_coarse/seed_939163/trajectory.csv",
+                "sha256": "bd90002a5f3c22523cd8e6a4cf7c9a5001c2f979a2d3c100cdd7803c662610de"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "comsol": {
+      "levels": [
+        {
+          "level_id": "dt_20us",
+          "numerical_setting": {
+            "fixed_step_s": 2e-05,
+            "integrator": "classical_rk4",
+            "purpose": "accepted_final"
+          },
+          "ordinal": 0,
+          "replicas": [
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/events.csv",
+                "sha256": "5043d754bca21203aebce9641937af4b4b069adb75991192fc35f52edab650a4"
+              },
+              "seed": 939100,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/trajectory.csv",
+                "sha256": "ae1911eac08385ffa3bfb3da1b5c3bd5fc8d6433d42786fae7d732754b705042"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/events.csv",
+                "sha256": "d226979675c770c276f0d979dd1b2b3ee822715aa8b7eb196b7f0dd3c299b324"
+              },
+              "seed": 939101,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/trajectory.csv",
+                "sha256": "5221332c5f1cb6ac1f8418ff014b0674608585be3e8fb517ee969e568c0e5b3f"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/events.csv",
+                "sha256": "aaa565ff536cdba9579094381353a8237bba27acf63b8d92c708ce4d5b811470"
+              },
+              "seed": 939102,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/trajectory.csv",
+                "sha256": "03fd342eba528aa8ec03da4d79c469d40e24308eecc4b3edf531139eb6e1cf3d"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/events.csv",
+                "sha256": "e8a8c6f725684b7de1665cacb4940b332f155f0f5cadecaeae4da4af628019b0"
+              },
+              "seed": 939103,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/trajectory.csv",
+                "sha256": "a5a471e11e1b9a8bd8f435added94aeab6b5cdcdbb7cd98b848e711b223870f2"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/events.csv",
+                "sha256": "b6ff1bdba720bb6d6ac3323da413fdd4ae27cf69b78545335255dae147cd1cbe"
+              },
+              "seed": 939104,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/trajectory.csv",
+                "sha256": "a29c5d7d53b2fa7416a2962e47f33cc673f1c51df70bf2b8d741371c629f8938"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/events.csv",
+                "sha256": "d9d6a7615468af18e15731876a18d42bfa6191c2a8df87706bb2ba5df25a9379"
+              },
+              "seed": 939105,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/trajectory.csv",
+                "sha256": "fe534f23fb486badbf86164d61141ac3a9d46b0e0c389e236876803dd210fb3a"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/events.csv",
+                "sha256": "d0fe67e2a687a063e89443999ec3946845b071fd0ee018178dbb89a670dd0e32"
+              },
+              "seed": 939106,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/trajectory.csv",
+                "sha256": "46d02768fa22eecebad2165aa48dc181e9a0956f7dd90a7a79b5d7069269801b"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/events.csv",
+                "sha256": "c884e7c8dc72fab05f3927d83e02e747dbdad677dfe6eaa86a03a8beb1bf176d"
+              },
+              "seed": 939107,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/trajectory.csv",
+                "sha256": "6a00ac40408744c2f82d577b0b71f0a928a3688d1876c62afee1f01780c5d9cb"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/events.csv",
+                "sha256": "20e5af6d563f9accc6b01eb7c8b2824b8f80ab0eaca8f374550a0d9bc8305675"
+              },
+              "seed": 939108,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/trajectory.csv",
+                "sha256": "614a8849766fefb723f03f64fc5a7d4b086559f7b99b5ddaced1e1cea1d2713d"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/events.csv",
+                "sha256": "8d17ae51bd0ccad69ae1d226fdb4ce7152c5b2d50fe3717a6b5cd3385b065ede"
+              },
+              "seed": 939109,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/trajectory.csv",
+                "sha256": "dcd548d94c481f95cb78042bc2b056e990a34590be20f847868b9767eed12f22"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/events.csv",
+                "sha256": "e5770a40774f172af4ac081686e84566b9ec03ed2d6580741999166d4fe25a59"
+              },
+              "seed": 939110,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/trajectory.csv",
+                "sha256": "e19febda179fb44e6b8c1ea7d5042981ee169de2106f9158341b0cfe7dbf6581"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/events.csv",
+                "sha256": "79b942e3ab3092ca282c5486e587fc2efda310fcbe249bdbafa683c628538481"
+              },
+              "seed": 939111,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/trajectory.csv",
+                "sha256": "fc01414e0493008e9103369f59c1af1acb06a1c6c3416095d533b77825c62175"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/events.csv",
+                "sha256": "d4541ced3ffcb1e08bb49b6962201c1f0d00a958fd2ac0e38b8af1d089d1ab9f"
+              },
+              "seed": 939112,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/trajectory.csv",
+                "sha256": "de98ef32e8dce2255c44e704e1659ed33bac00256868329a0279e7652465efe0"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/events.csv",
+                "sha256": "5ae14ae517854eec008195b29a40e3984ff7c7fe65f2ee2bd62afd0a88fe2617"
+              },
+              "seed": 939113,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/trajectory.csv",
+                "sha256": "103b3b302a8539a8f8021ef40008b0b5c2fbb5ae5bb4692751b5c819740e6a9a"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/events.csv",
+                "sha256": "53382d2a37cbafd492ee298f620b67d367d1ae4e4132ae1157ca8d99fd653b61"
+              },
+              "seed": 939114,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/trajectory.csv",
+                "sha256": "5fa0797dd62a10156f77f044da65b9e39f45594144a2c0cd41b1e602a39a8cb3"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/events.csv",
+                "sha256": "01b7c5d1a33ce57d91af112d087c0f35ee55d0da2d5e97da25a63121e677401b"
+              },
+              "seed": 939115,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/trajectory.csv",
+                "sha256": "ef23b2a3d844b3b0eb50ff5031b285f22edd53d93f1595715ed496fd3647e15a"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/events.csv",
+                "sha256": "52b8d2fc3306aa03a2ce1ff7df9aec15377a2fd2ecb12baf3871c015f5cfb6be"
+              },
+              "seed": 939116,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/trajectory.csv",
+                "sha256": "cb4628e7bb2b81a62e2a8eafcb5d51f5b7b67f8e6fb4ce4d301b1b91fb215a0d"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/events.csv",
+                "sha256": "7d5417a8db46b2a4c76dd710aa9f7eb3e1f548e78214694a726aac4b41acd66e"
+              },
+              "seed": 939117,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/trajectory.csv",
+                "sha256": "18245cdbaa281a131ca64937cc34a0f3d1b344f1866486200c9382c5c270956d"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/events.csv",
+                "sha256": "74ef7941b9d1aabc591c4c470baad16ebd3010f7402fb37784e7a1bf6b37d4a0"
+              },
+              "seed": 939118,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/trajectory.csv",
+                "sha256": "10dfc9c1bfd13cfb20e5a6a4149c85c528c3d47ea7b39fbd0ea18cb7afbd4aee"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/events.csv",
+                "sha256": "c84ef04d2b25ff17057ad74375f73d4bdc0b990775d665ddb4e17e1e15373c29"
+              },
+              "seed": 939119,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/trajectory.csv",
+                "sha256": "c55cce1b9f3ca7e236310c5161685e92866ba764a4216d435800442ac89a3b03"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/events.csv",
+                "sha256": "d5dcf2bfee8701f5856942526c88ab4e48b4ab27f4743cbfc8416d03a801b06f"
+              },
+              "seed": 939120,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/trajectory.csv",
+                "sha256": "c18d36970a129024c3c506184cc49b2de78235ed349b6827f2f4396579584878"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/events.csv",
+                "sha256": "a26f892499382d07223a004b22bcec5e8c20868fb126333b70051e9d0f0dbe94"
+              },
+              "seed": 939121,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/trajectory.csv",
+                "sha256": "3f352beb73e350aec4bef7f97f11d074bc4c3b44ce6dadbc40a22333afbe7448"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/events.csv",
+                "sha256": "72d064ad1d86b25c37aff33e8da5c5081ab0d8452f75c2d64dfa07c5622e6a12"
+              },
+              "seed": 939122,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/trajectory.csv",
+                "sha256": "d4e941bbe2566d34b5abf9033d5296440a1591b9ab1ebb7f6d74de95f2addd18"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/events.csv",
+                "sha256": "2363e16d9dc7a0fd4be4f4fe5b1560f139b8e01e2a44121dc5b934b2954ebf73"
+              },
+              "seed": 939123,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/trajectory.csv",
+                "sha256": "e38f9ec95b6a0dfcec588a0ebae9af8c6d8806ec992f8de79b0bc924ae09a263"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/events.csv",
+                "sha256": "2b8e9c6b539e0037acfa879329951a21284304d27a0d29e5db9563bf070e7dbe"
+              },
+              "seed": 939124,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/trajectory.csv",
+                "sha256": "4031e4897e8ad46553f7a5e028bb682345a035570ce918d9e0daaf4507522886"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/events.csv",
+                "sha256": "1becc7caff1c6d0f37eb88b850b3a9dddfdb4680d0d4a0460db023bc69fe0dad"
+              },
+              "seed": 939125,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/trajectory.csv",
+                "sha256": "0fced2ada4982fe66d85102acb5ce11d6fbe4ad1160a9f57768805348a014ed2"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/events.csv",
+                "sha256": "3bdb728e74d78efd48916eb0b4fc5ade0262d5d27a4a13c7705088a1ffec5cd6"
+              },
+              "seed": 939126,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/trajectory.csv",
+                "sha256": "23b022cd6ddd71892cd8e4e85e05b92b8bb6016c551bbe0694164d84376baddf"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/events.csv",
+                "sha256": "e054e858f0bc1af5617c6630f4e9b566d5e72106c7b2bbeebc22c17beff78ac2"
+              },
+              "seed": 939127,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/trajectory.csv",
+                "sha256": "d86a801a3b2f4ba2069239b06ad4843f7880801e9b74a7794856f9f79e69e777"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/events.csv",
+                "sha256": "bae041a3da72be2878f2a2ebd81c8893c478df1ef8ba8dd948220b1d481f58f8"
+              },
+              "seed": 939128,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/trajectory.csv",
+                "sha256": "b5a1cbff8cd790e98169614b4e4253c274bfc5ac8e98a309b1d5e7a454d8fe3c"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/events.csv",
+                "sha256": "97e5efbe82e1f2421eafa44066bb1a685e0e75e39cf7a6240e18438c47c0b407"
+              },
+              "seed": 939129,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/trajectory.csv",
+                "sha256": "3dea29252885da8a007a9961da0ab8f1f408b80fdefc6f974255220a24d68c23"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/events.csv",
+                "sha256": "ca42fcbba39eac7a915c6dd1b724cc7ef20529e770da1244f5f47b2af7145873"
+              },
+              "seed": 939130,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/trajectory.csv",
+                "sha256": "1e3f412ab3188cd7f02299fcc85323736f157364bc267ca762797499a702b761"
+              }
+            },
+            {
+              "events": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/events.csv",
+                "sha256": "dab6a58f5723fc21404a60e60e2d192d46e0fe48edf2c3e15c11405818a9a611"
+              },
+              "seed": 939131,
+              "trajectory": {
+                "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/trajectory.csv",
+                "sha256": "7ee8d181ffa1b401002c7fafc7136c3ac7c8f57d86fdfeb9273ebcf57d5de6dc"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "purpose": "final",
+  "schema_version": 1,
+  "scope": {
+    "canonical_input": {
+      "content_hash": "sha256:4e1739a4b7f39f5047506f30d7c453e9023c3c9ec8a411937968dbeaaf35b483",
+      "path": "../comsol_binding_recert_2026_10_09_v1/inputs_axis_normalized/two_current/caseA/candidate_input.h5",
+      "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+    },
+    "geometry_bounds_m": [
+      0.0,
+      0.25,
+      0.0,
+      0.13
+    ],
+    "output_times_s": [
+      0.0,
+      1e-05,
+      2e-05,
+      3.0000000000000004e-05,
+      4e-05,
+      5e-05,
+      6.000000000000001e-05,
+      7.000000000000001e-05,
+      8e-05,
+      9e-05,
+      0.0001,
+      0.00011,
+      0.00012000000000000002,
+      0.00013000000000000002,
+      0.00014000000000000001,
+      0.00015000000000000001,
+      0.00016,
+      0.00017,
+      0.00018,
+      0.00019,
+      0.0002,
+      0.00021,
+      0.00022,
+      0.00023,
+      0.00024000000000000003,
+      0.00025,
+      0.00026000000000000003,
+      0.00027,
+      0.00028000000000000003,
+      0.00029,
+      0.00030000000000000003,
+      0.00031,
+      0.00032,
+      0.00033000000000000005,
+      0.00034,
+      0.00035000000000000005,
+      0.00036,
+      0.00037000000000000005,
+      0.00038,
+      0.00039000000000000005,
+      0.0004,
+      0.00041000000000000005,
+      0.00042,
+      0.00043000000000000004,
+      0.00044,
+      0.00045000000000000004,
+      0.00046,
+      0.00047000000000000004,
+      0.00048000000000000007,
+      0.0004900000000000001,
+      0.0005,
+      0.0006,
+      0.0007,
+      0.0007999999999999999,
+      0.0009,
+      0.001,
+      0.0010999999999999998,
+      0.0012000000000000001,
+      0.0013,
+      0.0014,
+      0.0015,
+      0.0015999999999999999,
+      0.0017000000000000001,
+      0.0018,
+      0.0019000000000000002,
+      0.002,
+      0.0021,
+      0.0022,
+      0.0023,
+      0.0024000000000000002,
+      0.0025,
+      0.0026,
+      0.0027,
+      0.0028,
+      0.0029,
+      0.003,
+      0.0031,
+      0.0032,
+      0.0033,
+      0.0034,
+      0.0035,
+      0.0036,
+      0.0037,
+      0.0038,
+      0.0039,
+      0.004,
+      0.0041,
+      0.004200000000000001,
+      0.0043,
+      0.0044,
+      0.0045000000000000005,
+      0.0046,
+      0.0047,
+      0.0048000000000000004,
+      0.0049,
+      0.005,
+      0.006,
+      0.007,
+      0.008,
+      0.009000000000000001,
+      0.01,
+      0.011,
+      0.012,
+      0.013000000000000001,
+      0.014,
+      0.015000000000000001,
+      0.016,
+      0.017,
+      0.018000000000000002,
+      0.019000000000000003,
+      0.02,
+      0.020999999999999998,
+      0.022,
+      0.023,
+      0.024,
+      0.025,
+      0.026000000000000002,
+      0.027000000000000003,
+      0.027999999999999997,
+      0.028999999999999998,
+      0.03
+    ],
+    "particle_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188,
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      223,
+      224,
+      225,
+      226,
+      227,
+      228,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      275,
+      276,
+      277,
+      278,
+      279,
+      280,
+      281,
+      282,
+      283,
+      284,
+      285,
+      286,
+      287
+    ]
+  }
+}

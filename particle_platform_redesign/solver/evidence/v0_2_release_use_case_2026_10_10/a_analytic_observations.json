@@ -1,0 +1,119 @@
+{
+  "started_at_utc": "2026-10-10T04:52:58.247022+00:00",
+  "public_api_only_execution": true,
+  "profiles": {
+    "A01_HARMONIC": {
+      "status": "PASS",
+      "criteria": {
+        "position_linf_error_m": 1e-06,
+        "velocity_linf_error_m_s": 1e-06
+      },
+      "errors": {
+        "position_linf_error_m": 1.3869053214210503e-07,
+        "velocity_linf_error_m_s": 2.7608958663716265e-07
+      },
+      "expected_final_position_m": [
+        0.1087763461840148,
+        0.0
+      ],
+      "expected_final_velocity_m_s": [
+        -0.6569103141886248,
+        0.4
+      ],
+      "actual_final_position_m": [
+        0.10877648487454694,
+        -4.163336342344337e-17
+      ],
+      "actual_final_velocity_m_s": [
+        -0.6569100380990381,
+        0.4
+      ],
+      "event_times_s": [],
+      "boundary_events": 0,
+      "failure_events": 0,
+      "simulate_elapsed_s_descriptive": 0.16750589990988374,
+      "engine_revision": "particle_engine_v46",
+      "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "input_content_hash": "sha256:46902fe2c46e50604502a085abef5a83deec7e67be816eea284c76314de01c2d",
+      "raw_artifact_sha256": {
+        "A01_HARMONIC/input/case.h5": "59d028f26be44be955bbd35933247db9fee80f2bd79993e805160289654abb08",
+        "A01_HARMONIC/input/case.yaml": "bbfb562c828a07317167aea0a8816de805ef05c70d31964c8877d3f31399fcfa",
+        "A01_HARMONIC/result/final.h5": "fddf5c63746c3ac610239f1db40639ca49b6208289814882a92ed5bd309a96ef",
+        "A01_HARMONIC/result/LATEST": "4280996483954c5c62c8bbbc281e534003b59142eb3b82598a496bd787657221",
+        "A01_HARMONIC/result/run.json": "648bf82cbb3113e4309be900500c8215116f0cd5cf348eb176a82325da97d08b",
+        "A01_HARMONIC/result/_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "A01_HARMONIC/result/checkpoints/A.h5": "307412dc538f81a2dbb874320b4fd2a623b3a98d7bab1e7acebfb20f5c5ebf96",
+        "A01_HARMONIC/result/segments/epoch-000000.h5": "911d43cbaf7db56e44e2766f098d3f5387ceb5978d2da9629ab1f9c5933bc6f4"
+      }
+    },
+    "A02_SPECULAR20": {
+      "status": "PASS",
+      "criteria": {
+        "event_time_linf_error_s": 1e-15,
+        "position_linf_error_m": 5e-14,
+        "velocity_linf_error_m_s": 1e-13,
+        "hits_per_particle": 20
+      },
+      "errors": {
+        "position_linf_error_m": 0.0,
+        "velocity_linf_error_m_s": 0.0,
+        "event_time_linf_error_s": 0.0
+      },
+      "expected_final_position_m": [
+        0.000244140625,
+        0.0625
+      ],
+      "expected_final_velocity_m_s": [
+        1.0,
+        0.0
+      ],
+      "actual_final_position_m": [
+        0.000244140625,
+        0.0625
+      ],
+      "actual_final_velocity_m_s": [
+        1.0,
+        0.0
+      ],
+      "event_times_s": [
+        0.00048828125,
+        0.00146484375,
+        0.00244140625,
+        0.00341796875,
+        0.00439453125,
+        0.00537109375,
+        0.00634765625,
+        0.00732421875,
+        0.00830078125,
+        0.00927734375,
+        0.01025390625,
+        0.01123046875,
+        0.01220703125,
+        0.01318359375,
+        0.01416015625,
+        0.01513671875,
+        0.01611328125,
+        0.01708984375,
+        0.01806640625,
+        0.01904296875
+      ],
+      "boundary_events": 20,
+      "failure_events": 0,
+      "simulate_elapsed_s_descriptive": 0.14224250009283423,
+      "engine_revision": "particle_engine_v46",
+      "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "input_content_hash": "sha256:0e6e58db9da3a496db2b6c69b9549cc29a29c0b7d28917527af1e2e95ff42dc2",
+      "raw_artifact_sha256": {
+        "A02_SPECULAR20/input/case.h5": "71ee5891cfb228f39aa73b8ca7fed688d96588cc792db641a36799b606456ffa",
+        "A02_SPECULAR20/input/case.yaml": "3a9bc7ac591d08791c121b01d84ad5d63560fe92354cdbdf7824bfa7e358c385",
+        "A02_SPECULAR20/result/final.h5": "623d5018b7fcbe13f6e8be6e0164c17c02dfe792ae069786b7b0b2e5eae8c76c",
+        "A02_SPECULAR20/result/LATEST": "9e4a7dda52a9796e4e8c2ea19d3d67e07a3dacbe6590748f0067a6c66e15d563",
+        "A02_SPECULAR20/result/run.json": "99f83ac727b147c4b29803c30c06eda9d22d656c3d99fcdfe91f4f87700905a1",
+        "A02_SPECULAR20/result/_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "A02_SPECULAR20/result/checkpoints/A.h5": "9d332d956415bbe19da2ae8bd953cc7a53ab6167510d9a3b85457d89357bb548",
+        "A02_SPECULAR20/result/segments/epoch-000000.h5": "20099f261d8b245b14980bfe217abad3e3075093d2160a4f4e6e1eff9e9e882e"
+      }
+    }
+  },
+  "completed_at_utc": "2026-10-10T04:52:58.630702+00:00"
+}

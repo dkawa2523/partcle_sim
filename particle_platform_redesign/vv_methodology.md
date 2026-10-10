@@ -883,14 +883,14 @@ Brownianを比較する時だけ`ensemble_metrics.parquet`を追加する。最�
 成功した各campaignは一意completion record、native成果物、設定/入力/source hash、正規化を追加検証する。
 source MPHはloadCopy/-nosaveでhash不変である。
 
-現行C3は明示axis-odd Ω補正後の共通P1、共有Z0、Brownian-off、100 nm・287粒子・30 msで、両実装3刻み収束と141 stick eventを
+2026-10-09のv45 C3は明示axis-odd Ω補正後の共通P1、共有Z0、Brownian-off、100 nm・287粒子・30 msで、両実装3刻み収束と141 stick eventを
 [固定条件評価](solver/evidence/comsol_binding_recert_2026_10_09_v1/c3_axis_normalized_after_projection_evaluation.json)でPASSした。
 元のcandidate event semantic欠落によるBLOCKEDとraw結果は保持し、ID8→grounded_wallのreporting-only再projection receiptを別途結合した。
 状態の直接差の一部は絶対floorだけでは不合格であり、合格は事前登録した4×fine-pairの経験的数値感度幅を使う。これは厳密誤差上限ではない。
 同一fine solveの保存common-active stateではnative named total Ftr/FtzをN単位で実観測し、独立成分和とrelL2 7.83e-17で一致した。
 configured formula診断とは別証拠であり、個別native force、auxq RHS、全内部stageのassembly認証はNOT_TESTEDのままである。
 Freeze/Stickの保持終端IDはcontrolで観測できるが、Disappear ID/原因とescapedの意味境界event一致は未認証である。
-現行C2は独立監査済みpilot screeningとpost-pilot設定選択を経て、両anchorで未使用native32+candidate32seedを完了した。
+同日のv45 C2は独立監査済みpilot screeningとpost-pilot設定選択を経て、両anchorで当時未使用native32+candidate32seedを完了した。
 [Case-A final](solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_final_evaluation/evaluation_manifest.json)と
 [Case-P final](solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_final_evaluation/evaluation_manifest.json)は登録人口gateをPASSした。
 終端曲線の同時信頼上限はA/P `0.040128262937/0.035010667118`（上限0.05）、RZ/fate TVは`0.130735400519/0.129537665328`（上限0.15）である。
@@ -898,6 +898,14 @@ alpha/seed/bin/許容幅は結果後に変更せず、独立監査は128 CSV・4
 全64 native replicaの実numeric seed、20 µs step、SI time unit、UserDefined getterを確認した。これは固定source・一方向背景・粒子間非相互作用と標準PRNG sampling条件付きの有限algorithm人口同等性である。
 121保存時刻をsample数に乗算しない。Case-Pは全9184 unitがactiveなのでwall lawは未試験、Case-AのDisappearは観測status/time人口だけで原因・IDを認証しない。
 continuous SDE bias、OU noise time-law、pathwise一致、個別native contribution/auxq assembled RHS、native FE/物理真値へ拡張しない。
+
+0.2.0正式公開のv46/event22再資格は、[新登録](solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/execution_preregistration.json)で
+最終LF sourceを固定し、保存nativeの条件・入力・seed cohort・v45数値設定選択・alpha/bin/許容幅を変えず、candidate C3の3刻みとC2両32seedを再実行する。
+既に観測済みの同cohortによるversion regressionであり、新しい未使用seed confirmation、信頼family、COMSOL solveではない。
+原JSONを保持したpath-only参照viewは変更pointerと非path科学値の同値を結び、登録時の保存native closureを変更しない。
+四判断のsummaryは、初期条件と登録観測量の軌道検査を、完全なnative RHS/境界応答の未観測部分から分ける。
+Stickの141 event ID/意味/outcome/時刻だけではnative hit位置、前後速度、残substepを認証しない。Disappear原因/IDとCaseP Brownian壁positiveは引き続きNOT_TESTEDである。
+raw CSV/HDF5/MPH/resultはhash付き外部入力、公開GitのJSON/sourceはauthority連鎖と再生成手順であり、raw dataset自体の配布ではない。
 
 2D比較の終了判断は§1.1の四つの必須判断と五つの終了条件だけで行う。現在の100 nm common-P1
 Case-A/Case-P anchorは、その限定scopeについて`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。aggregate three-current productionと

@@ -1,0 +1,203 @@
+{
+  "applicability": {
+    "charge_applicable_fraction": 1.0,
+    "epstein_applicable_fraction": 1.0,
+    "field_support_inside_fraction": 1.0,
+    "ion_drag_applicable_fraction": 1.0,
+    "lift_applicable_fraction": 1.0,
+    "runtime_applicable_fraction": 1.0,
+    "status": "PASS",
+    "thermophoresis_applicable_fraction": 1.0
+  },
+  "artifacts": {
+    "case": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_v0_2_0_release_requalification_v2\\c3_prepared\\candidate\\dt_0p625us\\case.yaml",
+      "sha256": "6c4a185b44b6c2de8b80f0d14a20daf28aec4ed2c32ed727729bb1aa166b6d89"
+    },
+    "execution": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_1p25us\\execution_inputs.json",
+      "sha256": "d7f6019d04446484382f4a57f269dfd0430b4cb91c6e84c10df1c8d6de368f72",
+      "source_mph_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "source_unchanged": true
+    },
+    "force": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_1p25us\\diagnostic_force_raw_wide.csv",
+      "sha256": "e3f59443fc8b5748b7219ef737b190525523501f18548f71b90adfd08dcd213d"
+    },
+    "state": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_binding_recert_2026_10_09_v1\\c3_reference_axis_dt_1p25us\\diagnostic_state_raw_wide.csv",
+      "sha256": "ac77f4251a00e80f5fe522e8910dabcf69d8c246e617f19d6a374be5fcbc4fcc"
+    }
+  },
+  "failed_comparisons": [],
+  "formula_parity_relative_l2_limit": 1e-08,
+  "interpretation": "PASS identifies same-state RHS parity within the predeclared formula tolerance. It does not relax the trajectory gate, validate the physical closure, or claim general COMSOL equivalence.",
+  "production_runtime_internal": {
+    "acceleration": {
+      "maximum_absolute_or_vector": 9.31436254515153e-10,
+      "passed": true,
+      "relative_l2": 1.4452591022486128e-16,
+      "rms": 5.3229801932889e-11,
+      "scale_normalized_p99": 1.8411531603164572e-15,
+      "worst_key": {
+        "particle_id": 31,
+        "time_s": 1e-05
+      }
+    },
+    "charge_rate": {
+      "maximum_absolute_or_vector": 6.51925802230835e-09,
+      "passed": true,
+      "relative_l2": 2.2201219233919581e-16,
+      "rms": 3.621616139286912e-10,
+      "scale_normalized_p99": 5.368638675730818e-13,
+      "worst_key": {
+        "particle_id": 9,
+        "time_s": 0.00044
+      }
+    },
+    "status": "PASS"
+  },
+  "production_vs_comsol": {
+    "charge_rate": {
+      "maximum_absolute_or_vector": 0.013999797971337102,
+      "passed": true,
+      "relative_l2": 1.5536473270675002e-09,
+      "rms": 0.0025344167680654618,
+      "scale_normalized_p99": 0.9999985605818037,
+      "worst_key": {
+        "particle_id": 7,
+        "time_s": 0.0005
+      }
+    },
+    "dep": {
+      "maximum_absolute_or_vector": 3.640592275760639e-31,
+      "passed": true,
+      "relative_l2": 6.806613981896487e-10,
+      "rms": 2.1693572307271022e-32,
+      "scale_normalized_p99": 6.806862472819786e-10,
+      "worst_key": {
+        "particle_id": 64,
+        "time_s": 0.0
+      }
+    },
+    "electric": {
+      "maximum_absolute_or_vector": 1.9228891289052463e-26,
+      "passed": true,
+      "relative_l2": 1.0766231197055772e-15,
+      "rms": 4.603348709149228e-28,
+      "scale_normalized_p99": 4.408686475094998e-15,
+      "worst_key": {
+        "particle_id": 64,
+        "time_s": 0.0
+      }
+    },
+    "electron_current": {
+      "maximum_absolute_or_vector": 0.009797208942472935,
+      "passed": true,
+      "relative_l2": 2.016952288670775e-09,
+      "rms": 0.0016355784857031725,
+      "scale_normalized_p99": 9.540122695570277e-09,
+      "worst_key": {
+        "particle_id": 1,
+        "time_s": 0.00044
+      }
+    },
+    "epstein_drag": {
+      "maximum_absolute_or_vector": 2.5840463217877894e-29,
+      "passed": true,
+      "relative_l2": 2.1002394085806172e-16,
+      "rms": 3.172054457896986e-30,
+      "scale_normalized_p99": 7.814566425490542e-16,
+      "worst_key": {
+        "particle_id": 93,
+        "time_s": 0.00014000000000000001
+      }
+    },
+    "gravity_buoyancy": {
+      "maximum_absolute_or_vector": 4.622231866529366e-33,
+      "passed": true,
+      "relative_l2": 1.098831816080445e-16,
+      "rms": 1.241289822892447e-33,
+      "scale_normalized_p99": 2.7278375311846664e-16,
+      "worst_key": {
+        "particle_id": 135,
+        "time_s": 0.00048000000000000007
+      }
+    },
+    "ion_drag": {
+      "maximum_absolute_or_vector": 1.567607674581945e-22,
+      "passed": true,
+      "relative_l2": 1.0537487075149208e-09,
+      "rms": 2.5806318351892028e-23,
+      "scale_normalized_p99": 1.2359522141827266e-09,
+      "worst_key": {
+        "particle_id": 4,
+        "time_s": 0.00031
+      }
+    },
+    "lift": {
+      "maximum_absolute_or_vector": 2.2180827392754752e-32,
+      "passed": true,
+      "relative_l2": 9.407291584349384e-16,
+      "rms": 6.989385699532876e-34,
+      "scale_normalized_p99": 2.3235275997369842e-14,
+      "worst_key": {
+        "particle_id": 97,
+        "time_s": 0.0012000000000000001
+      }
+    },
+    "negative_current": {
+      "maximum_absolute_or_vector": 8.235775794673827e-07,
+      "passed": true,
+      "relative_l2": 3.8634846398689137e-10,
+      "rms": 2.006520514951017e-07,
+      "scale_normalized_p99": 3.026068363177924e-08,
+      "worst_key": {
+        "particle_id": 21,
+        "time_s": 0.0007999999999999999
+      }
+    },
+    "positive_current": {
+      "maximum_absolute_or_vector": 0.008045999333262444,
+      "passed": true,
+      "relative_l2": 6.670180386768044e-10,
+      "rms": 0.0012604054745955098,
+      "scale_normalized_p99": 6.728508241865662e-10,
+      "worst_key": {
+        "particle_id": 4,
+        "time_s": 0.00034
+      }
+    },
+    "thermophoresis": {
+      "maximum_absolute_or_vector": 1.1072190432514448e-29,
+      "passed": true,
+      "relative_l2": 5.023980676887351e-16,
+      "rms": 5.6012682082202935e-31,
+      "scale_normalized_p99": 1.3790663570014289e-15,
+      "worst_key": {
+        "particle_id": 274,
+        "time_s": 1e-05
+      }
+    },
+    "total_force": {
+      "maximum_absolute_or_vector": 1.567607951474009e-22,
+      "passed": true,
+      "relative_l2": 6.08268904785805e-11,
+      "rms": 2.5806318653777612e-23,
+      "scale_normalized_p99": 1.3521275403134458e-08,
+      "worst_key": {
+        "particle_id": 4,
+        "time_s": 0.00031
+      }
+    }
+  },
+  "rows": {
+    "active": 25503,
+    "raw": 34727
+  },
+  "runtime_decomposition_relative_l2_limit": 1e-12,
+  "schema_version": 1,
+  "scope": "same_state_active_rows_formula_and_runtime_parity",
+  "status": "PASS",
+  "tool_revision": "m3c3_casep_frozen_rhs_v2"
+}

@@ -1,0 +1,7 @@
+{
+  "created_before_candidate_at_utc": "2026-10-10T00:05:04.097137+00:00",
+  "case_yaml_sha256": "025c29b2e774d4e9cecf3b8c9f02e4bfa9392b0af76b3fbc3e27bedacef31ee5",
+  "canonical_file_sha256": "dbc788b381d3aa88586320ac2f09f12493dd5acf90dd0ae66b41917dac73f55a",
+  "canonical_content_hash": "sha256:a0d1a46be57ed58c772de1ad52fa771ccb43dc9cf2134c975fc5a102d0aa519c",
+  "preregistration_sha256": "9669b5dd56f7423c897a006a2b7c672bc7ea469f77733a357b06cabe25f8a39b"
+}

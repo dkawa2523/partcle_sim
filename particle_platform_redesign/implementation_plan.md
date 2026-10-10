@@ -141,13 +141,13 @@ A1/P14-RはUnicode CLI、全sourceのwheel/install digest、三APIとCLIのclean
 一般SDE次数、native FE真値は受入条件に追加しない。
 
 正式性能は[観測前登録](reviews/v0_2_release_performance_registration_2026-10-10.json)に従い、
-P14全19条件×3、B03全24観測、P14-U全18性能観測と独立収束・profileを既存harnessで測定する。
+P14全19条件×3、B03全24観測、P14-U全18性能観測と独立収束・profileを既存harnessで測定し、計99観測のgateを完了した。
 全科学入力、解像度、seed、既存gateを維持し、費用・RSSはmachine-localとして記録する。
-COMSOLは旧native参照をhash固定した現行v46の再資格として評価し、旧seed集合の再利用を新cohortと呼ばない。
+COMSOLは旧native参照をhash固定した現行v46の再資格として評価し、C3三刻みとCase-A/Case-P各32 runの登録gateを完了した。旧seed集合の再利用を新cohortと呼ばない。
 Disappear原因/IDとCase-Pのwall未観測、元N16k RZ D2の登録未達は保持する。
 
 数値・性能・外部比較の結果を[0.2.0検証記録](reviews/v0_2_release_qualification_2026-10-10.json)へ結合し、
-公開sourceをcommitへ固定する。測定sourceからGit正規化sourceへの差は改行のみであることを照合する。
+全科学資格を登録scope内で完了した。公開sourceをcommitへ固定し、測定sourceからGit正規化sourceへの差が改行のみであることを照合済みである。
 同じrelease commitのWindows/Linux CIを通し、version一致の`v0.2.0` tagで再度両OSの配布gateを検査した後、
 verified wheel・SHA256SUMS・Release NotesをGitHub Releaseへ公開する。公開後のreceiptはCI run/tag/asset hashへ結合する。
 生MPH/CSV/HDF5とCOMSOL個人設定・回復dataはGitへ配布せず、必要な外部入力と再現commandを明記する。

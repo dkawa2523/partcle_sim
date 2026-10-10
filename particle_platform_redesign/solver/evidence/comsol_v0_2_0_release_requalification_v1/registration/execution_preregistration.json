@@ -1,0 +1,532 @@
+{
+  "c2": {
+    "A": {
+      "authority_projection_receipt": {
+        "path": "registration/caseA_authority_projection_receipt.json",
+        "sha256": "97db0475feaafe14046aaaf954f865898aa47a6cd9488d931d86335191048105"
+      },
+      "candidate_seeds": [
+        939132,
+        939133,
+        939134,
+        939135,
+        939136,
+        939137,
+        939138,
+        939139,
+        939140,
+        939141,
+        939142,
+        939143,
+        939144,
+        939145,
+        939146,
+        939147,
+        939148,
+        939149,
+        939150,
+        939151,
+        939152,
+        939153,
+        939154,
+        939155,
+        939156,
+        939157,
+        939158,
+        939159,
+        939160,
+        939161,
+        939162,
+        939163
+      ],
+      "canonical_input": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/inputs_axis_normalized/two_current/caseA/candidate_input.h5",
+        "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+      },
+      "native_manifest": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/comsol_campaign_manifest.json",
+        "sha256": "2705658a01e1de69e7e3e41e1c686f394e64b9be15a432ff4ab2d6bb3e5975fe"
+      },
+      "native_meaning_inventory": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/meaning_inventory.json",
+        "sha256": "2b3592b075d0a3156f608a699a218bf46ccba94ce9a8f3bd8cba2569e5424c4f"
+      },
+      "native_observed_receipt_sha256": [
+        "07ca10ea186c57cc7f3dff607e28775fc30058253a9fb491b072af792e6d58e7",
+        "09862ceefc4380837a28ee589a8bbb21a1c3aefae2fadcdcdd57d1f91b5a2481",
+        "0f1c25369d288467cd127af89ba77d1d06f4e5761aa9b980979379fa3b3c17c6",
+        "21010c3104b68fda52cafed2513245d26e576e74ce38d19b52343f6b72db8240",
+        "282aab7670cd387edbc6ba10e6de9ee19dda2f3193449924c668f86e936c512b",
+        "316803d898b2449312d16a0c3cc41135cbbaa735c55bdea90de98970bc40ec00",
+        "320b4b23d989ca92bf78a17a0915840710a4b2f0530d1f99db2ebe2a9fd2a205",
+        "347e0dd2d20cab90fd080fd6cde92caf7c7a573beb6d48e63821b7d93b746587",
+        "415a4a2e59b2c70965f44df23b50b21e79af787ed527c7f51423ebf615f50170",
+        "415eb17dc3e63dd0f7c101caeef11eb0fa652641c64496ed1d3f1d6bfa788dba",
+        "4a9753fc3132db76b5389286febc0bbb0f3d7ac78771b0209c46a285ac816b3e",
+        "4ad677261b27034123b8ba797df2f878b51c1c920607eb377b9b28966f85b457",
+        "575dde46dd24d0667cef389269345f4a3925bb0954064beb82c22a43b698b62c",
+        "5fbb59d6f6dafa65d1874d0a715c4abe8d17878879502e6badd21d7587b490a7",
+        "7d25ff6dc116eb2f8bf22af16aa5fc58e144fa17e1aed5f3992308a704f51b92",
+        "985c73f76e6072d45d622904851b055f57a1409946ada69977df2e64c415130c",
+        "a12e2585f8720aac56274f055aa47df380296814d47e8a890ba4626406fb4e40",
+        "a1c0acabb6d56412524495221fb34820f2864161afea89496ff1c074160b49cd",
+        "a9a618d07a8b65a6d7cb72ec7197afbc4669708c81bfd760ab7f69386a676549",
+        "af9dd04c339649db56fcd684e8ecb7b815a78342d75efa76117ead94c43e2fbf",
+        "c2cc585a391bb7fc5a9c492dafd56e01e064115e0e26e2158511d589303897ce",
+        "d07205d8553c4107504187a4d7e7579b75ad68d79a329ac8f6b590d998eafd2b",
+        "d159e1af3e13970b6c479f216ef1dbeae7a70e94b20043edd04c52bec91082bb",
+        "d2be12b080a71fd970913b5c14998f8f7bf7ee4dc2557a7a9e3dc890b462402f",
+        "d45cbf609ab18569473e666dd153ee4460f209d255ae8495cc889ded922c19ab",
+        "d6052862d440eea7b306e2523da7dd120d33ea4a6f09717967ddab2e18531c20",
+        "dc8aefef4ae2cd608a3a5ce66991f3c7dedb4c6c4a1cb323cf87a050f41bcf20",
+        "dd97c1d90d530ab304a06925571e66cb654978e8b86002c52ae2f1588213cbb0",
+        "e4e0b87206af783bb8b36244ad724afcfb15c18eedf130a812268a8c87f6eae5",
+        "eb1ec4a83f318369785e1ae164b9227570914e1a2710dfde8bd4c09da72f4649",
+        "f3ea80bc762720445ef7ace1f0e826b20ac73d0419f35c3be938a24c384d25ce",
+        "fbf95f7d944cce34544fc85f262cdbd9de93cfb49559fd497e01ae7b1f9998fa"
+      ],
+      "pilot_report": {
+        "path": "registration/m3c2_caseA_100nm_axis_normalized_historical_pilot_path_projection.json",
+        "sha256": "0501b9de7c19a1d2f54cfe705bb236941cef225865e918f8eb8d230c8ad373d3"
+      },
+      "policy": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_axis_normalized_population_policy.json",
+        "sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f"
+      },
+      "prepared": {
+        "path": "caseA_candidate_final/prepare_report.json",
+        "sha256": "c27c6f516c39d857cc6cb38df51179b7a9eca4087afe16216eda3b9a91ae63e5"
+      },
+      "recipe": {
+        "path": "registration/m3c2_caseA_100nm_axis_normalized_candidate_recipe_v46.json",
+        "sha256": "3055f031ebd85821babac1353b90da85c0196cdf4dc1a682f658634bb4198d45"
+      },
+      "registration": {
+        "path": "registration/m3c2_caseA_100nm_axis_normalized_v46_registration.json",
+        "sha256": "8ac246b08e1645914b40807dfb4b5dbfa6c4954392e9e600be2499a3edc8464f"
+      },
+      "selection": {
+        "path": "registration/m3c2_caseA_100nm_axis_normalized_fixed_selection_path_projection.json",
+        "sha256": "8164e5ee70026aa3c58489e70ac1953cc91266b59d179b53e7ba3b806f363b3f"
+      }
+    },
+    "P": {
+      "authority_projection_receipt": {
+        "path": "registration/caseP_authority_projection_receipt.json",
+        "sha256": "e96f21fd4fb78288b2967cb7a4c834724f67961686e4976b5a24b0d8fe1eab57"
+      },
+      "candidate_seeds": [
+        939032,
+        939033,
+        939034,
+        939035,
+        939036,
+        939037,
+        939038,
+        939039,
+        939040,
+        939041,
+        939042,
+        939043,
+        939044,
+        939045,
+        939046,
+        939047,
+        939048,
+        939049,
+        939050,
+        939051,
+        939052,
+        939053,
+        939054,
+        939055,
+        939056,
+        939057,
+        939058,
+        939059,
+        939060,
+        939061,
+        939062,
+        939063
+      ],
+      "canonical_input": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/inputs_axis_normalized/two_current/caseP/candidate_input.h5",
+        "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+      },
+      "native_manifest": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/comsol_campaign_manifest.json",
+        "sha256": "ff79dbef3c5455ba54948d2512cfaf8c167c3c977a8e6649aa046dab305ef4e7"
+      },
+      "native_meaning_inventory": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/meaning_inventory.json",
+        "sha256": "98d02693cafbcfd814c14af51cea824cfa6a7de6fb79366bf0219703a9e29959"
+      },
+      "native_observed_receipt_sha256": [
+        "0122006e1b81a540b7dcdba5d71dd1a49bbcab2081c631514502bdbdba8d7e35",
+        "0c0578a0be4c957aae9d047e6884adaf71d14624f7d8c26daf9c598883a4974d",
+        "127c9bd57ebd9dab040b8570c543939e4c5b9bf30989c4fd84a0db2dfd43d571",
+        "1728a18d7c3078365d5b3010c28f90d7ab599d041654c32c0fd94fc721b13e36",
+        "24e83741fcef47ef9e93db13d6e4faa42660a56b21bac7b4d8e20bb71a5c0286",
+        "29a6ba1daa1d310c55ade33b662052a1938fbbdb9012c120b67bbbd04b7643d3",
+        "2cd840c69c7c39d9c2e64e1e4f12d5b8c1efec6c1f5abad3e673f7374607a86b",
+        "2f999c56b0518bd63b3c27a654e5641fd9b52eb8b14f4e76bb5f0d922fa49474",
+        "3a09e589cc3ef66072d8bbcf13942a877549e4ca699c5183ff6265595e5eef9f",
+        "3bd234903fe20ce8faf072d90d015814afbea5117bc1e31fc77235c24640f947",
+        "3d4ac87206f0af142eafe8d700454d4b73701eb81e8e06901ca8533d9f6a8d2d",
+        "45e0d3828fcbf0b4373796822e16ca74984fdbbaec85fbb591ddb9b94f52321e",
+        "559c21803fe1f7056c8ab1049c99475a5a177adae449eddb0654026b4a6eaec1",
+        "7ac209c59b16b09ad8e9588d35d48822425c434ea909d4955f09657e9734ef32",
+        "7ccb2e9553a6dd82981730f1d7d57d3d5a606c424418bfdd599d537fbefb9f78",
+        "851c84c68e71ed30dadaf87597d603f7c09c2be98dc26400bba61252a2e10b15",
+        "891d8b32ff515d96e915f4f9974b67a75b3e3975b7bb2865cb7e4cafebc09603",
+        "93d58c118d252d81b12314538a5c42055c994359317e614cfcb5a4fb13bc7965",
+        "93fa14a56730d82d15f1bac7d8aad3c5f25ece587dd670b42abdd791dd5293ed",
+        "970ac4f6c3e529a164eef7e17cb0bd8b5cc4b9d23275f07406296f2a7482eadd",
+        "9c34b564dd5efcc31e1eeedc189ba42b3ee2778f80a3a381c11327b389ec31ab",
+        "9eb2e7db14349a20d9f54ca2f8272506518612b927ce6cb31026862a1fd7c787",
+        "9ece990f3d618408dce9031738c877f710a692dc7ecacb8593311640c5623950",
+        "a92df4eab06322142ecb54d6c66d2d5899f76d3a8b9c65de3b4e8d8af780dfae",
+        "c1f00ab1654060f4fd0f5dc4c5560af40623754dd1d8fef9b834e11d10b24199",
+        "c6a9167a5fccb8b1dce5685d6a5c00ac351c4aa89c3ede2bc4d351657deab062",
+        "c777d46565d759d891587acc1944a45ad3ae0d3f2ce8a0db5cd500512c7532d7",
+        "ca3518ab0defe119555dd896bd395f9381ffdb684196c0d809973c2a66558004",
+        "dd358711b4a2339fe73a3fced573ab50eb9ba40a0ed1936aaeca1043bd516888",
+        "deadfa6f5b8b20c9d29e2a61c2e1cbc3b8f9f5b1cc978cfcea46088a7624f2c7",
+        "f0d35d2bdb0058db63f94cb5ef0fcad5dbce4c02730f9ea97fec730a1757c6bf",
+        "f73a89ed80b7afc7e806e7d5a6391eaa7c5e2e04939254ad4414773ab8216ab0"
+      ],
+      "pilot_report": {
+        "path": "registration/m3c2_caseP_100nm_axis_normalized_historical_pilot_path_projection.json",
+        "sha256": "273a0f61254e03904c05cd478483b58ef3df900aeb97b29fc6c9a9b2316a1b23"
+      },
+      "policy": {
+        "path": "../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_population_policy.json",
+        "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+      },
+      "prepared": {
+        "path": "caseP_candidate_final/prepare_report.json",
+        "sha256": "4329544376e62699878edfb0d26e43477d86f5688794b227bb170e2773821b9d"
+      },
+      "recipe": {
+        "path": "registration/m3c2_caseP_100nm_axis_normalized_candidate_recipe_v46.json",
+        "sha256": "11f1121ed1ab5a7fbaa7306bec31385a9ac2cea71a27efdd388895b24c5d9d30"
+      },
+      "registration": {
+        "path": "registration/m3c2_caseP_100nm_axis_normalized_v46_registration.json",
+        "sha256": "13313cc0c16bd3e65d270a95f07bbe7d7434e108b825b95efed64b9e497625bd"
+      },
+      "selection": {
+        "path": "registration/m3c2_caseP_100nm_axis_normalized_fixed_selection_path_projection.json",
+        "sha256": "8f1cf0df0e2b4e1454aa7ca1da9961d562415ba9180eb610f05b89b229853819"
+      }
+    }
+  },
+  "c3": {
+    "configuration": {
+      "path": "c3_prepared/campaign_config.json",
+      "sha256": "b8614ab6eb71b04c28d55e2bc42a3702511f06612af2dceb6e9b46b70aef34ec"
+    },
+    "saved_references": [
+      {
+        "events": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/events_reference.csv",
+          "sha256": "c239f6db10cb2b0d5b84705f86dd0334e081bcd96f87659f9f3f0aca2f41a666"
+        },
+        "meaning_inventory": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/meaning_inventory.json",
+          "sha256": "b11ad8823e9b4f625cf90f8c30103d9b088308f76e65206f28b6671ac222eb83"
+        },
+        "normalization_summary": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/normalization_summary.json",
+          "sha256": "a5e09b1a3b765e2e2b9087323bac84c232956b27a6149dcfd6244d122c46f60e"
+        },
+        "root": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us",
+        "run_receipt": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/run_receipt.json",
+          "sha256": "fe5c4087ea90024dec39b21ea882f96c08ad93bf8662e60d2822cdb1f8a9b9a4"
+        },
+        "trajectory": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/trajectory_reference.csv",
+          "sha256": "7091ef02291b05e015512950a79703a63878a8f31e7e6d2ac4185b919eddbe31"
+        }
+      },
+      {
+        "events": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/events_reference.csv",
+          "sha256": "a0a3732f1c26998c16ab46cb49d69342dc3e7857a805f7d2ccdcccf85ab9b516"
+        },
+        "meaning_inventory": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/meaning_inventory.json",
+          "sha256": "e88bbfcedf491823cd170133ef80a2f4c2342f0e79149cf732c29a274ddc2c2a"
+        },
+        "normalization_summary": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/normalization_summary.json",
+          "sha256": "26343aa2ff3679951cc1c2d6119ab56399ec1ba11458b4e78bf5110edb54d34d"
+        },
+        "root": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us",
+        "run_receipt": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/run_receipt.json",
+          "sha256": "9381239dc578a23b6dab4ce3a43aa991495c1ea4dac10240539fcd1cf0190f11"
+        },
+        "trajectory": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/trajectory_reference.csv",
+          "sha256": "1a214d7153fcef4998d55efc5a92a22d3b72b19bae2929bfadf257a98f2b7c0d"
+        }
+      },
+      {
+        "events": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/events_reference.csv",
+          "sha256": "815dc438aa4cc3c414792ae08a87cbfe49dc9476fc9d3a5782cc86465f7f4a85"
+        },
+        "meaning_inventory": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/meaning_inventory.json",
+          "sha256": "34d1b6ee02bd16763cd23a3426b2303188e7e7c76b036e2bfb6c57a497259a12"
+        },
+        "normalization_summary": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/normalization_summary.json",
+          "sha256": "82302f6e876b2c6d1350c1f79c3c84a3e73af4593f83e31f92d57e3ec45d23ed"
+        },
+        "root": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us",
+        "run_receipt": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/run_receipt.json",
+          "sha256": "c517d28737071a63fd0cb109fdd260c4250e0009a854ffdddbf8743912b51788"
+        },
+        "trajectory": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/trajectory_reference.csv",
+          "sha256": "f91c01899d99e40477db9910b1c0903132f8c380c23ff6ea19aaddf85d649fc3"
+        }
+      }
+    ],
+    "staged_authorities": [
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/candidate_input_three_current_z0.h5",
+          "sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc"
+        },
+        "staged": {
+          "path": "c3_prepared/candidate_input_three_current_z0.h5",
+          "sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/three_current_release_state.csv",
+          "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+        },
+        "staged": {
+          "path": "c3_prepared/three_current_release_state.csv",
+          "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/three_current_release_receipt.json",
+          "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2"
+        },
+        "staged": {
+          "path": "c3_prepared/three_current_release_receipt.json",
+          "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/primitive_receipt.json",
+          "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab"
+        },
+        "staged": {
+          "path": "c3_prepared/primitive_receipt.json",
+          "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/reference_run_config.json",
+          "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d"
+        },
+        "staged": {
+          "path": "c3_prepared/reference_run_config.json",
+          "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/campaign_config.json",
+          "sha256": "b8614ab6eb71b04c28d55e2bc42a3702511f06612af2dceb6e9b46b70aef34ec"
+        },
+        "staged": {
+          "path": "c3_prepared/campaign_config.json",
+          "sha256": "b8614ab6eb71b04c28d55e2bc42a3702511f06612af2dceb6e9b46b70aef34ec"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/prepare_report.json",
+          "sha256": "113fcda3d9a1861b31cee4678fa02c031425570cd0021c3a6e252d8993433ad0"
+        },
+        "staged": {
+          "path": "c3_prepared/prepare_report.json",
+          "sha256": "113fcda3d9a1861b31cee4678fa02c031425570cd0021c3a6e252d8993433ad0"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/candidate/dt_2p5us/case.yaml",
+          "sha256": "37a205ec2f373bb1de1a2af1f1a80c67e2b5fb8aae898912a5525bbae8ddac8c"
+        },
+        "staged": {
+          "path": "c3_prepared/candidate/dt_2p5us/case.yaml",
+          "sha256": "37a205ec2f373bb1de1a2af1f1a80c67e2b5fb8aae898912a5525bbae8ddac8c"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/candidate/dt_1p25us/case.yaml",
+          "sha256": "fbfafc887c0ee8e3cb27d8a38266aca3abe626ed89ec81dd5340cf9bf271a415"
+        },
+        "staged": {
+          "path": "c3_prepared/candidate/dt_1p25us/case.yaml",
+          "sha256": "fbfafc887c0ee8e3cb27d8a38266aca3abe626ed89ec81dd5340cf9bf271a415"
+        }
+      },
+      {
+        "copied_preparation_authority_not_new_production": true,
+        "source": {
+          "path": "../comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/candidate/dt_0p625us/case.yaml",
+          "sha256": "6c4a185b44b6c2de8b80f0d14a20daf28aec4ed2c32ed727729bb1aa166b6d89"
+        },
+        "staged": {
+          "path": "c3_prepared/candidate/dt_0p625us/case.yaml",
+          "sha256": "6c4a185b44b6c2de8b80f0d14a20daf28aec4ed2c32ed727729bb1aa166b6d89"
+        }
+      }
+    ]
+  },
+  "candidate_engine_revision": "particle_engine_v46",
+  "candidate_event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+  "candidate_executor": {
+    "distribution_version": "0.2.0",
+    "python_version": "3.12.13",
+    "source_sha256": "dd59e69222ab1563f51c0fa401f2c56db401b1f1ed47df621b7e4f00503e84bc",
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+  },
+  "changed_core_files_since_original_v45": {
+    "src/chamber_particles/cli.py": "ensure_ascii=True JSON presentation only, three public APIs/exit classification unchanged",
+    "src/chamber_particles/engine.py": "Empty replay search/event-ordinal construction work elision plus event22 use",
+    "src/chamber_particles/events.py": "Strict-inside monotone approach clear certificate; localization budget no longer treated as boundary thickness"
+  },
+  "claim_limits": [
+    "Previously observed same-cohort version requalification, not fresh unseen confirmation or a new confidence family.",
+    "Historical v45 pilot qualifies unchanged fixed numerical selection; no v46 pilot matrix or path-depth convergence assertion.",
+    "CaseA Disappear is observed status/time only; boundary cause/ID NOT_TESTED. CaseP wall-positive NOT_TESTED if zero events.",
+    "Current formulas and saved output-time native total can be checked; individual native forces/auxq RHS/all integration stages NOT_TESTED.",
+    "Native finite-element field truth, continuous stochastic bias/noise law, experimental physical validity and universal COMSOL equivalence NOT_CLAIMED."
+  ],
+  "execution_condition": "Wait for root quiet performance completion signal and pre-execution independent registration audit.",
+  "frozen_original_manifest": {
+    "path": "../comsol_binding_recert_2026_10_09_v1/comparison_manifest.json",
+    "sha256": "e1d507bb71344c4900478649383440ca992afc91e88573b7ba46b8b8a05044f2"
+  },
+  "frozen_original_summary": {
+    "path": "../comsol_binding_recert_2026_10_09_v1/comparison_summary.json",
+    "sha256": "f5edd11b6d85de562ec84441e64decd4ac17b077c37bdc8a639689b3566e4992"
+  },
+  "new_candidate_outcomes_observed": false,
+  "new_native_execution_planned": false,
+  "prior_source_witness": {
+    "path": "../../../reviews/product_performance_acceptance_2026-10-09.json",
+    "sha256": "d3428b653d65011111e42697d0b6dc67fc9428f9c16cfcf7434d0d779f507051"
+  },
+  "producers": {
+    "actual_run_receipt.py": {
+      "path": "../../tools/vv/comsol/actual_run_receipt.py",
+      "sha256": "a8530e34986a07bf8997e6258c2cd6aa4ebbc6131dda1a9f9e05222a44b57c08"
+    },
+    "assemble_m3c2_campaign.py": {
+      "path": "../../tools/vv/comsol/assemble_m3c2_campaign.py",
+      "sha256": "c005a7d2049e25608f992bd25c3c102caafcb3483d01bf86b8a57acc24ed23b9"
+    },
+    "diagnose_m3c3_casep_rhs.py": {
+      "path": "../../tools/vv/comsol/diagnose_m3c3_casep_rhs.py",
+      "sha256": "6319b5597398046af5594b6bde253a8399ddefa6db63fa2aa5cf15c7b21b59fb"
+    },
+    "evaluate_m3c2_stochastic_ensemble.py": {
+      "path": "../../tools/vv/comsol/evaluate_m3c2_stochastic_ensemble.py",
+      "sha256": "860ac37d6e942ea7ebf6d3ffb06303899e5914c2e25d860caf3338151cde4550"
+    },
+    "evaluate_m3c3_casep_three_current.py": {
+      "path": "../../tools/vv/comsol/evaluate_m3c3_casep_three_current.py",
+      "sha256": "de20ed15da9d787ee486953714c75867d6b1a346eb75fe67d65c3f820fc277d7"
+    },
+    "meaning_preflight.py": {
+      "path": "../../tools/vv/comsol/meaning_preflight.py",
+      "sha256": "37e7c149e4ea1bfae5c6fa97cedbf6c4b4a8abf5fdd1afbc3f2815c1aa05be0b"
+    },
+    "run_m3c2_candidate_pilot.py": {
+      "path": "../../tools/vv/comsol/run_m3c2_candidate_pilot.py",
+      "sha256": "edf86aabf86b0fa6b35e41493d3fc8d6e3e69a431bda416d592d6cec12d55010"
+    },
+    "run_m3c3_casep_three_current_candidate.py": {
+      "path": "../../tools/vv/comsol/run_m3c3_casep_three_current_candidate.py",
+      "sha256": "c060e0c5c39776bea616edeb472109c4fb683ec3a26cf2e17eb5abf6b5c9f221"
+    }
+  },
+  "registered_at_utc": "2026-10-10T01:24:52.932433+00:00",
+  "registration_kind": "v0_2_0_external_comsol_version_requalification",
+  "schema_version": 1,
+  "scope": "Same canonical exact P1 meridional RZ 2DOF; C3 deterministic three-level trajectory/events and C2 fixed 32 previously observed seed arms at unchanged selected 20us/depth3; saved native conditions unchanged.",
+  "source_files": {
+    "src/chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+    "src/chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+    "src/chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+    "src/chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+    "src/chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+    "src/chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+    "src/chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+    "src/chamber_particles/engine.py": "566a6de8e52ff8bebe5ed1d16361cdef09576244021251b37b31f879f54a9eca",
+    "src/chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+    "src/chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+    "src/chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+    "src/chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+    "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+    "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "src/chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+    "src/chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+    "src/chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+    "src/chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+    "src/chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+    "src/chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+    "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "src/chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+    "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+    "uv.lock": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+  },
+  "status": "REGISTERED_NOT_EXECUTED",
+  "unchanged_acceptance": {
+    "c2_anchor_alpha": 0.025,
+    "c2_family_alpha": 0.05,
+    "c2_gate_alpha": 0.0125,
+    "c3_direct_fine_pair_multiplier": 4.0,
+    "c3_minimum_order": 0.75,
+    "particle_ids": 287,
+    "rz_fate_categories": 83,
+    "rz_fate_tv_margin": 0.15,
+    "seed_replicas_per_arm": 32,
+    "terminal_margin": 0.05,
+    "time_union_count": 121
+  },
+  "unchanged_source_file_count": 24,
+  "unchanged_uv_lock": true
+}

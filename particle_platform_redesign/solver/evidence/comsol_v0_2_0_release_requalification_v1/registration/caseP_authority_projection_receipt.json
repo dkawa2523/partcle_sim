@@ -1,0 +1,38 @@
+{
+  "changed_pilot_pointers": [
+    "/scope_fingerprint/common_design_sha256",
+    "/scope_fingerprint/payload/canonical_input/path",
+    "/scope_fingerprint/sha256"
+  ],
+  "changed_selection_pointers": [
+    "/common_design_sha256",
+    "/pilot_report_sha256",
+    "/pilot_scope_sha256"
+  ],
+  "old_executor_observation_not_relabelled": true,
+  "original_pilot": {
+    "path": "../../comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_pilot_evaluation/evaluation_manifest.json",
+    "sha256": "d66478e0096f88fd53acb8a4bea27377dce12e0ea3a56ab701ed8a741648e13f"
+  },
+  "original_selection": {
+    "path": "../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_final_selection.json",
+    "sha256": "01a4a09992a8bf98c16a01de56a62f87381e4be9d1458847b065963ebaf74bcc"
+  },
+  "projected_pilot": {
+    "path": "m3c2_caseP_100nm_axis_normalized_historical_pilot_path_projection.json",
+    "sha256": "273a0f61254e03904c05cd478483b58ef3df900aeb97b29fc6c9a9b2316a1b23"
+  },
+  "projected_selection": {
+    "path": "m3c2_caseP_100nm_axis_normalized_fixed_selection_path_projection.json",
+    "sha256": "8f1cf0df0e2b4e1454aa7ca1da9961d562415ba9180eb610f05b89b229853819"
+  },
+  "recipe_changed_pointers": [
+    "/claim_policy/version_requalification",
+    "/evaluation_plan/stochastic_claim_unit",
+    "/execution/expected_executor/source_sha256",
+    "/execution/expected_revisions/engine_algorithm_revision"
+  ],
+  "scientific_payload_identical_after_reference_path_removal": true,
+  "unchanged_fixed_design_without_path_sha256": "39fee5e3fcbebe773c6614bdcc49d19a6bce8ebfc60abf30936ca98aef78304d",
+  "unchanged_pilot_scientific_payload_sha256": "6733ca82430f9b4792b200eb475ac9f536e48a58c42a61c30a8df702b6248bfa"
+}

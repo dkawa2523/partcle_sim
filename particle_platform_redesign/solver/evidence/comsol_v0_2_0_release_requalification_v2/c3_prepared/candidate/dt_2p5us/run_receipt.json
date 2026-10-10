@@ -1,0 +1,39 @@
+{
+  "canonical_boundary_meaning_sha256": "57b178132fc0b507154eda495741f2c7a5ad028b765854d71421b7444dd2c419",
+  "case_id": "caseP_100nm_three_current",
+  "case_sha256": "37a205ec2f373bb1de1a2af1f1a80c67e2b5fb8aae898912a5525bbae8ddac8c",
+  "derived_input_sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc",
+  "dt_s": 2.5e-06,
+  "event_projection_revision": "canonical_boundary_id_group_v1",
+  "event_rows": 141,
+  "events_sha256": "4e5ff7d9790939c6449baa08c0cc87e7c7a8f6f66afc935e89dcb4239d14328b",
+  "level": "dt_2p5us",
+  "maximum_observed_particle_speed_m_s": 166.96201183384375,
+  "preparation_envelope_exceeded": false,
+  "preparation_particle_speed_envelope_m_s": 1000.0,
+  "public_api_path": [
+    "load_case",
+    "simulate",
+    "open_result"
+  ],
+  "release_state_sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267",
+  "result_counts": {
+    "boundary_events": 141,
+    "failure_events": 0,
+    "frame_rows": 34727,
+    "frames": 121,
+    "macro_steps": 12000,
+    "particles": 287,
+    "probe_rows": 0,
+    "probes": 0,
+    "release_events": 287,
+    "series": 12000
+  },
+  "result_manifest_sha256": "a433fb2b63a37d77fff3f1b92e44ef24c9ad7fc8d9cdd2cd68290be5f829a7b0",
+  "runtime_applicability_owner": "physics relative-ion-speed gate at 1.0e6 m/s",
+  "schema_version": 1,
+  "status": "PASS",
+  "tool_revision": "m3c3_casep_three_current_candidate_v5",
+  "trajectory_rows": 34727,
+  "trajectory_sha256": "842e3f6180155f78e1ff2da4180a0a0536d42062a46e6cd2e42059cfd64fcc75"
+}

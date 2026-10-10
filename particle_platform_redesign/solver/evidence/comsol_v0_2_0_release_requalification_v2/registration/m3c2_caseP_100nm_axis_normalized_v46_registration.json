@@ -1,0 +1,114 @@
+{
+  "case_id": "formal_iondrag_theory_consistent/caseP_100nm",
+  "comsol_numerical_setting": {
+    "fixed_step_s": 2e-05,
+    "integrator": "classical_rk4"
+  },
+  "execution_authorization": {
+    "evaluation_policy": {
+      "path": "../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_population_policy.json",
+      "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+    },
+    "pilot_evaluation": {
+      "path": "m3c2_caseP_100nm_axis_normalized_historical_pilot_path_projection.json",
+      "sha256": "273a0f61254e03904c05cd478483b58ef3df900aeb97b29fc6c9a9b2316a1b23"
+    },
+    "selection_receipt": {
+      "path": "m3c2_caseP_100nm_axis_normalized_fixed_selection_path_projection.json",
+      "sha256": "8f1cf0df0e2b4e1454aa7ca1da9961d562415ba9180eb610f05b89b229853819"
+    },
+    "status": "AUTHORIZED"
+  },
+  "independent_review": "Required before first final run, recorded separately without rewriting this preregistration.",
+  "locked_inputs": {
+    "canonical_content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+    "canonical_input_sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296",
+    "contract": {
+      "path": "../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_current_binding_pilot.json",
+      "sha256": "868f1d55716e9fe152fb112f79c304a63019a58c1d0eda0f5a0b0841c86f1be0"
+    },
+    "recipe": {
+      "path": "m3c2_caseP_100nm_axis_normalized_candidate_recipe_v46.json",
+      "sha256": "220024426543d2bb80cb789a54b144c4c058538499a506dffa5e361dca4566b5"
+    }
+  },
+  "participant_seed_source": {
+    "json_pointers": {
+      "candidate": "/participant_seed_sets/candidate",
+      "comsol": "/participant_seed_sets/comsol"
+    },
+    "path": "../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_final_seed_allocation.json",
+    "sha256": "f02caad95fffe3e91c4a63577846825c266e6b46f00dad82a64f2535907ccc9f"
+  },
+  "producer_observation_amendment": {
+    "current_producers": {
+      "actual_run_receipt.py": {
+        "path": "../../../tools/vv/comsol/actual_run_receipt.py",
+        "sha256": "a8530e34986a07bf8997e6258c2cd6aa4ebbc6131dda1a9f9e05222a44b57c08"
+      },
+      "comsol/ParticleRunReadback.java": {
+        "path": "../../../tools/vv/comsol/comsol/ParticleRunReadback.java",
+        "sha256": "087cbd312fa3fec85690a0078cd9cfb9e98ef98e8ca99fa792c7da66e2f6ca01"
+      },
+      "evaluate_m3c2_stochastic_ensemble.py": {
+        "path": "../../../tools/vv/comsol/evaluate_m3c2_stochastic_ensemble.py",
+        "sha256": "860ac37d6e942ea7ebf6d3ffb06303899e5914c2e25d860caf3338151cde4550"
+      },
+      "meaning_preflight.py": {
+        "path": "../../../tools/vv/comsol/meaning_preflight.py",
+        "sha256": "37e7c149e4ea1bfae5c6fa97cedbf6c4b4a8abf5fdd1afbc3f2815c1aa05be0b"
+      },
+      "run_m3c2_candidate_pilot.py": {
+        "path": "../../../tools/vv/comsol/run_m3c2_candidate_pilot.py",
+        "sha256": "edf86aabf86b0fa6b35e41493d3fc8d6e3e69a431bda416d592d6cec12d55010"
+      },
+      "run_m3c2_comsol_campaign.ps1": {
+        "path": "../../../tools/vv/comsol/run_m3c2_comsol_campaign.ps1",
+        "sha256": "54a8418cbba0ea6edd8097404fb24427aab3a0340b0f9bd0fac21c835d6b3b15"
+      }
+    },
+    "numerical_physics_core_thresholds_seeds_unchanged": true,
+    "original_pilot_registration": {
+      "path": "../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_execution_preregistration.json",
+      "sha256": "185851ac520a5e995d52eb2f1941feeb9ec3a545f9da74d065bfd032b08d639b"
+    },
+    "reason": "Add raw RandomNumberArgs and evaluated seed/fixed-step observations. Existing native setter/getter-assertion pilot facts remain immutable. Population reader now accepts explicit terminal_status without semantic ID; terminal_boundary still requires it. This reporting repair does not assign a missing ID, alter trajectories, change any population statistic or relax registered numerical/statistical margins."
+  },
+  "purpose": "final",
+  "registered_at_utc": "2026-10-10T04:50:09.851197+00:00",
+  "registration_kind": "m3c2_caseP_100nm_final_campaign",
+  "schema_version": 1,
+  "version_requalification": {
+    "final_lf_source_amendment": {
+      "historical_pointer_repair": "/producer_observation_amendment/original_pilot_registration/path",
+      "new_candidate_outcomes_observed": false,
+      "new_native_solve": false,
+      "numeric_inputs_models_seeds_thresholds_bins_unchanged": true,
+      "path_basis": "release evidence root",
+      "prior_unexecuted_crlf_registration": {
+        "path": "../comsol_v0_2_0_release_requalification_v1/registration/execution_preregistration.json",
+        "sha256": "da3664a30acb1558ef6d1de94f64ba82d65622a8f74b1686adc210271259b209"
+      },
+      "python_ast_unchanged": true,
+      "root_index_witness": {
+        "path": "../../../reviews/v0_2_release_index_source_2026-10-10.json",
+        "sha256": "1a56482f45cec3286d19fd67419d2912f3cd08cbfa238d75cd81b931a4097788"
+      },
+      "root_performance_complete_utc": "2026-10-10T04:43:37.526+00:00",
+      "source_file_changed_since_crlf_preparation": [
+        "src/chamber_particles/engine.py"
+      ]
+    },
+    "native_reference_reused_without_solve": true,
+    "new_execution_revision": "particle_engine_v46",
+    "new_unseen_confirmation": false,
+    "original_authority_observation_chronology_preserved": true,
+    "original_pilot_executor_revision": "particle_engine_v45",
+    "original_registration": {
+      "path": "../../comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_final_registration.json",
+      "sha256": "6aa7ce55b95aeb6b874e02a7a637ede3c3daf15230b834489cdf5f36b32aebfe"
+    },
+    "previously_observed_cohort": true,
+    "selection_thresholds_bins_and_seed_vectors_unchanged": true
+  }
+}

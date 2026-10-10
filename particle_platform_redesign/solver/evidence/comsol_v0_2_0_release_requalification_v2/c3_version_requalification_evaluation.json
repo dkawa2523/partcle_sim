@@ -1,0 +1,519 @@
+{
+  "artifacts": {
+    "candidate": {
+      "dt_0p625us": {
+        "events_sha256": "6b249529704b2d6a8a7479b53a6e3f86cacf729e8d0b35e318a977e033409d32",
+        "trajectory_sha256": "bc3f3e9d4bc15ca91d256209b69cad79e7aef1eb0a0b825a2cb4f1572e1726ee"
+      },
+      "dt_1p25us": {
+        "events_sha256": "c329516f97002d6a4f4392f6b0ce243b3007723fa5b80499859278c33ba07d6a",
+        "trajectory_sha256": "12b62027063e03930dda20e6e13c811b166f803d96c13f28b5c122b0af5eaadc"
+      },
+      "dt_2p5us": {
+        "events_sha256": "4e5ff7d9790939c6449baa08c0cc87e7c7a8f6f66afc935e89dcb4239d14328b",
+        "trajectory_sha256": "842e3f6180155f78e1ff2da4180a0a0536d42062a46e6cd2e42059cfd64fcc75"
+      }
+    },
+    "reference": {
+      "dt_1p25us": {
+        "events_sha256": "815dc438aa4cc3c414792ae08a87cbfe49dc9476fc9d3a5782cc86465f7f4a85",
+        "trajectory_sha256": "f91c01899d99e40477db9910b1c0903132f8c380c23ff6ea19aaddf85d649fc3"
+      },
+      "dt_2p5us": {
+        "events_sha256": "a0a3732f1c26998c16ab46cb49d69342dc3e7857a805f7d2ccdcccf85ab9b516",
+        "trajectory_sha256": "1a214d7153fcef4998d55efc5a92a22d3b72b19bae2929bfadf257a98f2b7c0d"
+      },
+      "dt_5us": {
+        "events_sha256": "c239f6db10cb2b0d5b84705f86dd0334e081bcd96f87659f9f3f0aca2f41a666",
+        "trajectory_sha256": "7091ef02291b05e015512950a79703a63878a8f31e7e6d2ac4185b919eddbe31"
+      }
+    }
+  },
+  "boundary_event_self_convergence": {
+    "coarse_vs_medium": {
+      "event_count": 141,
+      "identity_exact": true,
+      "maximum_s": 1.150131289119876e-07,
+      "rms_s": 3.228924816290937e-08
+    },
+    "identity_exact": true,
+    "levels_s": {
+      "dt_0p625us": 6.25e-07,
+      "dt_1p25us": 1.25e-06,
+      "dt_2p5us": 2.5e-06
+    },
+    "medium_vs_fine": {
+      "event_count": 141,
+      "identity_exact": true,
+      "maximum_s": 1.5697894279170094e-08,
+      "rms_s": 7.3322896548973795e-09
+    },
+    "minimum_rms_order": 0.75,
+    "observed_rms_order": 2.1387181646295255,
+    "order_pass": true,
+    "roundoff_limited": false,
+    "status": "PASS"
+  },
+  "boundary_events_fine_vs_comsol": {
+    "identity_exact_required": true,
+    "limits": {
+      "maximum_s": 9.781336940672263e-07,
+      "rms_s": 1.2070829713986093e-07
+    },
+    "metrics": {
+      "event_count": 141,
+      "identity_exact": true,
+      "maximum_s": 2.752707806033365e-08,
+      "rms_s": 4.70238456305777e-09
+    },
+    "pass": {
+      "maximum_s": true,
+      "rms_s": true
+    },
+    "status": "PASS",
+    "uncertainty_components": {
+      "candidate_fine_pair": {
+        "maximum_s": 1.5697894279170094e-08,
+        "rms_s": 7.3322896548973795e-09
+      },
+      "comsol_reference_pair": {
+        "maximum_s": 2.2883552582703137e-07,
+        "rms_s": 2.284478121946272e-08
+      }
+    }
+  },
+  "candidate_fine_vs_comsol": {
+    "gates": {
+      "charge": {
+        "inherited_absolute_only_diagnostic": {
+          "maximum": false,
+          "rms": false
+        },
+        "limits": {
+          "maximum": 0.4888049505698734,
+          "relative_l2": 4.125798971091032e-05,
+          "rms": 0.02757056135896643
+        },
+        "observed": {
+          "maximum": 0.02445712284088586,
+          "relative_l2": 2.2544249617771982e-06,
+          "rms": 0.0015065145869173023
+        },
+        "pass": {
+          "maximum": true,
+          "relative_l2": true,
+          "rms": true
+        },
+        "uncertainty_components": {
+          "candidate_fine_pair": {
+            "maximum": 0.0529445732130398,
+            "relative_l2": 4.167679799803209e-06,
+            "rms": 0.0027850426850883772
+          },
+          "comsol_reference_pair": {
+            "maximum": 0.06925666423546772,
+            "relative_l2": 6.146817514237533e-06,
+            "rms": 0.004107597460692407
+          }
+        }
+      },
+      "position": {
+        "inherited_absolute_only_diagnostic": {
+          "maximum": false,
+          "rms": false
+        },
+        "limits": {
+          "maximum": 1.9792935261920003e-05,
+          "relative_l2": 0.0001,
+          "rms": 2.230991515244269e-06
+        },
+        "observed": {
+          "maximum": 1.1211828897976107e-06,
+          "relative_l2": 1.571197350178269e-06,
+          "rms": 1.098206866348243e-07
+        },
+        "pass": {
+          "maximum": true,
+          "relative_l2": true,
+          "rms": true
+        },
+        "uncertainty_components": {
+          "candidate_fine_pair": {
+            "maximum": 1.7808157878085664e-06,
+            "relative_l2": 2.847670182396818e-06,
+            "rms": 1.99041283494698e-07
+          },
+          "comsol_reference_pair": {
+            "maximum": 3.1674180028529175e-06,
+            "relative_l2": 5.131991342686084e-06,
+            "rms": 3.587065704978521e-07
+          }
+        }
+      },
+      "velocity": {
+        "inherited_absolute_only_diagnostic": {
+          "maximum": true,
+          "rms": true
+        },
+        "limits": {
+          "maximum": 0.04348914576493441,
+          "relative_l2": 0.0005,
+          "rms": 0.006198561932930469
+        },
+        "observed": {
+          "maximum": 0.0025955805151173213,
+          "relative_l2": 4.959065109305856e-06,
+          "rms": 0.000351409915711881
+        },
+        "pass": {
+          "maximum": true,
+          "relative_l2": true,
+          "rms": true
+        },
+        "uncertainty_components": {
+          "candidate_fine_pair": {
+            "maximum": 0.003781813566418366,
+            "relative_l2": 9.742928302783502e-06,
+            "rms": 0.0006904061756054361
+          },
+          "comsol_reference_pair": {
+            "maximum": 0.007090472855834233,
+            "relative_l2": 1.212543696415804e-05,
+            "rms": 0.0008592342886461792
+          }
+        }
+      }
+    },
+    "kinematics_valid_exact": true,
+    "lifecycle_exact": true,
+    "lifecycle_exact_required": true,
+    "metrics": {
+      "charge": {
+        "maximum": 0.02445712284088586,
+        "p99": 0.007502280268610029,
+        "relative_l2": 2.2544249617771982e-06,
+        "rms": 0.0015065145869173023
+      },
+      "kinematics_valid_exact": true,
+      "lifecycle_exact": true,
+      "position": {
+        "maximum": 1.1211828897976107e-06,
+        "p99": 4.82878105388857e-07,
+        "relative_l2": 1.571197350178269e-06,
+        "rms": 1.098206866348243e-07
+      },
+      "quantity_scope": {
+        "charge": "all common finite lifecycle states",
+        "position": "all common finite lifecycle states",
+        "velocity": "common active states only; terminal Freeze velocity is not compared"
+      },
+      "velocity": {
+        "maximum": 0.0025955805151173213,
+        "p99": 0.0015551368698975454,
+        "relative_l2": 4.959065109305856e-06,
+        "rms": 0.000351409915711881
+      }
+    },
+    "status": "PASS"
+  },
+  "case_id": "caseP_100nm_three_current",
+  "claim_policy": {
+    "physical_model_validity": "NOT_CLAIMED_BY_NUMERICAL_AGREEMENT",
+    "three_current_same_field_agreement": "PASS",
+    "universal_comsol_equivalence": false
+  },
+  "comsol_boundary_event_convergence": {
+    "coarse_vs_medium": {
+      "event_count": 141,
+      "identity_exact": true,
+      "maximum_s": 5.594437490644231e-07,
+      "rms_s": 7.45443104083361e-08
+    },
+    "identity_exact": true,
+    "levels_s": {
+      "dt_1p25us": 1.25e-06,
+      "dt_2p5us": 2.5e-06,
+      "dt_5us": 5e-06
+    },
+    "medium_vs_fine": {
+      "event_count": 141,
+      "identity_exact": true,
+      "maximum_s": 2.2883552582703137e-07,
+      "rms_s": 2.284478121946272e-08
+    },
+    "minimum_rms_order": 0.75,
+    "observed_rms_order": 1.7062336168959942,
+    "order_pass": true,
+    "roundoff_limited": false,
+    "status": "PASS"
+  },
+  "comsol_reference_convergence": {
+    "coarse_vs_medium": {
+      "charge": {
+        "maximum": 0.46345775668419265,
+        "p99": 0.09817291527149866,
+        "relative_l2": 3.2594871820630716e-05,
+        "rms": 0.021781443784389957
+      },
+      "kinematics_valid_exact": true,
+      "lifecycle_exact": true,
+      "position": {
+        "maximum": 1.872542687666827e-05,
+        "p99": 6.774880073596071e-06,
+        "relative_l2": 2.2051416385233367e-05,
+        "rms": 1.5413096026385208e-06
+      },
+      "quantity_scope": {
+        "charge": "all common finite lifecycle states",
+        "position": "all common finite lifecycle states",
+        "velocity": "common active states only; terminal Freeze velocity is not compared"
+      },
+      "velocity": {
+        "maximum": 0.03529930647201033,
+        "p99": 0.02465337439349899,
+        "relative_l2": 6.457658385696442e-05,
+        "rms": 0.00457604423991367
+      }
+    },
+    "gates": {
+      "charge": {
+        "fine_pair_relative_l2": 6.146817514237533e-06,
+        "fine_pair_relative_l2_limit": 2e-05,
+        "fine_pair_relative_l2_pass": true,
+        "minimum_rms_order": 0.75,
+        "observed_rms_order": 2.4067328749335184,
+        "order_pass": true,
+        "roundoff_limited": false
+      },
+      "position": {
+        "fine_pair_relative_l2": 5.131991342686084e-06,
+        "fine_pair_relative_l2_limit": 0.0001,
+        "fine_pair_relative_l2_pass": true,
+        "minimum_rms_order": 0.75,
+        "observed_rms_order": 2.103280608132599,
+        "order_pass": true,
+        "roundoff_limited": false
+      },
+      "velocity": {
+        "fine_pair_relative_l2": 1.212543696415804e-05,
+        "fine_pair_relative_l2_limit": 0.0005,
+        "fine_pair_relative_l2_pass": true,
+        "minimum_rms_order": 0.75,
+        "observed_rms_order": 2.4129775279105297,
+        "order_pass": true,
+        "roundoff_limited": false
+      }
+    },
+    "levels_s": {
+      "dt_1p25us": 1.25e-06,
+      "dt_2p5us": 2.5e-06,
+      "dt_5us": 5e-06
+    },
+    "lifecycle_and_validity_exact": true,
+    "medium_vs_fine": {
+      "charge": {
+        "maximum": 0.06925666423546772,
+        "p99": 0.02102552472107384,
+        "relative_l2": 6.146817514237533e-06,
+        "rms": 0.004107597460692407
+      },
+      "kinematics_valid_exact": true,
+      "lifecycle_exact": true,
+      "position": {
+        "maximum": 3.1674180028529175e-06,
+        "p99": 1.483313723899789e-06,
+        "relative_l2": 5.131991342686084e-06,
+        "rms": 3.587065704978521e-07
+      },
+      "quantity_scope": {
+        "charge": "all common finite lifecycle states",
+        "position": "all common finite lifecycle states",
+        "velocity": "common active states only; terminal Freeze velocity is not compared"
+      },
+      "velocity": {
+        "maximum": 0.007090472855834233,
+        "p99": 0.0035755601554539065,
+        "relative_l2": 1.212543696415804e-05,
+        "rms": 0.0008592342886461792
+      }
+    },
+    "status": "PASS"
+  },
+  "final_fates": {
+    "comsol_dt_1p25us": {
+      "active": 146,
+      "stuck": 141
+    },
+    "comsol_dt_2p5us": {
+      "active": 146,
+      "stuck": 141
+    },
+    "comsol_dt_5us": {
+      "active": 146,
+      "stuck": 141
+    },
+    "dt_0p625us": {
+      "active": 146,
+      "stuck": 141
+    },
+    "dt_1p25us": {
+      "active": 146,
+      "stuck": 141
+    },
+    "dt_2p5us": {
+      "active": 146,
+      "stuck": 141
+    }
+  },
+  "gate_policy": {
+    "direct_limit_rule": "max(inherited_gate,4*(candidate_fine_pair+comsol_fine_pair)+float64_roundoff_floor)",
+    "event_direct_limit_rule": "4*(candidate_fine_pair+comsol_fine_pair)+float64_roundoff_floor",
+    "fine_pair_relative_l2_limits": {
+      "charge": 2e-05,
+      "position": 0.0001,
+      "velocity": 0.0005
+    },
+    "inherited_absolute_limits": {
+      "charge": {
+        "maximum": 0.0045,
+        "rms": 0.0004
+      },
+      "position": {
+        "maximum": 7e-07,
+        "rms": 6e-08
+      },
+      "velocity": {
+        "maximum": 0.0035,
+        "rms": 0.0004
+      }
+    },
+    "minimum_rms_order": 0.75,
+    "result_dependent_tolerance_tuning": "PROHIBITED",
+    "source": "tools/vv/comsol/cases/m3c1_caseA_100nm_common_p1_v1.json",
+    "source_sha256": "db85d2187edd2b8807717a9f7272b6e198b3dc1a1a080df46e67980458fc763d"
+  },
+  "observed_particle_speed_m_s": {
+    "comsol_dt_1p25us": 166.9637867660615,
+    "comsol_dt_2p5us": 166.96044171862647,
+    "comsol_dt_5us": 166.96011096187544,
+    "dt_0p625us": 166.96322671406983,
+    "dt_1p25us": 166.9658773637361,
+    "dt_2p5us": 166.96201183384375,
+    "preparation_envelope_is_not_runtime_gate": true,
+    "preparation_envelope_m_s": 1000.0,
+    "runtime_applicability_owner": "physics relative-ion-speed gate at 1.0e6 m/s"
+  },
+  "schema_version": 1,
+  "scope": {
+    "boundary_event_scope": "terminal particle/outcome/semantic identity plus event-time convergence",
+    "brownian_active": false,
+    "candidate_integrator": "exponential_midpoint",
+    "candidate_steps_s": [
+      2.5e-06,
+      1.25e-06,
+      6.25e-07
+    ],
+    "comsol_integrator": "classical_rk4",
+    "comsol_is_observed_reference_not_truth": true,
+    "comsol_reference_steps_s": [
+      5e-06,
+      2.5e-06,
+      1.25e-06
+    ],
+    "reference_step_convergence": "MEASURED_WITH_THREE_FIXED_RK4_LEVELS"
+  },
+  "self_convergence": {
+    "coarse_vs_medium": {
+      "charge": {
+        "maximum": 0.16708774160019857,
+        "p99": 0.05690188345868128,
+        "relative_l2": 1.6098183705604196e-05,
+        "rms": 0.010757576264566958
+      },
+      "kinematics_valid_exact": true,
+      "lifecycle_exact": true,
+      "position": {
+        "maximum": 7.776588547645259e-06,
+        "p99": 3.382519820016583e-06,
+        "relative_l2": 1.2490818441991307e-05,
+        "rms": 8.7306078178436e-07
+      },
+      "quantity_scope": {
+        "charge": "all common finite lifecycle states",
+        "position": "all common finite lifecycle states",
+        "velocity": "common active states only; terminal Freeze velocity is not compared"
+      },
+      "velocity": {
+        "maximum": 0.01667921644359042,
+        "p99": 0.01160166326419265,
+        "relative_l2": 4.340886229102915e-05,
+        "rms": 0.0030760679619623063
+      }
+    },
+    "gates": {
+      "charge": {
+        "fine_pair_relative_l2": 4.167679799803209e-06,
+        "fine_pair_relative_l2_limit": 2e-05,
+        "fine_pair_relative_l2_pass": true,
+        "minimum_rms_order": 0.75,
+        "observed_rms_order": 1.9495817237575133,
+        "order_pass": true,
+        "roundoff_limited": false
+      },
+      "position": {
+        "fine_pair_relative_l2": 2.847670182396818e-06,
+        "fine_pair_relative_l2_limit": 0.0001,
+        "fine_pair_relative_l2_pass": true,
+        "minimum_rms_order": 0.75,
+        "observed_rms_order": 2.1330144029478695,
+        "order_pass": true,
+        "roundoff_limited": false
+      },
+      "velocity": {
+        "fine_pair_relative_l2": 9.742928302783502e-06,
+        "fine_pair_relative_l2_limit": 0.0005,
+        "fine_pair_relative_l2_pass": true,
+        "minimum_rms_order": 0.75,
+        "observed_rms_order": 2.1555701038038677,
+        "order_pass": true,
+        "roundoff_limited": false
+      }
+    },
+    "levels_s": {
+      "dt_0p625us": 6.25e-07,
+      "dt_1p25us": 1.25e-06,
+      "dt_2p5us": 2.5e-06
+    },
+    "lifecycle_and_validity_exact": true,
+    "medium_vs_fine": {
+      "charge": {
+        "maximum": 0.0529445732130398,
+        "p99": 0.013864614847630024,
+        "relative_l2": 4.167679799803209e-06,
+        "rms": 0.0027850426850883772
+      },
+      "kinematics_valid_exact": true,
+      "lifecycle_exact": true,
+      "position": {
+        "maximum": 1.7808157878085664e-06,
+        "p99": 7.688384435515275e-07,
+        "relative_l2": 2.847670182396818e-06,
+        "rms": 1.99041283494698e-07
+      },
+      "quantity_scope": {
+        "charge": "all common finite lifecycle states",
+        "position": "all common finite lifecycle states",
+        "velocity": "common active states only; terminal Freeze velocity is not compared"
+      },
+      "velocity": {
+        "maximum": 0.003781813566418366,
+        "p99": 0.0026181613046902027,
+        "relative_l2": 9.742928302783502e-06,
+        "rms": 0.0006904061756054361
+      }
+    },
+    "status": "PASS"
+  },
+  "status": "PASS",
+  "tool_revision": "m3c3_casep_three_current_evaluation_v5"
+}

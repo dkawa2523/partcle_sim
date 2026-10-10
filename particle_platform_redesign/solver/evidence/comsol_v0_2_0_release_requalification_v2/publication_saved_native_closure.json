@@ -1,0 +1,2229 @@
+{
+  "external_raw_inputs": {
+    "../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/candidate_input_three_current_z0.h5": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/CommonP1Epstein.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "64546639d4a615e27a53d5e36359d2c088a1434f821d3fe67f1c75c9e1324395"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/ParticleRunReadback.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "aca2adb2173a97cea51c81e3af26d4ecdda1307588146cd8ff1cf61000c138a7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/RunM3C3CasePThreeCurrent.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "0d817441f2f7a5dce5f233b1f63f28882dedf050cbe1b711985ee5e67754dc7f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/RunM3C3CasePThreeCurrentDiagnostic.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "34af3048946015176595a3ce2ed21441579d0a798791836840e82b50afce5da2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/diagnostic_force_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e3f59443fc8b5748b7219ef737b190525523501f18548f71b90adfd08dcd213d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/diagnostic_state_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ac77f4251a00e80f5fe522e8910dabcf69d8c246e617f19d6a374be5fcbc4fcc"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "0cf398213f522ede29da95ef41e4a3038bc62edfb1bf65f7e30a0e3819b3ff75"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/three_current_release_state.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/CommonP1Epstein.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "64546639d4a615e27a53d5e36359d2c088a1434f821d3fe67f1c75c9e1324395"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/ParticleRunReadback.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "aca2adb2173a97cea51c81e3af26d4ecdda1307588146cd8ff1cf61000c138a7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/RunM3C3CasePThreeCurrent.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "50233e145e1fa85cc9df283ffc71edede14ae435b97fce922f710e5047d29431"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "800fc96db0e29d568e5aa988b97b7d56c193fcaaa17d1cd5334b4d3197d6605d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/three_current_release_state.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/CommonP1Epstein.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "64546639d4a615e27a53d5e36359d2c088a1434f821d3fe67f1c75c9e1324395"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/ParticleRunReadback.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "aca2adb2173a97cea51c81e3af26d4ecdda1307588146cd8ff1cf61000c138a7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/RunM3C3CasePThreeCurrent.java": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "044cb89070cb6efc4c01303d45df2718bf0fe3f3495ca4fb8f54c60175561a85"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "df131a14911ed1f7ac8edb4236b3109f8a220b4f804a2ce7cf1d5eddc9d1ea78"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/three_current_release_state.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5043d754bca21203aebce9641937af4b4b069adb75991192fc35f52edab650a4"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ec795ccc64a190d802cb00a557affa291ae45bd0123106cbf2e75d1b29a036e8"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ae1911eac08385ffa3bfb3da1b5c3bd5fc8d6433d42786fae7d732754b705042"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "00df00ddcecf50258786cefcdc19e89f2249457198b1b557d04c12c990340c33"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d226979675c770c276f0d979dd1b2b3ee822715aa8b7eb196b7f0dd3c299b324"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e6fc479e5fe1bad6a22676bebbafed8bbc21cae07c78439a1749c12f5ac64d34"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5221332c5f1cb6ac1f8418ff014b0674608585be3e8fb517ee969e568c0e5b3f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9db2c032168c2f4452990f7c9c44c6987411eb746898b336461156b626d3f253"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "aaa565ff536cdba9579094381353a8237bba27acf63b8d92c708ce4d5b811470"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d0af3f861f6b3354ca7575136b8d07580878ba7e9f058e560b01b63784871faf"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "03fd342eba528aa8ec03da4d79c469d40e24308eecc4b3edf531139eb6e1cf3d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7801f8631b28dbd538c0dae5eadba6cf0839bc546706d4b3e66a8b6737a35e0e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e8a8c6f725684b7de1665cacb4940b332f155f0f5cadecaeae4da4af628019b0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "794ee153a5a1f3134d8b05fda2fd8622c3372e7c67f76b48b21f902330369e81"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "a5a471e11e1b9a8bd8f435added94aeab6b5cdcdbb7cd98b848e711b223870f2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "93a2d2d24034bd18624018a03412fc6763ba5d519ec70a3220a237ae8d023d02"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b6ff1bdba720bb6d6ac3323da413fdd4ae27cf69b78545335255dae147cd1cbe"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "6e1c181cd5c911793fe83e4cc28385ee50ca60229cb0a37e88e667496a2aa93b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "a29c5d7d53b2fa7416a2962e47f33cc673f1c51df70bf2b8d741371c629f8938"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "2c186737a14d7488356c7ec47343f3cfef725cea92c5fd57a97edc94aaaeab28"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d9d6a7615468af18e15731876a18d42bfa6191c2a8df87706bb2ba5df25a9379"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "1a9cc3214d6ba8a697cd271f1c9a52e9e34a7191dcf02d32f175c61360967b3e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "fe534f23fb486badbf86164d61141ac3a9d46b0e0c389e236876803dd210fb3a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9e89b3f85b58a5ab2dc3e34f535e6df57176a578a936c1e05e842023334d7ff5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d0fe67e2a687a063e89443999ec3946845b071fd0ee018178dbb89a670dd0e32"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "737bedbed88d73f19762b7c8f9a9c28bf8575445f824b8fac44780a3a86a0371"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "46d02768fa22eecebad2165aa48dc181e9a0956f7dd90a7a79b5d7069269801b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5c7f2f0c9b445495f877599b9630f27c8a1d42a445bf2119d24f569fabc030fc"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c884e7c8dc72fab05f3927d83e02e747dbdad677dfe6eaa86a03a8beb1bf176d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7cbd0a00bf03e9699a14cba29b3a1cc9596e73cec6f30cb3f4e16cc90e5ee7b7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "6a00ac40408744c2f82d577b0b71f0a928a3688d1876c62afee1f01780c5d9cb"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "50965f9c554c8e38ed9bef6843a651cbac35d9f47e551f18e6eeabb3d80434cb"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "20e5af6d563f9accc6b01eb7c8b2824b8f80ab0eaca8f374550a0d9bc8305675"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "71dc450ff91fbbc1d545a8d2a4dd141beffad21b45f7c2be1c67cc7687a4f92b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "614a8849766fefb723f03f64fc5a7d4b086559f7b99b5ddaced1e1cea1d2713d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "4a16ecd37f30da2bc9ce38f1168107097159ffdf985d3b4840bf3d66b540221f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "8d17ae51bd0ccad69ae1d226fdb4ce7152c5b2d50fe3717a6b5cd3385b065ede"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "805a171c31c4d64dd2d84441ed5de8fba8108bc2eb39cb3173fad5c7dfb6e993"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "dcd548d94c481f95cb78042bc2b056e990a34590be20f847868b9767eed12f22"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c88ef4fb99ea1c39a99bc6fc87cbbba0e78754daede24e3a14c5747055774433"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e5770a40774f172af4ac081686e84566b9ec03ed2d6580741999166d4fe25a59"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "fd73284507f65051e3db14ec5f585fd563f42edd21535cf67e884f98b41bc250"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e19febda179fb44e6b8c1ea7d5042981ee169de2106f9158341b0cfe7dbf6581"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "88f7d45324491408aa058fa4a0ddf0522a42caabf120d0b3966d2015015ee701"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "79b942e3ab3092ca282c5486e587fc2efda310fcbe249bdbafa683c628538481"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e72387a10f636f3b1a4489d2affe8e1fc8169ff50c601020752d6aec99def6b0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "fc01414e0493008e9103369f59c1af1acb06a1c6c3416095d533b77825c62175"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d08bab57cea4535f88bd2e0f3e3e3936028cb8bd565be910f363f2d7b9708c37"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d4541ced3ffcb1e08bb49b6962201c1f0d00a958fd2ac0e38b8af1d089d1ab9f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "8e09396ddc92d65ed04ba764858462c8ea28d3651bf1eb4eedd327475fa104be"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "de98ef32e8dce2255c44e704e1659ed33bac00256868329a0279e7652465efe0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "1044e6eca5ca1c4e0dc1d43b11b8cc8d7fdd1fca5a3811c37284ededc54813e9"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5ae14ae517854eec008195b29a40e3984ff7c7fe65f2ee2bd62afd0a88fe2617"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "8c4d3283401cd42bef3e96f3e185e73f08468bb185ca65adb839b1f8949c5292"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "103b3b302a8539a8f8021ef40008b0b5c2fbb5ae5bb4692751b5c819740e6a9a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7bd3f4403f39db0c0e47dd69653ab7f22aea798cd90b579ea605a83499738e0c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "53382d2a37cbafd492ee298f620b67d367d1ae4e4132ae1157ca8d99fd653b61"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e894b852b95ef133a9a42da4fcb09f9e8d483ca7c25d70706a996cb178f540ba"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5fa0797dd62a10156f77f044da65b9e39f45594144a2c0cd41b1e602a39a8cb3"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "78641918b883efbffa8e256bf35be9a69fa09807929854dd482e52f8fa3d009c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "01b7c5d1a33ce57d91af112d087c0f35ee55d0da2d5e97da25a63121e677401b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "442adb75680678e1b176308f6b9fcdccc26560f4b7af461cb7dd98e501f197ce"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ef23b2a3d844b3b0eb50ff5031b285f22edd53d93f1595715ed496fd3647e15a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3b1923bf0cdc0b7cae27923a113b7a967627c08edf30744c7d8a62f5df1d264f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "52b8d2fc3306aa03a2ce1ff7df9aec15377a2fd2ecb12baf3871c015f5cfb6be"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5fb2f7000d91219bd696c5b3d1a6238d96fce9caa7e401e40cb9b8bf720a80ed"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "cb4628e7bb2b81a62e2a8eafcb5d51f5b7b67f8e6fb4ce4d301b1b91fb215a0d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "8382fabad0a242775292983c123bfed05b83a69e9a90cf14921675fc6042ac2e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7d5417a8db46b2a4c76dd710aa9f7eb3e1f548e78214694a726aac4b41acd66e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "02fd80b672a63d85d4a3937f0a2e69666fc5c2c6f0211af211654b9195f0f456"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "18245cdbaa281a131ca64937cc34a0f3d1b344f1866486200c9382c5c270956d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3520b441a8b76a3b11019f2874ecd43782f6cf9370e58a92cfe5ebcced2f1c5a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "74ef7941b9d1aabc591c4c470baad16ebd3010f7402fb37784e7a1bf6b37d4a0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "644bb54ba692f5bf4d52f9964b5f722932270acf9769e395abbeedd323fd3b17"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "10dfc9c1bfd13cfb20e5a6a4149c85c528c3d47ea7b39fbd0ea18cb7afbd4aee"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ade3b889a72113f73ab9e68f9af10702d5e578f13d0766ba656729eb62a0ed6f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c84ef04d2b25ff17057ad74375f73d4bdc0b990775d665ddb4e17e1e15373c29"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "648729a30791a7b0107ddd77b1f7ff928bc2fcf1f41e69c12017c5125add572e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c55cce1b9f3ca7e236310c5161685e92866ba764a4216d435800442ac89a3b03"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7c4479188b70c89524e39de0651402904024958c4c2d158c01358b158ed71052"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d5dcf2bfee8701f5856942526c88ab4e48b4ab27f4743cbfc8416d03a801b06f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d4dd7c420fd97e746e5cad55a49336d5143ac37227d21d1bb8118247d39fed2f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c18d36970a129024c3c506184cc49b2de78235ed349b6827f2f4396579584878"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "515ffad17d8a74b4f49d4910b50391d381a764ef46708b378b978d2045e6a216"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "a26f892499382d07223a004b22bcec5e8c20868fb126333b70051e9d0f0dbe94"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "55deff6b94936b90b4302e352680123796287605192e5a02ad0fb00e0cdafee7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3f352beb73e350aec4bef7f97f11d074bc4c3b44ce6dadbc40a22333afbe7448"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "758f82d3fefdca09e546377eaf7893df693e02b58261ca35b995a5088c7acd1a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "72d064ad1d86b25c37aff33e8da5c5081ab0d8452f75c2d64dfa07c5622e6a12"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "280368e883fe032db3dd0699f8c48c9170756499acee17fbb0bffbedc5a3dd98"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d4e941bbe2566d34b5abf9033d5296440a1591b9ab1ebb7f6d74de95f2addd18"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "14feafae2159dd32cb8e53f09971d7179d52cf6305c7b9f2f3e6650ed2a630c0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "2363e16d9dc7a0fd4be4f4fe5b1560f139b8e01e2a44121dc5b934b2954ebf73"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c7e2288fab7be4c2ef8dbd6e214b927b540a38d8178460358ed444447dcf8e76"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e38f9ec95b6a0dfcec588a0ebae9af8c6d8806ec992f8de79b0bc924ae09a263"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "41c6f0c511db150944c984d985c73025965891408aeda1eab6e411388aaaf2c8"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "2b8e9c6b539e0037acfa879329951a21284304d27a0d29e5db9563bf070e7dbe"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "996db2c15c46b78d0d8f822d07a6574e4e4b22a1680fa6445a8951cac0902871"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "4031e4897e8ad46553f7a5e028bb682345a035570ce918d9e0daaf4507522886"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "913f4d8fd396254677897c0fd91b526404de5240306d9a114801bed22bb2b168"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "1becc7caff1c6d0f37eb88b850b3a9dddfdb4680d0d4a0460db023bc69fe0dad"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e4ad1059531b5db271931df3dfd12e2e063234d98e21d9ff7dfdf5cf91835dd9"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "0fced2ada4982fe66d85102acb5ce11d6fbe4ad1160a9f57768805348a014ed2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5c4d06d3ce2eb00cd49da4764e48603a342217fa908fc382fd2e87a6a7f7ed58"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3bdb728e74d78efd48916eb0b4fc5ade0262d5d27a4a13c7705088a1ffec5cd6"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5b6f98a772f983c06c59406198ee4856746d21314a64a6661259fae3c281d4be"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "23b022cd6ddd71892cd8e4e85e05b92b8bb6016c551bbe0694164d84376baddf"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "6759e6396b79beed46f7df1873aec7cd12e90d33341e6268a1d2eef90b46698c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e054e858f0bc1af5617c6630f4e9b566d5e72106c7b2bbeebc22c17beff78ac2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "177307b720e3165a9ae7295e69ae8a01e557864f7eb6668eb167d22111be5e8e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d86a801a3b2f4ba2069239b06ad4843f7880801e9b74a7794856f9f79e69e777"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "2ba9d80c3262262b0899fae9f14fe7978c364e4b77277863b88a2851301e8cc3"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "bae041a3da72be2878f2a2ebd81c8893c478df1ef8ba8dd948220b1d481f58f8"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b780110de4d91ee6e39d28913d342ed6a61c8faa178295970bbdc167feaca19c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b5a1cbff8cd790e98169614b4e4253c274bfc5ac8e98a309b1d5e7a454d8fe3c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ad62379b955f58fad61f1ffb3d21a6541d6c0e39e0f2dca0e82580b9f8214389"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "97e5efbe82e1f2421eafa44066bb1a685e0e75e39cf7a6240e18438c47c0b407"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "0b0554a5d68f078809ec61b70c22f15d62208a04fdf68f72827396b4d2ecc759"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3dea29252885da8a007a9961da0ab8f1f408b80fdefc6f974255220a24d68c23"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3c50042a283031c28bd8574a6ac16b9ba477e59f4b9f0306369b4d45fd73622f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ca42fcbba39eac7a915c6dd1b724cc7ef20529e770da1244f5f47b2af7145873"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e962d79d15abf3a48da2b98e0676dd67c461a142d71c04d86234038886c1f459"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "1e3f412ab3188cd7f02299fcc85323736f157364bc267ca762797499a702b761"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "092a6572698c5e409b5a3a4d0ce383342afb2293a62992a21adc5810e3a00d9f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "dab6a58f5723fc21404a60e60e2d192d46e0fe48edf2c3e15c11405818a9a611"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "0c295fce94f5060b167c25eaf416197af167cf4b1077798aadb710de4e53be12"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7ee8d181ffa1b401002c7fafc7136c3ac7c8f57d86fdfeb9273ebcf57d5de6dc"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7ab8a88d0da37a0e208d1c7813c0232e95cc9493b3d4d1d37b4d5bf564c0655e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939000/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939000/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b036e466eea06220a9e0793b486d0762321aa44f5d14c839b086446138ed6219"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939000/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "bb56159fc4423f967bbd0c8ae3af492efd7a0dbb2f28bbfb0a9fac9122f3bbcf"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939000/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "573e81f1f6638537e08bb83fa6affc77123311dc498bb03b5ad80f15cc64e4a1"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939001/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939001/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e3fa059d32ab4a1c3ed6a9d6edf70d921531309257192882dd812b87f591f0ff"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939001/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c1abbd6245dd8a240966efa238b2a4bd48e0c1f7ce43bd867b3ea8605bc12b5a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939001/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "f015442bfa46cae890ccea7138a8a9b513c0c5d69f45c32446f371a67dbddd3b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939002/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939002/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "82fc5e222e7101a33d3af8677641db37cd9a197c41a81a4530134663f4432806"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939002/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c09deb07eec58c6fecd5ae7b76b0ff64877352510e5fb4178af36175bcd06fa5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939002/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "6c4f03ba45a721496c1af9928eabfdd3cb22d63dcf4f0e62053395e267e323a5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939003/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939003/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "fb53ad5f0ee5a5d3be965961f7877de8fd35e9e075f05c9b3097096c7209b3f6"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939003/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "a05913d53ac03e13d77bde440012c2352326f6651fcd89b02cfa1d4240c618b2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939003/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c0fca859a1ecb19a63c90f762dd6582430762ee1b291ff6bb964fc3245045010"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939004/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939004/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "f00a193af0ddcdb45e0984ddfe4b2268f7fb2a79e3c83f1950871ce468602d4f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939004/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "adb872289e51cfd94d9dbc98c2537f2e6656db1a594d5768f239e3210a6504fe"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939004/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "28226e4ae9fc4ab2ded15aa791909d60d58291f44314fada2f362f4ec3730a6c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939005/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939005/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3e273c8c1aa5174dcae186f9fc9176456d053bd085f2b7d13f95446a4df435e1"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939005/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d40200875798e4f288576e2c96c7d6bd692bc3691797c72d2270db219182822e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939005/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c4efd54fe91c2e8c369a9039fa42d36b4874c46ebcc7c527a7807c52a12adb81"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939006/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939006/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "4b13ba7fba74085632ebcb68bd593d652a030332c26ebc151dd1c3b6577b3035"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939006/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5470ea29c9f6c0619285e7cbe5b4ff1ac3c86d3d62d6eae9799a7897cb3bd7c0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939006/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c6dcbdd5d6563f47c840158d0be7e6e2c378ff4fbe2e345c38425b78cb600153"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939007/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939007/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9e1c43adee08ff9e625832ec6fc82705efe6e98ce20bc3a3d137a536413cf82b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939007/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "f6e2433f3adf059fd0a86f4fb026f5af72e30b8c1f98e0f9151ae36884cf27f0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939007/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "8e6e9908894260f0211ce6380494cfc56ec37125448c60bb4901ad9aa6d4bdce"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939008/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939008/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "66c27745a34fe799d5152691295b2ef48ba99009a7b362051676846bdc208b5b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939008/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e90722d6b4a9603346589e16bbcfecc6370ce8cd49411af86f759d7fe52f2ded"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939008/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5be3b48a2b04c505fd4aa5ab8d34d0478b3cdf677adef14c50e2424d392ca16e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939009/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939009/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "bed77fb280559f84d7a14c2a69d046c3e6d9b8cf8f1dd32f2753bb1990da244d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939009/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "214b49383711b3be13405b1560d5f31ceafa56f592422490105d45037c33a906"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939009/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "da84a36f573fb706f6a64473a5800d9f61406f1a9b5f4420ecd49a62b368b6b2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939010/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939010/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9b83cfaea09064b672ec165d15e3fd461c8022a614116954ada35d878ff797ae"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939010/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ad5310e4ca4a0946529ddef11b684b733030810e954bfd7592f702e9849b870c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939010/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9f88dd0cb9579b7d0b9a35b986fe6b8f00bd4c16e5d492570a702cfb42b303df"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939011/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939011/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "1c5438daf06fb753cb7339419bda6382b163a71b733cbefd4189f322a8dfb440"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939011/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b42f93435a1452e6acbe94503a5e4db8224487bcca4db1f27499e5b8d753eafe"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939011/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "620f106d48272275843ac55466741b39e91fc8d124aec9f3ab2620ad88f076db"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939012/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939012/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d3c8ca01e1e3cdd03f00d69ed532208a5a7dfe9dd8ddca49acb2b3a807bc8a42"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939012/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "8d16f13aebe3438921920a91e74dc9209e029dfcb976f6279d0417d3a82b1d61"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939012/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "158bc77a79cc32427c46e4b6d4445c339dc42283888a859f69006f226a4a98c5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939013/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939013/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d3c8ca01e1e3cdd03f00d69ed532208a5a7dfe9dd8ddca49acb2b3a807bc8a42"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939013/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "f7a7ea01ca4e613499744a5c41bdbf727be0f93c3af2fba4d3bb7d2d0b1786b5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939013/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "f3e63e6fa8ef5fd56abf64659909812fb5bdd04da38ef1e387428e1057999af9"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939014/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939014/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e1a14b961426822eff17dfd5c1db67060b3d059db6c64c20147d9d0535bcdf1e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939014/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9adb7ff2518a65812c9c093b82ef6c10328cf2a423ecdeb84e2a6cc11ed7152e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939014/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "0768c15e47140deacc8431efbfac0fc25602b46cb5922c66c72150e6e0fb0884"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939015/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939015/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b56ff379e756eff39f332b3937371cd5744edf76d35b31b906a2e6203b7edcb9"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939015/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "ae094b7f7b272fc66adcbb933f53ec22d371ef4208abd0f5112e35c73640e00b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939015/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "fd75f6e7c957efd3c605b4d70a16ee18aa5f3010364082725c3d3b8d1a264fe0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939016/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939016/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "4917a132195399f475753e2990bb1b1851ef45bd64d4f61a0790b16578dc6821"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939016/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "27d6ab3c47f3defcde0647376c51d8efd98dae4ee36ac440d9827b76a1f4230f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939016/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "df94b8e20e5e569a2a5cf540bd8f70622091704f951266430d0d955fb429ded2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939017/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939017/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "995254691e2027b04af50cc47c2093b95bbb6c75060807a94812ebac0021757e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939017/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "448e67ad7653d46ccdadb871f2e3563bee07139211ec9c16b5accb6dc7eefeea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939017/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7ed8795f99550e114999b16ceb16c76d8aa6fb00c3cf312a9a37ed774130fccf"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939018/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939018/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "2cb29934c95da1879a01cfa65d11d00824d14ffca67a17c38e5369b87f637e63"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939018/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d70f6b6ada248d02b630e50835d0c5043139f6b9347fbaf2647db007f681e74e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939018/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "90e7d7e5ad854381672592f52c4641462ebee1bd81dcf314724569b5b9138761"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939019/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939019/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "134b725e7304067a46bc35bc8e4f4fc808f0534ff822b0a5e4115e17d195bcfb"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939019/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "2673c38423901947e0628a563d05155c0812be9839d12d4d55bb825d0b46a128"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939019/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e47b4a57a16782926a9639a2d030fa9d4c204a1c6fca8e8805850349a4330128"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939020/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939020/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b2a6813a0b821355768429c21d7df1997e84eccb393b412e62dd2e1b9038e292"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939020/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7f6b5f7020930b8cdc5067dfb0b642f29af60646d4d94c9c0e5174585acaad0c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939020/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "8136993f140e5841f428e637078d3720dbe06f4e5ba90af2447a1fe6328f8432"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939021/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939021/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9e8847a155aac696dbb2a808be0d306b5f8750e248ec37b218bdb7719e0927f5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939021/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7ccb5460059053de344524062c7c49ac1d24c98cfc77fee9c23348932a79bebf"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939021/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "a8afb8366a860abb9dc0affda335eba851fc6f041744ef553f0ca047ad35d5af"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939022/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939022/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "f63fa256c941253c22329b0dc6ee56e88058ff5fa182b7137e46e67fd26d1e12"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939022/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d64ac3f1fbfcef9892475e6456cc482ed4a3653d12458f36f2e9d8cb7393c2d3"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939022/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "1f14f975c708f70719d1ee23e58eae3727d22263ea3127b08d2fe803f3e773f0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939023/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939023/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3a26e8eb54da85d07207671b56c618c46837eec72bbc80190d42c3bca4691d87"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939023/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "6b00657ba1988e2504caf8b01fc1628c72159c64e9bc75f8c5038a4bb8ad99ca"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939023/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "2cdaee93ac8a83b9b0c4f4e79ef3dc5dc503b05b12ea05bdad13456531667f25"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939024/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939024/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "1d9e6309b484c4e3971df2f57b4c6a9d481b3608f2fbe4d22367d332b3b78837"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939024/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "fb4772827675b838421dcc9fbf8ddf2851b0bf7195820342796d944c4782c638"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939024/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "a875fbff63ae0d1a7cbae7ec130a2dc354c2d1ee5b4b6d6fccfade3a2570008f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939025/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939025/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "87cb992b535b450f17a60c00d28466e012e70224582a22ce8990121bb0b8dfc4"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939025/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9c23ba2fc37da07bbb8ceee8ef589a0fa1a04c8f50f3897fb3aad970dd6a1493"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939025/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "844d5e4ef63fb3f9fff38ca199541b4cfcfac816dd6e582bd4a81a3c13ee229e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939026/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939026/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "21f7d710eb85c0371e5b39cfa1e661aaa35fd4feabde95f261dc04aaf93ace91"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939026/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e67e6b535d85e8c95cce5d1e635f98c0e733ec9ee30ffbb71e9111500e247773"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939026/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "e6f02907797041e0bc64adfb438ddd424a4efdfa0c6a14cdf3830b2ee1804429"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939027/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939027/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "21f7d710eb85c0371e5b39cfa1e661aaa35fd4feabde95f261dc04aaf93ace91"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939027/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9ad3aca72a3cf4ba7dd7288647e4d735ac29606034054e164bbfad168d02224b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939027/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5be489a150ac50badaf84ad247966399684f4f61e3cb8ce2b62ca6df0737d8b2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939028/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939028/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "44c9571d0a7bd08d561a17eb0cd34fe4bfaeb1f0ce76c81fabf26b4adcc3f1eb"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939028/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "b7966842ff0e774057a3ddabe366f8f4ad929fd1185c8a069ebab6173a379fd7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939028/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9d485065291031ce437ea2f4384ad261e9f9f3744594a4ae165fcbe67fae2b98"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939029/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939029/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7d29a0755f98afca140dfe7aae2401e876ca79090e6e910e3b6ef061df7baa8d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939029/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "3bd554f68aa940160edc17828f5202fd313728907afb68ce195ae6ed5d026ec8"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939029/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "5098f41e062d307fa74c26d8db0c176ca17f89f2cb9d1753fb5dcf18e868f84e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939030/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939030/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "63c0b43b20eed7c666658848be439246c6e86debaa09791f106ba9811d65fdee"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939030/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "83896c66cc5231dae319df5a1812bf4cf5f0a2ebb6733cc926cd13df61be2738"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939030/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "7261697542c8375261860d119a5bdeb53aafb6d8a16f38c369b898a419000eb7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939031/events.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939031/terminal_boundary_raw.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "c7ba5f4634367b4deedf708627c80201043df9c1261dabd3c7baf6b580f6beb5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939031/trajectory.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "442e8257fe86da292f773fd0b29cba497231f62cb397a42534ace65521514f06"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939031/trajectory_raw_wide.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "fbfeb57c44fca668220461964670cfdc1f4d182f3b5f66c27de15dc51cf40969"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/c3_prepared/candidate_input_three_current_z0.h5": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/c3_prepared/three_current_release_state.csv": {
+      "classification": "EXTERNAL_RAW_INPUT",
+      "distributed_in_git": false,
+      "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+    }
+  },
+  "local_regenerated_metadata": {
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_1p25us/preflight/comparison_conditions.json": {
+      "classification": "LOCAL_REGENERATED_METADATA",
+      "command": "uv run --locked python tools/vv/comsol/meaning_preflight.py evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_1p25us/meaning_inventory.json --output <new-empty-directory>",
+      "hash_scope": "Original generated report includes absolute inventory_path; relocation may alter only that provenance field, never binding values.",
+      "sha256": "571c7d119f7adf9fff5a5f9c01387ce2f813f1b1fdd697eda26e5216f7ee19f6"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_2p5us/preflight/comparison_conditions.json": {
+      "classification": "LOCAL_REGENERATED_METADATA",
+      "command": "uv run --locked python tools/vv/comsol/meaning_preflight.py evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_2p5us/meaning_inventory.json --output <new-empty-directory>",
+      "hash_scope": "Original generated report includes absolute inventory_path; relocation may alter only that provenance field, never binding values.",
+      "sha256": "84842c1bd747e63e5b4b97d6edea4e501b3ade8d4b678ea2cba8cce5908bfd0f"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_5us/preflight/comparison_conditions.json": {
+      "classification": "LOCAL_REGENERATED_METADATA",
+      "command": "uv run --locked python tools/vv/comsol/meaning_preflight.py evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_5us/meaning_inventory.json --output <new-empty-directory>",
+      "hash_scope": "Original generated report includes absolute inventory_path; relocation may alter only that provenance field, never binding values.",
+      "sha256": "77ddd4fc366238c89d556c3c7b88957afd8a565d7aeb13c261bec72ba8b6875e"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/preflight/comparison_conditions.json": {
+      "classification": "LOCAL_REGENERATED_METADATA",
+      "command": "uv run --locked python tools/vv/comsol/meaning_preflight.py evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/meaning_inventory.json --output <new-empty-directory>",
+      "hash_scope": "Original generated report includes absolute inventory_path; relocation may alter only that provenance field, never binding values.",
+      "sha256": "e376a0352b79fa53eeab4ddde62966c53d2c2bb8a1e673612902770d8f6e809e"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/preflight/comparison_conditions.json": {
+      "classification": "LOCAL_REGENERATED_METADATA",
+      "command": "uv run --locked python tools/vv/comsol/meaning_preflight.py evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/meaning_inventory.json --output <new-empty-directory>",
+      "hash_scope": "Original generated report includes absolute inventory_path; relocation may alter only that provenance field, never binding values.",
+      "sha256": "0f465044f337971d3c29e4d918f1abd49da2d69af4438b6533db99651b15db80"
+    }
+  },
+  "path_basis": "solver project directory",
+  "retained_git_authority": {
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a0281483feb82854fc649c1c9541c6838d5065c905b0f4f7aed9996e4c9a834b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/execution_inputs.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d7f6019d04446484382f4a57f269dfd0430b4cb91c6e84c10df1c8d6de368f72"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/m3c3_table_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9d3cfeb2eca511f4956b41961f9c6ccaf110128f015a89d9d28c53d2dcf9509d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "34d1b6ee02bd16763cd23a3426b2303188e7e7c76b036e2bfb6c57a497259a12"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/normalization_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "82302f6e876b2c6d1350c1f79c3c84a3e73af4593f83e31f92d57e3ec45d23ed"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/primitive_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/reference_run_config.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/run_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "c517d28737071a63fd0cb109fdd260c4250e0009a854ffdddbf8743912b51788"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us/three_current_release_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/execution_inputs.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "aac1f9a5f48659c2ba01f95bd99987f2af8da3ac052806ca4e6bb66f02119018"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/m3c3_table_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9d3cfeb2eca511f4956b41961f9c6ccaf110128f015a89d9d28c53d2dcf9509d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "e88bbfcedf491823cd170133ef80a2f4c2342f0e79149cf732c29a274ddc2c2a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/normalization_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "26343aa2ff3679951cc1c2d6119ab56399ec1ba11458b4e78bf5110edb54d34d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/primitive_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/reference_run_config.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/run_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "9381239dc578a23b6dab4ce3a43aa991495c1ea4dac10240539fcd1cf0190f11"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us/three_current_release_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "24c340d739c8d5e0ceeb0ebce720e8508662f512d43c5a3867a04c402bb6a77d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/execution_inputs.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "8e4b696779d8d80da68704b551613086f5a196a991f04b87533dade869ecd175"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/m3c3_table_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9d3cfeb2eca511f4956b41961f9c6ccaf110128f015a89d9d28c53d2dcf9509d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "b11ad8823e9b4f625cf90f8c30103d9b088308f76e65206f28b6671ac222eb83"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/normalization_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "a5e09b1a3b765e2e2b9087323bac84c232956b27a6149dcfd6244d122c46f60e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/primitive_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/reference_run_config.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/run_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "fe5c4087ea90024dec39b21ea882f96c08ad93bf8662e60d2822cdb1f8a9b9a4"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us/three_current_release_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/comsol_campaign_manifest.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "2705658a01e1de69e7e3e41e1c686f394e64b9be15a432ff4ab2d6bb3e5975fe"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/executed_configuration_observations.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d0bf5bede76e4aaeed21874ebbce31f6a5f21ed0bdeaddbd8f41ca20d5603334"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/expected_binding_values.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "ec491eca005190e222ce43756fc11adbc8e43e464e393ae39a66228d003996db"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "282aab7670cd387edbc6ba10e6de9ee19dda2f3193449924c668f86e936c512b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "0dc6b3981a0a0a0b9aee8f43e5f6474f27e0b0ca7f2992ce4d9be076c03d0379"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "347e0dd2d20cab90fd080fd6cde92caf7c7a573beb6d48e63821b7d93b746587"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "5e1a9132659b1e4577476f1768f44c1a5edf5e5168122fea3df3b5ec5c9bdfe6"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "575dde46dd24d0667cef389269345f4a3925bb0954064beb82c22a43b698b62c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "521fb4e7fd609fc7d754c1c288cf671c8c33d3d8c5b495a1bb950b9caa2ac814"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "0f1c25369d288467cd127af89ba77d1d06f4e5761aa9b980979379fa3b3c17c6"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "13cc50b3303d9adb79ce12d6ad62f20acc42eb99b20594adf02ae1bb7eea6e2e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a1c0acabb6d56412524495221fb34820f2864161afea89496ff1c074160b49cd"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "07d473fe738df86c6a1526378470b8e23fae00993584d2256543b4247783b042"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c2cc585a391bb7fc5a9c492dafd56e01e064115e0e26e2158511d589303897ce"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "3c982bf823aab10f391d67f18aad8b79311bbbeaf877622d3bcc37fb49169015"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "4a9753fc3132db76b5389286febc0bbb0f3d7ac78771b0209c46a285ac816b3e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "0520a4dd2bb9176d2a7bcd717d2dbb2321736d74df412cba754e639f5361dd8f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "21010c3104b68fda52cafed2513245d26e576e74ce38d19b52343f6b72db8240"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "efd69ae73cee82991043423c50542a7d3869d3fb7fef0295de1b1a13a4621cb9"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "415a4a2e59b2c70965f44df23b50b21e79af787ed527c7f51423ebf615f50170"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "28e7e37572f8872da226077be8e2e9695262aca3f460709ac0cc5a6faf0e4058"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d07205d8553c4107504187a4d7e7579b75ad68d79a329ac8f6b590d998eafd2b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "e9b985383d42e3c6a1a4c884bd6f355ee19702b489eee8c0499283662007b513"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d2be12b080a71fd970913b5c14998f8f7bf7ee4dc2557a7a9e3dc890b462402f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "4c405681a6bdb1dcc5f934f8b72d490512592fc0994bc57a401443bf657e65af"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "af9dd04c339649db56fcd684e8ecb7b815a78342d75efa76117ead94c43e2fbf"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "74e23c581abcb432d228eaf9a9b18b0245c22940981d119a7d222163f62d4915"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a9a618d07a8b65a6d7cb72ec7197afbc4669708c81bfd760ab7f69386a676549"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "978582f1d996ab95173cb4ec9a2b5de8f68e328643402461e87bb2bedbb94d7c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7d25ff6dc116eb2f8bf22af16aa5fc58e144fa17e1aed5f3992308a704f51b92"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "573e15f9474ce969377b579a1f3961ba90ba8933770d46b3aa166b867fc37669"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "dd97c1d90d530ab304a06925571e66cb654978e8b86002c52ae2f1588213cbb0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "755284e6d6fbcdd082659d51042c605c75e0a42a8942bf533b55fc56730b7068"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d45cbf609ab18569473e666dd153ee4460f209d255ae8495cc889ded922c19ab"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d486db8a1cf6a6042d0ba858c89b20c18ab99a1e58f931236a9f9564c86b730b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "4ad677261b27034123b8ba797df2f878b51c1c920607eb377b9b28966f85b457"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "b7bb3205ed4be570bb12a965b48895dae65d84ad2b267ce9c5094d24466c52cd"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "e4e0b87206af783bb8b36244ad724afcfb15c18eedf130a812268a8c87f6eae5"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "97a06df91dc1a5170f2e767bde1b7fe71eea625ab75328bda0cceb7ad60399d7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "f3ea80bc762720445ef7ace1f0e826b20ac73d0419f35c3be938a24c384d25ce"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "54f888dc9be5dcf6a39ba21eecae83f7805120278732f4d01a7eb30ce6dd2f20"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a12e2585f8720aac56274f055aa47df380296814d47e8a890ba4626406fb4e40"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "adf5267b507b9438733bdfebb8075f43621e55ce273da350accba6eb631d6220"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "5fbb59d6f6dafa65d1874d0a715c4abe8d17878879502e6badd21d7587b490a7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d4ab66dabeaef8336590838cf8d0d3a1e63f2b07920e778be7eb28d10175226a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "fbf95f7d944cce34544fc85f262cdbd9de93cfb49559fd497e01ae7b1f9998fa"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "924af12f1f1e9e1ff98661efbdca95b106c7c355619c31f180c3b3fc71fdf440"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "eb1ec4a83f318369785e1ae164b9227570914e1a2710dfde8bd4c09da72f4649"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "3d1e254e319b5d44647785c1e8ee6a242906a5f3a49b39802d6ba49d6ff84298"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "985c73f76e6072d45d622904851b055f57a1409946ada69977df2e64c415130c"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "b2d3617a14507439295ac6f10ec470ede985725b6e82451a54c36e32a1826d1e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "07ca10ea186c57cc7f3dff607e28775fc30058253a9fb491b072af792e6d58e7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "5c0d5e2fc51f7d230f1a0a276a4b5ff714df8fdf7617264c69850e5117b24b38"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "320b4b23d989ca92bf78a17a0915840710a4b2f0530d1f99db2ebe2a9fd2a205"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "01680e36a7ad348c500ef409072a889e5752c3bf6a954c039b763b56558dfb81"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "09862ceefc4380837a28ee589a8bbb21a1c3aefae2fadcdcdd57d1f91b5a2481"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "8917d5d4178aee07d7194be44364a0d89d7d8c95e523944a493806f08c0a2eb7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "dc8aefef4ae2cd608a3a5ce66991f3c7dedb4c6c4a1cb323cf87a050f41bcf20"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d244b8db3541d6272633c5c7131ac7304527b4cb9131d729fd72015525300675"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d6052862d440eea7b306e2523da7dd120d33ea4a6f09717967ddab2e18531c20"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "97c5719b74b92e870d620aa8c085ced19792201b19dd9bbeb6defa4ae0161df4"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "415eb17dc3e63dd0f7c101caeef11eb0fa652641c64496ed1d3f1d6bfa788dba"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "b57cf821612760cd3d58fe6d0ee19cbc38a58287a859a14b6d355f814f02f5b6"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "316803d898b2449312d16a0c3cc41135cbbaa735c55bdea90de98970bc40ec00"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "62f806f5857e030a7ae8be3c0fc32a1ed69eb694b8fbef467cb37673b7510a64"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d159e1af3e13970b6c479f216ef1dbeae7a70e94b20043edd04c52bec91082bb"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "ce4eed824e72a58dba5fda8d471f052496c969f783d4e6d05f0d7aaa10d3d7a3"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/m3c2_execution_request.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7fda298ad42571eae4f1428ef5a3ed56f9cb84018999485770f0400b7f437f71"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "2b3592b075d0a3156f608a699a218bf46ccba94ce9a8f3bd8cba2569e5424c4f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_pilot_evaluation/evaluation_manifest.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "3e3274f96f5df1543b3f7e5251859477c273c6501c6913d2a1a86d287aab0bda"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/comsol_campaign_manifest.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "ff79dbef3c5455ba54948d2512cfaf8c167c3c977a8e6649aa046dab305ef4e7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/executed_configuration_observations.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "6322d7fa4631544f0128dd379f00a8c518817fa66ee043d24ae8118373102cd9"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/expected_binding_values.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "2d79779e112f3279873f0ad2b88456cd7182f3bbca3a87f5c30f2e7a696f83f3"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939000/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c777d46565d759d891587acc1944a45ad3ae0d3f2ce8a0db5cd500512c7532d7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939000/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d82025bdcc931572c954d2bd92395b8941634aa565cbd355fed360a4fcb5d1ea"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939001/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "891d8b32ff515d96e915f4f9974b67a75b3e3975b7bb2865cb7e4cafebc09603"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939001/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7422452cf93d6d9e1d2006fff089c9ba6662b9aff911d9b8074bae741e377b0f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939002/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "3a09e589cc3ef66072d8bbcf13942a877549e4ca699c5183ff6265595e5eef9f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939002/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "ed2e73ea895860f2f77361144b02d2db16c3aebef01b501a83d857c4766e3240"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939003/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c6a9167a5fccb8b1dce5685d6a5c00ac351c4aa89c3ede2bc4d351657deab062"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939003/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "92e92c49612a4bc2ba2e68527beafb9f25e3bec3a0ef1a77ed181959820c426a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939004/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "3bd234903fe20ce8faf072d90d015814afbea5117bc1e31fc77235c24640f947"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939004/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "b0e4f38796150947e9f6103e2e1f340c8c4fd79b8126656c4c910588f31a7415"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939005/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "2f999c56b0518bd63b3c27a654e5641fd9b52eb8b14f4e76bb5f0d922fa49474"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939005/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d038054547601e2bf59cb5befd86ae75affadc22a2ccfe9218832c515998698f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939006/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "93d58c118d252d81b12314538a5c42055c994359317e614cfcb5a4fb13bc7965"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939006/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a8eb12808adbdd6e6ee352706f7bd181f2879fcb19a057771092423ec61d1f89"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939007/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "93fa14a56730d82d15f1bac7d8aad3c5f25ece587dd670b42abdd791dd5293ed"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939007/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c05ea2718201774d110a47a45f59eb768ce2005b56968a0d15606f7160cc385d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939008/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "deadfa6f5b8b20c9d29e2a61c2e1cbc3b8f9f5b1cc978cfcea46088a7624f2c7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939008/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "378fbd8d1f8a366608d16ac7a3f952a44670971179c890c86afa5ab4c01e8af7"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939009/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "0122006e1b81a540b7dcdba5d71dd1a49bbcab2081c631514502bdbdba8d7e35"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939009/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "2eb9861f786b056dda3dd194bc04bc4713d68bd0d22343896959b55630f7c1d2"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939010/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9ece990f3d618408dce9031738c877f710a692dc7ecacb8593311640c5623950"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939010/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "fa0a49ecb9f83409e38ebae9b7659717b24467e9077d927139effa81ff6f2c86"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939011/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7ac209c59b16b09ad8e9588d35d48822425c434ea909d4955f09657e9734ef32"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939011/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "28c81b904eb32baad78eb09355e1d74999c87dd6a9ea5dcb062554dddd6378eb"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939012/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "29a6ba1daa1d310c55ade33b662052a1938fbbdb9012c120b67bbbd04b7643d3"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939012/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "72ab95821a5ff35667568c8c8f2c25960ae2fa961d0f4950b870ac7d06f0e549"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939013/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "0c0578a0be4c957aae9d047e6884adaf71d14624f7d8c26daf9c598883a4974d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939013/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a651b1bf4c8dc18543ecedf0396c2300e427c54989bae7b66e4d7c6b7375cbf0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939014/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "970ac4f6c3e529a164eef7e17cb0bd8b5cc4b9d23275f07406296f2a7482eadd"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939014/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "932e1000cd9330c12281186c36e267de51b2759068b9e16ea7302944354f0064"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939015/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "1728a18d7c3078365d5b3010c28f90d7ab599d041654c32c0fd94fc721b13e36"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939015/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7a7c5ae9e244c722c7dac0eca817d71c662a0340b34add39b04785e9573745ad"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939016/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9eb2e7db14349a20d9f54ca2f8272506518612b927ce6cb31026862a1fd7c787"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939016/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "b50e72f9710fd62e14e3c7c19c7cf99b68c9b7a62ad259d54de9a95cb0c974fa"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939017/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "45e0d3828fcbf0b4373796822e16ca74984fdbbaec85fbb591ddb9b94f52321e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939017/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "dee65abccd462d1e3fbdfdd98e11e3d2174214e2673fac71649a507191b2e18f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939018/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "2cd840c69c7c39d9c2e64e1e4f12d5b8c1efec6c1f5abad3e673f7374607a86b"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939018/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "fafe91e4cc0a1a0158cfa2bb35df287bf2d10170368ec18a40c47052cd23bb83"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939019/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "dd358711b4a2339fe73a3fced573ab50eb9ba40a0ed1936aaeca1043bd516888"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939019/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d5c0a681f23c1818b45796411346dc3fb3803f6f693f05f6530b177eef66dd77"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939020/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9c34b564dd5efcc31e1eeedc189ba42b3ee2778f80a3a381c11327b389ec31ab"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939020/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7168de889fb68713d76d270ae9acfa8870edeb2e165b3058284b3d0c80af8323"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939021/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c1f00ab1654060f4fd0f5dc4c5560af40623754dd1d8fef9b834e11d10b24199"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939021/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "2f2bbc195ebe29e0aaa0e6bdece00896ed50b6924c34555d15e6d428cf379e3a"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939022/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "851c84c68e71ed30dadaf87597d603f7c09c2be98dc26400bba61252a2e10b15"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939022/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "14a253e6c47473fcc09ded4bca001fc34e8f6fd6eb40d844b758c9f05216743f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939023/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "127c9bd57ebd9dab040b8570c543939e4c5b9bf30989c4fd84a0db2dfd43d571"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939023/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "b261a4e443162c8d66f8e1b18ab6f774a59331249adda8c705e206235484d940"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939024/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "24e83741fcef47ef9e93db13d6e4faa42660a56b21bac7b4d8e20bb71a5c0286"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939024/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "8249158d16398cce0096cc5993ad0ee88f82bc2f22b90da0ed8e4c596fe98e01"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939025/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "3d4ac87206f0af142eafe8d700454d4b73701eb81e8e06901ca8533d9f6a8d2d"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939025/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "fda4ecddbf87bb7c38ce7c4beb6111c4cd33be60f74cf33484cfc06a3a9b6568"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939026/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "559c21803fe1f7056c8ab1049c99475a5a177adae449eddb0654026b4a6eaec1"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939026/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "8b76a1b5b06eeaf7bae6b272b97b8367693243b8da0499c2a08c05d773c144ee"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939027/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a92df4eab06322142ecb54d6c66d2d5899f76d3a8b9c65de3b4e8d8af780dfae"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939027/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "f63afa4b3e2bb00b7e037f6a38c8f021aee57f7f29b7139578b493c6af388b00"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939028/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "f0d35d2bdb0058db63f94cb5ef0fcad5dbce4c02730f9ea97fec730a1757c6bf"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939028/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "86f34d553aedddb132581f51de36ed2f97eb22a2a9361871cbcf9cb874f27714"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939029/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "f73a89ed80b7afc7e806e7d5a6391eaa7c5e2e04939254ad4414773ab8216ab0"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939029/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "f7fc25cb55dfd4f55a1a69e2b6a77134de6292906566d388406797536362ef95"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939030/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "ca3518ab0defe119555dd896bd395f9381ffdb684196c0d809973c2a66558004"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939030/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "5e248909c78ecd632604c36d1f2f6ad94e5251f5b6b9f4d26b25f133a0b5c74e"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939031/actual_binding_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7ccb2e9553a6dd82981730f1d7d57d3d5a606c424418bfdd599d537fbefb9f78"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939031/performance.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "56358393b8d323707d83bb6910402096b75f2f037ab1bbcda749ee14b6917a52"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/m3c2_execution_request.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "a4f1895e064d266a271e26d713a89e95ee66df2e0c53ac51c8aae99d0f007aae"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "purpose": "immutable_original_bytes_for_path_projection_audit",
+      "sha256": "98d02693cafbcfd814c14af51cea824cfa6a7de6fb79366bf0219703a9e29959"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_pilot_evaluation/evaluation_manifest.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d66478e0096f88fd53acb8a4bea27377dce12e0ea3a56ab701ed8a741648e13f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_binding_values.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "c274c6e15455e2059218bde7e0b0e549266257bbf7cdc90568e472e41f7bbd01"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/c3_expected_native_settings.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "246b67d0efde60d576709787f3e6491e0d1e86fbab8137357eed3053ed4d2e17"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_axis_normalized_final_selection.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "b49cc9c5cb5c1d1d3208d3318cfc4497634781b7f6de865d26ee74b98b9e1cd9"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_axis_normalized_population_policy.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_final_selection.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "01a4a09992a8bf98c16a01de56a62f87381e4be9d1458847b065963ebaf74bcc"
+    },
+    "evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_population_policy.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_1p25us/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "2937a209f57a2213f257d4d2ee33a1d67d5e664d064da217d9f4c60179cee37a"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_1p25us/normalization_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "702c0b740f90b535dab6a06c9069d46e078a7480d6283476b3918152431fdf7e"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_1p25us/preflight/comparison_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "f36d97642cd2bf2616dbbaffe645a58c1fff5ca2a8d9b47ee082bc0b006b3804"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_1p25us/publication_projection_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "96f0283e440237386a0872ef36bf28715fa64ea1100cd725f940011e8f450fd8"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_1p25us/run_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "092b7a54f8b562bb6cdbf8ae930ab11e0e19f8eb21723a7722b58a15a5aedc63"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_2p5us/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "00180aa516896143064981925020e55118fdf0d70098c25789d9999eed9fe949"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_2p5us/normalization_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "67bd74c1b29f4de0eaf91a9af6412455efc44e09de6dec82dd288f446376a3d9"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_2p5us/preflight/comparison_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "6d0dfc49bf531ecd453216195b1b03469e7a8f89389d7fed8821e04ffe80da61"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_2p5us/publication_projection_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "4b5d841e5bab58d9cd44935acc2ea40c87e3c33f98b49975af519119d9310ae3"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_2p5us/run_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "ba64e173b177a6bd273cc27704e5ce949532676070d4c0fa44fa91941f9c9c93"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_5us/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "ad2859f73b4ee371319e9586d79660646ae309d5248dbb4e83b9761b0689e9f4"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_5us/normalization_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "e673ce07cc76b100ddbd5afb41fcbcae9f0741dc37fe969d9dbce49a353290cb"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_5us/preflight/comparison_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9e0d0435a888ce49282de27e5f1d31214fda888fe8b58fdce9e46f7766f01951"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_5us/publication_projection_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "7694c525be439e56bc97761b11137ed51af4d8e3412894d6f64c7970296d8e71"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/c3_dt_5us/run_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "015ef5e988941b4af242c3aabf9a63a4dfd21da436d28edeaa5f4c859ac4fc18"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/comsol_campaign_manifest.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "9ce2954a1380de7f1b6ecb82180432f19b404cd8e373f1cca944ab680073239a"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "bf95e18ee509ef9440adff789af7785ba1ce28b3ca620f8f2f8eb7c0049b322f"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/preflight/comparison_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "97bfe3e5c3da690f1612f2c439e2397eede442e27ba516709662765d26df5af0"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/publication_projection_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "f7d7b0c72a885d0a3f1d2838f14c426c6ec253b0f18c3ee894cb516acdf4dd73"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/comsol_campaign_manifest.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "8af8603265403625f76e8271cd6e47dfa7b10eb449215da53628ebb2a55f42ff"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/meaning_inventory.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "3caee458dd4ffd1a55dcbfd452062bebf3d8fd89dbd315c60b156579f5212708"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/preflight/comparison_summary.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "bcf84588927151adb45722624f5e331a21fc66c02f4df5d0879a86e5e741b1bc"
+    },
+    "evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/publication_projection_receipt.json": {
+      "classification": "GIT_AUTHORITY",
+      "sha256": "fee4f746dea43ffb80f59f0ba02f41f3d29ce82f869bf7bdd20fc5a740d36c81"
+    }
+  },
+  "schema_version": 1,
+  "scientific_reproduction": "Obtain hash-identical external raw references/canonical HDF5 files. Published JSON binds observations and conclusions but does not contain the native CSV rows. No new native solve is claimed.",
+  "status": "PRE_REGISTRATION_SAVED_NATIVE_CLOSURE"
+}

@@ -1,7 +1,7 @@
 {
   "artifact": "chamber-particles 0.2.0 scoped engineering qualification",
-  "status": "VERIFICATION_IN_PROGRESS_NOT_A_PUBLICATION_RECEIPT",
-  "recorded_at_utc": "2026-10-10T02:11:52.964119+00:00",
+  "status": "QUALIFIED_FOR_DECLARED_ENGINEERING_SCOPE",
+  "recorded_at_utc": "2026-10-10T05:35:15.870703+00:00",
   "path_base": "particle_platform_redesign",
   "version": "0.2.0",
   "branch": "release/chamber-particles-0.2.0",
@@ -71,13 +71,6 @@
     },
     "total_timed_observations": 99
   },
-  "next_required_verification": [
-    "Record exact CRLF-to-LF source correspondence and execute fixed numeric repeats.",
-    "Register and execute v46 comparison with hash-locked saved native COMSOL references.",
-    "Verify a source checkout containing only indexed release inputs, commit and push.",
-    "Complete Windows/Linux CI on the release source and publish tagged wheel and checksum.",
-    "Verify downloaded public assets and record immutable tag/commit/run linkage."
-  ],
   "retained_scope_limits": [
     "Original N16k RZ D2 Brownian campaign remains NOT_MET; independently registered N64k follow-up PASS is separate.",
     "Finite-depth Hermite stochastic paths do not establish exact continuous-OU first passage, zero miss probability or general state-dependent SDE order.",
@@ -97,5 +90,96 @@
   "indexed_checkout_clean_wheel": {
     "path": "reviews/v0_2_release_index_clean_wheel_2026-10-10.json",
     "sha256": "213404e659f7bb58701bf92ca9ebd37f0a0b97642d78c2eda37e5072e32318fc"
+  },
+  "numeric_use_cases": {
+    "path": "reviews/v0_2_release_use_case_verification_2026-10-10.json",
+    "sha256": "dec685ffaf125892643f75f84083690c24fb6e8a93330a16dec3fc8769d32ec4",
+    "status": "QUALIFIED_SCOPED_USE_CASES; ORIGINAL_BROWNIAN_ALL_DEPTH_REQUIREMENT_NOT_MET_PRESERVED",
+    "scientific_runs": 11,
+    "scope": "Declared A/B/C/D engineering profiles; original Brownian requirement and separate follow-up outcomes remain distinct."
+  },
+  "initial_source_commit": "95dc75ae7bd0c6c560c8a8272e809e86bd90d2a0",
+  "qualified_source": {
+    "distribution_version": "0.2.0",
+    "python_version": "3.12.13",
+    "source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+    "production_file_count": 27,
+    "engine": "particle_engine_v46",
+    "event": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "identity_basis": "Actual package-relative names, lengths and raw file bytes; engine LF normalization is linked separately."
+  },
+  "comsol_requalification": {
+    "status": "REGISTERED_CURRENT_VERSION_REGRESSION_GATES_PASS_WITH_RETAINED_NOT_TESTED_LIMITS",
+    "registration": {
+      "path": "solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/execution_preregistration.json",
+      "sha256": "323d3a68bf49cd46d853df7559a2305aab7d6fc91d166e117f25fa4957973d84"
+    },
+    "manifest": {
+      "path": "solver/evidence/comsol_v0_2_0_release_requalification_v2/comparison_manifest.json",
+      "sha256": "9b3375f14e8b56ac68293f37a9bd08c693485ca1db7105c5e668f7aaee6b448b"
+    },
+    "summary": {
+      "path": "solver/evidence/comsol_v0_2_0_release_requalification_v2/comparison_summary.json",
+      "sha256": "67950e790076a60342b96f60fd26cd2778c43faa18deb582279188b420c63def"
+    },
+    "publication_closure": {
+      "path": "solver/evidence/comsol_v0_2_0_release_requalification_v2/publication_release_closure.json",
+      "sha256": "4d1716b2f59a5726e05df9e2a5f1c0b248f5b1fb9be087f9af7e4755bca00e6f"
+    },
+    "independent_post_run_audit": {
+      "path": "reviews/comsol_v0_2_release_post_run_independent_audit_2026-10-10.json",
+      "sha256": "dbc9ff7fd104c3f8d2d568dbdb585170949a11fee4e75c0e00b52ca730f54059"
+    },
+    "four_evaluations": {
+      "boundary_behavior": "NOT_TESTED",
+      "fields_and_right_hand_side": "NOT_TESTED",
+      "initial_conditions": "PASS",
+      "time_trajectory": "PASS"
+    },
+    "registered_gates": {
+      "C3": "PASS",
+      "CaseA": "PASS",
+      "CaseP": "PASS"
+    },
+    "cohort": "Previously observed hash-locked saved native references, with no new native solve or unseen confidence family.",
+    "independent_publication_closure_audit": "620 Git authorities, 1345 external raw inputs and 5 local regenerated metadata entries: exact-byte SHA/category audit PASS; original 196 Git authorities unchanged."
+  },
+  "preliminary_source_ci": {
+    "run_id": 38025707005,
+    "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/38025707005",
+    "head_commit": "95dc75ae7bd0c6c560c8a8272e809e86bd90d2a0",
+    "status": "SUCCESS_BOTH_OS",
+    "os_results": {
+      "Linux": {
+        "solver_tests_passed": 847,
+        "portable_tool_tests_passed": 120,
+        "quality_gates": "PASS",
+        "quick_start": "PASS",
+        "performance_smoke": "PASS",
+        "clean_wheel": "PASS"
+      },
+      "Windows": {
+        "solver_tests_passed": 847,
+        "portable_tool_tests_passed": 120,
+        "quality_gates": "PASS",
+        "quick_start": "PASS",
+        "performance_smoke": "PASS",
+        "clean_wheel": "PASS"
+      }
+    },
+    "wheel_sha256": "db654f537c023fa7e3e59e7e1774e551f958b31f9d33af4a4460d211d7dd34b9",
+    "limit": "Preliminary source commit proof; not the final qualification commit or publication tag receipt."
+  },
+  "scientific_work_remaining": [],
+  "publication": {
+    "status": "FINAL_TAG_CI_AND_PUBLISH_PENDING",
+    "planned_tag": "v0.2.0",
+    "remaining": [
+      "Push final qualification commit and annotated tag.",
+      "Complete Windows/Linux CI on the exact tagged commit and publish gated wheel, SHA256SUMS and Release Notes.",
+      "Verify actual downloaded public assets and save a separate post-publication receipt binding tag, commit, runs and asset hashes."
+    ],
+    "receipt_is_publication_proof": false
   }
 }

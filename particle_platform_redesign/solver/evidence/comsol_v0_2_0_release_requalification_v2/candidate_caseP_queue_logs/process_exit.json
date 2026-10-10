@@ -1,0 +1,267 @@
+{
+  "status": "EXECUTION_COMPLETE_ACCURACY_NOT_EVALUATED",
+  "exit_code": 0,
+  "started_at_utc": "2026-10-10T04:59:50.2780857Z",
+  "finished_at_utc": "2026-10-10T05:19:17.1351279Z",
+  "elapsed_s": 1166.8570422,
+  "completed_cell_processes": 32,
+  "cells": [
+    {
+      "seed": 939032,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T04:59:50.2904896Z",
+      "finished_at_utc": "2026-10-10T05:00:27.7077613Z",
+      "elapsed_s": 37.4172717,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939032.log"
+    },
+    {
+      "seed": 939033,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:00:27.7153809Z",
+      "finished_at_utc": "2026-10-10T05:01:04.9427156Z",
+      "elapsed_s": 37.2273347,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939033.log"
+    },
+    {
+      "seed": 939034,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:01:04.9435128Z",
+      "finished_at_utc": "2026-10-10T05:01:41.6600027Z",
+      "elapsed_s": 36.7164899,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939034.log"
+    },
+    {
+      "seed": 939035,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:01:41.6604644Z",
+      "finished_at_utc": "2026-10-10T05:02:18.2707135Z",
+      "elapsed_s": 36.6102491,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939035.log"
+    },
+    {
+      "seed": 939036,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:02:18.2712982Z",
+      "finished_at_utc": "2026-10-10T05:02:55.0697810Z",
+      "elapsed_s": 36.7984828,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939036.log"
+    },
+    {
+      "seed": 939037,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:02:55.0703640Z",
+      "finished_at_utc": "2026-10-10T05:03:31.5663342Z",
+      "elapsed_s": 36.4959702,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939037.log"
+    },
+    {
+      "seed": 939038,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:03:31.5670222Z",
+      "finished_at_utc": "2026-10-10T05:04:07.8063520Z",
+      "elapsed_s": 36.2393298,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939038.log"
+    },
+    {
+      "seed": 939039,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:04:07.8071130Z",
+      "finished_at_utc": "2026-10-10T05:04:44.8480825Z",
+      "elapsed_s": 37.0409695,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939039.log"
+    },
+    {
+      "seed": 939040,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:04:44.8485112Z",
+      "finished_at_utc": "2026-10-10T05:05:21.5672180Z",
+      "elapsed_s": 36.7187068,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939040.log"
+    },
+    {
+      "seed": 939041,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:05:21.5676571Z",
+      "finished_at_utc": "2026-10-10T05:06:00.4082091Z",
+      "elapsed_s": 38.840552,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939041.log"
+    },
+    {
+      "seed": 939042,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:06:00.4087466Z",
+      "finished_at_utc": "2026-10-10T05:06:38.0143329Z",
+      "elapsed_s": 37.6055863,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939042.log"
+    },
+    {
+      "seed": 939043,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:06:38.0148457Z",
+      "finished_at_utc": "2026-10-10T05:07:14.8025170Z",
+      "elapsed_s": 36.7876713,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939043.log"
+    },
+    {
+      "seed": 939044,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:07:14.8028908Z",
+      "finished_at_utc": "2026-10-10T05:07:51.2901945Z",
+      "elapsed_s": 36.4873037,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939044.log"
+    },
+    {
+      "seed": 939045,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:07:51.2905589Z",
+      "finished_at_utc": "2026-10-10T05:08:27.6953971Z",
+      "elapsed_s": 36.4048382,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939045.log"
+    },
+    {
+      "seed": 939046,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:08:27.6957606Z",
+      "finished_at_utc": "2026-10-10T05:09:03.9848100Z",
+      "elapsed_s": 36.2890494,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939046.log"
+    },
+    {
+      "seed": 939047,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:09:03.9852984Z",
+      "finished_at_utc": "2026-10-10T05:09:40.1238179Z",
+      "elapsed_s": 36.1385195,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939047.log"
+    },
+    {
+      "seed": 939048,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:09:40.1243171Z",
+      "finished_at_utc": "2026-10-10T05:10:16.5460196Z",
+      "elapsed_s": 36.4217025,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939048.log"
+    },
+    {
+      "seed": 939049,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:10:16.5464865Z",
+      "finished_at_utc": "2026-10-10T05:10:52.3221683Z",
+      "elapsed_s": 35.7756818,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939049.log"
+    },
+    {
+      "seed": 939050,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:10:52.3224889Z",
+      "finished_at_utc": "2026-10-10T05:11:28.1242641Z",
+      "elapsed_s": 35.8017752,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939050.log"
+    },
+    {
+      "seed": 939051,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:11:28.1245532Z",
+      "finished_at_utc": "2026-10-10T05:12:03.8854708Z",
+      "elapsed_s": 35.7609176,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939051.log"
+    },
+    {
+      "seed": 939052,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:12:03.8857715Z",
+      "finished_at_utc": "2026-10-10T05:12:40.1586340Z",
+      "elapsed_s": 36.2728625,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939052.log"
+    },
+    {
+      "seed": 939053,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:12:40.1589995Z",
+      "finished_at_utc": "2026-10-10T05:13:16.1126050Z",
+      "elapsed_s": 35.9536055,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939053.log"
+    },
+    {
+      "seed": 939054,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:13:16.1129655Z",
+      "finished_at_utc": "2026-10-10T05:13:54.2070029Z",
+      "elapsed_s": 38.0940374,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939054.log"
+    },
+    {
+      "seed": 939055,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:13:54.2073801Z",
+      "finished_at_utc": "2026-10-10T05:14:31.5460131Z",
+      "elapsed_s": 37.338633,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939055.log"
+    },
+    {
+      "seed": 939056,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:14:31.5463696Z",
+      "finished_at_utc": "2026-10-10T05:15:07.4097458Z",
+      "elapsed_s": 35.8633762,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939056.log"
+    },
+    {
+      "seed": 939057,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:15:07.4101417Z",
+      "finished_at_utc": "2026-10-10T05:15:42.5184783Z",
+      "elapsed_s": 35.1083366,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939057.log"
+    },
+    {
+      "seed": 939058,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:15:42.5188287Z",
+      "finished_at_utc": "2026-10-10T05:16:18.0657357Z",
+      "elapsed_s": 35.546907,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939058.log"
+    },
+    {
+      "seed": 939059,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:16:18.0660564Z",
+      "finished_at_utc": "2026-10-10T05:16:53.0972503Z",
+      "elapsed_s": 35.0311939,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939059.log"
+    },
+    {
+      "seed": 939060,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:16:53.0975476Z",
+      "finished_at_utc": "2026-10-10T05:17:28.5390096Z",
+      "elapsed_s": 35.441462,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939060.log"
+    },
+    {
+      "seed": 939061,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:17:28.5393188Z",
+      "finished_at_utc": "2026-10-10T05:18:03.8165707Z",
+      "elapsed_s": 35.2772519,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939061.log"
+    },
+    {
+      "seed": 939062,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:18:03.8171374Z",
+      "finished_at_utc": "2026-10-10T05:18:39.4995016Z",
+      "elapsed_s": 35.6823642,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939062.log"
+    },
+    {
+      "seed": 939063,
+      "exit_code": 0,
+      "started_at_utc": "2026-10-10T05:18:39.4998942Z",
+      "finished_at_utc": "2026-10-10T05:19:15.1357404Z",
+      "elapsed_s": 35.6358462,
+      "stdout_stderr_log": "evidence\\comsol_v0_2_0_release_requalification_v2\\candidate_caseP_queue_logs\\run_cell_939063.log"
+    }
+  ],
+  "prepared": "evidence/comsol_v0_2_0_release_requalification_v2/caseP_candidate_final"
+}

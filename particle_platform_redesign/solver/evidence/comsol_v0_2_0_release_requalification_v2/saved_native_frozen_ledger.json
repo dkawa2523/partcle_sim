@@ -1,0 +1,2215 @@
+{
+  "directories": {
+    "c3_dt_1p25us": {
+      "files": {
+        "actual_binding_receipt.json": {
+          "sha256": "a0281483feb82854fc649c1c9541c6838d5065c905b0f4f7aed9996e4c9a834b",
+          "size": 55217
+        },
+        "boundary_meaning.json": {
+          "sha256": "57b178132fc0b507154eda495741f2c7a5ad028b765854d71421b7444dd2c419",
+          "size": 728
+        },
+        "campaign_config.json": {
+          "sha256": "b8614ab6eb71b04c28d55e2bc42a3702511f06612af2dceb6e9b46b70aef34ec",
+          "size": 2983
+        },
+        "comsol_process_metrics.json": {
+          "sha256": "47b1af201a71366dadac56aa3312526126859deb9cda07ec9dc925325674567d",
+          "size": 782
+        },
+        "diagnostic_assembled_force_raw_wide.csv": {
+          "sha256": "a20978a98379b58a3f56f97d90cad0406f0a54494367eaeaea065b2ffbd81f8d",
+          "size": 2126609
+        },
+        "diagnostic_force_raw_wide.csv": {
+          "sha256": "e3f59443fc8b5748b7219ef737b190525523501f18548f71b90adfd08dcd213d",
+          "size": 16417019
+        },
+        "diagnostic_state_raw_wide.csv": {
+          "sha256": "ac77f4251a00e80f5fe522e8910dabcf69d8c246e617f19d6a374be5fcbc4fcc",
+          "size": 3995817
+        },
+        "events_reference.csv": {
+          "sha256": "815dc438aa4cc3c414792ae08a87cbfe49dc9476fc9d3a5782cc86465f7f4a85",
+          "size": 8955
+        },
+        "execution_inputs.json": {
+          "sha256": "d7f6019d04446484382f4a57f269dfd0430b4cb91c6e84c10df1c8d6de368f72",
+          "size": 5265
+        },
+        "m3c3_table_receipt.json": {
+          "sha256": "9d3cfeb2eca511f4956b41961f9c6ccaf110128f015a89d9d28c53d2dcf9509d",
+          "size": 6158
+        },
+        "meaning_conditions.json": {
+          "sha256": "e0ec4fde06d7c38720d9f5a76ffc04f3eb497feccf80f88ecc225741258952f7",
+          "size": 72990
+        },
+        "meaning_inventory.json": {
+          "sha256": "34d1b6ee02bd16763cd23a3426b2303188e7e7c76b036e2bfb6c57a497259a12",
+          "size": 64942
+        },
+        "meaning_preflight_report.json": {
+          "sha256": "47f833192992a79d4da036494a66dd68f4de3f45d8684ad630697c59f0bd1489",
+          "size": 1478
+        },
+        "normalization_summary.json": {
+          "sha256": "82302f6e876b2c6d1350c1f79c3c84a3e73af4593f83e31f92d57e3ec45d23ed",
+          "size": 50883
+        },
+        "primitive_receipt.json": {
+          "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab",
+          "size": 3272
+        },
+        "reference_run_config.json": {
+          "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d",
+          "size": 1522
+        },
+        "run_receipt.json": {
+          "sha256": "c517d28737071a63fd0cb109fdd260c4250e0009a854ffdddbf8743912b51788",
+          "size": 9259
+        },
+        "terminal_boundary_raw.csv": {
+          "sha256": "0cf398213f522ede29da95ef41e4a3038bc62edfb1bf65f7e30a0e3819b3ff75",
+          "size": 6076
+        },
+        "three_current_release_receipt.json": {
+          "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2",
+          "size": 4623
+        },
+        "three_current_release_state.csv": {
+          "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267",
+          "size": 29148
+        },
+        "trajectory_raw_wide.csv": {
+          "sha256": "ac77f4251a00e80f5fe522e8910dabcf69d8c246e617f19d6a374be5fcbc4fcc",
+          "size": 3995817
+        },
+        "trajectory_reference.csv": {
+          "sha256": "f91c01899d99e40477db9910b1c0903132f8c380c23ff6ea19aaddf85d649fc3",
+          "size": 3715781
+        }
+      },
+      "source_root": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_1p25us"
+    },
+    "c3_dt_2p5us": {
+      "files": {
+        "actual_binding_receipt.json": {
+          "sha256": "e58d918eb495b3d41b536add4611844d5bb208bb922fd17f4dc96d8a7a954a19",
+          "size": 55216
+        },
+        "boundary_meaning.json": {
+          "sha256": "57b178132fc0b507154eda495741f2c7a5ad028b765854d71421b7444dd2c419",
+          "size": 728
+        },
+        "campaign_config.json": {
+          "sha256": "b8614ab6eb71b04c28d55e2bc42a3702511f06612af2dceb6e9b46b70aef34ec",
+          "size": 2983
+        },
+        "comsol_process_metrics.json": {
+          "sha256": "ff9e159cff147b608195c089aa3f324029796b64b4f8c9a2a3a73b7a806cafa8",
+          "size": 708
+        },
+        "events_reference.csv": {
+          "sha256": "a0a3732f1c26998c16ab46cb49d69342dc3e7857a805f7d2ccdcccf85ab9b516",
+          "size": 8950
+        },
+        "execution_inputs.json": {
+          "sha256": "aac1f9a5f48659c2ba01f95bd99987f2af8da3ac052806ca4e6bb66f02119018",
+          "size": 4428
+        },
+        "m3c3_table_receipt.json": {
+          "sha256": "9d3cfeb2eca511f4956b41961f9c6ccaf110128f015a89d9d28c53d2dcf9509d",
+          "size": 6158
+        },
+        "meaning_conditions.json": {
+          "sha256": "ffa4cf35a3186037782ac2b0d41813a07027240c8d338d99bae0b9622097bd8a",
+          "size": 72942
+        },
+        "meaning_inventory.json": {
+          "sha256": "e88bbfcedf491823cd170133ef80a2f4c2342f0e79149cf732c29a274ddc2c2a",
+          "size": 64895
+        },
+        "meaning_preflight_report.json": {
+          "sha256": "34f8ce4e199c5fb927e43698923262cdd233489e8ad113a1b5dac418fb0a7074",
+          "size": 1477
+        },
+        "normalization_summary.json": {
+          "sha256": "26343aa2ff3679951cc1c2d6119ab56399ec1ba11458b4e78bf5110edb54d34d",
+          "size": 50882
+        },
+        "primitive_receipt.json": {
+          "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab",
+          "size": 3272
+        },
+        "reference_run_config.json": {
+          "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d",
+          "size": 1522
+        },
+        "run_receipt.json": {
+          "sha256": "9381239dc578a23b6dab4ce3a43aa991495c1ea4dac10240539fcd1cf0190f11",
+          "size": 8255
+        },
+        "terminal_boundary_raw.csv": {
+          "sha256": "800fc96db0e29d568e5aa988b97b7d56c193fcaaa17d1cd5334b4d3197d6605d",
+          "size": 6071
+        },
+        "three_current_release_receipt.json": {
+          "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2",
+          "size": 4623
+        },
+        "three_current_release_state.csv": {
+          "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267",
+          "size": 29148
+        },
+        "trajectory_raw_wide.csv": {
+          "sha256": "a072247bf9aae36412002836d2bc68aa1bf42f820ff6157fd14680db4ee22656",
+          "size": 3997509
+        },
+        "trajectory_reference.csv": {
+          "sha256": "1a214d7153fcef4998d55efc5a92a22d3b72b19bae2929bfadf257a98f2b7c0d",
+          "size": 3718070
+        }
+      },
+      "source_root": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_2p5us"
+    },
+    "c3_dt_5us": {
+      "files": {
+        "actual_binding_receipt.json": {
+          "sha256": "24c340d739c8d5e0ceeb0ebce720e8508662f512d43c5a3867a04c402bb6a77d",
+          "size": 55214
+        },
+        "boundary_meaning.json": {
+          "sha256": "57b178132fc0b507154eda495741f2c7a5ad028b765854d71421b7444dd2c419",
+          "size": 728
+        },
+        "campaign_config.json": {
+          "sha256": "b8614ab6eb71b04c28d55e2bc42a3702511f06612af2dceb6e9b46b70aef34ec",
+          "size": 2983
+        },
+        "comsol_process_metrics.json": {
+          "sha256": "64ae48a31b2de520f828a9a78c4c039f0ed8dd4098fe2a19339cfcdfceef4463",
+          "size": 704
+        },
+        "events_reference.csv": {
+          "sha256": "c239f6db10cb2b0d5b84705f86dd0334e081bcd96f87659f9f3f0aca2f41a666",
+          "size": 8959
+        },
+        "execution_inputs.json": {
+          "sha256": "8e4b696779d8d80da68704b551613086f5a196a991f04b87533dade869ecd175",
+          "size": 4426
+        },
+        "m3c3_table_receipt.json": {
+          "sha256": "9d3cfeb2eca511f4956b41961f9c6ccaf110128f015a89d9d28c53d2dcf9509d",
+          "size": 6158
+        },
+        "meaning_conditions.json": {
+          "sha256": "28fa8321cbac5956c3a1550916fb62f68c17a9b37bcaa6d4329058dc88f86623",
+          "size": 72846
+        },
+        "meaning_inventory.json": {
+          "sha256": "b11ad8823e9b4f625cf90f8c30103d9b088308f76e65206f28b6671ac222eb83",
+          "size": 64801
+        },
+        "meaning_preflight_report.json": {
+          "sha256": "c4da77f6b2c08101ade4de649f6e773192cf55852899634c2d979b9b0644c4d3",
+          "size": 1475
+        },
+        "normalization_summary.json": {
+          "sha256": "a5e09b1a3b765e2e2b9087323bac84c232956b27a6149dcfd6244d122c46f60e",
+          "size": 50880
+        },
+        "primitive_receipt.json": {
+          "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab",
+          "size": 3272
+        },
+        "reference_run_config.json": {
+          "sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d",
+          "size": 1522
+        },
+        "run_receipt.json": {
+          "sha256": "fe5c4087ea90024dec39b21ea882f96c08ad93bf8662e60d2822cdb1f8a9b9a4",
+          "size": 8243
+        },
+        "terminal_boundary_raw.csv": {
+          "sha256": "df131a14911ed1f7ac8edb4236b3109f8a220b4f804a2ce7cf1d5eddc9d1ea78",
+          "size": 6080
+        },
+        "three_current_release_receipt.json": {
+          "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2",
+          "size": 4623
+        },
+        "three_current_release_state.csv": {
+          "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267",
+          "size": 29148
+        },
+        "trajectory_raw_wide.csv": {
+          "sha256": "ceaa6a871b303ae505316428d07b41c2167c23bcdce80d525cd395d74edfa02d",
+          "size": 3997310
+        },
+        "trajectory_reference.csv": {
+          "sha256": "7091ef02291b05e015512950a79703a63878a8f31e7e6d2ac4185b919eddbe31",
+          "size": 3716777
+        }
+      },
+      "source_root": "../comsol_binding_recert_2026_10_09_v1/c3_reference_axis_dt_5us"
+    },
+    "caseA": {
+      "files": {
+        "artifact_hashes.csv": {
+          "sha256": "f0dd8c0f77cf58cc3dc7b1869f7521355dca070fc6c8cb29739026766186bda1",
+          "size": 35043
+        },
+        "boundary_meaning.json": {
+          "sha256": "e1d4a9c5fa2871b5793b52aa963ec94f74316f01d650ddc6424378470a338059",
+          "size": 728
+        },
+        "common_p1_release_probes.csv": {
+          "sha256": "b87858369612a370f77feba70d1e6573952d21ecebb322c3f78ce95cc50eb5b4",
+          "size": 149168
+        },
+        "common_p1_table_receipt.json": {
+          "sha256": "9e57719c05b27b5c843290dd7524109a9cebf850a0febd4f3cd755d46df417d4",
+          "size": 14916
+        },
+        "comsol_campaign_manifest.json": {
+          "sha256": "2705658a01e1de69e7e3e41e1c686f394e64b9be15a432ff4ab2d6bb3e5975fe",
+          "size": 2886263
+        },
+        "comsol_process_metrics.json": {
+          "sha256": "9e9c1f18507382a610d2aee447c1441fdf1aa4d4a4cd2afee41937397325f6de",
+          "size": 242
+        },
+        "executed_configuration_observations.json": {
+          "sha256": "d0bf5bede76e4aaeed21874ebbce31f6a5f21ed0bdeaddbd8f41ca20d5603334",
+          "size": 41517
+        },
+        "expected_binding_values.json": {
+          "sha256": "ec491eca005190e222ce43756fc11adbc8e43e464e393ae39a66228d003996db",
+          "size": 13799
+        },
+        "levels/dt_20us/replicas/seed_939100/actual_binding_receipt.json": {
+          "sha256": "282aab7670cd387edbc6ba10e6de9ee19dda2f3193449924c668f86e936c512b",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939100/events.csv": {
+          "sha256": "5043d754bca21203aebce9641937af4b4b069adb75991192fc35f52edab650a4",
+          "size": 13463
+        },
+        "levels/dt_20us/replicas/seed_939100/fdt_probe_raw.csv": {
+          "sha256": "a8c9aaa71e664cfb7d4461992fbbe211a52953f757469a427eb9c4accc9b7b2b",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939100/performance.json": {
+          "sha256": "0dc6b3981a0a0a0b9aee8f43e5f6474f27e0b0ca7f2992ce4d9be076c03d0379",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939100/terminal_boundary_raw.csv": {
+          "sha256": "ec795ccc64a190d802cb00a557affa291ae45bd0123106cbf2e75d1b29a036e8",
+          "size": 8346
+        },
+        "levels/dt_20us/replicas/seed_939100/trajectory.csv": {
+          "sha256": "ae1911eac08385ffa3bfb3da1b5c3bd5fc8d6433d42786fae7d732754b705042",
+          "size": 3800811
+        },
+        "levels/dt_20us/replicas/seed_939100/trajectory_raw_wide.csv": {
+          "sha256": "00df00ddcecf50258786cefcdc19e89f2249457198b1b557d04c12c990340c33",
+          "size": 4369071
+        },
+        "levels/dt_20us/replicas/seed_939101/actual_binding_receipt.json": {
+          "sha256": "347e0dd2d20cab90fd080fd6cde92caf7c7a573beb6d48e63821b7d93b746587",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939101/events.csv": {
+          "sha256": "d226979675c770c276f0d979dd1b2b3ee822715aa8b7eb196b7f0dd3c299b324",
+          "size": 13420
+        },
+        "levels/dt_20us/replicas/seed_939101/fdt_probe_raw.csv": {
+          "sha256": "cd892e7d87d403e85dea83fbf65e14ccf3199a58cd7476fede570bf473db1598",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939101/performance.json": {
+          "sha256": "5e1a9132659b1e4577476f1768f44c1a5edf5e5168122fea3df3b5ec5c9bdfe6",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939101/terminal_boundary_raw.csv": {
+          "sha256": "e6fc479e5fe1bad6a22676bebbafed8bbc21cae07c78439a1749c12f5ac64d34",
+          "size": 8334
+        },
+        "levels/dt_20us/replicas/seed_939101/trajectory.csv": {
+          "sha256": "5221332c5f1cb6ac1f8418ff014b0674608585be3e8fb517ee969e568c0e5b3f",
+          "size": 3800966
+        },
+        "levels/dt_20us/replicas/seed_939101/trajectory_raw_wide.csv": {
+          "sha256": "9db2c032168c2f4452990f7c9c44c6987411eb746898b336461156b626d3f253",
+          "size": 4367809
+        },
+        "levels/dt_20us/replicas/seed_939102/actual_binding_receipt.json": {
+          "sha256": "575dde46dd24d0667cef389269345f4a3925bb0954064beb82c22a43b698b62c",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939102/events.csv": {
+          "sha256": "aaa565ff536cdba9579094381353a8237bba27acf63b8d92c708ce4d5b811470",
+          "size": 13456
+        },
+        "levels/dt_20us/replicas/seed_939102/fdt_probe_raw.csv": {
+          "sha256": "5dd79cf811d50a49b6649999a5b7ce85db0121a7ce0dad4c14d50ee45ce2205b",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939102/performance.json": {
+          "sha256": "521fb4e7fd609fc7d754c1c288cf671c8c33d3d8c5b495a1bb950b9caa2ac814",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939102/terminal_boundary_raw.csv": {
+          "sha256": "d0af3f861f6b3354ca7575136b8d07580878ba7e9f058e560b01b63784871faf",
+          "size": 8339
+        },
+        "levels/dt_20us/replicas/seed_939102/trajectory.csv": {
+          "sha256": "03fd342eba528aa8ec03da4d79c469d40e24308eecc4b3edf531139eb6e1cf3d",
+          "size": 3799944
+        },
+        "levels/dt_20us/replicas/seed_939102/trajectory_raw_wide.csv": {
+          "sha256": "7801f8631b28dbd538c0dae5eadba6cf0839bc546706d4b3e66a8b6737a35e0e",
+          "size": 4367379
+        },
+        "levels/dt_20us/replicas/seed_939103/actual_binding_receipt.json": {
+          "sha256": "0f1c25369d288467cd127af89ba77d1d06f4e5761aa9b980979379fa3b3c17c6",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939103/events.csv": {
+          "sha256": "e8a8c6f725684b7de1665cacb4940b332f155f0f5cadecaeae4da4af628019b0",
+          "size": 13367
+        },
+        "levels/dt_20us/replicas/seed_939103/fdt_probe_raw.csv": {
+          "sha256": "324872bc207b7fdb0d5eb415a8c1be5c80fc90256c2ce96eb03242af74841514",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939103/performance.json": {
+          "sha256": "13cc50b3303d9adb79ce12d6ad62f20acc42eb99b20594adf02ae1bb7eea6e2e",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939103/terminal_boundary_raw.csv": {
+          "sha256": "794ee153a5a1f3134d8b05fda2fd8622c3372e7c67f76b48b21f902330369e81",
+          "size": 8331
+        },
+        "levels/dt_20us/replicas/seed_939103/trajectory.csv": {
+          "sha256": "a5a471e11e1b9a8bd8f435added94aeab6b5cdcdbb7cd98b848e711b223870f2",
+          "size": 3803285
+        },
+        "levels/dt_20us/replicas/seed_939103/trajectory_raw_wide.csv": {
+          "sha256": "93a2d2d24034bd18624018a03412fc6763ba5d519ec70a3220a237ae8d023d02",
+          "size": 4369759
+        },
+        "levels/dt_20us/replicas/seed_939104/actual_binding_receipt.json": {
+          "sha256": "a1c0acabb6d56412524495221fb34820f2864161afea89496ff1c074160b49cd",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939104/events.csv": {
+          "sha256": "b6ff1bdba720bb6d6ac3323da413fdd4ae27cf69b78545335255dae147cd1cbe",
+          "size": 13308
+        },
+        "levels/dt_20us/replicas/seed_939104/fdt_probe_raw.csv": {
+          "sha256": "5e241ea03b5365d3501b4619f8ddb96859db16d6cb513a71cc871c32161f56d9",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939104/performance.json": {
+          "sha256": "07d473fe738df86c6a1526378470b8e23fae00993584d2256543b4247783b042",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939104/terminal_boundary_raw.csv": {
+          "sha256": "6e1c181cd5c911793fe83e4cc28385ee50ca60229cb0a37e88e667496a2aa93b",
+          "size": 8284
+        },
+        "levels/dt_20us/replicas/seed_939104/trajectory.csv": {
+          "sha256": "a29c5d7d53b2fa7416a2962e47f33cc673f1c51df70bf2b8d741371c629f8938",
+          "size": 3802187
+        },
+        "levels/dt_20us/replicas/seed_939104/trajectory_raw_wide.csv": {
+          "sha256": "2c186737a14d7488356c7ec47343f3cfef725cea92c5fd57a97edc94aaaeab28",
+          "size": 4362964
+        },
+        "levels/dt_20us/replicas/seed_939105/actual_binding_receipt.json": {
+          "sha256": "c2cc585a391bb7fc5a9c492dafd56e01e064115e0e26e2158511d589303897ce",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939105/events.csv": {
+          "sha256": "d9d6a7615468af18e15731876a18d42bfa6191c2a8df87706bb2ba5df25a9379",
+          "size": 13365
+        },
+        "levels/dt_20us/replicas/seed_939105/fdt_probe_raw.csv": {
+          "sha256": "f6a8c4395945ca89cc8fc52dc4f58036342e818c32497fbae9f5670e4c689f09",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939105/performance.json": {
+          "sha256": "3c982bf823aab10f391d67f18aad8b79311bbbeaf877622d3bcc37fb49169015",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939105/terminal_boundary_raw.csv": {
+          "sha256": "1a9cc3214d6ba8a697cd271f1c9a52e9e34a7191dcf02d32f175c61360967b3e",
+          "size": 8328
+        },
+        "levels/dt_20us/replicas/seed_939105/trajectory.csv": {
+          "sha256": "fe534f23fb486badbf86164d61141ac3a9d46b0e0c389e236876803dd210fb3a",
+          "size": 3801303
+        },
+        "levels/dt_20us/replicas/seed_939105/trajectory_raw_wide.csv": {
+          "sha256": "9e89b3f85b58a5ab2dc3e34f535e6df57176a578a936c1e05e842023334d7ff5",
+          "size": 4367407
+        },
+        "levels/dt_20us/replicas/seed_939106/actual_binding_receipt.json": {
+          "sha256": "4a9753fc3132db76b5389286febc0bbb0f3d7ac78771b0209c46a285ac816b3e",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939106/events.csv": {
+          "sha256": "d0fe67e2a687a063e89443999ec3946845b071fd0ee018178dbb89a670dd0e32",
+          "size": 13462
+        },
+        "levels/dt_20us/replicas/seed_939106/fdt_probe_raw.csv": {
+          "sha256": "6a3fb98a2b2ec849d6b177c6a5e27ae90ab36bcdaac8118d4173f431e2f5565a",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939106/performance.json": {
+          "sha256": "0520a4dd2bb9176d2a7bcd717d2dbb2321736d74df412cba754e639f5361dd8f",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939106/terminal_boundary_raw.csv": {
+          "sha256": "737bedbed88d73f19762b7c8f9a9c28bf8575445f824b8fac44780a3a86a0371",
+          "size": 8345
+        },
+        "levels/dt_20us/replicas/seed_939106/trajectory.csv": {
+          "sha256": "46d02768fa22eecebad2165aa48dc181e9a0956f7dd90a7a79b5d7069269801b",
+          "size": 3799970
+        },
+        "levels/dt_20us/replicas/seed_939106/trajectory_raw_wide.csv": {
+          "sha256": "5c7f2f0c9b445495f877599b9630f27c8a1d42a445bf2119d24f569fabc030fc",
+          "size": 4368140
+        },
+        "levels/dt_20us/replicas/seed_939107/actual_binding_receipt.json": {
+          "sha256": "21010c3104b68fda52cafed2513245d26e576e74ce38d19b52343f6b72db8240",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939107/events.csv": {
+          "sha256": "c884e7c8dc72fab05f3927d83e02e747dbdad677dfe6eaa86a03a8beb1bf176d",
+          "size": 13506
+        },
+        "levels/dt_20us/replicas/seed_939107/fdt_probe_raw.csv": {
+          "sha256": "1627ffbce308bb84de925aa4a64ba927257680375c613c37e03a695a68fbcf9a",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939107/performance.json": {
+          "sha256": "efd69ae73cee82991043423c50542a7d3869d3fb7fef0295de1b1a13a4621cb9",
+          "size": 502
+        },
+        "levels/dt_20us/replicas/seed_939107/terminal_boundary_raw.csv": {
+          "sha256": "7cbd0a00bf03e9699a14cba29b3a1cc9596e73cec6f30cb3f4e16cc90e5ee7b7",
+          "size": 8358
+        },
+        "levels/dt_20us/replicas/seed_939107/trajectory.csv": {
+          "sha256": "6a00ac40408744c2f82d577b0b71f0a928a3688d1876c62afee1f01780c5d9cb",
+          "size": 3799403
+        },
+        "levels/dt_20us/replicas/seed_939107/trajectory_raw_wide.csv": {
+          "sha256": "50965f9c554c8e38ed9bef6843a651cbac35d9f47e551f18e6eeabb3d80434cb",
+          "size": 4369147
+        },
+        "levels/dt_20us/replicas/seed_939108/actual_binding_receipt.json": {
+          "sha256": "415a4a2e59b2c70965f44df23b50b21e79af787ed527c7f51423ebf615f50170",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939108/events.csv": {
+          "sha256": "20e5af6d563f9accc6b01eb7c8b2824b8f80ab0eaca8f374550a0d9bc8305675",
+          "size": 13425
+        },
+        "levels/dt_20us/replicas/seed_939108/fdt_probe_raw.csv": {
+          "sha256": "edc73c68b66d04339f21599ac909ed0859bd3fa6ce07c290b3eb4fb470fb8f43",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939108/performance.json": {
+          "sha256": "28e7e37572f8872da226077be8e2e9695262aca3f460709ac0cc5a6faf0e4058",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939108/terminal_boundary_raw.csv": {
+          "sha256": "71dc450ff91fbbc1d545a8d2a4dd141beffad21b45f7c2be1c67cc7687a4f92b",
+          "size": 8339
+        },
+        "levels/dt_20us/replicas/seed_939108/trajectory.csv": {
+          "sha256": "614a8849766fefb723f03f64fc5a7d4b086559f7b99b5ddaced1e1cea1d2713d",
+          "size": 3804035
+        },
+        "levels/dt_20us/replicas/seed_939108/trajectory_raw_wide.csv": {
+          "sha256": "4a16ecd37f30da2bc9ce38f1168107097159ffdf985d3b4840bf3d66b540221f",
+          "size": 4371438
+        },
+        "levels/dt_20us/replicas/seed_939109/actual_binding_receipt.json": {
+          "sha256": "d07205d8553c4107504187a4d7e7579b75ad68d79a329ac8f6b590d998eafd2b",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939109/events.csv": {
+          "sha256": "8d17ae51bd0ccad69ae1d226fdb4ce7152c5b2d50fe3717a6b5cd3385b065ede",
+          "size": 13425
+        },
+        "levels/dt_20us/replicas/seed_939109/fdt_probe_raw.csv": {
+          "sha256": "2971537d3d1edf2cfc7238205ffeb356c0f76c5ede494668bcfdcc2f06108830",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939109/performance.json": {
+          "sha256": "e9b985383d42e3c6a1a4c884bd6f355ee19702b489eee8c0499283662007b513",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939109/terminal_boundary_raw.csv": {
+          "sha256": "805a171c31c4d64dd2d84441ed5de8fba8108bc2eb39cb3173fad5c7dfb6e993",
+          "size": 8358
+        },
+        "levels/dt_20us/replicas/seed_939109/trajectory.csv": {
+          "sha256": "dcd548d94c481f95cb78042bc2b056e990a34590be20f847868b9767eed12f22",
+          "size": 3798571
+        },
+        "levels/dt_20us/replicas/seed_939109/trajectory_raw_wide.csv": {
+          "sha256": "c88ef4fb99ea1c39a99bc6fc87cbbba0e78754daede24e3a14c5747055774433",
+          "size": 4368307
+        },
+        "levels/dt_20us/replicas/seed_939110/actual_binding_receipt.json": {
+          "sha256": "d2be12b080a71fd970913b5c14998f8f7bf7ee4dc2557a7a9e3dc890b462402f",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939110/events.csv": {
+          "sha256": "e5770a40774f172af4ac081686e84566b9ec03ed2d6580741999166d4fe25a59",
+          "size": 13515
+        },
+        "levels/dt_20us/replicas/seed_939110/fdt_probe_raw.csv": {
+          "sha256": "82c1dca70ff5de134778ed3bb31fd5676da34912033ea20983a17e103f6381d4",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939110/performance.json": {
+          "sha256": "4c405681a6bdb1dcc5f934f8b72d490512592fc0994bc57a401443bf657e65af",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939110/terminal_boundary_raw.csv": {
+          "sha256": "fd73284507f65051e3db14ec5f585fd563f42edd21535cf67e884f98b41bc250",
+          "size": 8367
+        },
+        "levels/dt_20us/replicas/seed_939110/trajectory.csv": {
+          "sha256": "e19febda179fb44e6b8c1ea7d5042981ee169de2106f9158341b0cfe7dbf6581",
+          "size": 3799925
+        },
+        "levels/dt_20us/replicas/seed_939110/trajectory_raw_wide.csv": {
+          "sha256": "88f7d45324491408aa058fa4a0ddf0522a42caabf120d0b3966d2015015ee701",
+          "size": 4370739
+        },
+        "levels/dt_20us/replicas/seed_939111/actual_binding_receipt.json": {
+          "sha256": "af9dd04c339649db56fcd684e8ecb7b815a78342d75efa76117ead94c43e2fbf",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939111/events.csv": {
+          "sha256": "79b942e3ab3092ca282c5486e587fc2efda310fcbe249bdbafa683c628538481",
+          "size": 13410
+        },
+        "levels/dt_20us/replicas/seed_939111/fdt_probe_raw.csv": {
+          "sha256": "c591679c6dee2974068a93c197c3a26db36fd4507dad0fa1bec2a04fb99f5340",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939111/performance.json": {
+          "sha256": "74e23c581abcb432d228eaf9a9b18b0245c22940981d119a7d222163f62d4915",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939111/terminal_boundary_raw.csv": {
+          "sha256": "e72387a10f636f3b1a4489d2affe8e1fc8169ff50c601020752d6aec99def6b0",
+          "size": 8324
+        },
+        "levels/dt_20us/replicas/seed_939111/trajectory.csv": {
+          "sha256": "fc01414e0493008e9103369f59c1af1acb06a1c6c3416095d533b77825c62175",
+          "size": 3799566
+        },
+        "levels/dt_20us/replicas/seed_939111/trajectory_raw_wide.csv": {
+          "sha256": "d08bab57cea4535f88bd2e0f3e3e3936028cb8bd565be910f363f2d7b9708c37",
+          "size": 4365177
+        },
+        "levels/dt_20us/replicas/seed_939112/actual_binding_receipt.json": {
+          "sha256": "a9a618d07a8b65a6d7cb72ec7197afbc4669708c81bfd760ab7f69386a676549",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939112/events.csv": {
+          "sha256": "d4541ced3ffcb1e08bb49b6962201c1f0d00a958fd2ac0e38b8af1d089d1ab9f",
+          "size": 13513
+        },
+        "levels/dt_20us/replicas/seed_939112/fdt_probe_raw.csv": {
+          "sha256": "ecb3c74941c4cc3b05d59c3f0a513d78f6a2af5f1f0a84ca5ad2f32b55afa4f9",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939112/performance.json": {
+          "sha256": "978582f1d996ab95173cb4ec9a2b5de8f68e328643402461e87bb2bedbb94d7c",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939112/terminal_boundary_raw.csv": {
+          "sha256": "8e09396ddc92d65ed04ba764858462c8ea28d3651bf1eb4eedd327475fa104be",
+          "size": 8364
+        },
+        "levels/dt_20us/replicas/seed_939112/trajectory.csv": {
+          "sha256": "de98ef32e8dce2255c44e704e1659ed33bac00256868329a0279e7652465efe0",
+          "size": 3801888
+        },
+        "levels/dt_20us/replicas/seed_939112/trajectory_raw_wide.csv": {
+          "sha256": "1044e6eca5ca1c4e0dc1d43b11b8cc8d7fdd1fca5a3811c37284ededc54813e9",
+          "size": 4372448
+        },
+        "levels/dt_20us/replicas/seed_939113/actual_binding_receipt.json": {
+          "sha256": "7d25ff6dc116eb2f8bf22af16aa5fc58e144fa17e1aed5f3992308a704f51b92",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939113/events.csv": {
+          "sha256": "5ae14ae517854eec008195b29a40e3984ff7c7fe65f2ee2bd62afd0a88fe2617",
+          "size": 13416
+        },
+        "levels/dt_20us/replicas/seed_939113/fdt_probe_raw.csv": {
+          "sha256": "26a370ae646167ea2e0ded55ead3a8e0fc289dbce8b995ee3248fbf0d202502a",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939113/performance.json": {
+          "sha256": "573e15f9474ce969377b579a1f3961ba90ba8933770d46b3aa166b867fc37669",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939113/terminal_boundary_raw.csv": {
+          "sha256": "8c4d3283401cd42bef3e96f3e185e73f08468bb185ca65adb839b1f8949c5292",
+          "size": 8330
+        },
+        "levels/dt_20us/replicas/seed_939113/trajectory.csv": {
+          "sha256": "103b3b302a8539a8f8021ef40008b0b5c2fbb5ae5bb4692751b5c819740e6a9a",
+          "size": 3801078
+        },
+        "levels/dt_20us/replicas/seed_939113/trajectory_raw_wide.csv": {
+          "sha256": "7bd3f4403f39db0c0e47dd69653ab7f22aea798cd90b579ea605a83499738e0c",
+          "size": 4367412
+        },
+        "levels/dt_20us/replicas/seed_939114/actual_binding_receipt.json": {
+          "sha256": "dd97c1d90d530ab304a06925571e66cb654978e8b86002c52ae2f1588213cbb0",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939114/events.csv": {
+          "sha256": "53382d2a37cbafd492ee298f620b67d367d1ae4e4132ae1157ca8d99fd653b61",
+          "size": 13494
+        },
+        "levels/dt_20us/replicas/seed_939114/fdt_probe_raw.csv": {
+          "sha256": "021ffeb2a7fc7ad22ef20368977aa4a095b33e8c9873e479981115144ac6328c",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939114/performance.json": {
+          "sha256": "755284e6d6fbcdd082659d51042c605c75e0a42a8942bf533b55fc56730b7068",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939114/terminal_boundary_raw.csv": {
+          "sha256": "e894b852b95ef133a9a42da4fcb09f9e8d483ca7c25d70706a996cb178f540ba",
+          "size": 8346
+        },
+        "levels/dt_20us/replicas/seed_939114/trajectory.csv": {
+          "sha256": "5fa0797dd62a10156f77f044da65b9e39f45594144a2c0cd41b1e602a39a8cb3",
+          "size": 3801619
+        },
+        "levels/dt_20us/replicas/seed_939114/trajectory_raw_wide.csv": {
+          "sha256": "78641918b883efbffa8e256bf35be9a69fa09807929854dd482e52f8fa3d009c",
+          "size": 4369906
+        },
+        "levels/dt_20us/replicas/seed_939115/actual_binding_receipt.json": {
+          "sha256": "d45cbf609ab18569473e666dd153ee4460f209d255ae8495cc889ded922c19ab",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939115/events.csv": {
+          "sha256": "01b7c5d1a33ce57d91af112d087c0f35ee55d0da2d5e97da25a63121e677401b",
+          "size": 13467
+        },
+        "levels/dt_20us/replicas/seed_939115/fdt_probe_raw.csv": {
+          "sha256": "9010d0fc09e31dcd29d29eba4958232ce067c84d1f7da77be2657161045f18be",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939115/performance.json": {
+          "sha256": "d486db8a1cf6a6042d0ba858c89b20c18ab99a1e58f931236a9f9564c86b730b",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939115/terminal_boundary_raw.csv": {
+          "sha256": "442adb75680678e1b176308f6b9fcdccc26560f4b7af461cb7dd98e501f197ce",
+          "size": 8350
+        },
+        "levels/dt_20us/replicas/seed_939115/trajectory.csv": {
+          "sha256": "ef23b2a3d844b3b0eb50ff5031b285f22edd53d93f1595715ed496fd3647e15a",
+          "size": 3801066
+        },
+        "levels/dt_20us/replicas/seed_939115/trajectory_raw_wide.csv": {
+          "sha256": "3b1923bf0cdc0b7cae27923a113b7a967627c08edf30744c7d8a62f5df1d264f",
+          "size": 4369790
+        },
+        "levels/dt_20us/replicas/seed_939116/actual_binding_receipt.json": {
+          "sha256": "4ad677261b27034123b8ba797df2f878b51c1c920607eb377b9b28966f85b457",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939116/events.csv": {
+          "sha256": "52b8d2fc3306aa03a2ce1ff7df9aec15377a2fd2ecb12baf3871c015f5cfb6be",
+          "size": 13555
+        },
+        "levels/dt_20us/replicas/seed_939116/fdt_probe_raw.csv": {
+          "sha256": "9dd16328107f9b70a0058956fca2c3726d834140a9cbf26769460666bc4ecab5",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939116/performance.json": {
+          "sha256": "b7bb3205ed4be570bb12a965b48895dae65d84ad2b267ce9c5094d24466c52cd",
+          "size": 502
+        },
+        "levels/dt_20us/replicas/seed_939116/terminal_boundary_raw.csv": {
+          "sha256": "5fb2f7000d91219bd696c5b3d1a6238d96fce9caa7e401e40cb9b8bf720a80ed",
+          "size": 8376
+        },
+        "levels/dt_20us/replicas/seed_939116/trajectory.csv": {
+          "sha256": "cb4628e7bb2b81a62e2a8eafcb5d51f5b7b67f8e6fb4ce4d301b1b91fb215a0d",
+          "size": 3800474
+        },
+        "levels/dt_20us/replicas/seed_939116/trajectory_raw_wide.csv": {
+          "sha256": "8382fabad0a242775292983c123bfed05b83a69e9a90cf14921675fc6042ac2e",
+          "size": 4372416
+        },
+        "levels/dt_20us/replicas/seed_939117/actual_binding_receipt.json": {
+          "sha256": "e4e0b87206af783bb8b36244ad724afcfb15c18eedf130a812268a8c87f6eae5",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939117/events.csv": {
+          "sha256": "7d5417a8db46b2a4c76dd710aa9f7eb3e1f548e78214694a726aac4b41acd66e",
+          "size": 13558
+        },
+        "levels/dt_20us/replicas/seed_939117/fdt_probe_raw.csv": {
+          "sha256": "89803d1433cd68d2178b6c3d628dd155ff354ba5da7b9db7ddd02eb72366042f",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939117/performance.json": {
+          "sha256": "97a06df91dc1a5170f2e767bde1b7fe71eea625ab75328bda0cceb7ad60399d7",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939117/terminal_boundary_raw.csv": {
+          "sha256": "02fd80b672a63d85d4a3937f0a2e69666fc5c2c6f0211af211654b9195f0f456",
+          "size": 8379
+        },
+        "levels/dt_20us/replicas/seed_939117/trajectory.csv": {
+          "sha256": "18245cdbaa281a131ca64937cc34a0f3d1b344f1866486200c9382c5c270956d",
+          "size": 3801112
+        },
+        "levels/dt_20us/replicas/seed_939117/trajectory_raw_wide.csv": {
+          "sha256": "3520b441a8b76a3b11019f2874ecd43782f6cf9370e58a92cfe5ebcced2f1c5a",
+          "size": 4373375
+        },
+        "levels/dt_20us/replicas/seed_939118/actual_binding_receipt.json": {
+          "sha256": "f3ea80bc762720445ef7ace1f0e826b20ac73d0419f35c3be938a24c384d25ce",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939118/events.csv": {
+          "sha256": "74ef7941b9d1aabc591c4c470baad16ebd3010f7402fb37784e7a1bf6b37d4a0",
+          "size": 13260
+        },
+        "levels/dt_20us/replicas/seed_939118/fdt_probe_raw.csv": {
+          "sha256": "b7f8d869e9569fcb22c4106327ecebc5522ec9b1f89fb1babb3ee40c25bb0f86",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939118/performance.json": {
+          "sha256": "54f888dc9be5dcf6a39ba21eecae83f7805120278732f4d01a7eb30ce6dd2f20",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939118/terminal_boundary_raw.csv": {
+          "sha256": "644bb54ba692f5bf4d52f9964b5f722932270acf9769e395abbeedd323fd3b17",
+          "size": 8285
+        },
+        "levels/dt_20us/replicas/seed_939118/trajectory.csv": {
+          "sha256": "10dfc9c1bfd13cfb20e5a6a4149c85c528c3d47ea7b39fbd0ea18cb7afbd4aee",
+          "size": 3800590
+        },
+        "levels/dt_20us/replicas/seed_939118/trajectory_raw_wide.csv": {
+          "sha256": "ade3b889a72113f73ab9e68f9af10702d5e578f13d0766ba656729eb62a0ed6f",
+          "size": 4361484
+        },
+        "levels/dt_20us/replicas/seed_939119/actual_binding_receipt.json": {
+          "sha256": "a12e2585f8720aac56274f055aa47df380296814d47e8a890ba4626406fb4e40",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939119/events.csv": {
+          "sha256": "c84ef04d2b25ff17057ad74375f73d4bdc0b990775d665ddb4e17e1e15373c29",
+          "size": 13569
+        },
+        "levels/dt_20us/replicas/seed_939119/fdt_probe_raw.csv": {
+          "sha256": "c2f4c16936f7deedd60c2dbe5821f0ccaaeef1b8207f497b3e373bb40df2c394",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939119/performance.json": {
+          "sha256": "adf5267b507b9438733bdfebb8075f43621e55ce273da350accba6eb631d6220",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939119/terminal_boundary_raw.csv": {
+          "sha256": "648729a30791a7b0107ddd77b1f7ff928bc2fcf1f41e69c12017c5125add572e",
+          "size": 8409
+        },
+        "levels/dt_20us/replicas/seed_939119/trajectory.csv": {
+          "sha256": "c55cce1b9f3ca7e236310c5161685e92866ba764a4216d435800442ac89a3b03",
+          "size": 3798200
+        },
+        "levels/dt_20us/replicas/seed_939119/trajectory_raw_wide.csv": {
+          "sha256": "7c4479188b70c89524e39de0651402904024958c4c2d158c01358b158ed71052",
+          "size": 4374088
+        },
+        "levels/dt_20us/replicas/seed_939120/actual_binding_receipt.json": {
+          "sha256": "5fbb59d6f6dafa65d1874d0a715c4abe8d17878879502e6badd21d7587b490a7",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939120/events.csv": {
+          "sha256": "d5dcf2bfee8701f5856942526c88ab4e48b4ab27f4743cbfc8416d03a801b06f",
+          "size": 13406
+        },
+        "levels/dt_20us/replicas/seed_939120/fdt_probe_raw.csv": {
+          "sha256": "2de87e33a4d77c1b700822267ea9eadf2ce87ac417dbccd1ef7af3416aefae51",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939120/performance.json": {
+          "sha256": "d4ab66dabeaef8336590838cf8d0d3a1e63f2b07920e778be7eb28d10175226a",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939120/terminal_boundary_raw.csv": {
+          "sha256": "d4dd7c420fd97e746e5cad55a49336d5143ac37227d21d1bb8118247d39fed2f",
+          "size": 8320
+        },
+        "levels/dt_20us/replicas/seed_939120/trajectory.csv": {
+          "sha256": "c18d36970a129024c3c506184cc49b2de78235ed349b6827f2f4396579584878",
+          "size": 3803119
+        },
+        "levels/dt_20us/replicas/seed_939120/trajectory_raw_wide.csv": {
+          "sha256": "515ffad17d8a74b4f49d4910b50391d381a764ef46708b378b978d2045e6a216",
+          "size": 4368248
+        },
+        "levels/dt_20us/replicas/seed_939121/actual_binding_receipt.json": {
+          "sha256": "fbf95f7d944cce34544fc85f262cdbd9de93cfb49559fd497e01ae7b1f9998fa",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939121/events.csv": {
+          "sha256": "a26f892499382d07223a004b22bcec5e8c20868fb126333b70051e9d0f0dbe94",
+          "size": 13528
+        },
+        "levels/dt_20us/replicas/seed_939121/fdt_probe_raw.csv": {
+          "sha256": "e9ac8d433a6eb95ab66dd735c7d7a0f801577d1c15c6e8db121760cbcf2ea03f",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939121/performance.json": {
+          "sha256": "924af12f1f1e9e1ff98661efbdca95b106c7c355619c31f180c3b3fc71fdf440",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939121/terminal_boundary_raw.csv": {
+          "sha256": "55deff6b94936b90b4302e352680123796287605192e5a02ad0fb00e0cdafee7",
+          "size": 8380
+        },
+        "levels/dt_20us/replicas/seed_939121/trajectory.csv": {
+          "sha256": "3f352beb73e350aec4bef7f97f11d074bc4c3b44ce6dadbc40a22333afbe7448",
+          "size": 3799629
+        },
+        "levels/dt_20us/replicas/seed_939121/trajectory_raw_wide.csv": {
+          "sha256": "758f82d3fefdca09e546377eaf7893df693e02b58261ca35b995a5088c7acd1a",
+          "size": 4372014
+        },
+        "levels/dt_20us/replicas/seed_939122/actual_binding_receipt.json": {
+          "sha256": "eb1ec4a83f318369785e1ae164b9227570914e1a2710dfde8bd4c09da72f4649",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939122/events.csv": {
+          "sha256": "72d064ad1d86b25c37aff33e8da5c5081ab0d8452f75c2d64dfa07c5622e6a12",
+          "size": 13568
+        },
+        "levels/dt_20us/replicas/seed_939122/fdt_probe_raw.csv": {
+          "sha256": "24a77b416f944cd28bc3c23bab7215b000eaf573207e156edcee332dd21507c2",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939122/performance.json": {
+          "sha256": "3d1e254e319b5d44647785c1e8ee6a242906a5f3a49b39802d6ba49d6ff84298",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939122/terminal_boundary_raw.csv": {
+          "sha256": "280368e883fe032db3dd0699f8c48c9170756499acee17fbb0bffbedc5a3dd98",
+          "size": 8389
+        },
+        "levels/dt_20us/replicas/seed_939122/trajectory.csv": {
+          "sha256": "d4e941bbe2566d34b5abf9033d5296440a1591b9ab1ebb7f6d74de95f2addd18",
+          "size": 3799691
+        },
+        "levels/dt_20us/replicas/seed_939122/trajectory_raw_wide.csv": {
+          "sha256": "14feafae2159dd32cb8e53f09971d7179d52cf6305c7b9f2f3e6650ed2a630c0",
+          "size": 4373163
+        },
+        "levels/dt_20us/replicas/seed_939123/actual_binding_receipt.json": {
+          "sha256": "985c73f76e6072d45d622904851b055f57a1409946ada69977df2e64c415130c",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939123/events.csv": {
+          "sha256": "2363e16d9dc7a0fd4be4f4fe5b1560f139b8e01e2a44121dc5b934b2954ebf73",
+          "size": 13360
+        },
+        "levels/dt_20us/replicas/seed_939123/fdt_probe_raw.csv": {
+          "sha256": "1f1bcf487bf4f434cbd463fed8688ee26b14fa679a2053cfdb297a6af330deda",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939123/performance.json": {
+          "sha256": "b2d3617a14507439295ac6f10ec470ede985725b6e82451a54c36e32a1826d1e",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939123/terminal_boundary_raw.csv": {
+          "sha256": "c7e2288fab7be4c2ef8dbd6e214b927b540a38d8178460358ed444447dcf8e76",
+          "size": 8305
+        },
+        "levels/dt_20us/replicas/seed_939123/trajectory.csv": {
+          "sha256": "e38f9ec95b6a0dfcec588a0ebae9af8c6d8806ec992f8de79b0bc924ae09a263",
+          "size": 3802584
+        },
+        "levels/dt_20us/replicas/seed_939123/trajectory_raw_wide.csv": {
+          "sha256": "41c6f0c511db150944c984d985c73025965891408aeda1eab6e411388aaaf2c8",
+          "size": 4365902
+        },
+        "levels/dt_20us/replicas/seed_939124/actual_binding_receipt.json": {
+          "sha256": "07ca10ea186c57cc7f3dff607e28775fc30058253a9fb491b072af792e6d58e7",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939124/events.csv": {
+          "sha256": "2b8e9c6b539e0037acfa879329951a21284304d27a0d29e5db9563bf070e7dbe",
+          "size": 13509
+        },
+        "levels/dt_20us/replicas/seed_939124/fdt_probe_raw.csv": {
+          "sha256": "0a0d5812c264878f6c6830546191dce57315ca9c3454ea39cfa6fc85ee04c810",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939124/performance.json": {
+          "sha256": "5c0d5e2fc51f7d230f1a0a276a4b5ff714df8fdf7617264c69850e5117b24b38",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939124/terminal_boundary_raw.csv": {
+          "sha256": "996db2c15c46b78d0d8f822d07a6574e4e4b22a1680fa6445a8951cac0902871",
+          "size": 8379
+        },
+        "levels/dt_20us/replicas/seed_939124/trajectory.csv": {
+          "sha256": "4031e4897e8ad46553f7a5e028bb682345a035570ce918d9e0daaf4507522886",
+          "size": 3799181
+        },
+        "levels/dt_20us/replicas/seed_939124/trajectory_raw_wide.csv": {
+          "sha256": "913f4d8fd396254677897c0fd91b526404de5240306d9a114801bed22bb2b168",
+          "size": 4371453
+        },
+        "levels/dt_20us/replicas/seed_939125/actual_binding_receipt.json": {
+          "sha256": "320b4b23d989ca92bf78a17a0915840710a4b2f0530d1f99db2ebe2a9fd2a205",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939125/events.csv": {
+          "sha256": "1becc7caff1c6d0f37eb88b850b3a9dddfdb4680d0d4a0460db023bc69fe0dad",
+          "size": 13422
+        },
+        "levels/dt_20us/replicas/seed_939125/fdt_probe_raw.csv": {
+          "sha256": "1dd64e4fc922eb569204acaa6193d8cf2172f8b8b9849668bd549c850aca3181",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939125/performance.json": {
+          "sha256": "01680e36a7ad348c500ef409072a889e5752c3bf6a954c039b763b56558dfb81",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939125/terminal_boundary_raw.csv": {
+          "sha256": "e4ad1059531b5db271931df3dfd12e2e063234d98e21d9ff7dfdf5cf91835dd9",
+          "size": 8336
+        },
+        "levels/dt_20us/replicas/seed_939125/trajectory.csv": {
+          "sha256": "0fced2ada4982fe66d85102acb5ce11d6fbe4ad1160a9f57768805348a014ed2",
+          "size": 3800640
+        },
+        "levels/dt_20us/replicas/seed_939125/trajectory_raw_wide.csv": {
+          "sha256": "5c4d06d3ce2eb00cd49da4764e48603a342217fa908fc382fd2e87a6a7f7ed58",
+          "size": 4367692
+        },
+        "levels/dt_20us/replicas/seed_939126/actual_binding_receipt.json": {
+          "sha256": "09862ceefc4380837a28ee589a8bbb21a1c3aefae2fadcdcdd57d1f91b5a2481",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939126/events.csv": {
+          "sha256": "3bdb728e74d78efd48916eb0b4fc5ade0262d5d27a4a13c7705088a1ffec5cd6",
+          "size": 13254
+        },
+        "levels/dt_20us/replicas/seed_939126/fdt_probe_raw.csv": {
+          "sha256": "b6509f81d9851e0edc55a55a4ecbdf905f2627d212c787ff1048e7b3381dab4c",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939126/performance.json": {
+          "sha256": "8917d5d4178aee07d7194be44364a0d89d7d8c95e523944a493806f08c0a2eb7",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939126/terminal_boundary_raw.csv": {
+          "sha256": "5b6f98a772f983c06c59406198ee4856746d21314a64a6661259fae3c281d4be",
+          "size": 8279
+        },
+        "levels/dt_20us/replicas/seed_939126/trajectory.csv": {
+          "sha256": "23b022cd6ddd71892cd8e4e85e05b92b8bb6016c551bbe0694164d84376baddf",
+          "size": 3800909
+        },
+        "levels/dt_20us/replicas/seed_939126/trajectory_raw_wide.csv": {
+          "sha256": "6759e6396b79beed46f7df1873aec7cd12e90d33341e6268a1d2eef90b46698c",
+          "size": 4361098
+        },
+        "levels/dt_20us/replicas/seed_939127/actual_binding_receipt.json": {
+          "sha256": "dc8aefef4ae2cd608a3a5ce66991f3c7dedb4c6c4a1cb323cf87a050f41bcf20",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939127/events.csv": {
+          "sha256": "e054e858f0bc1af5617c6630f4e9b566d5e72106c7b2bbeebc22c17beff78ac2",
+          "size": 13415
+        },
+        "levels/dt_20us/replicas/seed_939127/fdt_probe_raw.csv": {
+          "sha256": "13afbeadbd1000954af29464a15dc63e4184dffd9cb6eb9a24b0154f6599119e",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939127/performance.json": {
+          "sha256": "d244b8db3541d6272633c5c7131ac7304527b4cb9131d729fd72015525300675",
+          "size": 502
+        },
+        "levels/dt_20us/replicas/seed_939127/terminal_boundary_raw.csv": {
+          "sha256": "177307b720e3165a9ae7295e69ae8a01e557864f7eb6668eb167d22111be5e8e",
+          "size": 8329
+        },
+        "levels/dt_20us/replicas/seed_939127/trajectory.csv": {
+          "sha256": "d86a801a3b2f4ba2069239b06ad4843f7880801e9b74a7794856f9f79e69e777",
+          "size": 3802743
+        },
+        "levels/dt_20us/replicas/seed_939127/trajectory_raw_wide.csv": {
+          "sha256": "2ba9d80c3262262b0899fae9f14fe7978c364e4b77277863b88a2851301e8cc3",
+          "size": 4368965
+        },
+        "levels/dt_20us/replicas/seed_939128/actual_binding_receipt.json": {
+          "sha256": "d6052862d440eea7b306e2523da7dd120d33ea4a6f09717967ddab2e18531c20",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939128/events.csv": {
+          "sha256": "bae041a3da72be2878f2a2ebd81c8893c478df1ef8ba8dd948220b1d481f58f8",
+          "size": 13616
+        },
+        "levels/dt_20us/replicas/seed_939128/fdt_probe_raw.csv": {
+          "sha256": "4d8c445a45c2afd0ac59c8b10d14167076cd72bb0fd7136ceb838c981d6389e0",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939128/performance.json": {
+          "sha256": "97c5719b74b92e870d620aa8c085ced19792201b19dd9bbeb6defa4ae0161df4",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939128/terminal_boundary_raw.csv": {
+          "sha256": "b780110de4d91ee6e39d28913d342ed6a61c8faa178295970bbdc167feaca19c",
+          "size": 8401
+        },
+        "levels/dt_20us/replicas/seed_939128/trajectory.csv": {
+          "sha256": "b5a1cbff8cd790e98169614b4e4253c274bfc5ac8e98a309b1d5e7a454d8fe3c",
+          "size": 3800255
+        },
+        "levels/dt_20us/replicas/seed_939128/trajectory_raw_wide.csv": {
+          "sha256": "ad62379b955f58fad61f1ffb3d21a6541d6c0e39e0f2dca0e82580b9f8214389",
+          "size": 4375051
+        },
+        "levels/dt_20us/replicas/seed_939129/actual_binding_receipt.json": {
+          "sha256": "415eb17dc3e63dd0f7c101caeef11eb0fa652641c64496ed1d3f1d6bfa788dba",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939129/events.csv": {
+          "sha256": "97e5efbe82e1f2421eafa44066bb1a685e0e75e39cf7a6240e18438c47c0b407",
+          "size": 13444
+        },
+        "levels/dt_20us/replicas/seed_939129/fdt_probe_raw.csv": {
+          "sha256": "94bb3a6f40fb75d233d5a5862268575d5fe8f939dd712b2f20b0c74c4d62cdf4",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939129/performance.json": {
+          "sha256": "b57cf821612760cd3d58fe6d0ee19cbc38a58287a859a14b6d355f814f02f5b6",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939129/terminal_boundary_raw.csv": {
+          "sha256": "0b0554a5d68f078809ec61b70c22f15d62208a04fdf68f72827396b4d2ecc759",
+          "size": 8327
+        },
+        "levels/dt_20us/replicas/seed_939129/trajectory.csv": {
+          "sha256": "3dea29252885da8a007a9961da0ab8f1f408b80fdefc6f974255220a24d68c23",
+          "size": 3800300
+        },
+        "levels/dt_20us/replicas/seed_939129/trajectory_raw_wide.csv": {
+          "sha256": "3c50042a283031c28bd8574a6ac16b9ba477e59f4b9f0306369b4d45fd73622f",
+          "size": 4366317
+        },
+        "levels/dt_20us/replicas/seed_939130/actual_binding_receipt.json": {
+          "sha256": "316803d898b2449312d16a0c3cc41135cbbaa735c55bdea90de98970bc40ec00",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939130/events.csv": {
+          "sha256": "ca42fcbba39eac7a915c6dd1b724cc7ef20529e770da1244f5f47b2af7145873",
+          "size": 13353
+        },
+        "levels/dt_20us/replicas/seed_939130/fdt_probe_raw.csv": {
+          "sha256": "f98b079306cfd787f423f43f3192d7eaf041c8f0ca1d8321cf610e8e42196e86",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939130/performance.json": {
+          "sha256": "62f806f5857e030a7ae8be3c0fc32a1ed69eb694b8fbef467cb37673b7510a64",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939130/terminal_boundary_raw.csv": {
+          "sha256": "e962d79d15abf3a48da2b98e0676dd67c461a142d71c04d86234038886c1f459",
+          "size": 8302
+        },
+        "levels/dt_20us/replicas/seed_939130/trajectory.csv": {
+          "sha256": "1e3f412ab3188cd7f02299fcc85323736f157364bc267ca762797499a702b761",
+          "size": 3803491
+        },
+        "levels/dt_20us/replicas/seed_939130/trajectory_raw_wide.csv": {
+          "sha256": "092a6572698c5e409b5a3a4d0ce383342afb2293a62992a21adc5810e3a00d9f",
+          "size": 4366712
+        },
+        "levels/dt_20us/replicas/seed_939131/actual_binding_receipt.json": {
+          "sha256": "d159e1af3e13970b6c479f216ef1dbeae7a70e94b20043edd04c52bec91082bb",
+          "size": 70452
+        },
+        "levels/dt_20us/replicas/seed_939131/events.csv": {
+          "sha256": "dab6a58f5723fc21404a60e60e2d192d46e0fe48edf2c3e15c11405818a9a611",
+          "size": 13556
+        },
+        "levels/dt_20us/replicas/seed_939131/fdt_probe_raw.csv": {
+          "sha256": "ab640f20e18dbb54b8610291837092d25d073a64e5e39402779fd092a5646a6c",
+          "size": 39302
+        },
+        "levels/dt_20us/replicas/seed_939131/performance.json": {
+          "sha256": "ce4eed824e72a58dba5fda8d471f052496c969f783d4e6d05f0d7aaa10d3d7a3",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939131/terminal_boundary_raw.csv": {
+          "sha256": "0c295fce94f5060b167c25eaf416197af167cf4b1077798aadb710de4e53be12",
+          "size": 8377
+        },
+        "levels/dt_20us/replicas/seed_939131/trajectory.csv": {
+          "sha256": "7ee8d181ffa1b401002c7fafc7136c3ac7c8f57d86fdfeb9273ebcf57d5de6dc",
+          "size": 3802595
+        },
+        "levels/dt_20us/replicas/seed_939131/trajectory_raw_wide.csv": {
+          "sha256": "7ab8a88d0da37a0e208d1c7813c0232e95cc9493b3d4d1d37b4d5bf564c0655e",
+          "size": 4374644
+        },
+        "m3c2_caseA_100nm_axis_normalized_final_registration.json": {
+          "sha256": "375723aa995ebd3aca853655870add6fd886c655ac73d05210f39e9e796d2eaf",
+          "size": 4043
+        },
+        "m3c2_caseA_100nm_current_binding_pilot.json": {
+          "sha256": "c3006414f56052bd5cf484d7443b0a9d4c4aeaaa812a5b718c0d8e3b06cfeef7",
+          "size": 8985
+        },
+        "m3c2_execution_request.json": {
+          "sha256": "7fda298ad42571eae4f1428ef5a3ed56f9cb84018999485770f0400b7f437f71",
+          "size": 8121
+        },
+        "m3c2_pilot_request.csv": {
+          "sha256": "8acff5fcb3dec5bf8c4056e661dcb333e72eb107d0957ae542f356d73d1f9789",
+          "size": 1600
+        },
+        "meaning_binding_attachment_receipt.json": {
+          "sha256": "3b6e1ccf94cd6eb03060d77df4df34b01389c73c3d9428efa4327bc7016b58f6",
+          "size": 1632
+        },
+        "meaning_conditions.json": {
+          "sha256": "40c3c5fbef27426f0f50c25df993e487cd519e68e44715dcbb76abca59fbba66",
+          "size": 3793326
+        },
+        "meaning_inventory.json": {
+          "sha256": "2b3592b075d0a3156f608a699a218bf46ccba94ce9a8f3bd8cba2569e5424c4f",
+          "size": 3378640
+        },
+        "meaning_preflight_report.json": {
+          "sha256": "caabec41d22d4c8ab1ac97c5a7b31b948b08ddd52e2b49d18f2fca59ae0b24b0",
+          "size": 1455
+        },
+        "prepared_table_validation.json": {
+          "sha256": "666187be664f5ed30879bc70bde91c8edce2bc1c3a787ebf82ebb0a00ccc57d3",
+          "size": 10229
+        },
+        "run_receipt.json": {
+          "sha256": "223f6da459cf670173e423b90b8b702c414d7601f9d724b3d5548323cb93e765",
+          "size": 16007
+        },
+        "run_status.json": {
+          "sha256": "ca069a90fd23b98233982890830ce8d01ec9af931fa10b32548f3cb184609f23",
+          "size": 199
+        }
+      },
+      "source_root": "../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final"
+    },
+    "caseP": {
+      "files": {
+        "artifact_hashes.csv": {
+          "sha256": "23816609f68ebac14145a2177d6b5378e12dfddbeeea7b3f69a9b1fc0f23c791",
+          "size": 34946
+        },
+        "boundary_meaning.json": {
+          "sha256": "5b29c22f4e68af92e7b5b150fad151515bd527f1a0644a5bdcf11b6fb9db6ab4",
+          "size": 728
+        },
+        "common_p1_release_probes.csv": {
+          "sha256": "e48067c2021e24a41271234fbf8056ead9e3efae852a4dcf20a4d857eda270b5",
+          "size": 154053
+        },
+        "common_p1_table_receipt.json": {
+          "sha256": "ca1d61cb8f0d5034b1adf2693cf7fdad5316690288f5df848d532a24e069be8e",
+          "size": 14916
+        },
+        "comsol_campaign_manifest.json": {
+          "sha256": "ff79dbef3c5455ba54948d2512cfaf8c167c3c977a8e6649aa046dab305ef4e7",
+          "size": 98127
+        },
+        "comsol_process_metrics.json": {
+          "sha256": "f15c2be9cba6de595d9c3bb2c65785c712680a09b41f2c82c580292040fa17a8",
+          "size": 242
+        },
+        "executed_configuration_observations.json": {
+          "sha256": "6322d7fa4631544f0128dd379f00a8c518817fa66ee043d24ae8118373102cd9",
+          "size": 41261
+        },
+        "expected_binding_values.json": {
+          "sha256": "2d79779e112f3279873f0ad2b88456cd7182f3bbca3a87f5c30f2e7a696f83f3",
+          "size": 13706
+        },
+        "levels/dt_20us/replicas/seed_939000/actual_binding_receipt.json": {
+          "sha256": "c777d46565d759d891587acc1944a45ad3ae0d3f2ce8a0db5cd500512c7532d7",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939000/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939000/fdt_probe_raw.csv": {
+          "sha256": "d7d8c3b7fe10698f72ea032e9be926c4e666a6118df14a466ef303ccb6b611aa",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939000/performance.json": {
+          "sha256": "d82025bdcc931572c954d2bd92395b8941634aa565cbd355fed360a4fcb5d1ea",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939000/terminal_boundary_raw.csv": {
+          "sha256": "b036e466eea06220a9e0793b486d0762321aa44f5d14c839b086446138ed6219",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939000/trajectory.csv": {
+          "sha256": "bb56159fc4423f967bbd0c8ae3af492efd7a0dbb2f28bbfb0a9fac9122f3bbcf",
+          "size": 4140816
+        },
+        "levels/dt_20us/replicas/seed_939000/trajectory_raw_wide.csv": {
+          "sha256": "573e81f1f6638537e08bb83fa6affc77123311dc498bb03b5ad80f15cc64e4a1",
+          "size": 4120367
+        },
+        "levels/dt_20us/replicas/seed_939001/actual_binding_receipt.json": {
+          "sha256": "891d8b32ff515d96e915f4f9974b67a75b3e3975b7bb2865cb7e4cafebc09603",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939001/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939001/fdt_probe_raw.csv": {
+          "sha256": "fb195058047fa78f17173e7a2de6cc2bce99ffe7e0aae1100c7fb4d4f567d82b",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939001/performance.json": {
+          "sha256": "7422452cf93d6d9e1d2006fff089c9ba6662b9aff911d9b8074bae741e377b0f",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939001/terminal_boundary_raw.csv": {
+          "sha256": "e3fa059d32ab4a1c3ed6a9d6edf70d921531309257192882dd812b87f591f0ff",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939001/trajectory.csv": {
+          "sha256": "c1abbd6245dd8a240966efa238b2a4bd48e0c1f7ce43bd867b3ea8605bc12b5a",
+          "size": 4140741
+        },
+        "levels/dt_20us/replicas/seed_939001/trajectory_raw_wide.csv": {
+          "sha256": "f015442bfa46cae890ccea7138a8a9b513c0c5d69f45c32446f371a67dbddd3b",
+          "size": 4120294
+        },
+        "levels/dt_20us/replicas/seed_939002/actual_binding_receipt.json": {
+          "sha256": "3a09e589cc3ef66072d8bbcf13942a877549e4ca699c5183ff6265595e5eef9f",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939002/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939002/fdt_probe_raw.csv": {
+          "sha256": "ff7a06b8027b06ec408e2b01abf974c19b6bb2a11e9a42af2f9cfbe063d9b8ca",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939002/performance.json": {
+          "sha256": "ed2e73ea895860f2f77361144b02d2db16c3aebef01b501a83d857c4766e3240",
+          "size": 502
+        },
+        "levels/dt_20us/replicas/seed_939002/terminal_boundary_raw.csv": {
+          "sha256": "82fc5e222e7101a33d3af8677641db37cd9a197c41a81a4530134663f4432806",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939002/trajectory.csv": {
+          "sha256": "c09deb07eec58c6fecd5ae7b76b0ff64877352510e5fb4178af36175bcd06fa5",
+          "size": 4141598
+        },
+        "levels/dt_20us/replicas/seed_939002/trajectory_raw_wide.csv": {
+          "sha256": "6c4f03ba45a721496c1af9928eabfdd3cb22d63dcf4f0e62053395e267e323a5",
+          "size": 4121155
+        },
+        "levels/dt_20us/replicas/seed_939003/actual_binding_receipt.json": {
+          "sha256": "c6a9167a5fccb8b1dce5685d6a5c00ac351c4aa89c3ede2bc4d351657deab062",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939003/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939003/fdt_probe_raw.csv": {
+          "sha256": "58820686c1941bbfb0ee20bccecebf149f5e1f12ed653e7048ebff4af550853f",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939003/performance.json": {
+          "sha256": "92e92c49612a4bc2ba2e68527beafb9f25e3bec3a0ef1a77ed181959820c426a",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939003/terminal_boundary_raw.csv": {
+          "sha256": "fb53ad5f0ee5a5d3be965961f7877de8fd35e9e075f05c9b3097096c7209b3f6",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939003/trajectory.csv": {
+          "sha256": "a05913d53ac03e13d77bde440012c2352326f6651fcd89b02cfa1d4240c618b2",
+          "size": 4141246
+        },
+        "levels/dt_20us/replicas/seed_939003/trajectory_raw_wide.csv": {
+          "sha256": "c0fca859a1ecb19a63c90f762dd6582430762ee1b291ff6bb964fc3245045010",
+          "size": 4120803
+        },
+        "levels/dt_20us/replicas/seed_939004/actual_binding_receipt.json": {
+          "sha256": "3bd234903fe20ce8faf072d90d015814afbea5117bc1e31fc77235c24640f947",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939004/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939004/fdt_probe_raw.csv": {
+          "sha256": "274bf52da01e64289c5dd1b715fb6659d9bd8fa6677f0d3a138980e7a057889f",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939004/performance.json": {
+          "sha256": "b0e4f38796150947e9f6103e2e1f340c8c4fd79b8126656c4c910588f31a7415",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939004/terminal_boundary_raw.csv": {
+          "sha256": "f00a193af0ddcdb45e0984ddfe4b2268f7fb2a79e3c83f1950871ce468602d4f",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939004/trajectory.csv": {
+          "sha256": "adb872289e51cfd94d9dbc98c2537f2e6656db1a594d5768f239e3210a6504fe",
+          "size": 4141144
+        },
+        "levels/dt_20us/replicas/seed_939004/trajectory_raw_wide.csv": {
+          "sha256": "28226e4ae9fc4ab2ded15aa791909d60d58291f44314fada2f362f4ec3730a6c",
+          "size": 4120709
+        },
+        "levels/dt_20us/replicas/seed_939005/actual_binding_receipt.json": {
+          "sha256": "2f999c56b0518bd63b3c27a654e5641fd9b52eb8b14f4e76bb5f0d922fa49474",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939005/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939005/fdt_probe_raw.csv": {
+          "sha256": "3466c911d83b6880dbb29145f662743937e39f89b255c5b504c255ca1154c414",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939005/performance.json": {
+          "sha256": "d038054547601e2bf59cb5befd86ae75affadc22a2ccfe9218832c515998698f",
+          "size": 502
+        },
+        "levels/dt_20us/replicas/seed_939005/terminal_boundary_raw.csv": {
+          "sha256": "3e273c8c1aa5174dcae186f9fc9176456d053bd085f2b7d13f95446a4df435e1",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939005/trajectory.csv": {
+          "sha256": "d40200875798e4f288576e2c96c7d6bd692bc3691797c72d2270db219182822e",
+          "size": 4141146
+        },
+        "levels/dt_20us/replicas/seed_939005/trajectory_raw_wide.csv": {
+          "sha256": "c4efd54fe91c2e8c369a9039fa42d36b4874c46ebcc7c527a7807c52a12adb81",
+          "size": 4120705
+        },
+        "levels/dt_20us/replicas/seed_939006/actual_binding_receipt.json": {
+          "sha256": "93d58c118d252d81b12314538a5c42055c994359317e614cfcb5a4fb13bc7965",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939006/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939006/fdt_probe_raw.csv": {
+          "sha256": "046551c7b371419a7aee6e1ee62521c91580aba1e3b1aae46e084e9fbb706570",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939006/performance.json": {
+          "sha256": "a8eb12808adbdd6e6ee352706f7bd181f2879fcb19a057771092423ec61d1f89",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939006/terminal_boundary_raw.csv": {
+          "sha256": "4b13ba7fba74085632ebcb68bd593d652a030332c26ebc151dd1c3b6577b3035",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939006/trajectory.csv": {
+          "sha256": "5470ea29c9f6c0619285e7cbe5b4ff1ac3c86d3d62d6eae9799a7897cb3bd7c0",
+          "size": 4140943
+        },
+        "levels/dt_20us/replicas/seed_939006/trajectory_raw_wide.csv": {
+          "sha256": "c6dcbdd5d6563f47c840158d0be7e6e2c378ff4fbe2e345c38425b78cb600153",
+          "size": 4120500
+        },
+        "levels/dt_20us/replicas/seed_939007/actual_binding_receipt.json": {
+          "sha256": "93fa14a56730d82d15f1bac7d8aad3c5f25ece587dd670b42abdd791dd5293ed",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939007/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939007/fdt_probe_raw.csv": {
+          "sha256": "b70d1dc8f109ba53af22eeb089d17d6666f2de81a792340fdced512e09d5201f",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939007/performance.json": {
+          "sha256": "c05ea2718201774d110a47a45f59eb768ce2005b56968a0d15606f7160cc385d",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939007/terminal_boundary_raw.csv": {
+          "sha256": "9e1c43adee08ff9e625832ec6fc82705efe6e98ce20bc3a3d137a536413cf82b",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939007/trajectory.csv": {
+          "sha256": "f6e2433f3adf059fd0a86f4fb026f5af72e30b8c1f98e0f9151ae36884cf27f0",
+          "size": 4141008
+        },
+        "levels/dt_20us/replicas/seed_939007/trajectory_raw_wide.csv": {
+          "sha256": "8e6e9908894260f0211ce6380494cfc56ec37125448c60bb4901ad9aa6d4bdce",
+          "size": 4120568
+        },
+        "levels/dt_20us/replicas/seed_939008/actual_binding_receipt.json": {
+          "sha256": "deadfa6f5b8b20c9d29e2a61c2e1cbc3b8f9f5b1cc978cfcea46088a7624f2c7",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939008/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939008/fdt_probe_raw.csv": {
+          "sha256": "2936016919d9b121d74a9048b223b7d48e89426b431360d73cb0baae5d665a05",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939008/performance.json": {
+          "sha256": "378fbd8d1f8a366608d16ac7a3f952a44670971179c890c86afa5ab4c01e8af7",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939008/terminal_boundary_raw.csv": {
+          "sha256": "66c27745a34fe799d5152691295b2ef48ba99009a7b362051676846bdc208b5b",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939008/trajectory.csv": {
+          "sha256": "e90722d6b4a9603346589e16bbcfecc6370ce8cd49411af86f759d7fe52f2ded",
+          "size": 4141246
+        },
+        "levels/dt_20us/replicas/seed_939008/trajectory_raw_wide.csv": {
+          "sha256": "5be3b48a2b04c505fd4aa5ab8d34d0478b3cdf677adef14c50e2424d392ca16e",
+          "size": 4120804
+        },
+        "levels/dt_20us/replicas/seed_939009/actual_binding_receipt.json": {
+          "sha256": "0122006e1b81a540b7dcdba5d71dd1a49bbcab2081c631514502bdbdba8d7e35",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939009/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939009/fdt_probe_raw.csv": {
+          "sha256": "434fea9e8f3c7f1604da9a751edf383ce36a2c3f24fcc07cfe1d5d58bddcd69d",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939009/performance.json": {
+          "sha256": "2eb9861f786b056dda3dd194bc04bc4713d68bd0d22343896959b55630f7c1d2",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939009/terminal_boundary_raw.csv": {
+          "sha256": "bed77fb280559f84d7a14c2a69d046c3e6d9b8cf8f1dd32f2753bb1990da244d",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939009/trajectory.csv": {
+          "sha256": "214b49383711b3be13405b1560d5f31ceafa56f592422490105d45037c33a906",
+          "size": 4141130
+        },
+        "levels/dt_20us/replicas/seed_939009/trajectory_raw_wide.csv": {
+          "sha256": "da84a36f573fb706f6a64473a5800d9f61406f1a9b5f4420ecd49a62b368b6b2",
+          "size": 4120680
+        },
+        "levels/dt_20us/replicas/seed_939010/actual_binding_receipt.json": {
+          "sha256": "9ece990f3d618408dce9031738c877f710a692dc7ecacb8593311640c5623950",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939010/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939010/fdt_probe_raw.csv": {
+          "sha256": "18dfe60eb678abae46f237acea63dfcae44195860df01e4880ece75bbb0a068c",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939010/performance.json": {
+          "sha256": "fa0a49ecb9f83409e38ebae9b7659717b24467e9077d927139effa81ff6f2c86",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939010/terminal_boundary_raw.csv": {
+          "sha256": "9b83cfaea09064b672ec165d15e3fd461c8022a614116954ada35d878ff797ae",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939010/trajectory.csv": {
+          "sha256": "ad5310e4ca4a0946529ddef11b684b733030810e954bfd7592f702e9849b870c",
+          "size": 4141117
+        },
+        "levels/dt_20us/replicas/seed_939010/trajectory_raw_wide.csv": {
+          "sha256": "9f88dd0cb9579b7d0b9a35b986fe6b8f00bd4c16e5d492570a702cfb42b303df",
+          "size": 4120667
+        },
+        "levels/dt_20us/replicas/seed_939011/actual_binding_receipt.json": {
+          "sha256": "7ac209c59b16b09ad8e9588d35d48822425c434ea909d4955f09657e9734ef32",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939011/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939011/fdt_probe_raw.csv": {
+          "sha256": "b72858df43d6380ea805988566f0596f525ee9e819576199ce4981b42dfd91f5",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939011/performance.json": {
+          "sha256": "28c81b904eb32baad78eb09355e1d74999c87dd6a9ea5dcb062554dddd6378eb",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939011/terminal_boundary_raw.csv": {
+          "sha256": "1c5438daf06fb753cb7339419bda6382b163a71b733cbefd4189f322a8dfb440",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939011/trajectory.csv": {
+          "sha256": "b42f93435a1452e6acbe94503a5e4db8224487bcca4db1f27499e5b8d753eafe",
+          "size": 4141467
+        },
+        "levels/dt_20us/replicas/seed_939011/trajectory_raw_wide.csv": {
+          "sha256": "620f106d48272275843ac55466741b39e91fc8d124aec9f3ab2620ad88f076db",
+          "size": 4121015
+        },
+        "levels/dt_20us/replicas/seed_939012/actual_binding_receipt.json": {
+          "sha256": "29a6ba1daa1d310c55ade33b662052a1938fbbdb9012c120b67bbbd04b7643d3",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939012/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939012/fdt_probe_raw.csv": {
+          "sha256": "5ec01b453a1368ac03f5ebef4c7919711ec627db31763a8a24436bedee8259da",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939012/performance.json": {
+          "sha256": "72ab95821a5ff35667568c8c8f2c25960ae2fa961d0f4950b870ac7d06f0e549",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939012/terminal_boundary_raw.csv": {
+          "sha256": "d3c8ca01e1e3cdd03f00d69ed532208a5a7dfe9dd8ddca49acb2b3a807bc8a42",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939012/trajectory.csv": {
+          "sha256": "8d16f13aebe3438921920a91e74dc9209e029dfcb976f6279d0417d3a82b1d61",
+          "size": 4141397
+        },
+        "levels/dt_20us/replicas/seed_939012/trajectory_raw_wide.csv": {
+          "sha256": "158bc77a79cc32427c46e4b6d4445c339dc42283888a859f69006f226a4a98c5",
+          "size": 4120950
+        },
+        "levels/dt_20us/replicas/seed_939013/actual_binding_receipt.json": {
+          "sha256": "0c0578a0be4c957aae9d047e6884adaf71d14624f7d8c26daf9c598883a4974d",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939013/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939013/fdt_probe_raw.csv": {
+          "sha256": "5ec01b453a1368ac03f5ebef4c7919711ec627db31763a8a24436bedee8259da",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939013/performance.json": {
+          "sha256": "a651b1bf4c8dc18543ecedf0396c2300e427c54989bae7b66e4d7c6b7375cbf0",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939013/terminal_boundary_raw.csv": {
+          "sha256": "d3c8ca01e1e3cdd03f00d69ed532208a5a7dfe9dd8ddca49acb2b3a807bc8a42",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939013/trajectory.csv": {
+          "sha256": "f7a7ea01ca4e613499744a5c41bdbf727be0f93c3af2fba4d3bb7d2d0b1786b5",
+          "size": 4141297
+        },
+        "levels/dt_20us/replicas/seed_939013/trajectory_raw_wide.csv": {
+          "sha256": "f3e63e6fa8ef5fd56abf64659909812fb5bdd04da38ef1e387428e1057999af9",
+          "size": 4120856
+        },
+        "levels/dt_20us/replicas/seed_939014/actual_binding_receipt.json": {
+          "sha256": "970ac4f6c3e529a164eef7e17cb0bd8b5cc4b9d23275f07406296f2a7482eadd",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939014/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939014/fdt_probe_raw.csv": {
+          "sha256": "e62a1e2c50af30a1bd414c7d883f49825337ea769348cb995e7f670a6931608d",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939014/performance.json": {
+          "sha256": "932e1000cd9330c12281186c36e267de51b2759068b9e16ea7302944354f0064",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939014/terminal_boundary_raw.csv": {
+          "sha256": "e1a14b961426822eff17dfd5c1db67060b3d059db6c64c20147d9d0535bcdf1e",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939014/trajectory.csv": {
+          "sha256": "9adb7ff2518a65812c9c093b82ef6c10328cf2a423ecdeb84e2a6cc11ed7152e",
+          "size": 4141298
+        },
+        "levels/dt_20us/replicas/seed_939014/trajectory_raw_wide.csv": {
+          "sha256": "0768c15e47140deacc8431efbfac0fc25602b46cb5922c66c72150e6e0fb0884",
+          "size": 4120855
+        },
+        "levels/dt_20us/replicas/seed_939015/actual_binding_receipt.json": {
+          "sha256": "1728a18d7c3078365d5b3010c28f90d7ab599d041654c32c0fd94fc721b13e36",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939015/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939015/fdt_probe_raw.csv": {
+          "sha256": "dd118bdd67569eed6b043481b219501c9215559f55e4eb2abfb5d7db72b329f3",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939015/performance.json": {
+          "sha256": "7a7c5ae9e244c722c7dac0eca817d71c662a0340b34add39b04785e9573745ad",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939015/terminal_boundary_raw.csv": {
+          "sha256": "b56ff379e756eff39f332b3937371cd5744edf76d35b31b906a2e6203b7edcb9",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939015/trajectory.csv": {
+          "sha256": "ae094b7f7b272fc66adcbb933f53ec22d371ef4208abd0f5112e35c73640e00b",
+          "size": 4141130
+        },
+        "levels/dt_20us/replicas/seed_939015/trajectory_raw_wide.csv": {
+          "sha256": "fd75f6e7c957efd3c605b4d70a16ee18aa5f3010364082725c3d3b8d1a264fe0",
+          "size": 4120699
+        },
+        "levels/dt_20us/replicas/seed_939016/actual_binding_receipt.json": {
+          "sha256": "9eb2e7db14349a20d9f54ca2f8272506518612b927ce6cb31026862a1fd7c787",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939016/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939016/fdt_probe_raw.csv": {
+          "sha256": "ce56a6c5064bdc5aa955fd181889144921ee159da5e299391f21294786b51c56",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939016/performance.json": {
+          "sha256": "b50e72f9710fd62e14e3c7c19c7cf99b68c9b7a62ad259d54de9a95cb0c974fa",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939016/terminal_boundary_raw.csv": {
+          "sha256": "4917a132195399f475753e2990bb1b1851ef45bd64d4f61a0790b16578dc6821",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939016/trajectory.csv": {
+          "sha256": "27d6ab3c47f3defcde0647376c51d8efd98dae4ee36ac440d9827b76a1f4230f",
+          "size": 4141380
+        },
+        "levels/dt_20us/replicas/seed_939016/trajectory_raw_wide.csv": {
+          "sha256": "df94b8e20e5e569a2a5cf540bd8f70622091704f951266430d0d955fb429ded2",
+          "size": 4120933
+        },
+        "levels/dt_20us/replicas/seed_939017/actual_binding_receipt.json": {
+          "sha256": "45e0d3828fcbf0b4373796822e16ca74984fdbbaec85fbb591ddb9b94f52321e",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939017/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939017/fdt_probe_raw.csv": {
+          "sha256": "3b5a6bc584d65487cd57ea85d76e2ec4508e89d7af3627a514d5c9806e33ebfd",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939017/performance.json": {
+          "sha256": "dee65abccd462d1e3fbdfdd98e11e3d2174214e2673fac71649a507191b2e18f",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939017/terminal_boundary_raw.csv": {
+          "sha256": "995254691e2027b04af50cc47c2093b95bbb6c75060807a94812ebac0021757e",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939017/trajectory.csv": {
+          "sha256": "448e67ad7653d46ccdadb871f2e3563bee07139211ec9c16b5accb6dc7eefeea",
+          "size": 4141258
+        },
+        "levels/dt_20us/replicas/seed_939017/trajectory_raw_wide.csv": {
+          "sha256": "7ed8795f99550e114999b16ceb16c76d8aa6fb00c3cf312a9a37ed774130fccf",
+          "size": 4120807
+        },
+        "levels/dt_20us/replicas/seed_939018/actual_binding_receipt.json": {
+          "sha256": "2cd840c69c7c39d9c2e64e1e4f12d5b8c1efec6c1f5abad3e673f7374607a86b",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939018/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939018/fdt_probe_raw.csv": {
+          "sha256": "9048d83871d118f54ad82bb57367c94990c4eb315983d51dae60383ce2aa9ee3",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939018/performance.json": {
+          "sha256": "fafe91e4cc0a1a0158cfa2bb35df287bf2d10170368ec18a40c47052cd23bb83",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939018/terminal_boundary_raw.csv": {
+          "sha256": "2cb29934c95da1879a01cfa65d11d00824d14ffca67a17c38e5369b87f637e63",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939018/trajectory.csv": {
+          "sha256": "d70f6b6ada248d02b630e50835d0c5043139f6b9347fbaf2647db007f681e74e",
+          "size": 4141611
+        },
+        "levels/dt_20us/replicas/seed_939018/trajectory_raw_wide.csv": {
+          "sha256": "90e7d7e5ad854381672592f52c4641462ebee1bd81dcf314724569b5b9138761",
+          "size": 4121165
+        },
+        "levels/dt_20us/replicas/seed_939019/actual_binding_receipt.json": {
+          "sha256": "dd358711b4a2339fe73a3fced573ab50eb9ba40a0ed1936aaeca1043bd516888",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939019/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939019/fdt_probe_raw.csv": {
+          "sha256": "0fbefbda60ce3b066c29b608d3bfe94ac1c2ae875209e0eb9008d96b5f29f875",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939019/performance.json": {
+          "sha256": "d5c0a681f23c1818b45796411346dc3fb3803f6f693f05f6530b177eef66dd77",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939019/terminal_boundary_raw.csv": {
+          "sha256": "134b725e7304067a46bc35bc8e4f4fc808f0534ff822b0a5e4115e17d195bcfb",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939019/trajectory.csv": {
+          "sha256": "2673c38423901947e0628a563d05155c0812be9839d12d4d55bb825d0b46a128",
+          "size": 4141505
+        },
+        "levels/dt_20us/replicas/seed_939019/trajectory_raw_wide.csv": {
+          "sha256": "e47b4a57a16782926a9639a2d030fa9d4c204a1c6fca8e8805850349a4330128",
+          "size": 4121072
+        },
+        "levels/dt_20us/replicas/seed_939020/actual_binding_receipt.json": {
+          "sha256": "9c34b564dd5efcc31e1eeedc189ba42b3ee2778f80a3a381c11327b389ec31ab",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939020/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939020/fdt_probe_raw.csv": {
+          "sha256": "b217ebe33b9cc390106510a9ae163789772bbf5c1a9fac5c37f956d63ff7114d",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939020/performance.json": {
+          "sha256": "7168de889fb68713d76d270ae9acfa8870edeb2e165b3058284b3d0c80af8323",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939020/terminal_boundary_raw.csv": {
+          "sha256": "b2a6813a0b821355768429c21d7df1997e84eccb393b412e62dd2e1b9038e292",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939020/trajectory.csv": {
+          "sha256": "7f6b5f7020930b8cdc5067dfb0b642f29af60646d4d94c9c0e5174585acaad0c",
+          "size": 4140755
+        },
+        "levels/dt_20us/replicas/seed_939020/trajectory_raw_wide.csv": {
+          "sha256": "8136993f140e5841f428e637078d3720dbe06f4e5ba90af2447a1fe6328f8432",
+          "size": 4120314
+        },
+        "levels/dt_20us/replicas/seed_939021/actual_binding_receipt.json": {
+          "sha256": "c1f00ab1654060f4fd0f5dc4c5560af40623754dd1d8fef9b834e11d10b24199",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939021/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939021/fdt_probe_raw.csv": {
+          "sha256": "fa908fef8e0b22a04bd1a69466fec1b73fc637f114ffa13ea5dac880d3dca848",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939021/performance.json": {
+          "sha256": "2f2bbc195ebe29e0aaa0e6bdece00896ed50b6924c34555d15e6d428cf379e3a",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939021/terminal_boundary_raw.csv": {
+          "sha256": "9e8847a155aac696dbb2a808be0d306b5f8750e248ec37b218bdb7719e0927f5",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939021/trajectory.csv": {
+          "sha256": "7ccb5460059053de344524062c7c49ac1d24c98cfc77fee9c23348932a79bebf",
+          "size": 4141061
+        },
+        "levels/dt_20us/replicas/seed_939021/trajectory_raw_wide.csv": {
+          "sha256": "a8afb8366a860abb9dc0affda335eba851fc6f041744ef553f0ca047ad35d5af",
+          "size": 4120619
+        },
+        "levels/dt_20us/replicas/seed_939022/actual_binding_receipt.json": {
+          "sha256": "851c84c68e71ed30dadaf87597d603f7c09c2be98dc26400bba61252a2e10b15",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939022/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939022/fdt_probe_raw.csv": {
+          "sha256": "3c9ba4e9f1cb112895db55f8aa29af783be20e39f392fdaa072dc5544b50ff7e",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939022/performance.json": {
+          "sha256": "14a253e6c47473fcc09ded4bca001fc34e8f6fd6eb40d844b758c9f05216743f",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939022/terminal_boundary_raw.csv": {
+          "sha256": "f63fa256c941253c22329b0dc6ee56e88058ff5fa182b7137e46e67fd26d1e12",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939022/trajectory.csv": {
+          "sha256": "d64ac3f1fbfcef9892475e6456cc482ed4a3653d12458f36f2e9d8cb7393c2d3",
+          "size": 4141731
+        },
+        "levels/dt_20us/replicas/seed_939022/trajectory_raw_wide.csv": {
+          "sha256": "1f14f975c708f70719d1ee23e58eae3727d22263ea3127b08d2fe803f3e773f0",
+          "size": 4121282
+        },
+        "levels/dt_20us/replicas/seed_939023/actual_binding_receipt.json": {
+          "sha256": "127c9bd57ebd9dab040b8570c543939e4c5b9bf30989c4fd84a0db2dfd43d571",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939023/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939023/fdt_probe_raw.csv": {
+          "sha256": "c67023d9929cd781cdc24757c8d652cabd60a8075faad3dc92b9f16ef556bff2",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939023/performance.json": {
+          "sha256": "b261a4e443162c8d66f8e1b18ab6f774a59331249adda8c705e206235484d940",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939023/terminal_boundary_raw.csv": {
+          "sha256": "3a26e8eb54da85d07207671b56c618c46837eec72bbc80190d42c3bca4691d87",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939023/trajectory.csv": {
+          "sha256": "6b00657ba1988e2504caf8b01fc1628c72159c64e9bc75f8c5038a4bb8ad99ca",
+          "size": 4141385
+        },
+        "levels/dt_20us/replicas/seed_939023/trajectory_raw_wide.csv": {
+          "sha256": "2cdaee93ac8a83b9b0c4f4e79ef3dc5dc503b05b12ea05bdad13456531667f25",
+          "size": 4120943
+        },
+        "levels/dt_20us/replicas/seed_939024/actual_binding_receipt.json": {
+          "sha256": "24e83741fcef47ef9e93db13d6e4faa42660a56b21bac7b4d8e20bb71a5c0286",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939024/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939024/fdt_probe_raw.csv": {
+          "sha256": "e3f146badc31255a42948214befc359575a506386afca3541cff5116a3f9e472",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939024/performance.json": {
+          "sha256": "8249158d16398cce0096cc5993ad0ee88f82bc2f22b90da0ed8e4c596fe98e01",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939024/terminal_boundary_raw.csv": {
+          "sha256": "1d9e6309b484c4e3971df2f57b4c6a9d481b3608f2fbe4d22367d332b3b78837",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939024/trajectory.csv": {
+          "sha256": "fb4772827675b838421dcc9fbf8ddf2851b0bf7195820342796d944c4782c638",
+          "size": 4140895
+        },
+        "levels/dt_20us/replicas/seed_939024/trajectory_raw_wide.csv": {
+          "sha256": "a875fbff63ae0d1a7cbae7ec130a2dc354c2d1ee5b4b6d6fccfade3a2570008f",
+          "size": 4120462
+        },
+        "levels/dt_20us/replicas/seed_939025/actual_binding_receipt.json": {
+          "sha256": "3d4ac87206f0af142eafe8d700454d4b73701eb81e8e06901ca8533d9f6a8d2d",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939025/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939025/fdt_probe_raw.csv": {
+          "sha256": "c09cf71b63be0d2055a07fbcf91c0dfc7af2acae1851acde1b9ac5a8dc524cbf",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939025/performance.json": {
+          "sha256": "fda4ecddbf87bb7c38ce7c4beb6111c4cd33be60f74cf33484cfc06a3a9b6568",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939025/terminal_boundary_raw.csv": {
+          "sha256": "87cb992b535b450f17a60c00d28466e012e70224582a22ce8990121bb0b8dfc4",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939025/trajectory.csv": {
+          "sha256": "9c23ba2fc37da07bbb8ceee8ef589a0fa1a04c8f50f3897fb3aad970dd6a1493",
+          "size": 4141173
+        },
+        "levels/dt_20us/replicas/seed_939025/trajectory_raw_wide.csv": {
+          "sha256": "844d5e4ef63fb3f9fff38ca199541b4cfcfac816dd6e582bd4a81a3c13ee229e",
+          "size": 4120729
+        },
+        "levels/dt_20us/replicas/seed_939026/actual_binding_receipt.json": {
+          "sha256": "559c21803fe1f7056c8ab1049c99475a5a177adae449eddb0654026b4a6eaec1",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939026/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939026/fdt_probe_raw.csv": {
+          "sha256": "ec70874c0a1883fda659d2305932db25b0165fc8b56fb08b0c3925829ef7a95d",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939026/performance.json": {
+          "sha256": "8b76a1b5b06eeaf7bae6b272b97b8367693243b8da0499c2a08c05d773c144ee",
+          "size": 502
+        },
+        "levels/dt_20us/replicas/seed_939026/terminal_boundary_raw.csv": {
+          "sha256": "21f7d710eb85c0371e5b39cfa1e661aaa35fd4feabde95f261dc04aaf93ace91",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939026/trajectory.csv": {
+          "sha256": "e67e6b535d85e8c95cce5d1e635f98c0e733ec9ee30ffbb71e9111500e247773",
+          "size": 4141205
+        },
+        "levels/dt_20us/replicas/seed_939026/trajectory_raw_wide.csv": {
+          "sha256": "e6f02907797041e0bc64adfb438ddd424a4efdfa0c6a14cdf3830b2ee1804429",
+          "size": 4120767
+        },
+        "levels/dt_20us/replicas/seed_939027/actual_binding_receipt.json": {
+          "sha256": "a92df4eab06322142ecb54d6c66d2d5899f76d3a8b9c65de3b4e8d8af780dfae",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939027/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939027/fdt_probe_raw.csv": {
+          "sha256": "ec70874c0a1883fda659d2305932db25b0165fc8b56fb08b0c3925829ef7a95d",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939027/performance.json": {
+          "sha256": "f63afa4b3e2bb00b7e037f6a38c8f021aee57f7f29b7139578b493c6af388b00",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939027/terminal_boundary_raw.csv": {
+          "sha256": "21f7d710eb85c0371e5b39cfa1e661aaa35fd4feabde95f261dc04aaf93ace91",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939027/trajectory.csv": {
+          "sha256": "9ad3aca72a3cf4ba7dd7288647e4d735ac29606034054e164bbfad168d02224b",
+          "size": 4141483
+        },
+        "levels/dt_20us/replicas/seed_939027/trajectory_raw_wide.csv": {
+          "sha256": "5be489a150ac50badaf84ad247966399684f4f61e3cb8ce2b62ca6df0737d8b2",
+          "size": 4121040
+        },
+        "levels/dt_20us/replicas/seed_939028/actual_binding_receipt.json": {
+          "sha256": "f0d35d2bdb0058db63f94cb5ef0fcad5dbce4c02730f9ea97fec730a1757c6bf",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939028/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939028/fdt_probe_raw.csv": {
+          "sha256": "c5274d6c15d8092753732802743e64db7355b4e2e7a2120fffd684e6cbe85f9b",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939028/performance.json": {
+          "sha256": "86f34d553aedddb132581f51de36ed2f97eb22a2a9361871cbcf9cb874f27714",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939028/terminal_boundary_raw.csv": {
+          "sha256": "44c9571d0a7bd08d561a17eb0cd34fe4bfaeb1f0ce76c81fabf26b4adcc3f1eb",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939028/trajectory.csv": {
+          "sha256": "b7966842ff0e774057a3ddabe366f8f4ad929fd1185c8a069ebab6173a379fd7",
+          "size": 4140978
+        },
+        "levels/dt_20us/replicas/seed_939028/trajectory_raw_wide.csv": {
+          "sha256": "9d485065291031ce437ea2f4384ad261e9f9f3744594a4ae165fcbe67fae2b98",
+          "size": 4120530
+        },
+        "levels/dt_20us/replicas/seed_939029/actual_binding_receipt.json": {
+          "sha256": "f73a89ed80b7afc7e806e7d5a6391eaa7c5e2e04939254ad4414773ab8216ab0",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939029/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939029/fdt_probe_raw.csv": {
+          "sha256": "cc807d34d807f6afd7154a6410855e6d213f7b4c331e717f005076ce9558bfa9",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939029/performance.json": {
+          "sha256": "f7fc25cb55dfd4f55a1a69e2b6a77134de6292906566d388406797536362ef95",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939029/terminal_boundary_raw.csv": {
+          "sha256": "7d29a0755f98afca140dfe7aae2401e876ca79090e6e910e3b6ef061df7baa8d",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939029/trajectory.csv": {
+          "sha256": "3bd554f68aa940160edc17828f5202fd313728907afb68ce195ae6ed5d026ec8",
+          "size": 4140630
+        },
+        "levels/dt_20us/replicas/seed_939029/trajectory_raw_wide.csv": {
+          "sha256": "5098f41e062d307fa74c26d8db0c176ca17f89f2cb9d1753fb5dcf18e868f84e",
+          "size": 4120184
+        },
+        "levels/dt_20us/replicas/seed_939030/actual_binding_receipt.json": {
+          "sha256": "ca3518ab0defe119555dd896bd395f9381ffdb684196c0d809973c2a66558004",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939030/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939030/fdt_probe_raw.csv": {
+          "sha256": "1cc3bcbb73a9c94ce463b5c4eff3ff181e6ead1b9bdef0c7fd540057ff0bedc8",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939030/performance.json": {
+          "sha256": "5e248909c78ecd632604c36d1f2f6ad94e5251f5b6b9f4d26b25f133a0b5c74e",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939030/terminal_boundary_raw.csv": {
+          "sha256": "63c0b43b20eed7c666658848be439246c6e86debaa09791f106ba9811d65fdee",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939030/trajectory.csv": {
+          "sha256": "83896c66cc5231dae319df5a1812bf4cf5f0a2ebb6733cc926cd13df61be2738",
+          "size": 4141557
+        },
+        "levels/dt_20us/replicas/seed_939030/trajectory_raw_wide.csv": {
+          "sha256": "7261697542c8375261860d119a5bdeb53aafb6d8a16f38c369b898a419000eb7",
+          "size": 4121111
+        },
+        "levels/dt_20us/replicas/seed_939031/actual_binding_receipt.json": {
+          "sha256": "7ccb2e9553a6dd82981730f1d7d57d3d5a606c424418bfdd599d537fbefb9f78",
+          "size": 68965
+        },
+        "levels/dt_20us/replicas/seed_939031/events.csv": {
+          "sha256": "976af7441ba723a47770a17c7f421f4d9f2c40981d6386b5ff901c37f4ff22ea",
+          "size": 62
+        },
+        "levels/dt_20us/replicas/seed_939031/fdt_probe_raw.csv": {
+          "sha256": "da35b4be6d6046732c0313f6bcd8d76ea7a2270fc69d3498dbf4066616811f1a",
+          "size": 39342
+        },
+        "levels/dt_20us/replicas/seed_939031/performance.json": {
+          "sha256": "56358393b8d323707d83bb6910402096b75f2f037ab1bbcda749ee14b6917a52",
+          "size": 505
+        },
+        "levels/dt_20us/replicas/seed_939031/terminal_boundary_raw.csv": {
+          "sha256": "c7ba5f4634367b4deedf708627c80201043df9c1261dabd3c7baf6b580f6beb5",
+          "size": 3370
+        },
+        "levels/dt_20us/replicas/seed_939031/trajectory.csv": {
+          "sha256": "442e8257fe86da292f773fd0b29cba497231f62cb397a42534ace65521514f06",
+          "size": 4141248
+        },
+        "levels/dt_20us/replicas/seed_939031/trajectory_raw_wide.csv": {
+          "sha256": "fbfeb57c44fca668220461964670cfdc1f4d182f3b5f66c27de15dc51cf40969",
+          "size": 4120800
+        },
+        "m3c2_caseP_100nm_axis_normalized_final_registration.json": {
+          "sha256": "6aa7ce55b95aeb6b874e02a7a637ede3c3daf15230b834489cdf5f36b32aebfe",
+          "size": 4043
+        },
+        "m3c2_caseP_100nm_current_binding_pilot.json": {
+          "sha256": "868f1d55716e9fe152fb112f79c304a63019a58c1d0eda0f5a0b0841c86f1be0",
+          "size": 10230
+        },
+        "m3c2_execution_request.json": {
+          "sha256": "a4f1895e064d266a271e26d713a89e95ee66df2e0c53ac51c8aae99d0f007aae",
+          "size": 8104
+        },
+        "m3c2_pilot_request.csv": {
+          "sha256": "f6760a1f69818177240d6364efe51d7a5ecbd516059ae3a4feeb1014d4b5a251",
+          "size": 1600
+        },
+        "meaning_binding_attachment_receipt.json": {
+          "sha256": "d9a7c741a6c39791a9af127ac01429717bb7f0c58cdc4e114774318610c63c01",
+          "size": 1632
+        },
+        "meaning_conditions.json": {
+          "sha256": "c33a967272534a460f9bd1ed4e689d97b70b4099053d77537d44c5f872c144d1",
+          "size": 3790350
+        },
+        "meaning_inventory.json": {
+          "sha256": "98d02693cafbcfd814c14af51cea824cfa6a7de6fb79366bf0219703a9e29959",
+          "size": 3378640
+        },
+        "meaning_preflight_report.json": {
+          "sha256": "53c93dc75f8f4e020f2bfaa5cfabd62845be711d739eb897de919ecbe00b4548",
+          "size": 1455
+        },
+        "prepared_table_validation.json": {
+          "sha256": "3918ef4b3d870cdd4462284e71365bba73f9b9dc0cc64e88156d75eab294f639",
+          "size": 10229
+        },
+        "run_receipt.json": {
+          "sha256": "8e1cf2a15ce7b74abb698463ce3c82a87ed437e31e10a26ac39d55401cf03278",
+          "size": 16007
+        },
+        "run_status.json": {
+          "sha256": "5e09704f2ec02a788b08dda99cbbe5e667e37c26c3dcb8190cbabd49030f7420",
+          "size": 199
+        }
+      },
+      "source_root": "../comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final"
+    }
+  },
+  "purpose": "Read-only pre-execution byte witness for reused native CSV/JSON authority; exact file set checked at closeout.",
+  "schema_version": 1
+}

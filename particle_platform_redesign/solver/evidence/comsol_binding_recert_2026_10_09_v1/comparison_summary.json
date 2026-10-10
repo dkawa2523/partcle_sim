@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "comparison_id": "current_common_P1_axis_normalized_C2_C3_2026_10_09_v1",
+  "status": "CLOSED_ACCEPTED_WITH_LIMITATIONS",
+  "comparison_manifest": {
+    "path": "comparison_manifest.json",
+    "sha256": "e1d507bb71344c4900478649383440ca992afc91e88573b7ba46b8b8a05044f2"
+  },
+  "c2": {
+    "caseA": {
+      "status": "PASS",
+      "terminal": {
+        "maximum_absolute_difference": 0.005117595818815324,
+        "critical_radius": 0.03501066711816651,
+        "simultaneous_confidence_bound": 0.04012826293698183,
+        "margin": 0.05,
+        "observations_per_participant": 9184,
+        "familywise_alpha": 0.0125,
+        "status": "PASS"
+      },
+      "rz_fate": {
+        "maximum_empirical_total_variation": 0.009581881533101043,
+        "two_sample_critical_radius": 0.12115351898620552,
+        "simultaneous_confidence_bound": 0.13073540051930657,
+        "margin_total_variation": 0.15,
+        "category_count": 83,
+        "output_time_count": 121,
+        "familywise_alpha": 0.0125,
+        "status": "PASS"
+      },
+      "claim_policy": {
+        "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+        "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+        "continuous_noise_time_law": "NOT_TESTED",
+        "disappear_boundary_identity": "NOT_TESTED",
+        "escape_boundary_cause_identity": "NOT_TESTED",
+        "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+      }
+    },
+    "caseP": {
+      "status": "PASS",
+      "terminal": {
+        "maximum_absolute_difference": 0.0,
+        "critical_radius": 0.03501066711816651,
+        "simultaneous_confidence_bound": 0.03501066711816651,
+        "margin": 0.05,
+        "observations_per_participant": 9184,
+        "familywise_alpha": 0.0125,
+        "status": "PASS"
+      },
+      "rz_fate": {
+        "maximum_empirical_total_variation": 0.008384146341463419,
+        "two_sample_critical_radius": 0.12115351898620552,
+        "simultaneous_confidence_bound": 0.12953766532766894,
+        "margin_total_variation": 0.15,
+        "category_count": 83,
+        "output_time_count": 121,
+        "familywise_alpha": 0.0125,
+        "status": "PASS"
+      },
+      "claim_policy": {
+        "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+        "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+        "continuous_noise_time_law": "NOT_TESTED",
+        "disappear_boundary_identity": "NOT_TESTED",
+        "escape_boundary_cause_identity": "NOT_TESTED",
+        "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+      }
+    }
+  },
+  "c3": {
+    "status": "PASS_AFTER_REPORTING_ONLY_PROJECTION",
+    "state_order": "approximately2 observed, fixed minimum0.75",
+    "event_time_rms_s": 4.70238456e-09,
+    "event_time_max_s": 2.75270781e-08,
+    "matched_stick_events": 141,
+    "direct_state_band": "uses predeclared 4*(candidate fine-pair + reference fine-pair) empirical sensitivity allowance; not a rigorous truncation bound"
+  },
+  "independent_audit": {
+    "final_csv_count": 128,
+    "final_rows": 4445056,
+    "final_binding_pairs": 3904,
+    "native_unique_actual_receipts": 64,
+    "retained_native_original_ledger_rows_verified": 808,
+    "receipt": {
+      "path": "..\\..\\..\\reviews\\comsol_recert_independent_review_2026-10-09.json",
+      "sha256": "399a5cdca8c662645d24050690a50180ffcb1d5d485dec947e6e6667286e4d63"
+    }
+  },
+  "not_certified": [
+    "Continuous SDE discretization bias or continuous OU temporal noise law",
+    "Pathwise Brownian equality",
+    "C2 CaseP wall behavior with zero terminal observations",
+    "Disappear boundary identity or cause, including semantic escape event parity",
+    "Individual native force contributions, auxiliary-charge assembled RHS, all integration stages",
+    "Native finite-element/curl field truth or species-resolved physical-model validity",
+    "Arbitrary geometries, parameters or universal COMSOL equivalence",
+    "Product performance from overlapping external campaign timings"
+  ]
+}

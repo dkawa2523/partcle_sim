@@ -1,0 +1,606 @@
+{
+  "artifact": "saved_release_brownian_independent_reaggregation",
+  "scientific_simulations_performed": 0,
+  "B01_TIME_LINEAR_OU": {
+    "count": 16000,
+    "duration_s": 0.2,
+    "derived_rate0_s_inv": 2.0000000000000004,
+    "thermal_velocity_variance": 1.0354867499999999e-06,
+    "counts": {
+      "boundary_events": 0,
+      "failure_events": 0,
+      "frame_rows": 0,
+      "frames": 0,
+      "macro_steps": 32,
+      "particles": 16000,
+      "probe_rows": 0,
+      "probes": 0,
+      "release_events": 16000,
+      "series": 32
+    },
+    "engine_revision": "particle_engine_v46",
+    "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "data_content_hash": "sha256:908e52b6d0897c4a913c16ecf58ec681a93fe0b0b2267eeaa4d895be47a32149",
+    "reference_refinement_absolute_difference": [
+      1.3877787807814457e-17,
+      0.0,
+      2.117582368135751e-22
+    ],
+    "components": [
+      {
+        "component": 0,
+        "reference_mean": [
+          0.03652118611479205,
+          0.16887497427248224
+        ],
+        "observed_mean": [
+          0.036521885776068144,
+          0.16887278353794918
+        ],
+        "mean_absolute_error": [
+          6.996612760962195e-07,
+          2.1907345330585137e-06
+        ],
+        "seven_standard_error_allowance": [
+          5.213999506823452e-06,
+          4.5280353352202275e-05
+        ],
+        "fixed_mean_budget": [
+          1e-06,
+          1e-06
+        ],
+        "maximum_mean_error_to_gate": 0.11259435655376822,
+        "reference_covariance": [
+          [
+            8.876992932948637e-09,
+            6.03682686893435e-08
+          ],
+          [
+            6.03682686893435e-08,
+            6.69489110106219e-07
+          ]
+        ],
+        "observed_covariance": [
+          [
+            8.84243271004267e-09,
+            6.073284463444914e-08
+          ],
+          [
+            6.073284463444914e-08,
+            6.736524640936445e-07
+          ]
+        ],
+        "covariance_absolute_error": [
+          [
+            3.456022290596664e-11,
+            3.6457594510563513e-10
+          ],
+          [
+            3.6457594510563513e-10,
+            4.163353987425527e-09
+          ]
+        ],
+        "covariance_mc_allowance": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "fixed_covariance_allowance": [
+          [
+            2.443849646647432e-09,
+            5.018413434467175e-09
+          ],
+          [
+            5.018413434467175e-09,
+            3.547445550531095e-08
+          ]
+        ],
+        "maximum_covariance_error_to_gate": 0.11736202650953229,
+        "pass": true
+      },
+      {
+        "component": 1,
+        "reference_mean": [
+          -0.018260593057396024,
+          -0.08443748713624112
+        ],
+        "observed_mean": [
+          -0.018260323582296078,
+          -0.08442886451061332
+        ],
+        "mean_absolute_error": [
+          2.694750999461537e-07,
+          8.622625627799363e-06
+        ],
+        "seven_standard_error_allowance": [
+          5.213999506823452e-06,
+          4.5280353352202275e-05
+        ],
+        "fixed_mean_budget": [
+          1e-06,
+          1e-06
+        ],
+        "maximum_mean_error_to_gate": 0.186312873676213,
+        "reference_covariance": [
+          [
+            8.876992932948637e-09,
+            6.03682686893435e-08
+          ],
+          [
+            6.03682686893435e-08,
+            6.69489110106219e-07
+          ]
+        ],
+        "observed_covariance": [
+          [
+            8.908057588249007e-09,
+            6.023394599609103e-08
+          ],
+          [
+            6.023394599609103e-08,
+            6.66969760375983e-07
+          ]
+        ],
+        "covariance_absolute_error": [
+          [
+            3.106465530037022e-11,
+            1.3432269325247106e-10
+          ],
+          [
+            1.3432269325247106e-10,
+            2.5193497302359643e-09
+          ]
+        ],
+        "covariance_mc_allowance": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "fixed_covariance_allowance": [
+          [
+            2.443849646647432e-09,
+            5.018413434467175e-09
+          ],
+          [
+            5.018413434467175e-09,
+            3.547445550531095e-08
+          ]
+        ],
+        "maximum_covariance_error_to_gate": 0.07101870048037207,
+        "pass": true
+      }
+    ],
+    "charge": null,
+    "confidence_scope": "Inherited seven-SE or fixed-relative covariance regression criteria; no newly registered formal joint confidence family.",
+    "raw_artifacts_sha256": {
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/brownian.h5": "a00a3b466b29860ebc8bb9dcfe4ffdf78a11accf0fc73d62069a18b85e919831",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/brownian.yaml": "aeeb4d1c5af70d67e38660dea4f9c2a9b16c999d1104d0996713f775a12a6265",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/case.h5": "caa9bc838f939a2b232484613ec89516b28f7bfef4015650f8c7a04fb74aeea0",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/case.yaml": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/expected.json": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/time-linear.h5": "ef703b49479889099af626cb4ccc1f283915650c753ef948156569d86dcb4810",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear-result/final.h5": "c8f22bd49e2b16e70c916ea9e4b7ac94d1647e3846bdddbb28ae4422d654c2c1",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear-result/LATEST": "4903b5fe058b6655ce1cdf0f9163fd6cbaaa3f2672f0759db22419fcefb7e92f",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear-result/run.json": "840a922f616882d2fb656687f55354a9cd90aeb7f38fc1f805118f1a74475355",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear-result/_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear-result/checkpoints/A.h5": "144ae6135c82fed60d5b74476d72fb9d614b6715f76094fa94bab301ef37267f",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear-result/segments/epoch-000000.h5": "3602fc9c05e69dfa6ce8c6c80fe4c9930d5321e2229104dbe25253b4b92770f5"
+    },
+    "pass": true
+  },
+  "B02_SPATIAL_AFFINE_OU": {
+    "count": 16000,
+    "duration_s": 0.4,
+    "derived_rate0_s_inv": 2.0000000000000004,
+    "thermal_velocity_variance": 1.0354867499999999e-06,
+    "counts": {
+      "boundary_events": 0,
+      "failure_events": 0,
+      "frame_rows": 0,
+      "frames": 0,
+      "macro_steps": 32,
+      "particles": 16000,
+      "probe_rows": 0,
+      "probes": 0,
+      "release_events": 16000,
+      "series": 32
+    },
+    "engine_revision": "particle_engine_v46",
+    "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "data_content_hash": "sha256:06a8e78c5d1ec27eb4bc4391adc44df609df5da81bfb8c7ed88ba4c8a49b5e19",
+    "reference_refinement_absolute_difference": [
+      [
+        0.0,
+        4.235164736271502e-22
+      ],
+      [
+        0.0,
+        5.293955920339377e-22
+      ]
+    ],
+    "components": [
+      {
+        "component": 0,
+        "reference_mean": [
+          0.046756138822886345,
+          0.037163322427551576
+        ],
+        "observed_mean": [
+          0.04675491509251545,
+          0.03716391044512755
+        ],
+        "mean_absolute_error": [
+          1.2237303708972913e-06,
+          5.880175759712114e-07
+        ],
+        "seven_standard_error_allowance": [
+          1.1383460473816244e-05,
+          4.4964319888704784e-05
+        ],
+        "fixed_mean_budget": [
+          1e-05,
+          3e-05
+        ],
+        "maximum_mean_error_to_gate": 0.057227892201813284,
+        "reference_covariance": [
+          [
+            4.231287260699975e-08,
+            1.1318576988459257e-07
+          ],
+          [
+            1.1318576988459256e-07,
+            6.601763471195993e-07
+          ]
+        ],
+        "observed_covariance": [
+          [
+            4.215748407359151e-08,
+            1.142716388324749e-07
+          ],
+          [
+            1.142716388324749e-07,
+            6.638254999851406e-07
+          ]
+        ],
+        "covariance_absolute_error": [
+          [
+            1.553885334082336e-10,
+            1.0858689478823293e-09
+          ],
+          [
+            1.0858689478823425e-09,
+            3.6491528655413093e-09
+          ]
+        ],
+        "covariance_mc_allowance": [
+          [
+            3.311609570955046e-09,
+            1.117091262503981e-08
+          ],
+          [
+            1.117091262503981e-08,
+            5.1668586293943526e-08
+          ]
+        ],
+        "fixed_covariance_allowance": [
+          [
+            1.2693861782099925e-10,
+            5.014036488343842e-10
+          ],
+          [
+            5.014036488343842e-10,
+            1.980529041358798e-09
+          ]
+        ],
+        "maximum_covariance_error_to_gate": 0.09302943155445602,
+        "pass": true
+      },
+      {
+        "component": 1,
+        "reference_mean": [
+          -0.027533551794138925,
+          -0.044932896411722156
+        ],
+        "observed_mean": [
+          -0.027532992386427976,
+          -0.04492394376951035
+        ],
+        "mean_absolute_error": [
+          5.594077109490059e-07,
+          8.95264221180414e-06
+        ],
+        "seven_standard_error_allowance": [
+          1.2446982973111732e-05,
+          5.030833271966762e-05
+        ],
+        "fixed_mean_budget": [
+          1e-05,
+          3e-05
+        ],
+        "maximum_mean_error_to_gate": 0.11147837227620125,
+        "reference_covariance": [
+          [
+            5.058853392095783e-08,
+            1.569997708926928e-07
+          ],
+          [
+            1.569997708926928e-07,
+            8.264255807453975e-07
+          ]
+        ],
+        "observed_covariance": [
+          [
+            5.07799152242859e-08,
+            1.5663893576120528e-07
+          ],
+          [
+            1.5663893576120528e-07,
+            8.232972229618577e-07
+          ]
+        ],
+        "covariance_absolute_error": [
+          [
+            1.9138130332806753e-10,
+            3.6083513148751454e-10
+          ],
+          [
+            3.6083513148751454e-10,
+            3.1283577835398584e-09
+          ]
+        ],
+        "covariance_mc_allowance": [
+          [
+            3.959302755670477e-09,
+            1.4266604971673722e-08
+          ],
+          [
+            1.4266604971673722e-08,
+            6.468005347445488e-08
+          ]
+        ],
+        "fixed_covariance_allowance": [
+          [
+            1.517656017628735e-10,
+            6.13407635037397e-10
+          ],
+          [
+            6.13407635037397e-10,
+            2.4792767422361927e-09
+          ]
+        ],
+        "maximum_covariance_error_to_gate": 0.046581134347917746,
+        "pass": true
+      }
+    ],
+    "charge": null,
+    "confidence_scope": "Inherited seven-SE or fixed-relative covariance regression criteria; no newly registered formal joint confidence family.",
+    "raw_artifacts_sha256": {
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/brownian.h5": "a00a3b466b29860ebc8bb9dcfe4ffdf78a11accf0fc73d62069a18b85e919831",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/brownian.yaml": "19abc3bf73d14a939b07abf6dce19dae0e4c001f1bf2a8b3b6b32d660c42ef89",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/case.h5": "caa9bc838f939a2b232484613ec89516b28f7bfef4015650f8c7a04fb74aeea0",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/case.yaml": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/expected.json": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/spatial-affine.h5": "3bf7d19ce9caa0923f23660deb4b056831f8d729b0645634898377a55358e5eb",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine-result/final.h5": "fba9bca502c939c2b5873342656825df5ebdbac685950be746a22f238c2f16e3",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine-result/LATEST": "569dec3cb44b2b2e0ff44af6f0395ca9b9082b24675e99453a3814d7c56317d9",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine-result/run.json": "bfb2e0be83677f557db27c76eb6dfdc5dd8aa6d3e757c8e8390d6bbcc6ce271a",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine-result/_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine-result/checkpoints/A.h5": "091fb9da21bdb95f96f1134171f9394e4fa817ae374e9b218db972d68df0d03b",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine-result/segments/epoch-000000.h5": "a757596646fc19fdad94a5a7b08a509977a94c416019063c327c8206819ec3b3"
+    },
+    "pass": true
+  },
+  "B03_STATIONARY_OML_COULOMB_OU": {
+    "count": 12000,
+    "duration_s": 0.1,
+    "derived_rate0_s_inv": 2.0000000000000004,
+    "thermal_velocity_variance": 1.0354867499999999e-06,
+    "counts": {
+      "boundary_events": 0,
+      "failure_events": 0,
+      "frame_rows": 0,
+      "frames": 0,
+      "macro_steps": 32,
+      "particles": 12000,
+      "probe_rows": 0,
+      "probes": 0,
+      "release_events": 12000,
+      "series": 32
+    },
+    "engine_revision": "particle_engine_v46",
+    "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "data_content_hash": "sha256:34dbd0c20a6862ca838fa476da3ae24d2622bac3df8cd1828232fc9db874524f",
+    "reference_refinement_absolute_difference": [
+      7.105427357601002e-14,
+      0.0,
+      0.0
+    ],
+    "components": [
+      {
+        "component": 0,
+        "reference_mean": [
+          0.019013935318162308,
+          0.1807410158448374
+        ],
+        "observed_mean": [
+          0.019014283367760627,
+          0.18073973638755358
+        ],
+        "mean_absolute_error": [
+          3.4804959831921667e-07,
+          1.2794572838148444e-06
+        ],
+        "seven_standard_error_allowance": [
+          2.20581248683576e-06,
+          3.7335842898686254e-05
+        ],
+        "fixed_mean_budget": [
+          2e-08,
+          5e-07
+        ],
+        "maximum_mean_error_to_gate": 0.1563696853969976,
+        "reference_covariance": [
+          [
+            1.1915776474483006e-09,
+            1.701229133487534e-08
+          ],
+          [
+            1.701229133487534e-08,
+            3.4137922407070554e-07
+          ]
+        ],
+        "observed_covariance": [
+          [
+            1.196751114068964e-09,
+            1.7187153520573882e-08
+          ],
+          [
+            1.7187153520573882e-08,
+            3.4409435338275213e-07
+          ]
+        ],
+        "covariance_absolute_error": [
+          [
+            5.173466620663461e-12,
+            1.7486218569854252e-10
+          ],
+          [
+            1.7486218569854252e-10,
+            2.7151293120465933e-09
+          ]
+        ],
+        "covariance_mc_allowance": [
+          [
+            1.0768689601402258e-10,
+            1.6861331648258973e-09
+          ],
+          [
+            1.6861331648258973e-09,
+            3.085159333306879e-08
+          ]
+        ],
+        "fixed_covariance_allowance": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "maximum_covariance_error_to_gate": 0.10370603541067175,
+        "pass": true
+      },
+      {
+        "component": 1,
+        "reference_mean": [
+          -0.009531731173050454,
+          -0.0909365376538991
+        ],
+        "observed_mean": [
+          -0.00953142418162447,
+          -0.09092933379937738
+        ],
+        "mean_absolute_error": [
+          3.0699142598324125e-07,
+          7.20385452171457e-06
+        ],
+        "seven_standard_error_allowance": [
+          2.20581248683576e-06,
+          3.7335842898686254e-05
+        ],
+        "fixed_mean_budget": [
+          2e-08,
+          5e-07
+        ],
+        "maximum_mean_error_to_gate": 0.19039762219661568,
+        "reference_covariance": [
+          [
+            1.1915776474483006e-09,
+            1.701229133487534e-08
+          ],
+          [
+            1.701229133487534e-08,
+            3.4137922407070554e-07
+          ]
+        ],
+        "observed_covariance": [
+          [
+            1.209982377749822e-09,
+            1.725701597734867e-08
+          ],
+          [
+            1.725701597734867e-08,
+            3.454185582928838e-07
+          ]
+        ],
+        "covariance_absolute_error": [
+          [
+            1.8404730301521433e-11,
+            2.4472464247333036e-10
+          ],
+          [
+            2.4472464247333036e-10,
+            4.039334222178272e-09
+          ]
+        ],
+        "covariance_mc_allowance": [
+          [
+            1.0768689601402258e-10,
+            1.6861331648258973e-09
+          ],
+          [
+            1.6861331648258973e-09,
+            3.085159333306879e-08
+          ]
+        ],
+        "fixed_covariance_allowance": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "maximum_covariance_error_to_gate": 0.17090965551764847,
+        "pass": true
+      }
+    ],
+    "charge": {
+      "reference_charge_number": -44.11827392821702,
+      "maximum_absolute_error": 5.453087510431942e-07,
+      "budget": 0.0002,
+      "negative_branch": true,
+      "pass": true
+    },
+    "confidence_scope": "Inherited seven-SE or fixed-relative covariance regression criteria; no newly registered formal joint confidence family.",
+    "raw_artifacts_sha256": {
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/brownian.h5": "95141a48e574850c40abc54db2165f1003c45dd7c59586ceee6d186616178902",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/brownian.yaml": "0cbd035967f59e68b0558289142ba4e1ed88046ffb9aa568decb022cec58038b",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/case.h5": "caa9bc838f939a2b232484613ec89516b28f7bfef4015650f8c7a04fb74aeea0",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/case.yaml": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/charged.h5": "8a76bd01a6d664fb1f97c533d2c12e9c334175f3698a341a0cdae4b308cc5e31",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/expected.json": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb-result/final.h5": "e086e033a332a83ca7ae6564bae2e4862d1ae30144bf1e29239097a1ac366679",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb-result/LATEST": "02390decc323a843ae06da6c3845396b9fe8f646c0999012c48310642be8516b",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb-result/run.json": "9b103e1589117b81497435b422127bb510df57c81479e7faa898389e208bdca7",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb-result/_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb-result/checkpoints/A.h5": "c2457c4942bdb6e1f52cf6acdfb1afb245c9afb247c14f61fbed47f8ed6446c3",
+      "evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb-result/segments/epoch-000000.h5": "1947c84cb4c42d145a960255d5c9dbaba35ae6f2f22c8c5bcffcb6eecc995b03"
+    },
+    "pass": true
+  }
+}

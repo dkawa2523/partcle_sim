@@ -1,0 +1,249 @@
+format_version: 3
+case:
+  name: m3c2_caseP_100nm_macro_coarse_seed_939032
+  data_path: ../../../candidate_input.h5
+  expected_content_hash: sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4
+motion:
+  mode: axisymmetric_rz_meridional
+time:
+  start_s: 0.0
+  end_s: 0.03
+  dt_s: 2.0e-05
+solver:
+  integrator: ou_langevin
+  backend: cpu
+  seed: 939032
+  event:
+    geometry_rtol: 1.0e-09
+    roundoff_ulps: 64
+    max_refinements: 48
+    max_interactions_per_step: 8
+    corner_policy: priority_then_combined_normal_v1
+resources:
+  memory_limit_mb: 512
+physics:
+  charge:
+    model: plasma_continuous
+    revision: aggregate_relative_drift_regularized_two_current_v1
+    electron_number_density_field: electron_number_density
+    positive_ion_number_density_field: positive_ion_number_density
+    electron_thermal_voltage_field: electron_thermal_voltage
+    positive_ion_thermal_voltage_field: positive_ion_thermal_voltage
+    positive_ion_velocity_field: positive_ion_velocity
+    effective_positive_ion_mass_field: effective_positive_ion_mass
+    screening_length_field: screening_length
+    maximum_relative_ion_speed_m_s: 30000.0
+    applicability: error
+  drag:
+    model: epstein_linear
+    revision: epstein_linear_effective_gas_sensitivity_v1
+    gas_velocity_field: gas_velocity
+    gas_density_field: gas_density
+    gas_temperature_field: gas_temperature
+    gas_mean_free_path_field: gas_mean_free_path
+    gas_molecular_mass_kg: 1.2753471408396638e-25
+    delta: 1.3534291735288517
+    maximum_speed_ratio: 0.25
+    applicability: error
+  electric:
+    model: coulomb
+    revision: electric_coulomb_v1
+    electric_field: electric_field
+  ion_drag:
+    model: screened_collection_orbital
+    revision: relative_flow_screened_collection_orbital_aggregate_ion_v1
+    positive_ion_number_density_field: positive_ion_number_density
+    positive_ion_thermal_voltage_field: positive_ion_thermal_voltage
+    positive_ion_velocity_field: positive_ion_velocity
+    effective_positive_ion_mass_field: effective_positive_ion_mass
+    screening_length_field: screening_length
+    ion_neutral_mean_free_path_field: ion_neutral_mean_free_path
+    maximum_relative_ion_speed_m_s: 30000.0
+    applicability: error
+  thermophoresis:
+    model: waldmann_gallis
+    revision: waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1
+    gas_velocity_field: gas_velocity
+    gas_temperature_field: gas_temperature
+    gas_translational_heat_flux_field: gas_translational_heat_flux
+    gas_mean_free_path_field: gas_mean_free_path
+    gas_molecular_mass_kg: 1.2753471408396638e-25
+    maximum_speed_ratio: 0.25
+    applicability: error
+  dielectrophoresis:
+    model: quasistatic_spherical
+    revision: quasistatic_spherical_gradient_e2_v1
+    gradient_mean_e_squared_field: gradient_mean_e_squared
+    medium_relative_permittivity: 1.0
+    real_clausius_mossotti_factor: 0.5161290322580645
+    maximum_point_dipole_radius_m: 5.000000000000001e-08
+  lift:
+    model: rarefied_vorticity_sensitivity
+    revision: rarefied_vorticity_sensitivity_rz_v1
+    gas_velocity_field: gas_velocity
+    gas_density_field: gas_density
+    gas_mean_free_path_field: gas_mean_free_path
+    azimuthal_gas_vorticity_field: azimuthal_gas_vorticity
+    lift_coefficient: 1.0
+    applicability: error
+  gravity_buoyancy:
+    model: standard
+    revision: gravity_buoyancy_standard_v1
+    gas_density_field: gas_density
+    gravity_m_s2:
+    - 0.0
+    - -9.80665
+  noise:
+    model: inertial_langevin_fdt
+    revision: inertial_langevin_fdt_epstein_linear_midpoint_2d_v2
+    interval_tree_depth: 3
+sources:
+- name: release
+  type: table
+  table: particles
+boundaries:
+- boundary_group: wafer
+  priority: 10
+  law: stick
+- boundary_group: grounded_wall
+  priority: 10
+  law: stick
+- boundary_group: focus_transition
+  priority: 10
+  law: stick
+- boundary_group: outer_dielectric
+  priority: 10
+  law: stick
+- boundary_group: gas_inlet
+  priority: 10
+  law: hold
+- boundary_group: pump_outlet
+  priority: 10
+  law: escape
+output:
+  trajectories:
+    selection: all
+    schedule:
+      explicit_times_s:
+      - 0.0
+      - 1.0e-05
+      - 2.0e-05
+      - 3.0000000000000004e-05
+      - 4.0e-05
+      - 5.0e-05
+      - 6.000000000000001e-05
+      - 7.000000000000001e-05
+      - 8.0e-05
+      - 9.0e-05
+      - 0.0001
+      - 0.00011
+      - 0.00012000000000000002
+      - 0.00013000000000000002
+      - 0.00014000000000000001
+      - 0.00015000000000000001
+      - 0.00016
+      - 0.00017
+      - 0.00018
+      - 0.00019
+      - 0.0002
+      - 0.00021
+      - 0.00022
+      - 0.00023
+      - 0.00024000000000000003
+      - 0.00025
+      - 0.00026000000000000003
+      - 0.00027
+      - 0.00028000000000000003
+      - 0.00029
+      - 0.00030000000000000003
+      - 0.00031
+      - 0.00032
+      - 0.00033000000000000005
+      - 0.00034
+      - 0.00035000000000000005
+      - 0.00036
+      - 0.00037000000000000005
+      - 0.00038
+      - 0.00039000000000000005
+      - 0.0004
+      - 0.00041000000000000005
+      - 0.00042
+      - 0.00043000000000000004
+      - 0.00044
+      - 0.00045000000000000004
+      - 0.00046
+      - 0.00047000000000000004
+      - 0.00048000000000000007
+      - 0.0004900000000000001
+      - 0.0005
+      - 0.0006000000000000001
+      - 0.0007
+      - 0.0008
+      - 0.0009000000000000001
+      - 0.001
+      - 0.0011
+      - 0.0012000000000000001
+      - 0.0013000000000000002
+      - 0.0014
+      - 0.0015
+      - 0.0016
+      - 0.0017000000000000001
+      - 0.0018000000000000002
+      - 0.0019
+      - 0.002
+      - 0.0021000000000000003
+      - 0.0022
+      - 0.0023
+      - 0.0024000000000000002
+      - 0.0025
+      - 0.0026000000000000003
+      - 0.0027
+      - 0.0028
+      - 0.0029000000000000002
+      - 0.003
+      - 0.0031000000000000003
+      - 0.0032
+      - 0.0033
+      - 0.0034000000000000002
+      - 0.0035
+      - 0.0036000000000000003
+      - 0.0037
+      - 0.0038
+      - 0.0039000000000000003
+      - 0.004
+      - 0.0041
+      - 0.004200000000000001
+      - 0.0043
+      - 0.0044
+      - 0.0045000000000000005
+      - 0.0046
+      - 0.0047
+      - 0.0048000000000000004
+      - 0.0049
+      - 0.005
+      - 0.006
+      - 0.007
+      - 0.008
+      - 0.009000000000000001
+      - 0.01
+      - 0.011
+      - 0.012
+      - 0.013000000000000001
+      - 0.014
+      - 0.015
+      - 0.016
+      - 0.017
+      - 0.018000000000000002
+      - 0.019
+      - 0.02
+      - 0.021
+      - 0.022
+      - 0.023
+      - 0.024
+      - 0.025
+      - 0.026000000000000002
+      - 0.027
+      - 0.028
+      - 0.029
+      - 0.03
+  probes: null

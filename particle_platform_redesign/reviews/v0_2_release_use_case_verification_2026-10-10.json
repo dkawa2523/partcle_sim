@@ -1,0 +1,1987 @@
+{
+  "artifact": "v0_2_release_use_case_verification_v1",
+  "status": "QUALIFIED_SCOPED_USE_CASES; ORIGINAL_BROWNIAN_ALL_DEPTH_REQUIREMENT_NOT_MET_PRESERVED",
+  "path_base": "particle_platform_redesign",
+  "acceptance": {
+    "path": "reviews/v0_2_release_use_case_acceptance_2026-10-10.json",
+    "file_sha256": "fc72a48f548449c062d3073b815847c22c80684c96b29888929dec542dac7d8d",
+    "contract_object_sha256": "2fd577b2c2771d2619b5221e911289ac4f45bd10a51141513837bbc316bd2260",
+    "immutability": "Acceptance file is frozen. PENDING means unobserved at registration; later outcomes belong only in this verification receipt."
+  },
+  "before_line_ending_normalization": {
+    "recorded_at_utc": "2026-10-10T01:37:40.193012+00:00",
+    "source_sha256": {
+      "src/chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "src/chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+      "src/chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+      "src/chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+      "src/chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "src/chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+      "src/chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+      "src/chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+      "src/chamber_particles/engine.py": "566a6de8e52ff8bebe5ed1d16361cdef09576244021251b37b31f879f54a9eca",
+      "src/chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+      "src/chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+      "src/chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+      "src/chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+      "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "src/chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "src/chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "src/chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "src/chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+      "src/chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+      "src/chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+      "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "src/chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+      "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+    },
+    "LF_normalized_source_sha256": {
+      "src/chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "src/chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+      "src/chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+      "src/chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+      "src/chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "src/chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+      "src/chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+      "src/chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+      "src/chamber_particles/engine.py": "230f2784b87c4d76155cc0a7525a3edbc8ab812c9e022511a9e4b74d83cae309",
+      "src/chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+      "src/chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+      "src/chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+      "src/chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+      "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "src/chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "src/chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "src/chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "src/chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+      "src/chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+      "src/chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+      "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "src/chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+      "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+    },
+    "tests_oracles_sha256": {
+      "solver/tests/scenarios/test_brownian_run.py": "70d83fdc1361fa20aa041865bfabf6be8abe457a5eb8a5a72a893803de860f9a",
+      "solver/tests/scenarios/test_force_coupled_run.py": "26c80134253a4655661b55f1df2e5d322c0cff14cfbdfb05fdb8a9ea50479ad0",
+      "solver/tests/scenarios/test_talbot_saffman_run.py": "1426e4cb8c96a9b204a75428ad2097e0b81376580a65c54ea5b0a8718095a6ef",
+      "solver/tests/verification/ou_reference.py": "2f59fde8a5fbb4fc0e44d37b31c1052e6514f66b8fc1b3ec5710f1c0b7573d48",
+      "solver/tests/verification/kramers_reference.py": "5d4f595e642de3e881ab9d6b4fd18d4abd398a6399a5c5147b6c83de162603be",
+      "solver/tests/verification/test_kramers_reference.py": "5847b3bfbe1be2b16b02564ab4c21f8a21addc2d4e2509243279c9e5abe4478e",
+      "solver/tests/verification/test_integrators.py": "245c7ba0edd6840d0d56b100b4e56d2d13ffba3382a233a72512d8124bec5fec",
+      "solver/tests/verification/microcases.py": "03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644",
+      "solver/tests/verification/test_talbot_saffman.py": "f940c9dd67a2075f3ceea6938077cdca6ea5369c2997c83e63233473f6cff125",
+      "solver/tests/verification/test_physics.py": "17c41e218b7fe3aab0ea43526c70929eef1390a6767bca461a43b8ab880a13f5",
+      "solver/tests/verification/test_ion_drag.py": "787f6bb83e140b43c612cbd5ce3e19c4d1197b7197413b25db4667b31f053360",
+      "solver/tests/verification/test_aggregate_charge.py": "884cfe09175e2927364ebb488638cd76a2b63e3857ffb447dae22679f6e1495f",
+      "solver/tests/verification/test_effective_gas_sensitivity.py": "f7c33a19a917e2a50b721590b29ae4d03fdb57ee156350575e3cd8205935587a"
+    },
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+  },
+  "scientific_run_count": 11,
+  "verification_results": {
+    "A01_HARMONIC": {
+      "status": "PASS",
+      "criteria": {
+        "position_linf_error_m": 1e-06,
+        "velocity_linf_error_m_s": 1e-06
+      },
+      "errors": {
+        "position_linf_error_m": 1.3869053214210503e-07,
+        "velocity_linf_error_m_s": 2.7608958663716265e-07
+      },
+      "expected_final_position_m": [
+        0.1087763461840148,
+        0.0
+      ],
+      "expected_final_velocity_m_s": [
+        -0.6569103141886248,
+        0.4
+      ],
+      "actual_final_position_m": [
+        0.10877648487454694,
+        -4.163336342344337e-17
+      ],
+      "actual_final_velocity_m_s": [
+        -0.6569100380990381,
+        0.4
+      ],
+      "event_times_s": [],
+      "boundary_events": 0,
+      "failure_events": 0,
+      "engine_revision": "particle_engine_v46",
+      "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "input_content_hash": "sha256:46902fe2c46e50604502a085abef5a83deec7e67be816eea284c76314de01c2d"
+    },
+    "A02_SPECULAR20": {
+      "status": "PASS",
+      "criteria": {
+        "event_time_linf_error_s": 1e-15,
+        "position_linf_error_m": 5e-14,
+        "velocity_linf_error_m_s": 1e-13,
+        "hits_per_particle": 20
+      },
+      "errors": {
+        "position_linf_error_m": 0.0,
+        "velocity_linf_error_m_s": 0.0,
+        "event_time_linf_error_s": 0.0
+      },
+      "expected_final_position_m": [
+        0.000244140625,
+        0.0625
+      ],
+      "expected_final_velocity_m_s": [
+        1.0,
+        0.0
+      ],
+      "actual_final_position_m": [
+        0.000244140625,
+        0.0625
+      ],
+      "actual_final_velocity_m_s": [
+        1.0,
+        0.0
+      ],
+      "event_times_s": [
+        0.00048828125,
+        0.00146484375,
+        0.00244140625,
+        0.00341796875,
+        0.00439453125,
+        0.00537109375,
+        0.00634765625,
+        0.00732421875,
+        0.00830078125,
+        0.00927734375,
+        0.01025390625,
+        0.01123046875,
+        0.01220703125,
+        0.01318359375,
+        0.01416015625,
+        0.01513671875,
+        0.01611328125,
+        0.01708984375,
+        0.01806640625,
+        0.01904296875
+      ],
+      "boundary_events": 20,
+      "failure_events": 0,
+      "engine_revision": "particle_engine_v46",
+      "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "input_content_hash": "sha256:0e6e58db9da3a496db2b6c69b9549cc29a29c0b7d28917527af1e2e95ff42dc2"
+    },
+    "B01_TIME_LINEAR_OU": {
+      "count": 16000,
+      "duration_s": 0.2,
+      "derived_rate0_s_inv": 2.0000000000000004,
+      "thermal_velocity_variance": 1.0354867499999999e-06,
+      "counts": {
+        "boundary_events": 0,
+        "failure_events": 0,
+        "frame_rows": 0,
+        "frames": 0,
+        "macro_steps": 32,
+        "particles": 16000,
+        "probe_rows": 0,
+        "probes": 0,
+        "release_events": 16000,
+        "series": 32
+      },
+      "engine_revision": "particle_engine_v46",
+      "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "data_content_hash": "sha256:908e52b6d0897c4a913c16ecf58ec681a93fe0b0b2267eeaa4d895be47a32149",
+      "reference_refinement_absolute_difference": [
+        1.3877787807814457e-17,
+        0.0,
+        2.117582368135751e-22
+      ],
+      "components": [
+        {
+          "component": 0,
+          "reference_mean": [
+            0.03652118611479205,
+            0.16887497427248224
+          ],
+          "observed_mean": [
+            0.036521885776068144,
+            0.16887278353794918
+          ],
+          "mean_absolute_error": [
+            6.996612760962195e-07,
+            2.1907345330585137e-06
+          ],
+          "seven_standard_error_allowance": [
+            5.213999506823452e-06,
+            4.5280353352202275e-05
+          ],
+          "fixed_mean_budget": [
+            1e-06,
+            1e-06
+          ],
+          "maximum_mean_error_to_gate": 0.11259435655376822,
+          "reference_covariance": [
+            [
+              8.876992932948637e-09,
+              6.03682686893435e-08
+            ],
+            [
+              6.03682686893435e-08,
+              6.69489110106219e-07
+            ]
+          ],
+          "observed_covariance": [
+            [
+              8.84243271004267e-09,
+              6.073284463444914e-08
+            ],
+            [
+              6.073284463444914e-08,
+              6.736524640936445e-07
+            ]
+          ],
+          "covariance_absolute_error": [
+            [
+              3.456022290596664e-11,
+              3.6457594510563513e-10
+            ],
+            [
+              3.6457594510563513e-10,
+              4.163353987425527e-09
+            ]
+          ],
+          "covariance_mc_allowance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "fixed_covariance_allowance": [
+            [
+              2.443849646647432e-09,
+              5.018413434467175e-09
+            ],
+            [
+              5.018413434467175e-09,
+              3.547445550531095e-08
+            ]
+          ],
+          "maximum_covariance_error_to_gate": 0.11736202650953229,
+          "pass": true
+        },
+        {
+          "component": 1,
+          "reference_mean": [
+            -0.018260593057396024,
+            -0.08443748713624112
+          ],
+          "observed_mean": [
+            -0.018260323582296078,
+            -0.08442886451061332
+          ],
+          "mean_absolute_error": [
+            2.694750999461537e-07,
+            8.622625627799363e-06
+          ],
+          "seven_standard_error_allowance": [
+            5.213999506823452e-06,
+            4.5280353352202275e-05
+          ],
+          "fixed_mean_budget": [
+            1e-06,
+            1e-06
+          ],
+          "maximum_mean_error_to_gate": 0.186312873676213,
+          "reference_covariance": [
+            [
+              8.876992932948637e-09,
+              6.03682686893435e-08
+            ],
+            [
+              6.03682686893435e-08,
+              6.69489110106219e-07
+            ]
+          ],
+          "observed_covariance": [
+            [
+              8.908057588249007e-09,
+              6.023394599609103e-08
+            ],
+            [
+              6.023394599609103e-08,
+              6.66969760375983e-07
+            ]
+          ],
+          "covariance_absolute_error": [
+            [
+              3.106465530037022e-11,
+              1.3432269325247106e-10
+            ],
+            [
+              1.3432269325247106e-10,
+              2.5193497302359643e-09
+            ]
+          ],
+          "covariance_mc_allowance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "fixed_covariance_allowance": [
+            [
+              2.443849646647432e-09,
+              5.018413434467175e-09
+            ],
+            [
+              5.018413434467175e-09,
+              3.547445550531095e-08
+            ]
+          ],
+          "maximum_covariance_error_to_gate": 0.07101870048037207,
+          "pass": true
+        }
+      ],
+      "charge": null,
+      "confidence_scope": "Inherited seven-SE or fixed-relative covariance regression criteria; no newly registered formal joint confidence family.",
+      "pass": true,
+      "status": "PASS_INHERITED_FIXED_REGRESSION_CRITERIA"
+    },
+    "B02_SPATIAL_AFFINE_OU": {
+      "count": 16000,
+      "duration_s": 0.4,
+      "derived_rate0_s_inv": 2.0000000000000004,
+      "thermal_velocity_variance": 1.0354867499999999e-06,
+      "counts": {
+        "boundary_events": 0,
+        "failure_events": 0,
+        "frame_rows": 0,
+        "frames": 0,
+        "macro_steps": 32,
+        "particles": 16000,
+        "probe_rows": 0,
+        "probes": 0,
+        "release_events": 16000,
+        "series": 32
+      },
+      "engine_revision": "particle_engine_v46",
+      "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "data_content_hash": "sha256:06a8e78c5d1ec27eb4bc4391adc44df609df5da81bfb8c7ed88ba4c8a49b5e19",
+      "reference_refinement_absolute_difference": [
+        [
+          0.0,
+          4.235164736271502e-22
+        ],
+        [
+          0.0,
+          5.293955920339377e-22
+        ]
+      ],
+      "components": [
+        {
+          "component": 0,
+          "reference_mean": [
+            0.046756138822886345,
+            0.037163322427551576
+          ],
+          "observed_mean": [
+            0.04675491509251545,
+            0.03716391044512755
+          ],
+          "mean_absolute_error": [
+            1.2237303708972913e-06,
+            5.880175759712114e-07
+          ],
+          "seven_standard_error_allowance": [
+            1.1383460473816244e-05,
+            4.4964319888704784e-05
+          ],
+          "fixed_mean_budget": [
+            1e-05,
+            3e-05
+          ],
+          "maximum_mean_error_to_gate": 0.057227892201813284,
+          "reference_covariance": [
+            [
+              4.231287260699975e-08,
+              1.1318576988459257e-07
+            ],
+            [
+              1.1318576988459256e-07,
+              6.601763471195993e-07
+            ]
+          ],
+          "observed_covariance": [
+            [
+              4.215748407359151e-08,
+              1.142716388324749e-07
+            ],
+            [
+              1.142716388324749e-07,
+              6.638254999851406e-07
+            ]
+          ],
+          "covariance_absolute_error": [
+            [
+              1.553885334082336e-10,
+              1.0858689478823293e-09
+            ],
+            [
+              1.0858689478823425e-09,
+              3.6491528655413093e-09
+            ]
+          ],
+          "covariance_mc_allowance": [
+            [
+              3.311609570955046e-09,
+              1.117091262503981e-08
+            ],
+            [
+              1.117091262503981e-08,
+              5.1668586293943526e-08
+            ]
+          ],
+          "fixed_covariance_allowance": [
+            [
+              1.2693861782099925e-10,
+              5.014036488343842e-10
+            ],
+            [
+              5.014036488343842e-10,
+              1.980529041358798e-09
+            ]
+          ],
+          "maximum_covariance_error_to_gate": 0.09302943155445602,
+          "pass": true
+        },
+        {
+          "component": 1,
+          "reference_mean": [
+            -0.027533551794138925,
+            -0.044932896411722156
+          ],
+          "observed_mean": [
+            -0.027532992386427976,
+            -0.04492394376951035
+          ],
+          "mean_absolute_error": [
+            5.594077109490059e-07,
+            8.95264221180414e-06
+          ],
+          "seven_standard_error_allowance": [
+            1.2446982973111732e-05,
+            5.030833271966762e-05
+          ],
+          "fixed_mean_budget": [
+            1e-05,
+            3e-05
+          ],
+          "maximum_mean_error_to_gate": 0.11147837227620125,
+          "reference_covariance": [
+            [
+              5.058853392095783e-08,
+              1.569997708926928e-07
+            ],
+            [
+              1.569997708926928e-07,
+              8.264255807453975e-07
+            ]
+          ],
+          "observed_covariance": [
+            [
+              5.07799152242859e-08,
+              1.5663893576120528e-07
+            ],
+            [
+              1.5663893576120528e-07,
+              8.232972229618577e-07
+            ]
+          ],
+          "covariance_absolute_error": [
+            [
+              1.9138130332806753e-10,
+              3.6083513148751454e-10
+            ],
+            [
+              3.6083513148751454e-10,
+              3.1283577835398584e-09
+            ]
+          ],
+          "covariance_mc_allowance": [
+            [
+              3.959302755670477e-09,
+              1.4266604971673722e-08
+            ],
+            [
+              1.4266604971673722e-08,
+              6.468005347445488e-08
+            ]
+          ],
+          "fixed_covariance_allowance": [
+            [
+              1.517656017628735e-10,
+              6.13407635037397e-10
+            ],
+            [
+              6.13407635037397e-10,
+              2.4792767422361927e-09
+            ]
+          ],
+          "maximum_covariance_error_to_gate": 0.046581134347917746,
+          "pass": true
+        }
+      ],
+      "charge": null,
+      "confidence_scope": "Inherited seven-SE or fixed-relative covariance regression criteria; no newly registered formal joint confidence family.",
+      "pass": true,
+      "status": "PASS_INHERITED_FIXED_REGRESSION_CRITERIA"
+    },
+    "B03_STATIONARY_OML_COULOMB_OU": {
+      "count": 12000,
+      "duration_s": 0.1,
+      "derived_rate0_s_inv": 2.0000000000000004,
+      "thermal_velocity_variance": 1.0354867499999999e-06,
+      "counts": {
+        "boundary_events": 0,
+        "failure_events": 0,
+        "frame_rows": 0,
+        "frames": 0,
+        "macro_steps": 32,
+        "particles": 12000,
+        "probe_rows": 0,
+        "probes": 0,
+        "release_events": 12000,
+        "series": 32
+      },
+      "engine_revision": "particle_engine_v46",
+      "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "data_content_hash": "sha256:34dbd0c20a6862ca838fa476da3ae24d2622bac3df8cd1828232fc9db874524f",
+      "reference_refinement_absolute_difference": [
+        7.105427357601002e-14,
+        0.0,
+        0.0
+      ],
+      "components": [
+        {
+          "component": 0,
+          "reference_mean": [
+            0.019013935318162308,
+            0.1807410158448374
+          ],
+          "observed_mean": [
+            0.019014283367760627,
+            0.18073973638755358
+          ],
+          "mean_absolute_error": [
+            3.4804959831921667e-07,
+            1.2794572838148444e-06
+          ],
+          "seven_standard_error_allowance": [
+            2.20581248683576e-06,
+            3.7335842898686254e-05
+          ],
+          "fixed_mean_budget": [
+            2e-08,
+            5e-07
+          ],
+          "maximum_mean_error_to_gate": 0.1563696853969976,
+          "reference_covariance": [
+            [
+              1.1915776474483006e-09,
+              1.701229133487534e-08
+            ],
+            [
+              1.701229133487534e-08,
+              3.4137922407070554e-07
+            ]
+          ],
+          "observed_covariance": [
+            [
+              1.196751114068964e-09,
+              1.7187153520573882e-08
+            ],
+            [
+              1.7187153520573882e-08,
+              3.4409435338275213e-07
+            ]
+          ],
+          "covariance_absolute_error": [
+            [
+              5.173466620663461e-12,
+              1.7486218569854252e-10
+            ],
+            [
+              1.7486218569854252e-10,
+              2.7151293120465933e-09
+            ]
+          ],
+          "covariance_mc_allowance": [
+            [
+              1.0768689601402258e-10,
+              1.6861331648258973e-09
+            ],
+            [
+              1.6861331648258973e-09,
+              3.085159333306879e-08
+            ]
+          ],
+          "fixed_covariance_allowance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "maximum_covariance_error_to_gate": 0.10370603541067175,
+          "pass": true
+        },
+        {
+          "component": 1,
+          "reference_mean": [
+            -0.009531731173050454,
+            -0.0909365376538991
+          ],
+          "observed_mean": [
+            -0.00953142418162447,
+            -0.09092933379937738
+          ],
+          "mean_absolute_error": [
+            3.0699142598324125e-07,
+            7.20385452171457e-06
+          ],
+          "seven_standard_error_allowance": [
+            2.20581248683576e-06,
+            3.7335842898686254e-05
+          ],
+          "fixed_mean_budget": [
+            2e-08,
+            5e-07
+          ],
+          "maximum_mean_error_to_gate": 0.19039762219661568,
+          "reference_covariance": [
+            [
+              1.1915776474483006e-09,
+              1.701229133487534e-08
+            ],
+            [
+              1.701229133487534e-08,
+              3.4137922407070554e-07
+            ]
+          ],
+          "observed_covariance": [
+            [
+              1.209982377749822e-09,
+              1.725701597734867e-08
+            ],
+            [
+              1.725701597734867e-08,
+              3.454185582928838e-07
+            ]
+          ],
+          "covariance_absolute_error": [
+            [
+              1.8404730301521433e-11,
+              2.4472464247333036e-10
+            ],
+            [
+              2.4472464247333036e-10,
+              4.039334222178272e-09
+            ]
+          ],
+          "covariance_mc_allowance": [
+            [
+              1.0768689601402258e-10,
+              1.6861331648258973e-09
+            ],
+            [
+              1.6861331648258973e-09,
+              3.085159333306879e-08
+            ]
+          ],
+          "fixed_covariance_allowance": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "maximum_covariance_error_to_gate": 0.17090965551764847,
+          "pass": true
+        }
+      ],
+      "charge": {
+        "reference_charge_number": -44.11827392821702,
+        "maximum_absolute_error": 5.453087510431942e-07,
+        "budget": 0.0002,
+        "negative_branch": true,
+        "pass": true
+      },
+      "confidence_scope": "Inherited seven-SE or fixed-relative covariance regression criteria; no newly registered formal joint confidence family.",
+      "pass": true,
+      "status": "PASS_INHERITED_FIXED_REGRESSION_CRITERIA"
+    },
+    "D01_TALBOT_SAFFMAN": {
+      "status": "PASS_SCOPED_FORMULA_AND_TRAJECTORY_VERIFICATION",
+      "talbot_revision": "talbot_cross_regime_radius_knudsen_v1",
+      "talbot": [
+        {
+          "integrator": "rk4_fixed",
+          "position_linf_error_m": 2.7755575615628914e-17,
+          "velocity_linf_error_m_s": 8.673617379884035e-19,
+          "absolute_SI_budget": 2e-12,
+          "pass": true,
+          "manifest": {
+            "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat0/rk4_fixed-result/run.json",
+            "sha256": "0aa0788a0be942fd4a616c7f31ebf397c43f1681d274b134b4f2ad6433d18a02"
+          }
+        },
+        {
+          "integrator": "exponential_midpoint",
+          "position_linf_error_m": 3.109179580462751e-13,
+          "velocity_linf_error_m_s": 6.217552514509173e-13,
+          "absolute_SI_budget": 2e-09,
+          "pass": true,
+          "manifest": {
+            "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat1/exponential_midpoint-result/run.json",
+            "sha256": "6c05ff99bb7cc1e62f2a6d7351a785a892c8d2d624cd20d9b4847e66e72c07a4"
+          }
+        }
+      ],
+      "saffman": [
+        {
+          "label": "coarse",
+          "sum_position_velocity_error_SI": 7.065518947397833e-12,
+          "manifest": {
+            "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/coarse-result/run.json",
+            "sha256": "e28d5ebb66392f698a9990ba30dfd6fa973ef05968437c75c1672abbf1d55ba7"
+          }
+        },
+        {
+          "label": "fine",
+          "sum_position_velocity_error_SI": 4.4156249417708613e-13,
+          "manifest": {
+            "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/fine-result/run.json",
+            "sha256": "9fc9fa7682ed6c3ded7108bd399a0beae8b81bbd2d26dc4f102055482833d4ed"
+          }
+        }
+      ],
+      "saffman_fine_to_coarse_error_ratio": 0.06249540868328003,
+      "intentionally_invalid_slip_run": {
+        "expected_applicability_failure_events": 1,
+        "actual_failure_events": 1,
+        "pass": true
+      },
+      "composite_scope": "Finite composed output and model identity only; independent composite absolute accuracy not claimed."
+    },
+    "D02_MODEL_APPLICABILITY_SENSITIVITY": {
+      "status": "PASS_EXISTING_INDEPENDENT_LIMIT_AND_SENSITIVITY_TESTS",
+      "barnes_neutral_weak_drift_model_to_exact_coefficient_ratio": 0.75,
+      "number_weighted_equal_density_pseudogas_to_species_sum_drag_ratio": 1.118033988749895,
+      "aggregate_scope": "Documented attractive zero-drift coefficient gap relative to stationary Maxwell integral, not a charge closure repair. See fixed test_aggregate_charge independent test.",
+      "scope": "Necessary runtime applicability gates and equation/sensitivity verification; no experimental prediction or universal mixture/lift validity."
+    },
+    "C01_PLANAR_TERMINAL_OU": {
+      "status": "QUALIFIED_EXISTING_REGISTERED_PROFILE",
+      "authority": {
+        "path": "reviews/d2_kramers_first_arrival_2026-10-09.json",
+        "sha256": "ed03ee3d1029e334d29e434a6ee5d85ceaa420f47aff26a67521d87097b09f00"
+      },
+      "repeat_in_this_release": false,
+      "criterion": "Registered max five-time CDF difference + DKW MC width + empirical reference allowance <= .03; coarse D0 excluded; current regression and AST-equivalent final source linked."
+    },
+    "C02_REPEATED_SPECULAR_OU": {
+      "status": "QUALIFIED_FIXED_SELECTED_PROFILES",
+      "authority": {
+        "path": "reviews/brownian_wall_accuracy_extension_2026-10-10.json",
+        "sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8"
+      },
+      "profiles": [
+        {
+          "gamma_h": 0.6,
+          "depth": 2,
+          "seed": 53629,
+          "N": 16000,
+          "counts": [
+            3121,
+            6044,
+            10866,
+            13881,
+            15296,
+            1334,
+            4040,
+            2200,
+            7893,
+            2265,
+            8400
+          ],
+          "failure_count": 0,
+          "event_count": 18986,
+          "repeated_particle_count": 4387,
+          "max_probability_difference": 0.009522271582278474,
+          "MC_width": 0.01942794320851114,
+          "quadrature_allowance": 1e-12,
+          "far_wall_allowance": 8.676041020847487e-09,
+          "original_registered_upper": 0.02895021479178961,
+          "scoped_probability_upper": 0.028950223467830632,
+          "within_fixed_budget": true,
+          "original_registered_requirement_satisfied": true,
+          "qualification": "QUALIFIED_REGISTERED_PROFILE",
+          "input_content_hash": "sha256:9a6a8c58cc774104d705c4b727c8a4b2fb1a3f381b678c10ccb36bddce69a395",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+          "maximum_localization_residual_m": 3.1138765220263354e-13,
+          "minimum_position_budget_m": 1.0142111195854656e-12
+        },
+        {
+          "gamma_h": 0.6,
+          "depth": 4,
+          "seed": 53629,
+          "N": 16000,
+          "counts": [
+            3083,
+            5966,
+            10777,
+            13831,
+            15280,
+            1300,
+            4002,
+            2189,
+            7892,
+            2248,
+            8417
+          ],
+          "failure_count": 0,
+          "event_count": 18918,
+          "repeated_particle_count": 4351,
+          "max_probability_difference": 0.00639727158227843,
+          "MC_width": 0.01942794320851114,
+          "quadrature_allowance": 1e-12,
+          "far_wall_allowance": 8.676041020847487e-09,
+          "original_registered_upper": 0.025825214791789567,
+          "scoped_probability_upper": 0.025825223467830588,
+          "within_fixed_budget": true,
+          "original_registered_requirement_satisfied": true,
+          "qualification": "QUALIFIED_REGISTERED_PROFILE",
+          "input_content_hash": "sha256:9a6a8c58cc774104d705c4b727c8a4b2fb1a3f381b678c10ccb36bddce69a395",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+          "maximum_localization_residual_m": 3.4776302161556354e-14,
+          "minimum_position_budget_m": 1.0142111195854656e-12
+        },
+        {
+          "gamma_h": 0.3,
+          "depth": 4,
+          "seed": 53629,
+          "N": 16000,
+          "counts": [
+            3041,
+            5923,
+            10738,
+            13816,
+            15304,
+            1271,
+            3987,
+            2148,
+            7863,
+            2214,
+            8378
+          ],
+          "failure_count": 0,
+          "event_count": 18779,
+          "repeated_particle_count": 4334,
+          "max_probability_difference": 0.006667811939056079,
+          "MC_width": 0.01942794320851114,
+          "quadrature_allowance": 1e-12,
+          "far_wall_allowance": 8.676041020847487e-09,
+          "original_registered_upper": 0.026095755148567216,
+          "scoped_probability_upper": 0.026095763824608237,
+          "within_fixed_budget": true,
+          "original_registered_requirement_satisfied": true,
+          "qualification": "QUALIFIED_REGISTERED_PROFILE",
+          "input_content_hash": "sha256:9a6a8c58cc774104d705c4b727c8a4b2fb1a3f381b678c10ccb36bddce69a395",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+          "maximum_localization_residual_m": 3.90510468375079e-14,
+          "minimum_position_budget_m": 1.0142111195854656e-12
+        }
+      ],
+      "unqualified_coarse_observation": [
+        {
+          "gamma_h": 0.6,
+          "depth": 0,
+          "seed": 53629,
+          "N": 16000,
+          "counts": [
+            3326,
+            6346,
+            11234,
+            14134,
+            15399,
+            1353,
+            4218,
+            2171,
+            7938,
+            2223,
+            8374
+          ],
+          "failure_count": 0,
+          "event_count": 19289,
+          "repeated_particle_count": 4656,
+          "max_probability_difference": 0.02978333119356824,
+          "MC_width": 0.01942794320851114,
+          "quadrature_allowance": 1e-12,
+          "far_wall_allowance": 8.676041020847487e-09,
+          "original_registered_upper": 0.04921127440307938,
+          "scoped_probability_upper": 0.0492112830791204,
+          "within_fixed_budget": false,
+          "original_registered_requirement_satisfied": null,
+          "qualification": "COARSE_OBSERVATION_NOT_QUALIFIED",
+          "input_content_hash": "sha256:9a6a8c58cc774104d705c4b727c8a4b2fb1a3f381b678c10ccb36bddce69a395",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+          "maximum_localization_residual_m": 5.136135005652631e-13,
+          "minimum_position_budget_m": 1.0142111195854656e-12
+        }
+      ],
+      "reference_scope": "Flat constant-gamma,T zero-forcing specular joint reflected OU law; empirical quadrature refinement and separate far-wall probability allowance, not general wall/SDE order."
+    },
+    "C03_RZ_MERIDIONAL_ARRIVAL_OU": {
+      "status": "D4_PROFILE_QUALIFICATION_SELECTED_AFTER_OBSERVATIONS",
+      "authority": {
+        "path": "reviews/brownian_wall_accuracy_extension_2026-10-10.json",
+        "sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8"
+      },
+      "original_registered_requirement": "NOT_MET: v45 safety failures and RZ D2 confidence criterion not met; not proof that continuum bias exceeds .03",
+      "corrected_original_registered_requirement": "NOT_MET: v46 RZ h1.2 D2 confidence upper .031120052032726116 > .03; not proof of excessive true bias",
+      "qualified_profiles": [
+        {
+          "gamma_h": 1.2,
+          "depth": 4,
+          "seed": 53639,
+          "N": 16000,
+          "counts": [
+            41,
+            927,
+            2307,
+            3820,
+            5297
+          ],
+          "failure_count": 0,
+          "axis_crossings": 7559,
+          "event_count": 5297,
+          "max_CDF_difference": 0.004857463121236048,
+          "MC_width": 0.017592156946115333,
+          "empirical_reference_allowance": 0.005,
+          "original_registered_upper": 0.027449620067351382,
+          "within_fixed_budget": true,
+          "original_registered_requirement_satisfied": true,
+          "qualification": "POST_OBSERVATION_SELECTED_PROFILE_QUALIFIED",
+          "input_content_hash": "sha256:2af636444f3074418699bf880c1825d3d57d2c356915221da94521d0a52bb4dc",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        },
+        {
+          "gamma_h": 0.6,
+          "depth": 4,
+          "seed": 53639,
+          "N": 16000,
+          "counts": [
+            48,
+            869,
+            2249,
+            3812,
+            5358
+          ],
+          "failure_count": 0,
+          "axis_crossings": 7317,
+          "event_count": 5358,
+          "max_CDF_difference": 0.0032610995163565304,
+          "MC_width": 0.017592156946115333,
+          "empirical_reference_allowance": 0.005,
+          "original_registered_upper": 0.025853256462471864,
+          "within_fixed_budget": true,
+          "original_registered_requirement_satisfied": true,
+          "qualification": "POST_OBSERVATION_SELECTED_PROFILE_QUALIFIED",
+          "input_content_hash": "sha256:2af636444f3074418699bf880c1825d3d57d2c356915221da94521d0a52bb4dc",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        },
+        {
+          "gamma_h": 0.3,
+          "depth": 4,
+          "seed": 53639,
+          "N": 16000,
+          "counts": [
+            46,
+            837,
+            2257,
+            3845,
+            5404
+          ],
+          "failure_count": 0,
+          "axis_crossings": 7276,
+          "event_count": 5404,
+          "max_CDF_difference": 0.002284604913389221,
+          "MC_width": 0.017592156946115333,
+          "empirical_reference_allowance": 0.005,
+          "original_registered_upper": 0.024876761859504555,
+          "within_fixed_budget": true,
+          "original_registered_requirement_satisfied": true,
+          "qualification": "POST_OBSERVATION_SELECTED_PROFILE_QUALIFIED",
+          "input_content_hash": "sha256:2af636444f3074418699bf880c1825d3d57d2c356915221da94521d0a52bb4dc",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        }
+      ],
+      "nonqualified_profiles": [
+        {
+          "gamma_h": 1.2,
+          "depth": 0,
+          "seed": 53639,
+          "N": 16000,
+          "counts": [
+            2,
+            581,
+            1963,
+            3395,
+            4717
+          ],
+          "failure_count": 0,
+          "axis_crossings": 7151,
+          "event_count": 4717,
+          "max_CDF_difference": 0.040652895086610796,
+          "MC_width": 0.017592156946115333,
+          "empirical_reference_allowance": 0.005,
+          "original_registered_upper": 0.06324505203272614,
+          "within_fixed_budget": false,
+          "original_registered_requirement_satisfied": null,
+          "qualification": "NOT_QUALIFIED",
+          "input_content_hash": "sha256:2af636444f3074418699bf880c1825d3d57d2c356915221da94521d0a52bb4dc",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        },
+        {
+          "gamma_h": 1.2,
+          "depth": 2,
+          "seed": 53639,
+          "N": 16000,
+          "counts": [
+            40,
+            927,
+            2264,
+            3773,
+            5231
+          ],
+          "failure_count": 0,
+          "axis_crossings": 7559,
+          "event_count": 5231,
+          "max_CDF_difference": 0.008527895086610782,
+          "MC_width": 0.017592156946115333,
+          "empirical_reference_allowance": 0.005,
+          "original_registered_upper": 0.031120052032726116,
+          "within_fixed_budget": false,
+          "original_registered_requirement_satisfied": false,
+          "qualification": "NOT_QUALIFIED",
+          "input_content_hash": "sha256:2af636444f3074418699bf880c1825d3d57d2c356915221da94521d0a52bb4dc",
+          "engine_revision": "particle_engine_v46",
+          "event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        }
+      ],
+      "scope": "Meridional signed 2DOF model with two flat absorbing ends; measured reference refinement allowance is empirical, not rigorous PDE error bound or general 3D radial diffusion."
+    },
+    "C04_RZ_D2_HELD_OUT_FOLLOWUP": {
+      "status": "PASS_SEPARATE_POST_OBSERVATION_PREREGISTERED_FOLLOWUP",
+      "authority": {
+        "path": "reviews/brownian_wall_accuracy_extension_2026-10-10.json",
+        "sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8"
+      },
+      "embedded_registration_pointer": "/held_out_rz_d2_followup/registration",
+      "canonical_registration_sha256": "9669b5dd56f7423c897a006a2b7c672bc7ea469f77733a357b06cabe25f8a39b",
+      "N": 64000,
+      "seed": 53649,
+      "counts": [
+        163,
+        3294,
+        8939,
+        15204,
+        21082
+      ],
+      "max_CDF_difference": 0.006059145086610762,
+      "MC_width": 0.008049674702327859,
+      "empirical_reference_allowance": 0.005,
+      "probability_upper": 0.019108819788938622,
+      "probability_budget": 0.03,
+      "failure_count": 0,
+      "scope": "New seed separate alpha=.0005 follow-up preserves original NOT_MET; not silently combined into original family."
+    }
+  },
+  "interpretation": "All eleven explicitly scoped release profiles are qualified using fixed criteria and identified current-final-source or AST-equivalent prior evidence. Original Brownian all-D>=2 requirement remains NOT_MET, distinct from D4 selected qualification and separately registered heldout D2 PASS. This is mathematical/model-applicability and finite-resolution use-case qualification, not a user SLA, real-chamber predictive validation, exact continuous-OU first hit, zero-miss guarantee or general SDE convergence theorem. Operational elapsed times here are descriptive only.",
+  "model_subset_repeat_plan": {
+    "fixed_before_new_observations_at_utc": "2026-10-10T01:55:55.093158+00:00",
+    "basis": "Root requested a necessary existing-model subset after final-source normalization; criteria are inherited unchanged from D01/D02 and their fixed test/oracle hashes. This is existing mathematical verification, not new experimental prediction evidence.",
+    "nodes": [
+      "tests/verification/test_talbot_saffman.py",
+      "tests/scenarios/test_talbot_saffman_run.py",
+      "tests/verification/test_ion_drag.py::test_barnes_effective_speed_has_documented_weak_drift_model_form_gap",
+      "tests/verification/test_aggregate_charge.py::test_aggregate_attractive_increment_has_documented_stationary_maxwellian_gap",
+      "tests/verification/test_effective_gas_sensitivity.py::test_number_weighted_pseudogas_is_not_a_species_sum_even_at_equal_temperature"
+    ],
+    "cost_estimate": "Small existing formula/scenario subset, expected a few seconds beyond JIT/process startup; no new large reference solve or source/test edits."
+  },
+  "test_oracle_publication_line_ending_map_before_repeat": {
+    "recorded_at_utc": "2026-10-10T04:22:43.617098+00:00",
+    "working_test_files_modified": false,
+    "acceptance_raw_hashes_preserved": true,
+    "interpretation": "Raw registered/tested bytes remain unchanged. Git publication uses LF bytes with identical Python AST; this is a byte-provenance mapping, not a scientific amendment.",
+    "entries": {
+      "solver/tests/scenarios/test_brownian_run.py": {
+        "working_sha256": "70d83fdc1361fa20aa041865bfabf6be8abe457a5eb8a5a72a893803de860f9a",
+        "index_sha256": "4cec3ba6003863b76e2e9e78ee9f14c77d23533b518d8cd27c7dfae661c5be3a",
+        "working_equals_index": false,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/scenarios/test_force_coupled_run.py": {
+        "working_sha256": "26c80134253a4655661b55f1df2e5d322c0cff14cfbdfb05fdb8a9ea50479ad0",
+        "index_sha256": "5d50e2b868d5a12df0f373c4961ef660ce86231f9085c1b174112170b5b37aa6",
+        "working_equals_index": false,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/scenarios/test_talbot_saffman_run.py": {
+        "working_sha256": "1426e4cb8c96a9b204a75428ad2097e0b81376580a65c54ea5b0a8718095a6ef",
+        "index_sha256": "1426e4cb8c96a9b204a75428ad2097e0b81376580a65c54ea5b0a8718095a6ef",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/ou_reference.py": {
+        "working_sha256": "2f59fde8a5fbb4fc0e44d37b31c1052e6514f66b8fc1b3ec5710f1c0b7573d48",
+        "index_sha256": "e8c2558e015981bae19ba8dceb0c3658824242acd18de23ba5a2a03fc133fdeb",
+        "working_equals_index": false,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/kramers_reference.py": {
+        "working_sha256": "5d4f595e642de3e881ab9d6b4fd18d4abd398a6399a5c5147b6c83de162603be",
+        "index_sha256": "5d4f595e642de3e881ab9d6b4fd18d4abd398a6399a5c5147b6c83de162603be",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/test_kramers_reference.py": {
+        "working_sha256": "5847b3bfbe1be2b16b02564ab4c21f8a21addc2d4e2509243279c9e5abe4478e",
+        "index_sha256": "5847b3bfbe1be2b16b02564ab4c21f8a21addc2d4e2509243279c9e5abe4478e",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/test_integrators.py": {
+        "working_sha256": "245c7ba0edd6840d0d56b100b4e56d2d13ffba3382a233a72512d8124bec5fec",
+        "index_sha256": "34d1822b49243c7b59da68e58c9889c081dd9d6c62a2adb1bea0db08517873b5",
+        "working_equals_index": false,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/microcases.py": {
+        "working_sha256": "03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644",
+        "index_sha256": "03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/test_talbot_saffman.py": {
+        "working_sha256": "f940c9dd67a2075f3ceea6938077cdca6ea5369c2997c83e63233473f6cff125",
+        "index_sha256": "f940c9dd67a2075f3ceea6938077cdca6ea5369c2997c83e63233473f6cff125",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/test_physics.py": {
+        "working_sha256": "17c41e218b7fe3aab0ea43526c70929eef1390a6767bca461a43b8ab880a13f5",
+        "index_sha256": "17c41e218b7fe3aab0ea43526c70929eef1390a6767bca461a43b8ab880a13f5",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/test_ion_drag.py": {
+        "working_sha256": "787f6bb83e140b43c612cbd5ce3e19c4d1197b7197413b25db4667b31f053360",
+        "index_sha256": "787f6bb83e140b43c612cbd5ce3e19c4d1197b7197413b25db4667b31f053360",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/test_aggregate_charge.py": {
+        "working_sha256": "884cfe09175e2927364ebb488638cd76a2b63e3857ffb447dae22679f6e1495f",
+        "index_sha256": "884cfe09175e2927364ebb488638cd76a2b63e3857ffb447dae22679f6e1495f",
+        "working_equals_index": true,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      },
+      "solver/tests/verification/test_effective_gas_sensitivity.py": {
+        "working_sha256": "f7c33a19a917e2a50b721590b29ae4d03fdb57ee156350575e3cd8205935587a",
+        "index_sha256": "450c5a4559d797622eaa142d6f7d0e576047bef93c17b33bca23810365f371ca",
+        "working_equals_index": false,
+        "LF_normalized_working_equals_index": true,
+        "python_ast_identical": true
+      }
+    }
+  },
+  "repeat_started_at_utc": "2026-10-10T04:50:42.219407+00:00",
+  "final_source_before_repeats": {
+    "source_sha256": {
+      "src/chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "src/chamber_particles/__main__.py": "fb48ae518ad404315e05089a43084c0ececa4e22daaf8e16bb162bbed66a9c6e",
+      "src/chamber_particles/api.py": "21253194f1a53b3b15069e1a96385538d270930564c979748f18e4a14390aef0",
+      "src/chamber_particles/boundaries.py": "b308e97acdfebebe43c28674c670801bb13d71e61b1ef772213bdab60d409892",
+      "src/chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "src/chamber_particles/cli.py": "8d635d4f287a5ec1579d649d131511a611185716bd487035a3c86b794c0edec7",
+      "src/chamber_particles/coordinates.py": "8504224ac85404ee124d1d2933e3bc3fb78a6d4f4c4c2506dc18787086cbef27",
+      "src/chamber_particles/cpu.py": "4237077604e09a07bd660b253a03c8f9344cac97c9a44532e8778232a4660fa9",
+      "src/chamber_particles/engine.py": "230f2784b87c4d76155cc0a7525a3edbc8ab812c9e022511a9e4b74d83cae309",
+      "src/chamber_particles/events.py": "28f85c6db3ce4c7a98bb751d8a0448465686e0a114c984bfb5f36a8e22b1df16",
+      "src/chamber_particles/fields.py": "50b556a779dd682444312dd8c50ea854fe59f9efe08b7f2e4ff0e3958a628254",
+      "src/chamber_particles/geometry.py": "d185c8d17114dc273b91df861ba4fed3ba287aed450950e178790aea057a34ee",
+      "src/chamber_particles/integrators.py": "47bc519f67cb1aa04b22c0b23cac64d651c8a02c41bbeba43067c27f93e8c6f1",
+      "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "src/chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "src/chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "src/chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "src/chamber_particles/physics/forces.py": "58eb5ff12bfcbc52b89d0e478b143e80e5195f00ef8fcf3b9baaee5a8feab12b",
+      "src/chamber_particles/physics/runtime.py": "3feb23ad770e4c113738d3955ed7e4f4cfdaae1d77eb755360bbcef597d809d2",
+      "src/chamber_particles/rng.py": "f00aab19370d87c75301d7cbe19a1d28baba7cc50751db9baff92fc04192bfd6",
+      "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "src/chamber_particles/stochastic.py": "9a4d124c463e4e7c054159c9acb1805511431846026feeee45b70d9e73da87ac",
+      "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+    },
+    "source_normalization": {
+      "path": "reviews/v0_2_release_source_normalization_2026-10-10.json",
+      "sha256": "3f34172016ad6b60ade36dfc31b7378f327b824b3e6ea559ba330e35780710b7"
+    },
+    "executor_source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+    "working_tests_and_oracles_unchanged": true,
+    "all27_equal_index": true,
+    "performance_completion": {
+      "path": "reviews/v0_2_release_performance_2026_10_10/completion_summary.json",
+      "sha256": "b52e4c38d70b490a11e59871fd5baa02d8ca4641d323b5e6a52914221e999091"
+    }
+  },
+  "repeat_completed_at_utc": "2026-10-10T04:53:09.687425+00:00",
+  "receipt_finalized_at_utc": "2026-10-10T05:05:45.384654+00:00",
+  "scientific_run_count_interpretation": {
+    "qualified_public_runs": 10,
+    "intentional_applicability_rejection_runs": 1,
+    "new_A": 2,
+    "new_B": 3,
+    "new_D": 6,
+    "C_reference_or_population_reruns": 0,
+    "saved_result_reaggregation_simulations": 0
+  },
+  "operational_launch_failures": [
+    {
+      "phase": "B pytest executable launch",
+      "exit_code": 2,
+      "science_started": false,
+      "cause": "Windows application control blocked pytest.exe; identical locked environment and tests subsequently executed using python -m pytest",
+      "log": {
+        "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b_launch_blocked.log",
+        "sha256": "ef4271328d75f3e5fa19ff453ef53ec331080d2bb0f6a4ed253fc268a1f313ca"
+      }
+    },
+    {
+      "phase": "A acceptance JSON reader before case creation or simulate",
+      "exit_code": 1,
+      "science_started": false,
+      "cause": "Windows default cp932 failed reading UTF-8 acceptance; explicit encoding=utf-8 used on retry, scientific settings unchanged",
+      "tool_output_excerpt": "UnicodeDecodeError at read_text before scientific loop; no scientific output created"
+    }
+  ],
+  "actual_process_results": {
+    "A_public_API": {
+      "exit_code": 0,
+      "tool_wall_seconds_descriptive": 1.3537116,
+      "observations": {
+        "path": "solver/evidence/v0_2_release_use_case_2026_10_10/a_analytic_observations.json",
+        "sha256": "7070af671ff1d068065c474588fcb05e45f0260408afde39ee6779d264e54577"
+      }
+    },
+    "B_existing_nodes": {
+      "exit_code": 0,
+      "passed": 3,
+      "pytest_reported_seconds_descriptive": 7.73,
+      "tool_wall_seconds_descriptive": 8.4437316,
+      "log": {
+        "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b.log",
+        "sha256": "700b8a8327813da3fce37b435942cfdd68897b4d5768e11176ec19e22761090e"
+      }
+    },
+    "D_existing_subset": {
+      "exit_code": 0,
+      "passed": 44,
+      "pytest_reported_seconds_descriptive": 1.38,
+      "tool_wall_seconds_descriptive": 2.1166253,
+      "log": {
+        "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d.log",
+        "sha256": "dae3303f760a383edd57d70a4df569cc75727bc578cef9f83a4d77678f8c7969"
+      }
+    },
+    "saved_B_independent_reaggregation": {
+      "exit_code": 0,
+      "scientific_simulations": 0,
+      "recipe": {
+        "path": "solver/evidence/v0_2_release_use_case_2026_10_10/audit_saved_brownian.py",
+        "sha256": "02aaf008d0f2cc6dcd5d4dacf29b473317e5c8db0bebeaa4287308faa0863797"
+      },
+      "command": "uv run --locked python -m evidence.v0_2_release_use_case_2026_10_10.audit_saved_brownian",
+      "observations": {
+        "path": "solver/evidence/v0_2_release_use_case_2026_10_10/b_independent_observations.json",
+        "sha256": "2ebad95fc4b7a00a438ef91efb9e8f7fd268fa9e842d7876370ac5cd68aeea73"
+      }
+    }
+  },
+  "brownian_publication_closure": {
+    "status": "COMPACT_AUTHORITY_AND_RECIPE_CLOSURE_VERIFIED",
+    "embedded_original_registration": {
+      "owner": {
+        "path": "reviews/brownian_wall_accuracy_extension_2026-10-10.json",
+        "sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8"
+      },
+      "json_pointer": "/registration",
+      "canonical_object_sha256": "6faf238d07caefb3966e325c563807f16180e7188d8f62d7d7f319ddad0c6ee2",
+      "hash_algorithm": "sha256 of UTF-8 json.dumps(sort_keys=True, ensure_ascii=False, separators=(comma,colon)); no trailing newline"
+    },
+    "embedded_followup_registration": {
+      "owner": {
+        "path": "reviews/brownian_wall_accuracy_extension_2026-10-10.json",
+        "sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8"
+      },
+      "json_pointer": "/held_out_rz_d2_followup/registration",
+      "canonical_object_sha256": "9669b5dd56f7423c897a006a2b7c672bc7ea469f77733a357b06cabe25f8a39b",
+      "same_canonical_hash_algorithm": true
+    },
+    "compact_authorities_exact_byte_allowlist": [
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_brownian_monotone_approac0/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_brownian_monotone_approac0/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_brownian_monotone_approac0/first-passage.yaml",
+        "sha256": "722e51f290dc590ec0e9a66ec02fdb2e55e32537a1ea44b2bc9d606c845d6216"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_brownian_monotone_approac0/result/run.json",
+        "sha256": "f9835526d73e1750e65f45935252ee6953d1ed5b6b7c05567df1917ae74f922e"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_brownian_monotone_approac0/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_brownian_monotone_approac0/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/first-passage.yaml",
+        "sha256": "38c82dceca0048cd41e53c68288c4a06126f4fd20ceac190735ff8805a0513a1"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/result/run.json",
+        "sha256": "13927da07a9f804fbe678118950bc272b017be028b98984a457137c39bbd720a"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/first-passage.yaml",
+        "sha256": "1717d3c34eea032b1ef17cb151623b35ce45691d1eb53912a51b2a07869dce6e"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/result/run.json",
+        "sha256": "3a0d198112cd6941c8538cef2d4bbedeeb5b915bfdda1b4e7dc1b1cc062a3400"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/first-passage.yaml",
+        "sha256": "2e55f97be11a2f3b521415249acd728e834152e6b8f4a40ab0bc034e33910218"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/result/run.json",
+        "sha256": "552d186e2857d6f04d3a2bdb6f845c7bca97bd3a985516c94d1b55456ba385cf"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/first-passage.yaml",
+        "sha256": "fd36cf36f6a9bd6b4714379da0f645c1a734b57fb13fb88b6829e39d6b3dd51b"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/result/run.json",
+        "sha256": "f52290a2e67aae6ead0f1e6c3ab6eb23ac2f8cf25d8996a30aaaa9936637b53d"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/first-passage.yaml",
+        "sha256": "68ff004e5c83f3dbace5456cde1d83dc0ed026e0fee7c40b07b9f93063f7732d"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/result/run.json",
+        "sha256": "189f4fe838adc1bdd870f0d27474f2a8d13f543fa45dcfffa72a1f925d16aad8"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/first-passage.yaml",
+        "sha256": "726146a576a7c4fa0d702b08d0444b5992c81f2f00431f492d0852c18230950a"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/result/run.json",
+        "sha256": "84dd771adc1f6f0abb85d2eb98c97c3b1d6e8604084baf16d953ce544a69d236"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/first-passage.yaml",
+        "sha256": "da727c15d2e81319378d6cb2f07ad601069d07e05a89b3cafda9eb1d9c02068a"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/result/run.json",
+        "sha256": "c2d33b82fb9f69e529bb12ed1c6ef8c4004704e030e15daaefdbc9efd7f58250"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/first-passage.yaml",
+        "sha256": "2dd9ac7203b01562cff70dd58e3663f14d792f954885d75f318a551d6e8b798d"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/result/run.json",
+        "sha256": "d9e288b2342abc6bd83f18ab05742715d491becbd608b7c2d551c9723156c368"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/first-passage.yaml",
+        "sha256": "f6b77f821a95fa93c847464f4b7d8ae031a72e5e638c24ecf5bf56355269e5af"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/result/run.json",
+        "sha256": "992e6ae946cb0c7c4cb0fd5dd25a4cdf2fe07f9fe814670e595e6e8247890bbe"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/held_out_rz_d2_n64000_seed53649/candidate_input_receipt.json",
+        "sha256": "7a450f18fa675b79136f4b069039dbbfce245ef2dd6e5c4f7c37d7f590e90482"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/held_out_rz_d2_n64000_seed53649/field/case.yaml",
+        "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/held_out_rz_d2_n64000_seed53649/field/expected.json",
+        "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/held_out_rz_d2_n64000_seed53649/first-passage.yaml",
+        "sha256": "025c29b2e774d4e9cecf3b8c9f02e4bfa9392b0af76b3fbc3e27bedacef31ee5"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/held_out_rz_d2_n64000_seed53649/result/run.json",
+        "sha256": "dac809bb9a985897ec01e383dbb551185ab4637ea7ba93b3e07abfd1da6876c0"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/held_out_rz_d2_n64000_seed53649/wall/case.yaml",
+        "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/held_out_rz_d2_n64000_seed53649/wall/expected.json",
+        "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/specular_indeterminate_minimal/case.yaml",
+        "sha256": "249135d421c685f70cfa266e870f761e960a2cda1bc0124182cd2d09b1068ae9"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/specular_indeterminate_minimal/corrected/run.json",
+        "sha256": "ae056ede4ea2404a0fb09386dea8d6b0a67b0f4d01ecef68281e961b9d32bcad"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/specular_indeterminate_minimal/debug_reproduced/run.json",
+        "sha256": "32ded9abb462f4bbca7b22f29d03541bbb96554d020657f11c8182a3ef1f8ea6"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/specular_indeterminate_minimal/localization_tail_inputs.json",
+        "sha256": "a7ff6508fb6d02659ea536004528c7327ef3949af171ef0467a4c092c080ba0d"
+      },
+      {
+        "path": "solver/evidence/brownian_wall_accuracy_extension_2026_10_10/specular_indeterminate_minimal/reproduced/run.json",
+        "sha256": "32ded9abb462f4bbca7b22f29d03541bbb96554d020657f11c8182a3ef1f8ea6"
+      }
+    ],
+    "execution_recipes": [
+      {
+        "path": "solver/tests/scenarios/test_brownian_run.py",
+        "sha256": "70d83fdc1361fa20aa041865bfabf6be8abe457a5eb8a5a72a893803de860f9a",
+        "published_index_sha256": "4cec3ba6003863b76e2e9e78ee9f14c77d23533b518d8cd27c7dfae661c5be3a",
+        "raw_to_published_equivalence": "LF-normalized byte equality and Python AST equality recorded before repeats; historical raw SHA is not rewritten."
+      },
+      {
+        "path": "solver/tests/verification/ou_reference.py",
+        "sha256": "2f59fde8a5fbb4fc0e44d37b31c1052e6514f66b8fc1b3ec5710f1c0b7573d48",
+        "published_index_sha256": "e8c2558e015981bae19ba8dceb0c3658824242acd18de23ba5a2a03fc133fdeb",
+        "raw_to_published_equivalence": "LF-normalized byte equality and Python AST equality recorded before repeats; historical raw SHA is not rewritten."
+      },
+      {
+        "path": "solver/tests/verification/kramers_reference.py",
+        "sha256": "5d4f595e642de3e881ab9d6b4fd18d4abd398a6399a5c5147b6c83de162603be",
+        "published_index_sha256": "5d4f595e642de3e881ab9d6b4fd18d4abd398a6399a5c5147b6c83de162603be",
+        "raw_to_published_equivalence": "LF-normalized byte equality and Python AST equality recorded before repeats; historical raw SHA is not rewritten."
+      },
+      {
+        "path": "solver/tests/verification/test_kramers_reference.py",
+        "sha256": "5847b3bfbe1be2b16b02564ab4c21f8a21addc2d4e2509243279c9e5abe4478e",
+        "published_index_sha256": "5847b3bfbe1be2b16b02564ab4c21f8a21addc2d4e2509243279c9e5abe4478e",
+        "raw_to_published_equivalence": "LF-normalized byte equality and Python AST equality recorded before repeats; historical raw SHA is not rewritten."
+      },
+      {
+        "path": "solver/tests/verification/microcases.py",
+        "sha256": "03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644",
+        "published_index_sha256": "03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644",
+        "raw_to_published_equivalence": "LF-normalized byte equality and Python AST equality recorded before repeats; historical raw SHA is not rewritten."
+      },
+      {
+        "path": "solver/tests/scenarios/test_force_coupled_run.py",
+        "sha256": "26c80134253a4655661b55f1df2e5d322c0cff14cfbdfb05fdb8a9ea50479ad0",
+        "published_index_sha256": "5d50e2b868d5a12df0f373c4961ef660ce86231f9085c1b174112170b5b37aa6",
+        "raw_to_published_equivalence": "LF-normalized byte equality and Python AST equality recorded before repeats; historical raw SHA is not rewritten."
+      }
+    ],
+    "commands": {
+      "corrected_original_and_selected_profiles": "uv run --locked python -m pytest tests/scenarios/test_brownian_run.py -k \"repeated_brownian_specular or rz_brownian_radius_arrival or brownian_monotone_approach\" -s --basetemp evidence/brownian_wall_accuracy_extension_2026_10_10/corrected_v46",
+      "independent_reference": "uv run --locked python -m pytest tests/verification/test_kramers_reference.py tests/verification/test_stochastic.py -s",
+      "heldout": "Reproduce retained first-passage.yaml / .h5 with public load_case, simulate, open_result; N64000/seed53649/gamma_h1.2/D2 are fixed in embedded preregistration and candidate_input_receipt.json."
+    },
+    "historical_original_raw_limitation": "v45 original large N16k temporary population was not retained after shared pytest cleanup; captured counts/FAIL chronology remain in immutable owner receipt. Do not claim full original raw closure. Durable corrected v46 negative D2 and selected D4, original two-ID reproducer, and heldout raw hashes are retained.",
+    "raw_HDF5_policy": "Large HDF5/result segments remain external hash-identified evidence; compact metadata and source execution recipes are publishable, full raw audit requires those exact external bytes."
+  },
+  "release_numeric_publication_allowlist": [
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/A01_HARMONIC/input/case.yaml",
+      "sha256": "bbfb562c828a07317167aea0a8816de805ef05c70d31964c8877d3f31399fcfa"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/A01_HARMONIC/result/run.json",
+      "sha256": "648bf82cbb3113e4309be900500c8215116f0cd5cf348eb176a82325da97d08b"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/A02_SPECULAR20/input/case.yaml",
+      "sha256": "3a9bc7ac591d08791c121b01d84ad5d63560fe92354cdbdf7824bfa7e358c385"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/A02_SPECULAR20/result/run.json",
+      "sha256": "99f83ac727b147c4b29803c30c06eda9d22d656c3d99fcdfe91f4f87700905a1"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/a_analytic_observations.json",
+      "sha256": "7070af671ff1d068065c474588fcb05e45f0260408afde39ee6779d264e54577"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/audit_saved_brownian.py",
+      "sha256": "02aaf008d0f2cc6dcd5d4dacf29b473317e5c8db0bebeaa4287308faa0863797"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/b_independent_observations.json",
+      "sha256": "2ebad95fc4b7a00a438ef91efb9e8f7fd268fa9e842d7876370ac5cd68aeea73"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/brownian.yaml",
+      "sha256": "19abc3bf73d14a939b07abf6dce19dae0e4c001f1bf2a8b3b6b32d660c42ef89"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/case.yaml",
+      "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine/expected.json",
+      "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_spatial_affine_f0/spatial-affine-result/run.json",
+      "sha256": "bfb2e0be83677f557db27c76eb6dfdc5dd8aa6d3e757c8e8390d6bbcc6ce271a"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/brownian.yaml",
+      "sha256": "0cbd035967f59e68b0558289142ba4e1ed88046ffb9aa568decb022cec58038b"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/case.yaml",
+      "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb/expected.json",
+      "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_stationary_oml_a0/oml-coulomb-result/run.json",
+      "sha256": "9b103e1589117b81497435b422127bb510df57c81479e7faa898389e208bdca7"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/brownian.yaml",
+      "sha256": "aeeb4d1c5af70d67e38660dea4f9c2a9b16c999d1104d0996713f775a12a6265"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/case.yaml",
+      "sha256": "0b42a83fcf23d902fca6679bb013c85f1a32ee784201429a3881026cba955b27"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear/expected.json",
+      "sha256": "24d05ced5d399fe56f0605549c7a41eafff9fcd0750a56c2556e0812f8c0a862"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b/test_brownian_time_linear_drag0/time-linear-result/run.json",
+      "sha256": "840a922f616882d2fb656687f55354a9cd90aeb7f38fc1f805118f1a74475355"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b.log",
+      "sha256": "700b8a8327813da3fce37b435942cfdd68897b4d5768e11176ec19e22761090e"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_b_launch_blocked.log",
+      "sha256": "ef4271328d75f3e5fa19ff453ef53ec331080d2bb0f6a4ed253fc268a1f313ca"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_hierarchy_violati0/inapplicable/case.yaml",
+      "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_hierarchy_violati0/inapplicable/expected.json",
+      "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_hierarchy_violati0/inapplicable/saffman-rotation.yaml",
+      "sha256": "4d90efb64827907a05c2d6b98c3ff77d01eee9ac9d93852d18113b42bd2ad4d2"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_hierarchy_violati0/inapplicable/talbot-saffman.yaml",
+      "sha256": "8c716df98d48ac36bb10a6ef36a9c14906340f76c4151c3b9544a5c2951357e4"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_hierarchy_violati0/inapplicable-result/run.json",
+      "sha256": "014d579ccf9a76df69e5325c8c214dd5c628d006fd134b3ca5c56b7b51aea49f"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/coarse/case.yaml",
+      "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/coarse/expected.json",
+      "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/coarse/saffman-rotation.yaml",
+      "sha256": "2b35460ab29a896687077461166db7febabdb910b0701d99214bba9b43c0331c"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/coarse/talbot-saffman.yaml",
+      "sha256": "8c716df98d48ac36bb10a6ef36a9c14906340f76c4151c3b9544a5c2951357e4"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/coarse-result/run.json",
+      "sha256": "e28d5ebb66392f698a9990ba30dfd6fa973ef05968437c75c1672abbf1d55ba7"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/fine/case.yaml",
+      "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/fine/expected.json",
+      "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/fine/saffman-rotation.yaml",
+      "sha256": "d78f85ed32e8ca7a656024ae1de41a5484cdec16fd0d8e61f9cb75b538c45367"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/fine/talbot-saffman.yaml",
+      "sha256": "8c716df98d48ac36bb10a6ef36a9c14906340f76c4151c3b9544a5c2951357e4"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_saffman_rotation_converge0/fine-result/run.json",
+      "sha256": "9fc9fa7682ed6c3ded7108bd399a0beae8b81bbd2d26dc4f102055482833d4ed"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_and_saffman_compos0/result/run.json",
+      "sha256": "19577503b57433ac619d576abae3a68e4c9b4a5005d0908f84c87dc4623761cb"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_and_saffman_compos0/talbot-saffman/case.yaml",
+      "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_and_saffman_compos0/talbot-saffman/expected.json",
+      "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_and_saffman_compos0/talbot-saffman/talbot-saffman.yaml",
+      "sha256": "8c716df98d48ac36bb10a6ef36a9c14906340f76c4151c3b9544a5c2951357e4"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat0/rk4_fixed/case.yaml",
+      "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat0/rk4_fixed/expected.json",
+      "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat0/rk4_fixed/talbot-saffman.yaml",
+      "sha256": "9059fc796afe61c1b0ef7a610d10c9cfa47e8376f99b4759898cf9e157349003"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat0/rk4_fixed-result/run.json",
+      "sha256": "0aa0788a0be942fd4a616c7f31ebf397c43f1681d274b134b4f2ad6433d18a02"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat1/exponential_midpoint/case.yaml",
+      "sha256": "60b7abc633398db7689915acc02b7b8e448ba4b97e70efc0fe443df6595edd59"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat1/exponential_midpoint/expected.json",
+      "sha256": "6661b2e34fd4ae5fc9f0162c10d67d1161ad5100143613d92b9ec704ba743e21"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat1/exponential_midpoint/talbot-saffman.yaml",
+      "sha256": "47ad8446e3cb65819e556006940239b9e8aa5541ff2d5de18c0fcd890df092c4"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d/test_talbot_in_affine_temperat1/exponential_midpoint-result/run.json",
+      "sha256": "6c05ff99bb7cc1e62f2a6d7351a785a892c8d2d624cd20d9b4847e66e72c07a4"
+    },
+    {
+      "path": "solver/evidence/v0_2_release_use_case_2026_10_10/pytest_d.log",
+      "sha256": "dae3303f760a383edd57d70a4df569cc75727bc578cef9f83a4d77678f8c7969"
+    },
+    {
+      "path": "reviews/v0_2_release_use_case_acceptance_2026-10-10.json",
+      "sha256": "fc72a48f548449c062d3073b815847c22c80684c96b29888929dec542dac7d8d"
+    },
+    {
+      "path": "reviews/brownian_wall_accuracy_extension_2026-10-10.json",
+      "sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8"
+    },
+    {
+      "path": "reviews/d2_kramers_first_arrival_2026-10-09.json",
+      "sha256": "ed03ee3d1029e334d29e434a6ee5d85ceaa420f47aff26a67521d87097b09f00"
+    }
+  ],
+  "comsol_v2_pre_run_audit": {
+    "status": "PASS_SCOPED_REGISTRATION_AUDIT",
+    "registration": {
+      "path": "solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/execution_preregistration.json",
+      "sha256": "323d3a68bf49cd46d853df7559a2305aab7d6fc91d166e117f25fa4957973d84"
+    },
+    "observations_before_execution_authorization": true,
+    "report_saved_after_execution_authorization": true,
+    "science_queues_started_after_pass_utc": {
+      "A": "2026-10-10T04:59:23+00:00",
+      "C3": "2026-10-10T05:00:00+00:00"
+    },
+    "checked": {
+      "top_reference_hashes": 77,
+      "nested_registration_reference_hashes": 32,
+      "repo_recipe_reference_hashes": 16,
+      "current_production_sources": 27,
+      "lock_matches": true,
+      "C2_prepared_cell_case_hashes_status_and_output_absence": 64,
+      "C3_three_output_directories_contained_only_case_yaml": 3,
+      "A_and_P_recipe_diff_from_unexecuted_v1": [
+        "/execution/expected_executor/source_sha256"
+      ],
+      "repaired_nested_original_pilot_pointer_sha256": "185851ac520a5e995d52eb2f1941feeb9ec3a545f9da74d065bfd032b08d639b"
+    },
+    "fixed_statistics": {
+      "N_per_arm": 9184,
+      "replicas": 32,
+      "particles": 287,
+      "T": 121,
+      "K": 83,
+      "anchor_alpha": 0.025,
+      "subfamily_alpha": 0.0125,
+      "terminal_margin": 0.05,
+      "TV_margin": 0.15,
+      "terminal_radius": 0.03501066711816651,
+      "TV_radius": 0.12115351898620552
+    },
+    "scope": "Saved native reuse and previously observed same-cohort v46 regression, fixed policy4 gates; no new unseen inference family, continuous stochastic accuracy or universal COMSOL equivalence. No outcome evaluation performed by this pre-run audit."
+  },
+  "after_repeats_invariants": {
+    "recorded_at_utc": "2026-10-10T05:05:07.177932+00:00",
+    "production27_actual_bytes_equal_before_repeats": true,
+    "registered13_working_tests_oracles_equal_frozen_raw_hashes": true,
+    "uv_lock_unchanged": true,
+    "acceptance_file_unchanged_sha256": "fc72a48f548449c062d3073b815847c22c80684c96b29888929dec542dac7d8d",
+    "old_brownian_owner_receipt_unchanged_sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8",
+    "no_production_or_test_edits_by_this_repeat": true,
+    "source_normalization": {
+      "path": "reviews/v0_2_release_source_normalization_2026-10-10.json",
+      "sha256": "3f34172016ad6b60ade36dfc31b7378f327b824b3e6ea559ba330e35780710b7"
+    }
+  },
+  "completion_timestamp_basis": "Last successful scientific repeat log saved after process exit; filesystem UTC log timestamp. A observation completion is separately recorded; saved-data audits do not simulate."
+}

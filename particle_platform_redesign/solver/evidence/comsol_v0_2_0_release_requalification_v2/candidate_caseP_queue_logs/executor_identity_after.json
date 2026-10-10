@@ -1,0 +1,9 @@
+{
+  "expected_executor": {
+    "distribution_version": "0.2.0",
+    "python_version": "3.12.13",
+    "source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+  },
+  "status": "COMPLETE"
+}

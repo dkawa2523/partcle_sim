@@ -1,0 +1,52 @@
+{
+  "acceptance": {
+    "accepted_budget_multiplier": 4.0,
+    "boundary_event_count_and_order_exact": true,
+    "candidate_set_exact": true,
+    "charge_number_exact": true,
+    "law_id_and_outcome_exact": true,
+    "model_weight_exact": true,
+    "normal_atol": 2e-13,
+    "requested_geometry_rtol": 1e-12,
+    "velocity_atol_m_s": 2e-13
+  },
+  "activation_package": "P05",
+  "boundary_events": [
+    {
+      "boundary_event_ordinal": 0,
+      "boundary_id": 10,
+      "candidate_facet_id": [
+        1
+      ],
+      "charge_number_post": 3.0,
+      "charge_number_pre": 3.0,
+      "event_type": "boundary",
+      "law_id": "stick",
+      "material_id": 0,
+      "model_weight": 1.0,
+      "normal": [
+        1.0,
+        0.0
+      ],
+      "outcome": "stuck",
+      "particle_id": 701,
+      "position_m": [
+        1.0,
+        0.625
+      ],
+      "primary_facet_id": 1,
+      "time_s": 1.5,
+      "velocity_post_m_s": [
+        0.0,
+        0.0
+      ],
+      "velocity_pre_m_s": [
+        0.5,
+        0.25
+      ]
+    }
+  ],
+  "case_id": "C07",
+  "format_version": 2,
+  "oracle_revision": "plane_first_hit_v1"
+}

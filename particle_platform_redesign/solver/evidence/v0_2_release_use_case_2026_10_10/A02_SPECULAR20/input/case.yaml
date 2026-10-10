@@ -1,0 +1,39 @@
+format_version: 3
+case:
+  name: A02_SPECULAR20
+  data_path: case.h5
+  expected_content_hash: sha256:0e6e58db9da3a496db2b6c69b9549cc29a29c0b7d28917527af1e2e95ff42dc2
+motion:
+  mode: cartesian_xy
+time:
+  start_s: 0.0
+  end_s: 0.019287109375
+  dt_s: 0.019287109375
+solver:
+  integrator: rk4_fixed
+  backend: cpu
+  seed: 0
+  event:
+    geometry_rtol: 1.0e-12
+    roundoff_ulps: 64
+    max_refinements: 48
+    max_interactions_per_step: 8
+    corner_policy: priority_then_combined_normal_v1
+resources:
+  memory_limit_mb: 1024
+physics:
+  charge:
+    model: fixed
+sources:
+- name: release
+  type: table
+  table: particles
+boundaries:
+- boundary_group: mirror
+  priority: 10
+  law: specular
+- boundary_group: caps
+  priority: 20
+  law: escape
+output:
+  trajectories: null

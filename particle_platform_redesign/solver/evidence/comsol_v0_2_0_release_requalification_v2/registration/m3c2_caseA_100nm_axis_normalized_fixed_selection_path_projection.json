@@ -1,0 +1,35 @@
+{
+  "claim_scope": "Conditional finite-algorithm registered terminal-time/fate and full-population RZ/fate distributions. Disappear boundary ID/cause, semantic boundary-event parity, continuous noise time-law and continuous bias are not certified.",
+  "common_design_sha256": "b1cdb6577a14f3c364d13bdb2dcc1f8938be0651dfe1815349b8c50088746b62",
+  "final_outcomes_inspected": false,
+  "pilot_report_sha256": "0501b9de7c19a1d2f54cfe705bb236941cef225865e918f8eb8d230c8ad373d3",
+  "pilot_scope_sha256": "907e34a92911d0565dbd91f11e243df338868d8e100998ef7b07a64e94c8b92d",
+  "policy_sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f",
+  "receipt_kind": "m3c2_post_pilot_final_authorization",
+  "registered_at_utc": "2026-10-09T15:31:25.307529+00:00",
+  "schema_version": 1,
+  "seed_plan_sha256": "5236abc27f5df24845b0a886ad2253c47bae327a9c108bfb8685a208622c99a0",
+  "selected_final_levels": {
+    "candidate": {
+      "level_id": "macro_coarse",
+      "numerical_setting": {
+        "brownian_interval_tree_depth": 3,
+        "dt_s": 2e-05,
+        "geometry_rtol": 1e-09,
+        "purpose": "accepted_final"
+      },
+      "ordinal": 0
+    },
+    "comsol": {
+      "level_id": "dt_20us",
+      "numerical_setting": {
+        "fixed_step_s": 2e-05,
+        "integrator": "classical_rk4",
+        "purpose": "accepted_final"
+      },
+      "ordinal": 0
+    }
+  },
+  "selection_rule": "First passing macro level in registered descending-step ordinal order; not measured runtime selection. Pilot raw results, policy, margins and seeds unchanged.",
+  "status": "AUTHORIZED_FOR_CONFIRMATORY_FINAL"
+}

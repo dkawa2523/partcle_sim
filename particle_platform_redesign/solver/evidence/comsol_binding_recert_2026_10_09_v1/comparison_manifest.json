@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "comparison_id": "current_common_P1_axis_normalized_C2_C3_2026_10_09_v1",
+  "recorded_at_utc": "2026-10-09T16:18:08.080598+00:00",
+  "status": "CLOSED_ACCEPTED_WITH_LIMITATIONS",
+  "requested_question": "same_canonical_field_solver_parity",
+  "native_fe_end_to_end_requested": false,
+  "source_model_sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+  "conditions": {
+    "coordinates": "axisymmetric_rz_meridional_2DOF",
+    "canonical_representation": "static_P1_exact_connectivity_1987_nodes",
+    "axis_recovery": "azimuthal gas vorticity odd-axis nodal values explicitly zeroed in a fresh producer artifact; native FE/curl truth not certified",
+    "units": "SI; interpolation function/argument units reset after importData and actual resolved beta kg/s",
+    "source_population": 287,
+    "release_time_s": 0.0,
+    "nominal_diameter_m": 1e-07,
+    "contact_radius_m": 0.0,
+    "time_range_s": [
+      0.0,
+      0.03
+    ],
+    "saved_times": 121,
+    "native_profile": "COMSOL6.4.0.429 Multiphysics_copy1 np1 per independent-case queue, loadCopy -nosave",
+    "source_axis_mapping": "immutable source Freeze -> companion Bounce meridional fold",
+    "candidate_identity": {
+      "engine": 45,
+      "event": 21,
+      "geometry": 7,
+      "source": 5,
+      "memory": 16,
+      "gradient": 2,
+      "case_format": 3,
+      "result_format": 3,
+      "physics_runtime": 22,
+      "physics_catalog": 23,
+      "source_sha256": "ad45822dbae830fa6ff52ea760c676e6a0641cb104021306e01218d66d9f1501",
+      "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+    }
+  },
+  "four_required_judgments": {
+    "initial_conditions": {
+      "status": "PASS_WITH_SCOPED_SOURCE_PROVENANCE",
+      "scope": "Matched canonical IDs/release/state; fresh immutable-density and registered-100nm mass expression match. Per-replica numeric mass getter is not claimed."
+    },
+    "field_and_rhs": {
+      "status": "SUPPORTED_REGISTERED_CANONICAL_FORMULAS_AND_OBSERVED_TOTAL",
+      "scope": "Same canonical P1, configured force/charge selectors and initial beta/FDT. Fine C3 output-time native Ftr/Ftz agrees with independent seven-component sum; individual native contributions and auxq assembled RHS remain NOT_TESTED."
+    },
+    "boundaries": {
+      "status": "SUPPORTED_CONFIGURATION_AND_OBSERVED_STICK_SCOPE",
+      "scope": "Native selected laws/IDs and explicit axis fold are hash-bound; C3 141 Stick events match and separate current force-free critical microcases pass. C2 CaseP has zero wall observations; C2 CaseA Disappear status/time does not identify cause/entity."
+    },
+    "time_trajectories": {
+      "status": "PASS_REGISTERED_DETERMINISTIC_AND_POPULATION_GATES",
+      "scope": "C3 fixed three-step state/event gates, including preregistered empirical fine-pair allowance; C2 independent unused 32-seed arms satisfy fixed finite-algorithm population bounds."
+    }
+  },
+  "statistics": {
+    "overall_familywise_alpha": 0.05,
+    "anchors": 2,
+    "alpha_per_anchor": 0.025,
+    "alpha_per_gate": 0.0125,
+    "independent_unit": "seed_x_fixed_source_particle_trajectory_conditional_on_standard_PRNG_sampling",
+    "units_per_participant": 9184,
+    "times_union_bound_only": 121,
+    "rz_fate_categories": 83,
+    "pilot_role": "4-seed noninferential configuration screening; first passing largest registered macro step",
+    "continuous_discretization_bias": "NOT_RESOLVED",
+    "OU_temporal_noise_law": "NOT_TESTED",
+    "threshold_seed_bin_changes_after_outcomes": false
+  },
+  "anchors": {
+    "caseA": {
+      "registration": {
+        "path": "registration_axis_normalized\\m3c2_caseA_100nm_axis_normalized_final_registration.json",
+        "sha256": "375723aa995ebd3aca853655870add6fd886c655ac73d05210f39e9e796d2eaf"
+      },
+      "selected_numerical_setting": {
+        "native_fixed_rk4_step_s": 2e-05,
+        "candidate_macro_step_s": 2e-05,
+        "candidate_brownian_max_depth": 3,
+        "candidate_rtol": 1e-09
+      },
+      "policy": {
+        "path": "registration_axis_normalized\\m3c2_caseA_100nm_axis_normalized_population_policy.json",
+        "sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f"
+      },
+      "pilot_evaluation": {
+        "path": "caseA_axis_normalized_pilot_evaluation\\evaluation_manifest.json",
+        "sha256": "3e3274f96f5df1543b3f7e5251859477c273c6501c6913d2a1a86d287aab0bda"
+      },
+      "native_run_receipt": {
+        "path": "caseA_axis_normalized_comsol_final\\run_receipt.json",
+        "sha256": "223f6da459cf670173e423b90b8b702c414d7601f9d724b3d5548323cb93e765"
+      },
+      "native_current_manifest": {
+        "path": "caseA_axis_normalized_comsol_final\\comsol_campaign_manifest.json",
+        "sha256": "2705658a01e1de69e7e3e41e1c686f394e64b9be15a432ff4ab2d6bb3e5975fe"
+      },
+      "native_metadata_attachment": {
+        "path": "caseA_axis_normalized_comsol_final\\meaning_binding_attachment_receipt.json",
+        "sha256": "3b6e1ccf94cd6eb03060d77df4df34b01389c73c3d9428efa4327bc7016b58f6"
+      },
+      "meaning_inventory": {
+        "path": "caseA_axis_normalized_comsol_final\\meaning_inventory.json",
+        "sha256": "2b3592b075d0a3156f608a699a218bf46ccba94ce9a8f3bd8cba2569e5424c4f"
+      },
+      "candidate_current_manifest": {
+        "path": "caseA_axis_normalized_candidate_final_v1\\candidate_campaign_manifest.json",
+        "sha256": "3a08e61a7b7144911f216daed06b20b9832f51beef8fec45f0b9a1f5faaa81c2"
+      },
+      "assembled_campaign": {
+        "path": "caseA_axis_normalized_final_campaign.json",
+        "sha256": "843995372e4939d0401801542e86ce926005313bf58ec622587201434b8bbfdd"
+      },
+      "evaluation": {
+        "path": "caseA_axis_normalized_final_evaluation\\evaluation_manifest.json",
+        "sha256": "63dcce0423e4034279ad0ea680809780c4e3dc77d4e2d9ab640fba5b556ac732"
+      },
+      "source_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "source_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "native_completion": {
+        "status": "COMPLETE",
+        "process_exit_code": 0,
+        "expected_completion_record": "M3C2_COMSOL|run_pass|case=caseA_100nm|requests=32|mode=FinalCampaign|time_end_s=0.03|output_times=121|model_saved=false",
+        "native_error_record_absent": true,
+        "class_status_raw": "1791562067166\r\nError",
+        "class_status_authority": "non_authoritative_for_6_4_class_input_verified_by_controls",
+        "completion_authority": "process_log_and_registered_artifacts_and_normalization"
+      }
+    },
+    "caseP": {
+      "registration": {
+        "path": "registration_axis_normalized\\m3c2_caseP_100nm_axis_normalized_final_registration.json",
+        "sha256": "6aa7ce55b95aeb6b874e02a7a637ede3c3daf15230b834489cdf5f36b32aebfe"
+      },
+      "selected_numerical_setting": {
+        "native_fixed_rk4_step_s": 2e-05,
+        "candidate_macro_step_s": 2e-05,
+        "candidate_brownian_max_depth": 3,
+        "candidate_rtol": 1e-09
+      },
+      "policy": {
+        "path": "registration_axis_normalized\\m3c2_caseP_100nm_axis_normalized_population_policy.json",
+        "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+      },
+      "pilot_evaluation": {
+        "path": "caseP_axis_normalized_pilot_evaluation\\evaluation_manifest.json",
+        "sha256": "d66478e0096f88fd53acb8a4bea27377dce12e0ea3a56ab701ed8a741648e13f"
+      },
+      "native_run_receipt": {
+        "path": "caseP_axis_normalized_comsol_final\\run_receipt.json",
+        "sha256": "8e1cf2a15ce7b74abb698463ce3c82a87ed437e31e10a26ac39d55401cf03278"
+      },
+      "native_current_manifest": {
+        "path": "caseP_axis_normalized_comsol_final\\comsol_campaign_manifest.json",
+        "sha256": "ff79dbef3c5455ba54948d2512cfaf8c167c3c977a8e6649aa046dab305ef4e7"
+      },
+      "native_metadata_attachment": {
+        "path": "caseP_axis_normalized_comsol_final\\meaning_binding_attachment_receipt.json",
+        "sha256": "d9a7c741a6c39791a9af127ac01429717bb7f0c58cdc4e114774318610c63c01"
+      },
+      "meaning_inventory": {
+        "path": "caseP_axis_normalized_comsol_final\\meaning_inventory.json",
+        "sha256": "98d02693cafbcfd814c14af51cea824cfa6a7de6fb79366bf0219703a9e29959"
+      },
+      "candidate_current_manifest": {
+        "path": "caseP_axis_normalized_candidate_final_v1\\candidate_campaign_manifest.json",
+        "sha256": "9518b3a6759dcf9e3f311ddd17f04a405d107fcbb501b6efb86b8420cbfa4f2e"
+      },
+      "assembled_campaign": {
+        "path": "caseP_axis_normalized_final_campaign.json",
+        "sha256": "4bedb697a33f8bc50da9e8db338832dc3ec91430e869ee00a4107927c9ff9373"
+      },
+      "evaluation": {
+        "path": "caseP_axis_normalized_final_evaluation\\evaluation_manifest.json",
+        "sha256": "6180722add8f813b1c21911de78b6124e8f158a1a82e362105da1542f7ee00f4"
+      },
+      "source_sha256_before": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "source_sha256_after": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524",
+      "native_completion": {
+        "status": "COMPLETE",
+        "process_exit_code": 0,
+        "expected_completion_record": "M3C2_COMSOL|run_pass|case=caseP_100nm|requests=32|mode=FinalCampaign|time_end_s=0.03|output_times=121|model_saved=false",
+        "native_error_record_absent": true,
+        "class_status_raw": "1791561996303\r\nError",
+        "class_status_authority": "non_authoritative_for_6_4_class_input_verified_by_controls",
+        "completion_authority": "process_log_and_registered_artifacts_and_normalization"
+      }
+    }
+  },
+  "c3": {
+    "registration": {
+      "path": "registration_axis_normalized\\c3_execution_preregistration.json",
+      "sha256": "93abf0d960f460a2ab673555864100daf9414eb8ff714037244684fccc51106a"
+    },
+    "original_blocked_evaluation": {
+      "path": "c3_axis_normalized_evaluation.json",
+      "sha256": "0a31c1ff3a470e7cb224b6a52edb2939bc13d594dbd8e3f5523012b8a3ee1fec"
+    },
+    "reporting_repaired_evaluation": {
+      "path": "c3_axis_normalized_after_projection_evaluation.json",
+      "sha256": "4b8b4697fed8f223d81a803d3f13bc494ca1984939a50b99a100730fcb12b7c3"
+    },
+    "configured_formula_diagnostic": {
+      "path": "c3_frozen_formula_diagnostic.json",
+      "sha256": "20d0cdccb19db95becb4c5a80b74b7382c53120f00db81b7000fdc1dad51d10c"
+    },
+    "projection_history": "Only boundary semantic ID8 -> grounded_wall reprojected; original executed recipe/receipts/raw results retained. No recomputation or threshold change.",
+    "native_total_scope": "Same fine solve, output-time common-active25503 rows, SI N; native Ftr/Ftz versus independent component sum relL2 7.83448e-17. No all-stage/per-contribution/auxq assembly claim."
+  },
+  "controls": {
+    "native_unit_and_completion": {
+      "path": "native_unit_and_completion_closeout.json",
+      "sha256": "a9f0b46be61ee34d8bdbb5c04ad67c24eada08bb5cd7c3a2102beaa89e874fba"
+    },
+    "throw_after_valid_marker": {
+      "path": "controls\\native_completion_negative_control_receipt.json",
+      "sha256": "9cb98cbf05f276cdf7f86a7b80dc5b5caf8f71d470280769ddbd728bbf218998"
+    },
+    "immutable_source_density_and_registered_mass": {
+      "path": "controls\\source_mass_identity_receipt.json",
+      "sha256": "34faea6a248948f1ece4b149532da6e704c206e51b880508c2aac7d443a77f7e"
+    },
+    "current_force_free_axis_boundary_comparison": {
+      "path": "../m3c0/critical_axis_native_2026_10_09_v1/comparison_manifest.json",
+      "sha256": "87b154c1a1c471d2b96b99efabafde9c201894979e2e26f9cca709735e03406e"
+    }
+  },
+  "independent_review": {
+    "path": "..\\..\\..\\reviews\\comsol_recert_independent_review_2026-10-09.json",
+    "sha256": "399a5cdca8c662645d24050690a50180ffcb1d5d485dec947e6e6667286e4d63"
+  },
+  "visualization": {
+    "path": "derived_c3\\visualization_receipt.json",
+    "sha256": "8351f7283d978206c27d068ef2e7a2eccb824a6c602d28fd3bb397ee57b98b9c"
+  },
+  "primary_sources": [
+    "https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/comsol_api_general.47.34.html",
+    "https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/api/com/comsol/model/ParamBase.html",
+    "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_modeling.05.13.html",
+    "https://doc.comsol.com/6.4/doc/com.comsol.help.models.particle.brownian_motion/brownian_motion.html"
+  ],
+  "historical_artifacts_rewritten": false,
+  "production_core_COMSOL_dependency_added": false,
+  "performance_claim": "NOT_EVALUATED_HERE_EXTERNAL_CONCURRENT_TIMINGS_NON_AUTHORITATIVE"
+}

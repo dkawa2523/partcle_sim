@@ -1,0 +1,50 @@
+format_version: 3
+case:
+  name: C07
+  data_path: input.h5
+  expected_content_hash: sha256:46fb2de8a47f48b13d02d8a72d5c3ed6f5c835db966fa4c20f2c3540760af0b4
+motion:
+  mode: cartesian_xy
+time:
+  start_s: 0.0
+  end_s: 1.2
+  dt_s: 0.15
+solver:
+  integrator: ou_langevin
+  backend: cpu
+  seed: 53629
+  event:
+    geometry_rtol: 1.0e-12
+    roundoff_ulps: 64
+    max_refinements: 48
+    max_interactions_per_step: 32
+    corner_policy: priority_then_combined_normal_v1
+resources:
+  memory_limit_mb: 128
+physics:
+  charge:
+    model: fixed
+  drag:
+    model: epstein_linear
+    revision: epstein_linear_v1
+    gas_velocity_field: gas_velocity
+    gas_density_field: gas_density
+    gas_temperature_field: gas_temperature
+    gas_mean_free_path_field: gas_mean_free_path
+    gas_molecular_mass_kg: 4.65e-26
+    delta: 1.0
+    applicability: error
+  noise:
+    model: inertial_langevin_fdt
+    revision: inertial_langevin_fdt_epstein_linear_midpoint_2d_v2
+    interval_tree_depth: 4
+sources:
+- name: release
+  type: table
+  table: particles
+boundaries:
+- boundary_group: wall
+  priority: 10
+  law: specular
+output:
+  trajectories: null

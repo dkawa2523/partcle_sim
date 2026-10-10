@@ -1,0 +1,15 @@
+{
+  "classification": "performance_only_supersession_science_payload_unchanged",
+  "performance_classification": "NON_AUTHORITATIVE_EXTERNAL_WORKLOAD_OVERLAP",
+  "reason": "Concurrent independent Case-A and numerical acceptance jobs; these version-requalification timings are descriptive and not an authoritative serial product baseline.",
+  "replacement": {
+    "performance_sha256": "7a1b0d155cd04fce6e5d11357af6c7118e6233f1abb7383a1b8eac08d65e79f9",
+    "run_receipt_sha256": "ecff135f9a84fd64dddb9d1d9fe71c253b5e6a944a9133394be46604c71b6a4f"
+  },
+  "science_payload_unchanged": true,
+  "status": "COMPLETE",
+  "superseded": {
+    "performance_sha256": "c001a1a7612ad120d4ab6b2927683bc7d2f764b07b1f8a7e4f29ede9e3f09b07",
+    "run_receipt_sha256": "b38e3d11ca0efcb73f6351406de48daaa394aa2955d22b9116e4a802ed3468ab"
+  }
+}

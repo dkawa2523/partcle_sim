@@ -1,0 +1,89 @@
+{
+  "axis_limits_m": [
+    [
+      -0.00625,
+      -0.00625
+    ],
+    [
+      0.25625,
+      0.13625
+    ]
+  ],
+  "case_and_result_hash_match": true,
+  "common_active_rows_in_full_tables": 25503,
+  "coordinates": "R-Z meridional; stored SI metres; display millimetres",
+  "created_at_utc": "2026-10-10T05:10:46.414163+00:00",
+  "data_content_hash": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+  "equal_aspect": true,
+  "figure_sha256": "83a1ff0464ebb044b873daff9d2b22cd26a161ab3a75c04ce0ed0dcd4e28d92a",
+  "full_population": 287,
+  "geometry_boundary_segments": 160,
+  "kind": "saved_c3_version_requalification_geometry_overlay_v1",
+  "limits": [
+    "Meridional 2D, not reconstructed 3D",
+    "No boundary or equivalence claim from visual overlap",
+    "Numeric evaluation remains authoritative"
+  ],
+  "new_native_solve": false,
+  "raster_preview": {
+    "height_px": 710,
+    "path": "c3_geometry_overlay.png",
+    "renderer": "sharp rasterization of the hash-bound SVG",
+    "sha256": "9bed6d474913b3327843a98259d411504fcf48d397ea445f0f08956ab0d3e536",
+    "visual_qa": "PASS: equal aspect, fixed IDs, geometry and starts/contact markers, readable legend/axes/limits; no numerical or native boundary claim is inferred from overlap.",
+    "width_px": 1180
+  },
+  "renderer_sha256": "b1dd7c5e0e81744016dd771b2a05ee2e6e03318122c3ad9693ebf947dda86ffa",
+  "sampling": "12 evenly spaced indices in sorted stable particle IDs; illustrative only",
+  "selected_particle_ids": [
+    1,
+    27,
+    53,
+    79,
+    105,
+    131,
+    157,
+    183,
+    209,
+    235,
+    261,
+    287
+  ],
+  "source_result_directory": "c3_prepared\\candidate\\dt_0p625us\\result",
+  "source_result_files_sha256": {
+    "c3_prepared\\candidate\\dt_0p625us\\result\\LATEST": "380abbee7c4680e3e6d3ded816e5398824448e62bd42c857557d2f71d960c56c",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\checkpoints\\A.h5": "42c41bf18a0600a5bb431f125a667f0734416dc42e558d81683c43bf8856ca0f",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\checkpoints\\B.h5": "0e0502cb25e38962ffc16a0b3fafdf3b0082a14e3a54de3fb73e3bf3410e3073",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\final.h5": "bab1598029a424d684917d6fb71c4065171166b36633cb08ffddbc7b908b1a9f",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\run.json": "56085a404e885d664b564ff74b72f7113ce1d91e2279cc84c9ec2bd0d24bb5a4",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000000.h5": "b7682fb952c2515d1ffdcd09417977a4eed91bd0421e49d005ec302d823724b7",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000001.h5": "4d94f93e8b93b62ef3f3470ae340f9895e3f5fb87d62b3de292ead99a0d2b442",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000002.h5": "852ad906ea7f52c642ab4c6276b3866261d863aeb2ddd118e6176183dd28f63d",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000003.h5": "ebd25349a50c0669bdb1517819d0ba23718fc7365270c947c5072b0162e929a1",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000004.h5": "d68773b47f7f00649eb48f7d4d48352f2bbaa4d54b815ea57690cc5a80eab525",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000005.h5": "78f6f639bf125e888654f7869a694a013949334ad4a634df46c4744ed49b6eee",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000006.h5": "47ad5b52b8af500059ecbe0fd03df637b9dc46071f3018c97c3cb495e3ed4b98",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000007.h5": "7034f0dc651bfa593ed38092dc90d6f2caa3e4b9560cc501ae4a4b31f29a7902",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000008.h5": "543c44ec3b3b223e8239009349a68f898790de3fff6be3bb1657f8e03bacf053",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000009.h5": "e8bf3e1f309e4c3ad566bba7d5365d8c8471826874b41874ce3ee8432b40cca7",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000010.h5": "e2c94f55fb30326e656e3f8e9aed705b109eaa271d6239cc8b0e502b6e6c9449",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000011.h5": "3fdd017e272f70056c4bae91b25da9c3feb9b936ea7d68afae62e1476b2eed76",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000012.h5": "6ef28bbeff86ceaaa28b56ae570715a7c538e953543414ee0b1905c652734410",
+    "c3_prepared\\candidate\\dt_0p625us\\result\\segments\\epoch-000013.h5": "5b5ddd8572ff22a568c11cc2c01d9742009ac58f1a3cd6eab33e6e72292850d6"
+  },
+  "source_sha256": {
+    "c3_prepared\\candidate\\dt_0p625us\\case.yaml": "6c4a185b44b6c2de8b80f0d14a20daf28aec4ed2c32ed727729bb1aa166b6d89",
+    "c3_prepared\\candidate\\dt_0p625us\\events.csv": "6b249529704b2d6a8a7479b53a6e3f86cacf729e8d0b35e318a977e033409d32",
+    "c3_prepared\\candidate\\dt_0p625us\\trajectory.csv": "bc3f3e9d4bc15ca91d256209b69cad79e7aef1eb0a0b825a2cb4f1572e1726ee",
+    "c3_prepared\\candidate_input_three_current_z0.h5": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc",
+    "c3_version_requalification_evaluation.json": "4b8b4697fed8f223d81a803d3f13bc494ca1984939a50b99a100730fcb12b7c3",
+    "registration\\execution_preregistration.json": "323d3a68bf49cd46d853df7559a2305aab7d6fc91d166e117f25fa4957973d84",
+    "saved_native\\c3_dt_1p25us\\trajectory_reference.csv": "f91c01899d99e40477db9910b1c0903132f8c380c23ff6ea19aaddf85d649fc3"
+  },
+  "time_range_s": [
+    0.0,
+    0.03
+  ],
+  "trajectory_recomputation": false
+}

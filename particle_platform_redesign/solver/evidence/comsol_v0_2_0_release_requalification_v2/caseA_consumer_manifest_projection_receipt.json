@@ -1,0 +1,799 @@
+{
+  "all_sha256_pointer_type_value_source_model_field_observation_values_unchanged": true,
+  "changed_artifact_pointer_path_basis": "solver/evidence",
+  "changes": [
+    {
+      "consumer": "comsol_v0_2_0_release_requalification_v2/saved_native/caseA/meaning_inventory.json",
+      "original": "meaning_inventory.json",
+      "pointer": "/meaning_preflight_inventory/path",
+      "sha256": "bf95e18ee509ef9440adff789af7785ba1ce28b3ca620f8f2f8eb7c0049b322f"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/trajectory.csv",
+      "pointer": "/levels/0/replicas/0/trajectory/path",
+      "sha256": "ae1911eac08385ffa3bfb3da1b5c3bd5fc8d6433d42786fae7d732754b705042"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/events.csv",
+      "pointer": "/levels/0/replicas/0/events/path",
+      "sha256": "5043d754bca21203aebce9641937af4b4b069adb75991192fc35f52edab650a4"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/performance.json",
+      "pointer": "/levels/0/replicas/0/performance/path",
+      "sha256": "0dc6b3981a0a0a0b9aee8f43e5f6474f27e0b0ca7f2992ce4d9be076c03d0379"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/0/actual_run_readback/path",
+      "sha256": "282aab7670cd387edbc6ba10e6de9ee19dda2f3193449924c668f86e936c512b"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/trajectory.csv",
+      "pointer": "/levels/0/replicas/1/trajectory/path",
+      "sha256": "5221332c5f1cb6ac1f8418ff014b0674608585be3e8fb517ee969e568c0e5b3f"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/events.csv",
+      "pointer": "/levels/0/replicas/1/events/path",
+      "sha256": "d226979675c770c276f0d979dd1b2b3ee822715aa8b7eb196b7f0dd3c299b324"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/performance.json",
+      "pointer": "/levels/0/replicas/1/performance/path",
+      "sha256": "5e1a9132659b1e4577476f1768f44c1a5edf5e5168122fea3df3b5ec5c9bdfe6"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/1/actual_run_readback/path",
+      "sha256": "347e0dd2d20cab90fd080fd6cde92caf7c7a573beb6d48e63821b7d93b746587"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/trajectory.csv",
+      "pointer": "/levels/0/replicas/2/trajectory/path",
+      "sha256": "03fd342eba528aa8ec03da4d79c469d40e24308eecc4b3edf531139eb6e1cf3d"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/events.csv",
+      "pointer": "/levels/0/replicas/2/events/path",
+      "sha256": "aaa565ff536cdba9579094381353a8237bba27acf63b8d92c708ce4d5b811470"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/performance.json",
+      "pointer": "/levels/0/replicas/2/performance/path",
+      "sha256": "521fb4e7fd609fc7d754c1c288cf671c8c33d3d8c5b495a1bb950b9caa2ac814"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/2/actual_run_readback/path",
+      "sha256": "575dde46dd24d0667cef389269345f4a3925bb0954064beb82c22a43b698b62c"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/trajectory.csv",
+      "pointer": "/levels/0/replicas/3/trajectory/path",
+      "sha256": "a5a471e11e1b9a8bd8f435added94aeab6b5cdcdbb7cd98b848e711b223870f2"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/events.csv",
+      "pointer": "/levels/0/replicas/3/events/path",
+      "sha256": "e8a8c6f725684b7de1665cacb4940b332f155f0f5cadecaeae4da4af628019b0"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/performance.json",
+      "pointer": "/levels/0/replicas/3/performance/path",
+      "sha256": "13cc50b3303d9adb79ce12d6ad62f20acc42eb99b20594adf02ae1bb7eea6e2e"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/3/actual_run_readback/path",
+      "sha256": "0f1c25369d288467cd127af89ba77d1d06f4e5761aa9b980979379fa3b3c17c6"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/trajectory.csv",
+      "pointer": "/levels/0/replicas/4/trajectory/path",
+      "sha256": "a29c5d7d53b2fa7416a2962e47f33cc673f1c51df70bf2b8d741371c629f8938"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/events.csv",
+      "pointer": "/levels/0/replicas/4/events/path",
+      "sha256": "b6ff1bdba720bb6d6ac3323da413fdd4ae27cf69b78545335255dae147cd1cbe"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/performance.json",
+      "pointer": "/levels/0/replicas/4/performance/path",
+      "sha256": "07d473fe738df86c6a1526378470b8e23fae00993584d2256543b4247783b042"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/4/actual_run_readback/path",
+      "sha256": "a1c0acabb6d56412524495221fb34820f2864161afea89496ff1c074160b49cd"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/trajectory.csv",
+      "pointer": "/levels/0/replicas/5/trajectory/path",
+      "sha256": "fe534f23fb486badbf86164d61141ac3a9d46b0e0c389e236876803dd210fb3a"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/events.csv",
+      "pointer": "/levels/0/replicas/5/events/path",
+      "sha256": "d9d6a7615468af18e15731876a18d42bfa6191c2a8df87706bb2ba5df25a9379"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/performance.json",
+      "pointer": "/levels/0/replicas/5/performance/path",
+      "sha256": "3c982bf823aab10f391d67f18aad8b79311bbbeaf877622d3bcc37fb49169015"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/5/actual_run_readback/path",
+      "sha256": "c2cc585a391bb7fc5a9c492dafd56e01e064115e0e26e2158511d589303897ce"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/trajectory.csv",
+      "pointer": "/levels/0/replicas/6/trajectory/path",
+      "sha256": "46d02768fa22eecebad2165aa48dc181e9a0956f7dd90a7a79b5d7069269801b"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/events.csv",
+      "pointer": "/levels/0/replicas/6/events/path",
+      "sha256": "d0fe67e2a687a063e89443999ec3946845b071fd0ee018178dbb89a670dd0e32"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/performance.json",
+      "pointer": "/levels/0/replicas/6/performance/path",
+      "sha256": "0520a4dd2bb9176d2a7bcd717d2dbb2321736d74df412cba754e639f5361dd8f"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/6/actual_run_readback/path",
+      "sha256": "4a9753fc3132db76b5389286febc0bbb0f3d7ac78771b0209c46a285ac816b3e"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/trajectory.csv",
+      "pointer": "/levels/0/replicas/7/trajectory/path",
+      "sha256": "6a00ac40408744c2f82d577b0b71f0a928a3688d1876c62afee1f01780c5d9cb"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/events.csv",
+      "pointer": "/levels/0/replicas/7/events/path",
+      "sha256": "c884e7c8dc72fab05f3927d83e02e747dbdad677dfe6eaa86a03a8beb1bf176d"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/performance.json",
+      "pointer": "/levels/0/replicas/7/performance/path",
+      "sha256": "efd69ae73cee82991043423c50542a7d3869d3fb7fef0295de1b1a13a4621cb9"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/7/actual_run_readback/path",
+      "sha256": "21010c3104b68fda52cafed2513245d26e576e74ce38d19b52343f6b72db8240"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/trajectory.csv",
+      "pointer": "/levels/0/replicas/8/trajectory/path",
+      "sha256": "614a8849766fefb723f03f64fc5a7d4b086559f7b99b5ddaced1e1cea1d2713d"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/events.csv",
+      "pointer": "/levels/0/replicas/8/events/path",
+      "sha256": "20e5af6d563f9accc6b01eb7c8b2824b8f80ab0eaca8f374550a0d9bc8305675"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/performance.json",
+      "pointer": "/levels/0/replicas/8/performance/path",
+      "sha256": "28e7e37572f8872da226077be8e2e9695262aca3f460709ac0cc5a6faf0e4058"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/8/actual_run_readback/path",
+      "sha256": "415a4a2e59b2c70965f44df23b50b21e79af787ed527c7f51423ebf615f50170"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/trajectory.csv",
+      "pointer": "/levels/0/replicas/9/trajectory/path",
+      "sha256": "dcd548d94c481f95cb78042bc2b056e990a34590be20f847868b9767eed12f22"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/events.csv",
+      "pointer": "/levels/0/replicas/9/events/path",
+      "sha256": "8d17ae51bd0ccad69ae1d226fdb4ce7152c5b2d50fe3717a6b5cd3385b065ede"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/performance.json",
+      "pointer": "/levels/0/replicas/9/performance/path",
+      "sha256": "e9b985383d42e3c6a1a4c884bd6f355ee19702b489eee8c0499283662007b513"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/9/actual_run_readback/path",
+      "sha256": "d07205d8553c4107504187a4d7e7579b75ad68d79a329ac8f6b590d998eafd2b"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/trajectory.csv",
+      "pointer": "/levels/0/replicas/10/trajectory/path",
+      "sha256": "e19febda179fb44e6b8c1ea7d5042981ee169de2106f9158341b0cfe7dbf6581"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/events.csv",
+      "pointer": "/levels/0/replicas/10/events/path",
+      "sha256": "e5770a40774f172af4ac081686e84566b9ec03ed2d6580741999166d4fe25a59"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/performance.json",
+      "pointer": "/levels/0/replicas/10/performance/path",
+      "sha256": "4c405681a6bdb1dcc5f934f8b72d490512592fc0994bc57a401443bf657e65af"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/10/actual_run_readback/path",
+      "sha256": "d2be12b080a71fd970913b5c14998f8f7bf7ee4dc2557a7a9e3dc890b462402f"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/trajectory.csv",
+      "pointer": "/levels/0/replicas/11/trajectory/path",
+      "sha256": "fc01414e0493008e9103369f59c1af1acb06a1c6c3416095d533b77825c62175"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/events.csv",
+      "pointer": "/levels/0/replicas/11/events/path",
+      "sha256": "79b942e3ab3092ca282c5486e587fc2efda310fcbe249bdbafa683c628538481"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/performance.json",
+      "pointer": "/levels/0/replicas/11/performance/path",
+      "sha256": "74e23c581abcb432d228eaf9a9b18b0245c22940981d119a7d222163f62d4915"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/11/actual_run_readback/path",
+      "sha256": "af9dd04c339649db56fcd684e8ecb7b815a78342d75efa76117ead94c43e2fbf"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/trajectory.csv",
+      "pointer": "/levels/0/replicas/12/trajectory/path",
+      "sha256": "de98ef32e8dce2255c44e704e1659ed33bac00256868329a0279e7652465efe0"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/events.csv",
+      "pointer": "/levels/0/replicas/12/events/path",
+      "sha256": "d4541ced3ffcb1e08bb49b6962201c1f0d00a958fd2ac0e38b8af1d089d1ab9f"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/performance.json",
+      "pointer": "/levels/0/replicas/12/performance/path",
+      "sha256": "978582f1d996ab95173cb4ec9a2b5de8f68e328643402461e87bb2bedbb94d7c"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/12/actual_run_readback/path",
+      "sha256": "a9a618d07a8b65a6d7cb72ec7197afbc4669708c81bfd760ab7f69386a676549"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/trajectory.csv",
+      "pointer": "/levels/0/replicas/13/trajectory/path",
+      "sha256": "103b3b302a8539a8f8021ef40008b0b5c2fbb5ae5bb4692751b5c819740e6a9a"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/events.csv",
+      "pointer": "/levels/0/replicas/13/events/path",
+      "sha256": "5ae14ae517854eec008195b29a40e3984ff7c7fe65f2ee2bd62afd0a88fe2617"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/performance.json",
+      "pointer": "/levels/0/replicas/13/performance/path",
+      "sha256": "573e15f9474ce969377b579a1f3961ba90ba8933770d46b3aa166b867fc37669"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/13/actual_run_readback/path",
+      "sha256": "7d25ff6dc116eb2f8bf22af16aa5fc58e144fa17e1aed5f3992308a704f51b92"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/trajectory.csv",
+      "pointer": "/levels/0/replicas/14/trajectory/path",
+      "sha256": "5fa0797dd62a10156f77f044da65b9e39f45594144a2c0cd41b1e602a39a8cb3"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/events.csv",
+      "pointer": "/levels/0/replicas/14/events/path",
+      "sha256": "53382d2a37cbafd492ee298f620b67d367d1ae4e4132ae1157ca8d99fd653b61"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/performance.json",
+      "pointer": "/levels/0/replicas/14/performance/path",
+      "sha256": "755284e6d6fbcdd082659d51042c605c75e0a42a8942bf533b55fc56730b7068"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/14/actual_run_readback/path",
+      "sha256": "dd97c1d90d530ab304a06925571e66cb654978e8b86002c52ae2f1588213cbb0"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/trajectory.csv",
+      "pointer": "/levels/0/replicas/15/trajectory/path",
+      "sha256": "ef23b2a3d844b3b0eb50ff5031b285f22edd53d93f1595715ed496fd3647e15a"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/events.csv",
+      "pointer": "/levels/0/replicas/15/events/path",
+      "sha256": "01b7c5d1a33ce57d91af112d087c0f35ee55d0da2d5e97da25a63121e677401b"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/performance.json",
+      "pointer": "/levels/0/replicas/15/performance/path",
+      "sha256": "d486db8a1cf6a6042d0ba858c89b20c18ab99a1e58f931236a9f9564c86b730b"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/15/actual_run_readback/path",
+      "sha256": "d45cbf609ab18569473e666dd153ee4460f209d255ae8495cc889ded922c19ab"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/trajectory.csv",
+      "pointer": "/levels/0/replicas/16/trajectory/path",
+      "sha256": "cb4628e7bb2b81a62e2a8eafcb5d51f5b7b67f8e6fb4ce4d301b1b91fb215a0d"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/events.csv",
+      "pointer": "/levels/0/replicas/16/events/path",
+      "sha256": "52b8d2fc3306aa03a2ce1ff7df9aec15377a2fd2ecb12baf3871c015f5cfb6be"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/performance.json",
+      "pointer": "/levels/0/replicas/16/performance/path",
+      "sha256": "b7bb3205ed4be570bb12a965b48895dae65d84ad2b267ce9c5094d24466c52cd"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/16/actual_run_readback/path",
+      "sha256": "4ad677261b27034123b8ba797df2f878b51c1c920607eb377b9b28966f85b457"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/trajectory.csv",
+      "pointer": "/levels/0/replicas/17/trajectory/path",
+      "sha256": "18245cdbaa281a131ca64937cc34a0f3d1b344f1866486200c9382c5c270956d"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/events.csv",
+      "pointer": "/levels/0/replicas/17/events/path",
+      "sha256": "7d5417a8db46b2a4c76dd710aa9f7eb3e1f548e78214694a726aac4b41acd66e"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/performance.json",
+      "pointer": "/levels/0/replicas/17/performance/path",
+      "sha256": "97a06df91dc1a5170f2e767bde1b7fe71eea625ab75328bda0cceb7ad60399d7"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/17/actual_run_readback/path",
+      "sha256": "e4e0b87206af783bb8b36244ad724afcfb15c18eedf130a812268a8c87f6eae5"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/trajectory.csv",
+      "pointer": "/levels/0/replicas/18/trajectory/path",
+      "sha256": "10dfc9c1bfd13cfb20e5a6a4149c85c528c3d47ea7b39fbd0ea18cb7afbd4aee"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/events.csv",
+      "pointer": "/levels/0/replicas/18/events/path",
+      "sha256": "74ef7941b9d1aabc591c4c470baad16ebd3010f7402fb37784e7a1bf6b37d4a0"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/performance.json",
+      "pointer": "/levels/0/replicas/18/performance/path",
+      "sha256": "54f888dc9be5dcf6a39ba21eecae83f7805120278732f4d01a7eb30ce6dd2f20"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/18/actual_run_readback/path",
+      "sha256": "f3ea80bc762720445ef7ace1f0e826b20ac73d0419f35c3be938a24c384d25ce"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/trajectory.csv",
+      "pointer": "/levels/0/replicas/19/trajectory/path",
+      "sha256": "c55cce1b9f3ca7e236310c5161685e92866ba764a4216d435800442ac89a3b03"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/events.csv",
+      "pointer": "/levels/0/replicas/19/events/path",
+      "sha256": "c84ef04d2b25ff17057ad74375f73d4bdc0b990775d665ddb4e17e1e15373c29"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/performance.json",
+      "pointer": "/levels/0/replicas/19/performance/path",
+      "sha256": "adf5267b507b9438733bdfebb8075f43621e55ce273da350accba6eb631d6220"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/19/actual_run_readback/path",
+      "sha256": "a12e2585f8720aac56274f055aa47df380296814d47e8a890ba4626406fb4e40"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/trajectory.csv",
+      "pointer": "/levels/0/replicas/20/trajectory/path",
+      "sha256": "c18d36970a129024c3c506184cc49b2de78235ed349b6827f2f4396579584878"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/events.csv",
+      "pointer": "/levels/0/replicas/20/events/path",
+      "sha256": "d5dcf2bfee8701f5856942526c88ab4e48b4ab27f4743cbfc8416d03a801b06f"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/performance.json",
+      "pointer": "/levels/0/replicas/20/performance/path",
+      "sha256": "d4ab66dabeaef8336590838cf8d0d3a1e63f2b07920e778be7eb28d10175226a"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/20/actual_run_readback/path",
+      "sha256": "5fbb59d6f6dafa65d1874d0a715c4abe8d17878879502e6badd21d7587b490a7"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/trajectory.csv",
+      "pointer": "/levels/0/replicas/21/trajectory/path",
+      "sha256": "3f352beb73e350aec4bef7f97f11d074bc4c3b44ce6dadbc40a22333afbe7448"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/events.csv",
+      "pointer": "/levels/0/replicas/21/events/path",
+      "sha256": "a26f892499382d07223a004b22bcec5e8c20868fb126333b70051e9d0f0dbe94"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/performance.json",
+      "pointer": "/levels/0/replicas/21/performance/path",
+      "sha256": "924af12f1f1e9e1ff98661efbdca95b106c7c355619c31f180c3b3fc71fdf440"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/21/actual_run_readback/path",
+      "sha256": "fbf95f7d944cce34544fc85f262cdbd9de93cfb49559fd497e01ae7b1f9998fa"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/trajectory.csv",
+      "pointer": "/levels/0/replicas/22/trajectory/path",
+      "sha256": "d4e941bbe2566d34b5abf9033d5296440a1591b9ab1ebb7f6d74de95f2addd18"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/events.csv",
+      "pointer": "/levels/0/replicas/22/events/path",
+      "sha256": "72d064ad1d86b25c37aff33e8da5c5081ab0d8452f75c2d64dfa07c5622e6a12"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/performance.json",
+      "pointer": "/levels/0/replicas/22/performance/path",
+      "sha256": "3d1e254e319b5d44647785c1e8ee6a242906a5f3a49b39802d6ba49d6ff84298"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/22/actual_run_readback/path",
+      "sha256": "eb1ec4a83f318369785e1ae164b9227570914e1a2710dfde8bd4c09da72f4649"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/trajectory.csv",
+      "pointer": "/levels/0/replicas/23/trajectory/path",
+      "sha256": "e38f9ec95b6a0dfcec588a0ebae9af8c6d8806ec992f8de79b0bc924ae09a263"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/events.csv",
+      "pointer": "/levels/0/replicas/23/events/path",
+      "sha256": "2363e16d9dc7a0fd4be4f4fe5b1560f139b8e01e2a44121dc5b934b2954ebf73"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/performance.json",
+      "pointer": "/levels/0/replicas/23/performance/path",
+      "sha256": "b2d3617a14507439295ac6f10ec470ede985725b6e82451a54c36e32a1826d1e"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/23/actual_run_readback/path",
+      "sha256": "985c73f76e6072d45d622904851b055f57a1409946ada69977df2e64c415130c"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/trajectory.csv",
+      "pointer": "/levels/0/replicas/24/trajectory/path",
+      "sha256": "4031e4897e8ad46553f7a5e028bb682345a035570ce918d9e0daaf4507522886"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/events.csv",
+      "pointer": "/levels/0/replicas/24/events/path",
+      "sha256": "2b8e9c6b539e0037acfa879329951a21284304d27a0d29e5db9563bf070e7dbe"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/performance.json",
+      "pointer": "/levels/0/replicas/24/performance/path",
+      "sha256": "5c0d5e2fc51f7d230f1a0a276a4b5ff714df8fdf7617264c69850e5117b24b38"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/24/actual_run_readback/path",
+      "sha256": "07ca10ea186c57cc7f3dff607e28775fc30058253a9fb491b072af792e6d58e7"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/trajectory.csv",
+      "pointer": "/levels/0/replicas/25/trajectory/path",
+      "sha256": "0fced2ada4982fe66d85102acb5ce11d6fbe4ad1160a9f57768805348a014ed2"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/events.csv",
+      "pointer": "/levels/0/replicas/25/events/path",
+      "sha256": "1becc7caff1c6d0f37eb88b850b3a9dddfdb4680d0d4a0460db023bc69fe0dad"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/performance.json",
+      "pointer": "/levels/0/replicas/25/performance/path",
+      "sha256": "01680e36a7ad348c500ef409072a889e5752c3bf6a954c039b763b56558dfb81"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/25/actual_run_readback/path",
+      "sha256": "320b4b23d989ca92bf78a17a0915840710a4b2f0530d1f99db2ebe2a9fd2a205"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/trajectory.csv",
+      "pointer": "/levels/0/replicas/26/trajectory/path",
+      "sha256": "23b022cd6ddd71892cd8e4e85e05b92b8bb6016c551bbe0694164d84376baddf"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/events.csv",
+      "pointer": "/levels/0/replicas/26/events/path",
+      "sha256": "3bdb728e74d78efd48916eb0b4fc5ade0262d5d27a4a13c7705088a1ffec5cd6"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/performance.json",
+      "pointer": "/levels/0/replicas/26/performance/path",
+      "sha256": "8917d5d4178aee07d7194be44364a0d89d7d8c95e523944a493806f08c0a2eb7"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/26/actual_run_readback/path",
+      "sha256": "09862ceefc4380837a28ee589a8bbb21a1c3aefae2fadcdcdd57d1f91b5a2481"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/trajectory.csv",
+      "pointer": "/levels/0/replicas/27/trajectory/path",
+      "sha256": "d86a801a3b2f4ba2069239b06ad4843f7880801e9b74a7794856f9f79e69e777"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/events.csv",
+      "pointer": "/levels/0/replicas/27/events/path",
+      "sha256": "e054e858f0bc1af5617c6630f4e9b566d5e72106c7b2bbeebc22c17beff78ac2"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/performance.json",
+      "pointer": "/levels/0/replicas/27/performance/path",
+      "sha256": "d244b8db3541d6272633c5c7131ac7304527b4cb9131d729fd72015525300675"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/27/actual_run_readback/path",
+      "sha256": "dc8aefef4ae2cd608a3a5ce66991f3c7dedb4c6c4a1cb323cf87a050f41bcf20"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/trajectory.csv",
+      "pointer": "/levels/0/replicas/28/trajectory/path",
+      "sha256": "b5a1cbff8cd790e98169614b4e4253c274bfc5ac8e98a309b1d5e7a454d8fe3c"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/events.csv",
+      "pointer": "/levels/0/replicas/28/events/path",
+      "sha256": "bae041a3da72be2878f2a2ebd81c8893c478df1ef8ba8dd948220b1d481f58f8"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/performance.json",
+      "pointer": "/levels/0/replicas/28/performance/path",
+      "sha256": "97c5719b74b92e870d620aa8c085ced19792201b19dd9bbeb6defa4ae0161df4"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/28/actual_run_readback/path",
+      "sha256": "d6052862d440eea7b306e2523da7dd120d33ea4a6f09717967ddab2e18531c20"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/trajectory.csv",
+      "pointer": "/levels/0/replicas/29/trajectory/path",
+      "sha256": "3dea29252885da8a007a9961da0ab8f1f408b80fdefc6f974255220a24d68c23"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/events.csv",
+      "pointer": "/levels/0/replicas/29/events/path",
+      "sha256": "97e5efbe82e1f2421eafa44066bb1a685e0e75e39cf7a6240e18438c47c0b407"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/performance.json",
+      "pointer": "/levels/0/replicas/29/performance/path",
+      "sha256": "b57cf821612760cd3d58fe6d0ee19cbc38a58287a859a14b6d355f814f02f5b6"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/29/actual_run_readback/path",
+      "sha256": "415eb17dc3e63dd0f7c101caeef11eb0fa652641c64496ed1d3f1d6bfa788dba"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/trajectory.csv",
+      "pointer": "/levels/0/replicas/30/trajectory/path",
+      "sha256": "1e3f412ab3188cd7f02299fcc85323736f157364bc267ca762797499a702b761"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/events.csv",
+      "pointer": "/levels/0/replicas/30/events/path",
+      "sha256": "ca42fcbba39eac7a915c6dd1b724cc7ef20529e770da1244f5f47b2af7145873"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/performance.json",
+      "pointer": "/levels/0/replicas/30/performance/path",
+      "sha256": "62f806f5857e030a7ae8be3c0fc32a1ed69eb694b8fbef467cb37673b7510a64"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/30/actual_run_readback/path",
+      "sha256": "316803d898b2449312d16a0c3cc41135cbbaa735c55bdea90de98970bc40ec00"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/trajectory.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/trajectory.csv",
+      "pointer": "/levels/0/replicas/31/trajectory/path",
+      "sha256": "7ee8d181ffa1b401002c7fafc7136c3ac7c8f57d86fdfeb9273ebcf57d5de6dc"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/events.csv",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/events.csv",
+      "pointer": "/levels/0/replicas/31/events/path",
+      "sha256": "dab6a58f5723fc21404a60e60e2d192d46e0fe48edf2c3e15c11405818a9a611"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/performance.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/performance.json",
+      "pointer": "/levels/0/replicas/31/performance/path",
+      "sha256": "ce4eed824e72a58dba5fda8d471f052496c969f783d4e6d05f0d7aaa10d3d7a3"
+    },
+    {
+      "consumer": "comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/actual_binding_receipt.json",
+      "original": "../../../comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/actual_binding_receipt.json",
+      "pointer": "/levels/0/replicas/31/actual_run_readback/path",
+      "sha256": "d159e1af3e13970b6c479f216ef1dbeae7a70e94b20043edd04c52bec91082bb"
+    }
+  ],
+  "consumer_manifest": {
+    "path": "../comsol_v0_2_0_release_caseA_consumer_manifest.json",
+    "sha256": "0f04c694fe173f8117112c84802ac739ae0cc01ca3aaad469ec04b51bcab02df"
+  },
+  "created_at_utc": "2026-10-10T05:18:16.907067+00:00",
+  "new_native_solve": false,
+  "original_registered_manifest": {
+    "path": "saved_native/caseA/comsol_campaign_manifest.json",
+    "sha256": "9ce2954a1380de7f1b6ecb82180432f19b404cd8e373f1cca944ab680073239a"
+  },
+  "reason": "The existing assembler requires trajectory/event/performance artifacts inside the manifest parent. The solver/evidence common ancestor contains all unchanged registered raw inputs; no runtime containment or meaning gate is weakened.",
+  "recipe": {
+    "path": "prepare_consumer_manifest_views.py",
+    "sha256": "795455484e4fe039ab93343b0eda244a5db3d4a8a3d556f0b42e2e8a71bd51c2"
+  },
+  "remaining_metadata_path_basis": "Unchanged original declared basis; pilot authorization remains identical to the candidate authority.",
+  "restoring_changed_path_values_is_exact_original": true,
+  "schema_version": 1,
+  "scope": "Post-registration transport-only view after candidate outcomes. Not a preregistration or a new numerical/model observation."
+}

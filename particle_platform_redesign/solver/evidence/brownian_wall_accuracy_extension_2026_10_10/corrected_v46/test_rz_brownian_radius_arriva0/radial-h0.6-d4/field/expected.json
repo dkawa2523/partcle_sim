@@ -1,0 +1,118 @@
+{
+  "activation_package": "P06",
+  "analytic_reference_precision": {
+    "charge_number_exact": true,
+    "position_atol_m": 1e-13,
+    "position_rtol": 1e-13,
+    "velocity_atol_m_s": 1e-13,
+    "velocity_rtol": 1e-13
+  },
+  "case_id": "C02",
+  "charge_number": [
+    [
+      0.0
+    ],
+    [
+      0.0
+    ],
+    [
+      0.0
+    ],
+    [
+      0.0
+    ]
+  ],
+  "derived": {
+    "rate_s_inverse": 2.0,
+    "tau_s": 0.5
+  },
+  "format_version": 2,
+  "method_acceptance": {
+    "rk4_fixed": {
+      "comparison_time_s": 1.0,
+      "dt_s": [
+        0.2,
+        0.1,
+        0.05,
+        0.025
+      ],
+      "error_norm": "component_linf",
+      "errors_strictly_decrease": true,
+      "finest_position_error_m": 1e-08,
+      "finest_velocity_error_m_s": 2e-08,
+      "minimum_observed_order": 3.5,
+      "minimum_order_on_dt_pairs": [
+        [
+          0.1,
+          0.05
+        ],
+        [
+          0.05,
+          0.025
+        ]
+      ]
+    }
+  },
+  "oracle_revision": "linear_relaxation_closed_form_v1",
+  "particle_id": [
+    201
+  ],
+  "position_m": [
+    [
+      [
+        -0.4,
+        0.2
+      ]
+    ],
+    [
+      [
+        -0.21761226388505336,
+        0.2661938680574733
+      ]
+    ],
+    [
+      [
+        -0.09715177646857698,
+        0.30142411176571154
+      ]
+    ],
+    [
+      [
+        0.04586588670535491,
+        0.32293294335267747
+      ]
+    ]
+  ],
+  "time_s": [
+    0.0,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "velocity_m_s": [
+    [
+      [
+        0.9,
+        0.35
+      ]
+    ],
+    [
+      [
+        0.5852245277701068,
+        0.19261226388505337
+      ]
+    ],
+    [
+      [
+        0.3943035529371539,
+        0.09715177646857691
+      ]
+    ],
+    [
+      [
+        0.20826822658929017,
+        0.004134113294645074
+      ]
+    ]
+  ]
+}

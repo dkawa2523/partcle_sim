@@ -1,0 +1,31 @@
+{
+  "candidate_cases": {
+    "dt_0p625us": {
+      "dt_s": 6.25e-07,
+      "path": "candidate\\dt_0p625us\\case.yaml",
+      "sha256": "6c4a185b44b6c2de8b80f0d14a20daf28aec4ed2c32ed727729bb1aa166b6d89"
+    },
+    "dt_1p25us": {
+      "dt_s": 1.25e-06,
+      "path": "candidate\\dt_1p25us\\case.yaml",
+      "sha256": "fbfafc887c0ee8e3cb27d8a38266aca3abe626ed89ec81dd5340cf9bf271a415"
+    },
+    "dt_2p5us": {
+      "dt_s": 2.5e-06,
+      "path": "candidate\\dt_2p5us\\case.yaml",
+      "sha256": "37a205ec2f373bb1de1a2af1f1a80c67e2b5fb8aae898912a5525bbae8ddac8c"
+    }
+  },
+  "case_id": "caseP_100nm_three_current",
+  "charge_number_content_identity": "f8d28e70d865ce1cf6e40cfadb0ebf2116220fe4d0e0ed4acda5ec07c95291b4",
+  "configuration_sha256": "b8614ab6eb71b04c28d55e2bc42a3702511f06612af2dceb6e9b46b70aef34ec",
+  "derived_input_content_hash": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+  "derived_input_sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc",
+  "primitive_receipt_sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab",
+  "reference_config_sha256": "c97d7d984480dffac6cbc0b38c66cf8ffbdc8e2cf36f4b495f2b05fd672f310d",
+  "release_receipt_sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2",
+  "release_state_sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267",
+  "schema_version": 1,
+  "status": "PREPARED",
+  "tool_revision": "m3c3_casep_three_current_candidate_v5"
+}

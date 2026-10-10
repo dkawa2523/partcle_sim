@@ -1,0 +1,1379 @@
+[
+  {
+    "start_position_m": [
+      1.0144254838522102e-12,
+      -3.600136164330899e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332125762335,
+      0.0010439855719050557
+    ],
+    "end_position_m": [
+      1.013828879673279e-12,
+      -3.600136163761222e-06
+    ],
+    "end_velocity_m_s": [
+      -0.00109333321235726,
+      0.00104398557160932
+    ],
+    "position_lower_m": [
+      1.0138288785301151e-12,
+      -3.6001361643309e-06
+    ],
+    "position_upper_m": [
+      1.0144254849920653e-12,
+      -3.600136163761221e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.001093333212576265,
+      0.0010439855716092902
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332123572283,
+      0.0010439855719050857
+    ],
+    "start_time_s": 0.3003742832052012,
+    "target_time_s": 0.3003742832057469,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      1.483628942771859e-25,
+      1.0232218538869706e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0144254838522102e-12,
+      -3.600136164330899e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332125762335,
+      0.0010439855719050557
+    ],
+    "end_position_m": [
+      1.0141271817610902e-12,
+      -3.6001361640460608e-06
+    ],
+    "end_velocity_m_s": [
+      -0.001093333212466747,
+      0.0010439855717571883
+    ],
+    "position_lower_m": [
+      1.0141271806212351e-12,
+      -3.6001361643309e-06
+    ],
+    "position_upper_m": [
+      1.0144254849920653e-12,
+      -3.600136164046059e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.001093333212576265,
+      0.001043985571757158
+    ],
+    "velocity_upper_m_s": [
+      -0.001093333212466715,
+      0.0010439855719050857
+    ],
+    "start_time_s": 0.3003742832052012,
+    "target_time_s": 0.30037428320547405,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      5.872526056418255e-26,
+      1.023220643367391e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142763024607023e-12,
+      -3.600136164188451e-06
+    ],
+    "start_velocity_m_s": [
+      -0.001093333212521479,
+      0.0010439855718311073
+    ],
+    "end_position_m": [
+      1.0141271817610902e-12,
+      -3.6001361640460608e-06
+    ],
+    "end_velocity_m_s": [
+      -0.001093333212466747,
+      0.0010439855717571883
+    ],
+    "position_lower_m": [
+      1.0141271806228895e-12,
+      -3.600136164188452e-06
+    ],
+    "position_upper_m": [
+      1.0142763036005573e-12,
+      -3.600136164046059e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332125215105,
+      0.0010439855717571586
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124667154,
+      0.0010439855718311372
+    ],
+    "start_time_s": 0.30037428320533766,
+    "target_time_s": 0.30037428320547405,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      3.6303144426884614e-26,
+      1.0232203406048246e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142763024607023e-12,
+      -3.600136164188451e-06
+    ],
+    "start_velocity_m_s": [
+      -0.001093333212521479,
+      0.0010439855718311073
+    ],
+    "end_position_m": [
+      1.0142017724584985e-12,
+      -3.600136164117285e-06
+    ],
+    "end_velocity_m_s": [
+      -0.001093333212494124,
+      0.0010439855717941627
+    ],
+    "position_lower_m": [
+      1.0142017713153347e-12,
+      -3.600136164188452e-06
+    ],
+    "position_upper_m": [
+      1.0142763036005573e-12,
+      -3.600136164117283e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332125215105,
+      0.001043985571794133
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124940928,
+      0.0010439855718311372
+    ],
+    "start_time_s": 0.30037428320533766,
+    "target_time_s": 0.3003742832054058,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      3.069752946692088e-26,
+      1.0232202649195943e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142390374612548e-12,
+      -3.600136164152868e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332125078014,
+      0.0010439855718126347
+    ],
+    "end_position_m": [
+      1.0142017724584985e-12,
+      -3.600136164117285e-06
+    ],
+    "end_velocity_m_s": [
+      -0.001093333212494124,
+      0.0010439855717941627
+    ],
+    "position_lower_m": [
+      1.0142017713153347e-12,
+      -3.600136164152869e-06
+    ],
+    "position_upper_m": [
+      1.0142390386011099e-12,
+      -3.600136164117283e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332125078329,
+      0.0010439855717941325
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124940926,
+      0.0010439855718126646
+    ],
+    "start_time_s": 0.30037428320537174,
+    "target_time_s": 0.3003742832054058,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.929525943814384e-26,
+      1.0232202459959138e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142204049582223e-12,
+      -3.6001361641350763e-06
+    ],
+    "start_velocity_m_s": [
+      -0.001093333212500963,
+      0.0010439855718033988
+    ],
+    "end_position_m": [
+      1.0142017724584985e-12,
+      -3.600136164117285e-06
+    ],
+    "end_velocity_m_s": [
+      -0.001093333212494124,
+      0.0010439855717941627
+    ],
+    "position_lower_m": [
+      1.0142017713153347e-12,
+      -3.6001361641350776e-06
+    ],
+    "position_upper_m": [
+      1.0142204060980774e-12,
+      -3.600136164117283e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332125009944,
+      0.0010439855717941332
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124940928,
+      0.0010439855718034287
+    ],
+    "start_time_s": 0.3003742832053888,
+    "target_time_s": 0.3003742832054058,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8943758925444454e-26,
+      1.0232202412560276e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142204049582223e-12,
+      -3.6001361641350763e-06
+    ],
+    "start_velocity_m_s": [
+      -0.001093333212500963,
+      0.0010439855718033988
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179136261e-12,
+      -3.6001361641350776e-06
+    ],
+    "position_upper_m": [
+      1.0142204060980774e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332125009944,
+      0.0010439855717987658
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124975232,
+      0.0010439855718034287
+    ],
+    "start_time_s": 0.3003742832053888,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8855491070254615e-26,
+      1.0232202400666575e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142157316623853e-12,
+      -3.6001361641306137e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332124992475,
+      0.0010439855718010823
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179119717e-12,
+      -3.6001361641306154e-06
+    ],
+    "position_upper_m": [
+      1.0142157328022404e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.001093333212499279,
+      0.001043985571798766
+    ],
+    "velocity_upper_m_s": [
+      -0.001093333212497523,
+      0.0010439855718011122
+    ],
+    "start_time_s": 0.30037428320539306,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8833218559915346e-26,
+      1.0232202397677054e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142134253587604e-12,
+      -3.6001361641284114e-06
+    ],
+    "start_velocity_m_s": [
+      -0.001093333212498401,
+      0.0010439855717999389
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179185892e-12,
+      -3.600136164128413e-06
+    ],
+    "position_upper_m": [
+      1.0142134264986155e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332124984324,
+      0.0010439855717987658
+    ],
+    "velocity_upper_m_s": [
+      -0.001093333212497523,
+      0.0010439855717999688
+    ],
+    "start_time_s": 0.30037428320539517,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8827630421136473e-26,
+      1.0232202396931604e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142122722061208e-12,
+      -3.6001361641273107e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332124979777,
+      0.0010439855717993673
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179136261e-12,
+      -3.600136164127312e-06
+    ],
+    "position_upper_m": [
+      1.014212273345976e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332124980091,
+      0.0010439855717987658
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124975234,
+      0.0010439855717993972
+    ],
+    "start_time_s": 0.3003742832053962,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8826175186010244e-26,
+      1.0232202396739739e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142117259790577e-12,
+      -3.600136164126789e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332124977773,
+      0.0010439855717990967
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179185892e-12,
+      -3.6001361641267906e-06
+    ],
+    "position_upper_m": [
+      1.0142117271189128e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332124978088,
+      0.0010439855717987662
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124975234,
+      0.0010439855717991266
+    ],
+    "start_time_s": 0.3003742832053967,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8825798009248625e-26,
+      1.0232202396690922e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142114225162694e-12,
+      -3.6001361641264992e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332124976659,
+      0.0010439855717989462
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179136261e-12,
+      -3.6001361641265005e-06
+    ],
+    "position_upper_m": [
+      1.0142114236561245e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332124976973,
+      0.0010439855717987662
+    ],
+    "velocity_upper_m_s": [
+      -0.001093333212497523,
+      0.001043985571798976
+    ],
+    "start_time_s": 0.300374283205397,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.882567505315668e-26,
+      1.0232202396675507e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142112404405817e-12,
+      -3.600136164126325e-06
+    ],
+    "start_velocity_m_s": [
+      -0.001093333212497599,
+      0.0010439855717988558
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179185892e-12,
+      -3.600136164126327e-06
+    ],
+    "position_upper_m": [
+      1.0142112415804368e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332124976305,
+      0.0010439855717987655
+    ],
+    "velocity_upper_m_s": [
+      -0.001093333212497523,
+      0.0010439855717988857
+    ],
+    "start_time_s": 0.30037428320539716,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.882563084255437e-26,
+      1.0232202396670274e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142111797486858e-12,
+      -3.600136164126267e-06
+    ],
+    "start_velocity_m_s": [
+      -0.0010933332124975768,
+      0.0010439855717988256
+    ],
+    "end_position_m": [
+      1.0142111190534812e-12,
+      -3.6001361641262096e-06
+    ],
+    "end_velocity_m_s": [
+      -0.0010933332124975549,
+      0.0010439855717987957
+    ],
+    "position_lower_m": [
+      1.0142111179152805e-12,
+      -3.600136164126269e-06
+    ],
+    "position_upper_m": [
+      1.014211180888541e-12,
+      -3.600136164126208e-06
+    ],
+    "velocity_lower_m_s": [
+      -0.0010933332124976082,
+      0.0010439855717987653
+    ],
+    "velocity_upper_m_s": [
+      -0.0010933332124975232,
+      0.0010439855717988555
+    ],
+    "start_time_s": 0.3003742832053972,
+    "target_time_s": 0.3003742832053973,
+    "root_interval_s": 3.6621093750022204e-05,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.882562103285771e-26,
+      1.0232202396669193e-19
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142686986227737e-12,
+      -0.0004956191696152574
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413216562,
+      -0.001615709674520821
+    ],
+    "end_position_m": [
+      1.0139960561606373e-12,
+      -0.0004956191696161389
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413823239,
+      -0.001615709674561215
+    ],
+    "position_lower_m": [
+      1.0139960392729177e-12,
+      -0.0004956191696161392
+    ],
+    "position_upper_m": [
+      1.0142687154575537e-12,
+      -0.0004956191696152572
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413823401,
+      -0.0016157096745612618
+    ],
+    "velocity_upper_m_s": [
+      -0.00049964294132164,
+      -0.0016157096745207738
+    ],
+    "start_time_s": 0.5382240627888675,
+    "target_time_s": 0.5382240627894131,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      6.195365188512057e-26,
+      1.4086344049073846e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142686986227737e-12,
+      -0.0004956191696152574
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413216562,
+      -0.001615709674520821
+    ],
+    "end_position_m": [
+      1.0141323496381416e-12,
+      -0.0004956191696156982
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413519961,
+      -0.0016157096745410223
+    ],
+    "position_lower_m": [
+      1.0141323328563011e-12,
+      -0.0004956191696156984
+    ],
+    "position_upper_m": [
+      1.0142687154575537e-12,
+      -0.0004956191696152572
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413520124,
+      -0.0016157096745410692
+    ],
+    "velocity_upper_m_s": [
+      -0.00049964294132164,
+      -0.0016157096745207738
+    ],
+    "start_time_s": 0.5382240627888675,
+    "target_time_s": 0.5382240627891404,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      3.711759937304833e-26,
+      1.4086344032500245e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142686986227737e-12,
+      -0.0004956191696152574
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413216562,
+      -0.001615709674520821
+    ],
+    "end_position_m": [
+      1.014200524196632e-12,
+      -0.0004956191696154778
+    ],
+    "end_velocity_m_s": [
+      -0.000499642941336826,
+      -0.001615709674530921
+    ],
+    "position_lower_m": [
+      1.0142005072824427e-12,
+      -0.0004956191696154779
+    ],
+    "position_upper_m": [
+      1.0142687154575537e-12,
+      -0.0004956191696152572
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413368423,
+      -0.0016157096745309687
+    ],
+    "velocity_upper_m_s": [
+      -0.00049964294132164,
+      -0.0016157096745207738
+    ],
+    "start_time_s": 0.5382240627888675,
+    "target_time_s": 0.5382240627890039,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      3.090251137577516e-26,
+      1.408634402834344e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142346391632668e-12,
+      -0.0004956191696153674
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413292348,
+      -0.001615709674525867
+    ],
+    "end_position_m": [
+      1.014200524196632e-12,
+      -0.0004956191696154778
+    ],
+    "end_velocity_m_s": [
+      -0.000499642941336826,
+      -0.001615709674530921
+    ],
+    "position_lower_m": [
+      1.0142005074412614e-12,
+      -0.0004956191696154779
+    ],
+    "position_upper_m": [
+      1.0142346559980468e-12,
+      -0.0004956191696153673
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413368421,
+      -0.0016157096745309683
+    ],
+    "velocity_upper_m_s": [
+      -0.0004996429413292187,
+      -0.0016157096745258196
+    ],
+    "start_time_s": 0.5382240627889356,
+    "target_time_s": 0.5382240627890039,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.9347287014454696e-26,
+      1.4086344027302358e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142175538999158e-12,
+      -0.0004956191696154227
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413330368,
+      -0.0016157096745283985
+    ],
+    "end_position_m": [
+      1.014200524196632e-12,
+      -0.0004956191696154778
+    ],
+    "end_velocity_m_s": [
+      -0.000499642941336826,
+      -0.001615709674530921
+    ],
+    "position_lower_m": [
+      1.0142005073353823e-12,
+      -0.0004956191696154779
+    ],
+    "position_upper_m": [
+      1.0142175707346958e-12,
+      -0.0004956191696154225
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413368423,
+      -0.001615709674530969
+    ],
+    "velocity_upper_m_s": [
+      -0.0004996429413330207,
+      -0.0016157096745283513
+    ],
+    "start_time_s": 0.5382240627889698,
+    "target_time_s": 0.5382240627890039,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8956293310816643e-26,
+      1.4086344027039248e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142175538999158e-12,
+      -0.0004956191696154227
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413330368,
+      -0.0016157096745283985
+    ],
+    "end_position_m": [
+      1.014209011307945e-12,
+      -0.0004956191696154504
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413349375,
+      -0.0016157096745296638
+    ],
+    "position_lower_m": [
+      1.0142089945261044e-12,
+      -0.0004956191696154505
+    ],
+    "position_upper_m": [
+      1.0142175707346958e-12,
+      -0.0004956191696154225
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413349538,
+      -0.0016157096745297113
+    ],
+    "velocity_upper_m_s": [
+      -0.0004996429413330207,
+      -0.0016157096745283513
+    ],
+    "start_time_s": 0.5382240627889698,
+    "target_time_s": 0.5382240627889869,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.885896962027484e-26,
+      1.408634402697211e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142132826039303e-12,
+      -0.0004956191696154365
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413339871,
+      -0.001615709674529031
+    ],
+    "end_position_m": [
+      1.014209011307945e-12,
+      -0.0004956191696154504
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413349375,
+      -0.0016157096745296638
+    ],
+    "position_lower_m": [
+      1.0142089944202253e-12,
+      -0.0004956191696154505
+    ],
+    "position_upper_m": [
+      1.0142132994387104e-12,
+      -0.0004956191696154364
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413349537,
+      -0.001615709674529711
+    ],
+    "velocity_upper_m_s": [
+      -0.000499642941333971,
+      -0.0016157096745289838
+    ],
+    "start_time_s": 0.5382240627889784,
+    "target_time_s": 0.5382240627889869,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.883413692039754e-26,
+      1.4086344026954877e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142132826039303e-12,
+      -0.0004956191696154365
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413339871,
+      -0.001615709674529031
+    ],
+    "end_position_m": [
+      1.0142111192023737e-12,
+      -0.0004956191696154435
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413344685,
+      -0.0016157096745293518
+    ],
+    "position_lower_m": [
+      1.0142111023411239e-12,
+      -0.0004956191696154436
+    ],
+    "position_upper_m": [
+      1.0142132994387104e-12,
+      -0.0004956191696154364
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413344847,
+      -0.0016157096745293988
+    ],
+    "velocity_upper_m_s": [
+      -0.000499642941333971,
+      -0.0016157096745289838
+    ],
+    "start_time_s": 0.5382240627889784,
+    "target_time_s": 0.5382240627889827,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8827930194468744e-26,
+      1.4086344026950165e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142122286302461e-12,
+      -0.00049561916961544
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413342217,
+      -0.0016157096745291874
+    ],
+    "end_position_m": [
+      1.0142111192023737e-12,
+      -0.0004956191696154435
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413344685,
+      -0.0016157096745293518
+    ],
+    "position_lower_m": [
+      1.014211102447003e-12,
+      -0.0004956191696154436
+    ],
+    "position_upper_m": [
+      1.0142122454650262e-12,
+      -0.0004956191696154397
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413344847,
+      -0.001615709674529399
+    ],
+    "velocity_upper_m_s": [
+      -0.0004996429413342056,
+      -0.0016157096745291401
+    ],
+    "start_time_s": 0.5382240627889805,
+    "target_time_s": 0.5382240627889827,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.882628069683529e-26,
+      1.4086344026948896e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142116739560146e-12,
+      -0.0004956191696154417
+    ],
+    "start_velocity_m_s": [
+      -0.000499642941334345,
+      -0.0016157096745292691
+    ],
+    "end_position_m": [
+      1.0142111192023737e-12,
+      -0.0004956191696154435
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413344685,
+      -0.0016157096745293518
+    ],
+    "position_lower_m": [
+      1.0142111023675937e-12,
+      -0.0004956191696154436
+    ],
+    "position_upper_m": [
+      1.0142116907907946e-12,
+      -0.0004956191696154416
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413344848,
+      -0.0016157096745293984
+    ],
+    "velocity_upper_m_s": [
+      -0.0004996429413343289,
+      -0.0016157096745292219
+    ],
+    "start_time_s": 0.5382240627889816,
+    "target_time_s": 0.5382240627889827,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8825810473483203e-26,
+      1.4086344026948492e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142113965527244e-12,
+      -0.0004956191696154427
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413344069,
+      -0.0016157096745293108
+    ],
+    "end_position_m": [
+      1.0142111192023737e-12,
+      -0.0004956191696154435
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413344685,
+      -0.0016157096745293518
+    ],
+    "position_lower_m": [
+      1.0142111023411239e-12,
+      -0.0004956191696154436
+    ],
+    "position_upper_m": [
+      1.0142114133875044e-12,
+      -0.0004956191696154424
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413344849,
+      -0.0016157096745293992
+    ],
+    "velocity_upper_m_s": [
+      -0.0004996429413343908,
+      -0.0016157096745292635
+    ],
+    "start_time_s": 0.5382240627889822,
+    "target_time_s": 0.5382240627889827,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8825677796265674e-26,
+      1.4086344026948356e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142112301107502e-12,
+      -0.0004956191696154432
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413344439,
+      -0.0016157096745293355
+    ],
+    "end_position_m": [
+      1.0142111192023737e-12,
+      -0.0004956191696154435
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413344685,
+      -0.0016157096745293518
+    ],
+    "position_lower_m": [
+      1.0142111023411239e-12,
+      -0.0004956191696154436
+    ],
+    "position_upper_m": [
+      1.0142112469455303e-12,
+      -0.000495619169615443
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413344848,
+      -0.0016157096745293992
+    ],
+    "velocity_upper_m_s": [
+      -0.0004996429413344277,
+      -0.0016157096745292882
+    ],
+    "start_time_s": 0.5382240627889825,
+    "target_time_s": 0.5382240627889827,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.882563112333721e-26,
+      1.40863440269483e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  },
+  {
+    "start_position_m": [
+      1.0142111747359713e-12,
+      -0.0004956191696154433
+    ],
+    "start_velocity_m_s": [
+      -0.0004996429413344561,
+      -0.0016157096745293433
+    ],
+    "end_position_m": [
+      1.0142111192023737e-12,
+      -0.0004956191696154435
+    ],
+    "end_velocity_m_s": [
+      -0.0004996429413344685,
+      -0.0016157096745293518
+    ],
+    "position_lower_m": [
+      1.0142111024734728e-12,
+      -0.0004956191696154436
+    ],
+    "position_upper_m": [
+      1.0142111915707513e-12,
+      -0.0004956191696154432
+    ],
+    "velocity_lower_m_s": [
+      -0.0004996429413344847,
+      -0.0016157096745293988
+    ],
+    "velocity_upper_m_s": [
+      -0.00049964294133444,
+      -0.001615709674529296
+    ],
+    "start_time_s": 0.5382240627889826,
+    "target_time_s": 0.5382240627889827,
+    "root_interval_s": 0.0011718749999999334,
+    "contact_radius_m": 0.0,
+    "geometry_rtol": 1e-12,
+    "roundoff_ulps": 64,
+    "candidate_capacity": 262144,
+    "certify_start_contact_departure": false,
+    "chord_deviation_bound_m": [
+      2.8825621056099363e-26,
+      1.4086344026948285e-17
+    ],
+    "certify_monotone_approach": true,
+    "use_position_controls": null,
+    "position_control_origin_m": null,
+    "relative_position_control_lower_m": null,
+    "relative_position_control_upper_m": null
+  }
+]

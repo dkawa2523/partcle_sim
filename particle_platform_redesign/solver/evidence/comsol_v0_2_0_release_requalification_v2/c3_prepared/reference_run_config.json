@@ -1,0 +1,35 @@
+{
+  "canonical_input": {
+    "content_hash": "sha256:4a0ede4273e1086d38ff9e00f5bc347922e47cfa03676f71296f1d83dbdffe93",
+    "file_sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc",
+    "parent_file_sha256": "18679c0f68234d8bfd3c0bf1d7782204bbcc949b2bc0ef8621226d3afb0b1b10",
+    "path": "candidate_input_three_current_z0.h5"
+  },
+  "case_id": "caseP_100nm_three_current",
+  "charge_revision": "aggregate_relative_drift_regularized_three_current_v1",
+  "comsol": {
+    "fixed_rk4_step_s": 1e-05,
+    "output_count": 121,
+    "particle_count": 287,
+    "time_end_s": 0.03
+  },
+  "ion_drag_revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+  "maximum_relative_ion_speed_m_s": 1000000.0,
+  "primitive_receipt": {
+    "path": "primitive_receipt.json",
+    "sha256": "95c17b33780ecd2f2c5a48e3703c6994e680cf930ca0e33de03f6647d791edab"
+  },
+  "release_receipt": {
+    "path": "three_current_release_receipt.json",
+    "sha256": "95ddf18d197666e5ff3b29c2adc07895e1c7214047ddd39ac54f29d0aa21cde2"
+  },
+  "release_state": {
+    "path": "three_current_release_state.csv",
+    "sha256": "d2a9de8ce251f088a0761107ed2ddad533743de8bcb716bdc5521d1939e5b267"
+  },
+  "schema_version": 1,
+  "source_mph": {
+    "path": "model_dataset/cf4_o2_etch_caseA_nonlinear_sass/model/icp_rf_bias_cf4_o2_si_etching_caseP_caseA_SASS_formal_iondrag_theory_consistent_10_30_100nm.mph",
+    "sha256": "3bbf08e3469758313eac5de473a7a0dd4cc9a6f72c9722393229f0b856e9b524"
+  }
+}

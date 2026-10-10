@@ -1,0 +1,372 @@
+{
+  "schema_version": 1,
+  "audit_kind": "v0_2_0_current_candidate_comsol_saved_native_post_run_independent_review",
+  "reviewer_role": "physics_review",
+  "audited_at_utc": "2026-10-10 05:24:43 UTC",
+  "status": "PASS_SCOPED_REGISTERED_VERSION_REGRESSION_AND_RESULT_BINDINGS",
+  "path_basis": "This JSON parent: particle_platform_redesign/reviews",
+  "provenance": {
+    "preregistration": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/execution_preregistration.json",
+      "sha256": "323d3a68bf49cd46d853df7559a2305aab7d6fc91d166e117f25fa4957973d84"
+    },
+    "immutable_pre_run_audit_snapshot": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/independent_pre_run_audit_snapshot.json",
+      "sha256": "dec685ffaf125892643f75f84083690c24fb6e8a93330a16dec3fc8769d32ec4"
+    },
+    "numeric_use_case_verification": {
+      "path": "v0_2_release_use_case_verification_2026-10-10.json",
+      "sha256": "dec685ffaf125892643f75f84083690c24fb6e8a93330a16dec3fc8769d32ec4"
+    },
+    "brownian_original_and_heldout_authority": {
+      "path": "brownian_wall_accuracy_extension_2026-10-10.json",
+      "sha256": "329415b766fb403b0284b480175cffd198e6f5f5a52f6737d67d20b8fe1f96c8"
+    },
+    "source_normalization": {
+      "path": "v0_2_release_source_normalization_2026-10-10.json",
+      "sha256": "3f34172016ad6b60ade36dfc31b7378f327b824b3e6ea559ba330e35780710b7"
+    },
+    "source_index_witness": {
+      "path": "v0_2_release_index_source_2026-10-10.json",
+      "sha256": "1a56482f45cec3286d19fd67419d2912f3cd08cbfa238d75cd81b931a4097788"
+    },
+    "saved_native_projection": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/saved_native_projection_manifest.json",
+      "sha256": "e78ed4c2e757b295d11bf36e46e60acfa68d344334147ece77577258de0c2bc7"
+    },
+    "saved_native_publication_closure": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/publication_saved_native_closure.json",
+      "sha256": "dac2b4dd815619161c366979784ffb1b98f2445d8eca899d9b844ac6975664a8"
+    },
+    "c3_evaluation": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/c3_version_requalification_evaluation.json",
+      "sha256": "4b8b4697fed8f223d81a803d3f13bc494ca1984939a50b99a100730fcb12b7c3"
+    },
+    "c3_configured_rhs_diagnostic": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/c3_configured_rhs_diagnostic.json",
+      "sha256": "0bb1ea0e048eb36fc6a4e2354d30bea12e66dbbcc14795fba7848b61fba32e58"
+    },
+    "consumer_containment_rejection": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/consumer_manifest_containment_rejection.json",
+      "sha256": "c490658c52c1b8c685d4b5f778c96cc128e67cbf0676aeaacc92c3142a05573a"
+    },
+    "consumer_view_recipe": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/prepare_consumer_manifest_views.py",
+      "sha256": "795455484e4fe039ab93343b0eda244a5db3d4a8a3d556f0b42e2e8a71bd51c2"
+    },
+    "A_candidate_manifest": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseA_candidate_final/candidate_campaign_manifest.json",
+      "sha256": "8f608673f829789a6fc1143fd81768ea7c41f3b227d1f1c5dfba5fdcc2e9507e"
+    },
+    "A_evaluation": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseA_final_evaluation/evaluation_manifest.json",
+      "sha256": "0258b442e30ffccd6b25afaec58578aa4e0005c0fc2b0101fdb17737adfeff58"
+    },
+    "A_campaign": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseA_final_campaign.json",
+      "sha256": "b52fc1fc0c77127a408ac0e5f6c67fe9641cf8f300ed41b0556d2677278c9723"
+    },
+    "A_consumer_manifest": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_caseA_consumer_manifest.json",
+      "sha256": "0f04c694fe173f8117112c84802ac739ae0cc01ca3aaad469ec04b51bcab02df"
+    },
+    "A_consumer_projection_receipt": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseA_consumer_manifest_projection_receipt.json",
+      "sha256": "33121389471580de6bbae760fc83ee4a283e3ff06348eff62f3e117b5dc1d4c7"
+    },
+    "A_registered_native_manifest": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/comsol_campaign_manifest.json",
+      "sha256": "9ce2954a1380de7f1b6ecb82180432f19b404cd8e373f1cca944ab680073239a"
+    },
+    "A_registered_native_meaning_inventory": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/meaning_inventory.json",
+      "sha256": "bf95e18ee509ef9440adff789af7785ba1ce28b3ca620f8f2f8eb7c0049b322f"
+    },
+    "A_registered_policy": {
+      "path": "../solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_axis_normalized_population_policy.json",
+      "sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f"
+    },
+    "A_registered_selection": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseA_100nm_axis_normalized_fixed_selection_path_projection.json",
+      "sha256": "8164e5ee70026aa3c58489e70ac1953cc91266b59d179b53e7ba3b806f363b3f"
+    },
+    "A_registered_pilot_report": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseA_100nm_axis_normalized_historical_pilot_path_projection.json",
+      "sha256": "0501b9de7c19a1d2f54cfe705bb236941cef225865e918f8eb8d230c8ad373d3"
+    },
+    "P_candidate_manifest": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseP_candidate_final/candidate_campaign_manifest.json",
+      "sha256": "1647d77ce040e1880dd526732dcf9f619aba154fc96dcb4e297074cef38c3f3b"
+    },
+    "P_evaluation": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseP_final_evaluation/evaluation_manifest.json",
+      "sha256": "00d0c90a695673b77b1d3bcef3c2cb883c906ac41101a315b42f6ae223fd72ee"
+    },
+    "P_campaign": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseP_final_campaign.json",
+      "sha256": "360d98160e2b1f57bd1b29414edca66832557123598a02eef88ea53ff2889fa2"
+    },
+    "P_consumer_manifest": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_caseP_consumer_manifest.json",
+      "sha256": "c33158fa54e90c3bffd09bdbc9e5d9849ad4fe249f2dd91434e91782ee31c38b"
+    },
+    "P_consumer_projection_receipt": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/caseP_consumer_manifest_projection_receipt.json",
+      "sha256": "e9b164a1cd7c1fce68412ac850c23104dab1e70872fcfe73daac0b76f6706220"
+    },
+    "P_registered_native_manifest": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/comsol_campaign_manifest.json",
+      "sha256": "8af8603265403625f76e8271cd6e47dfa7b10eb449215da53628ebb2a55f42ff"
+    },
+    "P_registered_native_meaning_inventory": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/meaning_inventory.json",
+      "sha256": "3caee458dd4ffd1a55dcbfd452062bebf3d8fd89dbd315c60b156579f5212708"
+    },
+    "P_registered_policy": {
+      "path": "../solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_population_policy.json",
+      "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+    },
+    "P_registered_selection": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseP_100nm_axis_normalized_fixed_selection_path_projection.json",
+      "sha256": "8f1cf0df0e2b4e1454aa7ca1da9961d562415ba9180eb610f05b89b229853819"
+    },
+    "P_registered_pilot_report": {
+      "path": "../solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseP_100nm_axis_normalized_historical_pilot_path_projection.json",
+      "sha256": "273a0f61254e03904c05cd478483b58ef3df900aeb97b29fc6c9a9b2316a1b23"
+    }
+  },
+  "observed_current_source": {
+    "candidate_executor_source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+    "production_source_count": 27,
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+    "distribution_version": "0.2.0",
+    "python_version": "3.12.13",
+    "engine_algorithm_revision": "particle_engine_v46",
+    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "all_27_current_source_bytes_and_lock_equal_preregistration": true,
+    "all_8_frozen_producer_hashes_equal_preregistration": true,
+    "source_changed_during_this_audit": false,
+    "new_scientific_runs_during_this_audit": 0,
+    "new_native_solve": false
+  },
+  "c3": {
+    "status": "PASS_SCOPED_REGISTERED_EMPIRICAL_GATES",
+    "evaluation_sha256": "4b8b4697fed8f223d81a803d3f13bc494ca1984939a50b99a100730fcb12b7c3",
+    "checks": {
+      "candidate_cells": 3,
+      "candidate_native_csv_hashes": 12,
+      "registered_case_hash_result_manifest_hash_and_current_revisions": true,
+      "failure_events_each_cell": 0,
+      "particle_count_each_cell": 287,
+      "terminal_event_count_each_cell": 141,
+      "independent_gate_arithmetic_count": 9,
+      "fine_candidate_and_native_finite_maximum_scales": {
+        "position": 0.21830598594093303,
+        "velocity": 166.95866051943867,
+        "charge": 1706.0974460363186
+      },
+      "roundoff_factor": 4.547473508864641e-13,
+      "all_reported_direct_limits_equal_max_inherited_or_4times_pair_plus_independent_roundoff": true,
+      "all_reported_candidate_reference_orders_recomputed": true
+    },
+    "retained_floor_only_fail": {
+      "position": {
+        "rms": false,
+        "maximum": false
+      },
+      "charge": {
+        "rms": false,
+        "maximum": false
+      }
+    },
+    "comparison_metrics": {
+      "position_rms_m": 1.098206866348243e-7,
+      "velocity_common_active_rms_m_s": 0.000351409915711881,
+      "charge_rms_e": 0.0015065145869173023,
+      "event_rms_s": 4.70238456305777e-9,
+      "event_max_s": 2.752707806033365e-8
+    },
+    "candidate_observed_orders": {
+      "position": 2.1330144029478695,
+      "velocity": 2.1555701038038677,
+      "charge": 1.9495817237575133
+    },
+    "interpretation": "Empirical comparison and three-level self-convergence at registered times; no rigorous truncation enclosure, all-shape certification or experimental truth. Configured same-state RHS diagnostic does not certify individual native force assembly, auxq RHS or internal stages."
+  },
+  "c2": {
+    "execution": {
+      "status": "PASS_CURRENT_SOURCE_REGISTERED_EXECUTION_AND_HASH_LINKAGE",
+      "candidate_executor_source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+      "candidate_engine_revision": "particle_engine_v46",
+      "candidate_event_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+      "checked_candidate_replicas": 64,
+      "checked_run_receipt_hashes": 64,
+      "checked_case_trajectory_events_failures_performance_result_hashes": 384,
+      "failure_rows": 0,
+      "per_anchor_particles": 287,
+      "per_anchor_replicas": 32,
+      "output_times": 121,
+      "dt_s": 0.00002,
+      "base_depth": 3,
+      "adaptive_max_depth": 3,
+      "A": {
+        "manifest_sha256": "8f608673f829789a6fc1143fd81768ea7c41f3b227d1f1c5dfba5fdcc2e9507e",
+        "event_rows_sum": 8444,
+        "event_rows_min": 259,
+        "event_rows_max": 269
+      },
+      "P": {
+        "manifest_sha256": "1647d77ce040e1880dd526732dcf9f619aba154fc96dcb4e297074cef38c3f3b",
+        "event_rows_sum": 0,
+        "event_rows_min": 0,
+        "event_rows_max": 0
+      },
+      "exact_checks": [
+        "registered seed sequence",
+        "registered candidate executor identity",
+        "case, canonical content, model revisions",
+        "policy and fixed registration identity",
+        "receipt payload matches manifest",
+        "result engine46/event22 and failure0"
+      ],
+      "interpretation": "Hash and execution provenance audit; no fresh cohort independence or broad raw-population statistical recomputation. A native Disappear cause/ID remain NOT_TESTED; P wall-positive remains NOT_TESTED."
+    },
+    "A": {
+      "status": "PASS_REGISTERED_SAME_COHORT_VERSION_REGRESSION",
+      "evaluation_sha256": "0258b442e30ffccd6b25afaec58578aa4e0005c0fc2b0101fdb17737adfeff58",
+      "campaign_sha256": "b52fc1fc0c77127a408ac0e5f6c67fe9641cf8f300ed41b0556d2677278c9723",
+      "participant_science_refs_checked": 128,
+      "terminal_empirical_difference": 0.005117595818815324,
+      "terminal_fixed_radius": 0.03501066711816651,
+      "terminal_gate_value": 0.04012826293698183,
+      "terminal_margin": 0.05,
+      "rz_empirical_tv": 0.009581881533101043,
+      "rz_fixed_radius": 0.12115351898620552,
+      "rz_gate_value": 0.13073540051930657,
+      "rz_margin": 0.15,
+      "observed_initial_conditions_status": "PASS",
+      "source_identity_mismatch_count": 0,
+      "raw_population_recalculation": false,
+      "independent_checks": [
+        "campaign/participant/source/policy/pilot/selection hashes",
+        "registered seed sets and fixed selected settings",
+        "critical radii recomputed from N9184/T121/K83/alpha.0125",
+        "reported maxima and sums and gate pass flags"
+      ],
+      "interpretation": "Observed same-cohort algorithm-version regression only. No new unseen confirmation or new inferential family. Native Disappear cause/ID, semantic wall-event parity, continuous-path noise law and absolute continuous-SDE bias remain NOT_TESTED/NOT_RESOLVED."
+    },
+    "P": {
+      "status": "PASS_REGISTERED_SAME_COHORT_VERSION_REGRESSION",
+      "evaluation_sha256": "00d0c90a695673b77b1d3bcef3c2cb883c906ac41101a315b42f6ae223fd72ee",
+      "campaign_sha256": "360d98160e2b1f57bd1b29414edca66832557123598a02eef88ea53ff2889fa2",
+      "participant_science_refs_checked": 128,
+      "terminal_empirical_difference": 0,
+      "terminal_fixed_radius": 0.03501066711816651,
+      "terminal_gate_value": 0.03501066711816651,
+      "terminal_margin": 0.05,
+      "rz_empirical_tv": 0.008384146341463419,
+      "rz_fixed_radius": 0.12115351898620552,
+      "rz_gate_value": 0.12953766532766894,
+      "rz_margin": 0.15,
+      "observed_initial_conditions_status": "PASS",
+      "source_identity_mismatch_count": 0,
+      "raw_population_recalculation": false,
+      "independent_checks": [
+        "campaign/participant/source/policy/pilot/selection hashes",
+        "registered seed sets and fixed selected settings",
+        "critical radii recomputed from N9184/T121/K83/alpha.0125",
+        "reported maxima and sums and gate pass flags",
+        "canonical scope fingerprint hash recomputed"
+      ],
+      "interpretation": "Observed same-cohort algorithm-version regression only. No new unseen confirmation or new inferential family. Native wall-positive response NOT_TESTED because zero observed events; continuous noise law and absolute continuous-SDE bias remain NOT_TESTED/NOT_RESOLVED."
+    },
+    "fixed_gate_calculation": {
+      "N_per_arm": 9184,
+      "replicas_per_arm": 32,
+      "particles_per_replica": 287,
+      "output_time_count": 121,
+      "terminal_endpoint_count": 484,
+      "rz_category_count": 83,
+      "inherited_global_alpha": 0.05,
+      "inherited_per_anchor_alpha": 0.025,
+      "inherited_per_gate_alpha": 0.0125,
+      "terminal_radius_formula": "sqrt(log(2 * (4 * T) / alpha) / N)",
+      "terminal_radius": 0.03501066711816651,
+      "terminal_derivation": "For the difference of two equally sized independent bounded samples, sum of squared weights is 2/N, so the two-sided bound is 2*exp(-N*epsilon^2); union over 4*T registered fate/time endpoints.",
+      "rz_two_arm_tv_radius_formula": "2 * sqrt((K * log(2) + log(2 * T / alpha)) / (2 * N))",
+      "rz_two_arm_tv_radius": 0.12115351898620552,
+      "interpretation": "Original frozen policy numbers and formulas are reused as locked algorithm-version regression gates. This same previously observed cohort does not establish a new unseen-cohort confirmation or a new confidence family."
+    },
+    "actual_both_canonical_scope_fingerprint_hashes_recomputed": true,
+    "broad_128_csv_population_recalculation": false,
+    "independent_review_scope": "Small authority JSONs, all candidate run/result receipts and artifact byte hashes, campaign/reference linkage and reported metric/gate arithmetic. No new candidate or native scientific calculation."
+  },
+  "consumer_locator_amendment": {
+    "status": "PASS_PATH_ONLY_SAME_REFERENCED_BYTES",
+    "path_pointer_count_each_anchor": 129,
+    "changed_pointer_classes": [
+      "meaning_preflight_inventory/path",
+      "each replica trajectory/path",
+      "each replica events/path",
+      "each replica performance/path",
+      "each replica actual_run_readback/path"
+    ],
+    "original_registered_manifest_hashes_unchanged": true,
+    "actual_restored_consumer_payload_equals_original_manifest": true,
+    "every_original_and_rebased_reference_resolves_to_same_file_and_sha256": true,
+    "meaning_source_model_field_sha_pointer_type_value_observation_data_unchanged": true,
+    "containment_gate_or_runtime_modified": false,
+    "chronology": "Created after candidate outcomes to satisfy the existing consumer manifest-parent containment rule. A post-registration transport-only locator amendment, not a preregistered new view or numerical/model observation."
+  },
+  "four_evaluation_interpretation": {
+    "initial_conditions": {
+      "status": "PASS",
+      "scope": "Registered canonical source and fixed 287 IDs, release states and saved native condition provenance. Per-replica fresh native mass getter not claimed."
+    },
+    "fields_and_rhs": {
+      "status": "NOT_TESTED",
+      "supported_subscope": "Configured same-state formulas/runtime parity, registered exact-P1 input and separately retained saved output-time native total-force observation.",
+      "limits": [
+        "Individual native force assembly and native auxiliary charge RHS unobserved",
+        "All integration-stage native field/force values unobserved",
+        "Native finite-element field truth not established by imported P1 parity"
+      ]
+    },
+    "boundary_behavior": {
+      "status": "NOT_TESTED",
+      "supported_subscope": "Retained C3 141 Stick events: observed identity/outcome/time comparison at registered resolution.",
+      "limits": [
+        "Native hit positions, incident/post velocity and remaining substep not fully observed",
+        "CaseA native Disappear population/status/time does not identify boundary cause or ID",
+        "CaseP has zero observed wall-positive events and cannot certify wall response",
+        "No general corner/curved-wall/stochastic wall parity"
+      ]
+    },
+    "time_trajectory": {
+      "status": "PASS",
+      "scope": "Registered C3 observed-time state/event gates and C2 fixed fate-time/RZ-bin version-regression gates.",
+      "limits": [
+        "No pathwise Brownian RNG equality",
+        "No continuous stochastic first-passage exactness or general SDE convergence order",
+        "No absolute continuous-SDE bias certificate"
+      ]
+    }
+  },
+  "retained_negative_or_unmeasured_evidence": {
+    "c3_position_and_charge_absolute_floor_only_checks": "FAIL retained; registered empirical 4-times fine-pair gate PASS does not erase these stricter diagnostics.",
+    "brownian_original_all_D_ge_2_campaign_requirement": "NOT_MET retained in frozen numerical authority; N16k D2 bound above .03 is an unresolved confidence qualification, not proof of true bias above .03.",
+    "brownian_separate_preregistered_N64000_heldout_D2": "PASS retained separately; does not replace or rewrite original NOT_MET.",
+    "brownian_post_observation_D4_qualification": "Selected-profile qualification kept separate from original all-depth requirement.",
+    "physical_experimental_predictive_validation": "NOT_TESTED",
+    "effective_gas_aggregate_charge_ion_drag_rarefied_lift_model_form_truth": "NOT_CERTIFIED; same-form numerical sensitivity scope only",
+    "new_unseen_current_cohort_confirmation": false,
+    "universal_comsol_equivalence": false
+  },
+  "chronology_and_freeze": {
+    "original_preregistration_status_preserved": "REGISTERED_NOT_EXECUTED is its historical registration state, not the present execution outcome.",
+    "numeric_acceptance_and_dec685ff_verification_unchanged": true,
+    "immutable_pre_run_snapshot": "Identical preserved copy of dec685ff. Its later copy/preservation time is not represented as an earlier new observation.",
+    "post_run_audit_observation_after_outcomes": true,
+    "subsequent_publication_closure_review": "A separate read-only audit after metadata closeout; it will not overwrite this frozen result audit."
+  }
+}

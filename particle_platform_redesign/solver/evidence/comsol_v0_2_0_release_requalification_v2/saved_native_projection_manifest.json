@@ -1,0 +1,28 @@
+{
+  "new_native_execution": false,
+  "raw_native_regeneration_required": false,
+  "records": {
+    "c3_dt_1p25us": {
+      "path": "saved_native/c3_dt_1p25us/publication_projection_receipt.json",
+      "sha256": "96f0283e440237386a0872ef36bf28715fa64ea1100cd725f940011e8f450fd8"
+    },
+    "c3_dt_2p5us": {
+      "path": "saved_native/c3_dt_2p5us/publication_projection_receipt.json",
+      "sha256": "4b5d841e5bab58d9cd44935acc2ea40c87e3c33f98b49975af519119d9310ae3"
+    },
+    "c3_dt_5us": {
+      "path": "saved_native/c3_dt_5us/publication_projection_receipt.json",
+      "sha256": "7694c525be439e56bc97761b11137ed51af4d8e3412894d6f64c7970296d8e71"
+    },
+    "caseA": {
+      "path": "saved_native/caseA/publication_projection_receipt.json",
+      "sha256": "f7d7b0c72a885d0a3f1d2838f14c426c6ec253b0f18c3ee894cb516acdf4dd73"
+    },
+    "caseP": {
+      "path": "saved_native/caseP/publication_projection_receipt.json",
+      "sha256": "fee4f746dea43ffb80f59f0ba02f41f3d29ce82f869bf7bdd20fc5a740d36c81"
+    }
+  },
+  "schema_version": 1,
+  "status": "READY_FOR_PREREGISTRATION"
+}

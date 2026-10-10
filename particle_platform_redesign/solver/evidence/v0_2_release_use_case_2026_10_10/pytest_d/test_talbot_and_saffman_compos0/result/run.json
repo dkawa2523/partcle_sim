@@ -1,0 +1,394 @@
+{
+  "boundary_algorithm_revision": null,
+  "boundary_interactions": {
+    "axis_crossings": 0,
+    "residual_splits": 0,
+    "wall_events": 0
+  },
+  "brownian_adaptive_max_depth": null,
+  "brownian_charge_dense_revision": null,
+  "brownian_composition_revision": null,
+  "brownian_interval_tree_depth": null,
+  "brownian_rng_revision": null,
+  "brownian_tree_policy_revision": null,
+  "case_file_hash": "sha256:8c716df98d48ac36bb10a6ef36a9c14906340f76c4151c3b9544a5c2951357e4",
+  "case_name": "C07",
+  "case_schema_version": 3,
+  "checkpoint_schema_version": 2,
+  "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+  "counts": {
+    "boundary_events": 0,
+    "failure_events": 0,
+    "frame_rows": 0,
+    "frames": 0,
+    "macro_steps": 10,
+    "particles": 1,
+    "probe_rows": 0,
+    "probes": 0,
+    "release_events": 1,
+    "series": 10
+  },
+  "data_content_hash": "sha256:1256d60f452863e8a8166e24b17fd6bf749e32ced2599ac999b4f3c08ec45339",
+  "data_coordinate_system": "cartesian_xy",
+  "durable_commit_cadence": {
+    "barrier": "accepted_macro_step",
+    "revision": "cumulative_solver_work_v1",
+    "work_components": [
+      "macro_step_count",
+      "accepted_particle_pieces",
+      "candidate_queries",
+      "refinements"
+    ],
+    "work_threshold": 1048576
+  },
+  "engine_algorithm_revision": "particle_engine_v46",
+  "event": {
+    "corner_policy": "priority_then_combined_normal_v1",
+    "geometry_rtol": 1e-12,
+    "max_interactions_per_step": 8,
+    "max_refinements": 48,
+    "roundoff_ulps": 64
+  },
+  "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+  "event_refinement": null,
+  "exponential_midpoint_enclosure_revision": "exponential_midpoint_local_stage_enclosure_v4",
+  "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+  "failure_reason_codes": {
+    "field_support": 5,
+    "indeterminate_applicability_certificate": 9,
+    "indeterminate_boundary_policy": 3,
+    "indeterminate_event": 2,
+    "indeterminate_surface_departure": 4,
+    "integrator_accuracy": 8,
+    "model_applicability": 6,
+    "nonfinite_physics": 7,
+    "numerical_event_budget": 1
+  },
+  "failure_reason_counts": {
+    "field_support": 0,
+    "indeterminate_applicability_certificate": 0,
+    "indeterminate_boundary_policy": 0,
+    "indeterminate_event": 0,
+    "indeterminate_surface_departure": 0,
+    "integrator_accuracy": 0,
+    "model_applicability": 0,
+    "nonfinite_physics": 0,
+    "numerical_event_budget": 0
+  },
+  "field_location_revision": "field_location_v4",
+  "field_time_revision": "fixed_topology_linear_time_v2",
+  "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v7",
+  "joint_ou_revision": null,
+  "joint_ou_split_revision": null,
+  "latest_commit_id": 0,
+  "lifecycle_counts": {
+    "active": 1,
+    "escaped": 0,
+    "failed": 0,
+    "held": 0,
+    "pending": 0,
+    "stuck": 0
+  },
+  "maximum_dt_charge_lipschitz": 0.0,
+  "maximum_dt_over_tau": 0.0891569194990691,
+  "memory_plan": {
+    "certificate_work_bytes_per_particle": 544,
+    "components": {
+      "active_index": 9,
+      "canonical_data": 565,
+      "field_runtime": 0,
+      "geometry_query_scratch": 0,
+      "output_buffer": 9,
+      "particle_schedule": 128,
+      "physics_runtime": 82,
+      "prepared_geometry": 96,
+      "probe_index": 0,
+      "replay_work": 0,
+      "resident_state": 101,
+      "safety_margin": 393671,
+      "slab_certificate_work": 544,
+      "slab_dense_path": 0,
+      "slab_event_staging": 0,
+      "slab_event_work": 0,
+      "slab_failure_staging": 52,
+      "slab_proposal_scratch": 2048,
+      "slab_release_work": 0,
+      "slab_stochastic_tree_work": 0,
+      "writer_reserve": 3145728
+    },
+    "dense_path_bytes_per_particle": 0,
+    "event_candidate_capacity": 0,
+    "event_staging_bytes_per_row": 0,
+    "event_staging_capacity": 0,
+    "event_staging_fixed_bytes": 0,
+    "event_work_bytes_per_particle": 0,
+    "failure_staging_bytes_per_particle": 52,
+    "field_preparation_transient_bytes": 0,
+    "geometry_preparation_transient_bytes": 1024,
+    "limit_bytes": 134217728,
+    "phase_peaks": {
+      "load_case": 66101,
+      "prepare": 67559,
+      "run": 3543033
+    },
+    "planned_bytes": 3543033,
+    "release_work_bytes_per_particle": 0,
+    "replay_work_bytes": 0,
+    "revision": "solver_owned_memory_plan_v16",
+    "runtime_layout_revision": "resident_soa_serial_slab_v6",
+    "scratch_bytes_per_particle": 2048,
+    "semantics": "predicted peak of solver-owned arrays; not process RSS",
+    "slab_particles": 1,
+    "stochastic_tree_work_bytes_per_particle": 0
+  },
+  "motion_mode": "cartesian_xy",
+  "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+  "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+  "random_draw_kinds": {
+    "brownian_root_normal": null,
+    "brownian_split_normal": null,
+    "wall_maxwell_diffuse": 1463897090,
+    "wall_maxwell_normal": 1463897091,
+    "wall_maxwell_tangential": 1463897092,
+    "wall_probabilistic_stick": 1463897089
+  },
+  "requested": {
+    "backend": "cpu",
+    "integrator": "exponential_midpoint",
+    "seed": 0
+  },
+  "required_field_revision": "required_field_time_linear_v6",
+  "resolved": {
+    "backend": "cpu",
+    "boundary_laws": [],
+    "brownian_coefficient_policy": null,
+    "integrator": "exponential_midpoint",
+    "path_kind": "exponential_midpoint_reintegrated",
+    "physics_models": {
+      "charge": {
+        "model": "fixed",
+        "revision": "fixed_charge_v1"
+      },
+      "drag": {
+        "model": "stokes_cunningham",
+        "revision": "stokes_cunningham_allen_raabe_air_v1"
+      },
+      "lift": {
+        "model": "saffman",
+        "revision": "saffman_unbounded_creeping_shear_v1"
+      },
+      "thermophoresis": {
+        "model": "talbot",
+        "momentum_exchange_coefficient": 1.14,
+        "particle_thermal_conductivity_W_m_K": 0.2,
+        "revision": "talbot_cross_regime_radius_knudsen_v1",
+        "thermal_exchange_coefficient": 2.18,
+        "thermal_slip_coefficient": 1.17
+      }
+    },
+    "required_fields": [
+      {
+        "components": [
+          "value"
+        ],
+        "layout": "gas",
+        "name": "gas_conductivity",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "scalar",
+        "time_interpolation": "static",
+        "unit": "W/(m*K)"
+      },
+      {
+        "components": [
+          "value"
+        ],
+        "layout": "gas",
+        "name": "gas_density",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "scalar",
+        "time_interpolation": "static",
+        "unit": "kg/m^3"
+      },
+      {
+        "components": [
+          "x",
+          "y"
+        ],
+        "layout": "gas",
+        "name": "gas_velocity",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "cartesian_xy",
+        "time_interpolation": "static",
+        "unit": "m/s"
+      },
+      {
+        "components": [
+          "value"
+        ],
+        "layout": "gas",
+        "name": "gas_viscosity",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "scalar",
+        "time_interpolation": "static",
+        "unit": "Pa*s"
+      },
+      {
+        "components": [
+          "value"
+        ],
+        "layout": "gas",
+        "name": "mean_free_path",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "scalar",
+        "time_interpolation": "static",
+        "unit": "m"
+      },
+      {
+        "components": [
+          "value"
+        ],
+        "layout": "gas",
+        "name": "temperature",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "scalar",
+        "time_interpolation": "static",
+        "unit": "K"
+      },
+      {
+        "components": [
+          "x",
+          "y"
+        ],
+        "layout": "gas",
+        "name": "temperature_gradient",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "cartesian_xy",
+        "time_interpolation": "static",
+        "unit": "K/m"
+      },
+      {
+        "components": [
+          "value"
+        ],
+        "layout": "gas",
+        "name": "vorticity",
+        "snapshot_count": 1,
+        "snapshot_range_s": null,
+        "stored_basis": "scalar",
+        "time_interpolation": "static",
+        "unit": "1/s"
+      }
+    ],
+    "sources": [
+      {
+        "name": "release",
+        "source_id": 0,
+        "type": "table"
+      }
+    ]
+  },
+  "result_algorithm_revision": "durable_segmented_result_v6",
+  "result_schema_version": 3,
+  "resume_identity": {
+    "boundary_algorithm_revision": null,
+    "brownian_adaptive_max_depth": null,
+    "brownian_charge_dense_revision": null,
+    "brownian_coefficient_policy": null,
+    "brownian_composition_revision": null,
+    "brownian_interval_tree_depth": null,
+    "brownian_rng_revision": null,
+    "brownian_tree_policy_revision": null,
+    "case_file_hash": "sha256:8c716df98d48ac36bb10a6ef36a9c14906340f76c4151c3b9544a5c2951357e4",
+    "case_schema_version": 3,
+    "checkpoint_schema_version": 2,
+    "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+    "coordinate_system": "cartesian_xy",
+    "cpu_runtime_layout_revision": "resident_soa_serial_slab_v6",
+    "data_content_hash": "sha256:1256d60f452863e8a8166e24b17fd6bf749e32ced2599ac999b4f3c08ec45339",
+    "durable_commit_cadence": {
+      "barrier": "accepted_macro_step",
+      "revision": "cumulative_solver_work_v1",
+      "work_components": [
+        "macro_step_count",
+        "accepted_particle_pieces",
+        "candidate_queries",
+        "refinements"
+      ],
+      "work_threshold": 1048576
+    },
+    "engine_algorithm_revision": "particle_engine_v46",
+    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "exponential_midpoint_enclosure_revision": "exponential_midpoint_local_stage_enclosure_v4",
+    "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+    "field_location_revision": "field_location_v4",
+    "field_time_revision": "fixed_topology_linear_time_v2",
+    "field_time_split_s": [],
+    "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v7",
+    "joint_ou_revision": null,
+    "joint_ou_split_revision": null,
+    "memory_plan_revision": "solver_owned_memory_plan_v16",
+    "motion_mode": "cartesian_xy",
+    "particle_count": 1,
+    "particle_id_sha256": "ad283961ac040531de90b5e85e258aa1922264fe4afddc6a5eabc3a3df60d045",
+    "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+    "required_field_revision": "required_field_time_linear_v6",
+    "resolved_backend": "cpu",
+    "resolved_integrator": "exponential_midpoint",
+    "resolved_physics_models": {
+      "charge": {
+        "model": "fixed",
+        "revision": "fixed_charge_v1"
+      },
+      "drag": {
+        "model": "stokes_cunningham",
+        "revision": "stokes_cunningham_allen_raabe_air_v1"
+      },
+      "lift": {
+        "model": "saffman",
+        "revision": "saffman_unbounded_creeping_shear_v1"
+      },
+      "thermophoresis": {
+        "model": "talbot",
+        "momentum_exchange_coefficient": 1.14,
+        "particle_thermal_conductivity_W_m_K": 0.2,
+        "revision": "talbot_cross_regime_radius_knudsen_v1",
+        "thermal_exchange_coefficient": 2.18,
+        "thermal_slip_coefficient": 1.17
+      }
+    },
+    "result_algorithm_revision": "durable_segmented_result_v6",
+    "result_schema_version": 3,
+    "rk4_dense_path_revision": null,
+    "rk4_enclosure_revision": null,
+    "rng_algorithm_revision": "philox4x32_10_v2",
+    "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+    "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+    "topology_algorithm_revision": null
+  },
+  "resume_identity_hash": "sha256:3cd09dd47ec93991afad60901f56715b5a2abb03b08bb3f1f85f35b06ec0a158",
+  "rk4_dense_path_revision": null,
+  "rk4_enclosure_revision": null,
+  "rng_algorithm_revision": "philox4x32_10_v2",
+  "segment_count": 1,
+  "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+  "source_id_to_name": [
+    "release"
+  ],
+  "status": "complete",
+  "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+  "time": {
+    "dt_s": 0.0005,
+    "end_s": 0.005,
+    "field_snapshot_splits_s": [],
+    "start_s": 0.0
+  },
+  "topology_algorithm_revision": null
+}

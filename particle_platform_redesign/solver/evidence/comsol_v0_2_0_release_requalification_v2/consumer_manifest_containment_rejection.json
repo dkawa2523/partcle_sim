@@ -1,0 +1,12 @@
+{
+  "attempt": "A ensemble assembly with the registered saved_native/caseA/comsol_campaign_manifest.json",
+  "candidate_runs_repeated": false,
+  "criteria_changed": false,
+  "error": "comsol.dt_20us.replicas[0].trajectory is missing or outside its participant directory",
+  "native_solve": false,
+  "owner": "assemble_m3c2_campaign._artifact participant-parent containment",
+  "recorded_at_utc": "2026-10-10T05:19:53.430471+00:00",
+  "remedy": "Separate post-registration consumer view at the common evidence ancestor; path-only, hashes and scientific payload unchanged; all existing containment/meaning gates retained.",
+  "result": "REJECTED_BEFORE_CAMPAIGN_OUTPUT",
+  "schema_version": 1
+}

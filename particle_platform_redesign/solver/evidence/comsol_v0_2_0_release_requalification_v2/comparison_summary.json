@@ -1,0 +1,477 @@
+{
+  "broader_guarantees": {
+    "continuous_stochastic_bias_and_noise_law": "NOT_TESTED",
+    "experimental_truth": "NOT_TESTED",
+    "general_3d": "NOT_APPLICABLE",
+    "universal_COMSOL_equivalence": "NOT_TESTED"
+  },
+  "c2": {
+    "A": {
+      "boundary_limit": "CaseA Disappear is population status/time only; its cause and boundary ID remain unobserved.",
+      "evaluation": {
+        "path": "caseA_final_evaluation/evaluation_manifest.json",
+        "sha256": "0258b442e30ffccd6b25afaec58578aa4e0005c0fc2b0101fdb17737adfeff58"
+      },
+      "interpretation": "Previously observed cohorts, fixed v45 selection and statistical formula used as a current-version regression gate. This creates neither a fresh unseen confirmation nor a new confidence family.",
+      "rz_distribution_gate": {
+        "active_position_bins": {
+          "axial_bins": 8,
+          "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes",
+          "bounds_m": [
+            0.0,
+            0.25,
+            0.0,
+            0.13
+          ],
+          "radial_bins": 10
+        },
+        "category_count": 83,
+        "confidence": 0.9875,
+        "familywise_alpha": 0.0125,
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin_total_variation": 0.15,
+        "maximum_empirical_total_variation": 0.009581881533101043,
+        "maximum_empirical_tv_that_can_pass": 0.028846481013794473,
+        "method": "two_sample_union_multinomial_l1",
+        "observable": "full_population_fixed_geometry_rz_fate_partition",
+        "observations_per_participant_per_time": 9184,
+        "one_sample_critical_radius": 0.06057675949310276,
+        "one_sample_critical_radius_formula": "sqrt((K*ln(2)+ln(2*T/alpha))/(2*N))",
+        "output_time_count": 121,
+        "participant_union_count": 2,
+        "role": "confirmatory_full_population_distribution_gate",
+        "simultaneous_confidence_bound": 0.13073540051930657,
+        "status": "PASS",
+        "terminal_categories": [
+          "stuck",
+          "held",
+          "escaped"
+        ],
+        "two_sample_critical_radius": 0.12115351898620552,
+        "within_unit_dependence": "time_dependence_retained"
+      },
+      "status": "PASS",
+      "terminal_population_gate": {
+        "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+        "confidence": 0.9875,
+        "critical_radius": 0.03501066711816651,
+        "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+        "curves": [
+          "stuck",
+          "held",
+          "escaped",
+          "any_terminal"
+        ],
+        "familywise_alpha": 0.0125,
+        "first_arrival_role": "represented_once_as_any_terminal",
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin": 0.05,
+        "maximum_absolute_difference": 0.005117595818815324,
+        "maximum_absolute_difference_by_curve": {
+          "any_terminal": 0.005117595818815324,
+          "escaped": 0.004899825783972189,
+          "held": 0.0,
+          "stuck": 0.003919860627177701
+        },
+        "maximum_point_difference_that_can_pass": 0.014989332881833496,
+        "method": "two_sample_union_hoeffding",
+        "observations_per_participant": 9184,
+        "role": "confirmatory_terminal_population_gate",
+        "simultaneous_confidence_bound": 0.04012826293698183,
+        "simultaneous_endpoint_count": 484,
+        "status": "PASS",
+        "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+      }
+    },
+    "P": {
+      "boundary_limit": "CaseP has no observed Brownian wall events; wall behavior is NOT_TESTED.",
+      "evaluation": {
+        "path": "caseP_final_evaluation/evaluation_manifest.json",
+        "sha256": "00d0c90a695673b77b1d3bcef3c2cb883c906ac41101a315b42f6ae223fd72ee"
+      },
+      "interpretation": "Previously observed cohorts, fixed v45 selection and statistical formula used as a current-version regression gate. This creates neither a fresh unseen confirmation nor a new confidence family.",
+      "rz_distribution_gate": {
+        "active_position_bins": {
+          "axial_bins": 8,
+          "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes",
+          "bounds_m": [
+            0.0,
+            0.25,
+            0.0,
+            0.13
+          ],
+          "radial_bins": 10
+        },
+        "category_count": 83,
+        "confidence": 0.9875,
+        "familywise_alpha": 0.0125,
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin_total_variation": 0.15,
+        "maximum_empirical_total_variation": 0.008384146341463419,
+        "maximum_empirical_tv_that_can_pass": 0.028846481013794473,
+        "method": "two_sample_union_multinomial_l1",
+        "observable": "full_population_fixed_geometry_rz_fate_partition",
+        "observations_per_participant_per_time": 9184,
+        "one_sample_critical_radius": 0.06057675949310276,
+        "one_sample_critical_radius_formula": "sqrt((K*ln(2)+ln(2*T/alpha))/(2*N))",
+        "output_time_count": 121,
+        "participant_union_count": 2,
+        "role": "confirmatory_full_population_distribution_gate",
+        "simultaneous_confidence_bound": 0.12953766532766894,
+        "status": "PASS",
+        "terminal_categories": [
+          "stuck",
+          "held",
+          "escaped"
+        ],
+        "two_sample_critical_radius": 0.12115351898620552,
+        "within_unit_dependence": "time_dependence_retained"
+      },
+      "status": "PASS",
+      "terminal_population_gate": {
+        "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+        "confidence": 0.9875,
+        "critical_radius": 0.03501066711816651,
+        "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+        "curves": [
+          "stuck",
+          "held",
+          "escaped",
+          "any_terminal"
+        ],
+        "familywise_alpha": 0.0125,
+        "first_arrival_role": "represented_once_as_any_terminal",
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin": 0.05,
+        "maximum_absolute_difference": 0.0,
+        "maximum_absolute_difference_by_curve": {
+          "any_terminal": 0.0,
+          "escaped": 0.0,
+          "held": 0.0,
+          "stuck": 0.0
+        },
+        "maximum_point_difference_that_can_pass": 0.014989332881833496,
+        "method": "two_sample_union_hoeffding",
+        "observations_per_participant": 9184,
+        "role": "confirmatory_terminal_population_gate",
+        "simultaneous_confidence_bound": 0.03501066711816651,
+        "simultaneous_endpoint_count": 484,
+        "status": "PASS",
+        "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+      }
+    }
+  },
+  "c3_registered_empirical_gate_status": "PASS",
+  "candidate_executor": {
+    "distribution_version": "0.2.0",
+    "python_version": "3.12.13",
+    "source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+    "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+  },
+  "closed_at_utc": "2026-10-10T05:26:31.133774+00:00",
+  "four_evaluations": {
+    "boundary_behavior": {
+      "axis_limit": "The separate saved axis control is unchanged historical evidence; this release performs no new native axis or wall solve.",
+      "retained_stick_event_subscope": {
+        "identity_exact_required": true,
+        "limits": {
+          "maximum_s": 9.781336940672263e-07,
+          "rms_s": 1.2070829713986093e-07
+        },
+        "metrics": {
+          "event_count": 141,
+          "identity_exact": true,
+          "maximum_s": 2.752707806033365e-08,
+          "rms_s": 4.70238456305777e-09
+        },
+        "pass": {
+          "maximum_s": true,
+          "rms_s": true
+        },
+        "status": "PASS",
+        "uncertainty_components": {
+          "candidate_fine_pair": {
+            "maximum_s": 1.5697894279170094e-08,
+            "rms_s": 7.3322896548973795e-09
+          },
+          "comsol_reference_pair": {
+            "maximum_s": 2.2883552582703137e-07,
+            "rms_s": 2.284478121946272e-08
+          }
+        }
+      },
+      "scope": "The deterministic retained Stick case compares 141 observed first-event IDs, semantic group, outcome and time. The current candidate reports actual canonical boundary IDs.",
+      "status": "NOT_TESTED",
+      "unobserved": [
+        "native first-hit location",
+        "native pre/post velocity",
+        "native remaining-substep response",
+        "CaseA Disappear boundary ID/cause",
+        "CaseP Brownian wall-positive behavior"
+      ]
+    },
+    "fields_and_right_hand_side": {
+      "interpretation": "The aggregate item remains NOT_TESTED because the complete native component/stage assembly was not observed. Algebra reconstruction is not promoted to that observation.",
+      "status": "NOT_TESTED",
+      "supported_subscope": "Unchanged exact-P1 common primitives, initial SI beta/FDT algebra, configured force/charge expression parity, and the saved named native total Ftr/Ftz at matched output states.",
+      "unobserved": [
+        "individual native force contributions",
+        "auxiliary-charge assembled RHS",
+        "all internal integration stages",
+        "native FE field truth or arbitrary continuous fields"
+      ]
+    },
+    "initial_conditions": {
+      "mass_limit": "Density/diameter getter expressions plus immutable-source provenance and the registered 100 nm override; fresh per-replica numerical native mass is NOT_TESTED.",
+      "scope": "The immutable canonical releases and saved native configuration/provenance are reused unchanged. Current candidate checks bind all particle IDs, releases, position, velocity, diameter, mass, charge, enabled models and configured boundary profile to registered artifacts.",
+      "status": "PASS"
+    },
+    "time_trajectory": {
+      "allowance_limit": "The registered four-times fine-pair allowance is empirical numerical sensitivity, not a rigorous truncation bound. Inherited absolute floors alone are separately reported by the evaluator.",
+      "candidate_self_convergence": {
+        "coarse_vs_medium": {
+          "charge": {
+            "maximum": 0.16708774160019857,
+            "p99": 0.05690188345868128,
+            "relative_l2": 1.6098183705604196e-05,
+            "rms": 0.010757576264566958
+          },
+          "kinematics_valid_exact": true,
+          "lifecycle_exact": true,
+          "position": {
+            "maximum": 7.776588547645259e-06,
+            "p99": 3.382519820016583e-06,
+            "relative_l2": 1.2490818441991307e-05,
+            "rms": 8.7306078178436e-07
+          },
+          "quantity_scope": {
+            "charge": "all common finite lifecycle states",
+            "position": "all common finite lifecycle states",
+            "velocity": "common active states only; terminal Freeze velocity is not compared"
+          },
+          "velocity": {
+            "maximum": 0.01667921644359042,
+            "p99": 0.01160166326419265,
+            "relative_l2": 4.340886229102915e-05,
+            "rms": 0.0030760679619623063
+          }
+        },
+        "gates": {
+          "charge": {
+            "fine_pair_relative_l2": 4.167679799803209e-06,
+            "fine_pair_relative_l2_limit": 2e-05,
+            "fine_pair_relative_l2_pass": true,
+            "minimum_rms_order": 0.75,
+            "observed_rms_order": 1.9495817237575133,
+            "order_pass": true,
+            "roundoff_limited": false
+          },
+          "position": {
+            "fine_pair_relative_l2": 2.847670182396818e-06,
+            "fine_pair_relative_l2_limit": 0.0001,
+            "fine_pair_relative_l2_pass": true,
+            "minimum_rms_order": 0.75,
+            "observed_rms_order": 2.1330144029478695,
+            "order_pass": true,
+            "roundoff_limited": false
+          },
+          "velocity": {
+            "fine_pair_relative_l2": 9.742928302783502e-06,
+            "fine_pair_relative_l2_limit": 0.0005,
+            "fine_pair_relative_l2_pass": true,
+            "minimum_rms_order": 0.75,
+            "observed_rms_order": 2.1555701038038677,
+            "order_pass": true,
+            "roundoff_limited": false
+          }
+        },
+        "levels_s": {
+          "dt_0p625us": 6.25e-07,
+          "dt_1p25us": 1.25e-06,
+          "dt_2p5us": 2.5e-06
+        },
+        "lifecycle_and_validity_exact": true,
+        "medium_vs_fine": {
+          "charge": {
+            "maximum": 0.0529445732130398,
+            "p99": 0.013864614847630024,
+            "relative_l2": 4.167679799803209e-06,
+            "rms": 0.0027850426850883772
+          },
+          "kinematics_valid_exact": true,
+          "lifecycle_exact": true,
+          "position": {
+            "maximum": 1.7808157878085664e-06,
+            "p99": 7.688384435515275e-07,
+            "relative_l2": 2.847670182396818e-06,
+            "rms": 1.99041283494698e-07
+          },
+          "quantity_scope": {
+            "charge": "all common finite lifecycle states",
+            "position": "all common finite lifecycle states",
+            "velocity": "common active states only; terminal Freeze velocity is not compared"
+          },
+          "velocity": {
+            "maximum": 0.003781813566418366,
+            "p99": 0.0026181613046902027,
+            "relative_l2": 9.742928302783502e-06,
+            "rms": 0.0006904061756054361
+          }
+        },
+        "status": "PASS"
+      },
+      "deterministic_comparison": {
+        "gates": {
+          "charge": {
+            "inherited_absolute_only_diagnostic": {
+              "maximum": false,
+              "rms": false
+            },
+            "limits": {
+              "maximum": 0.4888049505698734,
+              "relative_l2": 4.125798971091032e-05,
+              "rms": 0.02757056135896643
+            },
+            "observed": {
+              "maximum": 0.02445712284088586,
+              "relative_l2": 2.2544249617771982e-06,
+              "rms": 0.0015065145869173023
+            },
+            "pass": {
+              "maximum": true,
+              "relative_l2": true,
+              "rms": true
+            },
+            "uncertainty_components": {
+              "candidate_fine_pair": {
+                "maximum": 0.0529445732130398,
+                "relative_l2": 4.167679799803209e-06,
+                "rms": 0.0027850426850883772
+              },
+              "comsol_reference_pair": {
+                "maximum": 0.06925666423546772,
+                "relative_l2": 6.146817514237533e-06,
+                "rms": 0.004107597460692407
+              }
+            }
+          },
+          "position": {
+            "inherited_absolute_only_diagnostic": {
+              "maximum": false,
+              "rms": false
+            },
+            "limits": {
+              "maximum": 1.9792935261920003e-05,
+              "relative_l2": 0.0001,
+              "rms": 2.230991515244269e-06
+            },
+            "observed": {
+              "maximum": 1.1211828897976107e-06,
+              "relative_l2": 1.571197350178269e-06,
+              "rms": 1.098206866348243e-07
+            },
+            "pass": {
+              "maximum": true,
+              "relative_l2": true,
+              "rms": true
+            },
+            "uncertainty_components": {
+              "candidate_fine_pair": {
+                "maximum": 1.7808157878085664e-06,
+                "relative_l2": 2.847670182396818e-06,
+                "rms": 1.99041283494698e-07
+              },
+              "comsol_reference_pair": {
+                "maximum": 3.1674180028529175e-06,
+                "relative_l2": 5.131991342686084e-06,
+                "rms": 3.587065704978521e-07
+              }
+            }
+          },
+          "velocity": {
+            "inherited_absolute_only_diagnostic": {
+              "maximum": true,
+              "rms": true
+            },
+            "limits": {
+              "maximum": 0.04348914576493441,
+              "relative_l2": 0.0005,
+              "rms": 0.006198561932930469
+            },
+            "observed": {
+              "maximum": 0.0025955805151173213,
+              "relative_l2": 4.959065109305856e-06,
+              "rms": 0.000351409915711881
+            },
+            "pass": {
+              "maximum": true,
+              "relative_l2": true,
+              "rms": true
+            },
+            "uncertainty_components": {
+              "candidate_fine_pair": {
+                "maximum": 0.003781813566418366,
+                "relative_l2": 9.742928302783502e-06,
+                "rms": 0.0006904061756054361
+              },
+              "comsol_reference_pair": {
+                "maximum": 0.007090472855834233,
+                "relative_l2": 1.212543696415804e-05,
+                "rms": 0.0008592342886461792
+              }
+            }
+          }
+        },
+        "kinematics_valid_exact": true,
+        "lifecycle_exact": true,
+        "lifecycle_exact_required": true,
+        "metrics": {
+          "charge": {
+            "maximum": 0.02445712284088586,
+            "p99": 0.007502280268610029,
+            "relative_l2": 2.2544249617771982e-06,
+            "rms": 0.0015065145869173023
+          },
+          "kinematics_valid_exact": true,
+          "lifecycle_exact": true,
+          "position": {
+            "maximum": 1.1211828897976107e-06,
+            "p99": 4.82878105388857e-07,
+            "relative_l2": 1.571197350178269e-06,
+            "rms": 1.098206866348243e-07
+          },
+          "quantity_scope": {
+            "charge": "all common finite lifecycle states",
+            "position": "all common finite lifecycle states",
+            "velocity": "common active states only; terminal Freeze velocity is not compared"
+          },
+          "velocity": {
+            "maximum": 0.0025955805151173213,
+            "p99": 0.0015551368698975454,
+            "relative_l2": 4.959065109305856e-06,
+            "rms": 0.000351409915711881
+          }
+        },
+        "status": "PASS"
+      },
+      "deterministic_scope": "Three current-candidate steps versus three saved-native steps at the registered common observed times. Position/charge use finite lifecycle states, velocity uses common active states, and lifecycle/validity/event identity are separate gates.",
+      "status": "PASS",
+      "stochastic_scope": "CaseA/CaseP fixed full-population RZ occupancy and fate/time curves use independent ensemble arms. No pathwise equality, velocity/charge ensemble law, continuous-SDE bias or time-stage noise law is certified."
+    }
+  },
+  "fresh_unseen_confirmation": false,
+  "frozen_original_native_integrity": {
+    "checked_original_external_inputs_including_source_mph": 278,
+    "checked_original_files": 546,
+    "ledger": {
+      "path": "saved_native_frozen_ledger.json",
+      "sha256": "ba981c8c8f0868d735e4f23b8aaf5953674bd6f0700a400a8e01e67db81f538d"
+    },
+    "status": "PASS"
+  },
+  "new_confidence_family": false,
+  "new_native_solve": false,
+  "schema_version": 1,
+  "scope": "0.2.0 current-v46/event-v22 same-canonical-field version requalification on previously observed cohorts against unchanged saved COMSOL 6.4.0.429 references.",
+  "status": "PASS"
+}

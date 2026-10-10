@@ -1,0 +1,156 @@
+{
+  "base_recipe": {
+    "path": "particle_platform_redesign/solver/tools/vv/comsol/cases/m3c2_caseA_100nm_candidate_pilot_v1.json",
+    "sha256": "f2b96690cac830e5d28c6173520d343a3e999114eecd3293e1152af377b0f6fa"
+  },
+  "campaign": {
+    "candidate_case_name_prefix": "m3c2_caseA_100nm",
+    "case_id": "formal_iondrag_theory_consistent/caseA_100nm",
+    "evaluation_case_id": "M3-C2A_caseA_100nm_common-P1",
+    "final_registration_kind": "m3c2_caseA_100nm_final_campaign",
+    "output_slug": "caseA_100nm"
+  },
+  "canonical_input": {
+    "content_hash": "sha256:4e1739a4b7f39f5047506f30d7c453e9023c3c9ec8a411937968dbeaaf35b483",
+    "path": "particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/inputs_axis_normalized/two_current/caseA/candidate_input.h5",
+    "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+  },
+  "claim_policy": {
+    "brownian_path_depth_convergence": "NOT_ESTABLISHED_UNTIL_INDEPENDENT_EVALUATION",
+    "comsol_golden_truth": false,
+    "geometry_rtol_1e-9": "CURRENT_PILOT_CONFIGURATION_TO_BE_SCREENED; not qualified by historical PASS",
+    "macro_convergence": "NOT_ESTABLISHED_UNTIL_INDEPENDENT_EVALUATION",
+    "pathwise_comsol_equality": false,
+    "production_core_changed": false,
+    "version_requalification": "Fixed v45 numerical selection is reused; no v46 pilot-selection claim."
+  },
+  "classification": "external_vv_executable_candidate_macro_and_path_pilot",
+  "contract": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_current_binding_pilot.json",
+    "sha256": "c3006414f56052bd5cf484d7443b0a9d4c4aeaaa812a5b718c0d8e3b06cfeef7"
+  },
+  "contract_receipt": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_contract_v2/contract_receipt.json",
+    "sha256": "85af3381402bca97c860dbefec1ef55e496a0ce165b4b21710b89efda1f774bc"
+  },
+  "deterministic_case_template": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/inputs_axis_normalized/two_current/caseA/candidate_coarse.yaml",
+    "sha256": "bb2b691820bbfadd5c9b5cf25c5a73ed25133ffe9426b0cecaa0cd6afab626e5"
+  },
+  "evaluation_plan": {
+    "accepted_macro_convergence_before_execution": "NOT_ESTABLISHED",
+    "macro_convergence_levels": [
+      "macro_coarse",
+      "macro_medium",
+      "macro_fine"
+    ],
+    "path_sensitivity_pair": [
+      "macro_fine",
+      "path_fine"
+    ],
+    "policy": {
+      "path": "particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_axis_normalized_population_policy.json",
+      "sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f"
+    },
+    "stochastic_claim_unit": "Previously observed registered 32-seed arms; fixed-condition engine-v46 version requalification, not a new unseen confirmatory cohort."
+  },
+  "execution": {
+    "expected_executor": {
+      "distribution_version": "0.2.0",
+      "python_version": "3.12.13",
+      "source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+      "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+    },
+    "expected_revisions": {
+      "boundary_algorithm_revision": "contact_wall_laws_v7",
+      "brownian_charge_dense_revision": "macro_root_affine_exponential_v2",
+      "brownian_composition_revision": "stochastic_exponential_midpoint_v1",
+      "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+      "brownian_tree_policy_revision": "conditional_boundary_refinement_v1",
+      "case_schema_version": 3,
+      "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+      "engine_algorithm_revision": "particle_engine_v46",
+      "joint_ou_revision": "inertial_joint_ou_v1",
+      "joint_ou_split_revision": "conditional_gaussian_half_split_v1",
+      "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+      "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+      "result_algorithm_revision": "durable_segmented_result_v6",
+      "result_schema_version": 3,
+      "rng_algorithm_revision": "philox4x32_10_v2"
+    },
+    "memory_limit_mb": 512,
+    "output_count": 121,
+    "parallel_policy": "sequential cells within each case root; independently locked CaseA and CaseP may run concurrently",
+    "public_api_path": [
+      "load_case",
+      "simulate",
+      "open_result"
+    ],
+    "time_end_s": 0.03
+  },
+  "execution_authorization": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_axis_normalized_pilot_authorization.json",
+    "sha256": "1977eaaf804404ba26e9ee4795c1e353b33707c983e8811ac6e0f35efcba8703"
+  },
+  "physics": {
+    "coefficient_policy": "macro_root_frozen_midpoint_v1",
+    "continuous_charge_revision": "aggregate_relative_drift_regularized_two_current_v1",
+    "deterministic_forces": [
+      "drag",
+      "electric",
+      "ion_drag",
+      "thermophoresis",
+      "dielectrophoresis",
+      "lift",
+      "gravity_buoyancy"
+    ],
+    "integrator": "ou_langevin",
+    "noise_model": "inertial_langevin_fdt",
+    "noise_revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
+  },
+  "pilot": {
+    "levels": [
+      {
+        "brownian_interval_tree_depth": 3,
+        "dt_s": 2e-05,
+        "geometry_rtol": 1e-09,
+        "name": "macro_coarse",
+        "purpose": "macro_step_convergence"
+      },
+      {
+        "brownian_interval_tree_depth": 3,
+        "dt_s": 1e-05,
+        "geometry_rtol": 1e-09,
+        "name": "macro_medium",
+        "purpose": "macro_step_convergence"
+      },
+      {
+        "brownian_interval_tree_depth": 3,
+        "dt_s": 5e-06,
+        "geometry_rtol": 1e-09,
+        "name": "macro_fine",
+        "purpose": "macro_step_convergence"
+      },
+      {
+        "brownian_interval_tree_depth": 4,
+        "dt_s": 5e-06,
+        "geometry_rtol": 1e-09,
+        "name": "path_fine",
+        "purpose": "brownian_first_passage_path_depth_sensitivity",
+        "reference_level_id": "macro_fine"
+      }
+    ],
+    "seed_source": {
+      "json_pointer": "/seed_plan/pilot/candidate_seeds",
+      "path": "particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_current_binding_pilot.json",
+      "sha256": "c3006414f56052bd5cf484d7443b0a9d4c4aeaaa812a5b718c0d8e3b06cfeef7"
+    }
+  },
+  "recipe_id": "M3-C2-caseA-100nm-axis-normalized-current-macro-pilot",
+  "recipe_revision": 6,
+  "schema_version": 1,
+  "tolerance_qualification": {
+    "path": "particle_platform_redesign/solver/evidence/m3c2/caseA_100nm_event_tolerance_cross_band_v2/qualification_decision.json",
+    "sha256": "8ef56344aeb377303af2d6796521f39a5c240c71cee02edc4aab7f05937ea6b7"
+  }
+}

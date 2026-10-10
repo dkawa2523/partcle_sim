@@ -1,0 +1,118 @@
+{
+  "brownian_interval_tree_depth": 3,
+  "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+  "case": "levels/macro_coarse/seed_939146/case.yaml",
+  "case_sha256": "f5508bc0411a44023d375fd249dfceeb0c966fb09a8d4acd84126927544f5a5b",
+  "dt_s": 2e-05,
+  "engine_algorithm_revision": "particle_engine_v46",
+  "event_rows": 266,
+  "events": "levels/macro_coarse/seed_939146/events.csv",
+  "events_sha256": "8c91d121a67f81155f7f99798f9d139a97f2fc82bdd9688ce3a0d27adda1b363",
+  "executor": {
+    "actual_revisions": {
+      "boundary_algorithm_revision": "contact_wall_laws_v7",
+      "brownian_charge_dense_revision": "macro_root_affine_exponential_v2",
+      "brownian_composition_revision": "stochastic_exponential_midpoint_v1",
+      "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+      "brownian_tree_policy_revision": "conditional_boundary_refinement_v1",
+      "case_schema_version": 3,
+      "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+      "engine_algorithm_revision": "particle_engine_v46",
+      "joint_ou_revision": "inertial_joint_ou_v1",
+      "joint_ou_split_revision": "conditional_gaussian_half_split_v1",
+      "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+      "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+      "result_algorithm_revision": "durable_segmented_result_v6",
+      "result_schema_version": 3,
+      "rng_algorithm_revision": "philox4x32_10_v2"
+    },
+    "identity": {
+      "distribution_version": "0.2.0",
+      "python_version": "3.12.13",
+      "source_sha256": "9d078a4d948ae0bd961932cd68e0b58c45b6df5331b001e0fe6fd42410fbb583",
+      "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401"
+    }
+  },
+  "failure_reason_counts": {
+    "field_support": 0,
+    "indeterminate_applicability_certificate": 0,
+    "indeterminate_boundary_policy": 0,
+    "indeterminate_event": 0,
+    "indeterminate_surface_departure": 0,
+    "integrator_accuracy": 0,
+    "model_applicability": 0,
+    "nonfinite_physics": 0,
+    "numerical_event_budget": 0
+  },
+  "failure_rows": 0,
+  "failures": "levels/macro_coarse/seed_939146/failures.csv",
+  "failures_sha256": "c1c1407fbe754ba47fdd0eb4316bfd385952b0941c350c6d6a74e8b9fd9f4f07",
+  "geometry_rtol": 1e-09,
+  "joint_ou_revision": "inertial_joint_ou_v1",
+  "level": "macro_coarse",
+  "participant": "candidate",
+  "performance": "levels/macro_coarse/seed_939146/performance.json",
+  "performance_sha256": "8b0466660487b7e0dcf6ca68615541d4862cbc5d2feb661c6467bc921d16efe4",
+  "recovered_after_postprocess_failure": false,
+  "resolved_physics_models": {
+    "charge": {
+      "model": "plasma_continuous",
+      "revision": "aggregate_relative_drift_regularized_two_current_v1"
+    },
+    "dielectrophoresis": {
+      "model": "quasistatic_spherical",
+      "revision": "quasistatic_spherical_gradient_e2_v1"
+    },
+    "drag": {
+      "model": "epstein_linear",
+      "revision": "epstein_linear_effective_gas_sensitivity_v1"
+    },
+    "electric": {
+      "model": "coulomb",
+      "revision": "electric_coulomb_v1"
+    },
+    "gravity_buoyancy": {
+      "model": "standard",
+      "revision": "gravity_buoyancy_standard_v1"
+    },
+    "ion_drag": {
+      "model": "screened_collection_orbital",
+      "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1"
+    },
+    "lift": {
+      "lift_coefficient": 1.0,
+      "model": "rarefied_vorticity_sensitivity",
+      "revision": "rarefied_vorticity_sensitivity_rz_v1"
+    },
+    "noise": {
+      "model": "inertial_langevin_fdt",
+      "revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
+    },
+    "thermophoresis": {
+      "model": "waldmann_gallis",
+      "revision": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1"
+    }
+  },
+  "result": "levels/macro_coarse/seed_939146/result",
+  "result_counts": {
+    "boundary_events": 266,
+    "failure_events": 0,
+    "frame_rows": 31519,
+    "frames": 121,
+    "macro_steps": 1500,
+    "particles": 287,
+    "probe_rows": 0,
+    "probes": 0,
+    "release_events": 287,
+    "series": 1500
+  },
+  "result_manifest_sha256": "2f1365da5fa317cba8471edebeee2ff4468dd6374908d57295a8f473de77b18c",
+  "seed": 939146,
+  "source_runner_tool_revision": "m3c2_candidate_campaign_runner_v6",
+  "status": "COMPLETE",
+  "tool_revision": "m3c2_candidate_campaign_runner_v6",
+  "trajectory": "levels/macro_coarse/seed_939146/trajectory.csv",
+  "trajectory_normalization_revision": "dense_schedule_escape_nan_suffix_v1",
+  "trajectory_rows": 34727,
+  "trajectory_sha256": "13d5d7a93b3eb6a477f660a14d6f848b6e9b3f94835d73574cc06855404642d6"
+}

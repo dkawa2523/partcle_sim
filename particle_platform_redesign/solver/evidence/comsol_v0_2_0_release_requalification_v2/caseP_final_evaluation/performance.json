@@ -1,0 +1,17 @@
+{
+  "participants": {
+    "candidate": [
+      {
+        "level_id": "macro_coarse",
+        "status": "NOT_REPORTED"
+      }
+    ],
+    "comsol": [
+      {
+        "level_id": "dt_20us",
+        "status": "NOT_REPORTED"
+      }
+    ]
+  },
+  "policy": "A stage is only a candidate for a bounded optimization when it is at least 25% of end-to-end wall time in a >=10000-particle accepted-accuracy workload."
+}

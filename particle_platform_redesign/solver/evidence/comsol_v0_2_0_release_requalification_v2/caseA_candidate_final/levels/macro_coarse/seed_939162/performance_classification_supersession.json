@@ -1,0 +1,15 @@
+{
+  "classification": "performance_only_supersession_science_payload_unchanged",
+  "performance_classification": "NON_AUTHORITATIVE_EXTERNAL_WORKLOAD_OVERLAP",
+  "reason": "Concurrent external version-requalification candidate queues; timing is non-authoritative.",
+  "replacement": {
+    "performance_sha256": "6310a06f128ec5eaaf9ae89c8b3571dfa0ca7c154f4b5ece743b20d03c9d8b7a",
+    "run_receipt_sha256": "24dc029a99500fc4b6b2455ba79ebffd42094878c7c14814cc305319b0716922"
+  },
+  "science_payload_unchanged": true,
+  "status": "COMPLETE",
+  "superseded": {
+    "performance_sha256": "682df772db22409ca481a69c5f9fb53844e30df999651cc56908d25f7afc3b08",
+    "run_receipt_sha256": "fad9e7e7becb3a685115f8208892128a49ea100541ed8f3795cdcdb23420d0ab"
+  }
+}

@@ -98,11 +98,11 @@ engine v46 / event v22の追加改良とlocal Windows/Linux検証は
 | 対象 | 0.2.0の状態と完了条件 | 追加主張が必要な用途だけの後続 |
 |---|---|---|
 | F1：用途条件 | 完了。決定論、線形OU、限定first-arrival、model式・適用域のprofileと数値budgetを固定。性能は登録機での測定とcompletion・memory plan・identityの検証とし、絶対時間SLAを設けない | 使用装置・parameter・粒子数・出力・hardware・必要KPIとSLAを定め、対象caseで適格性を確認する |
-| D1/D2・C3：数値精度 | 既存独立参照に加え、固定した決定論解析解と3つのOU profileを公開sourceで再実行する工程が残る。元N16k RZ D2のNOT_METと別seed/N64kの独立PASSは両方保持 | 一般time/state-dependent到達精度、使用field・wallでの必要KPIを独立参照とh/depth系列で検証する。有限Hermiteから連続OU exact first-passageやzero-missを主張しない |
-| H1/H2・C2/C3：境界とCOMSOL | 現行v46のC3・Case-A/Case-Pを、hash固定した保存native referenceと再比較する工程が残る。条件・cohort・判定marginを固定し、新しいnative観測とは呼ばない | Case-AのDisappear原因/境界ID、Case-Pの今回未発生wall応答、専用pre/post速度・残substepを保証する場合は実観測を追加する。C3 fine-pair allowanceは絶対誤差boundではない |
-| M/G11：物理式と場 | 独立式・極限・適用域・感度の既存検証を採用し、選択した既存Talbot/Saffman・Barnes・aggregate・effective-gasの小subsetを公開sourceで再確認する工程が残る | 実装式の検証と実物理のvalidationを分ける。実験的予測、個別native force/auxq RHS/全内部stage、native FE/curl、壁近傍局所場の精度を必要な用途で確認する |
-| F1/E：性能 | 登録P14全19条件×3反復（57観測）とB03全8条件×3反復（24観測）は合格。P14-Uの18観測・別profile・収束/RZ確認の終了判定が残る | 別hardwareや未測定model/scaleのSLAは対象条件で測る。全用途へのspeedupを主張せず、未達hotspotが実測された場合に同精度・同科学payloadで改良する |
-| A1/P14-R：正式公開 | release/chamber-particles-0.2.0を作成済み。残る検証を終え、source/lock/証拠のcommit固定・push、Windows/Linux CI、v0.2.0 tag、wheel・SHA256SUMS・Release Notesの公開と実asset照合を完了させる | 0.1.0のCIを0.2.0の合格へ流用しない。別OS/Python版、PyPI、sdist等は今回の配布scopeに含めない |
+| D1/D2・C3：数値精度 | 完了。既存独立参照に加え、固定した決定論解析解2件と独立OU/chargeの3 profileを公開LF sourceで再実行し合格。元N16k RZ D2のNOT_METと別seed/N64kの独立PASSは両方保持 | 一般time/state-dependent到達精度、使用field・wallでの必要KPIを独立参照とh/depth系列で検証する。有限Hermiteから連続OU exact first-passageやzero-missを主張しない |
+| H1/H2・C2/C3：境界とCOMSOL | 登録scopeで完了。現行v46のC3三刻み・Case-A/Case-P各32 runをhash固定した保存native referenceと再比較し、登録gateに合格。独立監査と公開用620 authorityのSHA照合も完了。四判断は初期条件PASS、完全RHS NOT_TESTED、完全境界挙動NOT_TESTED、時系列PASSとして保持 | Case-AのDisappear原因/境界ID、Case-Pの今回未発生wall応答、専用pre/post速度・残substepを保証する場合は実観測を追加する。C3 fine-pair allowanceは絶対誤差boundではない |
+| M/G11：物理式と場 | 完了。独立式・極限・適用域・感度の既存検証を採用し、選択した既存Talbot/Saffman・Barnes・aggregate・effective-gasの44試験を公開LF sourceで再確認して合格 | 実装式の検証と実物理のvalidationを分ける。実験的予測、個別native force/auxq RHS/全内部stage、native FE/curl、壁近傍局所場の精度を必要な用途で確認する |
+| F1/E：性能 | 完了。登録P14全19条件×3反復（57観測）、B03全8条件×3反復（24観測）、P14-Uの18観測・別profile・収束/RZ確認は全て合格。計99観測で、source/recipe/lockの事前登録との一致とLF公開sourceへの対応を保存 | 別hardwareや未測定model/scaleのSLAは対象条件で測る。全用途へのspeedupを主張せず、未達hotspotが実測された場合に同精度・同科学payloadで改良する |
+| A1/P14-R：正式公開 | release/chamber-particles-0.2.0を作成・push済み。公開sourceの先行commitはWindows/Linuxとも847 core＋120 portable試験、静的gate、Quick Start、clean wheelに合格。科学資格は全て完了し、最終資格commitとv0.2.0 tagの両OS CI、wheel・SHA256SUMS・Release Notes公開、実asset照合を残す | 先行commitのCIを最終tagの証明へ読み替えない。別OS/Python版、PyPI、sdist等は今回の配布scopeに含めない |
 
 用途別保証は固定profile内の検証であり、各実行の自動的な誤差上限や全物理条件を保証するものではない。
 安全failureと精度不足、数値・MC・reference・field表現の不確かさを区別する。
