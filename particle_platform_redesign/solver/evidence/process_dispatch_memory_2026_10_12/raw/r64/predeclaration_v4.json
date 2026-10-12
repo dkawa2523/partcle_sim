@@ -1,0 +1,662 @@
+{
+  "status": "closed_pre_run",
+  "created_utc": "2026-10-12T04:49:47.534633+00:00",
+  "scope": "Windows same-run process qualification; not a benchmark result or release verdict",
+  "cases": [
+    {
+      "case_id": "p14_none_100k",
+      "family": "p14u-none",
+      "rows": 100000,
+      "case": ".artifacts/k64/inputs/p14_none_100k/case.yaml",
+      "primary": true,
+      "digest_owner": "p14u",
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate2",
+        "candidate4",
+        "candidate8"
+      ],
+      "expected_counts": {
+        "particles": 100000,
+        "release_events": 100000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 0,
+        "probe_rows": 0,
+        "boundary_events": 100000,
+        "macro_steps": 32,
+        "series": 32
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/p14_none_100k/case.yaml": "55211f087521501213328fc19e3817d4a39f481cd84908575f5f5696cbd323cc",
+        ".artifacts/k64/inputs/p14_none_100k/case.h5": "9dfdf282aa298878ae3f8033396decbf01c378b58f841c21a7b4ec08293514ae"
+      },
+      "purpose": "Unchanged R63 input bytes; original primary 2x and serial nonregression gates retained",
+      "resources": {
+        "memory_limit_mb": 8192
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 4.0,
+        "dt_s": 0.125
+      },
+      "output": {
+        "trajectories": null,
+        "probes": null
+      },
+      "canonical_content_hash": "sha256:a9a0a28047a732bd5d79cb450ee30e2a92cb41785dba520838d11001359dcb75"
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "family": "b03_rz_effective_drag_continuous_charge_gravity",
+      "rows": 100000,
+      "case": ".artifacts/k64/inputs/b03_continuous_100k/brownian-rz.yaml",
+      "primary": true,
+      "digest_owner": "b03",
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate2",
+        "candidate4",
+        "candidate8"
+      ],
+      "expected_counts": {
+        "particles": 100000,
+        "release_events": 100000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 0,
+        "probe_rows": 0,
+        "boundary_events": 0,
+        "macro_steps": 10,
+        "series": 10
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/b03_continuous_100k/brownian-rz.yaml": "01e791c82c2eaed55eb068b841e8b042cef14fd7ed0b0e07a9e0700810d023c3",
+        ".artifacts/k64/inputs/b03_continuous_100k/brownian-rz.h5": "99893152ea3a8fc7723b7300944c00699d958c3bf0446a6addc0da37e2b2a9f4"
+      },
+      "purpose": "Unchanged R63 input bytes; original primary 2x and serial nonregression gates retained",
+      "resources": {
+        "memory_limit_mb": 512
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 0.2,
+        "dt_s": 0.02
+      },
+      "output": {
+        "trajectories": null
+      },
+      "canonical_content_hash": "sha256:1a404579d3435b159b7fbb435209db887c33b0df7dacd428c3766c80302059c7"
+    },
+    {
+      "case_id": "p14_none_10k",
+      "family": "p14u-none",
+      "rows": 10000,
+      "case": ".artifacts/k64/inputs/p14_none_10k/case.yaml",
+      "primary": false,
+      "digest_owner": "p14u",
+      "roles": [
+        "baseline1",
+        "candidate1",
+        "candidate4"
+      ],
+      "expected_counts": {
+        "particles": 10000,
+        "release_events": 10000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 0,
+        "probe_rows": 0,
+        "boundary_events": 10000,
+        "macro_steps": 32,
+        "series": 32
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/p14_none_10k/case.yaml": "7319dc87bbf57fe1a009570dc9f0a79822a4f6fee3aedb684e20cbfb451e8c6b",
+        ".artifacts/k64/inputs/p14_none_10k/case.h5": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641"
+      },
+      "purpose": "Small workload/startup guard; retain negative parallel speedups",
+      "resources": {
+        "memory_limit_mb": 8192
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 4.0,
+        "dt_s": 0.125
+      },
+      "output": {
+        "trajectories": null,
+        "probes": null
+      },
+      "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+    },
+    {
+      "case_id": "p14_observed_100k",
+      "family": "p14u-observed",
+      "rows": 100000,
+      "case": ".artifacts/k64/inputs/p14_observed_100k/case.yaml",
+      "primary": false,
+      "digest_owner": "p14u",
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "expected_counts": {
+        "particles": 100000,
+        "release_events": 100000,
+        "failure_events": 0,
+        "frames": 4,
+        "frame_rows": 400000,
+        "probes": 4,
+        "probe_rows": 128,
+        "macro_steps": 32,
+        "series": 32,
+        "boundary_events": 100000
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/p14_observed_100k/case.yaml": "28f1adde884a6d00ecbebd3cb2c4d769e0e6af94285511017e5b70499761da28",
+        ".artifacts/k64/inputs/p14_observed_100k/case.h5": "9dfdf282aa298878ae3f8033396decbf01c378b58f841c21a7b4ec08293514ae"
+      },
+      "purpose": "Same P14-U physics and four existing sync times; all-particle frames plus fixed32-ID probes",
+      "resources": {
+        "memory_limit_mb": 8192
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 4.0,
+        "dt_s": 0.125
+      },
+      "output": {
+        "trajectories": {
+          "selection": "all",
+          "schedule": {
+            "explicit_times_s": [
+              0.5,
+              1.5,
+              2.5,
+              3.5
+            ]
+          }
+        },
+        "probes": {
+          "particle_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "schedule": {
+            "explicit_times_s": [
+              0.5,
+              1.5,
+              2.5,
+              3.5
+            ]
+          }
+        }
+      },
+      "canonical_content_hash": "sha256:a9a0a28047a732bd5d79cb450ee30e2a92cb41785dba520838d11001359dcb75"
+    },
+    {
+      "case_id": "event_front_10k",
+      "family": "p14u-event-skew",
+      "rows": 10000,
+      "case": ".artifacts/k64/inputs/event_front_10k/case.yaml",
+      "primary": false,
+      "digest_owner": "p14u",
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "expected_counts": {
+        "particles": 10000,
+        "release_events": 10000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 4,
+        "probe_rows": 128,
+        "macro_steps": 1,
+        "series": 1,
+        "boundary_events": 100000
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/event_front_10k/case.yaml": "539a6cb18baa407d662e5d4ced786b6d488531088bff02ee14fd58a6c4cb3e7d",
+        ".artifacts/k64/inputs/event_front_10k/case.h5": "0e8d4b911f77d60897e724be808276793476b3630bf4b5763637bb805c5d2673"
+      },
+      "purpose": "C09 specular thin gap; 5000 rows have20 hits and5000 are stationary; heavy IDs front",
+      "resources": {
+        "memory_limit_mb": 4096
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 0.019287109375,
+        "dt_s": 0.019287109375
+      },
+      "output": {
+        "trajectories": null,
+        "probes": {
+          "particle_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "schedule": {
+            "explicit_times_s": [
+              0.00482177734375,
+              0.0096435546875,
+              0.01446533203125,
+              0.019287109375
+            ]
+          }
+        }
+      },
+      "canonical_content_hash": "sha256:f2e1babbba4f39cb191b47ac56b17e418b9b1aa9a109ec083e65d4955fce5229"
+    },
+    {
+      "case_id": "event_spread_10k",
+      "family": "p14u-event-skew",
+      "rows": 10000,
+      "case": ".artifacts/k64/inputs/event_spread_10k/case.yaml",
+      "primary": false,
+      "digest_owner": "p14u",
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "expected_counts": {
+        "particles": 10000,
+        "release_events": 10000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 4,
+        "probe_rows": 128,
+        "macro_steps": 1,
+        "series": 1,
+        "boundary_events": 100000
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/event_spread_10k/case.yaml": "9d30c3cce894a9ef2aab60587d70416f53c37220f02ab9ddec2199935423fd92",
+        ".artifacts/k64/inputs/event_spread_10k/case.h5": "1dcb7fd71e192fbc8e314a17de0a26383839a06c7dbae04b9128354d6bd8cde5"
+      },
+      "purpose": "C09 specular thin gap; 5000 rows have20 hits and5000 are stationary; heavy IDs spread",
+      "resources": {
+        "memory_limit_mb": 4096
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 0.019287109375,
+        "dt_s": 0.019287109375
+      },
+      "output": {
+        "trajectories": null,
+        "probes": {
+          "particle_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "schedule": {
+            "explicit_times_s": [
+              0.00482177734375,
+              0.0096435546875,
+              0.01446533203125,
+              0.019287109375
+            ]
+          }
+        }
+      },
+      "canonical_content_hash": "sha256:f688343b0bc11454a9a793dab40cac66344b89ea40ea885c9dd4a2b0f5573b04"
+    },
+    {
+      "case_id": "early_hold_100k",
+      "family": "p14u-early-hold",
+      "rows": 100000,
+      "case": ".artifacts/k64/inputs/early_hold_100k/case.yaml",
+      "primary": false,
+      "digest_owner": "p14u",
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "expected_counts": {
+        "particles": 100000,
+        "release_events": 100000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 4,
+        "probe_rows": 128,
+        "macro_steps": 16,
+        "series": 16,
+        "boundary_events": 100000
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/early_hold_100k/case.yaml": "8e62744ce62f921b8fe856d74643240305bf53f81568d9eba0f569100f89a41a",
+        ".artifacts/k64/inputs/early_hold_100k/case.h5": "75ce88edcb0c6aec6b8b08b59c248d20af097bdd6dbe661bd27ec7d5690985b5"
+      },
+      "purpose": "C09 mirror hold on first hit at gap/2; terminal snapshots and32-ID probes continue for16 macros",
+      "resources": {
+        "memory_limit_mb": 8192
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 0.015625,
+        "dt_s": 0.0009765625
+      },
+      "output": {
+        "trajectories": null,
+        "probes": {
+          "particle_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "schedule": {
+            "explicit_times_s": [
+              0.000244140625,
+              0.00048828125,
+              0.00390625,
+              0.015625
+            ]
+          }
+        }
+      },
+      "canonical_content_hash": "sha256:6433ec3e0c627d5b40cd78c50315673968c60c940f0e2886c0415b913533124e"
+    },
+    {
+      "case_id": "regular_1m",
+      "family": "p14u-regular-scale",
+      "rows": 1000000,
+      "case": ".artifacts/k64/inputs/regular_1m/case.yaml",
+      "primary": false,
+      "digest_owner": "p14u",
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8",
+        "candidate20"
+      ],
+      "expected_counts": {
+        "particles": 1000000,
+        "release_events": 1000000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 0,
+        "probe_rows": 0,
+        "macro_steps": 4,
+        "series": 4,
+        "boundary_events": 0
+      },
+      "input_files": {
+        ".artifacts/k64/inputs/regular_1m/case.yaml": "b4d3b4589a1f56f532aec319b671ce17230c9cfd1cd6def89ff4820d4ae24223",
+        ".artifacts/k64/inputs/regular_1m/case.h5": "6b3a9766efe0ee694382509622babdac2741f4367b909edb72e37c16e47c13a8"
+      },
+      "purpose": "Unchanged existing P14 release regular-n1000000 case material; four macros, rk4_dense;20worker scale observation",
+      "resources": {
+        "memory_limit_mb": 8192
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 0.5,
+        "dt_s": 0.125
+      },
+      "output": {
+        "trajectories": null,
+        "probes": null
+      },
+      "canonical_content_hash": "sha256:5dae9100c012798727feb632753028c09b4ea9a65d9cf1d3667a534a80490f63"
+    }
+  ],
+  "workers": [
+    1,
+    2,
+    4,
+    8,
+    20
+  ],
+  "samples": 3,
+  "sampling_interval_s": 0.1,
+  "input_binding": {
+    "path": ".artifacts/r64_2026_10_12/input_binding.json",
+    "sha256": "f95927b0db768da62d59c53bc63e6c27cf6ed9851863e500c0776f157595ca71"
+  },
+  "memory": {
+    "primary_up_to_4_private_ceiling_bytes": 8589934592,
+    "other_private_ceiling_bytes": 34359738368,
+    "scope": "Observed synchronized parent+live-child private commit; per-case solver-owned arrays obey unchanged case budget. 8GiB original primary1/2/4 kept;32GiB additional scope fixed before outcomes on64GiB host. Neither is an OS hard cap."
+  },
+  "acceptance": {
+    "nonregression_max_ratio": 1.1,
+    "primary_4worker_min_speedup": 2.0,
+    "rules": "Every case C1/Q1 <=1.10; every declared Q4 case C4/Q4 <=1.10; each original bulk primary C1/C4 >=2.0. All8/20worker results remain descriptive; every role requires exact held science, declared counts, array budget and observed memory ceiling, cleanup. Stop expansion on any required failure; retain every negative and partial result. No threshold relaxation, best-pair choice or unchanged-source acceptance retry."
+  },
+  "execution": "Only root runs one driver at a time; no concurrent profiles/tests/benchmarks. Each41role uses an absent private cache, actual-input cold followed by3warm public calls;164results total. New workers on each simulate. Parent import outside retained three-API timer; spawn/JIT/IPC/writer/shutdown inside.",
+  "numerical_invariants": "No added JIT; existing444 compiled function bodies and signatures must match Q; science/model/RNG/tolerance revisions unchanged. Source-specific version/pyproject/lock bytes are explicit. Full output/event/release/failure/lifecycle/final digest owners are unchanged held B readers.",
+  "unqualified": [
+    "Native Linux scaling",
+    "NUMA placement",
+    "CPU-proportional speedup",
+    "Any unmeasured model/size/output",
+    "0.3.0 release without separate final quality/OS/installed wheel receipts"
+  ],
+  "draft": {
+    "path": ".artifacts/r64_2026_10_12/trial_plan.json",
+    "sha256": "ef6394177e173cd5fbb35667462f96c96b6f8215df5ae442db21b5d33dd203a8"
+  },
+  "predeclaration_script": {
+    "path": ".artifacts/r64_2026_10_12/predeclare.py",
+    "sha256": "6902b82aaff1b4ef823af8f2f0966bb8394053b9eafb426201a620d769d48b6b"
+  },
+  "driver": {
+    "path": ".artifacts/r64_2026_10_12/measure_processes.py",
+    "sha256": "ab774f1cbcba6c6ad65859192daf7cbd4940254f683acabc2ce5fb244465974c"
+  },
+  "comparer": {
+    "path": ".artifacts/r64_2026_10_12/compare_processes.py",
+    "sha256": "f3148ed901efe57dfcb20736a5258effec97c6ee11871f8b2a9700616b161c19"
+  },
+  "sources": {
+    "baseline": {
+      "directory": ".artifacts/k63/q",
+      "version": "0.2.0",
+      "source_file_count": 27,
+      "source_map_sha256": "ae4e33bec254f445b36ec7a9e4c4ca58114e68b6ed75a1d67e4f8e7cbadd6fda",
+      "bound_file_count": 237,
+      "quality_map_sha256": "986f8d383460e0d42f0c6e84799200f7747f8ddee4c28d47ed62992cd4aff6c1",
+      "uv_lock_sha256": "b4ce982ab16e9b341f5dfd3b1fa81dae71c71b757e5a006bc093ae31ceaa7401",
+      "pyproject_sha256": "27edb8b62e82085520a337a9c0162ca301bb82d7aeffea2dd0ee83973a5c992c",
+      "binding": {
+        "path": ".artifacts/r63_2026_10_12/candidate_binding_v61.json",
+        "sha256": "425030a9956d21f9d2a1c7667e74a1de3089240b746f8cdd308b5f4873106207"
+      }
+    },
+    "candidate": {
+      "directory": ".artifacts/k64/c3",
+      "version": "0.3.0",
+      "source_file_count": 27,
+      "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+      "bound_file_count": 237,
+      "quality_map_sha256": "062ab5a0a6785192a0774848e1f1ffe7c9547cc4da57a2d3775212c4ba835dd2",
+      "uv_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+      "pyproject_sha256": "32d53ccfa9fd08a9de465464e106fd4c7a805fa8868583856c25b0ac35c50697",
+      "binding": {
+        "path": ".artifacts/r64_2026_10_12/candidate_binding_c3.json",
+        "sha256": "ceaaf85d28a9bbf9c41daf77572c9496e607b1c9fef41ffcf83fd0c5fde0f1c5"
+      }
+    }
+  },
+  "held_reader_binding": {
+    "directory": ".artifacts/k63/b",
+    "binding": {
+      "path": ".artifacts/r62_2026_10_12/memory_candidate_binding.json",
+      "sha256": "0b1fb218190204b16153fe47ceab90c4aaba4eefa964e89f2bf6a8475e0ed1f8"
+    },
+    "source_map_sha256": "74a359a4563ec82354ccdbebff52ae7f26ffbd144a393c375ab6468327aba4fa",
+    "quality_map_sha256": "5f81957af338415836488eec7f6e0905d3eb96382f9a3b84a7024ca68d8dadfb",
+    "source_file_count": 27,
+    "bound_file_count": 235,
+    "binding_original_source_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k62\\m",
+    "semantics": "Actual imported B is byte-identical to the fixed R62 M source27 and all235 bound files; the original binding path is provenance, not an imported runtime."
+  },
+  "numerical_binding": {
+    "compiled_count": 444,
+    "kernels_map_sha256": "bc5be860af9277780da442a1c405b657df8fcbeb3c14ad58fb8b23f78d2dc2cf",
+    "bodies_signatures_decorators_equal": true,
+    "third_party_lock_records_equal": true,
+    "third_party_package_count": 23,
+    "held_science_files": {
+      "tests/performance/p09_memory.py": "1ae7db635bece8512c232b0c3b362df26410aaaab7c1d039a07323b2df5eda75",
+      "tests/performance/p14u_representative.py": "c4e449e4b4564085a05c07db67a65090852ad9d4ee773bd4098705dd704b7289",
+      "tests/performance/b03_characterization.py": "655023104f44fff690fa34e57f388a942da1b4dc98046f4a05b8e213d8649e90"
+    }
+  },
+  "harness_origins": {
+    "driver": {
+      "path": ".artifacts/r63_2026_10_12/measure_processes.py",
+      "sha256": "045bcb8ddc314fc6a2ada0da5ab0cd67d8c2e82babac4aa7d2d3ff154cd05903"
+    },
+    "comparer": {
+      "path": ".artifacts/r63_2026_10_12/compare_bulk_processes.py",
+      "sha256": "014fc7901269822d93aade2827ff6bb84432bdf541e0893d78b33b40db89f116"
+    }
+  }
+}

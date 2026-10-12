@@ -1,6 +1,6 @@
 # Result format v3
 
-この文書はresult schema 3、現行engine v45、result algorithm v6、checkpoint schema 2の永続resultと
+この文書は0.3.0のresult schema 3、engine v62 process実装、result algorithm v6、checkpoint schema 2の永続resultと
 `ResultView`の契約です。軌道計算の入力契約は
 [`case_format_v3.md`](case_format_v3.md)が所有し、集計、可視化、COMSOL比較はこのresultを読むcore外の
 toolが所有します。
@@ -60,7 +60,7 @@ release eventは物理時刻、次に`particle_id`の順で格納します。P04
 boundary eventは、局在した材料壁interactionまたはperiodic topology transferを一行に保存します。releaseが
 `event_ordinal=0`なので、同じ粒子のwall/periodic logical interactionは1から連続します。行の物理的identityは
 `(particle_id,event_ordinal)`、一括readerの公開canonical順は`(time_s,particle_id,event_ordinal)`であり、file行順を
-意味論のauthorityにしません。同時hit candidateは各event内でfacet ID順です。event v21はevent v19 / v18と同じくexact、一般RK4、
+意味論のauthorityにしません。同時hit candidateは各event内でfacet ID順です。event v23はevent v19 / v18と同じくexact、一般RK4、
 exponential midpoint、Brownianの最初のhitと局在budget内で同時なincident facet集合をここへ保持し、
 primary facetだけへ潰しません。`candidate_count[i]`は重複列を持たず、
 `candidate_offset[i+1]-candidate_offset[i]`です。hold eventは`law_id=hold`、`outcome=held`で、
@@ -282,34 +282,47 @@ manifestは少なくとも次を記録します。
 - resolved event設定。一般RK4材料boundary経路ではaccepted particle-piece、candidate query、refinement、最大深さの集約
 - wall event、residual split、RZ axis crossingの集約
 - solver-owned memory plan revision、semantics、limit/planned bytes、slab幅、phase peak、component内訳
+- 実行資源のworkers/process policy。数値設定、particle IDやRNG keyとは分けて記録する
 - particle、release/boundary/failure event、series、frame/frame row、probe/probe row、macro stepの件数
 - lifecycle counts、failure reasonのname-to-code mappingとreason別件数
 
 P06 revision 3bの数値pathはengine `coupled_rk4_engine_v6`で確立した。現行algorithm revisionは次である。
 
 ```text
-engine          particle_engine_v45
-compiled tile   compiled_cpu_tile_v21
-runtime layout  resident_soa_serial_slab_v6
-memory plan     solver_owned_memory_plan_v16
+engine          particle_engine_v62
+compiled tile   compiled_cpu_tile_v31
+runtime layout  resident_soa_process_slab_v14
+memory plan     solver_owned_memory_plan_v25
 step proposal   coupled_fixed_step_proposal_v10
 RK4 enclosure   rk4_global_abs_enclosure_v2
 RK4 dense path  rk4_position_hermite_state_extension_v3
 exponential     charge_stable_exponential_midpoint_v3
 exp enclosure   exponential_midpoint_local_stage_enclosure_v4
-event           line_quadratic_curved_capsule_periodic_first_hit_v21
+event           line_quadratic_curved_capsule_periodic_first_hit_v23
 boundary        contact_wall_laws_v7
 topology        translation_periodic_xy_v1
 source          realized_internal_surface_contact_schedule_v5
 physics catalog inertial_langevin_2d_catalog_v23
-physics runtime signed_ion_compiled_physics_runtime_v22
+physics runtime prepared_native_physics_runtime_v24
 required field  required_field_time_linear_v6
-field location  field_location_v4
+field location  field_location_v5
 field time      fixed_topology_linear_time_v2
-geometry        line_boundary_capsule_contact_bvh_v7
+geometry        line_boundary_capsule_contact_bvh_v8
 result          durable_segmented_result_v6
 checkpoint      schema version 2
 ```
+
+現行v62は同じslab数値処理を使い、親macro/単一writer/barrierを維持する。
+event/failureは到着順にsingle writerへappendし、workerごとの一batch ACKで容量を制限する。
+公開canonical event順は既存readerが所有し、storage batch順・HDF5 byte列を物理順のauthorityにしない。
+非空replayの一shared root、永続reader、macro/slab viewとprivate scratch template解放はruntime所有の変更であり、
+result/checkpoint形式へ共有memory名や未完taskを永続化しない。
+測定C3と最終公開前品質C4はproduction27 fileが同一である。C4のbound差は外部synthetic fixture二fileの
+五expected revision literalだけで、永続resultの数値意味・科学reader・schemaは変わらない。
+品質・用途性能・OS/installed-wheel資格は[`parallel_execution_plan.md`](parallel_execution_plan.md)第9.27節、
+公開工程はimplementation plan第21.4節を参照する。過去の実装・採否は
+[保存済み性能記録](../evidence/comsol_brownian_fullstep_parallel_2026_10_12/current_docs/solver/docs/parallel_execution_plan.md)に保持する。
+compiled tile、result/checkpoint schemaと他の数値method revisionは維持し、process数を科学RNG identityへ加えない。
 
 `rk4_enclosure_revision`と`rk4_dense_path_revision`は一般stage RK4を実際に使うrunだけに記録し、ballistic、
 `quadratic_exact`、exponential midpoint、OUへ実行していないrevisionを付けません。
@@ -417,7 +430,7 @@ applicability認証にbounded local fallbackを追加した。P19-L完了時点�
 authorityとして維持し、
 result/checkpoint schema 1とlogical datasetを変えていない。runtime v16はP19-L性能snapshot、v17はDEP上限の
 1 ULP外向き境界だけを変更した後続revisionである。runtime v18はcharge Jacobianをstage payloadへ追加し、
-現行runtime v22はそのpayload意味を維持する。
+開発source runtime v24はそのpayload意味を維持する。
 
 後続M3-C1のevent v14はresult/checkpoint schema 1、logical dataset、event/final/frame payloadを変更しない。
 manifestのevent revisionだけが`line_quadratic_rk4_axis_first_hit_v14`を記録する。global enclosureはshortened-stage、
@@ -440,7 +453,7 @@ case/result/checkpoint schemaとlogical datasetを変更しない。P19-L証拠�
 
 Brownian resultのtop-level manifestは`brownian_rng_revision=philox4x32_10_brownian_interval_tree_v1`、
 `joint_ou_revision=inertial_joint_ou_v1`、`joint_ou_split_revision=conditional_gaussian_half_split_v1`、
-`brownian_tree_policy_revision=conditional_boundary_refinement_v1`、`brownian_interval_tree_depth`、
+`brownian_tree_policy_revision=conditional_boundary_refinement_absolute_target_v2`、`brownian_interval_tree_depth`、
 `brownian_adaptive_max_depth`を持つ。`random_draw_kinds`は`brownian_root_normal`と`brownian_split_normal`、
 `resolved`は`brownian_coefficient_policy=macro_root_frozen_midpoint_v1`、noise model/revision、
 `path_kind=cubic_hermite`を記録する。resume identityはBrownian RNG/OU/split/tree-policy revision、coefficient policy、base/max depth、
@@ -457,10 +470,9 @@ prepare済みinvariantを証明できない場合はfail-closedとする。別�
 axis hitではaccepted prefixの既存axis counterに加え、残時間の新しい`root_stochastic_interval`が
 従来のBrownian RNG identityに反映される。mutable RNG cursorやaxis専用datasetは追加しない。
 fixed chargeは同じaffine式の`G=J=0`へ退化する。旧XY frozen-start / 旧RZ projected revisionは現行入力として
-受理せず、履歴resultがそれらを記録することだけが正しい。現行supersessionはengine v45 / proposal v10 / event v21 /
-catalog v23 / runtime v22 / compiled tile v21 / memory plan v16である。
-CPU layoutはv6のままで、B03 path arrayの静的な保守上限は`648 B/row`、受入上限は`2048 B/row`である。
-正式characterizationは24/24実行を全粒子active・failure 0で完了した。計時とprocess RSSはmachine-localな
+受理せず、履歴resultがそれらを記録することだけが正しい。開発sourceの現行revisionは前掲の一覧が所有する。
+B03初回closeoutのpath array `648 B/row`は履歴容量である。現行stage scratchの容量はmemory-plan ownerのnamed componentへ計上する。
+B03初回の正式characterizationは24/24実行を全粒子active・failure 0で完了した。計時とprocess RSSはmachine-localな
 外部performance証跡[`evidence/b03/`](../evidence/b03/README.md)が所有し、portable result契約や合否閾値へ格上げしない。
 
 B04のBrownian active wallは新しいdatasetやschemaを追加しない。`/events/boundary/*`は決定論runと
@@ -537,11 +549,13 @@ manifestの`maximum_dt_charge_lipschitz`はfixed chargeでは0、continuous char
 `dt * L_Z`上限であり、選択methodにかかわらず0.5以下を要求する。
 `memory_plan` mappingは次を持ちます。
 
-- `revision: solver_owned_memory_plan_v16`と`runtime_layout_revision: resident_soa_serial_slab_v6`
+- `revision: solver_owned_memory_plan_v23`と`runtime_layout_revision: resident_soa_native_continuation_serial_slab_v12`
 - `semantics`、`limit_bytes`、`planned_bytes`
 - `geometry_preparation_transient_bytes`、`field_preparation_transient_bytes`
 - `slab_particles`、`scratch_bytes_per_particle`、`event_work_bytes_per_particle`、
   `stochastic_tree_work_bytes_per_particle`、
+  `stage_composition_work_bytes_per_particle`、
+  `proposal_replay_work_bytes_per_particle`、
   `dense_path_bytes_per_particle`、`certificate_work_bytes_per_particle`、
   `release_work_bytes_per_particle`、`replay_work_bytes`
 - `event_candidate_capacity`、`event_staging_capacity`、`event_staging_bytes_per_row`、
@@ -550,21 +564,72 @@ manifestの`maximum_dt_charge_lipschitz`はfixed chargeでは0、continuous char
 - canonical data、prepared geometry、schedule、resident state、P1/Q1 cell hint、active index、compiled physics runtime、probe index、
   output buffer、replay work、writer reserve、`geometry_query_scratch`、`slab_proposal_scratch`、`slab_event_work`、
   `slab_stochastic_tree_work`、`slab_dense_path`、`slab_certificate_work`、
+  `slab_stage_composition_work`、
+  `slab_proposal_replay_work`、
   `slab_release_work`、`slab_event_staging`、`slab_failure_staging`、safety marginの`components`
 
-memory plan v16の`stochastic_tree_work_bytes_per_particle`は、実際に境界候補になったrow数ではなく
+現行memory planの`stochastic_tree_work_bytes_per_particle`は、実際に境界候補になったrow数ではなく
 `brownian_adaptive_max_depth`から`128*(D_max+4)`として解決する。従ってadaptive runでも予測peakは
 到達可能な最深treeを保守的に含み、観測された候補率で過小評価しない。active wall/axis後のfresh-root stateは
-同じslab幅のbounded SoA waveだけに保持し、前rootのgenerator/tree/proposalを解放してから次waveを進めるため、
+同じslab幅のbounded SoA waveだけに保持する。前rootのcursor/tree/proposalの生きた継続状態を完全にunwindしてから
+pending bankを交換する。固定workspaceと二つのpending bankはslab内で再利用し、
 反射回数分のroot scratchを同時保持しない。
+
+`stage_composition_work_bytes_per_particle`は一組のstage hint/status・RZ基底work（`9+40*RZ` B/row）、
+global velocity/acceleration/certificate work（34 B/row）、RK4 stage work（209 B/row）、
+exact stage work（65 B/row）またはexponential/predictor work（169 B/row）、
+Brownian係数のFDT work（9 B/row）、局所field rangeのpacked上下限（16*C B/row）を計画する。
+配列定義から数えたfield/physics/native stage容量は`N*(126+40*RZ+8*P)` bytesである（`N`はslab容量、`RZ`はRZ座標で1・他で0、`P`はpacked primitive列数）。
+field/physics分は既存のgeneral proposal reserve内に保守的に含むため、この全容量をstage componentへ重ねて加算しない。
+v52はこのbankを四組から一組へ減らした。planの減少量、実配列容量、process RSSを同じ値として扱わない。
+局所certificateはさらにbound/verdict（18 B/row）、RZの場合は四つのcanonical box（64 B/row）を保持する。
+stage scratchは有効row数で切り詰めた異なるlayoutへ変換せず、固定capacityとlogical countで再利用する。
+stageを必要としないballisticではこれらを確保しない。readonlyのfield/physics投影は既存配列を共有し、
+静的cell metric/statusとpadded bounds、必要な正規化copyだけを`field_runtime`へ計上する。
+rangeの候補容量とavailabilityは連続support証明の代わりにはならない。
+
+geometry v8のclearance batchでは、query行数`N>=1`、候補総数`K`、一行最大候補数`K_max`に対して、
+数値一時配列を従来の`57*N+8*K+8`から`9*N+8*K_max+48` bytesへ減らす。返却valid配列を含み、
+`K_max<=K`なので、この範囲では旧容量を増やさない。prepared geometryと既存safety marginが行候補scratchを保守的に含み、
+prepareのschedule予算がrow scratchを含むため、memory planのcomponent、reserveと予算を減らさない。
+この配列上限とOS process RSSは別である。
+
+`proposal_replay_work_bytes_per_particle`はframeまたはprobeの要求がある場合だけ171 B/rowを計画し、
+`slab_proposal_replay_work`へ計上する。sample work 59 B/row、prefix work 80 B/row、selector/time work 32 B/rowを
+同じslab capacityとlogical countで再利用する。出力要求がない場合は0であり、保存時刻のためにproduction stepや
+Brownian rootを分割しない。proposalの数値投影・sampling・Hermite restrictionは一つの数値bodyを使うが、
+所有配列を返すwrapperと借用workspaceへ書くwrapperの寿命契約は区別する。
 
 このplanはsolverが所有する配列の予測peakであり、Python、HDF5、native library、allocatorを含む
 OS process RSSのhard capではありません。最小slabが収まらなければ開始前に
 拒否します。writerのbounded raw-chunk cacheとreserveはplanへ含みます。event/failureは固定容量SoA/CSR stagingを
 各waveでcanonical順にflushし、総event数に比例するmacro-wide object stagingを持ちません。frame/probeは要求slotへ
 direct columnar replayします。
-`event_work_bytes_per_particle`はdeferred target/depth/interactionのint64 stack三列と、point/surface arbitrationの行別workを表します。periodicまたはparticle_centerのpoint viewでは後者も計画します。depth依存容量をproposal scratchへ隠さず、slab幅のfit判定へ含めます。byte式はengine/cpuのmemory-plan ownerとmanifestが所有します。
-P19-Lを使う一般RK4では`dense_path_bytes_per_particle=176`です。`certificate_work_bytes_per_particle`は共有する
+`event_work_bytes_per_particle`はdeferred target/depth/interactionのint64 stack三列（24*(D+1) B/row）、
+point/surface arbitrationの保守的な96 B/row allowanceと経路別の継続/query workを表します。
+periodicまたはparticle_centerのpoint viewではarbitration allowanceを計画します。v51のcurved追加分は332 B/rowです。
+prepare済みquery work 70、gathered input work 88、radius展開のtransient 32、stable selector/target/exhaustion work 42、
+固定result/CSR arenaのrow work 100 B/rowを含みます。point/finite混在時のshadow row bankは実配列84 B/rowであり、
+既存96 B/row allowance内へ保守的に含めます。depth stackやshadowを332 B/rowへ重ねて数えません。
+exact追加分は495 B/rowで、継続state/selector 160、prepare query 106、独立にgatherした入力73、
+radius展開transient 32、固定result/control arena 124 B/rowです。160 B/rowへdepth stackを含めません。
+材料facetがある場合だけ、全三経路が再利用するboundary response bank 44 B/rowを別に加えます。
+したがって材料壁を持つexactは539 B/row、curvedは376 B/rowです。facetのないRZ axis経路は495 B/rowのままです。
+depth stackと条件付きshadowの96 B/rowはこれらと別に加算します。query/control配列と既存proposal reserveが
+同時に生存し得るため、generic proposal reserveからこの追加分を差し引きません。
+curved candidate arenaはint64三列で3*C*8 bytes、point/finite混在時だけ四列で4*C*8 bytesです。
+exact queryの候補scratchはpoint/finite混在時も四列の4*C*8 bytesで、実粒子を持つexact arenaのCSR offset原点などの固定分は24 bytesです。
+curved arenaの固定分は16 bytes、event queryを無効にしたarenaや粒子数0のarenaも16 bytesを
+`geometry_query_scratch`へ固定計上します。candidate列とこの固定分をrow workへ重複計上しません。
+readonly geometryとborrowed prefix inputを共有しても、query/candidate arenaと更新先workは各logical ownerが独占します。
+exact/curved resultとboundary responseは次のowner呼出しまでの借用であり、応答・staging転記を終える前に再利用しません。exact prepare inputのgatherは
+prefix commitから隔離した所有配列で、projection自体は追加payloadを持ちません。depth依存容量をproposal scratchへ隠さず、
+slab幅のfit判定へ含めます。
+byte式はengine/cpuのmemory-plan ownerとmanifestが所有します。
+P19-Lを使う一般RK4では`dense_path_bytes_per_particle=851`です。root controlの176 B/rowと、root、現在のchild proposal、
+局在hit prefix proposalが同時に保持し得る3組のfull enclosure（各225 B/row）を`slab_dense_path`へ計上し、
+slab幅のfit判定に含めます。選択行の返却copyは一時配列として既存のproposal/query reserveへ含め、この851 B/rowへ追加しません。
+`certificate_work_bytes_per_particle`は共有する
 event split budgetで決まるinterval stackと、最大64 cellの候補arenaを含みます。split budget 2の現観測では
 72 B/row + 544 B/row = 616 B/rowです。
 `geometry_query_scratch`、event/failure staging、surface-release work、direct replayは別componentのまま保ちます。

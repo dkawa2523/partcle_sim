@@ -1,0 +1,500 @@
+{
+  "status": "QUALIFIED_PREPUBLICATION_LOCAL_WINDOWS_WSL_LINUX_SCOPED",
+  "created_utc": "2026-10-12T07:22:08.434337+00:00",
+  "prepublication_required_work_complete": true,
+  "package_version": "0.3.0",
+  "release_published": false,
+  "tag_created": false,
+  "pushed": false,
+  "remote_ci_executed": false,
+  "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+  "quality_map_sha256": "1f07b777ff209f9a09844d7b1c4f4babd482d5b7706333d7f1d48b68eef58a59",
+  "source_binding": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\candidate_binding_c4.json",
+    "sha256": "751650c4cf90cb5d4218b82f00969ea18f84f1ae894958954a9495a95ff58229"
+  },
+  "measured_binding": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\candidate_binding_c3.json",
+    "sha256": "ceaaf85d28a9bbf9c41daf77572c9496e607b1c9fef41ffcf83fd0c5fde0f1c5"
+  },
+  "quality": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\quality_final_c4.json",
+    "sha256": "8c62270b7fc8c65b369b7ba5356768727a59c602d858e369d9754d19785fd98c"
+  },
+  "source_equivalence": {
+    "production27_identical": true,
+    "core_tests_project_lock_identical": true,
+    "only_bound_changes": {
+      "tools/vv/comsol/tests/test_m3c2_candidate_pilot.py": {
+        "c3": "68e280b50bfe1cbe0294602fb3e689ca0243cf2ca7d4ee1688f48bc53f70a024",
+        "c4": "6b3d21f4f605d67d6579192ee89bf5eccd8628dfc72f1cf68df9620184a9ba11"
+      },
+      "tools/vv/comsol/tests/test_p18h_hold_freeze.py": {
+        "c3": "6980b9382f58121e38d88fc900dac8df31bc28c90740a0e37c87d4a59e9df650",
+        "c4": "940a7997c694635180505a982537ad089238a6f5cdaf3cf9da2555d2fc4bbcad"
+      }
+    },
+    "semantics": "Measured C3/184 results and Windows core/wheel execution remain their original records; final C4 differs only in five expected revision literals in two synthetic external fixtures. Linux full qualification executed C4."
+  },
+  "main_policy": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\predeclaration_v4.json",
+    "sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f"
+  },
+  "supplement_policy": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\supplemental_time_field_policy.json",
+    "sha256": "580e1f920bd082359d571858d2d4f70c23ae19b2293591871d3b28d242ff7ad4"
+  },
+  "main_results": 164,
+  "supplement_results": 20,
+  "total_scientific_results": 184,
+  "distinct_requested_conditions": 46,
+  "independent_metadata": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\all9_independent_metadata_audit.json",
+    "sha256": "f9be5915f435d5ca4d51908fd75f702815850b8cc4a23080f16b6c39351dc395"
+  },
+  "main_independent_metadata": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\main8_independent_metadata_audit.json",
+    "sha256": "9489e829bc0eb671babe321473af45597bbc88032bae81fd646ff45cc42c04d7"
+  },
+  "scientific_reports": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_none_100k_science.json",
+      "sha256": "6d6bee5a806b64fef6ca1fb60746b4a633e0c7a55deb3e01f2e983fb91503507"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\b03_continuous_100k_science.json",
+      "sha256": "27508c168bb609188f035681ba4585f2c100c7606df553c13490518c6c2028e5"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_none_10k_science.json",
+      "sha256": "f3db2901649bd87a894e281925fdfae2e8777b4e2432b9df6f4139e5c82cde03"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_observed_100k_science.json",
+      "sha256": "fea24584960b46c18e6f36fa330eb20f755a946b70e3aeac6727d997e3629022"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\event_front_10k_science.json",
+      "sha256": "e79815234abe4caa2aebea4319ce5839a1e643fb7232bd6f9b12dc104cda0f37"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\event_spread_10k_science.json",
+      "sha256": "98f366b3ee022aec232fc1cdf93af32dd7ae739e0cd4d5ecb14a5205b34a225e"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\early_hold_100k_science.json",
+      "sha256": "8ecf730a19e312622ea1d509d7db3a72634a5b4aa5ddce94ea825a5c3fddf466"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\regular_1m_science.json",
+      "sha256": "4c9844320272b7b2b6e97eb7eb8907f02a0f3def3da571481c8746f02a674bca"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\time_field_observed_10k_science.json",
+      "sha256": "447ceea23357040bff506ba559f5320e8e40bcb859c65af0f535660d52b2aaff"
+    }
+  ],
+  "scope_results": [
+    {
+      "case_id": "p14_none_100k",
+      "rows": 100000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate2",
+        "candidate4",
+        "candidate8"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 62.84646619996056,
+        "baseline4": 21.211972899734974,
+        "candidate1": 62.22174960002303,
+        "candidate2": 34.838902400340885,
+        "candidate4": 20.72664949996397,
+        "candidate8": 13.362964800093323
+      },
+      "candidate1_vs_baseline1_ratio": 0.9900596383900115,
+      "candidate4_vs_baseline4_ratio": 0.9771203083246882,
+      "candidate_speedup_observations": {
+        "2": 1.7859847846243921,
+        "4": 3.002016780383689,
+        "8": 4.656283282253987,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 118.8969530002214,
+        "baseline4": 84.75833219988272,
+        "candidate1": 120.73846230003983,
+        "candidate2": 92.78799050021917,
+        "candidate4": 82.7944801999256,
+        "candidate8": 80.32212179992348
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "rows": 100000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate2",
+        "candidate4",
+        "candidate8"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 22.791184999980032,
+        "baseline4": 10.741548000369221,
+        "candidate1": 22.966331399977207,
+        "candidate2": 15.483610399998724,
+        "candidate4": 10.413015900179744,
+        "candidate8": 8.269923300016671
+      },
+      "candidate1_vs_baseline1_ratio": 1.0076848307798532,
+      "candidate4_vs_baseline4_ratio": 0.9694148273434905,
+      "candidate_speedup_observations": {
+        "2": 1.4832671971634663,
+        "4": 2.2055407981832404,
+        "8": 2.7770912216236527,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 89.08621630026028,
+        "baseline4": 73.35982180014253,
+        "candidate1": 90.92377889994532,
+        "candidate2": 73.08410729980096,
+        "candidate4": 73.30579680018127,
+        "candidate8": 75.4180172001943
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "p14_none_10k",
+      "rows": 10000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "candidate1",
+        "candidate4"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 6.1515393001027405,
+        "candidate1": 6.109820399899036,
+        "candidate4": 5.930616500321776
+      },
+      "candidate1_vs_baseline1_ratio": 0.9932181364422059,
+      "candidate4_vs_baseline4_ratio": null,
+      "candidate_speedup_observations": {
+        "2": null,
+        "4": 1.0302167404632447,
+        "8": null,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 66.03434550017118,
+        "candidate1": 65.86167999962345,
+        "candidate4": 68.38188160024583
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "p14_observed_100k",
+      "rows": 100000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 62.340828199870884,
+        "baseline4": 21.30061380006373,
+        "candidate1": 62.06710729980841,
+        "candidate4": 20.73062319960445,
+        "candidate8": 14.021614500321448
+      },
+      "candidate1_vs_baseline1_ratio": 0.995609283547134,
+      "candidate4_vs_baseline4_ratio": 0.9732406490343686,
+      "candidate_speedup_observations": {
+        "2": null,
+        "4": 2.9939817391014407,
+        "8": 4.4265307178702935,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 125.87539519974962,
+        "baseline4": 88.19697989989072,
+        "candidate1": 125.92708740010858,
+        "candidate4": 87.5603573997505,
+        "candidate8": 83.36662869993597
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "event_front_10k",
+      "rows": 10000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 2.6105887000449,
+        "baseline4": 3.8197622997686267,
+        "candidate1": 2.386701500043273,
+        "candidate4": 2.47016269993037,
+        "candidate8": 3.3092000000178814
+      },
+      "candidate1_vs_baseline1_ratio": 0.9142388075158003,
+      "candidate4_vs_baseline4_ratio": 0.646679690011076,
+      "candidate_speedup_observations": {
+        "2": null,
+        "4": 0.9662122661436635,
+        "8": 0.7212321709266216,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 29.307519200257957,
+        "baseline4": 34.21963320020586,
+        "candidate1": 29.62757539981976,
+        "candidate4": 31.633921999949962,
+        "candidate8": 36.0516623002477
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "event_spread_10k",
+      "rows": 10000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 2.5634262999519706,
+        "baseline4": 4.04082620004192,
+        "candidate1": 2.5191536997444928,
+        "candidate4": 2.6036489997059107,
+        "candidate8": 3.7641386999748647
+      },
+      "candidate1_vs_baseline1_ratio": 0.9827291308479174,
+      "candidate4_vs_baseline4_ratio": 0.6443358043161818,
+      "candidate_speedup_observations": {
+        "2": null,
+        "4": 0.9675473537443173,
+        "8": 0.6692510293952012,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 31.108754499815404,
+        "baseline4": 34.440844300203025,
+        "candidate1": 29.194136099889874,
+        "candidate4": 31.736163400113583,
+        "candidate8": 34.72033210005611
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "early_hold_100k",
+      "rows": 100000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 2.337575000245124,
+        "baseline4": 2.5217892001383007,
+        "candidate1": 2.153781699948013,
+        "candidate4": 2.4860616996884346,
+        "candidate8": 2.997173300012946
+      },
+      "candidate1_vs_baseline1_ratio": 0.9213743728959121,
+      "candidate4_vs_baseline4_ratio": 0.9858324793968082,
+      "candidate_speedup_observations": {
+        "2": null,
+        "4": 0.8663428185301818,
+        "8": 0.7186043262625854,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 28.00961609976366,
+        "baseline4": 29.681892199907452,
+        "candidate1": 27.1660576001741,
+        "candidate4": 29.002367400098592,
+        "candidate8": 31.81181460013613
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "regular_1m",
+      "rows": 1000000,
+      "scope": "original_main164",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8",
+        "candidate20"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 25.656142000108957,
+        "baseline4": 10.793475599959493,
+        "candidate1": 25.271947900298983,
+        "candidate4": 10.750537800136954,
+        "candidate8": 8.55329960025847,
+        "candidate20": 9.866913000121713
+      },
+      "candidate1_vs_baseline1_ratio": 0.9850252582867548,
+      "candidate4_vs_baseline4_ratio": 0.9960218745644174,
+      "candidate_speedup_observations": {
+        "2": null,
+        "4": 2.350761270750291,
+        "8": 2.9546431297151448,
+        "20": 2.561282125421319
+      },
+      "cold_public_s_observations": {
+        "baseline1": 54.636475999839604,
+        "baseline4": 41.8397321999073,
+        "candidate1": 54.65885090036318,
+        "candidate4": 42.11796649964526,
+        "candidate8": 42.77578249992803,
+        "candidate20": 52.768436800222844
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    },
+    {
+      "case_id": "time_field_observed_10k",
+      "rows": 10000,
+      "scope": "independent_temporal20",
+      "qualified": true,
+      "roles": [
+        "baseline1",
+        "baseline4",
+        "candidate1",
+        "candidate4",
+        "candidate8"
+      ],
+      "warm_public_median_s": {
+        "baseline1": 0.30707900039851665,
+        "baseline4": 3.5683041997253895,
+        "candidate1": 0.3117571999318898,
+        "candidate4": 3.5571174998767674,
+        "candidate8": 4.382606300059706
+      },
+      "candidate1_vs_baseline1_ratio": 1.0152345146600774,
+      "candidate4_vs_baseline4_ratio": 0.9968649814526791,
+      "candidate_speedup_observations": {
+        "2": null,
+        "4": 0.08764321109513258,
+        "8": 0.07113511426468824,
+        "20": null
+      },
+      "cold_public_s_observations": {
+        "baseline1": 33.36459660017863,
+        "baseline4": 38.37901039980352,
+        "candidate1": 32.53759580012411,
+        "candidate4": 37.88005609996617,
+        "candidate8": 41.38236579997465
+      },
+      "scientific_reader": "Existing frozen B reader; all emitted scientific payload/frame/probe reread by unchanged comparer"
+    }
+  ],
+  "release_receipts": {
+    "windows": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\windows_release.json",
+      "sha256": "fdfa551ae12809b4d08c24752bcb05ad8975ca309063e31cc63d03046b4b6303"
+    },
+    "linux_wsl": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\Linux_release.json",
+      "sha256": "fa75b2baa0ae69758cf29849e73cb271ee3062c8356f4d410327b8e7710c8837"
+    }
+  },
+  "distribution_readme": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\final_readme_binding.json",
+    "sha256": "4dd2f45c852c9bc88aee3094f58cc48d74e1060385a85cddcd44455655a9c3c3"
+  },
+  "numerical_and_architecture_scope": {
+    "engine_count": 1,
+    "additional_jit_functions": 0,
+    "existing_njit_bodies_signatures_decorators_preserved": 444,
+    "ready_first_dispatch": true,
+    "one_unacknowledged_batch_per_worker": true,
+    "template_release_after_ready": true,
+    "run_owned_shared_replay_reuse": true,
+    "crash_resume": "Actual midmacro child exit, incomplete macro hidden, durable checkpoint recovery, shared-memory/process cleanup and changed-worker resume matched serial scientific data on both OSes"
+  },
+  "test_evidence": {
+    "windows_core": {
+      "passed": 944,
+      "warnings": 1,
+      "wall_s": 336.4,
+      "execution_snapshot": "C3; identical C4 production/core test bytes"
+    },
+    "windows_all_external_tools": {
+      "passed": 495,
+      "wall_s": 68.89,
+      "execution_snapshot": "C4"
+    },
+    "linux_core": {
+      "passed": 944,
+      "warnings": 1,
+      "wall_s": 541.71,
+      "execution_snapshot": "C4"
+    },
+    "linux_portable_external_tools": {
+      "passed": 120,
+      "wall_s": 3.71
+    },
+    "both_os_quickstart": "Six actual commands each, all exit0; derived artifacts bound",
+    "both_os_existing_p14_smoke": "Eight declared rows each, all complete; not portable speedup or manual cold qualification",
+    "both_os_clean_wheel": "Runtime-only installed source/wheel/metadata/README identity and actual workers2 API/console/module full scientific byte identity; API live children0"
+  },
+  "memory": {
+    "maximum_sampled_parent_live_child_private_bytes": 10231394304,
+    "at": "regular_1m candidate20 cold",
+    "owned_array_plan_bytes_at_that_run": 1345378574,
+    "sampled_ws_sum_bytes_at_that_run": 11614429184,
+    "semantics": "100ms-class synchronized observations can miss transients; WS sum can double-count shared pages; solver-owned budget is not an OS cap; total process memory reduction is not qualified"
+  },
+  "preserved_negative_evidence": {
+    "lifecycle_probe": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\lifecycle_rejected.json",
+      "sha256": "c14096edb341f02b0fdb054f6a887c559a3ad9d00659adbd04f2de9af2a71d68"
+    },
+    "external_tools_initial": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\windows_full_tools.log",
+      "sha256": "9a1235da34c602e2c4bb17adb180ffa70027bed263df4c2d88b3fb1e60cd9e9d"
+    },
+    "negative_observations": "All recorded small-run parallel slowdowns, C20 slower than C8, planned-array increases and sampled-private increases remain in unchanged reports and audit"
+  },
+  "remaining_outside_prepublication_scope": [
+    "Formal tag/publish/push and remote CI at that published Git identity",
+    "Native Linux20CPU, hybrid-core affinity, SMT/NUMA placement need separately declared hardware scope",
+    "Additional JIT/native-chain/Rust/GPU/out-of-core/new interacting physics remain paused or separate work"
+  ],
+  "limits": "Accept only the predeclared model/input/output/CPU-host/cold-warm scope. No universal CPU-proportional speedup, all-N/physics performance, total memory reduction, application accuracy SLA, or new COMSOL scientific qualification."
+}

@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Literal, Protocol
+from typing import Literal, NamedTuple, Protocol
 
 import numpy as np
 from numba import njit
 from numpy.typing import NDArray
 
+from .cpu import next_float64
 from .numerical_status import (
     INTEGRATOR_NUMERICAL_FAILURE,
     NUMERICAL_STATUS_OK,
@@ -19,7 +21,6 @@ type FloatArray = NDArray[np.float64]
 type Int64Array = NDArray[np.int64]
 type BoolArray = NDArray[np.bool_]
 type UInt8Array = NDArray[np.uint8]
-type RowSelection = Int64Array | slice
 type PathKind = Literal[
     "linear_exact",
     "quadratic_exact",
@@ -31,6 +32,17 @@ type PathKind = Literal[
 STEP_PROPOSAL_REVISION = "coupled_fixed_step_proposal_v10"
 RK4_ENCLOSURE_REVISION = "rk4_global_abs_enclosure_v2"
 RK4_DENSE_PATH_REVISION = "rk4_position_hermite_state_extension_v3"
+# Ten numeric arrays in Rk4AdvanceWorkspace; persistent slot scratch is separate
+# from proposal-owned endpoint and dense controls.
+RK4_ADVANCE_WORK_BYTES_PER_PARTICLE = 209
+# Ten frozen arrays retained by each full-interval dense enclosure.
+RK4_DENSE_FULL_ENCLOSURE_BYTES_PER_PARTICLE = 225
+STAGE_ADVANCE_WORK_BYTES_PER_PARTICLE = 65
+RELAXATION_ADVANCE_WORK_BYTES_PER_PARTICLE = 169
+# Sample buffers are borrowed until their next use; retained proposals/events
+# keep their own copies. Prefix input and stage scratch must be distinct.
+PROPOSAL_SAMPLE_WORK_BYTES_PER_PARTICLE = 59
+PROPOSAL_PREFIX_WORK_BYTES_PER_PARTICLE = 80
 EXPONENTIAL_MIDPOINT_REVISION = "charge_stable_exponential_midpoint_v3"
 EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION = "exponential_midpoint_local_stage_enclosure_v4"
 # With unit roundoff u=eps/2, 16*eps=32u exceeds the dense expression's gamma_6,
@@ -208,8 +220,7 @@ class _AdvanceResult:
     rk4_dense_controls: _Rk4DenseControls | None = None
 
 
-@dataclass(frozen=True, slots=True)
-class _CubicHermitePath:
+class _CubicHermitePath(NamedTuple):
     """Original endpoint data defining one immutable Hermite polynomial per row."""
 
     start_time_s: FloatArray
@@ -220,14 +231,13 @@ class _CubicHermitePath:
     end_velocity_m_s: FloatArray
     start_charge_number: FloatArray
     end_charge_number: FloatArray
-    charge_root_time_s: FloatArray | None = None
-    charge_root_number: FloatArray | None = None
-    charge_affine_rate_number_s: FloatArray | None = None
-    charge_rate_derivative_s_inv: FloatArray | None = None
+    charge_root_time_s: FloatArray
+    charge_root_number: FloatArray
+    charge_affine_rate_number_s: FloatArray
+    charge_rate_derivative_s_inv: FloatArray
 
 
-@dataclass(frozen=True, slots=True)
-class _Rk4DensePath:
+class _Rk4DensePath(NamedTuple):
     """Immutable Bernstein form of the classical-RK4 state path.
 
     Position is the cubic Hermite path owned jointly by the RK4 endpoint
@@ -244,6 +254,33 @@ class _Rk4DensePath:
     charge_controls_number: FloatArray
 
 
+# Empty numeric projections keep absent paths out of optional Numba types.
+# They own no particle payload and are never sampled by the path dispatcher.
+_EMPTY_PATH_VECTOR = np.empty(0, dtype=np.float64)
+_EMPTY_PATH_STATE = np.empty((0, 2), dtype=np.float64)
+_EMPTY_CUBIC_HERMITE_PATH = _CubicHermitePath(
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_STATE,
+    _EMPTY_PATH_STATE,
+    _EMPTY_PATH_STATE,
+    _EMPTY_PATH_STATE,
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_VECTOR,
+)
+_EMPTY_RK4_DENSE_PATH = _Rk4DensePath(
+    _EMPTY_PATH_VECTOR,
+    _EMPTY_PATH_VECTOR,
+    np.empty((0, 4, 2), dtype=np.float64),
+    np.empty((0, 4, 2), dtype=np.float64),
+    np.empty((0, 4), dtype=np.float64),
+)
+
+
 @dataclass(frozen=True, slots=True)
 class _Rk4DenseControls:
     """Mutable construction result kept private to one RK4 advance."""
@@ -251,6 +288,112 @@ class _Rk4DenseControls:
     position_inner_m: FloatArray
     velocity_inner_m_s: FloatArray
     charge_inner_number: FloatArray
+
+
+class Rk4AdvanceWorkspace(NamedTuple):
+    """Exclusive bounded scratch for one native RK4 proposal batch."""
+
+    active_rows: Int64Array
+    particle_index: Int64Array
+    time_s: FloatArray
+    position_m: FloatArray
+    velocity_m_s: FloatArray
+    charge_number: FloatArray
+    incoming_status: UInt8Array
+    stage_velocity_m_s: FloatArray
+    acceleration_m_s2: FloatArray
+    charge_rate_number_s: FloatArray
+
+
+class _Rk4AdvanceOutputs(NamedTuple):
+    """Proposal-owned arrays retained after the scratch slot is reused."""
+
+    position_m: FloatArray
+    velocity_m_s: FloatArray
+    charge_number: FloatArray
+    support_inside: BoolArray
+    applicability_inside: BoolArray
+    numerical_status: UInt8Array
+    field_cell_id: Int64Array
+    position_inner_m: FloatArray
+    velocity_inner_m_s: FloatArray
+    charge_inner_number: FloatArray
+
+
+class StageAdvanceWorkspace(NamedTuple):
+    """Compact stage inputs retained by one exclusive advance slot."""
+
+    active_rows: Int64Array
+    particle_index: Int64Array
+    time_s: FloatArray
+    position_m: FloatArray
+    velocity_m_s: FloatArray
+    charge_number: FloatArray
+    incoming_status: UInt8Array
+
+
+class RelaxationAdvanceWorkspace(NamedTuple):
+    """Bounded predictor state and frozen coefficients for exponential advance."""
+
+    stage: StageAdvanceWorkspace
+    midpoint_position_m: FloatArray
+    midpoint_velocity_m_s: FloatArray
+    midpoint_charge_number: FloatArray
+    elapsed_s: FloatArray
+    rate_s_inv: FloatArray
+    target_velocity_m_s: FloatArray
+    additive_acceleration_m_s2: FloatArray
+    charge_rate_number_s: FloatArray
+    charge_rate_derivative_s_inv: FloatArray
+
+
+class _StageAdvanceOutputs(NamedTuple):
+    """Proposal-owned state and independent stage verdicts."""
+
+    position_m: FloatArray
+    velocity_m_s: FloatArray
+    charge_number: FloatArray
+    support_inside: BoolArray
+    applicability_inside: BoolArray
+    numerical_status: UInt8Array
+    field_cell_id: Int64Array
+
+
+class ProposalSampleBuffer(NamedTuple):
+    """Exclusive reusable samples, never retained by an accepted proposal."""
+
+    particle_index: Int64Array
+    state: _StageAdvanceOutputs
+
+
+class ProposalPrefixWorkspace(NamedTuple):
+    """Packed root inputs kept separate from the advance's mutable stages."""
+
+    particle_index: Int64Array
+    start_time_s: FloatArray
+    elapsed_s: FloatArray
+    position_m: FloatArray
+    velocity_m_s: FloatArray
+    charge_number: FloatArray
+    acceleration_m_s2: FloatArray
+
+
+class StepProposalProjection(NamedTuple):
+    """Borrowed numeric proposal facts, excluding Python stage evaluators."""
+
+    path_kind: PathKind
+    particle_index: Int64Array
+    start_time_s: FloatArray
+    target_time_s: FloatArray
+    start_position_m: FloatArray
+    start_velocity_m_s: FloatArray
+    start_charge_number: FloatArray
+    support_inside: BoolArray
+    applicability_inside: BoolArray
+    numerical_status: UInt8Array
+    constant_acceleration_m_s2: FloatArray
+    cubic_hermite_path: _CubicHermitePath
+    rk4_dense_path: _Rk4DensePath
 
 
 @dataclass(frozen=True, slots=True)
@@ -277,6 +420,32 @@ class StepProposal:
     _relaxation_evaluator: RelaxationStageEvaluator | None
     _cubic_hermite_path: _CubicHermitePath | None = None
     _rk4_dense_path: _Rk4DensePath | None = None
+    _rk4_dense_full_enclosure: tuple[_Rk4DensePath, Rk4DenseEnclosure] | None = None
+
+    def numeric_projection(self) -> StepProposalProjection:
+        """Borrow original roots for a native chain; no array payload is copied."""
+
+        return StepProposalProjection(
+            self.path_kind,
+            self.particle_index,
+            self.start_time_s,
+            self.target_time_s,
+            self.start_position_m,
+            self.start_velocity_m_s,
+            self.start_charge_number,
+            self.support_inside,
+            self.applicability_inside,
+            self.numerical_status,
+            (
+                _EMPTY_PATH_STATE
+                if self.constant_acceleration_m_s2 is None
+                else self.constant_acceleration_m_s2
+            ),
+            _EMPTY_CUBIC_HERMITE_PATH
+            if self._cubic_hermite_path is None
+            else self._cubic_hermite_path,
+            _EMPTY_RK4_DENSE_PATH if self._rk4_dense_path is None else self._rk4_dense_path,
+        )
 
     def state_at(self, time_s: float) -> ProposalSample:
         """Evaluate selected rows on the proposal path without committing state."""
@@ -305,51 +474,48 @@ class StepProposal:
             ((self.start_time_s[selected] > time_s) | (time_s > self.target_time_s[selected])).any()
         ):
             raise ValueError("proposal sample is outside a selected row interval")
-        if self.path_kind == "cubic_hermite":
-            path = self._cubic_hermite_path
-            if path is None:
-                raise ValueError("cubic Hermite proposal has no original path")
-            sample_time_s = np.full(selected.size, time_s, dtype=np.float64)
-            position_m, velocity_m_s = _evaluate_cubic_hermite(path, selected, sample_time_s)
-            charge_number = _evaluate_cubic_charge(path, selected, sample_time_s)
-            return ProposalSample(
-                particle_index=self.particle_index[selected],
-                position_m=position_m,
-                velocity_m_s=velocity_m_s,
-                charge_number=charge_number,
-                support_inside=self.support_inside[selected].copy(),
-                applicability_inside=self.applicability_inside[selected].copy(),
-                numerical_status=self.numerical_status[selected].copy(),
-            )
-        if self.path_kind == "rk4_dense":
-            sample_time_s = np.full(selected.size, time_s, dtype=np.float64)
-            return self.rk4_dense_state_at_rows(selected, sample_time_s)
-        elapsed = time_s - self.start_time_s[selected]
-        acceleration = (
-            None
-            if self.constant_acceleration_m_s2 is None
-            else self.constant_acceleration_m_s2[selected]
-        )
-        result = _advance(
-            self.path_kind,
-            self._evaluator,
-            self._relaxation_evaluator,
-            self.particle_index[selected],
-            self.start_time_s[selected],
-            elapsed,
-            self.start_position_m[selected],
-            self.start_velocity_m_s[selected],
-            self.start_charge_number[selected],
-            acceleration,
-        )
+        sample_time_s = np.full(selected.size, time_s, dtype=np.float64)
+        buffer = allocate_proposal_sample_buffer(selected.size)
+        return self.state_at_times_into(selected, sample_time_s, buffer)
+
+    def state_at_times_into(
+        self,
+        local_rows: Int64Array,
+        time_s: FloatArray,
+        buffer: ProposalSampleBuffer,
+        prefix_workspace: ProposalPrefixWorkspace | None = None,
+    ) -> ProposalSample:
+        """Evaluate per-row times into exclusive scratch, valid until reuse.
+
+        Stage evaluators retain their existing prepared native bindings. Dense
+        paths borrow their original immutable roots, including after restriction.
+        """
+
+        selected = np.asarray(local_rows, dtype=np.int64)
+        times = np.asarray(time_s, dtype=np.float64)
+        _validate_dense_sample(selected, times, self.start_time_s, self.target_time_s)
+        count = selected.size
+        _validate_proposal_sample_buffer(buffer, count)
+        outputs = _proposal_sample_outputs_view(buffer.state, count)
+        projection = self.numeric_projection()
+        if self.path_kind in ("cubic_hermite", "rk4_dense"):
+            step_proposal_dense_state_into(projection, selected, times, outputs)
+        else:
+            if prefix_workspace is None:
+                prefix_workspace = allocate_proposal_prefix_workspace(count)
+            if prefix_workspace.particle_index.size < count:
+                raise ValueError("proposal prefix exceeds its workspace capacity")
+            step_proposal_prefix_into(projection, selected, times, prefix_workspace)
+            _evaluate_proposal_prefix_into(self, prefix_workspace, count, outputs)
+        _proposal_sample_indices_into(self.particle_index, selected, buffer.particle_index)
         return ProposalSample(
-            particle_index=self.particle_index[selected],
-            position_m=result.position_m,
-            velocity_m_s=result.velocity_m_s,
-            charge_number=result.charge_number,
-            support_inside=result.support_inside,
-            applicability_inside=result.applicability_inside,
-            numerical_status=result.numerical_status,
+            particle_index=buffer.particle_index[:count],
+            position_m=outputs.position_m,
+            velocity_m_s=outputs.velocity_m_s,
+            charge_number=outputs.charge_number,
+            support_inside=outputs.support_inside,
+            applicability_inside=outputs.applicability_inside,
+            numerical_status=outputs.numerical_status,
         )
 
     def start_position(self) -> FloatArray:
@@ -430,12 +596,43 @@ class StepProposal:
             self.start_time_s,
             self.target_time_s,
         )
+        inherited_status = self.numerical_status[selected]
+        full = self._rk4_dense_full_enclosure
+        if (
+            full is not None
+            and full[0] is path
+            and all(not value.flags.writeable for value in path)
+            and np.array_equal(starts.view(np.uint64), path.start_time_s[selected].view(np.uint64))
+            and np.array_equal(
+                targets.view(np.uint64), path.target_time_s[selected].view(np.uint64)
+            )
+            and np.array_equal(inherited_status, full[1].numerical_status[selected])
+        ):
+            # Advanced row selection copies every column, including repeated rows.
+            # Callers may modify these results without changing the frozen fact.
+            enclosure = full[1]
+            return Rk4DenseEnclosure(
+                position_lower_m=enclosure.position_lower_m[selected],
+                position_upper_m=enclosure.position_upper_m[selected],
+                velocity_lower_m_s=enclosure.velocity_lower_m_s[selected],
+                velocity_upper_m_s=enclosure.velocity_upper_m_s[selected],
+                charge_lower_number=enclosure.charge_lower_number[selected],
+                charge_upper_number=enclosure.charge_upper_number[selected],
+                position_control_origin_m=enclosure.position_control_origin_m[selected],
+                relative_position_control_lower_m=(
+                    enclosure.relative_position_control_lower_m[selected]
+                ),
+                relative_position_control_upper_m=(
+                    enclosure.relative_position_control_upper_m[selected]
+                ),
+                numerical_status=enclosure.numerical_status[selected],
+            )
         return _enclose_rk4_dense_subinterval(
             path,
             selected,
             starts,
             targets,
-            self.numerical_status[selected],
+            inherited_status,
         )
 
     def rk4_dense_chord_deviation(
@@ -479,20 +676,125 @@ class StepProposal:
         selected = np.asarray(local_rows, dtype=np.int64)
         sample_time_s = np.asarray(time_s, dtype=np.float64)
         _validate_dense_sample(selected, sample_time_s, self.start_time_s, self.target_time_s)
-        position_m, velocity_m_s, charge_number = _evaluate_rk4_dense_path(
-            path,
-            selected,
-            sample_time_s,
+        buffer = allocate_proposal_sample_buffer(selected.size)
+        return self.state_at_times_into(selected, sample_time_s, buffer)
+
+
+def allocate_proposal_sample_buffer(capacity: int) -> ProposalSampleBuffer:
+    return ProposalSampleBuffer(
+        np.empty(capacity, dtype=np.int64), _allocate_stage_advance_outputs(capacity)
+    )
+
+
+def allocate_proposal_prefix_workspace(capacity: int) -> ProposalPrefixWorkspace:
+    return ProposalPrefixWorkspace(
+        np.empty(capacity, dtype=np.int64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+    )
+
+
+def _validate_proposal_sample_buffer(buffer: ProposalSampleBuffer, count: int) -> None:
+    if buffer.particle_index.size < count:
+        raise ValueError("proposal sample exceeds its buffer capacity")
+    arrays = (*buffer.state,)
+    if any(array.shape[0] < count for array in arrays):
+        raise ValueError("proposal sample state exceeds its buffer capacity")
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _proposal_sample_outputs_view(state: _StageAdvanceOutputs, count: int) -> _StageAdvanceOutputs:
+    return _StageAdvanceOutputs(
+        state.position_m[:count],
+        state.velocity_m_s[:count],
+        state.charge_number[:count],
+        state.support_inside[:count],
+        state.applicability_inside[:count],
+        state.numerical_status[:count],
+        state.field_cell_id[:count],
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _proposal_sample_indices_into(
+    particle_index: Int64Array, rows: Int64Array, result: Int64Array
+) -> None:
+    for row in range(rows.size):
+        result[row] = particle_index[rows[row]]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def step_proposal_prefix_into(
+    proposal: StepProposalProjection,
+    rows: Int64Array,
+    time_s: FloatArray,
+    workspace: ProposalPrefixWorkspace,
+) -> None:
+    """Pack selected original starts without aliasing mutable stage scratch."""
+
+    acceleration = proposal.constant_acceleration_m_s2
+    for row in range(rows.size):
+        source = rows[row]
+        workspace.particle_index[row] = proposal.particle_index[source]
+        workspace.start_time_s[row] = proposal.start_time_s[source]
+        workspace.elapsed_s[row] = time_s[row] - proposal.start_time_s[source]
+        workspace.charge_number[row] = proposal.start_charge_number[source]
+        for axis in range(2):
+            workspace.position_m[row, axis] = proposal.start_position_m[source, axis]
+            workspace.velocity_m_s[row, axis] = proposal.start_velocity_m_s[source, axis]
+            workspace.acceleration_m_s2[row, axis] = (
+                0.0 if acceleration.size == 0 else acceleration[source, axis]
+            )
+
+
+def _evaluate_proposal_prefix_into(
+    proposal: StepProposal,
+    workspace: ProposalPrefixWorkspace,
+    count: int,
+    outputs: _StageAdvanceOutputs,
+) -> None:
+    indices = workspace.particle_index[:count]
+    starts = workspace.start_time_s[:count]
+    elapsed = workspace.elapsed_s[:count]
+    position = workspace.position_m[:count]
+    velocity = workspace.velocity_m_s[:count]
+    charge = workspace.charge_number[:count]
+    if proposal.path_kind == "linear_exact":
+        _compiled_linear_advance_into(position, velocity, charge, elapsed, outputs)
+    elif proposal.path_kind == "quadratic_exact":
+        if proposal._evaluator is None or proposal.constant_acceleration_m_s2 is None:
+            raise ValueError("quadratic proposal lost its evaluator or acceleration")
+        _advance_quadratic(
+            proposal._evaluator,
+            indices,
+            starts,
+            elapsed,
+            position,
+            velocity,
+            charge,
+            workspace.acceleration_m_s2[:count],
+            outputs=outputs,
         )
-        return ProposalSample(
-            particle_index=self.particle_index[selected],
-            position_m=position_m,
-            velocity_m_s=velocity_m_s,
-            charge_number=charge_number,
-            support_inside=self.support_inside[selected].copy(),
-            applicability_inside=self.applicability_inside[selected].copy(),
-            numerical_status=self.numerical_status[selected].copy(),
+    elif proposal.path_kind == "exponential_midpoint_reintegrated":
+        if proposal._relaxation_evaluator is None:
+            raise ValueError("exponential midpoint proposal has no relaxation evaluator")
+        _run_relaxation_advance(
+            proposal._relaxation_evaluator,
+            indices,
+            starts,
+            elapsed,
+            position,
+            velocity,
+            charge,
+            predictor_only=False,
+            outputs=outputs,
         )
+    else:
+        raise ValueError("proposal prefix requires an exact or relaxation path")
 
 
 def cubic_hermite_step(
@@ -569,10 +871,12 @@ def cubic_hermite_step(
         end_velocity_m_s=end_velocity.copy(),
         start_charge_number=charge.copy(),
         end_charge_number=end_charge.copy(),
-        charge_root_time_s=(None if charge_path is None else charge_path[0]),
-        charge_root_number=(None if charge_path is None else charge_path[1]),
-        charge_affine_rate_number_s=(None if charge_path is None else charge_path[2]),
-        charge_rate_derivative_s_inv=(None if charge_path is None else charge_path[3]),
+        charge_root_time_s=(_EMPTY_PATH_VECTOR if charge_path is None else charge_path[0]),
+        charge_root_number=(_EMPTY_PATH_VECTOR if charge_path is None else charge_path[1]),
+        charge_affine_rate_number_s=(_EMPTY_PATH_VECTOR if charge_path is None else charge_path[2]),
+        charge_rate_derivative_s_inv=(
+            _EMPTY_PATH_VECTOR if charge_path is None else charge_path[3]
+        ),
     )
     rows = np.arange(count, dtype=np.int64)
     enclosure = _enclose_cubic_hermite_subinterval(path, rows, starts, targets)
@@ -721,47 +1025,44 @@ def restrict_cubic_hermite_proposal(
     ):
         raise ValueError("cubic Hermite restriction is outside the proposal interval")
 
-    original = _subset_cubic_hermite_path(path, selected)
-    result_rows = np.arange(count, dtype=np.int64)
-    start_position, start_velocity = _evaluate_cubic_hermite(
-        original,
-        result_rows,
-        starts,
+    start_state = _allocate_stage_advance_outputs(count)
+    end_state = _allocate_stage_advance_outputs(count)
+    enclosure = CurvedPathEnclosure(
+        np.empty((count, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
+        np.empty(count, dtype=np.uint8),
     )
-    end_position, end_velocity = _evaluate_cubic_hermite(
-        original,
-        result_rows,
-        targets,
-    )
-    enclosure = _enclose_cubic_hermite_subinterval(
-        original,
-        result_rows,
+    cubic_hermite_restriction_into(
+        proposal.numeric_projection(),
+        selected,
         starts,
         targets,
+        start_state,
+        end_state,
+        enclosure.position_lower_m,
+        enclosure.position_upper_m,
+        enclosure.velocity_lower_m_s,
+        enclosure.velocity_upper_m_s,
+        enclosure.numerical_status,
     )
-    numerical_status = proposal.numerical_status[selected].copy()
-    first_failure = (numerical_status == NUMERICAL_STATUS_OK) & (
-        enclosure.numerical_status != NUMERICAL_STATUS_OK
-    )
-    numerical_status[first_failure] = enclosure.numerical_status[first_failure]
+    _require_finite_enclosure(enclosure)
+    numerical_status = end_state.numerical_status
     _require_enclosure_contains_endpoint(
-        enclosure,
-        end_position,
-        end_velocity,
-        numerical_status,
+        enclosure, end_state.position_m, end_state.velocity_m_s, numerical_status
     )
-    start_charge = _evaluate_cubic_charge(original, result_rows, starts)
-    end_charge = _evaluate_cubic_charge(original, result_rows, targets)
+    original = _subset_cubic_hermite_path(path, selected)
     return StepProposal(
         particle_index=proposal.particle_index[selected].copy(),
         start_time_s=starts.copy(),
         target_time_s=targets.copy(),
-        start_position_m=start_position,
-        start_velocity_m_s=start_velocity,
-        start_charge_number=start_charge,
-        end_position_m=end_position,
-        end_velocity_m_s=end_velocity,
-        end_charge_number=end_charge,
+        start_position_m=start_state.position_m,
+        start_velocity_m_s=start_state.velocity_m_s,
+        start_charge_number=start_state.charge_number,
+        end_position_m=end_state.position_m,
+        end_velocity_m_s=end_state.velocity_m_s,
+        end_charge_number=end_state.charge_number,
         end_field_cell_id=(
             None
             if proposal.end_field_cell_id is None
@@ -793,125 +1094,114 @@ def _subset_cubic_hermite_path(
         start_charge_number=path.start_charge_number[selected].copy(),
         end_charge_number=path.end_charge_number[selected].copy(),
         charge_root_time_s=(
-            None if path.charge_root_time_s is None else path.charge_root_time_s[selected].copy()
+            path.charge_root_time_s
+            if path.charge_root_time_s.size == 0
+            else path.charge_root_time_s[selected].copy()
         ),
         charge_root_number=(
-            None if path.charge_root_number is None else path.charge_root_number[selected].copy()
+            path.charge_root_number
+            if path.charge_root_number.size == 0
+            else path.charge_root_number[selected].copy()
         ),
         charge_affine_rate_number_s=(
-            None
-            if path.charge_affine_rate_number_s is None
+            path.charge_affine_rate_number_s
+            if path.charge_affine_rate_number_s.size == 0
             else path.charge_affine_rate_number_s[selected].copy()
         ),
         charge_rate_derivative_s_inv=(
-            None
-            if path.charge_rate_derivative_s_inv is None
+            path.charge_rate_derivative_s_inv
+            if path.charge_rate_derivative_s_inv.size == 0
             else path.charge_rate_derivative_s_inv[selected].copy()
         ),
     )
 
 
-def _evaluate_cubic_hermite(
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _cubic_hermite_root_controls_scalar(
+    start_position: float,
+    end_position: float,
+    start_velocity: float,
+    end_velocity: float,
+    duration: float,
+) -> tuple[
+    tuple[float, float, float, float],
+    tuple[float, float, float, float],
+    tuple[float, float, float],
+]:
+    displacement, displacement_residual = _dense_two_diff_scalar(end_position, start_position)
+    start_tangent = duration * start_velocity / 3.0
+    end_tangent = duration * end_velocity / 3.0
+    second, second_residual = _dense_two_diff_scalar(displacement, end_tangent)
+    residual = second_residual + displacement_residual
+    difference, difference_residual = _dense_two_diff_scalar(second, start_tangent)
+    middle_velocity = 3.0 * (difference + difference_residual + residual) / duration
+    return (
+        (0.0, start_tangent, second, displacement),
+        (0.0, 0.0, residual, displacement_residual),
+        (start_velocity, middle_velocity, end_velocity),
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _cubic_hermite_motion_into(
     path: _CubicHermitePath,
     rows: Int64Array,
     time_s: FloatArray,
-) -> tuple[FloatArray, FloatArray]:
-    start_time = path.start_time_s[rows]
-    duration = path.target_time_s[rows] - start_time
-    unit_time = (time_s - start_time) / duration
-    origin, relative_position, position_residual, velocity_controls = _cubic_hermite_root_controls(
-        path, rows
-    )
-    with np.errstate(over="ignore", invalid="ignore"):
-        position_m = origin + (
-            _evaluate_bezier(relative_position, unit_time)
-            + _evaluate_bezier(position_residual, unit_time)
-        )
-        weight = unit_time[:, None]
-        first = _lerp_controls(velocity_controls[:, 0], velocity_controls[:, 1], unit_time)
-        second = _lerp_controls(velocity_controls[:, 1], velocity_controls[:, 2], unit_time)
-        velocity_m_s = (1.0 - weight) * first + weight * second
-    at_start = time_s == start_time
-    at_end = time_s == path.target_time_s[rows]
-    position_m[at_start] = path.start_position_m[rows[at_start]]
-    velocity_m_s[at_start] = path.start_velocity_m_s[rows[at_start]]
-    position_m[at_end] = path.end_position_m[rows[at_end]]
-    velocity_m_s[at_end] = path.end_velocity_m_s[rows[at_end]]
-    return position_m, velocity_m_s
+    position: FloatArray,
+    velocity: FloatArray,
+) -> None:
+    for row in range(rows.size):
+        source = rows[row]
+        duration = path.target_time_s[source] - path.start_time_s[source]
+        parameter = (time_s[row] - path.start_time_s[source]) / duration
+        for axis in range(2):
+            relative, residual, speeds = _cubic_hermite_root_controls_scalar(
+                path.start_position_m[source, axis],
+                path.end_position_m[source, axis],
+                path.start_velocity_m_s[source, axis],
+                path.end_velocity_m_s[source, axis],
+                duration,
+            )
+            position[row, axis] = path.start_position_m[source, axis] + (
+                _dense_cubic_sample_scalar(relative, parameter)
+                + _dense_cubic_sample_scalar(residual, parameter)
+            )
+            first = _dense_lerp_scalar(speeds[0], speeds[1], parameter)
+            second = _dense_lerp_scalar(speeds[1], speeds[2], parameter)
+            velocity[row, axis] = _dense_lerp_scalar(first, second, parameter)
+            if time_s[row] == path.start_time_s[source]:
+                position[row, axis] = path.start_position_m[source, axis]
+                velocity[row, axis] = path.start_velocity_m_s[source, axis]
+            if time_s[row] == path.target_time_s[source]:
+                position[row, axis] = path.end_position_m[source, axis]
+                velocity[row, axis] = path.end_velocity_m_s[source, axis]
 
 
-def _cubic_hermite_root_controls(
-    path: _CubicHermitePath,
-    rows: Int64Array,
-) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
-    origin = path.start_position_m[rows]
-    duration = (path.target_time_s[rows] - path.start_time_s[rows])[:, None]
-    displacement, displacement_residual = _two_diff(
-        path.end_position_m[rows],
-        origin,
-    )
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        start_tangent = duration * path.start_velocity_m_s[rows] / 3.0
-        end_tangent = duration * path.end_velocity_m_s[rows] / 3.0
-        second_control, second_residual = _two_diff(displacement, end_tangent)
-        zero = np.zeros_like(displacement)
-        relative_position = np.stack(
-            (zero, start_tangent, second_control, displacement),
-            axis=1,
-        )
-        position_residual = np.stack(
-            (
-                zero,
-                zero,
-                second_residual + displacement_residual,
-                displacement_residual,
-            ),
-            axis=1,
-        )
-        difference, difference_residual = _two_diff(
-            relative_position[:, 1:],
-            relative_position[:, :-1],
-        )
-        residual_difference = position_residual[:, 1:] - position_residual[:, :-1]
-        velocity_controls = (
-            3.0 * (difference + difference_residual + residual_difference) / duration[:, None]
-        )
-    velocity_controls[:, 0] = path.start_velocity_m_s[rows]
-    velocity_controls[:, 2] = path.end_velocity_m_s[rows]
-    return origin, relative_position, position_residual, velocity_controls
-
-
-def _evaluate_cubic_charge(
-    path: _CubicHermitePath,
-    rows: Int64Array,
-    time_s: FloatArray,
-) -> FloatArray:
-    """Evaluate the root-owned linear or affine-exponential charge path."""
-
-    start_time = path.start_time_s[rows]
-    duration = path.target_time_s[rows] - start_time
-    start_charge = path.start_charge_number[rows]
-    end_charge = path.end_charge_number[rows]
-    if path.charge_root_time_s is None:
-        unit_time = (time_s - start_time) / duration
-        charge = start_charge + unit_time * (end_charge - start_charge)
-    else:
-        if (
-            path.charge_root_number is None
-            or path.charge_affine_rate_number_s is None
-            or path.charge_rate_derivative_s_inv is None
-        ):
-            raise ValueError("cubic Hermite exponential charge metadata is incomplete")
-        elapsed = time_s - path.charge_root_time_s[rows]
-        multiplier = _affine_exponential_multiplier(
-            path.charge_rate_derivative_s_inv[rows],
-            elapsed,
-        )
-        charge = path.charge_root_number[rows] + multiplier * path.charge_affine_rate_number_s[rows]
-    charge[time_s == start_time] = start_charge[time_s == start_time]
-    at_end = time_s == path.target_time_s[rows]
-    charge[at_end] = end_charge[at_end]
-    return charge
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _cubic_hermite_charge_into(
+    path: _CubicHermitePath, rows: Int64Array, time_s: FloatArray, charge: FloatArray
+) -> None:
+    root_time = path.charge_root_time_s
+    root_charge = path.charge_root_number
+    affine_rate = path.charge_affine_rate_number_s
+    derivative = path.charge_rate_derivative_s_inv
+    for row in range(rows.size):
+        source = rows[row]
+        start_charge = path.start_charge_number[source]
+        if root_time.size == 0:
+            duration = path.target_time_s[source] - path.start_time_s[source]
+            parameter = (time_s[row] - path.start_time_s[source]) / duration
+            charge[row] = start_charge + parameter * (path.end_charge_number[source] - start_charge)
+        else:
+            if root_charge.size == 0 or affine_rate.size == 0 or derivative.size == 0:
+                raise ValueError("cubic Hermite exponential charge metadata is incomplete")
+            elapsed = time_s[row] - root_time[source]
+            multiplier = _affine_exponential_multiplier_scalar(derivative[source], elapsed)
+            charge[row] = root_charge[source] + multiplier * affine_rate[source]
+        if time_s[row] == path.start_time_s[source]:
+            charge[row] = start_charge
+        if time_s[row] == path.target_time_s[source]:
+            charge[row] = path.end_charge_number[source]
 
 
 def _validate_dense_sample(
@@ -1021,48 +1311,100 @@ def _dense_parameter(path: _Rk4DensePath, rows: Int64Array, time_s: FloatArray) 
     return np.clip(parameter, 0.0, 1.0)
 
 
-def _evaluate_bezier(controls: FloatArray, parameter: FloatArray) -> FloatArray:
-    first_01 = _lerp_controls(controls[:, 0], controls[:, 1], parameter)
-    first_12 = _lerp_controls(controls[:, 1], controls[:, 2], parameter)
-    first_23 = _lerp_controls(controls[:, 2], controls[:, 3], parameter)
-    second_012 = _lerp_controls(first_01, first_12, parameter)
-    second_123 = _lerp_controls(first_12, first_23, parameter)
-    return _lerp_controls(second_012, second_123, parameter)
-
-
-def _evaluate_rk4_dense_path(
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def rk4_dense_state_at_into(
     path: _Rk4DensePath,
     rows: Int64Array,
     time_s: FloatArray,
-) -> tuple[FloatArray, FloatArray, FloatArray]:
-    parameter = _dense_parameter(path, rows, time_s)
-    position_controls = path.position_controls_m[rows]
-    position_origin = position_controls[:, :1]
-    relative_position, position_origin_residual = _two_diff(
-        position_controls,
-        position_origin,
-    )
-    # Evaluate the same stored-control cubic as a root-origin-relative
-    # polynomial.  The TwoDiff residual preserves the exact control
-    # differences while avoiding loss from repeated interpolation of a large
-    # common coordinate.  Dense position samples consequently use the same
-    # arithmetic representation as their enclosure and chord certificate.
-    with np.errstate(over="ignore", invalid="ignore"):
-        position = position_origin[:, 0] + (
-            _evaluate_bezier(relative_position, parameter)
-            + _evaluate_bezier(position_origin_residual, parameter)
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+) -> None:
+    """Sample immutable controls without selected-control or Bezier arrays."""
+
+    for row in range(rows.size):
+        source = rows[row]
+        duration = path.target_time_s[source] - path.start_time_s[source]
+        parameter = 0.0
+        if duration > 0.0:
+            parameter = (time_s[row] - path.start_time_s[source]) / duration
+        parameter = np.minimum(np.maximum(parameter, 0.0), 1.0)
+        for axis in range(2):
+            origin = path.position_controls_m[source, 0, axis]
+            first, first_residual = _dense_two_diff_scalar(origin, origin)
+            second, second_residual = _dense_two_diff_scalar(
+                path.position_controls_m[source, 1, axis], origin
+            )
+            third, third_residual = _dense_two_diff_scalar(
+                path.position_controls_m[source, 2, axis], origin
+            )
+            fourth, fourth_residual = _dense_two_diff_scalar(
+                path.position_controls_m[source, 3, axis], origin
+            )
+            position[row, axis] = origin + (
+                _dense_cubic_sample_scalar((first, second, third, fourth), parameter)
+                + _dense_cubic_sample_scalar(
+                    (first_residual, second_residual, third_residual, fourth_residual), parameter
+                )
+            )
+            velocity[row, axis] = _dense_cubic_sample_scalar(
+                (
+                    path.velocity_controls_m_s[source, 0, axis],
+                    path.velocity_controls_m_s[source, 1, axis],
+                    path.velocity_controls_m_s[source, 2, axis],
+                    path.velocity_controls_m_s[source, 3, axis],
+                ),
+                parameter,
+            )
+            if time_s[row] == path.start_time_s[source]:
+                position[row, axis] = path.position_controls_m[source, 0, axis]
+                velocity[row, axis] = path.velocity_controls_m_s[source, 0, axis]
+            if time_s[row] == path.target_time_s[source]:
+                position[row, axis] = path.position_controls_m[source, 3, axis]
+                velocity[row, axis] = path.velocity_controls_m_s[source, 3, axis]
+        charge[row] = _dense_cubic_sample_scalar(
+            (
+                path.charge_controls_number[source, 0],
+                path.charge_controls_number[source, 1],
+                path.charge_controls_number[source, 2],
+                path.charge_controls_number[source, 3],
+            ),
+            parameter,
         )
-    velocity = _evaluate_bezier(path.velocity_controls_m_s[rows], parameter)
-    charge = _evaluate_bezier(path.charge_controls_number[rows, :, None], parameter)[:, 0]
-    at_start = time_s == path.start_time_s[rows]
-    at_end = time_s == path.target_time_s[rows]
-    position[at_start] = path.position_controls_m[rows[at_start], 0]
-    velocity[at_start] = path.velocity_controls_m_s[rows[at_start], 0]
-    charge[at_start] = path.charge_controls_number[rows[at_start], 0]
-    position[at_end] = path.position_controls_m[rows[at_end], 3]
-    velocity[at_end] = path.velocity_controls_m_s[rows[at_end], 3]
-    charge[at_end] = path.charge_controls_number[rows[at_end], 3]
-    return position, velocity, charge
+        if time_s[row] == path.start_time_s[source]:
+            charge[row] = path.charge_controls_number[source, 0]
+        if time_s[row] == path.target_time_s[source]:
+            charge[row] = path.charge_controls_number[source, 3]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def step_proposal_dense_state_into(
+    proposal: StepProposalProjection,
+    rows: Int64Array,
+    time_s: FloatArray,
+    outputs: _StageAdvanceOutputs,
+) -> None:
+    """Native dense path sampling and the proposal's independent verdicts."""
+
+    if proposal.path_kind == "cubic_hermite":
+        path = proposal.cubic_hermite_path
+        if path.start_time_s.size == 0 and rows.size != 0:
+            raise ValueError("cubic Hermite proposal has no original path")
+        _cubic_hermite_motion_into(path, rows, time_s, outputs.position_m, outputs.velocity_m_s)
+        _cubic_hermite_charge_into(path, rows, time_s, outputs.charge_number)
+    else:
+        dense = proposal.rk4_dense_path
+        if proposal.path_kind != "rk4_dense":
+            raise ValueError("dense sampling requires an RK4 or cubic Hermite proposal")
+        rk4_dense_state_at_into(
+            dense, rows, time_s, outputs.position_m, outputs.velocity_m_s, outputs.charge_number
+        )
+    for row in range(rows.size):
+        source = rows[row]
+        outputs.support_inside[row] = proposal.support_inside[source]
+        outputs.applicability_inside[row] = proposal.applicability_inside[source]
+        outputs.numerical_status[row] = proposal.numerical_status[source]
+        outputs.field_cell_id[row] = -1
 
 
 def _lerp_controls(left: FloatArray, right: FloatArray, parameter: FloatArray) -> FloatArray:
@@ -1071,33 +1413,218 @@ def _lerp_controls(left: FloatArray, right: FloatArray, parameter: FloatArray) -
     return (1.0 - weight) * left + weight * right
 
 
+_DENSE_BOUND_EPS = 128.0 * np.finfo(np.float64).eps
+_DENSE_BOUND_UNDERFLOW = 128.0 * np.finfo(np.float64).smallest_subnormal
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_lerp_scalar(left: float, right: float, parameter: float) -> float:
+    # Keep the two products and their final addition separate: FMA or an
+    # algebraic rewrite would change the stored-control restriction arithmetic.
+    first = (1.0 - parameter) * left
+    second = parameter * right
+    return first + second
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_cubic_sample_scalar(
+    controls: tuple[float, float, float, float], parameter: float
+) -> float:
+    first_01 = _dense_lerp_scalar(controls[0], controls[1], parameter)
+    first_12 = _dense_lerp_scalar(controls[1], controls[2], parameter)
+    first_23 = _dense_lerp_scalar(controls[2], controls[3], parameter)
+    second_012 = _dense_lerp_scalar(first_01, first_12, parameter)
+    second_123 = _dense_lerp_scalar(first_12, first_23, parameter)
+    return _dense_lerp_scalar(second_012, second_123, parameter)
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_relative_target(start: float, target: float) -> float:
+    denominator = 1.0 - start
+    relative = 0.0
+    if denominator > 0.0:
+        relative = (target - start) / denominator
+    return np.minimum(np.maximum(relative, 0.0), 1.0)
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_restrict_cubic_scalar(
+    first: float,
+    second: float,
+    third: float,
+    fourth: float,
+    start: float,
+    target: float,
+) -> tuple[float, float, float, float]:
+    first_01 = _dense_lerp_scalar(first, second, start)
+    first_12 = _dense_lerp_scalar(second, third, start)
+    first_23 = _dense_lerp_scalar(third, fourth, start)
+    second_012 = _dense_lerp_scalar(first_01, first_12, start)
+    second_123 = _dense_lerp_scalar(first_12, first_23, start)
+    start_value = _dense_lerp_scalar(second_012, second_123, start)
+    relative = _dense_relative_target(start, target)
+    third_01 = _dense_lerp_scalar(start_value, second_123, relative)
+    third_12 = _dense_lerp_scalar(second_123, first_23, relative)
+    third_23 = _dense_lerp_scalar(first_23, fourth, relative)
+    fourth_012 = _dense_lerp_scalar(third_01, third_12, relative)
+    fourth_123 = _dense_lerp_scalar(third_12, third_23, relative)
+    target_value = _dense_lerp_scalar(fourth_012, fourth_123, relative)
+    if start == 1.0:
+        return fourth, fourth, fourth, fourth
+    return start_value, third_01, fourth_012, target_value
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_restrict_quadratic_scalar(
+    first: float,
+    second: float,
+    third: float,
+    start: float,
+    target: float,
+) -> tuple[float, float, float]:
+    first_01 = _dense_lerp_scalar(first, second, start)
+    first_12 = _dense_lerp_scalar(second, third, start)
+    start_value = _dense_lerp_scalar(first_01, first_12, start)
+    relative = _dense_relative_target(start, target)
+    second_01 = _dense_lerp_scalar(start_value, first_12, relative)
+    second_12 = _dense_lerp_scalar(first_12, third, relative)
+    target_value = _dense_lerp_scalar(second_01, second_12, relative)
+    if start == 1.0:
+        return third, third, third
+    return start_value, second_01, target_value
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_two_diff_scalar(left: float, right: float) -> tuple[float, float]:
+    difference = left - right
+    virtual_right = left - difference
+    virtual_left = difference + virtual_right
+    right_roundoff = virtual_right - right
+    left_roundoff = left - virtual_left
+    residual = left_roundoff + right_roundoff
+    if left == right:
+        return 0.0, 0.0
+    return difference, residual
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_absolute_maximum(controls: tuple[float, ...]) -> float:
+    maximum = abs(controls[0])
+    for index in range(1, len(controls)):
+        maximum = np.maximum(maximum, abs(controls[index]))
+    return maximum
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_outward_padding(scale: float, absolute_padding: float, include_absolute: bool) -> float:
+    padding = next_float64(scale * _DENSE_BOUND_EPS + _DENSE_BOUND_UNDERFLOW, True)
+    if include_absolute:
+        padding = next_float64(padding + absolute_padding, True)
+    return padding
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_outward_extrema(controls: tuple[float, ...], padding: float) -> tuple[float, float]:
+    lower = next_float64(controls[0] - padding, False)
+    upper = next_float64(controls[0] + padding, True)
+    for index in range(1, len(controls)):
+        lower = np.minimum(lower, next_float64(controls[index] - padding, False))
+        upper = np.maximum(upper, next_float64(controls[index] + padding, True))
+    return lower, upper
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy", nogil=True)
+def _compiled_restrict_controls_into(
+    controls: FloatArray,
+    start: FloatArray,
+    target: FloatArray,
+    restricted: FloatArray,
+) -> None:
+    for row in range(controls.shape[0]):
+        for component in range(controls.shape[2]):
+            if controls.shape[1] == 4:
+                cubic = _dense_restrict_cubic_scalar(
+                    controls[row, 0, component],
+                    controls[row, 1, component],
+                    controls[row, 2, component],
+                    controls[row, 3, component],
+                    start[row],
+                    target[row],
+                )
+                for control in range(4):
+                    restricted[row, control, component] = cubic[control]
+            else:
+                quadratic = _dense_restrict_quadratic_scalar(
+                    controls[row, 0, component],
+                    controls[row, 1, component],
+                    controls[row, 2, component],
+                    start[row],
+                    target[row],
+                )
+                for control in range(3):
+                    restricted[row, control, component] = quadratic[control]
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy", nogil=True)
+def _compiled_two_diff_into(
+    left: FloatArray,
+    right: FloatArray,
+    difference: FloatArray,
+    residual: FloatArray,
+) -> None:
+    for index in range(left.size):
+        difference[index], residual[index] = _dense_two_diff_scalar(left[index], right[index])
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy", nogil=True)
+def _compiled_outward_control_bounds_into(
+    restricted: FloatArray,
+    root: FloatArray,
+    extra_scale: FloatArray,
+    absolute_padding: FloatArray,
+    include_extra: bool,
+    include_absolute: bool,
+    lower: FloatArray,
+    upper: FloatArray,
+) -> None:
+    for row in range(restricted.shape[0]):
+        for component in range(restricted.shape[2]):
+            restricted_scale = abs(restricted[row, 0, component])
+            for control in range(1, restricted.shape[1]):
+                restricted_scale = np.maximum(
+                    restricted_scale, abs(restricted[row, control, component])
+                )
+            root_scale = abs(root[row, 0, component])
+            for control in range(1, root.shape[1]):
+                root_scale = np.maximum(root_scale, abs(root[row, control, component]))
+            scale = np.maximum(restricted_scale, root_scale)
+            if include_extra:
+                extra = extra_scale[row, 0, component]
+                for control in range(1, extra_scale.shape[1]):
+                    extra = np.maximum(extra, extra_scale[row, control, component])
+                scale = np.maximum(scale, extra)
+            absolute = 0.0
+            if include_absolute:
+                absolute = absolute_padding[row, 0, component]
+                for control in range(1, absolute_padding.shape[1]):
+                    absolute = np.maximum(absolute, absolute_padding[row, control, component])
+            padding = _dense_outward_padding(scale, absolute, include_absolute)
+            for control in range(restricted.shape[1]):
+                lower[row, control, component] = next_float64(
+                    restricted[row, control, component] - padding, False
+                )
+                upper[row, control, component] = next_float64(
+                    restricted[row, control, component] + padding, True
+                )
+
+
 def _restrict_cubic_controls(
     controls: FloatArray,
     start_parameter: FloatArray,
     target_parameter: FloatArray,
 ) -> FloatArray:
-    first_01 = _lerp_controls(controls[:, 0], controls[:, 1], start_parameter)
-    first_12 = _lerp_controls(controls[:, 1], controls[:, 2], start_parameter)
-    first_23 = _lerp_controls(controls[:, 2], controls[:, 3], start_parameter)
-    second_012 = _lerp_controls(first_01, first_12, start_parameter)
-    second_123 = _lerp_controls(first_12, first_23, start_parameter)
-    start_value = _lerp_controls(second_012, second_123, start_parameter)
-    denominator = 1.0 - start_parameter
-    relative_target = np.zeros_like(start_parameter)
-    moving = denominator > 0.0
-    relative_target[moving] = (target_parameter[moving] - start_parameter[moving]) / denominator[
-        moving
-    ]
-    relative_target = np.clip(relative_target, 0.0, 1.0)
-    third_01 = _lerp_controls(start_value, second_123, relative_target)
-    third_12 = _lerp_controls(second_123, first_23, relative_target)
-    third_23 = _lerp_controls(first_23, controls[:, 3], relative_target)
-    fourth_012 = _lerp_controls(third_01, third_12, relative_target)
-    fourth_123 = _lerp_controls(third_12, third_23, relative_target)
-    target_value = _lerp_controls(fourth_012, fourth_123, relative_target)
-    restricted = np.stack((start_value, third_01, fourth_012, target_value), axis=1)
-    at_root_end = start_parameter == 1.0
-    restricted[at_root_end] = controls[at_root_end, 3, None]
+    restricted = np.empty_like(controls)
+    _compiled_restrict_controls_into(controls, start_parameter, target_parameter, restricted)
     return restricted
 
 
@@ -1106,53 +1633,9 @@ def _restrict_quadratic_controls(
     start_parameter: FloatArray,
     target_parameter: FloatArray,
 ) -> FloatArray:
-    first_01 = _lerp_controls(controls[:, 0], controls[:, 1], start_parameter)
-    first_12 = _lerp_controls(controls[:, 1], controls[:, 2], start_parameter)
-    start_value = _lerp_controls(first_01, first_12, start_parameter)
-    denominator = 1.0 - start_parameter
-    relative_target = np.zeros_like(start_parameter)
-    moving = denominator > 0.0
-    relative_target[moving] = (target_parameter[moving] - start_parameter[moving]) / denominator[
-        moving
-    ]
-    relative_target = np.clip(relative_target, 0.0, 1.0)
-    second_01 = _lerp_controls(start_value, first_12, relative_target)
-    second_12 = _lerp_controls(first_12, controls[:, 2], relative_target)
-    target_value = _lerp_controls(second_01, second_12, relative_target)
-    restricted = np.stack((start_value, second_01, target_value), axis=1)
-    at_root_end = start_parameter == 1.0
-    restricted[at_root_end] = controls[at_root_end, 2, None]
+    restricted = np.empty_like(controls)
+    _compiled_restrict_controls_into(controls, start_parameter, target_parameter, restricted)
     return restricted
-
-
-def _position_derivative_controls(
-    path: _Rk4DensePath,
-    rows: Int64Array,
-) -> tuple[FloatArray, FloatArray, FloatArray]:
-    position = path.position_controls_m[rows]
-    duration = path.target_time_s[rows] - path.start_time_s[rows]
-    derivative = np.repeat(path.velocity_controls_m_s[rows, :1], 3, axis=1)
-    scale = np.abs(derivative)
-    absolute_error = np.zeros_like(derivative)
-    moving = duration > 0.0
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        difference, residual = _two_diff(
-            position[moving, 1:],
-            position[moving, :-1],
-        )
-        derivative[moving] = 3.0 * difference / duration[moving, None, None]
-        residual_contribution = np.nextafter(3.0 * np.abs(residual), np.inf)
-        residual_contribution = np.nextafter(
-            residual_contribution / duration[moving, None, None],
-            np.inf,
-        )
-        residual_contribution[residual == 0.0] = 0.0
-        absolute_error[moving] = residual_contribution
-        scale[moving] = np.maximum(
-            np.abs(derivative[moving]),
-            residual_contribution,
-        )
-    return derivative, scale, absolute_error
 
 
 def _two_diff(left: FloatArray, right: FloatArray) -> tuple[FloatArray, FloatArray]:
@@ -1166,16 +1649,15 @@ def _two_diff(left: FloatArray, right: FloatArray) -> tuple[FloatArray, FloatArr
     case where a physical displacement is below the position ULP.
     """
 
-    with np.errstate(over="ignore", invalid="ignore"):
-        difference = left - right
-        virtual_right = left - difference
-        virtual_left = difference + virtual_right
-        right_roundoff = virtual_right - right
-        left_roundoff = left - virtual_left
-        residual = left_roundoff + right_roundoff
-    equal = left == right
-    difference[equal] = 0.0
-    residual[equal] = 0.0
+    broadcast_left, broadcast_right = np.broadcast_arrays(left, right)
+    difference = np.empty(broadcast_left.shape, dtype=np.float64)
+    residual = np.empty_like(difference)
+    _compiled_two_diff_into(
+        broadcast_left.reshape(-1),
+        broadcast_right.reshape(-1),
+        difference.reshape(-1),
+        residual.reshape(-1),
+    )
     return difference, residual
 
 
@@ -1202,25 +1684,237 @@ def _outward_bezier_control_bounds(
 ) -> tuple[FloatArray, FloatArray]:
     """Bound every restricted control without collapsing control identity."""
 
-    axis = 1
-    scale = np.maximum(
-        np.max(np.abs(restricted_controls), axis=axis),
-        np.max(np.abs(root_controls), axis=axis),
+    lower = np.empty_like(restricted_controls)
+    upper = np.empty_like(restricted_controls)
+    empty = np.empty((0, 0, 0), dtype=np.float64)
+    _compiled_outward_control_bounds_into(
+        restricted_controls,
+        root_controls,
+        empty if extra_scale is None else extra_scale,
+        empty if absolute_padding is None else absolute_padding,
+        extra_scale is not None,
+        absolute_padding is not None,
+        lower,
+        upper,
     )
-    if extra_scale is not None:
-        scale = np.maximum(scale, np.max(extra_scale, axis=axis))
-    eps_factor = 128.0 * np.finfo(np.float64).eps
-    underflow = 128.0 * np.finfo(np.float64).smallest_subnormal
-    with np.errstate(over="ignore", invalid="ignore"):
-        padding = np.nextafter(scale * eps_factor + underflow, np.inf)
-        if absolute_padding is not None:
-            padding = np.nextafter(
-                padding + np.max(absolute_padding, axis=axis),
-                np.inf,
-            )
-        lower = np.nextafter(restricted_controls - padding[:, None, :], -np.inf)
-        upper = np.nextafter(restricted_controls + padding[:, None, :], np.inf)
     return lower, upper
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_derivative_pair(right: float, left: float, duration: float) -> tuple[float, float]:
+    difference, residual = _dense_two_diff_scalar(right, left)
+    derivative = 3.0 * difference / duration
+    residual_contribution = next_float64(3.0 * abs(residual), True)
+    residual_contribution = next_float64(residual_contribution / duration, True)
+    if residual == 0.0:
+        residual_contribution = 0.0
+    return derivative, residual_contribution
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_derivative_controls_scalar(
+    position: tuple[float, float, float, float], initial_velocity: float, duration: float
+) -> tuple[tuple[float, float, float], float, float]:
+    if not (duration > 0.0):
+        return (initial_velocity, initial_velocity, initial_velocity), abs(initial_velocity), 0.0
+    first, first_error = _dense_derivative_pair(position[1], position[0], duration)
+    second, second_error = _dense_derivative_pair(position[2], position[1], duration)
+    third, third_error = _dense_derivative_pair(position[3], position[2], duration)
+    error = np.maximum(np.maximum(first_error, second_error), third_error)
+    scale = np.maximum(_dense_absolute_maximum((first, second, third)), error)
+    return (first, second, third), scale, error
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_enclose_axis_scalar(
+    position: tuple[float, float, float, float],
+    velocity: tuple[float, float, float, float],
+    duration: float,
+    start: float,
+    target: float,
+) -> tuple[
+    float,
+    float,
+    float,
+    float,
+    tuple[float, float, float, float],
+    tuple[float, float, float, float],
+]:
+    first, first_residual = _dense_two_diff_scalar(position[0], position[0])
+    second, second_residual = _dense_two_diff_scalar(position[1], position[0])
+    third, third_residual = _dense_two_diff_scalar(position[2], position[0])
+    fourth, fourth_residual = _dense_two_diff_scalar(position[3], position[0])
+    relative_root = (first, second, third, fourth)
+    relative = _dense_restrict_cubic_scalar(first, second, third, fourth, start, target)
+    relative_scale = np.maximum(
+        _dense_absolute_maximum(relative), _dense_absolute_maximum(relative_root)
+    )
+    origin_error = _dense_absolute_maximum(
+        (first_residual, second_residual, third_residual, fourth_residual)
+    )
+    relative_padding = _dense_outward_padding(relative_scale, origin_error, True)
+    relative_lower = (
+        next_float64(relative[0] - relative_padding, False),
+        next_float64(relative[1] - relative_padding, False),
+        next_float64(relative[2] - relative_padding, False),
+        next_float64(relative[3] - relative_padding, False),
+    )
+    relative_upper = (
+        next_float64(relative[0] + relative_padding, True),
+        next_float64(relative[1] + relative_padding, True),
+        next_float64(relative[2] + relative_padding, True),
+        next_float64(relative[3] + relative_padding, True),
+    )
+    lower = np.minimum(
+        np.minimum(np.minimum(relative_lower[0], relative_lower[1]), relative_lower[2]),
+        relative_lower[3],
+    )
+    upper = np.maximum(
+        np.maximum(np.maximum(relative_upper[0], relative_upper[1]), relative_upper[2]),
+        relative_upper[3],
+    )
+    position_lower = next_float64(position[0] + lower, False)
+    position_upper = next_float64(position[0] + upper, True)
+    restricted_velocity = _dense_restrict_cubic_scalar(
+        velocity[0], velocity[1], velocity[2], velocity[3], start, target
+    )
+    derivative, derivative_scale, derivative_error = _dense_derivative_controls_scalar(
+        position, velocity[0], duration
+    )
+    derivative = _dense_restrict_quadratic_scalar(
+        derivative[0], derivative[1], derivative[2], start, target
+    )
+    derivative_maximum = _dense_absolute_maximum(derivative)
+    velocity_scale = np.maximum(
+        np.maximum(_dense_absolute_maximum(restricted_velocity), derivative_maximum),
+        np.maximum(_dense_absolute_maximum(velocity), derivative_maximum),
+    )
+    velocity_scale = np.maximum(velocity_scale, derivative_scale)
+    velocity_padding = _dense_outward_padding(velocity_scale, derivative_error, True)
+    velocity_lower, velocity_upper = _dense_outward_extrema(
+        (
+            restricted_velocity[0],
+            restricted_velocity[1],
+            restricted_velocity[2],
+            restricted_velocity[3],
+            derivative[0],
+            derivative[1],
+            derivative[2],
+        ),
+        velocity_padding,
+    )
+    return (
+        position_lower,
+        position_upper,
+        velocity_lower,
+        velocity_upper,
+        relative_lower,
+        relative_upper,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _dense_enclose_charge_scalar(
+    root: tuple[float, float, float, float], start: float, target: float
+) -> tuple[float, float]:
+    restricted = _dense_restrict_cubic_scalar(root[0], root[1], root[2], root[3], start, target)
+    scale = np.maximum(_dense_absolute_maximum(restricted), _dense_absolute_maximum(root))
+    padding = _dense_outward_padding(scale, 0.0, False)
+    lower, upper = _dense_outward_extrema(restricted, padding)
+    if root[0] <= 0.0 and root[1] <= 0.0 and root[2] <= 0.0 and root[3] <= 0.0:
+        upper = np.minimum(upper, 0.0)
+    if root[0] >= 0.0 and root[1] >= 0.0 and root[2] >= 0.0 and root[3] >= 0.0:
+        lower = np.maximum(lower, 0.0)
+    return lower, upper
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy", nogil=True)
+def _compiled_rk4_dense_enclosure_into(
+    root_start: FloatArray,
+    root_target: FloatArray,
+    root_position: FloatArray,
+    root_velocity: FloatArray,
+    root_charge: FloatArray,
+    rows: Int64Array,
+    start: FloatArray,
+    target: FloatArray,
+    inherited_status: UInt8Array,
+    position_lower: FloatArray,
+    position_upper: FloatArray,
+    velocity_lower: FloatArray,
+    velocity_upper: FloatArray,
+    charge_lower: FloatArray,
+    charge_upper: FloatArray,
+    position_origin: FloatArray,
+    relative_lower: FloatArray,
+    relative_upper: FloatArray,
+    numerical_status: UInt8Array,
+) -> None:
+    """Restrict and certify frozen controls without particle-sized intermediates."""
+
+    for row in range(rows.size):
+        source = rows[row]
+        duration = root_target[source] - root_start[source]
+        finite = True
+        for component in range(2):
+            axis = _dense_enclose_axis_scalar(
+                (
+                    root_position[source, 0, component],
+                    root_position[source, 1, component],
+                    root_position[source, 2, component],
+                    root_position[source, 3, component],
+                ),
+                (
+                    root_velocity[source, 0, component],
+                    root_velocity[source, 1, component],
+                    root_velocity[source, 2, component],
+                    root_velocity[source, 3, component],
+                ),
+                duration,
+                start[row],
+                target[row],
+            )
+            position_lower[row, component] = axis[0]
+            position_upper[row, component] = axis[1]
+            velocity_lower[row, component] = axis[2]
+            velocity_upper[row, component] = axis[3]
+            position_origin[row, component] = root_position[source, 0, component]
+            finite &= (
+                np.isfinite(axis[0])
+                & np.isfinite(axis[1])
+                & np.isfinite(axis[2])
+                & np.isfinite(axis[3])
+            )
+            for control in range(4):
+                relative_lower[row, control, component] = axis[4][control]
+                relative_upper[row, control, component] = axis[5][control]
+                finite &= np.isfinite(axis[4][control]) & np.isfinite(axis[5][control])
+        charge_lower[row], charge_upper[row] = _dense_enclose_charge_scalar(
+            (
+                root_charge[source, 0],
+                root_charge[source, 1],
+                root_charge[source, 2],
+                root_charge[source, 3],
+            ),
+            start[row],
+            target[row],
+        )
+        finite &= np.isfinite(charge_lower[row]) & np.isfinite(charge_upper[row])
+        numerical_status[row] = inherited_status[row]
+        if (not finite) & (numerical_status[row] == NUMERICAL_STATUS_OK):
+            numerical_status[row] = INTEGRATOR_NUMERICAL_FAILURE
+        if numerical_status[row] != NUMERICAL_STATUS_OK:
+            for component in range(2):
+                position_lower[row, component] = root_position[source, 0, component]
+                position_upper[row, component] = root_position[source, 0, component]
+                velocity_lower[row, component] = root_velocity[source, 0, component]
+                velocity_upper[row, component] = root_velocity[source, 0, component]
+                position_origin[row, component] = 0.0
+                for control in range(4):
+                    relative_lower[row, control, component] = 0.0
+                    relative_upper[row, control, component] = 0.0
+            charge_lower[row] = root_charge[source, 0]
+            charge_upper[row] = root_charge[source, 0]
 
 
 def _enclose_rk4_dense_subinterval(
@@ -1232,99 +1926,41 @@ def _enclose_rk4_dense_subinterval(
 ) -> Rk4DenseEnclosure:
     start_parameter = _dense_parameter(path, rows, start_time_s)
     target_parameter = _dense_parameter(path, rows, target_time_s)
-    root_position = path.position_controls_m[rows]
-    root_velocity = path.velocity_controls_m_s[rows]
-    root_charge = path.charge_controls_number[rows, :, None]
-    position_origin = root_position[:, :1]
-    relative_root_position, position_origin_residual = _two_diff(
-        root_position,
-        position_origin,
+    count = rows.size
+    enclosure = Rk4DenseEnclosure(
+        position_lower_m=np.empty((count, 2), dtype=np.float64),
+        position_upper_m=np.empty((count, 2), dtype=np.float64),
+        velocity_lower_m_s=np.empty((count, 2), dtype=np.float64),
+        velocity_upper_m_s=np.empty((count, 2), dtype=np.float64),
+        charge_lower_number=np.empty(count, dtype=np.float64),
+        charge_upper_number=np.empty(count, dtype=np.float64),
+        position_control_origin_m=np.empty((count, 2), dtype=np.float64),
+        relative_position_control_lower_m=np.empty((count, 4, 2), dtype=np.float64),
+        relative_position_control_upper_m=np.empty((count, 4, 2), dtype=np.float64),
+        numerical_status=np.empty(count, dtype=np.uint8),
     )
-    relative_position = _restrict_cubic_controls(
-        relative_root_position,
+    _compiled_rk4_dense_enclosure_into(
+        path.start_time_s,
+        path.target_time_s,
+        path.position_controls_m,
+        path.velocity_controls_m_s,
+        path.charge_controls_number,
+        rows,
         start_parameter,
         target_parameter,
+        inherited_status,
+        enclosure.position_lower_m,
+        enclosure.position_upper_m,
+        enclosure.velocity_lower_m_s,
+        enclosure.velocity_upper_m_s,
+        enclosure.charge_lower_number,
+        enclosure.charge_upper_number,
+        enclosure.position_control_origin_m,
+        enclosure.relative_position_control_lower_m,
+        enclosure.relative_position_control_upper_m,
+        enclosure.numerical_status,
     )
-    velocity = _restrict_cubic_controls(root_velocity, start_parameter, target_parameter)
-    charge = _restrict_cubic_controls(root_charge, start_parameter, target_parameter)
-    derivative, derivative_scale, derivative_error = _position_derivative_controls(path, rows)
-    derivative = _restrict_quadratic_controls(
-        derivative,
-        start_parameter,
-        target_parameter,
-    )
-    relative_position_control_lower, relative_position_control_upper = (
-        _outward_bezier_control_bounds(
-            relative_position,
-            relative_root_position,
-            absolute_padding=np.abs(position_origin_residual),
-        )
-    )
-    relative_position_lower = np.min(relative_position_control_lower, axis=1)
-    relative_position_upper = np.max(relative_position_control_upper, axis=1)
-    with np.errstate(over="ignore", invalid="ignore"):
-        position_lower = np.nextafter(
-            position_origin[:, 0] + relative_position_lower,
-            -np.inf,
-        )
-        position_upper = np.nextafter(
-            position_origin[:, 0] + relative_position_upper,
-            np.inf,
-        )
-    velocity_controls = np.concatenate((velocity, derivative), axis=1)
-    velocity_source = np.concatenate((root_velocity, derivative), axis=1)
-    velocity_lower, velocity_upper = _outward_bezier_bounds(
-        velocity_controls,
-        velocity_source,
-        derivative_scale,
-        derivative_error,
-    )
-    charge_lower, charge_upper = _outward_bezier_bounds(charge, root_charge)
-    root_charge_nonpositive = np.all(root_charge <= 0.0, axis=1)
-    root_charge_nonnegative = np.all(root_charge >= 0.0, axis=1)
-    charge_upper[root_charge_nonpositive] = np.minimum(
-        charge_upper[root_charge_nonpositive],
-        0.0,
-    )
-    charge_lower[root_charge_nonnegative] = np.maximum(
-        charge_lower[root_charge_nonnegative],
-        0.0,
-    )
-    numerical_status = inherited_status.copy()
-    invalid = ~np.isfinite(position_lower).all(axis=1)
-    invalid |= ~np.isfinite(position_upper).all(axis=1)
-    invalid |= ~np.isfinite(velocity_lower).all(axis=1)
-    invalid |= ~np.isfinite(velocity_upper).all(axis=1)
-    invalid |= ~np.isfinite(charge_lower[:, 0]) | ~np.isfinite(charge_upper[:, 0])
-    invalid |= ~np.isfinite(relative_position_control_lower).all(axis=(1, 2))
-    invalid |= ~np.isfinite(relative_position_control_upper).all(axis=(1, 2))
-    numerical_status[invalid & (numerical_status == NUMERICAL_STATUS_OK)] = (
-        INTEGRATOR_NUMERICAL_FAILURE
-    )
-    failed = numerical_status != NUMERICAL_STATUS_OK
-    if bool(failed.any()):
-        position_lower[failed] = root_position[failed, 0]
-        position_upper[failed] = root_position[failed, 0]
-        velocity_lower[failed] = root_velocity[failed, 0]
-        velocity_upper[failed] = root_velocity[failed, 0]
-        charge_lower[failed, 0] = root_charge[failed, 0, 0]
-        charge_upper[failed, 0] = root_charge[failed, 0, 0]
-        relative_position_control_lower[failed] = 0.0
-        relative_position_control_upper[failed] = 0.0
-    position_control_origin = position_origin[:, 0].copy()
-    position_control_origin[failed] = 0.0
-    return Rk4DenseEnclosure(
-        position_lower_m=position_lower,
-        position_upper_m=position_upper,
-        velocity_lower_m_s=velocity_lower,
-        velocity_upper_m_s=velocity_upper,
-        charge_lower_number=charge_lower[:, 0],
-        charge_upper_number=charge_upper[:, 0],
-        position_control_origin_m=position_control_origin,
-        relative_position_control_lower_m=relative_position_control_lower,
-        relative_position_control_upper_m=relative_position_control_upper,
-        numerical_status=numerical_status,
-    )
+    return enclosure
 
 
 def _rk4_dense_chord_deviation(
@@ -1386,73 +2022,168 @@ def _rk4_dense_chord_deviation(
     return bound
 
 
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _cubic_hermite_enclose_axis_scalar(
+    position: tuple[float, float, float, float],
+    residual: tuple[float, float, float, float],
+    velocity: tuple[float, float, float],
+    origin: float,
+    start: float,
+    target: float,
+) -> tuple[float, float, float, float]:
+    restricted = _dense_restrict_cubic_scalar(
+        position[0], position[1], position[2], position[3], start, target
+    )
+    restricted_residual = _dense_restrict_cubic_scalar(
+        residual[0], residual[1], residual[2], residual[3], start, target
+    )
+    restricted_velocity = _dense_restrict_quadratic_scalar(
+        velocity[0], velocity[1], velocity[2], start, target
+    )
+    position_scale = np.maximum(
+        _dense_absolute_maximum(restricted), _dense_absolute_maximum(position)
+    )
+    position_padding = _dense_outward_padding(
+        position_scale, _dense_absolute_maximum(restricted_residual), True
+    )
+    lower, upper = _dense_outward_extrema(restricted, position_padding)
+    position_lower = next_float64(origin + lower, False)
+    position_upper = next_float64(origin + upper, True)
+    velocity_scale = np.maximum(
+        _dense_absolute_maximum(restricted_velocity), _dense_absolute_maximum(velocity)
+    )
+    velocity_padding = _dense_outward_padding(velocity_scale, 0.0, False)
+    velocity_lower, velocity_upper = _dense_outward_extrema(restricted_velocity, velocity_padding)
+    return position_lower, position_upper, velocity_lower, velocity_upper
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def cubic_hermite_enclosure_into(
+    path: _CubicHermitePath,
+    rows: Int64Array,
+    start_time_s: FloatArray,
+    target_time_s: FloatArray,
+    position_lower: FloatArray,
+    position_upper: FloatArray,
+    velocity_lower: FloatArray,
+    velocity_upper: FloatArray,
+    status: UInt8Array,
+) -> None:
+    """Restrict original controls with the existing outward-rounding owners."""
+
+    for row in range(rows.size):
+        source = rows[row]
+        duration = path.target_time_s[source] - path.start_time_s[source]
+        start = (start_time_s[row] - path.start_time_s[source]) / duration
+        target = (target_time_s[row] - path.start_time_s[source]) / duration
+        start = np.minimum(np.maximum(start, 0.0), 1.0)
+        target = np.minimum(np.maximum(target, 0.0), 1.0)
+        finite = True
+        for axis in range(2):
+            controls = _cubic_hermite_root_controls_scalar(
+                path.start_position_m[source, axis],
+                path.end_position_m[source, axis],
+                path.start_velocity_m_s[source, axis],
+                path.end_velocity_m_s[source, axis],
+                duration,
+            )
+            bound = _cubic_hermite_enclose_axis_scalar(
+                controls[0],
+                controls[1],
+                controls[2],
+                path.start_position_m[source, axis],
+                start,
+                target,
+            )
+            position_lower[row, axis] = bound[0]
+            position_upper[row, axis] = bound[1]
+            velocity_lower[row, axis] = bound[2]
+            velocity_upper[row, axis] = bound[3]
+            finite &= (
+                np.isfinite(bound[0])
+                & np.isfinite(bound[1])
+                & np.isfinite(bound[2])
+                & np.isfinite(bound[3])
+                & (bound[0] <= bound[1])
+                & (bound[2] <= bound[3])
+            )
+        status[row] = NUMERICAL_STATUS_OK if finite else INTEGRATOR_NUMERICAL_FAILURE
+        if not finite:
+            _cubic_hermite_motion_into(
+                path,
+                rows[row : row + 1],
+                start_time_s[row : row + 1],
+                position_lower[row : row + 1],
+                velocity_lower[row : row + 1],
+            )
+            for axis in range(2):
+                position_upper[row, axis] = position_lower[row, axis]
+                velocity_upper[row, axis] = velocity_lower[row, axis]
+
+
 def _enclose_cubic_hermite_subinterval(
     path: _CubicHermitePath,
     rows: Int64Array,
     start_time_s: FloatArray,
     target_time_s: FloatArray,
 ) -> CurvedPathEnclosure:
-    start_position, start_velocity = _evaluate_cubic_hermite(path, rows, start_time_s)
-    root_duration = path.target_time_s[rows] - path.start_time_s[rows]
-    start_parameter = np.clip(
-        (start_time_s - path.start_time_s[rows]) / root_duration,
-        0.0,
-        1.0,
+    count = rows.size
+    result = CurvedPathEnclosure(
+        np.empty((count, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
+        np.empty(count, dtype=np.uint8),
     )
-    target_parameter = np.clip(
-        (target_time_s - path.start_time_s[rows]) / root_duration,
-        0.0,
-        1.0,
-    )
-    origin, root_position, root_residual, root_velocity = _cubic_hermite_root_controls(
+    cubic_hermite_enclosure_into(
         path,
         rows,
+        start_time_s,
+        target_time_s,
+        result.position_lower_m,
+        result.position_upper_m,
+        result.velocity_lower_m_s,
+        result.velocity_upper_m_s,
+        result.numerical_status,
     )
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        relative_position = _restrict_cubic_controls(
-            root_position,
-            start_parameter,
-            target_parameter,
-        )
-        relative_residual = _restrict_cubic_controls(
-            root_residual,
-            start_parameter,
-            target_parameter,
-        )
-        velocity_controls = _restrict_quadratic_controls(
-            root_velocity,
-            start_parameter,
-            target_parameter,
-        )
-        relative_lower, relative_upper = _outward_bezier_bounds(
-            relative_position,
-            root_position,
-            absolute_padding=np.abs(relative_residual),
-        )
-        position_lower = np.nextafter(
-            origin + relative_lower,
-            -np.inf,
-        )
-        position_upper = np.nextafter(
-            origin + relative_upper,
-            np.inf,
-        )
-        velocity_lower, velocity_upper = _outward_bezier_bounds(
-            velocity_controls,
-            root_velocity,
-        )
-    numerical_status = np.full(rows.size, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    result = _normalize_enclosure_bounds(
-        start_position,
-        start_velocity,
+    _require_finite_enclosure(result)
+    return result
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def cubic_hermite_restriction_into(
+    proposal: StepProposalProjection,
+    rows: Int64Array,
+    starts: FloatArray,
+    targets: FloatArray,
+    start_state: _StageAdvanceOutputs,
+    end_state: _StageAdvanceOutputs,
+    position_lower: FloatArray,
+    position_upper: FloatArray,
+    velocity_lower: FloatArray,
+    velocity_upper: FloatArray,
+    enclosure_status: UInt8Array,
+) -> None:
+    """Evaluate a child interval while retaining the original root authority."""
+
+    if proposal.path_kind != "cubic_hermite":
+        raise ValueError("restriction requires a cubic Hermite proposal")
+    step_proposal_dense_state_into(proposal, rows, starts, start_state)
+    step_proposal_dense_state_into(proposal, rows, targets, end_state)
+    cubic_hermite_enclosure_into(
+        proposal.cubic_hermite_path,
+        rows,
+        starts,
+        targets,
         position_lower,
         position_upper,
         velocity_lower,
         velocity_upper,
-        numerical_status,
+        enclosure_status,
     )
-    _require_finite_enclosure(result)
-    return result
+    for row in range(rows.size):
+        if end_state.numerical_status[row] == NUMERICAL_STATUS_OK:
+            end_state.numerical_status[row] = enclosure_status[row]
 
 
 def rk4_step(
@@ -1528,6 +2259,7 @@ def rk4_step(
         result.numerical_status,
     )
     dense_path = None
+    dense_full_enclosure = None
     stored_enclosure = enclosure
     if path_kind == "rk4_dense":
         if result.rk4_dense_controls is None:
@@ -1565,6 +2297,20 @@ def rk4_step(
             result.velocity_m_s,
             result.numerical_status,
         )
+        for value in (
+            dense_enclosure.position_lower_m,
+            dense_enclosure.position_upper_m,
+            dense_enclosure.velocity_lower_m_s,
+            dense_enclosure.velocity_upper_m_s,
+            dense_enclosure.charge_lower_number,
+            dense_enclosure.charge_upper_number,
+            dense_enclosure.position_control_origin_m,
+            dense_enclosure.relative_position_control_lower_m,
+            dense_enclosure.relative_position_control_upper_m,
+            dense_enclosure.numerical_status,
+        ):
+            value.setflags(write=False)
+        dense_full_enclosure = (dense_path, dense_enclosure)
     return StepProposal(
         particle_index=particle_index.copy(),
         start_time_s=start_time_s.copy(),
@@ -1587,6 +2333,7 @@ def rk4_step(
         _evaluator=evaluator,
         _relaxation_evaluator=None,
         _rk4_dense_path=dense_path,
+        _rk4_dense_full_enclosure=dense_full_enclosure,
     )
 
 
@@ -1758,63 +2505,30 @@ def _frozen_start_predictor_data(
     )
     if elapsed.shape != (count,) or not bool(np.isfinite(elapsed).all() and (elapsed >= 0.0).all()):
         raise ValueError("frozen-start predictor elapsed time must be finite and nonnegative")
-    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    support = np.ones(count, dtype=np.bool_)
-    applicable = np.ones(count, dtype=np.bool_)
-    drag_rate = np.zeros(count, dtype=np.float64)
-    target_velocity = np.zeros((count, 2), dtype=np.float64)
-    additive_acceleration = np.zeros((count, 2), dtype=np.float64)
-    charge_rate = np.zeros(count, dtype=np.float64)
-    charge_derivative = np.zeros(count, dtype=np.float64)
-    rows, start = _evaluate_active_relaxation(
+    outputs, workspace, _ = _run_relaxation_advance(
         evaluator,
         particle_index,
         start_time_s,
+        elapsed,
         start_position_m,
         start_velocity_m_s,
         start_charge_number,
-        numerical_status,
-    )
-    if start is not None:
-        support[rows] &= start.support_inside
-        applicable[rows] &= start.applicability_inside
-        drag_rate[rows] = start.linear_drag_rate_s_inv
-        target_velocity[rows] = start.target_velocity_m_s
-        additive_acceleration[rows] = start.additive_acceleration_m_s2
-        charge_rate[rows] = start.charge_rate_number_s
-        charge_derivative[rows] = start.charge_rate_derivative_s_inv
-    position, velocity = _exponential_update_active(
-        start_position_m,
-        start_velocity_m_s,
-        start_charge_number,
-        drag_rate,
-        target_velocity,
-        additive_acceleration,
-        elapsed,
-        numerical_status,
-    )
-    charge = _stable_charge_update_active(
-        start_charge_number,
-        start_charge_number,
-        charge_rate,
-        charge_derivative,
-        elapsed,
-        numerical_status,
+        predictor_only=True,
     )
     return _FrozenStartPredictorData(
         sample=ProposalSample(
             particle_index=particle_index.copy(),
-            position_m=position,
-            velocity_m_s=velocity,
-            charge_number=charge,
-            support_inside=support,
-            applicability_inside=applicable,
-            numerical_status=numerical_status,
+            position_m=outputs.position_m,
+            velocity_m_s=outputs.velocity_m_s,
+            charge_number=outputs.charge_number,
+            support_inside=outputs.support_inside,
+            applicability_inside=outputs.applicability_inside,
+            numerical_status=outputs.numerical_status,
         ),
         elapsed_s=elapsed.copy(),
-        target_velocity_m_s=target_velocity,
-        additive_acceleration_m_s2=additive_acceleration,
-        charge_rate_number_s=charge_rate,
+        target_velocity_m_s=workspace.target_velocity_m_s[:count].copy(),
+        additive_acceleration_m_s2=workspace.additive_acceleration_m_s2[:count].copy(),
+        charge_rate_number_s=workspace.charge_rate_number_s[:count].copy(),
     )
 
 
@@ -1946,7 +2660,7 @@ def enclose_rk4_path(
 ) -> CurvedPathEnclosure:
     """Enclose all shortened-step RK4 stages and dense endpoint states.
 
-    The enclosure follows the exact algebra used by ``_advance_positive_rk4``
+    The enclosure follows the exact algebra used by ``_compiled_rk4_advance_into``
     for every elapsed time from zero through each row's proposal duration.  It
     is deliberately independent of sampled stage points: the supplied bounder
     must provide a global componentwise acceleration bound for each velocity
@@ -2357,39 +3071,39 @@ def curved_chord_deviation_component(
     """Return one outward curve-to-chord certificate component."""
 
     roundoff_factor = _CURVED_CHORD_ROUNDOFF_EPS_FACTOR * np.finfo(np.float64).eps
-    underflow_unit = _CURVED_CHORD_ROUNDOFF_EPS_FACTOR * np.nextafter(0.0, np.inf)
-    velocity_span = np.nextafter(velocity_upper - velocity_lower, np.inf)
+    underflow_unit = _CURVED_CHORD_ROUNDOFF_EPS_FACTOR * next_float64(0.0, True)
+    velocity_span = next_float64(velocity_upper - velocity_lower, True)
     velocity_abs = max(abs(velocity_lower), abs(velocity_upper))
-    motion_scale = np.nextafter(velocity_abs * interval_s, np.inf)
-    curve_deviation = np.nextafter(velocity_span * interval_s, np.inf)
-    normal_padding = np.nextafter(abs(start) * roundoff_factor, np.inf)
-    normal_padding = np.nextafter(
-        normal_padding + np.nextafter(abs(end) * roundoff_factor, np.inf),
-        np.inf,
+    motion_scale = next_float64(velocity_abs * interval_s, True)
+    curve_deviation = next_float64(velocity_span * interval_s, True)
+    normal_padding = next_float64(abs(start) * roundoff_factor, True)
+    normal_padding = next_float64(
+        normal_padding + next_float64(abs(end) * roundoff_factor, True),
+        True,
     )
-    normal_padding = np.nextafter(
-        normal_padding + np.nextafter(motion_scale * (2.0 * roundoff_factor), np.inf),
-        np.inf,
+    normal_padding = next_float64(
+        normal_padding + next_float64(motion_scale * (2.0 * roundoff_factor), True),
+        True,
     )
-    underflow_padding = np.nextafter(underflow_unit, np.inf)
-    underflow_padding = np.nextafter(
-        underflow_padding + np.nextafter(interval_s * underflow_unit, np.inf),
-        np.inf,
+    underflow_padding = next_float64(underflow_unit, True)
+    underflow_padding = next_float64(
+        underflow_padding + next_float64(interval_s * underflow_unit, True),
+        True,
     )
-    underflow_padding = np.nextafter(
-        underflow_padding + np.nextafter(velocity_abs * underflow_unit, np.inf),
-        np.inf,
+    underflow_padding = next_float64(
+        underflow_padding + next_float64(velocity_abs * underflow_unit, True),
+        True,
     )
-    underflow_padding = np.nextafter(
-        underflow_padding + np.nextafter(abs(start) * underflow_unit, np.inf),
-        np.inf,
+    underflow_padding = next_float64(
+        underflow_padding + next_float64(abs(start) * underflow_unit, True),
+        True,
     )
-    underflow_padding = np.nextafter(
-        underflow_padding + np.nextafter(abs(end) * underflow_unit, np.inf),
-        np.inf,
+    underflow_padding = next_float64(
+        underflow_padding + next_float64(abs(end) * underflow_unit, True),
+        True,
     )
-    deviation = np.nextafter(curve_deviation + normal_padding, np.inf)
-    deviation = np.nextafter(deviation + underflow_padding, np.inf)
+    deviation = next_float64(curve_deviation + normal_padding, True)
+    deviation = next_float64(deviation + underflow_padding, True)
     return math.isfinite(deviation) and deviation >= 0.0, deviation
 
 
@@ -2854,188 +3568,495 @@ def _advance_with_initial_status(
     )
 
 
-def _evaluate_active_dynamics(
-    evaluator: StageEvaluator,
+def allocate_stage_advance_workspace(capacity: int) -> StageAdvanceWorkspace:
+    """Allocate one compact input bank, reusable across native stages."""
+
+    return StageAdvanceWorkspace(
+        np.empty(capacity, dtype=np.int64),
+        np.empty(capacity, dtype=np.int64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.uint8),
+    )
+
+
+def allocate_relaxation_advance_workspace(capacity: int) -> RelaxationAdvanceWorkspace:
+    """Allocate the compact bank, predictor state and reusable coefficients."""
+
+    return RelaxationAdvanceWorkspace(
+        allocate_stage_advance_workspace(capacity),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+    )
+
+
+def _allocate_stage_advance_outputs(
+    count: int, *, retain_field_cells: bool = True
+) -> _StageAdvanceOutputs:
+    return _StageAdvanceOutputs(
+        np.empty((count, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
+        np.empty(count, dtype=np.float64),
+        np.empty(count, dtype=np.bool_),
+        np.empty(count, dtype=np.bool_),
+        np.empty(count, dtype=np.uint8),
+        np.empty(count if retain_field_cells else 0, dtype=np.int64),
+    )
+
+
+@dataclass(slots=True)
+class _PythonRelaxationAdapter:
+    """Project a verification evaluator onto the sole relaxation body."""
+
+    evaluator: RelaxationStageEvaluator
+    has_field_cell: bool = False
+
+
+def _evaluate_python_relaxation_stage(
+    context: _PythonRelaxationAdapter,
+    stage_workspace: object,
     particle_index: Int64Array,
     time_s: FloatArray,
     position_m: FloatArray,
     velocity_m_s: FloatArray,
     charge_number: FloatArray,
-    numerical_status: UInt8Array,
-) -> tuple[RowSelection, DynamicsEvaluation | None]:
-    if not bool((numerical_status != NUMERICAL_STATUS_OK).any()):
-        stage = evaluator(
-            particle_index,
-            time_s,
-            position_m,
-            velocity_m_s,
-            charge_number,
-        )
-        _validate_stage(stage, particle_index.size)
-        numerical_status[:] = stage.numerical_status
-        return slice(None), stage
-    rows = np.flatnonzero(numerical_status == NUMERICAL_STATUS_OK).astype("<i8", copy=False)
-    if not rows.size:
-        return rows, None
-    stage = evaluator(
-        particle_index[rows],
-        time_s[rows],
-        position_m[rows],
-        velocity_m_s[rows],
-        charge_number[rows],
+    incoming_status: UInt8Array,
+) -> tuple:
+    del stage_workspace, incoming_status
+    stage = context.evaluator(particle_index, time_s, position_m, velocity_m_s, charge_number)
+    _validate_relaxation_stage(stage, particle_index.size)
+    cells = stage.field_cell_id
+    context.has_field_cell = cells is not None
+    if cells is None:
+        cells = np.full(particle_index.size, -1, dtype=np.int64)
+    return (
+        stage.linear_drag_rate_s_inv,
+        stage.target_velocity_m_s,
+        stage.additive_acceleration_m_s2,
+        stage.charge_rate_number_s,
+        stage.charge_rate_derivative_s_inv,
+        stage.support_inside,
+        stage.applicability_inside,
+        stage.numerical_status,
+        cells,
     )
-    _validate_stage(stage, rows.size)
-    _merge_numerical_status(numerical_status, rows, stage.numerical_status)
-    return rows, stage
 
 
-def _evaluate_active_relaxation(
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _copy_stage_state_into(
+    position: FloatArray, velocity: FloatArray, charge: FloatArray, outputs: _StageAdvanceOutputs
+) -> None:
+    for row in range(charge.size):
+        outputs.charge_number[row] = charge[row]
+        for axis in range(2):
+            outputs.position_m[row, axis] = position[row, axis]
+            outputs.velocity_m_s[row, axis] = velocity[row, axis]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _initialize_stage_advance_into(
+    position: FloatArray, velocity: FloatArray, charge: FloatArray, outputs: _StageAdvanceOutputs
+) -> None:
+    _copy_stage_state_into(position, velocity, charge, outputs)
+    for row in range(charge.size):
+        outputs.support_inside[row] = True
+        outputs.applicability_inside[row] = True
+        outputs.numerical_status[row] = NUMERICAL_STATUS_OK
+        if outputs.field_cell_id.size:
+            outputs.field_cell_id[row] = -1
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _pack_stage_advance_into(
+    particle_index: Int64Array,
+    start_time: FloatArray,
+    step: FloatArray,
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+    status: UInt8Array,
+    positive_only: bool,
+    fraction: float,
+    workspace: StageAdvanceWorkspace,
+) -> int:
+    count = 0
+    for row in range(particle_index.size):
+        if status[row] != NUMERICAL_STATUS_OK or (positive_only and step[row] <= 0.0):
+            continue
+        workspace.active_rows[count] = row
+        workspace.particle_index[count] = particle_index[row]
+        workspace.time_s[count] = (
+            start_time[row] if fraction == 0.0 else start_time[row] + fraction * step[row]
+        )
+        workspace.charge_number[count] = charge[row]
+        workspace.incoming_status[count] = NUMERICAL_STATUS_OK
+        for axis in range(2):
+            workspace.position_m[count, axis] = position[row, axis]
+            workspace.velocity_m_s[count, axis] = velocity[row, axis]
+        count += 1
+    return count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _collect_stage_verdicts_into(
+    count: int,
+    support: BoolArray,
+    applicable: BoolArray,
+    status: UInt8Array,
+    cells: Int64Array,
+    endpoint: bool,
+    workspace: StageAdvanceWorkspace,
+    outputs: _StageAdvanceOutputs,
+) -> None:
+    for local in range(count):
+        row = workspace.active_rows[local]
+        outputs.support_inside[row] = outputs.support_inside[row] and support[local]
+        outputs.applicability_inside[row] = outputs.applicability_inside[row] and applicable[local]
+        outputs.numerical_status[row] = status[local]
+        if endpoint:
+            outputs.field_cell_id[row] = cells[local]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _collect_relaxation_coefficients_into(
+    count: int, values: tuple, workspace: RelaxationAdvanceWorkspace
+) -> None:
+    for local in range(count):
+        row = workspace.stage.active_rows[local]
+        workspace.rate_s_inv[row] = values[0][local]
+        workspace.charge_rate_number_s[row] = values[3][local]
+        workspace.charge_rate_derivative_s_inv[row] = values[4][local]
+        for axis in range(2):
+            workspace.target_velocity_m_s[row, axis] = values[1][local, axis]
+            workspace.additive_acceleration_m_s2[row, axis] = values[2][local, axis]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _affine_exponential_multiplier_scalar(derivative: float, elapsed: float) -> float:
+    result = elapsed
+    if derivative < 0.0:
+        argument = derivative * elapsed
+        if np.isfinite(argument) and argument != 0.0:
+            result = elapsed * (np.expm1(argument) / argument)
+        elif np.isneginf(argument):
+            result = -1.0 / derivative
+    return result
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _affine_exponential_multiplier_into(
+    derivative: FloatArray, elapsed: FloatArray, result: FloatArray
+) -> None:
+    for row in range(elapsed.size):
+        result.flat[row] = _affine_exponential_multiplier_scalar(
+            derivative.flat[row], elapsed.flat[row]
+        )
+
+
+def _affine_exponential_multiplier(
+    rate_derivative_s_inv: FloatArray, elapsed_s: FloatArray
+) -> FloatArray:
+    result = np.empty_like(elapsed_s)
+    _affine_exponential_multiplier_into(rate_derivative_s_inv, elapsed_s, result)
+    return result
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def stable_charge_update_into(
+    start: FloatArray,
+    reference: FloatArray,
+    rate: FloatArray,
+    derivative: FloatArray,
+    elapsed: FloatArray,
+    status: UInt8Array,
+    result: FloatArray,
+) -> None:
+    """Apply one affine charge update without replacing an earlier failure."""
+
+    for row in range(start.size):
+        result[row] = start[row]
+        if status[row] != NUMERICAL_STATUS_OK:
+            continue
+        valid = (
+            np.isfinite(start[row])
+            and np.isfinite(reference[row])
+            and np.isfinite(rate[row])
+            and np.isfinite(derivative[row])
+            and np.isfinite(elapsed[row])
+            and elapsed[row] >= 0.0
+            and derivative[row] <= 0.0
+        )
+        affine_start_rate = rate[row] + derivative[row] * (start[row] - reference[row])
+        multiplier = _affine_exponential_multiplier_scalar(derivative[row], elapsed[row])
+        candidate = start[row] + multiplier * affine_start_rate
+        if valid and np.isfinite(candidate):
+            result[row] = candidate
+        else:
+            status[row] = INTEGRATOR_NUMERICAL_FAILURE
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def affine_exponential_charge_into(
+    root: FloatArray,
+    elapsed: FloatArray,
+    rate: FloatArray,
+    derivative: FloatArray,
+    result: FloatArray,
+) -> None:
+    """Evaluate validated root-owned charge, retaining arithmetic overflow."""
+
+    for row in range(root.size):
+        multiplier = _affine_exponential_multiplier_scalar(derivative.flat[row], elapsed.flat[row])
+        result.flat[row] = root.flat[row] + multiplier * rate.flat[row]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _relaxation_motion_into(
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+    workspace: RelaxationAdvanceWorkspace,
+    status: UInt8Array,
+    result_position: FloatArray,
+    result_velocity: FloatArray,
+    skip_zero: bool,
+) -> None:
+    count = charge.size
+    _compiled_exponential_update_into(
+        position,
+        velocity,
+        workspace.rate_s_inv,
+        workspace.target_velocity_m_s,
+        workspace.additive_acceleration_m_s2,
+        workspace.elapsed_s,
+        result_position,
+        result_velocity,
+        count,
+    )
+    for row in range(count):
+        failed = status[row] != NUMERICAL_STATUS_OK
+        skip = skip_zero and workspace.elapsed_s[row] == 0.0
+        finite = _rk4_state_is_finite(
+            result_position[row, 0],
+            result_position[row, 1],
+            result_velocity[row, 0],
+            result_velocity[row, 1],
+            charge[row],
+        )
+        if not failed and not skip and not finite:
+            status[row] = INTEGRATOR_NUMERICAL_FAILURE
+        if failed or skip or not finite:
+            for axis in range(2):
+                result_position[row, axis] = position[row, axis]
+                result_velocity[row, axis] = velocity[row, axis]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _initialize_relaxation_workspace_into(
+    step: FloatArray, workspace: RelaxationAdvanceWorkspace, predictor_only: bool
+) -> None:
+    for row in range(step.size):
+        workspace.elapsed_s[row] = step[row] if predictor_only else 0.5 * step[row]
+        workspace.rate_s_inv[row] = 0.0
+        workspace.charge_rate_number_s[row] = 0.0
+        workspace.charge_rate_derivative_s_inv[row] = 0.0
+        for axis in range(2):
+            workspace.target_velocity_m_s[row, axis] = 0.0
+            workspace.additive_acceleration_m_s2[row, axis] = 0.0
+
+
+# First-class dispatcher identity is process-local; its disk-cache index can hold dead weakrefs.
+@njit(cache=False, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _compiled_relaxation_advance_into(
+    stage_evaluator: Callable,
+    context: object,
+    stage_workspace: object,
+    particle_index: Int64Array,
+    start_time: FloatArray,
+    step: FloatArray,
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+    workspace: RelaxationAdvanceWorkspace,
+    outputs: _StageAdvanceOutputs,
+    predictor_only: bool,
+) -> bool:
+    """Own start, coupled predictor, frozen midpoint and endpoint validation."""
+
+    _initialize_stage_advance_into(position, velocity, charge, outputs)
+    _initialize_relaxation_workspace_into(step, workspace, predictor_only)
+    count_rows = particle_index.size
+    midpoint_position = workspace.midpoint_position_m[:count_rows]
+    midpoint_velocity = workspace.midpoint_velocity_m_s[:count_rows]
+    midpoint_charge = workspace.midpoint_charge_number[:count_rows]
+    stage = workspace.stage
+    for phase in range(3):
+        source_position, source_velocity, source_charge = position, velocity, charge
+        if phase == 1:
+            source_position, source_velocity, source_charge = (
+                midpoint_position,
+                midpoint_velocity,
+                midpoint_charge,
+            )
+        elif phase == 2:
+            source_position, source_velocity, source_charge = (
+                outputs.position_m,
+                outputs.velocity_m_s,
+                outputs.charge_number,
+            )
+        count = _pack_stage_advance_into(
+            particle_index,
+            start_time,
+            step,
+            source_position,
+            source_velocity,
+            source_charge,
+            outputs.numerical_status,
+            phase < 2 and not predictor_only,
+            0.5 * phase,
+            stage,
+        )
+        if count:
+            values = stage_evaluator(
+                context,
+                stage_workspace,
+                stage.particle_index[:count],
+                stage.time_s[:count],
+                stage.position_m[:count],
+                stage.velocity_m_s[:count],
+                stage.charge_number[:count],
+                stage.incoming_status[:count],
+            )
+            _collect_stage_verdicts_into(
+                count, values[5], values[6], values[7], values[8], phase == 2, stage, outputs
+            )
+            if phase < 2:
+                _collect_relaxation_coefficients_into(count, values, workspace)
+        if phase == 2:
+            return count > 0
+        if phase == 0:
+            _relaxation_motion_into(
+                position,
+                velocity,
+                charge,
+                workspace,
+                outputs.numerical_status,
+                midpoint_position,
+                midpoint_velocity,
+                not predictor_only,
+            )
+            stable_charge_update_into(
+                charge,
+                charge,
+                workspace.charge_rate_number_s,
+                workspace.charge_rate_derivative_s_inv,
+                workspace.elapsed_s,
+                outputs.numerical_status,
+                midpoint_charge,
+            )
+            if predictor_only:
+                _copy_stage_state_into(
+                    midpoint_position, midpoint_velocity, midpoint_charge, outputs
+                )
+                return False
+        else:
+            for row in range(count_rows):
+                workspace.elapsed_s[row] = step[row]
+            stable_charge_update_into(
+                charge,
+                midpoint_charge,
+                workspace.charge_rate_number_s,
+                workspace.charge_rate_derivative_s_inv,
+                workspace.elapsed_s,
+                outputs.numerical_status,
+                outputs.charge_number,
+            )
+            _relaxation_motion_into(
+                position,
+                velocity,
+                outputs.charge_number,
+                workspace,
+                outputs.numerical_status,
+                outputs.position_m,
+                outputs.velocity_m_s,
+                True,
+            )
+            for row in range(count_rows):
+                if step[row] == 0.0:
+                    outputs.charge_number[row] = charge[row]
+    return False
+
+
+def _run_relaxation_advance(
     evaluator: RelaxationStageEvaluator,
     particle_index: Int64Array,
-    time_s: FloatArray,
+    start_time_s: FloatArray,
+    elapsed_s: FloatArray,
     position_m: FloatArray,
     velocity_m_s: FloatArray,
     charge_number: FloatArray,
-    numerical_status: UInt8Array,
-) -> tuple[RowSelection, RelaxationEvaluation | None]:
-    if not bool((numerical_status != NUMERICAL_STATUS_OK).any()):
-        stage = evaluator(
+    *,
+    predictor_only: bool,
+    outputs: _StageAdvanceOutputs | None = None,
+) -> tuple[_StageAdvanceOutputs, RelaxationAdvanceWorkspace, bool]:
+    count = particle_index.size
+    owner = getattr(evaluator, "__self__", evaluator)
+    workspace = getattr(owner, "native_relaxation_workspace", None)
+    if workspace is None:
+        workspace = allocate_relaxation_advance_workspace(count)
+    if workspace.stage.active_rows.size < count:
+        raise ValueError("relaxation advance exceeds its workspace capacity")
+    if outputs is None:
+        outputs = _allocate_stage_advance_outputs(count, retain_field_cells=not predictor_only)
+    stage_evaluator = getattr(owner, "native_relaxation_stage_evaluator", None)
+    if stage_evaluator is None:
+        adapter = _PythonRelaxationAdapter(evaluator)
+        numerical_body = getattr(_compiled_relaxation_advance_into, "py_func", None)
+        assert numerical_body is not None
+        endpoint = numerical_body(
+            _evaluate_python_relaxation_stage,
+            adapter,
+            (),
             particle_index,
-            time_s,
+            start_time_s,
+            elapsed_s,
             position_m,
             velocity_m_s,
             charge_number,
+            workspace,
+            outputs,
+            predictor_only,
         )
-        _validate_relaxation_stage(stage, particle_index.size)
-        numerical_status[:] = stage.numerical_status
-        return slice(None), stage
-    rows = np.flatnonzero(numerical_status == NUMERICAL_STATUS_OK).astype("<i8", copy=False)
-    if not rows.size:
-        return rows, None
-    stage = evaluator(
-        particle_index[rows],
-        time_s[rows],
-        position_m[rows],
-        velocity_m_s[rows],
-        charge_number[rows],
-    )
-    _validate_relaxation_stage(stage, rows.size)
-    _merge_numerical_status(numerical_status, rows, stage.numerical_status)
-    return rows, stage
-
-
-def _rk4_stage_state_active(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    start_charge_number: FloatArray,
-    stage_velocity_m_s: FloatArray,
-    stage_acceleration_m_s2: FloatArray,
-    stage_charge_rate_number_s: FloatArray,
-    elapsed_s: FloatArray,
-    numerical_status: UInt8Array,
-) -> tuple[FloatArray, FloatArray, FloatArray]:
-    if not bool((numerical_status != NUMERICAL_STATUS_OK).any()):
-        candidate = _compiled_rk4_stage_state(
-            start_position_m,
-            start_velocity_m_s,
-            start_charge_number,
-            stage_velocity_m_s,
-            stage_acceleration_m_s2,
-            stage_charge_rate_number_s,
+        has_field_cell = endpoint and adapter.has_field_cell
+    else:
+        context = getattr(owner, "native_context", None)
+        stage_workspace = getattr(owner, "native_workspace", None)
+        if context is None or stage_workspace is None:
+            raise ValueError("native relaxation stage evaluator lost its prepared bindings")
+        has_field_cell = _compiled_relaxation_advance_into(
+            stage_evaluator,
+            context,
+            stage_workspace,
+            particle_index,
+            start_time_s,
             elapsed_s,
-        )
-        rows = np.arange(numerical_status.size, dtype=np.int64)
-        finite = _mark_nonfinite_state(numerical_status, rows, *candidate)
-        if bool(finite.all()):
-            return candidate
-        position = start_position_m.copy()
-        velocity = start_velocity_m_s.copy()
-        charge = start_charge_number.copy()
-        position[finite] = candidate[0][finite]
-        velocity[finite] = candidate[1][finite]
-        charge[finite] = candidate[2][finite]
-        return position, velocity, charge
-    position = start_position_m.copy()
-    velocity = start_velocity_m_s.copy()
-    charge = start_charge_number.copy()
-    rows = np.flatnonzero(numerical_status == NUMERICAL_STATUS_OK).astype("<i8", copy=False)
-    if not rows.size:
-        return position, velocity, charge
-    candidate = _compiled_rk4_stage_state(
-        start_position_m[rows],
-        start_velocity_m_s[rows],
-        start_charge_number[rows],
-        stage_velocity_m_s[rows],
-        stage_acceleration_m_s2[rows],
-        stage_charge_rate_number_s[rows],
-        elapsed_s[rows],
-    )
-    finite = _mark_nonfinite_state(numerical_status, rows, *candidate)
-    survivors = rows[finite]
-    position[survivors] = candidate[0][finite]
-    velocity[survivors] = candidate[1][finite]
-    charge[survivors] = candidate[2][finite]
-    return position, velocity, charge
-
-
-def _exponential_update_active(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    charge_number: FloatArray,
-    linear_drag_rate_s_inv: FloatArray,
-    target_velocity_m_s: FloatArray,
-    additive_acceleration_m_s2: FloatArray,
-    step_s: FloatArray,
-    numerical_status: UInt8Array,
-) -> tuple[FloatArray, FloatArray]:
-    if not bool((numerical_status != NUMERICAL_STATUS_OK).any()):
-        candidate_position, candidate_velocity = _compiled_exponential_update(
-            start_position_m,
-            start_velocity_m_s,
-            linear_drag_rate_s_inv,
-            target_velocity_m_s,
-            additive_acceleration_m_s2,
-            step_s,
-        )
-        rows = np.arange(numerical_status.size, dtype=np.int64)
-        finite = _mark_nonfinite_state(
-            numerical_status,
-            rows,
-            candidate_position,
-            candidate_velocity,
+            position_m,
+            velocity_m_s,
             charge_number,
+            workspace,
+            outputs,
+            predictor_only,
         )
-        if bool(finite.all()):
-            return candidate_position, candidate_velocity
-        position = start_position_m.copy()
-        velocity = start_velocity_m_s.copy()
-        position[finite] = candidate_position[finite]
-        velocity[finite] = candidate_velocity[finite]
-        return position, velocity
-    position = start_position_m.copy()
-    velocity = start_velocity_m_s.copy()
-    rows = np.flatnonzero(numerical_status == NUMERICAL_STATUS_OK).astype("<i8", copy=False)
-    if not rows.size:
-        return position, velocity
-    candidate_position, candidate_velocity = _compiled_exponential_update(
-        start_position_m[rows],
-        start_velocity_m_s[rows],
-        linear_drag_rate_s_inv[rows],
-        target_velocity_m_s[rows],
-        additive_acceleration_m_s2[rows],
-        step_s[rows],
-    )
-    finite = _mark_nonfinite_state(
-        numerical_status,
-        rows,
-        candidate_position,
-        candidate_velocity,
-        charge_number[rows],
-    )
-    survivors = rows[finite]
-    position[survivors] = candidate_position[finite]
-    velocity[survivors] = candidate_velocity[finite]
-    return position, velocity
+    return outputs, workspace, has_field_cell
 
 
 def _advance_exponential_midpoint(
@@ -3047,221 +4068,25 @@ def _advance_exponential_midpoint(
     velocity_m_s: FloatArray,
     charge_number: FloatArray,
 ) -> _AdvanceResult:
-    """Advance positive rows and inspect the accepted endpoint."""
-
-    count = int(particle_index.size)
-    result_position = position_m.copy()
-    result_velocity = velocity_m_s.copy()
-    result_charge = charge_number.copy()
-    support = np.ones(count, dtype=np.bool_)
-    applicable = np.ones(count, dtype=np.bool_)
-    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    moving = np.flatnonzero(elapsed_s > 0.0)
-    if moving.size:
-        advanced = _advance_positive_exponential_midpoint(
-            evaluator,
-            particle_index[moving],
-            start_time_s[moving],
-            elapsed_s[moving],
-            position_m[moving],
-            velocity_m_s[moving],
-            charge_number[moving],
-        )
-        result_position[moving] = advanced.position_m
-        result_velocity[moving] = advanced.velocity_m_s
-        result_charge[moving] = advanced.charge_number
-        support[moving] = advanced.support_inside
-        applicable[moving] = advanced.applicability_inside
-        numerical_status[moving] = advanced.numerical_status
-    _require_finite_state(result_position, result_velocity, result_charge)
-    rows, endpoint = _evaluate_active_relaxation(
-        evaluator,
-        particle_index,
-        start_time_s + elapsed_s,
-        result_position,
-        result_velocity,
-        result_charge,
-        numerical_status,
-    )
-    end_field_cell_id: Int64Array | None = None
-    if endpoint is not None:
-        support[rows] &= endpoint.support_inside
-        applicable[rows] &= endpoint.applicability_inside
-        if endpoint.field_cell_id is not None:
-            end_field_cell_id = np.full(count, -1, dtype=np.int64)
-            end_field_cell_id[rows] = endpoint.field_cell_id
-    return _AdvanceResult(
-        result_position,
-        result_velocity,
-        result_charge,
-        support,
-        applicable,
-        numerical_status,
-        end_field_cell_id,
-    )
-
-
-def _advance_positive_exponential_midpoint(
-    evaluator: RelaxationStageEvaluator,
-    particle_index: Int64Array,
-    start_time_s: FloatArray,
-    step_s: FloatArray,
-    position_m: FloatArray,
-    velocity_m_s: FloatArray,
-    charge_number: FloatArray,
-) -> _AdvanceResult:
-    """Use a start half-step predictor and midpoint-frozen analytic update."""
-
-    count = int(particle_index.size)
-    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    support = np.ones(count, dtype=np.bool_)
-    applicable = np.ones(count, dtype=np.bool_)
-    first_rate = np.zeros(count, dtype=np.float64)
-    first_target = np.zeros((count, 2), dtype=np.float64)
-    first_additive = np.zeros((count, 2), dtype=np.float64)
-    first_charge_rate = np.zeros(count, dtype=np.float64)
-    first_charge_derivative = np.zeros(count, dtype=np.float64)
-    rows, first = _evaluate_active_relaxation(
+    outputs, _, has_field_cell = _run_relaxation_advance(
         evaluator,
         particle_index,
         start_time_s,
+        elapsed_s,
         position_m,
         velocity_m_s,
         charge_number,
-        numerical_status,
-    )
-    if first is not None:
-        support[rows] &= first.support_inside
-        applicable[rows] &= first.applicability_inside
-        first_rate[rows] = first.linear_drag_rate_s_inv
-        first_target[rows] = first.target_velocity_m_s
-        first_additive[rows] = first.additive_acceleration_m_s2
-        first_charge_rate[rows] = first.charge_rate_number_s
-        first_charge_derivative[rows] = first.charge_rate_derivative_s_inv
-    half_step = 0.5 * step_s
-    midpoint_position, midpoint_velocity = _exponential_update_active(
-        position_m,
-        velocity_m_s,
-        charge_number,
-        first_rate,
-        first_target,
-        first_additive,
-        half_step,
-        numerical_status,
-    )
-    midpoint_charge = _stable_charge_update_active(
-        charge_number,
-        charge_number,
-        first_charge_rate,
-        first_charge_derivative,
-        half_step,
-        numerical_status,
-    )
-    midpoint_rate = np.zeros(count, dtype=np.float64)
-    midpoint_target = np.zeros((count, 2), dtype=np.float64)
-    midpoint_additive = np.zeros((count, 2), dtype=np.float64)
-    midpoint_charge_rate = np.zeros(count, dtype=np.float64)
-    midpoint_charge_derivative = np.zeros(count, dtype=np.float64)
-    rows, midpoint = _evaluate_active_relaxation(
-        evaluator,
-        particle_index,
-        start_time_s + half_step,
-        midpoint_position,
-        midpoint_velocity,
-        midpoint_charge,
-        numerical_status,
-    )
-    if midpoint is not None:
-        support[rows] &= midpoint.support_inside
-        applicable[rows] &= midpoint.applicability_inside
-        midpoint_rate[rows] = midpoint.linear_drag_rate_s_inv
-        midpoint_target[rows] = midpoint.target_velocity_m_s
-        midpoint_additive[rows] = midpoint.additive_acceleration_m_s2
-        midpoint_charge_rate[rows] = midpoint.charge_rate_number_s
-        midpoint_charge_derivative[rows] = midpoint.charge_rate_derivative_s_inv
-    end_charge = _stable_charge_update_active(
-        charge_number,
-        midpoint_charge,
-        midpoint_charge_rate,
-        midpoint_charge_derivative,
-        step_s,
-        numerical_status,
-    )
-    end_position, end_velocity = _exponential_update_active(
-        position_m,
-        velocity_m_s,
-        end_charge,
-        midpoint_rate,
-        midpoint_target,
-        midpoint_additive,
-        step_s,
-        numerical_status,
+        predictor_only=False,
     )
     return _AdvanceResult(
-        end_position,
-        end_velocity,
-        end_charge,
-        support,
-        applicable,
-        numerical_status,
-        None,
+        outputs.position_m,
+        outputs.velocity_m_s,
+        outputs.charge_number,
+        outputs.support_inside,
+        outputs.applicability_inside,
+        outputs.numerical_status,
+        outputs.field_cell_id if has_field_cell else None,
     )
-
-
-def _stable_charge_update_active(
-    start_charge_number: FloatArray,
-    reference_charge_number: FloatArray,
-    charge_rate_number_s: FloatArray,
-    charge_rate_derivative_s_inv: FloatArray,
-    elapsed_s: FloatArray,
-    numerical_status: UInt8Array,
-) -> FloatArray:
-    """Advance one midpoint-frozen affine charge law with an exponential."""
-
-    result = start_charge_number.copy()
-    rows = np.flatnonzero(numerical_status == NUMERICAL_STATUS_OK).astype("<i8", copy=False)
-    if not rows.size:
-        return result
-    start = start_charge_number[rows]
-    reference = reference_charge_number[rows]
-    rate = charge_rate_number_s[rows]
-    derivative = charge_rate_derivative_s_inv[rows]
-    elapsed = elapsed_s[rows]
-    valid = (
-        np.isfinite(start)
-        & np.isfinite(reference)
-        & np.isfinite(rate)
-        & np.isfinite(derivative)
-        & np.isfinite(elapsed)
-        & (elapsed >= 0.0)
-        & (derivative <= 0.0)
-    )
-    affine_start_rate = rate + derivative * (start - reference)
-    multiplier = _affine_exponential_multiplier(derivative, elapsed)
-    with np.errstate(over="ignore", invalid="ignore", under="ignore"):
-        candidate = start + multiplier * affine_start_rate
-    valid &= np.isfinite(candidate)
-    numerical_status[rows[~valid]] = INTEGRATOR_NUMERICAL_FAILURE
-    result[rows[valid]] = candidate[valid]
-    return result
-
-
-def _affine_exponential_multiplier(
-    rate_derivative_s_inv: FloatArray,
-    elapsed_s: FloatArray,
-) -> FloatArray:
-    """Return ``expm1(J h) / J`` with its exact ``J=0`` limit."""
-
-    result = elapsed_s.copy()
-    relaxing = rate_derivative_s_inv < 0.0
-    argument = np.zeros_like(elapsed_s)
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        argument[relaxing] = rate_derivative_s_inv[relaxing] * elapsed_s[relaxing]
-        resolved = relaxing & np.isfinite(argument) & (argument != 0.0)
-        result[resolved] = elapsed_s[resolved] * (np.expm1(argument[resolved]) / argument[resolved])
-        saturated = relaxing & np.isneginf(argument)
-        result[saturated] = -1.0 / rate_derivative_s_inv[saturated]
-    return result
 
 
 def affine_exponential_charge(
@@ -3287,13 +4112,169 @@ def affine_exponential_charge(
         and (derivative <= 0.0).all()
     ):
         raise ValueError("affine-exponential charge inputs are invalid")
-    multiplier = _affine_exponential_multiplier(derivative, elapsed)
-    with np.errstate(over="ignore", invalid="ignore", under="ignore"):
-        result = root + multiplier * affine_rate
+    result = np.empty_like(root)
+    affine_exponential_charge_into(root, elapsed, affine_rate, derivative, result)
     # Brownian execution owns row-local numerical failure.  Returning an
     # arithmetic overflow here lets that caller retire only the affected row;
     # malformed inputs above remain fail-fast structural errors.
     return result
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _quadratic_position_scalar(
+    position: float, velocity: float, acceleration: float, step: float
+) -> float:
+    return position + step * velocity + 0.5 * (step * step) * acceleration
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _compiled_linear_advance_into(
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+    elapsed: FloatArray,
+    outputs: _StageAdvanceOutputs,
+) -> None:
+    _initialize_stage_advance_into(position, velocity, charge, outputs)
+    for row in range(charge.size):
+        x = position[row, 0] + elapsed[row] * velocity[row, 0]
+        y = position[row, 1] + elapsed[row] * velocity[row, 1]
+        if np.isfinite(x) and np.isfinite(y):
+            if elapsed[row] != 0.0:
+                outputs.position_m[row, 0] = x
+                outputs.position_m[row, 1] = y
+        else:
+            outputs.numerical_status[row] = INTEGRATOR_NUMERICAL_FAILURE
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _initialize_quadratic_advance_into(
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+    acceleration: FloatArray,
+    elapsed: FloatArray,
+    outputs: _StageAdvanceOutputs,
+) -> None:
+    _initialize_stage_advance_into(position, velocity, charge, outputs)
+    for row in range(charge.size):
+        finite = True
+        for axis in range(2):
+            x, v, a, step = (
+                position[row, axis],
+                velocity[row, axis],
+                acceleration[row, axis],
+                elapsed[row],
+            )
+            midpoint = _quadratic_position_scalar(x, v, a, 0.5 * step)
+            midpoint_velocity = v + (0.5 * step) * a
+            endpoint = _quadratic_position_scalar(x, v, a, step)
+            endpoint_velocity = v + step * a
+            finite = finite and np.isfinite(midpoint) and np.isfinite(midpoint_velocity)
+            finite = finite and np.isfinite(endpoint) and np.isfinite(endpoint_velocity)
+            outputs.position_m[row, axis] = endpoint
+            outputs.velocity_m_s[row, axis] = endpoint_velocity
+        if not finite:
+            outputs.numerical_status[row] = INTEGRATOR_NUMERICAL_FAILURE
+        if not finite or elapsed[row] == 0.0:
+            for axis in range(2):
+                outputs.position_m[row, axis] = position[row, axis]
+                outputs.velocity_m_s[row, axis] = velocity[row, axis]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _prepare_quadratic_stage_into(
+    phase: int,
+    particle_index: Int64Array,
+    start_time: FloatArray,
+    step: FloatArray,
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+    acceleration: FloatArray,
+    workspace: StageAdvanceWorkspace,
+    outputs: _StageAdvanceOutputs,
+) -> int:
+    source_position = outputs.position_m if phase == 2 else position
+    source_velocity = outputs.velocity_m_s if phase == 2 else velocity
+    count = _pack_stage_advance_into(
+        particle_index,
+        start_time,
+        step,
+        source_position,
+        source_velocity,
+        charge,
+        outputs.numerical_status,
+        False,
+        0.5 * phase,
+        workspace,
+    )
+    if phase == 1:
+        for local in range(count):
+            row = workspace.active_rows[local]
+            half_step = 0.5 * step[row]
+            for axis in range(2):
+                workspace.position_m[local, axis] = _quadratic_position_scalar(
+                    position[row, axis], velocity[row, axis], acceleration[row, axis], half_step
+                )
+                workspace.velocity_m_s[local, axis] = (
+                    velocity[row, axis] + half_step * acceleration[row, axis]
+                )
+    return count
+
+
+# First-class dispatcher identity is process-local; its disk-cache index can hold dead weakrefs.
+@njit(cache=False, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _compiled_quadratic_advance_into(
+    stage_evaluator: Callable,
+    context: object,
+    stage_workspace: object,
+    particle_index: Int64Array,
+    start_time: FloatArray,
+    step: FloatArray,
+    position: FloatArray,
+    velocity: FloatArray,
+    charge: FloatArray,
+    acceleration: FloatArray,
+    workspace: StageAdvanceWorkspace,
+    outputs: _StageAdvanceOutputs,
+) -> bool:
+    """Keep analytic advance and all three actual-state inspections native."""
+
+    _initialize_quadratic_advance_into(position, velocity, charge, acceleration, step, outputs)
+    endpoint_evaluated = False
+    for phase in range(3):
+        count = _prepare_quadratic_stage_into(
+            phase,
+            particle_index,
+            start_time,
+            step,
+            position,
+            velocity,
+            charge,
+            acceleration,
+            workspace,
+            outputs,
+        )
+        if phase == 2:
+            endpoint_evaluated = count > 0
+        if count:
+            values = stage_evaluator(
+                context,
+                stage_workspace,
+                workspace.particle_index[:count],
+                workspace.time_s[:count],
+                workspace.position_m[:count],
+                workspace.velocity_m_s[:count],
+                workspace.charge_number[:count],
+                workspace.incoming_status[:count],
+            )
+            if np.any(values[1] != 0.0):
+                raise ValueError("quadratic exact path requires fixed charge")
+            _collect_stage_verdicts_into(
+                count, values[2], values[3], values[4], values[5], phase == 2, workspace, outputs
+            )
+    return endpoint_evaluated
 
 
 def _advance_linear(
@@ -3302,24 +4283,15 @@ def _advance_linear(
     charge_number: FloatArray,
     elapsed_s: FloatArray,
 ) -> _AdvanceResult:
-    with np.errstate(over="ignore", invalid="ignore"):
-        candidate_position = position_m + elapsed_s[:, None] * velocity_m_s
-    position = position_m.copy()
-    finite = np.isfinite(candidate_position).all(axis=1)
-    position[finite] = candidate_position[finite]
-    exact_start = elapsed_s == 0.0
-    if bool(exact_start.any()):
-        position[exact_start] = position_m[exact_start]
-    count = int(elapsed_s.size)
-    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    numerical_status[~finite] = INTEGRATOR_NUMERICAL_FAILURE
+    outputs = _allocate_stage_advance_outputs(charge_number.size, retain_field_cells=False)
+    _compiled_linear_advance_into(position_m, velocity_m_s, charge_number, elapsed_s, outputs)
     return _AdvanceResult(
-        position,
-        velocity_m_s.copy(),
-        charge_number.copy(),
-        np.ones(count, dtype=np.bool_),
-        np.ones(count, dtype=np.bool_),
-        numerical_status,
+        outputs.position_m,
+        outputs.velocity_m_s,
+        outputs.charge_number,
+        outputs.support_inside,
+        outputs.applicability_inside,
+        outputs.numerical_status,
         None,
     )
 
@@ -3333,78 +4305,80 @@ def _advance_quadratic(
     velocity_m_s: FloatArray,
     charge_number: FloatArray,
     acceleration_m_s2: FloatArray,
+    *,
+    outputs: _StageAdvanceOutputs | None = None,
 ) -> _AdvanceResult:
-    """Evaluate a prepare-certified constant-acceleration path exactly."""
-
-    count = int(particle_index.size)
-    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    half_elapsed = 0.5 * elapsed_s
-    with np.errstate(over="ignore", invalid="ignore"):
-        midpoint_position = _quadratic_position(
-            position_m,
-            velocity_m_s,
-            acceleration_m_s2,
-            half_elapsed,
-        )
-        midpoint_velocity = velocity_m_s + half_elapsed[:, None] * acceleration_m_s2
-        end_position = _quadratic_position(
-            position_m,
-            velocity_m_s,
-            acceleration_m_s2,
-            elapsed_s,
-        )
-        end_velocity = velocity_m_s + elapsed_s[:, None] * acceleration_m_s2
-    finite = (
-        np.isfinite(midpoint_position).all(axis=1)
-        & np.isfinite(midpoint_velocity).all(axis=1)
-        & np.isfinite(end_position).all(axis=1)
-        & np.isfinite(end_velocity).all(axis=1)
-    )
-    numerical_status[~finite] = INTEGRATOR_NUMERICAL_FAILURE
-    midpoint_position[~finite] = position_m[~finite]
-    midpoint_velocity[~finite] = velocity_m_s[~finite]
-    end_position[~finite] = position_m[~finite]
-    end_velocity[~finite] = velocity_m_s[~finite]
-    support = np.ones(count, dtype=np.bool_)
-    applicable = np.ones(count, dtype=np.bool_)
-    end_field_cell_id: Int64Array | None = None
-    stage_inputs = (
-        (start_time_s, position_m, velocity_m_s),
-        (start_time_s + half_elapsed, midpoint_position, midpoint_velocity),
-        (start_time_s + elapsed_s, end_position, end_velocity),
-    )
-    for stage_index, (stage_time, stage_position, stage_velocity) in enumerate(stage_inputs):
-        rows, stage = _evaluate_active_dynamics(
-            evaluator,
+    count = particle_index.size
+    workspace = getattr(evaluator, "native_stage_advance_workspace", None)
+    if workspace is None:
+        workspace = allocate_stage_advance_workspace(count)
+    if workspace.active_rows.size < count:
+        raise ValueError("quadratic advance exceeds its workspace capacity")
+    if outputs is None:
+        outputs = _allocate_stage_advance_outputs(count)
+    stage_evaluator = getattr(evaluator, "native_stage_evaluator", None)
+    if stage_evaluator is None:
+        adapter = _PythonStageAdapter(evaluator)
+        numerical_body = getattr(_compiled_quadratic_advance_into, "py_func", None)
+        assert numerical_body is not None
+        endpoint = numerical_body(
+            _evaluate_python_dynamics_stage,
+            adapter,
+            (),
             particle_index,
-            stage_time,
-            stage_position,
-            stage_velocity,
+            start_time_s,
+            elapsed_s,
+            position_m,
+            velocity_m_s,
             charge_number,
-            numerical_status,
+            acceleration_m_s2,
+            workspace,
+            outputs,
         )
-        if stage is None:
-            continue
-        if not bool((stage.charge_rate_number_s == 0.0).all()):
-            raise ValueError("quadratic exact path requires fixed charge")
-        support[rows] &= stage.support_inside
-        applicable[rows] &= stage.applicability_inside
-        if stage_index == 2 and stage.field_cell_id is not None:
-            end_field_cell_id = np.full(count, -1, dtype=np.int64)
-            end_field_cell_id[rows] = stage.field_cell_id
-    exact_start = elapsed_s == 0.0
-    if bool(exact_start.any()):
-        end_position[exact_start] = position_m[exact_start]
-        end_velocity[exact_start] = velocity_m_s[exact_start]
+        has_field_cell = endpoint and adapter.has_field_cell
+    else:
+        context = getattr(evaluator, "native_context", None)
+        stage_workspace = getattr(evaluator, "native_workspace", None)
+        if context is None or stage_workspace is None:
+            raise ValueError("native quadratic stage evaluator lost its prepared bindings")
+        has_field_cell = _compiled_quadratic_advance_into(
+            stage_evaluator,
+            context,
+            stage_workspace,
+            particle_index,
+            start_time_s,
+            elapsed_s,
+            position_m,
+            velocity_m_s,
+            charge_number,
+            acceleration_m_s2,
+            workspace,
+            outputs,
+        )
     return _AdvanceResult(
-        end_position,
-        end_velocity,
-        charge_number.copy(),
-        support,
-        applicable,
-        numerical_status,
-        end_field_cell_id,
+        outputs.position_m,
+        outputs.velocity_m_s,
+        outputs.charge_number,
+        outputs.support_inside,
+        outputs.applicability_inside,
+        outputs.numerical_status,
+        outputs.field_cell_id if has_field_cell else None,
     )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _quadratic_position_into(
+    position: FloatArray,
+    velocity: FloatArray,
+    acceleration: FloatArray,
+    elapsed: FloatArray,
+    result: FloatArray,
+) -> None:
+    for row in range(elapsed.size):
+        for axis in range(2):
+            result[row, axis] = _quadratic_position_scalar(
+                position[row, axis], velocity[row, axis], acceleration[row, axis], elapsed[row]
+            )
 
 
 def _quadratic_position(
@@ -3413,14 +4387,11 @@ def _quadratic_position(
     acceleration_m_s2: FloatArray,
     elapsed_s: FloatArray,
 ) -> FloatArray:
-    """Evaluate the constant-acceleration position with one operation order."""
-
-    with np.errstate(over="ignore", invalid="ignore"):
-        return (
-            start_position_m
-            + elapsed_s[:, None] * start_velocity_m_s
-            + 0.5 * (elapsed_s * elapsed_s)[:, None] * acceleration_m_s2
-        )
+    result = np.empty_like(start_position_m)
+    _quadratic_position_into(
+        start_position_m, start_velocity_m_s, acceleration_m_s2, elapsed_s, result
+    )
+    return result
 
 
 def _enclose_quadratic_position(
@@ -3517,70 +4488,397 @@ def _degenerate_rk4_dense_controls(
     )
 
 
-def _rk4_dense_inner_pair(
-    start_value: FloatArray,
-    end_value: FloatArray,
-    start_derivative: FloatArray,
-    end_derivative: FloatArray,
-    step_s: FloatArray,
-    numerical_status: UInt8Array,
-) -> FloatArray:
-    scale_shape = (step_s.size,) + (1,) * (start_value.ndim - 1)
-    one_third_step = (step_s / 3.0).reshape(scale_shape)
-    with np.errstate(over="ignore", invalid="ignore"):
-        first = start_value + one_third_step * start_derivative
-        second = end_value - one_third_step * end_derivative
-    result = np.stack((first, second), axis=1)
-    axes = tuple(range(1, result.ndim))
-    invalid = ~np.isfinite(result).all(axis=axes)
-    numerical_status[invalid & (numerical_status == NUMERICAL_STATUS_OK)] = (
-        INTEGRATOR_NUMERICAL_FAILURE
+def allocate_rk4_advance_workspace(capacity: int) -> Rk4AdvanceWorkspace:
+    """Allocate scratch once for one exclusive bounded advance slot."""
+
+    return Rk4AdvanceWorkspace(
+        np.empty(capacity, dtype=np.int64),
+        np.empty(capacity, dtype=np.int64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.uint8),
+        np.empty((3, capacity, 2), dtype=np.float64),
+        np.empty((4, capacity, 2), dtype=np.float64),
+        np.empty((4, capacity), dtype=np.float64),
     )
-    failed = numerical_status != NUMERICAL_STATUS_OK
-    result[failed, 0] = start_value[failed]
-    result[failed, 1] = end_value[failed]
-    return result
 
 
-def _build_rk4_dense_controls(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    start_charge_number: FloatArray,
-    end_position_m: FloatArray,
-    end_velocity_m_s: FloatArray,
-    end_charge_number: FloatArray,
-    first_acceleration_m_s2: FloatArray,
-    fourth_acceleration_m_s2: FloatArray,
-    first_charge_rate_number_s: FloatArray,
-    fourth_charge_rate_number_s: FloatArray,
+@dataclass(slots=True)
+class _PythonStageAdapter:
+    """Project a verification evaluator onto the owned native stage bodies."""
+
+    evaluator: StageEvaluator
+    has_field_cell: bool = False
+
+
+def _evaluate_python_dynamics_stage(
+    context: _PythonStageAdapter,
+    stage_workspace: object,
+    particle_index: Int64Array,
+    time_s: FloatArray,
+    position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    charge_number: FloatArray,
+    incoming_status: UInt8Array,
+) -> tuple[FloatArray, FloatArray, BoolArray, BoolArray, UInt8Array, Int64Array]:
+    del stage_workspace, incoming_status
+    stage = context.evaluator(particle_index, time_s, position_m, velocity_m_s, charge_number)
+    _validate_stage(stage, particle_index.size)
+    cells = stage.field_cell_id
+    context.has_field_cell = cells is not None
+    if cells is None:
+        cells = np.full(particle_index.size, -1, dtype=np.int64)
+    return (
+        stage.acceleration_m_s2,
+        stage.charge_rate_number_s,
+        stage.support_inside,
+        stage.applicability_inside,
+        stage.numerical_status,
+        cells,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _rk4_stage_component(start: float, rate: float, step: float) -> float:
+    return start + step * rate
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _rk4_endpoint_component(
+    start: float, first: float, second: float, third: float, fourth: float, weight: float
+) -> float:
+    total = first + 2.0 * second
+    total = total + 2.0 * third
+    total = total + fourth
+    return start + weight * total
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _rk4_state_is_finite(
+    position_0: float, position_1: float, velocity_0: float, velocity_1: float, charge: float
+) -> bool:
+    return bool(
+        np.isfinite(position_0)
+        & np.isfinite(position_1)
+        & np.isfinite(velocity_0)
+        & np.isfinite(velocity_1)
+        & np.isfinite(charge)
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _initialize_rk4_advance_into(
+    position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    charge_number: FloatArray,
+    workspace: Rk4AdvanceWorkspace,
+    outputs: _Rk4AdvanceOutputs,
+) -> None:
+    for row in range(charge_number.size):
+        outputs.numerical_status[row] = NUMERICAL_STATUS_OK
+        outputs.support_inside[row] = True
+        outputs.applicability_inside[row] = True
+        outputs.field_cell_id[row] = -1
+        outputs.charge_number[row] = charge_number[row]
+        for axis in range(2):
+            outputs.position_m[row, axis] = position_m[row, axis]
+            outputs.velocity_m_s[row, axis] = velocity_m_s[row, axis]
+            for control in range(2):
+                outputs.position_inner_m[row, control, axis] = position_m[row, axis]
+                outputs.velocity_inner_m_s[row, control, axis] = velocity_m_s[row, axis]
+        for control in range(2):
+            outputs.charge_inner_number[row, control] = charge_number[row]
+        for stage in range(4):
+            workspace.charge_rate_number_s[stage, row] = 0.0
+            for axis in range(2):
+                workspace.acceleration_m_s2[stage, row, axis] = 0.0
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _rk4_stage_is_active(stage: int, step: float, status: np.uint8) -> bool:
+    return status == NUMERICAL_STATUS_OK and (stage == 4 or step > 0.0)
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _prepare_rk4_stage_into(
+    stage: int,
+    particle_index: Int64Array,
+    start_time_s: FloatArray,
     step_s: FloatArray,
-    numerical_status: UInt8Array,
-) -> _Rk4DenseControls:
-    position_inner = _rk4_dense_inner_pair(
-        start_position_m,
-        end_position_m,
-        start_velocity_m_s,
-        end_velocity_m_s,
-        step_s,
-        numerical_status,
-    )
-    velocity_inner = _rk4_dense_inner_pair(
-        start_velocity_m_s,
-        end_velocity_m_s,
-        first_acceleration_m_s2,
-        fourth_acceleration_m_s2,
-        step_s,
-        numerical_status,
-    )
-    charge_inner = _rk4_dense_inner_pair(
-        start_charge_number,
-        end_charge_number,
-        first_charge_rate_number_s,
-        fourth_charge_rate_number_s,
-        step_s,
-        numerical_status,
-    )
-    return _Rk4DenseControls(position_inner, velocity_inner, charge_inner)
+    position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    charge_number: FloatArray,
+    workspace: Rk4AdvanceWorkspace,
+    outputs: _Rk4AdvanceOutputs,
+) -> int:
+    count = 0
+    for row in range(particle_index.size):
+        if not _rk4_stage_is_active(stage, step_s[row], outputs.numerical_status[row]):
+            continue
+        source_position = position_m
+        source_velocity = velocity_m_s
+        source_charge = charge_number
+        if stage == 4:
+            source_position = outputs.position_m
+            source_velocity = outputs.velocity_m_s
+            source_charge = outputs.charge_number
+        charge = source_charge[row]
+        fraction = 0.5 if stage == 1 or stage == 2 else 1.0
+        elapsed = fraction * step_s[row]
+        for axis in range(2):
+            position = source_position[row, axis]
+            velocity = source_velocity[row, axis]
+            if 0 < stage < 4:
+                previous_velocity = velocity_m_s[row, axis]
+                if stage > 1:
+                    previous_velocity = workspace.stage_velocity_m_s[stage - 2, row, axis]
+                position = _rk4_stage_component(position, previous_velocity, elapsed)
+                velocity = _rk4_stage_component(
+                    velocity, workspace.acceleration_m_s2[stage - 1, row, axis], elapsed
+                )
+            workspace.position_m[count, axis] = position
+            workspace.velocity_m_s[count, axis] = velocity
+        if 0 < stage < 4:
+            charge = _rk4_stage_component(
+                charge, workspace.charge_rate_number_s[stage - 1, row], elapsed
+            )
+        workspace.charge_number[count] = charge
+        if not _rk4_state_is_finite(
+            workspace.position_m[count, 0],
+            workspace.position_m[count, 1],
+            workspace.velocity_m_s[count, 0],
+            workspace.velocity_m_s[count, 1],
+            charge,
+        ):
+            outputs.numerical_status[row] = INTEGRATOR_NUMERICAL_FAILURE
+            continue
+        if 0 < stage < 4:
+            for axis in range(2):
+                workspace.stage_velocity_m_s[stage - 1, row, axis] = workspace.velocity_m_s[
+                    count, axis
+                ]
+        workspace.active_rows[count] = row
+        workspace.particle_index[count] = particle_index[row]
+        workspace.incoming_status[count] = NUMERICAL_STATUS_OK
+        workspace.time_s[count] = start_time_s[row] if stage == 0 else start_time_s[row] + elapsed
+        count += 1
+    return count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _collect_rk4_stage_into(
+    stage: int,
+    count: int,
+    values: tuple[FloatArray, FloatArray, BoolArray, BoolArray, UInt8Array, Int64Array],
+    workspace: Rk4AdvanceWorkspace,
+    outputs: _Rk4AdvanceOutputs,
+) -> None:
+    acceleration, charge_rate, support, applicable, status, cells = values
+    for selected in range(count):
+        if not bool(
+            np.isfinite(acceleration[selected, 0])
+            & np.isfinite(acceleration[selected, 1])
+            & np.isfinite(charge_rate[selected])
+        ):
+            raise ValueError("stage evaluator returned a non-finite derivative")
+        row = workspace.active_rows[selected]
+        outputs.numerical_status[row] = status[selected]
+        outputs.support_inside[row] &= support[selected]
+        outputs.applicability_inside[row] &= applicable[selected]
+        if stage < 4:
+            workspace.acceleration_m_s2[stage, row, 0] = acceleration[selected, 0]
+            workspace.acceleration_m_s2[stage, row, 1] = acceleration[selected, 1]
+            workspace.charge_rate_number_s[stage, row] = charge_rate[selected]
+        else:
+            outputs.field_cell_id[row] = cells[selected]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _rk4_dense_vector_pair_row_into(
+    row: int,
+    start: FloatArray,
+    end: FloatArray,
+    first_rate: FloatArray,
+    fourth_rate: FloatArray,
+    step: float,
+    inner: FloatArray,
+    status: UInt8Array,
+) -> None:
+    one_third_step = step / 3.0
+    finite = True
+    for axis in range(2):
+        first = start[row, axis] + one_third_step * first_rate[row, axis]
+        second = end[row, axis] - one_third_step * fourth_rate[row, axis]
+        inner[row, 0, axis] = first
+        inner[row, 1, axis] = second
+        finite = finite & np.isfinite(first) & np.isfinite(second)
+    if not finite and status[row] == NUMERICAL_STATUS_OK:
+        status[row] = INTEGRATOR_NUMERICAL_FAILURE
+    if status[row] != NUMERICAL_STATUS_OK:
+        for axis in range(2):
+            inner[row, 0, axis] = start[row, axis]
+            inner[row, 1, axis] = end[row, axis]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _rk4_dense_charge_pair_row_into(
+    row: int,
+    start: FloatArray,
+    end: FloatArray,
+    first_rate: FloatArray,
+    fourth_rate: FloatArray,
+    step: float,
+    inner: FloatArray,
+    status: UInt8Array,
+) -> None:
+    one_third_step = step / 3.0
+    first = start[row] + one_third_step * first_rate[row]
+    second = end[row] - one_third_step * fourth_rate[row]
+    inner[row, 0] = first
+    inner[row, 1] = second
+    if not bool(np.isfinite(first) & np.isfinite(second)) and status[row] == NUMERICAL_STATUS_OK:
+        status[row] = INTEGRATOR_NUMERICAL_FAILURE
+    if status[row] != NUMERICAL_STATUS_OK:
+        inner[row, 0] = start[row]
+        inner[row, 1] = end[row]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _finish_rk4_advance_into(
+    position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    charge_number: FloatArray,
+    step_s: FloatArray,
+    workspace: Rk4AdvanceWorkspace,
+    outputs: _Rk4AdvanceOutputs,
+) -> None:
+    for row in range(step_s.size):
+        if not (step_s[row] > 0.0):
+            continue
+        if outputs.numerical_status[row] == NUMERICAL_STATUS_OK:
+            weight = step_s[row] / 6.0
+            for axis in range(2):
+                workspace.position_m[row, axis] = _rk4_endpoint_component(
+                    position_m[row, axis],
+                    velocity_m_s[row, axis],
+                    workspace.stage_velocity_m_s[0, row, axis],
+                    workspace.stage_velocity_m_s[1, row, axis],
+                    workspace.stage_velocity_m_s[2, row, axis],
+                    weight,
+                )
+                workspace.velocity_m_s[row, axis] = _rk4_endpoint_component(
+                    velocity_m_s[row, axis],
+                    workspace.acceleration_m_s2[0, row, axis],
+                    workspace.acceleration_m_s2[1, row, axis],
+                    workspace.acceleration_m_s2[2, row, axis],
+                    workspace.acceleration_m_s2[3, row, axis],
+                    weight,
+                )
+            charge = _rk4_endpoint_component(
+                charge_number[row],
+                workspace.charge_rate_number_s[0, row],
+                workspace.charge_rate_number_s[1, row],
+                workspace.charge_rate_number_s[2, row],
+                workspace.charge_rate_number_s[3, row],
+                weight,
+            )
+            if _rk4_state_is_finite(
+                workspace.position_m[row, 0],
+                workspace.position_m[row, 1],
+                workspace.velocity_m_s[row, 0],
+                workspace.velocity_m_s[row, 1],
+                charge,
+            ):
+                for axis in range(2):
+                    outputs.position_m[row, axis] = workspace.position_m[row, axis]
+                    outputs.velocity_m_s[row, axis] = workspace.velocity_m_s[row, axis]
+                outputs.charge_number[row] = charge
+            else:
+                outputs.numerical_status[row] = INTEGRATOR_NUMERICAL_FAILURE
+        _rk4_dense_vector_pair_row_into(
+            row,
+            position_m,
+            outputs.position_m,
+            velocity_m_s,
+            outputs.velocity_m_s,
+            step_s[row],
+            outputs.position_inner_m,
+            outputs.numerical_status,
+        )
+        _rk4_dense_vector_pair_row_into(
+            row,
+            velocity_m_s,
+            outputs.velocity_m_s,
+            workspace.acceleration_m_s2[0],
+            workspace.acceleration_m_s2[3],
+            step_s[row],
+            outputs.velocity_inner_m_s,
+            outputs.numerical_status,
+        )
+        _rk4_dense_charge_pair_row_into(
+            row,
+            charge_number,
+            outputs.charge_number,
+            workspace.charge_rate_number_s[0],
+            workspace.charge_rate_number_s[3],
+            step_s[row],
+            outputs.charge_inner_number,
+            outputs.numerical_status,
+        )
+
+
+# First-class dispatcher identity is process-local; its disk-cache index can hold dead weakrefs.
+@njit(cache=False, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _compiled_rk4_advance_into(
+    stage_evaluator: Callable,
+    context: object,
+    stage_workspace: object,
+    particle_index: Int64Array,
+    start_time_s: FloatArray,
+    step_s: FloatArray,
+    position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    charge_number: FloatArray,
+    workspace: Rk4AdvanceWorkspace,
+    outputs: _Rk4AdvanceOutputs,
+) -> bool:
+    """Keep four coupled stages and endpoint validation in one native call."""
+
+    _initialize_rk4_advance_into(position_m, velocity_m_s, charge_number, workspace, outputs)
+    endpoint_evaluated = False
+    for stage in range(5):
+        if stage == 4:
+            _finish_rk4_advance_into(
+                position_m, velocity_m_s, charge_number, step_s, workspace, outputs
+            )
+        count = _prepare_rk4_stage_into(
+            stage,
+            particle_index,
+            start_time_s,
+            step_s,
+            position_m,
+            velocity_m_s,
+            charge_number,
+            workspace,
+            outputs,
+        )
+        if stage == 4:
+            endpoint_evaluated = count > 0
+        if count:
+            values = stage_evaluator(
+                context,
+                stage_workspace,
+                workspace.particle_index[:count],
+                workspace.time_s[:count],
+                workspace.position_m[:count],
+                workspace.velocity_m_s[:count],
+                workspace.charge_number[:count],
+                workspace.incoming_status[:count],
+            )
+            _collect_rk4_stage_into(stage, count, values, workspace, outputs)
+    return endpoint_evaluated
 
 
 def _advance_rk4(
@@ -3592,222 +4890,73 @@ def _advance_rk4(
     velocity_m_s: FloatArray,
     charge_number: FloatArray,
 ) -> _AdvanceResult:
-    count = int(particle_index.size)
-    result_position = position_m.copy()
-    result_velocity = velocity_m_s.copy()
-    result_charge = charge_number.copy()
-    support = np.ones(count, dtype=np.bool_)
-    applicable = np.ones(count, dtype=np.bool_)
-    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    dense_controls = _degenerate_rk4_dense_controls(
-        position_m,
-        velocity_m_s,
-        charge_number,
+    count = particle_index.size
+    workspace = getattr(evaluator, "native_rk4_workspace", None)
+    if workspace is None:
+        workspace = allocate_rk4_advance_workspace(count)
+    if workspace.active_rows.size < count:
+        raise ValueError("RK4 advance exceeds its workspace capacity")
+    outputs = _Rk4AdvanceOutputs(
+        np.empty_like(position_m),
+        np.empty_like(velocity_m_s),
+        np.empty_like(charge_number),
+        np.empty(count, dtype=np.bool_),
+        np.empty(count, dtype=np.bool_),
+        np.empty(count, dtype=np.uint8),
+        np.empty(count, dtype=np.int64),
+        np.empty((count, 2, 2), dtype=np.float64),
+        np.empty((count, 2, 2), dtype=np.float64),
+        np.empty((count, 2), dtype=np.float64),
     )
-    moving = np.flatnonzero(elapsed_s > 0.0)
-    if moving.size:
-        advanced = _advance_positive_rk4(
-            evaluator,
-            particle_index[moving],
-            start_time_s[moving],
-            elapsed_s[moving],
-            position_m[moving],
-            velocity_m_s[moving],
-            charge_number[moving],
+    stage_evaluator = getattr(evaluator, "native_stage_evaluator", None)
+    has_field_cell = True
+    if stage_evaluator is None:
+        adapter = _PythonStageAdapter(evaluator)
+        python_advance = getattr(_compiled_rk4_advance_into, "py_func", None)
+        assert python_advance is not None
+        endpoint_evaluated = python_advance(
+            _evaluate_python_dynamics_stage,
+            adapter,
+            (),
+            particle_index,
+            start_time_s,
+            elapsed_s,
+            position_m,
+            velocity_m_s,
+            charge_number,
+            workspace,
+            outputs,
         )
-        result_position[moving] = advanced.position_m
-        result_velocity[moving] = advanced.velocity_m_s
-        result_charge[moving] = advanced.charge_number
-        support[moving] = advanced.support_inside
-        applicable[moving] = advanced.applicability_inside
-        numerical_status[moving] = advanced.numerical_status
-        if advanced.rk4_dense_controls is None:
-            raise ValueError("positive RK4 advance did not return dense controls")
-        dense_controls.position_inner_m[moving] = advanced.rk4_dense_controls.position_inner_m
-        dense_controls.velocity_inner_m_s[moving] = advanced.rk4_dense_controls.velocity_inner_m_s
-        dense_controls.charge_inner_number[moving] = advanced.rk4_dense_controls.charge_inner_number
-    _require_finite_state(result_position, result_velocity, result_charge)
-    rows, endpoint = _evaluate_active_dynamics(
-        evaluator,
-        particle_index,
-        start_time_s + elapsed_s,
-        result_position,
-        result_velocity,
-        result_charge,
-        numerical_status,
-    )
-    end_field_cell_id: Int64Array | None = None
-    if endpoint is not None:
-        support[rows] &= endpoint.support_inside
-        applicable[rows] &= endpoint.applicability_inside
-        if endpoint.field_cell_id is not None:
-            end_field_cell_id = np.full(count, -1, dtype=np.int64)
-            end_field_cell_id[rows] = endpoint.field_cell_id
-    return _AdvanceResult(
-        result_position,
-        result_velocity,
-        result_charge,
-        support,
-        applicable,
-        numerical_status,
-        end_field_cell_id,
-        dense_controls,
-    )
-
-
-def _advance_positive_rk4(
-    evaluator: StageEvaluator,
-    particle_index: Int64Array,
-    start_time_s: FloatArray,
-    step_s: FloatArray,
-    position_m: FloatArray,
-    velocity_m_s: FloatArray,
-    charge_number: FloatArray,
-) -> _AdvanceResult:
-    count = int(particle_index.size)
-    numerical_status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
-    support = np.ones(count, dtype=np.bool_)
-    applicable = np.ones(count, dtype=np.bool_)
-    acceleration = [np.zeros((count, 2), dtype=np.float64) for _ in range(4)]
-    charge_rate = [np.zeros(count, dtype=np.float64) for _ in range(4)]
-    half_step = 0.5 * step_s
-    rows, first = _evaluate_active_dynamics(
-        evaluator,
-        particle_index,
-        start_time_s,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        numerical_status,
-    )
-    if first is not None:
-        support[rows] &= first.support_inside
-        applicable[rows] &= first.applicability_inside
-        acceleration[0][rows] = first.acceleration_m_s2
-        charge_rate[0][rows] = first.charge_rate_number_s
-    position_2, velocity_2, charge_2 = _rk4_stage_state_active(
-        position_m,
-        velocity_m_s,
-        charge_number,
-        velocity_m_s,
-        acceleration[0],
-        charge_rate[0],
-        half_step,
-        numerical_status,
-    )
-    rows, second = _evaluate_active_dynamics(
-        evaluator,
-        particle_index,
-        start_time_s + half_step,
-        position_2,
-        velocity_2,
-        charge_2,
-        numerical_status,
-    )
-    if second is not None:
-        support[rows] &= second.support_inside
-        applicable[rows] &= second.applicability_inside
-        acceleration[1][rows] = second.acceleration_m_s2
-        charge_rate[1][rows] = second.charge_rate_number_s
-    position_3, velocity_3, charge_3 = _rk4_stage_state_active(
-        position_m,
-        velocity_m_s,
-        charge_number,
-        velocity_2,
-        acceleration[1],
-        charge_rate[1],
-        half_step,
-        numerical_status,
-    )
-    rows, third = _evaluate_active_dynamics(
-        evaluator,
-        particle_index,
-        start_time_s + half_step,
-        position_3,
-        velocity_3,
-        charge_3,
-        numerical_status,
-    )
-    if third is not None:
-        support[rows] &= third.support_inside
-        applicable[rows] &= third.applicability_inside
-        acceleration[2][rows] = third.acceleration_m_s2
-        charge_rate[2][rows] = third.charge_rate_number_s
-    position_4, velocity_4, charge_4 = _rk4_stage_state_active(
-        position_m,
-        velocity_m_s,
-        charge_number,
-        velocity_3,
-        acceleration[2],
-        charge_rate[2],
-        step_s,
-        numerical_status,
-    )
-    rows, fourth = _evaluate_active_dynamics(
-        evaluator,
-        particle_index,
-        start_time_s + step_s,
-        position_4,
-        velocity_4,
-        charge_4,
-        numerical_status,
-    )
-    if fourth is not None:
-        support[rows] &= fourth.support_inside
-        applicable[rows] &= fourth.applicability_inside
-        acceleration[3][rows] = fourth.acceleration_m_s2
-        charge_rate[3][rows] = fourth.charge_rate_number_s
-
-    end_position = position_m.copy()
-    end_velocity = velocity_m_s.copy()
-    end_charge = charge_number.copy()
-    rows = np.flatnonzero(numerical_status == NUMERICAL_STATUS_OK).astype("<i8", copy=False)
-    if rows.size:
-        candidate = _compiled_rk4_endpoint(
-            position_m[rows],
-            velocity_m_s[rows],
-            charge_number[rows],
-            velocity_2[rows],
-            velocity_3[rows],
-            velocity_4[rows],
-            acceleration[0][rows],
-            acceleration[1][rows],
-            acceleration[2][rows],
-            acceleration[3][rows],
-            charge_rate[0][rows],
-            charge_rate[1][rows],
-            charge_rate[2][rows],
-            charge_rate[3][rows],
-            step_s[rows],
+        has_field_cell = endpoint_evaluated and adapter.has_field_cell
+    else:
+        native_context = getattr(evaluator, "native_context", None)
+        native_workspace = getattr(evaluator, "native_workspace", None)
+        if native_context is None or native_workspace is None:
+            raise ValueError("native RK4 stage evaluator lost its prepared bindings")
+        has_field_cell = _compiled_rk4_advance_into(
+            stage_evaluator,
+            native_context,
+            native_workspace,
+            particle_index,
+            start_time_s,
+            elapsed_s,
+            position_m,
+            velocity_m_s,
+            charge_number,
+            workspace,
+            outputs,
         )
-        finite = _mark_nonfinite_state(numerical_status, rows, *candidate)
-        survivors = rows[finite]
-        end_position[survivors] = candidate[0][finite]
-        end_velocity[survivors] = candidate[1][finite]
-        end_charge[survivors] = candidate[2][finite]
-    dense_controls = _build_rk4_dense_controls(
-        position_m,
-        velocity_m_s,
-        charge_number,
-        end_position,
-        end_velocity,
-        end_charge,
-        acceleration[0],
-        acceleration[3],
-        charge_rate[0],
-        charge_rate[3],
-        step_s,
-        numerical_status,
-    )
     return _AdvanceResult(
-        end_position,
-        end_velocity,
-        end_charge,
-        support,
-        applicable,
-        numerical_status,
-        None,
-        dense_controls,
+        outputs.position_m,
+        outputs.velocity_m_s,
+        outputs.charge_number,
+        outputs.support_inside,
+        outputs.applicability_inside,
+        outputs.numerical_status,
+        outputs.field_cell_id if has_field_cell else None,
+        _Rk4DenseControls(
+            outputs.position_inner_m, outputs.velocity_inner_m_s, outputs.charge_inner_number
+        ),
     )
 
 
@@ -3821,10 +4970,10 @@ def _compiled_exponential_update_into(
     step_s: FloatArray,
     position: FloatArray,
     velocity: FloatArray,
+    count: int,
 ) -> None:
     """Apply the midpoint-frozen update into caller-owned buffers."""
 
-    count = step_s.size
     for row in range(count):
         step = step_s[row]
         rate = linear_drag_rate_s_inv[row]
@@ -3903,174 +5052,6 @@ def _compiled_exponential_update_into(
                 )
 
 
-@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
-def _compiled_exponential_update(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    linear_drag_rate_s_inv: FloatArray,
-    target_velocity_m_s: FloatArray,
-    additive_acceleration_m_s2: FloatArray,
-    step_s: FloatArray,
-) -> tuple[FloatArray, FloatArray]:
-    """Allocate one result and dispatch the sole exponential row kernel."""
-
-    position = np.empty_like(start_position_m)
-    velocity = np.empty_like(start_velocity_m_s)
-    _compiled_exponential_update_into(
-        start_position_m,
-        start_velocity_m_s,
-        linear_drag_rate_s_inv,
-        target_velocity_m_s,
-        additive_acceleration_m_s2,
-        step_s,
-        position,
-        velocity,
-    )
-    return position, velocity
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _compiled_rk4_stage_state_into(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    start_charge_number: FloatArray,
-    stage_velocity_m_s: FloatArray,
-    stage_acceleration_m_s2: FloatArray,
-    stage_charge_rate_number_s: FloatArray,
-    elapsed_s: FloatArray,
-    position: FloatArray,
-    velocity: FloatArray,
-    charge: FloatArray,
-) -> None:
-    """Advance one explicit RK stage into caller-owned buffers."""
-
-    count = elapsed_s.size
-    for row in range(count):
-        step = elapsed_s[row]
-        position[row, 0] = start_position_m[row, 0] + step * stage_velocity_m_s[row, 0]
-        position[row, 1] = start_position_m[row, 1] + step * stage_velocity_m_s[row, 1]
-        velocity[row, 0] = start_velocity_m_s[row, 0] + step * stage_acceleration_m_s2[row, 0]
-        velocity[row, 1] = start_velocity_m_s[row, 1] + step * stage_acceleration_m_s2[row, 1]
-        charge[row] = start_charge_number[row] + step * stage_charge_rate_number_s[row]
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _compiled_rk4_stage_state(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    start_charge_number: FloatArray,
-    stage_velocity_m_s: FloatArray,
-    stage_acceleration_m_s2: FloatArray,
-    stage_charge_rate_number_s: FloatArray,
-    elapsed_s: FloatArray,
-) -> tuple[FloatArray, FloatArray, FloatArray]:
-    """Allocate one stage result and dispatch the sole RK row kernel."""
-
-    position = np.empty_like(start_position_m)
-    velocity = np.empty_like(start_velocity_m_s)
-    charge = np.empty_like(start_charge_number)
-    _compiled_rk4_stage_state_into(
-        start_position_m,
-        start_velocity_m_s,
-        start_charge_number,
-        stage_velocity_m_s,
-        stage_acceleration_m_s2,
-        stage_charge_rate_number_s,
-        elapsed_s,
-        position,
-        velocity,
-        charge,
-    )
-    return position, velocity, charge
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _compiled_rk4_endpoint_into(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    start_charge_number: FloatArray,
-    velocity_2_m_s: FloatArray,
-    velocity_3_m_s: FloatArray,
-    velocity_4_m_s: FloatArray,
-    acceleration_1_m_s2: FloatArray,
-    acceleration_2_m_s2: FloatArray,
-    acceleration_3_m_s2: FloatArray,
-    acceleration_4_m_s2: FloatArray,
-    charge_rate_1_number_s: FloatArray,
-    charge_rate_2_number_s: FloatArray,
-    charge_rate_3_number_s: FloatArray,
-    charge_rate_4_number_s: FloatArray,
-    step_s: FloatArray,
-    position: FloatArray,
-    velocity: FloatArray,
-    charge: FloatArray,
-) -> None:
-    """Finish classical RK4 into caller-owned buffers in reference order."""
-
-    count = step_s.size
-    for row in range(count):
-        weight = step_s[row] / 6.0
-        for axis in range(2):
-            velocity_sum = start_velocity_m_s[row, axis] + 2.0 * velocity_2_m_s[row, axis]
-            velocity_sum = velocity_sum + 2.0 * velocity_3_m_s[row, axis]
-            velocity_sum = velocity_sum + velocity_4_m_s[row, axis]
-            acceleration_sum = acceleration_1_m_s2[row, axis] + 2.0 * acceleration_2_m_s2[row, axis]
-            acceleration_sum = acceleration_sum + 2.0 * acceleration_3_m_s2[row, axis]
-            acceleration_sum = acceleration_sum + acceleration_4_m_s2[row, axis]
-            position[row, axis] = start_position_m[row, axis] + weight * velocity_sum
-            velocity[row, axis] = start_velocity_m_s[row, axis] + weight * acceleration_sum
-        charge_rate_sum = charge_rate_1_number_s[row] + 2.0 * charge_rate_2_number_s[row]
-        charge_rate_sum = charge_rate_sum + 2.0 * charge_rate_3_number_s[row]
-        charge_rate_sum = charge_rate_sum + charge_rate_4_number_s[row]
-        charge[row] = start_charge_number[row] + weight * charge_rate_sum
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _compiled_rk4_endpoint(
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    start_charge_number: FloatArray,
-    velocity_2_m_s: FloatArray,
-    velocity_3_m_s: FloatArray,
-    velocity_4_m_s: FloatArray,
-    acceleration_1_m_s2: FloatArray,
-    acceleration_2_m_s2: FloatArray,
-    acceleration_3_m_s2: FloatArray,
-    acceleration_4_m_s2: FloatArray,
-    charge_rate_1_number_s: FloatArray,
-    charge_rate_2_number_s: FloatArray,
-    charge_rate_3_number_s: FloatArray,
-    charge_rate_4_number_s: FloatArray,
-    step_s: FloatArray,
-) -> tuple[FloatArray, FloatArray, FloatArray]:
-    """Allocate one endpoint result and dispatch the sole RK row kernel."""
-
-    position = np.empty_like(start_position_m)
-    velocity = np.empty_like(start_velocity_m_s)
-    charge = np.empty_like(start_charge_number)
-    _compiled_rk4_endpoint_into(
-        start_position_m,
-        start_velocity_m_s,
-        start_charge_number,
-        velocity_2_m_s,
-        velocity_3_m_s,
-        velocity_4_m_s,
-        acceleration_1_m_s2,
-        acceleration_2_m_s2,
-        acceleration_3_m_s2,
-        acceleration_4_m_s2,
-        charge_rate_1_number_s,
-        charge_rate_2_number_s,
-        charge_rate_3_number_s,
-        charge_rate_4_number_s,
-        step_s,
-        position,
-        velocity,
-        charge,
-    )
-    return position, velocity, charge
-
-
 def _validate_constant_acceleration(
     count: int,
     requires_stage_evaluation: bool,
@@ -4139,23 +5120,6 @@ def _merge_numerical_status(current: UInt8Array, rows: Int64Array, update: UInt8
     current[rows[first_failure]] = update[first_failure]
 
 
-def _mark_nonfinite_state(
-    status: UInt8Array,
-    rows: Int64Array,
-    position_m: FloatArray,
-    velocity_m_s: FloatArray,
-    charge_number: FloatArray,
-) -> BoolArray:
-    finite = (
-        np.isfinite(position_m).all(axis=1)
-        & np.isfinite(velocity_m_s).all(axis=1)
-        & np.isfinite(charge_number)
-    )
-    failed = ~finite
-    status[rows[failed]] = INTEGRATOR_NUMERICAL_FAILURE
-    return finite
-
-
 def _validate_inputs(
     count: int,
     start_time_s: FloatArray,
@@ -4182,14 +5146,3 @@ def _validate_inputs(
         raise ValueError("proposal must contain only finite values")
     if bool((start_time_s > target_time_s).any()):
         raise ValueError("proposal time interval is inconsistent")
-
-
-def _require_finite_state(
-    position_m: FloatArray, velocity_m_s: FloatArray, charge_number: FloatArray
-) -> None:
-    if not bool(
-        np.isfinite(position_m).all()
-        and np.isfinite(velocity_m_s).all()
-        and np.isfinite(charge_number).all()
-    ):
-        raise ValueError("proposal state is not finite at the requested time")

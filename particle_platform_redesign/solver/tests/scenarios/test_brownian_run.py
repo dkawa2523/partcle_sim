@@ -606,7 +606,7 @@ def test_rz_brownian_constant_gravity_matches_joint_ou_mean_covariance_and_charg
         "stochastic_exponential_midpoint_v1"
     )
     assert result.manifest["brownian_charge_dense_revision"] == ("macro_root_affine_exponential_v2")
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v46"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v62"
     assert result.manifest["step_proposal_revision"] == "coupled_fixed_step_proposal_v10"
     assert result.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
     resume_identity = result.manifest["resume_identity"]
@@ -834,7 +834,9 @@ def test_brownian_output_schedule_does_not_change_physical_result(tmp_path: Path
     memory_plan = plain.manifest["memory_plan"]
     assert memory_plan["stochastic_tree_work_bytes_per_particle"] == 128 * (5 + 4)
     assert plain.manifest["brownian_adaptive_max_depth"] == 5
-    assert plain.manifest["brownian_tree_policy_revision"] == ("conditional_boundary_refinement_v1")
+    assert plain.manifest["brownian_tree_policy_revision"] == (
+        "conditional_boundary_refinement_absolute_target_v2"
+    )
 
 
 def test_brownian_decimal_macro_grid_has_no_roundoff_tail(tmp_path: Path) -> None:
@@ -961,7 +963,7 @@ def test_rz_brownian_checkpoint_resume_is_bitwise_identical(
         _assert_record_identity(first, second)
     assert expected.manifest["resume_identity"] == actual.manifest["resume_identity"]
     assert actual.manifest["resume_identity"]["engine_algorithm_revision"] == (
-        "particle_engine_v46"
+        "particle_engine_v62"
     )
 
 
@@ -1835,7 +1837,7 @@ def test_brownian_all_row_adaptive_multi_reflection_respects_memory_and_output_i
     components = memory["components"]
     assert isinstance(components, dict)
     assert components["geometry_query_scratch"] == (
-        4 * memory["event_candidate_capacity"] * np.dtype("<i8").itemsize
+        3 * memory["event_candidate_capacity"] * np.dtype("<i8").itemsize + 16
     )
     assert memory["slab_particles"] < framed.manifest["memory_plan"]["slab_particles"]
     _assert_final_identity(strict.read_final(), framed.read_final())
@@ -1995,6 +1997,66 @@ def test_rz_brownian_restitution_restarts_from_the_post_impact_velocity(
         atol=2.0e-9,
     )
     assert result.read_failure_events().particle_id.size == 0
+
+
+@pytest.mark.parametrize(
+    ("rz", "law", "base_depth", "max_depth"),
+    [
+        (True, "restitution", 2, 7),
+        (True, "restitution", 2, 2),
+        (True, "specular", 0, 6),
+        (False, "specular", 1, 6),
+    ],
+)
+def test_brownian_wall_restart_reaches_absolute_nondyadic_end(
+    tmp_path: Path, rz: bool, law: str, base_depth: int, max_depth: int
+) -> None:
+    """A rounded root duration must not lose the requested absolute endpoint."""
+
+    end_s = 0.46
+    rule: dict[str, object] = {"law": law}
+    if law == "restitution":
+        rule.update(normal_restitution=0.8, tangential_restitution=0.5)
+    case_path = _brownian_reflection_case(
+        tmp_path / "restart",
+        initial_position_m=np.asarray([0.003 if rz else 0.001, 0.5]),
+        initial_velocity_m_s=np.asarray([0.02, 0.0]),
+        end_s=end_s,
+        law=rule,
+        rz_b03=rz,
+        tree_depth=base_depth,
+        adaptive_max_depth=max_depth,
+        particle_mass_kg=_MASS_KG,
+        particle_count=64,
+    )
+    document = yaml.safe_load(case_path.read_text(encoding="utf-8"))
+    results = []
+    for name, frames in (
+        ("plain", None),
+        ("framed", [0.0, 0.037, 0.153, 0.329, end_s]),
+    ):
+        document["output"]["trajectories"] = (
+            None
+            if frames is None
+            else {"selection": "all", "schedule": {"explicit_times_s": frames}}
+        )
+        variant = case_path.with_name(f"{name}.yaml")
+        variant.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+        output = tmp_path / f"{name}-result"
+        simulate(load_case(variant), output)
+        results.append(open_result(output))
+    plain, framed = results
+    assert plain.read_boundary_events().particle_id.size > 64
+    assert plain.read_failure_events().particle_id.size == 0
+    _assert_final_identity(plain.read_final(), framed.read_final())
+    _assert_record_identity(plain.read_boundary_events(), framed.read_boundary_events())
+    final = framed.read_final()
+    frame = list(framed.iter_frames())[-1]
+    assert frame.time_s == end_s
+    np.testing.assert_array_equal(frame.lifecycle, np.ones(64, dtype=np.uint8))
+    np.testing.assert_array_equal(frame.position_m, final.position_m)
+    np.testing.assert_array_equal(frame.velocity_m_s, final.velocity_m_s)
+    np.testing.assert_array_equal(frame.charge_number, final.charge_number)
 
 
 @pytest.mark.parametrize(
@@ -3064,3 +3126,75 @@ def _assert_record_identity(first: Any, second: Any) -> None:
             np.testing.assert_array_equal(actual, expected)
         else:
             assert actual == expected
+
+
+def test_brownian_nongrid_release_reaches_absolute_end_with_frames_and_probes(
+    tmp_path: Path,
+) -> None:
+    """The first root after release retains its requested absolute endpoint."""
+
+    release_s = 0.20708774409941713
+    end_s = 0.46
+    assert release_s + (end_s - release_s) == np.nextafter(end_s, -np.inf)
+    case_path = _brownian_case(
+        tmp_path / "nongrid-release",
+        particle_count=1,
+        end_s=end_s,
+        dt_s=end_s,
+        tree_depth=3,
+        adaptive_max_depth=5,
+        frame_times=None,
+        continuous_charge=True,
+        initial_charge_number=-17.25,
+    )
+    case = load_case(case_path)
+    source = replace(
+        case.data.sources[0],
+        release_time_s=np.asarray([release_s], dtype="<f8"),
+    )
+    data_path = case_path.with_name("nongrid-release.h5")
+    info = write(data_path, replace(case.data, sources=(source,)))
+    document = yaml.safe_load(case_path.read_text(encoding="utf-8"))
+    document["case"]["data_path"] = data_path.name
+    document["case"]["expected_content_hash"] = info.content_hash
+    results = []
+    for label, output_spec in (
+        ("plain", {"trajectories": None}),
+        (
+            "observed",
+            {
+                "trajectories": {
+                    "selection": "all",
+                    "schedule": {"explicit_times_s": [release_s, 0.311, end_s]},
+                },
+                "probes": {
+                    "particle_ids": [1],
+                    "schedule": {"explicit_times_s": [0.329, end_s]},
+                },
+            },
+        ),
+    ):
+        document["output"] = output_spec
+        variant_path = case_path.with_name(f"{label}.yaml")
+        variant_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+        output = tmp_path / f"{label}-result"
+        simulate(load_case(variant_path), output)
+        results.append(open_result(output))
+    plain, observed = results
+    _assert_final_identity(plain.read_final(), observed.read_final())
+    _assert_record_identity(plain.read_boundary_events(), observed.read_boundary_events())
+    assert observed.read_boundary_events().particle_id.size == 0
+    assert observed.read_failure_events().particle_id.size == 0
+    final = observed.read_final()
+    np.testing.assert_array_equal(final.time_s, [end_s])
+    np.testing.assert_array_equal(final.lifecycle, [1])
+    frames = list(observed.iter_frames())
+    probes = list(observed.iter_probes())
+    assert [frame.time_s for frame in frames] == [release_s, 0.311, end_s]
+    assert [probe.time_s for probe in probes] == [0.329, end_s]
+    for terminal_observation in (frames[-1], probes[-1]):
+        np.testing.assert_array_equal(terminal_observation.particle_id, final.particle_id)
+        np.testing.assert_array_equal(terminal_observation.position_m, final.position_m)
+        np.testing.assert_array_equal(terminal_observation.velocity_m_s, final.velocity_m_s)
+        np.testing.assert_array_equal(terminal_observation.charge_number, final.charge_number)
+        np.testing.assert_array_equal(terminal_observation.lifecycle, final.lifecycle)

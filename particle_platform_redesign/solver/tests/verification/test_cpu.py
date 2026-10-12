@@ -1,5 +1,7 @@
 """Verification of the bounded resident CPU execution plan."""
 
+import pytest
+
 from chamber_particles.cpu import (
     early_memory_requirement_bytes,
     plan_cpu_memory,
@@ -91,12 +93,15 @@ def test_memory_plan_owns_one_bounded_slab() -> None:
         event_staging_bytes_per_row=490,
         event_staging_fixed_bytes=2 * 256 * 8 + 16,
         failure_staging_bytes_per_particle=52,
+        stage_composition_work_bytes_per_particle=196,
     )
 
     manifest = plan.as_manifest()
     components = manifest["components"]
     assert isinstance(components, dict)
     assert plan.slab_particles == manifest["slab_particles"] == 100
+    assert components["slab_stage_composition_work"] == 100 * 196
+    assert components["active_index"] == 100 * 8
     assert components["slab_proposal_scratch"] == (
         plan.slab_particles * plan.scratch_bytes_per_particle
     )
@@ -202,3 +207,44 @@ def test_memory_plan_reports_when_minimum_event_capacity_leaves_no_slab_row() ->
     assert baseline.slab_particles > 0
     assert plan.slab_particles == 0
     assert plan.planned_bytes <= plan.limit_bytes
+
+
+@pytest.mark.parametrize("workers", [2, 4, 8, 20])
+def test_process_plan_distributes_fewer_active_particles_without_extra_scratch(
+    workers: int,
+) -> None:
+    particle_count = 64_000
+    plan = plan_cpu_memory(
+        limit_bytes=512 * 1024 * 1024,
+        particle_count=particle_count,
+        canonical_data_bytes=1_000,
+        prepared_geometry_bytes=2_000,
+        particle_schedule_bytes=particle_count * 128,
+        physics_runtime_bytes=particle_count * 32,
+        probe_index_bytes=0,
+        output_buffer_bytes=0,
+        writer_reserve_bytes=3 * 1024 * 1024,
+        requires_stage_evaluation=True,
+        geometry_query_scratch_bytes=4 * 256 * 8,
+        event_staging_fixed_bytes=2 * 256 * 8 + 16,
+        event_staging_bytes_per_row=490,
+        failure_staging_bytes_per_particle=52,
+        worker_count=workers,
+    )
+
+    for active_count in (particle_count, 3_200, 20):
+        width = plan.active_slab_particles(active_count)
+        assert 0 < width <= plan.slab_particles
+        tasks = (active_count + width - 1) // width
+        assert tasks >= min(active_count, workers)
+        if active_count >= 16 * workers:
+            assert tasks >= 3 * workers
+    assert plan.active_slab_particles(0) == 0
+    assert plan.run_peak_bytes == sum(plan.components.values()) <= plan.limit_bytes
+    assert plan.components["process_private_query"] == (workers + 1) * 4 * 256 * 8
+    assert plan.components["process_private_scratch_and_handoff"] == (workers + 1) * sum(
+        value for name, value in plan.components.items() if name.startswith("slab_")
+    )
+    assert plan.components["process_handoff_serialization"] == workers * (
+        2 * 256 * 8 + 16 + plan.slab_particles * (490 + 52 + 8)
+    )

@@ -188,6 +188,49 @@ _RZ_VECTOR_REQUIREMENT = RequiredFieldMetadata("m/s", ("r", "z"), "axisymmetric_
 _RZ_AXIS_ODD_SCALAR_REQUIREMENT = RequiredFieldMetadata("1/s", ("value",), "scalar", False, True)
 
 
+def test_required_catalog_samples_in_physics_requirement_order() -> None:
+    layout = _regular_layout()
+    first = _scalar_field(name="a_density")
+    second = replace(_scalar_field(name="z_density"), values=3.0 * first.values)
+    requirements = {
+        "z_density": _DENSITY_REQUIREMENT,
+        "a_density": _DENSITY_REQUIREMENT,
+    }
+    prepared = prepare_required_fields(
+        _bundle(_quad_geometry(), (layout,), (first, second)), requirements
+    )
+
+    sampled = prepared.sample(np.asarray([[0.25, 0.5]], dtype="<f8"))
+
+    assert tuple(sampled.values) == tuple(requirements)
+    np.testing.assert_array_equal(sampled.values["z_density"], [[3.0]])
+    np.testing.assert_array_equal(sampled.values["a_density"], [[1.0]])
+
+
+@pytest.mark.parametrize("kind", ["p1", "q1"])
+def test_prepared_local_ranges_leave_large_indexed_query_unavailable(
+    kind: Literal["p1", "q1"],
+) -> None:
+    data, _, field = _unstructured_strip(kind, cell_columns=70)
+    prepared = prepare_required_fields(data, {field.name: _DENSITY_REQUIREMENT})
+    workspace = prepared.allocate_range_workspace(2)
+
+    ranges = prepared.local_component_bounds(
+        np.asarray([[0.0, 0.0], [0.2, 0.2]]),
+        np.asarray([[70.0, 1.0], [0.3, 0.3]]),
+        workspace=workspace,
+    )
+
+    np.testing.assert_array_equal(
+        ranges.candidate_count, [140 if kind == "p1" else 70, 2 if kind == "p1" else 1]
+    )
+    np.testing.assert_array_equal(ranges.range_available, [False, True])
+    np.testing.assert_array_equal(ranges.lower[field.name][0], [0.0])
+    np.testing.assert_array_equal(ranges.upper[field.name][0], [0.0])
+    assert ranges.lower[field.name][1, 0] < 2.0
+    assert ranges.upper[field.name][1, 0] > 3.25
+
+
 def test_required_snapshot_field_must_cover_the_complete_run_interval() -> None:
     layout = _regular_layout()
     static = _scalar_field()

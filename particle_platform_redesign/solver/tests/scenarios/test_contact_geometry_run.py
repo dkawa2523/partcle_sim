@@ -398,3 +398,172 @@ def test_simultaneous_surface_and_center_contact_fails_without_guessed_response(
     np.testing.assert_array_equal(
         failure.reason_code, [result.manifest["failure_reason_codes"]["indeterminate_event"]]
     )
+
+
+def test_mixed_exact_periodic_and_finite_reflections_preserve_slab_and_output_identity(
+    tmp_path: Path,
+) -> None:
+    """Reused exact work must retain each row's origin, targets, and contact mode."""
+
+    count = 1025
+    paths = materialize_microcase("C07", tmp_path / "mixed-exact")
+    case = load_case(paths.case_path)
+    original = case.data.sources[0]
+    assert isinstance(original, RealizedTableSource)
+    kind = np.arange(count) % 5
+    # Stationary finite bodies must remain active alongside moving point/finite paths.
+    velocity = np.asarray(
+        [[0.0, 0.0], [0.5, 0.125], [0.0, 0.6], [2.0, 0.6], [64.0, 0.25]],
+        dtype="<f8",
+    )[kind]
+    release = np.resize(np.asarray([0.0, 0.071, 0.20708774409941713]), count)
+    radii = np.resize(np.asarray([0.0, 0.05, 0.1]), count)
+    # The last row has a zero-length root at the final macro boundary.
+    release[-1] = 1.0
+    velocity[-1] = 0.0
+    source = replace(
+        original,
+        particle_id=np.arange(7001, 7001 + count, dtype="<i8"),
+        release_time_s=release,
+        position_m=np.tile(np.asarray([0.25, 0.5]), (count, 1)),
+        velocity_m_s=velocity,
+        contact_radius_m=radii,
+        **{
+            name: np.repeat(getattr(original, name)[:1], count, axis=0)
+            for name in (
+                "charge_number",
+                "mass_kg",
+                "drag_diameter_m",
+                "electrostatic_radius_m",
+                "displaced_volume_m3",
+                "model_weight",
+                "material_id",
+            )
+        },
+    )
+    geometry = replace(
+        case.data.geometry,
+        group_names=("bottom", "right", "top", "left"),
+        boundary=replace(
+            case.data.geometry.boundary,
+            boundary_id=np.asarray([10, 20, 30, 40], dtype="<i4"),
+            group_id=np.arange(4, dtype="<i4"),
+        ),
+    )
+    data_path = paths.case_path.with_name("mixed-exact.h5")
+    info = write(data_path, replace(case.data, geometry=geometry, sources=(source,)))
+    document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+    document["case"].update(data_path=data_path.name, expected_content_hash=info.content_hash)
+    document["time"].update(end_s=1.0, dt_s=1.0)
+    document["solver"]["event"].update(max_interactions_per_step=1, max_refinements=3)
+    document["boundaries"] = [
+        {
+            "boundary_group": group,
+            "priority": priority,
+            "law": "specular",
+            "contact_geometry": "particle_surface",
+        }
+        for group, priority in (("bottom", 10), ("top", 20))
+    ]
+    document["topology"] = {
+        "model": "translation_periodic_xy_v1",
+        "field_match_rtol": 1.0e-12,
+        "pairs": [
+            {
+                "first_boundary_group": "left",
+                "second_boundary_group": "right",
+                "first_to_second_m": [1.0, 0.0],
+            }
+        ],
+    }
+    frame_times = [0.0, 0.20708774409941713, 0.46, 1.0]
+    results = []
+    for label, budget_mb, frames in (
+        ("tight", 5, True),
+        ("loose", 64, True),
+        ("no-frames", 64, False),
+    ):
+        document["resources"]["memory_limit_mb"] = budget_mb
+        document["output"]["trajectories"] = (
+            {"selection": "all", "schedule": {"explicit_times_s": frame_times}} if frames else None
+        )
+        variant = paths.case_path.with_name(f"mixed-exact-{label}.yaml")
+        variant.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+        output = tmp_path / f"mixed-exact-{label}-result"
+        simulate(load_case(variant), output)
+        results.append(open_result(output))
+
+    plans = [result.manifest["memory_plan"] for result in results]
+    assert plans[0]["slab_particles"] < plans[1]["slab_particles"]
+    assert plans[1]["slab_particles"] == count
+    for actual in results[1:]:
+        for reader in ("read_final", "read_boundary_events", "read_failure_events"):
+            expected_payload = getattr(results[0], reader)()
+            actual_payload = getattr(actual, reader)()
+            for field in dataclass_fields(expected_payload):
+                np.testing.assert_array_equal(
+                    getattr(actual_payload, field.name), getattr(expected_payload, field.name)
+                )
+    tight_frames, loose_frames = list(results[0].iter_frames()), list(results[1].iter_frames())
+    assert len(tight_frames) == len(loose_frames) == len(frame_times)
+    for expected_frame, actual_frame in zip(tight_frames, loose_frames, strict=True):
+        for field in dataclass_fields(expected_frame):
+            np.testing.assert_array_equal(
+                getattr(actual_frame, field.name), getattr(expected_frame, field.name)
+            )
+
+    reference = results[0]
+    final = reference.read_final()
+    healthy = velocity[:, 0] < 64.0
+    np.testing.assert_array_equal(final.lifecycle[healthy], np.ones(healthy.sum(), dtype="u1"))
+    elapsed = 1.0 - release[healthy]
+    expected_x = np.remainder(0.25 + velocity[healthy, 0] * elapsed, 1.0)
+    gap = 1.0 - 2.0 * radii[healthy]
+    unfolded_y = 0.5 - radii[healthy] + velocity[healthy, 1] * elapsed
+    remainder = np.remainder(unfolded_y, 2.0 * gap)
+    expected_y = radii[healthy] + np.minimum(remainder, 2.0 * gap - remainder)
+    reflections = np.floor(unfolded_y / gap).astype(np.int64)
+    expected_vy = velocity[healthy, 1] * np.where(reflections % 2 == 0, 1.0, -1.0)
+    np.testing.assert_allclose(
+        final.position_m[healthy], np.column_stack((expected_x, expected_y)), rtol=0, atol=3e-12
+    )
+    np.testing.assert_allclose(
+        final.velocity_m_s[healthy],
+        np.column_stack((velocity[healthy, 0], expected_vy)),
+        rtol=0,
+        atol=3e-12,
+    )
+    np.testing.assert_array_equal(final.contact_radius_m, radii)
+    failure = reference.read_failure_events()
+    assert 0 < failure.particle_id.size < count
+    failed_rows = failure.particle_id - source.particle_id[0]
+    np.testing.assert_array_equal(velocity[failed_rows, 0], np.full(failed_rows.size, 64.0))
+    np.testing.assert_array_equal(
+        failure.reason_code,
+        np.full(
+            failed_rows.size,
+            reference.manifest["failure_reason_codes"]["numerical_event_budget"],
+        ),
+    )
+    assert reference.manifest["boundary_interactions"]["residual_splits"] > 0
+
+    events = reference.read_boundary_events()
+    periodic = events.interaction_kind == "periodic_translation"
+    wall = events.interaction_kind == "wall"
+    assert bool(periodic.any() and wall.any())
+    event_radii = radii[events.particle_id - source.particle_id[0]]
+    np.testing.assert_array_equal(events.contact_radius_m, event_radii)
+    # Periodic seams use the centre even when the physical body radius is positive.
+    np.testing.assert_allclose(events.position_m[periodic, 0], 1.0, rtol=0, atol=3e-12)
+    np.testing.assert_allclose(events.position_post_m[periodic, 0], 0.0, rtol=0, atol=3e-12)
+    np.testing.assert_array_equal(events.primary_facet_id[periodic], 1)
+    np.testing.assert_array_equal(events.destination_facet_id[periodic], 3)
+    np.testing.assert_array_equal(events.law_id[periodic], "")
+    np.testing.assert_array_equal(
+        events.velocity_pre_m_s[periodic], events.velocity_post_m_s[periodic]
+    )
+    expected_wall_y = np.where(
+        events.primary_facet_id[wall] == 0, event_radii[wall], 1.0 - event_radii[wall]
+    )
+    np.testing.assert_allclose(events.position_m[wall, 1], expected_wall_y, rtol=0, atol=3e-12)
+    assert reference.manifest["boundary_interactions"]["wall_events"] == int(wall.sum())

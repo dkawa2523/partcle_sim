@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import NamedTuple
 
 import numpy as np
 from numba import njit
@@ -72,8 +73,7 @@ class BoundaryRule:
     wall_velocity_m_s: tuple[float, float] | None = None
 
 
-@dataclass(frozen=True, slots=True)
-class PreparedBoundaryRules:
+class PreparedBoundaryRules(NamedTuple):
     """Dense numeric wall-law table consumed by compiled event rows."""
 
     priority: Int64Array
@@ -87,8 +87,7 @@ class PreparedBoundaryRules:
     wall_velocity_m_s: FloatArray
 
 
-@dataclass(frozen=True, slots=True)
-class BoundaryResponseBatch:
+class BoundaryResponseBatch(NamedTuple):
     """Columnar responses aligned with one CSR candidate row batch."""
 
     status: UInt8Array
@@ -413,8 +412,13 @@ def resolve_boundary_responses_batch(
     thermal_tangential_standard_normal: FloatArray,
     *,
     roundoff_ulps: int,
+    result_buffer: BoundaryResponseBatch | None = None,
 ) -> BoundaryResponseBatch:
-    """Resolve independent CSR hit rows without Python objects or callbacks."""
+    """Validate CSR hit rows and resolve them through the one native body.
+
+    Without a supplied buffer, the result owns its arrays. With a supplied
+    buffer, the returned row prefix borrows that storage until the next reuse.
+    """
 
     offsets = np.asarray(candidate_offsets, dtype=np.int64)
     candidates = np.asarray(candidate_facet_ids, dtype=np.int64)
@@ -438,23 +442,10 @@ def resolve_boundary_responses_batch(
         thermal_tangent_draws,
         roundoff_ulps,
     )
-    status = np.empty(row_count, dtype=np.uint8)
-    law = np.empty(row_count, dtype=np.uint8)
-    outcome = np.empty(row_count, dtype=np.uint8)
-    velocity_post = np.empty((row_count, 2), dtype=np.float64)
-    primary = np.empty(row_count, dtype=np.int64)
-    effective_normal = np.empty((row_count, 2), dtype=np.float64)
-    remains_active = np.empty(row_count, dtype=np.bool_)
-    _resolve_boundary_responses_kernel(
-        rules.priority,
-        rules.law,
-        rules.otherwise_law,
-        rules.normal_restitution,
-        rules.tangential_restitution,
-        rules.stick_probability,
-        rules.wall_temperature_K,
-        rules.diffuse_reflection_fraction,
-        rules.wall_velocity_m_s,
+    if result_buffer is None:
+        result_buffer = allocate_boundary_response_buffer(row_count)
+    return resolve_boundary_responses_into(
+        rules,
         offsets,
         candidates,
         boundary_id,
@@ -467,23 +458,100 @@ def resolve_boundary_responses_batch(
         thermal_normal_draws,
         thermal_tangent_draws,
         roundoff_ulps,
-        status,
-        law,
-        outcome,
-        velocity_post,
-        primary,
-        effective_normal,
-        remains_active,
+        result_buffer,
     )
+
+
+def allocate_boundary_response_buffer(capacity: int) -> BoundaryResponseBatch:
+    """Allocate one exclusive 44-byte-per-row wall response bank."""
+
+    if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity < 0:
+        raise ValueError("boundary response capacity must be a nonnegative integer")
     return BoundaryResponseBatch(
-        status,
-        law,
-        outcome,
-        velocity_post,
-        primary,
-        effective_normal,
-        remains_active,
+        np.empty(capacity, dtype=np.uint8),
+        np.empty(capacity, dtype=np.uint8),
+        np.empty(capacity, dtype=np.uint8),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.int64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.bool_),
     )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def resolve_boundary_responses_into(
+    rules: PreparedBoundaryRules,
+    candidate_offsets: Int64Array,
+    candidate_facet_ids: Int64Array,
+    boundary_id: Int32Array,
+    group_id: Int32Array,
+    candidate_contact_normal: FloatArray,
+    velocity_pre_m_s: FloatArray,
+    particle_mass_kg: FloatArray,
+    law_uniform_draw: FloatArray,
+    diffuse_uniform_draw: FloatArray,
+    thermal_normal_uniform_open: FloatArray,
+    thermal_tangential_standard_normal: FloatArray,
+    roundoff_ulps: int,
+    result_buffer: BoundaryResponseBatch,
+) -> BoundaryResponseBatch:
+    """Resolve prevalidated rows into exclusive storage without payload allocation.
+
+    Inputs obey the batch wrapper's shape/value preconditions. The returned
+    prefix borrows the bank until reuse; capacity is checked before any write.
+    """
+
+    row_count = velocity_pre_m_s.shape[0]
+    if (
+        result_buffer.status.size < row_count
+        or result_buffer.law.size < row_count
+        or result_buffer.outcome.size < row_count
+        or result_buffer.velocity_post_m_s.shape[0] < row_count
+        or result_buffer.primary_facet_id.size < row_count
+        or result_buffer.effective_normal.shape[0] < row_count
+        or result_buffer.remains_active.size < row_count
+    ):
+        raise ValueError("boundary response rows exceed their buffer capacity")
+    result = BoundaryResponseBatch(
+        result_buffer.status[:row_count],
+        result_buffer.law[:row_count],
+        result_buffer.outcome[:row_count],
+        result_buffer.velocity_post_m_s[:row_count],
+        result_buffer.primary_facet_id[:row_count],
+        result_buffer.effective_normal[:row_count],
+        result_buffer.remains_active[:row_count],
+    )
+    _resolve_boundary_responses_kernel(
+        rules.priority,
+        rules.law,
+        rules.otherwise_law,
+        rules.normal_restitution,
+        rules.tangential_restitution,
+        rules.stick_probability,
+        rules.wall_temperature_K,
+        rules.diffuse_reflection_fraction,
+        rules.wall_velocity_m_s,
+        candidate_offsets,
+        candidate_facet_ids,
+        boundary_id,
+        group_id,
+        candidate_contact_normal,
+        velocity_pre_m_s,
+        particle_mass_kg,
+        law_uniform_draw,
+        diffuse_uniform_draw,
+        thermal_normal_uniform_open,
+        thermal_tangential_standard_normal,
+        roundoff_ulps,
+        result.status,
+        result.law,
+        result.outcome,
+        result.velocity_post_m_s,
+        result.primary_facet_id,
+        result.effective_normal,
+        result.remains_active,
+    )
+    return result
 
 
 def _validate_boundary_batch_inputs(

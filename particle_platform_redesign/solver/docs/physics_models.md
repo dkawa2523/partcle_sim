@@ -4,7 +4,7 @@
 適用域外での別modelへの自動切替、backend固有の係数を認めない。runtime contributionはdragを、stageで
 凍結した正の`linear_relaxation(rate, target_velocity)`、その他の力を`explicit_acceleration`として返す。
 現行physics catalog revisionは`inertial_langevin_2d_catalog_v23`、physics runtime revisionは
-`signed_ion_compiled_physics_runtime_v22`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
+`prepared_native_physics_runtime_v24`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
 v17はDEP認証上限の直列化丸めを一つのfloat64 successorまで外向きに扱い、v18は各charge stageへ
 `charge_rate_derivative_s_inv=J`を追加し、v19はoptional aggregate three-currentを同じstage payloadへ統合した。
 v20はrelative-flow ion dragの局所interval上界とprepared charge invariantを同じruntime ownerへ追加した。
@@ -14,6 +14,11 @@ catalog v20で、同時に選択した中性気体modelの重複primitive author
 prepare時に一度だけ照合する。力式、runtime、case schemaは変更しない。
 catalog v23/runtime v22/compiled tile v21で、Talbotの原著bindingを半径Knへ修正し、pure/boundの暗黙係数を削除する。
 continuous modelはfiniteな`J<=0`、fixed chargeは`J=0`を返す。
+runtime v23はvalidated planからstageのmodel code、primitive offset、適用条件をprepare時に一度だけ投影し、
+従来の単一compiled physics passへnative contextから渡す。新しい物理式、適用域、係数は導入しない。
+runtime v24は同じownerのglobal/local適用域・加速度包絡をnative intoへ収束し、
+prepared contextとpacked primitive rangeから評価する。range unavailableをcertifiedへ読み替えず、
+非有限・適用外のfailureと最初のstatusを維持する。
 
 ## Particle authority
 
@@ -1117,7 +1122,7 @@ resolved modelにはnoise model/revisionを記録し、manifestにはBrownian RN
 base/max depth、root/split draw stream、`macro_root_frozen_midpoint_v1`、`stochastic_exponential_midpoint_v1`、
 `path_kind=cubic_hermite`を残す。checkpoint resume
 identityはRNG/OU/split/tree-policy revision、coefficient policy、base/max depth、resolved modelを含み、mutable RNG cursorを保存しない。
-現行全体revisionはengine v46、proposal v10、event v22、catalog v23、runtime v22、runtime layout v6、memory plan v16である。
+0.3.0の全体revisionは[`result_format_v3.md`](result_format_v3.md)の現行revision一覧を参照する。
 root covariance、conditional split、mean updateがfloat64で表現不能なrowは`nonfinite_physics`となり、同一batchの
 正常rowは継続する。`gamma*h`上限をこの実表現可能性検査の代用にはしない。
 COMSOLまたは`model_dataset`との比較は物理式のauthorityでなく、core外のV&Vだけが所有する。
@@ -1156,7 +1161,7 @@ B05は物理modelやFDT係数を増やさない。`interval_tree_depth`を全roo
 accuracy authorityとし、wall、RZ axis、surface contact、またはgeometry certificateがclearにできない区間だけを
 `adaptive_max_depth`まで既存conditional OU splitで細分する。base=maxは従来固定depthへ退化し、RNG key、
 coefficient policy、wall/axis fresh-root意味論を変えない。tree policyは
-`conditional_boundary_refinement_v1`である。
+`conditional_boundary_refinement_absolute_target_v2`である。
 
 この局所分割は連続OU軌道のexact crossingを解くmodelでも、RMS/probability thresholdによるclearでもない。
 zero miss probabilityやuniform max-depthと同じglobal解像度は主張せず、base depthの収束を物理・数値精度の

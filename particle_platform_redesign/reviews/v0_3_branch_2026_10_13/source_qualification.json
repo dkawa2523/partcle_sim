@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "package": "chamber-particles",
+  "version": "0.3.0",
+  "date": "2026-10-13",
+  "scope": "Qualified current solver and cleaned documentation for the release/chamber-particles-0.3.0 branch. The commit containing this receipt owns the source.",
+  "target_branch": "release/chamber-particles-0.3.0",
+  "repository": "https://github.com/dkawa2523/partcle_sim",
+  "source": {
+    "production_file_count": 27,
+    "bound_file_count": 237,
+    "production_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+    "bound_map_sha256": "1f07b777ff209f9a09844d7b1c4f4babd482d5b7706333d7f1d48b68eef58a59",
+    "staged_and_live_qualified_bytes": "PASS",
+    "byte_binding_receipt": "index_payload.json",
+    "readme_staged_and_live_sha256": "9dd8dc675920156532a484f1af0746e48f15cce4ab5cb47b1b8a98fb6d0e8d57",
+    "release_notes_staged_and_live_sha256": "834b234d7907a0c705605920a0e3b94b5a142af07d15864dbc64d8c291d08693",
+    "git_attributes": "Preserve already qualified numerical and immutable-evidence bytes. CR at line end is permitted; trailing spaces, blank EOF and space-before-tab checks remain enabled."
+  },
+  "validation": {
+    "final_static_six_gates": "PASS; static_checks.json",
+    "numerical_requalification": "The staged/live 237-file payload exactly equals the already qualified C4 payload. No numerical code or test change was made during release documentation cleanup.",
+    "prior_source_qualification": {
+      "windows": "../../solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/windows_release.json",
+      "linux_wsl": "../../solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/Linux_release.json",
+      "quality": "../../solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/quality_final_c4.json",
+      "scope": "Core 944 passed with 1 warning on both OSes; Windows full tools 495 passed; Linux portable tools 120 passed. Prior wheel metadata belonged to the prior README."
+    },
+    "final_windows_wheel": {
+      "status": "PASS",
+      "receipt": "windows_clean_wheel.json",
+      "wheel_sha256": "f5ebff77bc0d69bd1fe368ff777ce1030a0f671325faedeca1f672737f2915e0",
+      "metadata_sha256": "e56be3d122addd5b7b76817b13043c1a07537b23b681c35155d1b08b52d4d7be",
+      "scope": "Fresh final-README wheel installed into locked runtime-only environment. All 27 Python payloads match source/wheel/installed bytes. Three public API operations and console/module CLI with real workers=2 match serial scientific payload; child count after API return is zero."
+    },
+    "linux_final_readme_wheel": "Not separately rerun locally after documentation cleanup; prior exact-source Linux/WSL qualification is retained. Branch CI rebuilds and tests its own wheel.",
+    "remote_ci": "Actual branch run status is owned by GitHub Actions. This local qualification receipt makes no remote-CI success claim."
+  },
+  "evidence_owners": {
+    "cpu_scope": "../../solver/docs/parallel_execution_plan.md",
+    "comsol_scientific_scope": "../../vv_methodology.md",
+    "fullstep_comsol": "../../solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/verdict.json",
+    "p14_10000_320_steps": "../../solver/evidence/p14_10000_320step_process_2026_10_13/summary.json",
+    "distribution": "Git includes selected receipts, inventory hashes, frozen historical documents and comparison figures. Large raw results, ZIP archives, HDF5, wheels, caches and environments stay in local evidence storage and are excluded from this branch. Referenced archives and external native datasets are not implied to be distributed by these receipts. No old_code or model_dataset data was deleted or changed."
+  },
+  "cleanup": {
+    "current_owners": "Project and solver READMEs, product specification, release notes, architecture, implementation plan, quality gates, numerical/result/support documentation and performance instructions have current 0.3.0 descriptions.",
+    "removed": "Completed task diaries, superseded execution plans, initial stubs, repeated old performance tables and obsolete section references.",
+    "history": "Prior immutable evidence and versioned Git history retain the original observations and negative decisions.",
+    "deferred": "Configurable multi-macro worker synchronization remains future work, with no API/configuration/stub added to 0.3.0."
+  },
+  "publication_scope": "Source branch push only. This receipt neither creates nor certifies a v0.3.0 tag, GitHub Release, or package-registry publication."
+}

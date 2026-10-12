@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 import numpy as np
+from numba import njit
 from numpy.typing import NDArray
 
 from ..numerical_status import NUMERICAL_STATUS_OK, PHYSICS_NUMERICAL_FAILURE
@@ -576,6 +577,65 @@ def saffman_lift_acceleration_abs_upper(
     return result
 
 
+@njit(cache=True, fastmath=False, error_model="numpy")
+def velocity_acceleration_abs_upper_row(
+    rate: float,
+    target_x: float,
+    target_y: float,
+    velocity_x: float,
+    velocity_y: float,
+    cross: bool,
+    incoming_status: int | np.uint8,
+) -> tuple[float, float, int]:
+    """One strict bound body for linear and cross-coupled velocity terms."""
+
+    if (math.isfinite(velocity_x) and velocity_x < 0.0) or (
+        math.isfinite(velocity_y) and velocity_y < 0.0
+    ):
+        raise PhysicsEvaluationError("velocity_abs_upper_m_s must be nonnegative")
+    status = int(incoming_status)
+    if status == NUMERICAL_STATUS_OK and not _continuous_velocity_is_finite(velocity_x, velocity_y):
+        status = int(PHYSICS_NUMERICAL_FAILURE)
+    if status != NUMERICAL_STATUS_OK:
+        velocity_x, velocity_y = 0.0, 0.0
+    relative_x = target_x + velocity_x
+    relative_y = target_y + velocity_y
+    if cross:
+        relative_x = np.nextafter(relative_x, np.inf)
+        relative_y = np.nextafter(relative_y, np.inf)
+        relative_x, relative_y = relative_y, relative_x
+    result_x = np.nextafter(rate * relative_x * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    result_y = np.nextafter(rate * relative_y * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    if status == NUMERICAL_STATUS_OK and not _continuous_velocity_is_finite(result_x, result_y):
+        status = int(PHYSICS_NUMERICAL_FAILURE)
+    if status != NUMERICAL_STATUS_OK:
+        result_x, result_y = 0.0, 0.0
+    return result_x, result_y, status
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
+def velocity_acceleration_abs_upper_into(
+    rate: FloatArray,
+    target: FloatArray,
+    velocity: FloatArray,
+    cross: bool,
+    result: FloatArray,
+    status: UInt8Array,
+) -> None:
+    """Fill caller-owned bound and preserve each incoming first failure."""
+
+    for row in range(rate.size):
+        result[row, 0], result[row, 1], status[row] = velocity_acceleration_abs_upper_row(
+            rate[row],
+            target[0],
+            target[1],
+            velocity[row, 0],
+            velocity[row, 1],
+            cross,
+            status[row],
+        )
+
+
 def saffman_lift_acceleration_abs_upper_batch(
     *,
     coupling_rate_abs_upper_s_inv: FloatArray,
@@ -591,20 +651,12 @@ def saffman_lift_acceleration_abs_upper_batch(
         gas_velocity_abs_upper_m_s,
         "gas_velocity_abs_upper_m_s",
     )
-    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    velocity, _ = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
     status = _force_numerical_status(numerical_status, count)
-    status[(status == NUMERICAL_STATUS_OK) & ~finite_velocity] = PHYSICS_NUMERICAL_FAILURE
-    safe_velocity = velocity.copy()
-    safe_velocity[status != NUMERICAL_STATUS_OK] = 0.0
-    with np.errstate(over="ignore", invalid="ignore"):
-        relative_component = np.nextafter(gas_velocity[None, :] + safe_velocity, np.inf)
-        result = np.empty((count, 2), dtype=np.float64)
-        result[:, 0] = coupling_rate_abs_upper_s_inv * relative_component[:, 1]
-        result[:, 1] = coupling_rate_abs_upper_s_inv * relative_component[:, 0]
-        result = np.nextafter(result * _BOUND_ROUNDOFF_FACTOR, np.inf)
-    finite_result = np.isfinite(result).all(axis=1)
-    status[(status == NUMERICAL_STATUS_OK) & ~finite_result] = PHYSICS_NUMERICAL_FAILURE
-    result[status != NUMERICAL_STATUS_OK] = 0.0
+    result = np.empty((count, 2), dtype=np.float64)
+    velocity_acceleration_abs_upper_into(
+        coupling_rate_abs_upper_s_inv, gas_velocity, velocity, True, result, status
+    )
     return result, status
 
 
@@ -626,7 +678,7 @@ def saffman_lift_continuous_applicability_batch(
     if static.shape != (count,):
         raise PhysicsEvaluationError("Saffman static applicability must have shape [N]")
     _require_positive(drag_diameter_m, "drag_diameter_m")
-    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    velocity, _ = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
     gas_velocity = _component_abs_upper(
         gas_velocity_abs_upper_m_s,
         "gas_velocity_abs_upper_m_s",
@@ -647,25 +699,19 @@ def saffman_lift_continuous_applicability_batch(
         raise PhysicsEvaluationError("Saffman shear-Reynolds upper bound must have shape [N]")
     _require_nonnegative(shear_lower, "shear_reynolds_lower")
     _require_nonnegative(shear_upper, "shear_reynolds_upper")
-    status = np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8)
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        relative_component = np.nextafter(velocity + gas_velocity[None, :], np.inf)
-        relative_speed = np.nextafter(
-            np.hypot(relative_component[:, 0], relative_component[:, 1]),
-            np.inf,
-        )
-        slip_reynolds_upper = density_upper * (0.5 * drag_diameter_m) * relative_speed
-        slip_reynolds_upper /= viscosity_lower
-        slip_reynolds_upper = np.nextafter(
-            slip_reynolds_upper * _BOUND_ROUNDOFF_FACTOR,
-            np.inf,
-        )
-    numerical_ok = finite_velocity & np.isfinite(slip_reynolds_upper)
-    status[~numerical_ok] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
-    applicable = static & numerical_ok
-    applicable &= slip_reynolds_upper <= SAFFMAN_MAX_SLIP_REYNOLDS
-    applicable &= (shear_upper == 0.0) | (
-        slip_reynolds_upper <= SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS * np.sqrt(shear_lower)
+    applicable = np.empty(count, dtype=np.bool_)
+    status = np.empty(count, dtype=np.uint8)
+    _saffman_continuous_applicability_into(
+        static,
+        drag_diameter_m,
+        velocity,
+        gas_velocity,
+        density_upper,
+        viscosity_lower,
+        shear_lower,
+        shear_upper,
+        applicable,
+        status,
     )
     return applicable, status
 
@@ -835,23 +881,12 @@ def rarefied_vorticity_lift_acceleration_abs_upper_batch(
         gas_velocity_abs_upper_m_s,
         "gas_velocity_abs_upper_m_s",
     )
-    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    velocity, _ = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
     status = _force_numerical_status(numerical_status, count)
-    status[(status == NUMERICAL_STATUS_OK) & ~finite_velocity] = PHYSICS_NUMERICAL_FAILURE
-    safe_velocity = velocity.copy()
-    safe_velocity[status != NUMERICAL_STATUS_OK] = 0.0
-    with np.errstate(over="ignore", invalid="ignore"):
-        relative_component = np.nextafter(
-            gas_velocity[None, :] + safe_velocity,
-            np.inf,
-        )
-        result = np.empty((count, 2), dtype=np.float64)
-        result[:, 0] = coupling_rate_abs_upper_s_inv * relative_component[:, 1]
-        result[:, 1] = coupling_rate_abs_upper_s_inv * relative_component[:, 0]
-        result = np.nextafter(result * _BOUND_ROUNDOFF_FACTOR, np.inf)
-    finite_result = np.isfinite(result).all(axis=1)
-    status[(status == NUMERICAL_STATUS_OK) & ~finite_result] = PHYSICS_NUMERICAL_FAILURE
-    result[status != NUMERICAL_STATUS_OK] = 0.0
+    result = np.empty((count, 2), dtype=np.float64)
+    velocity_acceleration_abs_upper_into(
+        coupling_rate_abs_upper_s_inv, gas_velocity, velocity, True, result, status
+    )
     return result, status
 
 
@@ -1000,6 +1035,8 @@ def waldmann_gallis_continuous_applicability_batch(
     """Certify the low-relative-drift gate over one velocity/path box."""
 
     static = np.asarray(static_applicable, dtype=np.bool_)
+    if static.ndim != 1:
+        raise PhysicsEvaluationError("Waldmann--Gallis static applicability must have shape [N]")
     count = int(static.size)
     velocity = np.asarray(velocity_abs_upper_m_s, dtype=np.float64)
     gas_velocity = np.asarray(gas_velocity_abs_upper_m_s, dtype=np.float64)
@@ -1013,29 +1050,20 @@ def waldmann_gallis_continuous_applicability_batch(
     if velocity.shape != (count, 2) or gas_velocity.shape != (2,) or not valid_scalar:
         raise PhysicsEvaluationError("Waldmann--Gallis continuous applicability bounds are invalid")
     speed_ratio_limit = _sensitivity_maximum_speed_ratio(maximum_speed_ratio)
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        relative_component = np.nextafter(velocity + gas_velocity[None, :], np.inf)
-        relative_speed = np.nextafter(
-            np.hypot(relative_component[:, 0], relative_component[:, 1]),
-            np.inf,
-        )
-        mean_thermal_speed_lower = math.nextafter(
-            math.sqrt(
-                8.0 * BOLTZMANN_J_K * gas_temperature_lower_K / (math.pi * gas_molecular_mass_kg)
-            ),
-            0.0,
-        )
-        ratio = np.nextafter(relative_speed / mean_thermal_speed_lower, np.inf)
-    numerical_ok = (
-        np.isfinite(velocity).all(axis=1)
-        & (velocity >= 0.0).all(axis=1)
-        & np.isfinite(gas_velocity).all()
-        & (gas_velocity >= 0.0).all()
-        & np.isfinite(ratio)
+    thermal_lower = _continuous_mean_thermal_speed_lower(
+        gas_temperature_lower_K,
+        gas_molecular_mass_kg,
     )
-    status[~numerical_ok] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
-    applicable = static & numerical_ok
-    applicable &= ratio <= speed_ratio_limit
+    applicable = np.empty(count, dtype=np.bool_)
+    _drift_continuous_applicability_into(
+        static,
+        velocity,
+        gas_velocity,
+        thermal_lower,
+        speed_ratio_limit,
+        applicable,
+        status,
+    )
     return applicable, status
 
 
@@ -1851,180 +1879,194 @@ def relative_flow_screened_ion_drag_local_bound(
         "maximum_relative_ion_speed_m_s",
     )
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        relative_component_upper = _outward_abs_upper(
-            np.maximum(
-                np.abs(positive_ion_velocity_lower_m_s - velocity_upper_m_s),
-                np.abs(positive_ion_velocity_upper_m_s - velocity_lower_m_s),
-            ),
-            "local ion-drag relative-component upper bound",
-        )
-        relative_component_lower = np.maximum(
-            positive_ion_velocity_lower_m_s - velocity_upper_m_s,
-            velocity_lower_m_s - positive_ion_velocity_upper_m_s,
-        )
-        relative_component_lower = _outward_nonnegative_lower(
-            np.maximum(relative_component_lower, 0.0),
-            "local ion-drag relative-component lower bound",
-        )
-        relative_speed_upper = _outward_abs_upper(
-            np.hypot(relative_component_upper[:, 0], relative_component_upper[:, 1]),
-            "local ion-drag relative-speed upper bound",
-        )
-        relative_speed_lower = _outward_nonnegative_lower(
-            np.hypot(relative_component_lower[:, 0], relative_component_lower[:, 1]),
-            "local ion-drag relative-speed lower bound",
-        )
-        speed_square_lower = _outward_nonnegative_lower(
-            relative_speed_lower**2
-            + 8.0
-            * ELEMENTARY_CHARGE_C
-            * positive_ion_thermal_voltage_lower_V
-            / (math.pi * effective_positive_ion_mass_upper_kg)
-            + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2,
-            "local ion-drag effective-speed-square lower bound",
-        )
-        speed_square_upper = _outward_abs_upper(
-            relative_speed_upper**2
-            + 8.0
-            * ELEMENTARY_CHARGE_C
-            * positive_ion_thermal_voltage_upper_V
-            / (math.pi * effective_positive_ion_mass_lower_kg)
-            + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2,
-            "local ion-drag effective-speed-square upper bound",
-        )
-        charge_abs_upper = np.maximum(
-            np.abs(charge_number_lower),
-            np.abs(charge_number_upper),
-        )
-        charge_abs_lower = np.minimum(
-            np.abs(charge_number_lower),
-            np.abs(charge_number_upper),
-        )
-        charge_abs_lower[(charge_number_lower <= 0.0) & (charge_number_upper >= 0.0)] = 0.0
-        capacitance_lower = _outward_nonnegative_lower(
-            4.0
-            * math.pi
-            * VACUUM_PERMITTIVITY_F_M
-            * electrostatic_radius_m
-            * (
-                1.0
-                + electrostatic_radius_m
-                / np.maximum(electrostatic_radius_m, screening_length_upper_m)
-            ),
-            "local ion-drag capacitance lower bound",
-        )
-        potential_abs_upper = _outward_abs_upper(
-            charge_abs_upper * ELEMENTARY_CHARGE_C / capacitance_lower,
-            "local ion-drag potential upper bound",
-        )
-        screening_radius_upper = np.maximum(
-            electrostatic_radius_m,
-            np.minimum(screening_length_upper_m, ion_neutral_mean_free_path_upper_m),
-        )
-        screening_square_upper = _outward_abs_upper(
-            screening_radius_upper**2,
-            "local ion-drag screening-square upper bound",
-        )
-        focused_collection_square_upper = _outward_abs_upper(
-            electrostatic_radius_m**2
-            * (
-                1.0
-                + 2.0
-                * ELEMENTARY_CHARGE_C
-                * potential_abs_upper
-                / (effective_positive_ion_mass_lower_kg * speed_square_lower)
-            ),
-            "local ion-drag focused collection-square upper bound",
-        )
-        collection_square_upper = np.minimum(
-            screening_square_upper,
-            focused_collection_square_upper,
-        )
-        orbital_impact_lower = _outward_nonnegative_lower(
-            np.sqrt(charge_abs_lower**2 + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
-            * ELEMENTARY_CHARGE_C**2
-            / (
-                4.0
-                * math.pi
-                * VACUUM_PERMITTIVITY_F_M
-                * effective_positive_ion_mass_upper_kg
-                * speed_square_upper
-            ),
-            "local ion-drag orbital-impact lower bound",
-        )
-        orbital_impact_upper = _outward_abs_upper(
-            np.sqrt(charge_abs_upper**2 + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
-            * ELEMENTARY_CHARGE_C**2
-            / (
-                4.0
-                * math.pi
-                * VACUUM_PERMITTIVITY_F_M
-                * effective_positive_ion_mass_lower_kg
-                * speed_square_lower
-            ),
-            "local ion-drag orbital-impact upper bound",
-        )
-        logarithm_argument_upper = _outward_abs_upper(
-            (
-                screening_square_upper
-                + _outward_abs_upper(
-                    orbital_impact_upper**2,
-                    "local ion-drag orbital-impact-square upper bound",
-                )
-            )
-            / _outward_nonnegative_lower(
-                orbital_impact_lower**2,
-                "local ion-drag orbital-impact-square lower bound",
-            ),
-            "local ion-drag logarithm-argument upper bound",
-        )
-        logarithm_upper = _outward_abs_upper(
-            0.5 * np.log(logarithm_argument_upper),
-            "local ion-drag logarithm upper bound",
-        )
-        collection_cross_section_upper = _outward_abs_upper(
-            math.pi * collection_square_upper,
-            "local ion-drag collection-cross-section upper bound",
-        )
-        orbital_cross_section_upper = _outward_abs_upper(
-            4.0 * math.pi * orbital_impact_upper**2 * np.maximum(logarithm_upper, 0.0),
-            "local ion-drag orbital-cross-section upper bound",
-        )
-        force_factor_upper = _outward_abs_upper(
-            positive_ion_number_density_upper_m3
-            * effective_positive_ion_mass_upper_kg
-            * np.sqrt(speed_square_upper)
-            * (collection_cross_section_upper + orbital_cross_section_upper)
-            / mass_kg,
-            "local ion-drag force-factor upper bound",
-        )
-        acceleration_upper = _outward_abs_upper(
-            force_factor_upper[:, None] * relative_component_upper,
-            "local ion-drag acceleration upper bound",
-        )
-
-    finite = all(
-        bool(np.isfinite(value).all())
-        for value in (
-            relative_speed_lower,
-            relative_speed_upper,
-            speed_square_lower,
-            speed_square_upper,
-            capacitance_lower,
-            potential_abs_upper,
-            screening_radius_upper,
-            collection_square_upper,
-            orbital_impact_lower,
-            orbital_impact_upper,
-            logarithm_upper,
-            acceleration_upper,
-        )
+    result = np.empty((count, 2), dtype=np.float64)
+    applicable = np.empty(count, dtype=np.bool_)
+    relative_flow_screened_ion_drag_local_bound_into(
+        mass_kg,
+        electrostatic_radius_m,
+        charge_number_lower,
+        charge_number_upper,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        positive_ion_number_density_upper_m3,
+        positive_ion_thermal_voltage_lower_V,
+        positive_ion_thermal_voltage_upper_V,
+        positive_ion_velocity_lower_m_s,
+        positive_ion_velocity_upper_m_s,
+        effective_positive_ion_mass_lower_kg,
+        effective_positive_ion_mass_upper_kg,
+        screening_length_upper_m,
+        ion_neutral_mean_free_path_upper_m,
+        relative_speed_limit,
+        result,
+        applicable,
     )
-    if not finite or bool((acceleration_upper < 0.0).any()):
+    return result, applicable
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
+def _force_bound_upper_scalar(value: float) -> float:
+    if not math.isfinite(value) or value < 0.0:
         raise PhysicsEvaluationError("local relative-flow ion-drag bound is not finite")
-    applicable = relative_speed_upper <= relative_speed_limit
-    return acceleration_upper, applicable
+    result = np.nextafter(value * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    if not math.isfinite(result):
+        raise PhysicsEvaluationError("local relative-flow ion-drag bound is not finite")
+    return result
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
+def _force_bound_lower_scalar(value: float) -> float:
+    if not math.isfinite(value) or value < 0.0:
+        raise PhysicsEvaluationError("local relative-flow ion-drag bound is not finite")
+    result = np.nextafter(value / _BOUND_ROUNDOFF_FACTOR, 0.0)
+    if not math.isfinite(result):
+        raise PhysicsEvaluationError("local relative-flow ion-drag bound is not finite")
+    return result
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
+def relative_flow_screened_ion_drag_local_bound_row(
+    mass: float,
+    radius: float,
+    charge_lo: float,
+    charge_hi: float,
+    velocity_x_lo: float,
+    velocity_y_lo: float,
+    velocity_x_hi: float,
+    velocity_y_hi: float,
+    density_hi: float,
+    voltage_lo: float,
+    voltage_hi: float,
+    ion_x_lo: float,
+    ion_y_lo: float,
+    ion_x_hi: float,
+    ion_y_hi: float,
+    ion_mass_lo: float,
+    ion_mass_hi: float,
+    screening_hi: float,
+    mean_free_path_hi: float,
+    speed_limit: float,
+) -> tuple[float, float, bool]:
+    """Strict scalar owner of the existing screened local force enclosure."""
+
+    component_x_hi = _force_bound_upper_scalar(
+        max(abs(ion_x_lo - velocity_x_hi), abs(ion_x_hi - velocity_x_lo))
+    )
+    component_y_hi = _force_bound_upper_scalar(
+        max(abs(ion_y_lo - velocity_y_hi), abs(ion_y_hi - velocity_y_lo))
+    )
+    component_x_lo = _force_bound_lower_scalar(
+        max(max(ion_x_lo - velocity_x_hi, velocity_x_lo - ion_x_hi), 0.0)
+    )
+    component_y_lo = _force_bound_lower_scalar(
+        max(max(ion_y_lo - velocity_y_hi, velocity_y_lo - ion_y_hi), 0.0)
+    )
+    speed_hi = _force_bound_upper_scalar(np.hypot(component_x_hi, component_y_hi))
+    speed_lo = _force_bound_lower_scalar(np.hypot(component_x_lo, component_y_lo))
+    speed_square_lo = _force_bound_lower_scalar(
+        speed_lo**2
+        + 8.0 * ELEMENTARY_CHARGE_C * voltage_lo / (math.pi * ion_mass_hi)
+        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    )
+    speed_square_hi = _force_bound_upper_scalar(
+        speed_hi**2
+        + 8.0 * ELEMENTARY_CHARGE_C * voltage_hi / (math.pi * ion_mass_lo)
+        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    )
+    charge_abs_hi = max(abs(charge_lo), abs(charge_hi))
+    charge_abs_lo = min(abs(charge_lo), abs(charge_hi))
+    if charge_lo <= 0.0 and charge_hi >= 0.0:
+        charge_abs_lo = 0.0
+    capacitance_lo = _force_bound_lower_scalar(
+        4.0
+        * math.pi
+        * VACUUM_PERMITTIVITY_F_M
+        * radius
+        * (1.0 + radius / max(radius, screening_hi))
+    )
+    potential_hi = _force_bound_upper_scalar(charge_abs_hi * ELEMENTARY_CHARGE_C / capacitance_lo)
+    screening_radius_hi = max(radius, min(screening_hi, mean_free_path_hi))
+    screening_square_hi = _force_bound_upper_scalar(screening_radius_hi**2)
+    focused_square_hi = _force_bound_upper_scalar(
+        radius**2
+        * (1.0 + 2.0 * ELEMENTARY_CHARGE_C * potential_hi / (ion_mass_lo * speed_square_lo))
+    )
+    collection_square_hi = min(screening_square_hi, focused_square_hi)
+    orbital_lo = _force_bound_lower_scalar(
+        np.sqrt(charge_abs_lo**2 + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
+        * ELEMENTARY_CHARGE_C**2
+        / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * ion_mass_hi * speed_square_hi)
+    )
+    orbital_hi = _force_bound_upper_scalar(
+        np.sqrt(charge_abs_hi**2 + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
+        * ELEMENTARY_CHARGE_C**2
+        / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * ion_mass_lo * speed_square_lo)
+    )
+    log_argument_hi = _force_bound_upper_scalar(
+        (screening_square_hi + _force_bound_upper_scalar(orbital_hi**2))
+        / _force_bound_lower_scalar(orbital_lo**2)
+    )
+    log_hi = _force_bound_upper_scalar(0.5 * np.log(log_argument_hi))
+    collection_cross_hi = _force_bound_upper_scalar(math.pi * collection_square_hi)
+    orbital_cross_hi = _force_bound_upper_scalar(4.0 * math.pi * orbital_hi**2 * max(log_hi, 0.0))
+    force_factor_hi = _force_bound_upper_scalar(
+        density_hi
+        * ion_mass_hi
+        * np.sqrt(speed_square_hi)
+        * (collection_cross_hi + orbital_cross_hi)
+        / mass
+    )
+    x_hi = _force_bound_upper_scalar(force_factor_hi * component_x_hi)
+    y_hi = _force_bound_upper_scalar(force_factor_hi * component_y_hi)
+    return x_hi, y_hi, speed_hi <= speed_limit
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
+def relative_flow_screened_ion_drag_local_bound_into(
+    mass: FloatArray,
+    radius: FloatArray,
+    charge_lo: FloatArray,
+    charge_hi: FloatArray,
+    velocity_lo: FloatArray,
+    velocity_hi: FloatArray,
+    density_hi: FloatArray,
+    voltage_lo: FloatArray,
+    voltage_hi: FloatArray,
+    ion_lo: FloatArray,
+    ion_hi: FloatArray,
+    ion_mass_lo: FloatArray,
+    ion_mass_hi: FloatArray,
+    screening_hi: FloatArray,
+    mean_free_path_hi: FloatArray,
+    speed_limit: float,
+    result: FloatArray,
+    applicable: BoolArray,
+) -> None:
+    for row in range(mass.size):
+        result[row, 0], result[row, 1], applicable[row] = (
+            relative_flow_screened_ion_drag_local_bound_row(
+                mass[row],
+                radius[row],
+                charge_lo[row],
+                charge_hi[row],
+                velocity_lo[row, 0],
+                velocity_lo[row, 1],
+                velocity_hi[row, 0],
+                velocity_hi[row, 1],
+                density_hi[row],
+                voltage_lo[row],
+                voltage_hi[row],
+                ion_lo[row, 0],
+                ion_lo[row, 1],
+                ion_hi[row, 0],
+                ion_hi[row, 1],
+                ion_mass_lo[row],
+                ion_mass_hi[row],
+                screening_hi[row],
+                mean_free_path_hi[row],
+                speed_limit,
+            )
+        )
 
 
 def electric_field_directed_image_ion_drag_global_bound(
@@ -2165,7 +2207,7 @@ def relative_flow_screened_continuous_applicability_batch(
     if value.ndim != 2 or value.shape[1:] != (2,):
         raise PhysicsEvaluationError("velocity_abs_upper_m_s must have shape [N, 2]")
     count = int(value.shape[0])
-    velocity, finite_velocity = _continuous_velocity_bound(value, count)
+    velocity, _ = _continuous_velocity_bound(value, count)
     ion_velocity = _component_abs_upper(
         positive_ion_velocity_abs_upper_m_s,
         "positive_ion_velocity_abs_upper_m_s",
@@ -2174,16 +2216,16 @@ def relative_flow_screened_continuous_applicability_batch(
         maximum_relative_ion_speed_m_s,
         "maximum_relative_ion_speed_m_s",
     )
-    with np.errstate(over="ignore", invalid="ignore"):
-        relative_component = np.nextafter(velocity + ion_velocity[None, :], np.inf)
-        relative_speed = np.nextafter(
-            np.hypot(relative_component[:, 0], relative_component[:, 1]),
-            np.inf,
-        )
-    numerical_ok = finite_velocity & np.isfinite(relative_speed)
-    status = np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8)
-    status[~numerical_ok] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
-    return numerical_ok & (relative_speed <= speed_limit), status
+    applicable = np.empty(count, dtype=np.bool_)
+    status = np.empty(count, dtype=np.uint8)
+    _relative_speed_continuous_applicability_into(
+        velocity,
+        ion_velocity,
+        speed_limit,
+        applicable,
+        status,
+    )
+    return applicable, status
 
 
 def barnes_collisionless_global_bounds(
@@ -2386,7 +2428,7 @@ def barnes_collisionless_continuous_applicability_batch(
     if static.ndim != 1:
         raise PhysicsEvaluationError("ion-drag static applicability must have shape [N]")
     count = int(static.size)
-    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    velocity, _ = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
     ion_velocity = _component_abs_upper(
         positive_ion_velocity_abs_upper_m_s,
         "positive_ion_velocity_abs_upper_m_s",
@@ -2400,21 +2442,19 @@ def barnes_collisionless_continuous_applicability_batch(
         maximum_ion_drift_ratio,
         "maximum_ion_drift_ratio",
     )
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        relative_component = np.nextafter(velocity + ion_velocity[None, :], np.inf)
-        relative_speed = np.nextafter(
-            np.hypot(relative_component[:, 0], relative_component[:, 1]),
-            np.inf,
-        )
-        thermal_speed_lower = math.nextafter(
-            math.sqrt(8.0 * BOLTZMANN_J_K * ion_temperature_lower / (math.pi * ion_mass)),
-            0.0,
-        )
-        drift_ratio = np.nextafter(relative_speed / thermal_speed_lower, np.inf)
-    numerical_ok = finite_velocity & np.isfinite(drift_ratio)
-    status = np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8)
-    status[~numerical_ok] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
-    return static & numerical_ok & (drift_ratio <= drift_limit), status
+    thermal_lower = _continuous_mean_thermal_speed_lower(ion_temperature_lower, ion_mass)
+    applicable = np.empty(count, dtype=np.bool_)
+    status = np.empty(count, dtype=np.uint8)
+    _drift_continuous_applicability_into(
+        static,
+        velocity,
+        ion_velocity,
+        thermal_lower,
+        drift_limit,
+        applicable,
+        status,
+    )
+    return applicable, status
 
 
 def _linear_two_species_debye_length(
@@ -2570,7 +2610,7 @@ def stokes_cunningham_continuous_applicability_batch(
 
     count = _common_count(drag_diameter_m)
     _require_positive(drag_diameter_m, "drag_diameter_m")
-    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    velocity, _ = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
     gas_velocity = _component_abs_upper(
         gas_velocity_abs_upper_m_s,
         "gas_velocity_abs_upper_m_s",
@@ -2591,45 +2631,19 @@ def stokes_cunningham_continuous_applicability_batch(
     if mean_free_path_lower > mean_free_path_upper:
         raise PhysicsEvaluationError("gas mean-free-path bounds are reversed")
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        knudsen_lower = np.nextafter(
-            2.0 * mean_free_path_lower / drag_diameter_m,
-            -np.inf,
-        )
-        knudsen_upper = np.nextafter(
-            2.0 * mean_free_path_upper / drag_diameter_m,
-            np.inf,
-        )
-        relative_component_upper = velocity + gas_velocity[None, :]
-        relative_speed_upper = np.hypot(
-            relative_component_upper[:, 0],
-            relative_component_upper[:, 1],
-        )
-        relative_speed_upper = np.nextafter(
-            relative_speed_upper * _BOUND_ROUNDOFF_FACTOR,
-            np.inf,
-        )
-        reynolds_upper = np.nextafter(
-            density_upper
-            * drag_diameter_m
-            * relative_speed_upper
-            / viscosity_lower
-            * _BOUND_ROUNDOFF_FACTOR,
-            np.inf,
-        )
-    numerical_ok = finite_velocity
-    numerical_ok &= np.isfinite(knudsen_lower)
-    numerical_ok &= np.isfinite(knudsen_upper)
-    numerical_ok &= np.isfinite(relative_speed_upper)
-    numerical_ok &= np.isfinite(reynolds_upper)
-    applicable = (
-        (knudsen_lower >= STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS)
-        & (knudsen_upper <= STOKES_CUNNINGHAM_MAX_KNUDSEN_RADIUS)
-        & (reynolds_upper <= STOKES_CUNNINGHAM_MAX_REYNOLDS)
+    applicable = np.empty(count, dtype=np.bool_)
+    status = np.empty(count, dtype=np.uint8)
+    _stokes_continuous_applicability_into(
+        drag_diameter_m,
+        velocity,
+        gas_velocity,
+        density_upper,
+        viscosity_lower,
+        mean_free_path_lower,
+        mean_free_path_upper,
+        applicable,
+        status,
     )
-    applicable &= numerical_ok
-    status = np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8)
-    status[~numerical_ok] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
     return applicable, status
 
 
@@ -2692,17 +2706,10 @@ def linear_drag_acceleration_abs_upper_batch(
         target_velocity_abs_upper_m_s,
         "target_velocity_abs_upper_m_s",
     )
-    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    velocity, _ = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
     status = _force_numerical_status(numerical_status, count)
-    status[(status == NUMERICAL_STATUS_OK) & ~finite_velocity] = PHYSICS_NUMERICAL_FAILURE
-    safe_velocity = velocity.copy()
-    safe_velocity[status != NUMERICAL_STATUS_OK] = 0.0
-    with np.errstate(over="ignore", invalid="ignore"):
-        result = rate_upper_s_inv[:, None] * (target[None, :] + safe_velocity)
-        result = np.nextafter(result * _BOUND_ROUNDOFF_FACTOR, np.inf)
-    finite_result = np.isfinite(result).all(axis=1)
-    status[(status == NUMERICAL_STATUS_OK) & ~finite_result] = PHYSICS_NUMERICAL_FAILURE
-    result[status != NUMERICAL_STATUS_OK] = 0.0
+    result = np.empty((count, 2), dtype=np.float64)
+    velocity_acceleration_abs_upper_into(rate_upper_s_inv, target, velocity, False, result, status)
     return result, status
 
 
@@ -2865,7 +2872,7 @@ def _epstein_continuous_applicability_batch(
 
     count = _common_count(drag_diameter_m)
     _require_positive(drag_diameter_m, "drag_diameter_m")
-    velocity, finite_velocity = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
+    velocity, _ = _continuous_velocity_bound(velocity_abs_upper_m_s, count)
     gas_velocity = _component_abs_upper(
         gas_velocity_abs_upper_m_s,
         "gas_velocity_abs_upper_m_s",
@@ -2884,38 +2891,23 @@ def _epstein_continuous_applicability_batch(
     )
     speed_ratio_limit = _finite_positive_scalar(maximum_speed_ratio, "maximum_speed_ratio")
 
-    radius_m = 0.5 * drag_diameter_m
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        required_mean_free_path = np.nextafter(
-            EPSTEIN_MIN_LAMBDA_OVER_RADIUS * radius_m,
-            np.inf,
-        )
-        relative_component_upper = velocity + gas_velocity[None, :]
-        relative_speed_upper = np.hypot(
-            relative_component_upper[:, 0],
-            relative_component_upper[:, 1],
-        )
-        relative_speed_upper = np.nextafter(
-            relative_speed_upper * _BOUND_ROUNDOFF_FACTOR,
-            np.inf,
-        )
-        thermal_speed_lower = math.sqrt(
-            thermal_speed_squared_factor * BOLTZMANN_J_K * temperature_lower / molecular_mass
-        )
-        speed_limit = np.nextafter(
-            speed_ratio_limit * thermal_speed_lower / _BOUND_ROUNDOFF_FACTOR,
-            -np.inf,
-        )
-    if not math.isfinite(speed_limit) or speed_limit <= 0.0:
-        raise PhysicsEvaluationError("Epstein applicability bound is not finite")
-    numerical_ok = finite_velocity & np.isfinite(required_mean_free_path)
-    numerical_ok &= np.isfinite(relative_speed_upper)
-    applicable = (mean_free_path_lower >= required_mean_free_path) & (
-        relative_speed_upper <= speed_limit
+    speed_limit = _epstein_continuous_speed_limit(
+        thermal_speed_squared_factor,
+        temperature_lower,
+        molecular_mass,
+        speed_ratio_limit,
     )
-    applicable &= numerical_ok
-    status = np.full(count, CONTINUOUS_APPLICABILITY_OK, dtype=np.uint8)
-    status[~numerical_ok] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+    applicable = np.empty(count, dtype=np.bool_)
+    status = np.empty(count, dtype=np.uint8)
+    _epstein_continuous_applicability_into(
+        drag_diameter_m,
+        velocity,
+        gas_velocity,
+        mean_free_path_lower,
+        speed_limit,
+        applicable,
+        status,
+    )
     return applicable, status
 
 
@@ -3078,6 +3070,320 @@ def _require_finite(value: FloatArray, name: str) -> None:
         raise PhysicsEvaluationError(f"{name} must be finite")
 
 
+def _continuous_mean_thermal_speed_lower(temperature_K: float, molecular_mass_kg: float) -> float:
+    """Prepare the existing strictly downward-rounded mean thermal speed."""
+
+    return math.nextafter(
+        math.sqrt(8.0 * BOLTZMANN_J_K * temperature_K / (math.pi * molecular_mass_kg)),
+        0.0,
+    )
+
+
+def _epstein_continuous_speed_limit(
+    thermal_speed_squared_factor: float,
+    temperature_K: float,
+    molecular_mass_kg: float,
+    maximum_speed_ratio: float,
+) -> float:
+    """Prepare the declared speed envelope in the original operation order."""
+
+    thermal_lower = math.sqrt(
+        thermal_speed_squared_factor * BOLTZMANN_J_K * temperature_K / molecular_mass_kg,
+    )
+    limit = float(
+        np.nextafter(
+            maximum_speed_ratio * thermal_lower / _BOUND_ROUNDOFF_FACTOR,
+            -np.inf,
+        )
+    )
+    if not math.isfinite(limit) or limit <= 0.0:
+        raise PhysicsEvaluationError("Epstein applicability bound is not finite")
+    return limit
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _has_finite_negative_velocity(velocity: FloatArray) -> bool:
+    """Preserve the shared-input rejection without a temporary sign mask."""
+
+    for row in range(velocity.shape[0]):
+        for component in range(2):
+            value = velocity[row, component]
+            if value < 0.0 and math.isfinite(value):
+                return True
+    return False
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _continuous_velocity_is_finite(vx: float, vy: float) -> bool:
+    return math.isfinite(vx) and math.isfinite(vy)
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _outward_relative_speed(vx: float, vy: float, ux: float, uy: float) -> float:
+    """Directed component sums followed by the existing hypot rounding."""
+
+    relative_x = np.nextafter(vx + ux, np.inf)
+    relative_y = np.nextafter(vy + uy, np.inf)
+    return np.nextafter(np.hypot(relative_x, relative_y), np.inf)
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _relative_speed_continuous_applicability_row(
+    vx: float,
+    vy: float,
+    ux: float,
+    uy: float,
+    speed_limit: float,
+) -> tuple[bool, np.uint8]:
+    speed = _outward_relative_speed(vx, vy, ux, uy)
+    numerical_ok = _continuous_velocity_is_finite(vx, vy) and math.isfinite(speed)
+    status = (
+        CONTINUOUS_APPLICABILITY_OK if numerical_ok else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+    )
+    return numerical_ok and speed <= speed_limit, status
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _drift_continuous_applicability_row(
+    static: bool,
+    vx: float,
+    vy: float,
+    ux: float,
+    uy: float,
+    thermal_lower: float,
+    drift_limit: float,
+) -> tuple[bool, np.uint8]:
+    speed = _outward_relative_speed(vx, vy, ux, uy)
+    ratio = np.nextafter(speed / thermal_lower, np.inf)
+    numerical_ok = (
+        _continuous_velocity_is_finite(vx, vy)
+        and vx >= 0.0
+        and vy >= 0.0
+        and math.isfinite(ux)
+        and math.isfinite(uy)
+        and ux >= 0.0
+        and uy >= 0.0
+        and math.isfinite(ratio)
+    )
+    status = (
+        CONTINUOUS_APPLICABILITY_OK if numerical_ok else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+    )
+    return static and numerical_ok and ratio <= drift_limit, status
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _epstein_continuous_applicability_row(
+    diameter: float,
+    vx: float,
+    vy: float,
+    ux: float,
+    uy: float,
+    mean_free_path_lower: float,
+    speed_limit: float,
+) -> tuple[bool, np.uint8]:
+    radius = 0.5 * diameter
+    required_path = np.nextafter(EPSTEIN_MIN_LAMBDA_OVER_RADIUS * radius, np.inf)
+    speed = np.hypot(vx + ux, vy + uy)
+    speed = np.nextafter(speed * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    numerical_ok = (
+        _continuous_velocity_is_finite(vx, vy)
+        and math.isfinite(required_path)
+        and math.isfinite(speed)
+    )
+    status = (
+        CONTINUOUS_APPLICABILITY_OK if numerical_ok else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+    )
+    applicable = mean_free_path_lower >= required_path and speed <= speed_limit
+    return applicable and numerical_ok, status
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _stokes_continuous_applicability_row(
+    diameter: float,
+    vx: float,
+    vy: float,
+    ux: float,
+    uy: float,
+    density_upper: float,
+    viscosity_lower: float,
+    path_lower: float,
+    path_upper: float,
+) -> tuple[bool, np.uint8]:
+    kn_lower = np.nextafter(2.0 * path_lower / diameter, -np.inf)
+    kn_upper = np.nextafter(2.0 * path_upper / diameter, np.inf)
+    speed = np.hypot(vx + ux, vy + uy)
+    speed = np.nextafter(speed * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    reynolds = np.nextafter(
+        density_upper * diameter * speed / viscosity_lower * _BOUND_ROUNDOFF_FACTOR,
+        np.inf,
+    )
+    numerical_ok = (
+        _continuous_velocity_is_finite(vx, vy)
+        and math.isfinite(kn_lower)
+        and math.isfinite(kn_upper)
+        and math.isfinite(speed)
+        and math.isfinite(reynolds)
+    )
+    status = (
+        CONTINUOUS_APPLICABILITY_OK if numerical_ok else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+    )
+    applicable = (
+        kn_lower >= STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS
+        and kn_upper <= STOKES_CUNNINGHAM_MAX_KNUDSEN_RADIUS
+        and reynolds <= STOKES_CUNNINGHAM_MAX_REYNOLDS
+    )
+    return applicable and numerical_ok, status
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _saffman_continuous_applicability_row(
+    static: bool,
+    diameter: float,
+    vx: float,
+    vy: float,
+    ux: float,
+    uy: float,
+    density_upper: float,
+    viscosity_lower: float,
+    shear_lower: float,
+    shear_upper: float,
+) -> tuple[bool, np.uint8]:
+    speed = _outward_relative_speed(vx, vy, ux, uy)
+    slip_reynolds = density_upper * (0.5 * diameter) * speed
+    slip_reynolds /= viscosity_lower
+    slip_reynolds = np.nextafter(slip_reynolds * _BOUND_ROUNDOFF_FACTOR, np.inf)
+    numerical_ok = _continuous_velocity_is_finite(vx, vy) and math.isfinite(slip_reynolds)
+    status = (
+        CONTINUOUS_APPLICABILITY_OK if numerical_ok else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
+    )
+    applicable = (
+        static
+        and numerical_ok
+        and slip_reynolds <= SAFFMAN_MAX_SLIP_REYNOLDS
+        and (
+            shear_upper == 0.0
+            or slip_reynolds <= SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS * np.sqrt(shear_lower)
+        )
+    )
+    return applicable, status
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _relative_speed_continuous_applicability_into(
+    velocity: FloatArray,
+    flow: FloatArray,
+    speed_limit: float,
+    applicable: BoolArray,
+    status: UInt8Array,
+) -> None:
+    for row in range(velocity.shape[0]):
+        applicable[row], status[row] = _relative_speed_continuous_applicability_row(
+            velocity[row, 0],
+            velocity[row, 1],
+            flow[0],
+            flow[1],
+            speed_limit,
+        )
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _drift_continuous_applicability_into(
+    static: BoolArray,
+    velocity: FloatArray,
+    flow: FloatArray,
+    thermal_lower: float,
+    drift_limit: float,
+    applicable: BoolArray,
+    status: UInt8Array,
+) -> None:
+    for row in range(velocity.shape[0]):
+        applicable[row], status[row] = _drift_continuous_applicability_row(
+            static[row],
+            velocity[row, 0],
+            velocity[row, 1],
+            flow[0],
+            flow[1],
+            thermal_lower,
+            drift_limit,
+        )
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _epstein_continuous_applicability_into(
+    diameter: FloatArray,
+    velocity: FloatArray,
+    flow: FloatArray,
+    path_lower: float,
+    speed_limit: float,
+    applicable: BoolArray,
+    status: UInt8Array,
+) -> None:
+    for row in range(velocity.shape[0]):
+        applicable[row], status[row] = _epstein_continuous_applicability_row(
+            diameter[row],
+            velocity[row, 0],
+            velocity[row, 1],
+            flow[0],
+            flow[1],
+            path_lower,
+            speed_limit,
+        )
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _stokes_continuous_applicability_into(
+    diameter: FloatArray,
+    velocity: FloatArray,
+    flow: FloatArray,
+    density_upper: float,
+    viscosity_lower: float,
+    path_lower: float,
+    path_upper: float,
+    applicable: BoolArray,
+    status: UInt8Array,
+) -> None:
+    for row in range(velocity.shape[0]):
+        applicable[row], status[row] = _stokes_continuous_applicability_row(
+            diameter[row],
+            velocity[row, 0],
+            velocity[row, 1],
+            flow[0],
+            flow[1],
+            density_upper,
+            viscosity_lower,
+            path_lower,
+            path_upper,
+        )
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _saffman_continuous_applicability_into(
+    static: BoolArray,
+    diameter: FloatArray,
+    velocity: FloatArray,
+    flow: FloatArray,
+    density_upper: float,
+    viscosity_lower: float,
+    shear_lower: FloatArray,
+    shear_upper: FloatArray,
+    applicable: BoolArray,
+    status: UInt8Array,
+) -> None:
+    for row in range(velocity.shape[0]):
+        applicable[row], status[row] = _saffman_continuous_applicability_row(
+            static[row],
+            diameter[row],
+            velocity[row, 0],
+            velocity[row, 1],
+            flow[0],
+            flow[1],
+            density_upper,
+            viscosity_lower,
+            shear_lower[row],
+            shear_upper[row],
+        )
+
+
 def _component_abs_upper(value: FloatArray, name: str) -> FloatArray:
     result = np.asarray(value, dtype=np.float64)
     if result.shape != (2,):
@@ -3096,7 +3402,7 @@ def _continuous_velocity_bound(
     if result.shape != (count, 2):
         raise PhysicsEvaluationError("velocity_abs_upper_m_s must have shape [N, 2]")
     finite = np.isfinite(result)
-    if bool(((result < 0.0) & finite).any()):
+    if _has_finite_negative_velocity(result):
         raise PhysicsEvaluationError("velocity_abs_upper_m_s must be nonnegative")
     return result, finite.all(axis=1)
 

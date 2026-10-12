@@ -5,8 +5,9 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from types import MappingProxyType
-from typing import Literal
+from typing import Literal, NamedTuple
 
 import numpy as np
 from numba import njit
@@ -30,7 +31,7 @@ type Int64Array = NDArray[np.int64]
 type OutsideReason = Literal["outside_layout", "masked_cell"]
 type Weights = tuple[float, ...]
 
-FIELD_LOCATION_REVISION = "field_location_v4"
+FIELD_LOCATION_REVISION = "field_location_v5"
 FIELD_TIME_REVISION = "fixed_topology_linear_time_v2"
 FIELD_SPATIAL_GRADIENT_REVISION = "static_nodal_p1_regular_q1_gradient_v2"
 REQUIRED_FIELD_REVISION = "required_field_time_linear_v6"
@@ -121,17 +122,55 @@ class LocalFieldRangeBatch:
     range_available: NDArray[np.bool_]
 
 
+class NumericFieldWorkspace(NamedTuple):
+    """Caller-owned numeric columns shared by Python and native stage sampling."""
+
+    packed_values: FloatArray
+    support_inside: NDArray[np.bool_]
+    cell_id: Int64Array
+    weights: FloatArray
+    row_status: NDArray[np.uint8]
+    numerical_status: NDArray[np.uint8]
+
+
+class NumericFieldRangeWorkspace(NamedTuple):
+    """Bounded caller-owned candidates and packed primitive ranges."""
+
+    packed_lower: FloatArray
+    packed_upper: FloatArray
+    candidate_count: Int64Array
+    range_available: NDArray[np.bool_]
+    row_status: NDArray[np.uint8]
+    candidates: Int64Array
+
+
 @dataclass(frozen=True, slots=True)
 class FieldWorkspace:
     """Reusable location and interpolation columns for one stage slab."""
 
     field_names: tuple[str, ...]
+    packed_values: FloatArray
     sampled_values: Mapping[str, FloatArray]
     support_inside: NDArray[np.bool_]
     cell_id: Int64Array
     weights: FloatArray
     row_status: NDArray[np.uint8]
     numerical_status: NDArray[np.uint8]
+    numeric: NumericFieldWorkspace = dataclass_field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "numeric",
+            NumericFieldWorkspace(
+                self.packed_values,
+                self.support_inside,
+                self.cell_id,
+                self.weights,
+                self.row_status,
+                self.numerical_status,
+            ),
+        )
 
     @classmethod
     def allocate(cls, fields: Mapping[str, FieldData], capacity: int) -> FieldWorkspace:
@@ -140,11 +179,18 @@ class FieldWorkspace:
         if capacity < 0:
             raise ValueError("field workspace capacity must be nonnegative")
         names = tuple(fields)
-        sampled = {
-            name: np.empty((capacity, len(fields[name].components)), dtype="<f8") for name in names
-        }
+        packed = np.empty(
+            (capacity, sum(len(fields[name].components) for name in names)), dtype="<f8"
+        )
+        sampled: dict[str, FloatArray] = {}
+        begin = 0
+        for name in names:
+            end = begin + len(fields[name].components)
+            sampled[name] = packed[:, begin:end]
+            begin = end
         return cls(
             names,
+            packed,
             MappingProxyType(sampled),
             np.empty(capacity, dtype=np.bool_),
             np.empty(capacity, dtype="<i8"),
@@ -190,6 +236,39 @@ class _FieldCellIndex:
         return sum(int(array.nbytes) for array in arrays)
 
 
+class NumericFieldContext(NamedTuple):
+    """Closed read-only field projection for a native stage provider.
+
+    Fields and component offsets retain the required physics-plan order.
+    Static values use a one-snapshot view; no canonical value array is copied.
+    Layout tags are 0 (empty), 1 (regular), 3 (P1), and 4 (Q1).
+    """
+
+    layout_kind: int
+    axis0_m: FloatArray
+    axis1_m: FloatArray
+    axis_metrics: tuple[float, float, float, float, bool]
+    nodes_m: FloatArray
+    connectivity: Int64Array
+    cell_support: NDArray[np.uint8]
+    cell_metrics: FloatArray
+    cell_status: NDArray[np.uint8]
+    cell_bounds_m: FloatArray
+    index_cell_id: Int64Array
+    index_lower_m: FloatArray
+    index_upper_m: FloatArray
+    index_begin: Int64Array
+    index_end: Int64Array
+    index_skip: Int64Array
+    field_count: int
+    values: tuple[FloatArray, ...]
+    time_s: tuple[FloatArray, ...]
+    association: NDArray[np.uint8]
+    zero_axis_radial: NDArray[np.bool_]
+    component_offsets: Int64Array
+    owned_normalization_nbytes: int
+
+
 @dataclass(frozen=True, slots=True)
 class PreparedFieldSet:
     """Required fields certified on one layout for the complete particle domain."""
@@ -199,6 +278,7 @@ class PreparedFieldSet:
     axis_accessible: bool = False
     cell_index: _FieldCellIndex | None = None
     has_time_dependent_fields: bool = False
+    numeric_context: NumericFieldContext = dataclass_field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -206,6 +286,7 @@ class PreparedFieldSet:
             "has_time_dependent_fields",
             any(field.time_s is not None for field in self.fields.values()),
         )
+        object.__setattr__(self, "numeric_context", _prepare_numeric_field_context(self))
 
     @property
     def uses_cell_hint(self) -> bool:
@@ -217,7 +298,23 @@ class PreparedFieldSet:
     def prepared_nbytes(self) -> int:
         """Return non-canonical resident bytes owned by field preparation."""
 
-        return 0 if self.cell_index is None else self.cell_index.nbytes
+        context = self.numeric_context
+        index_bytes = 0 if self.cell_index is None else self.cell_index.nbytes
+        return (
+            index_bytes
+            + context.owned_normalization_nbytes
+            + sum(
+                int(array.nbytes)
+                for array in (
+                    context.cell_metrics,
+                    context.cell_status,
+                    context.cell_bounds_m,
+                    context.association,
+                    context.zero_axis_radial,
+                    context.component_offsets,
+                )
+            )
+        )
 
     @property
     def preparation_transient_nbytes(self) -> int:
@@ -229,6 +326,22 @@ class PreparedFieldSet:
         """Allocate one reusable stage workspace for this prepared catalog."""
 
         return FieldWorkspace.allocate(self.fields, capacity)
+
+    def allocate_range_workspace(self, capacity: int) -> NumericFieldRangeWorkspace:
+        """Allocate reusable ranges and at most 64 candidate slots per row."""
+
+        if capacity < 0:
+            raise ValueError("field range workspace capacity must be nonnegative")
+        components = int(self.numeric_context.component_offsets[-1])
+        candidate_capacity = LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW if self.layout is not None else 0
+        return NumericFieldRangeWorkspace(
+            np.empty((capacity, components), dtype="<f8"),
+            np.empty((capacity, components), dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype=np.bool_),
+            np.empty(capacity, dtype=np.uint8),
+            np.empty((capacity, candidate_capacity), dtype="<i8"),
+        )
 
     def regular_support_box(self) -> tuple[FloatArray, FloatArray] | None:
         """Return the closed convex support box for a fully supported regular layout."""
@@ -303,141 +416,63 @@ class PreparedFieldSet:
         *,
         time_lower_s: FloatArray | None = None,
         time_upper_s: FloatArray | None = None,
+        workspace: NumericFieldRangeWorkspace | None = None,
     ) -> LocalFieldRangeBatch:
-        """Bound primitives over cells and snapshots overlapping each path box.
+        """Bound nodal primitives over overlapping cells and bracketing snapshots.
 
-        P1, Q1, and regular nodal bases use nonnegative
-        partition-of-unity weights.  Nodal extrema over every conservative
-        cell candidate and every snapshot that brackets the requested time
-        interval therefore contain the interpolated value everywhere in the
-        in-support part of the query box.  Omitting both time arrays retains
-        the run-global all-snapshot bound for callers without a path interval.
-        This method deliberately makes no claim that the full spatial query
-        box is covered by those cells.
+        A range is available only for one to 64 supported candidate cells.
+        Availability does not certify that the complete spatial box is covered.
+        The optional caller-owned workspace is reused by repeated path queries.
         """
 
         lower_m, upper_m = _validated_local_range_boxes(position_lower_m, position_upper_m)
         count = int(lower_m.shape[0])
         lower_time_s, upper_time_s = _validated_local_time_intervals(
-            time_lower_s,
-            time_upper_s,
-            count,
+            time_lower_s, time_upper_s, count
         )
-        if self.layout is None:
-            if self.fields:
-                raise FieldLocationError("constant field catalog unexpectedly owns no layout")
-            empty: Mapping[str, FloatArray] = MappingProxyType({})
-            candidate_count = np.zeros(count, dtype=np.int64)
-            range_available = np.zeros(count, dtype=np.bool_)
-            candidate_count.setflags(write=False)
-            range_available.setflags(write=False)
-            return LocalFieldRangeBatch(
-                empty,
-                empty,
-                candidate_count,
-                range_available,
-            )
-
-        result_lower: dict[str, FloatArray] = {}
-        result_upper: dict[str, FloatArray] = {}
-        cell_index = self.cell_index
-        if not isinstance(self.layout, RegularLayout) and cell_index is None:
-            cell_index = _build_field_cell_index(self.layout)
-        if isinstance(self.layout, RegularLayout):
-            candidate_count, offsets, candidates = _local_regular_candidates(
-                self.layout.axis0_m,
-                self.layout.axis1_m,
-                self.layout.cell_support,
-                lower_m,
-                upper_m,
-            )
-        else:
-            if cell_index is None:
-                raise AssertionError("unstructured field index was not prepared")
-            candidate_count, offsets, candidates = _local_unstructured_candidates(
-                self.layout.nodes_m,
-                self.layout.connectivity,
-                self.layout.cell_support,
-                cell_index,
-                lower_m,
-                upper_m,
-            )
         for name, field in self.fields.items():
             if field.association != "node":
                 raise FieldLocationError(f"local bounds require node-associated field {name!r}")
-            field_lower = np.empty((count, field.values.shape[-1]), dtype=np.float64)
-            field_upper = np.empty_like(field_lower)
-            snapshot_begin, snapshot_end = _local_snapshot_ranges(
-                field,
-                lower_time_s,
-                upper_time_s,
-                count,
-            )
-            if isinstance(self.layout, RegularLayout):
-                if field.time_s is None:
-                    _local_regular_nodal_bounds(
-                        int(self.layout.axis1_m.size) - 1,
-                        int(self.layout.axis1_m.size),
-                        offsets,
-                        candidates,
-                        field.values,
-                        field_lower,
-                        field_upper,
+            if field.time_s is not None and lower_time_s is not None and upper_time_s is not None:
+                if bool(
+                    (lower_time_s < field.time_s[0]).any()
+                    or (upper_time_s > field.time_s[-1]).any()
+                ):
+                    raise FieldLocationError(
+                        f"field {name!r} cannot bound time outside its snapshot range"
                     )
-                else:
-                    _local_regular_snapshot_bounds(
-                        int(self.layout.axis1_m.size) - 1,
-                        int(self.layout.axis1_m.size),
-                        offsets,
-                        candidates,
-                        field.values,
-                        snapshot_begin,
-                        snapshot_end,
-                        field_lower,
-                        field_upper,
-                    )
-            else:
-                if field.time_s is None:
-                    _local_unstructured_nodal_bounds(
-                        self.layout.connectivity,
-                        offsets,
-                        candidates,
-                        field.values,
-                        field_lower,
-                        field_upper,
-                    )
-                else:
-                    _local_unstructured_snapshot_bounds(
-                        self.layout.connectivity,
-                        offsets,
-                        candidates,
-                        field.values,
-                        snapshot_begin,
-                        snapshot_end,
-                        field_lower,
-                        field_upper,
-                    )
-            _expand_local_component_bounds(
-                field_lower,
-                field_upper,
-                (candidate_count != 0) & (candidate_count <= LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW),
-                name,
-            )
-            field_lower.setflags(write=False)
-            field_upper.setflags(write=False)
-            result_lower[name] = field_lower
-            result_upper[name] = field_upper
-
-        range_available = (candidate_count != 0) & (
-            candidate_count <= LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW
+        range_workspace = (
+            workspace if workspace is not None else self.allocate_range_workspace(count)
         )
-        candidate_count.setflags(write=False)
-        range_available.setflags(write=False)
+        _validate_range_workspace(self.numeric_context, range_workspace, count)
+        local_prepared_field_ranges_into(
+            self.numeric_context, lower_m, upper_m, lower_time_s, upper_time_s, range_workspace
+        )
+        failed = np.flatnonzero(range_workspace.row_status[:count] != cpu_backend.FIELD_KERNEL_OK)
+        if failed.size:
+            _raise_kernel_error(
+                int(range_workspace.row_status[int(failed[0])]),
+                int(failed[0]),
+                "local field bounds",
+            )
+        offsets = self.numeric_context.component_offsets
+        result_lower = {
+            name: _readonly_field_view(
+                range_workspace.packed_lower[:count, offsets[slot] : offsets[slot + 1]]
+            )
+            for slot, name in enumerate(self.fields)
+        }
+        result_upper = {
+            name: _readonly_field_view(
+                range_workspace.packed_upper[:count, offsets[slot] : offsets[slot + 1]]
+            )
+            for slot, name in enumerate(self.fields)
+        }
         return LocalFieldRangeBatch(
             MappingProxyType(result_lower),
             MappingProxyType(result_upper),
-            candidate_count,
-            range_available,
+            _readonly_field_view(range_workspace.candidate_count[:count]),
+            _readonly_field_view(range_workspace.range_available[:count]),
         )
 
     def sample(
@@ -489,51 +524,14 @@ class PreparedFieldSet:
         if stage_workspace.field_names != tuple(self.fields):
             raise ValueError("field workspace does not match the prepared field catalog")
         batch = stage_workspace.batch(count)
-        row_status = stage_workspace.row_status[:count]
         numerical_status = stage_workspace.numerical_status[:count]
-        row_status.fill(cpu_backend.FIELD_KERNEL_OK)
-        nonfinite_position = ~np.isfinite(positions).all(axis=1)
-        row_status[nonfinite_position] = cpu_backend.FIELD_KERNEL_NONFINITE_GEOMETRY
-        if self.layout is None:
-            batch.support_inside.fill(True)
-            batch.cell_id.fill(-1)
-            _field_numerical_status(row_status, numerical_status)
-            return batch, numerical_status
-
-        support = batch.support_inside
-        cell_id = batch.cell_id
-        weights = stage_workspace.weights[:count]
-        _locate_field_stage(
-            self.layout,
-            self.cell_index,
+        sample_prepared_fields_into(
+            self.numeric_context,
             positions,
+            self.numeric_context.time_s[0] if stage_times is None else stage_times,
             hints,
-            support,
-            cell_id,
-            weights,
-            row_status,
+            stage_workspace.numeric,
         )
-        for name, field in self.fields.items():
-            if field.layout != self.layout.name:
-                raise ValueError(
-                    f"field {field.name} uses layout {field.layout}, not {self.layout.name}"
-                )
-            values = batch.values[name]
-            zero_axis_radial = self.axis_accessible and (
-                field.components == ("r", "z") and field.stored_basis == "axisymmetric_rz"
-            )
-            _sample_compiled_field(
-                self.layout,
-                field,
-                positions,
-                stage_times,
-                cell_id,
-                weights,
-                zero_axis_radial,
-                values,
-                row_status,
-            )
-        _field_numerical_status(row_status, numerical_status)
         return batch, numerical_status
 
     def spatial_gradient(self, name: str, workspace: FieldWorkspace, output: FloatArray) -> None:
@@ -559,35 +557,12 @@ class PreparedFieldSet:
         if not bool(workspace.support_inside[:count].all()):
             raise ValueError("spatial gradients require supported sampled rows")
         status = workspace.row_status[:count]
-        if isinstance(self.layout, P1TriLayout):
-            cpu_backend.sample_p1_nodal_gradient(
-                self.layout.nodes_m,
-                self.layout.connectivity,
-                workspace.cell_id[:count],
-                field.values,
-                output,
-                status,
-            )
-        elif isinstance(self.layout, Q1QuadLayout):
-            cpu_backend.sample_q1_nodal_gradient(
-                self.layout.nodes_m,
-                self.layout.connectivity,
-                workspace.cell_id[:count],
-                workspace.weights[:count],
-                field.values,
-                output,
-                status,
-            )
-        else:
-            cpu_backend.sample_regular_nodal_gradient(
-                self.layout.axis0_m,
-                self.layout.axis1_m,
-                workspace.cell_id[:count],
-                workspace.weights[:count],
-                field.values,
-                output,
-                status,
-            )
+        sample_prepared_field_gradient_into(
+            self.numeric_context,
+            workspace.field_names.index(name),
+            workspace.numeric,
+            output,
+        )
         failed = np.flatnonzero(status != cpu_backend.FIELD_KERNEL_OK)
         if failed.size:
             _raise_kernel_error(int(status[int(failed[0])]), int(failed[0]), "field gradient")
@@ -595,6 +570,262 @@ class PreparedFieldSet:
 
 class FieldLocationError(RuntimeError):
     """A field location could not be computed from a numerically valid basis."""
+
+
+def _readonly_field_view(array: np.ndarray) -> np.ndarray:
+    view = array.view()
+    view.setflags(write=False)
+    return view
+
+
+def _numeric_field_snapshots(
+    field: FieldData,
+    empty_time_s: FloatArray,
+) -> tuple[FloatArray, FloatArray, int]:
+    """Share canonical arrays and normalize only direct strided numerical inputs."""
+
+    values = np.ascontiguousarray(field.values)
+    owned_bytes = 0 if values is field.values else int(values.nbytes)
+    if field.time_s is None:
+        return _readonly_field_view(values[None, :, :]), empty_time_s, owned_bytes
+    times = np.ascontiguousarray(field.time_s)
+    if times is not field.time_s:
+        owned_bytes += int(times.nbytes)
+    return _readonly_field_view(values), _readonly_field_view(times), owned_bytes
+
+
+def _regular_projected_uncertainty_is_certified(
+    layout: RegularLayout,
+    axis_metrics: tuple[float, float, float, float],
+) -> bool:
+    """Prove resolved uncertainty throughout the canonical regular axis box.
+
+    An uncertified layout keeps each candidate's original error check.  The
+    proof covers containing points and nearest projections, but not tolerance
+    extensions.  Every nearest distance is still evaluated.
+    """
+
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        for dimension, axis in enumerate((layout.axis0_m, layout.axis1_m)):
+            maximum_coordinate = max(abs(float(axis[0])), abs(float(axis[-1])))
+            tolerance = float(
+                cpu_backend._field_axis_tolerance(
+                    axis_metrics[dimension], axis_metrics[dimension + 2], maximum_coordinate
+                )
+            )
+            if not np.isfinite(tolerance):
+                return False
+            for index in range(axis.size - 1):
+                width = float(axis[index + 1] - axis[index])
+                if not np.isfinite(width) or width <= 0.0:
+                    return False
+                uncertainty = tolerance / width
+                if (
+                    not np.isfinite(uncertainty)
+                    or uncertainty > cpu_backend._FIELD_MAX_REFERENCE_UNCERTAINTY
+                ):
+                    return False
+    return True
+
+
+def _prepare_numeric_field_context(prepared: PreparedFieldSet) -> NumericFieldContext:
+    """Project the one field owner to fixed arrays without copying primitive values."""
+
+    empty_float = _readonly_field_view(np.empty(0, dtype="<f8"))
+    empty_int = _readonly_field_view(np.empty(0, dtype="<i8"))
+    empty_points = _readonly_field_view(np.empty((0, 2), dtype="<f8"))
+    layout = prepared.layout
+    kind = 0
+    axes = (empty_float, empty_float)
+    axis_metrics: tuple[float, float, float, float, bool] = (0.0, 0.0, 0.0, 0.0, False)
+    nodes = empty_points
+    connectivity = _readonly_field_view(np.empty((0, 4), dtype="<i8"))
+    support = np.empty(0, dtype=np.uint8)
+    metrics = np.empty((0, 9), dtype="<f8")
+    cell_status = np.empty(0, dtype=np.uint8)
+    cell_bounds = np.empty((0, 4), dtype="<f8")
+    if isinstance(layout, RegularLayout):
+        kind = 1
+        axes = (_readonly_field_view(layout.axis0_m), _readonly_field_view(layout.axis1_m))
+        regular_metrics = (
+            float(cpu_backend.field_axis_spacing(layout.axis0_m)),
+            float(cpu_backend.field_axis_spacing(layout.axis1_m)),
+            float(layout.axis0_m[-1] - layout.axis0_m[0]),
+            float(layout.axis1_m[-1] - layout.axis1_m[0]),
+        )
+        axis_metrics = (
+            *regular_metrics,
+            _regular_projected_uncertainty_is_certified(layout, regular_metrics),
+        )
+        support = layout.cell_support.reshape(-1)
+    elif isinstance(layout, P1TriLayout | Q1QuadLayout):
+        kind = 3 if isinstance(layout, P1TriLayout) else 4
+        nodes = _readonly_field_view(layout.nodes_m)
+        connectivity = _readonly_field_view(layout.connectivity)
+        support = layout.cell_support
+        metrics = np.empty((connectivity.shape[0], 9), dtype="<f8")
+        cell_status = np.empty(connectivity.shape[0], dtype=np.uint8)
+        cpu_backend.prepare_field_cell_metrics(kind, nodes, connectivity, metrics, cell_status)
+        cell_bounds = np.empty((connectivity.shape[0], 4), dtype="<f8")
+        _prepare_local_cell_bounds(nodes, connectivity, cell_bounds)
+    index = prepared.cell_index
+    index_arrays = (
+        (empty_int, empty_points, empty_points, empty_int, empty_int, empty_int)
+        if index is None
+        else (index.cell_id, index.lower_m, index.upper_m, index.begin, index.end, index.skip)
+    )
+    names = tuple(prepared.fields)
+    association = np.empty(len(names), dtype=np.uint8)
+    zero_axis = np.empty(len(names), dtype=np.bool_)
+    offsets = np.zeros(len(names) + 1, dtype="<i8")
+    values: list[FloatArray] = []
+    times: list[FloatArray] = []
+    normalization_nbytes = 0
+    for slot, name in enumerate(names):
+        field = prepared.fields[name]
+        if layout is None or field.layout != layout.name:
+            raise ValueError(f"field {field.name} does not use the prepared field layout")
+        association[slot] = field.association == "cell"
+        zero_axis[slot] = prepared.axis_accessible and (
+            field.components == ("r", "z") and field.stored_basis == "axisymmetric_rz"
+        )
+        offsets[slot + 1] = offsets[slot] + len(field.components)
+        field_values, field_times, owned_bytes = _numeric_field_snapshots(field, empty_float)
+        values.append(field_values)
+        times.append(field_times)
+        normalization_nbytes += owned_bytes
+    # A zero-field catalog still gives Numba one homogeneous array type.  The
+    # field_count, rather than this non-scientific empty sentinel, controls use.
+    if not values:
+        values.append(_readonly_field_view(np.empty((0, 0, 0), dtype="<f8")))
+        times.append(empty_float)
+    return NumericFieldContext(
+        kind,
+        *axes,
+        axis_metrics,
+        nodes,
+        connectivity,
+        _readonly_field_view(support),
+        _readonly_field_view(metrics),
+        _readonly_field_view(cell_status),
+        _readonly_field_view(cell_bounds),
+        *index_arrays,
+        len(names),
+        tuple(values),
+        tuple(times),
+        _readonly_field_view(association),
+        _readonly_field_view(zero_axis),
+        _readonly_field_view(offsets),
+        normalization_nbytes,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_prepared_fields_into(
+    context: NumericFieldContext,
+    position_m: FloatArray,
+    time_s: FloatArray,
+    cell_hint: Int64Array | None,
+    workspace: NumericFieldWorkspace,
+) -> None:
+    """Locate once and sample the required primitive slots into caller-owned arrays."""
+
+    cpu_backend.locate_prepared_field_batch(
+        context.layout_kind,
+        context.axis0_m,
+        context.axis1_m,
+        context.axis_metrics,
+        context.nodes_m,
+        context.connectivity,
+        context.cell_support,
+        context.cell_metrics,
+        context.cell_status,
+        context.index_cell_id,
+        context.index_lower_m,
+        context.index_upper_m,
+        context.index_begin,
+        context.index_end,
+        context.index_skip,
+        position_m,
+        cell_hint,
+        workspace.support_inside,
+        workspace.cell_id,
+        workspace.weights,
+        workspace.row_status,
+    )
+    for slot in range(context.field_count):
+        begin = context.component_offsets[slot]
+        end = context.component_offsets[slot + 1]
+        cpu_backend.sample_prepared_field_into(
+            context.layout_kind,
+            context.axis1_m.size,
+            context.connectivity,
+            context.association[slot],
+            position_m,
+            time_s,
+            workspace.cell_id,
+            workspace.weights,
+            context.time_s[slot],
+            context.values[slot],
+            context.zero_axis_radial[slot],
+            workspace.packed_values[:, begin:end],
+            workspace.row_status,
+        )
+    for row in range(position_m.shape[0]):
+        workspace.numerical_status[row] = (
+            NUMERICAL_STATUS_OK
+            if workspace.row_status[row] == cpu_backend.FIELD_KERNEL_OK
+            else FIELD_NUMERICAL_FAILURE
+        )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def sample_prepared_field_gradient_into(
+    context: NumericFieldContext,
+    field_slot: int,
+    workspace: NumericFieldWorkspace,
+    output: FloatArray,
+) -> None:
+    """Use the already sampled static nodal basis; never run another locator."""
+
+    if context.time_s[field_slot].size or context.association[field_slot] != 0:
+        raise ValueError("spatial gradients require a static nodal field")
+    if context.layout_kind == 0:
+        raise ValueError("spatial gradients require a supported field layout")
+    values = context.values[field_slot][0]
+    count = output.shape[0]
+    cell_id = workspace.cell_id[:count]
+    weights = workspace.weights[:count]
+    row_status = workspace.row_status[:count]
+    if context.layout_kind == 3:
+        cpu_backend.sample_p1_nodal_gradient(
+            context.cell_metrics,
+            context.connectivity,
+            cell_id,
+            values,
+            output,
+            row_status,
+        )
+    elif context.layout_kind == 4:
+        cpu_backend.sample_q1_nodal_gradient(
+            context.nodes_m,
+            context.connectivity,
+            cell_id,
+            weights,
+            values,
+            output,
+            row_status,
+        )
+    else:
+        cpu_backend.sample_regular_nodal_gradient(
+            context.axis0_m,
+            context.axis1_m,
+            cell_id,
+            weights,
+            values,
+            output,
+            row_status,
+        )
 
 
 def _prepare_stage_times(
@@ -660,264 +891,156 @@ def _validated_local_time_intervals(
     return lower, upper
 
 
-def _local_snapshot_ranges(
-    field: FieldData,
-    lower_time_s: FloatArray | None,
-    upper_time_s: FloatArray | None,
+def _validate_range_workspace(
+    context: NumericFieldContext,
+    workspace: NumericFieldRangeWorkspace,
     count: int,
-) -> tuple[Int64Array, Int64Array]:
-    """Return half-open snapshot ranges that enclose linear time interpolation."""
-
-    snapshot_time_s = field.time_s
-    if snapshot_time_s is None:
-        empty = np.empty(0, dtype="<i8")
-        return empty, empty
-    if lower_time_s is None or upper_time_s is None:
-        return (
-            np.zeros(count, dtype="<i8"),
-            np.full(count, snapshot_time_s.size, dtype="<i8"),
-        )
-    if bool(
-        (lower_time_s < snapshot_time_s[0]).any() or (upper_time_s > snapshot_time_s[-1]).any()
+) -> None:
+    capacity = workspace.candidate_count.size
+    components = int(context.component_offsets[-1])
+    candidate_capacity = LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW if context.layout_kind != 0 else 0
+    if count > capacity or (
+        workspace.packed_lower.shape != (capacity, components)
+        or workspace.packed_upper.shape != (capacity, components)
+        or workspace.range_available.shape != (capacity,)
+        or workspace.row_status.shape != (capacity,)
+        or workspace.candidates.shape != (capacity, candidate_capacity)
     ):
-        raise FieldLocationError(
-            f"field {field.name!r} cannot bound time outside its snapshot range"
-        )
-    begin = np.searchsorted(snapshot_time_s, lower_time_s, side="right") - 1
-    begin = np.clip(begin, 0, snapshot_time_s.size - 2).astype("<i8", copy=False)
-    end = np.searchsorted(snapshot_time_s, upper_time_s, side="left") + 1
-    end = np.clip(end, begin + 2, snapshot_time_s.size).astype("<i8", copy=False)
-    return np.ascontiguousarray(begin), np.ascontiguousarray(end)
+        raise ValueError("field range workspace does not cover the prepared field rows")
 
 
-def _expand_local_component_bounds(
-    lower: FloatArray,
-    upper: FloatArray,
-    available: NDArray[np.bool_],
-    name: str,
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def local_prepared_field_ranges_into(
+    context: NumericFieldContext,
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    time_lower_s: FloatArray | None,
+    time_upper_s: FloatArray | None,
+    workspace: NumericFieldRangeWorkspace,
 ) -> None:
-    """Expand finite candidate extrema over interpolation roundoff."""
+    """Reduce bounded spatial candidates into fixed primitive columns.
 
-    lower[~available] = 0.0
-    upper[~available] = 0.0
-    if not bool(available.any()):
-        return
-    selected_lower = lower[available]
-    selected_upper = upper[available]
-    scale = np.maximum(np.abs(selected_lower), np.abs(selected_upper))
-    expansion = FIELD_LOCATION_ULPS * _FLOAT_EPS * scale
-    with np.errstate(over="ignore", invalid="ignore"):
-        selected_lower = np.nextafter(selected_lower - expansion, -np.inf)
-        selected_upper = np.nextafter(selected_upper + expansion, np.inf)
-    if not bool(np.isfinite(selected_lower).all() and np.isfinite(selected_upper).all()):
-        raise FieldLocationError(f"field {name!r} local component bounds are not finite")
-    lower[available] = selected_lower
-    upper[available] = selected_upper
+    Counts include every candidate; the first 64 slots are never used when the
+    count is larger.  This query provides ranges over the in-support part of a
+    box and deliberately does not certify complete spatial support.
+    """
 
-
-def _local_regular_candidates(
-    axis0_m: FloatArray,
-    axis1_m: FloatArray,
-    cell_support: NDArray[np.uint8],
-    query_lower_m: FloatArray,
-    query_upper_m: FloatArray,
-) -> tuple[Int64Array, Int64Array, Int64Array]:
-    counts = _count_local_regular_candidates(
-        axis0_m,
-        axis1_m,
-        cell_support,
-        query_lower_m,
-        query_upper_m,
-    )
-    bounded_counts = np.where(
-        counts <= LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW,
-        counts,
-        0,
-    )
-    offsets, candidates = _allocate_local_candidate_csr(bounded_counts)
-    _fill_local_regular_candidates(
-        axis0_m,
-        axis1_m,
-        cell_support,
-        query_lower_m,
-        query_upper_m,
-        offsets,
-        candidates,
-    )
-    return counts, offsets, candidates
-
-
-def _allocate_local_candidate_csr(counts: Int64Array) -> tuple[Int64Array, Int64Array]:
-    offsets = np.empty(counts.size + 1, dtype=np.int64)
-    offsets[0] = 0
-    np.cumsum(counts, out=offsets[1:])
-    candidates = np.empty(int(offsets[-1]), dtype=np.int64)
-    return offsets, candidates
+    has_time_interval = time_lower_s is not None
+    if time_lower_s is None:
+        if time_upper_s is not None:
+            raise ValueError("local field bounds require both time interval arrays")
+        lower_time = context.time_s[0]
+        upper_time = lower_time
+    else:
+        if time_upper_s is None:
+            raise ValueError("local field bounds require both time interval arrays")
+        lower_time = time_lower_s
+        upper_time = time_upper_s
+    count = position_lower_m.shape[0]
+    workspace.packed_lower[:count].fill(0.0)
+    workspace.packed_upper[:count].fill(0.0)
+    for row in range(count):
+        workspace.row_status[row] = _local_range_row_status(
+            position_lower_m[row],
+            position_upper_m[row],
+            lower_time,
+            upper_time,
+            has_time_interval,
+            row,
+        )
+        candidates = 0
+        if workspace.row_status[row] == cpu_backend.FIELD_KERNEL_OK:
+            if context.layout_kind == 1:
+                candidates = _collect_local_regular_cells_into(
+                    context, position_lower_m[row], position_upper_m[row], workspace.candidates[row]
+                )
+            elif context.layout_kind != 0:
+                candidates = _collect_local_unstructured_cells_into(
+                    context, position_lower_m[row], position_upper_m[row], workspace.candidates[row]
+                )
+        workspace.candidate_count[row] = candidates
+        workspace.range_available[row] = 0 < candidates <= LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW
+    for slot in range(context.field_count):
+        if context.association[slot] != 0:
+            raise ValueError("local bounds require node-associated fields")
+        _local_field_snapshot_bounds_into(
+            context, slot, lower_time, upper_time, has_time_interval, count, workspace
+        )
+    for row in range(count):
+        if workspace.row_status[row] != cpu_backend.FIELD_KERNEL_OK:
+            workspace.range_available[row] = False
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _count_local_regular_candidates(
-    axis0_m: FloatArray,
-    axis1_m: FloatArray,
-    cell_support: NDArray[np.uint8],
-    query_lower_m: FloatArray,
-    query_upper_m: FloatArray,
-) -> Int64Array:
-    """Count supported regular cells overlapping each query box."""
-
-    row_count = query_lower_m.shape[0]
-    counts = np.zeros(row_count, dtype=np.int64)
-    for row in range(row_count):
-        pad0 = _regular_query_padding(axis0_m, query_lower_m[row, 0], query_upper_m[row, 0])
-        pad1 = _regular_query_padding(axis1_m, query_lower_m[row, 1], query_upper_m[row, 1])
-        first0, last0 = _overlapping_regular_intervals(
-            axis0_m,
-            query_lower_m[row, 0] - pad0,
-            query_upper_m[row, 0] + pad0,
-        )
-        first1, last1 = _overlapping_regular_intervals(
-            axis1_m,
-            query_lower_m[row, 1] - pad1,
-            query_upper_m[row, 1] + pad1,
-        )
-        if first0 < 0 or first1 < 0:
-            continue
-        for index0 in range(first0, last0 + 1):
-            for index1 in range(first1, last1 + 1):
-                if cell_support[index0, index1] != 0:
-                    counts[row] += 1
-    return counts
+def _local_range_row_status(
+    lower_m: FloatArray,
+    upper_m: FloatArray,
+    lower_time_s: FloatArray,
+    upper_time_s: FloatArray,
+    has_time_interval: bool,
+    row: int,
+) -> int:
+    for axis in range(2):
+        if (
+            not np.isfinite(lower_m[axis])
+            or not np.isfinite(upper_m[axis])
+            or lower_m[axis] > upper_m[axis]
+        ):
+            return cpu_backend.FIELD_KERNEL_NONFINITE_GEOMETRY
+    if has_time_interval and (
+        not np.isfinite(lower_time_s[row])
+        or not np.isfinite(upper_time_s[row])
+        or lower_time_s[row] > upper_time_s[row]
+    ):
+        return cpu_backend.FIELD_KERNEL_TIME_OUTSIDE
+    return cpu_backend.FIELD_KERNEL_OK
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _fill_local_regular_candidates(
-    axis0_m: FloatArray,
-    axis1_m: FloatArray,
-    cell_support: NDArray[np.uint8],
-    query_lower_m: FloatArray,
-    query_upper_m: FloatArray,
-    offsets: Int64Array,
+def _collect_local_regular_cells_into(
+    context: NumericFieldContext,
+    lower_m: FloatArray,
+    upper_m: FloatArray,
     candidates: Int64Array,
-) -> None:
-    axis1_cell_count = axis1_m.size - 1
-    for row in range(query_lower_m.shape[0]):
-        if offsets[row] == offsets[row + 1]:
-            continue
-        write = offsets[row]
-        pad0 = _regular_query_padding(axis0_m, query_lower_m[row, 0], query_upper_m[row, 0])
-        pad1 = _regular_query_padding(axis1_m, query_lower_m[row, 1], query_upper_m[row, 1])
-        first0, last0 = _overlapping_regular_intervals(
-            axis0_m,
-            query_lower_m[row, 0] - pad0,
-            query_upper_m[row, 0] + pad0,
-        )
-        first1, last1 = _overlapping_regular_intervals(
-            axis1_m,
-            query_lower_m[row, 1] - pad1,
-            query_upper_m[row, 1] + pad1,
-        )
-        if first0 < 0 or first1 < 0:
-            continue
-        for index0 in range(first0, last0 + 1):
-            for index1 in range(first1, last1 + 1):
-                if cell_support[index0, index1] != 0:
-                    candidates[write] = index0 * axis1_cell_count + index1
-                    write += 1
+) -> int:
+    pad0 = _regular_query_padding(
+        context.axis_metrics[0], context.axis_metrics[2], lower_m[0], upper_m[0]
+    )
+    pad1 = _regular_query_padding(
+        context.axis_metrics[1], context.axis_metrics[3], lower_m[1], upper_m[1]
+    )
+    first0, last0 = _overlapping_regular_intervals(
+        context.axis0_m, lower_m[0] - pad0, upper_m[0] + pad0
+    )
+    first1, last1 = _overlapping_regular_intervals(
+        context.axis1_m, lower_m[1] - pad1, upper_m[1] + pad1
+    )
+    if first0 < 0 or first1 < 0:
+        return 0
+    count = 0
+    axis1_cells = context.axis1_m.size - 1
+    for index0 in range(first0, last0 + 1):
+        for index1 in range(first1, last1 + 1):
+            cell = index0 * axis1_cells + index1
+            if context.cell_support[cell] != 0:
+                if count < LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW:
+                    candidates[count] = cell
+                count += 1
+    return count
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _local_regular_nodal_bounds(
-    axis1_cell_count: int,
-    axis1_size: int,
-    offsets: Int64Array,
-    candidates: Int64Array,
-    values: FloatArray,
-    result_lower: FloatArray,
-    result_upper: FloatArray,
-) -> None:
-    """Reduce regular nodal extrema over precomputed cell candidates."""
-
-    result_lower.fill(0.0)
-    result_upper.fill(0.0)
-    for row in range(offsets.size - 1):
-        initialized = False
-        for offset in range(offsets[row], offsets[row + 1]):
-            cell_id = candidates[offset]
-            index0 = cell_id // axis1_cell_count
-            index1 = cell_id - index0 * axis1_cell_count
-            node_ids = (
-                index0 * axis1_size + index1,
-                (index0 + 1) * axis1_size + index1,
-                (index0 + 1) * axis1_size + index1 + 1,
-                index0 * axis1_size + index1 + 1,
-            )
-            for node_id in node_ids:
-                for component in range(values.shape[1]):
-                    value = values[node_id, component]
-                    if not initialized:
-                        result_lower[row, component] = value
-                        result_upper[row, component] = value
-                    else:
-                        result_lower[row, component] = min(result_lower[row, component], value)
-                        result_upper[row, component] = max(result_upper[row, component], value)
-                initialized = True
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _local_regular_snapshot_bounds(
-    axis1_cell_count: int,
-    axis1_size: int,
-    offsets: Int64Array,
-    candidates: Int64Array,
-    values: FloatArray,
-    snapshot_begin: Int64Array,
-    snapshot_end: Int64Array,
-    result_lower: FloatArray,
-    result_upper: FloatArray,
-) -> None:
-    """Reduce extrema over spatial candidates and row-local snapshots."""
-
-    result_lower.fill(0.0)
-    result_upper.fill(0.0)
-    for row in range(offsets.size - 1):
-        initialized = False
-        for offset in range(offsets[row], offsets[row + 1]):
-            cell_id = candidates[offset]
-            index0 = cell_id // axis1_cell_count
-            index1 = cell_id - index0 * axis1_cell_count
-            node_ids = (
-                index0 * axis1_size + index1,
-                (index0 + 1) * axis1_size + index1,
-                (index0 + 1) * axis1_size + index1 + 1,
-                index0 * axis1_size + index1 + 1,
-            )
-            for snapshot in range(snapshot_begin[row], snapshot_end[row]):
-                for node_id in node_ids:
-                    for component in range(values.shape[2]):
-                        value = values[snapshot, node_id, component]
-                        if not initialized:
-                            result_lower[row, component] = value
-                            result_upper[row, component] = value
-                        else:
-                            result_lower[row, component] = min(result_lower[row, component], value)
-                            result_upper[row, component] = max(result_upper[row, component], value)
-                    initialized = True
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _regular_query_padding(axis_m: FloatArray, lower_m: float, upper_m: float) -> float:
-    spacing = max(abs(float(np.spacing(lower_m))), abs(float(np.spacing(upper_m))))
-    for coordinate in axis_m:
-        spacing = max(spacing, abs(float(np.spacing(coordinate))))
-    spacing = max(spacing, _FLOAT_EPS * (axis_m[-1] - axis_m[0]))
+def _regular_query_padding(
+    axis_spacing: float, axis_span_m: float, lower_m: float, upper_m: float
+) -> float:
+    spacing = max(abs(float(np.spacing(lower_m))), abs(float(np.spacing(upper_m))), axis_spacing)
+    spacing = max(spacing, _FLOAT_EPS * axis_span_m)
     return FIELD_LOCATION_ULPS * spacing
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _overlapping_regular_intervals(
-    axis_m: FloatArray,
-    lower_m: float,
-    upper_m: float,
+    axis_m: FloatArray, lower_m: float, upper_m: float
 ) -> tuple[int, int]:
     if upper_m < axis_m[0] or axis_m[-1] < lower_m:
         return -1, -1
@@ -926,214 +1049,185 @@ def _overlapping_regular_intervals(
     return max(first, 0), min(last, axis_m.size - 2)
 
 
-def _local_unstructured_candidates(
-    nodes_m: FloatArray,
-    connectivity: Int64Array,
-    cell_support: NDArray[np.uint8],
-    cell_index: _FieldCellIndex,
-    query_lower_m: FloatArray,
-    query_upper_m: FloatArray,
-) -> tuple[Int64Array, Int64Array, Int64Array]:
-    counts = _count_local_unstructured_candidates(
-        nodes_m,
-        connectivity,
-        cell_support,
-        cell_index.cell_id,
-        cell_index.lower_m,
-        cell_index.upper_m,
-        cell_index.begin,
-        cell_index.end,
-        cell_index.skip,
-        query_lower_m,
-        query_upper_m,
-    )
-    bounded_counts = np.where(
-        counts <= LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW,
-        counts,
-        0,
-    )
-    offsets, candidates = _allocate_local_candidate_csr(bounded_counts)
-    _fill_local_unstructured_candidates(
-        nodes_m,
-        connectivity,
-        cell_support,
-        cell_index.cell_id,
-        cell_index.lower_m,
-        cell_index.upper_m,
-        cell_index.begin,
-        cell_index.end,
-        cell_index.skip,
-        query_lower_m,
-        query_upper_m,
-        offsets,
-        candidates,
-    )
-    return counts, offsets, candidates
-
-
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _count_local_unstructured_candidates(
-    nodes_m: FloatArray,
-    connectivity: Int64Array,
-    cell_support: NDArray[np.uint8],
-    index_cell_id: Int64Array,
-    index_lower_m: FloatArray,
-    index_upper_m: FloatArray,
-    index_begin: Int64Array,
-    index_end: Int64Array,
-    index_skip: Int64Array,
-    query_lower_m: FloatArray,
-    query_upper_m: FloatArray,
-) -> Int64Array:
-    """Count padded P1/Q1 cell AABBs overlapping each query box."""
-
-    row_count = query_lower_m.shape[0]
-    counts = np.zeros(row_count, dtype=np.int64)
-    for row in range(row_count):
-        node = 0
-        while node < index_skip.size:
-            if not _local_boxes_overlap(
-                query_lower_m[row],
-                query_upper_m[row],
-                index_lower_m[node],
-                index_upper_m[node],
-            ):
-                node = index_skip[node]
-                continue
-            begin = index_begin[node]
-            if begin < 0:
-                node += 1
-                continue
-            for offset in range(begin, index_end[node]):
-                cell_id = index_cell_id[offset]
-                if cell_support[cell_id] == 0:
-                    continue
-                cell_lower, cell_upper = _padded_unstructured_cell_box(
-                    nodes_m,
-                    connectivity[cell_id],
-                )
-                if not _local_boxes_overlap(
-                    query_lower_m[row],
-                    query_upper_m[row],
-                    cell_lower,
-                    cell_upper,
-                ):
-                    continue
-                counts[row] += 1
-            node = index_skip[node]
-    return counts
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _fill_local_unstructured_candidates(
-    nodes_m: FloatArray,
-    connectivity: Int64Array,
-    cell_support: NDArray[np.uint8],
-    index_cell_id: Int64Array,
-    index_lower_m: FloatArray,
-    index_upper_m: FloatArray,
-    index_begin: Int64Array,
-    index_end: Int64Array,
-    index_skip: Int64Array,
-    query_lower_m: FloatArray,
-    query_upper_m: FloatArray,
-    offsets: Int64Array,
+def _collect_local_cell_leaf_into(
+    context: NumericFieldContext,
+    begin: int,
+    end: int,
+    lower_m: FloatArray,
+    upper_m: FloatArray,
     candidates: Int64Array,
-) -> None:
-    for row in range(query_lower_m.shape[0]):
-        if offsets[row] == offsets[row + 1]:
+    count: int,
+) -> int:
+    for offset in range(begin, end):
+        cell = context.index_cell_id[offset] if context.index_cell_id.size else offset
+        if context.cell_support[cell] == 0:
             continue
-        write = offsets[row]
-        node = 0
-        while node < index_skip.size:
-            if not _local_boxes_overlap(
-                query_lower_m[row],
-                query_upper_m[row],
-                index_lower_m[node],
-                index_upper_m[node],
-            ):
-                node = index_skip[node]
-                continue
-            begin = index_begin[node]
-            if begin < 0:
-                node += 1
-                continue
-            for offset in range(begin, index_end[node]):
-                cell_id = index_cell_id[offset]
-                if cell_support[cell_id] == 0:
-                    continue
-                cell_lower, cell_upper = _padded_unstructured_cell_box(
-                    nodes_m,
-                    connectivity[cell_id],
-                )
-                if _local_boxes_overlap(
-                    query_lower_m[row],
-                    query_upper_m[row],
-                    cell_lower,
-                    cell_upper,
-                ):
-                    candidates[write] = cell_id
-                    write += 1
-            node = index_skip[node]
+        if not _local_boxes_overlap(
+            lower_m, upper_m, context.cell_bounds_m[cell, :2], context.cell_bounds_m[cell, 2:]
+        ):
+            continue
+        if count < LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW:
+            candidates[count] = cell
+        count += 1
+    return count
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _local_unstructured_nodal_bounds(
-    connectivity: Int64Array,
-    offsets: Int64Array,
+def _collect_local_unstructured_cells_into(
+    context: NumericFieldContext,
+    lower_m: FloatArray,
+    upper_m: FloatArray,
     candidates: Int64Array,
-    values: FloatArray,
-    result_lower: FloatArray,
-    result_upper: FloatArray,
-) -> None:
-    """Reduce P1/Q1 nodal extrema over precomputed cell candidates."""
+) -> int:
+    if not context.index_skip.size:
+        return _collect_local_cell_leaf_into(
+            context, 0, context.connectivity.shape[0], lower_m, upper_m, candidates, 0
+        )
+    count = 0
+    node = 0
+    while node < context.index_skip.size:
+        if not _local_boxes_overlap(
+            lower_m, upper_m, context.index_lower_m[node], context.index_upper_m[node]
+        ):
+            node = context.index_skip[node]
+            continue
+        begin = context.index_begin[node]
+        if begin < 0:
+            node += 1
+            continue
+        count = _collect_local_cell_leaf_into(
+            context, begin, context.index_end[node], lower_m, upper_m, candidates, count
+        )
+        node = context.index_skip[node]
+    return count
 
-    result_lower.fill(0.0)
-    result_upper.fill(0.0)
-    for row in range(offsets.size - 1):
-        initialized = False
-        for offset in range(offsets[row], offsets[row + 1]):
-            for node_id in connectivity[candidates[offset]]:
-                for component in range(values.shape[1]):
-                    value = values[node_id, component]
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _local_snapshot_range(
+    snapshot_time_s: FloatArray,
+    lower_time_s: float,
+    upper_time_s: float,
+    has_time_interval: bool,
+) -> tuple[int, int, int]:
+    if not snapshot_time_s.size:
+        return cpu_backend.FIELD_KERNEL_OK, 0, 1
+    if not has_time_interval:
+        return cpu_backend.FIELD_KERNEL_OK, 0, snapshot_time_s.size
+    if lower_time_s < snapshot_time_s[0] or upper_time_s > snapshot_time_s[-1]:
+        return cpu_backend.FIELD_KERNEL_TIME_OUTSIDE, 0, 0
+    begin = int(np.searchsorted(snapshot_time_s, lower_time_s, side="right")) - 1
+    begin = min(max(begin, 0), snapshot_time_s.size - 2)
+    end = int(np.searchsorted(snapshot_time_s, upper_time_s, side="left")) + 1
+    end = min(max(end, begin + 2), snapshot_time_s.size)
+    return cpu_backend.FIELD_KERNEL_OK, begin, end
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _local_field_snapshot_bounds_into(
+    context: NumericFieldContext,
+    slot: int,
+    lower_time_s: FloatArray,
+    upper_time_s: FloatArray,
+    has_time_interval: bool,
+    count: int,
+    workspace: NumericFieldRangeWorkspace,
+) -> None:
+    for row in range(count):
+        if workspace.row_status[row] != cpu_backend.FIELD_KERNEL_OK:
+            continue
+        lower_time = lower_time_s[row] if has_time_interval else 0.0
+        upper_time = upper_time_s[row] if has_time_interval else 0.0
+        status, begin, end = _local_snapshot_range(
+            context.time_s[slot], lower_time, upper_time, has_time_interval
+        )
+        if status != cpu_backend.FIELD_KERNEL_OK:
+            workspace.row_status[row] = status
+            continue
+        if not workspace.range_available[row]:
+            continue
+        _reduce_local_row_nodes_into(context, slot, row, begin, end, workspace)
+        _expand_local_range_row_into(context, slot, row, workspace)
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _local_cell_node_id(context: NumericFieldContext, cell: int, local_node: int) -> int:
+    if context.layout_kind != 1:
+        return context.connectivity[cell, local_node]
+    axis1_size = context.axis1_m.size
+    index0 = cell // (axis1_size - 1)
+    index1 = cell - index0 * (axis1_size - 1)
+    node0 = index0 * axis1_size + index1
+    if local_node == 0:
+        return node0
+    if local_node == 1:
+        return node0 + axis1_size
+    if local_node == 2:
+        return node0 + axis1_size + 1
+    return node0 + 1
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _reduce_local_row_nodes_into(
+    context: NumericFieldContext,
+    slot: int,
+    row: int,
+    snapshot_begin: int,
+    snapshot_end: int,
+    workspace: NumericFieldRangeWorkspace,
+) -> None:
+    initialized = False
+    components = context.values[slot].shape[2]
+    output_begin = context.component_offsets[slot]
+    node_count = 3 if context.layout_kind == 3 else 4
+    for offset in range(workspace.candidate_count[row]):
+        cell = workspace.candidates[row, offset]
+        for snapshot in range(snapshot_begin, snapshot_end):
+            for local_node in range(node_count):
+                node = _local_cell_node_id(context, cell, local_node)
+                for component in range(components):
+                    value = context.values[slot][snapshot, node, component]
+                    output_column = output_begin + component
                     if not initialized:
-                        result_lower[row, component] = value
-                        result_upper[row, component] = value
+                        workspace.packed_lower[row, output_column] = value
+                        workspace.packed_upper[row, output_column] = value
                     else:
-                        result_lower[row, component] = min(result_lower[row, component], value)
-                        result_upper[row, component] = max(result_upper[row, component], value)
+                        workspace.packed_lower[row, output_column] = min(
+                            workspace.packed_lower[row, output_column], value
+                        )
+                        workspace.packed_upper[row, output_column] = max(
+                            workspace.packed_upper[row, output_column], value
+                        )
                 initialized = True
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def _local_unstructured_snapshot_bounds(
-    connectivity: Int64Array,
-    offsets: Int64Array,
-    candidates: Int64Array,
-    values: FloatArray,
-    snapshot_begin: Int64Array,
-    snapshot_end: Int64Array,
-    result_lower: FloatArray,
-    result_upper: FloatArray,
+def _expand_local_range_row_into(
+    context: NumericFieldContext, slot: int, row: int, workspace: NumericFieldRangeWorkspace
 ) -> None:
-    """Reduce P1/Q1 extrema over candidates and row-local snapshots."""
+    for component in range(context.component_offsets[slot], context.component_offsets[slot + 1]):
+        lower = workspace.packed_lower[row, component]
+        upper = workspace.packed_upper[row, component]
+        scale = max(abs(lower), abs(upper))
+        expansion = FIELD_LOCATION_ULPS * _FLOAT_EPS * scale
+        lower = np.nextafter(lower - expansion, -np.inf)
+        upper = np.nextafter(upper + expansion, np.inf)
+        if not np.isfinite(lower) or not np.isfinite(upper):
+            workspace.row_status[row] = cpu_backend.FIELD_KERNEL_NONFINITE_SAMPLE
+            lower = 0.0
+            upper = 0.0
+        workspace.packed_lower[row, component] = lower
+        workspace.packed_upper[row, component] = upper
 
-    result_lower.fill(0.0)
-    result_upper.fill(0.0)
-    for row in range(offsets.size - 1):
-        initialized = False
-        for offset in range(offsets[row], offsets[row + 1]):
-            for snapshot in range(snapshot_begin[row], snapshot_end[row]):
-                for node_id in connectivity[candidates[offset]]:
-                    for component in range(values.shape[2]):
-                        value = values[snapshot, node_id, component]
-                        if not initialized:
-                            result_lower[row, component] = value
-                            result_upper[row, component] = value
-                        else:
-                            result_lower[row, component] = min(result_lower[row, component], value)
-                            result_upper[row, component] = max(result_upper[row, component], value)
-                    initialized = True
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _prepare_local_cell_bounds(
+    nodes_m: FloatArray, connectivity: Int64Array, cell_bounds_m: FloatArray
+) -> None:
+    for cell in range(connectivity.shape[0]):
+        lower, upper = _padded_unstructured_cell_box(nodes_m, connectivity[cell])
+        cell_bounds_m[cell, :2] = lower
+        cell_bounds_m[cell, 2:] = upper
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -1178,254 +1272,6 @@ def _local_boxes_overlap(
     )
 
 
-def _locate_field_stage(
-    layout: Layout,
-    cell_index: _FieldCellIndex | None,
-    positions: FloatArray,
-    hints: Int64Array | None,
-    support: NDArray[np.bool_],
-    cell_id: Int64Array,
-    weights: FloatArray,
-    row_status: NDArray[np.uint8],
-) -> None:
-    support.fill(False)
-    cell_id.fill(-1)
-    weights.fill(0.0)
-    if not bool((row_status != cpu_backend.FIELD_KERNEL_OK).any()):
-        _locate_field_rows(
-            layout,
-            cell_index,
-            positions,
-            hints,
-            support,
-            cell_id,
-            weights,
-            row_status,
-        )
-        return
-    active = np.flatnonzero(row_status == cpu_backend.FIELD_KERNEL_OK)
-    if not active.size:
-        return
-    active_hints = None if hints is None else np.ascontiguousarray(hints[active])
-    active_support = np.empty(active.size, dtype=np.bool_)
-    active_cell = np.empty(active.size, dtype=np.int64)
-    active_weights = np.empty((active.size, 4), dtype=np.float64)
-    active_status = np.empty(active.size, dtype=np.uint8)
-    _locate_field_rows(
-        layout,
-        cell_index,
-        np.ascontiguousarray(positions[active]),
-        active_hints,
-        active_support,
-        active_cell,
-        active_weights,
-        active_status,
-    )
-    support[active] = active_support
-    cell_id[active] = active_cell
-    weights[active] = active_weights
-    row_status[active] = active_status
-
-
-def _locate_field_rows(
-    layout: Layout,
-    cell_index: _FieldCellIndex | None,
-    positions: FloatArray,
-    hints: Int64Array | None,
-    support: NDArray[np.bool_],
-    cell_id: Int64Array,
-    weights: FloatArray,
-    row_status: NDArray[np.uint8],
-) -> None:
-    if isinstance(layout, RegularLayout):
-        cpu_backend.locate_regular_field_batch(
-            layout.axis0_m,
-            layout.axis1_m,
-            layout.cell_support,
-            positions,
-            support,
-            cell_id,
-            weights,
-            row_status,
-        )
-    else:
-        if hints is None:
-            hints = np.full(positions.shape[0], -1, dtype="<i8")
-        node_count = 3 if isinstance(layout, P1TriLayout) else 4
-        if cell_index is None:
-            index_cell_id = np.empty(0, dtype="<i8")
-            index_lower = np.empty((0, 2), dtype="<f8")
-            index_upper = np.empty((0, 2), dtype="<f8")
-            index_begin = np.empty(0, dtype="<i8")
-            index_end = np.empty(0, dtype="<i8")
-            index_skip = np.empty(0, dtype="<i8")
-        else:
-            index_cell_id = cell_index.cell_id
-            index_lower = cell_index.lower_m
-            index_upper = cell_index.upper_m
-            index_begin = cell_index.begin
-            index_end = cell_index.end
-            index_skip = cell_index.skip
-        cpu_backend.locate_unstructured_field_batch(
-            node_count,
-            layout.nodes_m,
-            layout.connectivity,
-            layout.cell_support,
-            index_cell_id,
-            index_lower,
-            index_upper,
-            index_begin,
-            index_end,
-            index_skip,
-            positions,
-            hints,
-            support,
-            cell_id,
-            weights,
-            row_status,
-        )
-
-
-def _sample_compiled_field(
-    layout: Layout,
-    field: FieldData,
-    positions: FloatArray,
-    time_s: FloatArray | None,
-    cell_id: Int64Array,
-    weights: FloatArray,
-    zero_axis_radial: bool,
-    sampled: FloatArray,
-    row_status: NDArray[np.uint8],
-) -> None:
-    sampled.fill(0.0)
-    if not bool((row_status != cpu_backend.FIELD_KERNEL_OK).any()):
-        _sample_compiled_rows(
-            layout,
-            field,
-            positions,
-            time_s,
-            cell_id,
-            weights,
-            zero_axis_radial,
-            sampled,
-            row_status,
-        )
-        sampled[row_status != cpu_backend.FIELD_KERNEL_OK] = 0.0
-        return
-    active = np.flatnonzero(row_status == cpu_backend.FIELD_KERNEL_OK)
-    if not active.size:
-        return
-    active_sampled = np.empty((active.size, sampled.shape[1]), dtype=np.float64)
-    active_status = np.empty(active.size, dtype=np.uint8)
-    active_time_s = None if time_s is None else np.ascontiguousarray(time_s[active])
-    _sample_compiled_rows(
-        layout,
-        field,
-        np.ascontiguousarray(positions[active]),
-        active_time_s,
-        np.ascontiguousarray(cell_id[active]),
-        np.ascontiguousarray(weights[active]),
-        zero_axis_radial,
-        active_sampled,
-        active_status,
-    )
-    sampled[active] = active_sampled
-    row_status[active] = active_status
-    sampled[row_status != cpu_backend.FIELD_KERNEL_OK] = 0.0
-
-
-def _sample_compiled_rows(
-    layout: Layout,
-    field: FieldData,
-    positions: FloatArray,
-    time_s: FloatArray | None,
-    cell_id: Int64Array,
-    weights: FloatArray,
-    zero_axis_radial: bool,
-    sampled: FloatArray,
-    row_status: NDArray[np.uint8],
-) -> None:
-    if field.time_s is not None:
-        if time_s is None:
-            raise ValueError("stage times are required for time-dependent fields")
-        if field.association == "cell":
-            cpu_backend.sample_cell_time_field(
-                positions,
-                time_s,
-                cell_id,
-                field.time_s,
-                field.values,
-                zero_axis_radial,
-                sampled,
-                row_status,
-            )
-        elif isinstance(layout, RegularLayout):
-            cpu_backend.sample_regular_nodal_time_field(
-                int(layout.axis1_m.size),
-                positions,
-                time_s,
-                cell_id,
-                weights,
-                field.time_s,
-                field.values,
-                zero_axis_radial,
-                sampled,
-                row_status,
-            )
-        else:
-            node_count = 3 if isinstance(layout, P1TriLayout) else 4
-            cpu_backend.sample_unstructured_nodal_time_field(
-                node_count,
-                layout.connectivity,
-                positions,
-                time_s,
-                cell_id,
-                weights,
-                field.time_s,
-                field.values,
-                zero_axis_radial,
-                sampled,
-                row_status,
-            )
-        return
-    if field.association == "cell":
-        cpu_backend.sample_cell_field(
-            positions, cell_id, field.values, zero_axis_radial, sampled, row_status
-        )
-    elif isinstance(layout, RegularLayout):
-        cpu_backend.sample_regular_nodal_field(
-            int(layout.axis1_m.size),
-            positions,
-            cell_id,
-            weights,
-            field.values,
-            zero_axis_radial,
-            sampled,
-            row_status,
-        )
-    else:
-        node_count = 3 if isinstance(layout, P1TriLayout) else 4
-        cpu_backend.sample_unstructured_nodal_field(
-            node_count,
-            layout.connectivity,
-            positions,
-            cell_id,
-            weights,
-            field.values,
-            zero_axis_radial,
-            sampled,
-            row_status,
-        )
-
-
-def _field_numerical_status(
-    row_status: NDArray[np.uint8],
-    numerical_status: NDArray[np.uint8],
-) -> None:
-    numerical_status.fill(NUMERICAL_STATUS_OK)
-    numerical_status[row_status != cpu_backend.FIELD_KERNEL_OK] = FIELD_NUMERICAL_FAILURE
-
-
 def _raise_kernel_error(status: int, row: int, owner: str) -> None:
     if status == cpu_backend.FIELD_KERNEL_OK:
         return
@@ -1463,7 +1309,7 @@ def prepare_required_fields(
     available_layouts = {layout.name: layout for layout in data.layouts}
     selected: dict[str, FieldData] = {}
     layout_name: str | None = None
-    for name in sorted(requirements):
+    for name in requirements:
         requirement = requirements[name]
         field = available_fields.get(name)
         if field is None:

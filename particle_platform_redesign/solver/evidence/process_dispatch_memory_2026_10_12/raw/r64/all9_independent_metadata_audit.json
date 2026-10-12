@@ -1,0 +1,1827 @@
+{
+  "captured_at_utc": "2026-10-12T06:32:49.369325+00:00",
+  "scope": "Combined evidence index for original main8/164 and separately predeclared temporal supplement1/20. Acceptance scopes and policies stay distinct; main8 and first3 fixed reports remain unchanged. No Linux, installed-wheel, release or universal scaling qualification is inferred.",
+  "status": "passed",
+  "metadata_consistent": true,
+  "issue_count": 0,
+  "issues": [],
+  "case_count": 9,
+  "role_count": 46,
+  "record_count": 184,
+  "sample_point_count": 34998,
+  "fresh_cache_directory_count": 46,
+  "acceptance_scopes": {
+    "original_main8": {
+      "report": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\main8_independent_metadata_audit.json",
+        "sha256": "9489e829bc0eb671babe321473af45597bbc88032bae81fd646ff45cc42c04d7"
+      },
+      "policy": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\predeclaration_v4.json",
+        "sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f"
+      },
+      "case_count": 8,
+      "role_count": 41,
+      "record_count": 164,
+      "status": "passed",
+      "rules": "Every case C1/Q1 <=1.10; every declared Q4 case C4/Q4 <=1.10; each original bulk primary C1/C4 >=2.0. All8/20worker results remain descriptive; every role requires exact held science, declared counts, array budget and observed memory ceiling, cleanup. Stop expansion on any required failure; retain every negative and partial result. No threshold relaxation, best-pair choice or unchanged-source acceptance retry.",
+      "case_acceptance_table": [
+        {
+          "case_id": "p14_none_100k",
+          "records": 24,
+          "roles": 6,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 0.9900596383900115,
+          "candidate4_vs_baseline4_ratio": 0.9771203083246882,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": true
+          },
+          "candidate_speedup_observations": {
+            "2": 1.7859847846243921,
+            "4": 3.002016780383689,
+            "8": 4.656283282253987,
+            "20": null
+          }
+        },
+        {
+          "case_id": "b03_continuous_100k",
+          "records": 24,
+          "roles": 6,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 1.0076848307798532,
+          "candidate4_vs_baseline4_ratio": 0.9694148273434905,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": true
+          },
+          "candidate_speedup_observations": {
+            "2": 1.4832671971634663,
+            "4": 2.2055407981832404,
+            "8": 2.7770912216236527,
+            "20": null
+          }
+        },
+        {
+          "case_id": "p14_none_10k",
+          "records": 12,
+          "roles": 3,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 0.9932181364422059,
+          "candidate4_vs_baseline4_ratio": null,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": null,
+            "primary_4worker_2x": null
+          },
+          "candidate_speedup_observations": {
+            "2": null,
+            "4": 1.0302167404632447,
+            "8": null,
+            "20": null
+          }
+        },
+        {
+          "case_id": "p14_observed_100k",
+          "records": 20,
+          "roles": 5,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 0.995609283547134,
+          "candidate4_vs_baseline4_ratio": 0.9732406490343686,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": null
+          },
+          "candidate_speedup_observations": {
+            "2": null,
+            "4": 2.9939817391014407,
+            "8": 4.4265307178702935,
+            "20": null
+          }
+        },
+        {
+          "case_id": "event_front_10k",
+          "records": 20,
+          "roles": 5,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 0.9142388075158003,
+          "candidate4_vs_baseline4_ratio": 0.646679690011076,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": null
+          },
+          "candidate_speedup_observations": {
+            "2": null,
+            "4": 0.9662122661436635,
+            "8": 0.7212321709266216,
+            "20": null
+          }
+        },
+        {
+          "case_id": "event_spread_10k",
+          "records": 20,
+          "roles": 5,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 0.9827291308479174,
+          "candidate4_vs_baseline4_ratio": 0.6443358043161818,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": null
+          },
+          "candidate_speedup_observations": {
+            "2": null,
+            "4": 0.9675473537443173,
+            "8": 0.6692510293952012,
+            "20": null
+          }
+        },
+        {
+          "case_id": "early_hold_100k",
+          "records": 20,
+          "roles": 5,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 0.9213743728959121,
+          "candidate4_vs_baseline4_ratio": 0.9858324793968082,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": null
+          },
+          "candidate_speedup_observations": {
+            "2": null,
+            "4": 0.8663428185301818,
+            "8": 0.7186043262625854,
+            "20": null
+          }
+        },
+        {
+          "case_id": "regular_1m",
+          "records": 24,
+          "roles": 6,
+          "policy_sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 0.9850252582867548,
+          "candidate4_vs_baseline4_ratio": 0.9960218745644174,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": null
+          },
+          "candidate_speedup_observations": {
+            "2": null,
+            "4": 2.350761270750291,
+            "8": 2.9546431297151448,
+            "20": 2.561282125421319
+          }
+        }
+      ]
+    },
+    "temporal_supplement1": {
+      "report": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\time_field_observed_10k_independent_metadata_audit.json",
+        "sha256": "1aa85b1e260116d0def80b3a1f976f4ac45c69720f9fdc95e102f4995c59cce1"
+      },
+      "policy": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\supplemental_time_field_policy.json",
+        "sha256": "580e1f920bd082359d571858d2d4f70c23ae19b2293591871d3b28d242ff7ad4"
+      },
+      "case_count": 1,
+      "role_count": 5,
+      "record_count": 20,
+      "status": "passed",
+      "rules": "Temporal supplement C1/Q1 <=1.10 and C4/Q4 <=1.10; exact unchanged held scientific payloads including every frame/probe/event/final/lifecycle, declared counts, per-case array fit, observed memory ceiling and cleanup. C1/C4 or C1/C8 speedups are descriptive; no2x temporal-field gate. New-scope32GiB observed private ceiling follows unchanged driver semantics; original bulk8GiB remains in original policy. Stop on required failure and retain negative/partial evidence.",
+      "all_role_observed_private_ceiling_bytes": 34359738368,
+      "per_case_solver_array_budget_bytes": 134217728,
+      "own_1_to_4_2x_required": false,
+      "case_acceptance_table": [
+        {
+          "case_id": "time_field_observed_10k",
+          "records": 20,
+          "roles": 5,
+          "policy_sha256": "580e1f920bd082359d571858d2d4f70c23ae19b2293591871d3b28d242ff7ad4",
+          "scientific_reread_passed": true,
+          "metadata_consistent": true,
+          "case_qualified": true,
+          "candidate1_vs_baseline1_ratio": 1.0152345146600774,
+          "candidate4_vs_baseline4_ratio": 0.9968649814526791,
+          "gates": {
+            "candidate1_nonregression": true,
+            "candidate4_nonregression": true,
+            "primary_4worker_2x": null
+          },
+          "candidate_speedup_observations": {
+            "2": null,
+            "4": 0.08764321109513258,
+            "8": 0.07113511426468824,
+            "20": null
+          }
+        }
+      ]
+    }
+  },
+  "archival_reports_preserved": {
+    "first3": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\first3_independent_metadata_audit.json",
+      "sha256": "fe6413278f67a0b74f74fa540dc82f1b5a407a7a4211311bf536ad7f6b62dd44"
+    },
+    "main8": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\main8_independent_metadata_audit.json",
+      "sha256": "9489e829bc0eb671babe321473af45597bbc88032bae81fd646ff45cc42c04d7"
+    }
+  },
+  "shared_world_bindings_match": {
+    "sources": true,
+    "held_reader_binding": true,
+    "numerical_binding": true,
+    "driver": true,
+    "comparer": true
+  },
+  "audit_receipts": {
+    "p14_none_100k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_none_100k_independent_metadata_audit.json",
+      "sha256": "2cac475e27626c3b6f0de8facbd67552441ea8e3738bf865b0cf623abac2526e"
+    },
+    "b03_continuous_100k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\b03_continuous_100k_independent_metadata_audit.json",
+      "sha256": "0a624ce06f90f1e9f9409dfa7b60a9f54eb2298aa88c463834b952885743a8ad"
+    },
+    "p14_none_10k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_none_10k_independent_metadata_audit.json",
+      "sha256": "2817a8e0197b92acec809088528153e061f488a8c199fe5da08541cc3e517d38"
+    },
+    "p14_observed_100k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_observed_100k_independent_metadata_audit.json",
+      "sha256": "97bbc5726aff1df83cc3a1a4d5700bb941df5558dbec88f794e52a4259401a4d"
+    },
+    "event_front_10k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\event_front_10k_independent_metadata_audit.json",
+      "sha256": "5d7df9dd65eb93ec3c798648d9861a9b960021a1b33dd2882fa313eb0b2a2ace"
+    },
+    "event_spread_10k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\event_spread_10k_independent_metadata_audit.json",
+      "sha256": "e571792c11fc2991256b266fcce0bb68c5e997598227afd602668122da230a13"
+    },
+    "early_hold_100k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\early_hold_100k_independent_metadata_audit.json",
+      "sha256": "7d162cbdddc54789c0a92230a73441df8d4c7d88d3265bc6542614353eade3d6"
+    },
+    "regular_1m": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\regular_1m_independent_metadata_audit.json",
+      "sha256": "ec847bbf38e3d6c0987a2590e7e70e0e26017caeeeb1fb843e5c83963100df56"
+    },
+    "time_field_observed_10k": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\time_field_observed_10k_independent_metadata_audit.json",
+      "sha256": "1aa85b1e260116d0def80b3a1f976f4ac45c69720f9fdc95e102f4995c59cce1"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "p14_none_100k",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 118.8969530002214,
+          "all3_warm_public_s": [
+            62.84646619996056,
+            62.853436099831015,
+            62.248898699879646
+          ],
+          "warm_median_s": 62.84646619996056,
+          "max_array_planned_bytes": 620991609,
+          "max_sampled_private_peak_bytes": 1192423424,
+          "max_sampled_ws_sum_peak_bytes": 1146486784,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_100k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 84.75833219988272,
+          "all3_warm_public_s": [
+            21.211972899734974,
+            21.2600508001633,
+            21.154779399745166
+          ],
+          "warm_median_s": 21.211972899734974,
+          "max_array_planned_bytes": 601642678,
+          "max_sampled_private_peak_bytes": 3107667968,
+          "max_sampled_ws_sum_peak_bytes": 3405225984,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_100k_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 120.73846230003983,
+          "all3_warm_public_s": [
+            62.22174960002303,
+            61.871589799877256,
+            62.84499629959464
+          ],
+          "warm_median_s": 62.22174960002303,
+          "max_array_planned_bytes": 620991609,
+          "max_sampled_private_peak_bytes": 1192124416,
+          "max_sampled_ws_sum_peak_bytes": 1145823232,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_100k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate2": {
+          "cold_public_s": 92.78799050021917,
+          "all3_warm_public_s": [
+            34.71320529980585,
+            34.838902400340885,
+            35.41626470023766
+          ],
+          "warm_median_s": 34.838902400340885,
+          "max_array_planned_bytes": 485585554,
+          "max_sampled_private_peak_bytes": 1701806080,
+          "max_sampled_ws_sum_peak_bytes": 1894023168,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_100k_candidate2",
+          "source_role": "candidate",
+          "workers": 2
+        },
+        "candidate4": {
+          "cold_public_s": 82.7944801999256,
+          "all3_warm_public_s": [
+            20.763440100010484,
+            20.72058939980343,
+            20.72664949996397
+          ],
+          "warm_median_s": 20.72664949996397,
+          "max_array_planned_bytes": 689747710,
+          "max_sampled_private_peak_bytes": 3136000000,
+          "max_sampled_ws_sum_peak_bytes": 3424083968,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_100k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 80.32212179992348,
+          "all3_warm_public_s": [
+            13.418268600013107,
+            13.362964800093323,
+            13.354664400219917
+          ],
+          "warm_median_s": 13.362964800093323,
+          "max_array_planned_bytes": 1014412819,
+          "max_sampled_private_peak_bytes": 5958418432,
+          "max_sampled_ws_sum_peak_bytes": 6429863936,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_100k_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        }
+      },
+      "sampler_points": 9430,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 89.08621630026028,
+          "all3_warm_public_s": [
+            22.791184999980032,
+            22.735293900128454,
+            22.981119299773127
+          ],
+          "warm_median_s": 22.791184999980032,
+          "max_array_planned_bytes": 402097372,
+          "max_sampled_private_peak_bytes": 978948096,
+          "max_sampled_ws_sum_peak_bytes": 1007321088,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_b03_continuous_100k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 73.35982180014253,
+          "all3_warm_public_s": [
+            10.78976590000093,
+            10.53139330027625,
+            10.741548000369221
+          ],
+          "warm_median_s": 10.741548000369221,
+          "max_array_planned_bytes": 222980160,
+          "max_sampled_private_peak_bytes": 2893324288,
+          "max_sampled_ws_sum_peak_bytes": 3173851136,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_b03_continuous_100k_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 90.92377889994532,
+          "all3_warm_public_s": [
+            23.066139499656856,
+            22.966331399977207,
+            22.699932999908924
+          ],
+          "warm_median_s": 22.966331399977207,
+          "max_array_planned_bytes": 402097372,
+          "max_sampled_private_peak_bytes": 982757376,
+          "max_sampled_ws_sum_peak_bytes": 1011515392,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_b03_continuous_100k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate2": {
+          "cold_public_s": 73.08410729980096,
+          "all3_warm_public_s": [
+            15.483610399998724,
+            15.477287899702787,
+            15.670868499670178
+          ],
+          "warm_median_s": 15.483610399998724,
+          "max_array_planned_bytes": 179029020,
+          "max_sampled_private_peak_bytes": 1531662336,
+          "max_sampled_ws_sum_peak_bytes": 1714233344,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_b03_continuous_100k_candidate2",
+          "source_role": "candidate",
+          "workers": 2
+        },
+        "candidate4": {
+          "cold_public_s": 73.30579680018127,
+          "all3_warm_public_s": [
+            10.413015900179744,
+            10.311616399791092,
+            10.450405799783766
+          ],
+          "warm_median_s": 10.413015900179744,
+          "max_array_planned_bytes": 224086080,
+          "max_sampled_private_peak_bytes": 2899845120,
+          "max_sampled_ws_sum_peak_bytes": 3173294080,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_b03_continuous_100k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 75.4180172001943,
+          "all3_warm_public_s": [
+            8.290572500322014,
+            8.205472900066525,
+            8.269923300016671
+          ],
+          "warm_median_s": 8.269923300016671,
+          "max_array_planned_bytes": 261164753,
+          "max_sampled_private_peak_bytes": 5627871232,
+          "max_sampled_ws_sum_peak_bytes": 6100779008,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_b03_continuous_100k_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        }
+      },
+      "sampler_points": 5559,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "p14_none_10k",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 66.03434550017118,
+          "all3_warm_public_s": [
+            6.17331189988181,
+            6.1515393001027405,
+            6.080276999622583
+          ],
+          "warm_median_s": 6.1515393001027405,
+          "max_array_planned_bytes": 135443535,
+          "max_sampled_private_peak_bytes": 825491456,
+          "max_sampled_ws_sum_peak_bytes": 833286144,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_10k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "candidate1": {
+          "cold_public_s": 65.86167999962345,
+          "all3_warm_public_s": [
+            6.179567900020629,
+            6.109820399899036,
+            6.054202700033784
+          ],
+          "warm_median_s": 6.109820399899036,
+          "max_array_planned_bytes": 135443535,
+          "max_sampled_private_peak_bytes": 830586880,
+          "max_sampled_ws_sum_peak_bytes": 838840320,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_10k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate4": {
+          "cold_public_s": 68.38188160024583,
+          "all3_warm_public_s": [
+            5.930616500321776,
+            5.894317800179124,
+            6.10087010031566
+          ],
+          "warm_median_s": 5.930616500321776,
+          "max_array_planned_bytes": 432406016,
+          "max_sampled_private_peak_bytes": 2994368512,
+          "max_sampled_ws_sum_peak_bytes": 3208052736,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_none_10k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        }
+      },
+      "sampler_points": 1810,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "p14_observed_100k",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 125.87539519974962,
+          "all3_warm_public_s": [
+            62.683864099904895,
+            62.03890349995345,
+            62.340828199870884
+          ],
+          "warm_median_s": 62.340828199870884,
+          "max_array_planned_bytes": 646424394,
+          "max_sampled_private_peak_bytes": 1257668608,
+          "max_sampled_ws_sum_peak_bytes": 1197903872,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_observed_100k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 88.19697989989072,
+          "all3_warm_public_s": [
+            21.4317946000956,
+            21.254719299729913,
+            21.30061380006373
+          ],
+          "warm_median_s": 21.30061380006373,
+          "max_array_planned_bytes": 631933240,
+          "max_sampled_private_peak_bytes": 3293544448,
+          "max_sampled_ws_sum_peak_bytes": 3590746112,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_observed_100k_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 125.92708740010858,
+          "all3_warm_public_s": [
+            62.06710729980841,
+            62.268143199849874,
+            61.83376249996945
+          ],
+          "warm_median_s": 62.06710729980841,
+          "max_array_planned_bytes": 646424394,
+          "max_sampled_private_peak_bytes": 1241755648,
+          "max_sampled_ws_sum_peak_bytes": 1186402304,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_observed_100k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate4": {
+          "cold_public_s": 87.5603573997505,
+          "all3_warm_public_s": [
+            20.767340800259262,
+            20.73062319960445,
+            20.692108400166035
+          ],
+          "warm_median_s": 20.73062319960445,
+          "max_array_planned_bytes": 720038272,
+          "max_sampled_private_peak_bytes": 3272667136,
+          "max_sampled_ws_sum_peak_bytes": 3576922112,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_observed_100k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 83.36662869993597,
+          "all3_warm_public_s": [
+            14.13163059996441,
+            14.021614500321448,
+            13.818324400112033
+          ],
+          "warm_median_s": 14.021614500321448,
+          "max_array_planned_bytes": 1046054280,
+          "max_sampled_private_peak_bytes": 6223847424,
+          "max_sampled_ws_sum_peak_bytes": 6716317696,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_p14_observed_100k_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        }
+      },
+      "sampler_points": 7992,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "event_front_10k",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 29.307519200257957,
+          "all3_warm_public_s": [
+            2.4318821001797915,
+            2.6105887000449,
+            2.6203636997379363
+          ],
+          "warm_median_s": 2.6105887000449,
+          "max_array_planned_bytes": 98196957,
+          "max_sampled_private_peak_bytes": 552964096,
+          "max_sampled_ws_sum_peak_bytes": 556597248,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_front_10k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 34.21963320020586,
+          "all3_warm_public_s": [
+            3.8197622997686267,
+            3.773132899776101,
+            3.8284012000076473
+          ],
+          "warm_median_s": 3.8197622997686267,
+          "max_array_planned_bytes": 403075707,
+          "max_sampled_private_peak_bytes": 2047201280,
+          "max_sampled_ws_sum_peak_bytes": 2296832000,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_front_10k_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 29.62757539981976,
+          "all3_warm_public_s": [
+            2.386701500043273,
+            2.420533000025898,
+            2.370335599873215
+          ],
+          "warm_median_s": 2.386701500043273,
+          "max_array_planned_bytes": 98196957,
+          "max_sampled_private_peak_bytes": 554610688,
+          "max_sampled_ws_sum_peak_bytes": 558489600,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_front_10k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate4": {
+          "cold_public_s": 31.633921999949962,
+          "all3_warm_public_s": [
+            2.4618599000386894,
+            2.47016269993037,
+            2.5695020998828113
+          ],
+          "warm_median_s": 2.47016269993037,
+          "max_array_planned_bytes": 480497001,
+          "max_sampled_private_peak_bytes": 2042183680,
+          "max_sampled_ws_sum_peak_bytes": 2258137088,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_front_10k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 36.0516623002477,
+          "all3_warm_public_s": [
+            3.3092000000178814,
+            3.2716394001618028,
+            3.321311299689114
+          ],
+          "warm_median_s": 3.3092000000178814,
+          "max_array_planned_bytes": 780338157,
+          "max_sampled_private_peak_bytes": 3821912064,
+          "max_sampled_ws_sum_peak_bytes": 4192178176,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_front_10k_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        }
+      },
+      "sampler_points": 1501,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "event_spread_10k",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 31.108754499815404,
+          "all3_warm_public_s": [
+            2.5634262999519706,
+            2.5355215999297798,
+            2.594453699886799
+          ],
+          "warm_median_s": 2.5634262999519706,
+          "max_array_planned_bytes": 98196957,
+          "max_sampled_private_peak_bytes": 621666304,
+          "max_sampled_ws_sum_peak_bytes": 582905856,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_spread_10k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 34.440844300203025,
+          "all3_warm_public_s": [
+            4.04082620004192,
+            4.169398300349712,
+            3.903151800390333
+          ],
+          "warm_median_s": 4.04082620004192,
+          "max_array_planned_bytes": 403075707,
+          "max_sampled_private_peak_bytes": 2049626112,
+          "max_sampled_ws_sum_peak_bytes": 2283794432,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_spread_10k_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 29.194136099889874,
+          "all3_warm_public_s": [
+            2.3796668997965753,
+            2.5191536997444928,
+            2.5195010998286307
+          ],
+          "warm_median_s": 2.5191536997444928,
+          "max_array_planned_bytes": 98196957,
+          "max_sampled_private_peak_bytes": 621219840,
+          "max_sampled_ws_sum_peak_bytes": 583327744,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_spread_10k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate4": {
+          "cold_public_s": 31.736163400113583,
+          "all3_warm_public_s": [
+            2.6036489997059107,
+            2.5945981997065246,
+            2.6241721999831498
+          ],
+          "warm_median_s": 2.6036489997059107,
+          "max_array_planned_bytes": 480497001,
+          "max_sampled_private_peak_bytes": 2039152640,
+          "max_sampled_ws_sum_peak_bytes": 2237730816,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_spread_10k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 34.72033210005611,
+          "all3_warm_public_s": [
+            3.8888758001849055,
+            3.7641386999748647,
+            3.678822400048375
+          ],
+          "warm_median_s": 3.7641386999748647,
+          "max_array_planned_bytes": 780338157,
+          "max_sampled_private_peak_bytes": 3837251584,
+          "max_sampled_ws_sum_peak_bytes": 4197486592,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_event_spread_10k_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        }
+      },
+      "sampler_points": 1513,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "early_hold_100k",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 28.00961609976366,
+          "all3_warm_public_s": [
+            2.130241199862212,
+            2.3952623000368476,
+            2.337575000245124
+          ],
+          "warm_median_s": 2.337575000245124,
+          "max_array_planned_bytes": 323715195,
+          "max_sampled_private_peak_bytes": 713039872,
+          "max_sampled_ws_sum_peak_bytes": 706256896,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_early_hold_100k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 29.681892199907452,
+          "all3_warm_public_s": [
+            2.530100100208074,
+            2.489115800242871,
+            2.5217892001383007
+          ],
+          "warm_median_s": 2.5217892001383007,
+          "max_array_planned_bytes": 548324222,
+          "max_sampled_private_peak_bytes": 1974648832,
+          "max_sampled_ws_sum_peak_bytes": 2287124480,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_early_hold_100k_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 27.1660576001741,
+          "all3_warm_public_s": [
+            2.129723899997771,
+            2.185155800078064,
+            2.153781699948013
+          ],
+          "warm_median_s": 2.153781699948013,
+          "max_array_planned_bytes": 323715195,
+          "max_sampled_private_peak_bytes": 716754944,
+          "max_sampled_ws_sum_peak_bytes": 707895296,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_early_hold_100k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate4": {
+          "cold_public_s": 29.002367400098592,
+          "all3_warm_public_s": [
+            2.59348229970783,
+            2.4743739999830723,
+            2.4860616996884346
+          ],
+          "warm_median_s": 2.4860616996884346,
+          "max_array_planned_bytes": 636429254,
+          "max_sampled_private_peak_bytes": 1983180800,
+          "max_sampled_ws_sum_peak_bytes": 2251952128,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_early_hold_100k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 31.81181460013613,
+          "all3_warm_public_s": [
+            2.997173300012946,
+            3.0120048001408577,
+            2.9419493000023067
+          ],
+          "warm_median_s": 2.997173300012946,
+          "max_array_planned_bytes": 967856951,
+          "max_sampled_private_peak_bytes": 3736694784,
+          "max_sampled_ws_sum_peak_bytes": 4173471744,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_early_hold_100k_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        }
+      },
+      "sampler_points": 1310,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "regular_1m",
+      "scope_id": "original_main8",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 54.636475999839604,
+          "all3_warm_public_s": [
+            25.27937680017203,
+            25.656194400042295,
+            25.656142000108957
+          ],
+          "warm_median_s": 25.656142000108957,
+          "max_array_planned_bytes": 777306759,
+          "max_sampled_private_peak_bytes": 1031507968,
+          "max_sampled_ws_sum_peak_bytes": 1013133312,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_regular_1m_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 41.8397321999073,
+          "all3_warm_public_s": [
+            10.783127499744296,
+            11.04493309976533,
+            10.793475599959493
+          ],
+          "warm_median_s": 10.793475599959493,
+          "max_array_planned_bytes": 1000331246,
+          "max_sampled_private_peak_bytes": 2342248448,
+          "max_sampled_ws_sum_peak_bytes": 2960822272,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_regular_1m_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 54.65885090036318,
+          "all3_warm_public_s": [
+            25.211632799822837,
+            25.614174500107765,
+            25.271947900298983
+          ],
+          "warm_median_s": 25.271947900298983,
+          "max_array_planned_bytes": 777306759,
+          "max_sampled_private_peak_bytes": 1038245888,
+          "max_sampled_ws_sum_peak_bytes": 1013661696,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_regular_1m_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate4": {
+          "cold_public_s": 42.11796649964526,
+          "all3_warm_public_s": [
+            10.76680799992755,
+            10.742024800274521,
+            10.750537800136954
+          ],
+          "warm_median_s": 10.750537800136954,
+          "max_array_planned_bytes": 1001437166,
+          "max_sampled_private_peak_bytes": 2378842112,
+          "max_sampled_ws_sum_peak_bytes": 2992328704,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_regular_1m_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 42.77578249992803,
+          "all3_warm_public_s": [
+            8.55329960025847,
+            8.576725299935788,
+            8.538842299953103
+          ],
+          "warm_median_s": 8.55329960025847,
+          "max_array_planned_bytes": 1087422518,
+          "max_sampled_private_peak_bytes": 4435808256,
+          "max_sampled_ws_sum_peak_bytes": 5240553472,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_regular_1m_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        },
+        "candidate20": {
+          "cold_public_s": 52.768436800222844,
+          "all3_warm_public_s": [
+            9.930873799603432,
+            9.779173699673265,
+            9.866913000121713
+          ],
+          "warm_median_s": 9.866913000121713,
+          "max_array_planned_bytes": 1345378574,
+          "max_sampled_private_peak_bytes": 10231394304,
+          "max_sampled_ws_sum_peak_bytes": 11614429184,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_regular_1m_candidate20",
+          "source_role": "candidate",
+          "workers": 20
+        }
+      },
+      "sampler_points": 4251,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    },
+    {
+      "case_id": "time_field_observed_10k",
+      "scope_id": "temporal_supplement1",
+      "groups": {
+        "baseline1": {
+          "cold_public_s": 33.36459660017863,
+          "all3_warm_public_s": [
+            0.3103953003883362,
+            0.2961515998467803,
+            0.30707900039851665
+          ],
+          "warm_median_s": 0.30707900039851665,
+          "max_array_planned_bytes": 62894787,
+          "max_sampled_private_peak_bytes": 549883904,
+          "max_sampled_ws_sum_peak_bytes": 581840896,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_time_field_observed_10k_baseline1",
+          "source_role": "baseline",
+          "workers": 1
+        },
+        "baseline4": {
+          "cold_public_s": 38.37901039980352,
+          "all3_warm_public_s": [
+            3.593840700108558,
+            3.5683041997253895,
+            3.5191482002846897
+          ],
+          "warm_median_s": 3.5683041997253895,
+          "max_array_planned_bytes": 35978327,
+          "max_sampled_private_peak_bytes": 2079199232,
+          "max_sampled_ws_sum_peak_bytes": 2330427392,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_time_field_observed_10k_baseline4",
+          "source_role": "baseline",
+          "workers": 4
+        },
+        "candidate1": {
+          "cold_public_s": 32.53759580012411,
+          "all3_warm_public_s": [
+            0.3157400996424258,
+            0.3117571999318898,
+            0.30871389992535114
+          ],
+          "warm_median_s": 0.3117571999318898,
+          "max_array_planned_bytes": 62894787,
+          "max_sampled_private_peak_bytes": 542801920,
+          "max_sampled_ws_sum_peak_bytes": 574136320,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_time_field_observed_10k_candidate1",
+          "source_role": "candidate",
+          "workers": 1
+        },
+        "candidate4": {
+          "cold_public_s": 37.88005609996617,
+          "all3_warm_public_s": [
+            4.115477100014687,
+            3.4816296002827585,
+            3.5571174998767674
+          ],
+          "warm_median_s": 3.5571174998767674,
+          "max_array_planned_bytes": 36147077,
+          "max_sampled_private_peak_bytes": 2028949504,
+          "max_sampled_ws_sum_peak_bytes": 2276429824,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_time_field_observed_10k_candidate4",
+          "source_role": "candidate",
+          "workers": 4
+        },
+        "candidate8": {
+          "cold_public_s": 41.38236579997465,
+          "all3_warm_public_s": [
+            4.382606300059706,
+            4.398725199978799,
+            4.348577799741179
+          ],
+          "warm_median_s": 4.382606300059706,
+          "max_array_planned_bytes": 32797781,
+          "max_sampled_private_peak_bytes": 3992031232,
+          "max_sampled_ws_sum_peak_bytes": 4435632128,
+          "cache_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\cache_time_field_observed_10k_candidate8",
+          "source_role": "candidate",
+          "workers": 8
+        }
+      },
+      "sampler_points": 1632,
+      "recorded_scientific_reread_passed": true,
+      "recorded_case_qualified": true
+    }
+  ],
+  "all_records_cleanup_array_budget_observed_ceiling_passed": true,
+  "all_recorded_scientific_reread_passed": true,
+  "all_predeclared_required_gates_passed": true,
+  "max_sampled_private_commit_sum": {
+    "case_id": "regular_1m",
+    "role": "candidate20",
+    "label": "cold",
+    "bytes": 10231394304,
+    "observed_private_ceiling_bytes": 34359738368
+  },
+  "temporal_max_sampled_private_commit_sum_bytes": 3992031232,
+  "adverse_observations_retained": [
+    {
+      "case_id": "p14_none_100k",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.1464407948799138
+    },
+    {
+      "case_id": "p14_none_100k",
+      "workers": 4,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0091168143739093
+    },
+    {
+      "case_id": "p14_none_100k",
+      "workers": 4,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0055379537477416
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "workers": 1,
+      "metric": "warm_median_s",
+      "candidate_vs_baseline_ratio": 1.0076848307798532
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "workers": 1,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0038911971079618
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "workers": 1,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.00416382030513
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.00495972377094
+    },
+    {
+      "case_id": "b03_continuous_100k",
+      "workers": 4,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0022537508246292
+    },
+    {
+      "case_id": "p14_none_10k",
+      "workers": 1,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0061725944744364
+    },
+    {
+      "case_id": "p14_none_10k",
+      "workers": 1,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0066653886422958
+    },
+    {
+      "case_id": "p14_observed_100k",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.1394214236934268
+    },
+    {
+      "case_id": "event_front_10k",
+      "workers": 1,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.002977755720328
+    },
+    {
+      "case_id": "event_front_10k",
+      "workers": 1,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0033998587071706
+    },
+    {
+      "case_id": "event_front_10k",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.1920763088806043
+    },
+    {
+      "case_id": "event_front_10k",
+      "workers": 4,
+      "metric": "candidate_speedup",
+      "value": 0.9662122661436635
+    },
+    {
+      "case_id": "event_front_10k",
+      "workers": 8,
+      "metric": "candidate_speedup",
+      "value": 0.7212321709266216
+    },
+    {
+      "case_id": "event_spread_10k",
+      "workers": 1,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0007237669610922
+    },
+    {
+      "case_id": "event_spread_10k",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.1920763088806043
+    },
+    {
+      "case_id": "event_spread_10k",
+      "workers": 4,
+      "metric": "candidate_speedup",
+      "value": 0.9675473537443173
+    },
+    {
+      "case_id": "event_spread_10k",
+      "workers": 8,
+      "metric": "candidate_speedup",
+      "value": 0.6692510293952012
+    },
+    {
+      "case_id": "early_hold_100k",
+      "workers": 1,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0052101883020645
+    },
+    {
+      "case_id": "early_hold_100k",
+      "workers": 1,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0023198357556284
+    },
+    {
+      "case_id": "early_hold_100k",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.1606805398430857
+    },
+    {
+      "case_id": "early_hold_100k",
+      "workers": 4,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0043207520556243
+    },
+    {
+      "case_id": "early_hold_100k",
+      "workers": 4,
+      "metric": "candidate_speedup",
+      "value": 0.8663428185301818
+    },
+    {
+      "case_id": "early_hold_100k",
+      "workers": 8,
+      "metric": "candidate_speedup",
+      "value": 0.7186043262625854
+    },
+    {
+      "case_id": "regular_1m",
+      "workers": 1,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0065321065944495
+    },
+    {
+      "case_id": "regular_1m",
+      "workers": 1,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0005215345243725
+    },
+    {
+      "case_id": "regular_1m",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.0011055537897293
+    },
+    {
+      "case_id": "regular_1m",
+      "workers": 4,
+      "metric": "max_sampled_private_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0156233059013218
+    },
+    {
+      "case_id": "regular_1m",
+      "workers": 4,
+      "metric": "max_sampled_ws_sum_peak_bytes",
+      "candidate_vs_baseline_ratio": 1.0106411088223535
+    },
+    {
+      "case_id": "regular_1m",
+      "metric": "candidate20_vs_candidate8_public_median_ratio",
+      "value": 1.1535797249313642,
+      "note": "20worker slower than8worker on this fixed4macro workload; both remain descriptive observations"
+    },
+    {
+      "case_id": "time_field_observed_10k",
+      "workers": 1,
+      "metric": "warm_median_s",
+      "candidate_vs_baseline_ratio": 1.0152345146600774
+    },
+    {
+      "case_id": "time_field_observed_10k",
+      "workers": 4,
+      "metric": "max_array_planned_bytes",
+      "candidate_vs_baseline_ratio": 1.0046903237051572
+    },
+    {
+      "case_id": "time_field_observed_10k",
+      "workers": 4,
+      "metric": "candidate_speedup",
+      "value": 0.08764321109513258
+    },
+    {
+      "case_id": "time_field_observed_10k",
+      "workers": 8,
+      "metric": "candidate_speedup",
+      "value": 0.07113511426468824
+    }
+  ],
+  "inspected_unique_json_files": 430,
+  "inspected_json_files": {
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\predeclaration_v4.json": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_none_100k_science.json": "6d6bee5a806b64fef6ca1fb60746b4a633e0c7a55deb3e01f2e983fb91503507",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r63_2026_10_12\\candidate_binding_v61.json": "425030a9956d21f9d2a1c7667e74a1de3089240b746f8cdd308b5f4873106207",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\candidate_binding_c3.json": "ceaaf85d28a9bbf9c41daf77572c9496e607b1c9fef41ffcf83fd0c5fde0f1c5",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r62_2026_10_12\\memory_candidate_binding.json": "0b1fb218190204b16153fe47ceab90c4aaba4eefa964e89f2bf6a8475e0ed1f8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\input_binding.json": "f95927b0db768da62d59c53bc63e6c27cf6ed9851863e500c0776f157595ca71",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\receipt.json": "9cdfac62b11facf699062dfa95facbf13686cf5fde020e19651fe563b3b42bbb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\cold\\run.json": "2f15cc695b7ea8debb836e9e88e89332c15a5e96b2db4fb237b85b79c6012028",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\cold_process_samples.json": "463cbe39635d42b16523f14e0667bf27d232f14c9b861ed1bc5d8e362837f565",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\warm-0\\run.json": "2f15cc695b7ea8debb836e9e88e89332c15a5e96b2db4fb237b85b79c6012028",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\warm-0_process_samples.json": "148c91e4bcefa90c6a0285229458fd384e4729f494865d1aa9eb118db41bc1e7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\warm-1\\run.json": "2f15cc695b7ea8debb836e9e88e89332c15a5e96b2db4fb237b85b79c6012028",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\warm-1_process_samples.json": "32aebb488211a62f6ae6df3e3d8c8bf7402ffd9ade8707c4d1fea33e4b4e046f",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\warm-2\\run.json": "2f15cc695b7ea8debb836e9e88e89332c15a5e96b2db4fb237b85b79c6012028",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline1\\warm-2_process_samples.json": "19d0ffa9d5223fbfcdd4aa61fe1274f40cb48c23cf3c4af7ff11f385ab1f4b03",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\receipt.json": "a3fa050af51d737ddd570c4c5a9455c1279f776f4abeff9dcd607151ebbc0ecf",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\cold\\run.json": "a3ee6bc9485c98f7ab11aacc318d0c341d81fd1692b3ed062c65720e2c10ffad",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\cold_process_samples.json": "2b981f7949b2126462761fe1fd70ab61abef610ef0404dc1d2aeacd6ea212b27",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\warm-0\\run.json": "a3ee6bc9485c98f7ab11aacc318d0c341d81fd1692b3ed062c65720e2c10ffad",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\warm-0_process_samples.json": "8cdab28816c725c5fcc64f5a7c9a1679f5045d2e75a88359c6093c1e8156f23b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\warm-1\\run.json": "a3ee6bc9485c98f7ab11aacc318d0c341d81fd1692b3ed062c65720e2c10ffad",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\warm-1_process_samples.json": "609886c2af760988e719aa29a1503783876e9b32ee4e15fd2376b9e65d053371",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\warm-2\\run.json": "a3ee6bc9485c98f7ab11aacc318d0c341d81fd1692b3ed062c65720e2c10ffad",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_baseline4\\warm-2_process_samples.json": "77dab268e9fa1fd78a24cc0c799a58773165f505d0b1aabeacd2762d7a3fbb4e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\receipt.json": "88e60ec4fec0741a5594bd641868bbda69831d1e1d60763d9ad2350e3657ec51",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\cold\\run.json": "ec8ac886e85f6af013dd1db50693fb5247313c021cf8da2c0f06e73219c93c63",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\cold_process_samples.json": "ec36d422193dbdce8c6c21323c93739c64703987b32c40586e73cc8ebe2c400c",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\warm-0\\run.json": "ec8ac886e85f6af013dd1db50693fb5247313c021cf8da2c0f06e73219c93c63",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\warm-0_process_samples.json": "28a567bf801f9ce226c68bc0d5b713badacab494f1a0950a33a7ac3424555813",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\warm-1\\run.json": "ec8ac886e85f6af013dd1db50693fb5247313c021cf8da2c0f06e73219c93c63",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\warm-1_process_samples.json": "171f8589bce3da0a3240451c03b2c793fed0e79a8b61cb8df40b924a729210b3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\warm-2\\run.json": "ec8ac886e85f6af013dd1db50693fb5247313c021cf8da2c0f06e73219c93c63",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate1\\warm-2_process_samples.json": "a33c338d9df78986d50d2cfcebc183a1dc85674f44786177902ba35d8636b9f7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\receipt.json": "745b5011e1506607580d5862842164b0d247ad946647445e5c16246d73063052",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\cold\\run.json": "abe83d8248374b2af35125b273569edf641dda96ace62ac40b697a653c1fab96",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\cold_process_samples.json": "ef86f6a331c25da9b4753720a8af3e0b6d2ad27b274da2130e03cc9e43368614",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\warm-0\\run.json": "abe83d8248374b2af35125b273569edf641dda96ace62ac40b697a653c1fab96",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\warm-0_process_samples.json": "173d59dfbf5a7175d099156fdf7a5dbb79c20cdc8cdd8c66ce6c809e32835c40",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\warm-1\\run.json": "abe83d8248374b2af35125b273569edf641dda96ace62ac40b697a653c1fab96",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\warm-1_process_samples.json": "604c55247409723bccf8e02514ebfa1918a5bb3172c4e73df47fc0331b280ca4",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\warm-2\\run.json": "abe83d8248374b2af35125b273569edf641dda96ace62ac40b697a653c1fab96",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate2\\warm-2_process_samples.json": "f7baa540162b1c93f751a842c6cdd4d1e82f30ede976dac619a653f3ed1e4f47",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\receipt.json": "dffa043e2bb6d650fa464747cb9f8c5bd8dca05234a18e6c946017744254619c",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\cold\\run.json": "06e35619039f1d01ec6bbc8bd69288782521432e723f1e129d882b41a9c1696a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\cold_process_samples.json": "11a0d7621950b5760f6f09ac2a3e324b6ea3f23d2e33b55f09b157e4ba4afc6e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\warm-0\\run.json": "06e35619039f1d01ec6bbc8bd69288782521432e723f1e129d882b41a9c1696a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\warm-0_process_samples.json": "0d368565640881d8bcc7cfa0d1a5cf0979d0e9144ffb294a0e0c31b34b438ddc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\warm-1\\run.json": "06e35619039f1d01ec6bbc8bd69288782521432e723f1e129d882b41a9c1696a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\warm-1_process_samples.json": "7b74cde600a129a49b4ca4426df72769e2fe29a1c731f1a9bb01e442f18de92e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\warm-2\\run.json": "06e35619039f1d01ec6bbc8bd69288782521432e723f1e129d882b41a9c1696a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate4\\warm-2_process_samples.json": "e8cd20d626bfb9a454b558836d6c2531df110b232b29c64784bfc9a9b4754e1b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\receipt.json": "776a008ecbfd0bf158500a63f2d4f20084be90682c4cae5430f7e66e2565f28c",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\cold\\run.json": "2ebf9fb193eb7c5b295b0ca2651c131bc60bf9ba8bf562343a8f89c64371b715",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\cold_process_samples.json": "c008a3bb3750dfeecd39c111c30429e3ac36048bec4ae1473efcb3304767e802",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\warm-0\\run.json": "2ebf9fb193eb7c5b295b0ca2651c131bc60bf9ba8bf562343a8f89c64371b715",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\warm-0_process_samples.json": "6a0519f0b8c4b1d780692068672ccd7e696e67b14a99f23c2c3de11644ce238f",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\warm-1\\run.json": "2ebf9fb193eb7c5b295b0ca2651c131bc60bf9ba8bf562343a8f89c64371b715",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\warm-1_process_samples.json": "a2634f85acdac80ce71255f2241085412d65276afe21200dd236166ed790fcad",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\warm-2\\run.json": "2ebf9fb193eb7c5b295b0ca2651c131bc60bf9ba8bf562343a8f89c64371b715",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_100k_candidate8\\warm-2_process_samples.json": "a026fe865b6672c16217dae5dd7a3278adbcd8df92ae052128298f15449529a3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\b03_continuous_100k_science.json": "27508c168bb609188f035681ba4585f2c100c7606df553c13490518c6c2028e5",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\receipt.json": "b73db2f2a12c247ddd5b341ae7f410b509ee3ef8ebc4e1529aa835fa95ca5869",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\cold\\run.json": "58efcfba42d2946a9db991501c9d3ab4697a112ecd5202733732d3ad622bd463",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\cold_process_samples.json": "892875a789379f21f7f598f64ee9cfcf5ee759552f9cf50b1bd466423da86d51",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\warm-0\\run.json": "58efcfba42d2946a9db991501c9d3ab4697a112ecd5202733732d3ad622bd463",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\warm-0_process_samples.json": "be09af1d2b6e0781b8387859e16707b9eb9b4c8cde94ff908201c281b99f1017",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\warm-1\\run.json": "58efcfba42d2946a9db991501c9d3ab4697a112ecd5202733732d3ad622bd463",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\warm-1_process_samples.json": "2808b50ef3c26cca471592f48eb135906b23279ecfe797993c223eb2c55271e3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\warm-2\\run.json": "58efcfba42d2946a9db991501c9d3ab4697a112ecd5202733732d3ad622bd463",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline1\\warm-2_process_samples.json": "42008fecb26ccbe0a36f61f4278175a07b6e3b28052f4d8c0a3bc1970f6484e9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\receipt.json": "3b8a8f7f22be0b087bed2e86ba4af618b29372e8ca5d6a15ebc784cb099e64ae",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\cold\\run.json": "011713cd32fedccb521169ba0f4ede73c0e2d2aeec02012254d3dd953b556740",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\cold_process_samples.json": "d8ccf449df64c6e4050ff9b254fa13b1e06bd14ac97be77f65b2b6c5789d1f00",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\warm-0\\run.json": "011713cd32fedccb521169ba0f4ede73c0e2d2aeec02012254d3dd953b556740",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\warm-0_process_samples.json": "46fe68383fa825f8cb1e56ab1697cdef2ef5583f79959af77e84800ca9c12214",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\warm-1\\run.json": "011713cd32fedccb521169ba0f4ede73c0e2d2aeec02012254d3dd953b556740",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\warm-1_process_samples.json": "ec921cf40cbd29baf1b9159be53a97862073545dc0ebae393e844bf323b60bc5",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\warm-2\\run.json": "011713cd32fedccb521169ba0f4ede73c0e2d2aeec02012254d3dd953b556740",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_baseline4\\warm-2_process_samples.json": "3428d540610dd53527eee6ded78fdec5d5f0feeaefffc49cc1c94a6771afd8cc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\receipt.json": "b01f1795562e043b16ed70461abd6cd1b99a41d015dd7e8654836bdcd7536069",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\cold\\run.json": "de83af6869af784e188b40647ae0af094e35d30433fb1931450a9c150adeb5c3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\cold_process_samples.json": "65c5e573f3eea38dc05c7db1bb3150f756940875123167e3a9a533741170dea1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\warm-0\\run.json": "de83af6869af784e188b40647ae0af094e35d30433fb1931450a9c150adeb5c3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\warm-0_process_samples.json": "33addde71228f936b68588b251ed29740aa653a0cbdcb3b4bfbe3c92a6dba98c",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\warm-1\\run.json": "de83af6869af784e188b40647ae0af094e35d30433fb1931450a9c150adeb5c3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\warm-1_process_samples.json": "586d8037bb5140d71f61bff3eda1a3e8937c048d6116b89464b5ad92072eba6e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\warm-2\\run.json": "de83af6869af784e188b40647ae0af094e35d30433fb1931450a9c150adeb5c3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate1\\warm-2_process_samples.json": "0162a1b37e1fc0337267cde6c012661971d3a622b5bfae2cc1842a8ecaabf6bd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\receipt.json": "d3806d5b25efc6ce22e95278bf9bb24a5fdc934cbd6eaf8c6928ca3cf3af795c",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\cold\\run.json": "483d2d056f00f79e8d6ea2f9b27bde39f8e7c2584a1c2da1d293d412c4487991",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\cold_process_samples.json": "0bdfaa138dbf8f34c838e0f6767a6058dda6bf48b2b49cb7dd95f422c2365a48",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\warm-0\\run.json": "483d2d056f00f79e8d6ea2f9b27bde39f8e7c2584a1c2da1d293d412c4487991",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\warm-0_process_samples.json": "8a06e74f9ba4a7563a87d45c540c4d29c540afb5c049e4e4b57c305dd2da8f8e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\warm-1\\run.json": "483d2d056f00f79e8d6ea2f9b27bde39f8e7c2584a1c2da1d293d412c4487991",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\warm-1_process_samples.json": "b8b59cab95c1e00b1f276f624251dc1366d2eda816769f35df72f492f8fb3aad",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\warm-2\\run.json": "483d2d056f00f79e8d6ea2f9b27bde39f8e7c2584a1c2da1d293d412c4487991",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate2\\warm-2_process_samples.json": "1d466091e411d5c1f14ec5c1125a1439a3e64b892b492e641cd2f0e80d0951f1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\receipt.json": "2aceca132bfbea1543d8e5f318e5827c67c69357c8a033ffb6e060ce085fa059",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\cold\\run.json": "c0ebe77d7ca552843f5c8a1c358f28e41aab6a99a630c39b267804d8b3cb9bfa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\cold_process_samples.json": "d0232d1426b4108c2392b0f9e642b56e44bbc89455d9089f2c516be0a8f068df",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\warm-0\\run.json": "c0ebe77d7ca552843f5c8a1c358f28e41aab6a99a630c39b267804d8b3cb9bfa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\warm-0_process_samples.json": "041a63982283054adc43247e5199b925bb313e585cfab4efe016694682471f02",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\warm-1\\run.json": "c0ebe77d7ca552843f5c8a1c358f28e41aab6a99a630c39b267804d8b3cb9bfa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\warm-1_process_samples.json": "c77be769b039fc8c32117b3409e8c6c317c6f25dea969add5ae0a3339af77331",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\warm-2\\run.json": "c0ebe77d7ca552843f5c8a1c358f28e41aab6a99a630c39b267804d8b3cb9bfa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate4\\warm-2_process_samples.json": "b0da2b1b0f5459874eba7d8e770884c18a3f1f0a8df6f70d050a803b26d5d4e9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\receipt.json": "3c617dd6ec7ab763549eb4f2d3b7dc35b87156c031edb7c82641a15c8f9cc629",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\cold\\run.json": "d7e422ec6a49dc3700a0485e5fa208bf28df1aee95e63475dc8665e2dde88397",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\cold_process_samples.json": "522b6e69710b60b54d94e8c5870837e38a643a4c314dbf9865fecceb01978997",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\warm-0\\run.json": "d7e422ec6a49dc3700a0485e5fa208bf28df1aee95e63475dc8665e2dde88397",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\warm-0_process_samples.json": "8de9abfe1602e33e3dd02486211553ee055698594fea604bedaf62bbca7859d3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\warm-1\\run.json": "d7e422ec6a49dc3700a0485e5fa208bf28df1aee95e63475dc8665e2dde88397",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\warm-1_process_samples.json": "21d27ac936b781982dedc07e955676da82ab42b16b4d38c176560fc2b2a770a9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\warm-2\\run.json": "d7e422ec6a49dc3700a0485e5fa208bf28df1aee95e63475dc8665e2dde88397",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\b03_continuous_100k_candidate8\\warm-2_process_samples.json": "9b72f551f66fac9d563908152ff4520096c4a7d940b5699d2e1531e1309a7d94",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_none_10k_science.json": "f3db2901649bd87a894e281925fdfae2e8777b4e2432b9df6f4139e5c82cde03",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\receipt.json": "6f1374f48767295b4bdce9eb159a1c638abfc048f162b22a3530d466d63ca5fc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\cold\\run.json": "86f77c36b60f6abc97dfb573ddcc224ca1510ad63fda9b96dfc2dc16379150a0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\cold_process_samples.json": "6fda2ffcd7e7194ce3a4f28d84e2e8db4bdc5e785db6dfb900771ac4035e0e4e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\warm-0\\run.json": "86f77c36b60f6abc97dfb573ddcc224ca1510ad63fda9b96dfc2dc16379150a0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\warm-0_process_samples.json": "8b40c487e1465331ffbba25db9a0ac2437f428aa6b61fab50342b1bf0eaf77ad",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\warm-1\\run.json": "86f77c36b60f6abc97dfb573ddcc224ca1510ad63fda9b96dfc2dc16379150a0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\warm-1_process_samples.json": "3abaffa611dd5ce6f33d7beedc7d5a0cc0c2bbbcbf991f6acb296189f642243d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\warm-2\\run.json": "86f77c36b60f6abc97dfb573ddcc224ca1510ad63fda9b96dfc2dc16379150a0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_baseline1\\warm-2_process_samples.json": "48701df645dceeb7ec01d95754d1f3a615f35800cd104704835068c05f7841a4",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\receipt.json": "aa131d56e31a5e2f0062a8e6bbc8487710f660c0f4c66ddf4812545e41e857af",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\cold\\run.json": "909a3574e77a3d6d3c14547060d7d15d7da3559c33e7ee5793448e34c8596beb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\cold_process_samples.json": "fe5e40bed40a51b7de583d14e3729aeebee04b0681b317477128b8d866ed1a27",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\warm-0\\run.json": "909a3574e77a3d6d3c14547060d7d15d7da3559c33e7ee5793448e34c8596beb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\warm-0_process_samples.json": "2a8ef38d2350b8aa886c0ab2b4d0d32bccbe26fb1740896c459eee77bde792e0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\warm-1\\run.json": "909a3574e77a3d6d3c14547060d7d15d7da3559c33e7ee5793448e34c8596beb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\warm-1_process_samples.json": "953a2e2b5eff1785ac9a046fd5d1c53ae3a115612e310fa4510eb24017fe244a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\warm-2\\run.json": "909a3574e77a3d6d3c14547060d7d15d7da3559c33e7ee5793448e34c8596beb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate1\\warm-2_process_samples.json": "5fa0b8f2377fb5e2471ee3317667bac9f041afef91de999d6bb4f64343d99e72",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\receipt.json": "883732bea51082efa419c272a295f7aa816c9bedfe0ed641d8106751b94306c2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\cold\\run.json": "0c4c4637179da6d7e0a843138f09269656b549c2fc24b5b022e50644f4db4a8a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\cold_process_samples.json": "188a09e49b5a6bb53486a4594c325ae5c8c569488b840d60f84d9371ed9ce5aa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\warm-0\\run.json": "0c4c4637179da6d7e0a843138f09269656b549c2fc24b5b022e50644f4db4a8a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\warm-0_process_samples.json": "b26d95496244c155ae7dca70b84958abd083c8e1ba9313ad3e6b2ad3d9edf01b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\warm-1\\run.json": "0c4c4637179da6d7e0a843138f09269656b549c2fc24b5b022e50644f4db4a8a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\warm-1_process_samples.json": "745acfc6acad3261c9dbe1b9140e18bb6e4e21b15761248ee533ffe9da24e7b8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\warm-2\\run.json": "0c4c4637179da6d7e0a843138f09269656b549c2fc24b5b022e50644f4db4a8a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_none_10k_candidate4\\warm-2_process_samples.json": "49182fcf8cedf598e9c8b4863b5a0fb9531d081a21894cf1898ccb88a24556a0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\p14_observed_100k_science.json": "fea24584960b46c18e6f36fa330eb20f755a946b70e3aeac6727d997e3629022",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\receipt.json": "8f792545a348211a8dd1822f4bba1d6074b7681c600724715539e081faf9054d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\cold\\run.json": "faf2e660dbce4b5618c807891a80c053948608e77a5d3a508ab00d21d03034b8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\cold_process_samples.json": "ed33ad7b39a43edad94e941868b45cd555a38e62ddbdb729d9f4cafe84e159df",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\warm-0\\run.json": "faf2e660dbce4b5618c807891a80c053948608e77a5d3a508ab00d21d03034b8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\warm-0_process_samples.json": "335f82ea6a426773bee1fe2e7c43e15208233a5f9b35270f0303494b900e640e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\warm-1\\run.json": "faf2e660dbce4b5618c807891a80c053948608e77a5d3a508ab00d21d03034b8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\warm-1_process_samples.json": "9350f0e7781d6cbfd26a0048d5f0dff55b2cde5a2249341d7e1a72696cb7fcfe",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\warm-2\\run.json": "faf2e660dbce4b5618c807891a80c053948608e77a5d3a508ab00d21d03034b8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline1\\warm-2_process_samples.json": "9a3d41013132e02e98341f0d2a6983b69d9a84bb61f35af83585d8ce77e63fdf",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\receipt.json": "a5575b8d9e10ddc7bd25da2ad35e26ad7ce42f29cf9b037d0f7f9758cea4f7d7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\cold\\run.json": "8469e4a4de222a636815eef183864a857c9bfff293a3469f7dd8f06f678c4194",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\cold_process_samples.json": "71bd57f136d259e791071e529f8e98047a13a1f4d388cd5d1996de2162eb0a08",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\warm-0\\run.json": "8469e4a4de222a636815eef183864a857c9bfff293a3469f7dd8f06f678c4194",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\warm-0_process_samples.json": "9630912be13ff962a60e363bc71587a4bc1d007c0d2646fdca6c163055b1b8ae",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\warm-1\\run.json": "8469e4a4de222a636815eef183864a857c9bfff293a3469f7dd8f06f678c4194",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\warm-1_process_samples.json": "43855f0c54791902c06e9e2703b4176fa3eca4549fc0d0353eff2120053f6e37",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\warm-2\\run.json": "8469e4a4de222a636815eef183864a857c9bfff293a3469f7dd8f06f678c4194",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_baseline4\\warm-2_process_samples.json": "ffae4eb77ba8f0e6c4a21f0b3c7df44f7282bd938f3980643779c3e059492ad3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\receipt.json": "9b277be1fbf43db97bd1652afbd73ca430c71cb311db66614048c70b8fb5862c",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\cold\\run.json": "b1427e690a43086c11eb62d15f3f6bd0b69b182024e05497ee879ec2e18beda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\cold_process_samples.json": "4df9e2433a24d35bc265ef322a12158fa22175ffa537734be638295c6930a77a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\warm-0\\run.json": "b1427e690a43086c11eb62d15f3f6bd0b69b182024e05497ee879ec2e18beda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\warm-0_process_samples.json": "6ae9b3940325c0c50d5fc568a9e6e7e6f0dc35235bc6f6d8ff55456f5620dd80",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\warm-1\\run.json": "b1427e690a43086c11eb62d15f3f6bd0b69b182024e05497ee879ec2e18beda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\warm-1_process_samples.json": "fd5eb8315d131edce7ea5c9a68644faf8de75250e1e3e95125cb58f4d51b41ae",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\warm-2\\run.json": "b1427e690a43086c11eb62d15f3f6bd0b69b182024e05497ee879ec2e18beda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate1\\warm-2_process_samples.json": "f5776bde81ac16bee58a9c1f9d4f265ed7d56a3b7f9ec2aa8734848d6e87d6ed",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\receipt.json": "b4efafdc51c466abb00c4e191e4233de3a5908f139ba404a5e9ffe57c32affa2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\cold\\run.json": "a9887e7af72ad4cd441b72dea6faa96bae676263bd75acbb7865ff81f491436d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\cold_process_samples.json": "50219d4730833275bc80d7ae8ea9a36bb1a51f8912ebd8045081922c405f144c",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\warm-0\\run.json": "a9887e7af72ad4cd441b72dea6faa96bae676263bd75acbb7865ff81f491436d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\warm-0_process_samples.json": "7716c7a16776a26a7db44e2a50e7a7a9b4c35b3c5520cf461b71bbe65b2cfbd8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\warm-1\\run.json": "a9887e7af72ad4cd441b72dea6faa96bae676263bd75acbb7865ff81f491436d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\warm-1_process_samples.json": "83dca91fe7917814b9ca3f14f31edd8bc516e78f55075190c4b79bb6b5db234f",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\warm-2\\run.json": "a9887e7af72ad4cd441b72dea6faa96bae676263bd75acbb7865ff81f491436d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate4\\warm-2_process_samples.json": "73976db3c272333fd54958a7577584480c47cf4dfe689e1d6897bbd17ec278fc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\receipt.json": "5dd869b408dc4837fccd1883ff5ab12c76e7679f43c36b6f8063815c3b2de790",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\cold\\run.json": "2f5f731aaab6ddfd0411fc8f89be28e1fc887fb02a1d7508f3621e7e89f982e8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\cold_process_samples.json": "3d05d6de8e685ecdb8e732265b80d7f83d0e66a9c6899e8a089854f737c3432d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\warm-0\\run.json": "2f5f731aaab6ddfd0411fc8f89be28e1fc887fb02a1d7508f3621e7e89f982e8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\warm-0_process_samples.json": "cbf118407c78be2a6726588ebd04a7840a8d205a77596fac830e5bdc41fb56ec",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\warm-1\\run.json": "2f5f731aaab6ddfd0411fc8f89be28e1fc887fb02a1d7508f3621e7e89f982e8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\warm-1_process_samples.json": "cafb976169c190b6a0997d8cee45771950d708b383dfec07731f85408f5feb7b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\warm-2\\run.json": "2f5f731aaab6ddfd0411fc8f89be28e1fc887fb02a1d7508f3621e7e89f982e8",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\p14_observed_100k_candidate8\\warm-2_process_samples.json": "d39cfb64f8ec7848ccf2aaf28e17ffef9f931e176490ec33dbce53533a9fdb89",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\event_front_10k_science.json": "e79815234abe4caa2aebea4319ce5839a1e643fb7232bd6f9b12dc104cda0f37",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\receipt.json": "5c72f5d3f944c8226672f4e71a457885e71a3ccb17ff45e3389b58bbed3a10df",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\cold\\run.json": "7a6857530d68a07fb253f260cdc1bdf05176bda6def3c60376e6f059562fa7cf",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\cold_process_samples.json": "b8e39297fda199bf42e47641762dc803bcc17052d544d7e1f6cb89004c452357",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\warm-0\\run.json": "7a6857530d68a07fb253f260cdc1bdf05176bda6def3c60376e6f059562fa7cf",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\warm-0_process_samples.json": "4504587a90fcfd2d2e2e8884f7a0a09b7427a5c5ed100ba769ce3c84a4d050bd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\warm-1\\run.json": "7a6857530d68a07fb253f260cdc1bdf05176bda6def3c60376e6f059562fa7cf",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\warm-1_process_samples.json": "fde0c81329a7a47be47b099acd59a5075c8fe4f58f76e52f610e5b6a27994ad7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\warm-2\\run.json": "7a6857530d68a07fb253f260cdc1bdf05176bda6def3c60376e6f059562fa7cf",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline1\\warm-2_process_samples.json": "eac843ce838c58bc693be7502c81ef5efac950bf843c54f8306e099481822285",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\receipt.json": "6b5dc0a15457429ee3e3294c2bc8da757f06e051474bd9413a61f06397c1632a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\cold\\run.json": "ecf254099fe9c33021ca765b1e82a5a0ba459a3086f20eb52fffedb4cba9aa22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\cold_process_samples.json": "d5f69fb8ee54e892e475d83998e7cefaf20511f821da61643df0371d8a68a8d7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\warm-0\\run.json": "ecf254099fe9c33021ca765b1e82a5a0ba459a3086f20eb52fffedb4cba9aa22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\warm-0_process_samples.json": "cb5eb5949d75325a954bee299d3efd48f0e83b155fa8d1cfa4ffd10ac2f678f1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\warm-1\\run.json": "ecf254099fe9c33021ca765b1e82a5a0ba459a3086f20eb52fffedb4cba9aa22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\warm-1_process_samples.json": "e6827085eaa08123ae66581ec55c5b5a5146b806c2919ace2fd00286f13151d6",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\warm-2\\run.json": "ecf254099fe9c33021ca765b1e82a5a0ba459a3086f20eb52fffedb4cba9aa22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_baseline4\\warm-2_process_samples.json": "8c5c614c7aad615a13256dcadcc62aa76038ed5002b981897729780570938b4a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\receipt.json": "20478817ffc3a2b68ef45b14527c8b4562c6c9d77413d0b03dd7c2acdb88fb86",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\cold\\run.json": "c5766ade3fb196210396de53723a48dc8fc9dfb41e79e9e39fee9eb040988613",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\cold_process_samples.json": "db74fb564adc636c0f6f3f218c901307d48934aa07a6930009c13329fc159862",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\warm-0\\run.json": "c5766ade3fb196210396de53723a48dc8fc9dfb41e79e9e39fee9eb040988613",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\warm-0_process_samples.json": "5d8c1e31f47e62b6a190378f8a7ae40fa75c0a81adbacfb860d567edb987195b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\warm-1\\run.json": "c5766ade3fb196210396de53723a48dc8fc9dfb41e79e9e39fee9eb040988613",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\warm-1_process_samples.json": "54e2895e0d6c3841bf77825046a2ee9c00f88172bdd8df24c7f48ff9709902c1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\warm-2\\run.json": "c5766ade3fb196210396de53723a48dc8fc9dfb41e79e9e39fee9eb040988613",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate1\\warm-2_process_samples.json": "8b70840eacc4a4f70f1f61d4901ece2a10cedbc49ea4e7f9f918c05c49c28436",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\receipt.json": "93717b6d8239d5ae65ac26d230581784e1325948c632cde862c5ae0b8b606cbe",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\cold\\run.json": "1de4ffe7bdfd6a75435851f81b54b9fac29c7ba51b65be54d40053bad6db79dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\cold_process_samples.json": "073d6993bc60559cdcb793f5f9a44a4b458123568c63206aa76eaeb8f72fcfc9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\warm-0\\run.json": "1de4ffe7bdfd6a75435851f81b54b9fac29c7ba51b65be54d40053bad6db79dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\warm-0_process_samples.json": "6b26b41fac5c0f4600952741e8bafa2aae7e2f63d178a0cc5c151f95ef6cc8b5",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\warm-1\\run.json": "1de4ffe7bdfd6a75435851f81b54b9fac29c7ba51b65be54d40053bad6db79dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\warm-1_process_samples.json": "f861f283d6d618fa97725094e351ad96483dd73401785ad7f2f760803411ba0b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\warm-2\\run.json": "1de4ffe7bdfd6a75435851f81b54b9fac29c7ba51b65be54d40053bad6db79dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate4\\warm-2_process_samples.json": "f4d87915943d50b3c8431a71a1e9e76d25660148f655d91f0f84b64a17c73520",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\receipt.json": "5e59f4610d2ffae43d9d71826e28c68665c1cce009b312701b2447fb7fce4182",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\cold\\run.json": "6683e43267f2a0f247ae4f99ffa70e6d6642dac8393766e6b3faabfaae04637e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\cold_process_samples.json": "56e5833f402aeb0bda49b23835d52e45b7147f7f4bbd20aa6fc72e93a386c4d1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\warm-0\\run.json": "6683e43267f2a0f247ae4f99ffa70e6d6642dac8393766e6b3faabfaae04637e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\warm-0_process_samples.json": "3b97fe7fb247e522be4a3380d40255d5d136599f1e7ddab7ecf22e8438e8ced3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\warm-1\\run.json": "6683e43267f2a0f247ae4f99ffa70e6d6642dac8393766e6b3faabfaae04637e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\warm-1_process_samples.json": "b14705a4b4e4d2adcdc0a2db1f6eb891899f25581e56adbabf357b7e9e2c9a0b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\warm-2\\run.json": "6683e43267f2a0f247ae4f99ffa70e6d6642dac8393766e6b3faabfaae04637e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_front_10k_candidate8\\warm-2_process_samples.json": "6a091a4c1b5f16e43fa4d08a3e3f3aff177c72cda42a949dbcb2e084ec5c28b7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\event_spread_10k_science.json": "98f366b3ee022aec232fc1cdf93af32dd7ae739e0cd4d5ecb14a5205b34a225e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\receipt.json": "7ae351c3abf863eada0e5ed9bd12b2114fde91e0bb25264f322c6b9f15733152",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\cold\\run.json": "fe99ace7bc5d25e65b444d601281894b53a62d1f966761bfbe58ab01dc7d9a57",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\cold_process_samples.json": "0e837d24c62ef51c307afa4093bfe3cda628ef9e9691434bc277a8a7f169543a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\warm-0\\run.json": "fe99ace7bc5d25e65b444d601281894b53a62d1f966761bfbe58ab01dc7d9a57",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\warm-0_process_samples.json": "750a1c450b6dd75587e37adfdaba1a69bd5696cd63bfdf13ce4576400321d51d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\warm-1\\run.json": "fe99ace7bc5d25e65b444d601281894b53a62d1f966761bfbe58ab01dc7d9a57",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\warm-1_process_samples.json": "4e9b44f8115b98af3f605f2134f0f9b9994f235917ab71fc62d187ca5ce9e567",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\warm-2\\run.json": "fe99ace7bc5d25e65b444d601281894b53a62d1f966761bfbe58ab01dc7d9a57",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline1\\warm-2_process_samples.json": "38ff742f3e5cb081e88aa8df1805cbb227aa1adae19b2b635f427237ae22355b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\receipt.json": "1bb6f10d3f262da8fe52d9d235336ddd27f986f784ad0db8225013af2caac8f9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\cold\\run.json": "d6aae9f2ce74bf13eb305aa15792d7992cc6e38f6d49710c311c04b296537338",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\cold_process_samples.json": "c6060ec40e8849493bc91a768942b19ee8280a116f72758af7c596b435198a65",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\warm-0\\run.json": "d6aae9f2ce74bf13eb305aa15792d7992cc6e38f6d49710c311c04b296537338",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\warm-0_process_samples.json": "04cdadb686f38a30b31340b5ce48069d1c39dba20159f44b21ace1a115d20e94",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\warm-1\\run.json": "d6aae9f2ce74bf13eb305aa15792d7992cc6e38f6d49710c311c04b296537338",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\warm-1_process_samples.json": "c2bf430993af65ef17706436aa662e8a3b75f0e85703a78e1d4eb14176030327",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\warm-2\\run.json": "d6aae9f2ce74bf13eb305aa15792d7992cc6e38f6d49710c311c04b296537338",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_baseline4\\warm-2_process_samples.json": "f5393864a0cc3974bf517b3c2277d657309aa960649edbbe5ed7a14ae068229d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\receipt.json": "719df98dcc6c3e867b40bfc549dc1371d0ab487e68644a527f9c2d3f3dba4c17",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\cold\\run.json": "cba77f2498f3b00b277b13343e82b74c98ce28cff1a88efb09eb3667d5fdd95d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\cold_process_samples.json": "8bed71bb373188cb8f3401ddec948c10327aaa8b6b8d429ff37a8bd167822977",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\warm-0\\run.json": "cba77f2498f3b00b277b13343e82b74c98ce28cff1a88efb09eb3667d5fdd95d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\warm-0_process_samples.json": "321fb9fc5b6709fc3165fcc53b99095d456ddbbdc9b908ec4b0328ebdd243f0a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\warm-1\\run.json": "cba77f2498f3b00b277b13343e82b74c98ce28cff1a88efb09eb3667d5fdd95d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\warm-1_process_samples.json": "edf05cd8d67a293393e81659bce08844944e27bf60a1cf5de888dbe1db3115c3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\warm-2\\run.json": "cba77f2498f3b00b277b13343e82b74c98ce28cff1a88efb09eb3667d5fdd95d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate1\\warm-2_process_samples.json": "be06a7d0167e02952a91a00ad7ac5ffcd011ddc689b3525e68687bf872750604",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\receipt.json": "4be13c9441f895e1269c603a7a133885928ab32927bf29967bb6f57a978c4342",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\cold\\run.json": "caf74203ac336949496881f2ba8a0b60c4735702abe919ca3b1182b41d61d070",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\cold_process_samples.json": "3f046737f2a8d1c96056bcacca800f6ea37c7a5d8c0fd4137304a688c130adf5",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\warm-0\\run.json": "caf74203ac336949496881f2ba8a0b60c4735702abe919ca3b1182b41d61d070",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\warm-0_process_samples.json": "893db617cb093442c8aa408ad6a8bd6e529426b5277cd41ed40e8ca4290eb7b3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\warm-1\\run.json": "caf74203ac336949496881f2ba8a0b60c4735702abe919ca3b1182b41d61d070",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\warm-1_process_samples.json": "1f5c6e8b68a9cddccd370ae1ec33d22c383d1b12eeb769b9a7af24af71caa7a4",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\warm-2\\run.json": "caf74203ac336949496881f2ba8a0b60c4735702abe919ca3b1182b41d61d070",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate4\\warm-2_process_samples.json": "8282a6d5376849c4fa21a3f66cc8812523665cab2bc7f2ca914389a2277d545d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\receipt.json": "7426394ff1eb59c62ae76b91395be2d67dad1781da3b425e75f9a4cf7c5899b0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\cold\\run.json": "a3f00b7e1ebe9a202852948a9834d2524e84559d2efc811b964b4f8edac6b3eb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\cold_process_samples.json": "15e4fce49ceff69ccc3693e93b20ac3ef59cf63cf735f68b807842a94a6424bc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\warm-0\\run.json": "a3f00b7e1ebe9a202852948a9834d2524e84559d2efc811b964b4f8edac6b3eb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\warm-0_process_samples.json": "bdc3aaf50db161bd45f48025ac4c74b3091e6851848f417b143dad23bc20d026",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\warm-1\\run.json": "a3f00b7e1ebe9a202852948a9834d2524e84559d2efc811b964b4f8edac6b3eb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\warm-1_process_samples.json": "6ee80f7e8af9be5f9bdaa58faecb4fdf6991df97b5ede889b6b71eae08472ecc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\warm-2\\run.json": "a3f00b7e1ebe9a202852948a9834d2524e84559d2efc811b964b4f8edac6b3eb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\event_spread_10k_candidate8\\warm-2_process_samples.json": "f008e2754f4993416db872d6ad09b0053bb8b02ad5d824f8d15039d993dd21d0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\early_hold_100k_science.json": "8ecf730a19e312622ea1d509d7db3a72634a5b4aa5ddce94ea825a5c3fddf466",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\receipt.json": "28bb68c11db9ea316f1dd3dd365610ad7494e6c559e52709329e355d6484a722",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\cold\\run.json": "ed0d00a4527055ade1a3c87c699b7a6d23be6e3bdfce881be8670328c8a657dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\cold_process_samples.json": "7669e141ecf33048543ca6055e000ca06f2b3fd393524552cf436cd91faf1afb",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\warm-0\\run.json": "ed0d00a4527055ade1a3c87c699b7a6d23be6e3bdfce881be8670328c8a657dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\warm-0_process_samples.json": "2ba46513a88051ca2330f069fa5e7efc3e42d31b128563dc4a2c11c3aa395c90",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\warm-1\\run.json": "ed0d00a4527055ade1a3c87c699b7a6d23be6e3bdfce881be8670328c8a657dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\warm-1_process_samples.json": "aea70c41511491f6387ce674eb91cad2a05e3df22f70c8dee3c297066c3c1ffa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\warm-2\\run.json": "ed0d00a4527055ade1a3c87c699b7a6d23be6e3bdfce881be8670328c8a657dd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline1\\warm-2_process_samples.json": "178dd5f841140d61663139ef102a71bf8381de3235c37ab4c1beca56b414254d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\receipt.json": "0b2fcb18da594c634c93cb70ceb14ef5a346d451f79c93ff2c2a0ef790d10465",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\cold\\run.json": "44c704293632acd32181a8d317f91a674c8d995bf195e81f1ec4c09464a7a140",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\cold_process_samples.json": "296da8b46f21fd3c50c369b3d78ac0c3a73833524c24988216dcdddaf442f38d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\warm-0\\run.json": "44c704293632acd32181a8d317f91a674c8d995bf195e81f1ec4c09464a7a140",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\warm-0_process_samples.json": "ab7429584836db1f82be60355e259bbd24aa7a4a30aeae82f8f1d4df76076866",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\warm-1\\run.json": "44c704293632acd32181a8d317f91a674c8d995bf195e81f1ec4c09464a7a140",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\warm-1_process_samples.json": "f5d11a4a08ce3d8aa6f08490fa26a22744c47da26f0f13a0b944ad079c299069",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\warm-2\\run.json": "44c704293632acd32181a8d317f91a674c8d995bf195e81f1ec4c09464a7a140",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_baseline4\\warm-2_process_samples.json": "71fec42a99fcc41984206cd9d6e83043ddc33b6f918a2e0e37f4fcdcb5ba92fa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\receipt.json": "8b30c9d6291bdb7fab450cc27eb90a1e4538d7f68c92828fea0ba8595fcd3f79",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\cold\\run.json": "fa0bc7a1d3b32845a73ed14bb12b54cce80ca1968cb9f597ab0525e03503568a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\cold_process_samples.json": "703315d620e961862ffcd35741b6a58235a6e6105dca47511d40f5a4b1694072",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\warm-0\\run.json": "fa0bc7a1d3b32845a73ed14bb12b54cce80ca1968cb9f597ab0525e03503568a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\warm-0_process_samples.json": "5a8cb7f92c946318932521abc413b65bf59fc2ae7a451f401ca0a92bbae11eb0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\warm-1\\run.json": "fa0bc7a1d3b32845a73ed14bb12b54cce80ca1968cb9f597ab0525e03503568a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\warm-1_process_samples.json": "82f84a50dfc7b1b3cccb4b5309a36954545fa23245b641fc610e29c0c1a879d3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\warm-2\\run.json": "fa0bc7a1d3b32845a73ed14bb12b54cce80ca1968cb9f597ab0525e03503568a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate1\\warm-2_process_samples.json": "31d6e030cc10b231b89e96f7c21a9fb1523b245bc3dad990dee08c191c03bf56",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\receipt.json": "60a32c8018a09aebbb59b61d508ad9afa3cf21445f94b912dad08bbb04dabf64",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\cold\\run.json": "eb53082fbcc400cdb4b6826af70d3f31fe72cd5c39d88af3a2d25071f7f1fda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\cold_process_samples.json": "a293efeafd05b4afca9bf21f99c343758098bb87ffc7e60adfa8e9e512683b09",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\warm-0\\run.json": "eb53082fbcc400cdb4b6826af70d3f31fe72cd5c39d88af3a2d25071f7f1fda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\warm-0_process_samples.json": "228ab6a398e6dadabd2ce7d8af03f114c3e62fa8c7bf46ac8ad31fe91c6fbd86",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\warm-1\\run.json": "eb53082fbcc400cdb4b6826af70d3f31fe72cd5c39d88af3a2d25071f7f1fda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\warm-1_process_samples.json": "aea97a3d5aa18a60cb489ba47de2f25416a977ded379fe3dc1e0cd485546c517",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\warm-2\\run.json": "eb53082fbcc400cdb4b6826af70d3f31fe72cd5c39d88af3a2d25071f7f1fda2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate4\\warm-2_process_samples.json": "102a0a18ef72a8ff9983ceb18aa79fa024f0162bd903c068fca1f3bff0b5b0e7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\receipt.json": "ee0576518b7a1f001fd84ebff19203579e564cd736b992af763b9742b6667ffc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\cold\\run.json": "a48ff09de91b4c84bc512eefaa084b35ff83d0119158048d3cda8d13331415e9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\cold_process_samples.json": "9c40081e8ad3b14525c1e3e41ce9fc6b39ceee6aab0ca9e4c7fbebbcf7ff39c0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\warm-0\\run.json": "a48ff09de91b4c84bc512eefaa084b35ff83d0119158048d3cda8d13331415e9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\warm-0_process_samples.json": "943229cb8e0e03591919c0bdbab9643524676ab445db92738b8d589ce8db6857",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\warm-1\\run.json": "a48ff09de91b4c84bc512eefaa084b35ff83d0119158048d3cda8d13331415e9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\warm-1_process_samples.json": "71b61f241f5077049393711570bfb79946d8f0220f9fe560999a0cdd38c32f29",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\warm-2\\run.json": "a48ff09de91b4c84bc512eefaa084b35ff83d0119158048d3cda8d13331415e9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\early_hold_100k_candidate8\\warm-2_process_samples.json": "01ee9cc1383ab0a4e2b53583dd9eb3feb4a4800ebb0e45bd028fda5ad59ed71f",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\regular_1m_science.json": "4c9844320272b7b2b6e97eb7eb8907f02a0f3def3da571481c8746f02a674bca",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\receipt.json": "880d2819fb032d8b42c96d3449a7a218a8085a5ec96a5084be330d304a196083",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\cold\\run.json": "6d737591fa07768a17f00f67839db8ae058072f7a25f8055be082488800661e3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\cold_process_samples.json": "5310b76b9464dacaf26891d711506e5ec3836b889eaf3f404ce9f8f5800f2872",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\warm-0\\run.json": "6d737591fa07768a17f00f67839db8ae058072f7a25f8055be082488800661e3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\warm-0_process_samples.json": "d8b324e03f7f0ce29b384b58dac7b9ca89085669216dcc1fec9c6c64c04a9345",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\warm-1\\run.json": "6d737591fa07768a17f00f67839db8ae058072f7a25f8055be082488800661e3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\warm-1_process_samples.json": "f90fb20a1ee5c0749c05855a0ca63ba127e03a11ca0a4f8be18a4b2fb3cc6ef0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\warm-2\\run.json": "6d737591fa07768a17f00f67839db8ae058072f7a25f8055be082488800661e3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline1\\warm-2_process_samples.json": "f694963c3d659660d052f34cabb8107c8da961cf5eb514c480a3692c6b3aa069",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\receipt.json": "c65d00df1c7bf60a4f4f46ae441f582ba3b702210052a45a0beb3cb8de430336",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\cold\\run.json": "2d8aabe96f8a52766bc85d0c57947e16fb05c1778417311a1833b88fb52e2a5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\cold_process_samples.json": "d37b49ac0e52e38a96afb625a6eac37d49baaf7b450c2550430b869ddf3ddfa4",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\warm-0\\run.json": "2d8aabe96f8a52766bc85d0c57947e16fb05c1778417311a1833b88fb52e2a5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\warm-0_process_samples.json": "0428dafd5b796e2a7a6b9bfee169fe67b6ff4d607d78ae3c5bace7fa6eeab7e7",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\warm-1\\run.json": "2d8aabe96f8a52766bc85d0c57947e16fb05c1778417311a1833b88fb52e2a5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\warm-1_process_samples.json": "34be038a0a071a86aa74bec27399015c8ee8a453444f7cb83fef2612f284efff",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\warm-2\\run.json": "2d8aabe96f8a52766bc85d0c57947e16fb05c1778417311a1833b88fb52e2a5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_baseline4\\warm-2_process_samples.json": "c00da891d4cd2937825f7f4158e3236e3f37687bfab541ee94f4b1b3c7634afd",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\receipt.json": "d78f6347f3a7ad15b71121b6136bceb90157e74f895f23dffa0389b1e44689ec",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\cold\\run.json": "cc30acda9a92a4c80ea499953bd85f9abf5e0f705be0709babc27f25a3881d50",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\cold_process_samples.json": "a3f6dfc0f7eb4163e49aac6d1d46cd9d18a2530002dce3f9f3351810f1f51dac",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\warm-0\\run.json": "cc30acda9a92a4c80ea499953bd85f9abf5e0f705be0709babc27f25a3881d50",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\warm-0_process_samples.json": "34a68f9dce998e99482d8f1e57955ccc71fbdeae4f62917d1b5a63e62b69e906",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\warm-1\\run.json": "cc30acda9a92a4c80ea499953bd85f9abf5e0f705be0709babc27f25a3881d50",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\warm-1_process_samples.json": "659a516e6735202f45b160408338edbbb3a325c9001e11c2ae5b2b0849be3b58",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\warm-2\\run.json": "cc30acda9a92a4c80ea499953bd85f9abf5e0f705be0709babc27f25a3881d50",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate1\\warm-2_process_samples.json": "bd06670403a8875b8d818b14606c324bd2bbafeeff6b53c171e72c2debdfdbe1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\receipt.json": "aa97533d7b7cea6f3ff24afab2a36e965566228abe0d9e080d5ac84115ae5bd9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\cold\\run.json": "bd78b471a1abb2c23e5187044ada69662f8614f69a64d24469d42b5e3c1c932b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\cold_process_samples.json": "5285d4ecb90f770fe55da63424e073f50f97d7d85b7022bde4f05002a65be5ab",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\warm-0\\run.json": "bd78b471a1abb2c23e5187044ada69662f8614f69a64d24469d42b5e3c1c932b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\warm-0_process_samples.json": "68b698bec7d252067b04e58be40592d4a320cadecb735858a13e5064b2d4eab1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\warm-1\\run.json": "bd78b471a1abb2c23e5187044ada69662f8614f69a64d24469d42b5e3c1c932b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\warm-1_process_samples.json": "d4d1702943d3332bc46f8d0ebf04890e77e3db54bc7fcac9ac5b1216f8f30dce",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\warm-2\\run.json": "bd78b471a1abb2c23e5187044ada69662f8614f69a64d24469d42b5e3c1c932b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate4\\warm-2_process_samples.json": "2242eacd1e53c13a16e2774d72ed9448c8ac1a63f602167ddccda262638b35fc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\receipt.json": "03697a094c8ec6f9f551a42982f6fcb57544a8eea4554e1792ea0047426321ed",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\cold\\run.json": "6df17eae67709bc16ddf0a5d1367cc1d0ff4cb7245a6996378f92fe1219d7c5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\cold_process_samples.json": "d6e4914679738d825e9d4b0918ba3870b04f14c96f889adbd4750c78548a3635",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\warm-0\\run.json": "6df17eae67709bc16ddf0a5d1367cc1d0ff4cb7245a6996378f92fe1219d7c5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\warm-0_process_samples.json": "3f1e180d38b8fa1a9b4c93078ab13efe2977faa7e37367e61d45bdedbb098bc2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\warm-1\\run.json": "6df17eae67709bc16ddf0a5d1367cc1d0ff4cb7245a6996378f92fe1219d7c5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\warm-1_process_samples.json": "2318838d1338b18bdefb491a2d87a63e53180d8fe9962d5ad848b4d895f3f908",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\warm-2\\run.json": "6df17eae67709bc16ddf0a5d1367cc1d0ff4cb7245a6996378f92fe1219d7c5b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate8\\warm-2_process_samples.json": "0cd9738c5f9ab83d250e0a5092227fedfa189d07f98a1a295df3811557fde24f",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\receipt.json": "bcf8ac7bca834f272b9fceb19375ad2cd432c04f7c35125c86c1c1ae3115a09f",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\cold\\run.json": "5993f871b6b6bb4eeea7f19e747459a4811fdfec60d8f5167bcbf19f069496f0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\cold_process_samples.json": "0d866376ce58a5c031683d2e9c74b708bf8b798d0d267e1eff3ad3e3b9d6cba2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\warm-0\\run.json": "5993f871b6b6bb4eeea7f19e747459a4811fdfec60d8f5167bcbf19f069496f0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\warm-0_process_samples.json": "a44d40779dd635460c49d4c1128e4f7e605fcfca3e8264f5f733b87c6c40bb39",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\warm-1\\run.json": "5993f871b6b6bb4eeea7f19e747459a4811fdfec60d8f5167bcbf19f069496f0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\warm-1_process_samples.json": "7c570de86cad0b8be446dba7709da680e9b9ee55429e57725722f5a850b8ec15",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\warm-2\\run.json": "5993f871b6b6bb4eeea7f19e747459a4811fdfec60d8f5167bcbf19f069496f0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\regular_1m_candidate20\\warm-2_process_samples.json": "b6945a43d0f98166d001c8c50523cb526931b43e07a2d856b61d5ed48b3f12b1",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\supplemental_time_field_policy.json": "580e1f920bd082359d571858d2d4f70c23ae19b2293591871d3b28d242ff7ad4",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\time_field_observed_10k_science.json": "447ceea23357040bff506ba559f5320e8e40bcb859c65af0f535660d52b2aaff",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\supplemental_time_field_input_binding.json": "ec34a8dc3be40cac17b955878a1bd93900421f0f7b528f0e2b5a328c22373dea",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\receipt.json": "4f5469173664318c82c61a0558df7dd711aa8e724dddbdd16e0a539a455b4a8d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\cold\\run.json": "333bec8e610ef174e33493e5f8c7e44e46c993a329e50a1a28fbc2d77eeaaec0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\cold_process_samples.json": "75a3930066bc4289c2ac14e3c5b41640a89aba4d261423cdc97b27bf6ac10c6a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\warm-0\\run.json": "333bec8e610ef174e33493e5f8c7e44e46c993a329e50a1a28fbc2d77eeaaec0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\warm-0_process_samples.json": "7ace32ae43519e1db926873a33b88b57210cb136cf57ec8a5c4ebf3788605730",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\warm-1\\run.json": "333bec8e610ef174e33493e5f8c7e44e46c993a329e50a1a28fbc2d77eeaaec0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\warm-1_process_samples.json": "d439e91b129bcf6df869d4ddf7d4009e74acbc05856195105d1722566e91defe",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\warm-2\\run.json": "333bec8e610ef174e33493e5f8c7e44e46c993a329e50a1a28fbc2d77eeaaec0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline1\\warm-2_process_samples.json": "80dfd04b54ae4b28eda548c78ee6baf5fa5d4dff744ce1d9d2df44b09e2fa5ee",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\receipt.json": "5c95b241a1762677e35f772e0c4850254fc7637ba3301c4ab902ecb5319aa8d3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\cold\\run.json": "ef58d1ff2bef3640630fa7a78685e4d3c4f076df0be73d7930ed6808d2127c45",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\cold_process_samples.json": "9693013e67aad207d100d95ce6397f96e65c411944a418fa2ab678a0fb950451",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\warm-0\\run.json": "ef58d1ff2bef3640630fa7a78685e4d3c4f076df0be73d7930ed6808d2127c45",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\warm-0_process_samples.json": "385533e7da31423f94d6d5de37735f31bb0beb37ac417756f883ed48e81f0a25",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\warm-1\\run.json": "ef58d1ff2bef3640630fa7a78685e4d3c4f076df0be73d7930ed6808d2127c45",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\warm-1_process_samples.json": "39ac863ae0817c3640a0737c619006556ed2a4b63ac7d1990ccb1e804f9fe4aa",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\warm-2\\run.json": "ef58d1ff2bef3640630fa7a78685e4d3c4f076df0be73d7930ed6808d2127c45",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_baseline4\\warm-2_process_samples.json": "296d2fa2f8c46a3861c3fe907eef101c5cb9b3fba22c8e6e7d22492e57a3b7cc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\receipt.json": "210d45afc2cacd55dfa26b43f1a99444afeb04afa72dccc288001c0319686b27",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\cold\\run.json": "04b40a68047cd35bcdde0811759ad9c46515a1969f0729320e6c08245c92d5bc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\cold_process_samples.json": "e55f3886cc284769ed447bb937f7cef60cb872eaf51e9051d263e0be04e4caf3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\warm-0\\run.json": "04b40a68047cd35bcdde0811759ad9c46515a1969f0729320e6c08245c92d5bc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\warm-0_process_samples.json": "acda338e2f64954a528eafee286f1b6015d64fe41001ab7d2f2e118d210b7483",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\warm-1\\run.json": "04b40a68047cd35bcdde0811759ad9c46515a1969f0729320e6c08245c92d5bc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\warm-1_process_samples.json": "6fd9defaa4b35612d014dd9fabad6a9c71e22e3662e06d9866618e0f6d98dd4b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\warm-2\\run.json": "04b40a68047cd35bcdde0811759ad9c46515a1969f0729320e6c08245c92d5bc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate1\\warm-2_process_samples.json": "2d0a85be30b1d0906079073f7b79807478628cc1dfb6a1de0d735dde45721102",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\receipt.json": "20d65cfe50efc97f3dfc7e4380bdcb2d0d3e7e5a0d55a1a3775db9928e076b7e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\cold\\run.json": "fc313229430e57b1edd7e78ac3ff2d48fe240fdd7fa08ca25e794b4c68746f22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\cold_process_samples.json": "8646c9c10bba8e81efa1858a6b0f9a726e6b7cb65c339db2a7073c874b7ed871",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\warm-0\\run.json": "fc313229430e57b1edd7e78ac3ff2d48fe240fdd7fa08ca25e794b4c68746f22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\warm-0_process_samples.json": "89fb87019397ba9b032469aa350ecb00a7f76cde5f444b172abcbd58ad53defc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\warm-1\\run.json": "fc313229430e57b1edd7e78ac3ff2d48fe240fdd7fa08ca25e794b4c68746f22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\warm-1_process_samples.json": "cc17c91b77358dbdfc153e7e5154618d894fe96151f2d8d4d942240920f05efc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\warm-2\\run.json": "fc313229430e57b1edd7e78ac3ff2d48fe240fdd7fa08ca25e794b4c68746f22",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate4\\warm-2_process_samples.json": "8f8d2444a0bd53453bf964c166340871d1097235cbe2c5209ed6dce3e44d4e35",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\receipt.json": "480630e5935caa5e4ff658052c6be7ddfdfb1a16c213ac5853162d02fc29b6a0",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\cold\\run.json": "7792ef973789e15512d75639ddbb5b587488583e83fa7dfbbd880dea7a15ebf2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\cold_process_samples.json": "392e4b823c5c487a93f27bac8a9f5ea3a62bf1f0a6e2ef8d3aa0a2eb86bd2c15",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\warm-0\\run.json": "7792ef973789e15512d75639ddbb5b587488583e83fa7dfbbd880dea7a15ebf2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\warm-0_process_samples.json": "2e263b4916b79d344b1050d3d64d8932dc3804d0275fd9a44acf28b5fe596ef4",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\warm-1\\run.json": "7792ef973789e15512d75639ddbb5b587488583e83fa7dfbbd880dea7a15ebf2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\warm-1_process_samples.json": "0cd78c3fe8697e29091580a84cfdfeaf993e2854ec1ab849609440ed313320a6",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\warm-2\\run.json": "7792ef973789e15512d75639ddbb5b587488583e83fa7dfbbd880dea7a15ebf2",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\time_field_observed_10k_candidate8\\warm-2_process_samples.json": "bbc6fcaa97edbdee7a433c9e22cd581b58835ce32700e17004657b0299846804"
+  },
+  "inspected_json_map_sha256": "da734045e3cd4a9b326fa783095f25e470b8c128c2d24936e4760af17266a901",
+  "actual_small_source_test_tool_config_checks": {
+    "baseline": {
+      "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\q",
+      "binding": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r63_2026_10_12\\candidate_binding_v61.json",
+        "sha256": "425030a9956d21f9d2a1c7667e74a1de3089240b746f8cdd308b5f4873106207"
+      },
+      "source_files": 27,
+      "bound_files": 237,
+      "source_map_sha256": "ae4e33bec254f445b36ec7a9e4c4ca58114e68b6ed75a1d67e4f8e7cbadd6fda",
+      "quality_map_sha256": "986f8d383460e0d42f0c6e84799200f7747f8ddee4c28d47ed62992cd4aff6c1",
+      "all_actual_small_bound_bytes_equal": true
+    },
+    "candidate": {
+      "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\c3",
+      "binding": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\candidate_binding_c3.json",
+        "sha256": "ceaaf85d28a9bbf9c41daf77572c9496e607b1c9fef41ffcf83fd0c5fde0f1c5"
+      },
+      "source_files": 27,
+      "bound_files": 237,
+      "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+      "quality_map_sha256": "062ab5a0a6785192a0774848e1f1ffe7c9547cc4da57a2d3775212c4ba835dd2",
+      "all_actual_small_bound_bytes_equal": true
+    },
+    "heldB": {
+      "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\b",
+      "binding": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r62_2026_10_12\\memory_candidate_binding.json",
+        "sha256": "0b1fb218190204b16153fe47ceab90c4aaba4eefa964e89f2bf6a8475e0ed1f8"
+      },
+      "source_files": 27,
+      "bound_files": 235,
+      "source_map_sha256": "74a359a4563ec82354ccdbebff52ae7f26ffbd144a393c375ab6468327aba4fa",
+      "quality_map_sha256": "5f81957af338415836488eec7f6e0905d3eb96382f9a3b84a7024ca68d8dadfb",
+      "all_actual_small_bound_bytes_equal": true
+    },
+    "live_final": {
+      "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver",
+      "binding": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\candidate_binding_c3.json",
+        "sha256": "ceaaf85d28a9bbf9c41daf77572c9496e607b1c9fef41ffcf83fd0c5fde0f1c5"
+      },
+      "source_files": 27,
+      "bound_files": 237,
+      "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+      "quality_map_sha256": "062ab5a0a6785192a0774848e1f1ffe7c9547cc4da57a2d3775212c4ba835dd2",
+      "all_actual_small_bound_bytes_equal": true
+    }
+  },
+  "final_readme_release_notes_check": {
+    "binding": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\final_readme_binding.json",
+      "sha256": "4dd2f45c852c9bc88aee3094f58cc48d74e1060385a85cddcd44455655a9c3c3"
+    },
+    "actual_small_bytes_equal": true,
+    "recorded_distribution_binding": {
+      "scope": "Final distribution README and release notes frozen separately from immutable C3 archival README",
+      "source_readme": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\README.md",
+        "sha256": "3313d9f98f3dc95f1ea5d0254139df65605a4de0ef333fa773b7bf186eebd582"
+      },
+      "frozen_copy": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\final_distribution_README.md",
+        "sha256": "3313d9f98f3dc95f1ea5d0254139df65605a4de0ef333fa773b7bf186eebd582"
+      },
+      "release_notes": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\RELEASE_NOTES.md",
+        "sha256": "aa686750145187ae5bf6f47f20042cd3408eb8a4e23d5233517bf6a44ddc1072"
+      },
+      "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+      "quality_map_sha256": "062ab5a0a6785192a0774848e1f1ffe7c9547cc4da57a2d3775212c4ba835dd2",
+      "official_publication": false
+    }
+  },
+  "limits": [
+    "JSON metadata audit only; no H5 scientific payload or input/cache byte reread, numerical imports, JIT, solver, test, profile or archive execution",
+    "Root-owned held-science reread covers each original164 and supplemental20 record; this index does not replace that science reader",
+    "Only explicitly permitted small B/Q/C3/live source/test/tool/config and final README/notes bytes were rechecked",
+    "Solver-owned array prediction is separate from synchronized sampled parent+live-child private commit; working-set sum can duplicate shared pages",
+    "8GiB original primaryW<=4 and32GiB other/supplement ceilings are observed limits, not OS hard caps;100ms sampling can miss transients",
+    "Cold1+warm3 is retained for every role; warm median includes exactly all3 warm samples; private peaks refer to simultaneous live-process sampling, not sums of process lifetime peaks",
+    "CPU8/20 results are observations; negatives retained. Event, early-hold and temporal short workloads can run slower with multiple workers than serial",
+    "Temporal C1 warm median increased1.52% versus Q1 while passing predeclared1.10 nonregression; no temporal2x gate or universal memory reduction claim",
+    "This9-case index does not alter original main8/164 policy or fixed main8 report and does not qualify pending OS/wheel/publication tasks"
+  ]
+}

@@ -29,7 +29,6 @@ from chamber_particles.physics.charge import (
     oml_stationary_global_bounds,
     oml_stationary_maxwellian_debye_huckel_v1,
 )
-from chamber_particles.physics.compiled import evaluate_physics_tile_into
 from chamber_particles.physics.forces import (
     BOLTZMANN_J_K,
     CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE,
@@ -1874,7 +1873,6 @@ def test_compiled_runtime_matches_numpy_force_composition(
     assert bool(
         (np.abs(evaluation.additive_acceleration_m_s2) <= additive_acceleration_abs_upper).all()
     )
-    assert evaluate_physics_tile_into.nopython_signatures
 
 
 def test_physics_runtime_rejects_finite_inputs_that_overflow_combined_acceleration() -> None:

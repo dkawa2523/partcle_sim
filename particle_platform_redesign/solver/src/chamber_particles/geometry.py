@@ -19,7 +19,7 @@ type Int64Array = NDArray[np.int64]
 type Int32Array = NDArray[np.int32]
 type PointClassification = Literal["inside", "boundary", "outside"]
 
-GEOMETRY_ALGORITHM_REVISION = "line_boundary_capsule_contact_bvh_v7"
+GEOMETRY_ALGORITHM_REVISION = "line_boundary_capsule_contact_bvh_v8"
 BVH_LEAF_SIZE = 8
 _VOLUME_INDEX_ULPS = 64.0
 _VOLUME_INDEX_BUILD_WORK_BYTES_PER_CELL = 1024
@@ -361,30 +361,29 @@ def centers_respect_contact_radius(
         raise ValueError("contact radii and tolerance must be nonnegative")
     if not isinstance(allow_contact, (bool, np.bool_)):
         raise ValueError("allow_contact must be boolean")
-    reach = radii + tolerance_m
-    lower = positions - reach[:, None]
-    upper = positions + reach[:, None]
-    if not bool(np.isfinite(lower).all() and np.isfinite(upper).all()):
-        raise GeometryPreparationError("contact-radius query exceeds finite float64 range")
-    counts = count_aabb_candidates(geometry, lower, upper)
-    offsets = np.empty(positions.shape[0] + 1, dtype="<i8")
-    offsets[0] = 0
-    np.cumsum(counts, out=offsets[1:])
-    candidates = np.empty(int(offsets[-1]), dtype="<i8")
-    fill_aabb_candidates_csr(geometry, lower, upper, offsets, candidates)
     valid = np.ones(positions.shape[0], dtype=np.bool_)
-    _contact_clearance_kernel(
+    invalid_query, invalid_fill = _contact_clearance_query_kernel(
         positions,
         radii,
         tolerance_m,
-        offsets,
-        candidates,
+        geometry.bvh_facet_id,
+        geometry.bvh_lower_m,
+        geometry.bvh_upper_m,
+        geometry.bvh_begin,
+        geometry.bvh_end,
+        geometry.bvh_skip,
         geometry.facet_start_m,
         geometry.facet_end_m,
         geometry.facet_contact_enabled,
         bool(allow_contact),
         valid,
     )
+    if invalid_query:
+        raise GeometryPreparationError("contact-radius query exceeds finite float64 range")
+    if invalid_fill:
+        raise GeometryPreparationError(
+            "candidate counts changed between AABB count and bounded CSR fill"
+        )
     return valid
 
 
@@ -1424,6 +1423,100 @@ def _contact_normals_kernel(
                 continue
             normals[offset, 0] = (closest0 - position_m[row, 0]) / distance
             normals[offset, 1] = (closest1 - position_m[row, 1]) / distance
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _contact_clearance_query_kernel(
+    position_m: FloatArray,
+    contact_radius_m: FloatArray,
+    tolerance_m: float,
+    bvh_facet_id: Int64Array,
+    bvh_lower_m: FloatArray,
+    bvh_upper_m: FloatArray,
+    bvh_begin: Int64Array,
+    bvh_end: Int64Array,
+    bvh_skip: Int64Array,
+    facet_start_m: FloatArray,
+    facet_end_m: FloatArray,
+    facet_contact_enabled: NDArray[np.bool_],
+    allow_contact: bool,
+    valid: NDArray[np.bool_],
+) -> tuple[bool, bool]:
+    """Preflight all query boxes, then reuse one sorted row candidate buffer."""
+
+    counts = np.empty(position_m.shape[0], dtype=np.int64)
+    lower = np.empty(2, dtype=np.float64)
+    upper = np.empty(2, dtype=np.float64)
+    maximum_candidates = 0
+    for row in range(position_m.shape[0]):
+        reach = contact_radius_m[row] + tolerance_m
+        lower[0] = position_m[row, 0] - reach
+        lower[1] = position_m[row, 1] - reach
+        upper[0] = position_m[row, 0] + reach
+        upper[1] = position_m[row, 1] + reach
+        bounds_finite = (
+            math.isfinite(lower[0])
+            & math.isfinite(lower[1])
+            & math.isfinite(upper[0])
+            & math.isfinite(upper[1])
+        )
+        if not bounds_finite:
+            return True, False
+        counts[row] = _aabb_candidate_count_kernel(
+            lower,
+            upper,
+            bvh_facet_id,
+            bvh_lower_m,
+            bvh_upper_m,
+            bvh_begin,
+            bvh_end,
+            bvh_skip,
+            facet_start_m,
+            facet_end_m,
+        )
+        maximum_candidates = max(maximum_candidates, counts[row])
+    candidates = np.empty(maximum_candidates, dtype=np.int64)
+    offsets = np.empty(2, dtype=np.int64)
+    offsets[0] = 0
+    for row in range(position_m.shape[0]):
+        reach = contact_radius_m[row] + tolerance_m
+        lower[0] = position_m[row, 0] - reach
+        lower[1] = position_m[row, 1] - reach
+        upper[0] = position_m[row, 0] + reach
+        upper[1] = position_m[row, 1] + reach
+        count = counts[row]
+        filled = _aabb_candidate_fill_kernel(
+            lower,
+            upper,
+            bvh_facet_id,
+            bvh_lower_m,
+            bvh_upper_m,
+            bvh_begin,
+            bvh_end,
+            bvh_skip,
+            facet_start_m,
+            facet_end_m,
+            candidates,
+            0,
+            count,
+        )
+        if filled != count:
+            return False, True
+        candidates[:count].sort()
+        offsets[1] = count
+        _contact_clearance_kernel(
+            position_m[row : row + 1],
+            contact_radius_m[row : row + 1],
+            tolerance_m,
+            offsets,
+            candidates,
+            facet_start_m,
+            facet_end_m,
+            facet_contact_enabled,
+            allow_contact,
+            valid[row : row + 1],
+        )
+    return False, False
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)

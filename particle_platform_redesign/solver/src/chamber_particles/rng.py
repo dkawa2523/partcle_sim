@@ -183,11 +183,11 @@ def brownian_normal_pair_batch(
     _seed_key(seed)
     particles = _nonnegative_uint64_vector(particle_id, "particle IDs")
     macro_low, macro_high = _split_uint64(macro_interval, "macro interval")
-    root_low, root_high = _split_uint64(root_interval, "Brownian root interval")
+    _split_uint64(root_interval, "Brownian root interval")
     level = _uint32(tree_level, "Brownian tree level")
     if level > 63:
         raise ValueError("Brownian tree level must be in [0, 63]")
-    tree_low, tree_high = _split_uint64(tree_index, "Brownian tree index")
+    _split_uint64(tree_index, "Brownian tree index")
     if tree_index >= (1 << level):
         raise ValueError("Brownian tree index is outside its level")
     component_word = _uint32(component, "Brownian component")
@@ -199,31 +199,21 @@ def brownian_normal_pair_batch(
     if stream == BROWNIAN_ROOT_NORMAL_STREAM and (level != 0 or tree_index != 0):
         raise ValueError("Brownian root draws require tree node (0, 0)")
 
-    root_key = philox4x32_10(
-        (
-            root_low,
-            root_high,
-            tree_low,
-            tree_high,
-        ),
-        _seed_key(seed),
-    )
-    derived = philox4x32_10(
-        (
-            root_key[0],
-            root_key[1],
-            level,
-            stream ^ component_word,
-        ),
-        (root_key[2], root_key[3]),
+    key0, key1 = _brownian_node_key(
+        np.uint64(seed),
+        np.uint64(root_interval),
+        level,
+        np.uint64(tree_index),
+        component_word,
+        stream,
     )
     result = np.empty((particles.size, 2), dtype=np.float64)
     _brownian_normal_pair_batch_into_kernel(
         particles,
         np.uint64(macro_low),
         np.uint64(macro_high),
-        np.uint64(derived[0]),
-        np.uint64(derived[1]),
+        np.uint64(key0),
+        np.uint64(key1),
         result,
     )
     return result
@@ -353,25 +343,80 @@ def _brownian_normal_pair_batch_into_kernel(
     key1: np.uint64,
     result: FloatArray,
 ) -> None:
-    mask32 = np.uint64(_MASK32)
     for row in range(particle_id.size):
-        particle = particle_id[row]
-        block = _philox4x32_10_kernel(
-            particle & mask32,
-            particle >> np.uint64(32),
-            macro_low,
-            macro_high,
-            key0,
-            key1,
+        result[row, 0], result[row, 1] = _brownian_pair_from_key(
+            particle_id[row], macro_low, macro_high, key0, key1
         )
-        integer0 = ((block[0] << np.uint64(32)) | block[1]) >> np.uint64(12)
-        integer1 = ((block[2] << np.uint64(32)) | block[3]) >> np.uint64(12)
-        uniform0 = (float(integer0) + 0.5) * _UNIT52
-        uniform1 = (float(integer1) + 0.5) * _UNIT52
-        radius = math.sqrt(-2.0 * math.log(uniform0))
-        angle = 2.0 * math.pi * uniform1
-        result[row, 0] = radius * math.cos(angle)
-        result[row, 1] = radius * math.sin(angle)
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _brownian_pair_from_key(
+    particle_id: np.uint64,
+    macro_low: np.uint64,
+    macro_high: np.uint64,
+    key0: np.uint64,
+    key1: np.uint64,
+) -> tuple[float, float]:
+    mask32 = np.uint64(_MASK32)
+    block = _philox4x32_10_kernel(
+        particle_id & mask32, particle_id >> np.uint64(32), macro_low, macro_high, key0, key1
+    )
+    integer0 = ((block[0] << np.uint64(32)) | block[1]) >> np.uint64(12)
+    integer1 = ((block[2] << np.uint64(32)) | block[3]) >> np.uint64(12)
+    uniform0 = (float(integer0) + 0.5) * _UNIT52
+    uniform1 = (float(integer1) + 0.5) * _UNIT52
+    radius = math.sqrt(-2.0 * math.log(uniform0))
+    angle = 2.0 * math.pi * uniform1
+    return radius * math.cos(angle), radius * math.sin(angle)
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _brownian_node_key(
+    seed: np.uint64,
+    root_interval: np.uint64,
+    tree_level: int,
+    tree_index: np.uint64,
+    component: int,
+    draw_kind: int,
+) -> tuple[np.uint64, np.uint64]:
+    mask32 = np.uint64(_MASK32)
+    root = _philox4x32_10_kernel(
+        root_interval & mask32,
+        root_interval >> np.uint64(32),
+        tree_index & mask32,
+        tree_index >> np.uint64(32),
+        seed & mask32,
+        seed >> np.uint64(32),
+    )
+    derived = _philox4x32_10_kernel(
+        root[0], root[1], np.uint64(tree_level), np.uint64(draw_kind ^ component), root[2], root[3]
+    )
+    return derived[0], derived[1]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def brownian_normal_pair_native(
+    seed: np.uint64,
+    particle_id: np.uint64,
+    macro_interval: np.uint64,
+    root_interval: np.uint64,
+    tree_level: int,
+    tree_index: np.uint64,
+    component: int,
+    draw_kind: int,
+) -> tuple[float, float]:
+    """Draw from a validated physical address inside a native continuation."""
+
+    key0, key1 = _brownian_node_key(
+        seed, root_interval, tree_level, tree_index, component, draw_kind
+    )
+    return _brownian_pair_from_key(
+        particle_id,
+        macro_interval & np.uint64(_MASK32),
+        macro_interval >> np.uint64(32),
+        key0,
+        key1,
+    )
 
 
 def _seed_key(seed: int) -> tuple[int, int]:

@@ -224,7 +224,7 @@ def test_c09_residual_subdivision_preserves_all_hits_and_fails_at_its_budget(
     )
     assert split.manifest["boundary_interactions"]["residual_splits"] == 3
     memory_plan = split.manifest["memory_plan"]
-    assert memory_plan["event_work_bytes_per_particle"] == 24 * (2 + 1)
+    assert memory_plan["event_work_bytes_per_particle"] == 24 * (2 + 1) + 539
     assert memory_plan["release_work_bytes_per_particle"] == 64
     assert memory_plan["event_staging_capacity"] == (memory_plan["event_candidate_capacity"] // 2)
     assert memory_plan["slab_particles"] <= memory_plan["event_staging_capacity"]
@@ -248,7 +248,7 @@ def test_c09_residual_subdivision_preserves_all_hits_and_fails_at_its_budget(
         memory_plan["slab_particles"] * memory_plan["failure_staging_bytes_per_particle"]
     )
     assert memory_plan["components"]["geometry_query_scratch"] == (
-        4 * memory_plan["event_candidate_capacity"] * np.dtype("<i8").itemsize
+        4 * memory_plan["event_candidate_capacity"] * np.dtype("<i8").itemsize + 24
     )
     # One C09 particle produces five interactions, while only one output row
     # is solver-owned at once.  The completed payload therefore demonstrates

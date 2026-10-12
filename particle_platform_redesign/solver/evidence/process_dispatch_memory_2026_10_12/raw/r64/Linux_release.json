@@ -1,0 +1,391 @@
+{
+  "captured_at_utc": "2026-10-12T07:18:16.393034+00:00",
+  "status": "complete",
+  "passed": true,
+  "scope": "Actual local WSL2 Ubuntu4CPU final C4 ABI/public-functional and clean-installed-wheel qualification completed. Before/after actual27/237 source binding, standard7/core944(1warning), portabletools120, QuickStart6, P14smoke8 and installed-wheel2worker API/actual console/module all complete. No Windows20CPU scaling inheritance, native Linux20CPU/NUMA qualification, remoteCI execution or formal publication.",
+  "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+  "quality_map_sha256": "1f07b777ff209f9a09844d7b1c4f4babd482d5b7706333d7f1d48b68eef58a59",
+  "source_readme": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\README.md",
+    "sha256": "3313d9f98f3dc95f1ea5d0254139df65605a4de0ef333fa773b7bf186eebd582"
+  },
+  "release_notes": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\RELEASE_NOTES.md",
+    "sha256": "aa686750145187ae5bf6f47f20042cd3408eb8a4e23d5233517bf6a44ddc1072"
+  },
+  "wheel": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_dist\\chamber_particles-0.3.0-py3-none-any.whl",
+    "sha256": "74ff0572939a429d5cc57032a36bb3aeddd964ad17209f0a57b3e187d80c5609"
+  },
+  "final_source_binding": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\candidate_binding_c4.json",
+    "sha256": "751650c4cf90cb5d4218b82f00969ea18f84f1ae894958954a9495a95ff58229"
+  },
+  "source_binding_before": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_binding_before.json",
+    "sha256": "5218f500d015034c54e3105b91cdb25c021b6a64b18fe364c711622859517569"
+  },
+  "source_binding_after": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_binding_after.json",
+    "sha256": "3f272cdc5ffdf5c15445ea37ee0fdc870c5f7c72b46b4087890782e842960706"
+  },
+  "host_scope": {
+    "observed": {
+      "system": "WSL2 Ubuntu 24.04.4",
+      "kernel": "6.6.87.2-microsoft-standard-WSL2",
+      "visible_cpu_count": 4,
+      "memory_kib": 12250356,
+      "existing_uv": "0.11.28",
+      "existing_system_python": "3.12.3",
+      "runtime_limitation": "Linux ABI, clean wheel, spawn and shared-memory behavior are eligible for local qualification. This virtualized4CPU host cannot qualify native20CPU Linux, NUMA placement or Windows scaling claims."
+    },
+    "qualification": "WSL4CPU ABI/functional only",
+    "Windows20CPU_scaling_inherited": false
+  },
+  "standard_quality": {
+    "executed_snapshot": "C4 native Linux source",
+    "commands": [
+      {
+        "command": "uv lock --check",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individually executed command exit confirmed",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quality01_lock.log",
+          "sha256": "15ff6f4b4b02b3e3641c5cc0b3a7e811fcf24e9751564df54f9ef5794e331a00"
+        }
+      },
+      {
+        "command": "uv run --locked ruff format --check src tests tools",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individually executed command exit confirmed",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quality02_format.log",
+          "sha256": "fbf8c7ff025066cec05701a61e32ac79f606f45c0462ed33d43c4fd33c7538de"
+        }
+      },
+      {
+        "command": "uv run --locked ruff check src tests tools",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individually executed command exit confirmed",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quality03_lint.log",
+          "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+        }
+      },
+      {
+        "command": "uv run --locked pyrefly check --summarize-errors",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individually executed command exit confirmed",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quality04_types.log",
+          "sha256": "d7bc04d41208fa472c9ea691a60af7718b485cf32b74a88ddb32af7338595b49"
+        }
+      },
+      {
+        "command": "uv run --locked lint-imports",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individually executed command exit confirmed",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quality05_imports.log",
+          "sha256": "7534ceba3565b9babee3291f7323243b79addb35185f569b3a94775000f9f1bb"
+        }
+      },
+      {
+        "command": "uv run --locked python scripts/check_complexity.py",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individually executed command exit confirmed",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quality06_complexity.log",
+          "sha256": "3f4a894e282f8a6bb1e94bb72958dc87f996f36b7cbbb0eee9a52ac4f6e0d117"
+        }
+      },
+      {
+        "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individually executed command exit confirmed",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quality07_tests.log",
+          "sha256": "3d9f49c617a7b978975c12e27eac4fc71ee1f36c81c3ed0d67fde00333d8e729"
+        }
+      }
+    ],
+    "core_tests_passed": 944,
+    "core_warnings": 1,
+    "core_wall_s": 541.71,
+    "status": "completed"
+  },
+  "portable_tools": {
+    "command": "uv run --locked python -m pytest tools/comsol_adapter/tests tools/electrostatic_builder/tests tools/field_preprocessor/tests tools/vv/comsol/tests/test_meaning_preflight.py tools/vv/comsol/tests/test_boundary_response_mapping.py tools/vv/comsol/tests/test_curved_wall_line2_convergence.py tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py -q",
+    "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+    "exit_code": 0,
+    "passed_tests": 120,
+    "wall_s": 3.71,
+    "raw_log": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_portable_tools.log",
+      "sha256": "a6ee9e5a9f59383479521f4f1a04f8dc196515dffbb4dc6dfd5feb253082ea7a"
+    },
+    "status": "completed"
+  },
+  "raw_smoke_receipt": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_clean_wheel_smoke.json",
+    "sha256": "3a317f63cb7b1cd11791f4100e55fd9d4f4445286b676528404b119df5692080"
+  },
+  "raw_smoke_log": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_clean_wheel_smoke.log",
+    "sha256": "4f1005298f25a8e17793c817763408e75d34a3c781a5a8db20972d46027a9530"
+  },
+  "native_runtime_metadata_probe": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_runtime_metadata_probe.json",
+    "sha256": "944ac85d170e8be609a5ff767df38a0c9b26ffd71ed7ca1d6d4c34c5bad3ad7f"
+  },
+  "clean_runtime": {
+    "prefix_native": "/home/user/chamber-particles-r64-c4/runtime",
+    "package_path_native": "/home/user/chamber-particles-r64-c4/runtime/lib/python3.12/site-packages/chamber_particles/__init__.py",
+    "package_beneath_runtime_prefix": true,
+    "python": "3.12.13",
+    "dependency_count": 5,
+    "distribution_count": 6,
+    "observed_distribution_versions": {
+      "chamber-particles": "0.3.0",
+      "h5py": "3.16.0",
+      "llvmlite": "0.49.0",
+      "numba": "0.67.0",
+      "numpy": "2.5.3",
+      "pyyaml": "6.0.3"
+    },
+    "sync_raw_log": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_runtime_sync.log",
+      "sha256": "e0a3ec2c26677ce847f75101e217f0811031b5d276da56f522ce398777ead11f"
+    },
+    "install_raw_log": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_runtime_install.log",
+      "sha256": "2fd3372b181626020e62426f72003246ff9132cd136a934c1ad4928941839e03"
+    },
+    "editable_source_used": false
+  },
+  "wheel_identity": {
+    "source_wheel_installed_all27_python_bytes_equal": true,
+    "production_python_sha256": {
+      "chamber_particles/__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+      "chamber_particles/__main__.py": "f8122cfa72770c411e9f70dcba29a4bc89c21176692c00afb092d7b7e92d20ed",
+      "chamber_particles/api.py": "d2202b64ca56fd35863b9c713dd81bd7663b92526cc5158397a7e19043e6c952",
+      "chamber_particles/boundaries.py": "d6a332324e6d536b12456741c8da356cbda29fc0ade1d8cefb752bec865a9639",
+      "chamber_particles/case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+      "chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "chamber_particles/cli.py": "574e90eaecad5f9209bef12c0caec3be625e17bd52f9961ca0f54ddc248dbf50",
+      "chamber_particles/coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+      "chamber_particles/cpu.py": "bc2b64bb401e96d5f3aca6c3df84bd84c4a1ec01b782ad905b03a1d9d4fa66fb",
+      "chamber_particles/engine.py": "df4e78e30d7cea34647ba95411b17fe400faab927455adf1807d8a3d6743a070",
+      "chamber_particles/events.py": "4d3eb12273419ab97cc12b9b8e6f8f6d03076ab37a34dbc1b567f586073348f7",
+      "chamber_particles/fields.py": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f",
+      "chamber_particles/geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+      "chamber_particles/integrators.py": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d",
+      "chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "chamber_particles/physics/catalog.py": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+      "chamber_particles/physics/charge.py": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "chamber_particles/physics/compiled.py": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+      "chamber_particles/physics/forces.py": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+      "chamber_particles/physics/runtime.py": "b1511fcf1b3e12b7d5b21e829ef52c518fe5eca8045bdeec9c28851a95845f7c",
+      "chamber_particles/rng.py": "fff6f67cf1dc1243fb20f9221103f0c339e62280be0a7ea90640614016feb0ba",
+      "chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+      "chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+    },
+    "wheel_metadata_sha256": "1bfc1fcf5a81f51fb24797830b15a87df5c411e35450ecec33771431bd6d63cb",
+    "installed_metadata_sha256": "1bfc1fcf5a81f51fb24797830b15a87df5c411e35450ecec33771431bd6d63cb",
+    "installed_metadata_text_matches_wheel": true,
+    "long_description_matches_final_readme": true,
+    "readme_sha256": "3313d9f98f3dc95f1ea5d0254139df65605a4de0ef333fa773b7bf186eebd582",
+    "lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+    "wheel_size_bytes": 377787,
+    "build_raw_log": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_build_wheel.log",
+      "sha256": "fe23cbbad79ba182ba6db8a49b832203c5b42fe3e1e1b7cd7ed4f2f07d0f7571"
+    }
+  },
+  "installed_public_execution": {
+    "status": "completed",
+    "API_workers": 2,
+    "actual_console_workers": 2,
+    "module_workers": 2,
+    "all_full_scientific_bytes_equal_serial": true,
+    "API_live_children_after_return": 0,
+    "CLI_subprocesses_completed_with_expected_exit_within180s": true,
+    "public_error_exit": 2,
+    "independent_CLI_global_orphan_count_recorded": false,
+    "original_C4native_receipt_paths_preserved": true
+  },
+  "quickstart": {
+    "commands": [
+      {
+        "operation": "generate",
+        "command": "uv run --locked python examples/quickstart/create_case.py /home/user/chamber-particles-r64-c4/quickstart/input",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individual execution confirmed; stdout semantics reconciled",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart01_generate.log",
+          "sha256": "ddf15a1eb2f9d20024e7ee7e1d2d023394985bbd4628b1863a686776b7f3827c"
+        },
+        "observed_status": "created"
+      },
+      {
+        "operation": "check",
+        "command": "uv run --locked chamber-particles check /home/user/chamber-particles-r64-c4/quickstart/input/case.yaml",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individual execution confirmed; stdout semantics reconciled",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart02_check.log",
+          "sha256": "974ba95f70c7df53b3cdc464b030e481b63c62d87fdbdfea378b5a3f59fdbf7a"
+        },
+        "observed_status": "valid"
+      },
+      {
+        "operation": "run",
+        "command": "uv run --locked chamber-particles run /home/user/chamber-particles-r64-c4/quickstart/input/case.yaml -o /home/user/chamber-particles-r64-c4/quickstart/result",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individual execution confirmed; stdout semantics reconciled",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart03_run.log",
+          "sha256": "09db0e1a4c10fb9b395beb0ba401b2d08d678135d961cdcb6b4b28f2ad071bc1"
+        },
+        "observed_status": "complete"
+      },
+      {
+        "operation": "inspect",
+        "command": "uv run --locked chamber-particles inspect /home/user/chamber-particles-r64-c4/quickstart/result",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individual execution confirmed; stdout semantics reconciled",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart04_inspect.log",
+          "sha256": "102636f7fad0cffaf92f6eee4a7b45ab44e5a9cb5d05ed87404c06bb2f24555c"
+        },
+        "observed_status": "complete"
+      },
+      {
+        "operation": "analyze",
+        "command": "uv run --locked python -m tools.analysis /home/user/chamber-particles-r64-c4/quickstart/result --output /home/user/chamber-particles-r64-c4/quickstart/derived/summary.json",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individual execution confirmed; stdout semantics reconciled",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart05_analyze.log",
+          "sha256": "ffc7c301c92d43786e6ae5e8a20adf7a4de8e2daa4b3f8775479bc3f4724a3d1"
+        },
+        "observed_status": "complete"
+      },
+      {
+        "operation": "visualization",
+        "command": "uv run --locked python -m tools.visualization /home/user/chamber-particles-r64-c4/quickstart/result --output-directory /home/user/chamber-particles-r64-c4/quickstart/derived/visualization",
+        "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+        "exit_code": 0,
+        "exit_code_owner": "Root actual individual execution confirmed; stdout semantics reconciled",
+        "raw_log": {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart06_visualize.log",
+          "sha256": "a213379f2eea403a39f37481b111e000155d2afa30d4ee256a3d08b4b5814a1b"
+        },
+        "observed_status": "visualization_metadata_complete"
+      }
+    ],
+    "status": "completed",
+    "artifact_file_count": 12,
+    "result_manifest": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\result\\run.json",
+      "sha256": "5d04dd3b9de579f1331448d4e23690f9fe619f5ae4572a107c4408e0b7ba46ba"
+    },
+    "derived_canonical_manifest_sha256": "sha256:98c9daa4f265db242c4b57779189fb622f010b673035a08f1def3c84fe92ac81",
+    "result_particles": 1,
+    "result_boundary_events": 2,
+    "result_failure_events": 0,
+    "result_frames": 5,
+    "original_native_paths_preserved": true
+  },
+  "P14_smoke": {
+    "status": "complete",
+    "required": true,
+    "command": "uv run --locked python -m tests.performance.p14_matrix --suite smoke --json /home/user/chamber-particles-r64-c4/p14-smoke.json",
+    "working_directory_native": "/home/user/chamber-particles-r64-c4/source",
+    "exit_code": 0,
+    "exit_code_owner": "Root actual session42060 ended0",
+    "raw_json": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_p14_smoke.json",
+      "sha256": "90b13e14b0e4cb0c3f98b1b095b821db54f26f95a77b30c173131148e7bfbdad"
+    },
+    "raw_log": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_p14_smoke.log",
+      "sha256": "a576aa426225b38b6be8a8011f1c8ea0313aadfafa7bd879d5769b024598711d"
+    },
+    "complete_preset_rows": 8,
+    "identity": {
+      "core_definition": "final/release/boundary/failure/series payload; output frames, probes, execution partition, timing, RSS, and manifest are excluded",
+      "exact_global_algorithm_revisions": true,
+      "exact_repeats": true,
+      "exact_within_science_key": true
+    },
+    "solver_array_fit_checked": true,
+    "observed_visible_CPU": 4,
+    "seconds_non_gating": true,
+    "not_a_scaling_or_performance_SLA": true
+  },
+  "after_binding": {
+    "status": "complete",
+    "required": true,
+    "actual_source_files": 27,
+    "actual_bound_files": 237,
+    "source_before_after_equal": true,
+    "bound_before_after_equal": true,
+    "README_before_after_equal": true,
+    "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+    "quality_map_sha256": "1f07b777ff209f9a09844d7b1c4f4babd482d5b7706333d7f1d48b68eef58a59",
+    "selected_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+    "raw_receipt": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_binding_after.json",
+      "sha256": "3f272cdc5ffdf5c15445ea37ee0fdc870c5f7c72b46b4087890782e842960706"
+    }
+  },
+  "artifact_files": {
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\derived\\summary.json": "3382c2df9339e8701651822955635481bfeafe6cbc97fab9aa918b352642ed07",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\derived\\visualization\\boundary_events.svg": "010c4b0a9a3ad255615d540c490921f0a488e336ba17c7ce721dafdd1258de62",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\derived\\visualization\\trajectory.svg": "f2727d8c1ed42b07021265a7f40968ca5dccb9f90c5336b198c7102339c78bd6",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\derived\\visualization\\visualization.json": "ba28c1c63a3a91bf8264be093b15f114a9d4a7381a5737701c1ea574ba0d5605",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\input\\case.h5": "4571f402deceb037b39b5cbab0e8a6a6e99581a6c97b2bf9d66e52ee31ae5958",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\input\\case.yaml": "bff1b9cdf9f06dbc05ff9052030a9b1205e226737f1392e84ec1415f4b0df492",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\result\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\result\\checkpoints\\A.h5": "453b92ed47a522331b85795c254ada8cc9bd1ed469094a148e4ef1edd24a1dc9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\result\\final.h5": "4fd2070b7fc6defa929d9c33aeb44948878fdb048ed7456754e18c66206d39b9",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\result\\LATEST": "ff086dfddabdc3e061ffe5cb3a94b0bfa5f21732c6548b8586628cbe389e359e",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\result\\run.json": "5d04dd3b9de579f1331448d4e23690f9fe619f5ae4572a107c4408e0b7ba46ba",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_quickstart\\result\\segments\\epoch-000000.h5": "3a9dba09a5ef771baa0fad6e7346ee259e57bfa25d63aee2aaca95cbaf604910",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_dist\\SHA256SUMS.txt": "e45956b80f10a459a45d53e3556d49233f7a65537a4b357621ee4d4ef2e0b523"
+  },
+  "raw_native_path_handling": "Only host copied-file path/SHA objects are references in this wrapper. Original raw Linux JSON native strings are preserved; they are not recursively rewritten or treated as Windows filesystem references.",
+  "audit_method": "Existing root raw logs/JSON plus stdlib-only tiny wheel, small QuickStart files and isolated-I-S native metadata/source hash probe. No solver/NumPy/Numba import, JIT, numerical run, test, P14 or archive execution by this author.",
+  "official_publication": false,
+  "final_qualification_closed": true,
+  "distribution_checksums": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_dist\\SHA256SUMS.txt",
+    "sha256": "e45956b80f10a459a45d53e3556d49233f7a65537a4b357621ee4d4ef2e0b523"
+  },
+  "archive_extra_file_list": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\linux_release_extra_files.txt",
+    "sha256": "9020be1bd7f8b53ab9ed0e399c1aee1fe2f6f9aa12e91aae8654a14e4b2a04e8"
+  },
+  "prepared_receipt": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r64_2026_10_12\\Linux_release_prepared.json",
+    "sha256": "2fce1924baa23dc10a0d2f5e58a3e16f58dcdfc9e0bc907b0f19ae4f7a668f1f"
+  },
+  "remote_CI_executed": false
+}

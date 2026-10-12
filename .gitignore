@@ -41,3 +41,21 @@ hs_err_pid*.log
 
 # Local external V&V dataset; provenance belongs in committed evidence instead
 /model_dataset/
+
+# Local experiments, execution environments and large verification payloads
+/.artifacts/
+/particle_platform_redesign/solver/evidence/**/*.zip
+/particle_platform_redesign/solver/evidence/**/*.whl
+/particle_platform_redesign/solver/evidence/**/*.h5
+/particle_platform_redesign/solver/evidence/**/*.hdf5
+/particle_platform_redesign/solver/evidence/**/*.npy
+/particle_platform_redesign/solver/evidence/**/*.npz
+/particle_platform_redesign/solver/evidence/**/*.prof
+/particle_platform_redesign/solver/evidence/**/LATEST
+/particle_platform_redesign/solver/evidence/**/_SUCCESS
+/particle_platform_redesign/solver/evidence/**/checkpoints/
+/particle_platform_redesign/solver/evidence/**/segments/
+/particle_platform_redesign/solver/evidence/**/cache*/
+/particle_platform_redesign/solver/evidence/**/runtime/
+/particle_platform_redesign/solver/evidence/**/windows_runtime/
+/particle_platform_redesign/solver/evidence/**/linux_runtime/

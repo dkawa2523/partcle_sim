@@ -1,107 +1,43 @@
-# chamber-particles 0.2.0
+# chamber-particles 0.3.0
 
-`0.2.0`は時間依存場・接触geometry・境界応答・Brownian処理を、既存の2-D engineへ統合したminor releaseです。
-`0.1.0`のstatic 2-D baselineは同版のtagに保持します。
+0.3.0は、既存の2-D数値処理を一つのengineのまま高速化し、同一runのCPU process並列を追加した版です。
+Python 3.12、Cartesian XY/RZ meridional、canonical case/data/result schema 3、checkpoint schema 2を維持します。
 
-## 0.2.0の変更
+## 主な変更
 
-- canonical YAML case/HDF5 data/result schemaをv3へ更新。fixed-topology fieldは静的`values[N,C]`または
-  `time_s[T]`＋`values[T,N,C]`を持ち、実stage時刻の線形補間とtime-knot分割を使う
-- static 2-D Cartesian XYのconforming boundary pairをpure translationで接続する
-  `translation_periodic_xy_v1`を追加。材料wall lawと周期transferを分離し、required fieldのseam一致をprepare時に検査
-- `contact_wall_laws_v7`でMaxwell thermalを含む応答へcandidate固有接触法線を統一。sourceは粒子ごとのrealized internal/surface scheduleへ統一
-- B04でBrownian粒子のactive-wall hit後をpost-wall stateからfresh stochastic rootとして継続
-- B05で全rootへ一様なbase depthを維持し、wall/RZ-axis/証明不能候補だけを`adaptive_max_depth`まで条件付き分割。
-  base=maxは従来固定depthへ退化し、連続OUのexact first-passageは主張しない
-- Brownianを`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`へ統一。XY/RZ、fixed/continuous charge、
-  native/effective-gas線形Epsteinと適用域が交わる既存additive forceを同じOU/FDT engineで合成する
-- event v19でevent v18の有限半径first contactと同時incident facet集合を維持し、exact、一般RK4、
-  exponential、Brownianの材料wallと周期transferを同じfirst-event順序で解決
-- event v20で有限半径粒子が同時接触した複数facetから反射後に離脱するexact残時間を、暗黙の有限contact集合として
-  candidateごとに証明する。位置nudgeは行わず、証明不能接触・後続impact・材料/周期混在cornerはfail-closedのまま維持する
-- physics catalog v20でneutral drag、thermophoresis、lift、gravity/buoyancyの重複背景authorityを
-  liftの有無によらず照合し、linear Epstein/Waldmannのnative/effective-gas混在をfail-closedにする
-- Talbot熱泳動を原著の半径Knと明示係数Cs,Cm,Ctへ統一し、`talbot_cross_regime_radius_knudsen_v1`へ更新。
-  旧直径Kn revisionの入力を拒否し、純粋式・bound・compiled・公開scenarioを同時に検証
-- YAMLのnested duplicate/merge keyを主要入力で統一して拒否し、巨大数値の変換失敗を既存domain例外へ翻訳
-- finalの粒子数とmanifestの整合、非負・狭義昇順IDをpublish/open/readの共通検査へ追加
-- 外部field preprocessor v4はP1・regular・affine Q1からfull regularへのstatic/linear-time cacheを認証。
-  共通partitionの物理測度normと全時間区間のBernstein誤差比上界を用い、warped Q1・coverage不整合・解像不能patch・資源超過は公開拒否
-- 境界groupに`contact_geometry: particle_surface | particle_center`を追加。独立した粒子半径を保持して材料接触と仮想開口通過を混在できる。
-  exact端capの離脱証明と、反射originのmacro/checkpointを跨ぐ継続を修正
-- 外部比較はcurrent executor、hash付きexpected/observed artifact、実boundary responseを照合。
-  未観測の設定・boundary ID・terminal原因を認証済みにしない
-- 独立OU oracle、可変係数・位置依存流速の実noise ensemble、harmonic dense local/global試験を追加
-- 独立Kramers基準解と実noise first-arrival CDF比較、非dyadic dense covariance、RZ folded OU、continuous chargeの限定精度証拠を追加
-- release CIの品質gate・Quick Start・wheel検査を独立stepに分離し、途中のnative終了コードを後続成功で隠さない
-- 単調なHermite壁接近で、roundoff幅が非接触・接触条件の隙間に入ると時間表現限界まで二分する問題を修正。
-  厳密な法線速度下界とendpoint signed-distance上界から全区間の内側を証明し、位置nudgeや許容誤差の拡大は使わない
-- 外部field producerへ任意の`--source-time-diagnostic`を追加。不均一時刻の内部snapshot省略に対する値・gradient・境界traceの感度を既存samplerでreportする
-- 一定係数OUの反復鏡面反射とRZ到達に独立Gaussian/Kramers参照を追加。登録済み誤差基準で解像度ごとの適格性を判定する
-- Unicodeを含むcase名・pathをASCII pipeへ安全にJSON出力するCLIへ修正
-- source・wheel・runtime-only installの全Python source digestとREADME由来のMETADATA本文を照合し、三APIとconsole/module CLI、time-field、surface/center接触をclean installで検証する
-- 空replayの検索とevent ordinal上限の反復構築を削減。同一条件の効率測定と科学payload照合を保存
-- engine v46、event `line_quadratic_curved_capsule_periodic_first_hit_v22`、physics catalog v23、physics runtime v22、memory plan v16、source
-  `realized_internal_surface_contact_schedule_v5`、compiled tile v21、canonical case/data/result schema 3、checkpoint schema 2、
-  result algorithm `durable_segmented_result_v6`
+- `simulate(case, output, *, workers=1)`とCLI `run ... --workers 4`でprocess数を指定できます。
+  既定は1で、worker数はYAMLの数値設定やRNG keyに含めません。
+- 親が時刻・release・単一writer・checkpointを所有し、workerは排他的な粒子群を同じ数値処理で更新します。
+  完了したworkerへ次の粒子群を渡し、境界/failureイベントは容量を制限したbatchとACKで受け渡します。
+- 作業配列の再利用、stage workspaceの統合、field/geometry探索と初期包含検査の処理効率を改善しました。
+  共有scratch templateは全workerの準備完了後に解放し、run内のreplay共有メモリを再利用します。
+- 付着・保持後の粒子は運動更新を停止し、最終状態と要求された出力を保持します。
+- 計算途中のworker異常終了では未完結果を完成として公開せず、最後のdurable checkpointからworker数を変えて再開できます。
+  実workerの異常終了、再開後の保存科学出力一致と共有メモリ・process cleanupを検証します。
+- 0.2.0後の数値修正として、Brownianの絶対終端時計と、有効な静止exact pathの有限半径接触判定を修正しました。
+  数値revisionを更新し、実行資源だけの変更と区別しています。
 
-過去schemaのcompatibility readerやmigration shimはありません。`0.1.0`入力を使う場合は
-公開tagのsolverを使うか、producer側で明示的にschema v3へ再生成します。
+## 性能と検証範囲
 
-## 用途別保証と配布
+Windowsの登録用途では大粒子数の並列効果を確認しました。追加P14-Uの1万粒子・320ステップは
+1/4 processで27.36/13.93秒、warm中央値の速度比1.96xでした。一方、COMSOL入力の287粒子・1500ステップでは
+2/4 processが遅く、worker数を増やせば常に速くなる仕様ではありません。
+条件、cold/warm、出力量、総CPU・メモリ、科学一致と制約は[並列性能](docs/parallel_execution_plan.md)を参照してください。
 
-検証保証は、独立解析解・Green/OU/Kramers reference・登録ensemble・時間/mesh収束を持つ指定profileへ限定します。
-正式P14/B03/P14-Uの反復測定は測定機での工学的受入であり、未指定の利用者accuracy・時間・RSS SLAへ読み替えません。
-COMSOL比較は保存済みnative参照と現行v46のversion再資格です。元Brownian登録の未達、未観測のboundary原因/ID、
-native FE・内部stage・物理modelの実験的妥当性などの制約は保持します。
-条件と結果の入口は
-[`support_and_errors.md`](https://github.com/dkawa2523/partcle_sim/blob/v0.2.0/particle_platform_redesign/solver/docs/support_and_errors.md)
-です。
+品質・公開scenario・用途別科学出力、Windows/Linux、clean-installed wheelの三APIと実process CLIを検証対象とします。
+COMSOL Case A/Pは保存参照に対する登録済み位置・終端人口分布の回帰です。全native右辺、境界応答、速度・電荷分布、
+実験的な製造予測精度の一般保証へ拡張しません。[評価方法](../vv_methodology.md)に比較範囲を明示しています。
 
-同じtagのWindows/Linux品質gate、Quick Start、wheel build、runtime-only clean install、三API/CLI smokeを通したwheelと
-`SHA256SUMS.txt`をGitHub Releaseで配布します。wheelは`chamber_particles` packageとCLIを含み、source companionの
-`tools/`・`examples/`・外部V&Vは含みません。外部の生CSV/HDF5/MPHはGit配布せず、証拠のhashと再現条件を保存します。
-Python 3.12、single-thread CPU、2-D XY/RZ meridionalが対象です。開発statusはalpha、PyPI・sdist・3-D・GPU・
-普遍的COMSOL同等性は今回の配布scopeに含めません。利用ライセンスは設定しておらず、再利用には権利者の明示許諾が必要です。
+## 利用上の条件と将来項目
 
----
+複数processを使うscriptはimport可能なファイルに保存し、main guardを付けてください。
+solver-owned配列予算とOS総メモリは異なります。wheelはsolver packageとCLIを含み、`tools/`・`examples/`はsource checkoutに付属します。
+過去schemaの互換readerはありません。
 
-# chamber-particles 0.1.0（公開済み）
+全workerは活動粒子の各macroステップ末尾で同期します。複数macroをまとめて実行する同期間隔の設定化は将来項目です。
+数値刻み・Brownian乱数・境界処理・出力を維持した上で、時間・メモリ・checkpoint/resumeを比較して判断します。
+追加JIT化、3-D、GPU、粒子間相互作用や場へのfeedbackは0.3.0に追加していません。
 
-`0.1.0`は、半導体製造チャンバー内の粒子軌道を外部場とgeometryから計算する
-clean-room solverの最初の正式公開版です。公開状態はalphaであり、対応範囲を明示して使います。
-
-## 公開範囲
-
-- Python 3.12、Windows/Linuxで検証したpure-Python wheel
-- `load_case`、`simulate`、`open_result`の三つの公開Python APIと同じ経路を使うCLI
-- static 2-D XYおよびRZ meridionalのcanonical field/geometry入力
-- single-thread compiled CPU engine、bounded slab、再現可能なcounter RNG、checkpoint/resume
-- P1/Q1/regular field、first-hit境界event、stick/escape/hold/specular/probabilistic wall
-- 明示選択するdrag、electric、gravity、continuous charge、thermophoresis、ion drag、DEP、
-  RZ lift sensitivity、2-D Brownian/OUの受理済みrevision
-- source checkoutに付属するResultViewベースのanalysis/visualizationと、COMSOL非依存のQuick Start
-
-wheelが配布するのは`chamber_particles` packageとCLIです。`tools/`、`examples/`、外部V&Vはsource checkoutの
-companionでありwheelには含めません。
-
-正確な対応組合せ、適用域、schema、失敗時の扱いは
-[`support_and_errors.md`](https://github.com/dkawa2523/partcle_sim/blob/v0.1.0/particle_platform_redesign/solver/docs/support_and_errors.md)
-を権威とします。各式とrevisionは
-[`physics_models.md`](https://github.com/dkawa2523/partcle_sim/blob/v0.1.0/particle_platform_redesign/solver/docs/physics_models.md)、数値法は
-[`numerics.md`](https://github.com/dkawa2523/partcle_sim/blob/v0.1.0/particle_platform_redesign/solver/docs/numerics.md)にあります。
-
-## 検証と制約
-
-正式tagは、同一commitについてWindows/Linuxの品質gate、verification/scenario、producer-neutral
-Quick Start、warm performance smoke、wheel build、runtime-only clean install、三公開API smokeがすべて
-成功した後だけGitHub Releaseになります。Releaseにはwheelと`SHA256SUMS.txt`を添付します。
-
-外部COMSOL V&Vでは、明示したcommon-field/common-physicsの2-D範囲を
-`2D_CRITICAL_VV_COMPLETE` / `CLOSED_ACCEPTED_WITH_LIMITATIONS`として閉じました。これはnative COMSOL FE場、
-任意形状・任意条件、全物理組合せ、pathwise Brownian、普遍的なCOMSOL同等性を認定するものではありません。
-また、COMSOLより高速というportableな性能保証、solver内thread/GPU speedup、3-D粒子、時間依存場、
-自己無撞着plasma計算は`0.1.0`の主張に含めません。
-
-本repositoryには現時点でOSSライセンスを設定していません。この公開は再利用許諾を意味せず、再利用条件は
-権利者の明示許諾が必要です。PyPIとsdistへの公開も`0.1.0`の配布範囲外です。
+利用ライセンスは設定しておらず、再利用条件は権利者の明示許諾が必要です。
+過去の変更履歴は[v0.2.0](https://github.com/dkawa2523/partcle_sim/blob/v0.2.0/particle_platform_redesign/solver/RELEASE_NOTES.md)と
+[v0.1.0](https://github.com/dkawa2523/partcle_sim/blob/v0.1.0/particle_platform_redesign/solver/RELEASE_NOTES.md)に保持します。

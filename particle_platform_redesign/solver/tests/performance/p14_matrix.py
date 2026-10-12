@@ -63,17 +63,17 @@ type _FieldTime = Literal["static", "fixed_topology_linear"]
 
 _PROBE_PARTICLE_IDS = tuple(range(1, 33))
 _EXPECTED_REVISIONS = {
-    "engine_algorithm_revision": "particle_engine_v46",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
-    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+    "engine_algorithm_revision": "particle_engine_v62",
+    "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+    "physics_runtime_revision": "prepared_native_physics_runtime_v24",
     "step_proposal_revision": "coupled_fixed_step_proposal_v10",
-    "field_location_revision": "field_location_v4",
-    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
+    "field_location_revision": "field_location_v5",
+    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
     "result_algorithm_revision": "durable_segmented_result_v6",
-    "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v7",
+    "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
 }
-_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v16"
-_EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_serial_slab_v6"
+_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v25"
+_EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_process_slab_v14"
 
 
 @dataclass(frozen=True, slots=True)

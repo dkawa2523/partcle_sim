@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-13",
+  "status": "PASS",
+  "scope": "Final source before branch push. No numerical rerun: the staged/live 237-file qualified payload is unchanged.",
+  "checks": [
+    {
+      "command": "uv lock --check",
+      "exit_code": 0,
+      "output": "Resolved 24 packages in 1ms\n"
+    },
+    {
+      "command": "uv run --locked ruff format --check src tests tools examples scripts",
+      "exit_code": 0,
+      "output": "243 files already formatted\n"
+    },
+    {
+      "command": "uv run --locked ruff check src tests tools examples scripts",
+      "exit_code": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": "uv run --locked pyrefly check --summarize-errors",
+      "exit_code": 0,
+      "output": " INFO Checking project configured at `C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\pyproject.toml`\n=== Error Summary ===\nNo errors found!\n INFO 0 errors (61 suppressed, 239 warnings not shown)\n"
+    },
+    {
+      "command": "uv run --locked lint-imports",
+      "exit_code": 0,
+      "output": "=============\r\nImport Linter\r\n=============\r\n\r\n\r\n---------\r\nContracts\r\n---------\r\n\r\nAnalyzed 27 files, 52 dependencies.\r\n-----------------------------------\r\n\r\nLow-level numerics stay independent of orchestration and I/O KEPT\r\nIntegrator proposals stay independent of geometry and wall response KEPT\r\nPhysics models consume sampled primitives only KEPT\r\n\r\nContracts: 3 kept, 0 broken.\r\n"
+    },
+    {
+      "command": "uv run --locked python scripts/check_complexity.py",
+      "exit_code": 0,
+      "output": "Complexity gate passed: every function and method has CC < 16.\r\n"
+    }
+  ]
+}

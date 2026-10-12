@@ -37,10 +37,10 @@ def load_case(path: _PathInput) -> SimulationCase:
         raise CaseError(f"cannot load case {path!s}: {exc}") from exc
 
 
-def simulate(case: SimulationCase, output: _PathInput) -> RunSummary:
+def simulate(case: SimulationCase, output: _PathInput, *, workers: int = 1) -> RunSummary:
     """Run the supported production profile and atomically publish its result."""
     try:
-        return run_simulation(case, output)
+        return run_simulation(case, output, workers=workers)
     except (EngineError, ResultWriteError, OSError, ValueError) as exc:
         raise SimulationError(f"simulation failed: {exc}") from exc
 

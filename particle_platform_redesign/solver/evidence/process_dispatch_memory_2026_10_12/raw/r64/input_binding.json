@@ -1,0 +1,75 @@
+{
+  "created_utc": "2026-10-12T04:31:18.437244+00:00",
+  "scope": "Input-only canonical construction; zero load_case/simulate/test/JIT calls",
+  "script": {
+    "path": ".artifacts/r64_2026_10_12/prepare_inputs.py",
+    "sha256": "600c5f32e1ae02970b912baac371d1e11489a95fbd459d34d54dcdcc7dbb1d46"
+  },
+  "held_source_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\q",
+  "held_source_map_sha256": "ae4e33bec254f445b36ec7a9e4c4ca58114e68b6ed75a1d67e4f8e7cbadd6fda",
+  "source_unchanged": true,
+  "helpers_unchanged": true,
+  "held_builder_files": {
+    "tests/performance/p14_matrix.py": "897e5773268a770e65ec86405e48d153bc74be4cf04625e2f712f95233d3a37d",
+    "tests/performance/p14u_representative.py": "c4e449e4b4564085a05c07db67a65090852ad9d4ee773bd4098705dd704b7289",
+    "tests/performance/p06_baseline.py": "11606775a50c15d29ea859ad25cc0e279fe9cd76b868a431850efe032ded8c82",
+    "tests/verification/microcases.py": "03c40af70e1bc68fd053690c78cf86429193a622a02cba59414a676b57abc644"
+  },
+  "copied_original_input_files": {
+    "p14_none_100k": {
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\inputs\\p14_100000_uniform\\case.yaml": "55211f087521501213328fc19e3817d4a39f481cd84908575f5f5696cbd323cc",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\inputs\\p14_100000_uniform\\case.h5": "9dfdf282aa298878ae3f8033396decbf01c378b58f841c21a7b4ec08293514ae"
+    },
+    "b03_continuous_100k": {
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\inputs\\b03_100000\\b03_rz_effective_drag_continuous_charge_gravity\\brownian-rz.yaml": "01e791c82c2eaed55eb068b841e8b042cef14fd7ed0b0e07a9e0700810d023c3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\inputs\\b03_100000\\b03_rz_effective_drag_continuous_charge_gravity\\brownian-rz.h5": "99893152ea3a8fc7723b7300944c00699d958c3bf0446a6addc0da37e2b2a9f4"
+    },
+    "p14_none_10k": {
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r59_2026_10_11\\inputs\\standard\\10000-p14u-none\\case.yaml": "7319dc87bbf57fe1a009570dc9f0a79822a4f6fee3aedb684e20cbfb451e8c6b",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r59_2026_10_11\\inputs\\standard\\10000-p14u-none\\case.h5": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641"
+    },
+    "p14_observed_100k": {
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\inputs\\p14_100000_uniform\\case.yaml": "55211f087521501213328fc19e3817d4a39f481cd84908575f5f5696cbd323cc",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\inputs\\p14_100000_uniform\\case.h5": "9dfdf282aa298878ae3f8033396decbf01c378b58f841c21a7b4ec08293514ae"
+    }
+  },
+  "numba_disable_jit": "1",
+  "shape_reference_manifests": {
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\v61p_c1\\warm-0\\run.json": "2f15cc695b7ea8debb836e9e88e89332c15a5e96b2db4fb237b85b79c6012028",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\v61b_c1\\warm-0\\run.json": "58efcfba42d2946a9db991501c9d3ab4697a112ecd5202733732d3ad622bd463",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k63\\v61t_c1\\warm-0\\run.json": "86f77c36b60f6abc97dfb573ddcc224ca1510ad63fda9b96dfc2dc16379150a0"
+  },
+  "original_policy": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r63_2026_10_12\\bulk_predeclaration_v61.json",
+    "sha256": "beea4f6c192deb2af55fc4e5132a1f0f087b2e15c322f747b41fd1cbfdbac12f"
+  },
+  "cases": {
+    "p14_none_100k": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_none_100k\\case.yaml",
+    "b03_continuous_100k": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\b03_continuous_100k\\brownian-rz.yaml",
+    "p14_none_10k": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_none_10k\\case.yaml",
+    "p14_observed_100k": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_observed_100k\\case.yaml",
+    "event_front_10k": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\event_front_10k\\case.yaml",
+    "event_spread_10k": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\event_spread_10k\\case.yaml",
+    "early_hold_100k": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\early_hold_100k\\case.yaml",
+    "regular_1m": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\regular_1m\\case.yaml"
+  },
+  "files": {
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_none_100k\\case.yaml": "55211f087521501213328fc19e3817d4a39f481cd84908575f5f5696cbd323cc",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_none_100k\\case.h5": "9dfdf282aa298878ae3f8033396decbf01c378b58f841c21a7b4ec08293514ae",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\b03_continuous_100k\\brownian-rz.yaml": "01e791c82c2eaed55eb068b841e8b042cef14fd7ed0b0e07a9e0700810d023c3",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\b03_continuous_100k\\brownian-rz.h5": "99893152ea3a8fc7723b7300944c00699d958c3bf0446a6addc0da37e2b2a9f4",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_none_10k\\case.yaml": "7319dc87bbf57fe1a009570dc9f0a79822a4f6fee3aedb684e20cbfb451e8c6b",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_none_10k\\case.h5": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_observed_100k\\case.yaml": "28f1adde884a6d00ecbebd3cb2c4d769e0e6af94285511017e5b70499761da28",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\p14_observed_100k\\case.h5": "9dfdf282aa298878ae3f8033396decbf01c378b58f841c21a7b4ec08293514ae",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\event_front_10k\\case.yaml": "539a6cb18baa407d662e5d4ced786b6d488531088bff02ee14fd58a6c4cb3e7d",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\event_front_10k\\case.h5": "0e8d4b911f77d60897e724be808276793476b3630bf4b5763637bb805c5d2673",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\event_spread_10k\\case.yaml": "9d30c3cce894a9ef2aab60587d70416f53c37220f02ab9ddec2199935423fd92",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\event_spread_10k\\case.h5": "1dcb7fd71e192fbc8e314a17de0a26383839a06c7dbae04b9128354d6bd8cde5",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\early_hold_100k\\case.yaml": "8e62744ce62f921b8fe856d74643240305bf53f81568d9eba0f569100f89a41a",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\early_hold_100k\\case.h5": "75ce88edcb0c6aec6b8b08b59c248d20af097bdd6dbe661bd27ec7d5690985b5",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\regular_1m\\case.yaml": "b4d3b4589a1f56f532aec319b671ce17230c9cfd1cd6def89ff4820d4ae24223",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\k64\\inputs\\regular_1m\\case.h5": "6b3a9766efe0ee694382509622babdac2741f4367b909edb72e37c16e47c13a8"
+  },
+  "file_map_sha256": "b2e03b48854391eee2dac37bcf1b5691defffec893d757460bd91c718fea2ca2"
+}

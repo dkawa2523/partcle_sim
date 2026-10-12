@@ -1,0 +1,207 @@
+{
+  "anchors": {
+    "A": {
+      "candidate_seeds": [
+        939132,
+        939133,
+        939134,
+        939135,
+        939136,
+        939137,
+        939138,
+        939139,
+        939140,
+        939141,
+        939142,
+        939143,
+        939144,
+        939145,
+        939146,
+        939147,
+        939148,
+        939149,
+        939150,
+        939151,
+        939152,
+        939153,
+        939154,
+        939155,
+        939156,
+        939157,
+        939158,
+        939159,
+        939160,
+        939161,
+        939162,
+        939163
+      ],
+      "canonical_input": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/inputs_axis_normalized/two_current/caseA/candidate_input.h5",
+        "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+      },
+      "native_consumer_manifest": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_caseA_consumer_manifest.json",
+        "sha256": "0f04c694fe173f8117112c84802ac739ae0cc01ca3aaad469ec04b51bcab02df"
+      },
+      "native_meaning_inventory": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseA/meaning_inventory.json",
+        "sha256": "bf95e18ee509ef9440adff789af7785ba1ce28b3ca620f8f2f8eb7c0049b322f"
+      },
+      "performance_warm_seeds": [
+        939132,
+        939147,
+        939163
+      ],
+      "performance_workers": [
+        1,
+        2,
+        4
+      ],
+      "pilot_report": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseA_100nm_axis_normalized_historical_pilot_path_projection.json",
+        "sha256": "0501b9de7c19a1d2f54cfe705bb236941cef225865e918f8eb8d230c8ad373d3"
+      },
+      "policy": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseA_100nm_axis_normalized_population_policy.json",
+        "sha256": "d9911ffc6a29b38109613c8811eaf3d49884a080295de4957ea3c403ff45e50f"
+      },
+      "recipe": {
+        "path": "m3c2_caseA_100nm_axis_normalized_candidate_recipe_v62.json",
+        "sha256": "8001798e4cd040d160fec59014599fbc49afdca33b8e7ecbab60671a01c0e649"
+      },
+      "registration": {
+        "path": "m3c2_caseA_100nm_axis_normalized_v62_registration.json",
+        "sha256": "3a92ecc1206e255470d5976ecd645e691306a9222f43a15e81aaf920d497bd96"
+      },
+      "selection": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseA_100nm_axis_normalized_fixed_selection_path_projection.json",
+        "sha256": "8164e5ee70026aa3c58489e70ac1953cc91266b59d179b53e7ba3b806f363b3f"
+      }
+    },
+    "P": {
+      "candidate_seeds": [
+        939032,
+        939033,
+        939034,
+        939035,
+        939036,
+        939037,
+        939038,
+        939039,
+        939040,
+        939041,
+        939042,
+        939043,
+        939044,
+        939045,
+        939046,
+        939047,
+        939048,
+        939049,
+        939050,
+        939051,
+        939052,
+        939053,
+        939054,
+        939055,
+        939056,
+        939057,
+        939058,
+        939059,
+        939060,
+        939061,
+        939062,
+        939063
+      ],
+      "canonical_input": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/inputs_axis_normalized/two_current/caseP/candidate_input.h5",
+        "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+      },
+      "native_consumer_manifest": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_caseP_consumer_manifest.json",
+        "sha256": "c33158fa54e90c3bffd09bdbc9e5d9849ad4fe249f2dd91434e91782ee31c38b"
+      },
+      "native_meaning_inventory": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_requalification_v2/saved_native/caseP/meaning_inventory.json",
+        "sha256": "3caee458dd4ffd1a55dcbfd452062bebf3d8fd89dbd315c60b156579f5212708"
+      },
+      "performance_warm_seeds": [
+        939032,
+        939047,
+        939063
+      ],
+      "performance_workers": [
+        1,
+        2,
+        4
+      ],
+      "pilot_report": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseP_100nm_axis_normalized_historical_pilot_path_projection.json",
+        "sha256": "273a0f61254e03904c05cd478483b58ef3df900aeb97b29fc6c9a9b2316a1b23"
+      },
+      "policy": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/registration_axis_normalized/m3c2_caseP_100nm_axis_normalized_population_policy.json",
+        "sha256": "69f9176cdc86666cbc9011e8697d1afbbbe7e2d6a303c10e871d54fb302493f8"
+      },
+      "recipe": {
+        "path": "m3c2_caseP_100nm_axis_normalized_candidate_recipe_v62.json",
+        "sha256": "440d764156f5b616ebefff3c166c36767dcddb868d782242d0f99e72174be1c7"
+      },
+      "registration": {
+        "path": "m3c2_caseP_100nm_axis_normalized_v62_registration.json",
+        "sha256": "3a3ee5d0c045bde4f0acbc61bb52a4995a7a61f9ab73128affd8941a5574acdb"
+      },
+      "selection": {
+        "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/m3c2_caseP_100nm_axis_normalized_fixed_selection_path_projection.json",
+        "sha256": "8f1cf0df0e2b4e1454aa7ca1da9961d562415ba9180eb610f05b89b229853819"
+      }
+    }
+  },
+  "candidate_executor": {
+    "distribution_version": "0.3.0",
+    "python_version": "3.12.13",
+    "source_sha256": "8c8c3100539e0defc607a8923ed7138db5cd57677ffb2cccdb845213c3892635",
+    "uv_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281"
+  },
+  "numerical_and_statistical_design": {
+    "base_ou_intervals_per_active_particle": 12000,
+    "brownian_interval_tree_depth": 3,
+    "classification": "fixed-condition finite-algorithm version regression",
+    "end_time_s": 0.03,
+    "fixed_source_count": 287,
+    "full_final_candidate_seeds_per_anchor": 32,
+    "geometry_rtol": 1e-09,
+    "macro_dt_s": 2e-05,
+    "macro_intervals": 1500,
+    "new_confidence_family": false,
+    "new_native_solve": false,
+    "new_unseen_confirmation": false,
+    "output_count": 121,
+    "previously_observed_cohort": true,
+    "registered_policy_alpha_margins_bins_seed_vectors_unchanged": true,
+    "saved_native_seeds_per_anchor": 32
+  },
+  "prior_registration": {
+    "path": "../../../particle_platform_redesign/solver/evidence/comsol_v0_2_0_release_requalification_v2/registration/execution_preregistration.json",
+    "sha256": "323d3a68bf49cd46d853df7559a2305aab7d6fc91d166e117f25fa4957973d84"
+  },
+  "production_source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+  "registered_at_utc": "2026-10-12T08:56:33.025661+00:00",
+  "registration_kind": "v62_caseA_caseP_brownian_fullstep_saved_reference_requalification",
+  "registration_recipe": {
+    "path": "../draft_registration.py",
+    "sha256": "8a0011bfc027099a2697cd42c542f36cd649bd5530fd4951e2ed3679a4b14417"
+  },
+  "schema_version": 1,
+  "scientific_scope": {
+    "boundary_behavior": "Case A terminal population status/time only; missing Disappear cause/ID/hit-state NOT_TESTED. Case P zero observed native events do not certify a wall response.",
+    "caseP_negative_ion_current": "Omitted on both sides under registered two-current same-form model; species-resolved physical applicability not certified.",
+    "continuous_sde_bias_or_noise_time_law": "NOT_TESTED",
+    "fields_and_rhs": "Retain existing scoped SI-coefficient/configuration evidence; complete native per-force and auxiliary-charge assembled RHS NOT_TESTED.",
+    "initial_conditions": "Evaluate fixed source identity, initial state and registered meaning.",
+    "native_fe_end_to_end_reproduction": "NOT_TESTED; this comparison uses identical canonical P1 fields.",
+    "time_trajectory": "Registered terminal curves and fixed 83-category RZ/fate population over 121 saved times; no pathwise COMSOL RNG equality."
+  },
+  "status": "REGISTERED_NOT_EXECUTED_ROOT_REVIEW_REQUIRED",
+  "user_authorization": "Execute full Case A and Case P Brownian calculations; evaluate within-run process effects and saved COMSOL comparison."
+}

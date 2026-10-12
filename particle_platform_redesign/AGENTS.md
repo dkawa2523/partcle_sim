@@ -41,7 +41,7 @@ COMSOLは入力adapterと外部V&Vの一つであり、solver coreの目的で�
 | module責務、dependency、runtime境界 | `architecture_proposal.md`（権威）、`architecture_review.md`（review記録） |
 | 方程式、物理model、数値method、適用域 | `technical_research.md` |
 | file責務、work package、実装順、完了条件 | `implementation_plan.md` |
-| P14-Pの並列評価、否定的closeout、直列runtime方針 | `solver/docs/parallel_execution_plan.md` |
+| P14-Pの否定的closeout履歴、同一runのprocess並列、source別の品質・用途性能・配布資格 | `solver/docs/parallel_execution_plan.md` |
 | 品質toolとgate | `quality_tooling_plan.md` |
 | COMSOL比較 | `vv_methodology.md` |
 | datasetの許可用途 | `data_quality_assessment.md` |
@@ -71,6 +71,9 @@ simulate(case, output)
 open_result(path)
 ```
 
+0.3.0の`simulate`は実行資源keyword `workers=1`を持つ。複数process数はAPI/CLIで指定し、
+caseの数値設定へ混ぜない。追加の公開APIは作らない。
+
 CLIの`check`、`run`、`inspect`もこの三操作を呼び、別の検査・実行経路を作らない。公開例外は原則
 `CaseError`、`SimulationError`、`IncompleteResultError`の三分類に留める。
 
@@ -87,11 +90,13 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 | `case_format.py` | canonical read/write/version/hash | producer固有名、軌道計算 |
 | `coordinates.py` | XY/RZ/3D基底とaxis規則 | field locate、wall law |
 | `geometry.py` | containment、BVH、first-hit query | 付着、反射、field値 |
+| `topology.py` | XY periodic translation対応とtransfer | material wall law、一般periodic framework |
 | `fields.py` | locate、補間、support | mesh修復、cache生成 |
 | `sources.py` | canonical internal/surface scheduleのrelease、位置解決、時刻、weight | 分布sampling、source RNG、lifecycle、再飛散 |
 | `rng.py` | counter key、uniform/normal、stream ID | source/wall policy |
 | `physics/` | sample済みprimitiveからrate/加速度 | mesh探索、I/O、lifecycle |
 | `integrators.py` | stage積分、`StepProposal` | BVH、boundary law、出力 |
+| `stochastic.py` | joint OU、conditional split、stochastic tree | wall law、出力、第二engine |
 | `events.py` | earliest hit、残時間work | hit後の物理応答 |
 | `boundaries.py` | stick/escape/hold/reflection/probability | 交差探索、位置押戻し |
 | `engine.py` | prepare、唯一のproduction loop | importer、plot、COMSOL比較 |
@@ -157,10 +162,19 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 
 - 最初にscalar/NumPyの正しい縦切りを完成させ、その意味論を同じengine内でcompiled CPUへ移す。
 - production hot loopへparticleごとのPython callbackを入れない。
-- v0.1は全particle state resident、scratchだけbounded slabとする。
+- 現行は全particle state resident、scratchだけbounded slabとする。
 - outer particle batchやout-of-core stateは実測上必要になるまで作らない。
-- production computeはP14-Pで確定したsingle-thread compiled engine一つにする。outer
-  `ThreadPoolExecutor`、Numba内部parallel mask、multiprocessing backendをsolver内部へ再導入しない。
+- 2026-10-12の利用者指示に従い追加JIT化を停止し、既存数値ownerを使うprocess並列を進める。
+  計算engineは一つとし、親がmacro/release/output/checkpoint、永続workerが排他的particle slabを所有する。
+  `ThreadPoolExecutor`、Numba内部parallel mask、model別engine、backend選択frameworkは導入しない。
+  共有入力・state/replay、worker専用scratch、IPCと移送時の同時live容量を一つの予算へ入れる。
+- 現行v62の親coordinatorは全workerのconnection/sentinelを監視し、完了したworkerへ次の排他的slabを渡す。
+  event/failureはworkerごとに高々一batchを送信し、親single writerの同期消費後にACKする。
+  storage batchは到着順を許し、公開canonical event順は既存output reader一箇所が所有する。
+  macro-wide並べ替えbuffer、別scheduler、worker側HDF5 writerを追加しない。
+- private scratch templateは全workerがcopyを終えたready barrier後に解放し、prepared transportをsealする。
+  非空replayはrun所有の一shared rootとworkerの永続readerを使い、macro/slabのviewだけを再利用する。
+  全taskと同期output消費後にだけviewを解放し、容量・serialization・page paddingの会計を省かない。
 - 粒子更新はbounded slab上のflat SoA wavefrontで行い、field/geometryをread-onlyとして再利用する。
 - 曲線/exact eventの継続状態はPythonのlist、dict、dataclass queueではなく数値配列で保持する。各rowは独立した
   target time、residual、refinement depth、interaction/event ordinalを持ち、一roundに高々一件のevent/failureを
@@ -169,19 +183,28 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
   private APIを導入しない。
 - Brownian stochastic-tree scratchは実行時に到達し得る`adaptive_max_depth`から保守的に計画し、
   実際にrefineしたrow数が少ないことを根拠にmemory planを過小評価しない。
-- event、failure、frame、probe、finalはparticle ID・時刻・物理ordinalによるstable orderで出力し、tile幅、
-  実行順でbitwise payloadとRNG drawを変えない。
+- event、failureの公開canonical reader、frame、probe、finalはparticle ID・時刻・物理ordinalによるstable orderを保ち、tile幅、
+  実行順でbitwise科学payloadとRNG drawを変えない。境界eventのbounded storage batchは既存result契約どおり大域sortを保証せず、
+  その保存順を物理順のauthorityにしない。completion順の受信にmacro-wide並べ替えbufferを追加しない。
 - 最適化前後でtrajectory/event identity、時間、peak memoryを同じcaseで測る。
 - GPUはCPUと同じcase、model revision、RNG、event、result schemaを使い、end-to-end speedupを測る。
 
-P12/P14のouter worker-waveとP14-PのNumba内部parallel試行は履歴baselineであり、製品機能ではない。P14-Pの
-focused correction後もregular 1Mは1/2/4 threadで9.32/10.09/10.10 s、4-thread speedup 0.923xに留まり、
-v20の1-thread 7.534 sに対しても23.7%遅かった。end-to-end profileではPython/NumPyのproposal/enclosure調停が
-支配し、kernel単体の3.75xを製品価値へ変換できなかったため、case schema v2は`resources.threads`を削除し、
-engine v27をsingle-thread compiled runtimeへ一本化した。詳細は`solver/docs/parallel_execution_plan.md`を権威とする。
+P12/P14のouter worker-waveとP14-PのNumba内部parallel試行は履歴baselineであり、製品機能ではない。
+旧thread設定、pool、parallel maskは削除済みで、processと既存single-thread数値ownerへ一本化した。
+否定的計測とsource別資格は`solver/docs/parallel_execution_plan.md`が所有し、ここへ数値を複製しない。
 
-独立caseのprocess並列はsolver外の運用とする。再検討は代表用途profileが別work packageの必要性を示した時だけ行い、
+独立caseのprocess並列はsolver外の運用とする。同一runは明示workers数で実行し、追加JIT化を前提にしない。
 自動tuner、experimental flag、第二scheduler、互換aliasで失敗経路を復活させない。
+
+現行v62は用途matrix、Windows/Linux公開前local gate、runtime-only installed-wheel入口を完了した。
+品質・用途性能・source別bindingと制約は性能文書が所有する。
+Git branch push、remote CI、tag、Release/registry公開の実施状況はrelease記録が所有し、local gateから推定しない。
+追加JIT、NUMA、全CPU数比例効果を今回の必須工程へ追加しない。
+
+全worker同期は1 macroごとの固定仕様であり、同期間隔設定はない。
+複数macro連続実行は`implementation_plan.md`第21.3節の将来項目とし、dt、field/release時計、
+RNG、毎macro集計、bounded output、single writer、accepted checkpoint/resumeを維持して評価する。
+0.3.0へ設定やstubを先行追加しない。
 
 ## 10. 開発tool
 
@@ -203,8 +226,8 @@ uvをPython、dependency、lock、環境、command実行の唯一の基盤にす
 Ruffをformat、lint、import整形の唯一のtoolにする。Black、isort、Flake8を追加しない。
 
 ```console
-uv run --locked ruff format --check src tests tools
-uv run --locked ruff check src tests tools
+uv run --locked ruff format --check src tests tools scripts examples
+uv run --locked ruff check src tests tools scripts examples
 ```
 
 Ruffの`C90`を使わず、complexityはRadonへ一元化する。blanket `noqa`や全directory ignoreを作らない。
@@ -218,7 +241,7 @@ import-linterをdependency方向の唯一の自動検査にする。同じ内容
 uv run --locked lint-imports
 ```
 
-v0.1の契約は最大三つを目安とし、physics純粋性、integrator純粋性、低位numericsからouter layerへの
+既存三契約でphysics純粋性、integrator純粋性、低位numericsからouter layerへの
 逆依存禁止だけを固定する。契約を満たすためのempty moduleやfacadeを作らない。
 
 ### Pyrefly
@@ -251,8 +274,8 @@ manager、facadeを作らない。
 
 ```console
 uv lock --check
-uv run --locked ruff format --check src tests tools
-uv run --locked ruff check src tests tools
+uv run --locked ruff format --check src tests tools scripts examples
+uv run --locked ruff check src tests tools scripts examples
 uv run --locked pyrefly check --summarize-errors
 uv run --locked lint-imports
 uv run --locked python scripts/check_complexity.py
@@ -295,7 +318,7 @@ testは三層だけにする。
 
 - `tests/verification/`：解析解、manufactured solution、収束、event geometry
 - `tests/scenarios/`：三公開APIを通る小型end-to-end
-- `tests/performance/`：規模、memory、直列throughput。独立caseのprocess scalingは必要時だけcore外で測る
+- `tests/performance/`：規模、memory、同一runのprocess数別throughput・科学identity・cleanup。独立caseのprocess scalingは必要時だけcore外で測る
 
 次をtestしない。
 

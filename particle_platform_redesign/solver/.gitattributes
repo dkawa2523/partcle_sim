@@ -1,8 +1,20 @@
 * text=auto eol=lf
+* whitespace=trailing-space,space-before-tab,cr-at-eol
+
+# Keep the already qualified numerical payload byte-identical in Git/wheels.
+# Its existing LF/CRLF layout is not an execution setting.
+src/** -text -eol
+tests/** -text -eol
+tools/** -text -eol
+examples/** -text -eol
+scripts/** -text -eol
+pyproject.toml -text -eol
+uv.lock -text -eol
+.python-version -text -eol
 
 # Evidence receipts hash exact producer bytes. Never apply newline conversion
-# inside the immutable evidence tree; source/config files remain LF-normalized.
-evidence/** binary
+# inside the immutable evidence tree; JSON/Markdown remain reviewable.
+evidence/** -text -eol diff merge
 # Release receipts are authored in-repository and are not inputs to raw-byte
 # evidence ledgers, so keep them reviewable as normalized text.
 evidence/v0.1/** -binary diff merge text eol=lf

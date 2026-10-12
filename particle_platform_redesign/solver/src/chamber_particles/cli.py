@@ -37,7 +37,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             return 0
         if arguments.command == "run":
-            summary = simulate(load_case(arguments.case), arguments.output)
+            summary = simulate(
+                load_case(arguments.case), arguments.output, workers=arguments.workers
+            )
             payload = {field.name: getattr(summary, field.name) for field in fields(summary)}
             payload["output_path"] = str(Path(summary.output_path))
             _write_json({"operation": "run", "status": "complete", **payload})
@@ -78,6 +80,9 @@ def _parser() -> argparse.ArgumentParser:
     run = commands.add_parser("run", help="simulate one canonical case")
     run.add_argument("case", help="path to case.yaml")
     run.add_argument("-o", "--output", required=True, help="new result directory")
+    run.add_argument(
+        "--workers", type=int, default=1, help="CPU processes for this run (default: 1)"
+    )
 
     inspect = commands.add_parser("inspect", help="inspect one completed result")
     inspect.add_argument("result", help="completed result directory")

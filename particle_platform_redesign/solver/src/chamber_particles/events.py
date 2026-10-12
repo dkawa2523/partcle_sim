@@ -4,18 +4,20 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, NamedTuple
 
 import numpy as np
 from numba import njit
 from numpy.typing import NDArray
 
+from .cpu import next_float64
 from .geometry import (
     PointClassification,
     PreparedGeometry,
+    _aabb_candidate_count_kernel,
+    _aabb_candidate_fill_batch_kernel,
     classify_point,
     count_aabb_candidates,
-    fill_aabb_candidates_csr,
     points_inside_volume,
     query_aabb_candidates,
     query_segment_candidates,
@@ -27,7 +29,7 @@ type Int64Array = NDArray[np.int64]
 type Int32Array = NDArray[np.int32]
 type UInt8Array = NDArray[np.uint8]
 
-EVENT_ALGORITHM_REVISION = "line_quadratic_curved_capsule_periodic_first_hit_v22"
+EVENT_ALGORITHM_REVISION = "line_quadratic_curved_capsule_periodic_first_hit_v23"
 _FLOAT64_EPS = np.finfo(np.float64).eps
 _MAX_FLOAT64_INTEGER = int(np.finfo(np.float64).max)
 _MAX_INT64 = int(np.iinfo(np.int64).max)
@@ -54,6 +56,23 @@ CURVED_STATUS_FAILURE = np.uint8(5)
 
 CURVED_FAILURE_NONE = np.uint8(0)
 CURVED_FAILURE_INDETERMINATE_EVENT = np.uint8(1)
+
+EVENT_QUERY_OK = np.uint8(0)
+EVENT_QUERY_ROW_CAPACITY = np.uint8(1)
+EVENT_QUERY_CANDIDATE_CAPACITY = np.uint8(2)
+EVENT_QUERY_INVALID_RANGE = np.uint8(3)
+EVENT_QUERY_STALE_COUNTS = np.uint8(4)
+EVENT_QUERY_INCOMPLETE_CANDIDATES = np.uint8(5)
+
+CURVED_EVENT_ARENA_ROW_BYTES = 100
+CURVED_EVENT_ARENA_CANDIDATE_BYTES = 24
+CURVED_EVENT_ARENA_MIXED_ROW_BYTES = 84
+CURVED_EVENT_ARENA_MIXED_CANDIDATE_BYTES = 8
+CURVED_EVENT_ARENA_FIXED_BYTES = 16
+EXACT_EVENT_ARENA_ROW_BYTES = 124
+EXACT_EVENT_ARENA_CANDIDATE_BYTES = 32
+EXACT_EVENT_ARENA_MIXED_ROW_BYTES = 84
+EXACT_EVENT_ARENA_FIXED_BYTES = 24
 
 SURFACE_STATE_PENDING = np.uint8(0)
 SURFACE_STATE_RESOLVED = np.uint8(1)
@@ -200,8 +219,7 @@ class SurfaceReleaseBatch:
     time_budget_s: FloatArray
 
 
-@dataclass(frozen=True, slots=True)
-class _PreparedExactPathBatch:
+class _PreparedExactPathBatch(NamedTuple):
     """Numeric exact-path columns shared by sizing and localization."""
 
     path_kind: UInt8Array
@@ -221,8 +239,24 @@ class _PreparedExactPathBatch:
     failure_reason: UInt8Array
 
 
-@dataclass(frozen=True, slots=True)
-class _PreparedCurvedPathBatch:
+class PreparedExactEventBatch(NamedTuple):
+    """One exact-path preparation shared by counting and bounded localization.
+
+    State arrays and geometry masks are borrowed and must remain unchanged
+    until all row prefixes have been consumed. Query bounds include the
+    resolved contact radius; prefix projection allocates no array payload.
+    """
+
+    path: _PreparedExactPathBatch
+    contact_radius_m: FloatArray
+    geometry_rtol: float
+    roundoff_ulps: int
+    finite_contact_enabled: NDArray[np.bool_]
+    separate_finite_mask: bool
+    broad_counts: Int64Array
+
+
+class _PreparedCurvedPathBatch(NamedTuple):
     """Numeric curved-path columns shared by sizing and localization."""
 
     start_position_m: FloatArray
@@ -244,6 +278,160 @@ class _PreparedCurvedPathBatch:
     speed_upper_m_s: FloatArray
     ready: NDArray[np.bool_]
     failure_reason: UInt8Array
+
+
+class PreparedCurvedEventBatch(NamedTuple):
+    """One immutable numeric projection shared by counting and bounded locate.
+
+    Input state/control arrays and geometry masks are borrowed. Their owner must
+    retain them unchanged until every row prefix has been localized. Query
+    bounds already include the resolved particle contact radius.
+    """
+
+    path: _PreparedCurvedPathBatch
+    contact_radius_m: FloatArray
+    geometry_rtol: float
+    roundoff_ulps: int
+    certify_monotone_approach: bool
+    position_control_rows: NDArray[np.bool_]
+    position_control_origin_m: FloatArray
+    relative_position_control_lower_m: FloatArray
+    relative_position_control_upper_m: FloatArray
+    finite_contact_enabled: NDArray[np.bool_]
+    separate_finite_mask: bool
+    broad_counts: Int64Array
+    volume_inside: NDArray[np.bool_]
+
+
+class EventGeometry(NamedTuple):
+    """Borrow the immutable geometry facts needed by either first-hit locator."""
+
+    axisymmetric: bool
+    bbox_diagonal_m: float
+    facet_start_m: FloatArray
+    facet_end_m: FloatArray
+    facet_normal: FloatArray
+    facet_length_m: FloatArray
+    facet_node_ids: Int64Array
+    facet_contact_enabled: NDArray[np.bool_]
+    bvh_facet_id: Int64Array
+    bvh_lower_m: FloatArray
+    bvh_upper_m: FloatArray
+    bvh_begin: Int64Array
+    bvh_end: Int64Array
+    bvh_skip: Int64Array
+
+
+class _EventColumns(NamedTuple):
+    """One row-aligned locator verdict, excluding its CSR storage."""
+
+    status: UInt8Array
+    failure_reason: UInt8Array
+    start_contact_departure_certified: NDArray[np.bool_]
+    time_s: FloatArray
+    position_m: FloatArray
+    primary_facet_id: Int64Array
+    normal: FloatArray
+    position_budget_m: FloatArray
+    time_budget_s: FloatArray
+    localization_residual_m: FloatArray
+
+
+class EventArena(NamedTuple):
+    """Exclusive fixed-capacity result and candidate scratch for one consumer.
+
+    Results borrow this arena until its next successful query. Capacity failures
+    leave every array unchanged; other failures invalidate the attempted query.
+    The optional point bank preserves the first pass during finite arbitration.
+    """
+
+    result: _EventColumns
+    broad_offsets: Int64Array
+    broad_candidate_ids: Int64Array
+    selected_candidate_ids: Int64Array
+    candidate_offsets: Int64Array
+    candidate_facet_ids: Int64Array
+    candidate_count: Int64Array
+    fill_valid: NDArray[np.bool_]
+    point_result: _EventColumns
+    point_candidate_count: Int64Array
+    point_selected_candidate_ids: Int64Array
+    use_point_candidates: NDArray[np.bool_]
+    exact_first_position_budget_m: FloatArray
+    exact_first_time_budget_s: FloatArray
+    exact_point_offsets: Int64Array
+
+
+def prepare_event_geometry(geometry: PreparedGeometry) -> EventGeometry:
+    return EventGeometry(
+        geometry.coordinate_system == "axisymmetric_rz",
+        geometry.bbox_diagonal_m,
+        geometry.facet_start_m,
+        geometry.facet_end_m,
+        geometry.facet_normal,
+        geometry.facet_length_m,
+        geometry.facet_node_ids,
+        geometry.facet_contact_enabled,
+        geometry.bvh_facet_id,
+        geometry.bvh_lower_m,
+        geometry.bvh_upper_m,
+        geometry.bvh_begin,
+        geometry.bvh_end,
+        geometry.bvh_skip,
+    )
+
+
+def _allocate_event_columns(capacity: int) -> _EventColumns:
+    return _EventColumns(
+        np.empty(capacity, dtype=np.uint8),
+        np.empty(capacity, dtype=np.uint8),
+        np.empty(capacity, dtype=np.bool_),
+        np.empty(capacity, dtype=np.float64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.int64),
+        np.empty((capacity, 2), dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+        np.empty(capacity, dtype=np.float64),
+    )
+
+
+def allocate_event_arena(
+    row_capacity: int,
+    candidate_capacity: int,
+    *,
+    exact_enabled: bool = False,
+    separate_finite_mask: bool = False,
+) -> EventArena:
+    """Allocate once; even a disabled arena retains only its two offset origins."""
+
+    if isinstance(row_capacity, bool) or not isinstance(row_capacity, int) or row_capacity < 0:
+        raise ValueError("event row capacity must be a nonnegative integer")
+    _validate_exact_candidate_capacity(candidate_capacity)
+    if not isinstance(exact_enabled, (bool, np.bool_)):
+        raise ValueError("exact_enabled must be boolean")
+    if not isinstance(separate_finite_mask, (bool, np.bool_)):
+        raise ValueError("separate_finite_mask must be boolean")
+    point_rows = row_capacity if separate_finite_mask else 0
+    point_candidates = candidate_capacity if exact_enabled or separate_finite_mask else 0
+    exact_rows = row_capacity if exact_enabled else 0
+    return EventArena(
+        _allocate_event_columns(row_capacity),
+        np.empty(row_capacity + 1, dtype=np.int64),
+        np.empty(candidate_capacity, dtype=np.int64),
+        np.empty(candidate_capacity, dtype=np.int64),
+        np.empty(row_capacity + 1, dtype=np.int64),
+        np.empty(candidate_capacity, dtype=np.int64),
+        np.empty(row_capacity, dtype=np.int64),
+        np.empty(row_capacity, dtype=np.bool_),
+        _allocate_event_columns(point_rows),
+        np.empty(point_rows, dtype=np.int64),
+        np.empty(point_candidates, dtype=np.int64),
+        np.empty(point_rows, dtype=np.bool_),
+        np.empty(exact_rows, dtype=np.float64),
+        np.empty(exact_rows, dtype=np.float64),
+        np.empty(exact_rows + 1 if exact_rows else 0, dtype=np.int64),
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -701,7 +889,7 @@ def locate_constant_acceleration_first_hit(
     return _select_earliest(geometry, hits)
 
 
-def count_exact_event_candidates(
+def prepare_exact_event_batch(
     geometry: PreparedGeometry,
     path_kind: UInt8Array,
     start_position_m: FloatArray,
@@ -714,15 +902,17 @@ def count_exact_event_candidates(
     geometry_rtol: float,
     roundoff_ulps: int,
     certified_departing_facet_id: Int64Array | None = None,
-) -> Int64Array:
-    """Return broad-phase facet counts for memory-plan row partitioning.
+    finite_contact_enabled: NDArray[np.bool_] | None = None,
+) -> PreparedExactEventBatch:
+    """Prepare one exact query without allocating broad candidate IDs.
 
-    This sizing pass is not an additional scientific candidate query.  An
-    engine may use the stable row counts to split a slab by prefix, then call
-    :func:`locate_exact_first_event_batch` for each bounded row interval.
+    The sizing count is not an additional scientific candidate query. Input
+    state and geometry masks must remain unchanged until all prefixes have
+    been localized; no path metrics or tolerance resolution is repeated.
     """
 
     radii = _contact_radii(contact_radius_m, np.asarray(start_time_s).size)
+    finite_mask, separate_finite_mask = _finite_contact_mask(geometry, finite_contact_enabled)
     prepared = _prepare_exact_path_batch(
         geometry,
         path_kind,
@@ -739,106 +929,327 @@ def count_exact_event_candidates(
     query_lower, query_upper = _contact_query_bounds(
         prepared.query_lower_m, prepared.query_upper_m, radii
     )
-    return count_aabb_candidates(
-        geometry,
-        query_lower,
-        query_upper,
+    prepared = prepared._replace(query_lower_m=query_lower, query_upper_m=query_upper)
+    broad_counts = count_aabb_candidates(geometry, query_lower, query_upper)
+    return PreparedExactEventBatch(
+        prepared,
+        radii,
+        float(geometry_rtol),
+        int(roundoff_ulps),
+        finite_mask,
+        separate_finite_mask,
+        broad_counts,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def project_exact_event_batch(
+    batch: PreparedExactEventBatch, row_start: int, row_stop: int
+) -> PreparedExactEventBatch:
+    """Borrow a contiguous row prefix of the immutable exact query facts."""
+
+    path = batch.path
+    if row_start < 0 or row_stop < row_start or row_stop > path.start_time_s.size:
+        raise ValueError("exact event row bounds exceed the prepared batch")
+    rows = slice(row_start, row_stop)
+    projected_path = _PreparedExactPathBatch(
+        path.path_kind[rows],
+        path.start_position_m[rows],
+        path.velocity_m_s[rows],
+        path.start_time_s[rows],
+        path.target_time_s[rows],
+        path.departing_facet_id[rows],
+        path.query_lower_m[rows],
+        path.query_upper_m[rows],
+        path.linear_displacement_m[rows],
+        path.quadratic_displacement_m[rows],
+        path.path_position_bound_m[rows],
+        path.speed_m_s[rows],
+        path.parameter_speed_m[rows],
+        path.ready[rows],
+        path.failure_reason[rows],
+    )
+    return PreparedExactEventBatch(
+        projected_path,
+        batch.contact_radius_m[rows],
+        batch.geometry_rtol,
+        batch.roundoff_ulps,
+        batch.finite_contact_enabled,
+        batch.separate_finite_mask,
+        batch.broad_counts[rows],
     )
 
 
 def locate_exact_first_event_batch(
     geometry: PreparedGeometry,
-    path_kind: UInt8Array,
-    start_position_m: FloatArray,
-    velocity_m_s: FloatArray,
-    acceleration_m_s2: FloatArray,
+    batch: PreparedExactEventBatch,
     *,
-    start_time_s: FloatArray,
-    target_time_s: FloatArray,
-    contact_radius_m: FloatArray,
-    geometry_rtol: float,
-    roundoff_ulps: int,
     candidate_capacity: int,
-    certified_departing_facet_id: Int64Array | None = None,
-    finite_contact_enabled: NDArray[np.bool_] | None = None,
+    row_start: int = 0,
+    row_stop: int | None = None,
 ) -> ExactEventBatch:
-    """Locate exact first events without exceeding broad-candidate capacity.
-
-    Invalid shared inputs raise before entering compiled code.  A numerical
-    ambiguity local to one row is represented by ``EXACT_STATUS_FAILURE`` so
-    another row never triggers a scalar batch retry.  Candidate storage is not
-    allocated unless the complete row batch fits ``candidate_capacity``.
-    """
+    """Allocate a convenience result through the sole native exact into body."""
 
     _validate_exact_candidate_capacity(candidate_capacity)
-    radii = _contact_radii(contact_radius_m, np.asarray(start_time_s).size)
-    finite_mask, separate_finite_mask = _finite_contact_mask(
-        geometry,
-        finite_contact_enabled,
+    stop = batch.path.start_time_s.size if row_stop is None else row_stop
+    if (
+        not isinstance(row_start, int)
+        or isinstance(row_start, bool)
+        or not isinstance(stop, int)
+        or isinstance(stop, bool)
+    ):
+        raise ValueError("exact event row bounds must be integers")
+    projected = project_exact_event_batch(batch, row_start, stop)
+    broad_count = _require_exact_candidate_capacity(projected.broad_counts, candidate_capacity)
+    arena = allocate_event_arena(
+        stop - row_start,
+        broad_count,
+        exact_enabled=True,
+        separate_finite_mask=batch.separate_finite_mask,
     )
-    prepared = _prepare_exact_path_batch(
-        geometry,
-        path_kind,
-        start_position_m,
-        velocity_m_s,
-        acceleration_m_s2,
-        start_time_s,
-        target_time_s,
-        geometry_rtol,
-        roundoff_ulps,
-        certified_departing_facet_id,
-        radii,
+    status, rows, candidates, _ = locate_exact_first_event_into(
+        prepare_event_geometry(geometry), batch, arena, row_start, stop
     )
-    query_lower, query_upper = _contact_query_bounds(
-        prepared.query_lower_m, prepared.query_upper_m, radii
+    if status != EVENT_QUERY_OK:
+        raise EventLocationError(f"compiled exact-event query failed with status {status}")
+    return exact_event_result_view(arena, rows, candidates)
+
+
+def exact_event_result_view(
+    arena: EventArena, row_count: int, candidate_count: int
+) -> ExactEventBatch:
+    """Borrow one complete exact result until the exclusive arena is reused."""
+
+    if not 0 <= row_count <= arena.result.status.size:
+        raise ValueError("exact event result row count exceeds its arena")
+    if not 0 <= candidate_count <= arena.candidate_facet_ids.size:
+        raise ValueError("exact event result candidate count exceeds its arena")
+    columns = _event_columns_view(arena.result, row_count)
+    return ExactEventBatch(
+        columns.status,
+        columns.failure_reason,
+        columns.time_s,
+        columns.position_m,
+        columns.primary_facet_id,
+        columns.normal,
+        columns.position_budget_m,
+        columns.time_budget_s,
+        columns.localization_residual_m,
+        arena.candidate_offsets[: row_count + 1],
+        arena.candidate_facet_ids[:candidate_count],
     )
-    broad_counts = count_aabb_candidates(
-        geometry,
-        query_lower,
-        query_upper,
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _exact_event_arena_requirements(
+    batch: PreparedExactEventBatch, arena: EventArena, start: int, stop: int
+) -> tuple[np.uint8, int]:
+    query_status, broad_count = _event_arena_requirements(
+        batch.broad_counts, arena, start, stop, batch.separate_finite_mask
     )
-    broad_candidate_count = _require_exact_candidate_capacity(
-        broad_counts,
-        candidate_capacity,
-    )
+    if query_status != EVENT_QUERY_OK:
+        return query_status, broad_count
+    rows = stop - start
+    if rows and (
+        arena.exact_first_position_budget_m.size < rows
+        or arena.exact_first_time_budget_s.size < rows
+        or arena.exact_point_offsets.size < rows + 1
+    ):
+        return EVENT_QUERY_ROW_CAPACITY, broad_count
+    if broad_count > arena.point_selected_candidate_ids.size:
+        return EVENT_QUERY_CANDIDATE_CAPACITY, broad_count
+    return EVENT_QUERY_OK, broad_count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _fill_exact_point_candidates_into(
+    geometry: EventGeometry, batch: PreparedExactEventBatch, arena: EventArena
+) -> bool:
+    """Keep the point contact CSR alive while the finite pass replaces verdicts."""
+
+    prepared = batch.path
     row_count = prepared.path_kind.size
-    broad_offsets = np.empty(row_count + 1, dtype=np.int64)
-    broad_offsets[0] = 0
-    np.cumsum(broad_counts, out=broad_offsets[1:])
-    broad_candidates = np.empty(broad_candidate_count, dtype=np.int64)
-    fill_aabb_candidates_csr(
-        geometry,
-        query_lower,
-        query_upper,
-        broad_offsets,
-        broad_candidates,
+    point_offsets = arena.exact_point_offsets[: row_count + 1]
+    complete, point_count = _event_candidate_offsets_into(
+        row_count,
+        arena.candidate_count,
+        arena.broad_offsets,
+        point_offsets,
+        arena.point_selected_candidate_ids.size,
     )
+    if not complete:
+        return False
+    point_candidates = arena.point_selected_candidate_ids[:point_count]
+    for offset in range(point_count):
+        point_candidates[offset] = -1
     kinds = prepared.path_kind
     position = prepared.start_position_m
-    velocity = prepared.velocity_m_s
-    start_time = prepared.start_time_s
-    target_time = prepared.target_time_s
+    start_time, target_time = prepared.start_time_s, prepared.target_time_s
     departing = prepared.departing_facet_id
     linear_displacement = prepared.linear_displacement_m
     quadratic_displacement = prepared.quadratic_displacement_m
     path_position_bound = prepared.path_position_bound_m
-    speed = prepared.speed_m_s
-    parameter_speed = prepared.parameter_speed_m
+    speed, parameter_speed = prepared.speed_m_s, prepared.parameter_speed_m
+    broad_offsets = arena.broad_offsets[: row_count + 1]
+    broad_candidate_ids = arena.broad_candidate_ids
+    geometry_rtol, roundoff_ulps = batch.geometry_rtol, batch.roundoff_ulps
+    result = _event_columns_view(arena.result, row_count)
+    status, event_time, hit_position = result.status, result.time_s, result.position_m
+    first_position_budget = arena.exact_first_position_budget_m
+    first_time_budget = arena.exact_first_time_budget_s
+    _fill_exact_event_candidates_kernel(
+        kinds,
+        position,
+        start_time,
+        target_time,
+        departing,
+        linear_displacement,
+        quadratic_displacement,
+        path_position_bound,
+        speed,
+        parameter_speed,
+        broad_offsets,
+        broad_candidate_ids,
+        geometry.bbox_diagonal_m,
+        geometry.facet_start_m,
+        geometry.facet_end_m,
+        geometry.facet_length_m,
+        geometry.facet_contact_enabled,
+        geometry_rtol,
+        roundoff_ulps,
+        status,
+        event_time,
+        hit_position,
+        first_position_budget,
+        first_time_budget,
+        point_offsets,
+        point_candidates,
+    )
+    for offset in range(point_count):
+        if point_candidates[offset] < 0:
+            return False
+    return True
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _pack_exact_arena_candidates_into(
+    arena: EventArena, radii: FloatArray, separate_finite_mask: bool
+) -> tuple[bool, int]:
+    row_count = radii.size
+    candidate_offsets = arena.candidate_offsets[: row_count + 1]
+    complete, count = _event_candidate_offsets_into(
+        row_count,
+        arena.candidate_count,
+        arena.broad_offsets,
+        candidate_offsets,
+        arena.candidate_facet_ids.size,
+    )
+    if not complete:
+        return False, 0
+    candidates = arena.candidate_facet_ids[:count]
+    for offset in range(count):
+        candidates[offset] = -1
+    point_offsets = arena.exact_point_offsets[: row_count + 1]
+    point_candidates = arena.point_selected_candidate_ids[: point_offsets[row_count]]
+    if separate_finite_mask:
+        _merge_exact_topology_contact_candidates_kernel(
+            radii,
+            arena.use_point_candidates[:row_count],
+            point_offsets,
+            point_candidates,
+            arena.broad_offsets[: row_count + 1],
+            arena.selected_candidate_ids,
+            candidate_offsets,
+            candidates,
+        )
+    else:
+        _merge_exact_contact_candidates_kernel(
+            radii,
+            point_offsets,
+            point_candidates,
+            arena.broad_offsets[: row_count + 1],
+            arena.selected_candidate_ids,
+            candidate_offsets,
+            candidates,
+        )
+    for offset in range(count):
+        if candidates[offset] < 0:
+            return False, 0
+    return True, count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def locate_exact_first_event_into(
+    geometry: EventGeometry,
+    batch: PreparedExactEventBatch,
+    arena: EventArena,
+    row_start: int,
+    row_stop: int,
+) -> tuple[np.uint8, int, int, int]:
+    """Localize a prepared exact prefix without allocating array payloads.
+
+    Range and capacity failures leave the prior result and scratch unchanged.
+    On EVENT_QUERY_OK, logical row/CSR views borrow the arena until reuse.
+    An internal stale-count or incomplete-packing failure publishes no result.
+    """
+
+    query_status, broad_candidate_count = _exact_event_arena_requirements(
+        batch, arena, row_start, row_stop
+    )
+    if query_status != EVENT_QUERY_OK:
+        return query_status, 0, 0, broad_candidate_count
+    row_count = row_stop - row_start
+    if not row_count:
+        arena.candidate_offsets[0] = 0
+        return EVENT_QUERY_OK, 0, 0, 0
+    projected = project_exact_event_batch(batch, row_start, row_stop)
+    prepared = projected.path
+    if not _fill_event_arena_broad_candidates_into(
+        geometry,
+        prepared.query_lower_m,
+        prepared.query_upper_m,
+        projected.broad_counts,
+        arena,
+    ):
+        return EVENT_QUERY_STALE_COUNTS, 0, 0, broad_candidate_count
+    _initialize_event_arena_result_into(prepared.failure_reason, EXACT_STATUS_CLEAR, arena)
+    for row in range(row_count):
+        arena.exact_first_position_budget_m[row] = 0.0
+        arena.exact_first_time_budget_s[row] = 0.0
+    kinds = prepared.path_kind
+    position = prepared.start_position_m
+    velocity = prepared.velocity_m_s
+    start_time, target_time = prepared.start_time_s, prepared.target_time_s
+    departing = prepared.departing_facet_id
+    linear_displacement = prepared.linear_displacement_m
+    quadratic_displacement = prepared.quadratic_displacement_m
+    path_position_bound = prepared.path_position_bound_m
+    speed, parameter_speed = prepared.speed_m_s, prepared.parameter_speed_m
     ready = prepared.ready
-    failure_reason = prepared.failure_reason
-    status = np.full(row_count, EXACT_STATUS_CLEAR, dtype=np.uint8)
-    event_time = np.full(row_count, np.nan, dtype=np.float64)
-    hit_position = np.full((row_count, 2), np.nan, dtype=np.float64)
-    primary_facet = np.full(row_count, -1, dtype=np.int64)
-    normal = np.zeros((row_count, 2), dtype=np.float64)
-    position_budget = np.zeros(row_count, dtype=np.float64)
-    time_budget = np.zeros(row_count, dtype=np.float64)
-    residual = np.zeros(row_count, dtype=np.float64)
-    first_position_budget = np.zeros(row_count, dtype=np.float64)
-    first_time_budget = np.zeros(row_count, dtype=np.float64)
-    simultaneous_count = np.zeros(row_count, dtype=np.int64)
+    radii = projected.contact_radius_m
+    geometry_rtol, roundoff_ulps = projected.geometry_rtol, projected.roundoff_ulps
+    finite_mask, separate_finite_mask = (
+        projected.finite_contact_enabled,
+        projected.separate_finite_mask,
+    )
+    broad_offsets = arena.broad_offsets[: row_count + 1]
+    broad_candidate_ids = arena.broad_candidate_ids
+    selected_candidates = arena.selected_candidate_ids
+    result = _event_columns_view(arena.result, row_count)
+    status = result.status
+    failure_reason = result.failure_reason
+    event_time = result.time_s
+    hit_position = result.position_m
+    primary_facet = result.primary_facet_id
+    normal = result.normal
+    position_budget = result.position_budget_m
+    time_budget = result.time_budget_s
+    residual = result.localization_residual_m
+    first_position_budget = arena.exact_first_position_budget_m
+    first_time_budget = arena.exact_first_time_budget_s
+    simultaneous_count = arena.candidate_count[:row_count]
     _locate_exact_events_kernel(
-        geometry.coordinate_system == "axisymmetric_rz",
+        geometry.axisymmetric,
         kinds,
         position,
         velocity,
@@ -852,7 +1263,7 @@ def locate_exact_first_event_batch(
         parameter_speed,
         ready,
         broad_offsets,
-        broad_candidates,
+        broad_candidate_ids,
         geometry.bbox_diagonal_m,
         geometry.facet_start_m,
         geometry.facet_end_m,
@@ -875,82 +1286,65 @@ def locate_exact_first_event_batch(
         first_time_budget,
         simultaneous_count,
     )
-    point_counts = simultaneous_count.copy()
-    point_offsets = np.empty(row_count + 1, dtype=np.int64)
-    point_offsets[0] = 0
-    np.cumsum(point_counts, out=point_offsets[1:])
-    point_candidates = np.full(int(point_offsets[-1]), -1, dtype=np.int64)
-    _fill_exact_event_candidates_kernel(
+    if not _fill_exact_point_candidates_into(geometry, projected, arena):
+        return EVENT_QUERY_INCOMPLETE_CANDIDATES, 0, 0, broad_candidate_count
+    if separate_finite_mask:
+        _retain_point_result_into(arena, row_count)
+    _locate_finite_exact_events_kernel(
+        geometry.axisymmetric,
+        radii,
         kinds,
         position,
+        velocity,
         start_time,
         target_time,
         departing,
         linear_displacement,
         quadratic_displacement,
-        path_position_bound,
         speed,
-        parameter_speed,
+        ready,
         broad_offsets,
-        broad_candidates,
+        broad_candidate_ids,
+        selected_candidates,
         geometry.bbox_diagonal_m,
         geometry.facet_start_m,
         geometry.facet_end_m,
+        geometry.facet_normal,
         geometry.facet_length_m,
-        geometry.facet_contact_enabled,
+        finite_mask,
         geometry_rtol,
         roundoff_ulps,
         status,
+        failure_reason,
         event_time,
         hit_position,
-        first_position_budget,
-        first_time_budget,
-        point_offsets,
-        point_candidates,
+        primary_facet,
+        normal,
+        position_budget,
+        time_budget,
+        residual,
+        simultaneous_count,
     )
-    selected_candidates = broad_candidates.copy()
-    use_point_candidates = (
-        np.zeros(row_count, dtype=np.bool_) if separate_finite_mask else np.empty(0, dtype=np.bool_)
-    )
-    if bool((radii > 0.0).any()):
-        point_state = None
-        if separate_finite_mask:
-            point_state = (
-                status.copy(),
-                failure_reason.copy(),
-                event_time.copy(),
-                hit_position.copy(),
-                primary_facet.copy(),
-                normal.copy(),
-                position_budget.copy(),
-                time_budget.copy(),
-                residual.copy(),
-                simultaneous_count.copy(),
-            )
-        _locate_finite_exact_events_kernel(
-            geometry.coordinate_system == "axisymmetric_rz",
+    if separate_finite_mask:
+        point = _event_columns_view(arena.point_result, row_count)
+        point_offsets = arena.exact_point_offsets[: row_count + 1]
+        point_candidates = arena.point_selected_candidate_ids[: point_offsets[row_count]]
+        use_point_candidates = arena.use_point_candidates[:row_count]
+        _arbitrate_exact_topology_events_kernel(
             radii,
-            kinds,
-            position,
-            velocity,
-            start_time,
-            target_time,
-            departing,
-            linear_displacement,
-            quadratic_displacement,
-            speed,
-            ready,
-            broad_offsets,
-            broad_candidates,
-            selected_candidates,
-            geometry.bbox_diagonal_m,
-            geometry.facet_start_m,
-            geometry.facet_end_m,
-            geometry.facet_normal,
-            geometry.facet_length_m,
             finite_mask,
-            geometry_rtol,
-            roundoff_ulps,
+            point_offsets,
+            point_candidates,
+            point.status,
+            point.failure_reason,
+            point.time_s,
+            point.position_m,
+            point.primary_facet_id,
+            point.normal,
+            point.position_budget_m,
+            point.time_budget_s,
+            point.localization_residual_m,
+            arena.point_candidate_count[:row_count],
             status,
             failure_reason,
             event_time,
@@ -961,83 +1355,17 @@ def locate_exact_first_event_batch(
             time_budget,
             residual,
             simultaneous_count,
+            use_point_candidates,
         )
-        if separate_finite_mask:
-            if point_state is None:
-                raise EventLocationError("periodic exact-event state was not retained")
-            _arbitrate_exact_topology_events_kernel(
-                radii,
-                finite_mask,
-                point_offsets,
-                point_candidates,
-                point_state[0],
-                point_state[1],
-                point_state[2],
-                point_state[3],
-                point_state[4],
-                point_state[5],
-                point_state[6],
-                point_state[7],
-                point_state[8],
-                point_state[9],
-                status,
-                failure_reason,
-                event_time,
-                hit_position,
-                primary_facet,
-                normal,
-                position_budget,
-                time_budget,
-                residual,
-                simultaneous_count,
-                use_point_candidates,
-            )
-    candidate_offsets = np.empty(row_count + 1, dtype=np.int64)
-    candidate_offsets[0] = 0
-    np.cumsum(simultaneous_count, out=candidate_offsets[1:])
-    candidates = np.full(int(candidate_offsets[-1]), -1, dtype=np.int64)
-    if bool((radii > 0.0).any()):
-        if separate_finite_mask:
-            _merge_exact_topology_contact_candidates_kernel(
-                radii,
-                use_point_candidates,
-                point_offsets,
-                point_candidates,
-                broad_offsets,
-                selected_candidates,
-                candidate_offsets,
-                candidates,
-            )
-        else:
-            _merge_exact_contact_candidates_kernel(
-                radii,
-                point_offsets,
-                point_candidates,
-                broad_offsets,
-                selected_candidates,
-                candidate_offsets,
-                candidates,
-            )
-    else:
-        candidates[:] = point_candidates
-    if bool((candidates < 0).any()):
-        raise EventLocationError("compiled exact-event candidate packing is incomplete")
-    return ExactEventBatch(
-        status,
-        failure_reason,
-        event_time,
-        hit_position,
-        primary_facet,
-        normal,
-        position_budget,
-        time_budget,
-        residual,
-        candidate_offsets,
-        candidates,
+    complete, candidate_count = _pack_exact_arena_candidates_into(
+        arena, radii, separate_finite_mask
     )
+    if not complete:
+        return EVENT_QUERY_INCOMPLETE_CANDIDATES, 0, 0, broad_candidate_count
+    return EVENT_QUERY_OK, row_count, candidate_count, broad_candidate_count
 
 
-def count_curved_event_candidates(
+def prepare_curved_event_batch(
     geometry: PreparedGeometry,
     start_position_m: FloatArray,
     start_velocity_m_s: FloatArray,
@@ -1054,63 +1382,6 @@ def count_curved_event_candidates(
     contact_radius_m: FloatArray,
     geometry_rtol: float,
     roundoff_ulps: int,
-    certify_start_contact_departure: NDArray[np.bool_] | None = None,
-    chord_deviation_bound_m: FloatArray | None = None,
-) -> Int64Array:
-    """Return curved broad-phase counts for stable capacity partitioning.
-
-    The count/fill pair is one logical event query.  Callers may partition the
-    returned rows by stable prefix before invoking
-    :func:`locate_curved_first_event_batch` with caller-owned capacity.
-    """
-
-    prepared = _prepare_curved_path_batch(
-        geometry,
-        start_position_m,
-        start_velocity_m_s,
-        end_position_m,
-        end_velocity_m_s,
-        position_lower_m,
-        position_upper_m,
-        velocity_lower_m_s,
-        velocity_upper_m_s,
-        start_time_s,
-        target_time_s,
-        root_interval_s,
-        geometry_rtol,
-        roundoff_ulps,
-        certify_start_contact_departure,
-        chord_deviation_bound_m,
-    )
-    radii = _contact_radii(contact_radius_m, prepared.start_time_s.size)
-    query_lower, query_upper = _contact_query_bounds(
-        prepared.query_lower_m, prepared.query_upper_m, radii
-    )
-    return count_aabb_candidates(
-        geometry,
-        query_lower,
-        query_upper,
-    )
-
-
-def locate_curved_first_event_batch(
-    geometry: PreparedGeometry,
-    start_position_m: FloatArray,
-    start_velocity_m_s: FloatArray,
-    end_position_m: FloatArray,
-    end_velocity_m_s: FloatArray,
-    position_lower_m: FloatArray,
-    position_upper_m: FloatArray,
-    velocity_lower_m_s: FloatArray,
-    velocity_upper_m_s: FloatArray,
-    *,
-    start_time_s: FloatArray,
-    target_time_s: FloatArray,
-    root_interval_s: FloatArray,
-    contact_radius_m: FloatArray,
-    geometry_rtol: float,
-    roundoff_ulps: int,
-    candidate_capacity: int,
     certify_start_contact_departure: NDArray[np.bool_] | None = None,
     chord_deviation_bound_m: FloatArray | None = None,
     certify_monotone_approach: bool = False,
@@ -1119,16 +1390,9 @@ def locate_curved_first_event_batch(
     relative_position_control_lower_m: FloatArray | None = None,
     relative_position_control_upper_m: FloatArray | None = None,
     finite_contact_enabled: NDArray[np.bool_] | None = None,
-) -> CurvedEventBatch:
-    """Classify curved first events in independent compiled rows.
+) -> PreparedCurvedEventBatch:
+    """Resolve a curved query once, without allocating broad candidate IDs."""
 
-    Shared shape/configuration defects raise before compiled execution.  A
-    representational ambiguity local to one path is returned as a failure
-    status.  Broad candidate storage is allocated only after the whole row
-    batch fits ``candidate_capacity``.
-    """
-
-    _validate_exact_candidate_capacity(candidate_capacity)
     if not isinstance(certify_monotone_approach, (bool, np.bool_)):
         raise ValueError("certify_monotone_approach must be boolean")
     prepared = _prepare_curved_path_batch(
@@ -1149,62 +1413,392 @@ def locate_curved_first_event_batch(
         certify_start_contact_departure,
         chord_deviation_bound_m,
     )
-    (
-        position_control_rows,
-        position_control_origin,
-        relative_position_control_lower,
-        relative_position_control_upper,
-    ) = _curved_position_control_bounds(
+    row_count = prepared.start_time_s.size
+    controls, origin, control_lower, control_upper = _curved_position_control_bounds(
         position_control_origin_m,
         relative_position_control_lower_m,
         relative_position_control_upper_m,
         use_position_controls,
-        prepared.start_time_s.size,
+        row_count,
     )
-    radii = _contact_radii(contact_radius_m, prepared.start_time_s.size)
-    finite_mask, separate_finite_mask = _finite_contact_mask(
-        geometry,
-        finite_contact_enabled,
-    )
+    radii = _contact_radii(contact_radius_m, row_count)
+    finite_mask, separate_finite_mask = _finite_contact_mask(geometry, finite_contact_enabled)
     query_lower, query_upper = _contact_query_bounds(
         prepared.query_lower_m, prepared.query_upper_m, radii
     )
-    broad_counts = count_aabb_candidates(
-        geometry,
-        query_lower,
-        query_upper,
-    )
-    broad_candidate_count = _require_curved_candidate_capacity(
-        broad_counts,
-        candidate_capacity,
-    )
-    row_count = prepared.start_time_s.size
-    broad_offsets = np.empty(row_count + 1, dtype=np.int64)
-    broad_offsets[0] = 0
-    np.cumsum(broad_counts, out=broad_offsets[1:])
-    broad_candidate_ids = np.empty(broad_candidate_count, dtype=np.int64)
-    fill_aabb_candidates_csr(
-        geometry,
-        query_lower,
-        query_upper,
-        broad_offsets,
-        broad_candidate_ids,
-    )
-    selected_candidates = broad_candidate_ids.copy()
+    prepared = prepared._replace(query_lower_m=query_lower, query_upper_m=query_upper)
+    broad_counts = count_aabb_candidates(geometry, query_lower, query_upper)
     volume_inside = points_inside_volume(geometry, prepared.end_position_m)
-    status = np.full(row_count, CURVED_STATUS_CLEAR, dtype=np.uint8)
-    failure_reason = prepared.failure_reason.copy()
-    departure_certified = np.zeros(row_count, dtype=np.bool_)
-    event_time = np.full(row_count, np.nan, dtype=np.float64)
-    hit_position = np.full((row_count, 2), np.nan, dtype=np.float64)
-    primary_facet = np.full(row_count, -1, dtype=np.int64)
-    normal = np.zeros((row_count, 2), dtype=np.float64)
-    position_budget = np.zeros(row_count, dtype=np.float64)
-    time_budget = np.zeros(row_count, dtype=np.float64)
-    residual = np.zeros(row_count, dtype=np.float64)
-    event_candidate_count = np.zeros(row_count, dtype=np.int64)
+    return PreparedCurvedEventBatch(
+        prepared,
+        radii,
+        float(geometry_rtol),
+        int(roundoff_ulps),
+        bool(certify_monotone_approach),
+        controls,
+        origin,
+        control_lower,
+        control_upper,
+        finite_mask,
+        separate_finite_mask,
+        broad_counts,
+        volume_inside,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def project_curved_event_batch(
+    batch: PreparedCurvedEventBatch, row_start: int, row_stop: int
+) -> PreparedCurvedEventBatch:
+    """Borrow a stable contiguous row prefix; preserve all resolved query facts."""
+
+    path = batch.path
+    if row_start < 0 or row_stop < row_start or row_stop > path.start_time_s.size:
+        raise ValueError("curved event row bounds exceed the prepared batch")
+    rows = slice(row_start, row_stop)
+    projected_path = _PreparedCurvedPathBatch(
+        path.start_position_m[rows],
+        path.start_velocity_m_s[rows],
+        path.end_position_m[rows],
+        path.end_velocity_m_s[rows],
+        path.position_lower_m[rows],
+        path.position_upper_m[rows],
+        path.velocity_lower_m_s[rows],
+        path.velocity_upper_m_s[rows],
+        path.start_time_s[rows],
+        path.target_time_s[rows],
+        path.root_interval_s[rows],
+        path.certify_start_contact_departure[rows],
+        path.chord_deviation_m[rows],
+        path.chord_deviation_valid[rows],
+        path.query_lower_m[rows],
+        path.query_upper_m[rows],
+        path.speed_upper_m_s[rows],
+        path.ready[rows],
+        path.failure_reason[rows],
+    )
+    has_controls = batch.position_control_origin_m.shape[0] != 0
+    return PreparedCurvedEventBatch(
+        projected_path,
+        batch.contact_radius_m[rows],
+        batch.geometry_rtol,
+        batch.roundoff_ulps,
+        batch.certify_monotone_approach,
+        batch.position_control_rows[rows],
+        batch.position_control_origin_m[rows] if has_controls else batch.position_control_origin_m,
+        batch.relative_position_control_lower_m[rows]
+        if has_controls
+        else batch.relative_position_control_lower_m,
+        batch.relative_position_control_upper_m[rows]
+        if has_controls
+        else batch.relative_position_control_upper_m,
+        batch.finite_contact_enabled,
+        batch.separate_finite_mask,
+        batch.broad_counts[rows],
+        batch.volume_inside[rows],
+    )
+
+
+def locate_curved_first_event_batch(
+    geometry: PreparedGeometry,
+    batch: PreparedCurvedEventBatch,
+    *,
+    candidate_capacity: int,
+    row_start: int = 0,
+    row_stop: int | None = None,
+) -> CurvedEventBatch:
+    """Allocate a convenience result by delegating to the sole native into body."""
+
+    _validate_exact_candidate_capacity(candidate_capacity)
+    stop = batch.path.start_time_s.size if row_stop is None else row_stop
+    if (
+        not isinstance(row_start, int)
+        or isinstance(row_start, bool)
+        or not isinstance(stop, int)
+        or isinstance(stop, bool)
+    ):
+        raise ValueError("curved event row bounds must be integers")
+    projected = project_curved_event_batch(batch, row_start, stop)
+    broad_count = _require_curved_candidate_capacity(projected.broad_counts, candidate_capacity)
+    arena = allocate_event_arena(
+        stop - row_start, broad_count, separate_finite_mask=batch.separate_finite_mask
+    )
+    status, rows, candidates, _ = locate_curved_first_event_into(
+        prepare_event_geometry(geometry), batch, arena, row_start, stop
+    )
+    if status != EVENT_QUERY_OK:
+        raise EventLocationError(f"compiled curved-event query failed with status {status}")
+    return curved_event_result_view(arena, rows, candidates)
+
+
+def curved_event_result_view(
+    arena: EventArena, row_count: int, candidate_count: int
+) -> CurvedEventBatch:
+    """Borrow a successful result until this arena's next query; copy no payload."""
+
+    if not 0 <= row_count <= arena.result.status.size:
+        raise ValueError("curved event result row count exceeds its arena")
+    if not 0 <= candidate_count <= arena.candidate_facet_ids.size:
+        raise ValueError("curved event result candidate count exceeds its arena")
+    columns = _event_columns_view(arena.result, row_count)
+    return CurvedEventBatch(
+        *columns,
+        arena.candidate_offsets[: row_count + 1],
+        arena.candidate_facet_ids[:candidate_count],
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _event_columns_view(columns: _EventColumns, count: int) -> _EventColumns:
+    return _EventColumns(
+        columns.status[:count],
+        columns.failure_reason[:count],
+        columns.start_contact_departure_certified[:count],
+        columns.time_s[:count],
+        columns.position_m[:count],
+        columns.primary_facet_id[:count],
+        columns.normal[:count],
+        columns.position_budget_m[:count],
+        columns.time_budget_s[:count],
+        columns.localization_residual_m[:count],
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _event_arena_requirements(
+    broad_counts: Int64Array,
+    arena: EventArena,
+    start: int,
+    stop: int,
+    separate_finite_mask: bool,
+) -> tuple[np.uint8, int]:
+    """Check resources without changing a previous borrowed result or scratch."""
+
+    if start < 0 or stop < start or stop > broad_counts.size:
+        return EVENT_QUERY_INVALID_RANGE, 0
+    rows = stop - start
+    if rows > arena.result.status.size:
+        return EVENT_QUERY_ROW_CAPACITY, 0
+    if separate_finite_mask and rows > arena.point_result.status.size:
+        return EVENT_QUERY_ROW_CAPACITY, 0
+    broad_count = 0
+    for row in range(start, stop):
+        count = broad_counts[row]
+        if count < 0:
+            return EVENT_QUERY_STALE_COUNTS, 0
+        if count > _MAX_INT64 - broad_count:
+            return EVENT_QUERY_CANDIDATE_CAPACITY, _MAX_INT64
+        broad_count += count
+    if broad_count > arena.broad_candidate_ids.size:
+        return EVENT_QUERY_CANDIDATE_CAPACITY, broad_count
+    if separate_finite_mask and broad_count > arena.point_selected_candidate_ids.size:
+        return EVENT_QUERY_CANDIDATE_CAPACITY, broad_count
+    return EVENT_QUERY_OK, broad_count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _fill_event_arena_broad_candidates_into(
+    geometry: EventGeometry,
+    query_lower_m: FloatArray,
+    query_upper_m: FloatArray,
+    broad_counts: Int64Array,
+    arena: EventArena,
+) -> bool:
+    """Reuse geometry's bounded CSR fill and canonical sorting, without recount."""
+
+    count = broad_counts.size
+    offsets = arena.broad_offsets[: count + 1]
+    offsets[0] = 0
+    for row in range(count):
+        offsets[row + 1] = offsets[row] + broad_counts[row]
+    _aabb_candidate_fill_batch_kernel(
+        query_lower_m,
+        query_upper_m,
+        offsets,
+        geometry.bvh_facet_id,
+        geometry.bvh_lower_m,
+        geometry.bvh_upper_m,
+        geometry.bvh_begin,
+        geometry.bvh_end,
+        geometry.bvh_skip,
+        geometry.facet_start_m,
+        geometry.facet_end_m,
+        arena.broad_candidate_ids,
+        arena.fill_valid[:count],
+    )
+    for row in range(count):
+        if not arena.fill_valid[row]:
+            return False
+    for offset in range(offsets[count]):
+        arena.selected_candidate_ids[offset] = arena.broad_candidate_ids[offset]
+    return True
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _initialize_event_arena_result_into(
+    inherited_failure_reason: UInt8Array, clear_status: np.uint8, arena: EventArena
+) -> None:
+    result = arena.result
+    for row in range(inherited_failure_reason.size):
+        result.status[row] = clear_status
+        result.failure_reason[row] = inherited_failure_reason[row]
+        result.start_contact_departure_certified[row] = False
+        result.time_s[row] = np.nan
+        result.primary_facet_id[row] = -1
+        result.position_budget_m[row] = 0.0
+        result.time_budget_s[row] = 0.0
+        result.localization_residual_m[row] = 0.0
+        arena.candidate_count[row] = 0
+        for axis in range(2):
+            result.position_m[row, axis] = np.nan
+            result.normal[row, axis] = 0.0
+        if arena.use_point_candidates.size:
+            arena.use_point_candidates[row] = False
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _retain_point_result_into(arena: EventArena, row_count: int) -> None:
+    point, result = arena.point_result, arena.result
+    for row in range(row_count):
+        point.status[row] = result.status[row]
+        point.failure_reason[row] = result.failure_reason[row]
+        point.start_contact_departure_certified[row] = result.start_contact_departure_certified[row]
+        point.time_s[row] = result.time_s[row]
+        point.primary_facet_id[row] = result.primary_facet_id[row]
+        point.position_budget_m[row] = result.position_budget_m[row]
+        point.time_budget_s[row] = result.time_budget_s[row]
+        point.localization_residual_m[row] = result.localization_residual_m[row]
+        arena.point_candidate_count[row] = arena.candidate_count[row]
+        for axis in range(2):
+            point.position_m[row, axis] = result.position_m[row, axis]
+            point.normal[row, axis] = result.normal[row, axis]
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _event_candidate_offsets_into(
+    row_count: int,
+    counts: Int64Array,
+    broad_offsets: Int64Array,
+    offsets: Int64Array,
+    candidate_capacity: int,
+) -> tuple[bool, int]:
+    """Bound a complete contact CSR by each row's immutable broad superset."""
+
+    offsets[0] = 0
+    for row in range(row_count):
+        count = counts[row]
+        broad_count = broad_offsets[row + 1] - broad_offsets[row]
+        if count < 0 or count > broad_count:
+            return False, 0
+        offsets[row + 1] = offsets[row] + count
+    count = offsets[row_count]
+    return count <= candidate_capacity, count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _pack_curved_arena_candidates_into(
+    arena: EventArena, row_count: int, separate_finite_mask: bool
+) -> tuple[bool, int]:
+    """Check the complete event CSR against its broad superset before packing."""
+
+    offsets = arena.candidate_offsets[: row_count + 1]
+    complete, count = _event_candidate_offsets_into(
+        row_count,
+        arena.candidate_count,
+        arena.broad_offsets,
+        offsets,
+        arena.candidate_facet_ids.size,
+    )
+    if not complete:
+        return False, 0
+    candidates = arena.candidate_facet_ids[:count]
+    for offset in range(count):
+        candidates[offset] = -1
+    if separate_finite_mask:
+        _fill_curved_topology_event_candidates_kernel(
+            arena.result.status[:row_count],
+            arena.broad_offsets[: row_count + 1],
+            arena.point_selected_candidate_ids,
+            arena.selected_candidate_ids,
+            arena.use_point_candidates[:row_count],
+            offsets,
+            candidates,
+        )
+    else:
+        _fill_curved_event_candidates_kernel(
+            arena.result.status[:row_count],
+            arena.broad_offsets[: row_count + 1],
+            arena.selected_candidate_ids,
+            offsets,
+            candidates,
+        )
+    for offset in range(count):
+        if candidates[offset] < 0:
+            return False, 0
+    return True, count
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def locate_curved_first_event_into(
+    geometry: EventGeometry,
+    batch: PreparedCurvedEventBatch,
+    arena: EventArena,
+    row_start: int,
+    row_stop: int,
+) -> tuple[np.uint8, int, int, int]:
+    """Run one prepared prefix in fixed storage, returning status and counts.
+
+    The result is valid only on EVENT_QUERY_OK and borrows the arena until reuse.
+    Range/row/candidate capacity checks precede every arena write and locator.
+    Geometry and prepared input arrays remain immutable throughout the query.
+    """
+
+    query_status, broad_candidate_count = _event_arena_requirements(
+        batch.broad_counts, arena, row_start, row_stop, batch.separate_finite_mask
+    )
+    if query_status != EVENT_QUERY_OK:
+        return query_status, 0, 0, broad_candidate_count
+    projected = project_curved_event_batch(batch, row_start, row_stop)
+    if not _fill_event_arena_broad_candidates_into(
+        geometry,
+        projected.path.query_lower_m,
+        projected.path.query_upper_m,
+        projected.broad_counts,
+        arena,
+    ):
+        return EVENT_QUERY_STALE_COUNTS, 0, 0, broad_candidate_count
+    _initialize_event_arena_result_into(projected.path.failure_reason, CURVED_STATUS_CLEAR, arena)
+    prepared = projected.path
+    row_count = prepared.start_time_s.size
+    radii = projected.contact_radius_m
+    geometry_rtol, roundoff_ulps = projected.geometry_rtol, projected.roundoff_ulps
+    certify_monotone_approach = projected.certify_monotone_approach
+    position_control_rows = projected.position_control_rows
+    position_control_origin = projected.position_control_origin_m
+    relative_position_control_lower = projected.relative_position_control_lower_m
+    relative_position_control_upper = projected.relative_position_control_upper_m
+    finite_mask, separate_finite_mask = (
+        projected.finite_contact_enabled,
+        projected.separate_finite_mask,
+    )
+    broad_offsets = arena.broad_offsets[: row_count + 1]
+    broad_candidate_ids = arena.broad_candidate_ids[:broad_candidate_count]
+    selected_candidates = arena.selected_candidate_ids[:broad_candidate_count]
+    volume_inside = projected.volume_inside
+    result = _event_columns_view(arena.result, row_count)
+    status = result.status
+    failure_reason = result.failure_reason
+    departure_certified = result.start_contact_departure_certified
+    event_time = result.time_s
+    hit_position = result.position_m
+    primary_facet = result.primary_facet_id
+    normal = result.normal
+    position_budget = result.position_budget_m
+    time_budget = result.time_budget_s
+    residual = result.localization_residual_m
+    event_candidate_count = arena.candidate_count[:row_count]
     _locate_curved_events_kernel(
-        geometry.coordinate_system == "axisymmetric_rz",
+        geometry.axisymmetric,
         prepared.start_position_m,
         prepared.start_velocity_m_s,
         prepared.end_position_m,
@@ -1251,24 +1845,12 @@ def locate_curved_first_event_batch(
         residual,
         event_candidate_count,
     )
-    point_state = None
     if separate_finite_mask:
-        point_state = (
-            status.copy(),
-            failure_reason.copy(),
-            departure_certified.copy(),
-            event_time.copy(),
-            hit_position.copy(),
-            primary_facet.copy(),
-            normal.copy(),
-            position_budget.copy(),
-            time_budget.copy(),
-            residual.copy(),
-            event_candidate_count.copy(),
-            selected_candidates.copy(),
-        )
+        _retain_point_result_into(arena, row_count)
+        for offset in range(broad_candidate_count):
+            arena.point_selected_candidate_ids[offset] = arena.selected_candidate_ids[offset]
     _locate_finite_curved_events_kernel(
-        geometry.coordinate_system == "axisymmetric_rz",
+        geometry.axisymmetric,
         radii,
         prepared.start_position_m,
         prepared.start_velocity_m_s,
@@ -1309,30 +1891,26 @@ def locate_curved_first_event_batch(
         residual,
         event_candidate_count,
     )
-    use_point_candidates = (
-        np.zeros(row_count, dtype=np.bool_) if separate_finite_mask else np.empty(0, dtype=np.bool_)
-    )
-    point_candidates = np.empty(0, dtype=np.int64)
     if separate_finite_mask:
-        if point_state is None:
-            raise EventLocationError("periodic curved-event state was not retained")
-        point_candidates = point_state[11]
+        point = _event_columns_view(arena.point_result, row_count)
+        point_candidates = arena.point_selected_candidate_ids[:broad_candidate_count]
+        use_point_candidates = arena.use_point_candidates[:row_count]
         _arbitrate_curved_topology_events_kernel(
             radii,
             finite_mask,
             broad_offsets,
             point_candidates,
-            point_state[0],
-            point_state[1],
-            point_state[2],
-            point_state[3],
-            point_state[4],
-            point_state[5],
-            point_state[6],
-            point_state[7],
-            point_state[8],
-            point_state[9],
-            point_state[10],
+            point.status,
+            point.failure_reason,
+            point.start_contact_departure_certified,
+            point.time_s,
+            point.position_m,
+            point.primary_facet_id,
+            point.normal,
+            point.position_budget_m,
+            point.time_budget_s,
+            point.localization_residual_m,
+            arena.point_candidate_count[:row_count],
             status,
             failure_reason,
             departure_certified,
@@ -1346,44 +1924,12 @@ def locate_curved_first_event_batch(
             event_candidate_count,
             use_point_candidates,
         )
-    candidate_offsets = np.empty(row_count + 1, dtype=np.int64)
-    candidate_offsets[0] = 0
-    np.cumsum(event_candidate_count, out=candidate_offsets[1:])
-    event_candidates = np.full(int(candidate_offsets[-1]), -1, dtype=np.int64)
-    if separate_finite_mask:
-        _fill_curved_topology_event_candidates_kernel(
-            status,
-            broad_offsets,
-            point_candidates,
-            selected_candidates,
-            use_point_candidates,
-            candidate_offsets,
-            event_candidates,
-        )
-    else:
-        _fill_curved_event_candidates_kernel(
-            status,
-            broad_offsets,
-            selected_candidates,
-            candidate_offsets,
-            event_candidates,
-        )
-    if bool((event_candidates < 0).any()):
-        raise EventLocationError("compiled curved-event candidate packing is incomplete")
-    return CurvedEventBatch(
-        status,
-        failure_reason,
-        departure_certified,
-        event_time,
-        hit_position,
-        primary_facet,
-        normal,
-        position_budget,
-        time_budget,
-        residual,
-        candidate_offsets,
-        event_candidates,
+    complete, candidate_count = _pack_curved_arena_candidates_into(
+        arena, row_count, separate_finite_mask
     )
+    if not complete:
+        return EVENT_QUERY_INCOMPLETE_CANDIDATES, 0, 0, broad_candidate_count
+    return EVENT_QUERY_OK, row_count, candidate_count, broad_candidate_count
 
 
 def _prepare_curved_path_batch(
@@ -1753,17 +2299,17 @@ def _require_curved_candidate_capacity(counts: Int64Array, candidate_capacity: i
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _curved_upper_product(left: float, right: float) -> float:
-    return np.nextafter(left * right, np.inf)
+    return next_float64(left * right, True)
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _curved_upper_sum(left: float, right: float) -> float:
-    return np.nextafter(left + right, np.inf)
+    return next_float64(left + right, True)
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def _curved_upper_quotient(value: float, divisor: float) -> float:
-    return np.nextafter(value / divisor, np.inf)
+    return next_float64(value / divisor, True)
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -1899,7 +2445,7 @@ def _prepare_curved_paths_kernel(
     for row in range(start_time_s.size):
         velocity_abs_x = max(abs(velocity_lower_m_s[row, 0]), abs(velocity_upper_m_s[row, 0]))
         velocity_abs_y = max(abs(velocity_lower_m_s[row, 1]), abs(velocity_upper_m_s[row, 1]))
-        speed_upper = np.nextafter(_curved_hypot2(velocity_abs_x, velocity_abs_y), np.inf)
+        speed_upper = next_float64(_curved_hypot2(velocity_abs_x, velocity_abs_y), True)
         speed_upper_m_s[row] = speed_upper
         interval_s = target_time_s[row] - start_time_s[row]
         chord_valid = math.isfinite(speed_upper)
@@ -1939,10 +2485,10 @@ def _prepare_curved_paths_kernel(
                 geometry_rtol,
                 roundoff_ulps,
             )
-        lower_x = np.nextafter(position_lower_m[row, 0] - padding, -np.inf)
-        lower_y = np.nextafter(position_lower_m[row, 1] - padding, -np.inf)
-        upper_x = np.nextafter(position_upper_m[row, 0] + padding, np.inf)
-        upper_y = np.nextafter(position_upper_m[row, 1] + padding, np.inf)
+        lower_x = next_float64(position_lower_m[row, 0] - padding, False)
+        lower_y = next_float64(position_lower_m[row, 1] - padding, False)
+        upper_x = next_float64(position_upper_m[row, 0] + padding, True)
+        upper_y = next_float64(position_upper_m[row, 1] + padding, True)
         finite_query = (
             math.isfinite(lower_x)
             and math.isfinite(lower_y)
@@ -2002,7 +2548,7 @@ def _curved_offset_dot_bounds(
     if not math.isfinite(value) or not math.isfinite(scale):
         return -np.inf, np.inf
     margin = _curved_roundoff_margin(scale, roundoff_ulps)
-    return np.nextafter(value - margin, -np.inf), np.nextafter(value + margin, np.inf)
+    return next_float64(value - margin, False), next_float64(value + margin, True)
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -2025,7 +2571,7 @@ def _curved_distance_lower_bound(
     if not math.isfinite(distance) or not math.isfinite(scale):
         return -np.inf
     margin = _curved_roundoff_margin(scale, roundoff_ulps)
-    return np.nextafter(distance - margin, -np.inf)
+    return next_float64(distance - margin, False)
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -2175,7 +2721,7 @@ def _curved_departure_is_certified(
         ),
     )
     margin = _curved_roundoff_margin(velocity_scale, roundoff_ulps)
-    normal_velocity_upper = np.nextafter(normal_velocity + margin, np.inf)
+    normal_velocity_upper = next_float64(normal_velocity + margin, True)
     return math.isfinite(normal_velocity_upper) and normal_velocity_upper < 0.0
 
 
@@ -2319,7 +2865,7 @@ def _curved_monotone_approach_is_clear(
         ),
     )
     margin = _curved_roundoff_margin(velocity_scale, roundoff_ulps)
-    normal_velocity_lower = np.nextafter(normal_velocity - margin, -np.inf)
+    normal_velocity_lower = next_float64(normal_velocity - margin, False)
     return math.isfinite(normal_velocity_lower) and normal_velocity_lower > 0.0
 
 
@@ -2452,8 +2998,8 @@ def _curved_chord(
     velocity_y = endpoint_y / interval_s
     displacement_x = interval_s * velocity_x
     displacement_y = interval_s * velocity_y
-    error_x = np.nextafter(abs(displacement_x - endpoint_x), np.inf)
-    error_y = np.nextafter(abs(displacement_y - endpoint_y), np.inf)
+    error_x = next_float64(abs(displacement_x - endpoint_x), True)
+    error_y = next_float64(abs(displacement_y - endpoint_y), True)
     valid = (
         _exact_four_finite(velocity_x, velocity_y, displacement_x, displacement_y)
         and math.isfinite(error_x)
@@ -2526,7 +3072,7 @@ def _curved_transverse_position_radius(
         component_deviation_y,
         _curved_upper_product(abs(displacement_y), time_fraction),
     )
-    component_radius = np.nextafter(_curved_hypot2(error_x, error_y), np.inf)
+    component_radius = next_float64(_curved_hypot2(error_x, error_y), True)
     return _curved_upper_sum(component_radius, hit_residual_m)
 
 
@@ -2582,7 +3128,7 @@ def _curved_transverse_residual(
         _curved_upper_product(abs(displacement_y), abs(normal_y)),
     )
     progress_error = _curved_roundoff_margin(product_scale, roundoff_ulps)
-    progress_lower = np.nextafter(normal_progress - progress_error, -np.inf)
+    progress_lower = next_float64(normal_progress - progress_error, False)
     if not math.isfinite(progress_lower) or progress_lower <= 0.0:
         return False, 0.0
     component_deviation_x = _curved_upper_sum(
@@ -2603,8 +3149,8 @@ def _curved_transverse_residual(
         _curved_upper_product(interval_s, normal_uncertainty),
         progress_lower,
     )
-    bracket_lower = np.nextafter(hit_time_s - time_radius, -np.inf)
-    bracket_upper = np.nextafter(hit_time_s + time_radius, np.inf)
+    bracket_lower = next_float64(hit_time_s - time_radius, False)
+    bracket_upper = next_float64(hit_time_s + time_radius, True)
     if (
         not math.isfinite(time_radius)
         or time_radius > time_budget_s
@@ -2951,7 +3497,7 @@ def _certify_curved_wall_facet_hit(
             )
     span_x = position_upper_m[row, 0] - position_lower_m[row, 0]
     span_y = position_upper_m[row, 1] - position_lower_m[row, 1]
-    tube_diameter = np.nextafter(_curved_hypot2(span_x, span_y), np.inf)
+    tube_diameter = next_float64(_curved_hypot2(span_x, span_y), True)
     interval_s = target_time_s[row] - start_time_s[row]
     if interval_s > time_budget or tube_diameter > position_budget:
         return CURVED_STATUS_SPLIT, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
@@ -3497,8 +4043,8 @@ def _curved_radial_direction(
         max(abs(lower_velocity_m_s), abs(upper_velocity_m_s)),
         roundoff_ulps,
     )
-    lower = np.nextafter(lower_velocity_m_s - margin, -np.inf)
-    upper = np.nextafter(upper_velocity_m_s + margin, np.inf)
+    lower = next_float64(lower_velocity_m_s - margin, False)
+    upper = next_float64(upper_velocity_m_s + margin, True)
     if lower > 0.0:
         return 1, lower
     if upper < 0.0:
@@ -3563,7 +4109,7 @@ def _curved_localize_axis_crossing(
     radial_roundoff = abs(_exact_sum2(start_position_m[row, 0], radial_product))
     residual = _curved_upper_sum(
         _curved_upper_sum(chord_deviation_m[row, 0], chord[5]),
-        np.nextafter(radial_roundoff, np.inf),
+        next_float64(radial_roundoff, True),
     )
     if not math.isfinite(residual) or residual > position_budget_m:
         return CURVED_STATUS_SPLIT, 0.0, 0.0, 0.0
@@ -4413,9 +4959,9 @@ def _exact_event_budget(
         _exact_ulp(facet_length_m),
     )
     position_budget = float(
-        np.nextafter(
+        next_float64(
             geometry_rtol * facet_length_m + max(roundoff_position, position_ulp_floor),
-            np.inf,
+            True,
         )
     )
     effective_speed = max(speed_m_s, facet_length_m / interval_s)
@@ -7583,7 +8129,8 @@ def _locate_finite_exact_events_kernel(
             selected_candidates[offset] = -1
         simultaneous_count[row] = 0
         if not ready[row]:
-            status[row] = EXACT_STATUS_FAILURE
+            # The point query already distinguishes valid zero paths and axis
+            # events from invalid paths. Preserve that verdict here.
             continue
         interval_s = target_time_s[row] - start_time_s[row]
         hit = _find_finite_exact_hit(
@@ -8121,6 +8668,126 @@ def classify_event_point(
     )
 
 
+def certify_event_point_interiors(
+    geometry: PreparedGeometry,
+    position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    time_s: FloatArray,
+    eligible: NDArray[np.bool_],
+    volume_containment: NDArray[np.bool_],
+    *,
+    interval_s: float,
+    geometry_rtol: float,
+    roundoff_ulps: int,
+) -> NDArray[np.bool_]:
+    """Certify checked initial rows whose padded AABBs miss every facet.
+
+    The engine supplies aligned finite position, velocity and release arrays,
+    an eligible table-row mask, and its already computed volume containment.
+    False means use ``classify_event_point`` in the original particle order.
+    A speculative bound never publishes its own numerical error.
+
+    Componentwise absolute maxima dominate every selected position norm and
+    ULP floor. The same event-budget owner with zero speed therefore bounds
+    every selected padding and its associated time budget. A finite CPython
+    norm of the velocity maxima also proves every scalar speed is finite.
+    """
+
+    result = np.zeros(time_s.size, dtype=np.bool_)
+    if geometry.facet_count == 0:
+        return result
+    found, position_x, position_y, velocity_x, velocity_y, maximum_time = (
+        _event_point_batch_extrema(position_m, velocity_m_s, time_s, eligible)
+    )
+    if not found or not math.isfinite(math.hypot(velocity_x, velocity_y)):
+        return result
+    try:
+        budget = resolve_event_budget(
+            facet_length_m=float(np.max(geometry.facet_length_m)),
+            geometry_bbox_diagonal_m=geometry.bbox_diagonal_m,
+            position_m=np.asarray([position_x, position_y], dtype=np.float64),
+            speed_m_s=0.0,
+            interval_s=interval_s,
+            time_s=maximum_time,
+            geometry_rtol=geometry_rtol,
+            roundoff_ulps=roundoff_ulps,
+        )
+    except (ValueError, EventLocationError, ZeroDivisionError, OverflowError):
+        return result
+    _certify_event_point_interiors_into(
+        prepare_event_geometry(geometry),
+        position_m,
+        eligible,
+        volume_containment,
+        budget.position_m,
+        result,
+    )
+    return result
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _event_point_batch_extrema(
+    position_m: FloatArray,
+    velocity_m_s: FloatArray,
+    time_s: FloatArray,
+    eligible: NDArray[np.bool_],
+) -> tuple[bool, float, float, float, float, float]:
+    found = False
+    position_x = position_y = velocity_x = velocity_y = maximum_time = 0.0
+    for row in range(time_s.size):
+        if not eligible[row]:
+            continue
+        found = True
+        position_x = max(position_x, abs(position_m[row, 0]))
+        position_y = max(position_y, abs(position_m[row, 1]))
+        velocity_x = max(velocity_x, abs(velocity_m_s[row, 0]))
+        velocity_y = max(velocity_y, abs(velocity_m_s[row, 1]))
+        maximum_time = max(maximum_time, abs(time_s[row]))
+    return found, position_x, position_y, velocity_x, velocity_y, maximum_time
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def _certify_event_point_interiors_into(
+    geometry: EventGeometry,
+    position_m: FloatArray,
+    eligible: NDArray[np.bool_],
+    volume_containment: NDArray[np.bool_],
+    padding_m: float,
+    result: NDArray[np.bool_],
+) -> None:
+    lower = np.empty(2, dtype=np.float64)
+    upper = np.empty(2, dtype=np.float64)
+    for row in range(result.size):
+        if not eligible[row] or not volume_containment[row]:
+            continue
+        lower[0] = position_m[row, 0] - padding_m
+        lower[1] = position_m[row, 1] - padding_m
+        upper[0] = position_m[row, 0] + padding_m
+        upper[1] = position_m[row, 1] + padding_m
+        if not (
+            math.isfinite(lower[0])
+            and math.isfinite(lower[1])
+            and math.isfinite(upper[0])
+            and math.isfinite(upper[1])
+        ):
+            continue
+        result[row] = (
+            _aabb_candidate_count_kernel(
+                lower,
+                upper,
+                geometry.bvh_facet_id,
+                geometry.bvh_lower_m,
+                geometry.bvh_upper_m,
+                geometry.bvh_begin,
+                geometry.bvh_end,
+                geometry.bvh_skip,
+                geometry.facet_start_m,
+                geometry.facet_end_m,
+            )
+            == 0
+        )
+
+
 def inspect_rk4_piece(
     geometry: PreparedGeometry,
     start_position_m: FloatArray,
@@ -8236,17 +8903,17 @@ def _preclassification_query_bounds(
         maximum_facet_length_m,
         position_abs_x + position_abs_y,
     )
-    padding_m = np.nextafter(
+    padding_m = next_float64(
         max(
             geometry_rtol * maximum_facet_length_m,
             roundoff_factor * position_scale_m,
         ),
-        np.inf,
+        True,
     )
-    query_lower_x = np.nextafter(position_lower_m[row, 0] - padding_m, -np.inf)
-    query_lower_y = np.nextafter(position_lower_m[row, 1] - padding_m, -np.inf)
-    query_upper_x = np.nextafter(position_upper_m[row, 0] + padding_m, np.inf)
-    query_upper_y = np.nextafter(position_upper_m[row, 1] + padding_m, np.inf)
+    query_lower_x = next_float64(position_lower_m[row, 0] - padding_m, False)
+    query_lower_y = next_float64(position_lower_m[row, 1] - padding_m, False)
+    query_upper_x = next_float64(position_upper_m[row, 0] + padding_m, True)
+    query_upper_y = next_float64(position_upper_m[row, 1] + padding_m, True)
     finite = (
         np.isfinite(query_lower_x)
         and np.isfinite(query_lower_y)
@@ -8422,7 +9089,7 @@ def _preclassification_speed_is_finite(
         abs(velocity_lower_m_s[row, 1]),
         abs(velocity_upper_m_s[row, 1]),
     )
-    speed_upper_m_s = np.nextafter(math.hypot(velocity_abs_x, velocity_abs_y), np.inf)
+    speed_upper_m_s = next_float64(math.hypot(velocity_abs_x, velocity_abs_y), True)
     return math.isfinite(speed_upper_m_s)
 
 

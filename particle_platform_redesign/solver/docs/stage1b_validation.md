@@ -1,5 +1,7 @@
 # P10--P14 Stage 1B closeout、P14-P serial convergence、P14-U gate
 
+この文書はStage 1B/P14の保存履歴である。現行の実行仕様・性能判断は[並列実行・性能](parallel_execution_plan.md)が所有する。
+
 P10はStage 1Aで固定した数値意味を、同じproduction engineのcompiled array passへ移した。
 P11はそのengineへnative `exponential_midpoint`を第二engineなしで追加した。P12は粒子ごとの数値順序を変えず、
 event-heavy workをworker-localに分配した。P13はlogical resultの意味を変えず、durable multi-segment、
@@ -22,21 +24,21 @@ checkpoint/resume、bounded writerへ拡張した。P14は同じ公開経路の�
 - checkpoint schema: version 1、固定epoch cadence: 64 macro steps
 - case schema、result schema、proposal、event、physics model/result semanticsはP14で変更しない
 
-現行revisionはengine `particle_engine_v45`、compiled tile
+v45追加機能認定時の保存revisionはengine `particle_engine_v45`、compiled tile
 `compiled_cpu_tile_v21`、CPU runtime `resident_soa_serial_slab_v6`、memory plan
 `solver_owned_memory_plan_v16`、proposal `coupled_fixed_step_proposal_v10`、RK4 enclosure
 `rk4_global_abs_enclosure_v2`、charge-stable exponential midpoint v3 / enclosure v4、event
 `line_quadratic_curved_capsule_periodic_first_hit_v21`、dense path `rk4_position_hermite_state_extension_v3`、field location v4、geometry
 `line_boundary_capsule_contact_bvh_v7`である。P14の上記revisionと
-性能値は置換前baselineとして残し、現行runtime名と混同しない。result algorithm v6、result schema 3、checkpoint schema 2である。
-physics catalogは`inertial_langevin_2d_catalog_v23`、physics runtimeは
-`signed_ion_compiled_physics_runtime_v22`、boundary algorithmは`contact_wall_laws_v7`、source algorithmは
-`realized_internal_surface_contact_schedule_v5`である。canonical case/data/result schemaは3、checkpoint schemaは2である。
-memory plan v16はdeferred event depthを
-`event_work_bytes_per_particle`、Brownian tree、P19-L dense path・certificate workをそれぞれ別のnamed componentで解決し、
-候補、event/failure staging、surface release、direct replayも分離する。pack時だけのgatherは12.5% safety marginが所有し、正確なbyte式は
-[`parallel_execution_plan.md`](parallel_execution_plan.md)が所有する。
-Brownian tree workは実際の候補率でなく`adaptive_max_depth`から保守的に解決する。
+性能値は置換前baselineとして残し、開発runtime名と混同しない。result algorithm v6、result schema 3、checkpoint schema 2である。
+0.2.0の公開sourceはv46である。過去の移行・試作・不採用・品質logの詳細は
+[凍結した検証記録](../evidence/process_dispatch_memory_2026_10_12/current_docs/solver/docs/stage1b_validation.md)に保持する。
+現行0.3.0のrevisionは[`result_format_v3.md`](result_format_v3.md)、科学・用途性能・OS/wheel検査は
+[`parallel_execution_plan.md`](parallel_execution_plan.md)、今後の作業は[`implementation_plan.md`](../../implementation_plan.md)を参照する。
+serialとprocess workerは同じslab数値処理を使い、親macro/単一writer/checkpoint、bounded event ACKを維持する。
+追加JIT化・leaf途中yield・native teamの旧工程は現在の必須作業ではない。
+以下はStage 1B/P14の検証方法と保存履歴であり、古い品質数値・runtimeの採否を現行版へ付け替えない。
+
 現行dense path v3は、root始点相対のBernstein enclosure、TwoDiff残差、world座標への方向付き
 外向き丸めにより、座標原点に依存してevent certificateが閉じない不具合を修正した。endpoint、path、
 v3導入時のevent algorithmとengine v32 / event v14 / RK4 global enclosure v2は不変だった。event v15は
@@ -44,7 +46,7 @@ geometry budgetとroundoff budgetを加算し、補償したfacet-local offset d
 event v16はvalidなRK4 dense rowのposition Bernstein control enclosureをfacet half-spaceへ射影し、4制御点すべての
 外向き上限が既存budgetの負側に厳密に入る候補だけをclearする。証明不能ならsplit/fail-closedを維持する。
 cubic Hermite derivative-Bernstein enclosureだけがmonotone clearへ明示opt-inし、exponential/scalarはfail-closedする。
-現行event v21はevent v19 / v18の同時incident facet集合を曲線pathでも保持し、exact、RK4、exponential、Brownianの
+現行event v23はevent v19 / v18の同時incident facet集合を曲線pathでも保持し、exact、RK4、exponential、Brownianの
 材料facetへ共通のpriority/combined-normal意味論を適用する。static Cartesian XYの周期facetは同じfirst-event順序で
 対応facetへpure translationし、材料lawやwall RNGを使わない。
 
@@ -223,7 +225,8 @@ revision、memory-plan fit、科学payload identityをhard checkした。絶対�
 0.636655/0.779968 s（1.1737x/1.1473x）、event 10k×20 hitは1 worker 33.509603 sに対して
 20 worker 37.728221 s（0.8882x）だった。
 したがってP14時点では`threads: 1`を既定推奨とした。その後P14-Pの内部parallel試行も製品gateを満たさず、
-現行case schema v3はthread設定を持たず、single-thread compiled runtimeを維持する。
+P14-P closeout当時はthread設定を持たないcase schemaとsingle-thread compiled runtimeへ収束した。
+現行v62実装もcase schemaへthread設定を復活させず、API/CLIのworkersを実行資源として扱う（第9.27節）。
 
 このthread比較はparallel ownershipとsynthetic scalingの証拠であり、一般的な並列効率の完成を意味しない。
 20 workerの並列効率はregular 100k/1Mでも約9.4%/24.0%、P1/Q1 10kでは約5.9%/5.7%である。
@@ -314,7 +317,7 @@ mean/full covariance exactness、noise-off 2次収束、manufactured weak mean�
 tree-depth first-passage、slab/output/resume identityで閉じた。fixed/continuous charge、native/effective linear Epstein、
 既存additive forceを扱う。初回closeoutのwall subsetはterminal `stick`/`escape`/`hold`だけだった。
 等方3-D Brownianや一般SDEのstrong order/weak 2次は主張しない。
-現行revisionはengine v45 / proposal v10 / catalog v23 / event v21 / runtime v22 / compiled tile v21 / memory plan v16である。
+v45保存認定時のrevisionはengine v45 / proposal v10 / catalog v23 / event v21 / runtime v22 / compiled tile v21 / memory plan v16である。
 B05では`interval_tree_depth`を全rootへ一様な精度authorityとして維持し、wall/RZ-axis/証明不能候補だけを
 `adaptive_max_depth`まで条件付き分割する。base=maxは従来固定depthへ退化する。memory plan v16は候補率ではなく
 max depthからtree workを保守的に計画し、連続OU exact first-passageやzero miss probabilityは主張しない。
@@ -414,8 +417,8 @@ gravity parityも合格した。履歴generatorの受入範囲はXY line-length�
 検証していない。現行runtimeはgeneratorと分離したcanonical realized surface rowを入力とする。
 
 timingから分離した1M `none` profileではowner self timeのeventsが28.7%、fieldsが26.8%で、単一ownerが支配して
-いなかった。この結果だけを根拠に局所最適化や第二runtimeを追加せず、productionは一つのsingle-thread compiled
-engineを維持する。`none`とsampleの観測群は逐次実行したため、両者の秒数差をsampling overheadの因果推定には使わない。
+いなかった。当時はこの結果だけを根拠に局所最適化や第二runtimeを追加せず、一つのsingle-thread compiled
+engineを維持した。`none`とsampleの観測群は逐次実行したため、両者の秒数差をsampling overheadの因果推定には使わない。
 絶対秒数はmachine-localかつnon-gatingで、COMSOLとの速度比較ではない。RSSはload/simulate/openまでをsampleした
 process high-waterであり、後続の外部validationは含まない。P14/P14-Uの受理済みJSONとplatform smokeは
 `../evidence/v0.1/`へ保存した。T03、local audit、P14-R remote Windows/Linux workflowも完了した。remote receiptは

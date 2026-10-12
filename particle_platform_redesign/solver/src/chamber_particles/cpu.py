@@ -1,16 +1,22 @@
-"""Compiled field passes, resident particle indexing, and CPU memory planning."""
+"""Compiled scalar numerics, field passes, indexing, and CPU memory planning."""
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import dataclass
+import copyreg
+import io
+import mmap
+import pickle
+import weakref
+from collections.abc import Iterable, Iterator, Mapping
+from dataclasses import dataclass, fields, is_dataclass, replace
+from multiprocessing.shared_memory import SharedMemory
 from types import MappingProxyType
 
 import numpy as np
 from numba import njit
 
-CPU_RUNTIME_LAYOUT_REVISION = "resident_soa_serial_slab_v6"
-MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v16"
+CPU_RUNTIME_LAYOUT_REVISION = "resident_soa_process_slab_v14"
+MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v25"
 
 _MAX_SLAB_PARTICLES = 65_536
 _MINIMUM_SAFETY_MARGIN_BYTES = 64 * 1024
@@ -30,6 +36,32 @@ _FIELD_MAX_REFERENCE_UNCERTAINTY = 8.0 * np.sqrt(_FIELD_FLOAT_EPS)
 _FIELD_Q1_MAX_ITERATIONS = 20
 
 
+@njit(cache=True, fastmath=False, nogil=True)
+def next_float64(value: float, toward_positive: bool) -> float:
+    """Match nextafter(value, +/-inf), including signed zero and overflow.
+
+    Scalar bitcasts are documented Numba operations.  NaNs retain the
+    platform's original nextafter payload semantics.  The solver consumes
+    values and explicit statuses, never C floating-point exception flags.
+    """
+
+    bits = np.float64(value).view(np.uint64)
+    magnitude = bits & np.uint64(0x7FFFFFFFFFFFFFFF)
+    if magnitude >= np.uint64(0x7FF0000000000000):
+        if magnitude > np.uint64(0x7FF0000000000000):
+            return np.nextafter(value, np.inf if toward_positive else -np.inf)
+        if bool(bits >> np.uint64(63)) != toward_positive:
+            return value
+    if magnitude == 0:
+        result = np.uint64(1) if toward_positive else np.uint64(0x8000000000000001)
+        return np.uint64(result).view(np.float64)
+    if bool(bits >> np.uint64(63)) == toward_positive:
+        bits -= np.uint64(1)
+    else:
+        bits += np.uint64(1)
+    return np.uint64(bits).view(np.float64)
+
+
 @njit(cache=True, fastmath=False, parallel=False)
 def _field_two_term_sum(first: float, second: float) -> float:
     """Return a compensated two-term sum without enabling reassociation."""
@@ -41,7 +73,7 @@ def _field_two_term_sum(first: float, second: float) -> float:
 
 
 @njit(cache=True, fastmath=False, parallel=False)
-def _field_axis_spacing(axis: np.ndarray) -> float:
+def field_axis_spacing(axis: np.ndarray) -> float:
     spacing = 0.0
     for index in range(axis.size):
         spacing = max(spacing, abs(float(np.spacing(axis[index]))))
@@ -76,12 +108,10 @@ def _field_regular_axis_candidate_range(
     axis: np.ndarray,
     coordinate: float,
     interval: int,
-    axis_spacing: float,
-    span: float,
+    tolerance: float,
 ) -> tuple[int, int]:
     first = interval
     last = interval
-    tolerance = _field_axis_tolerance(axis_spacing, span, coordinate)
     for node_index in (interval, interval + 1):
         if 0 < node_index < axis.size - 1:
             if abs(coordinate - axis[node_index]) <= tolerance:
@@ -102,17 +132,19 @@ def _field_regular_candidate(
     spacing1: float,
     span0: float,
     span1: float,
+    certified_uncertainty: bool,
 ) -> tuple[int, int, float, float, float, float]:
     width0 = axis0[index0 + 1] - axis0[index0]
     width1 = axis1[index1 + 1] - axis1[index1]
     coordinate0 = (point0 - axis0[index0]) / width0
     coordinate1 = (point1 - axis1[index1]) / width1
-    uncertainty = max(
-        _field_axis_tolerance(spacing0, span0, point0) / width0,
-        _field_axis_tolerance(spacing1, span1, point1) / width1,
-    )
-    if not np.isfinite(uncertainty) or uncertainty > _FIELD_MAX_REFERENCE_UNCERTAINTY:
-        return FIELD_KERNEL_UNRESOLVED_CELL, -1, 0.0, 0.0, 0.0, 0.0
+    if not certified_uncertainty:
+        uncertainty = max(
+            _field_axis_tolerance(spacing0, span0, point0) / width0,
+            _field_axis_tolerance(spacing1, span1, point1) / width1,
+        )
+        if not np.isfinite(uncertainty) or uncertainty > _FIELD_MAX_REFERENCE_UNCERTAINTY:
+            return FIELD_KERNEL_UNRESOLVED_CELL, -1, 0.0, 0.0, 0.0, 0.0
     bounded0 = min(max(coordinate0, 0.0), 1.0)
     bounded1 = min(max(coordinate1, 0.0), 1.0)
     cell_id = index0 * (axis1.size - 1) + index1
@@ -137,11 +169,19 @@ def _field_regular_containing(
     spacing1: float,
     span0: float,
     span1: float,
+    tolerance0: float,
+    tolerance1: float,
+    certified_projected_uncertainty: bool,
 ) -> tuple[int, int, float, float, float, float]:
     interval0 = _field_interval_index(axis0, point0)
     interval1 = _field_interval_index(axis1, point1)
-    first0, last0 = _field_regular_axis_candidate_range(axis0, point0, interval0, spacing0, span0)
-    first1, last1 = _field_regular_axis_candidate_range(axis1, point1, interval1, spacing1, span1)
+    first0, last0 = _field_regular_axis_candidate_range(axis0, point0, interval0, tolerance0)
+    first1, last1 = _field_regular_axis_candidate_range(axis1, point1, interval1, tolerance1)
+    certified_uncertainty = (
+        certified_projected_uncertainty
+        and axis0[0] <= point0 <= axis0[-1]
+        and axis1[0] <= point1 <= axis1[-1]
+    )
     best_cell = -1
     best0 = 0.0
     best1 = 0.0
@@ -160,6 +200,7 @@ def _field_regular_containing(
                 spacing1,
                 span0,
                 span1,
+                certified_uncertainty,
             )
             if status != FIELD_KERNEL_OK:
                 return status, -1, 0.0, 0.0, 0.0, 0.0
@@ -183,50 +224,66 @@ def _field_regular_nearest(
     spacing1: float,
     span0: float,
     span1: float,
+    certified_projected_uncertainty: bool,
 ) -> tuple[int, int, float, float, float, float]:
     best_distance = np.inf
     best_cell = -1
-    best0 = 0.0
-    best1 = 0.0
-    best2 = 0.0
-    best3 = 0.0
+    best_projected0 = 0.0
+    best_projected1 = 0.0
+    best_index0 = 0
+    best_index1 = 0
     for index0 in range(axis0.size - 1):
+        projected0 = min(max(point0, axis0[index0]), axis0[index0 + 1])
+        difference0 = point0 - projected0
         for index1 in range(axis1.size - 1):
             if cell_support[index0, index1] == 0:
                 continue
-            projected0 = min(max(point0, axis0[index0]), axis0[index0 + 1])
             projected1 = min(max(point1, axis1[index1]), axis1[index1 + 1])
-            difference0 = point0 - projected0
             difference1 = point1 - projected1
             if not np.isfinite(difference0) or not np.isfinite(difference1):
                 return FIELD_KERNEL_NONFINITE_GEOMETRY, -1, 0.0, 0.0, 0.0, 0.0
             distance = np.hypot(difference0, difference1)
             if not np.isfinite(distance):
                 return FIELD_KERNEL_NONFINITE_GEOMETRY, -1, 0.0, 0.0, 0.0, 0.0
-            status, cell_id, weight0, weight1, weight2, weight3 = _field_regular_candidate(
-                axis0,
-                axis1,
-                projected0,
-                projected1,
-                index0,
-                index1,
-                spacing0,
-                spacing1,
-                span0,
-                span1,
-            )
-            if status != FIELD_KERNEL_OK:
-                return status, -1, 0.0, 0.0, 0.0, 0.0
+            cell_id = index0 * (axis1.size - 1) + index1
+            if not certified_projected_uncertainty:
+                status, cell_id, _, _, _, _ = _field_regular_candidate(
+                    axis0,
+                    axis1,
+                    projected0,
+                    projected1,
+                    index0,
+                    index1,
+                    spacing0,
+                    spacing1,
+                    span0,
+                    span1,
+                    False,
+                )
+                if status != FIELD_KERNEL_OK:
+                    return status, -1, 0.0, 0.0, 0.0, 0.0
             if distance < best_distance or (distance == best_distance and cell_id < best_cell):
                 best_distance = distance
                 best_cell = cell_id
-                best0 = weight0
-                best1 = weight1
-                best2 = weight2
-                best3 = weight3
+                best_projected0 = projected0
+                best_projected1 = projected1
+                best_index0 = index0
+                best_index1 = index1
     if best_cell < 0:
         return FIELD_KERNEL_NO_SUPPORTED_CELL, -1, 0.0, 0.0, 0.0, 0.0
-    return FIELD_KERNEL_OK, best_cell, best0, best1, best2, best3
+    return _field_regular_candidate(
+        axis0,
+        axis1,
+        best_projected0,
+        best_projected1,
+        best_index0,
+        best_index1,
+        spacing0,
+        spacing1,
+        span0,
+        span1,
+        certified_projected_uncertainty,
+    )
 
 
 @njit(cache=True, fastmath=False, parallel=False)
@@ -240,6 +297,7 @@ def _field_locate_regular_point(
     spacing1: float,
     span0: float,
     span1: float,
+    certified_projected_uncertainty: bool,
 ) -> tuple[int, bool, int, float, float, float, float]:
     tolerance0 = _field_axis_tolerance(spacing0, span0, point0)
     tolerance1 = _field_axis_tolerance(spacing1, span1, point1)
@@ -258,6 +316,9 @@ def _field_locate_regular_point(
             spacing1,
             span0,
             span1,
+            tolerance0,
+            tolerance1,
+            certified_projected_uncertainty,
         )
         if status != FIELD_KERNEL_OK or cell_id >= 0:
             return status, cell_id >= 0, cell_id, weight0, weight1, weight2, weight3
@@ -271,46 +332,9 @@ def _field_locate_regular_point(
         spacing1,
         span0,
         span1,
+        certified_projected_uncertainty,
     )
     return status, False, cell_id, weight0, weight1, weight2, weight3
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def locate_regular_field_batch(
-    axis0: np.ndarray,
-    axis1: np.ndarray,
-    cell_support: np.ndarray,
-    position_m: np.ndarray,
-    support_inside: np.ndarray,
-    cell_id: np.ndarray,
-    weights: np.ndarray,
-    row_status: np.ndarray,
-) -> None:
-    """Locate one regular-layout stage into disjoint row buffers."""
-
-    spacing0 = _field_axis_spacing(axis0)
-    spacing1 = _field_axis_spacing(axis1)
-    span0 = axis0[-1] - axis0[0]
-    span1 = axis1[-1] - axis1[0]
-    for row in range(position_m.shape[0]):
-        status, inside, owner, weight0, weight1, weight2, weight3 = _field_locate_regular_point(
-            axis0,
-            axis1,
-            cell_support,
-            position_m[row, 0],
-            position_m[row, 1],
-            spacing0,
-            spacing1,
-            span0,
-            span1,
-        )
-        row_status[row] = status
-        support_inside[row] = inside
-        cell_id[row] = owner
-        weights[row, 0] = weight0
-        weights[row, 1] = weight1
-        weights[row, 2] = weight2
-        weights[row, 3] = weight3
 
 
 @njit(cache=True, fastmath=False, parallel=False)
@@ -344,24 +368,19 @@ def _field_cell_resolution_scale(
 
 @njit(cache=True, fastmath=False, parallel=False)
 def _field_physical_tolerance(
-    nodes_m: np.ndarray,
-    connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
     cell_id: int,
-    node_count: int,
     point0: float,
     point1: float,
 ) -> tuple[int, float]:
-    status, node_spacing, diameter = _field_cell_resolution_scale(
-        nodes_m, connectivity, cell_id, node_count
-    )
-    if status != FIELD_KERNEL_OK:
-        return status, 0.0
     coordinate_spacing = max(
-        node_spacing,
+        cell_metrics[cell_id, 7],
         abs(float(np.spacing(np.float64(point0)))),
         abs(float(np.spacing(np.float64(point1)))),
     )
-    tolerance = _FIELD_LOCATION_ULPS * max(coordinate_spacing, _FIELD_FLOAT_EPS * diameter)
+    tolerance = _FIELD_LOCATION_ULPS * max(
+        coordinate_spacing, _FIELD_FLOAT_EPS * cell_metrics[cell_id, 8]
+    )
     if not np.isfinite(tolerance) or tolerance <= 0.0:
         return FIELD_KERNEL_UNRESOLVED_CELL, 0.0
     return FIELD_KERNEL_OK, tolerance
@@ -371,14 +390,13 @@ def _field_physical_tolerance(
 def _field_polygon_contains(
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
     cell_id: int,
     node_count: int,
     point0: float,
     point1: float,
 ) -> tuple[int, bool, bool]:
-    status, tolerance = _field_physical_tolerance(
-        nodes_m, connectivity, cell_id, node_count, point0, point1
-    )
+    status, tolerance = _field_physical_tolerance(cell_metrics, cell_id, point0, point1)
     if status != FIELD_KERNEL_OK:
         return status, False, False
     strict_interior = True
@@ -476,29 +494,18 @@ def _field_validate_jacobian(
 
 @njit(cache=True, fastmath=False, parallel=False)
 def _field_certify_reference(
-    nodes_m: np.ndarray,
-    connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
     cell_id: int,
-    node_count: int,
     point0: float,
     point1: float,
     reference0: float,
     reference1: float,
     residual0: float,
     residual1: float,
-    jacobian00: float,
-    jacobian01: float,
-    jacobian10: float,
-    jacobian11: float,
+    inverse_norm: float,
+    condition: float,
 ) -> tuple[int, float]:
-    status, inverse_norm, condition = _field_jacobian_metrics(
-        jacobian00, jacobian01, jacobian10, jacobian11
-    )
-    if status != FIELD_KERNEL_OK:
-        return status, 0.0
-    status, physical_tolerance = _field_physical_tolerance(
-        nodes_m, connectivity, cell_id, node_count, point0, point1
-    )
+    status, physical_tolerance = _field_physical_tolerance(cell_metrics, cell_id, point0, point1)
     if status != FIELD_KERNEL_OK:
         return status, 0.0
     reference_scale = max(1.0, abs(reference0), abs(reference1))
@@ -518,54 +525,37 @@ def _field_certify_reference(
 def _field_p1_weights(
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
     cell_id: int,
     point0: float,
     point1: float,
 ) -> tuple[int, float, float, float, float]:
     node0 = connectivity[cell_id, 0]
-    node1 = connectivity[cell_id, 1]
-    node2 = connectivity[cell_id, 2]
-    jacobian00 = nodes_m[node1, 0] - nodes_m[node0, 0]
-    jacobian01 = nodes_m[node2, 0] - nodes_m[node0, 0]
-    jacobian10 = nodes_m[node1, 1] - nodes_m[node0, 1]
-    jacobian11 = nodes_m[node2, 1] - nodes_m[node0, 1]
-    status = _field_validate_jacobian(
-        nodes_m,
-        connectivity,
-        cell_id,
-        3,
-        jacobian00,
-        jacobian01,
-        jacobian10,
-        jacobian11,
-    )
-    if status != FIELD_KERNEL_OK:
-        return status, 0.0, 0.0, 0.0, 0.0
+    jacobian00 = cell_metrics[cell_id, 0]
+    jacobian01 = cell_metrics[cell_id, 1]
+    jacobian10 = cell_metrics[cell_id, 2]
+    jacobian11 = cell_metrics[cell_id, 3]
     local0 = point0 - nodes_m[node0, 0]
     local1 = point1 - nodes_m[node0, 1]
     if not np.isfinite(local0) or not np.isfinite(local1):
         return FIELD_KERNEL_NONFINITE_GEOMETRY, 0.0, 0.0, 0.0, 0.0
-    determinant = jacobian00 * jacobian11 - jacobian01 * jacobian10
+    determinant = cell_metrics[cell_id, 4]
     reference0 = (jacobian11 * local0 - jacobian01 * local1) / determinant
     reference1 = (-jacobian10 * local0 + jacobian00 * local1) / determinant
     weight0 = 1.0 - reference0 - reference1
     residual0 = jacobian00 * reference0 + jacobian01 * reference1 - local0
     residual1 = jacobian10 * reference0 + jacobian11 * reference1 - local1
     status, tolerance = _field_certify_reference(
-        nodes_m,
-        connectivity,
+        cell_metrics,
         cell_id,
-        3,
         point0,
         point1,
         reference0,
         reference1,
         residual0,
         residual1,
-        jacobian00,
-        jacobian01,
-        jacobian10,
-        jacobian11,
+        cell_metrics[cell_id, 5],
+        cell_metrics[cell_id, 6],
     )
     if status != FIELD_KERNEL_OK:
         return status, 0.0, 0.0, 0.0, 0.0
@@ -675,6 +665,7 @@ def _field_q1_map_local(
 def _field_invert_q1(
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
     cell_id: int,
     point0: float,
     point1: float,
@@ -684,9 +675,7 @@ def _field_invert_q1(
     local1 = point1 - nodes_m[node0, 1]
     if not np.isfinite(local0) or not np.isfinite(local1):
         return FIELD_KERNEL_NONFINITE_GEOMETRY, 0.0, 0.0, 0.0, 0.0
-    status, residual_tolerance = _field_physical_tolerance(
-        nodes_m, connectivity, cell_id, 4, point0, point1
-    )
+    status, residual_tolerance = _field_physical_tolerance(cell_metrics, cell_id, point0, point1)
     if status != FIELD_KERNEL_OK:
         return status, 0.0, 0.0, 0.0, 0.0
     xi = 0.0
@@ -725,12 +714,13 @@ def _field_invert_q1(
 def _field_q1_weights(
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
     cell_id: int,
     point0: float,
     point1: float,
 ) -> tuple[int, float, float, float, float]:
     status, xi, eta, local0, local1 = _field_invert_q1(
-        nodes_m, connectivity, cell_id, point0, point1
+        nodes_m, connectivity, cell_metrics, cell_id, point0, point1
     )
     if status != FIELD_KERNEL_OK:
         return status, 0.0, 0.0, 0.0, 0.0
@@ -742,21 +732,22 @@ def _field_q1_weights(
     )
     if status != FIELD_KERNEL_OK:
         return status, 0.0, 0.0, 0.0, 0.0
+    status, inverse_norm, condition = _field_jacobian_metrics(
+        jacobian00, jacobian01, jacobian10, jacobian11
+    )
+    if status != FIELD_KERNEL_OK:
+        return status, 0.0, 0.0, 0.0, 0.0
     status, tolerance = _field_certify_reference(
-        nodes_m,
-        connectivity,
+        cell_metrics,
         cell_id,
-        4,
         point0,
         point1,
         xi,
         eta,
         residual0,
         residual1,
-        jacobian00,
-        jacobian01,
-        jacobian10,
-        jacobian11,
+        inverse_norm,
+        condition,
     )
     if status != FIELD_KERNEL_OK:
         return status, 0.0, 0.0, 0.0, 0.0
@@ -790,33 +781,78 @@ def _field_validate_p1_cell(nodes_m: np.ndarray, connectivity: np.ndarray, cell_
     )
 
 
+@njit(cache=True, fastmath=False, parallel=False, nogil=True)
+def prepare_field_cell_metrics(
+    element_node_count: int,
+    nodes_m: np.ndarray,
+    connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
+) -> None:
+    """Certify static cells once, retaining the locator's exact arithmetic.
+
+    Columns contain J00/J01/J10/J11, determinant, inverse infinity norm,
+    condition, coordinate spacing, and diameter.  Q1 queries retain their
+    point-dependent Jacobian; only their cell certificate and scale are reused.
+    """
+
+    cell_metrics.fill(0.0)
+    for cell in range(connectivity.shape[0]):
+        status = (
+            _field_validate_p1_cell(nodes_m, connectivity, cell)
+            if element_node_count == 3
+            else _field_validate_q1_cell(nodes_m, connectivity, cell)
+        )
+        cell_status[cell] = status
+        if status != FIELD_KERNEL_OK:
+            continue
+        _, spacing, diameter = _field_cell_resolution_scale(
+            nodes_m, connectivity, cell, element_node_count
+        )
+        cell_metrics[cell, 7] = spacing
+        cell_metrics[cell, 8] = diameter
+        if element_node_count == 3:
+            node0, node1, node2 = connectivity[cell]
+            j00 = nodes_m[node1, 0] - nodes_m[node0, 0]
+            j01 = nodes_m[node2, 0] - nodes_m[node0, 0]
+            j10 = nodes_m[node1, 1] - nodes_m[node0, 1]
+            j11 = nodes_m[node2, 1] - nodes_m[node0, 1]
+            _, inverse_norm, condition = _field_jacobian_metrics(j00, j01, j10, j11)
+            cell_metrics[cell, 0] = j00
+            cell_metrics[cell, 1] = j01
+            cell_metrics[cell, 2] = j10
+            cell_metrics[cell, 3] = j11
+            cell_metrics[cell, 4] = j00 * j11 - j01 * j10
+            cell_metrics[cell, 5] = inverse_norm
+            cell_metrics[cell, 6] = condition
+
+
 @njit(cache=True, fastmath=False, parallel=False)
 def _field_inside_candidate(
     element_node_count: int,
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
     cell_id: int,
     point0: float,
     point1: float,
 ) -> tuple[int, bool, bool, float, float, float, float]:
-    if element_node_count == 3:
-        status = _field_validate_p1_cell(nodes_m, connectivity, cell_id)
-    else:
-        status = _field_validate_q1_cell(nodes_m, connectivity, cell_id)
+    status = cell_status[cell_id]
     if status != FIELD_KERNEL_OK:
         return status, False, False, 0.0, 0.0, 0.0, 0.0
     status, contained, strict_interior = _field_polygon_contains(
-        nodes_m, connectivity, cell_id, element_node_count, point0, point1
+        nodes_m, connectivity, cell_metrics, cell_id, element_node_count, point0, point1
     )
     if status != FIELD_KERNEL_OK or not contained:
         return status, False, False, 0.0, 0.0, 0.0, 0.0
     if element_node_count == 3:
         status, weight0, weight1, weight2, weight3 = _field_p1_weights(
-            nodes_m, connectivity, cell_id, point0, point1
+            nodes_m, connectivity, cell_metrics, cell_id, point0, point1
         )
     else:
         status, weight0, weight1, weight2, weight3 = _field_q1_weights(
-            nodes_m, connectivity, cell_id, point0, point1
+            nodes_m, connectivity, cell_metrics, cell_id, point0, point1
         )
     return status, True, strict_interior, weight0, weight1, weight2, weight3
 
@@ -931,6 +967,8 @@ def _field_unstructured_full_search(
     element_node_count: int,
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
     cell_support: np.ndarray,
     point0: float,
     point1: float,
@@ -943,7 +981,14 @@ def _field_unstructured_full_search(
     best3 = 0.0
     for candidate in range(connectivity.shape[0]):
         status, contained, _, weight0, weight1, weight2, weight3 = _field_inside_candidate(
-            element_node_count, nodes_m, connectivity, candidate, point0, point1
+            element_node_count,
+            nodes_m,
+            connectivity,
+            cell_metrics,
+            cell_status,
+            candidate,
+            point0,
+            point1,
         )
         if status != FIELD_KERNEL_OK:
             return status, False, -1, 0.0, 0.0, 0.0, 0.0
@@ -973,6 +1018,8 @@ def _field_unstructured_hint_location(
     element_node_count: int,
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
     cell_support: np.ndarray,
     point0: float,
     point1: float,
@@ -986,12 +1033,21 @@ def _field_unstructured_hint_location(
         weight1,
         weight2,
         weight3,
-    ) = _field_inside_candidate(element_node_count, nodes_m, connectivity, hint, point0, point1)
+    ) = _field_inside_candidate(
+        element_node_count, nodes_m, connectivity, cell_metrics, cell_status, hint, point0, point1
+    )
     if status != FIELD_KERNEL_OK:
         return status, False, -1, 0.0, 0.0, 0.0, 0.0
     if not contained or cell_support[hint] == 0:
         return _field_unstructured_full_search(
-            element_node_count, nodes_m, connectivity, cell_support, point0, point1
+            element_node_count,
+            nodes_m,
+            connectivity,
+            cell_metrics,
+            cell_status,
+            cell_support,
+            point0,
+            point1,
         )
     if strict_interior:
         return FIELD_KERNEL_OK, True, hint, weight0, weight1, weight2, weight3
@@ -1005,7 +1061,14 @@ def _field_unstructured_hint_location(
             lower2,
             lower3,
         ) = _field_inside_candidate(
-            element_node_count, nodes_m, connectivity, candidate, point0, point1
+            element_node_count,
+            nodes_m,
+            connectivity,
+            cell_metrics,
+            cell_status,
+            candidate,
+            point0,
+            point1,
         )
         if status != FIELD_KERNEL_OK:
             return status, False, -1, 0.0, 0.0, 0.0, 0.0
@@ -1039,6 +1102,8 @@ def _field_index_containing_location(
     element_node_count: int,
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
     cell_support: np.ndarray,
     index_cell_id: np.ndarray,
     index_lower_m: np.ndarray,
@@ -1089,6 +1154,8 @@ def _field_index_containing_location(
                 element_node_count,
                 nodes_m,
                 connectivity,
+                cell_metrics,
+                cell_status,
                 candidate,
                 point0,
                 point1,
@@ -1112,6 +1179,8 @@ def _field_unstructured_index_location(
     element_node_count: int,
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
     cell_support: np.ndarray,
     index_cell_id: np.ndarray,
     index_lower_m: np.ndarray,
@@ -1130,6 +1199,8 @@ def _field_unstructured_index_location(
             element_node_count,
             nodes_m,
             connectivity,
+            cell_metrics,
+            cell_status,
             hint,
             point0,
             point1,
@@ -1142,6 +1213,8 @@ def _field_unstructured_index_location(
         element_node_count,
         nodes_m,
         connectivity,
+        cell_metrics,
+        cell_status,
         cell_support,
         index_cell_id,
         index_lower_m,
@@ -1158,6 +1231,80 @@ def _field_unstructured_index_location(
         element_node_count,
         nodes_m,
         connectivity,
+        cell_metrics,
+        cell_status,
+        cell_support,
+        point0,
+        point1,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False)
+def _field_locate_prepared_point(
+    layout_kind: int,
+    axis0: np.ndarray,
+    axis1: np.ndarray,
+    axis_metrics: tuple[float, float, float, float, bool],
+    nodes_m: np.ndarray,
+    connectivity: np.ndarray,
+    cell_support: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
+    index_cell_id: np.ndarray,
+    index_lower_m: np.ndarray,
+    index_upper_m: np.ndarray,
+    index_begin: np.ndarray,
+    index_end: np.ndarray,
+    index_skip: np.ndarray,
+    point0: float,
+    point1: float,
+    hint: int,
+) -> tuple[int, bool, int, float, float, float, float]:
+    if layout_kind == 1:
+        return _field_locate_regular_point(
+            axis0,
+            axis1,
+            cell_support.reshape((axis0.size - 1, axis1.size - 1)),
+            point0,
+            point1,
+            *axis_metrics,
+        )
+    if index_skip.size:
+        return _field_unstructured_index_location(
+            layout_kind,
+            nodes_m,
+            connectivity,
+            cell_metrics,
+            cell_status,
+            cell_support,
+            index_cell_id,
+            index_lower_m,
+            index_upper_m,
+            index_begin,
+            index_end,
+            index_skip,
+            point0,
+            point1,
+            hint,
+        )
+    if hint >= 0:
+        return _field_unstructured_hint_location(
+            layout_kind,
+            nodes_m,
+            connectivity,
+            cell_metrics,
+            cell_status,
+            cell_support,
+            point0,
+            point1,
+            hint,
+        )
+    return _field_unstructured_full_search(
+        layout_kind,
+        nodes_m,
+        connectivity,
+        cell_metrics,
+        cell_status,
         cell_support,
         point0,
         point1,
@@ -1165,11 +1312,16 @@ def _field_unstructured_index_location(
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def locate_unstructured_field_batch(
-    element_node_count: int,
+def locate_prepared_field_batch(
+    layout_kind: int,
+    axis0: np.ndarray,
+    axis1: np.ndarray,
+    axis_metrics: tuple[float, float, float, float, bool],
     nodes_m: np.ndarray,
     connectivity: np.ndarray,
     cell_support: np.ndarray,
+    cell_metrics: np.ndarray,
+    cell_status: np.ndarray,
     index_cell_id: np.ndarray,
     index_lower_m: np.ndarray,
     index_upper_m: np.ndarray,
@@ -1177,136 +1329,161 @@ def locate_unstructured_field_batch(
     index_end: np.ndarray,
     index_skip: np.ndarray,
     position_m: np.ndarray,
-    cell_hint: np.ndarray,
+    cell_hint: np.ndarray | None,
     support_inside: np.ndarray,
     cell_id: np.ndarray,
     weights: np.ndarray,
     row_status: np.ndarray,
 ) -> None:
-    """Locate one P1/Q1 stage into disjoint row buffers."""
+    """Locate each valid stage row without gathering or allocating temporary rows."""
 
     for row in range(position_m.shape[0]):
-        hint = cell_hint[row]
-        if index_skip.size:
-            status, inside, owner, weight0, weight1, weight2, weight3 = (
-                _field_unstructured_index_location(
-                    element_node_count,
-                    nodes_m,
-                    connectivity,
-                    cell_support,
-                    index_cell_id,
-                    index_lower_m,
-                    index_upper_m,
-                    index_begin,
-                    index_end,
-                    index_skip,
-                    position_m[row, 0],
-                    position_m[row, 1],
-                    hint,
-                )
-            )
-        elif hint >= 0:
-            status, inside, owner, weight0, weight1, weight2, weight3 = (
-                _field_unstructured_hint_location(
-                    element_node_count,
-                    nodes_m,
-                    connectivity,
-                    cell_support,
-                    position_m[row, 0],
-                    position_m[row, 1],
-                    hint,
-                )
-            )
-        else:
-            status, inside, owner, weight0, weight1, weight2, weight3 = (
-                _field_unstructured_full_search(
-                    element_node_count,
-                    nodes_m,
-                    connectivity,
-                    cell_support,
-                    position_m[row, 0],
-                    position_m[row, 1],
-                )
-            )
+        row_status[row] = FIELD_KERNEL_OK
+        support_inside[row] = layout_kind == 0
+        cell_id[row] = -1
+        weights[row, :] = 0.0
+        point0 = position_m[row, 0]
+        point1 = position_m[row, 1]
+        if not np.isfinite(point0) or not np.isfinite(point1):
+            row_status[row] = FIELD_KERNEL_NONFINITE_GEOMETRY
+            continue
+        if layout_kind == 0:
+            continue
+        hint = -1 if cell_hint is None else cell_hint[row]
+        status, inside, owner, w0, w1, w2, w3 = _field_locate_prepared_point(
+            layout_kind,
+            axis0,
+            axis1,
+            axis_metrics,
+            nodes_m,
+            connectivity,
+            cell_support,
+            cell_metrics,
+            cell_status,
+            index_cell_id,
+            index_lower_m,
+            index_upper_m,
+            index_begin,
+            index_end,
+            index_skip,
+            point0,
+            point1,
+            hint,
+        )
         row_status[row] = status
         support_inside[row] = inside
         cell_id[row] = owner
-        weights[row, 0] = weight0
-        weights[row, 1] = weight1
-        weights[row, 2] = weight2
-        weights[row, 3] = weight3
+        weights[row, 0] = w0
+        weights[row, 1] = w1
+        weights[row, 2] = w2
+        weights[row, 3] = w3
 
 
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def sample_regular_nodal_field(
+@njit(cache=True, fastmath=False, parallel=False)
+def _field_spatial_value(
+    layout_kind: int,
     axis1_size: int,
-    position_m: np.ndarray,
-    cell_id: np.ndarray,
+    connectivity: np.ndarray,
+    association: int,
+    owner: int,
     weights: np.ndarray,
+    row: int,
     canonical_values: np.ndarray,
-    zero_axis_radial: bool,
-    sampled_values: np.ndarray,
-    row_status: np.ndarray,
-) -> None:
-    """Interpolate one canonical regular nodal field into a stage buffer."""
-
-    axis1_cell_count = axis1_size - 1
-    for row in range(position_m.shape[0]):
-        index0 = cell_id[row] // axis1_cell_count
-        index1 = cell_id[row] - index0 * axis1_cell_count
+    snapshot: int,
+    component: int,
+) -> float:
+    if association == 1:
+        return canonical_values[snapshot, owner, component]
+    if layout_kind == 1:
+        index0 = owner // (axis1_size - 1)
+        index1 = owner - index0 * (axis1_size - 1)
         node0 = index0 * axis1_size + index1
         node1 = (index0 + 1) * axis1_size + index1
-        node2 = node1 + 1
-        node3 = node0 + 1
-        status = FIELD_KERNEL_OK
-        for component in range(canonical_values.shape[1]):
-            value = (
-                weights[row, 0] * canonical_values[node0, component]
-                + weights[row, 1] * canonical_values[node1, component]
-                + weights[row, 2] * canonical_values[node2, component]
-                + weights[row, 3] * canonical_values[node3, component]
-            )
-            if not np.isfinite(value):
-                status = FIELD_KERNEL_NONFINITE_SAMPLE
-            sampled_values[row, component] = value
-        if zero_axis_radial and position_m[row, 0] == 0.0:
-            sampled_values[row, 0] = 0.0
-        row_status[row] = status
+        return (
+            weights[row, 0] * canonical_values[snapshot, node0, component]
+            + weights[row, 1] * canonical_values[snapshot, node1, component]
+            + weights[row, 2] * canonical_values[snapshot, node1 + 1, component]
+            + weights[row, 3] * canonical_values[snapshot, node0 + 1, component]
+        )
+    value = 0.0
+    for local_node in range(layout_kind):
+        value += (
+            weights[row, local_node]
+            * canonical_values[snapshot, connectivity[owner, local_node], component]
+        )
+    return value
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def sample_unstructured_nodal_field(
-    element_node_count: int,
+def sample_prepared_field_into(
+    layout_kind: int,
+    axis1_size: int,
     connectivity: np.ndarray,
+    association: int,
     position_m: np.ndarray,
+    time_s: np.ndarray,
     cell_id: np.ndarray,
     weights: np.ndarray,
+    snapshot_time_s: np.ndarray,
     canonical_values: np.ndarray,
     zero_axis_radial: bool,
     sampled_values: np.ndarray,
     row_status: np.ndarray,
 ) -> None:
-    """Interpolate one canonical P1/Q1 nodal field into a stage buffer."""
+    """Sample one fixed primitive slot, retaining the first failed row status."""
 
     for row in range(position_m.shape[0]):
-        owner = cell_id[row]
+        sampled_values[row, :] = 0.0
+        if row_status[row] != FIELD_KERNEL_OK:
+            continue
+        snapshot = 0
+        time_weight = 0.0
         status = FIELD_KERNEL_OK
-        for component in range(canonical_values.shape[1]):
-            value = 0.0
-            for local_node in range(element_node_count):
-                node_id = connectivity[owner, local_node]
-                value += weights[row, local_node] * canonical_values[node_id, component]
+        if snapshot_time_s.size:
+            status, snapshot, time_weight = _field_time_bracket(snapshot_time_s, time_s[row])
+            if status != FIELD_KERNEL_OK:
+                row_status[row] = status
+                continue
+        for component in range(canonical_values.shape[2]):
+            value = _field_spatial_value(
+                layout_kind,
+                axis1_size,
+                connectivity,
+                association,
+                cell_id[row],
+                weights,
+                row,
+                canonical_values,
+                snapshot,
+                component,
+            )
+            if snapshot_time_s.size:
+                upper = _field_spatial_value(
+                    layout_kind,
+                    axis1_size,
+                    connectivity,
+                    association,
+                    cell_id[row],
+                    weights,
+                    row,
+                    canonical_values,
+                    snapshot + 1,
+                    component,
+                )
+                value = _field_linear_time_value(value, upper, time_weight)
             if not np.isfinite(value):
                 status = FIELD_KERNEL_NONFINITE_SAMPLE
             sampled_values[row, component] = value
         if zero_axis_radial and position_m[row, 0] == 0.0:
             sampled_values[row, 0] = 0.0
+        if status != FIELD_KERNEL_OK:
+            sampled_values[row, :] = 0.0
         row_status[row] = status
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
 def sample_p1_nodal_gradient(
-    nodes_m: np.ndarray,
+    cell_metrics: np.ndarray,
     connectivity: np.ndarray,
     cell_id: np.ndarray,
     canonical_values: np.ndarray,
@@ -1316,12 +1493,15 @@ def sample_p1_nodal_gradient(
     """Differentiate P1 basis using the previously located cell."""
 
     for row in range(cell_id.size):
+        if row_status[row] != FIELD_KERNEL_OK:
+            sampled_gradient[row, :, :] = 0.0
+            continue
         node0, node1, node2 = connectivity[cell_id[row]]
-        dx1 = nodes_m[node1, 0] - nodes_m[node0, 0]
-        dy1 = nodes_m[node1, 1] - nodes_m[node0, 1]
-        dx2 = nodes_m[node2, 0] - nodes_m[node0, 0]
-        dy2 = nodes_m[node2, 1] - nodes_m[node0, 1]
-        determinant = dx1 * dy2 - dx2 * dy1
+        dx1 = cell_metrics[cell_id[row], 0]
+        dx2 = cell_metrics[cell_id[row], 1]
+        dy1 = cell_metrics[cell_id[row], 2]
+        dy2 = cell_metrics[cell_id[row], 3]
+        determinant = cell_metrics[cell_id[row], 4]
         for component in range(canonical_values.shape[1]):
             difference1 = canonical_values[node1, component] - canonical_values[node0, component]
             difference2 = canonical_values[node2, component] - canonical_values[node0, component]
@@ -1346,6 +1526,9 @@ def sample_q1_nodal_gradient(
     """Use sampled Q1 coordinates and the locator's Jacobian, without locating."""
 
     for row in range(cell_id.size):
+        if row_status[row] != FIELD_KERNEL_OK:
+            sampled_gradient[row, :, :] = 0.0
+            continue
         xi = 2.0 * (weights[row, 1] + weights[row, 2]) - 1.0
         eta = 2.0 * (weights[row, 2] + weights[row, 3]) - 1.0
         status, j00, j01, j10, j11 = _field_q1_jacobian(
@@ -1355,6 +1538,7 @@ def sample_q1_nodal_gradient(
             status, _, _ = _field_jacobian_metrics(j00, j01, j10, j11)
         if status != FIELD_KERNEL_OK:
             row_status[row] = status
+            sampled_gradient[row, :, :] = 0.0
             continue
         determinant = j00 * j11 - j01 * j10
         node0, node1, node2, node3 = connectivity[cell_id[row]]
@@ -1386,6 +1570,9 @@ def sample_regular_nodal_gradient(
 
     axis1_size = axis1_m.size
     for row in range(cell_id.size):
+        if row_status[row] != FIELD_KERNEL_OK:
+            sampled_gradient[row, :, :] = 0.0
+            continue
         index0 = cell_id[row] // (axis1_size - 1)
         index1 = cell_id[row] - index0 * (axis1_size - 1)
         node0 = index0 * axis1_size + index1
@@ -1411,30 +1598,6 @@ def sample_regular_nodal_gradient(
             sampled_gradient[row, component, 1] = gradient1
             if not np.isfinite(gradient0) or not np.isfinite(gradient1):
                 row_status[row] = FIELD_KERNEL_NONFINITE_SAMPLE
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def sample_cell_field(
-    position_m: np.ndarray,
-    cell_id: np.ndarray,
-    canonical_values: np.ndarray,
-    zero_axis_radial: bool,
-    sampled_values: np.ndarray,
-    row_status: np.ndarray,
-) -> None:
-    """Copy one canonical cell field selected by the shared stage owner."""
-
-    for row in range(position_m.shape[0]):
-        owner = cell_id[row]
-        status = FIELD_KERNEL_OK
-        for component in range(canonical_values.shape[1]):
-            value = canonical_values[owner, component]
-            if not np.isfinite(value):
-                status = FIELD_KERNEL_NONFINITE_SAMPLE
-            sampled_values[row, component] = value
-        if zero_axis_radial and position_m[row, 0] == 0.0:
-            sampled_values[row, 0] = 0.0
-        row_status[row] = status
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True)
@@ -1467,144 +1630,18 @@ def _field_linear_time_value(lower: float, upper: float, upper_weight: float) ->
     return _field_two_term_sum((1.0 - upper_weight) * lower, upper_weight * upper)
 
 
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def sample_regular_nodal_time_field(
-    axis1_size: int,
-    position_m: np.ndarray,
-    time_s: np.ndarray,
-    cell_id: np.ndarray,
-    weights: np.ndarray,
-    snapshot_time_s: np.ndarray,
-    canonical_values: np.ndarray,
-    zero_axis_radial: bool,
-    sampled_values: np.ndarray,
-    row_status: np.ndarray,
-) -> None:
-    """Interpolate fixed-grid snapshots in space, then linearly in stage time."""
-
-    axis1_cell_count = axis1_size - 1
-    for row in range(position_m.shape[0]):
-        status, snapshot, time_weight = _field_time_bracket(snapshot_time_s, time_s[row])
-        if status != FIELD_KERNEL_OK:
-            row_status[row] = status
-            continue
-        index0 = cell_id[row] // axis1_cell_count
-        index1 = cell_id[row] - index0 * axis1_cell_count
-        node0 = index0 * axis1_size + index1
-        node1 = (index0 + 1) * axis1_size + index1
-        node2 = node1 + 1
-        node3 = node0 + 1
-        for component in range(canonical_values.shape[2]):
-            lower = (
-                weights[row, 0] * canonical_values[snapshot, node0, component]
-                + weights[row, 1] * canonical_values[snapshot, node1, component]
-                + weights[row, 2] * canonical_values[snapshot, node2, component]
-                + weights[row, 3] * canonical_values[snapshot, node3, component]
-            )
-            upper = (
-                weights[row, 0] * canonical_values[snapshot + 1, node0, component]
-                + weights[row, 1] * canonical_values[snapshot + 1, node1, component]
-                + weights[row, 2] * canonical_values[snapshot + 1, node2, component]
-                + weights[row, 3] * canonical_values[snapshot + 1, node3, component]
-            )
-            value = _field_linear_time_value(lower, upper, time_weight)
-            if not np.isfinite(value):
-                status = FIELD_KERNEL_NONFINITE_SAMPLE
-            sampled_values[row, component] = value
-        if zero_axis_radial and position_m[row, 0] == 0.0:
-            sampled_values[row, 0] = 0.0
-        row_status[row] = status
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def sample_unstructured_nodal_time_field(
-    element_node_count: int,
-    connectivity: np.ndarray,
-    position_m: np.ndarray,
-    time_s: np.ndarray,
-    cell_id: np.ndarray,
-    weights: np.ndarray,
-    snapshot_time_s: np.ndarray,
-    canonical_values: np.ndarray,
-    zero_axis_radial: bool,
-    sampled_values: np.ndarray,
-    row_status: np.ndarray,
-) -> None:
-    """Interpolate P1/Q1 snapshots in space, then linearly in stage time."""
-
-    for row in range(position_m.shape[0]):
-        status, snapshot, time_weight = _field_time_bracket(snapshot_time_s, time_s[row])
-        if status != FIELD_KERNEL_OK:
-            row_status[row] = status
-            continue
-        owner = cell_id[row]
-        for component in range(canonical_values.shape[2]):
-            lower = 0.0
-            upper = 0.0
-            for local_node in range(element_node_count):
-                node_id = connectivity[owner, local_node]
-                lower += weights[row, local_node] * canonical_values[snapshot, node_id, component]
-                upper += (
-                    weights[row, local_node] * canonical_values[snapshot + 1, node_id, component]
-                )
-            value = _field_linear_time_value(lower, upper, time_weight)
-            if not np.isfinite(value):
-                status = FIELD_KERNEL_NONFINITE_SAMPLE
-            sampled_values[row, component] = value
-        if zero_axis_radial and position_m[row, 0] == 0.0:
-            sampled_values[row, 0] = 0.0
-        row_status[row] = status
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def sample_cell_time_field(
-    position_m: np.ndarray,
-    time_s: np.ndarray,
-    cell_id: np.ndarray,
-    snapshot_time_s: np.ndarray,
-    canonical_values: np.ndarray,
-    zero_axis_radial: bool,
-    sampled_values: np.ndarray,
-    row_status: np.ndarray,
-) -> None:
-    """Select one cell value from each bracketing snapshot and interpolate it."""
-
-    for row in range(position_m.shape[0]):
-        status, snapshot, time_weight = _field_time_bracket(snapshot_time_s, time_s[row])
-        if status != FIELD_KERNEL_OK:
-            row_status[row] = status
-            continue
-        owner = cell_id[row]
-        for component in range(canonical_values.shape[2]):
-            value = _field_linear_time_value(
-                canonical_values[snapshot, owner, component],
-                canonical_values[snapshot + 1, owner, component],
-                time_weight,
-            )
-            if not np.isfinite(value):
-                status = FIELD_KERNEL_NONFINITE_SAMPLE
-            sampled_values[row, component] = value
-        if zero_axis_radial and position_m[row, 0] == 0.0:
-            sampled_values[row, 0] = 0.0
-        row_status[row] = status
-
-
 @dataclass(slots=True)
 class ActiveIndex:
     """Sorted resident-row indices for particles that still require work."""
 
     particle_index: np.ndarray
-    keep_mask: np.ndarray
     count: int = 0
 
     @classmethod
     def allocate(cls, particle_count: int) -> ActiveIndex:
         if particle_count < 0:
             raise ValueError("particle_count must be nonnegative")
-        return cls(
-            np.empty(particle_count, dtype="<i8"),
-            np.empty(particle_count, dtype=np.bool_),
-        )
+        return cls(np.empty(particle_count, dtype="<i8"))
 
     @property
     def rows(self) -> np.ndarray:
@@ -1627,27 +1664,28 @@ class ActiveIndex:
         self.particle_index[:stop].sort(kind="quicksort")
         self.count = stop
 
-    def compact(self, active: np.ndarray, batch_size: int) -> None:
-        """Remove terminal rows stably with only bounded batch temporaries."""
+    def compact(self, active: np.ndarray) -> None:
+        """Remove terminal rows stably in place without a resident mask or gather."""
 
         rows = self.rows
         if active.shape != self.particle_index.shape:
             raise ValueError("active-state shape does not match the active index")
-        if batch_size < 1:
-            raise ValueError("active-index compaction batch size must be positive")
         if not rows.size:
             return
-        write = 0
-        for begin in range(0, self.count, batch_size):
-            end = min(begin + batch_size, self.count)
-            block = self.particle_index[begin:end]
-            mask = self.keep_mask[: end - begin]
-            np.take(active, block, out=mask)
-            selected = block[mask]
-            kept = int(selected.size)
-            self.particle_index[write : write + kept] = selected
-            write += kept
-        self.count = write
+        self.count = _compact_active_rows_into(self.particle_index, self.count, active)
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _compact_active_rows_into(indices: np.ndarray, count: int, active: np.ndarray) -> int:
+    """Stable forward compaction; writes never overwrite an unread resident index."""
+
+    write = 0
+    for read in range(count):
+        resident = indices[read]
+        if active[resident]:
+            indices[write] = resident
+            write += 1
+    return write
 
 
 @dataclass(frozen=True, slots=True)
@@ -1658,6 +1696,8 @@ class CpuMemoryPlan:
     particle_count: int
     slab_particles: int
     scratch_bytes_per_particle: int
+    stage_composition_work_bytes_per_particle: int
+    proposal_replay_work_bytes_per_particle: int
     dense_path_bytes_per_particle: int
     stochastic_tree_work_bytes_per_particle: int
     event_work_bytes_per_particle: int
@@ -1676,6 +1716,31 @@ class CpuMemoryPlan:
     geometry_preparation_transient_bytes: int
     field_preparation_transient_bytes: int
     components: Mapping[str, int]
+    worker_count: int = 1
+
+    def active_slab_particles(self, active_count: int) -> int:
+        """Retain bounded scratch while giving the current workers enough tasks."""
+
+        _require_nonnegative(active_count)
+        return _process_slab_particles(active_count, self.slab_particles, self.worker_count)
+
+    def reserve_process_padding(self, padding_bytes: int) -> CpuMemoryPlan:
+        """Include actual mapping granularity without removing dynamic work reserves."""
+        _require_nonnegative(padding_bytes)
+        components = dict(self.components)
+        components["process_transport_page_padding"] = padding_bytes
+        owned = sum(value for name, value in components.items() if name != "safety_margin")
+        components["safety_margin"] = _safety_margin(owned)
+        run_peak = sum(components.values())
+        planned = max(self.load_peak_bytes, self.prepare_peak_bytes, run_peak)
+        if planned > self.limit_bytes:
+            raise ValueError("process mapping storage exceeds resources.memory_limit_mb")
+        return replace(
+            self,
+            components=MappingProxyType(components),
+            run_peak_bytes=run_peak,
+            planned_bytes=planned,
+        )
 
     def as_manifest(self) -> dict[str, object]:
         return {
@@ -1685,7 +1750,10 @@ class CpuMemoryPlan:
             "limit_bytes": self.limit_bytes,
             "planned_bytes": self.planned_bytes,
             "slab_particles": self.slab_particles,
+            "worker_count": self.worker_count,
             "scratch_bytes_per_particle": self.scratch_bytes_per_particle,
+            "stage_composition_work_bytes_per_particle": self.stage_composition_work_bytes_per_particle,
+            "proposal_replay_work_bytes_per_particle": self.proposal_replay_work_bytes_per_particle,
             "dense_path_bytes_per_particle": self.dense_path_bytes_per_particle,
             "stochastic_tree_work_bytes_per_particle": (
                 self.stochastic_tree_work_bytes_per_particle
@@ -1722,7 +1790,7 @@ def early_memory_requirement_bytes(
     _require_nonnegative(canonical_data_bytes, particle_count, writer_reserve_bytes)
     schedule_bytes = particle_count * 128
     resident_state_bytes = particle_count * 101
-    active_index_bytes = particle_count * 9
+    active_index_bytes = particle_count * 8
     # The early gate runs before model-specific runtime arrays exist, so it
     # must remain a guaranteed lower bound.  The final plan below uses the
     # realized 24/32/48-byte model footprint and makes the authoritative fit
@@ -1761,6 +1829,8 @@ def plan_cpu_memory(
     writer_reserve_bytes: int,
     requires_stage_evaluation: bool,
     geometry_query_scratch_bytes: int = 0,
+    stage_composition_work_bytes_per_particle: int = 0,
+    proposal_replay_work_bytes_per_particle: int = 0,
     dense_path_bytes_per_particle: int = 0,
     stochastic_tree_work_bytes_per_particle: int = 0,
     event_work_bytes_per_particle: int = 0,
@@ -1774,6 +1844,7 @@ def plan_cpu_memory(
     field_runtime_bytes: int = 0,
     geometry_preparation_transient_bytes: int = 0,
     field_preparation_transient_bytes: int = 0,
+    worker_count: int = 1,
 ) -> CpuMemoryPlan:
     """Choose one bounded slab under the configured memory ceiling."""
 
@@ -1792,6 +1863,8 @@ def plan_cpu_memory(
         replay_work_bytes,
         writer_reserve_bytes,
         geometry_query_scratch_bytes,
+        stage_composition_work_bytes_per_particle,
+        proposal_replay_work_bytes_per_particle,
         dense_path_bytes_per_particle,
         stochastic_tree_work_bytes_per_particle,
         event_work_bytes_per_particle,
@@ -1803,8 +1876,10 @@ def plan_cpu_memory(
         event_staging_fixed_bytes,
         failure_staging_bytes_per_particle,
     )
+    if isinstance(worker_count, bool) or not isinstance(worker_count, int) or worker_count < 1:
+        raise ValueError("worker_count must be a positive integer")
     resident_state_bytes = particle_count * 101
-    active_index_bytes = particle_count * 9
+    active_index_bytes = particle_count * 8
     final_state_buffer_bytes = particle_count * 9
     fixed_components = {
         "canonical_data": canonical_data_bytes,
@@ -1820,11 +1895,26 @@ def plan_cpu_memory(
         "geometry_query_scratch": geometry_query_scratch_bytes,
         "writer_reserve": writer_reserve_bytes,
     }
+    # Shared transport coexists with the original prepared owners at startup.
+    # Worker scratch is copied from one shared template; parent, template and
+    # all workers remain in the conservative simultaneous-live accounting.
+    copies = worker_count + 2 if worker_count > 1 else 1
+    if worker_count > 1:
+        fixed_components["process_shared_transport"] = sum(
+            value for name, value in fixed_components.items() if name != "writer_reserve"
+        )
+        fixed_components["process_private_query"] = (copies - 1) * geometry_query_scratch_bytes
+        # Each worker may own one serialized handoff while its numeric staging
+        # and canonical payload remain live. ACK credit bounds this to one
+        # boundary/failure batch plus the particle-index command per worker.
+        fixed_components["process_handoff_serialization"] = worker_count * event_staging_fixed_bytes
     fixed_component_bytes = sum(fixed_components.values())
-    fixed_run_bytes = fixed_component_bytes + event_staging_fixed_bytes
+    fixed_run_bytes = fixed_component_bytes + copies * event_staging_fixed_bytes
     scratch_per_particle = _scratch_bytes_per_particle(requires_stage_evaluation)
     slab_bytes_per_particle = (
         scratch_per_particle
+        + stage_composition_work_bytes_per_particle
+        + proposal_replay_work_bytes_per_particle
         + dense_path_bytes_per_particle
         + stochastic_tree_work_bytes_per_particle
         + event_work_bytes_per_particle
@@ -1833,16 +1923,27 @@ def plan_cpu_memory(
         + event_staging_bytes_per_row
         + failure_staging_bytes_per_particle
     )
+    handoff_bytes_per_particle = (
+        worker_count * (event_staging_bytes_per_row + failure_staging_bytes_per_particle + 8)
+        if worker_count > 1
+        else 0
+    )
     maximum_slab = min(particle_count, _MAX_SLAB_PARTICLES)
+    if worker_count > 1:
+        maximum_slab = _process_slab_particles(
+            particle_count, min(maximum_slab, 4096), worker_count
+        )
     if event_staging_capacity:
         maximum_slab = min(maximum_slab, event_staging_capacity)
     slab_particles = _largest_fitting_slab(
         limit_bytes=limit_bytes,
         fixed_run_bytes=fixed_run_bytes,
-        scratch_bytes_per_particle=slab_bytes_per_particle,
+        scratch_bytes_per_particle=copies * slab_bytes_per_particle + handoff_bytes_per_particle,
         maximum_slab=maximum_slab,
     )
     scratch_bytes = slab_particles * scratch_per_particle
+    stage_composition_work_bytes = slab_particles * stage_composition_work_bytes_per_particle
+    proposal_replay_work_bytes = slab_particles * proposal_replay_work_bytes_per_particle
     dense_path_bytes = slab_particles * dense_path_bytes_per_particle
     stochastic_tree_work_bytes = slab_particles * stochastic_tree_work_bytes_per_particle
     event_work_bytes = slab_particles * event_work_bytes_per_particle
@@ -1853,6 +1954,8 @@ def plan_cpu_memory(
     safety_margin_bytes = _safety_margin(
         fixed_component_bytes
         + scratch_bytes
+        + stage_composition_work_bytes
+        + proposal_replay_work_bytes
         + dense_path_bytes
         + stochastic_tree_work_bytes
         + event_work_bytes
@@ -1864,6 +1967,8 @@ def plan_cpu_memory(
     components = {
         **fixed_components,
         "slab_proposal_scratch": scratch_bytes,
+        "slab_stage_composition_work": stage_composition_work_bytes,
+        "slab_proposal_replay_work": proposal_replay_work_bytes,
         "slab_dense_path": dense_path_bytes,
         "slab_stochastic_tree_work": stochastic_tree_work_bytes,
         "slab_event_work": event_work_bytes,
@@ -1873,6 +1978,24 @@ def plan_cpu_memory(
         "slab_failure_staging": failure_staging_bytes,
         "safety_margin": safety_margin_bytes,
     }
+    if worker_count > 1:
+        worker_scratch = (copies - 1) * (
+            scratch_bytes
+            + stage_composition_work_bytes
+            + proposal_replay_work_bytes
+            + dense_path_bytes
+            + stochastic_tree_work_bytes
+            + event_work_bytes
+            + certificate_work_bytes
+            + release_work_bytes
+            + event_staging_bytes
+            + failure_staging_bytes
+        )
+        components["process_private_scratch_and_handoff"] = worker_scratch
+        components["process_handoff_serialization"] += slab_particles * handoff_bytes_per_particle
+        components["safety_margin"] = _safety_margin(
+            sum(value for name, value in components.items() if name != "safety_margin")
+        )
     run_peak_bytes = sum(components.values())
     load_owned = canonical_data_bytes
     load_peak_bytes = load_owned + _safety_margin(load_owned)
@@ -1892,6 +2015,8 @@ def plan_cpu_memory(
         particle_count=particle_count,
         slab_particles=slab_particles,
         scratch_bytes_per_particle=scratch_per_particle,
+        stage_composition_work_bytes_per_particle=stage_composition_work_bytes_per_particle,
+        proposal_replay_work_bytes_per_particle=proposal_replay_work_bytes_per_particle,
         dense_path_bytes_per_particle=dense_path_bytes_per_particle,
         stochastic_tree_work_bytes_per_particle=(stochastic_tree_work_bytes_per_particle),
         event_work_bytes_per_particle=event_work_bytes_per_particle,
@@ -1910,6 +2035,7 @@ def plan_cpu_memory(
         geometry_preparation_transient_bytes=geometry_preparation_transient_bytes,
         field_preparation_transient_bytes=field_preparation_transient_bytes,
         components=MappingProxyType(components),
+        worker_count=worker_count,
     )
 
 
@@ -1935,6 +2061,15 @@ def _largest_fitting_slab(
     return lower
 
 
+def _process_slab_particles(particle_count: int, capacity: int, worker_count: int) -> int:
+    """Four dispatch rounds per worker, bounded by the one prepared scratch slab."""
+
+    if worker_count == 1 or particle_count == 0:
+        return min(particle_count, capacity)
+    tasks = 4 * worker_count
+    return min(capacity, max(1, (particle_count + tasks - 1) // tasks))
+
+
 def _scratch_bytes_per_particle(requires_stage_evaluation: bool) -> int:
     # Includes proposal columns, RK stages/enclosures, row verdicts,
     # compiled-field temporaries, and the residual event wavefront's current
@@ -1951,3 +2086,439 @@ def _safety_margin(owned_bytes: int) -> int:
 def _require_nonnegative(*values: int) -> None:
     if any(value < 0 for value in values):
         raise ValueError("memory-plan inputs must be nonnegative")
+
+
+@dataclass(frozen=True, slots=True)
+class _ProcessArrayStorage:
+    name: str
+    nbytes: int
+    capacity: int
+    private: bool
+
+
+@dataclass(frozen=True, slots=True)
+class _ProcessArrayDescriptor:
+    storage: _ProcessArrayStorage
+    view_id: int
+    shape: tuple[int, ...]
+    dtype: str
+    strides: tuple[int, ...]
+    offset: int
+    writeable: bool
+
+
+@dataclass(slots=True)
+class _ProcessArrayRoot:
+    storage: _ProcessArrayStorage
+    handle: SharedMemory
+    bytes_view: np.ndarray
+
+
+def process_array_views(obj: object) -> Iterator[np.ndarray]:
+    """Visit prepared numeric arrays once without inferring scratch ownership."""
+
+    pending = [obj]
+    visited: set[int] = set()
+    while pending:
+        value = pending.pop()
+        identity = id(value)
+        if identity in visited:
+            continue
+        visited.add(identity)
+        if isinstance(value, np.ndarray):
+            yield value
+        elif is_dataclass(value) and not isinstance(value, type):
+            pending.extend(getattr(value, field.name) for field in fields(value))
+        elif isinstance(value, Mapping):
+            pending.extend(value.values())
+        elif isinstance(value, (tuple, list)):
+            pending.extend(value)
+
+
+def _process_array_dtype(dtype: np.dtype) -> None:
+    if dtype.kind not in "biufc" or dtype.hasobject or dtype.fields or dtype.subdtype:
+        raise ValueError("process arrays require primitive numeric dtypes")
+
+
+def _process_array_base(array: np.ndarray) -> np.ndarray:
+    root = array
+    while isinstance(root.base, np.ndarray):
+        root = root.base
+    return root
+
+
+def _process_buffer_owner(array: np.ndarray) -> object:
+    owner = array.base
+    while isinstance(owner, memoryview):
+        owner = owner.obj
+    return owner
+
+
+def _process_array_bounds(descriptor: _ProcessArrayDescriptor) -> None:
+    dtype = np.dtype(descriptor.dtype)
+    _process_array_dtype(dtype)
+    if len(descriptor.shape) != len(descriptor.strides) or any(
+        length < 0 for length in descriptor.shape
+    ):
+        raise ValueError("process array shape and strides are inconsistent")
+    if any(length == 0 for length in descriptor.shape):
+        if not 0 <= descriptor.offset <= descriptor.storage.nbytes:
+            raise ValueError("empty process array offset exceeds its root")
+        return
+    lower = upper = descriptor.offset
+    for length, stride in zip(descriptor.shape, descriptor.strides, strict=True):
+        extent = (length - 1) * stride
+        lower += min(0, extent)
+        upper += max(0, extent)
+    if lower < 0 or upper + dtype.itemsize > descriptor.storage.nbytes:
+        raise ValueError("process array view exceeds its root storage")
+
+
+def _process_mapping_proxy(value: Mapping) -> MappingProxyType:
+    return MappingProxyType(value)
+
+
+def _reduce_process_mapping_proxy(value: MappingProxyType) -> tuple:
+    return _process_mapping_proxy, (dict(value),)
+
+
+class _ProcessArrayPickler(pickle.Pickler):
+    def __init__(self, stream: io.BytesIO, store: ProcessArrayStore) -> None:
+        super().__init__(stream, protocol=pickle.HIGHEST_PROTOCOL)
+        self.store = store
+        self.dispatch_table = {
+            **copyreg.dispatch_table,
+            MappingProxyType: _reduce_process_mapping_proxy,
+        }
+
+    def persistent_id(self, obj: object) -> _ProcessArrayDescriptor | None:
+        if isinstance(obj, np.ndarray):
+            return self.store._descriptor(obj)
+        return None
+
+
+class _ProcessArrayUnpickler(pickle.Unpickler):
+    def __init__(self, stream: io.BytesIO, reader: ProcessArrayReader) -> None:
+        super().__init__(stream)
+        self.reader = reader
+
+    def persistent_load(self, pid: object) -> np.ndarray:
+        if not isinstance(pid, _ProcessArrayDescriptor):
+            raise pickle.UnpicklingError("unknown process array descriptor")
+        return self.reader._view(pid)
+
+
+class ProcessArrayStore:
+    """Parent-owned shared roots and metadata-only prepared-object transport.
+
+    ``shared_bytes`` counts page-rounded named storage, including private
+    templates. ``private_bytes`` counts one reader's private copies. Original
+    arrays still belong to the caller; use returned shared views for mutation.
+    Close only after all readers and users of the shared arrays have finished.
+    """
+
+    def __init__(self) -> None:
+        self._roots: dict[str, _ProcessArrayRoot] = {}
+        self._source_roots: dict[int, tuple[weakref.ReferenceType, str]] = {}
+        self._shared_owners: dict[int, str] = {}
+        self._private_roots: dict[int, weakref.ReferenceType] = {}
+        self._views: dict[int, tuple[weakref.ReferenceType, _ProcessArrayDescriptor]] = {}
+        self._next_view_id = 0
+        self._closed = False
+        self._sealed = False
+
+    @property
+    def shared_bytes(self) -> int:
+        return sum(root.storage.capacity for root in self._roots.values())
+
+    @property
+    def private_bytes(self) -> int:
+        return sum(
+            max(1, root.storage.nbytes) for root in self._roots.values() if root.storage.private
+        )
+
+    @property
+    def page_padding_bytes(self) -> int:
+        return sum(root.storage.capacity - root.storage.nbytes for root in self._roots.values())
+
+    def _open(self) -> None:
+        if self._closed:
+            raise RuntimeError("process array store is closed")
+
+    def _describing(self) -> None:
+        self._open()
+        if self._sealed:
+            raise RuntimeError("process array preparation is sealed")
+
+    def _known_root(self, root: np.ndarray) -> tuple[_ProcessArrayRoot, int] | None:
+        source = self._source_roots.get(id(root))
+        if source is not None and source[0]() is root:
+            return self._roots[source[1]], int(root.ctypes.data)
+        name = self._shared_owners.get(id(_process_buffer_owner(root)))
+        if name is not None:
+            record = self._roots[name]
+            return record, int(record.bytes_view.ctypes.data)
+        return None
+
+    def _root(self, root: np.ndarray) -> tuple[_ProcessArrayRoot, int]:
+        known = self._known_root(root)
+        if known is not None:
+            return known
+        _process_array_dtype(root.dtype)
+        if not root.flags.owndata or not (root.flags.c_contiguous or root.flags.f_contiguous):
+            raise ValueError("process array roots must own contiguous C or Fortran storage")
+        capacity = max(1, (root.nbytes + mmap.PAGESIZE - 1) // mmap.PAGESIZE) * mmap.PAGESIZE
+        private = self._private_roots.get(id(root))
+        handle = SharedMemory(create=True, size=capacity)
+        try:
+            bytes_view = np.ndarray((capacity,), dtype=np.uint8, buffer=handle.buf)
+            bytes_view.fill(0)
+            bytes_view[: root.nbytes] = root.ravel(order="K").view(np.uint8)
+        except BaseException:
+            handle.close()
+            handle.unlink()
+            raise
+        storage = _ProcessArrayStorage(
+            handle.name, int(root.nbytes), capacity, private is not None and private() is root
+        )
+        record = _ProcessArrayRoot(storage, handle, bytes_view)
+        self._roots[handle.name] = record
+        self._source_roots[id(root)] = (weakref.ref(root), handle.name)
+        self._source_roots[id(bytes_view)] = (weakref.ref(bytes_view), handle.name)
+        self._shared_owners[id(_process_buffer_owner(bytes_view))] = handle.name
+        return record, int(root.ctypes.data)
+
+    def _descriptor(self, array: np.ndarray) -> _ProcessArrayDescriptor:
+        self._describing()
+        _process_array_dtype(array.dtype)
+        root = _process_array_base(array)
+        record, address = self._root(root)
+        previous = self._views.get(id(array))
+        view_id = (
+            previous[1].view_id
+            if previous is not None and previous[0]() is array
+            else self._next_view_id
+        )
+        descriptor = _ProcessArrayDescriptor(
+            record.storage,
+            view_id,
+            tuple(array.shape),
+            array.dtype.str,
+            tuple(array.strides),
+            int(array.ctypes.data) - address,
+            bool(array.flags.writeable),
+        )
+        _process_array_bounds(descriptor)
+        if previous is not None and previous[0]() is array and previous[1] != descriptor:
+            raise ValueError("process array layout changed after description")
+        if previous is None or previous[0]() is not array:
+            self._next_view_id += 1
+        self._views[id(array)] = (weakref.ref(array), descriptor)
+        return descriptor
+
+    def share(self, array: np.ndarray) -> np.ndarray:
+        """Initialize a root once and return its shared view without changing IDs."""
+
+        descriptor = self._descriptor(array)
+        if descriptor.storage.private:
+            raise ValueError("private process arrays cannot become shared resident state")
+        result = self._make_view(descriptor)
+        return result
+
+    def _make_view(self, descriptor: _ProcessArrayDescriptor) -> np.ndarray:
+        result = np.ndarray(
+            descriptor.shape,
+            dtype=np.dtype(descriptor.dtype),
+            buffer=self._roots[descriptor.storage.name].bytes_view,
+            offset=descriptor.offset,
+            strides=descriptor.strides,
+        )
+        result.setflags(write=descriptor.writeable)
+        return result
+
+    def dumps(self, obj: object, *, private_arrays: Iterable[np.ndarray] = ()) -> bytes:
+        """Serialize facts with explicit private root ownership; no ndarray payload."""
+
+        self._describing()
+        try:
+            for array in private_arrays:
+                root = _process_array_base(array)
+                known = self._known_root(root)
+                if known is not None and not known[0].storage.private:
+                    raise ValueError("shared process root cannot become private scratch")
+                self._private_roots[id(root)] = weakref.ref(root)
+            stream = io.BytesIO()
+            _ProcessArrayPickler(stream, self).dump(obj)
+            return stream.getvalue()
+        except BaseException:
+            self.close()
+            raise
+
+    def describe(self, obj: object) -> bytes:
+        return self.dumps(obj)
+
+    def release_views(self) -> None:
+        """Forget completed-payload descriptors while preserving its shared roots."""
+
+        self._describing()
+        self._views.clear()
+
+    def release_private_templates(self) -> None:
+        """Seal preparation after every reader has copied its private scratch.
+
+        Shared state and facts stay mapped until normal store closure. The
+        detached reader copies keep their layout and aliases after their
+        startup templates disappear; no new reader may load the old payload.
+        """
+
+        self._open()
+        if self._sealed:
+            return
+        self._sealed = True
+        names = {name for name, root in self._roots.items() if root.storage.private}
+        roots = tuple(self._roots.pop(name) for name in names)
+        self._source_roots = {
+            identity: value
+            for identity, value in self._source_roots.items()
+            if value[1] not in names
+        }
+        self._shared_owners = {
+            identity: name for identity, name in self._shared_owners.items() if name not in names
+        }
+        self._private_roots.clear()
+        self._views = {
+            identity: value
+            for identity, value in self._views.items()
+            if value[1].storage.name not in names
+        }
+        self._close_roots(roots)
+
+    @staticmethod
+    def _close_roots(roots: tuple[_ProcessArrayRoot, ...]) -> None:
+        for root in roots:
+            del root.bytes_view
+            try:
+                root.handle.close()
+            finally:
+                try:
+                    root.handle.unlink()
+                except FileNotFoundError:
+                    pass
+
+    def close(self) -> None:
+        """Unlink parent-owned roots; closed stores cannot be reused."""
+
+        if self._closed:
+            return
+        self._closed = True
+        roots = tuple(self._roots.values())
+        self._roots.clear()
+        self._views.clear()
+        self._source_roots.clear()
+        self._private_roots.clear()
+        self._shared_owners.clear()
+        self._close_roots(roots)
+
+    def __enter__(self) -> ProcessArrayStore:
+        self._open()
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
+
+class ProcessArrayReader:
+    """Child-owned mappings; explicit scratch roots are copied once per reader."""
+
+    def __init__(self) -> None:
+        self._storage: dict[str, _ProcessArrayStorage] = {}
+        self._buffers: dict[str, np.ndarray] = {}
+        self._handles: dict[str, SharedMemory] = {}
+        self._views: dict[tuple[str, int], tuple[_ProcessArrayDescriptor, np.ndarray]] = {}
+        self._closed = False
+
+    def _buffer(self, storage: _ProcessArrayStorage) -> np.ndarray:
+        if storage.name in self._buffers:
+            if self._storage[storage.name] != storage:
+                raise ValueError("process array root metadata changed")
+            return self._buffers[storage.name]
+        if storage.nbytes < 0 or storage.capacity < max(1, storage.nbytes):
+            raise ValueError("process array root capacity is invalid")
+        handle = SharedMemory(name=storage.name)
+        try:
+            if handle.size < storage.capacity:
+                raise ValueError("process array shared mapping is too small")
+            buffer = np.ndarray((storage.capacity,), dtype=np.uint8, buffer=handle.buf)
+            if storage.private:
+                buffer = buffer[: max(1, storage.nbytes)].copy()
+                handle.close()
+            else:
+                self._handles[storage.name] = handle
+        except BaseException:
+            handle.close()
+            raise
+        self._storage[storage.name] = storage
+        self._buffers[storage.name] = buffer
+        return buffer
+
+    def _view(self, descriptor: _ProcessArrayDescriptor) -> np.ndarray:
+        _process_array_bounds(descriptor)
+        key = descriptor.storage.name, descriptor.view_id
+        if key in self._views:
+            previous, array = self._views[key]
+            if previous != descriptor:
+                raise ValueError("process array view metadata changed")
+            return array
+        array = np.ndarray(
+            descriptor.shape,
+            dtype=np.dtype(descriptor.dtype),
+            buffer=self._buffer(descriptor.storage),
+            offset=descriptor.offset,
+            strides=descriptor.strides,
+        )
+        array.setflags(write=descriptor.writeable)
+        self._views[key] = descriptor, array
+        return array
+
+    def loads(self, payload: bytes) -> object:
+        """Read trusted parent metadata; a failed load closes this reader."""
+
+        if self._closed:
+            raise RuntimeError("process array reader is closed")
+        try:
+            return _ProcessArrayUnpickler(io.BytesIO(payload), self).load()
+        except BaseException:
+            self.close()
+            raise
+
+    def release_views(self) -> None:
+        """Forget completed-task descriptors, retaining the named root mappings.
+
+        The engine calls this only when every consumer of the old payload has
+        finished. New views may then use the same root with another layout;
+        private copies and shared mapping ownership stay with this reader.
+        """
+
+        if self._closed:
+            raise RuntimeError("process array reader is closed")
+        self._views.clear()
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        self._views.clear()
+        self._buffers.clear()
+        self._storage.clear()
+        handles = tuple(self._handles.values())
+        self._handles.clear()
+        for handle in handles:
+            handle.close()
+
+    def __enter__(self) -> ProcessArrayReader:
+        if self._closed:
+            raise RuntimeError("process array reader is closed")
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()

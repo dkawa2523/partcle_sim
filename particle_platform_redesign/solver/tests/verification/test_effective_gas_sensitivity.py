@@ -12,7 +12,6 @@ from chamber_particles.physics.catalog import (
     WaldmannGallisThermophoresisPlan,
     resolve_physics_plan,
 )
-from chamber_particles.physics.compiled import evaluate_physics_tile_into
 from chamber_particles.physics.forces import (
     BOLTZMANN_J_K,
     epstein_finite_speed_relaxation,
@@ -277,7 +276,6 @@ def test_effective_gas_limits_drive_compiled_row_and_continuous_path_gates() -> 
     )
     assert plan.resolved_models()["drag"]["revision"] == _DRAG_REVISION
     assert plan.resolved_models()["thermophoresis"]["revision"] == _THERMOPHORESIS_REVISION
-    assert evaluate_physics_tile_into.nopython_signatures
 
 
 def test_finite_speed_drag_composes_with_effective_gas_heat_flux() -> None:

@@ -5,12 +5,15 @@ from typing import Any, cast
 
 import numpy as np
 import pytest
+from numba import njit
 
 from chamber_particles.engine import (
     _FAILURE_MODEL_APPLICABILITY,
     _curved_row_failure_codes,
+    _NumericSupportContext,
     _StageDynamics,
 )
+from chamber_particles.fields import PreparedFieldSet
 from chamber_particles.integrators import cubic_hermite_step
 from chamber_particles.physics.catalog import resolve_physics_plan
 from chamber_particles.physics.forces import (
@@ -21,7 +24,10 @@ from chamber_particles.physics.forces import (
 )
 from chamber_particles.physics.runtime import (
     LocalPrimitiveRange,
+    PhysicsRuntimeWorkspace,
     PrimitiveRange,
+    evaluate_local_continuous_applicability_into,
+    local_additive_acceleration_abs_upper_into,
     prepare_physics_runtime,
 )
 
@@ -172,6 +178,7 @@ def test_cubic_hermite_dense_charge_crossing_prepared_invariant_fails_closed() -
     prepared = cast(
         Any,
         SimpleNamespace(
+            support_context=_NumericSupportContext(True, (-1.0, -1.0), (1.0, 1.0), True, False),
             fields=SimpleNamespace(
                 regular_support_box=lambda: (
                     np.asarray([-1.0, -1.0]),
@@ -187,11 +194,11 @@ def test_cubic_hermite_dense_charge_crossing_prepared_invariant_fails_closed() -
             ),
             dynamics=_StageDynamics(
                 runtime=runtime,
-                fields=cast(Any, None),
+                fields=PreparedFieldSet(None, {}),
                 coordinate_system="cartesian_xy",
                 last_field_cell=None,
-                field_workspaces=(),
-                physics_workspaces=(),
+                field_workspace=PreparedFieldSet(None, {}).allocate_workspace(1),
+                physics_workspace=PhysicsRuntimeWorkspace.allocate(1),
             ),
         ),
     )
@@ -280,6 +287,121 @@ def test_barnes_static_gate_uses_local_fields_and_dense_charge_interval() -> Non
     np.testing.assert_array_equal(local_status, [CONTINUOUS_APPLICABILITY_OK])
     np.testing.assert_array_equal(positive_charge_certified, [False])
     np.testing.assert_array_equal(positive_charge_status, [CONTINUOUS_APPLICABILITY_OK])
+
+
+def test_native_local_certificate_skips_unavailable_ranges_and_reuses_prefix() -> None:
+    runtime = _coflow_runtime()
+    ranges = _local_ranges(ion_velocity_x_m_s=np.full(3, 90_001.0))
+    lower = np.column_stack([ranges[item.name].lower for item in runtime.plan.required_fields])
+    upper = np.column_stack([ranges[item.name].upper for item in runtime.plan.required_fields])
+    lower[1], upper[1] = np.nan, 0.0
+    velocity = np.tile([100_000.0, 0.0], (3, 1))
+    velocity[2, 0] = np.nan
+    certified = np.ones(4, dtype=np.bool_)
+    status = np.full(4, 77, dtype=np.uint8)
+
+    # Inputs remain read-only, while output views must be native-call arguments.
+    # Passing these columns explicitly avoids closing over mutable Numba globals.
+    fill = njit(_fill_local_certificate)
+    arguments = (
+        runtime.native_context,
+        np.zeros(3, dtype=np.int64),
+        velocity,
+        velocity,
+        np.full(3, -10.0),
+        np.full(3, -10.0),
+        lower,
+        upper,
+    )
+    fill(*arguments, np.asarray([True, False, True]), certified[:3], status[:3])
+    np.testing.assert_array_equal(certified, [True, False, False, True])
+    np.testing.assert_array_equal(status, [0, 0, 1, 77])
+    fill(*arguments, np.zeros(3, dtype=np.bool_), certified[:3], status[:3])
+    np.testing.assert_array_equal(certified, [False, False, False, True])
+    np.testing.assert_array_equal(status, [0, 0, 0, 77])
+
+
+@pytest.mark.parametrize("endpoint", [0.0, -1.0, np.nan])
+def test_local_certificate_rejects_invalid_primitive_lower_bound(endpoint: float) -> None:
+    runtime = _coflow_runtime()
+    ranges = _local_ranges(ion_velocity_x_m_s=90_001.0)
+    ranges["mfp"] = LocalPrimitiveRange(np.asarray([[endpoint]]), np.asarray([[1.0e-3]]))
+    velocity = np.asarray([[100_000.0, 0.0]])
+    with pytest.raises(PhysicsEvaluationError):
+        runtime.local_continuous_applicability_batch(
+            np.asarray([0], dtype=np.int64),
+            velocity,
+            velocity,
+            np.asarray([-10.0]),
+            np.asarray([-10.0]),
+            ranges,
+        )
+
+
+def _fill_local_certificate(
+    context, indices, vlo, vhi, qlo, qhi, lower, upper, available, certified, status
+):
+    evaluate_local_continuous_applicability_into(
+        context, indices, vlo, vhi, qlo, qhi, lower, upper, available, certified, status
+    )
+
+
+def test_native_local_additive_bound_preserves_unavailable_and_invalid_state_meanings() -> None:
+    plan = resolve_physics_plan(
+        {
+            "charge": {"model": "fixed"},
+            "electric": {
+                "model": "coulomb",
+                "revision": "electric_coulomb_v1",
+                "electric_field": "electric_field",
+            },
+        },
+        "cartesian_xy",
+    )
+    field = np.asarray([120.0, -80.0])
+    runtime = prepare_physics_runtime(
+        plan=plan,
+        coordinate_system="cartesian_xy",
+        mass_kg=np.asarray([2.0e-18]),
+        drag_diameter_m=np.asarray([1.0e-7]),
+        electrostatic_radius_m=np.asarray([5.0e-8]),
+        displaced_volume_m3=np.zeros(1),
+        charge_number=np.asarray([-10.0]),
+        primitive_ranges={"electric_field": PrimitiveRange(field, field, field)},
+    )
+    indices = np.zeros(3, dtype=np.int64)
+    velocity = np.zeros((3, 2))
+    charge = np.asarray([-10.0, np.nan, -10.0])
+    lower = np.tile(field, (3, 1))
+    lower[2] = np.nan
+    result = np.full((4, 2), -1.0)
+    applicable = np.ones(4, dtype=np.bool_)
+    status = np.full(4, 77, dtype=np.uint8)
+
+    # An unavailable row has invalid primitive placeholders; another available
+    # row has invalid dynamic charge. Only the latter is a numerical failure.
+    local_additive_acceleration_abs_upper_into(
+        runtime.native_context,
+        runtime.native_acceleration_bound_context,
+        indices,
+        velocity,
+        velocity,
+        charge,
+        charge,
+        lower,
+        lower,
+        np.asarray([True, True, False]),
+        result[:3],
+        applicable[:3],
+        status[:3],
+    )
+    analytical = 10.0 * 1.602176634e-19 * np.abs(field) / 2.0e-18
+    assert np.all(result[0] >= analytical)
+    np.testing.assert_allclose(result[0], analytical, rtol=1.0e-12, atol=0.0)
+    np.testing.assert_array_equal(result[1:3], np.zeros((2, 2)))
+    np.testing.assert_array_equal(result[3], [-1.0, -1.0])
+    np.testing.assert_array_equal(applicable, [True, False, False, True])
+    np.testing.assert_array_equal(status, [0, 1, 0, 77])
 
 
 def _coflow_runtime():

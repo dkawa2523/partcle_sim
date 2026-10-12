@@ -1,0 +1,14 @@
+{
+  "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/inventory.json": {
+    "bytes": 1287143,
+    "sha256": "e9957261c549d17b04319879f404d95a231e87fa389abe5373a36b7f3ba9dc90"
+  },
+  "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/source_v62_49906998c297.zip": {
+    "bytes": 1477090,
+    "sha256": "774816942caef99849ce9324c4bc50d109fd96626e4a0012189982c5110a8b9e"
+  },
+  "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/inventory.json": {
+    "bytes": 1720196,
+    "sha256": "594e7e9e850816221afe30fca555aed5ce7e4b7510934daa3fb6ba24fd905af3"
+  }
+}

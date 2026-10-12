@@ -1,0 +1,116 @@
+{
+  "status": "closed_pre_run",
+  "created_utc": "2026-10-12T22:21:53.914189+00:00",
+  "scope": "Same current source W1 vs W4 observation; not an old/new solver nonregression or release qualification.",
+  "cases": [
+    {
+      "case_id": "p14_none_10k_320",
+      "family": "p14u-none",
+      "rows": 10000,
+      "case": ".artifacts/r66_2026_10_13/input/case.yaml",
+      "primary": false,
+      "digest_owner": "p14u",
+      "roles": [
+        "candidate1",
+        "candidate4"
+      ],
+      "expected_counts": {
+        "particles": 10000,
+        "release_events": 10000,
+        "failure_events": 0,
+        "frames": 0,
+        "frame_rows": 0,
+        "probes": 0,
+        "probe_rows": 0,
+        "macro_steps": 320,
+        "series": 320
+      },
+      "input_files": {
+        ".artifacts/r66_2026_10_13/input/case.yaml": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+        ".artifacts/r66_2026_10_13/input/case.h5": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641"
+      },
+      "purpose": "Same P14-U 10k physics/geometry/source/output, fixed0..4s with dt0.0125s. 320 macro intervals; actual fates/events recorded without inheriting coarse-step counts.",
+      "resources": {
+        "memory_limit_mb": 8192
+      },
+      "time": {
+        "start_s": 0.0,
+        "end_s": 4.0,
+        "dt_s": 0.0125
+      },
+      "output": {
+        "trajectories": null,
+        "probes": null
+      },
+      "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+    }
+  ],
+  "workers": [
+    1,
+    4
+  ],
+  "samples": 3,
+  "sampling_interval_s": 0.1,
+  "sources": {
+    "candidate": {
+      "directory": "particle_platform_redesign/solver",
+      "version": "0.3.0",
+      "binding": {
+        "path": ".artifacts/r65_2026_10_12/source_binding.json",
+        "sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b"
+      },
+      "source_file_count": 27,
+      "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+      "quality_map_sha256": "1f07b777ff209f9a09844d7b1c4f4babd482d5b7706333d7f1d48b68eef58a59",
+      "uv_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+      "pyproject_sha256": "32d53ccfa9fd08a9de465464e106fd4c7a805fa8868583856c25b0ac35c50697"
+    }
+  },
+  "driver": {
+    "path": ".artifacts/r64_2026_10_12/measure_processes.py",
+    "sha256": "ab774f1cbcba6c6ad65859192daf7cbd4940254f683acabc2ce5fb244465974c"
+  },
+  "comparer": {
+    "path": ".artifacts/r64_2026_10_12/compare_processes_v2.py",
+    "sha256": "b2f9f98ff772c02a8a01def361bad651b929a26778a8cac1f3f9bdc8b3b42d43"
+  },
+  "acceptance": {
+    "nonregression_max_ratio": 1.1,
+    "primary_4worker_min_speedup": 2.0,
+    "rules": "Every case C1/Q1 <=1.10; every declared Q4 case C4/Q4 <=1.10; each original bulk primary C1/C4 >=2.0. All8/20worker results remain descriptive; every role requires exact held science, declared counts, array budget and observed memory ceiling, cleanup. Stop expansion on any required failure; retain every negative and partial result. No threshold relaxation, best-pair choice or unchanged-source acceptance retry."
+  },
+  "memory": {
+    "primary_up_to_4_private_ceiling_bytes": 8589934592,
+    "other_private_ceiling_bytes": 8589934592,
+    "scope": "Observed parent+live child private commit ceiling; sample can miss transients; not OS hard cap or unique physical RSS. Original case array budget8GiB retained."
+  },
+  "execution_order": [
+    "candidate1:cold,warm-0,warm-1,warm-2",
+    "candidate4:cold,warm-0,warm-1,warm-2"
+  ],
+  "warm_definition": "Same seed0 repeated3 times after actual-input cold, private absent cache per role; each simulate creates new workers.",
+  "timer": "Public load_case/simulate/open_result, includes child spawn/import/compile/IPC/output/cleanup; first parent import excluded equally.",
+  "declaration_limits": "Historical acceptance fields retained for unmodified comparer schema. No baseline roles or primary threshold apply; root owns paired observation conclusion and validates actual workers.",
+  "preparation": {
+    "script": {
+      "path": ".artifacts/r66_2026_10_13/prepare.py",
+      "sha256": "0dcaa3bfd232feba018e617853d8ae4b7cf1beacc1f0a01d205a9a04f63b53ec"
+    },
+    "original_case": {
+      "path": ".artifacts/k64/inputs/p14_none_10k/case.yaml",
+      "sha256": "7319dc87bbf57fe1a009570dc9f0a79822a4f6fee3aedb684e20cbfb451e8c6b"
+    },
+    "original_data": {
+      "path": ".artifacts/k64/inputs/p14_none_10k/case.h5",
+      "sha256": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641"
+    },
+    "yaml_semantic_change": {
+      "/time/dt_s": {
+        "before": 0.125,
+        "after": 0.0125
+      }
+    },
+    "all_other_yaml_values_identical": true,
+    "canonical_hdf5_bytes_identical": true
+  }
+}

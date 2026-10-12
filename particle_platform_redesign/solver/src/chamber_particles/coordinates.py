@@ -3,9 +3,40 @@
 from __future__ import annotations
 
 import numpy as np
+from numba import njit
 from numpy.typing import NDArray
 
 type FloatArray = NDArray[np.float64]
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def rz_signed_stage_into(
+    position_m: FloatArray,
+    vector: FloatArray,
+    canonical_position_m: FloatArray,
+    canonical_vector: FloatArray,
+    radial_sign: FloatArray,
+) -> None:
+    """Apply the signed chart to validated rows in caller-owned stage buffers."""
+
+    for row in range(position_m.shape[0]):
+        sign = -1.0 if position_m[row, 0] < 0.0 else 1.0
+        radial_sign[row] = sign
+        canonical_position_m[row, 0] = abs(position_m[row, 0])
+        canonical_position_m[row, 1] = position_m[row, 1]
+        canonical_vector[row, 0] = vector[row, 0] * sign
+        canonical_vector[row, 1] = vector[row, 1]
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def rz_vector_to_signed_into(
+    vector: FloatArray, radial_sign: FloatArray, transformed: FloatArray
+) -> None:
+    """Transform one canonical vector, with exact in-place alias permitted."""
+
+    for row in range(radial_sign.size):
+        transformed[row, 0] = vector[row, 0] * radial_sign[row]
+        transformed[row, 1] = vector[row, 1]
 
 
 def rz_signed_stage_to_canonical(
@@ -23,9 +54,8 @@ def rz_signed_stage_to_canonical(
 
     position = _finite_batch(position_m, "position_m")
     transformed = _finite_batch(vector, "vector")
-    radial_sign = np.where(position[:, 0] < 0.0, -1.0, 1.0)
-    position[:, 0] = np.abs(position[:, 0])
-    transformed[:, 0] *= radial_sign
+    radial_sign = np.empty(position.shape[0], dtype=np.float64)
+    rz_signed_stage_into(position, transformed, position, transformed, radial_sign)
     return position, transformed, radial_sign
 
 
@@ -40,8 +70,30 @@ def rz_canonical_vector_to_signed(vector: FloatArray, radial_sign: FloatArray) -
         ((orientation == -1.0) | (orientation == 1.0)).all()
     ):
         raise ValueError("radial_sign must contain only -1 or +1")
-    transformed[:, 0] *= orientation
+    rz_vector_to_signed_into(transformed, orientation, transformed)
     return transformed
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def rz_radial_interval(lower: float, upper: float) -> tuple[float, float]:
+    """Image of an ordered signed interval under the canonical radius map."""
+
+    radius_lower = 0.0 if lower <= 0.0 <= upper else min(abs(lower), abs(upper))
+    return radius_lower, max(abs(lower), abs(upper))
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def canonicalize_rz_enclosure_into(
+    lower: FloatArray, upper: FloatArray, canonical_lower: FloatArray, canonical_upper: FloatArray
+) -> None:
+    """Map validated boxes into reusable buffers; exact aliases are allowed."""
+
+    for row in range(lower.shape[0]):
+        radial_lower, radial_upper = rz_radial_interval(lower[row, 0], upper[row, 0])
+        canonical_lower[row, 0] = radial_lower
+        canonical_upper[row, 0] = radial_upper
+        canonical_lower[row, 1] = lower[row, 1]
+        canonical_upper[row, 1] = upper[row, 1]
 
 
 def canonicalize_rz_enclosure(
@@ -63,14 +115,33 @@ def canonicalize_rz_enclosure(
     if bool((signed_lower > signed_upper).any()):
         raise ValueError("lower bounds must not exceed upper bounds")
 
-    radial_lower = signed_lower[:, 0]
-    radial_upper = signed_upper[:, 0]
-    crosses_axis = (radial_lower <= 0.0) & (radial_upper >= 0.0)
-    endpoint_min = np.minimum(np.abs(radial_lower), np.abs(radial_upper))
-    endpoint_max = np.maximum(np.abs(radial_lower), np.abs(radial_upper))
-    signed_lower[:, 0] = np.where(crosses_axis, 0.0, endpoint_min)
-    signed_upper[:, 0] = endpoint_max
+    canonicalize_rz_enclosure_into(signed_lower, signed_upper, signed_lower, signed_upper)
     return signed_lower, signed_upper
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def canonicalize_rz_velocity_enclosure_into(
+    position_lower_m: FloatArray,
+    position_upper_m: FloatArray,
+    velocity_lower_m_s: FloatArray,
+    velocity_upper_m_s: FloatArray,
+    canonical_lower_m_s: FloatArray,
+    canonical_upper_m_s: FloatArray,
+) -> None:
+    """Image of a signed velocity box; corresponding exact aliases are safe."""
+
+    for row in range(position_lower_m.shape[0]):
+        lower = velocity_lower_m_s[row, 0]
+        upper = velocity_upper_m_s[row, 0]
+        if position_upper_m[row, 0] < 0.0:
+            lower, upper = -upper, -lower
+        elif position_lower_m[row, 0] < 0.0:
+            radial_abs = np.maximum(abs(lower), abs(upper))
+            lower, upper = -radial_abs, radial_abs
+        canonical_lower_m_s[row, 0] = lower
+        canonical_upper_m_s[row, 0] = upper
+        canonical_lower_m_s[row, 1] = velocity_lower_m_s[row, 1]
+        canonical_upper_m_s[row, 1] = velocity_upper_m_s[row, 1]
 
 
 def fold_rz_position_vector(
@@ -86,15 +157,23 @@ def fold_rz_position_vector(
 
     position = _finite_pair(position_m, "position_m")
     transformed = _finite_pair(vector, "vector")
-    radius = float(position[0])
-    if radius < 0.0:
-        position[0] = -radius
-        transformed[0] = -transformed[0]
-    elif radius == 0.0:
-        position[0] = 0.0
-        if transformed[0] < 0.0:
-            transformed[0] = -transformed[0]
+    fold_rz_position_vector_into(position[None, :], transformed[None, :])
     return position, transformed
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def fold_rz_position_vector_into(position_m: FloatArray, vector: FloatArray) -> None:
+    """Fold validated accepted rows in place, including inward axis departure."""
+
+    for row in range(position_m.shape[0]):
+        radius = position_m[row, 0]
+        if radius < 0.0:
+            position_m[row, 0] = -radius
+            vector[row, 0] = -vector[row, 0]
+        elif radius == 0.0:
+            position_m[row, 0] = 0.0
+            if vector[row, 0] < 0.0:
+                vector[row, 0] = -vector[row, 0]
 
 
 def _finite_pair(value: FloatArray, name: str) -> FloatArray:

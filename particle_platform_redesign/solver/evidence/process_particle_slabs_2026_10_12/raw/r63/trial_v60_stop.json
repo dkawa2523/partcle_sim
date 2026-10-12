@@ -1,0 +1,32 @@
+{
+  "trial": "v60-original",
+  "status": "rejected_for_general_parallel_adoption",
+  "created_utc": "2026-10-12T01:34:42.475149+00:00",
+  "policy": {
+    "path": "predeclaration_v3.json",
+    "sha256": "31f67d2576fc850035aa46cd2c296f88742fc305fecab3838a8e20f799daa5a2"
+  },
+  "candidate_binding": {
+    "path": "candidate_binding.json",
+    "sha256": "5407a294d6fd2b9278924c2d78e6699f1bd3c9d32eaa904ad06081e59d018fcf"
+  },
+  "p14": {
+    "path": "p14_100k_science.json",
+    "sha256": "1886c69c1a6504c6a594c5ec4b20a2c21024434771db62a200f26312d80943d7"
+  },
+  "b03": {
+    "path": "b03_20k_rejected_science.json",
+    "sha256": "09a7d388f07c637ad1f4f0cb92e03b83cb26044a284506c6acd9d716f3e6e05a"
+  },
+  "primary_observations": {
+    "p14_100000_speedup": 2.917316492291722,
+    "b03_20000_speedup": 0.7746848445284231
+  },
+  "stopped_expansion": [
+    "B03 historical baseline1",
+    "axis20k",
+    "P14 smallN10k",
+    "full candidate standard quality"
+  ],
+  "scope": "P14 scoped family qualification retained; B03 only 12 candidate results scientific identity confirmed, missing historical baseline not invented. No overall adoption or release qualification. Source/input/driver/policy unchanged; no retry or gate relaxation. Further diagnostic observations are outside adoption timing."
+}

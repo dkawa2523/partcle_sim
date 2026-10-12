@@ -15,6 +15,7 @@ import chamber_particles.engine as engine_module
 import chamber_particles.output as output_module
 from chamber_particles import SimulationError, load_case, open_result, simulate
 from chamber_particles.case_format import BoundaryData, GeometryData, write
+from chamber_particles.rng import WALL_PROBABILISTIC_STICK_STREAM, wall_uniform
 from tests.verification.microcases import build_microcase
 
 
@@ -55,6 +56,67 @@ def test_translation_periodic_multiple_wraps_preserve_state_and_record_transfer(
     np.testing.assert_array_equal(events.destination_facet_id, [3, 3, 3])
     assert result.manifest["topology_algorithm_revision"] == "translation_periodic_xy_v1"
     assert result.manifest["boundary_interactions"]["wall_events"] == 0
+
+
+def test_periodic_transfer_does_not_advance_the_physical_wall_rng_ordinal(
+    tmp_path: Path,
+) -> None:
+    # The known counter draws classify physical event 0 as reflected and 1 as stuck.
+    probability = 0.5
+    assert (
+        wall_uniform(0, 801, 0, WALL_PROBABILISTIC_STICK_STREAM)
+        > probability
+        > wall_uniform(0, 801, 1, WALL_PROBABILISTIC_STICK_STREAM)
+    )
+    responses = []
+    for label, velocity_x, transfer_count in (("direct", 0.0, 0), ("after-transfer", 1.0, 1)):
+        case = _materialize_periodic_case(
+            tmp_path / label,
+            position_m=(0.25, 0.5),
+            velocity_m_s=(velocity_x, 0.5),
+            end_s=1.5,
+            dt_s=1.5,
+        )
+        source = replace(case.data.sources[0], particle_id=np.asarray([801], dtype="<i8"))
+        modified_data_path = case.data_path.with_name("wall-rng-case.h5")
+        info = write(modified_data_path, replace(case.data, sources=(source,)))
+        document = yaml.safe_load(case.case_path.read_text(encoding="utf-8"))
+        document["case"]["data_path"] = modified_data_path.name
+        document["case"]["expected_content_hash"] = info.content_hash
+        document["solver"]["seed"] = 0
+        top = next(item for item in document["boundaries"] if item["boundary_group"] == "top")
+        top.update(
+            law="probabilistic_stick", probability=probability, otherwise={"law": "specular"}
+        )
+        case.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+        output = tmp_path / f"{label}-result"
+        simulate(load_case(case.case_path), output)
+        result = open_result(output)
+        event = result.read_boundary_events()
+        wall = event.interaction_kind == "wall"
+        periodic = event.interaction_kind == "periodic_translation"
+        assert int(periodic.sum()) == transfer_count
+        assert int(wall.sum()) == 1
+        np.testing.assert_array_equal(event.time_s[wall], [1.0])
+        np.testing.assert_array_equal(event.event_ordinal[wall], [transfer_count + 1])
+        np.testing.assert_array_equal(event.law_id[wall], ["probabilistic_stick"])
+        np.testing.assert_array_equal(event.outcome[wall], ["reflected"])
+        np.testing.assert_array_equal(event.velocity_pre_m_s[wall], [[velocity_x, 0.5]])
+        np.testing.assert_array_equal(event.velocity_post_m_s[wall], [[velocity_x, -0.5]])
+        np.testing.assert_array_equal(event.normal[wall], [[0.0, 1.0]])
+        np.testing.assert_array_equal(event.primary_facet_id[wall], [2])
+        np.testing.assert_array_equal(event.time_s[periodic], [0.75] * transfer_count)
+        np.testing.assert_array_equal(event.event_ordinal, np.arange(1, transfer_count + 2))
+        final = result.read_final()
+        np.testing.assert_array_equal(final.lifecycle, [1])
+        np.testing.assert_array_equal(final.velocity_m_s, [[velocity_x, -0.5]])
+        np.testing.assert_array_equal(final.position_m, [[0.25 + 0.5 * velocity_x, 0.75]])
+        assert result.manifest["boundary_interactions"]["wall_events"] == 1
+        assert result.manifest["counts"]["failure_events"] == 0
+        responses.append((event.velocity_pre_m_s[wall, 1], event.velocity_post_m_s[wall, 1]))
+    for actual, expected in zip(responses[1], responses[0], strict=True):
+        np.testing.assert_array_equal(actual, expected)
 
 
 def test_finite_radius_material_contact_precedes_later_periodic_center_crossing(

@@ -1,0 +1,1573 @@
+{
+  "all_population_inputs_used": true,
+  "anchors": {
+    "a": {
+      "campaign": {
+        "path": "../caseA_final_campaign.json",
+        "sha256": "5e59bbbe73e9569fa055846e8a6f0f97c1699d7cc686bf53a54b2928911dafb2"
+      },
+      "canonical_geometry": {
+        "path": "../candidate_caseA/candidate_input.h5",
+        "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+      },
+      "case_result_data_hash_match": true,
+      "case_yaml": {
+        "path": "../candidate_caseA/levels/macro_coarse/seed_939132/case.yaml",
+        "sha256": "7bdc3c7c4e41d98149c4a40ecc6c6c8282553e1b7adc1a98ad7457159430c1e4"
+      },
+      "evaluation": {
+        "path": "../caseA_final_evaluation/evaluation_manifest.json",
+        "sha256": "32adcbedbc17ff54e4f22e51c684f8c8aa5000b39e2e0fddd5613abea8c7cd42"
+      },
+      "geometry_figure": {
+        "axis_limits_m": [
+          [
+            -0.00625,
+            -0.00625
+          ],
+          [
+            0.25625,
+            0.13625
+          ]
+        ],
+        "equal_aspect": true,
+        "figure": {
+          "path": "case_a_rz_geometry.svg",
+          "sha256": "f420a09ed6d8ca4b6d0ca2d3f813f9d20fa80185d34f262d0f7d5248ce0827a0"
+        },
+        "geometry_boundary_segments": 160,
+        "observed_seed_count_by_participant_min_max": {
+          "candidate": [
+            0,
+            32
+          ],
+          "comsol": [
+            0,
+            32
+          ]
+        },
+        "pathwise_qualification": false,
+        "per_id_mean_rule": "At each saved time, arithmetic mean over only finite observed positions; held/stuck observed tails included, missing escaped suffix excluded; gaps not joined.",
+        "seed_count_less_than_32_particle_time_pairs": {
+          "candidate": 3343,
+          "comsol": 3318
+        },
+        "stable_particle_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269,
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287
+        ]
+      },
+      "normalized_source_tables": {
+        "candidate": [
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939132/trajectory.csv",
+            "rows": 34727,
+            "seed": 939132,
+            "sha256": "e9e5798f789feb779ab9d2d4fb5ad06b334f852cf71c311a498657e990915dea"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939133/trajectory.csv",
+            "rows": 34727,
+            "seed": 939133,
+            "sha256": "e8b8ed4317c4cdedf21282952d6bdba9228530045be8fe8e08c0381a8256f834"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939134/trajectory.csv",
+            "rows": 34727,
+            "seed": 939134,
+            "sha256": "6915faf766eace91a7c6911d969fa155294d5d99eb5477a55f897fde850467f8"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939135/trajectory.csv",
+            "rows": 34727,
+            "seed": 939135,
+            "sha256": "135a45c35e41a6bd5922d99973f085095122dc4c95796796460b26b2b19067d5"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939136/trajectory.csv",
+            "rows": 34727,
+            "seed": 939136,
+            "sha256": "31578a8eee078b022919c9d050e54c5aa6bca0de453f3e5b6730fcf7325356d1"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939137/trajectory.csv",
+            "rows": 34727,
+            "seed": 939137,
+            "sha256": "5b57d50a62831335b42e45227aa64de6c2c3f1274c4c7928c73d106cca8895bd"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939138/trajectory.csv",
+            "rows": 34727,
+            "seed": 939138,
+            "sha256": "fc468476d9d29633cdf437b9e81d067f175a05074f13985f36a68608064f6b92"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939139/trajectory.csv",
+            "rows": 34727,
+            "seed": 939139,
+            "sha256": "ac675f8feeec5e10169221816dfbc3f3652d828193285f65a69536a383f64a95"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939140/trajectory.csv",
+            "rows": 34727,
+            "seed": 939140,
+            "sha256": "ff701895ee992cb698be17bcc6fbfae6c1cd279b2d800b35965120eb13eab842"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939141/trajectory.csv",
+            "rows": 34727,
+            "seed": 939141,
+            "sha256": "d841b2eba52f8ab0654c3163e9570063e0b4725914bb7dc2f3cd20c3e68f1112"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939142/trajectory.csv",
+            "rows": 34727,
+            "seed": 939142,
+            "sha256": "8f40578e92527d9d525ea3fb829590527bc26869a2b5daddaa900de43a338a2a"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939143/trajectory.csv",
+            "rows": 34727,
+            "seed": 939143,
+            "sha256": "4a0ebd378456a9a0291bbd4af314b1f9cfb411d707496eadfe27c2bc600d4336"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939144/trajectory.csv",
+            "rows": 34727,
+            "seed": 939144,
+            "sha256": "9dadb338bf3907d9463d7196fa5c56042325982cec161f2a90ff2f9761678699"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939145/trajectory.csv",
+            "rows": 34727,
+            "seed": 939145,
+            "sha256": "24efdb665d90780f68cdc52d0c1e84e92e04b9320349009cd5488b1318649a3f"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939146/trajectory.csv",
+            "rows": 34727,
+            "seed": 939146,
+            "sha256": "13d5d7a93b3eb6a477f660a14d6f848b6e9b3f94835d73574cc06855404642d6"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939147/trajectory.csv",
+            "rows": 34727,
+            "seed": 939147,
+            "sha256": "8d2a9d8b3c7f68b7a68cec517d45c1b9686c8df85b727a973687fc594f2d54c0"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939148/trajectory.csv",
+            "rows": 34727,
+            "seed": 939148,
+            "sha256": "a46be3eeb4773a82b35255164be4dbea19b02293340eb73b5700a034520899b0"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939149/trajectory.csv",
+            "rows": 34727,
+            "seed": 939149,
+            "sha256": "4452c61f12d1a7d6f019d90f89b76e2dbf5f0b74a1884474bd3d1aef7346f073"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939150/trajectory.csv",
+            "rows": 34727,
+            "seed": 939150,
+            "sha256": "0fd638d0a1892b15e1bd0e5ec8bd05f91faf3b32a5e5cfee4709e6bf3e18e3c7"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939151/trajectory.csv",
+            "rows": 34727,
+            "seed": 939151,
+            "sha256": "e9daef1c99c1ae89a6d563802ed90f3a7fd1da50bca6e8aabca195bf8fa9446a"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939152/trajectory.csv",
+            "rows": 34727,
+            "seed": 939152,
+            "sha256": "d995ef47bc339b018a8bff6802f6dba46249286915534dd1b2fa5c142da2cf3a"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939153/trajectory.csv",
+            "rows": 34727,
+            "seed": 939153,
+            "sha256": "b0c04ce010d17d685575287483f2a27bacbfc9ff80ef2a52837bd66b1b31e82b"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939154/trajectory.csv",
+            "rows": 34727,
+            "seed": 939154,
+            "sha256": "d668dcd96ae964b59d68dc4e4799f128f56b4c311b8dc86d0b8277f4d030fdbf"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939155/trajectory.csv",
+            "rows": 34727,
+            "seed": 939155,
+            "sha256": "7f407cdbbfbde5871101710026fc6ae062bb39eccc117955994f284ec99f8901"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939156/trajectory.csv",
+            "rows": 34727,
+            "seed": 939156,
+            "sha256": "cefdd3f795374498d1be4a77d8e9019ff05b552b119058f197b60b1d6ac0d615"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939157/trajectory.csv",
+            "rows": 34727,
+            "seed": 939157,
+            "sha256": "a14d6265a1a8e7e5661bb1b49fcc094bfa3fdf0f69a630043da54b9ed274a270"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939158/trajectory.csv",
+            "rows": 34727,
+            "seed": 939158,
+            "sha256": "1eb653e73f9f172fa3f6f2022dc6dfef6cc3ceaa0dfd957a147255dc3dc440ec"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939159/trajectory.csv",
+            "rows": 34727,
+            "seed": 939159,
+            "sha256": "9bb72ff270ef55abe5538e58604318e4aa6463390ec886fe8315e87b59ffb707"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939160/trajectory.csv",
+            "rows": 34727,
+            "seed": 939160,
+            "sha256": "a83784e460e920833a7221646293455b3905528c3de6d0f2ac6cea852259c9b7"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939161/trajectory.csv",
+            "rows": 34727,
+            "seed": 939161,
+            "sha256": "a068071b144da006d67f170898e066202fb8d0c2ee6fb4ea25c9999c99b0e887"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939162/trajectory.csv",
+            "rows": 34727,
+            "seed": 939162,
+            "sha256": "b8636f38ae92d50621bdce433c14b04889bd7a62b4590cc4301e008092851e6a"
+          },
+          {
+            "path": "candidate_caseA/levels/macro_coarse/seed_939163/trajectory.csv",
+            "rows": 34727,
+            "seed": 939163,
+            "sha256": "bd90002a5f3c22523cd8e6a4cf7c9a5001c2f979a2d3c100cdd7803c662610de"
+          }
+        ],
+        "comsol": [
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939100/trajectory.csv",
+            "rows": 34727,
+            "seed": 939100,
+            "sha256": "ae1911eac08385ffa3bfb3da1b5c3bd5fc8d6433d42786fae7d732754b705042"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939101/trajectory.csv",
+            "rows": 34727,
+            "seed": 939101,
+            "sha256": "5221332c5f1cb6ac1f8418ff014b0674608585be3e8fb517ee969e568c0e5b3f"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939102/trajectory.csv",
+            "rows": 34727,
+            "seed": 939102,
+            "sha256": "03fd342eba528aa8ec03da4d79c469d40e24308eecc4b3edf531139eb6e1cf3d"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939103/trajectory.csv",
+            "rows": 34727,
+            "seed": 939103,
+            "sha256": "a5a471e11e1b9a8bd8f435added94aeab6b5cdcdbb7cd98b848e711b223870f2"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939104/trajectory.csv",
+            "rows": 34727,
+            "seed": 939104,
+            "sha256": "a29c5d7d53b2fa7416a2962e47f33cc673f1c51df70bf2b8d741371c629f8938"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939105/trajectory.csv",
+            "rows": 34727,
+            "seed": 939105,
+            "sha256": "fe534f23fb486badbf86164d61141ac3a9d46b0e0c389e236876803dd210fb3a"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939106/trajectory.csv",
+            "rows": 34727,
+            "seed": 939106,
+            "sha256": "46d02768fa22eecebad2165aa48dc181e9a0956f7dd90a7a79b5d7069269801b"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939107/trajectory.csv",
+            "rows": 34727,
+            "seed": 939107,
+            "sha256": "6a00ac40408744c2f82d577b0b71f0a928a3688d1876c62afee1f01780c5d9cb"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939108/trajectory.csv",
+            "rows": 34727,
+            "seed": 939108,
+            "sha256": "614a8849766fefb723f03f64fc5a7d4b086559f7b99b5ddaced1e1cea1d2713d"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939109/trajectory.csv",
+            "rows": 34727,
+            "seed": 939109,
+            "sha256": "dcd548d94c481f95cb78042bc2b056e990a34590be20f847868b9767eed12f22"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939110/trajectory.csv",
+            "rows": 34727,
+            "seed": 939110,
+            "sha256": "e19febda179fb44e6b8c1ea7d5042981ee169de2106f9158341b0cfe7dbf6581"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939111/trajectory.csv",
+            "rows": 34727,
+            "seed": 939111,
+            "sha256": "fc01414e0493008e9103369f59c1af1acb06a1c6c3416095d533b77825c62175"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939112/trajectory.csv",
+            "rows": 34727,
+            "seed": 939112,
+            "sha256": "de98ef32e8dce2255c44e704e1659ed33bac00256868329a0279e7652465efe0"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939113/trajectory.csv",
+            "rows": 34727,
+            "seed": 939113,
+            "sha256": "103b3b302a8539a8f8021ef40008b0b5c2fbb5ae5bb4692751b5c819740e6a9a"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939114/trajectory.csv",
+            "rows": 34727,
+            "seed": 939114,
+            "sha256": "5fa0797dd62a10156f77f044da65b9e39f45594144a2c0cd41b1e602a39a8cb3"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939115/trajectory.csv",
+            "rows": 34727,
+            "seed": 939115,
+            "sha256": "ef23b2a3d844b3b0eb50ff5031b285f22edd53d93f1595715ed496fd3647e15a"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939116/trajectory.csv",
+            "rows": 34727,
+            "seed": 939116,
+            "sha256": "cb4628e7bb2b81a62e2a8eafcb5d51f5b7b67f8e6fb4ce4d301b1b91fb215a0d"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939117/trajectory.csv",
+            "rows": 34727,
+            "seed": 939117,
+            "sha256": "18245cdbaa281a131ca64937cc34a0f3d1b344f1866486200c9382c5c270956d"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939118/trajectory.csv",
+            "rows": 34727,
+            "seed": 939118,
+            "sha256": "10dfc9c1bfd13cfb20e5a6a4149c85c528c3d47ea7b39fbd0ea18cb7afbd4aee"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939119/trajectory.csv",
+            "rows": 34727,
+            "seed": 939119,
+            "sha256": "c55cce1b9f3ca7e236310c5161685e92866ba764a4216d435800442ac89a3b03"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939120/trajectory.csv",
+            "rows": 34727,
+            "seed": 939120,
+            "sha256": "c18d36970a129024c3c506184cc49b2de78235ed349b6827f2f4396579584878"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939121/trajectory.csv",
+            "rows": 34727,
+            "seed": 939121,
+            "sha256": "3f352beb73e350aec4bef7f97f11d074bc4c3b44ce6dadbc40a22333afbe7448"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939122/trajectory.csv",
+            "rows": 34727,
+            "seed": 939122,
+            "sha256": "d4e941bbe2566d34b5abf9033d5296440a1591b9ab1ebb7f6d74de95f2addd18"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939123/trajectory.csv",
+            "rows": 34727,
+            "seed": 939123,
+            "sha256": "e38f9ec95b6a0dfcec588a0ebae9af8c6d8806ec992f8de79b0bc924ae09a263"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939124/trajectory.csv",
+            "rows": 34727,
+            "seed": 939124,
+            "sha256": "4031e4897e8ad46553f7a5e028bb682345a035570ce918d9e0daaf4507522886"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939125/trajectory.csv",
+            "rows": 34727,
+            "seed": 939125,
+            "sha256": "0fced2ada4982fe66d85102acb5ce11d6fbe4ad1160a9f57768805348a014ed2"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939126/trajectory.csv",
+            "rows": 34727,
+            "seed": 939126,
+            "sha256": "23b022cd6ddd71892cd8e4e85e05b92b8bb6016c551bbe0694164d84376baddf"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939127/trajectory.csv",
+            "rows": 34727,
+            "seed": 939127,
+            "sha256": "d86a801a3b2f4ba2069239b06ad4843f7880801e9b74a7794856f9f79e69e777"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939128/trajectory.csv",
+            "rows": 34727,
+            "seed": 939128,
+            "sha256": "b5a1cbff8cd790e98169614b4e4253c274bfc5ac8e98a309b1d5e7a454d8fe3c"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939129/trajectory.csv",
+            "rows": 34727,
+            "seed": 939129,
+            "sha256": "3dea29252885da8a007a9961da0ab8f1f408b80fdefc6f974255220a24d68c23"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939130/trajectory.csv",
+            "rows": 34727,
+            "seed": 939130,
+            "sha256": "1e3f412ab3188cd7f02299fcc85323736f157364bc267ca762797499a702b761"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939131/trajectory.csv",
+            "rows": 34727,
+            "seed": 939131,
+            "sha256": "7ee8d181ffa1b401002c7fafc7136c3ac7c8f57d86fdfeb9273ebcf57d5de6dc"
+          }
+        ]
+      },
+      "population_figure": {
+        "figure": {
+          "path": "case_a_population.svg",
+          "sha256": "e36506f34c6529f476543a24d244e03ee0b2554a54e72811d687b3263a425500"
+        },
+        "gate": {
+          "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+          "confidence": 0.9875,
+          "critical_radius": 0.03501066711816651,
+          "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+          "curves": [
+            "stuck",
+            "held",
+            "escaped",
+            "any_terminal"
+          ],
+          "familywise_alpha": 0.0125,
+          "first_arrival_role": "represented_once_as_any_terminal",
+          "independent_unit": "seed_x_fixed_source_particle_trajectory",
+          "margin": 0.05,
+          "maximum_absolute_difference": 0.005117595818815324,
+          "maximum_absolute_difference_by_curve": {
+            "any_terminal": 0.005117595818815324,
+            "escaped": 0.004899825783972189,
+            "held": 0.0,
+            "stuck": 0.003919860627177701
+          },
+          "maximum_point_difference_that_can_pass": 0.014989332881833496,
+          "method": "two_sample_union_hoeffding",
+          "observations_per_participant": 9184,
+          "role": "confirmatory_terminal_population_gate",
+          "simultaneous_confidence_bound": 0.04012826293698183,
+          "simultaneous_endpoint_count": 484,
+          "status": "PASS",
+          "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+        },
+        "metrics": {
+          "path": "../caseA_final_evaluation/ensemble_metrics.csv",
+          "sha256": "ac97a30e5f3dfc33d1bf731c670a075f4640aa691ce01c17d23ab664a57e387e"
+        },
+        "population_coverage": "32x287 units per participant at all 121 registered times"
+      },
+      "source_result_manifest": {
+        "path": "../candidate_caseA/levels/macro_coarse/seed_939132/result/run.json",
+        "sha256": "c086392323c07b5658e7fa099903fd028794c3d3e5a716ee0e00e0ff40654552"
+      }
+    },
+    "p": {
+      "campaign": {
+        "path": "../caseP_final_campaign.json",
+        "sha256": "223575e30be9c76f47b35e42f64f7f4de6e1056b7397eaf612c5d9cce17a07ba"
+      },
+      "canonical_geometry": {
+        "path": "../candidate_caseP/candidate_input.h5",
+        "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+      },
+      "case_result_data_hash_match": true,
+      "case_yaml": {
+        "path": "../candidate_caseP/levels/macro_coarse/seed_939032/case.yaml",
+        "sha256": "a217b3c6906dab77798f5aabc10943d67781eba172e1ac24418c94771975ebd3"
+      },
+      "evaluation": {
+        "path": "../caseP_final_evaluation/evaluation_manifest.json",
+        "sha256": "e0a0ec2bbd0f9c25e50496b43307d19fc8385085a20ad84fb299c28a7bf0bb72"
+      },
+      "geometry_figure": {
+        "axis_limits_m": [
+          [
+            -0.00625,
+            -0.00625
+          ],
+          [
+            0.25625,
+            0.13625
+          ]
+        ],
+        "equal_aspect": true,
+        "figure": {
+          "path": "case_p_rz_geometry.svg",
+          "sha256": "36e60825b6cce77d8927161d46e021728235372af37b5c9d606bd22e71efc8aa"
+        },
+        "geometry_boundary_segments": 160,
+        "observed_seed_count_by_participant_min_max": {
+          "candidate": [
+            32,
+            32
+          ],
+          "comsol": [
+            32,
+            32
+          ]
+        },
+        "pathwise_qualification": false,
+        "per_id_mean_rule": "At each saved time, arithmetic mean over only finite observed positions; held/stuck observed tails included, missing escaped suffix excluded; gaps not joined.",
+        "seed_count_less_than_32_particle_time_pairs": {
+          "candidate": 0,
+          "comsol": 0
+        },
+        "stable_particle_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269,
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287
+        ]
+      },
+      "normalized_source_tables": {
+        "candidate": [
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939032/trajectory.csv",
+            "rows": 34727,
+            "seed": 939032,
+            "sha256": "16845c8eb22565088d4ee4fd7b0c61191c7d0ba2869a9899fe2502652cffc1b7"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939033/trajectory.csv",
+            "rows": 34727,
+            "seed": 939033,
+            "sha256": "04859d3faccd4f262ea2be40b1d331806309c242a9c7277516f75bc15cce4e16"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939034/trajectory.csv",
+            "rows": 34727,
+            "seed": 939034,
+            "sha256": "bf8df60dd13fbdf8592f200b98c84cda28846faa0fadbd822880b74c4d126ab8"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939035/trajectory.csv",
+            "rows": 34727,
+            "seed": 939035,
+            "sha256": "7e2d8b8144d3fd0d635842e870d76d91c021e7181795378bb44d5d767fb3571f"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939036/trajectory.csv",
+            "rows": 34727,
+            "seed": 939036,
+            "sha256": "03d3e3d0bee436e2888e687f14cca3c4b9674fa0a09eaabaaf84c24ace639417"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939037/trajectory.csv",
+            "rows": 34727,
+            "seed": 939037,
+            "sha256": "cf334f2da31d8d23c06f5c35e38836640ba580bab39bb95d789c0c20bc7116db"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939038/trajectory.csv",
+            "rows": 34727,
+            "seed": 939038,
+            "sha256": "89449c651a4fc9fadc579bbbac01e62625fa804750fbe989246c197418a9cc8b"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939039/trajectory.csv",
+            "rows": 34727,
+            "seed": 939039,
+            "sha256": "2b5c827e333c8bfd1c24520fad67d9bcff6082e7e3f10ebd1e3ee074ac3d5d6f"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939040/trajectory.csv",
+            "rows": 34727,
+            "seed": 939040,
+            "sha256": "9e94fe52e227bae7d55f07b64d7e06b29ac55fdf0769aaeb7c06a45e345642a6"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939041/trajectory.csv",
+            "rows": 34727,
+            "seed": 939041,
+            "sha256": "ffaf1fd62f9064e3585979bc115742206046827e189eacdba6f7e9e5d74ef0ba"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939042/trajectory.csv",
+            "rows": 34727,
+            "seed": 939042,
+            "sha256": "0cfa8840d75db24fa0ea235acdb0b9eafa11275f74ca625843ab002d844b98e9"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939043/trajectory.csv",
+            "rows": 34727,
+            "seed": 939043,
+            "sha256": "233fb54b807ea6feec1f176992dc133c3b211790f79133a27352b6631787da4f"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939044/trajectory.csv",
+            "rows": 34727,
+            "seed": 939044,
+            "sha256": "59f295c1341ce26e49fa75db1951db95c0eed0090ca12c50e4acf4cfbe324e73"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939045/trajectory.csv",
+            "rows": 34727,
+            "seed": 939045,
+            "sha256": "e3cc6f404c42dffe8760128cb159883724e61da252b7e71eb529a8f4aac09a85"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939046/trajectory.csv",
+            "rows": 34727,
+            "seed": 939046,
+            "sha256": "b70928c41eb5c3d009b720b87d50f35e7739951903091c6604990557ecb2a0e4"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939047/trajectory.csv",
+            "rows": 34727,
+            "seed": 939047,
+            "sha256": "62f9d630e11f239d69d328b72c07f4842fbcfbfa74e6b7828acfad878fc88ece"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939048/trajectory.csv",
+            "rows": 34727,
+            "seed": 939048,
+            "sha256": "687c06803f88a91913009a470c3f22f0299c6399284f11a98e31ef864c9cf5ac"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939049/trajectory.csv",
+            "rows": 34727,
+            "seed": 939049,
+            "sha256": "8cece846200607e13a8bf9c5c5d3d69ea87f9397adeddd2dffea2ee63d743098"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939050/trajectory.csv",
+            "rows": 34727,
+            "seed": 939050,
+            "sha256": "3d2f2686f8257824f30d269a367963c73ac36e42e0334be405b037d652f9b8c3"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939051/trajectory.csv",
+            "rows": 34727,
+            "seed": 939051,
+            "sha256": "f81b35281f8c56bed7284101e3bdbaff7fbe3241e85f50f18b37d5c106e81391"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939052/trajectory.csv",
+            "rows": 34727,
+            "seed": 939052,
+            "sha256": "de3bb3faaf032898eb3ec9bb008c4d13358343deb2f21abcbc78aff34c44e492"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939053/trajectory.csv",
+            "rows": 34727,
+            "seed": 939053,
+            "sha256": "e9b372241e9dcabb119e4921c8ba3a2c2402e4558e9f374633525ec7178eb32c"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939054/trajectory.csv",
+            "rows": 34727,
+            "seed": 939054,
+            "sha256": "c4298d4ac09a0ec1e513fd5146099bca4cce728a24523bdb5d49e8bfa9eddb93"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939055/trajectory.csv",
+            "rows": 34727,
+            "seed": 939055,
+            "sha256": "d660d36c18d94cdb7abd015c7ba2c376a431fb99cf7f048c72f7520b7314179c"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939056/trajectory.csv",
+            "rows": 34727,
+            "seed": 939056,
+            "sha256": "fcd03f69af28ae1fbb39036fead76979f980bc9a070fc210b9e388b323a70280"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939057/trajectory.csv",
+            "rows": 34727,
+            "seed": 939057,
+            "sha256": "84721209bc5d9f02361cd252d8080bdb93b18e77b2dba9c98062407b45fa547d"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939058/trajectory.csv",
+            "rows": 34727,
+            "seed": 939058,
+            "sha256": "67f5cbc0cc37e1088363d9958281754c6eaecbab89d196091c4a357d418ae9ff"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939059/trajectory.csv",
+            "rows": 34727,
+            "seed": 939059,
+            "sha256": "46bd3af11e4fb10b33dd73c1952c9beab267766b4376f7f0da9a54f6ed8e0e65"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939060/trajectory.csv",
+            "rows": 34727,
+            "seed": 939060,
+            "sha256": "1d954a092831d03630b17ef4b033fef9acb1a167f4d15ab92d8dd16687b82bb6"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939061/trajectory.csv",
+            "rows": 34727,
+            "seed": 939061,
+            "sha256": "609dc8b333ffb6685e6c019fdd2027fe1665d279a688782aee2f27b10b7941e4"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939062/trajectory.csv",
+            "rows": 34727,
+            "seed": 939062,
+            "sha256": "5215ef73b7484fecb5d0a7096c08e770952e7677a1c8f66bcd72f4eabaa9f057"
+          },
+          {
+            "path": "candidate_caseP/levels/macro_coarse/seed_939063/trajectory.csv",
+            "rows": 34727,
+            "seed": 939063,
+            "sha256": "7ea525c7a347219b84640d2baed2b2f27910aa9e868dd6d229effa93a7938540"
+          }
+        ],
+        "comsol": [
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939000/trajectory.csv",
+            "rows": 34727,
+            "seed": 939000,
+            "sha256": "bb56159fc4423f967bbd0c8ae3af492efd7a0dbb2f28bbfb0a9fac9122f3bbcf"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939001/trajectory.csv",
+            "rows": 34727,
+            "seed": 939001,
+            "sha256": "c1abbd6245dd8a240966efa238b2a4bd48e0c1f7ce43bd867b3ea8605bc12b5a"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939002/trajectory.csv",
+            "rows": 34727,
+            "seed": 939002,
+            "sha256": "c09deb07eec58c6fecd5ae7b76b0ff64877352510e5fb4178af36175bcd06fa5"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939003/trajectory.csv",
+            "rows": 34727,
+            "seed": 939003,
+            "sha256": "a05913d53ac03e13d77bde440012c2352326f6651fcd89b02cfa1d4240c618b2"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939004/trajectory.csv",
+            "rows": 34727,
+            "seed": 939004,
+            "sha256": "adb872289e51cfd94d9dbc98c2537f2e6656db1a594d5768f239e3210a6504fe"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939005/trajectory.csv",
+            "rows": 34727,
+            "seed": 939005,
+            "sha256": "d40200875798e4f288576e2c96c7d6bd692bc3691797c72d2270db219182822e"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939006/trajectory.csv",
+            "rows": 34727,
+            "seed": 939006,
+            "sha256": "5470ea29c9f6c0619285e7cbe5b4ff1ac3c86d3d62d6eae9799a7897cb3bd7c0"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939007/trajectory.csv",
+            "rows": 34727,
+            "seed": 939007,
+            "sha256": "f6e2433f3adf059fd0a86f4fb026f5af72e30b8c1f98e0f9151ae36884cf27f0"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939008/trajectory.csv",
+            "rows": 34727,
+            "seed": 939008,
+            "sha256": "e90722d6b4a9603346589e16bbcfecc6370ce8cd49411af86f759d7fe52f2ded"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939009/trajectory.csv",
+            "rows": 34727,
+            "seed": 939009,
+            "sha256": "214b49383711b3be13405b1560d5f31ceafa56f592422490105d45037c33a906"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939010/trajectory.csv",
+            "rows": 34727,
+            "seed": 939010,
+            "sha256": "ad5310e4ca4a0946529ddef11b684b733030810e954bfd7592f702e9849b870c"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939011/trajectory.csv",
+            "rows": 34727,
+            "seed": 939011,
+            "sha256": "b42f93435a1452e6acbe94503a5e4db8224487bcca4db1f27499e5b8d753eafe"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939012/trajectory.csv",
+            "rows": 34727,
+            "seed": 939012,
+            "sha256": "8d16f13aebe3438921920a91e74dc9209e029dfcb976f6279d0417d3a82b1d61"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939013/trajectory.csv",
+            "rows": 34727,
+            "seed": 939013,
+            "sha256": "f7a7ea01ca4e613499744a5c41bdbf727be0f93c3af2fba4d3bb7d2d0b1786b5"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939014/trajectory.csv",
+            "rows": 34727,
+            "seed": 939014,
+            "sha256": "9adb7ff2518a65812c9c093b82ef6c10328cf2a423ecdeb84e2a6cc11ed7152e"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939015/trajectory.csv",
+            "rows": 34727,
+            "seed": 939015,
+            "sha256": "ae094b7f7b272fc66adcbb933f53ec22d371ef4208abd0f5112e35c73640e00b"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939016/trajectory.csv",
+            "rows": 34727,
+            "seed": 939016,
+            "sha256": "27d6ab3c47f3defcde0647376c51d8efd98dae4ee36ac440d9827b76a1f4230f"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939017/trajectory.csv",
+            "rows": 34727,
+            "seed": 939017,
+            "sha256": "448e67ad7653d46ccdadb871f2e3563bee07139211ec9c16b5accb6dc7eefeea"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939018/trajectory.csv",
+            "rows": 34727,
+            "seed": 939018,
+            "sha256": "d70f6b6ada248d02b630e50835d0c5043139f6b9347fbaf2647db007f681e74e"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939019/trajectory.csv",
+            "rows": 34727,
+            "seed": 939019,
+            "sha256": "2673c38423901947e0628a563d05155c0812be9839d12d4d55bb825d0b46a128"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939020/trajectory.csv",
+            "rows": 34727,
+            "seed": 939020,
+            "sha256": "7f6b5f7020930b8cdc5067dfb0b642f29af60646d4d94c9c0e5174585acaad0c"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939021/trajectory.csv",
+            "rows": 34727,
+            "seed": 939021,
+            "sha256": "7ccb5460059053de344524062c7c49ac1d24c98cfc77fee9c23348932a79bebf"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939022/trajectory.csv",
+            "rows": 34727,
+            "seed": 939022,
+            "sha256": "d64ac3f1fbfcef9892475e6456cc482ed4a3653d12458f36f2e9d8cb7393c2d3"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939023/trajectory.csv",
+            "rows": 34727,
+            "seed": 939023,
+            "sha256": "6b00657ba1988e2504caf8b01fc1628c72159c64e9bc75f8c5038a4bb8ad99ca"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939024/trajectory.csv",
+            "rows": 34727,
+            "seed": 939024,
+            "sha256": "fb4772827675b838421dcc9fbf8ddf2851b0bf7195820342796d944c4782c638"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939025/trajectory.csv",
+            "rows": 34727,
+            "seed": 939025,
+            "sha256": "9c23ba2fc37da07bbb8ceee8ef589a0fa1a04c8f50f3897fb3aad970dd6a1493"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939026/trajectory.csv",
+            "rows": 34727,
+            "seed": 939026,
+            "sha256": "e67e6b535d85e8c95cce5d1e635f98c0e733ec9ee30ffbb71e9111500e247773"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939027/trajectory.csv",
+            "rows": 34727,
+            "seed": 939027,
+            "sha256": "9ad3aca72a3cf4ba7dd7288647e4d735ac29606034054e164bbfad168d02224b"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939028/trajectory.csv",
+            "rows": 34727,
+            "seed": 939028,
+            "sha256": "b7966842ff0e774057a3ddabe366f8f4ad929fd1185c8a069ebab6173a379fd7"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939029/trajectory.csv",
+            "rows": 34727,
+            "seed": 939029,
+            "sha256": "3bd554f68aa940160edc17828f5202fd313728907afb68ce195ae6ed5d026ec8"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939030/trajectory.csv",
+            "rows": 34727,
+            "seed": 939030,
+            "sha256": "83896c66cc5231dae319df5a1812bf4cf5f0a2ebb6733cc926cd13df61be2738"
+          },
+          {
+            "path": "../../particle_platform_redesign/solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_comsol_final/levels/dt_20us/replicas/seed_939031/trajectory.csv",
+            "rows": 34727,
+            "seed": 939031,
+            "sha256": "442e8257fe86da292f773fd0b29cba497231f62cb397a42534ace65521514f06"
+          }
+        ]
+      },
+      "population_figure": {
+        "figure": {
+          "path": "case_p_population.svg",
+          "sha256": "584a4bdb6805b6bf91a0ed5bfb485ac9bef29e709d324352769767a991dddd1e"
+        },
+        "gate": {
+          "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+          "confidence": 0.9875,
+          "critical_radius": 0.03501066711816651,
+          "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+          "curves": [
+            "stuck",
+            "held",
+            "escaped",
+            "any_terminal"
+          ],
+          "familywise_alpha": 0.0125,
+          "first_arrival_role": "represented_once_as_any_terminal",
+          "independent_unit": "seed_x_fixed_source_particle_trajectory",
+          "margin": 0.05,
+          "maximum_absolute_difference": 0.0,
+          "maximum_absolute_difference_by_curve": {
+            "any_terminal": 0.0,
+            "escaped": 0.0,
+            "held": 0.0,
+            "stuck": 0.0
+          },
+          "maximum_point_difference_that_can_pass": 0.014989332881833496,
+          "method": "two_sample_union_hoeffding",
+          "observations_per_participant": 9184,
+          "role": "confirmatory_terminal_population_gate",
+          "simultaneous_confidence_bound": 0.03501066711816651,
+          "simultaneous_endpoint_count": 484,
+          "status": "PASS",
+          "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+        },
+        "metrics": {
+          "path": "../caseP_final_evaluation/ensemble_metrics.csv",
+          "sha256": "394842d613966109801525a30c32fc51f30c9227769e5ee71c0eef3f3bc73d51"
+        },
+        "population_coverage": "32x287 units per participant at all 121 registered times"
+      },
+      "source_result_manifest": {
+        "path": "../candidate_caseP/levels/macro_coarse/seed_939032/result/run.json",
+        "sha256": "2bd8a05a5068e8d55bc5677dccaf55026fcd3a9412a12eac0a2d6f4eee36fa60"
+      }
+    }
+  },
+  "coordinates": "RZ meridional SI metres/seconds; figures millimetres/milliseconds",
+  "created_at_utc": "2026-10-12T11:22:25.710112+00:00",
+  "new_native_solve": false,
+  "numeric_verdict_owner": "Existing independently registered evaluator; this renderer cannot change acceptance",
+  "renderer": {
+    "path": "../render_comparison.py",
+    "sha256": "f6ac1a93b698ef84871a439e68fc33ec62f04e0a3ea7e9ab03c5404e188dc0a6"
+  },
+  "rendering_sampling": "All 287 per-ID means; all 32 seeds per participant; all 121 registered times",
+  "schema_version": 1,
+  "tool_revision": "r65_fullstep_brownian_population_geometry_view_v1",
+  "trajectory_recomputation": false
+}

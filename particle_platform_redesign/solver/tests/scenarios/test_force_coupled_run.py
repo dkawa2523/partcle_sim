@@ -100,7 +100,7 @@ def test_force_coupled_microcases_match_analytic_time_series(
     )
     np.testing.assert_array_equal(final.charge_number, expected["charge_number"][-1])
     assert result.read_boundary_events().particle_id.size == 0
-    assert result.manifest["field_location_revision"] == "field_location_v4"
+    assert result.manifest["field_location_revision"] == "field_location_v5"
     assert result.manifest["required_field_revision"] == "required_field_time_linear_v6"
     expected_enclosure_revision = (
         "rk4_global_abs_enclosure_v2" if path_kind == "rk4_dense" else None
@@ -638,7 +638,7 @@ def test_exponential_midpoint_uses_local_enclosure_for_unused_extreme_cell(
     assert np.isfinite(final.velocity_m_s).all()
     assert np.isfinite(final.charge_number).all()
     memory_plan = result.manifest["memory_plan"]
-    assert memory_plan["revision"] == "solver_owned_memory_plan_v16"
+    assert memory_plan["revision"] == "solver_owned_memory_plan_v25"
     assert memory_plan["certificate_work_bytes_per_particle"] == 544
     assert memory_plan["components"]["slab_certificate_work"] == (
         544 * memory_plan["slab_particles"]
@@ -1080,8 +1080,9 @@ def test_general_rk4_material_wall_hit_converges_and_is_schedule_independent(
             assert isinstance(memory_plan, dict)
             components = memory_plan["components"]
             assert isinstance(components, dict)
+            # The native binding table is resident even for a regular layout.
+            assert components["field_runtime"] > 0
             if field_layout_kind == "regular":
-                assert components["field_runtime"] == 0
                 assert memory_plan["field_preparation_transient_bytes"] == 0
             else:
                 assert components["field_runtime"] > np.dtype("<i8").itemsize
@@ -1662,6 +1663,76 @@ def test_general_rk4_residual_cap_splits_only_when_another_hit_exists(
     assert outputs[1].manifest["boundary_interactions"]["residual_splits"] > 0
 
 
+def test_curved_mixed_residual_work_preserves_analytic_paths_and_slab_identity(
+    tmp_path: Path,
+) -> None:
+    """Different reflection counts and local failures must not leak across rows."""
+
+    count = 513
+    case_path = _general_rk4_c09_case(tmp_path / "mixed", interactions=1, refinements=3)
+    case = load_case(case_path)
+    original = case.data.sources[0]
+    speed = np.resize(np.asarray([0.0, 0.25, 1.0, 4.0, 64.0]), count)
+    release = np.resize(np.asarray([0.0, 0.000311, 0.001122]), count)
+    source = replace(
+        original,
+        particle_id=np.arange(6001, 6001 + count, dtype="<i8"),
+        release_time_s=release,
+        position_m=np.repeat(original.position_m, count, axis=0),
+        velocity_m_s=np.column_stack((speed, np.zeros(count))),
+        charge_number=np.repeat(original.charge_number, count),
+        mass_kg=np.repeat(original.mass_kg, count),
+        drag_diameter_m=np.repeat(original.drag_diameter_m, count),
+        contact_radius_m=np.repeat(original.contact_radius_m, count),
+        electrostatic_radius_m=np.repeat(original.electrostatic_radius_m, count),
+        displaced_volume_m3=np.repeat(original.displaced_volume_m3, count),
+        model_weight=np.repeat(original.model_weight, count),
+        material_id=np.repeat(original.material_id, count),
+    )
+    data_path = case_path.with_name("mixed.h5")
+    info = write(data_path, replace(case.data, sources=(source,)))
+    document = yaml.safe_load(case_path.read_text(encoding="utf-8"))
+    document["case"]["data_path"] = data_path.name
+    document["case"]["expected_content_hash"] = info.content_hash
+    end_s = case.spec.time.end_s
+    document["time"]["dt_s"] = end_s / 3.0
+    document["output"]["trajectories"] = {
+        "selection": "all",
+        "schedule": {"explicit_times_s": [0.0, 0.000311, 0.001122, 0.003, end_s]},
+    }
+    results = []
+    for label, budget_mb in (("tight", 6), ("loose", 64)):
+        document["resources"]["memory_limit_mb"] = budget_mb
+        variant = case_path.with_name(f"mixed-{label}.yaml")
+        variant.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+        output = tmp_path / f"mixed-{label}-result"
+        simulate(load_case(variant), output)
+        results.append(open_result(output))
+    _assert_public_result_identity(results[0], results[1])
+    plans = [result.manifest["memory_plan"] for result in results]
+    assert plans[0]["slab_particles"] < plans[1]["slab_particles"]
+    assert plans[1]["slab_particles"] == count
+    assert plans[0]["event_work_bytes_per_particle"] == 24 * 4 + 376
+    assert plans[0]["proposal_replay_work_bytes_per_particle"] == 171
+    assert all(plan["dense_path_bytes_per_particle"] == 851 for plan in plans)
+    assert results[0].manifest["boundary_interactions"]["residual_splits"] > 0
+    final = results[0].read_final()
+    assert 0 < results[0].read_failure_events().particle_id.size < count
+    # The intentionally small refinement budget can reject fast rows. The
+    # stationary/slow rows have a resolved zero/one-hit analytic reference.
+    healthy = speed <= 0.25
+    assert bool((speed[final.lifecycle == 4] >= 1.0).all())
+    np.testing.assert_array_equal(final.lifecycle[healthy], np.ones(healthy.sum(), dtype="u1"))
+    gap_m = 2.0**-10
+    free_x = original.position_m[0, 0] + speed[healthy] * (end_s - release[healthy])
+    remainder = np.remainder(free_x, 2.0 * gap_m)
+    expected_x = np.minimum(remainder, 2.0 * gap_m - remainder)
+    np.testing.assert_allclose(final.position_m[healthy, 0], expected_x, rtol=0.0, atol=2.0e-13)
+    reflections = np.floor(free_x / gap_m).astype(np.int64)
+    expected_v = speed[healthy] * np.where(reflections % 2 == 0, 1.0, -1.0)
+    np.testing.assert_allclose(final.velocity_m_s[healthy, 0], expected_v, rtol=0.0, atol=2.0e-13)
+
+
 @pytest.mark.parametrize(
     ("integrator", "path_kind"),
     [
@@ -1956,7 +2027,7 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
     assert all(isinstance(plan, dict) for plan in plans)
     assert plans[0]["slab_particles"] < plans[1]["slab_particles"]
     assert plans[1]["slab_particles"] == particle_count
-    expected_event_work = 24 * (case.spec.solver.event.max_refinements + 1)
+    expected_event_work = 24 * (case.spec.solver.event.max_refinements + 1) + 539
     for plan, limit_bytes in zip(plans, expected_limit_bytes, strict=True):
         phase_peaks = plan["phase_peaks"]
         components = plan["components"]
@@ -1993,18 +2064,18 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
             plan["slab_particles"] * plan["failure_staging_bytes_per_particle"]
         )
         assert components["geometry_query_scratch"] == (
-            4 * plan["event_candidate_capacity"] * np.dtype("<i8").itemsize
+            4 * plan["event_candidate_capacity"] * np.dtype("<i8").itemsize + 24
         )
         assert plan["planned_bytes"] <= plan["limit_bytes"]
 
     reference = results[1]
-    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v46"
-    assert reference.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
+    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v62"
+    assert reference.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert reference.manifest["geometry_algorithm_revision"] == (
-        "line_boundary_capsule_contact_bvh_v7"
+        "line_boundary_capsule_contact_bvh_v8"
     )
-    assert plans[1]["revision"] == "solver_owned_memory_plan_v16"
-    assert plans[1]["runtime_layout_revision"] == "resident_soa_serial_slab_v6"
+    assert plans[1]["revision"] == "solver_owned_memory_plan_v25"
+    assert plans[1]["runtime_layout_revision"] == "resident_soa_process_slab_v14"
     assert reference.manifest["resolved"]["physics_models"]["electric"]["model"] == "coulomb"
     reference_boundary = reference.read_boundary_events()
     assert set(reference_boundary.outcome.tolist()) == {"reflected", "stuck"}
@@ -2352,8 +2423,10 @@ def test_regular_nonuniform_excursion_is_local_failure_independent_of_output_sch
         np.testing.assert_array_equal(result.read_failure_events().reason_code, [reason])
 
 
+@pytest.mark.parametrize("integrator", ["rk4_fixed", "exponential_midpoint"])
 def test_constant_acceleration_wall_hit_is_exact_across_dt_and_output_schedule(
     tmp_path: Path,
+    integrator: str,
 ) -> None:
     expected_time_s = 1.0 - 1.0 / np.sqrt(2.0)
     results = []
@@ -2368,6 +2441,9 @@ def test_constant_acceleration_wall_hit_is_exact_across_dt_and_output_schedule(
             dt_s=dt_s,
             frame_times=frame_times,
         )
+        document = yaml.safe_load(case_path.read_text(encoding="utf-8"))
+        document["solver"]["integrator"] = integrator
+        case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
         output = tmp_path / f"{label}-result"
         simulate(load_case(case_path), output)
         result = open_result(output)
@@ -2493,10 +2569,10 @@ def test_constant_acceleration_surface_uses_the_first_nonzero_normal_derivative(
         [frame.velocity_m_s[0] for frame in frames],
         [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]],
     )
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v46"
-    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v62"
+    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert result.manifest["event_algorithm_revision"] == (
-        "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        "line_quadratic_curved_capsule_periodic_first_hit_v23"
     )
     assert result.manifest["resolved"]["path_kind"] == "quadratic_exact"
 
@@ -4095,12 +4171,9 @@ def test_barnes_ion_drag_constant_field_time_convergence(
         "model": "barnes_collisionless",
         "revision": _BARNES_ION_DRAG_REVISION,
     }
-    assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
+    assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
-    assert (
-        last_result.manifest["physics_runtime_revision"]
-        == "signed_ion_compiled_physics_runtime_v22"
-    )
+    assert last_result.manifest["physics_runtime_revision"] == "prepared_native_physics_runtime_v24"
 
 
 def test_barnes_ion_drag_xy_and_rz_use_the_same_stage_physics(tmp_path: Path) -> None:

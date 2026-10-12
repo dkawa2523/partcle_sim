@@ -1,0 +1,726 @@
+{
+  "schema_version": 1,
+  "owner": "/root",
+  "closed_at_utc": "2026-10-12T11:32:21.266717+00:00",
+  "status": "FULLSTEP_SCOPED_COMSOL_REGRESSION_PASS_PARALLEL_SLOWER",
+  "user_task_completed": true,
+  "candidate_executor": {
+    "distribution_version": "0.3.0",
+    "python_version": "3.12.13",
+    "source_sha256": "8c8c3100539e0defc607a8923ed7138db5cd57677ffb2cccdb845213c3892635",
+    "uv_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281"
+  },
+  "production_source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+  "production_code_changed": false,
+  "new_native_solve": false,
+  "new_unseen_confirmation": false,
+  "new_confidence_family": false,
+  "formal_publish": false,
+  "tag": false,
+  "push": false,
+  "full_conditions": {
+    "particles": 287,
+    "diameter_m": 1e-07,
+    "coordinate": "RZ meridional",
+    "start_s": 0,
+    "end_s": 0.03,
+    "dt_s": 2e-05,
+    "macro_steps": 1500,
+    "brownian": "OU Langevin midpoint FDT",
+    "base_depth": 3,
+    "adaptive_max_depth": 3,
+    "output_times": 121,
+    "field": "common canonical P1",
+    "physics_settings_changed": false
+  },
+  "execution_counts": {
+    "current_serial_population_results": 64,
+    "current_population_seeds_per_case": 32,
+    "performance_full_results": 24,
+    "extra_fresh_resume_validation_results": 1,
+    "total_current_completed_results": 89,
+    "saved_native_reference_results": 64,
+    "parallel_science_seed_count_per_case": 3,
+    "parallel_all32_campaign_executed": false,
+    "performance_full_scientific_rereads": 30
+  },
+  "four_evaluations": {
+    "initial_conditions": {
+      "status": "PASS",
+      "scope": "Registered ID/source and all replica initial states: r/z exact, v/Z registered roundoff budget."
+    },
+    "fields_and_right_hand_side": {
+      "status": "NOT_TESTED",
+      "scope": "Common P1 input and meaning binding checked; full native per-force/auxq assembled RHS/all stages not observed."
+    },
+    "boundary_behavior": {
+      "status": "NOT_TESTED",
+      "scope": "Case A observed fate/time population passed; Disappear cause/ID/hit/pre-post state not certified. Case P zero events gives no positive wall-law test."
+    },
+    "time_trajectory": {
+      "status": "PASS",
+      "scope": "Registered 121-time terminal curves and 83-category RZ/fate population only; later velocity/charge law and COMSOL pathwise equality not tested."
+    }
+  },
+  "comsol": {
+    "CaseA": {
+      "evaluation": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\caseA_final_evaluation\\evaluation_manifest.json",
+        "sha256": "32adcbedbc17ff54e4f22e51c684f8c8aa5000b39e2e0fddd5613abea8c7cd42"
+      },
+      "status": "PASS",
+      "source_identity": {
+        "canonical_input": {
+          "content_hash": "sha256:4e1739a4b7f39f5047506f30d7c453e9023c3c9ec8a411937968dbeaaf35b483",
+          "path": "candidate_caseA/candidate_input.h5",
+          "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+        },
+        "comparison": "canonical_source_hash_and_fixed_particle_ids_plus_t0_position_exact_and_velocity_charge_roundoff_bounded",
+        "maximum_absolute_dynamic_difference_by_component": {
+          "charge_number_e": 1.1102230246251565e-16,
+          "velocity_r_m_per_s": 1.9220736113823023e-15,
+          "velocity_z_m_per_s": 8.604228440844963e-16
+        },
+        "maximum_roundoff_budget_fraction": 0.13525390625,
+        "mismatch_count": 0,
+        "mismatches": [],
+        "particle_count": 287,
+        "position_rule": "exact_float64_by_particle_id_for_r_m_and_z_m",
+        "replica_level_states_compared": 64,
+        "status": "PASS",
+        "velocity_charge_epsilon_factor": 64.0,
+        "velocity_charge_rule": "absolute_difference_le_64_eps_times_max_1_abs_values"
+      },
+      "terminal_population_gate": {
+        "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+        "confidence": 0.9875,
+        "critical_radius": 0.03501066711816651,
+        "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+        "curves": [
+          "stuck",
+          "held",
+          "escaped",
+          "any_terminal"
+        ],
+        "familywise_alpha": 0.0125,
+        "first_arrival_role": "represented_once_as_any_terminal",
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin": 0.05,
+        "maximum_absolute_difference": 0.005117595818815324,
+        "maximum_absolute_difference_by_curve": {
+          "any_terminal": 0.005117595818815324,
+          "escaped": 0.004899825783972189,
+          "held": 0.0,
+          "stuck": 0.003919860627177701
+        },
+        "maximum_point_difference_that_can_pass": 0.014989332881833496,
+        "method": "two_sample_union_hoeffding",
+        "observations_per_participant": 9184,
+        "role": "confirmatory_terminal_population_gate",
+        "simultaneous_confidence_bound": 0.04012826293698183,
+        "simultaneous_endpoint_count": 484,
+        "status": "PASS",
+        "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+      },
+      "rz_distribution_gate": {
+        "active_position_bins": {
+          "axial_bins": 8,
+          "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes",
+          "bounds_m": [
+            0.0,
+            0.25,
+            0.0,
+            0.13
+          ],
+          "radial_bins": 10
+        },
+        "category_count": 83,
+        "confidence": 0.9875,
+        "familywise_alpha": 0.0125,
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin_total_variation": 0.15,
+        "maximum_empirical_total_variation": 0.009581881533101043,
+        "maximum_empirical_total_variation_by_time": [
+          0.0,
+          0.00021777003484316215,
+          0.0011977351916376555,
+          0.0007621951219512341,
+          0.0006533101045296252,
+          0.0013066202090592505,
+          0.0008710801393728429,
+          0.0007621951219512063,
+          0.0006533101045296252,
+          0.0006533101045296252,
+          0.0006533101045296669,
+          0.0005444250871080303,
+          0.0006533101045296114,
+          0.00010888501742158108,
+          0.00043554006968640757,
+          0.0003266550522648126,
+          0.0003266550522648126,
+          0.0003266550522648126,
+          0.00021777003484321766,
+          0.0003266550522648126,
+          0.0002177700348431899,
+          0.00010888501742165047,
+          0.00021777003484316215,
+          0.0003266550522648126,
+          0.00021777003484316215,
+          0.00010888501742165047,
+          0.00010888501742165047,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.003919860627177712,
+          0.0,
+          0.005117595818815298,
+          0.0007621951219512614,
+          0.00010888501742158541,
+          0.0006533101045295905,
+          0.005335365853658503,
+          0.0,
+          0.0018510452961672443,
+          0.0,
+          0.001197735191637629,
+          0.0006533101045295628,
+          0.0,
+          0.0,
+          0.00337543554006969,
+          0.00239547038327527,
+          0.005770905923344946,
+          0.0016332752613240427,
+          0.004790940766550556,
+          0.003375435540069699,
+          0.0008710801393728351,
+          0.0026132404181184728,
+          0.0015243902439024677,
+          0.0030487804878048803,
+          0.0019599303135888683,
+          0.005662020905923343,
+          0.0022865853658536454,
+          0.00250435540069686,
+          0.0008710801393728299,
+          0.0016332752613240436,
+          0.0028310104529616995,
+          0.0018510452961672287,
+          0.003048780487804889,
+          0.003919860627177713,
+          0.005335365853658538,
+          0.005770905923344966,
+          0.004137630662020932,
+          0.005444250871080131,
+          0.005879790940766558,
+          0.009581881533101043,
+          0.0074041811846690085,
+          0.0063153310104529774,
+          0.005553135888501748,
+          0.007295296167247372,
+          0.004790940766550546,
+          0.0030487804878048925,
+          0.004355400696864113,
+          0.000979965156794421,
+          0.0014155052264808502,
+          0.002722125435540087,
+          0.0032665505226480884,
+          0.004137630662020897,
+          0.003702090592334517,
+          0.0018510452961672534,
+          0.0032665505226480967,
+          0.007839721254355395,
+          0.00315766550522649,
+          0.004899825783972104,
+          0.0041376306620209136,
+          0.0038109756097561044,
+          0.0030487804878049063,
+          0.0013066202090592145,
+          0.004464285714285712,
+          0.005879790940766599,
+          0.0033754355400696587,
+          0.002613240418118487,
+          0.0009799651567944379,
+          0.0011977351916376208,
+          0.0007621951219512688,
+          0.001524390243902475,
+          0.002177700348432069,
+          0.0006533101045296252,
+          0.0006533101045295871,
+          0.0011977351916376208,
+          0.0026132404181184784
+        ],
+        "maximum_empirical_tv_that_can_pass": 0.028846481013794473,
+        "method": "two_sample_union_multinomial_l1",
+        "observable": "full_population_fixed_geometry_rz_fate_partition",
+        "observations_per_participant_per_time": 9184,
+        "one_sample_critical_radius": 0.06057675949310276,
+        "one_sample_critical_radius_formula": "sqrt((K*ln(2)+ln(2*T/alpha))/(2*N))",
+        "output_time_count": 121,
+        "participant_union_count": 2,
+        "role": "confirmatory_full_population_distribution_gate",
+        "simultaneous_confidence_bound": 0.13073540051930657,
+        "status": "PASS",
+        "terminal_categories": [
+          "stuck",
+          "held",
+          "escaped"
+        ],
+        "two_sample_critical_radius": 0.12115351898620552,
+        "within_unit_dependence": "time_dependence_retained"
+      },
+      "claim_policy": {
+        "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+        "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+        "continuous_noise_time_law": "NOT_TESTED",
+        "disappear_boundary_identity": "NOT_TESTED",
+        "escape_boundary_cause_identity": "NOT_TESTED",
+        "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+      }
+    },
+    "CaseP": {
+      "evaluation": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\caseP_final_evaluation\\evaluation_manifest.json",
+        "sha256": "e0a0ec2bbd0f9c25e50496b43307d19fc8385085a20ad84fb299c28a7bf0bb72"
+      },
+      "status": "PASS",
+      "source_identity": {
+        "canonical_input": {
+          "content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+          "path": "candidate_caseP/candidate_input.h5",
+          "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+        },
+        "comparison": "canonical_source_hash_and_fixed_particle_ids_plus_t0_position_exact_and_velocity_charge_roundoff_bounded",
+        "maximum_absolute_dynamic_difference_by_component": {
+          "charge_number_e": 1.1102230246251565e-16,
+          "velocity_r_m_per_s": 1.9220736113823023e-15,
+          "velocity_z_m_per_s": 8.604228440844963e-16
+        },
+        "maximum_roundoff_budget_fraction": 0.13525390625,
+        "mismatch_count": 0,
+        "mismatches": [],
+        "particle_count": 287,
+        "position_rule": "exact_float64_by_particle_id_for_r_m_and_z_m",
+        "replica_level_states_compared": 64,
+        "status": "PASS",
+        "velocity_charge_epsilon_factor": 64.0,
+        "velocity_charge_rule": "absolute_difference_le_64_eps_times_max_1_abs_values"
+      },
+      "terminal_population_gate": {
+        "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+        "confidence": 0.9875,
+        "critical_radius": 0.03501066711816651,
+        "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+        "curves": [
+          "stuck",
+          "held",
+          "escaped",
+          "any_terminal"
+        ],
+        "familywise_alpha": 0.0125,
+        "first_arrival_role": "represented_once_as_any_terminal",
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin": 0.05,
+        "maximum_absolute_difference": 0.0,
+        "maximum_absolute_difference_by_curve": {
+          "any_terminal": 0.0,
+          "escaped": 0.0,
+          "held": 0.0,
+          "stuck": 0.0
+        },
+        "maximum_point_difference_that_can_pass": 0.014989332881833496,
+        "method": "two_sample_union_hoeffding",
+        "observations_per_participant": 9184,
+        "role": "confirmatory_terminal_population_gate",
+        "simultaneous_confidence_bound": 0.03501066711816651,
+        "simultaneous_endpoint_count": 484,
+        "status": "PASS",
+        "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+      },
+      "rz_distribution_gate": {
+        "active_position_bins": {
+          "axial_bins": 8,
+          "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes",
+          "bounds_m": [
+            0.0,
+            0.25,
+            0.0,
+            0.13
+          ],
+          "radial_bins": 10
+        },
+        "category_count": 83,
+        "confidence": 0.9875,
+        "familywise_alpha": 0.0125,
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin_total_variation": 0.15,
+        "maximum_empirical_total_variation": 0.008384146341463419,
+        "maximum_empirical_total_variation_by_time": [
+          0.0,
+          0.003919860627177751,
+          0.002831010452961677,
+          0.001088850174216019,
+          0.001306620209059181,
+          0.00010888501742158108,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.00021777003484321766,
+          0.00021777003484321766,
+          0.0,
+          0.00010888501742163659,
+          0.00010888501742159842,
+          0.00010888501742160189,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0002177700348432246,
+          0.0005444250871080025,
+          0.0,
+          0.00010888501742159842,
+          0.000979965156794431,
+          0.00043554006968642145,
+          0.0,
+          0.001742160278745672,
+          0.004137630662020889,
+          0.000979965156794404,
+          0.003810975609756094,
+          0.0015243902439024473,
+          0.0025043554006968782,
+          0.0008710801393728151,
+          0.0002177700348432246,
+          0.0008710801393728212,
+          0.0014155052264808263,
+          0.005988675958188171,
+          0.00435540069686409,
+          0.000871080139372829,
+          0.004028745644599307,
+          0.00032665505226480915,
+          0.0002177700348431899,
+          0.000871080139372829,
+          0.0018510452961672495,
+          0.008384146341463419,
+          0.0011977351916376416,
+          0.002613240418118473,
+          0.001959930313588841,
+          0.0009799651567944483,
+          0.0022865853658536675,
+          0.0015243902439024274,
+          0.00032665505226480915,
+          0.003919860627177724,
+          0.00043554006968643533,
+          0.002504355400696854,
+          0.001851045296167253,
+          0.0023954703832752304,
+          0.001742160278745639,
+          0.005770905923344945,
+          0.003375435540069676,
+          0.00195993031358886,
+          0.00642421602787456,
+          0.001415505226480835,
+          0.0047909407665504885,
+          0.0031576655052264566,
+          0.005553135888501772,
+          0.0035932055749128724,
+          0.004464285714285726,
+          0.002613240418118456,
+          0.0021777003484320704,
+          0.005008710801393739,
+          0.0021777003484320517,
+          0.0038109756097560975,
+          0.004028745644599324,
+          0.0041376306620209,
+          0.006968641114982568,
+          0.002286585365853657,
+          0.00250435540069686,
+          0.004246515679442502,
+          0.0035932055749128603,
+          0.005226480836236911,
+          0.0030487804878048946,
+          0.007077526132404193,
+          0.0045731707317073,
+          0.005117595818815355,
+          0.003048780487804893,
+          0.00577090592334489,
+          0.005117595818815308,
+          0.001633275261324051,
+          0.002831010452961691
+        ],
+        "maximum_empirical_tv_that_can_pass": 0.028846481013794473,
+        "method": "two_sample_union_multinomial_l1",
+        "observable": "full_population_fixed_geometry_rz_fate_partition",
+        "observations_per_participant_per_time": 9184,
+        "one_sample_critical_radius": 0.06057675949310276,
+        "one_sample_critical_radius_formula": "sqrt((K*ln(2)+ln(2*T/alpha))/(2*N))",
+        "output_time_count": 121,
+        "participant_union_count": 2,
+        "role": "confirmatory_full_population_distribution_gate",
+        "simultaneous_confidence_bound": 0.12953766532766894,
+        "status": "PASS",
+        "terminal_categories": [
+          "stuck",
+          "held",
+          "escaped"
+        ],
+        "two_sample_critical_radius": 0.12115351898620552,
+        "within_unit_dependence": "time_dependence_retained"
+      },
+      "claim_policy": {
+        "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+        "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+        "continuous_noise_time_law": "NOT_TESTED",
+        "disappear_boundary_identity": "NOT_TESTED",
+        "escape_boundary_cause_identity": "NOT_TESTED",
+        "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+      }
+    }
+  },
+  "performance_observations": {
+    "CaseA": {
+      "warm_seeds": [
+        939132,
+        939147,
+        939163
+      ],
+      "roles": {
+        "1": {
+          "warm_public_s": [
+            14.266697499901056,
+            13.452912400010973,
+            13.925685399677604
+          ],
+          "warm_median_public_s": 13.925685399677604,
+          "warm_median_simulate_s": 13.876843600068241,
+          "warm_median_process_cpu_s": 15.9375,
+          "max_all_runs_private_peak_bytes": 907747328,
+          "max_all_runs_working_set_sum_peak_bytes": 886218752,
+          "cold_public_s": 89.99497709982097
+        },
+        "2": {
+          "warm_public_s": [
+            32.75254749972373,
+            35.92749769985676,
+            33.971820699982345
+          ],
+          "warm_median_public_s": 33.971820699982345,
+          "warm_median_simulate_s": 33.93241879995912,
+          "warm_median_process_cpu_s": 68.40625,
+          "max_all_runs_private_peak_bytes": 1763573760,
+          "max_all_runs_working_set_sum_peak_bytes": 1853440000,
+          "cold_public_s": 98.99421229958534,
+          "public_speedup_ratio_of_warm_medians": 0.4099187241879221,
+          "public_paired_seed_speedup_range": [
+            0.37444612793238335,
+            0.43559046819247865
+          ],
+          "timing_observation": "warm_median_slower_than_serial"
+        },
+        "4": {
+          "warm_public_s": [
+            32.2482880000025,
+            32.76012110011652,
+            31.579142599832267
+          ],
+          "warm_median_public_s": 32.2482880000025,
+          "warm_median_simulate_s": 32.20452050026506,
+          "warm_median_process_cpu_s": 117.1875,
+          "max_all_runs_private_peak_bytes": 3227131904,
+          "max_all_runs_working_set_sum_peak_bytes": 3402444800,
+          "cold_public_s": 105.4910893002525,
+          "public_speedup_ratio_of_warm_medians": 0.4318271220995212,
+          "public_paired_seed_speedup_range": [
+            0.4106490436619028,
+            0.4424017020655468
+          ],
+          "timing_observation": "warm_median_slower_than_serial"
+        }
+      }
+    },
+    "CaseP": {
+      "warm_seeds": [
+        939032,
+        939047,
+        939063
+      ],
+      "roles": {
+        "1": {
+          "warm_public_s": [
+            20.49431010009721,
+            19.690739799756557,
+            17.98958839988336
+          ],
+          "warm_median_public_s": 19.690739799756557,
+          "warm_median_simulate_s": 19.61173290014267,
+          "warm_median_process_cpu_s": 22.046875,
+          "max_all_runs_private_peak_bytes": 840495104,
+          "max_all_runs_working_set_sum_peak_bytes": 818823168,
+          "cold_public_s": 85.30469619994983
+        },
+        "2": {
+          "warm_public_s": [
+            35.40282260021195,
+            33.96717449976131,
+            33.39821090037003
+          ],
+          "warm_median_public_s": 33.96717449976131,
+          "warm_median_simulate_s": 33.91136399982497,
+          "warm_median_process_cpu_s": 69.484375,
+          "max_all_runs_private_peak_bytes": 1698689024,
+          "max_all_runs_working_set_sum_peak_bytes": 1797517312,
+          "cold_public_s": 97.83780639991164,
+          "public_speedup_ratio_of_warm_medians": 0.5796990797658169,
+          "public_paired_seed_speedup_range": [
+            0.5386392838091829,
+            0.5796990797658169
+          ],
+          "timing_observation": "warm_median_slower_than_serial"
+        },
+        "4": {
+          "warm_public_s": [
+            34.159491000231355,
+            33.873763100244105,
+            33.2326111998409
+          ],
+          "warm_median_public_s": 33.873763100244105,
+          "warm_median_simulate_s": 33.81571549968794,
+          "warm_median_process_cpu_s": 124.890625,
+          "max_all_runs_private_peak_bytes": 3155034112,
+          "max_all_runs_working_set_sum_peak_bytes": 3313725440,
+          "cold_public_s": 100.36577820032835,
+          "public_speedup_ratio_of_warm_medians": 0.5812976769508865,
+          "public_paired_seed_speedup_range": [
+            0.541323349275951,
+            0.5999594695353747
+          ],
+          "timing_observation": "warm_median_slower_than_serial"
+        }
+      }
+    }
+  },
+  "performance_decision": "Use workers=1 for these 287-particle 1500-macro inputs; W2/W4 slower in every selected warm pair and cold observation. No universal speedup or total-memory reduction qualified.",
+  "timing_scope": "Public load_case/simulate/open_result including worker startup, compile/cache, IPC, output and shutdown; initial parent import excluded consistently. Three distinct fixed paired warm seeds are descriptive, not repeated-seed inference/SLA.",
+  "memory_scope": "100 ms samples of parent plus live child private commit; sampled peak may miss transients. Working set sum repeats shared pages; solver-owned 512 MiB array budget is not total process memory cap.",
+  "interruption": {
+    "cause": "UNCONFIRMED",
+    "completed_before_interruption": {
+      "CaseA": 32,
+      "CaseP": 11
+    },
+    "partial_seed": 939043,
+    "resumed_all_seeds": true,
+    "fresh_full_scientific_identity": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\interruption_resume_comparison.json",
+      "sha256": "7c6b4b517d9319ee7a7a9ed9897e5f940bffbcb300a36df0144a214872835e58"
+    },
+    "interrupted_timing_used_for_performance": false
+  },
+  "limits": [
+    "Saved COMSOL 6.4.0.429 reference, previously observed cohort/version regression; no new native solve or unseen confirmation.",
+    "Case P follows original two-current same-form charging with omitted negative-ion current; numeric comparison does not validate physical charging truth.",
+    "Native FE end-to-end, continuous SDE bias/noise time law, later velocity/charge population, complete native RHS and wall response remain unqualified.",
+    "Independent-seed campaign parallel throughput not measured; same-run process observations do not establish all-CPU scaling or NUMA guarantees."
+  ],
+  "evidence": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\source_binding.json",
+      "sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\performance_policy.json",
+      "sha256": "12d2581ba67ce71a3f15dea1014fb86cb45d1def324006b8efb361827ae92c77"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\registration\\execution_preregistration_v62.json",
+      "sha256": "8a32f7beba29967d1395de0aeff659998a4903dfeeaf61b7c3ef57aad15e850c"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\root_pre_run_review.json",
+      "sha256": "188e686b2315172481f26d074ff8993c89ba39c52a1f371521ec9b0414edb3b0"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\new_registration_independent_review.json",
+      "sha256": "077ad3ad9d648f6061f9797fce7314b11627473bffa540905ea0a7ff39e27711"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\reference_independent_audit.json",
+      "sha256": "caef04ba466fdde23e7e45d27b28fef64463d96e8ac749284f4dbc8b4b43f4ad"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\evaluation_projection_independent_review.json",
+      "sha256": "519d7dc1f58b3402e9b5b44822dcff8aabaabdef5a22e3fa67732d8089f441fe"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\performance_consumer_independent_review.json",
+      "sha256": "a5419e1d5355a6d95826571bc2441ebe28860a7030b899e11f84b2dee0ab82cb"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\performance_comparison.json",
+      "sha256": "d08184b27a045e0825acff973186e7b1ede04f26e6ee1fa0982a842d91bb6cbc"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\interruption_resume_before.json",
+      "sha256": "ea69fcd769cf4f72646c6f37cfc7edfcdc76c845387acb24c99a3e3fc2671551"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\interruption_resume_comparison.json",
+      "sha256": "7c6b4b517d9319ee7a7a9ed9897e5f940bffbcb300a36df0144a214872835e58"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\derived\\visualization_receipt.json",
+      "sha256": "18362e0823d33653ede7c33e0b21eebe861cf4b6b82e37c493970db18f2f08db"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\visual_qa\\visual_qa_receipt.json",
+      "sha256": "9135becd7f99b96b71153ef93573e3e2c3435ce58db37a862dbec9b86f4a0d7e"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\native_model_after_receipt.json",
+      "sha256": "5bfbc89d20484aa4db68468cbfedfb74862550b92ca028d8ee834e91e2653bed"
+    }
+  ]
+}

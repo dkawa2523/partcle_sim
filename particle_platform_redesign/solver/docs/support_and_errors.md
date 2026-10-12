@@ -1,7 +1,7 @@
-# v0.2.0 support, qualification, limitations, and error guide
+# v0.3.0 support, qualification, limitations, and error guide
 
-この文書は、`0.2.0`の固定topology 2-D版を利用する時の入口です。公開済み`0.1.0`は
-static 2-D baselineとしてtag上で固定します。対応する設定、明示的な非対応範囲、失敗時の最初の確認先を
+この文書は、`0.3.0`の固定topology 2-D版を利用する時の入口です。過去版の仕様は各tagに保持します。
+対応する設定、明示的な非対応範囲、失敗時の最初の確認先を
 一か所にまとめます。式、適用域、数値許容差、永続形式の詳細を再定義する文書ではありません。厳密な正本は次です。
 
 - 入力：[`case_format_v3.md`](case_format_v3.md)
@@ -13,13 +13,14 @@ static 2-D baselineとしてtag上で固定します。対応する設定、明�
 COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行には不要であり、本表の「対応」は
 任意のCOMSOL設定との一般同等性を意味しません。
 
-## 0.2.0の用途別検証保証
+## 用途別検証の範囲
 
 保証するのは、登録した入力・方程式・解像度について、下表の判定基準を満たすことです。
 対応selectorの全組合せや、任意のチャンバーの予測精度を一括して認定しません。個別profileの入力、SI誤差budget、
 粒子数・seed・刻み・depth、独立reference、適用域は
-[用途別受入条件](../../reviews/v0_2_release_use_case_acceptance_2026-10-10.json)、結果と証拠のidentityは
-[0.2.0検証記録](../../reviews/v0_2_release_qualification_2026-10-10.json)を参照してください。
+[0.2.0の用途別受入条件](../../reviews/v0_2_release_use_case_acceptance_2026-10-10.json)に固定されています。
+その証拠は元のsourceに限定して保持します。現行0.3.0の科学出力・用途性能・配布検査は
+[並列実行・性能](parallel_execution_plan.md)、現行COMSOL回帰は[評価方法](../../vv_methodology.md)が所有します。
 
 | 用途 | 保証の範囲と判定 |
 |---|---|
@@ -27,17 +28,17 @@ COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行�
 | 可変係数・連成Brownian | B01/B02/B03：時間線形drag/flow、位置affine flow、一様stationary OML＋Coulombの指定ensembleで平均・共分散・電荷を独立Green/scalar referenceと比較。境界の一般first-passageや一般SDE次数へ拡張しない |
 | Brownian吸収・反復反射・RZ到達 | C01–C04：一定係数・point particleの登録h/depthごとにCDF誤差、MC幅、経験的reference幅を分離して判定。RZの元N16k D2判定未達は保持し、別登録N64k追試のPASSと区別 |
 | 物理式とmodel適用域 | D01/D02：Talbot/Saffman原著式、drag/charge/ion drag等の独立極限・解析運動・pure/compiled・適用外拒否。model-form感度の数値確認であり、species混合・付着・発生源の実験的validationではない |
-| 限定COMSOL比較 | 共通P1・100nmの登録Case A/Pと決定論三電流caseを現行v46で再評価。保存native参照をhash固定して使うversion再資格であり、新しい独立cohortとは呼ばない。Disappearの原因/IDと、衝突のないCase-Pのwall応答は未認証 |
-| 規模・性能・再現性 | 正式P14、B03、P14-Uの既存release条件で反復測定し、科学payload identity、failure、memory plan、収束を判定。時間とprocess RSSは測定機に限定し、利用者未指定のSLAやOS hard RSS capを保証しない |
+| 限定COMSOL比較 | 現行v62の共通P1・100nm・BrownianありCase A/P各32 seedで、保存native参照に対する登録位置・終端人口分布を再評価。以前の決定論三電流caseの証拠は元sourceに限定する。新しい独立cohortや一般native右辺・境界応答の認証ではない |
+| 規模・性能・再現性 | 登録P14、B03、P14-U等でprocess数別の科学payload、failure、memory plan、時間・実メモリを評価。小粒子数や早期終端では遅化も記録し、未指定のSLAやOS hard RSS capを保証しない |
 | 配布 | 同一tagのWindows/Linux CIで品質gate、Quick Start、wheel、runtime-only installを検査。source/wheel/install全Python bytesとREADME由来METADATA、三API・CLI・time-field・接触modeを照合 |
 
 背景場のmesh/time解像度、回復gradient/curl、source・wall parameter、実験的製造KPI、追加modelの精度は、
 実際の用途入力と独立referenceを伴って別途評価します。有限depth Hermite pathの連続OU exact first-passageや
-zero-miss probabilityは0.2.0の保証に含めません。
+zero-miss probabilityは保証に含めません。
 
 ## 公開する実行境界
 
-利用者向けPython APIは`load_case(path)`、`simulate(case, output)`、`open_result(path)`の三つです。CLIの
+利用者向けPython APIは`load_case(path)`、`simulate(case, output, *, workers=1)`、`open_result(path)`の三つです。CLIの
 `check`、`run`、`inspect`も同じ経路を使います。最初の実行方法は[Quick Start](../README.md#quick-start)を参照してください。
 
 `check`はYAML、canonical HDF5、hash、source/boundary参照と早期memory gateを検査します。物理モデルの組合せ、
@@ -46,14 +47,14 @@ field support、geometry topology、積分器安定性、完全なmemory planは
 
 ## 対応範囲
 
-| 項目 | `0.2.0`の対応範囲 |
+| 項目 | `0.3.0`の対応範囲 |
 |---|---|
 | 座標 | `cartesian_xy`の2自由度運動、または`axisymmetric_rz`場中の`axisymmetric_rz_meridional` 2自由度運動 |
 | geometry | 静的2-D volume meshと`line2`材料境界。RZの`r=0`は壁でなくaxis event |
 | field | 静的または固定topologyの線形時間snapshotを持つregular、P1 triangle、Q1 quadrilateral。全required fieldは同じlayout、SI単位、明示basisを使用 |
 | source | 粒子ごとのrealized table、またはfacet・facet内座標・速度・release時刻・物性を粒子ごとに保持するrealized surface table |
 | motion | 無力場ballistic、一定加速度の厳密経路、固定刻み`rk4_fixed`、`exponential_midpoint`、対応Brownian用`ou_langevin` |
-| backend | CPU上の一つのsingle-thread compiled engine。粒子stateはresident、scratchはbounded slab |
+| backend | CPU上の一つのengine。workerごとに単一直列compiled処理を使い、process数をAPI/CLIで指定する。粒子stateはresident、scratchはbounded slab |
 | output | release/boundary/failure event、lifecycle series、final state、任意の全粒子frame、明示particle probe、checkpoint/resume |
 
 stage評価する一般曲線運動では、材料boundaryがvolume外周を完全に覆うか、boundarylessなら全cell supportedな
@@ -112,7 +113,8 @@ realizeし、solverは再標本化しません。Brownian surface releaseは外�
 
 - Cartesian 3-D粒子、完全3-D geometry/field、axisymmetric fieldを回転展開した3-D軌道
 - zero-order hold／不連続snapshot、時間で変わるfield layout/topology、moving geometry、粒子によるfieldへのself-consistent feedback
-- GPU、solver内部thread/multiprocess、out-of-core particle state。独立caseのprocess並列はsolver外で行う
+- GPU、Numba内部thread並列、out-of-core particle state。同一runのprocess数は`workers`で指定し、独立caseの並列はsolver外で行う
+- 複数macroをまとめる同期間隔設定。現行は活動粒子の各macro末尾で全worker完了を待つ
 - adaptive time stepping、汎用ODE/DAE solver、適用域外での自動subcycleや別物理へのfallback
 - boundarylessなstage-evaluated P1/Q1一般曲線運動
 - moving geometry／法線wall motion、速度・温度依存付着率、再飛散、surface charging、rolling/sliding、粒子間衝突、3-D finite-radius surface
@@ -169,7 +171,7 @@ failureをepsilon、tolerance拡大、clampで消して成功扱いにしませ�
 ## schemaとversionの方針
 
 正式公開版`0.1.0`はYAML case schema 2、canonical HDF5 data schema 1、result schema 2、checkpoint schema 2です。
-`0.2.0`のpackage metadataはYAML case schema 3、canonical HDF5 data schema 3、
+`0.2.0`/`0.3.0`はYAML case schema 3、canonical HDF5 data schema 3、
 result schema 3、checkpoint schema 2です。現行readerは旧data/result schemaを互換読込しません。
 
 - readerは現行versionだけを受け、未知version・未知key・未知datasetをfail-closedで拒否します。

@@ -1,4 +1,4 @@
-# 半導体チャンバー粒子軌道計算基盤：ゼロベース再設計案
+# 半導体チャンバー粒子軌道計算基盤：アーキテクチャ
 
 ## 0. この文書の位置づけ
 
@@ -33,29 +33,18 @@ principal architecture／数値計算／performance reviewの指摘と採否は
 
 ## 1. 経営・開発上の結論
 
-### 1.1 推奨判断
+### 1.1 実装方針
 
-新しいトップレベルディレクトリに、別パッケージとして実装を開始する。現行solverを
-段階的に整理する方式は採らない。理由は、現行実装の中心経路がCOMSOL評価ケースの
-主要物理を同じ方法で計算できず、境界、補間、物理、積分、診断の分岐が強く絡み合って
-いるためである。
+独立uv projectとして再構築したsolverを維持する。旧solverはread-only archiveであり、
+新productionの実装母体・環境・dependencyにしない。
 
-最初の製品版は「何でも解ける粒子追跡」ではなく、次の狭い垂直スライスを完成させる。
+解析解・manufactured・収束で確立したXY/RZの数値pathへ、既存charge/force/Brownian、
+静的boundary/periodic、時間場、bounded output/processを同じengineで統合する。
+現在の能力は第3.3節、実行境界は第3.4節、適用域はmodel/数値仕様、用途資格はsource固定evidenceが所有する。
+COMSOL比較、adapter、field builder、analysis/可視化はcore外に保ち、実装順や物理modelをCOMSOLの個別caseに従属させない。
 
-> SI単位の2D軸対称meshと定常場を読み、パーツ表面から粒子を発生させ、Epsteinまたは
-> Stokes–Cunningham drag、電気力、重力、最初の壁イベント、stick・escape・鏡面反射・
-> 確率付着を、一つのCPU batch経路で計算するsolver。
-
-解析解と収束でこの経路を確立した後の機能追加は、一つの総順序へ混ぜず独立workstreamで進める。
-trajectory physicsでは連続電荷、有限速度drag、collisionless ion drag、P16 Waldmann--Gallis熱泳動に加え、
-P18-Cの集約連続帯電、P18-Iの二つの集約ion-drag感度revision、P18-Dの球形準静的DEP、P18-LのRZ lift感度、
-P18-Rの二つのeffective-gas drag/thermophoresis感度revision、P22のTalbot熱泳動とSaffman liftまで完了し、
-BrownianもB01数値基盤、B02のCartesian XY production、B03のRZ meridional force/charge連成に続き、
-B04でterminal/active wallを同じfirst-hit経路へ統合した。固定トポロジー時間依存場も、線形補間、
-実stage時刻評価、field knotでのmacro分割まで独立sliceとして完了した。solver本体を凍結した外部M3-V
-trajectory certificationの最初の決定論pre-event sliceも完了している。state dimensionのP17、完全3D、GPUは
-各々の利用caseと独立referenceが整った時に別変更として扱う。内部静電場生成はfield-production trackで完了している。
-COMSOL照合は並行する外部V&Vであり、実装順やcore構造を支配しない。
+完全3D、GPU、別物理は独立利用caseとreferenceを用意して追加する。
+完了済み初期stageや過去の試作順を、次のreleaseの必須工程として残さない。
 
 ### 1.2 COMSOLからの置換可能性
 
@@ -72,6 +61,12 @@ adapterが変換できないCOMSOL featureは外部変換時に拒否する。co
 検証済みのモデル、座標系、要素次数、物理、境界、versionを表にする。
 
 ### 1.3 性能目標の扱い
+
+2026-10-12の利用者指示で追加JIT化を停止し、現行数値ownerを変更せず同一runのCPU process並列を優先する。
+親はmacro時計・release・出力・checkpointを所有し、永続workerは排他的なglobal particle rowを既存slab関数で進める。
+入力とresident/replayを共有し、mutable scratchはworkerごとに独占する。全taskの成功と同期出力handoffを消費した
+macro barrierでだけcheckpointをcommitする。旧thread poolやNumba parallel maskを復活させない。
+現行提供範囲はimplementation plan第21.4節、条件付き将来項目は第17節・第21.3節が所有する。
 
 「COMSOLより高速」は設計目標であり、実測前の仕様保証にはしない。同一の物理、時間
 刻み、出力頻度、粒子数で、cold/warm、計算、イベント、I/O、メモリを分解して測る。
@@ -182,137 +177,64 @@ Case Aでは最終状態そのものも大きく異なる。最終status不一�
 ただし「熱流体場＋任意のプラズマパラメータから静電場を作る」機能は、solverとは別の
 `electrostatic_builder` として公式に提供する。
 
-### 3.3 P14-R `0.1.0.dev0` baselineと後続追加
+### 3.3 現行0.3.0の能力と適用境界
 
-| 軸 | P14-R baseline | 後続の現行追加／未実装候補 |
+| 軸 | 現行能力 | 未実装・別scope |
 |---|---|---|
-| 座標 | cartesian_xy microcase、axisymmetric_rz meridional | RZ場中Cartesian 3D粒子、cartesian_xyz |
-| 場 | 定常、P1三角形、Q1四辺形、規則格子 | **現行追加**：固定topologyの線形時間snapshot。**未実装**：P2以上、移動mesh |
-| 積分 | 一般固定RK4、native指数midpoint | 適応高次、GPU専用方式 |
-| 物理 | 適用域を明示したEpstein linear / air Stokes–Cunningham、電気、重力、fixed charge | **現行追加**：continuous charge、有限速度drag、Barnesと集約場向け二revisionのion drag、Waldmann--GallisまたはTalbot熱泳動、球形準静的DEP、RZ rarefied-vorticity感度またはXY/RZ Saffman lift、effective-gas linear Epstein感度。追加model revisionは後続 |
-| 確率 | なし（deterministic baseline） | **現行追加**：B02 joint OU、B03 RZ projected charged/forced Brownian、B04 active wall restart、B05の一様base depth＋境界候補だけの条件付き追加分割。**未実装**：Cartesian 3-D Brownian |
-| 壁／topology | stick、escape、parameterlessな完全鏡面`specular`、係数付き`restitution`、明示fallbackを持つ定数確率stick | **現行追加**：非deposition terminal hold、壁温度・Maxwell拡散混合率・接線wall frameを持つ`maxwell_thermal`、静的2-D XY/RZの独立半径first contact、静的Cartesian XYのpure-translation periodic topology。**未実装**：material依存付着、re-entrainment、rolling/sliding、surface charging、moving geometry、RZ/3-D periodic |
-| 出力 | final/event/probe/series、選択trajectory、segmented HDF5、checkpoint/resume | 分散実行・remote store |
+| 座標 | Cartesian XY、RZ meridional | 軸対称場中Cartesian 3D粒子、完全3D |
+| 場 | static/固定topology linear-time、regular/P1/Q1 | 高次要素、moving topology、部分supportの一般化 |
+| 積分 | ballistic/一定加速度exact、一般固定RK4、exponential midpoint、joint inertial OU | 一般適応ODE/DAE、GPU方式 |
+| 物理 | 対応drag、Coulomb、gravity/buoyancy、fixed/continuous charge、ion drag、熱泳動、DEP、lift | 未指定のmodel、適用域外の暗黙近似 |
+| 確率 | XY/RZ Brownian、active wall restart、一様base depthと条件付き追加refinement | 連続OU exact first-passage、3D Brownian |
+| 壁/topology | stick/escape/hold/specular/restitution/Maxwell/probabilistic stick、独立接触半径、静的XY translation periodic | moving geometry、resuspension、surface charging、RZ/3D periodic |
+| 実行・出力 | 同じengineのserial/process、bounded slab、共有transport、single writer、checkpoint/resume | thread/backend選択、複数macro同期間隔設定、remote store |
 
-未対応の組合せはPreparedRun作成時に具体的な理由とともに拒否する。現行engine revision
-`particle_engine_v46`でproduction利用できるsubsetは、realized internal/surface schedule、fixed charge、
-`oml_stationary_maxwellian_debye_huckel_v1`または
-`oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1`、P18-C aggregate continuous charge、P15-E finite-speed Epstein、
-P15-F collisionless BarnesまたはP18-Iの二つのaggregate ion drag、P18-D quasistatic spherical DEP、
-P18-L RZ rarefied-vorticity lift sensitivityまたはP22 Saffman lift、P16 single-species、P18-R effective-gas、
-またはP22 Talbot thermophoresis、無力場のballistic
-退化形、静的geometryの`stick`/`escape`/`hold`/`specular`/`restitution`/`maxwell_thermal`/`probabilistic_stick`、dragなし・厳密一様fieldから証明した一定加速度、および証明済みの
-Cartesian XY/RZ一般RK4/exponential midpointである。neutral dragはfinite-speed、linear、effective-gas linearの三つのEpstein revisionと明示air revisionの
-Stokes--Cunninghamを選択でき、ion dragとDEPは独立したexplicit-acceleration categoryである。これに加えて
-`ou_langevin`はそのB02 subsetに加え、B03のRZ meridional、fixed/continuous charge、native/effective-gas linear
-Epstein、既存additive forceを受理する。B04でterminal lawとactiveな
-`specular/restitution/maxwell_thermal/probabilistic_stick`を同じfirst-hit経路へ統合し、active hit後は残時間を
-post-wall stateからfresh stochastic rootとして進める。
-一定加速度は、topology-completeな材料boundaryによるevent confinement、またはboundaryなし・全cell supportedな
-`RegularLayout`に対するproposalごとの解析的な座標極値検査のどちらかで連続field supportを証明する。
-一般`rk4_reintegrated`は、既存のEpstein/electric/gravity、fixedまたは認証済みcontinuous charge、全cell supportedな共通layoutに限定する。
-`rk4_global_abs_enclosure_v2`は全短縮RK4を覆うsupport、再積分、受入安全性と、材料/RZ event queryの保守的fallbackを
-所有する。global supportを独立に証明済みのvalid `rk4_dense` rowだけは、現区間のdense Bernstein boundをevent broad phaseの
-authorityにする。applicabilityはglobal field/model boundを先に試し、証明できないrowだけdense pathとlocal cell rangeでboundedに認証する。boundarylessは
-`RegularLayout`だけ、topology-completeな材料domainではgeometryと完全一致するP1/Q1も許可する。
-revision 3bはこのsubsetをtopology-completeな材料boundaryと連成し、sequential accepted RK4 piecesと
-event-before-validityでterminal stick/escapeまで処理する。boundaryless unstructuredは連続包含gateが完了するまで拒否する。
-M3-C1で、局所的には適用域内の強い非一様場が遠方cellを含むglobal extremaだけで時刻0拒否される反例が得られた。
-完了したP19-Lは元の固定step proposal・endpoint・出力scheduleを変えず、integrator所有のdense RK4 pathをlocal cell rangeで
-certificate-onlyに部分区間制限する。実際の適用域違反とcertificate budget内での証明不能を別failureにし、gate bypassや
-COMSOL専用経路を作らない。rev3bのlocator-before-validity、hit prefix再積分、fresh residual proposalも変更しない。
-Stokes–Cunninghamは後続P06-Sで明示air revisionとして追加済みであり、
-v0.1全体のmodel selectorを先行して空interface化しない。
-この数値pathはrevision 3bのengine v6で確立した。engine v7はproposal/refinement行のwork partitionだけを
-deterministic wavefront batchへ置換し、event、proposal、enclosureのalgorithm revisionは変更しない。
-engine v8はaccepted replayを要求frameと重なるrowだけへ限定し、exact-mesh P1/Q1 material domainをP06-Uとして
-追加した。engine v9は単一のtable/surface schedule、Philox counter RNG、静止壁の
-stick/escape/specular/probabilistic stick、priority/combined-normal corner応答、exact-path残時間、ballistic RZ axis
-foldを追加した。engine v10 / event v6はCartesian XYの証明済み一定加速度surface departureとstart-contact
-certificateを追加した。engine v11 / event v7はCartesian XY一般RK4の厳密内向きsurface departure、
-single-facet active-boundary residual、右連続state jump、state-shared interaction capを追加した。tangentまたは
-facet端点/cornerからの一般RK4 departureはfail-closedである。engine v12 / event v8でforce-coupled RZを
-同じwork loopへ追加した。現行engine v46もその意味論を両integratorとも共有する。`coordinates.py`がsigned/canonical基底、
-`fields.py`がaxis regularity、`events.py`がaxis局在、engineがwall/axis arbitrationとresidual commitを所有する。
-P06-Sはdrag責務を小さいphysics runtimeへ
-集約し、P08はparticle-local failure、series/probe、薄いCLIでStage 1Aをcloseした。P09は
-resident stateのID対応を固定したまま使うresident-row active index、bounded microtile scratch、
-solver-owned phase memory planを`cpu.py`に集約し、tile幅によらないstable mergeを固定した。P10は同じengineの
-field sampling、sample済みprimitiveのphysics、RK4算術をNumba compiled array passへ置換し、accepted endpoint
-だけをP1/Q1 resident hintへcommitする。scalar evaluatorはverification oracleだけでproduction fallbackではない。
-P11は`physics/runtime.py`と`physics/compiled.py`が同じmodel passからdrag rate、target velocity、加算加速度を
-返し、`integrators.py`がstart half-step predictor、midpoint-frozen指数更新、`state_at()`、連続path enclosureを
-所有する形で追加した。`engine.py`はmethodを選ぶだけで、material first hit、wall residual、RZ axis、accepted state、
-writerを従来の単一loopで調停する。RK4の`dt/tau`gateを指数法へ流用せず、非零charge rateはP11の未対応として
-明示拒否する。曲線/chord偏差は`integrators.py`が全短縮secantを含むvelocity enclosureからmethod-neutralに作り、
-`events.py`はRK4/指数法を区別せずcertificateへ使う。別physics式、別event engine、COMSOL専用pathを作らない。
-P12は一粒子一workerの非重複tile ownershipを追加した。field/geometryはread-only共有、residual/event/failure/
-statisticsはworker-localとし、最大`W`個のin-flight tile waveをmain threadがtile順にstable mergeする。workerは
-fileへ書かず、writerはmain threadだけが呼ぶ。`geometry.py`はcompiled BVH query、`events.py`は保守的なRK4
-clear/split事前認証、`engine.py`は同時刻wall prefixのcompiled batchとmergeを所有する。汎用schedulerや第二engineは
-追加しない。
-P13は同じengine/output ownerへ固定64 macro-step epoch、worker-wave event/failure stream、容量1のsingle-writer
-queueとack backpressure、交互A/B checkpoint、`LATEST`を追加した。`simulate`はstrict identityが一致する
-`OUT.partial`を自動resumeし、`open_result(..., recovery=True)`は`LATEST`までの確定prefixだけを読む。第二writer、
-checkpoint migration、output schedule依存のcommit cadenceは追加しない。最初の`LATEST`以前はepoch 0から再実行し、
-最終公開途中は次回runが安全に完了する。容量1 queueは同期ack型なのでbounded backpressureだけを保証し、I/O overlapを
-性能主張にしない。power loss、remote filesystem、同じOUTへの複数process同時実行は保証外である。
-固定64 cadenceとbackground queueは履歴である。現行はengineが
-`W=macro_step_count+accepted_particle_pieces+candidate_queries+refinements`、`T=max(2^20,128N)`を計算し、
-accepted macro barrierでcommitを決定する。cadenceはmanifest/resume identityへ入り、output schedule/slab非依存である。
-`output.py`の同期single-owner writerがatomic persistenceだけを所有し、threadingや第二writerは再導入しない。
-P14は同じengineを23行×3観測の直交型matrixで測り、profileで支配的だったP1/Q1 supported containmentとtable-start volume
-containmentだけを、それぞれ`fields.py`と`geometry.py`所有のread-only BVHへ置換した。両indexはbroad phaseであり、
-既存exact predicateが最終authorityである。field outside/masked provisionalは最近傍/tie意味論を守るfull scanなので
-O(cell数)のまま残す。geometryは局所的にfloat64で解像不能なcellをprepareで拒否し、大offsetだけでは拒否しない。
-`cpu.py`は両index residentとfield 256 B/cell、geometry 1,024 B/cellのprepare transientをmemory planへ計上する。
+これは全組合せの受理を意味しない。対応matrixとmodel適用域をprepareで一度解決し、未対応を拒否する。
+case/result schemaと完全なalgorithm rosterは[case形式](solver/docs/case_format_v3.md)と
+[result形式](solver/docs/result_format_v3.md)、数値pathの詳細は第6～10節と
+[数値仕様](solver/docs/numerics.md)が所有する。旧engine revisionの逐次実装履歴を現行仕様として重ねない。
 
-現行milestoneとalgorithm revisionの完全なrosterは`implementation_plan.md`と実行manifestだけをauthorityとし、
-この文書へ複製しない。runtime v16はP19-L実装・性能snapshot、v17はDEP認証上限の1 ULP外向き境界を
-変更した履歴revisionである。architecture上は、single-thread compiled engine、bounded slab、stackless boundary BVH、
-単一physics stage pass、単一writerを維持する。
-P18-Cはengine、proposal、event、resident state、memory plan、永続schemaを変えず、この境界内へ追加した。
-M3-C1 event v14は`rk4_dense`のgeometry broad phaseだけを狭めた。現在のdense部分区間から外向きに丸めたBernstein
-position/velocity boundを作り、global enclosureがfield supportを独立に証明済みのvalid rowだけevent BVH queryへ渡す。dense arithmeticが
-無効なrowはglobal boundを保持してsplitし、support未証明rowはglobal event boundへfallbackする。
-`rk4_global_abs_enclosure_v2`はsupport、global-first applicability、短縮RK4再積分のauthorityであり、dense boundを
-physics validityやaccepted stateの代替にしない。event/result/case schema、wall law、first-hit順序は変更しない。
-現行dense path v3はroot始点相対のBernstein enclosureをTwoDiff残差込みで構成し、下限は`-inf`、
-上限は`+inf`方向へ外向きにworld座標へ戻す。dense位置評価も同じ相対制御点と残差を使い、
-始終点では保存済みendpointを厳密に戻す。物理的な曲率とenclosureは局所変位scaleのままだが、公開chord-deviation
-boundはworld座標での評価とendpoint chordを覆う狭い`8*eps`絶対座標termを別に含むため、戻り値自体は
-完全な平行移動不変ではない。v3は、v2の広いpaddingが絶対座標に比例して膨張し、分割しても
-event certificateが閉じなかった不具合を解消する。保存するendpoint、数学的なHermite/state path、event algorithm、
-v3導入時のengine v32、event v14、RK4 global enclosure v2は変更しなかった。
-surface sourceの現行形式は`realized_internal_surface_contact_schedule_v5`で、facet、strict interiorのfacet内座標、
-初速度、release時刻、粒子物性、独立`contact_radius_m`を粒子ごとにcanonical HDF5へ保持する。
-`particle_surface` groupではfacetの外向き法線と逆向きに半径だけoffsetし、`particle_center` groupでは
-物理半径を保持したままoffsetしない。coreに分布selectorやsource RNGを持たない。
-Brownian startは外向き法線成分の絶対値がroundoff幅を越えることを要求し、負ならdeparture、正なら
-zero-time impactとする。zero/tangentはnudgeせず拒否する。moving geometryは対応certificateを伴う後続gateへ分ける。
-P14は標準品質gateとverification/scenario 336件でsynthetic baselineをcloseした。regular大規模はhost幅で正の
-scaleを示したが、unstructured 10kとevent-heavyは小さいか負で、worker数に比例するscratchも生じた。この結果から
-P12のouter ThreadPoolを製品parallel runtimeとして残さない。P14-Pのv26試行はNumba内部thread team、thread数非依存の
-parallel slab、再利用workspace、stackless boundary BVHへ置換し、worker wave、future merge、worker別scratchを
-削除した。同期single-owner writerも選択済みである。linear/quadratic exactと一般曲線eventのflat SoA wavefront、
-compiled boundary/RNG、row numerical status、batch surface release、direct columnar replay、bounded event/failure stagingは
-engine接続済みである。このv26試行はP14-Pの速度・memory gateに届かなかったため、`threads > 1`の公開能力と内部thread teamを削除し、
-P14-P closeoutのv27 compiled single-thread runtimeへ一本化した。詳細な実装・計測・削除条件は
-[`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を権威とする。主用途を結合した
-時間/mesh収束とglobal-bound/event costは、その後のP14-Uで閉じた。T03とP14-Rのlocal gate/evidenceも完了し、
-2026-10-05のremote Windows/Linux workflow成功でP14-Rとv0.1配布経路を閉じた。P15はユーザーの明示指示で旧着手blockerを解除し、
-RK4-firstと、その受入後のexplicit midpoint chargeまで完了した。外部M3-V applicability/relevance評価も完了し、
-P15 stationary OMLと元datasetの全軌道比較は適用外、式parityと次workstreamだけを確定した。
-T04の用途別cache採用は精度・profile条件付きであり、現行の生成能力は§7.2のP1/regular/affine Q1からfull regularへのstatic/linear-time変換である。
+scalar evaluatorはverification oracleでありproduction fallbackではない。一般RK4ではglobal support/model
+boundを先に試し、必要なrowだけ同じproposalのdense pathとlocal cell rangeでcertificateを得る。
+certificate-only restrictionをhidden数値substepと混同しない。accepted pathのfirst hitとvalid prefixを調停し、
+同じintegratorでhit状態を再評価してpost-wall残時間を進める。
 
-P06 revision 3aは、この能力を一度に全geometryへ広げず、boundaryless Cartesian XY、fixed charge、
-既存のEpstein/electric/gravity、全cell supportedな`RegularLayout`だけに実装した。`fields.py`がcanonical node extremaと
-regular support box、`physics/`がsample済み数値からの純粋なmodel bound、`integrators.py`が全短縮RK4評価を覆う
-path enclosure、`engine.py`が証明と唯一のproduction loopを所有する。材料boundary、unstructured support、RZ、
-continuous chargeはrevision 3aでは拒否した。revision 3bは同じowner境界のまま材料boundaryだけを追加し、
-第二engineや一般certificate frameworkは作らない。
+位置押戻し、field-support bypass、wall/axisの混同は行わない。sourceはrealized internal/surface schedule、
+接触は独立半径とgroup別surface/center意味を共有する。terminal rowは通常更新を止めsnapshotを保持する。
+output sampleはaccepted pieceから評価し、production partitionを変えない。
 
----
+### 3.4 現行の実行境界：既存数値ownerによるprocess並列
+
+0.3.0は既存数値ownerを使うv62のprocess実装を提供する。追加JIT化は利用者指示で停止した。
+現在の資格・提供範囲は[implementation_plan.md](implementation_plan.md)第21.4節、
+source別の科学・性能・memory・品質・配布資格は[性能文書](solver/docs/parallel_execution_plan.md)が所有する。
+
+engineは一つで、workers=1と複数workerが同じslab数値処理・physics/integrator/event/RNG ownerを使う。
+親はprepare、macro時計、release、active compact、replay確定、single writer、durable checkpointを所有する。
+run内で永続するspawn workerは排他的global rowとprivate scratchを所有し、fileへ直接書かない。
+prepared field/geometry/model/lawはread-only、state/hint/replayは担当rowだけを更新する。
+
+親は全connection/sentinelを監視し、完了workerへ次slabを渡す。各workerのevent/failureは一batch ACKで
+容量を制限し、親writerの同期消費後にACKする。到着順storageを許し、公開canonical event順は既存readerが所有する。
+全taskとoutput消費の完了を**1 macroステップごと**に待つ。RK stage/OU leafはworker内で処理する。
+起動ready、event/failure ACK、終了joinは別の待機で、現在は全worker同期間隔の設定を持たない。
+checkpointは全task/outputを消費したaccepted macro/epoch barrierだけでcommitする。
+
+全子のscratch copy後に共有templateを解放してprepared transportをsealする。非空replayはrun所有の
+一shared rootと永続readerを使い、consumer完了後にmacro/slab viewを解放する。
+serialization/handoffの同時liveとpage paddingも総memory planへ含める。
+owned array削減、総OS memory、JIT/private allocator、NUMA配置の資格を区別する。
+child突然死は未完runとして扱い、worker/SHM cleanupと最後のdurable checkpointからのresumeを保証範囲で検証する。
+
+worker数はAPI keyword/CLIで指定し、数値設定やRNG keyへ混ぜない。
+旧ThreadPool、Numba内部parallel mask、model別engine、backend framework、第二schedulerを追加しない。
+複数macro連続実行は将来項目とし、dt/RNG/output/checkpointの不変条件は実装計画第21.3節に置く。
+
+用途別性能とWindows/Linux local gate、runtime-only installed wheelは同じproduction sourceへ結合して完了した。
+Case A/P少粒子full-stepでは並列遅化、P14-U 1万粒子320stepではW1/W4=1.964倍を観測した。
+総時間や粒子数だけで高速化を保証せず、主matrix・補足・個別caseのscopeを分ける。
+Git push、remote CI、tag、Release/registry公開の実施状況はrelease記録が所有する。
+local Linux/WSLのfunctional資格をnative20worker scalingへ拡張しない。
 
 ## 4. 論理アーキテクチャ
 
@@ -711,7 +633,7 @@ surface粒子のIDはcanonical rowに明示し、tableおよび他surfaceとの�
 
 検査ownerを分ける。`case_format.read`はindex範囲、局所node順、boundary rowと宣言owner edgeの整合だけを
 検査する。`geometry.prepare`はvolume incidenceから大域外周を導出し、non-manifold、重複boundary、
-内部edgeのwall登録、RZ axis seam以外の外周欠落を拒否する。v0.1は内部thin baffleを未定義のまま受理しない。
+内部edgeのwall登録、RZ axis seam以外の外周欠落を拒否する。現行は内部thin baffleを未定義のまま受理しない。
 修復やfacet生成は外部builderに残し、coreは判定と拒否だけを行う。
 P05で一つ以上の材料facetを与える場合、このtopology-completeな`line2`を必須とする。
 boundary rowが0件の明示的なcollision-free解析caseは、同じengineのno-hit profileとして残す。
@@ -751,7 +673,7 @@ insideとし、最小supported cell IDを決定論的ownerにする。全candida
 provisional値は物理距離が最小のsupported cellへlocal coordinateを射影した有限値に限る。regular/P1/Q1、
 cell hint、探索順でsupport規則を変えない。補間が有限にならない場合は明示errorとし、値をclampしない。
 
-v0.1で運動を駆動するrequired fieldはparticle domain全体を覆うcontinuous node-associated
+現行で運動を駆動するrequired fieldはparticle domain全体を覆うcontinuous node-associated
 regular/P1/Q1 fieldへ限定する。cell-associated quantityは保持・外部解析には使えるが、不連続面の側選択modelを
 定義するまでforce/chargeへ使わない。部分supportを将来許可する時はstage点のbooleanだけでなく、path上の
 最初のsupport exitをeventとして扱う。
@@ -791,7 +713,7 @@ work counterはcoverageと全選択fieldを共有し、AABB候補行とintersect
 out-of-core方式でもない。original fields/layouts/geometry/sourcesを保持し、生成条件・誤差・資源をoutput provenanceへ保存する。
 NaNを跨ぐbilinear補間やsolid越しDelaunayは許可しない。
 
-v0.1ではphysics設定が参照する一つのlayoutをrunのauthorityにする。cacheは外部preprocessorが別fieldまたは
+現行はphysics設定が参照する一つのlayoutをrunのauthorityにする。cacheは外部preprocessorが別fieldまたは
 別DataBundleとして作り、利用者が明示選択する。場所ごとにcacheとmesh-nativeを切り替えるhybrid samplerは、
 実ケースで必要性・精度・speedupが確認されるまで延期する。runtime failure時のsilent fallbackは作らない。
 
@@ -1099,8 +1021,8 @@ root基準`G_mid+J(Z_root-Z_mid)`のaffine exponentialとして全leaf interval�
 検証は定数係数mean/full covarianceのexactness、noise-offの2次収束、manufactured charge-electricの
 weak mean観測次数`>=0.9`、axis restart、tree-depth first-passage、slab/output/resume identityとする。
 一般state-dependent SDEのstrong orderやweak 2次を主張しない。初回受入revisionはengine v34、proposal v9、catalog v16、
-event v15、runtime v17、compiled tile v16、memory plan v13であり、現行supersessionはengine v46、proposal v10、
-event v22、catalog v23、runtime v22、compiled tile v21、memory plan v16である。B03 path arrayの静的な保守上限は一slab rowあたり
+event v15、runtime v17、compiled tile v16、memory plan v13であり、公開済み0.2.0のsupersessionはengine v46、proposal v10、
+event v22、catalog v23、runtime v22、compiled tile v21、memory plan v16である。その保存sourceでのB03 path arrayの静的な保守上限は一slab rowあたり
 `648 B`で、受入上限`2048 B`内に収まる。正式characterizationは2,000/20,000粒子×4構成×3反復を全粒子active・
 failure 0で完了し、計時/RSSは[`solver/evidence/b03/`](solver/evidence/b03/README.md)のmachine-local・non-gating証跡とする。
 characterizationで検出した反復加算由来の終端tailはengine v34で除去した。macro timeは補償積和による
@@ -1115,7 +1037,7 @@ Hermite derivative-Bernstein enclosureの明示opt-inだけに限定し、expone
 position-control payloadは`144 B/row`、構築時の追加peakは`128 B/row`で、保守的な同時live見積りは約`1.76 KB/row`と
 既存の一般stage scratch上限`2048 B/row`内に収まるため、memory plan v13を変更しない。broad AABB pre-countは
 このfacet-local clear前の保守的なwork量であり、event数や物理結果ではない。
-現行event v22は、曲線pathでも個々のfacetを独立に認証して最初のhit時刻を決め、その局在budget内で同時かつ
+現行event v23は、曲線pathでも個々のfacetを独立に認証して最初のhit時刻を決め、その局在budget内で同時かつ
 共有nodeへincidentなfacet集合を保持する。exact、一般RK4、exponential midpoint、Brownianは同じ候補集合、
 priority、combined-normal意味論を使う。有限半径material contactとperiodic center crossingは同一のfirst-event順序で比較し、
 証明不能な候補やmaterial/periodic混在cornerは一面へ丸めずsplit/fail-closedする。
@@ -1134,6 +1056,11 @@ macro stepの終点がdomain内かだけを判定すると、薄い部品を飛�
 pieceに対して最初の境界eventを解く。`StepProposal`が表すのはversioned integratorで定義した離散軌道であり、
 path enclosureはその離散軌道を保守的に包む。真のODE解まで包むとは主張しない。ODE離散化誤差は別runの
 `h / h/2 / h/4`収束、解析解、manufactured solutionで評価し、幾何判定幅へ混ぜない。
+
+`integrators.py`はreadonlyなRK4 dense rootに対応するfull区間enclosureをproposalの寿命内で保持する。
+同じroot pathを参照し、要求の始終時刻が選択行のroot時刻とuint64表現でbitwise一致し、現在のstatusも保持値と一致する場合だけ、
+保持結果から選択行の独立copyを返す。厳密な部分区間、full区間と部分区間の混在、statusまたはpathの不一致は既存のstrict restriction ownerで再計算する。
+callerによる返却配列の変更はrootや保持enclosureへ書き戻さない。
 
 ```text
 integratorがtrial pathを提示
@@ -1182,7 +1109,7 @@ proposal v3、enclosure v1、schema/APIはこの数値変更では不変であ�
 start-contact certificateを追加した。engine v11 / event v7は一般RK4へinterior-facet start-contact certificateと
 single-facet active-boundary residualを拡張した。interaction capはparticle residual stateで共有し、次hitが実際にある時だけ
 残区間を分割する。event時刻のactive jumpとterminal transitionは右連続である。
-engine v12 / event v8でこの意味論を保ったままRZ signed-stage/axis eventを追加し、現行engine v46も維持する。
+engine v12 / event v8でこの意味論を保ったままRZ signed-stage/axis eventを追加し、現行sourceも維持する。
 P11の指数pathも同じleft-first piece列とfirst-event arbitrationを使う。現行event locatorはintegratorが渡すmethod固有の
 component-wise deviationを受け、指数法では全短縮secantを含むvelocity enclosureから
 `h * (v_upper - v_lower) + roundoff`を外向きに作る。position enclosure全幅を流用した過剰分割や、
@@ -1419,172 +1346,74 @@ dt半減で差がどう変わるかを必ず記録し、誤差plateauが場補�
 
 ### 11.2 データ配置
 
-粒子状態はArray of StructuresではなくStructure of Arraysとする。
+particle state/propertyは固定particle IDに対応するflat SoAで保持し、active/pending indexだけを整理する。
+accepted endpointだけがstateとfield hintをcommitし、trial/output sampleは変更しない。
+全stateはresident、stage/proposal/event/OU workはmemory-fitしたworker専用bounded slabへ置く。
+各rowのtarget time、residual、depth、interaction/event ordinalをflat数値配列で保持する。
+terminal stuck/heldは通常更新を止め、final/frameのsnapshotを保持する。
 
-```text
-x_r[N], x_z[N], v_r[N], v_z[N], charge[N], mass[N], ...
-cell_id[N], lifecycle[N], rng_counter[N]
-```
+prepared field/geometry/model factsはread-only、resident state/hints/replayの更新は排他的rowとする。
+共有transport、worker scratch、writer/handoff/serialization reserve、page padding、safety marginを
+一つのmemory planへ含める。全Nのproposal/event bufferや全Kstep outputを先行確保しない。
+Brownian work容量は到達し得るadaptive max depthから保守的に決める。
+最小slabが収まらなければrun開始前に拒否し、要求worker数を黙って減らさない。
 
-- hot arraysは連続、dtypeをplanで固定。
-- 物理SoAのparticle ID対応を固定し、固定容量の`active_particle_index`だけをin-placeでstable compact。
-- v0.1は全粒子stateをresidentに置き、memory planからbounded tile slab幅を決める。全Nのstage/
-  sampled-field配列やouter particle batchは、必要性が実測されるまで作らない。
-- P09では未使用だったper-layout hintをP10で、実際に消費するP1/Q1のunique layout分だけ追加する。
-  trial stageはscratchとして扱い、accepted endpointだけをresident hintへcommitする。regular layoutはhintを持たない。
-- engine v7以降の候補粒子chunkはresident stateを分割するouter/out-of-core batchではなく、
-  各粒子の次のrefinement proposal行だけを有界にまとめるscratch work partitionである。
-- 一つのcompiled passは各粒子行を一度だけ更新し、field/geometryはread-onlyで共有。
-- inactive粒子は毎step全N maskを作らず、active IDを管理。
-- hit後もactiveな粒子はflat SoA work queueの次roundへ残時間を戻す。行ごとのtarget timeを持ち、
-  release/hit/splitで異なる区間をPython粒子loopへ戻さない。
-- event/failureは各roundで一行あたり高々一件を固定columnar slotへ書き、stable prefix/compactionで出力と次roundを作る。
-- boundary応答とcounter RNGは各ownerのcompiled leafを呼び、slab分割順に依存しない。
-- engineのmacro barrierだけがwriterへcolumnar batchを渡す。
-- release scheduleは時刻順source batchとしてactivateし、cohortごとに全粒子maskを走査しない。
+predictしたowned arrayとOS private commit/WSを区別する。Python/JIT/native allocatorを含むhard capではなく、
+WS合計は共有pageを重複計上し得る。正確なbyte式とcapacityはcpu memory planと
+[性能文書](solver/docs/parallel_execution_plan.md)が所有する。
+out-of-core、別slot scheduler、native teamは現在の工程に追加しない。
 
-通常設定はslab幅でなく`memory_limit_mb`だけを公開する。resident state、field snapshot、
-bounded slab、event/output、safety marginが上限内になるようprepareでslab幅を決める。
-P09の上限はsolverが所有する配列の予測peakであり、Python/native libraryまで含むOS hard RSS capではない。
-load/prepare/runのphase peakとcomponent内訳は`run.json`に残し、process RSSは外部performance scriptで別に測る。
-P12のruntime layout v3とP13のmemory plan v4がworker数倍のproposal/query/output stagingを数えるのは履歴である。
-P14-Pは一つのslabへstage、proposal、work queue、event/failure columnを明示して再利用する。最小slabが
-収まらなければ開始前に拒否する。
-memory plan v11はdeferred event depthを `event_work_bytes_per_particle = 24 * (max_refinements + 1)` として解決し、
-三つのint64列に対応する`slab_event_work`へ独立計上する。depth依存容量を一般proposal scratchへ隠さない。
-候補、event/failure staging、surface release、direct replayはnamed componentへ分離し、pack時だけのgatherは
-12.5% safety marginが所有する。正確なbyte式とcapacity規則は
-[`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を権威とし、容量超過のCSRを先に確保しない。
-`max_interactions_per_step`へ達した場合は、残区間に次のhitが存在する時だけ、そのresidual-work intervalの
-残時間を二分して再試行する。event-freeなら追加depthなしで残区間を受理する。子intervalではinteraction
-countを0へ戻し、refinement depthは引き継ぐ。明示したdepth budgetを超えた
-場合だけnumerical failureにする。
+fastmathを無効にし、model加算順、prefix/compactionとcanonical event順を固定する。
+worker/slab/output schedule、checkpoint-resumeで科学payloadとRNGを変えない。
+Numbaの内部parallel maskやthread IDに依存せず、同じ既存数値bodyを親またはworkerから使う。
 
-deterministic CPUの標準はfastmathを無効にし、model加算順、slab順、aggregate reduction順を固定する。
-GPUとのbitwise一致は求めず、trajectory tolerance、event outcome、RNG identity、ensemble統計で判定する。
-P10のcompiled passとP12のouter ThreadPoolは履歴である。P14-Pの実測後は`parallel=False`のsingle-thread compiled
-engineを唯一のcompute runtimeとする。thread ID、thread-local可変containerへ依存しない。行ownership、
-prefix/compaction順、commit順はengineと数値ownerが一度だけ所有する。
-Numbaは0.67系、NumPyは`<2.6`をlockする。
+### 11.3 lookup共有と拡張性
 
-### 11.3 kernel fusionと拡張性
+prepareは有効modelからrequired fieldの最小集合を解決する。同じlayoutのelement lookupを共有し、
+同じslabのstageでcharge/forceを固定順に評価する。別layout間にlookup共有を強制しない。
+追加JIT化は停止した。profile、cache適合、model追加は具体的利用caseの独立変更として扱い、
+物理組合せごとのkernelや常設backend selectorを先回りして増殖させない。
 
-`simulate`の内部準備は有効物理から必要fieldの最小集合を求める。1回のelement lookupで全quantityを
-samplingし、同じtile内でcharge derivative、forces、integration stageを計算する。力ごとに
-meshを再探索しない。
+### 11.4 将来のGPU等
 
-初期は選択modelごとのcompiled array passと、決定論／OUという少数のstep kernelだけを持つ。
-profileで配列往復が支配的と確認できた組合せだけを融合し、物理組合せごとのkernelを先回りして
-増殖させない。複数FieldLayoutがある場合、lookup共有は同じlayout group内に限定する。
-
-### 11.4 JAX/GPU
-
-JAXを採る場合の条件を明示する。
-
-- 64-bitを明示的に有効化する。既定float32のままCOMSOL比較をしない。
-- static shapeを保つためtile固定、`jit`内のPython分岐を避ける。
-- key splittingだけでなく粒子identityに基づくcounter RNGを維持する。
-- compile時間とcacheをcold/warm双方で測る。
-- wall eventが少ないregular grid caseを最初の対象にする。
-
-GPU backendはCPUと同じ`PreparedRun`と結果契約を実装するが、bitwise一致を一般要求にしない。
-float64 trajectory誤差、event順序、RNG identity、統計分布でbackend parityを判定する。
+GPU/別言語は現行profileと用途が必要性を示した時に検討する。
+同じcase/model/RNG/event/result意味論を保ち、float64 accuracy、event outcome、統計、compile/転送/I/O込み
+end-to-end時間とmemoryを評価する。bitwise CPU/GPU一致を一般要求にしない。
+未指定backendの詳細設計や追加dependencyを0.3.0へ持ち込まない。
 
 ### 11.5 memoryと出力
 
-1,000,000粒子の現在状態は、必要なfieldを絞れば概ね150～400 MBで保持可能である。一方、
-全粒子×全保存時刻×多数列をmemoryに保持する設計は成立しない。例えば73個のfloat64量を
-1,001時刻保存すると約584 GBである。
+全粒子×全時刻×多数列をmemoryへ保持しない。現在状態はresident、選択frame/probeとevent/seriesはboundedに
+streamする。exact byte式と実memory資格はcpu memory planと性能文書、永続列はresult形式が所有する。
 
-標準出力を次の4系統に分ける。
+標準resultはfinal、release/boundary/failure event、選択trajectory frame、選択probe、lifecycle seriesである。
+JSON manifestとsegmented HDF5、A/B checkpoint、`LATEST`を使い、形式を並存させない。
+frameはeventに対して右連続、holdはhit位置/速度/電荷のinactive snapshot、stickはpost-event速度0、
+escapeは以後frameに行を持たない。finalのlogical nullと非権威な最後hit payloadをfailureのNaNと区別する。
 
-1. `final`：粒子ごとの最終状態。
-2. `events`：全boundary/release/failure event。
-3. `probes`：選択粒子または層別sampleの時系列。
-4. `series`：onlineの整数状態数とwall別weight/flux。
+epoch順はsegment close/rename → inactive checkpoint replace → `LATEST` replace。
+`LATEST`が唯一のcommit pointで、全task/output消費後のaccepted macro barrierに限り既存work cadenceで判定する。
+resumeはLATESTより新しいorphanを無視し、最初のcommit前は初期状態から再実行する。
+final publicationはfinal → complete manifest → `_SUCCESS` → directory renameで、途中状態も次runが検査する。
 
-v0.1はJSON manifestとHDF5だけを使う。P05で導入した一segmentのlogical datasetは、P13でも
-release/boundary/failure event、series、frame/probe、finalの意味を変えない。P13はphysical layoutを固定64 macro-stepごとの
-closed segmentとA/B checkpointへ拡張し、`LATEST`を唯一のepoch commit pointにした。result v5は
-固定64をwork-scaled cadenceへ置換し、現行result v6はresult schema 3で有限接触とperiodic transferを
-明示列として保存する。checkpoint schemaは2を維持する。
-
-trajectory frameはboundary eventに対して右連続とする。hit時刻ちょうどのstickは速度0の
-post-event状態、holdはhit位置・hit時速度・hit時電荷を保持したinactiveなheld状態、escapeは行なしとし、
-escaped粒子は以後のframeからも除外する。finalは全粒子のrun終了時刻lifecycle snapshotであり、heldは
-`kinematics_valid=1`、escapedは`kinematics_valid=0`をlogical nullとする。保存する
-有限な最後hit payloadは非権威値であり、最後の有効状態はboundary eventが所有する。
-
-P13は同じlogical event/frame/final schemaのまま、閉じた`epoch-XXXX.h5`へevents/frames/series/probesをchunked
-streamし、一時名からrename後に`LATEST`を更新する。二世代checkpointは出力時刻とは独立した
-accepted macro-step上のepoch barrierでSoA、
-active IDs、source cursor、RNG/refinement counter、event ordinal、commit IDを保存する。完了時だけ
-final HDF5、`run.json.status=complete`、`_SUCCESS`を最後にcommitする。Parquet/CSV exportと分位・
-occupancyは外部analysisが必要時に作る。完了時に`OUT.partial`を要求された`OUT`へ同一volume内で
-renameする。`run`中にsnapshot listを溜めて最後にstackしない。
-
-P13のepoch commit順は`segment temp→close→rename`、`inactive checkpoint temp→close→replace`、
-`LATEST temp→replace`とし、`LATEST`を唯一のcommit pointにする。crash後はLATESTより新しいorphanを
-無視し、checkpoint記録済みevent/frame countから再開する。最終化は`final.h5→complete run.json→
-_SUCCESS→directory rename`の順である。最初の`LATEST`前とこれら全境界にfailure injection testを置き、確率wallの
-physical RNG ordinalを含むstate identityを検査する。参照checkpointと最新segmentはhash、全segmentは構造と累積countを
-検査する。過去segmentの同shape値改変は検出契約外である。
-
-P12/P13のworker-local mergeは履歴であり、P14-Pではparallel roundの固定columnar rowをstable prefixで詰めて
-engineへ返す。P13のbackground queueはcommand直後のackによりcompute/I/Oを重ねなかったため削除し、現行は
-main threadの同期single-owner writeだけを残す。compute threadはfileへ直接書かず、eventを捨てない。将来の
-output-rich profileが同期write比10%以上の改善余地を示した時だけ固定二buffer・一件in-flightを再検討する。
-boundary identityは`(particle_id,event_ordinal)`、公開時のcanonical順は
-`(time_s,particle_id,event_ordinal)`であり、thread順やrow到着順へ依存しない。output planは
-計算開始前にmemory/disk容量を表示し、budget超過を拒否する。
+参照checkpoint/最新segmentのhashと全segment構造/countを検査する。過去segmentの同shape値改変、power loss、
+remote filesystem、同一OUTへ複数runは保証外である。worker writerやbackground queueを追加しない。
+公開boundary orderは既存readerが所有し、到着順storageを物理順として使わない。
 
 ### 11.6 性能計測
 
-release gateには次を含める。
+同一hardware/input/model/dt/seed/outputでcold/warm、公開API時間、総process CPU、科学identity、
+owned array、sampled private/WS、cleanupを測る。worker起動/import/JIT/IPC/writer/shutdownを含める。
+粒子数、macro仕事量、活動粒子の時間変化、field/event/outputを区別し、
+短時間・小Nの不利も保存する。kernel単体速度やprofile self timeをend-to-end改善へ読み替えない。
 
-- 10^4、10^5、10^6粒子
-- 定常regular、定常unstructured、壁event多発の3case
-- 基本drag、製品標準の全決定論力、charge連成、Brownianの各profile
-- single-thread warm repeatと粒子数・workload family別scaling
-- cold compile、warm simulation、I/O込みend-to-end
-- peak RSS、bytes/particle、trajectory出力速度
-- field sampling、force、integration、event、outputの時間比
-- 0/1/5/20 hit per particleでprocessed step/event数に対するscaling
-- 予測RSSと実測peak RSS、frame数を増やした時のRSS不変性
-- slab幅変更時のparticle/event/RNG identity
-- output none/sample/allがfinal/event結果を変えないこと
+10^4/10^5/10^6の重いmatrixはrelease/manualで実施し、毎PRに重複させない。
+現行v62の主用途、時間場補足、COMSOL少粒子full-step、P14-U 1万粒子320stepを別scopeで扱う。
+数値・性能・memory判定の詳細は[性能文書](solver/docs/parallel_execution_plan.md)が所有する。
+旧thread試作や以前のsourceの値をこの文書へ複製して現行資格にしない。
 
-P10のmanual harnessはこのrelease gate全体ではなく、field-heavy/event-lightと小さいevent-heavyの二caseで
-cold/warm JIT、semantic digest、RSS、revision、speedupを記録する。絶対thresholdは置かない。10k/100k/1M、
-各field/event/output/thread軸のsynthetic判断はP14が所有し、23行×3観測matrixで完了した。unstructured行列にはrealistic cell count、
-initial localization、cross-cell motionを含める。read-only synthetic local profileではP1 stripの1000 warm sampleで、
-hintなしfull searchが100/500/1000/5000 cellで0.026/0.131/0.249/1.271 s、正しいstrict-interior hintが
-約0.0005 s（51x～2576x）だったため、P10はcompiled baseline完了であってlarge-mesh P1/Q1性能完了ではない。
-
-P12の512粒子×4 macro step warm実測（3回median）では、編集前serial baseline 3.066786 sに対して現行
-1/2/4 threadが0.440460/0.528229/0.632361 sだった。1 threadはbaseline比6.96倍だが、
-T1/T2=0.83384、T1/T4=0.69653である。workは8,704/19,968/11,264 accepted piece/query/refinement、
-最大深さ21で、全9観測のpayload digestは一致した。threads 1/2/4の科学出力はbitwise一致する。
-compiled BVH query、保守的RK4 clear/split事前認証、同時刻wall prefix batchは採用するが、正のthread scalingは
-まだ確認できなかった。P12の出口はparallel ownershipとstable mergeの正しさである。P14ではregular 100k/1Mで
-3観測medianで20 workerがregular 100k/1Mに1.8796x/4.7965x、P1/Q1 10k crossに
-1.1737x/1.1473x、event 10k×20 hitに0.8882xだった。
-このためP14のouter ThreadPoolは移行前の履歴実装とし、P14-P closeoutのv27で廃止した。P14-Pは
-field/physics/integratorのpreallocated `into` pass、stackless boundary BVH、linear/quadratic exactのrow-target
-residual/event batch、一般曲線flat SoA state、compiled boundary/RNG、row numerical status、batch surface release、
-direct columnar replay、bounded event/failure stagingまで統合した。focused correction後もregular 1Mの4-thread
-speedupは0.923x、1-threadはv20比23.7%退行したため、case schema v2からthread設定を削除し直列runtimeへ収束した。
-P14-Pはmultithread能力を削除し、single-thread production engineへ一本化して完了した。
-P14-Uはこの単一serial runtimeだけをtarget-use caseで評価して完了した。時間収束は固定空間mesh、mesh収束は
-`nx=ny`固定aspectとlayout別fine referenceで責務を分ける。10k/100k/1Mのnone/sampleを各3 fresh processで
-測り、別の1M非計時profileを使う。mode間core／mode内probe payload、event work、target hit、RZ actual-field parityをhard gateとし、
-production coreへtimer、第二scheduler、診断frameworkを追加しなかった。正式成果物は18 raw観測＋6 medianを
-完備し、profile self-timeはevents 28.7%、fields 26.8%ほかへ分散したため、単一owner最適化も追加していない。
-
-COMSOL比較は同一machineでなくてもよいが、hardware、COMSOL設定、solver刻み、保存量を明記する。
+COMSOLに対する速度比にはhardware、実方程式/field、刻み、粒子数、保存量を併記する。
 物理や出力を減らした計測を「COMSOLより高速」の根拠にしない。
-
----
 
 ## 12. 結果、可観測性、障害
 
@@ -1749,225 +1578,30 @@ ADRを機能ごとに増やさず、主仕様のdecision tableに理由を集約
 
 ---
 
-## 15. 開発ロードマップと完了条件
+## 15. 現行milestoneと拡張条件
 
-### Phase 0：主仕様と解析解microcaseを固定する
+0.3.0はv62の単一engine、既存CPU数値owner、同一runのprocess並列、共有transport、
+bounded slab、single writer、durable checkpoint/resumeを提供する。
+標準品質、用途別科学/性能/memory、Windows/Linux local gate、実installed-wheel入口は完了した。
+source別の資格・不合格・制約は性能文書が所有し、個別caseの観測を全用途へ外挿しない。
 
-成果物：
+完了した初期bootstrap/Stage 1の手順、旧native chain/team工程、90日ロードマップは現行計画から除いた。
+実装責務の索引、条件付きbacklog、変更順、0.3.0提供範囲は
+[implementation_plan.md](implementation_plan.md)第16～21節を参照する。
 
-- 製品仕様、physics model revision、canonical case最小schema
-- ballistic、linear drag、uniform E、first-hitの解析解
-- surface release、stick、escape、specular、確率stickの小型case
-- `model_dataset`再抽出仕様とknown-issue register
+完全3D、別物理、GPU/別言語、NUMA、out-of-coreは具体的利用case・独立reference・profileを先に用意する。
+既存のmodel/field/event/RNG/result意味論を同じengineへ統合し、置換した旧経路を同じ変更で削除する。
+追加JIT/native teamの再開や全CPU数比例効果を今回の必須工程へ戻さない。
 
-完了条件：COMSOLなしで基本式、補間、境界、収束を検証でき、外部datasetの不備がcore実装を
-左右しない。
+## 16. 将来項目：複数macro連続実行
 
-### Phase 1A：決定論2D RZ vertical slice
-
-成果物：
-
-- cartesian XY解析microcaseと単純geometry
-- P1 triangle/Q1 quad field sampler
-- table/source release
-- Epstein/Stokes–Cunningham drag、electric、gravity、fixed charge
-- 一般固定RK4
-- stick、escape、specular、確率stickを含むfirst-hit
-- scalar verification oracle
-
-完了条件：解析解、step/mesh収束、surface releaseからwall eventまでがbudget内。COMSOL一致は
-完了条件にしない。
-
-### Phase 1B：高速決定論製品経路
-
-- exponential midpoint fixed-step（P11完了）とNumba CPU batch（P10完了）
-- event-heavy residual-work schedulerとstable parallel merge（P12完了）
-- segmented HDF5、checkpoint/resume、bounded writer queue、lazy ResultView（P13完了）
-- memory planner（P09完了）と10^4/10^5/10^6 benchmark
-- P14-Pでouter worker-waveと内部parallel試行を削除しsingle-thread compiled runtimeへ収束（完了）
-
-完了条件：主要物理がcompiled batch経路を通り、slab/output設定で数値意味論が変わらず、
-memoryとsynthetic end-to-end scalingを説明できる。
-
-### Phase 1U：代表用途closure（完了）
-
-- surface release、非一様場、材料wall、多数macro stepを一つのcaseで結合
-- `h,h/2,h/4`とregular/P1/Q1 mesh系列の軌道・hit収束
-- global enclosure、refinement/failure/candidate量、serial end-to-end時間、RSS/outputの同時評価
-- profileが示したownerだけを変更し、常設diagnosticまたは別runtimeを作らない
-
-完了条件：現行model範囲で、目的用途のtrajectory精度とevent精度、入力表現、end-to-end時間・memoryを
-同じcaseから説明できる。P14-U正式releaseはこの条件を満たした。秒数はmachine-localな記述値であり、
-COMSOL比較またはportable thresholdではない。T03とP14-Rのlocal gate/evidenceに加え、remote Windows/Linux
-workflowも完了した。Phase 2AのP15は旧着手blockerを解除して完了した。
-
-### Phase 2A：帯電、熱、決定論3D粒子
-
-独立した変更理由を一つのreleaseへ束ねない。M3-V外部評価は完了し、全体を一列にした候補順ではなく
-field production、trajectory physics、state dimensionの三workstreamを採用する。
-
-1. P15（完了）：`oml_stationary_maxwellian_debye_huckel_v1`のRK4-first continuous charge。
-   `physics/charge.py`が式・finite invariant/rate/derivative bound、catalog/runtimeがrequired fieldと三つの
-   capability、既存integratorが`(x,v,Z)`更新、engineは配線だけを所有する。RK4受入後にexplicit midpointも完了した。
-2. M3-V（完了）：直接MPH inventory、12 package構造、保存時刻全体のvariant感度、charge/Epstein式parity、
-   sampled applicabilityと力relevanceを評価した。元の12 package全軌道は未実装物理と適用域のため
-   `NOT_APPLICABLE`。後続の別成果物exact-P1 pre-event companionは限定的な時間離散parityにPASSした。
-3. field production（完了）：F01で独立reduced electrostatic builderをcanonical outputへ接続し、F02でprovider
-   adapterのmixed-mesh P1化、代表case統合、同一node上の外部field V&Vまで完了した。
-4. trajectory physics：species制約付きrelative-drift charge、P15-E有限速度drag、P15-F collisionless Barnes ion drag、
-   P16 Waldmann--Gallis熱泳動、P18-D球形準静的DEP、P18-L RZ rarefied-vorticity lift、P18-R effective-gas
-   drag/thermophoresis sensitivity、Brownian B01/B02まで完了した。
-   P17はstate dimensionとして独立する。
-
-各縦切りは解析解・収束・compiled parity・代表scenarioを個別に満たす。Phase全体の完了条件はcharge relaxationと
-coupled trajectory、熱泳動modelの適用域、方位回転共変性、回転面hitがbudget内であることとする。relevance gateが
-有限速度Epstein、collisionless Barnes ion drag、Brownianを含め、評価が示した優先度をowner文書と同じchangeで更新する。
-
-### Phase 2B：確率過程
-
-- counter RNG、joint OU/Langevin、conditional split（B01数値基盤、B02 production接続とも完了）
-- Cartesian XY・Epstein linear drag-only・fixed-charge stateの固定depth dyadic node＋cubic Hermite leafによる
-  平面wall first-passageと一般曲面の数値crossing、およびXY/RZ active wall fresh-root restart（完了）
-- ensemble validation、first-passage depth安定化、row-local数値failure（完了）
-
-完了条件：OU平均・joint covariance・MSD・wall first-passageが解析解と統計budget内。
-
-### Phase 3：追加プラズマ力と外部V&V
-
-成果物：
-
-- M3-C0：監査済みMPH copyから、全式・parameter・derived-field意味、ion-drag以外が一致した12個のBrownian-off
-  companion、admissibleな`h, h/2, h/4`系列、frozen RHS/RK情報、正例Freeze/Disappear、multi-seed入力を再構築
-- P18-C（完了）：aggregate reference chargeを既存continuous-state passのoptional revisionとして追加
-- P18-I（完了）：二つのaggregate ion-drag sensitivityを既存の排他的`ion_drag` categoryと単一compiled passへ追加
-- P18-D（完了）：producer提供`grad(mean_E_squared)`を使う球形準静的DEPを既存の`dielectrophoresis` categoryと
-  単一compiled passへ追加
-- P18-L（完了）：producer提供のsigned方位vorticityを使うRZ/no-swirl rarefied-vorticity lift sensitivityを、
-  速度依存bound callbackとexponential enclosure v3を含む同じ責務境界へ追加。cross-representation比較はFAILで、
-  Case-A 100 nmのcommon-P1 event前same-field診断は後続M3-C1でPASS
-- P18-R（完了）：既存式ownerを再利用するeffective-gas linear Epsteinとeffective-gas heat-flux thermophoresisの
-  optional sensitivity revisionを追加。両者は`maximum_speed_ratio<=1`と`lambda/a>=10`を連続pathで認証し、
-  producer-owned pseudogas closureをspecies-resolved truthとは呼ばない
-- M3-C1：Case-A 100 nmのpre-event frozen saved-state producer-form replayは最小PPR補足後8/8完了。integrated candidateは
-  exported exact-connectivity P1、参照はCOMSOL native fieldである。3 runは287粒子×46 frame、event/failureなしで完了したが、
-  cross-representationの位置・速度・電荷RMS/max 6 gateはすべてFAILし、same-field agreementや物理適用性は認定しない
-- P19-L（完了）：integrator-owned dense RK4 pathとlocal cell primitive rangeを使うcertificate-only restrictionで、元の固定step
-  endpointを変えずにglobal envelopeの偽拒否を解消し、actual applicability違反と証明不能を分離した
-- M3-C1の続き：cross-representation FAILで既定条件を満たしたため、full-physics exact-connectivity common P1を使う
-  COMSOL診断を独立成果物として実行し、固定済み9 gateを全PASSした。さらに同じCase-A 100 nmを最初のwafer stickまで
-  延長し、event v14 candidateに対するmaterial 20/20と再計算prefix 9/9をPASSした。認定はBrownian-off、共通canonical P1、
-  最初のmaterial eventまでに限定する
-- B03（完了）/M3-C2：RZ projected charge/force Brownianを一つのengineへ追加済み。common-P1 Case-A/Case-P 100 nmの
-  multi-seed finalは外部V&Vとして完了し、production coreへCOMSOL経路を追加していない
-- P18-H（完了）：製品利用caseにも必要なgeneric holdを単一boundary/engine経路へ統合。解析・resume・Brownianを含む
-  公開回帰と、既存hash固定Freeze referenceへの外部candidate 15/15をCOMSOL再実行なしで閉じた
-- F01/F02 reduced electrostatic builder/provider adapterは完了済み基盤として再利用し、common-field parityと
-  exported-P1/native-field workflow comparisonを分離
-
-P18-R完了時点ではCOMSOL studyを再実行していなかった。その後もcoreを変更せず、外部M3-C0bを段階実行した。
-v5の旧「全gate PASS」は位置relative L2の分母が絶対RZ座標で原点依存だったため無効であり、履歴上の
-`CHARACTERIZED`に留める。逐次確認v6はCase-A 100 nmのpre-eventについて0.625/0.3125/0.15625 us系列、各run
-13,202 active recordを使い、原点不変な変位・速度・電荷のfine-pair relative L2
-`3.102727085428027e-5/3.92483251084038e-5/1.3511393490811483e-6`と観測次数
-`0.9041136/0.944312/1.123838`で運用上の刻み選択だけをPASSした。これはsolver agreementまたは普遍的なaccuracy
-claimではない。その後のM3-C1では、最小PPR熱泳動補足を一度だけ実行し、13,202 saved row・座標完全一致・
-`4.4046499933294035e-16` component normalized residual・`1.0992667494449471e-16` global relative L2で
-frozen producer-form 8/8を閉じた。その後P19-Lを完了し、global certificateが不十分な局所pathを同じfixed-step endpointの
-dense/local certificateで判定できるようにした。exported-P1/native-field比較は完了し、COMSOL referenceのpre-event運用自己収束PASSと
-candidateのfloat64-floor内macro-step partition stabilityを確認した一方、空間表現をまたぐ6 gateはすべてFAILした。旧三つの
-candidate runがglobal safety enclosure由来の人工的なevent subdivisionで同じaccepted-piece countへ細分されたため、この
-安定性を独立な時間収束またはRK4次数とは呼ばない。trigger済みだった
-full-physics exact-connectivity common-field COMSOL診断も完了した。287粒子×46 frameに対し、位置・速度・電荷の
-RMS/max/relative L2の事前登録9 gateを全PASSし、この限定sliceのsame-field agreementを閉じた。native-field等価性、物理妥当性、
-boundary、Brownian、30 ms、他case・粒径・variantは未認定である。
-
-material-event candidate v3はevent v14で0--458.75 usを実行し、最初のwafer stickについてmaterial gate 20/20と
-0--450 us prefix 9/9をPASSした。event時刻・hit位置・terminal電荷の絶対差は
-`2.157542807607049e-13 s`、`2.683964162031316e-14 m`、`4.7283812421028415e-9 e`である。v13からv14で
-query/refinement/accepted/depthは`16,427,517/7,792,306/8,635,211/16`から
-`842,927/11/842,916/11`へ減り、failure 0を維持した。v13 refinementの`97.8331703092769%`は450 us以前に
-発生しており、原因はglobal absolute safety enclosureをevent BVH boundにも流用したことだった。operator観測wall time
-約`853 s→36.5 s`（約`23.4x`）はmachine-localな非gating値である。
-
-v14のsolver-only 3刻み再実行はrefinement 0で、query=acceptedが`206,927/413,567/826,847`だった。位置・速度・電荷の
-RMS観測次数は`2.029875353701904/2.0816971911764033/2.044084026475049`、fine relative L2は
-`6.099791486063973e-8/8.321356016032579e-8/1.3796067752988052e-8`で、全量`ORDER_EVALUATED`の自己収束PASSである。
-このfine candidateと既存common-P1 referenceの現行comparisonも9/9をPASSした。COMSOL referenceとcommon-field入力は
-不変なので再実行せず、既存hash固定referenceを再評価した。P18-Hも同じ方針で既存Freeze referenceへの15/15 gateを
-閉じた。B03 core、charge-stable coupling、work-scaled cadence、P20 performance closeoutも完了した。続くmeaning-matched
-external V&V/M3-C2はcommon-P1 Case-A/Case-P 100 nm finalまで完了した。Case-PのR-Z/fate gateはPASSしたが、anchorは
-negative-ion currentを選択しない固定二電流same-form比較であり、Case-Pプラズマ全体のphysical applicabilityは未認定である。
-任意の三電流production revisionは後続P21で完了した。外部三電流軌道比較の5 primitive入力authorityも
-producer companionのpriority 3で解消した。priority 4の共有three-current初期電荷を用いたcommon-P1、Brownian-off、100 nm、287粒子、
-30 msの独立V&Vは、candidateと明示drag COMSOL referenceの各3刻み収束、全frameのlifecycle/finite mask exact、
-共通の有限lifecycle stateの`r,z,Z`、共通active stateの`v`、141件のevent/fate identityをすべてPASSした。
-これは物理model validationまたは普遍的COMSOL同等性の認定ではない。
-受理済み3 seedの287粒子owner discoveryも科学payload・work・
-case identity・revisionを完全一致させて完了した。支配ownerは`integrators`（自己時間比42.58--42.86%）だったが、
-事前登録済みbounded ownerではないため最適化は未承認でproduction変更はない。M3-C2A anchorは
-`CLOSED_ACCEPTED_WITH_LIMITATIONS`である。10,000粒子以上の性能は製品SLAを先に定義した独立work packageだけで評価し、
-COMSOL fittingは行わない。
-後続の明示指示によるbounded maintenanceでは、既存event/integrator責務を変えず、chord batchのPython scalar調停を
-同じsingle-thread compiled ownerへ統合し、重複式を削除した。accepted 3 seedの科学payload/work/revisionは完全一致し、
-end-to-end中央値は12.29%短縮した。新しいbackend、scheduler、診断層、公開設定はなく、追加ownerへ進まず終了した。
-authorityは[`solver/evidence/m3c2/caseP_100nm_chord_optimization_v1/`](solver/evidence/m3c2/caseP_100nm_chord_optimization_v1/README.md)である。
-既存M3-C1 compact
-evidence/evaluatorはevent v14の履歴として固定し、v15へ書き換えない。
-旧M3-Vの固定電荷・共通3力runnerはこの動的電荷・全力診断を代替しない。gate bypassを使わず、COMSOLは引き続きcore
-dependencyではない。
-
-将来の12-package coverage拡張条件：formula parity、numerical trajectory、physical applicability、stochastic ensembleを
-別statusで記録し、各追加claimに必要なdeterministic companionとBrownian-on gateを独立work packageで完了する。
-これはM3-C2A anchorの完了条件ではない。外部比較処理がcoreを公開API経由でimportする一方向依存を守り、比較のために
-coreの適用域や安全gateを緩めない。
-
-### Phase 4：時間依存場と完全3D
-
-成果物：
-
-- fixed-topology linear time field（完了）
-- tet4/tri3 full 3D（未着手、時間依存fieldと別release）
-- product-size CPU benchmark
-
-時間依存と3Dは同じreleaseで同時に導入しない。
-
-### Phase 5：GPUと製品化
-
-- regular/static caseからGPU backendを追加
-- installation、version migration、error guide、feature matrix
-- artifact schemaの後方互換policy
-- releaseごとのV&V/performance report
-
-完了条件：CPUとの差、対応外feature、hardware条件を公開し、GUIなしでもCLI/APIで全工程が再現可能。
-
----
-
-## 16. 最初の90日で実施する具体項目
-
-### 0～30日
-
-1. 新repoまたは新top-level packageを作る。
-2. canonical YAML/HDF5とprimitive quantityを決める。
-3. 解析caseとboundary microcaseを作る。
-4. 外部COMSOL再抽出仕様を作るが、core実装の前提にしない。
-
-### 31～60日
-
-1. P1/Q1 sampler、cell ID保持、scalar RK4を実装。
-2. drag、electric、gravity、fixed chargeを実装。
-3. surface source、first-hit、stick/escape/specularを実装。
-4. exponential midpointとNumba SoAへ移し、scalarとの差を確認する。
-
-### 61～90日
-
-1. 10^4/10^5/10^6のCPU benchmarkを取り、field/event/I/O別に測定する。
-2. segmented output、checkpoint、memory planを実装し、failure injectionで再開を確認する。
-3. COMSOL側でprimitive field、Brownian-off、event ledgerを再出力する。
-4. v0.1 feature matrix、known limits、次phaseのgo/no-goを決める。
-
-この順序なら「多くの物理が設定できるが、どこが違うか分からない」状態を避けられる。
-
----
+現在は全workerの完了を1 macroごとに待ち、同期間隔の公開設定はない。
+将来は数値dtと独立した最大連続macro数を検討する。積分刻み、field knot、release、stage、
+Brownian counter/条件付き分割、毎macro人口、要求frame/probe、bounded output、single writerを維持する。
+checkpointは全workerが同じaccepted時刻まで完了しoutputを消費した状態だけを公開する。
+child途中死・resume・将来の相互作用/field feedbackの連成周期も含め、
+[実装計画第21.3節](implementation_plan.md#213-将来項目複数macroの連続実行)の条件で設計・評価する。
+0.3.0へAPI/config/stubを先行追加しない。
 
 ## 17. 採否を決める主要設計判断
 
@@ -2031,18 +1665,8 @@ coreへ実装せず、専用exportとmicrocaseで観測して外部V&V manifest�
 
 ---
 
-## 19. 最終提案
+## 19. 実装判断の原則
 
-成功条件は、機能数ではなく「差が出たとき最初の原因を一つの層へ特定できること」である。
-そのために、新基盤は次の順序を守る。
-
-1. 入力をprimitive、topology、provenanceへ正規化する。
-2. 表面発生、field sampling、force、integration、first-hit、wall lawを一つの経路にする。
-3. 解析解と収束で製品標準の数値方式を確立する。
-4. 正しさを保った同じ経路をCPU batch化する。
-5. memoryとoutputを最初から10^6粒子向けにstreaming設計する。
-6. COMSOL固有処理、内部場builder、V&V、可視化をcore外に保つ。
-7. 外部比較ではtime-seriesとevent sequenceを主判定にする。
-
-この骨格が完成するまで、物理module、backend、診断helperを増やさない。狭いが端から端まで
-説明可能なv0.1を先に作ることが、最終的にCOMSOLより柔軟で高速な製品へ到達する最短経路である。
+入力、field、physics、integrator、event、law、outputの責務を一意に保ち、差が出た最初の層を確認する。
+解析解と収束で数値意味を説明し、同じ入力のend-to-end時間とmemoryで性能を評価する。
+機能追加は同じengineへ統合し、置換した旧code・設定・test・文書を同じ変更で削除する。

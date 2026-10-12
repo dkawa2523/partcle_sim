@@ -26,7 +26,12 @@ from chamber_particles.case_format import (
     RegularLayout,
     write,
 )
-from chamber_particles.integrators import ProposalSample, StepProposal
+from chamber_particles.integrators import (
+    ProposalPrefixWorkspace,
+    ProposalSample,
+    ProposalSampleBuffer,
+    StepProposal,
+)
 from chamber_particles.numerical_status import INTEGRATOR_NUMERICAL_FAILURE
 from tests.verification.microcases import materialize_microcase
 
@@ -117,16 +122,16 @@ def test_c01_runs_through_all_three_public_operations(tmp_path: Path) -> None:
         + lifecycle.failed
     )
     np.testing.assert_array_equal(population, np.full(summary.macro_step_count, 1, dtype="<u8"))
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v46"
-    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v21"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v62"
+    assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert result.manifest["step_proposal_revision"] == "coupled_fixed_step_proposal_v10"
     assert result.manifest["rk4_enclosure_revision"] is None
     assert result.manifest["rk4_dense_path_revision"] is None
-    assert result.manifest["field_location_revision"] == "field_location_v4"
-    assert result.manifest["geometry_algorithm_revision"] == "line_boundary_capsule_contact_bvh_v7"
+    assert result.manifest["field_location_revision"] == "field_location_v5"
+    assert result.manifest["geometry_algorithm_revision"] == "line_boundary_capsule_contact_bvh_v8"
     assert result.manifest["topology_algorithm_revision"] is None
     assert result.manifest["event_algorithm_revision"] == (
-        "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        "line_quadratic_curved_capsule_periodic_first_hit_v23"
     )
     assert result.manifest["boundary_algorithm_revision"] is None
     assert result.manifest["result_algorithm_revision"] == "durable_segmented_result_v6"
@@ -170,14 +175,16 @@ def test_accepted_replay_numerical_failure_is_run_integrity_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     paths = materialize_microcase("C01", tmp_path / "replay-numerical-failure")
-    original = StepProposal.state_at_rows
+    original = StepProposal.state_at_times_into
 
     def failed_replay(
         proposal: StepProposal,
-        time_s: float,
         local_rows: np.ndarray,
+        time_s: np.ndarray,
+        buffer: ProposalSampleBuffer,
+        prefix_workspace: ProposalPrefixWorkspace | None = None,
     ) -> ProposalSample:
-        sample = original(proposal, time_s, local_rows)
+        sample = original(proposal, local_rows, time_s, buffer, prefix_workspace)
         return replace(
             sample,
             numerical_status=np.full(
@@ -187,7 +194,7 @@ def test_accepted_replay_numerical_failure_is_run_integrity_failure(
             ),
         )
 
-    monkeypatch.setattr(StepProposal, "state_at_rows", failed_replay)
+    monkeypatch.setattr(StepProposal, "state_at_times_into", failed_replay)
     output = tmp_path / "replay-numerical-failure-result"
 
     with pytest.raises(
@@ -459,6 +466,40 @@ def test_trajectory_output_can_be_disabled_without_disabling_mandatory_results(
     assert result.manifest["memory_plan"]["components"]["replay_work"] == 0
     assert result.read_release_events().particle_id.size == 1
     assert result.read_final().particle_id.size == 1
+
+
+@pytest.mark.parametrize("case_id", ("C01", "C07"))
+def test_ballistic_run_does_not_allocate_unused_force_stage_buffers(
+    tmp_path: Path, case_id: str
+) -> None:
+    paths = materialize_microcase(case_id, tmp_path / case_id)
+    case = load_case(paths.case_path)
+    prepared = engine_module._prepare(case)
+    dynamics = prepared.dynamics
+    stage = dynamics.native_workspace
+    arrays = (
+        *stage.fields,
+        *stage.physics,
+        stage.physics_incoming_status,
+        stage.canonical_position_m,
+        stage.canonical_velocity_m_s,
+        stage.radial_sign,
+        stage.cell_hint,
+    )
+    assert sum(array.nbytes for array in arrays) == 0
+    assert dynamics.last_field_cell is None
+    assert dynamics.native_rk4_workspace is None
+    assert prepared.memory_plan.stage_composition_work_bytes_per_particle == 0
+    assert prepared.memory_plan.components["slab_stage_composition_work"] == 0
+    # Empty context metadata is still resident and belongs to the fixed field
+    # component; eliminating unused stage buffers must not omit these bytes.
+    assert prepared.fields.prepared_nbytes == np.dtype("<i8").itemsize
+    output = tmp_path / "result"
+    summary = simulate(case, output)
+    result = open_result(output)
+    assert summary.failure_event_count == 0
+    assert result.manifest["memory_plan"]["components"]["slab_stage_composition_work"] == 0
+    np.testing.assert_array_equal(result.read_final().particle_id, case.data.sources[0].particle_id)
 
 
 def test_memory_gate_counts_unused_canonical_field_arrays(tmp_path: Path) -> None:

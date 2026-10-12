@@ -1,0 +1,30 @@
+{
+  "status": "PASS_READ_ONLY_INPUT_SOURCE_PROTOCOL_REVIEW",
+  "recorded_at_utc": "2026-10-12T22:23:34Z",
+  "reviewer": "/root/p14_320_protocol",
+  "scope": "Independent read-only preparation review. No simulation, numerical imports, JIT, tests, production or documentation edits. Review receipt is saved separately from measurement receipts.",
+  "policy_sha256": "68a5a0ff1d45f9a09a57bfc464f186800c9f17f510867b7461c2f01e64303878",
+  "checks": {
+    "original_yaml_with_only_dt_line_replaced_equals_current_yaml": true,
+    "physical_end_s_unchanged": 4.0,
+    "dt_s_before": 0.125,
+    "dt_s_after": 0.0125,
+    "declared_macro_steps": 320,
+    "hdf5_byte_sha256_identical": true,
+    "hdf5_sha256": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641",
+    "source_files_actual_count": 27,
+    "bound_files_actual_count": 237,
+    "all_source_and_bound_actual_hashes_match_r65_binding": true,
+    "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+    "bound_map_sha256": "1f07b777ff209f9a09844d7b1c4f4babd482d5b7706333d7f1d48b68eef58a59",
+    "binding_sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b",
+    "driver_sha256": "ab774f1cbcba6c6ad65859192daf7cbd4940254f683acabc2ce5fb244465974c",
+    "comparer_sha256": "b2f9f98ff772c02a8a01def361bad651b929a26778a8cac1f3f9bdc8b3b42d43",
+    "boundary_event_count_not_fixed_from_coarse_result": true,
+    "reuse_driver_and_comparer_schema_compatible": true,
+    "comparer_checks_actual_children_worker_counts_cleanup_and_all_eight_science_rereads": true
+  },
+  "interpretation": "P14-U 10,000 particles, Brownian absent, fixed-charge XY RK4, same canonical input, same seed0 and no trajectory/probe output. Cold1 plus warm3 per role. Root owns W1/W4 performance conclusion. Existing comparer historical nonregression checks are null without baseline roles; its timing_conditions_passed/case_observation_qualified=false must not be interpreted as scientific mismatch.",
+  "issues": [],
+  "execution_blockers": []
+}

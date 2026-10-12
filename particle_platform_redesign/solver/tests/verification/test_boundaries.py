@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from numba import njit
 
 from chamber_particles.boundaries import (
     BOUNDARY_LAW_ESCAPE,
@@ -18,11 +19,13 @@ from chamber_particles.boundaries import (
     BOUNDARY_STATUS_INDETERMINATE_POLICY,
     BOUNDARY_STATUS_OK,
     BoundaryLawError,
+    allocate_boundary_response_buffer,
     half_range_maxwell_flux_velocity,
     half_range_maxwell_flux_velocity_batch,
     prepare_boundary_rule,
     prepare_boundary_rules,
     resolve_boundary_responses_batch,
+    resolve_boundary_responses_into,
     validate_boundary_rule_frames,
 )
 from chamber_particles.physics.forces import BOLTZMANN_J_K
@@ -524,3 +527,101 @@ def test_compiled_boundary_rows_apply_laws_and_corner_order() -> None:
         atol=4.0 * np.finfo(np.float64).eps,
     )
     assert actual.status[6] == BOUNDARY_STATUS_AMBIGUOUS_LAW
+
+
+def test_boundary_response_bank_reuse_preserves_laws_and_native_prefixes() -> None:
+    rules = prepare_boundary_rules(
+        (
+            prepare_boundary_rule(0, 10, "specular", {}),
+            prepare_boundary_rule(1, 10, "escape", {}),
+            prepare_boundary_rule(
+                2,
+                10,
+                "probabilistic_stick",
+                {
+                    "probability": 0.4,
+                    "otherwise": {
+                        "law": "restitution",
+                        "normal_restitution": 0.5,
+                        "tangential_restitution": 0.25,
+                    },
+                },
+            ),
+        )
+    )
+    arguments = (
+        np.asarray([0, 1, 2, 3], dtype="<i8"),
+        np.asarray([0, 1, 2], dtype="<i8"),
+        np.asarray([10, 20, 30], dtype="<i4"),
+        np.asarray([0, 1, 2], dtype="<i4"),
+        np.asarray([[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0]], dtype="<f8"),
+        np.asarray([[2.0, 3.0], [2.0, 3.0], [-2.0, 3.0]], dtype="<f8"),
+        np.ones(3, dtype="<f8"),
+        np.asarray([0.0, 0.0, 0.8], dtype="<f8"),
+        np.zeros(3, dtype="<f8"),
+        np.full(3, 0.5, dtype="<f8"),
+        np.zeros(3, dtype="<f8"),
+    )
+    buffer = allocate_boundary_response_buffer(5)
+    assert sum(column.nbytes for column in buffer) == 44 * 5
+    for column in buffer:
+        column.fill(1)
+    owned = resolve_boundary_responses_batch(rules, *arguments, roundoff_ulps=64)
+    actual = resolve_boundary_responses_batch(
+        rules, *arguments, roundoff_ulps=64, result_buffer=buffer
+    )
+    for expected_column, column, bank in zip(owned, actual, buffer, strict=True):
+        np.testing.assert_array_equal(column, expected_column)
+        assert np.shares_memory(column, bank)
+    np.testing.assert_array_equal(actual.status, np.full(3, BOUNDARY_STATUS_OK))
+    np.testing.assert_array_equal(
+        actual.outcome,
+        [BOUNDARY_OUTCOME_REFLECTED, BOUNDARY_OUTCOME_ESCAPED, BOUNDARY_OUTCOME_REFLECTED],
+    )
+    np.testing.assert_array_equal(actual.velocity_post_m_s, [[-2.0, 3.0], [2.0, 3.0], [1.0, 0.75]])
+    np.testing.assert_array_equal(actual.remains_active, [True, False, True])
+    tail = tuple(column[1:].copy() for column in buffer)
+
+    @njit(cache=False, fastmath=False, parallel=False)
+    def native_call(table, inputs, result):
+        return resolve_boundary_responses_into(
+            table,
+            inputs[0],
+            inputs[1],
+            inputs[2],
+            inputs[3],
+            inputs[4],
+            inputs[5],
+            inputs[6],
+            inputs[7],
+            inputs[8],
+            inputs[9],
+            inputs[10],
+            64,
+            result,
+        )
+
+    smaller = (
+        np.asarray([0, 1], dtype="<i8"),
+        arguments[1][:1],
+        arguments[2],
+        arguments[3],
+        arguments[4][:1],
+        np.asarray([[3.0, -2.0]], dtype="<f8"),
+        *(column[:1] for column in arguments[6:]),
+    )
+    reused = native_call(rules, smaller, buffer)
+    np.testing.assert_array_equal(reused.status, [BOUNDARY_STATUS_OK])
+    np.testing.assert_array_equal(reused.velocity_post_m_s, [[-3.0, -2.0]])
+    for column, expected_tail in zip(buffer, tail, strict=True):
+        np.testing.assert_array_equal(column[1:], expected_tail)
+    insufficient = allocate_boundary_response_buffer(1)
+    for column in insufficient:
+        column.fill(1)
+    before = tuple(column.copy() for column in insufficient)
+    with pytest.raises(ValueError, match="buffer capacity"):
+        resolve_boundary_responses_batch(
+            rules, *arguments, roundoff_ulps=64, result_buffer=insufficient
+        )
+    for column, expected_column in zip(insufficient, before, strict=True):
+        np.testing.assert_array_equal(column, expected_column)

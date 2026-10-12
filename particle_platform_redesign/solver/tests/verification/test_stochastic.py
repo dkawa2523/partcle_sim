@@ -4,6 +4,7 @@ import math
 from itertools import pairwise
 
 import numpy as np
+import pytest
 
 from chamber_particles.integrators import (
     RelaxationEvaluation,
@@ -18,13 +19,19 @@ from chamber_particles.stochastic import (
     JOINT_OU_REVISION,
     JOINT_OU_SPLIT_REVISION,
     MAXIMUM_JOINT_OU_RELAXATION_ARGUMENT,
+    OU_STATUS_OK,
     JointOuIncrement,
     advance_joint_ou,
     advance_joint_ou_with_increment,
+    advance_joint_ou_with_increment_into,
     compose_joint_ou_increments,
+    compose_joint_ou_increments_into,
     joint_ou_covariance,
+    joint_ou_covariance_into,
     joint_ou_increment,
+    joint_ou_increment_into,
     split_joint_ou_increment_half,
+    split_joint_ou_increment_half_into,
 )
 from tests.verification.ou_reference import (
     covariance_matrix as _covariance_matrix,
@@ -676,6 +683,169 @@ def test_two_level_interval_tree_reconstructs_the_same_root_increment() -> None:
         rtol=0.0,
         atol=6.0e-16,
     )
+
+
+def test_native_ou_partition_reuse_and_state_alias_preserve_the_same_draw() -> None:
+    """Native continuation buffers preserve component order and row partition identity."""
+
+    argument = np.array([0.0, 1.0e-12, 0.0499, 0.05, 0.0501, 0.2, 10.0, 1.0e3, 1.0e6])
+    count = argument.size
+    rate = np.full(count, 2.3)
+    duration = argument / rate
+    thermal = np.full(count, 0.7)
+    thermal[1] = 0.0
+    normals = _normal_tensor(
+        np.arange(count, dtype=np.uint64),
+        seed=741,
+        macro_interval=9,
+        root_interval=0,
+        draw_kind=BROWNIAN_ROOT_NORMAL_STREAM,
+    )
+    parent = joint_ou_increment(rate, thermal, duration, normals)
+    expected_covariance = joint_ou_covariance(rate, thermal, duration)
+    expected_left, expected_right = split_joint_ou_increment_half(
+        parent, rate, thermal, duration, -normals
+    )
+    # Strided, disjoint outputs represent reusable components of one slot arena.
+    covariance = np.full((count, 3), np.nan)
+    increment = np.full((count, 4), np.nan)
+    children = np.full((count, 8), np.nan)
+    status = np.full(count, 255, dtype=np.uint8)
+    for begin, end in ((0, 2), (2, 5), (5, count)):
+        rows = slice(begin, end)
+        joint_ou_covariance_into(
+            rate[rows],
+            thermal[rows],
+            duration[rows],
+            covariance[rows, 0],
+            covariance[rows, 1],
+            covariance[rows, 2],
+            status[rows],
+        )
+        np.testing.assert_array_equal(status[rows], OU_STATUS_OK)
+        joint_ou_increment_into(
+            rate[rows],
+            thermal[rows],
+            duration[rows],
+            normals[rows],
+            increment[rows, 0::2],
+            increment[rows, 1::2],
+            status[rows],
+        )
+        np.testing.assert_array_equal(status[rows], OU_STATUS_OK)
+        split_joint_ou_increment_half_into(
+            parent.position_m[rows],
+            parent.velocity_m_s[rows],
+            rate[rows],
+            thermal[rows],
+            duration[rows],
+            -normals[rows],
+            children[rows, 0:2],
+            children[rows, 2:4],
+            children[rows, 4:6],
+            children[rows, 6:8],
+            status[rows],
+        )
+        np.testing.assert_array_equal(status[rows], OU_STATUS_OK)
+    for component, expected in enumerate(expected_covariance):
+        np.testing.assert_array_equal(
+            covariance[:, component].view(np.uint64), expected.view(np.uint64)
+        )
+    np.testing.assert_array_equal(
+        increment[:, 0::2].view(np.uint64), parent.position_m.view(np.uint64)
+    )
+    np.testing.assert_array_equal(
+        increment[:, 1::2].view(np.uint64), parent.velocity_m_s.view(np.uint64)
+    )
+    for columns, expected in (
+        (slice(0, 2), expected_left.position_m),
+        (slice(2, 4), expected_left.velocity_m_s),
+        (slice(4, 6), expected_right.position_m),
+        (slice(6, 8), expected_right.velocity_m_s),
+    ):
+        np.testing.assert_array_equal(
+            children[:, columns].view(np.uint64), expected.view(np.uint64)
+        )
+    # A zero interval or zero temperature yields exact positive zero, independent of normals.
+    np.testing.assert_array_equal(increment[:2].view(np.uint64), 0)
+
+    start_x = np.broadcast_to(np.array([0.2, -0.1]), (count, 2)).copy()
+    start_v = np.broadcast_to(np.array([-0.4, 0.3]), (count, 2)).copy()
+    equilibrium = np.broadcast_to(np.array([0.1, -0.2]), (count, 2)).copy()
+    expected_x, expected_v = advance_joint_ou_with_increment(
+        start_x, start_v, equilibrium, rate, duration, parent
+    )
+    advance_joint_ou_with_increment_into(
+        start_x,
+        start_v,
+        equilibrium,
+        rate,
+        duration,
+        parent.position_m,
+        parent.velocity_m_s,
+        start_x,
+        start_v,
+        status,
+    )
+    np.testing.assert_array_equal(status, OU_STATUS_OK)
+    np.testing.assert_array_equal(start_x.view(np.uint64), expected_x.view(np.uint64))
+    np.testing.assert_array_equal(start_v.view(np.uint64), expected_v.view(np.uint64))
+    compose_joint_ou_increments_into(
+        children[:, 0:2],
+        children[:, 2:4],
+        children[:, 4:6],
+        children[:, 6:8],
+        rate,
+        0.5 * duration,
+        increment[:, 0::2],
+        increment[:, 1::2],
+        status,
+    )
+    expected_composed = compose_joint_ou_increments(
+        expected_left, expected_right, rate, 0.5 * duration
+    )
+    np.testing.assert_array_equal(status, OU_STATUS_OK)
+    np.testing.assert_array_equal(
+        increment[:, 0::2].view(np.uint64), expected_composed.position_m.view(np.uint64)
+    )
+    np.testing.assert_array_equal(
+        increment[:, 1::2].view(np.uint64), expected_composed.velocity_m_s.view(np.uint64)
+    )
+
+
+def test_native_ou_arithmetic_failure_is_row_local_and_reused_status_is_reset() -> None:
+    rate = np.array([2.3, np.finfo(np.float64).max, 0.1, 1.0])
+    duration = np.array([0.4, 2.0, np.nextafter(0.0, 1.0), 1.0e-4])
+    thermal = np.array([0.7, 0.7, 0.7, np.nextafter(0.0, 1.0)])
+    normals = np.ones((4, 2, 2))
+    position = np.full((4, 2), np.nan)
+    velocity = np.full((4, 2), np.nan)
+    status = np.full(4, 255, dtype=np.uint8)
+    expected = joint_ou_increment(rate[:1], thermal[:1], duration[:1], normals[:1])
+    joint_ou_increment_into(rate, thermal, duration, normals, position, velocity, status)
+    assert status[0] == OU_STATUS_OK
+    assert bool((status[1:] != OU_STATUS_OK).all())
+    np.testing.assert_array_equal(position[:1], expected.position_m)
+    np.testing.assert_array_equal(velocity[:1], expected.velocity_m_s)
+    for row in range(1, 4):
+        rows = slice(row, row + 1)
+        with pytest.raises(FloatingPointError):
+            joint_ou_increment(rate[rows], thermal[rows], duration[rows], normals[rows])
+    joint_ou_increment_into(
+        np.full(4, 2.3), np.zeros(4), np.full(4, 0.4), -normals, position, velocity, status
+    )
+    np.testing.assert_array_equal(status, OU_STATUS_OK)
+    np.testing.assert_array_equal(position.view(np.uint64), 0)
+    np.testing.assert_array_equal(velocity.view(np.uint64), 0)
+
+
+def test_zero_noise_or_zero_duration_split_rejects_a_nonzero_parent() -> None:
+    parent = JointOuIncrement(np.array([[0.1, 0.0]]), np.zeros((1, 2)))
+    for thermal, duration in ((0.0, 0.4), (0.7, 0.0)):
+        with pytest.raises(ValueError):
+            split_joint_ou_increment_half(
+                parent, np.ones(1), np.array([thermal]), np.array([duration]), np.zeros((1, 2, 2))
+            )
 
 
 def _normal_tensor(

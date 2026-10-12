@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "chamber-particles"
-version = "0.2.0"
+version = "0.3.0"
 description = "Particle trajectory solver for externally supplied chamber fields and geometry"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"

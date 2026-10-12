@@ -4,12 +4,22 @@ from __future__ import annotations
 
 import hashlib
 import math
+import mmap
+import multiprocessing
+import os
+import pickle
+import traceback
 from bisect import bisect_right
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, replace
+from dataclasses import field as dataclass_field
+from multiprocessing.connection import Connection, wait
+from multiprocessing.process import BaseProcess
 from os import PathLike
+from typing import NamedTuple, Protocol, cast
 
 import numpy as np
+from numba import njit
 
 from .boundaries import (
     BOUNDARY_ALGORITHM_REVISION,
@@ -21,6 +31,7 @@ from .boundaries import (
     BoundaryResponseBatch,
     BoundaryRule,
     PreparedBoundaryRules,
+    allocate_boundary_response_buffer,
     prepare_boundary_rule,
     prepare_boundary_rules,
     resolve_boundary_responses_batch,
@@ -29,18 +40,25 @@ from .boundaries import (
 from .case import CASE_FORMAT_VERSION, SimulationCase, TimeSpec
 from .case_format import resident_array_bytes
 from .coordinates import (
-    canonicalize_rz_enclosure,
+    canonicalize_rz_enclosure_into,
+    canonicalize_rz_velocity_enclosure_into,
     fold_rz_position_vector,
+    fold_rz_position_vector_into,
     rz_canonical_vector_to_signed,
-    rz_signed_stage_to_canonical,
+    rz_radial_interval,
+    rz_signed_stage_into,
+    rz_vector_to_signed_into,
 )
 from .cpu import (
     CPU_RUNTIME_LAYOUT_REVISION,
     MEMORY_PLAN_REVISION,
     ActiveIndex,
     CpuMemoryPlan,
+    ProcessArrayReader,
+    ProcessArrayStore,
     early_memory_requirement_bytes,
     plan_cpu_memory,
+    process_array_views,
 )
 from .events import (
     CURVED_STATUS_AXIS,
@@ -49,6 +67,7 @@ from .events import (
     CURVED_STATUS_SPLIT,
     CURVED_STATUS_WALL,
     EVENT_ALGORITHM_REVISION,
+    EVENT_QUERY_OK,
     EXACT_DEPARTURE_FINITE_CONTACT_SET,
     EXACT_DEPARTURE_NONE,
     EXACT_PATH_LINEAR,
@@ -68,15 +87,22 @@ from .events import (
     SURFACE_STATUS_OK,
     BoundaryHit,
     CurvedEventBatch,
+    EventArena,
+    EventGeometry,
     EventLocationError,
     ExactEventBatch,
     SurfaceReleaseBatch,
+    allocate_event_arena,
+    certify_event_point_interiors,
     classify_event_point,
     classify_surface_release_batch,
-    count_curved_event_candidates,
-    count_exact_event_candidates,
-    locate_curved_first_event_batch,
-    locate_exact_first_event_batch,
+    curved_event_result_view,
+    exact_event_result_view,
+    locate_curved_first_event_into,
+    locate_exact_first_event_into,
+    prepare_curved_event_batch,
+    prepare_event_geometry,
+    prepare_exact_event_batch,
 )
 from .fields import (
     FIELD_LOCATION_REVISION,
@@ -86,9 +112,14 @@ from .fields import (
     FieldBatch,
     FieldLocationError,
     FieldWorkspace,
+    NumericFieldContext,
+    NumericFieldRangeWorkspace,
+    NumericFieldWorkspace,
     PreparedFieldSet,
     RequiredFieldMetadata,
+    local_prepared_field_ranges_into,
     prepare_required_fields,
+    sample_prepared_fields_into,
     validate_periodic_field_seams,
 )
 from .geometry import (
@@ -103,16 +134,30 @@ from .geometry import (
 from .integrators import (
     EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION,
     EXPONENTIAL_MIDPOINT_REVISION,
+    RELAXATION_ADVANCE_WORK_BYTES_PER_PARTICLE,
+    RK4_ADVANCE_WORK_BYTES_PER_PARTICLE,
+    RK4_DENSE_FULL_ENCLOSURE_BYTES_PER_PARTICLE,
     RK4_DENSE_PATH_REVISION,
     RK4_ENCLOSURE_REVISION,
+    STAGE_ADVANCE_WORK_BYTES_PER_PARTICLE,
     STEP_PROPOSAL_REVISION,
     CurvedPathEnclosure,
     DynamicsEvaluation,
+    ProposalPrefixWorkspace,
     ProposalSample,
+    ProposalSampleBuffer,
+    RelaxationAdvanceWorkspace,
     RelaxationEvaluation,
+    Rk4AdvanceWorkspace,
     Rk4DenseEnclosure,
+    StageAdvanceWorkspace,
     StepProposal,
     affine_exponential_charge,
+    allocate_proposal_prefix_workspace,
+    allocate_proposal_sample_buffer,
+    allocate_relaxation_advance_workspace,
+    allocate_rk4_advance_workspace,
+    allocate_stage_advance_workspace,
     cubic_hermite_step,
     curved_chord_deviation_bounds,
     enclose_exponential_midpoint_path,
@@ -161,11 +206,21 @@ from .physics.forces import (
 )
 from .physics.runtime import (
     PHYSICS_RUNTIME_REVISION,
-    LocalPrimitiveRange,
+    AccelerationBoundContext,
+    ContinuousApplicabilityContext,
+    PhysicsNumericContext,
+    PhysicsNumericOutputs,
     PhysicsRuntime,
     PhysicsRuntimeEvaluation,
     PhysicsRuntimeWorkspace,
     PrimitiveRange,
+    acceleration_abs_upper_into,
+    brownian_thermal_variance_into,
+    charge_interval_inside_prepared_invariant_into,
+    evaluate_continuous_applicability_into,
+    evaluate_local_continuous_applicability_into,
+    evaluate_prepared_physics_into,
+    local_additive_acceleration_abs_upper_into,
     prepare_physics_runtime,
 )
 from .rng import (
@@ -177,7 +232,8 @@ from .rng import (
     WALL_MAXWELL_NORMAL_STREAM,
     WALL_MAXWELL_TANGENTIAL_STREAM,
     WALL_PROBABILISTIC_STICK_STREAM,
-    brownian_normal_pair_batch,
+    _brownian_node_key,
+    _brownian_pair_from_key,
     wall_standard_normal_batch,
     wall_uniform_batch,
     wall_uniform_open_batch,
@@ -192,10 +248,14 @@ from .stochastic import (
     JOINT_OU_REVISION,
     JOINT_OU_SPLIT_REVISION,
     MAXIMUM_JOINT_OU_RELAXATION_ARGUMENT,
+    OU_STATUS_OK,
     JointOuIncrement,
-    advance_joint_ou_with_increment,
-    joint_ou_increment,
-    split_joint_ou_increment_half,
+    _finite_children,
+    _half_split_coefficients_scalar,
+    _joint_ou_increment_component,
+    _joint_ou_increment_scales,
+    _split_joint_ou_component,
+    advance_joint_ou_with_increment_into,
 )
 from .topology import (
     TOPOLOGY_ALGORITHM_REVISION,
@@ -211,10 +271,10 @@ from .topology import (
 
 type _PathInput = str | PathLike[str]
 
-ENGINE_ALGORITHM_REVISION = "particle_engine_v46"
-COMPILED_CPU_TILE_REVISION = "compiled_cpu_tile_v21"
+ENGINE_ALGORITHM_REVISION = "particle_engine_v62"
+COMPILED_CPU_TILE_REVISION = "compiled_cpu_tile_v31"
 DURABLE_COMMIT_CADENCE_REVISION = "cumulative_solver_work_v1"
-BROWNIAN_TREE_POLICY_REVISION = "conditional_boundary_refinement_v1"
+BROWNIAN_TREE_POLICY_REVISION = "conditional_boundary_refinement_absolute_target_v2"
 
 _PREPARE_SCAN_BATCH_SIZE = 65_536
 _MAX_EVENT_ORDINAL = int(np.iinfo(np.uint32).max)
@@ -322,6 +382,16 @@ class _ApplicabilityCertificateWorkspace:
         )
 
 
+class _NumericSupportContext(NamedTuple):
+    """Prepared field/domain relation; contact remains an engine verdict."""
+
+    regular_box: bool
+    lower_m: tuple[float, float]
+    upper_m: tuple[float, float]
+    covers_geometry: bool
+    axisymmetric_rz: bool
+
+
 @dataclass(frozen=True, slots=True)
 class _PreparedRun:
     case: SimulationCase
@@ -344,6 +414,35 @@ class _PreparedRun:
     memory_plan: CpuMemoryPlan
     event_candidate_capacity: int
     certificate_workspace: _ApplicabilityCertificateWorkspace
+    curved_workspace: _CurvedWavefront
+    exact_workspace: _ExactWavefront
+    boundary_response_buffer: BoundaryResponseBatch
+    event_query_geometry: EventGeometry
+    event_query_arena: EventArena
+    replay_workspace: _ProposalReplayWorkspace
+    support_context: _NumericSupportContext = dataclass_field(init=False)
+
+    def __post_init__(self) -> None:
+        support_box = self.fields.regular_support_box()
+        lower, upper = (np.zeros(2), np.zeros(2)) if support_box is None else support_box
+        covers_geometry = False
+        if support_box is not None:
+            geometry_lower = np.min(self.geometry.nodes_m, axis=0)
+            geometry_upper = np.max(self.geometry.nodes_m, axis=0)
+            covers_geometry = bool(
+                (geometry_lower >= lower).all() and (geometry_upper <= upper).all()
+            )
+        object.__setattr__(
+            self,
+            "support_context",
+            _NumericSupportContext(
+                support_box is not None,
+                (float(lower[0]), float(lower[1])),
+                (float(upper[0]), float(upper[1])),
+                covers_geometry,
+                self.case.data.coordinate_system == "axisymmetric_rz",
+            ),
+        )
 
 
 @dataclass(slots=True)
@@ -385,8 +484,24 @@ class _FailureEventBuffer:
     count: int = 0
 
 
-@dataclass(slots=True)
-class _ReplayBuffer:
+class _FailureCommitContext(NamedTuple):
+    """Numeric resident and bounded failure columns, owned by the engine."""
+
+    position_m: np.ndarray
+    velocity_m_s: np.ndarray
+    charge_number: np.ndarray
+    active: np.ndarray
+    lifecycle: np.ndarray
+    terminal_time_s: np.ndarray
+    event_ordinal: np.ndarray
+    failure_reason_code: np.ndarray
+    failure_particle_index: np.ndarray
+    failure_time_s: np.ndarray
+    failure_event_ordinal: np.ndarray
+    failure_reason: np.ndarray
+
+
+class _ReplayBuffer(NamedTuple):
     """Requested macro-time states held in numeric columnar storage."""
 
     time_s: np.ndarray
@@ -398,8 +513,33 @@ class _ReplayBuffer:
     lifecycle: np.ndarray
 
 
-@dataclass(frozen=True, slots=True)
-class _ExactEndpointBatch:
+class _ProposalReplayWorkspace(NamedTuple):
+    """Exclusive bounded sampling and scatter scratch, reused across outputs."""
+
+    sample: ProposalSampleBuffer
+    prefix: ProposalPrefixWorkspace
+    time_s: np.ndarray
+    proposal_rows: np.ndarray
+    replay_slots: np.ndarray
+    radial_sign: np.ndarray
+
+    @classmethod
+    def allocate(
+        cls, capacity: int, frame_times_s: tuple[float, ...], probe_times_s: tuple[float, ...]
+    ) -> _ProposalReplayWorkspace:
+        if not frame_times_s and not probe_times_s:
+            capacity = 0
+        return cls(
+            allocate_proposal_sample_buffer(capacity),
+            allocate_proposal_prefix_workspace(capacity),
+            np.empty(capacity, dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<f8"),
+        )
+
+
+class _ExactEndpointBatch(NamedTuple):
     """Accepted exact-prefix endpoints indexed by slab-local row."""
 
     valid: np.ndarray
@@ -408,8 +548,7 @@ class _ExactEndpointBatch:
     charge_number: np.ndarray
 
 
-@dataclass(frozen=True, slots=True)
-class _LangevinCoefficients:
+class _LangevinCoefficients(NamedTuple):
     """Frozen macro-root coefficients for the supported inertial OU model."""
 
     drag_rate_s_inv: np.ndarray
@@ -440,7 +579,7 @@ class _LangevinRootBatch:
     particles: np.ndarray
     starts_s: np.ndarray
     duration_s: np.ndarray
-    requested_duration_s: np.ndarray
+    target_time_s: np.ndarray
     start_position_m: np.ndarray
     start_velocity_m_s: np.ndarray
     start_charge_number: np.ndarray
@@ -477,7 +616,7 @@ class _BrownianSlabRuntime:
     replay: _ReplayBuffer
     statistics: _EventStatistics
     failure_reason_code: np.ndarray
-    writer: ResultWriter
+    writer: _EventSink
     event_buffer: _BoundaryEventBuffer
     failure_buffer: _FailureEventBuffer
     root_continuing: np.ndarray
@@ -489,10 +628,11 @@ class _BrownianSlabRuntime:
     pending_stochastic_event_restart_count: np.ndarray
     pending_guard_restart_count: np.ndarray
     pending_count: np.ndarray
+    adaptive_workspace: _BrownianAdaptiveWorkspace
+    leaf_cursor: _BrownianLeafCursor
 
 
-@dataclass(slots=True)
-class _CurvedWavefront:
+class _CurvedWavefront(NamedTuple):
     """One slab's curved residual state held only in numeric SoA columns."""
 
     particle_index: np.ndarray
@@ -507,7 +647,130 @@ class _CurvedWavefront:
     stack_depth: np.ndarray
     stack_interaction_reset: np.ndarray
     stack_top: np.ndarray
-    stochastic_restart_time_s: np.ndarray | None
+    stochastic_restart_time_s: np.ndarray
+    root_rows: np.ndarray
+    zero_rows: np.ndarray
+    wave_rows: np.ndarray
+    wave_targets_s: np.ndarray
+    exhausted_rows: np.ndarray
+
+    exhausted_reason_code: np.ndarray
+
+    @classmethod
+    def allocate(
+        cls,
+        capacity: int,
+        stack_capacity: int,
+        stochastic: bool,
+        *,
+        exact_enabled: bool,
+        event_paths: bool,
+    ) -> _CurvedWavefront:
+        if exact_enabled or not event_paths:
+            capacity = 0
+        return cls(
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<f8"),
+            np.empty((capacity, 2), dtype="<f8"),
+            np.empty((capacity, 2), dtype="<f8"),
+            np.empty(capacity, dtype="<f8"),
+            np.empty(capacity, dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype=np.bool_),
+            np.empty((capacity, stack_capacity), dtype="<f8"),
+            np.empty((capacity, stack_capacity), dtype="<i8"),
+            np.empty((capacity, stack_capacity), dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity if stochastic else 0, dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<u2"),
+        )
+
+    def view(self, count: int) -> _CurvedWavefront:
+        """Borrow one exclusive slab; no view survives the consuming call."""
+
+        return _CurvedWavefront(
+            self.particle_index[:count],
+            self.current_time_s[:count],
+            self.current_position_m[:count],
+            self.current_velocity_m_s[:count],
+            self.current_charge_number[:count],
+            self.root_interval_s[:count],
+            self.interaction_count[:count],
+            self.certify_departure[:count],
+            self.stack_target_s[:count],
+            self.stack_depth[:count],
+            self.stack_interaction_reset[:count],
+            self.stack_top[:count],
+            self.stochastic_restart_time_s[:count],
+            self.root_rows[:count],
+            self.zero_rows[:count],
+            self.wave_rows[:count],
+            self.wave_targets_s[:count],
+            self.exhausted_rows[:count],
+            self.exhausted_reason_code[:count],
+        )
+
+
+class _ExactWavefront(NamedTuple):
+    """Exclusive exact residual columns, reused across bounded slabs."""
+
+    current_time_s: np.ndarray
+    current_position_m: np.ndarray
+    current_velocity_m_s: np.ndarray
+    current_charge_number: np.ndarray
+    acceleration_m_s2: np.ndarray
+    departing_facet_id: np.ndarray
+    stack_target_s: np.ndarray
+    stack_depth: np.ndarray
+    stack_interactions: np.ndarray
+    stack_top: np.ndarray
+    wave_rows: np.ndarray
+    wave_targets_s: np.ndarray
+    zero_rows: np.ndarray
+    exhausted_rows: np.ndarray
+    failed_rows: np.ndarray
+    split_rows: np.ndarray
+    clear_rows: np.ndarray
+    clear_targets_s: np.ndarray
+    axis_event_rows: np.ndarray
+    wall_event_rows: np.ndarray
+
+    @classmethod
+    def allocate(
+        cls, capacity: int, stack_capacity: int, *, exact_enabled: bool, event_paths: bool
+    ) -> _ExactWavefront:
+        if not exact_enabled or not event_paths:
+            capacity = 0
+        return cls(
+            np.empty(capacity, dtype="<f8"),
+            np.empty((capacity, 2), dtype="<f8"),
+            np.empty((capacity, 2), dtype="<f8"),
+            np.empty(capacity, dtype="<f8"),
+            np.empty((capacity, 2), dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty((capacity, stack_capacity), dtype="<f8"),
+            np.empty((capacity, stack_capacity), dtype="<i8"),
+            np.empty((capacity, stack_capacity), dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+            np.empty(capacity, dtype="<i8"),
+        )
+
+    def view(self, count: int) -> _ExactWavefront:
+        return _ExactWavefront(*(column[:count] for column in self))
 
 
 class _ParticleFailure(RuntimeError):
@@ -589,6 +852,761 @@ class _SlabResult:
     statistics: _EventStatistics
 
 
+class _EventSink(Protocol):
+    def write_boundary_events(self, events: BoundaryEvents) -> None: ...
+
+    def write_failure_events(self, events: FailureEvents) -> None: ...
+
+
+class _ProcessEventSink:
+    """Synchronous bounded handoff; workers never open the result store."""
+
+    def __init__(self, connection: Connection) -> None:
+        self.connection = connection
+
+    def write_boundary_events(self, events: BoundaryEvents) -> None:
+        self._handoff("boundary", events)
+
+    def write_failure_events(self, events: FailureEvents) -> None:
+        self._handoff("failure", events)
+
+    def _handoff(self, kind: str, events: BoundaryEvents | FailureEvents) -> None:
+        self.connection.send((kind, events))
+        if self.connection.recv() != ("accepted",):
+            raise EngineError("particle event handoff was not acknowledged")
+
+
+class _ProcessState(NamedTuple):
+    position_m: np.ndarray
+    velocity_m_s: np.ndarray
+    charge_number: np.ndarray
+    active: np.ndarray
+    lifecycle: np.ndarray
+    terminal_time_s: np.ndarray
+    event_ordinal: np.ndarray
+    physical_boundary_event_ordinal: np.ndarray
+    exact_origin_time_s: np.ndarray
+    exact_origin_position_m: np.ndarray
+    exact_origin_velocity_m_s: np.ndarray
+    start_contact_state: np.ndarray
+    failure_reason_code: np.ndarray
+
+
+@dataclass(slots=True)
+class _ProcessWorker:
+    process: BaseProcess
+    connection: Connection
+
+
+def _process_private_arrays(prepared: _PreparedRun) -> Iterator[np.ndarray]:
+    dynamics = prepared.dynamics
+    owners = (
+        dynamics.field_workspace,
+        dynamics.physics_workspace,
+        dynamics.native_workspace,
+        dynamics.native_rk4_workspace,
+        dynamics.native_stage_advance_workspace,
+        dynamics.native_relaxation_workspace,
+        dynamics.field_range_workspace,
+        dynamics.global_certificate_workspace,
+        dynamics.local_certificate_workspace,
+        dynamics.langevin_coefficient_workspace,
+        prepared.certificate_workspace,
+        prepared.curved_workspace,
+        prepared.exact_workspace,
+        prepared.boundary_response_buffer,
+        prepared.event_query_arena,
+        prepared.replay_workspace,
+    )
+    for owner in owners:
+        yield from process_array_views(owner)
+
+
+def _share_process_state(state: _RunState, store: ProcessArrayStore) -> None:
+    """Move the explicit resident columns into parent-owned storage."""
+    for name in _ProcessState._fields:
+        setattr(state, name, store.share(getattr(state, name)))
+
+
+def _process_state(state: _RunState) -> _ProcessState:
+    return _ProcessState(*(getattr(state, name) for name in _ProcessState._fields))
+
+
+def _process_particle_worker(connection: Connection, payload: bytes) -> None:
+    """Use the existing slab engine with exclusive scratch in one interpreter."""
+    reader = ProcessArrayReader()
+    replay_reader = ProcessArrayReader()
+    try:
+        prepared, state = cast(tuple[_PreparedRun, _ProcessState], reader.loads(payload))
+        sink = _ProcessEventSink(connection)
+        connection.send(("ready", None))
+        while True:
+            command = connection.recv()
+            if command[0] == "stop":
+                return
+            _, rows, interval, start, end, replay_payload = command
+            result = _process_worker_slab(
+                prepared, state, rows, interval, start, end, replay_payload, replay_reader, sink
+            )
+            connection.send(("done", result.statistics))
+    except BaseException:
+        try:
+            connection.send(("error", traceback.format_exc()))
+        except (BrokenPipeError, EOFError, OSError):
+            pass
+    finally:
+        replay_reader.close()
+        reader.close()
+        connection.close()
+
+
+def _process_worker_slab(
+    prepared: _PreparedRun,
+    state: _ProcessState,
+    rows: np.ndarray,
+    interval: int,
+    start: float,
+    end: float,
+    replay_payload: bytes,
+    reader: ProcessArrayReader,
+    sink: _EventSink,
+) -> _SlabResult:
+    replay = cast(_ReplayBuffer, reader.loads(replay_payload))
+    try:
+        return _advance_particle_slab(
+            prepared,
+            rows,
+            interval,
+            start,
+            end,
+            state.position_m,
+            state.velocity_m_s,
+            state.charge_number,
+            state.active,
+            state.lifecycle,
+            state.terminal_time_s,
+            state.event_ordinal,
+            state.physical_boundary_event_ordinal,
+            state.exact_origin_time_s,
+            state.exact_origin_position_m,
+            state.exact_origin_velocity_m_s,
+            state.start_contact_state,
+            replay,
+            state.failure_reason_code,
+            sink,
+        )
+    finally:
+        reader.release_views()
+
+
+def _receive_process_message(worker: _ProcessWorker) -> tuple[str, object]:
+    ready = wait([worker.connection, worker.process.sentinel])
+    if worker.connection not in ready:
+        raise EngineError(f"particle worker exited with code {worker.process.exitcode}")
+    try:
+        kind, payload = worker.connection.recv()
+    except (EOFError, OSError) as error:
+        raise EngineError("particle worker connection closed before completion") from error
+    if kind == "error":
+        raise EngineError(f"particle worker failed: {payload}")
+    return kind, payload
+
+
+class _ProcessTeam:
+    """One run owns fixed processes, shared state, and ordered macro barriers."""
+
+    def __init__(self, prepared: _PreparedRun, state: _RunState) -> None:
+        self.prepared = prepared
+        self.state = state
+        self.workers: list[_ProcessWorker] = []
+        self.store: ProcessArrayStore | None = None
+        self.replay_store: ProcessArrayStore | None = None
+        self.replay_storage: np.ndarray | None = None
+        self.finished = False
+
+    def __enter__(self) -> _ProcessTeam:
+        try:
+            if self.prepared.memory_plan.worker_count > 1:
+                self._start()
+            return self
+        except BaseException:
+            self.__exit__(None, None, None)
+            raise
+
+    def _start(self) -> None:
+        prepared = self.prepared
+        self.store = ProcessArrayStore()
+        _share_process_state(self.state, self.store)
+        hint = prepared.dynamics.last_field_cell
+        if hint is not None:
+            hint = self.store.share(hint)
+            prepared.dynamics.last_field_cell = hint
+            prepared.dynamics.native_context = prepared.dynamics.native_context._replace(
+                accepted_field_cell=hint,
+            )
+        payload = self.store.dumps(
+            (prepared, _process_state(self.state)),
+            private_arrays=_process_private_arrays(prepared),
+        )
+        plan = prepared.memory_plan.reserve_process_padding(
+            self.store.page_padding_bytes + 7 * mmap.PAGESIZE
+        )
+        prepared = replace(prepared, memory_plan=plan)
+        self.prepared = prepared
+        payload = self.store.dumps((prepared, _process_state(self.state)))
+        components = prepared.memory_plan.components
+        reserve = sum(value for name, value in components.items() if name.startswith("process_"))
+        required = self.store.shared_bytes + (
+            prepared.memory_plan.worker_count * self.store.private_bytes
+        )
+        if required > reserve:
+            raise EngineError("process storage exceeds its predicted array reserve")
+        context = multiprocessing.get_context("spawn")
+        for _ in range(prepared.memory_plan.worker_count):
+            parent, child = context.Pipe()
+            process = context.Process(target=_process_particle_worker, args=(child, payload))
+            # Windows PipeConnection implements the same documented Connection interface.
+            worker = _ProcessWorker(process, cast(Connection, parent))
+            self.workers.append(worker)
+            try:
+                process.start()
+            except RuntimeError as error:
+                raise EngineError(
+                    "process workers require an importable main module and a guarded script entry"
+                ) from error
+            finally:
+                child.close()
+        pending = {worker.connection: worker for worker in self.workers}
+        while pending:
+            ready = self._ready_connections(pending)
+            for connection in tuple(pending):
+                if connection in ready:
+                    kind, _ = _receive_process_message(pending.pop(connection))
+                    if kind != "ready":
+                        raise EngineError("particle worker did not complete preparation")
+        self.store.release_private_templates()
+
+    def _ready_connections(self, pending: dict[Connection, _ProcessWorker]) -> Sequence[object]:
+        ready = wait([*pending, *(worker.process.sentinel for worker in self.workers)])
+        for worker in self.workers:
+            if worker.process.sentinel in ready and worker.connection not in ready:
+                raise EngineError(f"particle worker exited with code {worker.process.exitcode}")
+        return ready
+
+    def allocate_replay(
+        self, time_s: tuple[float, ...], *, include_all_particles: bool
+    ) -> _ReplayBuffer:
+        """Initialize macro views in one run-owned shared replay allocation."""
+        if self.workers and time_s and self.replay_storage is None:
+            self.replay_store = ProcessArrayStore()
+            self.replay_storage = self.replay_store.share(
+                np.empty(self.prepared.memory_plan.replay_work_bytes, dtype=np.uint8)
+            )
+        return _allocate_replay_buffer(
+            time_s,
+            self.prepared.schedule,
+            self.prepared.probe_particle_index,
+            include_all_particles=include_all_particles,
+            storage=self.replay_storage,
+        )
+
+    def advance(
+        self,
+        interval: int,
+        start: float,
+        end: float,
+        replay: _ReplayBuffer,
+        writer: ResultWriter,
+    ) -> None:
+        prepared, state = self.prepared, self.state
+        if not self.workers:
+            _advance_active_slabs(
+                prepared,
+                state.active_index.rows,
+                interval,
+                start,
+                end,
+                state.position_m,
+                state.velocity_m_s,
+                state.charge_number,
+                state.active,
+                state.lifecycle,
+                state.terminal_time_s,
+                state.event_ordinal,
+                state.physical_boundary_event_ordinal,
+                state.exact_origin_time_s,
+                state.exact_origin_position_m,
+                state.exact_origin_velocity_m_s,
+                state.start_contact_state,
+                replay,
+                state.event_statistics,
+                state.failure_reason_code,
+                writer,
+            )
+            return
+        if not replay.time_s.size:
+            # The replay owner allocates no rows or payload without requested times.
+            payload = pickle.dumps(replay, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            if self.replay_store is None:
+                raise EngineError("process replay storage was not prepared")
+            payload = self.replay_store.describe(replay)
+        self._advance_processes(interval, start, end, payload, writer)
+
+    def release_replay(self) -> None:
+        if self.replay_store is not None:
+            self.replay_store.release_views()
+
+    def _advance_processes(
+        self,
+        interval: int,
+        start: float,
+        end: float,
+        replay_payload: bytes,
+        writer: ResultWriter,
+    ) -> None:
+        rows = self.state.active_index.rows
+        width = self.prepared.memory_plan.active_slab_particles(rows.size)
+        pending: dict[Connection, _ProcessWorker] = {}
+        next_row = 0
+        for worker in self.workers:
+            if next_row < rows.size:
+                self._send_slab(worker, rows, next_row, width, interval, start, end, replay_payload)
+                pending[worker.connection] = worker
+                next_row += width
+        while pending:
+            ready = self._ready_connections(pending)
+            for worker in tuple(pending.values()):
+                if worker.connection not in ready:
+                    continue
+                if not self._receive_handoff(worker, writer):
+                    continue
+                if next_row < rows.size:
+                    self._send_slab(
+                        worker, rows, next_row, width, interval, start, end, replay_payload
+                    )
+                    next_row += width
+                else:
+                    del pending[worker.connection]
+
+    @staticmethod
+    def _send_slab(
+        worker: _ProcessWorker,
+        rows: np.ndarray,
+        offset: int,
+        width: int,
+        interval: int,
+        start: float,
+        end: float,
+        replay_payload: bytes,
+    ) -> None:
+        worker.connection.send(
+            ("slab", rows[offset : offset + width], interval, start, end, replay_payload)
+        )
+
+    def _receive_handoff(self, worker: _ProcessWorker, writer: ResultWriter) -> bool:
+        kind, payload = _receive_process_message(worker)
+        if kind == "done":
+            self.state.event_statistics.merge(cast(_EventStatistics, payload))
+            return True
+        if kind == "boundary":
+            writer.write_boundary_events(cast(BoundaryEvents, payload))
+        elif kind == "failure":
+            writer.write_failure_events(cast(FailureEvents, payload))
+        else:
+            raise EngineError("unexpected particle worker handoff")
+        worker.connection.send(("accepted",))
+        return False
+
+    def finish(self) -> None:
+        if self.finished:
+            return
+        for worker in self.workers:
+            worker.connection.send(("stop",))
+        for worker in self.workers:
+            worker.process.join(timeout=30.0)
+            if worker.process.is_alive() or worker.process.exitcode != 0:
+                raise EngineError("particle worker did not shut down successfully")
+        self.finished = True
+
+    def __exit__(self, *_: object) -> None:
+        for worker in self.workers:
+            if worker.process.is_alive():
+                worker.process.terminate()
+            if worker.process.pid is not None:
+                worker.process.join(timeout=5.0)
+            worker.connection.close()
+            worker.process.close()
+        self.replay_storage = None
+        if self.replay_store is not None:
+            self.replay_store.close()
+            self.replay_store = None
+        if self.store is not None:
+            self.store.close()
+
+
+class _NumericStageContext(NamedTuple):
+    """Prepared stage facts and accepted resident hints, sampled without writes."""
+
+    fields: NumericFieldContext
+    physics: PhysicsNumericContext
+    axisymmetric_rz: bool
+    accepted_field_cell: np.ndarray
+
+
+class _NumericStageWorkspace(NamedTuple):
+    """One exclusive stage slot; no array is selected by operating-system thread ID."""
+
+    fields: NumericFieldWorkspace
+    physics: PhysicsNumericOutputs
+    physics_incoming_status: np.ndarray
+    canonical_position_m: np.ndarray
+    canonical_velocity_m_s: np.ndarray
+    radial_sign: np.ndarray
+    cell_hint: np.ndarray
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _evaluate_prepared_stage_into(
+    context: _NumericStageContext,
+    workspace: _NumericStageWorkspace,
+    particle_index: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+) -> None:
+    """Compose coordinate, field and physics owners without a Python stage return."""
+
+    count = particle_index.size
+    stage_position = position_m
+    stage_velocity = velocity_m_s
+    if context.axisymmetric_rz:
+        stage_position = workspace.canonical_position_m[:count]
+        stage_velocity = workspace.canonical_velocity_m_s[:count]
+        rz_signed_stage_into(
+            position_m, velocity_m_s, stage_position, stage_velocity, workspace.radial_sign[:count]
+        )
+    for row in range(count):
+        workspace.cell_hint[row] = (
+            context.accepted_field_cell[particle_index[row]]
+            if context.accepted_field_cell.size
+            else -1
+        )
+    sample_prepared_fields_into(
+        context.fields, stage_position, time_s, workspace.cell_hint[:count], workspace.fields
+    )
+    evaluate_prepared_physics_into(
+        context.physics,
+        particle_index,
+        stage_velocity,
+        charge_number,
+        workspace.fields.packed_values[:count],
+        workspace.physics,
+        workspace.fields.numerical_status[:count],
+        workspace.physics_incoming_status[:count],
+    )
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _native_stage_evaluator(
+    context: _NumericStageContext,
+    workspace: _NumericStageWorkspace,
+    particle_index: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    incoming_status: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Integrator-facing fixed stage tuple; accepted hints remain read-only."""
+
+    _evaluate_prepared_stage_into(
+        context, workspace, particle_index, time_s, position_m, velocity_m_s, charge_number
+    )
+    count = particle_index.size
+    if context.axisymmetric_rz:
+        rz_vector_to_signed_into(
+            workspace.physics.acceleration_m_s2[:count],
+            workspace.radial_sign[:count],
+            workspace.physics.acceleration_m_s2[:count],
+        )
+    status = workspace.fields.numerical_status[:count]
+    for row in range(count):
+        if incoming_status[row] != NUMERICAL_STATUS_OK:
+            status[row] = incoming_status[row]
+    return (
+        workspace.physics.acceleration_m_s2[:count],
+        workspace.physics.charge_rate_number_s[:count],
+        workspace.fields.support_inside[:count],
+        workspace.physics.applicable[:count],
+        status,
+        workspace.fields.cell_id[:count],
+    )
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _native_relaxation_stage_evaluator(
+    context: _NumericStageContext,
+    workspace: _NumericStageWorkspace,
+    particle_index: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    incoming_status: np.ndarray,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
+    """Expose the physics owner's affine relaxation in the signed stage basis."""
+
+    _evaluate_prepared_stage_into(
+        context, workspace, particle_index, time_s, position_m, velocity_m_s, charge_number
+    )
+    count = particle_index.size
+    target = workspace.physics.target_velocity_m_s[:count]
+    additive = workspace.physics.additive_acceleration_m_s2[:count]
+    if context.axisymmetric_rz:
+        rz_vector_to_signed_into(target, workspace.radial_sign[:count], target)
+        rz_vector_to_signed_into(additive, workspace.radial_sign[:count], additive)
+    status = workspace.fields.numerical_status[:count]
+    for row in range(count):
+        if incoming_status[row] != NUMERICAL_STATUS_OK:
+            status[row] = incoming_status[row]
+    return (
+        workspace.physics.linear_drag_rate_s_inv[:count],
+        target,
+        additive,
+        workspace.physics.charge_rate_number_s[:count],
+        workspace.physics.charge_rate_derivative_s_inv[:count],
+        workspace.fields.support_inside[:count],
+        workspace.physics.applicable[:count],
+        status,
+        workspace.fields.cell_id[:count],
+    )
+
+
+class _GlobalCertificateWorkspace(NamedTuple):
+    velocity_abs_upper_m_s: np.ndarray
+    acceleration_abs_upper_m_s2: np.ndarray
+    applicable: np.ndarray
+    status: np.ndarray
+
+
+class _LangevinCoefficientWorkspace(NamedTuple):
+    thermal_variance_m2_s2: np.ndarray
+    numerical_status: np.ndarray
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _evaluate_langevin_coefficients_into(
+    context: _NumericStageContext,
+    stage_workspace: _NumericStageWorkspace,
+    particle_index: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    workspace: _LangevinCoefficientWorkspace,
+) -> None:
+    """Compose sampled relaxation and the FDT owner before any Brownian draw."""
+
+    count = particle_index.size
+    thermal_status = workspace.numerical_status[:count]
+    thermal_status.fill(NUMERICAL_STATUS_OK)
+    rate, target, additive, charge_rate, derivative, _, _, status, _ = (
+        _native_relaxation_stage_evaluator(
+            context,
+            stage_workspace,
+            particle_index,
+            time_s,
+            position_m,
+            velocity_m_s,
+            charge_number,
+            thermal_status,
+        )
+    )
+    brownian_thermal_variance_into(
+        context.physics.mass_kg,
+        particle_index,
+        stage_workspace.fields.packed_values[:count, context.physics.bindings.gas_temperature],
+        workspace.thermal_variance_m2_s2[:count],
+        thermal_status,
+    )
+    for row in range(count):
+        invalid = not (
+            np.isfinite(rate[row])
+            and rate[row] > 0.0
+            and np.isfinite(charge_rate[row])
+            and np.isfinite(derivative[row])
+            and derivative[row] <= 0.0
+        )
+        for component in range(2):
+            invalid = invalid or not (
+                np.isfinite(target[row, component]) and np.isfinite(additive[row, component])
+            )
+        if status[row] == NUMERICAL_STATUS_OK and (
+            thermal_status[row] != NUMERICAL_STATUS_OK or invalid
+        ):
+            status[row] = PHYSICS_NUMERICAL_FAILURE
+
+
+class _LocalCertificateWorkspace(NamedTuple):
+    position_lower_m: np.ndarray
+    position_upper_m: np.ndarray
+    velocity_lower_m_s: np.ndarray
+    velocity_upper_m_s: np.ndarray
+    acceleration_abs_upper_m_s2: np.ndarray
+    applicable: np.ndarray
+    status: np.ndarray
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _local_primitive_ranges_into(
+    context: _NumericStageContext,
+    time_lower_s: np.ndarray,
+    time_upper_s: np.ndarray,
+    position_lower_m: np.ndarray,
+    position_upper_m: np.ndarray,
+    velocity_lower_m_s: np.ndarray,
+    velocity_upper_m_s: np.ndarray,
+    field_range: NumericFieldRangeWorkspace,
+    workspace: _LocalCertificateWorkspace,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compose signed coordinate boxes and packed field ranges in reusable slots."""
+
+    count = position_lower_m.shape[0]
+    position_lower, position_upper = position_lower_m, position_upper_m
+    velocity_lower, velocity_upper = velocity_lower_m_s, velocity_upper_m_s
+    if context.axisymmetric_rz:
+        position_lower, position_upper = (
+            workspace.position_lower_m[:count],
+            workspace.position_upper_m[:count],
+        )
+        velocity_lower, velocity_upper = (
+            workspace.velocity_lower_m_s[:count],
+            workspace.velocity_upper_m_s[:count],
+        )
+        canonicalize_rz_velocity_enclosure_into(
+            position_lower_m,
+            position_upper_m,
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            velocity_lower,
+            velocity_upper,
+        )
+        canonicalize_rz_enclosure_into(
+            position_lower_m, position_upper_m, position_lower, position_upper
+        )
+    local_prepared_field_ranges_into(
+        context.fields, position_lower, position_upper, time_lower_s, time_upper_s, field_range
+    )
+    return velocity_lower, velocity_upper
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _local_certificate_into(
+    context: _NumericStageContext,
+    acceleration_context: AccelerationBoundContext,
+    particle_index: np.ndarray,
+    time_lower_s: np.ndarray,
+    time_upper_s: np.ndarray,
+    position_lower_m: np.ndarray,
+    position_upper_m: np.ndarray,
+    velocity_lower_m_s: np.ndarray,
+    velocity_upper_m_s: np.ndarray,
+    charge_lower_number: np.ndarray,
+    charge_upper_number: np.ndarray,
+    field_range: NumericFieldRangeWorkspace,
+    workspace: _LocalCertificateWorkspace,
+    bound_additive: bool,
+) -> None:
+    """Evaluate the sole field/physics owners without dictionaries or row gathers."""
+
+    velocity_lower, velocity_upper = _local_primitive_ranges_into(
+        context,
+        time_lower_s,
+        time_upper_s,
+        position_lower_m,
+        position_upper_m,
+        velocity_lower_m_s,
+        velocity_upper_m_s,
+        field_range,
+        workspace,
+    )
+    count = particle_index.size
+    available = field_range.range_available[:count]
+    applicable, status = workspace.applicable[:count], workspace.status[:count]
+    if bound_additive:
+        local_additive_acceleration_abs_upper_into(
+            context.physics,
+            acceleration_context,
+            particle_index,
+            velocity_lower,
+            velocity_upper,
+            charge_lower_number,
+            charge_upper_number,
+            field_range.packed_lower[:count],
+            field_range.packed_upper[:count],
+            available,
+            workspace.acceleration_abs_upper_m_s2[:count],
+            applicable,
+            status,
+        )
+    else:
+        if context.fields.field_count == 0:
+            available.fill(True)
+        evaluate_local_continuous_applicability_into(
+            context.physics,
+            particle_index,
+            velocity_lower,
+            velocity_upper,
+            charge_lower_number,
+            charge_upper_number,
+            field_range.packed_lower[:count],
+            field_range.packed_upper[:count],
+            available,
+            applicable,
+            status,
+        )
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _global_applicability_into(
+    context: ContinuousApplicabilityContext,
+    particle_index: np.ndarray,
+    velocity_lower_m_s: np.ndarray,
+    velocity_upper_m_s: np.ndarray,
+    charge_lower_number: np.ndarray,
+    charge_upper_number: np.ndarray,
+    workspace: _GlobalCertificateWorkspace,
+) -> None:
+    """Compose all global model gates and the charge invariant in one call."""
+
+    count = particle_index.size
+    velocity_abs = workspace.velocity_abs_upper_m_s[:count]
+    for row in range(count):
+        for component in range(2):
+            velocity_abs[row, component] = np.maximum(
+                abs(velocity_lower_m_s[row, component]), abs(velocity_upper_m_s[row, component])
+            )
+    applicable, status = workspace.applicable[:count], workspace.status[:count]
+    evaluate_continuous_applicability_into(
+        context, particle_index, velocity_abs, applicable, status
+    )
+    charge_interval_inside_prepared_invariant_into(
+        context, charge_lower_number, charge_upper_number, applicable, status
+    )
+
+
 @dataclass(slots=True)
 class _StageDynamics:
     """Compose one resolved physics plan over shared stage field samples."""
@@ -597,9 +1615,81 @@ class _StageDynamics:
     fields: PreparedFieldSet
     coordinate_system: str
     last_field_cell: np.ndarray | None
-    field_workspaces: tuple[FieldWorkspace, ...]
-    physics_workspaces: tuple[PhysicsRuntimeWorkspace, ...]
-    physics_workspace_cursor: int = 0
+    field_workspace: FieldWorkspace
+    physics_workspace: PhysicsRuntimeWorkspace
+    native_context: _NumericStageContext = dataclass_field(init=False)
+    native_workspace: _NumericStageWorkspace = dataclass_field(init=False)
+    native_rk4_workspace: Rk4AdvanceWorkspace | None = None
+    native_stage_advance_workspace: StageAdvanceWorkspace | None = None
+    native_relaxation_workspace: RelaxationAdvanceWorkspace | None = None
+    field_range_workspace: NumericFieldRangeWorkspace | None = None
+    global_certificate_workspace: _GlobalCertificateWorkspace = dataclass_field(init=False)
+    local_certificate_workspace: _LocalCertificateWorkspace = dataclass_field(init=False)
+    langevin_coefficient_workspace: _LangevinCoefficientWorkspace = dataclass_field(init=False)
+
+    def __post_init__(self) -> None:
+        capacity = self.field_workspace.capacity
+        self.global_certificate_workspace = _GlobalCertificateWorkspace(
+            np.empty((capacity, 2), dtype="<f8"),
+            np.empty((capacity, 2), dtype="<f8"),
+            np.empty(capacity, dtype=np.bool_),
+            np.empty(capacity, dtype=np.uint8),
+        )
+        local_capacity = (
+            self.field_range_workspace.range_available.size
+            if self.field_range_workspace is not None
+            else 0
+        )
+        box_capacity = local_capacity if self.coordinate_system == "axisymmetric_rz" else 0
+        self.local_certificate_workspace = _LocalCertificateWorkspace(
+            np.empty((box_capacity, 2), dtype="<f8"),
+            np.empty((box_capacity, 2), dtype="<f8"),
+            np.empty((box_capacity, 2), dtype="<f8"),
+            np.empty((box_capacity, 2), dtype="<f8"),
+            np.empty((local_capacity, 2), dtype="<f8"),
+            np.empty(local_capacity, dtype=np.bool_),
+            np.empty(local_capacity, dtype=np.uint8),
+        )
+        langevin_capacity = capacity if self.runtime.plan.noise is not None else 0
+        self.langevin_coefficient_workspace = _LangevinCoefficientWorkspace(
+            np.empty(langevin_capacity, dtype="<f8"),
+            np.empty(langevin_capacity, dtype=np.uint8),
+        )
+        self.native_context = _NumericStageContext(
+            self.fields.numeric_context,
+            self.runtime.native_context,
+            self.coordinate_system == "axisymmetric_rz",
+            (np.empty(0, dtype="<i8") if self.last_field_cell is None else self.last_field_cell),
+        )
+        rz_capacity = capacity if self.native_context.axisymmetric_rz else 0
+        self.native_workspace = _NumericStageWorkspace(
+            self.field_workspace.numeric,
+            self.physics_workspace.numeric_outputs(capacity),
+            self.physics_workspace.incoming_status,
+            np.empty((rz_capacity, 2), dtype="<f8"),
+            np.empty((rz_capacity, 2), dtype="<f8"),
+            np.empty(rz_capacity, dtype="<f8"),
+            np.empty(capacity, dtype="<i8"),
+        )
+
+    @property
+    def native_stage_evaluator(self) -> Callable:
+        return _native_stage_evaluator
+
+    @property
+    def native_relaxation_stage_evaluator(self) -> Callable:
+        return _native_relaxation_stage_evaluator
+
+    def prepare_advance_workspaces(self, *, dense_enabled: bool, exact_enabled: bool) -> None:
+        """Allocate the numerical advance scratch from the already planned stage capacity."""
+
+        capacity = self.field_workspace.capacity
+        if dense_enabled:
+            self.native_rk4_workspace = allocate_rk4_advance_workspace(capacity)
+        elif exact_enabled:
+            self.native_stage_advance_workspace = allocate_stage_advance_workspace(capacity)
+        else:
+            self.native_relaxation_workspace = allocate_relaxation_advance_workspace(capacity)
 
     def invalidate_field_cell(self, particle_index: np.ndarray) -> None:
         """Discard location hints after a discontinuous topology transfer."""
@@ -615,6 +1705,8 @@ class _StageDynamics:
         velocity_m_s: np.ndarray,
         charge_number: np.ndarray,
     ) -> DynamicsEvaluation:
+        """Return stage views borrowed until the next dynamics evaluation."""
+
         evaluation, sampled, radial_sign, numerical_status = self._evaluate_stage(
             particle_index,
             time_s,
@@ -644,7 +1736,7 @@ class _StageDynamics:
         velocity_m_s: np.ndarray,
         charge_number: np.ndarray,
     ) -> RelaxationEvaluation:
-        """Return the owned linear-drag decomposition for exponential midpoint."""
+        """Return stage views borrowed until the next dynamics evaluation."""
 
         evaluation, sampled, radial_sign, numerical_status = self._evaluate_stage(
             particle_index,
@@ -683,48 +1775,32 @@ class _StageDynamics:
     ) -> _LangevinCoefficients:
         """Sample and freeze the one supported Brownian model at a macro root."""
 
-        evaluation, sampled, radial_sign, numerical_status = self._evaluate_stage(
+        count = particle_index.size
+        workspace = self.langevin_coefficient_workspace
+        if count > workspace.numerical_status.size:
+            raise EngineError("Langevin coefficients exceed their planned slab capacity")
+        _evaluate_langevin_coefficients_into(
+            self.native_context,
+            self.native_workspace,
             particle_index,
             time_s,
             position_m,
             velocity_m_s,
             charge_number,
+            workspace,
         )
-        target_velocity = evaluation.target_velocity_m_s
-        additive_acceleration = evaluation.additive_acceleration_m_s2
-        if radial_sign is not None:
-            target_velocity = rz_canonical_vector_to_signed(target_velocity, radial_sign)
-            additive_acceleration = rz_canonical_vector_to_signed(
-                additive_acceleration,
-                radial_sign,
-            )
-        thermal, thermal_status = self.runtime.brownian_thermal_velocity_variance_batch(
-            particle_index,
-            sampled.values,
-        )
-        status = numerical_status.copy()
-        thermal_failed = thermal_status != NUMERICAL_STATUS_OK
-        status[(status == NUMERICAL_STATUS_OK) & thermal_failed] = PHYSICS_NUMERICAL_FAILURE
-        invalid = ~np.isfinite(thermal) | (thermal <= 0.0)
-        invalid |= ~np.isfinite(evaluation.linear_drag_rate_s_inv)
-        invalid |= evaluation.linear_drag_rate_s_inv <= 0.0
-        invalid |= ~np.isfinite(target_velocity).all(axis=1)
-        invalid |= ~np.isfinite(additive_acceleration).all(axis=1)
-        invalid |= ~np.isfinite(evaluation.charge_rate_number_s)
-        invalid |= ~np.isfinite(evaluation.charge_rate_derivative_s_inv)
-        invalid |= evaluation.charge_rate_derivative_s_inv > 0.0
-        status[(status == NUMERICAL_STATUS_OK) & invalid] = PHYSICS_NUMERICAL_FAILURE
+        stage = self.native_workspace
         return _LangevinCoefficients(
-            drag_rate_s_inv=evaluation.linear_drag_rate_s_inv.copy(),
-            equilibrium_velocity_m_s=target_velocity.copy(),
-            additive_acceleration_m_s2=additive_acceleration.copy(),
-            charge_affine_rate_number_s=evaluation.charge_rate_number_s.copy(),
-            charge_rate_derivative_s_inv=evaluation.charge_rate_derivative_s_inv.copy(),
-            thermal_velocity_variance_m2_s2=thermal.copy(),
-            support_inside=sampled.support_inside.copy(),
-            applicability_inside=evaluation.applicable.copy(),
-            numerical_status=status,
-            field_cell_id=sampled.cell_id.copy(),
+            drag_rate_s_inv=stage.physics.linear_drag_rate_s_inv[:count].copy(),
+            equilibrium_velocity_m_s=stage.physics.target_velocity_m_s[:count].copy(),
+            additive_acceleration_m_s2=stage.physics.additive_acceleration_m_s2[:count].copy(),
+            charge_affine_rate_number_s=stage.physics.charge_rate_number_s[:count].copy(),
+            charge_rate_derivative_s_inv=stage.physics.charge_rate_derivative_s_inv[:count].copy(),
+            thermal_velocity_variance_m2_s2=workspace.thermal_variance_m2_s2[:count].copy(),
+            support_inside=stage.fields.support_inside[:count].copy(),
+            applicability_inside=stage.physics.applicable[:count].copy(),
+            numerical_status=stage.fields.numerical_status[:count].copy(),
+            field_cell_id=stage.fields.cell_id[:count].copy(),
         )
 
     def _evaluate_stage(
@@ -740,35 +1816,26 @@ class _StageDynamics:
         count = int(particle_index.size)
         if time_s.shape != (count,):
             raise PhysicsEvaluationError("stage times must have shape [N]")
-        radial_sign: np.ndarray | None = None
-        stage_position_m = position_m
-        stage_velocity_m_s = velocity_m_s
-        if self.coordinate_system == "axisymmetric_rz":
-            stage_position_m, stage_velocity_m_s, radial_sign = rz_signed_stage_to_canonical(
-                position_m,
-                velocity_m_s,
-            )
-        cell_hint = None if self.last_field_cell is None else self.last_field_cell[particle_index]
-        slot = self.physics_workspace_cursor
-        sampled, numerical_status = self.fields.sample_batch(
-            stage_position_m,
-            cell_hint=cell_hint,
-            workspace=self.field_workspaces[slot],
-            time_s=time_s,
-        )
-        workspace = self.physics_workspaces[slot]
-        self.physics_workspace_cursor = (self.physics_workspace_cursor + 1) % len(
-            self.physics_workspaces
-        )
-        evaluation, numerical_status = self.runtime.evaluate_batch(
+        _evaluate_prepared_stage_into(
+            self.native_context,
+            self.native_workspace,
             particle_index,
-            stage_velocity_m_s,
+            time_s,
+            position_m,
+            velocity_m_s,
             charge_number,
-            sampled.values,
-            numerical_status=numerical_status,
-            workspace=workspace,
         )
-        return evaluation, sampled, radial_sign, numerical_status
+        sampled = self.field_workspace.batch(count)
+        return (
+            self.physics_workspace.evaluation(count),
+            sampled,
+            (
+                self.native_workspace.radial_sign[:count]
+                if self.native_context.axisymmetric_rz
+                else None
+            ),
+            self.field_workspace.numerical_status[:count],
+        )
 
     def commit_field_cell(
         self,
@@ -788,9 +1855,22 @@ class _StageDynamics:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Bound every configured acceleration component for an RK stage box."""
 
-        return self.runtime.acceleration_abs_upper_batch(
+        count = particle_index.size
+        workspace = self.global_certificate_workspace
+        if count > workspace.status.size:
+            raise EngineError("acceleration certificate exceeds its planned slab capacity")
+        workspace.status[:count].fill(NUMERICAL_STATUS_OK)
+        acceleration_abs_upper_into(
+            self.runtime.native_acceleration_bound_context,
             particle_index,
             velocity_abs_upper_m_s,
+            workspace.acceleration_abs_upper_m_s2[:count],
+            workspace.status[:count],
+            True,
+        )
+        return (
+            workspace.acceleration_abs_upper_m_s2[:count].copy(),
+            workspace.status[:count].copy(),
         )
 
     def continuous_applicability_batch(
@@ -815,24 +1895,22 @@ class _StageDynamics:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Try the prepared run-global applicability certificate cheaply."""
 
-        velocity_abs_upper = np.maximum(
-            np.abs(velocity_lower_m_s),
-            np.abs(velocity_upper_m_s),
-        )
-        certified, status = self.runtime.continuous_applicability_batch(
+        count = particle_index.size
+        workspace = self.global_certificate_workspace
+        if count > workspace.applicable.size:
+            raise EngineError("global applicability certificate exceeds its planned slab capacity")
+        _global_applicability_into(
+            self.runtime.native_applicability_context,
             particle_index,
-            velocity_abs_upper,
-        )
-        charge_certified, charge_status = self.runtime.charge_interval_inside_prepared_invariant(
+            velocity_lower_m_s,
+            velocity_upper_m_s,
             charge_lower_number,
             charge_upper_number,
+            workspace,
         )
-        certified &= charge_certified
-        status[charge_status != CONTINUOUS_APPLICABILITY_OK] = (
-            CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
-        )
-        certified[status != CONTINUOUS_APPLICABILITY_OK] = False
-        return certified, status
+        # The host controller may retain a verdict while a later certificate
+        # reuses its slot. Native callers use the workspace directly.
+        return workspace.applicable[:count].copy(), workspace.status[:count].copy()
 
     def prepared_charge_invariant_interval(
         self,
@@ -856,60 +1934,32 @@ class _StageDynamics:
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Certify one signed local path box using field-cell primitive ranges."""
 
-        position_lower = np.asarray(position_lower_m, dtype="<f8")
-        position_upper = np.asarray(position_upper_m, dtype="<f8")
-        velocity_lower = np.asarray(velocity_lower_m_s, dtype="<f8")
-        velocity_upper = np.asarray(velocity_upper_m_s, dtype="<f8")
-        if self.coordinate_system == "axisymmetric_rz":
-            signed_position_lower = position_lower
-            signed_position_upper = position_upper
-            position_lower, position_upper = canonicalize_rz_enclosure(
-                signed_position_lower,
-                signed_position_upper,
-            )
-            velocity_lower, velocity_upper = _canonicalize_rz_velocity_enclosure(
-                signed_position_lower,
-                signed_position_upper,
-                velocity_lower,
-                velocity_upper,
-            )
-        local_fields = self.fields.local_component_bounds(
-            position_lower,
-            position_upper,
-            time_lower_s=time_lower_s,
-            time_upper_s=time_upper_s,
+        count = particle_index.size
+        field_range = self.field_range_workspace
+        workspace = self.local_certificate_workspace
+        if field_range is None or count > workspace.applicable.size:
+            raise EngineError("local applicability exceeds its planned slab capacity")
+        _local_certificate_into(
+            self.native_context,
+            self.runtime.native_acceleration_bound_context,
+            particle_index,
+            time_lower_s,
+            time_upper_s,
+            position_lower_m,
+            position_upper_m,
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            charge_lower_number,
+            charge_upper_number,
+            field_range,
+            workspace,
+            False,
         )
-        range_available = local_fields.range_available
-        if not self.fields.fields:
-            range_available = np.ones(particle_index.size, dtype=np.bool_)
-        certified = np.zeros(particle_index.size, dtype=np.bool_)
-        status = np.full(
-            particle_index.size,
-            CONTINUOUS_APPLICABILITY_OK,
-            dtype=np.uint8,
+        return (
+            workspace.applicable[:count].copy(),
+            workspace.status[:count].copy(),
+            field_range.range_available[:count].copy(),
         )
-        available_rows = np.flatnonzero(range_available).astype("<i8", copy=False)
-        if available_rows.size:
-            primitive_ranges = {
-                name: LocalPrimitiveRange(
-                    local_fields.lower[name][available_rows],
-                    local_fields.upper[name][available_rows],
-                )
-                for name in local_fields.lower
-            }
-            available_certified, available_status = (
-                self.runtime.local_continuous_applicability_batch(
-                    particle_index[available_rows],
-                    velocity_lower[available_rows],
-                    velocity_upper[available_rows],
-                    charge_lower_number[available_rows],
-                    charge_upper_number[available_rows],
-                    primitive_ranges,
-                )
-            )
-            certified[available_rows] = available_certified
-            status[available_rows] = available_status
-        return certified, status, range_available
 
     def local_additive_acceleration_abs_upper_batch(
         self,
@@ -925,61 +1975,33 @@ class _StageDynamics:
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Bound midpoint force over one local predictor enclosure."""
 
-        position_lower = np.asarray(position_lower_m, dtype="<f8")
-        position_upper = np.asarray(position_upper_m, dtype="<f8")
-        velocity_lower = np.asarray(velocity_lower_m_s, dtype="<f8")
-        velocity_upper = np.asarray(velocity_upper_m_s, dtype="<f8")
-        if self.coordinate_system == "axisymmetric_rz":
-            signed_position_lower = position_lower
-            signed_position_upper = position_upper
-            position_lower, position_upper = canonicalize_rz_enclosure(
-                signed_position_lower,
-                signed_position_upper,
-            )
-            velocity_lower, velocity_upper = _canonicalize_rz_velocity_enclosure(
-                signed_position_lower,
-                signed_position_upper,
-                velocity_lower,
-                velocity_upper,
-            )
-        local_fields = self.fields.local_component_bounds(
-            position_lower,
-            position_upper,
-            time_lower_s=time_lower_s,
-            time_upper_s=time_upper_s,
+        count = particle_index.size
+        field_range = self.field_range_workspace
+        workspace = self.local_certificate_workspace
+        if field_range is None or count > workspace.applicable.size:
+            raise EngineError("local acceleration certificate exceeds its planned slab capacity")
+        _local_certificate_into(
+            self.native_context,
+            self.runtime.native_acceleration_bound_context,
+            particle_index,
+            time_lower_s,
+            time_upper_s,
+            position_lower_m,
+            position_upper_m,
+            velocity_lower_m_s,
+            velocity_upper_m_s,
+            charge_lower_number,
+            charge_upper_number,
+            field_range,
+            workspace,
+            True,
         )
-        range_available = local_fields.range_available
-        count = int(particle_index.size)
-        bound = np.zeros((count, 2), dtype="<f8")
-        applicable = np.zeros(count, dtype=np.bool_)
-        status = np.full(
-            count,
-            CONTINUOUS_APPLICABILITY_OK,
-            dtype=np.uint8,
+        return (
+            workspace.acceleration_abs_upper_m_s2[:count].copy(),
+            workspace.applicable[:count].copy(),
+            workspace.status[:count].copy(),
+            field_range.range_available[:count].copy(),
         )
-        available_rows = np.flatnonzero(range_available).astype("<i8", copy=False)
-        if available_rows.size:
-            primitive_ranges = {
-                name: LocalPrimitiveRange(
-                    local_fields.lower[name][available_rows],
-                    local_fields.upper[name][available_rows],
-                )
-                for name in local_fields.lower
-            }
-            local_bound, local_applicable, local_status = (
-                self.runtime.local_additive_acceleration_abs_upper_batch(
-                    particle_index[available_rows],
-                    velocity_lower[available_rows],
-                    velocity_upper[available_rows],
-                    charge_lower_number[available_rows],
-                    charge_upper_number[available_rows],
-                    primitive_ranges,
-                )
-            )
-            bound[available_rows] = local_bound
-            applicable[available_rows] = local_applicable
-            status[available_rows] = local_status
-        return bound, applicable, status, range_available
 
     def linear_relaxation_abs_bounds(
         self,
@@ -1006,34 +2028,14 @@ class _StageDynamics:
         )
 
 
-def _canonicalize_rz_velocity_enclosure(
-    position_lower_m: np.ndarray,
-    position_upper_m: np.ndarray,
-    velocity_lower_m_s: np.ndarray,
-    velocity_upper_m_s: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Map signed-chart velocity boxes into the canonical radial basis."""
-
-    lower = np.asarray(velocity_lower_m_s, dtype="<f8").copy()
-    upper = np.asarray(velocity_upper_m_s, dtype="<f8").copy()
-    radial_position_lower = np.asarray(position_lower_m, dtype="<f8")[:, 0]
-    radial_position_upper = np.asarray(position_upper_m, dtype="<f8")[:, 0]
-    negative = radial_position_upper < 0.0
-    crossing = (radial_position_lower < 0.0) & ~negative
-    negative_lower = -upper[negative, 0]
-    negative_upper = -lower[negative, 0]
-    lower[negative, 0] = negative_lower
-    upper[negative, 0] = negative_upper
-    radial_abs = np.maximum(np.abs(lower[crossing, 0]), np.abs(upper[crossing, 0]))
-    lower[crossing, 0] = -radial_abs
-    upper[crossing, 0] = radial_abs
-    return lower, upper
-
-
-def run_simulation(case: SimulationCase, output: _PathInput) -> RunSummary:
+def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1) -> RunSummary:
     """Run or resume the selected production profile and publish one complete result."""
 
-    prepared = _prepare(case)
+    if isinstance(workers, bool) or not isinstance(workers, int) or workers < 1:
+        raise EngineError("workers must be a positive integer")
+    if workers > (os.cpu_count() or 1):
+        raise EngineError("workers exceeds the available logical CPU count")
+    prepared = _prepare(case, workers=workers)
     schedule = prepared.schedule
     count = schedule.particle_count
     commit_work_threshold = _durable_commit_work_threshold(count)
@@ -1044,141 +2046,121 @@ def run_simulation(case: SimulationCase, output: _PathInput) -> RunSummary:
         epoch_start_work = _durable_commit_work(state)
         epoch_open = False
         try:
-            while state.macro_start_s < case.spec.time.end_s:
-                if not epoch_open:
-                    writer.begin_epoch()
-                    epoch_open = True
-                macro_start = state.macro_start_s
-                macro_end = _macro_step_end(
-                    case.spec.time,
-                    state.macro_step_count,
-                    macro_start_s=macro_start,
-                    split_times_s=prepared.field_time_split_s,
-                )
-                if macro_end <= macro_start:
-                    raise EngineError("macro-step time no longer advances at float64 precision")
+            with _ProcessTeam(prepared, state) as team:
+                prepared = team.prepared
+                while state.macro_start_s < case.spec.time.end_s:
+                    if not epoch_open:
+                        writer.begin_epoch()
+                        epoch_open = True
+                    macro_start = state.macro_start_s
+                    macro_end = _macro_step_end(
+                        case.spec.time,
+                        state.macro_step_count,
+                        macro_start_s=macro_start,
+                        split_times_s=prepared.field_time_split_s,
+                    )
+                    if macro_end <= macro_start:
+                        raise EngineError("macro-step time no longer advances at float64 precision")
 
-                released, state.release_cursor = _activate_releases(
-                    writer,
-                    schedule,
-                    state.release_cursor,
-                    macro_end,
-                    prepared.memory_plan.slab_particles,
-                    state.active,
-                    state.lifecycle,
-                    state.event_ordinal,
-                )
-                state.active_index.add(released)
+                    released, state.release_cursor = _activate_releases(
+                        writer,
+                        schedule,
+                        state.release_cursor,
+                        macro_end,
+                        prepared.memory_plan.slab_particles,
+                        state.active,
+                        state.lifecycle,
+                        state.event_ordinal,
+                    )
+                    state.active_index.add(released)
 
-                frame_stop = _frame_stop(
-                    prepared.frame_times_s,
-                    state.frame_cursor,
-                    macro_end,
-                )
-                probe_stop = _frame_stop(
-                    prepared.probe_times_s,
-                    state.probe_cursor,
-                    macro_end,
-                )
-                frame_batch_times_s = prepared.frame_times_s[state.frame_cursor : frame_stop]
-                probe_batch_times_s = prepared.probe_times_s[state.probe_cursor : probe_stop]
-                replay_times_s = tuple(sorted(set(frame_batch_times_s) | set(probe_batch_times_s)))
-                replay = _allocate_replay_buffer(
-                    replay_times_s,
+                    frame_stop = _frame_stop(
+                        prepared.frame_times_s,
+                        state.frame_cursor,
+                        macro_end,
+                    )
+                    probe_stop = _frame_stop(
+                        prepared.probe_times_s,
+                        state.probe_cursor,
+                        macro_end,
+                    )
+                    frame_batch_times_s = prepared.frame_times_s[state.frame_cursor : frame_stop]
+                    probe_batch_times_s = prepared.probe_times_s[state.probe_cursor : probe_stop]
+                    replay_times_s = tuple(
+                        sorted(set(frame_batch_times_s) | set(probe_batch_times_s))
+                    )
+                    replay = team.allocate_replay(
+                        replay_times_s,
+                        include_all_particles=bool(frame_batch_times_s),
+                    )
+                    team.advance(state.macro_step_count, macro_start, macro_end, replay, writer)
+                    state.active_index.compact(state.active)
+                    _finalize_replay_buffer(
+                        replay,
+                        schedule,
+                        state.position_m,
+                        state.velocity_m_s,
+                        state.charge_number,
+                        state.lifecycle,
+                        state.terminal_time_s,
+                    )
+
+                    while state.frame_cursor < frame_stop:
+                        writer.write_frame(
+                            _frame_from_replay(
+                                prepared.frame_times_s[state.frame_cursor],
+                                schedule,
+                                replay,
+                            )
+                        )
+                        state.frame_cursor += 1
+
+                    while state.probe_cursor < probe_stop:
+                        writer.write_probe(
+                            _probe_from_replay(
+                                prepared.probe_times_s[state.probe_cursor],
+                                prepared.probe_particle_index,
+                                schedule,
+                                replay,
+                            )
+                        )
+                        state.probe_cursor += 1
+
+                    del replay
+                    team.release_replay()
+                    writer.write_lifecycle_series(_lifecycle_series_at(macro_end, state.lifecycle))
+                    state.macro_start_s = macro_end
+                    state.macro_step_count += 1
+                    completed_work = _durable_commit_work(state)
+                    if (
+                        completed_work - epoch_start_work >= commit_work_threshold
+                        or macro_end >= case.spec.time.end_s
+                    ):
+                        writer.commit_epoch(_checkpoint_state(prepared, state))
+                        epoch_open = False
+                        epoch_start_work = completed_work
+
+                team.finish()
+                _validate_completed_run_state(prepared, state)
+                final = _final_particles(
                     schedule,
-                    prepared.probe_particle_index,
-                    include_all_particles=bool(frame_batch_times_s),
-                )
-                _advance_active_slabs(
-                    prepared,
-                    state.active_index.rows,
-                    state.macro_step_count,
-                    macro_start,
-                    macro_end,
                     state.position_m,
                     state.velocity_m_s,
                     state.charge_number,
-                    state.active,
-                    state.lifecycle,
-                    state.terminal_time_s,
-                    state.event_ordinal,
-                    state.physical_boundary_event_ordinal,
-                    state.exact_origin_time_s,
-                    state.exact_origin_position_m,
-                    state.exact_origin_velocity_m_s,
-                    state.start_contact_state,
-                    replay,
-                    state.event_statistics,
-                    state.failure_reason_code,
-                    writer,
-                )
-                state.active_index.compact(
-                    state.active,
-                    prepared.memory_plan.slab_particles,
-                )
-                _finalize_replay_buffer(
-                    replay,
-                    schedule,
-                    state.position_m,
-                    state.velocity_m_s,
-                    state.charge_number,
-                    state.lifecycle,
-                    state.terminal_time_s,
-                )
-
-                while state.frame_cursor < frame_stop:
-                    writer.write_frame(
-                        _frame_from_replay(
-                            prepared.frame_times_s[state.frame_cursor],
-                            schedule,
-                            replay,
-                        )
-                    )
-                    state.frame_cursor += 1
-
-                while state.probe_cursor < probe_stop:
-                    writer.write_probe(
-                        _probe_from_replay(
-                            prepared.probe_times_s[state.probe_cursor],
-                            prepared.probe_particle_index,
-                            schedule,
-                            replay,
-                        )
-                    )
-                    state.probe_cursor += 1
-
-                writer.write_lifecycle_series(_lifecycle_series_at(macro_end, state.lifecycle))
-                state.macro_start_s = macro_end
-                state.macro_step_count += 1
-                completed_work = _durable_commit_work(state)
-                if (
-                    completed_work - epoch_start_work >= commit_work_threshold
-                    or macro_end >= case.spec.time.end_s
-                ):
-                    writer.commit_epoch(_checkpoint_state(prepared, state))
-                    epoch_open = False
-                    epoch_start_work = completed_work
-
-            _validate_completed_run_state(prepared, state)
-            final = _final_particles(
-                schedule,
-                state.position_m,
-                state.velocity_m_s,
-                state.charge_number,
-                state.lifecycle,
-                state.failure_reason_code,
-                case.spec.time.end_s,
-            )
-            return writer.finalize(
-                final,
-                _manifest(
-                    prepared,
                     state.lifecycle,
                     state.failure_reason_code,
-                    state.event_statistics,
-                ),
-                macro_step_count=state.macro_step_count,
-            )
+                    case.spec.time.end_s,
+                )
+                return writer.finalize(
+                    final,
+                    _manifest(
+                        prepared,
+                        state.lifecycle,
+                        state.failure_reason_code,
+                        state.event_statistics,
+                    ),
+                    macro_step_count=state.macro_step_count,
+                )
         except ValueError as error:
             raise EngineError(str(error)) from error
 
@@ -1644,7 +2626,7 @@ def _advance_active_slabs(
     replay: _ReplayBuffer,
     event_statistics: _EventStatistics,
     failure_reason_code: np.ndarray,
-    writer: ResultWriter,
+    writer: _EventSink,
 ) -> None:
     """Advance bounded slabs and flush each stable payload."""
 
@@ -1703,7 +2685,7 @@ def _advance_particle_slab(
     start_contact_state: np.ndarray,
     replay: _ReplayBuffer,
     failure_reason_code: np.ndarray,
-    writer: ResultWriter,
+    writer: _EventSink,
 ) -> _SlabResult:
     """Own one disjoint slab's proposal, residual work, and failures."""
 
@@ -2030,6 +3012,7 @@ def _prepare_langevin_root_batch(
     particles: np.ndarray,
     starts_s: np.ndarray,
     requested_duration_s: np.ndarray,
+    requested_target_time_s: float,
     start_position_m: np.ndarray,
     start_velocity_m_s: np.ndarray,
     start_charge_number: np.ndarray,
@@ -2121,7 +3104,11 @@ def _prepare_langevin_root_batch(
             particles[rows],
             starts_s[rows],
             duration_s[rows],
-            requested_duration_s[rows],
+            np.where(
+                duration_s[rows] < requested_duration_s[rows],
+                starts_s[rows] + duration_s[rows],
+                requested_target_time_s,
+            ),
             start_position_m[rows],
             start_velocity_m_s[rows],
             start_charge_number[rows],
@@ -2217,7 +3204,7 @@ def _advance_brownian_slab(
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
     failure_reason_code: np.ndarray,
-    writer: ResultWriter,
+    writer: _EventSink,
     event_buffer: _BoundaryEventBuffer,
     failure_buffer: _FailureEventBuffer,
 ) -> None:
@@ -2278,16 +3265,23 @@ def _advance_brownian_slab(
     del root_start_position_m
     del root_start_velocity_m_s
 
+    adaptive_workspace = _BrownianAdaptiveWorkspace.allocate(
+        capacity, noise.adaptive_max_depth - noise.interval_tree_depth
+    )
+    (
+        next_particle_index,
+        next_start_time_s,
+        next_start_position_m,
+        next_start_velocity_m_s,
+        next_root_interval,
+        next_stochastic_event_restart_count,
+        next_guard_restart_count,
+    ) = _allocate_brownian_pending_columns(capacity)
+    next_count = np.zeros(1, dtype="<i8")
+    current_bank_owned = False
     while pending_count:
-        next_particle_index = np.empty(capacity, dtype="<i8")
-        next_start_time_s = np.empty(capacity, dtype="<f8")
-        next_start_position_m = np.empty((capacity, 2), dtype="<f8")
-        next_start_velocity_m_s = np.empty((capacity, 2), dtype="<f8")
-        next_root_interval = np.empty(capacity, dtype="<i8")
-        next_stochastic_event_restart_count = np.empty(capacity, dtype="<i8")
-        next_guard_restart_count = np.empty(capacity, dtype="<i8")
-        next_count = np.zeros(1, dtype="<i8")
-        _advance_brownian_root_wave(
+        next_count[0] = 0
+        runtime = _prepare_brownian_root_wave(
             prepared,
             pending_particle_index[:pending_count],
             macro_interval,
@@ -2324,25 +3318,88 @@ def _advance_brownian_slab(
             next_stochastic_event_restart_count,
             next_guard_restart_count,
             next_count,
+            adaptive_workspace,
         )
+        if runtime is not None:
+            while _advance_brownian_base_leaf(runtime):
+                pass
+            _finish_brownian_root_wave(runtime, macro_end_s)
+        # Every base/adaptive consumer has returned before either pending bank
+        # can be recycled for the next root wave.
+        del runtime
         pending_count = int(next_count[0])
-        del pending_particle_index
-        del pending_start_time_s
-        del pending_start_position_m
-        del pending_start_velocity_m_s
-        del pending_root_interval
-        del pending_stochastic_event_restart_count
-        del pending_guard_restart_count
-        pending_particle_index = next_particle_index
-        pending_start_time_s = next_start_time_s
-        pending_start_position_m = next_start_position_m
-        pending_start_velocity_m_s = next_start_velocity_m_s
-        pending_root_interval = next_root_interval
-        pending_stochastic_event_restart_count = next_stochastic_event_restart_count
-        pending_guard_restart_count = next_guard_restart_count
+        if not pending_count:
+            break
+        previous_columns = None
+        if current_bank_owned:
+            previous_columns = (
+                pending_particle_index,
+                pending_start_time_s,
+                pending_start_position_m,
+                pending_start_velocity_m_s,
+                pending_root_interval,
+                pending_stochastic_event_restart_count,
+                pending_guard_restart_count,
+            )
+        (
+            pending_particle_index,
+            pending_start_time_s,
+            pending_start_position_m,
+            pending_start_velocity_m_s,
+            pending_root_interval,
+            pending_stochastic_event_restart_count,
+            pending_guard_restart_count,
+        ) = (
+            next_particle_index,
+            next_start_time_s,
+            next_start_position_m,
+            next_start_velocity_m_s,
+            next_root_interval,
+            next_stochastic_event_restart_count,
+            next_guard_restart_count,
+        )
+        # The initial source bank is borrowed.  Drop those references before
+        # allocating its writable replacement; never recycle caller inputs.
+        if previous_columns is None:
+            previous_columns = _allocate_brownian_pending_columns(capacity)
+        (
+            next_particle_index,
+            next_start_time_s,
+            next_start_position_m,
+            next_start_velocity_m_s,
+            next_root_interval,
+            next_stochastic_event_restart_count,
+            next_guard_restart_count,
+        ) = previous_columns
+        del previous_columns
+        current_bank_owned = True
 
 
-def _advance_brownian_root_wave(
+def _allocate_brownian_pending_columns(
+    capacity: int,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
+    """Allocate one writable 72 B/row fresh-root bank, reused after full unwind."""
+
+    return (
+        np.empty(capacity, dtype="<i8"),
+        np.empty(capacity, dtype="<f8"),
+        np.empty((capacity, 2), dtype="<f8"),
+        np.empty((capacity, 2), dtype="<f8"),
+        np.empty(capacity, dtype="<i8"),
+        np.empty(capacity, dtype="<i8"),
+        np.empty(capacity, dtype="<i8"),
+    )
+
+
+def _prepare_brownian_root_wave(
     prepared: _PreparedRun,
     particle_index: np.ndarray,
     macro_interval: int,
@@ -2368,7 +3425,7 @@ def _advance_brownian_root_wave(
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
     failure_reason_code: np.ndarray,
-    writer: ResultWriter,
+    writer: _EventSink,
     event_buffer: _BoundaryEventBuffer,
     failure_buffer: _FailureEventBuffer,
     pending_particle_index: np.ndarray,
@@ -2379,8 +3436,9 @@ def _advance_brownian_root_wave(
     pending_stochastic_event_restart_count: np.ndarray,
     pending_guard_restart_count: np.ndarray,
     pending_count: np.ndarray,
-) -> None:
-    """Consume one fresh-root wave and leave only minimal restart state live."""
+    adaptive_workspace: _BrownianAdaptiveWorkspace,
+) -> _BrownianSlabRuntime | None:
+    """Admit one fresh-root wave and retain its sole cursor until full unwind."""
 
     noise = prepared.physics.noise
     if noise is None:
@@ -2441,6 +3499,7 @@ def _advance_brownian_root_wave(
         particles,
         starts,
         requested_durations,
+        macro_end_s,
         start_positions,
         start_velocities,
         start_charges,
@@ -2459,7 +3518,6 @@ def _advance_brownian_root_wave(
     particles = batch.particles
     starts = batch.starts_s
     durations = batch.duration_s
-    requested_durations = batch.requested_duration_s
     numerical_status = batch.numerical_status
     safe_rate = batch.drag_rate_s_inv
     safe_thermal = batch.thermal_velocity_variance_m2_s2
@@ -2467,7 +3525,6 @@ def _advance_brownian_root_wave(
     event_restart_counts = event_restart_counts[source_rows]
     guard_restart_counts = guard_restart_counts[source_rows]
     del source_rows
-    leaf_count = 1 << noise.interval_tree_depth
     particle_ids = prepared.schedule.particle_id[particles].astype(np.uint64, copy=False)
     increments = _brownian_leaf_increments(
         seed=prepared.case.spec.solver.seed,
@@ -2481,7 +3538,7 @@ def _advance_brownian_root_wave(
         numerically_valid=numerical_status == NUMERICAL_STATUS_OK,
     )
     root_continuing = np.ones(particles.size, dtype=np.bool_)
-    runtime = _BrownianSlabRuntime(
+    return _BrownianSlabRuntime(
         prepared=prepared,
         batch=batch,
         particle_ids=particle_ids,
@@ -2516,27 +3573,64 @@ def _advance_brownian_root_wave(
         pending_stochastic_event_restart_count=pending_stochastic_event_restart_count,
         pending_guard_restart_count=pending_guard_restart_count,
         pending_count=pending_count,
+        adaptive_workspace=adaptive_workspace,
+        leaf_cursor=increments,
     )
-    for leaf_index in range(leaf_count):
-        increment, increment_valid = _next_brownian_increment(increments)
-        local_active = active[particles] & root_continuing
-        selected = np.flatnonzero(local_active).astype("<i8", copy=False)
-        if not selected.size:
-            break
-        _advance_brownian_tree_node(
-            runtime,
-            selected,
-            increment,
-            selected,
-            increment_valid,
-            noise.interval_tree_depth,
-            leaf_index,
-        )
 
-    root_target_s = starts + durations
-    shortened = durations < requested_durations
+
+def _advance_brownian_base_leaf(runtime: _BrownianSlabRuntime) -> bool:
+    """Consume one complete base leaf; retain this same root for the next call.
+
+    The native cursor owns both the next index and the materialized leaf index.
+    Its current buffers remain borrowed only while the synchronous adaptive
+    consumer runs; a return is therefore a complete base-leaf resume boundary.
+    """
+
+    increments = runtime.leaf_cursor
+    leaf_index = _next_brownian_leaf_into(
+        increments.seed,
+        increments.macro_interval,
+        increments.particle_id,
+        increments.root_interval,
+        increments.drag_rate_s_inv,
+        increments.thermal_velocity_variance_m2_s2,
+        increments.root_duration_s,
+        increments.tree_depth,
+        increments.next_leaf_index,
+        increments.position_m,
+        increments.velocity_m_s,
+        increments.valid,
+        increments.right_position_m,
+        increments.right_velocity_m_s,
+        increments.right_valid,
+    )
+    if leaf_index < 0:
+        return False
+    particles = runtime.batch.particles
+    selected = np.flatnonzero(runtime.active[particles] & runtime.root_continuing).astype(
+        "<i8", copy=False
+    )
+    if not selected.size:
+        return False
+    _advance_brownian_tree_node(
+        runtime,
+        selected,
+        JointOuIncrement(increments.position_m, increments.velocity_m_s),
+        selected,
+        increments.valid,
+        increments.tree_depth,
+        leaf_index,
+    )
+    return True
+
+
+def _finish_brownian_root_wave(runtime: _BrownianSlabRuntime, macro_end_s: float) -> None:
+    """Queue shortened-root residuals once, after every leaf consumer returned."""
+
+    particles = runtime.batch.particles
+    root_target_s = runtime.batch.target_time_s
     residual_rows = np.flatnonzero(
-        shortened & root_continuing & active[particles] & (root_target_s < macro_end_s)
+        runtime.root_continuing & runtime.active[particles] & (root_target_s < macro_end_s)
     ).astype("<i8", copy=False)
     if not residual_rows.size:
         return
@@ -2560,7 +3654,96 @@ def _advance_brownian_tree_node(
     tree_level: int,
     tree_index: int,
 ) -> None:
-    """Advance or conditionally split one particle-local OU tree node."""
+    """Consume a complete base leaf through one bounded numeric adaptive DFS.
+
+    A clear subset commits before the refined left subtree and then the right
+    subtree, exactly as in the recursive traversal.  Root-aligned increment
+    columns and pending right frames remain owned until this leaf unwinds.
+    """
+
+    workspace = runtime.adaptive_workspace
+    if workspace.right_count.size == 0:
+        _consume_brownian_tree_node(
+            runtime, root_rows, increment, increment_rows, increment_valid, tree_level, tree_index
+        )
+        return
+    _begin_brownian_adaptive_into(
+        root_rows,
+        increment_rows,
+        increment.position_m,
+        increment.velocity_m_s,
+        increment_valid,
+        tree_level,
+        tree_index,
+        workspace.root_rows,
+        workspace.position_m,
+        workspace.velocity_m_s,
+        workspace.valid,
+        workspace.control,
+    )
+    current_increment = JointOuIncrement(workspace.position_m, workspace.velocity_m_s)
+    while workspace.control[0]:
+        count, level, index = (int(value) for value in workspace.control[:3])
+        current_rows = workspace.root_rows[:count]
+        refined = _consume_brownian_tree_node(
+            runtime, current_rows, current_increment, current_rows, workspace.valid, level, index
+        )
+        if refined is None:
+            _pop_brownian_adaptive_into(
+                workspace.root_rows,
+                workspace.position_m,
+                workspace.velocity_m_s,
+                workspace.valid,
+                workspace.right_root_rows,
+                workspace.right_position_m,
+                workspace.right_velocity_m_s,
+                workspace.right_valid,
+                workspace.right_count,
+                workspace.right_level,
+                workspace.right_index,
+                workspace.control,
+            )
+            continue
+        refined_roots, refined_increments = refined
+        _push_brownian_adaptive_into(
+            np.uint64(runtime.prepared.case.spec.solver.seed),
+            np.uint64(runtime.macro_interval),
+            runtime.particle_ids,
+            runtime.root_interval,
+            runtime.batch.drag_rate_s_inv,
+            runtime.batch.thermal_velocity_variance_m2_s2,
+            runtime.batch.duration_s,
+            refined_roots,
+            refined_increments,
+            workspace.root_rows,
+            workspace.position_m,
+            workspace.velocity_m_s,
+            workspace.valid,
+            workspace.right_root_rows,
+            workspace.right_position_m,
+            workspace.right_velocity_m_s,
+            workspace.right_valid,
+            workspace.right_count,
+            workspace.right_level,
+            workspace.right_index,
+            workspace.control,
+        )
+        runtime.statistics.refinements += int(refined_roots.size)
+        runtime.statistics.maximum_refinement_depth = max(
+            runtime.statistics.maximum_refinement_depth, level + 1
+        )
+
+
+def _consume_brownian_tree_node(
+    runtime: _BrownianSlabRuntime,
+    root_rows: np.ndarray,
+    increment: JointOuIncrement,
+    increment_rows: np.ndarray,
+    increment_valid: np.ndarray,
+    tree_level: int,
+    tree_index: int,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Commit one node's clear rows and return only its refinement row maps."""
 
     batch = runtime.batch
     particles = batch.particles[root_rows]
@@ -2577,6 +3760,11 @@ def _advance_brownian_tree_node(
     target_time_s = batch.starts_s[root_rows] + batch.duration_s[root_rows] * (
         (tree_index + 1) / node_count
     )
+    if tree_index + 1 == node_count:
+        # Duration is the OU transition/split authority; the absolute requested
+        # endpoint is the clock authority. Re-adding a rounded remainder can
+        # land one ULP before (or after) that endpoint after a wall restart.
+        target_time_s = batch.target_time_s[root_rows]
     particles = batch.particles[root_rows]
     current_position = runtime.position_m[particles].copy()
     current_velocity = runtime.velocity_m_s[particles].copy()
@@ -2765,75 +3953,9 @@ def _advance_brownian_tree_node(
         return
     refine_root_rows = root_rows[refine_rows]
     refine_increment_rows = increment_rows[refine_rows]
-    parent = JointOuIncrement(
-        increment.position_m[refine_increment_rows],
-        increment.velocity_m_s[refine_increment_rows],
-    )
-    left, right, child_valid = _split_joint_ou_increment_particle_local(
-        parent,
-        batch.drag_rate_s_inv[refine_root_rows],
-        batch.thermal_velocity_variance_m2_s2[refine_root_rows],
-        batch.duration_s[refine_root_rows] / node_count,
-        _brownian_normal_tensor(
-            runtime.prepared.case.spec.solver.seed,
-            runtime.particle_ids[refine_root_rows],
-            runtime.macro_interval,
-            root_interval=runtime.root_interval[refine_root_rows],
-            tree_level=tree_level,
-            tree_index=tree_index,
-            draw_kind=BROWNIAN_SPLIT_NORMAL_STREAM,
-        ),
-        increment_valid[refine_increment_rows],
-    )
-    runtime.statistics.refinements += int(refine_root_rows.size)
-    runtime.statistics.maximum_refinement_depth = max(
-        runtime.statistics.maximum_refinement_depth,
-        tree_level + 1,
-    )
-    child_rows = np.arange(refine_root_rows.size, dtype="<i8")
-    # Only the two conditional children and their row identity may remain live
-    # across recursion.  Releasing the proposal and endpoint temporaries keeps
-    # the depth-dependent storage equal to the memory-plan accounting instead
-    # of retaining a complete Hermite proposal in every Python frame.
-    del parent
-    del proposal
-    del increment
-    del increment_rows
-    del increment_valid
-    del root_rows
-    del particles
-    del start_time_s
-    del target_time_s
-    del current_position
-    del current_velocity
-    del current_charge
-    del duration_s
-    del end_position
-    del end_velocity
-    del end_charge
-    del clear
-    del clear_rows
-    del refine_rows
-    del refine_increment_rows
-    _advance_brownian_tree_node(
-        runtime,
-        refine_root_rows,
-        left,
-        child_rows,
-        child_valid,
-        tree_level + 1,
-        2 * tree_index,
-    )
-    del left
-    _advance_brownian_tree_node(
-        runtime,
-        refine_root_rows,
-        right,
-        child_rows,
-        child_valid,
-        tree_level + 1,
-        2 * tree_index + 1,
-    )
+    # Returning releases the full proposal and endpoint temporaries before the
+    # native controller conditions children.  Only these compact maps survive.
+    return refine_root_rows, refine_increment_rows
 
 
 def _brownian_certified_clear_rows(
@@ -2947,17 +4069,6 @@ def _commit_brownian_tree_proposal(
     runtime.root_continuing[restart_rows] = False
 
 
-def _next_brownian_increment(
-    increments: Iterator[tuple[JointOuIncrement, np.ndarray]],
-) -> tuple[JointOuIncrement, np.ndarray]:
-    """Read one declared leaf or fail the corrupted conditional tree."""
-
-    try:
-        return next(increments)
-    except StopIteration as error:
-        raise EngineError("Brownian interval tree ended before its declared depth") from error
-
-
 def _advance_langevin_leaf_endpoint(
     position_m: np.ndarray,
     velocity_m_s: np.ndarray,
@@ -3063,18 +4174,74 @@ def _queue_langevin_roots(
     end = begin + count
     if end > runtime.pending_particle_index.size:
         raise EngineError("Brownian pending fresh-root wave exceeded its slab capacity")
-    runtime.pending_particle_index[begin:end] = particles
-    runtime.pending_start_time_s[begin:end] = start_time_s
-    runtime.pending_start_position_m[begin:end] = runtime.position_m[particles]
-    runtime.pending_start_velocity_m_s[begin:end] = runtime.velocity_m_s[particles]
-    runtime.pending_root_interval[begin:end] = runtime.root_interval[root_rows] + 1
-    runtime.pending_stochastic_event_restart_count[begin:end] = (
-        runtime.stochastic_event_restart_count[root_rows] + event_restart_increment
+    _append_brownian_pending_into(
+        root_rows,
+        particles,
+        start_time_s,
+        runtime.position_m,
+        runtime.velocity_m_s,
+        runtime.root_interval,
+        runtime.stochastic_event_restart_count,
+        runtime.guard_restart_count,
+        event_restart_increment,
+        guard_restart_increment,
+        runtime.pending_particle_index,
+        runtime.pending_start_time_s,
+        runtime.pending_start_position_m,
+        runtime.pending_start_velocity_m_s,
+        runtime.pending_root_interval,
+        runtime.pending_stochastic_event_restart_count,
+        runtime.pending_guard_restart_count,
+        runtime.pending_count,
     )
-    runtime.pending_guard_restart_count[begin:end] = (
-        runtime.guard_restart_count[root_rows] + guard_restart_increment
-    )
-    runtime.pending_count[0] = end
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _append_brownian_pending_into(
+    root_rows: np.ndarray,
+    particles: np.ndarray,
+    start_time_s: np.ndarray,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    root_interval: np.ndarray,
+    event_restart_count: np.ndarray,
+    guard_restart_count: np.ndarray,
+    event_restart_increment: int,
+    guard_restart_increment: int,
+    pending_particles: np.ndarray,
+    pending_start_time: np.ndarray,
+    pending_position: np.ndarray,
+    pending_velocity: np.ndarray,
+    pending_root_interval: np.ndarray,
+    pending_event_restart_count: np.ndarray,
+    pending_guard_restart_count: np.ndarray,
+    pending_count: np.ndarray,
+) -> None:
+    """Append checked disjoint rows in stable commit order without gathers.
+
+    Capacity is checked by the engine wrapper before mutation.  Pending columns
+    are disjoint from both immutable current-root metadata and resident state.
+    """
+
+    begin = pending_count[0]
+    for local_row in range(root_rows.size):
+        target = begin + local_row
+        root_row = root_rows[local_row]
+        particle = particles[local_row]
+        pending_particles[target] = particle
+        pending_start_time[target] = start_time_s[local_row]
+        pending_position[target, 0] = position[particle, 0]
+        pending_position[target, 1] = position[particle, 1]
+        pending_velocity[target, 0] = velocity[particle, 0]
+        pending_velocity[target, 1] = velocity[particle, 1]
+        pending_root_interval[target] = root_interval[root_row] + 1
+        pending_event_restart_count[target] = (
+            event_restart_count[root_row] + event_restart_increment
+        )
+        pending_guard_restart_count[target] = (
+            guard_restart_count[root_row] + guard_restart_increment
+        )
+    pending_count[0] = begin + root_rows.size
 
 
 def _queue_langevin_event_rows(
@@ -3203,6 +4370,198 @@ def _mark_brownian_numerical_failures(
         )
 
 
+@dataclass(frozen=True, slots=True)
+class _BrownianAdaptiveWorkspace:
+    """Reusable numeric DFS columns, bounded by slab rows and extra depth.
+
+    Increment columns use immutable root-row indices; compact row maps select
+    the current node.  A saved right frame is copied back before its slot can
+    be reused, so no live child borrows a subsequently overwritten bank.
+    """
+
+    root_rows: np.ndarray
+    position_m: np.ndarray
+    velocity_m_s: np.ndarray
+    valid: np.ndarray
+    right_root_rows: np.ndarray
+    right_position_m: np.ndarray
+    right_velocity_m_s: np.ndarray
+    right_valid: np.ndarray
+    right_count: np.ndarray
+    right_level: np.ndarray
+    right_index: np.ndarray
+    control: np.ndarray
+
+    @classmethod
+    def allocate(cls, capacity: int, extra_depth: int) -> _BrownianAdaptiveWorkspace:
+        rows = capacity if extra_depth else 0
+        return cls(
+            np.empty(rows, dtype="<i8"),
+            np.empty((rows, 2), dtype="<f8"),
+            np.empty((rows, 2), dtype="<f8"),
+            np.empty(rows, dtype=np.bool_),
+            np.empty((extra_depth, rows), dtype="<i8"),
+            np.empty((extra_depth, rows, 2), dtype="<f8"),
+            np.empty((extra_depth, rows, 2), dtype="<f8"),
+            np.empty((extra_depth, rows), dtype=np.bool_),
+            np.empty(extra_depth, dtype="<i8"),
+            np.empty(extra_depth, dtype="<i8"),
+            np.empty(extra_depth, dtype="<i8"),
+            np.zeros(4, dtype="<i8"),
+        )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _begin_brownian_adaptive_into(
+    root_rows: np.ndarray,
+    increment_rows: np.ndarray,
+    parent_position: np.ndarray,
+    parent_velocity: np.ndarray,
+    parent_valid: np.ndarray,
+    tree_level: int,
+    tree_index: int,
+    current_roots: np.ndarray,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+    control: np.ndarray,
+) -> None:
+    for local_row in range(root_rows.size):
+        root_row = root_rows[local_row]
+        increment_row = increment_rows[local_row]
+        current_roots[local_row] = root_row
+        position[root_row, 0] = parent_position[increment_row, 0]
+        position[root_row, 1] = parent_position[increment_row, 1]
+        velocity[root_row, 0] = parent_velocity[increment_row, 0]
+        velocity[root_row, 1] = parent_velocity[increment_row, 1]
+        valid[root_row] = parent_valid[increment_row]
+    control[0] = root_rows.size
+    control[1] = tree_level
+    control[2] = tree_index
+    control[3] = 0
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _push_brownian_adaptive_into(
+    seed: np.uint64,
+    macro_interval: np.uint64,
+    particle_id: np.ndarray,
+    root_interval: np.ndarray,
+    rate: np.ndarray,
+    thermal: np.ndarray,
+    duration: np.ndarray,
+    refined_roots: np.ndarray,
+    refined_increments: np.ndarray,
+    current_roots: np.ndarray,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+    right_roots: np.ndarray,
+    right_position: np.ndarray,
+    right_velocity: np.ndarray,
+    right_valid: np.ndarray,
+    right_count: np.ndarray,
+    right_level: np.ndarray,
+    right_index: np.ndarray,
+    control: np.ndarray,
+) -> None:
+    top = control[3]
+    level = control[1]
+    index = control[2]
+    _split_brownian_node_rows_into(
+        seed,
+        macro_interval,
+        particle_id,
+        root_interval,
+        rate,
+        thermal,
+        duration,
+        level,
+        index,
+        refined_roots,
+        refined_increments,
+        refined_roots.size,
+        True,
+        position,
+        velocity,
+        valid,
+        right_position[top],
+        right_velocity[top],
+        right_valid[top],
+    )
+    for local_row in range(refined_roots.size):
+        root_row = refined_roots[local_row]
+        current_roots[local_row] = root_row
+        right_roots[top, local_row] = root_row
+    right_count[top] = refined_roots.size
+    right_level[top] = level + 1
+    right_index[top] = 2 * index + 1
+    control[0] = refined_roots.size
+    control[1] = level + 1
+    control[2] = 2 * index
+    control[3] = top + 1
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _pop_brownian_adaptive_into(
+    current_roots: np.ndarray,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+    right_roots: np.ndarray,
+    right_position: np.ndarray,
+    right_velocity: np.ndarray,
+    right_valid: np.ndarray,
+    right_count: np.ndarray,
+    right_level: np.ndarray,
+    right_index: np.ndarray,
+    control: np.ndarray,
+) -> None:
+    if control[3] == 0:
+        control[0] = 0
+        return
+    top = control[3] - 1
+    count = right_count[top]
+    for local_row in range(count):
+        root_row = right_roots[top, local_row]
+        current_roots[local_row] = root_row
+        position[root_row, 0] = right_position[top, root_row, 0]
+        position[root_row, 1] = right_position[top, root_row, 1]
+        velocity[root_row, 0] = right_velocity[top, root_row, 0]
+        velocity[root_row, 1] = right_velocity[top, root_row, 1]
+        valid[root_row] = right_valid[top, root_row]
+    control[0] = count
+    control[1] = right_level[top]
+    control[2] = right_index[top]
+    control[3] = top
+
+
+@dataclass(frozen=True, slots=True)
+class _BrownianLeafCursor:
+    """One root's numeric base-tree cursor and reusable right-child banks.
+
+    All metadata vectors remain aligned with immutable root particle IDs.  The
+    current leaf buffers can be overwritten only after their synchronous tree
+    consumer has returned.  The banks and index persist for the whole root.
+    """
+
+    seed: np.uint64
+    macro_interval: np.uint64
+    particle_id: np.ndarray
+    root_interval: np.ndarray
+    drag_rate_s_inv: np.ndarray
+    thermal_velocity_variance_m2_s2: np.ndarray
+    root_duration_s: np.ndarray
+    tree_depth: int
+    next_leaf_index: np.ndarray
+    position_m: np.ndarray
+    velocity_m_s: np.ndarray
+    valid: np.ndarray
+    right_position_m: np.ndarray
+    right_velocity_m_s: np.ndarray
+    right_valid: np.ndarray
+
+
 def _brownian_leaf_increments(
     *,
     seed: int,
@@ -3214,220 +4573,328 @@ def _brownian_leaf_increments(
     root_duration_s: np.ndarray,
     tree_depth: int,
     numerically_valid: np.ndarray,
-) -> Iterator[tuple[JointOuIncrement, np.ndarray]]:
-    """Yield depth-first leaves while retaining only one right child per level."""
+) -> _BrownianLeafCursor:
+    """Allocate one root cursor; all root and split arithmetic is native."""
 
-    root, root_valid = _joint_ou_increment_particle_local(
+    count = particle_id.size
+    return _BrownianLeafCursor(
+        np.uint64(seed),
+        np.uint64(macro_interval),
+        particle_id,
+        root_interval,
         drag_rate_s_inv,
         thermal_velocity_variance_m2_s2,
         root_duration_s,
-        _brownian_normal_tensor(
+        tree_depth,
+        np.zeros(1, dtype="<i8"),
+        np.empty((count, 2), dtype="<f8"),
+        np.empty((count, 2), dtype="<f8"),
+        np.asarray(numerically_valid, dtype=np.bool_).copy(),
+        np.empty((tree_depth, count, 2), dtype="<f8"),
+        np.empty((tree_depth, count, 2), dtype="<f8"),
+        np.empty((tree_depth, count), dtype=np.bool_),
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _next_brownian_leaf_into(
+    seed: np.uint64,
+    macro_interval: np.uint64,
+    particle_id: np.ndarray,
+    root_interval: np.ndarray,
+    rate: np.ndarray,
+    thermal: np.ndarray,
+    duration: np.ndarray,
+    tree_depth: int,
+    next_leaf_index: np.ndarray,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+    right_position: np.ndarray,
+    right_velocity: np.ndarray,
+    right_valid: np.ndarray,
+) -> int:
+    """Return the materialized base leaf index, or -1 when the cursor is exhausted.
+
+    The caller retains every bank and the scalar index across yield/migration;
+    no random key or physical interval depends on when this function is called.
+    """
+
+    leaf_index = next_leaf_index[0]
+    if leaf_index >= (1 << tree_depth):
+        return -1
+    first_level = 0
+    if leaf_index == 0:
+        _draw_brownian_base_root_into(
             seed,
-            particle_id,
             macro_interval,
-            root_interval=root_interval,
-            tree_level=0,
-            tree_index=0,
-            draw_kind=BROWNIAN_ROOT_NORMAL_STREAM,
-        ),
-        numerically_valid,
-    )
-    if tree_depth == 0:
-        yield root, root_valid
-        return
-    count = particle_id.size
-    right_position = np.empty((tree_depth, count, 2), dtype="<f8")
-    right_velocity = np.empty((tree_depth, count, 2), dtype="<f8")
-    right_valid = np.empty((tree_depth, count), dtype=np.bool_)
-    current = root
-    current_valid = root_valid
-    for level in range(tree_depth):
-        left, right, child_valid = _split_joint_ou_increment_particle_local(
-            current,
-            drag_rate_s_inv,
-            thermal_velocity_variance_m2_s2,
-            root_duration_s / (1 << level),
-            _brownian_normal_tensor(
-                seed,
-                particle_id,
-                macro_interval,
-                root_interval=root_interval,
-                tree_level=level,
-                tree_index=0,
-                draw_kind=BROWNIAN_SPLIT_NORMAL_STREAM,
-            ),
-            current_valid,
-        )
-        right_position[level] = right.position_m
-        right_velocity[level] = right.velocity_m_s
-        right_valid[level] = child_valid
-        current = left
-        current_valid = child_valid
-    yield current, current_valid
-
-    for leaf_index in range(1, 1 << tree_depth):
-        trailing_zeros = (leaf_index & -leaf_index).bit_length() - 1
-        ancestor_level = tree_depth - 1 - trailing_zeros
-        current = JointOuIncrement(
-            right_position[ancestor_level],
-            right_velocity[ancestor_level],
-        )
-        current_valid = right_valid[ancestor_level].copy()
-        for level in range(ancestor_level + 1, tree_depth):
-            node_index = leaf_index >> (tree_depth - level)
-            left, right, child_valid = _split_joint_ou_increment_particle_local(
-                current,
-                drag_rate_s_inv,
-                thermal_velocity_variance_m2_s2,
-                root_duration_s / (1 << level),
-                _brownian_normal_tensor(
-                    seed,
-                    particle_id,
-                    macro_interval,
-                    root_interval=root_interval,
-                    tree_level=level,
-                    tree_index=node_index,
-                    draw_kind=BROWNIAN_SPLIT_NORMAL_STREAM,
-                ),
-                current_valid,
-            )
-            right_position[level] = right.position_m
-            right_velocity[level] = right.velocity_m_s
-            right_valid[level] = child_valid
-            current = left
-            current_valid = child_valid
-        yield current, current_valid
-
-
-def _joint_ou_increment_particle_local(
-    drag_rate_s_inv: np.ndarray,
-    thermal_velocity_variance_m2_s2: np.ndarray,
-    duration_s: np.ndarray,
-    standard_normal: np.ndarray,
-    numerically_valid: np.ndarray,
-) -> tuple[JointOuIncrement, np.ndarray]:
-    """Draw a vectorized OU increment and localize representability failures."""
-
-    valid = np.asarray(numerically_valid, dtype=np.bool_).copy()
-    count = int(valid.size)
-    rows = np.flatnonzero(valid)
-    position = np.zeros((count, 2), dtype="<f8")
-    velocity = np.zeros((count, 2), dtype="<f8")
-    if not rows.size:
-        return JointOuIncrement(position, velocity), valid
-    all_valid = rows.size == count
-    selected_rate = drag_rate_s_inv if all_valid else drag_rate_s_inv[rows]
-    selected_thermal = (
-        thermal_velocity_variance_m2_s2 if all_valid else thermal_velocity_variance_m2_s2[rows]
-    )
-    selected_duration = duration_s if all_valid else duration_s[rows]
-    selected_normal = standard_normal if all_valid else standard_normal[rows]
-    try:
-        increment = joint_ou_increment(
-            selected_rate,
-            selected_thermal,
-            selected_duration,
-            selected_normal,
-        )
-    except FloatingPointError:
-        for row_value in rows:
-            row = int(row_value)
-            try:
-                increment = joint_ou_increment(
-                    drag_rate_s_inv[row : row + 1],
-                    thermal_velocity_variance_m2_s2[row : row + 1],
-                    duration_s[row : row + 1],
-                    standard_normal[row : row + 1],
-                )
-            except FloatingPointError:
-                valid[row] = False
-            else:
-                position[row] = increment.position_m[0]
-                velocity[row] = increment.velocity_m_s[0]
-    else:
-        if all_valid:
-            return increment, valid
-        position[rows] = increment.position_m
-        velocity[rows] = increment.velocity_m_s
-    return JointOuIncrement(position, velocity), valid
-
-
-def _split_joint_ou_increment_particle_local(
-    parent: JointOuIncrement,
-    drag_rate_s_inv: np.ndarray,
-    thermal_velocity_variance_m2_s2: np.ndarray,
-    duration_s: np.ndarray,
-    standard_normal: np.ndarray,
-    numerically_valid: np.ndarray,
-) -> tuple[JointOuIncrement, JointOuIncrement, np.ndarray]:
-    """Split valid OU rows while retaining invalid rows as inert placeholders."""
-
-    valid = np.asarray(numerically_valid, dtype=np.bool_).copy()
-    count = int(valid.size)
-    rows = np.flatnonzero(valid)
-    left_position = np.zeros((count, 2), dtype="<f8")
-    left_velocity = np.zeros((count, 2), dtype="<f8")
-    right_position = np.zeros((count, 2), dtype="<f8")
-    right_velocity = np.zeros((count, 2), dtype="<f8")
-    if not rows.size:
-        return (
-            JointOuIncrement(left_position, left_velocity),
-            JointOuIncrement(right_position, right_velocity),
+            particle_id,
+            root_interval,
+            rate,
+            thermal,
+            duration,
+            position,
+            velocity,
             valid,
         )
-    all_valid = rows.size == count
-    selected_parent = (
-        parent
-        if all_valid
-        else JointOuIncrement(parent.position_m[rows], parent.velocity_m_s[rows])
-    )
-    selected_rate = drag_rate_s_inv if all_valid else drag_rate_s_inv[rows]
-    selected_thermal = (
-        thermal_velocity_variance_m2_s2 if all_valid else thermal_velocity_variance_m2_s2[rows]
-    )
-    selected_duration = duration_s if all_valid else duration_s[rows]
-    selected_normal = standard_normal if all_valid else standard_normal[rows]
-    try:
-        left, right = split_joint_ou_increment_half(
-            selected_parent,
-            selected_rate,
-            selected_thermal,
-            selected_duration,
-            selected_normal,
-        )
-    except FloatingPointError:
-        for row_value in rows:
-            row = int(row_value)
-            try:
-                left, right = split_joint_ou_increment_half(
-                    JointOuIncrement(
-                        parent.position_m[row : row + 1],
-                        parent.velocity_m_s[row : row + 1],
-                    ),
-                    drag_rate_s_inv[row : row + 1],
-                    thermal_velocity_variance_m2_s2[row : row + 1],
-                    duration_s[row : row + 1],
-                    standard_normal[row : row + 1],
-                )
-            except FloatingPointError:
-                valid[row] = False
-            else:
-                left_position[row] = left.position_m[0]
-                left_velocity[row] = left.velocity_m_s[0]
-                right_position[row] = right.position_m[0]
-                right_velocity[row] = right.velocity_m_s[0]
     else:
-        if all_valid:
-            return left, right, valid
-        left_position[rows] = left.position_m
-        left_velocity[rows] = left.velocity_m_s
-        right_position[rows] = right.position_m
-        right_velocity[rows] = right.velocity_m_s
-    return (
-        JointOuIncrement(left_position, left_velocity),
-        JointOuIncrement(right_position, right_velocity),
-        valid,
+        remainder = leaf_index
+        trailing_zeros = 0
+        while (remainder & 1) == 0:
+            remainder >>= 1
+            trailing_zeros += 1
+        ancestor_level = tree_depth - 1 - trailing_zeros
+        for row in range(particle_id.size):
+            position[row, 0] = right_position[ancestor_level, row, 0]
+            position[row, 1] = right_position[ancestor_level, row, 1]
+            velocity[row, 0] = right_velocity[ancestor_level, row, 0]
+            velocity[row, 1] = right_velocity[ancestor_level, row, 1]
+            valid[row] = right_valid[ancestor_level, row]
+        first_level = ancestor_level + 1
+    for level in range(first_level, tree_depth):
+        node_index = leaf_index >> (tree_depth - level)
+        _split_brownian_base_node_into(
+            seed,
+            macro_interval,
+            particle_id,
+            root_interval,
+            rate,
+            thermal,
+            duration,
+            level,
+            node_index,
+            position,
+            velocity,
+            valid,
+            right_position[level],
+            right_velocity[level],
+            right_valid[level],
+        )
+    next_leaf_index[0] = leaf_index + 1
+    return leaf_index
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _brownian_base_node_keys(
+    seed: np.uint64,
+    root_interval: np.uint64,
+    level: int,
+    node_index: int,
+    draw_kind: int,
+) -> tuple[np.uint64, np.uint64, np.uint64, np.uint64]:
+    """Ask the RNG owner for both component keys, reused for adjacent root rows."""
+
+    key00, key01 = _brownian_node_key(
+        seed, root_interval, level, np.uint64(node_index), 0, draw_kind
     )
+    key10, key11 = _brownian_node_key(
+        seed, root_interval, level, np.uint64(node_index), 1, draw_kind
+    )
+    return key00, key01, key10, key11
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _draw_brownian_base_root_into(
+    seed: np.uint64,
+    macro_interval: np.uint64,
+    particle_id: np.ndarray,
+    root_interval: np.ndarray,
+    rate: np.ndarray,
+    thermal: np.ndarray,
+    duration: np.ndarray,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+) -> None:
+    macro_low = macro_interval & np.uint64(0xFFFFFFFF)
+    macro_high = macro_interval >> np.uint64(32)
+    previous_root = np.uint64(0)
+    keys = (np.uint64(0), np.uint64(0), np.uint64(0), np.uint64(0))
+    for row in range(particle_id.size):
+        root = np.uint64(root_interval[row])
+        if row == 0 or root != previous_root:
+            keys = _brownian_base_node_keys(seed, root, 0, 0, BROWNIAN_ROOT_NORMAL_STREAM)
+            previous_root = root
+        scales = (0.0, 0.0, 0.0, OU_STATUS_OK)
+        if valid[row]:
+            scales = _joint_ou_increment_scales(rate[row], thermal[row], duration[row])
+        error = scales[3]
+        for component in range(2):
+            first, second = _brownian_pair_from_key(
+                particle_id[row],
+                macro_low,
+                macro_high,
+                keys[2 * component],
+                keys[2 * component + 1],
+            )
+            x, v = 0.0, 0.0
+            if valid[row] and error == OU_STATUS_OK and duration[row] > 0.0 and thermal[row] > 0.0:
+                x, v = _joint_ou_increment_component(scales[0], scales[1], scales[2], first, second)
+                if not (np.isfinite(x) and np.isfinite(v)):
+                    error = PHYSICS_NUMERICAL_FAILURE
+            position[row, component] = x
+            velocity[row, component] = v
+        if error != OU_STATUS_OK:
+            valid[row] = False
+            position[row, 0], position[row, 1] = 0.0, 0.0
+            velocity[row, 0], velocity[row, 1] = 0.0, 0.0
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _split_brownian_base_node_into(
+    seed: np.uint64,
+    macro_interval: np.uint64,
+    particle_id: np.ndarray,
+    root_interval: np.ndarray,
+    rate: np.ndarray,
+    thermal: np.ndarray,
+    duration: np.ndarray,
+    level: int,
+    node_index: int,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+    right_position: np.ndarray,
+    right_velocity: np.ndarray,
+    right_valid: np.ndarray,
+) -> None:
+    _split_brownian_node_rows_into(
+        seed,
+        macro_interval,
+        particle_id,
+        root_interval,
+        rate,
+        thermal,
+        duration,
+        level,
+        node_index,
+        root_interval,
+        root_interval,
+        particle_id.size,
+        False,
+        position,
+        velocity,
+        valid,
+        right_position,
+        right_velocity,
+        right_valid,
+    )
+
+
+@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
+def _split_brownian_node_rows_into(
+    seed: np.uint64,
+    macro_interval: np.uint64,
+    particle_id: np.ndarray,
+    root_interval: np.ndarray,
+    rate: np.ndarray,
+    thermal: np.ndarray,
+    duration: np.ndarray,
+    level: int,
+    node_index: int,
+    root_rows: np.ndarray,
+    increment_rows: np.ndarray,
+    row_count: int,
+    mapped_rows: bool,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+    right_position: np.ndarray,
+    right_velocity: np.ndarray,
+    right_valid: np.ndarray,
+) -> None:
+    """Condition base or adaptive rows using one numerical/RNG body.
+
+    The left child may overwrite its corresponding parent component.  Right
+    outputs are disjoint; all row maps are immutable throughout this call.
+    """
+
+    macro_low = macro_interval & np.uint64(0xFFFFFFFF)
+    macro_high = macro_interval >> np.uint64(32)
+    previous_root = np.uint64(0)
+    keys = (np.uint64(0), np.uint64(0), np.uint64(0), np.uint64(0))
+    for local_row in range(row_count):
+        row = root_rows[local_row] if mapped_rows else local_row
+        increment_row = increment_rows[local_row] if mapped_rows else local_row
+        root = np.uint64(root_interval[row])
+        if local_row == 0 or root != previous_root:
+            keys = _brownian_base_node_keys(
+                seed, root, level, node_index, BROWNIAN_SPLIT_NORMAL_STREAM
+            )
+            previous_root = root
+        _condition_brownian_row_into(
+            row,
+            increment_row,
+            particle_id[row],
+            macro_low,
+            macro_high,
+            keys,
+            rate[row],
+            thermal[row],
+            duration[row] / (1 << level),
+            position,
+            velocity,
+            valid,
+            right_position,
+            right_velocity,
+            right_valid,
+        )
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _condition_brownian_row_into(
+    row: int,
+    increment_row: int,
+    particle_id: np.uint64,
+    macro_low: np.uint64,
+    macro_high: np.uint64,
+    keys: tuple[np.uint64, np.uint64, np.uint64, np.uint64],
+    rate: float,
+    thermal: float,
+    duration: float,
+    position: np.ndarray,
+    velocity: np.ndarray,
+    valid: np.ndarray,
+    right_position: np.ndarray,
+    right_velocity: np.ndarray,
+    right_valid: np.ndarray,
+) -> None:
+    """Condition both components and propagate one row's numerical status."""
+
+    coefficients = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, OU_STATUS_OK)
+    active = thermal > 0.0 and duration > 0.0
+    parent_valid = valid[increment_row]
+    if parent_valid and active:
+        coefficients = _half_split_coefficients_scalar(rate, duration)
+    error = coefficients[9]
+    for component in range(2):
+        first, second = _brownian_pair_from_key(
+            particle_id, macro_low, macro_high, keys[2 * component], keys[2 * component + 1]
+        )
+        x_left, v_left, x_right, v_right = 0.0, 0.0, 0.0, 0.0
+        if parent_valid and error == OU_STATUS_OK and active:
+            x_left, v_left, x_right, v_right = _split_joint_ou_component(
+                position[increment_row, component],
+                velocity[increment_row, component],
+                thermal,
+                duration,
+                first,
+                second,
+                coefficients,
+            )
+            if not _finite_children(x_left, v_left, x_right, v_right):
+                error = PHYSICS_NUMERICAL_FAILURE
+        position[row, component] = x_left
+        velocity[row, component] = v_left
+        right_position[row, component] = x_right
+        right_velocity[row, component] = v_right
+    valid[row] = parent_valid and error == OU_STATUS_OK
+    right_valid[row] = valid[row]
+    if not valid[row]:
+        position[row, 0], position[row, 1] = 0.0, 0.0
+        velocity[row, 0], velocity[row, 1] = 0.0, 0.0
+        right_position[row, 0], right_position[row, 1] = 0.0, 0.0
+        right_velocity[row, 0], right_velocity[row, 1] = 0.0, 0.0
 
 
 def _advance_joint_ou_particle_local(
@@ -3438,91 +4905,28 @@ def _advance_joint_ou_particle_local(
     duration_s: np.ndarray,
     increment: JointOuIncrement,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Apply OU rows together, falling back only after a numerical exception."""
+    """Apply the stochastic owner's transition once, retaining row-local status."""
 
     count = int(drag_rate_s_inv.size)
-    valid = np.ones(count, dtype=np.bool_)
-    result_position = np.asarray(position_m, dtype="<f8").copy()
-    result_velocity = np.asarray(velocity_m_s, dtype="<f8").copy()
-    try:
-        return (
-            *advance_joint_ou_with_increment(
-                position_m,
-                velocity_m_s,
-                equilibrium_velocity_m_s,
-                drag_rate_s_inv,
-                duration_s,
-                increment,
-            ),
-            valid,
-        )
-    except FloatingPointError:
-        for row in range(count):
-            try:
-                advanced_position, advanced_velocity = advance_joint_ou_with_increment(
-                    position_m[row : row + 1],
-                    velocity_m_s[row : row + 1],
-                    equilibrium_velocity_m_s[row : row + 1],
-                    drag_rate_s_inv[row : row + 1],
-                    duration_s[row : row + 1],
-                    JointOuIncrement(
-                        increment.position_m[row : row + 1],
-                        increment.velocity_m_s[row : row + 1],
-                    ),
-                )
-            except FloatingPointError:
-                valid[row] = False
-            else:
-                result_position[row] = advanced_position[0]
-                result_velocity[row] = advanced_velocity[0]
+    status = np.empty(count, dtype=np.uint8)
+    result_position = np.empty((count, 2), dtype="<f8")
+    result_velocity = np.empty((count, 2), dtype="<f8")
+    advance_joint_ou_with_increment_into(
+        position_m,
+        velocity_m_s,
+        equilibrium_velocity_m_s,
+        drag_rate_s_inv,
+        duration_s,
+        increment.position_m,
+        increment.velocity_m_s,
+        result_position,
+        result_velocity,
+        status,
+    )
+    valid = status == OU_STATUS_OK
+    result_position[~valid] = position_m[~valid]
+    result_velocity[~valid] = velocity_m_s[~valid]
     return result_position, result_velocity, valid
-
-
-def _brownian_normal_tensor(
-    seed: int,
-    particle_id: np.ndarray,
-    macro_interval: int,
-    *,
-    root_interval: int | np.ndarray,
-    tree_level: int,
-    tree_index: int,
-    draw_kind: int,
-) -> np.ndarray:
-    """Return the two independent normal pairs needed by the 2-D OU update."""
-
-    result = np.empty((particle_id.size, 2, 2), dtype="<f8")
-    intervals = np.asarray(root_interval, dtype="<i8")
-    if intervals.ndim == 0:
-        intervals = np.full(particle_id.size, intervals.item(), dtype="<i8")
-    if intervals.shape != particle_id.shape:
-        raise EngineError("Brownian root ordinals do not align with particle rows")
-    if intervals.size and bool((intervals == intervals[0]).all()):
-        for component in range(2):
-            result[:, component] = brownian_normal_pair_batch(
-                seed,
-                particle_id,
-                macro_interval,
-                int(intervals[0]),
-                tree_level=tree_level,
-                tree_index=tree_index,
-                component=component,
-                draw_kind=draw_kind,
-            )
-        return result
-    for interval_value in np.unique(intervals):
-        rows = np.flatnonzero(intervals == interval_value)
-        for component in range(2):
-            result[rows, component] = brownian_normal_pair_batch(
-                seed,
-                particle_id[rows],
-                macro_interval,
-                int(interval_value),
-                tree_level=tree_level,
-                tree_index=tree_index,
-                component=component,
-                draw_kind=draw_kind,
-            )
-    return result
 
 
 def _advance_macro_proposal(
@@ -3543,7 +4947,7 @@ def _advance_macro_proposal(
     replay: _ReplayBuffer,
     event_statistics: _EventStatistics,
     failure_reason_code: np.ndarray,
-    writer: ResultWriter,
+    writer: _EventSink,
     event_buffer: _BoundaryEventBuffer,
     failure_buffer: _FailureEventBuffer,
 ) -> np.ndarray | None:
@@ -3613,11 +5017,11 @@ def _advance_macro_proposal(
     # per committed row.  Keep the cumulative-work cadence proportional to
     # cohort size instead of counting only the outer macro-step.
     event_statistics.accepted_particle_pieces += int(valid_rows.size)
-    _record_replay_rows(replay, proposal, valid_rows, prepared.case.data.coordinate_system)
+    _record_replay_rows(replay, proposal, valid_rows, prepared)
     return None
 
 
-def _prepare(case: SimulationCase) -> _PreparedRun:
+def _prepare(case: SimulationCase, *, workers: int = 1) -> _PreparedRun:
     spec = case.spec
     _validate_configuration(case)
     memory_limit_bytes = spec.resources.memory_limit_mb * 1024 * 1024
@@ -3726,16 +5130,34 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
         probe_times,
         probe_particle_index,
         memory_limit_bytes,
+        workers,
     )
+    stage_capacity = memory_plan.slab_particles * int(physics.requires_stage_evaluation)
     dynamics = _StageDynamics(
         runtime,
         fields,
         case.data.coordinate_system,
         (np.full(schedule.particle_count, -1, dtype="<i8") if field_cell_hint_bytes else None),
-        tuple(fields.allocate_workspace(memory_plan.slab_particles) for _ in range(4)),
-        tuple(PhysicsRuntimeWorkspace.allocate(memory_plan.slab_particles) for _ in range(4)),
+        fields.allocate_workspace(stage_capacity),
+        PhysicsRuntimeWorkspace.allocate(stage_capacity),
+        field_range_workspace=fields.allocate_range_workspace(
+            memory_plan.slab_particles * int(memory_plan.certificate_work_bytes_per_particle > 0)
+        ),
     )
     dense_certificate = _uses_rk4_dense_certificate(case, physics, constant_acceleration)
+    exact_enabled = _uses_exact_specialization(physics, constant_acceleration)
+    event_paths = geometry.facet_count > 0 or case.data.coordinate_system == "axisymmetric_rz"
+    curved_workspace = _CurvedWavefront.allocate(
+        memory_plan.slab_particles,
+        spec.solver.event.max_refinements + 1,
+        physics.noise is not None,
+        exact_enabled=exact_enabled,
+        event_paths=event_paths,
+    )
+    dynamics.prepare_advance_workspaces(
+        dense_enabled=dense_certificate,
+        exact_enabled=exact_enabled,
+    )
     certificate_workspace = _ApplicabilityCertificateWorkspace.allocate(
         memory_plan.slab_particles if dense_certificate else 0,
         spec.solver.event.max_refinements,
@@ -3750,6 +5172,8 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
         geometry.facet_normal,
         roundoff_ulps=spec.solver.event.roundoff_ulps,
     )
+    event_row_capacity = memory_plan.slab_particles * int(event_paths)
+    boundary_row_capacity = memory_plan.slab_particles * int(bool(geometry.facet_count))
     return _PreparedRun(
         case,
         schedule,
@@ -3771,6 +5195,22 @@ def _prepare(case: SimulationCase) -> _PreparedRun:
         memory_plan,
         event_candidate_capacity,
         certificate_workspace,
+        curved_workspace,
+        _ExactWavefront.allocate(
+            memory_plan.slab_particles,
+            spec.solver.event.max_refinements + 1,
+            exact_enabled=exact_enabled,
+            event_paths=event_paths,
+        ),
+        allocate_boundary_response_buffer(boundary_row_capacity),
+        prepare_event_geometry(event_geometry),
+        allocate_event_arena(
+            event_row_capacity,
+            event_candidate_capacity * int(event_paths),
+            exact_enabled=exact_enabled,
+            separate_finite_mask=event_geometry is not geometry,
+        ),
+        _ProposalReplayWorkspace.allocate(memory_plan.slab_particles, frame_times, probe_times),
     )
 
 
@@ -3787,6 +5227,7 @@ def _prepare_memory_plan(
     probe_times_s: tuple[float, ...],
     probe_particle_index: np.ndarray,
     memory_limit_bytes: int,
+    workers: int = 1,
 ) -> tuple[CpuMemoryPlan, int, int]:
     """Resolve the single solver-owned slab plan from prepared array owners."""
 
@@ -3802,6 +5243,14 @@ def _prepare_memory_plan(
         case,
         physics,
         runtime.constant_acceleration_m_s2,
+    )
+    exact_specialization = _uses_exact_specialization(physics, runtime.constant_acceleration_m_s2)
+    advance_work_bytes = (
+        RK4_ADVANCE_WORK_BYTES_PER_PARTICLE
+        if dense_certificate
+        else STAGE_ADVANCE_WORK_BYTES_PER_PARTICLE
+        if exact_specialization
+        else RELAXATION_ADVANCE_WORK_BYTES_PER_PARTICLE
     )
     local_range_certificate = dense_certificate or (
         case.spec.solver.integrator == "exponential_midpoint"
@@ -3831,7 +5280,9 @@ def _prepare_memory_plan(
         probe_particle_index,
     )
     stochastic_tree_work_bytes = _stochastic_tree_work_bytes_per_particle(physics)
-    event_work_bytes = _event_work_bytes_per_particle(case, event_paths=event_paths)
+    event_work_bytes = _event_work_bytes_per_particle(
+        case, event_paths=event_paths, curved_enabled=not exact_specialization
+    ) + 44 * int(geometry.facet_count > 0)
     certificate_work_bytes = _certificate_work_bytes_per_particle(
         case,
         dense_enabled=dense_certificate,
@@ -3840,6 +5291,14 @@ def _prepare_memory_plan(
     release_work_bytes = _surface_release_work_bytes_per_particle(
         schedule,
         event_paths=event_paths,
+    )
+    candidate_columns = (
+        3
+        + int(exact_specialization)
+        + int(not exact_specialization) * int(event_geometry is not geometry)
+    )
+    arena_offset_bytes = 16 + 8 * int(exact_specialization) * int(event_paths) * int(
+        schedule.particle_count > 0
     )
 
     def plan_for_capacity(event_candidate_capacity: int) -> CpuMemoryPlan:
@@ -3859,15 +5318,36 @@ def _prepare_memory_plan(
             replay_work_bytes=replay_work_bytes,
             writer_reserve_bytes=RESULT_WRITER_RESERVE_BYTES,
             requires_stage_evaluation=physics.requires_stage_evaluation,
-            # A yielded locator result remains live while the next broad-phase
-            # columns, its selected-candidate mask, and the synchronously packed
-            # output candidate column coexist.
+            # One exclusive fixed arena serves exact or curved queries. Exact
+            # reuses its point CSR bank for mixed contact, with four C columns.
             geometry_query_scratch_bytes=(
-                (5 if event_geometry is not geometry else 4)
-                * event_candidate_capacity
-                * np.dtype("<i8").itemsize
+                candidate_columns * event_candidate_capacity * np.dtype("<i8").itemsize
+                + arena_offset_bytes
             ),
-            dense_path_bytes_per_particle=(176 if dense_certificate else 0),
+            # One reusable native stage bank: int64 accepted hints and
+            # uint8 pre-physics status; RZ additionally owns x/v and basis sign.
+            stage_composition_work_bytes_per_particle=(
+                (
+                    9
+                    + (40 if case.data.coordinate_system == "axisymmetric_rz" else 0)
+                    + 34  # Global velocity/acceleration boxes and certificate verdicts.
+                    + advance_work_bytes
+                    + (9 if physics.noise is not None else 0)
+                    + (
+                        16 * int(fields.numeric_context.component_offsets[-1])
+                        + 18
+                        + (64 if case.data.coordinate_system == "axisymmetric_rz" else 0)
+                        if local_range_certificate
+                        else 0
+                    )
+                )
+                if physics.requires_stage_evaluation
+                else 0
+            ),
+            proposal_replay_work_bytes_per_particle=(171 if frame_times_s or probe_times_s else 0),
+            dense_path_bytes_per_particle=(
+                176 + 3 * RK4_DENSE_FULL_ENCLOSURE_BYTES_PER_PARTICLE if dense_certificate else 0
+            ),
             stochastic_tree_work_bytes_per_particle=stochastic_tree_work_bytes,
             event_work_bytes_per_particle=event_work_bytes,
             certificate_work_bytes_per_particle=certificate_work_bytes,
@@ -3884,6 +5364,7 @@ def _prepare_memory_plan(
                 else 0
             ),
             failure_staging_bytes_per_particle=_FAILURE_STAGING_BYTES_PER_PARTICLE,
+            worker_count=workers,
         )
 
     event_candidate_capacity, memory_plan = _event_candidate_capacity(
@@ -4232,9 +5713,7 @@ def _build_step_proposal(
     """Dispatch one proposal without creating a second production engine."""
 
     constant_acceleration = prepared.constant_acceleration_m_s2
-    use_exact_specialization = (
-        not prepared.physics.requires_stage_evaluation or constant_acceleration is not None
-    )
+    use_exact_specialization = _uses_exact_specialization(prepared.physics, constant_acceleration)
     if prepared.case.spec.solver.integrator == "rk4_fixed" or use_exact_specialization:
         return rk4_step(
             particle_index,
@@ -4960,36 +6439,51 @@ def _curved_position_bounds_inside_support(
 ) -> np.ndarray:
     """Return the continuous-support verdict for explicit position bounds."""
 
-    support_box = prepared.fields.regular_support_box()
-    if support_box is None:
+    context = prepared.support_context
+    if not context.regular_box:
         if not prepared.geometry.facet_count:
             raise EngineError("curved continuous support certificate is unavailable")
         return np.ones(position_lower_m.shape[0], dtype=np.bool_)
-    lower_bound, upper_bound = support_box
     path_lower = np.asarray(position_lower_m, dtype="<f8")
     path_upper = np.asarray(position_upper_m, dtype="<f8")
-    if prepared.case.data.coordinate_system == "axisymmetric_rz":
-        path_lower, path_upper = canonicalize_rz_enclosure(path_lower, path_upper)
-    position_inside = (path_lower >= lower_bound).all(axis=1)
-    position_inside &= (path_upper <= upper_bound).all(axis=1)
-    padded = event_slack_m != 0.0
-    if bool(padded.any()):
-        padded_lower = np.nextafter(
-            lower_bound[np.newaxis, :] - event_slack_m[padded, np.newaxis],
-            -np.inf,
-        )
-        padded_upper = np.nextafter(
-            upper_bound[np.newaxis, :] + event_slack_m[padded, np.newaxis],
-            np.inf,
-        )
-        position_inside[padded] = (path_lower[padded] >= padded_lower).all(axis=1)
-        position_inside[padded] &= (path_upper[padded] <= padded_upper).all(axis=1)
-    geometry_lower = np.min(prepared.geometry.nodes_m, axis=0)
-    geometry_upper = np.max(prepared.geometry.nodes_m, axis=0)
-    support_covers_geometry = bool(
-        (geometry_lower >= lower_bound).all() and (geometry_upper <= upper_bound).all()
+    if context.axisymmetric_rz:
+        if not bool(np.isfinite(path_lower).all() and np.isfinite(path_upper).all()):
+            raise ValueError("lower and upper must contain only finite values")
+        if bool((path_lower > path_upper).any()):
+            raise ValueError("lower bounds must not exceed upper bounds")
+    position_inside = np.empty(path_lower.shape[0], dtype=np.bool_)
+    _curved_support_into(
+        context, path_lower, path_upper, contact_certified, event_slack_m, position_inside
     )
-    return position_inside | (contact_certified & support_covers_geometry)
+    return position_inside
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _curved_support_into(
+    context: _NumericSupportContext,
+    path_lower: np.ndarray,
+    path_upper: np.ndarray,
+    contact_certified: np.ndarray,
+    event_slack_m: np.ndarray,
+    position_inside: np.ndarray,
+) -> None:
+    """Evaluate the prepared convex support relation without query temporaries."""
+
+    for row in range(path_lower.shape[0]):
+        radial_lower, radial_upper = path_lower[row, 0], path_upper[row, 0]
+        if context.axisymmetric_rz:
+            radial_lower, radial_upper = rz_radial_interval(radial_lower, radial_upper)
+        inside = True
+        for component in range(2):
+            lower = radial_lower if component == 0 else path_lower[row, 1]
+            upper = radial_upper if component == 0 else path_upper[row, 1]
+            support_lower = context.lower_m[component]
+            support_upper = context.upper_m[component]
+            if event_slack_m[row] != 0.0:
+                support_lower = np.nextafter(support_lower - event_slack_m[row], -np.inf)
+                support_upper = np.nextafter(support_upper + event_slack_m[row], np.inf)
+            inside = inside and lower >= support_lower and upper <= support_upper
+        position_inside[row] = inside or (contact_certified[row] and context.covers_geometry)
 
 
 def _commit_proposal_rows(
@@ -5001,11 +6495,39 @@ def _commit_proposal_rows(
     charge_number: np.ndarray,
 ) -> None:
     rows = np.asarray(local_rows, dtype=np.int64)
-    particle_index = proposal.particle_index[rows]
-    position_m[particle_index] = proposal.end_position_m[rows]
-    velocity_m_s[particle_index] = proposal.end_velocity_m_s[rows]
-    charge_number[particle_index] = proposal.end_charge_number[rows]
+    _commit_proposal_rows_into(
+        proposal.particle_index,
+        rows,
+        proposal.end_position_m,
+        proposal.end_velocity_m_s,
+        proposal.end_charge_number,
+        position_m,
+        velocity_m_s,
+        charge_number,
+    )
     _commit_proposal_field_cell(prepared, proposal, rows)
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _commit_proposal_rows_into(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    end_position_m: np.ndarray,
+    end_velocity_m_s: np.ndarray,
+    end_charge_number: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+) -> None:
+    """Commit accepted state using stable proposal rows without indexed copies."""
+
+    for offset in range(rows.size):
+        row = rows[offset]
+        particle = particle_index[row]
+        for component in range(2):
+            position_m[particle, component] = end_position_m[row, component]
+            velocity_m_s[particle, component] = end_velocity_m_s[row, component]
+        charge_number[particle] = end_charge_number[row]
 
 
 def _commit_proposal_field_cell(
@@ -5019,10 +6541,22 @@ def _commit_proposal_field_cell(
     if field_cell_id is None:
         return
     rows = np.asarray(local_rows, dtype=np.int64)
-    prepared.dynamics.commit_field_cell(
-        proposal.particle_index[rows],
-        field_cell_id[rows],
-    )
+    if prepared.dynamics.last_field_cell is not None:
+        _commit_proposal_field_cell_into(
+            proposal.particle_index, rows, field_cell_id, prepared.dynamics.last_field_cell
+        )
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _commit_proposal_field_cell_into(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    field_cell_id: np.ndarray,
+    accepted_field_cell: np.ndarray,
+) -> None:
+    for offset in range(rows.size):
+        row = rows[offset]
+        accepted_field_cell[particle_index[row]] = field_cell_id[row]
 
 
 def _build_curved_rows(
@@ -5081,7 +6615,7 @@ def _advance_curved_events(
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
     failure_reason_code: np.ndarray,
-    writer: ResultWriter,
+    writer: _EventSink,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
 ) -> np.ndarray | None:
@@ -5089,7 +6623,16 @@ def _advance_curved_events(
 
     if not _is_reintegrated_path(root_proposal) or root_proposal.path_enclosure is None:
         raise EngineError("curved wavefront requires a reintegrated proposal enclosure")
-    state = _allocate_curved_wavefront(prepared, root_proposal)
+    state = prepared.curved_workspace.view(root_proposal.particle_index.size)
+    _reset_curved_wavefront_into(
+        state,
+        root_proposal.particle_index,
+        root_proposal.start_time_s,
+        root_proposal.start_position_m,
+        root_proposal.start_velocity_m_s,
+        root_proposal.start_charge_number,
+        root_proposal.target_time_s,
+    )
     root_rows, zero_rows = _initialize_curved_wavefront(
         prepared,
         root_proposal,
@@ -5323,35 +6866,34 @@ def _advance_curved_events(
                 failure_reason_code,
             )
             _flush_boundary_event_wave(writer, prepared, pending)
-    return state.stochastic_restart_time_s
+    return state.stochastic_restart_time_s if state.stochastic_restart_time_s.size else None
 
 
-def _allocate_curved_wavefront(
-    prepared: _PreparedRun,
-    proposal: StepProposal,
-) -> _CurvedWavefront:
-    row_count = proposal.particle_index.size
-    stack_capacity = prepared.case.spec.solver.event.max_refinements + 1
-    restart_time_s = (
-        np.full(row_count, np.nan, dtype="<f8")
-        if proposal.path_kind == "cubic_hermite" and prepared.physics.noise is not None
-        else None
-    )
-    return _CurvedWavefront(
-        proposal.particle_index.copy(),
-        proposal.start_time_s.copy(),
-        proposal.start_position_m.copy(),
-        proposal.start_velocity_m_s.copy(),
-        proposal.start_charge_number.copy(),
-        proposal.target_time_s - proposal.start_time_s,
-        np.zeros(row_count, dtype="<i8"),
-        np.zeros(row_count, dtype=np.bool_),
-        np.empty((row_count, stack_capacity), dtype="<f8"),
-        np.empty((row_count, stack_capacity), dtype="<i8"),
-        np.empty((row_count, stack_capacity), dtype="<i8"),
-        np.full(row_count, -1, dtype="<i8"),
-        restart_time_s,
-    )
+@njit(cache=True, fastmath=False, nogil=True)
+def _reset_curved_wavefront_into(
+    state: _CurvedWavefront,
+    particle_index: np.ndarray,
+    start_time_s: np.ndarray,
+    start_position_m: np.ndarray,
+    start_velocity_m_s: np.ndarray,
+    start_charge_number: np.ndarray,
+    target_time_s: np.ndarray,
+) -> None:
+    """Reset a bounded continuation without retaining another proposal copy."""
+
+    for row in range(particle_index.size):
+        state.particle_index[row] = particle_index[row]
+        state.current_time_s[row] = start_time_s[row]
+        for component in range(2):
+            state.current_position_m[row, component] = start_position_m[row, component]
+            state.current_velocity_m_s[row, component] = start_velocity_m_s[row, component]
+        state.current_charge_number[row] = start_charge_number[row]
+        state.root_interval_s[row] = target_time_s[row] - start_time_s[row]
+        state.interaction_count[row] = 0
+        state.certify_departure[row] = False
+        state.stack_top[row] = -1
+        if state.stochastic_restart_time_s.size:
+            state.stochastic_restart_time_s[row] = np.nan
 
 
 def _schedule_stochastic_restarts(
@@ -5361,7 +6903,7 @@ def _schedule_stochastic_restarts(
 ) -> np.ndarray:
     """End accepted OU intervals so active rows restart from committed state."""
 
-    if state.stochastic_restart_time_s is None or not rows.size:
+    if not state.stochastic_restart_time_s.size or not rows.size:
         return np.empty(0, dtype="<i8")
     state.stochastic_restart_time_s[rows] = time_s
     state.stack_top[rows] = -1
@@ -5411,37 +6953,61 @@ def _initialize_curved_wavefront(
         statistics,
         failure_reason_code,
     )
-    local_active = active[proposal.particle_index]
-    response_rows = np.flatnonzero(local_active & (interactions != 0)).astype("<i8", copy=False)
-    particles = proposal.particle_index[response_rows]
-    state.current_position_m[response_rows] = position_m[particles]
-    state.current_velocity_m_s[response_rows] = velocity_m_s[particles]
-    state.current_charge_number[response_rows] = charge_number[particles]
-    state.interaction_count[:] = interactions
-    state.certify_departure[:] = (
-        start_contact_state[proposal.particle_index] == SURFACE_STATE_DEPARTURE
-    )
-    positive = state.current_time_s < proposal.target_time_s
-    active_response = local_active & (interactions != 0) & positive
-    response_rows = np.flatnonzero(active_response).astype("<i8", copy=False)
-    restart_rows = _schedule_stochastic_restarts(
+    root_count, zero_count = _seed_curved_wavefront_into(
         state,
-        response_rows,
-        state.current_time_s[response_rows],
+        proposal.target_time_s,
+        interactions,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        start_contact_state,
     )
-    continue_root = local_active.copy()
-    continue_root[restart_rows] = False
-    eligible = np.flatnonzero(continue_root).astype("<i8", copy=False)
-    state.stack_top[eligible] = 0
-    state.stack_target_s[eligible, 0] = proposal.target_time_s[eligible]
-    state.stack_depth[eligible, 0] = 0
-    state.stack_interaction_reset[eligible, 0] = -1
-    reuse_root = local_active & (interactions == 0)
-    root_rows = np.flatnonzero(reuse_root & positive).astype("<i8", copy=False)
-    zero_rows = np.flatnonzero(reuse_root & ~positive).astype("<i8", copy=False)
-    inactive_zero = np.flatnonzero((~reuse_root) & ~positive).astype("<i8", copy=False)
-    state.stack_top[inactive_zero] = -1
-    return root_rows, zero_rows
+    return state.root_rows[:root_count], state.zero_rows[:zero_count]
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _seed_curved_wavefront_into(
+    state: _CurvedWavefront,
+    target_time_s: np.ndarray,
+    interactions: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    active: np.ndarray,
+    start_contact_state: np.ndarray,
+) -> tuple[int, int]:
+    """Seed stable rows after surface response, including OU root termination."""
+
+    root_count = 0
+    zero_count = 0
+    for row in range(state.particle_index.size):
+        particle = state.particle_index[row]
+        is_active = active[particle]
+        response = interactions[row] != 0
+        positive = state.current_time_s[row] < target_time_s[row]
+        if is_active and response:
+            for component in range(2):
+                state.current_position_m[row, component] = position_m[particle, component]
+                state.current_velocity_m_s[row, component] = velocity_m_s[particle, component]
+            state.current_charge_number[row] = charge_number[particle]
+        state.interaction_count[row] = interactions[row]
+        state.certify_departure[row] = start_contact_state[particle] == SURFACE_STATE_DEPARTURE
+        if is_active and response and positive and state.stochastic_restart_time_s.size:
+            state.stochastic_restart_time_s[row] = state.current_time_s[row]
+        elif is_active and (positive or not response):
+            state.stack_top[row] = 0
+            state.stack_target_s[row, 0] = target_time_s[row]
+            state.stack_depth[row, 0] = 0
+            state.stack_interaction_reset[row, 0] = -1
+        if is_active and not response:
+            if positive:
+                state.root_rows[root_count] = row
+                root_count += 1
+            else:
+                state.zero_rows[zero_count] = row
+                zero_count += 1
+    return root_count, zero_count
 
 
 def _next_curved_wave_rows(
@@ -5451,24 +7017,37 @@ def _next_curved_wave_rows(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Pop exhausted work and return one stable row per active particle."""
 
-    while True:
-        rows = np.flatnonzero((state.stack_top >= 0) & active[particle_index]).astype(
-            "<i8", copy=False
-        )
-        if not rows.size:
-            return rows, np.empty(0, dtype="<f8")
-        top = state.stack_top[rows]
-        reset = state.stack_interaction_reset[rows, top]
-        reset_rows = reset >= 0
-        if bool(reset_rows.any()):
-            selected = rows[reset_rows]
-            state.interaction_count[selected] = reset[reset_rows]
-            state.stack_interaction_reset[selected, state.stack_top[selected]] = -1
-        targets = state.stack_target_s[rows, state.stack_top[rows]]
-        exhausted = state.current_time_s[rows] >= targets
-        if not bool(exhausted.any()):
-            return rows, targets
-        state.stack_top[rows[exhausted]] -= 1
+    count = _next_curved_wave_rows_into(particle_index, state, active)
+    return state.wave_rows[:count], state.wave_targets_s[:count]
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _next_curved_wave_rows_into(
+    particle_index: np.ndarray,
+    state: _CurvedWavefront,
+    active: np.ndarray,
+) -> int:
+    """Pop completed left-first continuations without masks or gather arrays."""
+
+    count = 0
+    for row in range(particle_index.size):
+        if not active[particle_index[row]]:
+            continue
+        top = state.stack_top[row]
+        while top >= 0:
+            reset = state.stack_interaction_reset[row, top]
+            if reset >= 0:
+                state.interaction_count[row] = reset
+                state.stack_interaction_reset[row, top] = -1
+            target = state.stack_target_s[row, top]
+            if state.current_time_s[row] < target:
+                state.wave_rows[count] = row
+                state.wave_targets_s[count] = target
+                count += 1
+                break
+            top -= 1
+        state.stack_top[row] = top
+    return count
 
 
 def _locate_curved_proposal_batches(
@@ -5512,7 +7091,7 @@ def _locate_curved_proposal_batches(
         target_time_s,
     )
     try:
-        candidate_count = count_curved_event_candidates(
+        prepared_query = prepare_curved_event_batch(
             prepared.event_geometry,
             proposal.start_position_m[proposal_rows],
             proposal.start_velocity_m_s[proposal_rows],
@@ -5532,6 +7111,16 @@ def _locate_curved_proposal_batches(
             roundoff_ulps=event.roundoff_ulps,
             certify_start_contact_departure=certify_departure,
             chord_deviation_bound_m=chord,
+            certify_monotone_approach=proposal.path_kind == "cubic_hermite",
+            use_position_controls=use_position_controls,
+            position_control_origin_m=position_control_origin_m,
+            relative_position_control_lower_m=relative_position_control_lower_m,
+            relative_position_control_upper_m=relative_position_control_upper_m,
+            finite_contact_enabled=(
+                prepared.geometry.facet_contact_enabled
+                if prepared.geometry is not prepared.event_geometry
+                else None
+            ),
         )
     except (EventLocationError, GeometryPreparationError, ValueError) as error:
         first_particle = int(proposal.particle_index[proposal_rows[0]])
@@ -5540,58 +7129,23 @@ def _locate_curved_proposal_batches(
             f"curved event batch violated a shared invariant at particle {particle_id}"
         ) from error
     capacity = prepared.event_candidate_capacity
+    arena = prepared.event_query_arena
     begin = 0
     while begin < proposal_rows.size:
-        end = _bounded_event_row_stop(candidate_count, begin, capacity)
-        bounded_proposal_rows = proposal_rows[begin:end]
-        bounded_chord = None if chord is None else chord[begin:end]
+        end = _bounded_event_row_stop(prepared_query.broad_counts, begin, capacity)
         try:
-            result = locate_curved_first_event_batch(
-                prepared.event_geometry,
-                proposal.start_position_m[bounded_proposal_rows],
-                proposal.start_velocity_m_s[bounded_proposal_rows],
-                proposal.end_position_m[bounded_proposal_rows],
-                proposal.end_velocity_m_s[bounded_proposal_rows],
-                event_position_lower_m[begin:end],
-                event_position_upper_m[begin:end],
-                event_velocity_lower_m_s[begin:end],
-                event_velocity_upper_m_s[begin:end],
-                start_time_s=proposal.start_time_s[bounded_proposal_rows],
-                target_time_s=proposal.target_time_s[bounded_proposal_rows],
-                root_interval_s=root_interval_s[begin:end],
-                contact_radius_m=prepared.schedule.contact_radius_m[
-                    proposal.particle_index[bounded_proposal_rows]
-                ],
-                geometry_rtol=event.geometry_rtol,
-                roundoff_ulps=event.roundoff_ulps,
-                candidate_capacity=capacity,
-                certify_start_contact_departure=certify_departure[begin:end],
-                chord_deviation_bound_m=bounded_chord,
-                certify_monotone_approach=proposal.path_kind == "cubic_hermite",
-                use_position_controls=(
-                    None if use_position_controls is None else use_position_controls[begin:end]
-                ),
-                position_control_origin_m=(
-                    None
-                    if position_control_origin_m is None
-                    else position_control_origin_m[begin:end]
-                ),
-                relative_position_control_lower_m=(
-                    None
-                    if relative_position_control_lower_m is None
-                    else relative_position_control_lower_m[begin:end]
-                ),
-                relative_position_control_upper_m=(
-                    None
-                    if relative_position_control_upper_m is None
-                    else relative_position_control_upper_m[begin:end]
-                ),
-                finite_contact_enabled=(
-                    prepared.geometry.facet_contact_enabled
-                    if prepared.geometry is not prepared.event_geometry
-                    else None
-                ),
+            query_status, row_count, candidate_count, _ = locate_curved_first_event_into(
+                prepared.event_query_geometry,
+                prepared_query,
+                arena,
+                begin,
+                end,
             )
+            if query_status != EVENT_QUERY_OK:
+                raise EventLocationError(
+                    "prepared curved candidate arena could not localize prefix"
+                )
+            result = curved_event_result_view(arena, row_count, candidate_count)
         except (EventLocationError, GeometryPreparationError, ValueError) as error:
             raise EngineError("bounded curved event batch violated its capacity") from error
         result.status[force_split[begin:end]] = CURVED_STATUS_SPLIT
@@ -5909,19 +7463,14 @@ def _commit_curved_clear_wave(
         start_contact_certified=start_contact_certified,
     )
     invalid = np.flatnonzero(codes).astype("<i8", copy=False)
-    _commit_event_proposal_failures(
+    _commit_failure_rows(
         state.particle_index,
-        [
-            (
-                int(wave_rows[offset]),
-                _proposal_row_failure(
-                    proposal,
-                    int(proposal_rows[offset]),
-                    codes[offset],
-                ),
-            )
-            for offset in invalid
-        ],
+        wave_rows[invalid],
+        proposal_rows[invalid],
+        proposal.start_time_s,
+        proposal.start_position_m,
+        proposal.start_velocity_m_s,
+        proposal.start_charge_number,
         state.stack_top,
         position_m,
         velocity_m_s,
@@ -5932,12 +7481,13 @@ def _commit_curved_clear_wave(
         event_ordinal,
         failure_reason_code,
         failures,
+        np.uint16(0),
+        codes[invalid],
     )
     valid_offsets = np.flatnonzero(codes == 0).astype("<i8", copy=False)
     if not valid_offsets.size:
         return
     valid_proposal_rows = proposal_rows[valid_offsets]
-    valid_wave_rows = wave_rows[valid_offsets]
     _commit_proposal_rows(
         prepared,
         proposal,
@@ -5946,18 +7496,48 @@ def _commit_curved_clear_wave(
         velocity_m_s,
         charge_number,
     )
-    state.current_time_s[valid_wave_rows] = target_time_s[valid_offsets]
-    state.current_position_m[valid_wave_rows] = proposal.end_position_m[valid_proposal_rows]
-    state.current_velocity_m_s[valid_wave_rows] = proposal.end_velocity_m_s[valid_proposal_rows]
-    state.current_charge_number[valid_wave_rows] = proposal.end_charge_number[valid_proposal_rows]
-    state.stack_top[valid_wave_rows] -= 1
+    _accept_curved_rows_into(
+        state,
+        valid_offsets,
+        proposal_rows,
+        wave_rows,
+        target_time_s,
+        proposal.end_position_m,
+        proposal.end_velocity_m_s,
+        proposal.end_charge_number,
+    )
     _record_replay_rows(
         replay,
         proposal,
         valid_proposal_rows,
-        prepared.case.data.coordinate_system,
+        prepared,
     )
     statistics.accepted_particle_pieces += int(valid_offsets.size)
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _accept_curved_rows_into(
+    state: _CurvedWavefront,
+    offsets: np.ndarray,
+    proposal_rows: np.ndarray,
+    wave_rows: np.ndarray,
+    target_time_s: np.ndarray,
+    end_position_m: np.ndarray,
+    end_velocity_m_s: np.ndarray,
+    end_charge_number: np.ndarray,
+) -> None:
+    """Accept the certified interval and pop its continuation in one native pass."""
+
+    for offset_index in range(offsets.size):
+        offset = offsets[offset_index]
+        row = wave_rows[offset]
+        proposal_row = proposal_rows[offset]
+        state.current_time_s[row] = target_time_s[offset]
+        for component in range(2):
+            state.current_position_m[row, component] = end_position_m[proposal_row, component]
+            state.current_velocity_m_s[row, component] = end_velocity_m_s[proposal_row, component]
+        state.current_charge_number[row] = end_charge_number[proposal_row]
+        state.stack_top[row] -= 1
 
 
 def _commit_curved_event_prefixes(
@@ -6039,15 +7619,14 @@ def _commit_curved_event_prefixes(
             statistics=statistics,
         )
         invalid = np.flatnonzero((codes != 0) & ~retryable).astype("<i8", copy=False)
-        _commit_event_proposal_failures(
+        _commit_failure_rows(
             particle_index,
-            [
-                (
-                    int(prefix_wave_rows[offset]),
-                    _proposal_row_failure(prefix, int(offset), codes[offset]),
-                )
-                for offset in invalid
-            ],
+            prefix_wave_rows[invalid],
+            invalid,
+            prefix.start_time_s,
+            prefix.start_position_m,
+            prefix.start_velocity_m_s,
+            prefix.start_charge_number,
             state.stack_top,
             position_m,
             velocity_m_s,
@@ -6058,6 +7637,8 @@ def _commit_curved_event_prefixes(
             event_ordinal,
             failure_reason_code,
             failures,
+            np.uint16(0),
+            codes[invalid],
         )
         valid_prefix = np.flatnonzero(codes == 0).astype("<i8", copy=False)
         valid_prefix_events = prefix_event_rows[valid_prefix]
@@ -6074,7 +7655,7 @@ def _commit_curved_event_prefixes(
                 replay,
                 prefix,
                 valid_prefix,
-                prepared.case.data.coordinate_system,
+                prepared,
                 exclude_target=True,
             )
             statistics.accepted_particle_pieces += int(valid_prefix.size)
@@ -6395,6 +7976,7 @@ def _commit_curved_wall_wave(
         thermal_normal_draws,
         thermal_tangent_draws,
         roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+        result_buffer=prepared.boundary_response_buffer,
     )
     for response_row, event_value in enumerate(event_rows):
         event_row = int(event_value)
@@ -6783,74 +8365,77 @@ def _split_curved_wave_rows(
         row_reasons = np.asarray(exhaustion_reason_codes, dtype="<u2")
         if row_reasons.shape != (rows.size,) or bool((row_reasons == 0).any()):
             raise EngineError("curved split exhaustion reasons are invalid")
-    top = state.stack_top[rows]
-    depth = state.stack_depth[rows, top]
-    target = state.stack_target_s[rows, top]
-    current = state.current_time_s[rows]
-    midpoint = current + 0.5 * (target - current)
-    invalid = (depth >= maximum) | (current >= midpoint) | (midpoint >= target)
-    exhausted = rows[invalid]
-    if row_reasons is None:
-        _fail_event_rows(
-            particle_index,
-            exhausted,
-            state.current_time_s,
-            state.current_position_m,
-            state.current_velocity_m_s,
-            state.current_charge_number,
-            state.stack_top,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
-            failures,
-            reason,
-        )
-    else:
-        exhausted_reasons = row_reasons[invalid]
-        for row_reason in np.unique(exhausted_reasons):
-            selected = exhausted[exhausted_reasons == row_reason]
-            _fail_event_rows(
-                particle_index,
-                selected,
-                state.current_time_s,
-                state.current_position_m,
-                state.current_velocity_m_s,
-                state.current_charge_number,
-                state.stack_top,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                failure_reason_code,
-                failures,
-                np.uint16(row_reason),
-            )
-    valid = ~invalid
-    selected = rows[valid]
-    if not selected.size:
-        return
-    selected_top = top[valid]
-    child_depth = depth[valid] + 1
-    reset_value = 0 if reset_interactions else -1
-    state.stack_depth[selected, selected_top] = child_depth
-    state.stack_interaction_reset[selected, selected_top] = reset_value
-    state.stack_top[selected] = selected_top + 1
-    state.stack_target_s[selected, selected_top + 1] = midpoint[valid]
-    state.stack_depth[selected, selected_top + 1] = child_depth
-    state.stack_interaction_reset[selected, selected_top + 1] = reset_value
-    statistics.refinements += int(selected.size)
+    exhausted_count, split_count, maximum_depth = _split_curved_wave_rows_into(
+        state, rows, maximum, reset_interactions, row_reasons, reason
+    )
+    exhausted = state.exhausted_rows[:exhausted_count]
+    _commit_failure_rows(
+        particle_index,
+        exhausted,
+        exhausted,
+        state.current_time_s,
+        state.current_position_m,
+        state.current_velocity_m_s,
+        state.current_charge_number,
+        state.stack_top,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        lifecycle,
+        terminal_time_s,
+        event_ordinal,
+        failure_reason_code,
+        failures,
+        reason,
+        state.exhausted_reason_code[:exhausted_count],
+    )
+    statistics.refinements += split_count
     statistics.maximum_refinement_depth = max(
         statistics.maximum_refinement_depth,
-        int(child_depth.max()),
+        maximum_depth,
     )
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _split_curved_wave_rows_into(
+    state: _CurvedWavefront,
+    rows: np.ndarray,
+    maximum: int,
+    reset_interactions: bool,
+    row_reasons: np.ndarray | None,
+    reason: np.uint16,
+) -> tuple[int, int, int]:
+    """Retain right child and expose left child with the original clock arithmetic."""
+
+    exhausted_count = 0
+    split_count = 0
+    maximum_depth = 0
+    reset_value = 0 if reset_interactions else -1
+    for offset in range(rows.size):
+        row = rows[offset]
+        top = state.stack_top[row]
+        depth = state.stack_depth[row, top]
+        target = state.stack_target_s[row, top]
+        current = state.current_time_s[row]
+        midpoint = current + 0.5 * (target - current)
+        if depth >= maximum or current >= midpoint or midpoint >= target:
+            state.exhausted_rows[exhausted_count] = row
+            state.exhausted_reason_code[exhausted_count] = (
+                reason if row_reasons is None else row_reasons[offset]
+            )
+            exhausted_count += 1
+            continue
+        child_depth = depth + 1
+        state.stack_depth[row, top] = child_depth
+        state.stack_interaction_reset[row, top] = reset_value
+        state.stack_top[row] = top + 1
+        state.stack_target_s[row, top + 1] = midpoint
+        state.stack_depth[row, top + 1] = child_depth
+        state.stack_interaction_reset[row, top + 1] = reset_value
+        split_count += 1
+        maximum_depth = max(maximum_depth, child_depth)
+    return exhausted_count, split_count, maximum_depth
 
 
 def _initialize_surface_releases(
@@ -7025,6 +8610,7 @@ def _commit_surface_release_responses(
         thermal_normal_draws,
         thermal_tangent_draws,
         roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+        result_buffer=prepared.boundary_response_buffer,
     )
     post_release: SurfaceReleaseBatch | None = None
     post_by_response = np.full(rows.size, -1, dtype="<i8")
@@ -7510,9 +9096,20 @@ def _validate_table_starts(
                     f"table particle {particle_id} contact body must start strictly inside the domain"
                 )
         volume_containment = points_inside_volume(geometry, positions)
-        for index in range(begin, end):
-            if int(schedule.source_facet_id[index]) >= 0:
-                continue
+        table_mask = source_facets < 0
+        certified_inside = certify_event_point_interiors(
+            geometry,
+            positions,
+            schedule.velocity_m_s[begin:end],
+            schedule.release_time_s[begin:end],
+            table_mask,
+            volume_containment,
+            interval_s=case.spec.time.dt_s,
+            geometry_rtol=event.geometry_rtol,
+            roundoff_ulps=event.roundoff_ulps,
+        )
+        for local in np.flatnonzero(table_mask & ~certified_inside):
+            index = begin + int(local)
             position = schedule.position_m[index]
             speed = math.hypot(
                 float(schedule.velocity_m_s[index, 0]),
@@ -7653,7 +9250,7 @@ def _advance_exact_paths(
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
     failure_reason_code: np.ndarray,
-    writer: ResultWriter,
+    writer: _EventSink,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
 ) -> None:
@@ -7661,17 +9258,25 @@ def _advance_exact_paths(
 
     if root_proposal.path_kind not in {"linear_exact", "quadratic_exact"}:
         raise EngineError("exact residual work requires a linear or quadratic proposal")
-    row_count = root_proposal.particle_index.size
-    current_time = root_proposal.start_time_s.copy()
-    current_position = root_proposal.start_position_m.copy()
-    current_velocity = root_proposal.start_velocity_m_s.copy()
-    current_charge = root_proposal.start_charge_number.copy()
-    maximum_depth = prepared.case.spec.solver.event.max_refinements
-    stack_target = np.empty((row_count, maximum_depth + 1), dtype="<f8")
-    stack_depth = np.empty((row_count, maximum_depth + 1), dtype="<i8")
-    stack_interactions = np.empty((row_count, maximum_depth + 1), dtype="<i8")
-    stack_top = np.full(row_count, -1, dtype="<i8")
-    departing_facet = np.full(row_count, -1, dtype="<i8")
+    state = prepared.exact_workspace.view(root_proposal.particle_index.size)
+    _reset_exact_wavefront_into(
+        state,
+        root_proposal.particle_index,
+        root_proposal.start_time_s,
+        root_proposal.start_position_m,
+        root_proposal.start_velocity_m_s,
+        root_proposal.start_charge_number,
+        prepared.constant_acceleration_m_s2,
+    )
+    current_time = state.current_time_s
+    current_position = state.current_position_m
+    current_velocity = state.current_velocity_m_s
+    current_charge = state.current_charge_number
+    stack_target = state.stack_target_s
+    stack_depth = state.stack_depth
+    stack_interactions = state.stack_interactions
+    stack_top = state.stack_top
+    departing_facet = state.departing_facet_id
     _initialize_exact_wavefront(
         prepared,
         root_proposal,
@@ -7690,6 +9295,7 @@ def _advance_exact_paths(
         exact_origin_position_m,
         exact_origin_velocity_m_s,
         surface_release_state,
+        state.zero_rows,
         stack_target,
         stack_depth,
         stack_interactions,
@@ -7705,21 +9311,16 @@ def _advance_exact_paths(
     path_code = (
         EXACT_PATH_LINEAR if root_proposal.path_kind == "linear_exact" else EXACT_PATH_QUADRATIC
     )
-    acceleration = _exact_wave_acceleration(prepared, root_proposal.particle_index)
     while True:
-        wave_rows = np.flatnonzero((stack_top >= 0) & active[root_proposal.particle_index]).astype(
-            "<i8", copy=False
+        wave_count, pending_count = _next_exact_wave_rows_into(
+            state, root_proposal.particle_index, active
         )
-        if not wave_rows.size:
+        if not pending_count:
             break
-        targets = stack_target[wave_rows, stack_top[wave_rows]]
-        exhausted = current_time[wave_rows] >= targets
-        if bool(exhausted.any()):
-            stack_top[wave_rows[exhausted]] -= 1
-            wave_rows = wave_rows[~exhausted]
-            targets = targets[~exhausted]
-            if not wave_rows.size:
-                continue
+        if not wave_count:
+            continue
+        wave_rows = state.wave_rows[:wave_count]
+        targets = state.wave_targets_s[:wave_count]
         statistics.candidate_queries += int(wave_rows.size)
         for bounded_rows, bounded_targets, event in _locate_exact_wave_batches(
             prepared,
@@ -7730,7 +9331,7 @@ def _advance_exact_paths(
             targets,
             current_position,
             current_velocity,
-            acceleration,
+            state.acceleration_m_s2,
             departing_facet,
         ):
             _consume_exact_wave(
@@ -7765,30 +9366,101 @@ def _advance_exact_paths(
                 failures,
                 statistics,
                 failure_reason_code,
+                state,
             )
-            committed_finite_wall = (
-                (event.status == EXACT_STATUS_WALL)
-                & active[root_proposal.particle_index[bounded_rows]]
-                & (
-                    prepared.schedule.contact_radius_m[root_proposal.particle_index[bounded_rows]]
-                    > 0.0
-                )
-                & (current_time[bounded_rows] == event.time_s)
+            _mark_exact_finite_departures_into(
+                root_proposal.particle_index,
+                bounded_rows,
+                event.status,
+                event.time_s,
+                event.primary_facet_id,
+                active,
+                prepared.schedule.contact_radius_m,
+                current_time,
+                departing_facet,
+                prepared.geometry is not prepared.event_geometry,
+                prepared.geometry.facet_contact_enabled,
             )
-            if prepared.geometry is not prepared.event_geometry:
-                event_primary = event.primary_facet_id
-                valid_primary = event_primary >= 0
-                surface_primary = np.zeros(event_primary.size, dtype=np.bool_)
-                surface_primary[valid_primary] = prepared.geometry.facet_contact_enabled[
-                    event_primary[valid_primary]
-                ]
-                committed_finite_wall &= surface_primary
-            if bool(committed_finite_wall.any()):
-                departing_facet[bounded_rows[committed_finite_wall]] = (
-                    EXACT_DEPARTURE_FINITE_CONTACT_SET
-                )
             _flush_boundary_event_wave(writer, prepared, pending)
     return
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _reset_exact_wavefront_into(
+    state: _ExactWavefront,
+    particle_index: np.ndarray,
+    start_time_s: np.ndarray,
+    start_position_m: np.ndarray,
+    start_velocity_m_s: np.ndarray,
+    start_charge_number: np.ndarray,
+    acceleration_m_s2: np.ndarray | None,
+) -> None:
+    for row in range(particle_index.size):
+        state.current_time_s[row] = start_time_s[row]
+        state.current_charge_number[row] = start_charge_number[row]
+        state.stack_top[row] = -1
+        state.departing_facet_id[row] = EXACT_DEPARTURE_NONE
+        for component in range(2):
+            state.current_position_m[row, component] = start_position_m[row, component]
+            state.current_velocity_m_s[row, component] = start_velocity_m_s[row, component]
+            state.acceleration_m_s2[row, component] = (
+                0.0
+                if acceleration_m_s2 is None
+                else acceleration_m_s2[particle_index[row], component]
+            )
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _next_exact_wave_rows_into(
+    state: _ExactWavefront, particle_index: np.ndarray, active: np.ndarray
+) -> tuple[int, int]:
+    """Preserve each round's single pop and stable row order without gathers."""
+
+    count = 0
+    pending_count = 0
+    for row in range(particle_index.size):
+        top = state.stack_top[row]
+        if top < 0 or not active[particle_index[row]]:
+            continue
+        pending_count += 1
+        target = state.stack_target_s[row, top]
+        if state.current_time_s[row] >= target:
+            state.stack_top[row] = top - 1
+        else:
+            state.wave_rows[count] = row
+            state.wave_targets_s[count] = target
+            count += 1
+    return count, pending_count
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _mark_exact_finite_departures_into(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    status: np.ndarray,
+    event_time_s: np.ndarray,
+    primary_facet_id: np.ndarray,
+    active: np.ndarray,
+    contact_radius_m: np.ndarray,
+    current_time_s: np.ndarray,
+    departing_facet_id: np.ndarray,
+    separate_finite_mask: bool,
+    finite_contact_enabled: np.ndarray,
+) -> None:
+    for local in range(rows.size):
+        row = rows[local]
+        particle = particle_index[row]
+        if (
+            status[local] != EXACT_STATUS_WALL
+            or not active[particle]
+            or contact_radius_m[particle] <= 0.0
+            or current_time_s[row] != event_time_s[local]
+        ):
+            continue
+        primary = primary_facet_id[local]
+        if separate_finite_mask and (primary < 0 or not finite_contact_enabled[primary]):
+            continue
+        departing_facet_id[row] = EXACT_DEPARTURE_FINITE_CONTACT_SET
 
 
 def _initialize_exact_wavefront(
@@ -7809,6 +9481,7 @@ def _initialize_exact_wavefront(
     exact_origin_position_m: np.ndarray,
     exact_origin_velocity_m_s: np.ndarray,
     surface_release_state: np.ndarray,
+    zero_rows: np.ndarray,
     stack_target_s: np.ndarray,
     stack_depth: np.ndarray,
     stack_interactions: np.ndarray,
@@ -7844,25 +9517,30 @@ def _initialize_exact_wavefront(
         statistics,
         failure_reason_code,
     )
-    local_active = active[proposal.particle_index]
-    response_rows = np.flatnonzero(local_active & (interactions != 0)).astype("<i8", copy=False)
-    particles = proposal.particle_index[response_rows]
-    current_position_m[response_rows] = position_m[particles]
-    current_velocity_m_s[response_rows] = velocity_m_s[particles]
-    current_charge_number[response_rows] = charge_number[particles]
-    exact_origin_time_s[particles] = proposal.start_time_s[response_rows]
-    exact_origin_position_m[particles] = current_position_m[response_rows]
-    exact_origin_velocity_m_s[particles] = current_velocity_m_s[response_rows]
-
-    positive = local_active & (proposal.start_time_s < proposal.target_time_s)
-    rows = np.flatnonzero(positive).astype("<i8", copy=False)
-    stack_top[rows] = 0
-    stack_target_s[rows, 0] = proposal.target_time_s[rows]
-    stack_depth[rows, 0] = 0
-    stack_interactions[rows, 0] = interactions[rows]
-    departing_facet_id[rows] = departing[rows]
-    zero_rows = np.flatnonzero(local_active & ~positive).astype("<i8", copy=False)
-    for row_value in zero_rows:
+    zero_count = _seed_exact_wavefront_into(
+        proposal.particle_index,
+        proposal.start_time_s,
+        proposal.target_time_s,
+        interactions,
+        departing,
+        current_position_m,
+        current_velocity_m_s,
+        current_charge_number,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        exact_origin_time_s,
+        exact_origin_position_m,
+        exact_origin_velocity_m_s,
+        stack_target_s,
+        stack_depth,
+        stack_interactions,
+        stack_top,
+        departing_facet_id,
+        zero_rows,
+    )
+    for row_value in zero_rows[:zero_count]:
         row = int(row_value)
         _record_replay_jump(
             replay,
@@ -7874,14 +9552,55 @@ def _initialize_exact_wavefront(
         )
 
 
-def _exact_wave_acceleration(
-    prepared: _PreparedRun,
+@njit(cache=True, fastmath=False, nogil=True)
+def _seed_exact_wavefront_into(
     particle_index: np.ndarray,
-) -> np.ndarray:
-    acceleration = prepared.constant_acceleration_m_s2
-    if acceleration is None:
-        return np.zeros((particle_index.size, 2), dtype="<f8")
-    return acceleration[particle_index].copy()
+    start_time_s: np.ndarray,
+    target_time_s: np.ndarray,
+    interactions: np.ndarray,
+    departing: np.ndarray,
+    current_position_m: np.ndarray,
+    current_velocity_m_s: np.ndarray,
+    current_charge_number: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    active: np.ndarray,
+    exact_origin_time_s: np.ndarray,
+    exact_origin_position_m: np.ndarray,
+    exact_origin_velocity_m_s: np.ndarray,
+    stack_target_s: np.ndarray,
+    stack_depth: np.ndarray,
+    stack_interactions: np.ndarray,
+    stack_top: np.ndarray,
+    departing_facet_id: np.ndarray,
+    zero_rows: np.ndarray,
+) -> int:
+    zero_count = 0
+    for row in range(particle_index.size):
+        particle = particle_index[row]
+        if not active[particle]:
+            continue
+        if interactions[row] != 0:
+            current_charge_number[row] = charge_number[particle]
+            exact_origin_time_s[particle] = start_time_s[row]
+            for component in range(2):
+                current_position_m[row, component] = position_m[particle, component]
+                current_velocity_m_s[row, component] = velocity_m_s[particle, component]
+                exact_origin_position_m[particle, component] = current_position_m[row, component]
+                exact_origin_velocity_m_s[particle, component] = current_velocity_m_s[
+                    row, component
+                ]
+        if start_time_s[row] < target_time_s[row]:
+            stack_top[row] = 0
+            stack_target_s[row, 0] = target_time_s[row]
+            stack_depth[row, 0] = 0
+            stack_interactions[row, 0] = interactions[row]
+            departing_facet_id[row] = departing[row]
+        else:
+            zero_rows[zero_count] = row
+            zero_count += 1
+    return zero_count
 
 
 def _locate_exact_wave_batches(
@@ -7899,7 +9618,7 @@ def _locate_exact_wave_batches(
     event = prepared.case.spec.solver.event
     try:
         path_kind = np.full(wave_rows.size, path_code, dtype="<u1")
-        candidate_count = count_exact_event_candidates(
+        prepared_query = prepare_exact_event_batch(
             prepared.event_geometry,
             path_kind,
             current_position_m[wave_rows],
@@ -7911,6 +9630,11 @@ def _locate_exact_wave_batches(
             geometry_rtol=event.geometry_rtol,
             roundoff_ulps=event.roundoff_ulps,
             certified_departing_facet_id=departing_facet_id[wave_rows],
+            finite_contact_enabled=(
+                prepared.geometry.facet_contact_enabled
+                if prepared.geometry is not prepared.event_geometry
+                else None
+            ),
         )
     except (GeometryPreparationError, ValueError) as error:
         first_particle = int(particle_index[wave_rows[0]])
@@ -7921,35 +9645,27 @@ def _locate_exact_wave_batches(
     capacity = prepared.event_candidate_capacity
     begin = 0
     while begin < wave_rows.size:
-        end = _bounded_event_row_stop(candidate_count, begin, capacity)
+        end = _bounded_event_row_stop(prepared_query.broad_counts, begin, capacity)
         bounded_rows = wave_rows[begin:end]
         bounded_targets = target_time_s[begin:end]
         try:
-            result = locate_exact_first_event_batch(
-                prepared.event_geometry,
-                path_kind[begin:end],
-                current_position_m[bounded_rows],
-                current_velocity_m_s[bounded_rows],
-                acceleration_m_s2[bounded_rows],
-                start_time_s=current_time_s[bounded_rows],
-                target_time_s=bounded_targets,
-                contact_radius_m=prepared.schedule.contact_radius_m[particle_index[bounded_rows]],
-                geometry_rtol=event.geometry_rtol,
-                roundoff_ulps=event.roundoff_ulps,
-                candidate_capacity=capacity,
-                certified_departing_facet_id=departing_facet_id[bounded_rows],
-                finite_contact_enabled=(
-                    prepared.geometry.facet_contact_enabled
-                    if prepared.geometry is not prepared.event_geometry
-                    else None
-                ),
+            status, row_count, candidate_count, _ = locate_exact_first_event_into(
+                prepared.event_query_geometry,
+                prepared_query,
+                prepared.event_query_arena,
+                begin,
+                end,
             )
+            if status != EVENT_QUERY_OK:
+                raise EventLocationError("bounded exact arena could not retain the full query")
+            result = exact_event_result_view(prepared.event_query_arena, row_count, candidate_count)
         except (EventLocationError, GeometryPreparationError, ValueError) as error:
             raise EngineError("bounded exact event batch violated its capacity") from error
         yield bounded_rows, bounded_targets, result
         begin = end
 
 
+@njit(cache=True, fastmath=False, nogil=True)
 def _bounded_event_row_stop(
     candidate_count: np.ndarray,
     begin: int,
@@ -8005,8 +9721,16 @@ def _consume_exact_wave(
     failures: _FailureEventBuffer,
     statistics: _EventStatistics,
     failure_reason_code: np.ndarray,
+    state: _ExactWavefront,
 ) -> None:
-    failed_rows = wave_rows[event.status == EXACT_STATUS_FAILURE]
+    failed_count, split_count, clear_count, axis_count, wall_count = _select_exact_event_rows_into(
+        state,
+        wave_rows,
+        target_time_s,
+        event.status,
+        prepared.case.spec.solver.event.max_interactions_per_step,
+    )
+    failed_rows = state.failed_rows[:failed_count]
     _fail_event_rows(
         particle_index,
         failed_rows,
@@ -8026,12 +9750,7 @@ def _consume_exact_wave(
         failures,
         _FAILURE_INDETERMINATE_EVENT,
     )
-    split_mask = event.status == EXACT_STATUS_WALL
-    wave_top = stack_top[wave_rows]
-    interaction_count = stack_interactions[wave_rows, np.maximum(wave_top, 0)]
-    split_mask &= interaction_count >= prepared.case.spec.solver.event.max_interactions_per_step
-    departing_facet_id[wave_rows[~split_mask]] = EXACT_DEPARTURE_NONE
-    split_rows = wave_rows[split_mask]
+    split_rows = state.split_rows[:split_count]
     _split_exact_wave_rows(
         prepared,
         particle_index,
@@ -8054,13 +9773,14 @@ def _consume_exact_wave(
         failure_reason_code,
         failures,
         statistics,
+        state.exhausted_rows,
     )
-    clear_rows = wave_rows[event.status == EXACT_STATUS_CLEAR]
+    clear_rows = state.clear_rows[:clear_count]
     _commit_exact_clear_rows(
         prepared,
         particle_index,
         clear_rows,
-        target_time_s[event.status == EXACT_STATUS_CLEAR],
+        state.clear_targets_s[:clear_count],
         current_time_s,
         current_position_m,
         current_velocity_m_s,
@@ -8078,7 +9798,7 @@ def _consume_exact_wave(
         statistics,
         failure_reason_code,
     )
-    axis_wave_rows = np.flatnonzero(event.status == EXACT_STATUS_AXIS).astype("<i8", copy=False)
+    axis_wave_rows = state.axis_event_rows[:axis_count]
     _commit_exact_axis_rows(
         prepared,
         particle_index,
@@ -8105,9 +9825,7 @@ def _consume_exact_wave(
         statistics,
         failure_reason_code,
     )
-    wall_wave_rows = np.flatnonzero((event.status == EXACT_STATUS_WALL) & ~split_mask).astype(
-        "<i8", copy=False
-    )
+    wall_wave_rows = state.wall_event_rows[:wall_count]
     _commit_exact_wall_rows(
         prepared,
         particle_index,
@@ -8141,6 +9859,45 @@ def _consume_exact_wave(
     )
 
 
+@njit(cache=True, fastmath=False, nogil=True)
+def _select_exact_event_rows_into(
+    state: _ExactWavefront,
+    wave_rows: np.ndarray,
+    target_time_s: np.ndarray,
+    status: np.ndarray,
+    maximum_interactions: int,
+) -> tuple[int, int, int, int, int]:
+    """Stable exclusive work maps; borrowed query/wave columns stay untouched."""
+
+    failed = split = clear = axis = wall = 0
+    for local in range(wave_rows.size):
+        row = wave_rows[local]
+        code = status[local]
+        needs_split = (
+            code == EXACT_STATUS_WALL
+            and state.stack_interactions[row, max(state.stack_top[row], 0)] >= maximum_interactions
+        )
+        if not needs_split:
+            state.departing_facet_id[row] = EXACT_DEPARTURE_NONE
+        if code == EXACT_STATUS_FAILURE:
+            state.failed_rows[failed] = row
+            failed += 1
+        elif needs_split:
+            state.split_rows[split] = row
+            split += 1
+        elif code == EXACT_STATUS_CLEAR:
+            state.clear_rows[clear] = row
+            state.clear_targets_s[clear] = target_time_s[local]
+            clear += 1
+        elif code == EXACT_STATUS_AXIS:
+            state.axis_event_rows[axis] = local
+            axis += 1
+        elif code == EXACT_STATUS_WALL:
+            state.wall_event_rows[wall] = local
+            wall += 1
+    return failed, split, clear, axis, wall
+
+
 def _evaluate_exact_targets(
     prepared: _PreparedRun,
     particle_index: np.ndarray,
@@ -8153,18 +9910,20 @@ def _evaluate_exact_targets(
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
 ) -> tuple[_ExactEndpointBatch, list[tuple[int, _ParticleFailure]]]:
-    """Reintegrate variable exact prefixes in one stable row-target batch."""
+    """Evaluate exact targets and borrow their independently owned end states."""
 
     count = selected_rows.size
-    endpoint = _ExactEndpointBatch(
-        np.zeros(count, dtype=np.bool_),
-        np.empty((count, 2), dtype="<f8"),
-        np.empty((count, 2), dtype="<f8"),
-        np.empty(count, dtype="<f8"),
-    )
     failures: list[tuple[int, _ParticleFailure]] = []
     if not count:
-        return endpoint, failures
+        return (
+            _ExactEndpointBatch(
+                np.zeros(0, dtype=np.bool_),
+                np.empty((0, 2), dtype="<f8"),
+                np.empty((0, 2), dtype="<f8"),
+                np.empty(0, dtype="<f8"),
+            ),
+            failures,
+        )
     try:
         proposal = _build_step_proposal(
             prepared,
@@ -8178,53 +9937,31 @@ def _evaluate_exact_targets(
         )
     except (FieldLocationError, PhysicsEvaluationError, ValueError) as error:
         raise EngineError("exact target batch could not be evaluated") from error
-    else:
-        _record_exact_target_proposal(
-            prepared,
-            proposal,
-            np.arange(count, dtype="<i8"),
-            replay,
-            endpoint,
-            failures,
-            statistics,
-            source_rows=selected_rows,
-        )
-    return endpoint, failures
-
-
-def _record_exact_target_proposal(
-    prepared: _PreparedRun,
-    proposal: StepProposal,
-    endpoint_rows: np.ndarray,
-    replay: _ReplayBuffer,
-    endpoint: _ExactEndpointBatch,
-    failures: list[tuple[int, _ParticleFailure]],
-    statistics: _EventStatistics,
-    *,
-    source_rows: np.ndarray | None = None,
-) -> None:
-    source = endpoint_rows if source_rows is None else source_rows
     codes = _proposal_numerical_failure_codes(proposal.numerical_status)
     codes[(codes == 0) & ~proposal.support_inside] = _FAILURE_FIELD_SUPPORT
     codes[(codes == 0) & ~proposal.applicability_inside] = _FAILURE_MODEL_APPLICABILITY
     failures.extend(
         (
-            int(source[local_row]),
+            int(selected_rows[local_row]),
             _proposal_row_failure(proposal, int(local_row), codes[local_row]),
         )
         for local_row in np.flatnonzero(codes)
     )
-    valid_local = np.flatnonzero(codes == 0).astype("<i8", copy=False)
-    if not valid_local.size:
-        return
-    destination = endpoint_rows[valid_local]
-    endpoint.valid[destination] = True
-    endpoint.position_m[destination] = proposal.end_position_m[valid_local]
-    endpoint.velocity_m_s[destination] = proposal.end_velocity_m_s[valid_local]
-    endpoint.charge_number[destination] = proposal.end_charge_number[valid_local]
-    _commit_proposal_field_cell(prepared, proposal, valid_local)
-    _record_replay_rows(replay, proposal, valid_local, prepared.case.data.coordinate_system)
-    statistics.accepted_particle_pieces += int(valid_local.size)
+    valid = codes == 0
+    valid_local = np.flatnonzero(valid).astype("<i8", copy=False)
+    if valid_local.size:
+        _commit_proposal_field_cell(prepared, proposal, valid_local)
+        _record_replay_rows(replay, proposal, valid_local, prepared)
+        statistics.accepted_particle_pieces += int(valid_local.size)
+    return (
+        _ExactEndpointBatch(
+            valid,
+            proposal.end_position_m,
+            proposal.end_velocity_m_s,
+            proposal.end_charge_number,
+        ),
+        failures,
+    )
 
 
 def _commit_exact_clear_rows(
@@ -8275,16 +10012,50 @@ def _commit_exact_clear_rows(
         failure_reason_code,
         failures,
     )
-    for selected_row in np.flatnonzero(endpoint.valid):
-        row = int(rows[selected_row])
-        particle = int(particle_index[row])
-        current_time_s[row] = target_time_s[selected_row]
-        current_position_m[row] = endpoint.position_m[selected_row]
-        current_velocity_m_s[row] = endpoint.velocity_m_s[selected_row]
-        current_charge_number[row] = endpoint.charge_number[selected_row]
-        position_m[particle] = endpoint.position_m[selected_row]
-        velocity_m_s[particle] = endpoint.velocity_m_s[selected_row]
-        charge_number[particle] = endpoint.charge_number[selected_row]
+    _commit_exact_clear_into(
+        particle_index,
+        rows,
+        target_time_s,
+        endpoint,
+        current_time_s,
+        current_position_m,
+        current_velocity_m_s,
+        current_charge_number,
+        stack_top,
+        position_m,
+        velocity_m_s,
+        charge_number,
+    )
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _commit_exact_clear_into(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    target_time_s: np.ndarray,
+    endpoint: _ExactEndpointBatch,
+    current_time_s: np.ndarray,
+    current_position_m: np.ndarray,
+    current_velocity_m_s: np.ndarray,
+    current_charge_number: np.ndarray,
+    stack_top: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+) -> None:
+    for selected in range(rows.size):
+        if not endpoint.valid[selected]:
+            continue
+        row = rows[selected]
+        particle = particle_index[row]
+        current_time_s[row] = target_time_s[selected]
+        current_charge_number[row] = endpoint.charge_number[selected]
+        charge_number[particle] = endpoint.charge_number[selected]
+        for component in range(2):
+            current_position_m[row, component] = endpoint.position_m[selected, component]
+            current_velocity_m_s[row, component] = endpoint.velocity_m_s[selected, component]
+            position_m[particle, component] = endpoint.position_m[selected, component]
+            velocity_m_s[particle, component] = endpoint.velocity_m_s[selected, component]
         stack_top[row] -= 1
 
 
@@ -8321,9 +10092,9 @@ def _commit_exact_axis_rows(
     positive = targets > current_time_s[rows]
     endpoint = _ExactEndpointBatch(
         np.ones(rows.size, dtype=np.bool_),
-        current_position_m[rows].copy(),
-        current_velocity_m_s[rows].copy(),
-        current_charge_number[rows].copy(),
+        current_position_m[rows],
+        current_velocity_m_s[rows],
+        current_charge_number[rows],
     )
     if bool(positive.any()):
         evaluated, proposal_failures = _evaluate_exact_targets(
@@ -8356,25 +10127,67 @@ def _commit_exact_axis_rows(
             failure_reason_code,
             failures,
         )
-    for selected_row in np.flatnonzero(endpoint.valid):
-        row = int(rows[selected_row])
-        particle = int(particle_index[row])
-        folded_position, folded_velocity = fold_rz_position_vector(
-            np.asarray([0.0, endpoint.position_m[selected_row, 1]], dtype="<f8"),
-            endpoint.velocity_m_s[selected_row],
+    statistics.axis_crossings += _commit_exact_axis_into(
+        particle_index,
+        rows,
+        targets,
+        endpoint,
+        current_time_s,
+        current_position_m,
+        current_velocity_m_s,
+        current_charge_number,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        exact_origin_time_s,
+        exact_origin_position_m,
+        exact_origin_velocity_m_s,
+        replay,
+    )
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _commit_exact_axis_into(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    targets: np.ndarray,
+    endpoint: _ExactEndpointBatch,
+    current_time_s: np.ndarray,
+    current_position_m: np.ndarray,
+    current_velocity_m_s: np.ndarray,
+    current_charge_number: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    exact_origin_time_s: np.ndarray,
+    exact_origin_position_m: np.ndarray,
+    exact_origin_velocity_m_s: np.ndarray,
+    replay: _ReplayBuffer,
+) -> int:
+    committed = 0
+    for selected in range(rows.size):
+        if not endpoint.valid[selected]:
+            continue
+        row = rows[selected]
+        particle = particle_index[row]
+        endpoint.position_m[selected, 0] = 0.0
+        fold_rz_position_vector_into(
+            endpoint.position_m[selected : selected + 1],
+            endpoint.velocity_m_s[selected : selected + 1],
         )
-        current_time_s[row] = targets[selected_row]
-        current_position_m[row] = folded_position
-        current_velocity_m_s[row] = folded_velocity
-        current_charge_number[row] = endpoint.charge_number[selected_row]
-        position_m[particle] = folded_position
-        velocity_m_s[particle] = folded_velocity
-        charge_number[particle] = endpoint.charge_number[selected_row]
+        current_time_s[row] = targets[selected]
+        current_charge_number[row] = endpoint.charge_number[selected]
+        charge_number[particle] = endpoint.charge_number[selected]
+        for component in range(2):
+            current_position_m[row, component] = endpoint.position_m[selected, component]
+            current_velocity_m_s[row, component] = endpoint.velocity_m_s[selected, component]
+            position_m[particle, component] = endpoint.position_m[selected, component]
+            velocity_m_s[particle, component] = endpoint.velocity_m_s[selected, component]
         _set_exact_origin(
             particle,
-            targets[selected_row],
-            folded_position,
-            folded_velocity,
+            targets[selected],
+            endpoint.position_m[selected],
+            endpoint.velocity_m_s[selected],
             exact_origin_time_s,
             exact_origin_position_m,
             exact_origin_velocity_m_s,
@@ -8382,12 +10195,13 @@ def _commit_exact_axis_rows(
         _record_replay_jump(
             replay,
             particle,
-            float(targets[selected_row]),
-            folded_position,
-            folded_velocity,
-            float(endpoint.charge_number[selected_row]),
+            targets[selected],
+            endpoint.position_m[selected],
+            endpoint.velocity_m_s[selected],
+            endpoint.charge_number[selected],
         )
-        statistics.axis_crossings += 1
+        committed += 1
+    return committed
 
 
 def _split_exact_wave_rows(
@@ -8412,34 +10226,62 @@ def _split_exact_wave_rows(
     failure_reason_code: np.ndarray,
     failures: _FailureEventBuffer,
     statistics: _EventStatistics,
+    exhausted_rows: np.ndarray,
 ) -> None:
-    maximum = prepared.case.spec.solver.event.max_refinements
-    for row_value in rows:
-        row = int(row_value)
-        top = int(stack_top[row])
-        depth = int(stack_depth[row, top])
-        target = float(stack_target_s[row, top])
+    exhausted_count, split_count = _split_exact_wave_rows_into(
+        rows,
+        current_time_s,
+        stack_target_s,
+        stack_depth,
+        stack_interactions,
+        stack_top,
+        prepared.case.spec.solver.event.max_refinements,
+        exhausted_rows,
+    )
+    _fail_event_rows(
+        particle_index,
+        exhausted_rows[:exhausted_count],
+        current_time_s,
+        current_position_m,
+        current_velocity_m_s,
+        current_charge_number,
+        stack_top,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        lifecycle,
+        terminal_time_s,
+        event_ordinal,
+        failure_reason_code,
+        failures,
+        _FAILURE_NUMERICAL_EVENT_BUDGET,
+    )
+    statistics.residual_splits += split_count
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _split_exact_wave_rows_into(
+    rows: np.ndarray,
+    current_time_s: np.ndarray,
+    stack_target_s: np.ndarray,
+    stack_depth: np.ndarray,
+    stack_interactions: np.ndarray,
+    stack_top: np.ndarray,
+    maximum_depth: int,
+    exhausted_rows: np.ndarray,
+) -> tuple[int, int]:
+    exhausted_count = 0
+    split_count = 0
+    for local in range(rows.size):
+        row = rows[local]
+        top = stack_top[row]
+        depth = stack_depth[row, top]
+        target = stack_target_s[row, top]
         midpoint = current_time_s[row] + 0.5 * (target - current_time_s[row])
-        if depth >= maximum or not current_time_s[row] < midpoint < target:
-            _fail_event_rows(
-                particle_index,
-                np.asarray([row], dtype="<i8"),
-                current_time_s,
-                current_position_m,
-                current_velocity_m_s,
-                current_charge_number,
-                stack_top,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                failure_reason_code,
-                failures,
-                _FAILURE_NUMERICAL_EVENT_BUDGET,
-            )
+        if depth >= maximum_depth or not current_time_s[row] < midpoint < target:
+            exhausted_rows[exhausted_count] = row
+            exhausted_count += 1
             continue
         child_depth = depth + 1
         stack_depth[row, top] = child_depth
@@ -8448,7 +10290,8 @@ def _split_exact_wave_rows(
         stack_target_s[row, top + 1] = midpoint
         stack_depth[row, top + 1] = child_depth
         stack_interactions[row, top + 1] = 0
-        statistics.residual_splits += 1
+        split_count += 1
+    return exhausted_count, split_count
 
 
 def _fail_event_rows(
@@ -8470,29 +10313,176 @@ def _fail_event_rows(
     failures: _FailureEventBuffer,
     reason_code: np.uint16,
 ) -> None:
-    for row_value in rows:
-        row = int(row_value)
-        particle = int(particle_index[row])
-        _mark_particle_failed(
-            particle,
-            _ParticleFailure(
-                reason_code,
-                float(current_time_s[row]),
-                current_position_m[row],
-                current_velocity_m_s[row],
-                float(current_charge_number[row]),
-            ),
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
-            failures,
+    _commit_failure_rows(
+        particle_index,
+        rows,
+        rows,
+        current_time_s,
+        current_position_m,
+        current_velocity_m_s,
+        current_charge_number,
+        stack_top,
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        lifecycle,
+        terminal_time_s,
+        event_ordinal,
+        failure_reason_code,
+        failures,
+        reason_code,
+    )
+
+
+def _commit_failure_rows(
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    source_rows: np.ndarray,
+    time_s: np.ndarray,
+    source_position_m: np.ndarray,
+    source_velocity_m_s: np.ndarray,
+    source_charge_number: np.ndarray,
+    stack_top: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    active: np.ndarray,
+    lifecycle: np.ndarray,
+    terminal_time_s: np.ndarray,
+    event_ordinal: np.ndarray,
+    failure_reason_code: np.ndarray,
+    failures: _FailureEventBuffer,
+    reason_code: np.uint16,
+    row_reasons: np.ndarray | None = None,
+) -> None:
+    """Commit aligned wave/proposal failures without Python per-row objects."""
+
+    if not rows.size:
+        return
+    context = _FailureCommitContext(
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        lifecycle,
+        terminal_time_s,
+        event_ordinal,
+        failure_reason_code,
+        failures.particle_index,
+        failures.time_s,
+        failures.event_ordinal,
+        failures.reason_code,
+    )
+    count, status = _commit_failure_rows_into(
+        context,
+        failures.count,
+        particle_index,
+        rows,
+        source_rows,
+        time_s,
+        source_position_m,
+        source_velocity_m_s,
+        source_charge_number,
+        stack_top,
+        reason_code,
+        row_reasons,
+    )
+    if status == 1:
+        raise EngineError("logical event ordinal exhausted uint32")
+    if status == 2:
+        raise EngineError("localized particle failure contains non-finite state")
+    if status == 3:
+        raise EngineError("failure staging capacity exhausted")
+    failures.count = count
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _commit_failure_rows_into(
+    context: _FailureCommitContext,
+    count: int,
+    particle_index: np.ndarray,
+    rows: np.ndarray,
+    source_rows: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    stack_top: np.ndarray,
+    reason_code: np.uint16,
+    row_reasons: np.ndarray | None,
+) -> tuple[int, int]:
+    """Check run integrity before committing the stable row-local failures."""
+
+    if count + rows.size > context.failure_particle_index.size:
+        return count, 3
+    for offset in range(rows.size):
+        particle = particle_index[rows[offset]]
+        source = source_rows[offset]
+        if context.event_ordinal[particle] >= _MAX_EVENT_ORDINAL:
+            return count, 1
+        if not _finite_failure_state(
+            time_s[source], position_m[source], velocity_m_s[source], charge_number[source]
+        ):
+            return count, 2
+    for offset in range(rows.size):
+        row = rows[offset]
+        source = source_rows[offset]
+        reason = reason_code if row_reasons is None else row_reasons[offset]
+        _write_particle_failure_into(
+            context,
+            count + offset,
+            particle_index[row],
+            time_s[source],
+            position_m[source],
+            velocity_m_s[source],
+            charge_number[source],
+            reason,
         )
         stack_top[row] = -1
+    return count + rows.size, 0
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _finite_failure_state(
+    time_s: float, position_m: np.ndarray, velocity_m_s: np.ndarray, charge_number: float
+) -> bool:
+    return (
+        math.isfinite(time_s)
+        and math.isfinite(position_m[0])
+        and math.isfinite(position_m[1])
+        and math.isfinite(velocity_m_s[0])
+        and math.isfinite(velocity_m_s[1])
+        and math.isfinite(charge_number)
+    )
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _write_particle_failure_into(
+    context: _FailureCommitContext,
+    offset: int,
+    particle: int,
+    time_s: float,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: float,
+    reason_code: np.uint16,
+) -> None:
+    """One accepted failure commit, shared by scalar and wave consumers."""
+
+    for component in range(2):
+        context.position_m[particle, component] = position_m[component]
+        context.velocity_m_s[particle, component] = velocity_m_s[component]
+    context.charge_number[particle] = charge_number
+    context.active[particle] = False
+    context.lifecycle[particle] = _LIFECYCLE_FAILED
+    context.terminal_time_s[particle] = time_s
+    context.failure_reason_code[particle] = reason_code
+    context.event_ordinal[particle] += np.uint32(1)
+    context.failure_particle_index[offset] = particle
+    context.failure_time_s[offset] = time_s
+    context.failure_event_ordinal[offset] = context.event_ordinal[particle]
+    context.failure_reason[offset] = reason_code
 
 
 def _commit_event_proposal_failures(
@@ -8716,6 +10706,7 @@ def _commit_exact_wall_rows(
         thermal_normal_draws,
         thermal_tangent_draws,
         roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+        result_buffer=prepared.boundary_response_buffer,
     )
     for response_row, selected_value in enumerate(material_valid):
         endpoint_row = int(selected_value)
@@ -9152,6 +11143,7 @@ def _set_boundary_lifecycle(
         raise EngineError(f"unsupported boundary outcome code: {outcome_code}")
 
 
+@njit(cache=True, fastmath=False, nogil=True)
 def _set_exact_origin(
     particle_index: int,
     time_s: float,
@@ -9318,25 +11310,8 @@ def _canonical_boundary_event_post(
     raise EngineError("boundary-event interaction code is unknown")
 
 
-def _append_failure_event(
-    pending: _FailureEventBuffer,
-    particle_index: int,
-    time_s: float,
-    event_ordinal: int,
-    reason_code: int,
-) -> None:
-    row = pending.count
-    if row >= pending.particle_index.size:
-        raise EngineError("failure-event buffer exceeded one row per slab particle")
-    pending.particle_index[row] = particle_index
-    pending.time_s[row] = time_s
-    pending.event_ordinal[row] = event_ordinal
-    pending.reason_code[row] = reason_code
-    pending.count = row + 1
-
-
 def _flush_boundary_event_wave(
-    writer: ResultWriter,
+    writer: _EventSink,
     prepared: _PreparedRun,
     pending: _BoundaryEventBuffer,
 ) -> None:
@@ -9359,7 +11334,7 @@ def _flush_boundary_event_wave(
 
 
 def _write_failure_events(
-    writer: ResultWriter,
+    writer: _EventSink,
     prepared: _PreparedRun,
     pending: _FailureEventBuffer,
 ) -> None:
@@ -9396,28 +11371,37 @@ def _mark_particle_failed(
 
     if int(event_ordinal[particle_index]) >= _MAX_EVENT_ORDINAL:
         raise EngineError("logical event ordinal exhausted uint32")
-    if not bool(
-        math.isfinite(failure.time_s)
-        and np.isfinite(failure.position_m).all()
-        and np.isfinite(failure.velocity_m_s).all()
-        and math.isfinite(failure.charge_number)
+    if not _finite_failure_state(
+        failure.time_s, failure.position_m, failure.velocity_m_s, failure.charge_number
     ):
         raise EngineError("localized particle failure contains non-finite state")
-    position_m[particle_index] = failure.position_m
-    velocity_m_s[particle_index] = failure.velocity_m_s
-    charge_number[particle_index] = failure.charge_number
-    active[particle_index] = False
-    lifecycle[particle_index] = _LIFECYCLE_FAILED
-    terminal_time_s[particle_index] = failure.time_s
-    failure_reason_code[particle_index] = np.uint16(failure.reason_code)
-    event_ordinal[particle_index] += np.uint32(1)
-    _append_failure_event(
-        failures,
+    if failures.count >= failures.particle_index.size:
+        raise EngineError("failure-event buffer exceeded one row per slab particle")
+    context = _FailureCommitContext(
+        position_m,
+        velocity_m_s,
+        charge_number,
+        active,
+        lifecycle,
+        terminal_time_s,
+        event_ordinal,
+        failure_reason_code,
+        failures.particle_index,
+        failures.time_s,
+        failures.event_ordinal,
+        failures.reason_code,
+    )
+    _write_particle_failure_into(
+        context,
+        failures.count,
         particle_index,
         failure.time_s,
-        int(event_ordinal[particle_index]),
-        failure.reason_code,
+        failure.position_m,
+        failure.velocity_m_s,
+        failure.charge_number,
+        np.uint16(failure.reason_code),
     )
+    failures.count += 1
 
 
 def _pack_boundary_events(
@@ -9486,6 +11470,7 @@ def _allocate_replay_buffer(
     probe_particle_index: np.ndarray,
     *,
     include_all_particles: bool,
+    storage: np.ndarray | None = None,
 ) -> _ReplayBuffer:
     """Allocate the exact numeric columns needed by one macro's outputs."""
 
@@ -9497,15 +11482,12 @@ def _allocate_replay_buffer(
     else:
         rows = probe_particle_index.copy()
     shape = (times.size, rows.size)
-    replay = _ReplayBuffer(
-        times,
-        rows,
-        np.full((*shape, 2), np.nan, dtype="<f8"),
-        np.full((*shape, 2), np.nan, dtype="<f8"),
-        np.full(shape, np.nan, dtype="<f8"),
-        np.zeros(shape, dtype=np.bool_),
-        np.full(shape, _LIFECYCLE_PENDING, dtype="<u1"),
-    )
+    replay = _replay_columns(times, rows, shape, storage)
+    replay.position_m.fill(np.nan)
+    replay.velocity_m_s.fill(np.nan)
+    replay.charge_number.fill(np.nan)
+    replay.presence.fill(False)
+    replay.lifecycle.fill(_LIFECYCLE_PENDING)
     for time_row, requested_time_s in enumerate(times):
         released = schedule.release_time_s[rows] == requested_time_s
         selected = np.flatnonzero(released).astype("<i8", copy=False)
@@ -9518,57 +11500,158 @@ def _allocate_replay_buffer(
     return replay
 
 
+def _replay_columns(
+    times: np.ndarray,
+    rows: np.ndarray,
+    shape: tuple[int, int],
+    storage: np.ndarray | None,
+) -> _ReplayBuffer:
+    if storage is None or not times.size:
+        return _ReplayBuffer(
+            times,
+            rows,
+            np.empty((*shape, 2), dtype="<f8"),
+            np.empty((*shape, 2), dtype="<f8"),
+            np.empty(shape, dtype="<f8"),
+            np.empty(shape, dtype=np.bool_),
+            np.empty(shape, dtype="<u1"),
+        )
+    layouts = (
+        (times.shape, "<f8"),
+        (rows.shape, "<i8"),
+        ((*shape, 2), "<f8"),
+        ((*shape, 2), "<f8"),
+        (shape, "<f8"),
+        (shape, "|b1"),
+        (shape, "|u1"),
+    )
+    columns = []
+    offset = 0
+    for dimensions, dtype in layouts:
+        size = math.prod(dimensions) * np.dtype(dtype).itemsize
+        if offset + size > storage.nbytes:
+            raise EngineError("macro replay exceeds its planned shared capacity")
+        columns.append(np.ndarray(dimensions, dtype=dtype, buffer=storage, offset=offset))
+        offset += size
+    replay = _ReplayBuffer(*columns)
+    replay.time_s[:] = times
+    replay.particle_index[:] = rows
+    return replay
+
+
 def _record_replay_rows(
     replay: _ReplayBuffer,
     proposal: StepProposal,
     local_rows: np.ndarray,
-    coordinate_system: str,
+    prepared: _PreparedRun,
     *,
     exclude_target: bool = False,
 ) -> None:
-    """Scatter accepted proposal states directly into requested numeric slots."""
+    """Sample accepted paths into bounded scratch and scatter requested outputs."""
 
     if not replay.time_s.size or not local_rows.size or not replay.particle_index.size:
         return
+    workspace = prepared.replay_workspace
     for time_row, requested_time_s in enumerate(replay.time_s):
-        available = proposal.start_time_s[local_rows] <= requested_time_s
-        available &= requested_time_s <= proposal.target_time_s[local_rows]
-        if exclude_target:
-            available &= requested_time_s < proposal.target_time_s[local_rows]
-        proposal_rows = local_rows[available]
-        if not proposal_rows.size:
+        count = _select_proposal_replay_rows_into(
+            local_rows,
+            proposal.particle_index,
+            proposal.start_time_s,
+            proposal.target_time_s,
+            replay.particle_index,
+            float(requested_time_s),
+            exclude_target,
+            workspace,
+        )
+        if not count:
             continue
-        particles = proposal.particle_index[proposal_rows]
-        slots = np.searchsorted(replay.particle_index, particles)
-        selected = slots < replay.particle_index.size
-        selected_rows = np.flatnonzero(selected).astype("<i8", copy=False)
-        if selected_rows.size:
-            selected[selected_rows] = (
-                replay.particle_index[slots[selected_rows]] == particles[selected_rows]
-            )
-        proposal_rows = proposal_rows[selected]
-        slots = slots[selected]
-        if not proposal_rows.size:
-            continue
-        sample = proposal.state_at_rows(float(requested_time_s), proposal_rows)
+        sample = proposal.state_at_times_into(
+            workspace.proposal_rows[:count],
+            workspace.time_s[:count],
+            workspace.sample,
+            workspace.prefix,
+        )
         if bool((sample.numerical_status != NUMERICAL_STATUS_OK).any()):
             raise EngineError("accepted trajectory replay produced a numerical failure")
         if not bool(sample.support_inside.all() and sample.applicability_inside.all()):
             raise EngineError("trajectory frame is outside field or model support")
-        sample_position = sample.position_m
-        sample_velocity = sample.velocity_m_s
-        if coordinate_system == "axisymmetric_rz":
-            sample_position, sample_velocity, _ = rz_signed_stage_to_canonical(
-                sample_position,
-                sample_velocity,
+        if prepared.case.data.coordinate_system == "axisymmetric_rz":
+            rz_signed_stage_into(
+                sample.position_m,
+                sample.velocity_m_s,
+                sample.position_m,
+                sample.velocity_m_s,
+                workspace.radial_sign[:count],
             )
-        replay.position_m[time_row, slots] = sample_position
-        replay.velocity_m_s[time_row, slots] = sample_velocity
-        replay.charge_number[time_row, slots] = sample.charge_number
-        replay.presence[time_row, slots] = True
-        replay.lifecycle[time_row, slots] = _LIFECYCLE_ACTIVE
+        _scatter_proposal_replay_into(
+            time_row,
+            workspace.replay_slots[:count],
+            sample.position_m,
+            sample.velocity_m_s,
+            sample.charge_number,
+            replay.position_m,
+            replay.velocity_m_s,
+            replay.charge_number,
+            replay.presence,
+            replay.lifecycle,
+        )
 
 
+@njit(cache=True, fastmath=False, nogil=True)
+def _select_proposal_replay_rows_into(
+    rows: np.ndarray,
+    particle_index: np.ndarray,
+    start_time_s: np.ndarray,
+    target_time_s: np.ndarray,
+    replay_particle_index: np.ndarray,
+    time_s: float,
+    exclude_target: bool,
+    workspace: _ProposalReplayWorkspace,
+) -> int:
+    """Preserve output eligibility and stable particle matching without gathers."""
+
+    count = 0
+    for offset in range(rows.size):
+        row = rows[offset]
+        if start_time_s[row] > time_s or time_s > target_time_s[row]:
+            continue
+        if exclude_target and time_s >= target_time_s[row]:
+            continue
+        particle = particle_index[row]
+        slot = np.searchsorted(replay_particle_index, particle)
+        if slot >= replay_particle_index.size or replay_particle_index[slot] != particle:
+            continue
+        workspace.proposal_rows[count] = row
+        workspace.replay_slots[count] = slot
+        workspace.time_s[count] = time_s
+        count += 1
+    return count
+
+
+@njit(cache=True, fastmath=False, nogil=True)
+def _scatter_proposal_replay_into(
+    time_row: int,
+    slots: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    replay_position_m: np.ndarray,
+    replay_velocity_m_s: np.ndarray,
+    replay_charge_number: np.ndarray,
+    presence: np.ndarray,
+    lifecycle: np.ndarray,
+) -> None:
+    for row in range(slots.size):
+        slot = slots[row]
+        for component in range(2):
+            replay_position_m[time_row, slot, component] = position_m[row, component]
+            replay_velocity_m_s[time_row, slot, component] = velocity_m_s[row, component]
+        replay_charge_number[time_row, slot] = charge_number[row]
+        presence[time_row, slot] = True
+        lifecycle[time_row, slot] = _LIFECYCLE_ACTIVE
+
+
+@njit(cache=True, fastmath=False, nogil=True)
 def _record_replay_jump(
     replay: _ReplayBuffer,
     particle_index: int,
@@ -9658,10 +11741,10 @@ def _frame_from_replay(
     return TrajectoryFrame(
         time_s=time_s,
         particle_id=schedule.particle_id[rows],
-        position_m=replay.position_m[time_row, slots].copy(),
-        velocity_m_s=replay.velocity_m_s[time_row, slots].copy(),
-        charge_number=replay.charge_number[time_row, slots].copy(),
-        lifecycle=replay.lifecycle[time_row, slots].copy(),
+        position_m=replay.position_m[time_row, slots],
+        velocity_m_s=replay.velocity_m_s[time_row, slots],
+        charge_number=replay.charge_number[time_row, slots],
+        lifecycle=replay.lifecycle[time_row, slots],
     )
 
 
@@ -9782,6 +11865,7 @@ def _event_work_bytes_per_particle(
     case: SimulationCase,
     *,
     event_paths: bool,
+    curved_enabled: bool,
 ) -> int:
     """Account target, depth, and interaction columns for every event stack."""
 
@@ -9795,7 +11879,22 @@ def _event_work_bytes_per_particle(
     # The point/surface arbitration holds a second row-aligned event result;
     # its candidate arena is accounted separately in the geometry plan.
     point_arbitration_bytes = 96 if has_point_view else 0
-    return stack_bytes + point_arbitration_bytes
+    # Curved query/selector/gather/radius and result: 232 + 100 B/row.
+    # Exact continuation/selection 160, prepared query 106, gather 73,
+    # radius transient 32, persistent exact result/control 124 B/row.
+    # Optional point shadow owns 84 B within the conservative 96 B reserve.
+    # Boundary response bank (44 B/row) is added separately only with facets.
+    control_bytes = 42 + 70 + 88 + 32 + 100 if curved_enabled else 160 + 106 + 73 + 32 + 124
+    return stack_bytes + point_arbitration_bytes + control_bytes
+
+
+def _uses_exact_specialization(
+    physics: PhysicsPlan,
+    constant_acceleration_m_s2: np.ndarray | None,
+) -> bool:
+    """Return whether prepared facts select an exact motion path."""
+
+    return not physics.requires_stage_evaluation or constant_acceleration_m_s2 is not None
 
 
 def _uses_rk4_dense_certificate(
@@ -9805,10 +11904,8 @@ def _uses_rk4_dense_certificate(
 ) -> bool:
     """Return whether a general stage-evaluated RK4 path is selected."""
 
-    return (
-        case.spec.solver.integrator == "rk4_fixed"
-        and physics.requires_stage_evaluation
-        and constant_acceleration_m_s2 is None
+    return case.spec.solver.integrator == "rk4_fixed" and not _uses_exact_specialization(
+        physics, constant_acceleration_m_s2
     )
 
 
@@ -9825,12 +11922,11 @@ def _certificate_work_bytes_per_particle(
     stack_capacity = case.spec.solver.event.max_refinements + 1
     # Two float64 interval endpoints per live stack slot; int64 stack top and
     # split count; uint16 failure code.  Round the scalar tail to 24 bytes.
-    # The local-field owner additionally retains at most 64 int64 candidate
-    # cell IDs plus count, bounded-count, and CSR-offset columns per row.  The
-    # extra eight-byte rounding covers the terminal CSR offset.  Primitive
-    # lower/upper and predictor transients stay inside the general stage scratch
-    # allowance. Exponential local-stage certification uses the candidate arena
-    # without the RK4 dense interval stack.
+    # The local-field owner retains 64 int64 candidate IDs, an int64 total
+    # count, availability, and row status: 522 B/row, rounded to 544 here.
+    # All candidates are counted; excess never becomes a truncated range.
+    # Packed primitive lower/upper buffers are separately charged to stage
+    # composition work. Exponential uses the arena without the RK4 DFS stack.
     interval_stack_bytes = 16 * stack_capacity + 24 if dense_enabled else 0
     candidate_arena_bytes = (
         (LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW + 4) * np.dtype("<i8").itemsize
@@ -9845,13 +11941,16 @@ def _stochastic_tree_work_bytes_per_particle(physics: PhysicsPlan) -> int:
 
     if physics.noise is None:
         return 0
-    # After a split the engine releases its Hermite proposal and endpoint
-    # temporaries before descending.  Each live level can still retain two
-    # 32-byte OU children, two int64 row maps, and one validity byte.  Round
-    # that 81-byte named-array set to 128 bytes, then reserve four equivalent
-    # rows for the live root, split/normal workspace, and the two alternating
-    # 72-byte pending-root SoA waves.  A pending root starts only after the
-    # preceding generator, tree, and proposal frames have unwound.
+    # Concurrent owned arrays for N slab rows, base depth D and extra adaptive
+    # depth H=A-D: base cursor 33*N*(D+1)+8; adaptive DFS (H>0)
+    # 41*N*(H+1)+24*H+32 (H=0:32); two pending-root banks 144*N+8.
+    # Conditional children use scalar temporaries, with one current increment
+    # and H saved right frames rather than two extra children at every level.
+    # The 128*(A+4) per-row allowance covers these banks and fixed controls even
+    # for N=1. Root metadata/compact maps fit its rounding; live proposal and
+    # endpoint transients remain in the general stage allowance. A consumer
+    # returns before splitting, and pending banks swap only after the complete
+    # base/adaptive tree has unwound; caller input columns are never recycled.
     return 128 * (physics.noise.adaptive_max_depth + 4)
 
 
@@ -10131,6 +12230,14 @@ def _manifest(
             "integrator": spec.solver.integrator,
             "backend": spec.solver.backend,
             "seed": spec.solver.seed,
+            "workers": prepared.memory_plan.worker_count,
+        },
+        "execution": {
+            "worker_count": prepared.memory_plan.worker_count,
+            "policy": "spawn_particle_slabs" if prepared.memory_plan.worker_count > 1 else "serial",
+            "barrier": "accepted_macro_step",
+            "writer_owner": "parent",
+            "callback_cache_policy": "process_local_overloads",
         },
         "resolved": {
             "integrator": spec.solver.integrator,

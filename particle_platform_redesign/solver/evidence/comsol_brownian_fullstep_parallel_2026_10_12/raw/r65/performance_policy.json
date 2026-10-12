@@ -1,0 +1,159 @@
+{
+  "status": "closed_pre_run",
+  "created_utc": "2026-10-12T09:01:24.756971+00:00",
+  "scope": "Current v62 full 287-particle/30-ms accepted Case A/P within-run Windows process observations; no production optimization or COMSOL speed-ratio claim",
+  "driver": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\performance_driver.py",
+    "sha256": "59b652a2142773783a89f3b6f1a19af2dadd710b3b23e37e15b8b9ba7f9e371c"
+  },
+  "source": {
+    "binding": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\source_binding.json",
+      "sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b"
+    },
+    "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+    "uv_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+    "pyproject_sha256": "32d53ccfa9fd08a9de465464e106fd4c7a805fa8868583856c25b0ac35c50697"
+  },
+  "workers": [
+    1,
+    2,
+    4
+  ],
+  "sampling_interval_s": 0.1,
+  "private_commit_ceiling_bytes": 8589934592,
+  "cases": [
+    {
+      "case_id": "CaseA",
+      "cold_seed": 939132,
+      "warm_seeds": [
+        939132,
+        939147,
+        939163
+      ],
+      "inputs": [
+        {
+          "seed": 939132,
+          "case": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939132\\case.yaml",
+            "sha256": "7bdc3c7c4e41d98149c4a40ecc6c6c8282553e1b7adc1a98ad7457159430c1e4"
+          },
+          "data": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\candidate_input.h5",
+            "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+          }
+        },
+        {
+          "seed": 939147,
+          "case": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939147\\case.yaml",
+            "sha256": "6f88fdf9957b5f1c3dacba7b6bd29652fa68a68f85046c9d39396c1643252667"
+          },
+          "data": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\candidate_input.h5",
+            "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+          }
+        },
+        {
+          "seed": 939163,
+          "case": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939163\\case.yaml",
+            "sha256": "91cea4e030d23469f56706e42ff49adf2a7366f479cb17bdff5ef20b59b80963"
+          },
+          "data": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\candidate_input.h5",
+            "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+          }
+        }
+      ],
+      "prepared_campaign": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\prepare_report.json",
+        "sha256": "1c1e2d1f117a4501c9fe4f1638a775990769843e13264c320bdee70c8b721df1"
+      },
+      "expected": {
+        "particles": 287,
+        "macro_steps": 1500,
+        "frames": 121,
+        "failure_events": 0,
+        "start_s": 0.0,
+        "end_s": 0.03,
+        "dt_s": 2e-05,
+        "brownian_interval_tree_depth": 3,
+        "brownian_adaptive_max_depth": 3
+      }
+    },
+    {
+      "case_id": "CaseP",
+      "cold_seed": 939032,
+      "warm_seeds": [
+        939032,
+        939047,
+        939063
+      ],
+      "inputs": [
+        {
+          "seed": 939032,
+          "case": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939032\\case.yaml",
+            "sha256": "a217b3c6906dab77798f5aabc10943d67781eba172e1ac24418c94771975ebd3"
+          },
+          "data": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\candidate_input.h5",
+            "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+          }
+        },
+        {
+          "seed": 939047,
+          "case": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939047\\case.yaml",
+            "sha256": "8d9db64d7535f763f9aac9e10682194b9b4da1fe76e13f087407e00da76f3e02"
+          },
+          "data": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\candidate_input.h5",
+            "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+          }
+        },
+        {
+          "seed": 939063,
+          "case": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939063\\case.yaml",
+            "sha256": "ddc07586d1c0cdaf04385d035ba20a850af6369852f6d5977a3cb59fd7c6596a"
+          },
+          "data": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\candidate_input.h5",
+            "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+          }
+        }
+      ],
+      "prepared_campaign": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\prepare_report.json",
+        "sha256": "b362a76b1bfca90c8b921cbf26c6a5d74ee028ec83fd4e5d584cde12e616eb16"
+      },
+      "expected": {
+        "particles": 287,
+        "macro_steps": 1500,
+        "frames": 121,
+        "failure_events": 0,
+        "start_s": 0.0,
+        "end_s": 0.03,
+        "dt_s": 2e-05,
+        "brownian_interval_tree_depth": 3,
+        "brownian_adaptive_max_depth": 3
+      }
+    }
+  ],
+  "execution": "Six roles run sequentially, each absent private cache cold once, followed by three fixed paired warm seeds. New worker processes on each simulate; parent imports excluded identically. No numerical job overlap.",
+  "science": "Full emitted public science/frame/probe/event/lifecycle identity across worker counts by seed, same-seed cold/warm identity, full 1500 macros and121frames, no failures, budget and child cleanup. Read all result bytes after measurement.",
+  "statistics": "Three preselected matched seeds; report all paired ratios and warm medians. Descriptive speed observations only, no significance test or universal/SLA claim; no selection of fastest run/seed or numerical change to gain speed.",
+  "comsol": "A separate64-run serial version-regression arm is evaluated against the unchanged saved32-native-seed references percase with original alpha/margins/bins/seed vectors. Process identity transfers its scoped numerical conclusion only when all paired science matches.",
+  "limits": [
+    "Previously observed cohorts, no fresh unseen stochastic confirmation",
+    "No native FE/physical truth/complete RHS/boundary or pathwise RNG claim",
+    "Cold costs reported separately, CPU-proportional speedup not presumed",
+    "100ms memory observations can miss transient peaks; not OS hard cap"
+  ],
+  "script": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\close_performance_policy.py",
+    "sha256": "596f5cceaabb51ae39a28bc6ff421b9c7d5fbf340b0f1e7dcdef65f13115ca2e"
+  }
+}

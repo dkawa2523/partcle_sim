@@ -26,7 +26,7 @@ def _synthetic_config(tmp_path: Path) -> tuple[Path, Path]:
         {
             "case_schema_version": 3,
             "result_schema_version": 3,
-            "engine_algorithm_revision": "particle_engine_v46",
+            "engine_algorithm_revision": "particle_engine_v62",
             "boundary_algorithm_revision": "contact_wall_laws_v7",
             "result_algorithm_revision": "durable_segmented_result_v6",
         }

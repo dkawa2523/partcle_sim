@@ -1,0 +1,183 @@
+{
+  "status": "COMPLETE_P14_10K_320STEP_W1_W4_OBSERVATION",
+  "created_at_utc": "2026-10-12T22:28:53.750805+00:00",
+  "full_science_eight_results_identical": true,
+  "roles": {
+    "1": {
+      "workers": 1,
+      "warm_public_s": [
+        27.42657080013305,
+        27.361519200261682,
+        27.34282850008458
+      ],
+      "warm_public_median_s": 27.361519200261682,
+      "warm_public_range_s": [
+        27.34282850008458,
+        27.42657080013305
+      ],
+      "warm_simulate_s": [
+        27.38098660018295,
+        27.31038480019197,
+        27.29747060034424
+      ],
+      "warm_simulate_median_s": 27.31038480019197,
+      "cold_public_s": 85.93009379971772,
+      "warm_process_cpu_s": [
+        31.65625,
+        31.828125,
+        32.0625
+      ],
+      "warm_process_cpu_median_s": 31.828125,
+      "warm_private_peaks_bytes": [
+        828723200,
+        829054976,
+        827494400
+      ],
+      "warm_private_peak_max_bytes": 829054976,
+      "max_all_runs_private_peak_bytes": 829054976,
+      "max_all_runs_working_set_sum_peak_bytes": 837038080,
+      "solver_owned_planned_bytes": [
+        135443535,
+        135443535,
+        135443535,
+        135443535
+      ],
+      "full_counts": {
+        "boundary_events": 10000,
+        "failure_events": 0,
+        "frame_rows": 0,
+        "frames": 0,
+        "macro_steps": 320,
+        "particles": 10000,
+        "probe_rows": 0,
+        "probes": 0,
+        "release_events": 10000,
+        "series": 320
+      },
+      "event_work": {
+        "accepted_particle_pieces": 3144057,
+        "candidate_queries": 3304830,
+        "maximum_refinement_depth": 15,
+        "refinements": 160773
+      },
+      "lifecycle": {
+        "series_rows": 320,
+        "last_macro_end_with_active_particles": 308,
+        "last_macro_end_time_with_active_particles_s": 3.85,
+        "macro_intervals_with_nonzero_active_at_start": 309,
+        "all_terminal_macro_tail_count": 11,
+        "active_population_sum_at_macro_ends": 3048066,
+        "active_particle_macro_interval_count_from_start_populations": 3058066,
+        "nominal_all_particle_macro_count": 3200000,
+        "count_semantics": "Lifecycle samples are macro ends. Start populations are initial10000 plus prior end counts, valid because all input particles release at0, no pending/failures and no re-release. These counts are not integrator stage/event-refinement work or measured CPU time.",
+        "terminal_event_count": 10000,
+        "terminal_event_time_min_s": 3.7819374276720117,
+        "terminal_event_time_max_s": 3.851308927477456,
+        "final_lifecycle_counts": {
+          "active": 0,
+          "escaped": 0,
+          "failed": 0,
+          "held": 0,
+          "pending": 0,
+          "stuck": 10000
+        }
+      }
+    },
+    "4": {
+      "workers": 4,
+      "warm_public_s": [
+        13.929349699988961,
+        13.804737200029194,
+        14.14806880010292
+      ],
+      "warm_public_median_s": 13.929349699988961,
+      "warm_public_range_s": [
+        13.804737200029194,
+        14.14806880010292
+      ],
+      "warm_simulate_s": [
+        13.86772740026936,
+        13.731189999729395,
+        14.093367000110447
+      ],
+      "warm_simulate_median_s": 13.86772740026936,
+      "cold_public_s": 76.00464540021494,
+      "warm_process_cpu_s": [
+        52.0,
+        51.703125,
+        53.21875
+      ],
+      "warm_process_cpu_median_s": 52.0,
+      "warm_private_peaks_bytes": [
+        858865664,
+        859533312,
+        861184000
+      ],
+      "warm_private_peak_max_bytes": 861184000,
+      "max_all_runs_private_peak_bytes": 2923343872,
+      "max_all_runs_working_set_sum_peak_bytes": 3138424832,
+      "solver_owned_planned_bytes": [
+        432406016,
+        432406016,
+        432406016,
+        432406016
+      ],
+      "full_counts": {
+        "boundary_events": 10000,
+        "failure_events": 0,
+        "frame_rows": 0,
+        "frames": 0,
+        "macro_steps": 320,
+        "particles": 10000,
+        "probe_rows": 0,
+        "probes": 0,
+        "release_events": 10000,
+        "series": 320
+      },
+      "event_work": {
+        "accepted_particle_pieces": 3144057,
+        "candidate_queries": 3304830,
+        "maximum_refinement_depth": 15,
+        "refinements": 160773
+      },
+      "lifecycle": {
+        "series_rows": 320,
+        "last_macro_end_with_active_particles": 308,
+        "last_macro_end_time_with_active_particles_s": 3.85,
+        "macro_intervals_with_nonzero_active_at_start": 309,
+        "all_terminal_macro_tail_count": 11,
+        "active_population_sum_at_macro_ends": 3048066,
+        "active_particle_macro_interval_count_from_start_populations": 3058066,
+        "nominal_all_particle_macro_count": 3200000,
+        "count_semantics": "Lifecycle samples are macro ends. Start populations are initial10000 plus prior end counts, valid because all input particles release at0, no pending/failures and no re-release. These counts are not integrator stage/event-refinement work or measured CPU time.",
+        "terminal_event_count": 10000,
+        "terminal_event_time_min_s": 3.7819374276720117,
+        "terminal_event_time_max_s": 3.851308927477456,
+        "final_lifecycle_counts": {
+          "active": 0,
+          "escaped": 0,
+          "failed": 0,
+          "held": 0,
+          "pending": 0,
+          "stuck": 10000
+        }
+      }
+    }
+  },
+  "warm_public_speedup_w1_over_w4": 1.9643070056804852,
+  "paired_repeat_speedups": [
+    1.9689771160066996,
+    1.9820383976743736,
+    1.9326191359689795
+  ],
+  "paired_repeat_speedup_range": [
+    1.9326191359689795,
+    1.9820383976743736
+  ],
+  "historical_nonregression": "NOT_APPLICABLE_NO_BASELINE_ROLES",
+  "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+  "comparison_sha256": "f0aa56cac764256c4a71618182b69adb567e0f5f29dfb1c31d1c0cc9efccd699",
+  "policy_sha256": "68a5a0ff1d45f9a09a57bfc464f186800c9f17f510867b7461c2f01e64303878",
+  "save_script_sha256": "e68f0aab32d6f95a945acee606fb6bc77a391120d6c277ad2ecaec7684b1cd6d",
+  "publication_tag_push_commit": false
+}

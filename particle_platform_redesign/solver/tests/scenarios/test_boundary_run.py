@@ -66,9 +66,9 @@ def test_c07_stick_event_and_terminal_state_are_published_by_public_api(
     np.testing.assert_array_equal(final.kinematics_valid, [1])
     assert result.manifest["counts"]["boundary_events"] == 1
     assert result.manifest["lifecycle_counts"]["stuck"] == 1
-    assert result.manifest["geometry_algorithm_revision"] == "line_boundary_capsule_contact_bvh_v7"
+    assert result.manifest["geometry_algorithm_revision"] == "line_boundary_capsule_contact_bvh_v8"
     assert result.manifest["event_algorithm_revision"] == (
-        "line_quadratic_curved_capsule_periodic_first_hit_v22"
+        "line_quadratic_curved_capsule_periodic_first_hit_v23"
     )
     assert result.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v7"
     memory_plan = result.manifest["memory_plan"]
@@ -319,6 +319,7 @@ def test_hold_retains_impact_payload_and_is_independent_of_trajectory_output(
     (
         ([[1.0, 0.5], [1.1, 0.5]], 901),
         ([[0.5, 0.5], [1.1, 0.5]], 902),
+        ([[0.5, 0.5], [float(np.nextafter(1.0, 0.0)), 0.5]], 902),
     ),
 )
 def test_table_start_validation_preserves_row_order_and_particle_id(

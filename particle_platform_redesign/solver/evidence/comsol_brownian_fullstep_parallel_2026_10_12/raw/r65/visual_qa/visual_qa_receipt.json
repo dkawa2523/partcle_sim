@@ -1,0 +1,36 @@
+{
+  "status": "PASS_VISUAL_LAYOUT_REVIEW",
+  "utc": "2026-10-12T11:32:20.855166+00:00",
+  "renderer": "bundled Node/sharp SVG rasterizer",
+  "render_script": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\render_visual_qa.cjs",
+    "sha256": "c7b32b27f415269ef131364604eaab70404eb24f85f84e5d6d27fab843a8875b"
+  },
+  "images": [
+    {
+      "svg": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\derived\\case_a_population.svg",
+        "sha256": "e36506f34c6529f476543a24d244e03ee0b2554a54e72811d687b3263a425500"
+      },
+      "png": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\visual_qa\\case_a_population.png",
+        "sha256": "583fd5820f58336e9bf23eefef0bdb7f52039fc90d7928fa96625154c2c6c473"
+      },
+      "viewed_by_root": true,
+      "layout_pass": true
+    },
+    {
+      "svg": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\derived\\case_p_rz_geometry.svg",
+        "sha256": "36e60825b6cce77d8927161d46e021728235372af37b5c9d606bd22e71efc8aa"
+      },
+      "png": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\visual_qa\\case_p_rz_geometry.png",
+        "sha256": "bbddb0f203f1d4f7c9861e9f0c249753dc22198f1ab62103f00c9e1b0bbbe899"
+      },
+      "viewed_by_root": true,
+      "layout_pass": true
+    }
+  ],
+  "scope": "Two representative derived figures visually inspected; numeric authority remains registered evaluator."
+}

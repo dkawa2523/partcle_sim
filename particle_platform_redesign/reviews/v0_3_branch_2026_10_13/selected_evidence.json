@@ -1,0 +1,224 @@
+{
+  "date": "2026-10-13",
+  "status": "PASS_STAGED_AND_LIVE_IMMUTABLE_BYTES",
+  "file_count": 43,
+  "total_bytes": 7959607,
+  "scope": "Selected evidence metadata, historical documents and figures only; inventories also reference local archives and external datasets not distributed by this source branch.",
+  "files": [
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/current_docs/solver/docs/parallel_execution_plan.md",
+      "bytes": 221919,
+      "sha256": "95619067783264352067b936e7fdbf51c3063e8de3a95a007653903d56aa5c3d"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/inventory.json",
+      "bytes": 1287143,
+      "sha256": "e9957261c549d17b04319879f404d95a231e87fa389abe5373a36b7f3ba9dc90"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/caseA_final_evaluation/evaluation_manifest.json",
+      "bytes": 47975,
+      "sha256": "32adcbedbc17ff54e4f22e51c684f8c8aa5000b39e2e0fddd5613abea8c7cd42"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/caseP_final_evaluation/evaluation_manifest.json",
+      "bytes": 45752,
+      "sha256": "e0a0ec2bbd0f9c25e50496b43307d19fc8385085a20ad84fb299c28a7bf0bb72"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/derived/case_a_population.svg",
+      "bytes": 123020,
+      "sha256": "e36506f34c6529f476543a24d244e03ee0b2554a54e72811d687b3263a425500"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/derived/case_a_rz_geometry.svg",
+      "bytes": 1164565,
+      "sha256": "f420a09ed6d8ca4b6d0ca2d3f813f9d20fa80185d34f262d0f7d5248ce0827a0"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/derived/case_p_population.svg",
+      "bytes": 123042,
+      "sha256": "584a4bdb6805b6bf91a0ed5bfb485ac9bef29e709d324352769767a991dddd1e"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/derived/case_p_rz_geometry.svg",
+      "bytes": 1263089,
+      "sha256": "36e60825b6cce77d8927161d46e021728235372af37b5c9d606bd22e71efc8aa"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/derived/index.html",
+      "bytes": 1093,
+      "sha256": "f60dc9be0e4a748d8696ce1b699687508657c877901b185be527797b6d0a9d7b"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/derived/visualization_receipt.json",
+      "bytes": 58069,
+      "sha256": "18362e0823d33653ede7c33e0b21eebe861cf4b6b82e37c493970db18f2f08db"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/interruption_resume_comparison.json",
+      "bytes": 2775,
+      "sha256": "7c6b4b517d9319ee7a7a9ed9897e5f940bffbcb300a36df0144a214872835e58"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/performance_comparison.json",
+      "bytes": 1048135,
+      "sha256": "d08184b27a045e0825acff973186e7b1ede04f26e6ee1fa0982a842d91bb6cbc"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/performance_policy.json",
+      "bytes": 7761,
+      "sha256": "12d2581ba67ce71a3f15dea1014fb86cb45d1def324006b8efb361827ae92c77"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/postrun_independent_audit_v2.json",
+      "bytes": 73757,
+      "sha256": "11e9b8934f0443cfe44e45689700e94fd2f875aecb60081b16ec2106a282d350"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/reference_independent_audit.json",
+      "bytes": 88945,
+      "sha256": "caef04ba466fdde23e7e45d27b28fef64463d96e8ac749284f4dbc8b4b43f4ad"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/registration/execution_preregistration_v62.json",
+      "bytes": 8554,
+      "sha256": "8a32f7beba29967d1395de0aeff659998a4903dfeeaf61b7c3ef57aad15e850c"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/verdict.json",
+      "bytes": 28353,
+      "sha256": "51fad2d80652878d843f996ee00f385419e0a1371207324635d4ae6f5e1d86ba"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/visual_qa/visual_qa_receipt.json",
+      "bytes": 1614,
+      "sha256": "9135becd7f99b96b71153ef93573e3e2c3435ce58db37a862dbec9b86f4a0d7e"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/README.md",
+      "bytes": 2239,
+      "sha256": "016c970fd1561cc4c0659257da17e83407b39aa46a1fc9e32c0fb48454a93dc8"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/comparison.json",
+      "bytes": 159752,
+      "sha256": "f0aa56cac764256c4a71618182b69adb567e0f5f29dfb1c31d1c0cc9efccd699"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/inventory.json",
+      "bytes": 20266,
+      "sha256": "b0e568c28da2db4622b8124a88c9e8913c61f0448395745930131216deac0c59"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/inventory.sha256",
+      "bytes": 66,
+      "sha256": "ebdef5ad3b979c8d6c3cdcb759112873f70c14377f9e8896b96d5389f65caeb8"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/policy.json",
+      "bytes": 4982,
+      "sha256": "68a5a0ff1d45f9a09a57bfc464f186800c9f17f510867b7461c2f01e64303878"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/prerun_independent_review.json",
+      "bytes": 2040,
+      "sha256": "f8d296a81ba12a7882286270ad1e19cd5f54965edf9a2dbbde466d93f6a22c08"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/prior_evidence_references.json",
+      "bytes": 674,
+      "sha256": "35bd219e6f9746356f1efea1f272c1f5cd5704282395bfd890bf6ddd3986c5c3"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/README.md",
+      "bytes": 2284,
+      "sha256": "41a6655bdf23163648be958c91102304edb9a546a3219b79badfb24e5a90155f"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/source_binding.json",
+      "bytes": 32704,
+      "sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/p14_10000_320step_process_2026_10_13/summary.json",
+      "bytes": 6283,
+      "sha256": "eeef6037da3b71be09fa55fe804ff15cabc762ab8e3e973a0b11baf5533a7367"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/current_docs/solver/docs/stage1b_validation.md",
+      "bytes": 47292,
+      "sha256": "6e38a57ce805fc120d3393bf9e2250e2a8edc254b1f4182a6f5f4a8ce66183cd"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/inventory.json",
+      "bytes": 1720196,
+      "sha256": "594e7e9e850816221afe30fca555aed5ce7e4b7510934daa3fb6ba24fd905af3"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/all9_independent_metadata_audit.json",
+      "bytes": 136909,
+      "sha256": "f9be5915f435d5ca4d51908fd75f702815850b8cc4a23080f16b6c39351dc395"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/candidate_binding_c4.json",
+      "bytes": 33579,
+      "sha256": "751650c4cf90cb5d4218b82f00969ea18f84f1ae894958954a9495a95ff58229"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/input_binding.json",
+      "bytes": 7542,
+      "sha256": "f95927b0db768da62d59c53bc63e6c27cf6ed9851863e500c0776f157595ca71"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/lifecycle_rejected.json",
+      "bytes": 409,
+      "sha256": "c14096edb341f02b0fdb054f6a887c559a3ad9d00659adbd04f2de9af2a71d68"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/Linux_release.json",
+      "bytes": 24038,
+      "sha256": "fa75b2baa0ae69758cf29849e73cb271ee3062c8356f4d410327b8e7710c8837"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/predeclaration_v4.json",
+      "bytes": 21171,
+      "sha256": "c4b149cebf651a51e4269a3ef360c68cd901267945055cf07627262bbe47379f"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/quality_final_c4.json",
+      "bytes": 36951,
+      "sha256": "8c62270b7fc8c65b369b7ba5356768727a59c602d858e369d9754d19785fd98c"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/quality_final.json",
+      "bytes": 35011,
+      "sha256": "cf9c6c5306892a522db028340c93bd7689aba55d49daf2b2b87c2ebdbaf4b6b9"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/verdict.json",
+      "bytes": 20050,
+      "sha256": "84c6790b14a813b7acc83971f5f7d8cb65a0be2b9b54b8da3a05b1974aa2f6fb"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/windows_clean_wheel_smoke.json",
+      "bytes": 5076,
+      "sha256": "69b16ecd14b3e521acdebbf52817f076dd1aa75a87bf51d4f6a31b34d6f66097"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/raw/r64/windows_release.json",
+      "bytes": 41930,
+      "sha256": "fdfa551ae12809b4d08c24752bcb05ad8975ca309063e31cc63d03046b4b6303"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_dispatch_memory_2026_10_12/README.md",
+      "bytes": 1279,
+      "sha256": "87205d0ff682dbbadcb9c01f38697f6b30197a2add7d0fbfb775f4b67ec0be34"
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/process_particle_slabs_2026_10_12/raw/r63/trial_v60_stop.json",
+      "bytes": 1323,
+      "sha256": "dccdc3748e66ba2cdebc8392ce15f648f46c23e90883ab39d4695304f5dbde66"
+    }
+  ]
+}

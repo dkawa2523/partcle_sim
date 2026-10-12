@@ -44,14 +44,14 @@ _CHARGE_DENSITY_M3 = 1.0e9
 _FIXED_64_MACRO_STEPS = 64
 _CHARGE_REVISION = "charge_stable_exponential_midpoint_v3"
 _EXPECTED_PRODUCTION_REVISIONS = {
-    "engine_algorithm_revision": "particle_engine_v46",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+    "engine_algorithm_revision": "particle_engine_v62",
+    "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
     "step_proposal_revision": "coupled_fixed_step_proposal_v10",
-    "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+    "physics_runtime_revision": "prepared_native_physics_runtime_v24",
     "result_algorithm_revision": "durable_segmented_result_v6",
-    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v22",
-    "memory_plan_revision": "solver_owned_memory_plan_v16",
-    "runtime_layout_revision": "resident_soa_serial_slab_v6",
+    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+    "memory_plan_revision": "solver_owned_memory_plan_v25",
+    "runtime_layout_revision": "resident_soa_process_slab_v14",
 }
 
 

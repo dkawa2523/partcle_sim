@@ -48,10 +48,10 @@ _NOISE_REVISION = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
 _NATIVE_DRAG_REVISION = "epstein_linear_v1"
 _EFFECTIVE_DRAG_REVISION = "epstein_linear_effective_gas_sensitivity_v1"
 _CONTINUOUS_CHARGE_REVISION = "oml_stationary_maxwellian_debye_huckel_v1"
-_ENGINE_REVISION = "particle_engine_v46"
-_EVENT_REVISION = "line_quadratic_curved_capsule_periodic_first_hit_v22"
-_TREE_POLICY_REVISION = "conditional_boundary_refinement_v1"
-_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v16"
+_ENGINE_REVISION = "particle_engine_v62"
+_EVENT_REVISION = "line_quadratic_curved_capsule_periodic_first_hit_v23"
+_TREE_POLICY_REVISION = "conditional_boundary_refinement_absolute_target_v2"
+_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v25"
 
 _DEFAULT_PARTICLES = (2_000, 20_000)
 _DEFAULT_REPEATS = 3

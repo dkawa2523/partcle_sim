@@ -1,10 +1,11 @@
-"""Runtime-only wheel smoke for public operations and v0.2 input capabilities."""
+"""Runtime-only wheel smoke for public operations and process execution."""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import multiprocessing
 import os
 import subprocess
 import sys
@@ -12,7 +13,7 @@ import tempfile
 import tomllib
 import zipfile
 from collections.abc import Sequence
-from dataclasses import replace
+from dataclasses import fields, replace
 from email import policy
 from email.parser import BytesParser
 from importlib.metadata import Distribution, distribution
@@ -48,7 +49,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         contact_records = [
             _contact_case(root / mode, mode) for mode in ("particle_surface", "particle_center")
         ]
-        cli = _check_cli(static_path, root / "cli-result")
+        parallel_path = _parallel_case(root / "parallel")
+        _, reference = _run_case(parallel_path, root / "parallel-reference")
+        _, parallel = _run_case(parallel_path, root / "parallel-result", workers=2)
+        _check_identity(reference, parallel)
+        cli = _check_cli(parallel_path, root / "cli", reference)
         payload = {
             "package": "chamber-particles",
             "status": "complete",
@@ -56,6 +61,17 @@ def main(argv: Sequence[str] | None = None) -> None:
             "wheel_identity": identity,
             "time_field": {"status": "complete", "snapshot_splits_s": [0.15]},
             "contact_geometry": contact_records,
+            "process_execution": {
+                "status": "complete",
+                "workers": 2,
+                "particle_count": 32,
+                "serial_result_bytes_match": True,
+                "live_api_children_after_return": 0,
+                "input_sha256": {
+                    path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                    for path in (parallel_path, parallel_path.with_name("parallel.h5"))
+                },
+            },
             "cli": cli,
             "claim": "Installed-wheel and small analytic input smoke; no application accuracy or performance SLA",
         }
@@ -136,13 +152,84 @@ def _python_payload(package: Path) -> dict[str, str]:
     }
 
 
-def _run_case(case_path: Path, output: Path) -> tuple[Any, Any]:
+def _run_case(case_path: Path, output: Path, *, workers: int = 1) -> tuple[Any, Any]:
     case = load_case(case_path)
-    simulate(case, output)
+    simulate(case, output, workers=workers)
+    if multiprocessing.active_children():
+        raise RuntimeError("wheel smoke left live API worker processes after simulate returned")
     result = open_result(output)
     if result.manifest.get("status") != "complete" or result.read_failure_events().particle_id.size:
         raise RuntimeError("wheel smoke produced an incomplete or failed particle result")
+    if result.manifest["execution"]["worker_count"] != workers:
+        raise RuntimeError("wheel smoke did not execute with the requested process count")
     return case, result
+
+
+def _parallel_case(directory: Path) -> Path:
+    paths = materialize_microcase("C01", directory)
+    case = load_case(paths.case_path)
+    source = case.data.sources[0]
+    assert isinstance(source, RealizedTableSource)
+    source = replace(
+        source,
+        **{
+            item.name: np.repeat(value, 32, axis=0)
+            for item in fields(source)
+            if isinstance(value := getattr(source, item.name), np.ndarray)
+        },
+    )
+    source = replace(source, particle_id=np.arange(101, 133, dtype="<i8"))
+    info = write(directory / "parallel.h5", replace(case.data, sources=(source,)))
+    document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+    document["case"].update(data_path="parallel.h5", expected_content_hash=info.content_hash)
+    document["output"]["probes"] = {
+        "particle_ids": source.particle_id.tolist(),
+        "schedule": {"explicit_times_s": [0.0, 0.05, 0.15, 0.35, 0.8]},
+    }
+    paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    return paths.case_path
+
+
+def _check_identity(reference: Any, actual: Any) -> None:
+    for name in (
+        "resume_identity",
+        "counts",
+        "lifecycle_counts",
+        "boundary_interactions",
+        "failure_reason_counts",
+    ):
+        if reference.manifest[name] != actual.manifest[name]:
+            raise RuntimeError(f"parallel wheel result differs in {name}")
+    for reader in (
+        "read_final",
+        "read_release_events",
+        "read_boundary_events",
+        "read_failure_events",
+        "read_lifecycle_series",
+    ):
+        _check_record_bytes(getattr(reference, reader)(), getattr(actual, reader)())
+    for reader in ("iter_frames", "iter_probes"):
+        for first, second in zip(
+            getattr(reference, reader)(), getattr(actual, reader)(), strict=True
+        ):
+            _check_record_bytes(first, second)
+
+
+def _check_record_bytes(reference: Any, actual: Any) -> None:
+    if type(reference) is not type(actual):
+        raise RuntimeError("parallel wheel result record type differs")
+    for item in fields(reference):
+        first, second = getattr(reference, item.name), getattr(actual, item.name)
+        if isinstance(first, np.ndarray):
+            if (
+                not isinstance(second, np.ndarray)
+                or first.dtype != second.dtype
+                or first.shape != second.shape
+                or first.tobytes(order="C") != second.tobytes(order="C")
+            ):
+                raise RuntimeError(f"parallel wheel result bytes differ in {item.name}")
+        elif first != second:
+            raise RuntimeError(f"parallel wheel result differs in {item.name}")
 
 
 def _time_field_case(directory: Path) -> Path:
@@ -212,15 +299,40 @@ def _contact_case(directory: Path, mode: str) -> dict[str, Any]:
     }
 
 
-def _check_cli(case_path: Path, output: Path) -> dict[str, Any]:
+def _check_cli(case_path: Path, output: Path, reference: Any) -> dict[str, Any]:
     environment = {**os.environ, "PYTHONIOENCODING": "ascii"}
     executable = Path(sys.prefix) / (
         "Scripts/chamber-particles.exe" if os.name == "nt" else "bin/chamber-particles"
     )
     commands = (
         ([str(executable), "check", str(case_path)], 0),
-        ([sys.executable, "-m", "chamber_particles", "run", str(case_path), "-o", str(output)], 0),
-        ([str(executable), "inspect", str(output)], 0),
+        (
+            [
+                str(executable),
+                "run",
+                str(case_path),
+                "-o",
+                str(output / "console"),
+                "--workers",
+                "2",
+            ],
+            0,
+        ),
+        (
+            [
+                sys.executable,
+                "-m",
+                "chamber_particles",
+                "run",
+                str(case_path),
+                "-o",
+                str(output / "module"),
+                "--workers",
+                "2",
+            ],
+            0,
+        ),
+        ([str(executable), "inspect", str(output / "module")], 0),
         (
             [
                 sys.executable,
@@ -233,14 +345,28 @@ def _check_cli(case_path: Path, output: Path) -> dict[str, Any]:
         ),
     )
     for command, expected in commands:
-        process = subprocess.run(command, env=environment, capture_output=True, check=False)
+        process = subprocess.run(
+            command, env=environment, capture_output=True, check=False, timeout=180
+        )
         if process.returncode != expected or (process.stderr if expected == 0 else process.stdout):
             message = process.stderr.decode("ascii", "backslashreplace")
-            raise RuntimeError(f"clean-wheel CLI failed: {message}")
+            raise RuntimeError(f"clean-wheel CLI failed ({command!r}): {message}")
         payload = json.loads((process.stdout or process.stderr).decode("ascii"))
         if expected == 2 and payload.get("error_type") != "CaseError":
             raise RuntimeError("clean-wheel CLI did not preserve the public error category")
-    return {"console_script": "complete", "module_entry": "complete", "public_error_exit": 2}
+    for entry in ("console", "module"):
+        result = open_result(output / entry)
+        if result.manifest["execution"]["worker_count"] != 2:
+            raise RuntimeError(f"clean-wheel {entry} CLI did not execute with two workers")
+        _check_identity(reference, result)
+    return {
+        "console_script": "complete",
+        "module_entry": "complete",
+        "workers": 2,
+        "serial_result_bytes_match": True,
+        "subprocess_timeout_s": 180,
+        "public_error_exit": 2,
+    }
 
 
 if __name__ == "__main__":

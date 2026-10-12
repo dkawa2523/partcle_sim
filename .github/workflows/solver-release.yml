@@ -110,7 +110,7 @@ jobs:
           $wheel = @(Get-ChildItem -LiteralPath $wheelDirectory -Filter "*.whl" -File -ErrorAction Stop)
           if ($wheel.Count -ne 1) { throw "expected exactly one wheel" }
           uv pip install --python $python --no-deps $wheel[0].FullName
-      - name: Verify clean-installed public API
+      - name: Verify clean-installed API and process CLI
         run: |
           $wheelDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-dist"
           $wheel = @(Get-ChildItem -LiteralPath $wheelDirectory -Filter "*.whl" -File -ErrorAction Stop)

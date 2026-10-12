@@ -1,0 +1,1903 @@
+{
+  "schema_version": 1,
+  "auditor": "/root/r65_reference_audit",
+  "audited_at_utc": "2026-10-12T11:33:31.294037+00:00",
+  "status": "PASS_JSON_SOURCE_CLOSURE_ONLY",
+  "scope": "Final metadata/source verification after actual existing comparer/evaluator and root verdict; never recomputes science, interprets CSV/HDF5 or certifies unobserved native physics.",
+  "source_binding": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\source_binding.json",
+    "sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b"
+  },
+  "source_files_checked": 27,
+  "bound_files_checked": 237,
+  "performance_comparison": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\performance_comparison.json",
+    "sha256": "d08184b27a045e0825acff973186e7b1ede04f26e6ee1fa0982a842d91bb6cbc"
+  },
+  "root_verdict": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\verdict.json",
+    "sha256": "51fad2d80652878d843f996ee00f385419e0a1371207324635d4ae6f5e1d86ba"
+  },
+  "cases": {
+    "A": {
+      "candidate": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\candidate_campaign_manifest.json",
+        "sha256": "f5e67b401ba71463df9cad81b9dff0d79cf0b4e48f50400361e6261b1f56f6cd"
+      },
+      "assembled_campaign": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\caseA_final_campaign.json",
+        "sha256": "5e59bbbe73e9569fa055846e8a6f0f97c1699d7cc686bf53a54b2928911dafb2"
+      },
+      "evaluation": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\caseA_final_evaluation\\evaluation_manifest.json",
+        "sha256": "32adcbedbc17ff54e4f22e51c684f8c8aa5000b39e2e0fddd5613abea8c7cd42"
+      },
+      "current_executor": {
+        "identity": {
+          "distribution_version": "0.3.0",
+          "python_version": "3.12.13",
+          "source_sha256": "8c8c3100539e0defc607a8923ed7138db5cd57677ffb2cccdb845213c3892635",
+          "uv_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281"
+        },
+        "revisions": {
+          "boundary_algorithm_revision": "contact_wall_laws_v7",
+          "brownian_charge_dense_revision": "macro_root_affine_exponential_v2",
+          "brownian_composition_revision": "stochastic_exponential_midpoint_v1",
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "brownian_tree_policy_revision": "conditional_boundary_refinement_absolute_target_v2",
+          "case_schema_version": 3,
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+          "engine_algorithm_revision": "particle_engine_v62",
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "joint_ou_split_revision": "conditional_gaussian_half_split_v1",
+          "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+          "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+          "result_algorithm_revision": "durable_segmented_result_v6",
+          "result_schema_version": 3,
+          "rng_algorithm_revision": "philox4x32_10_v2"
+        }
+      },
+      "checked_run_manifests": [
+        {
+          "seed": 939132,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939132\\result\\run.json",
+            "sha256": "c086392323c07b5658e7fa099903fd028794c3d3e5a716ee0e00e0ff40654552"
+          },
+          "counts": {
+            "boundary_events": 260,
+            "failure_events": 0,
+            "frame_rows": 31528,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 260,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939133,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939133\\result\\run.json",
+            "sha256": "cdea37e2ec54a904d126fd722a07de5989687a55683d5cdd0001745e4faea088"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31527,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939134,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939134\\result\\run.json",
+            "sha256": "6ccbef3619e15c3f8aa7f033da3805b500d800bb2cd9ccd722fce88dc1f3c916"
+          },
+          "counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31526,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 265,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939135,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939135\\result\\run.json",
+            "sha256": "9179df83f9cfc1282f1bd94881d5aee5b4f53eca5313720e5b70e2da6dbdf38d"
+          },
+          "counts": {
+            "boundary_events": 268,
+            "failure_events": 0,
+            "frame_rows": 31524,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 268,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939136,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939136\\result\\run.json",
+            "sha256": "4a1bb5b743caed5c815f7edb2548dcbcdf37ad73678bb946a9768f028248d700"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31525,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939137,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939137\\result\\run.json",
+            "sha256": "14c0116a7a0e108399bead467830391ecb621bec5aa49471a88e159f826f82e5"
+          },
+          "counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31516,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 262,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939138,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939138\\result\\run.json",
+            "sha256": "22b4933054e12a187de02e8295fce7ce52041d0097dfb27b32224a8c6fcee844"
+          },
+          "counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31533,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 262,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939139,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939139\\result\\run.json",
+            "sha256": "5f7f2075ee58b831e63c2f008d6bdbf81818d4ae5b17ebfdef7285d93417ee39"
+          },
+          "counts": {
+            "boundary_events": 259,
+            "failure_events": 0,
+            "frame_rows": 31548,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 259,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939140,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939140\\result\\run.json",
+            "sha256": "8b45705f4d44f93117f17498cd6270ab90225d1e393ffeba2f6ae39bc0ca25ab"
+          },
+          "counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31527,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 265,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939141,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939141\\result\\run.json",
+            "sha256": "d718b7b65b77b2a041bd701f8bb509ed1381a052282cb765c7676058341ebc69"
+          },
+          "counts": {
+            "boundary_events": 267,
+            "failure_events": 0,
+            "frame_rows": 31519,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 267,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939142,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939142\\result\\run.json",
+            "sha256": "00ecc378833047d78de23ae77195d2cf637dc2e1440f21d73ac35f94ee323f4f"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31538,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939143,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939143\\result\\run.json",
+            "sha256": "667c9abe5e34de5907683af8c7ab361c5edd9fa35a096aded650f042068386f0"
+          },
+          "counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31532,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 264,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939144,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939144\\result\\run.json",
+            "sha256": "5f7de82e2d449a654289f88eab50180f8f50e83eae623a96ab78004d4cff3021"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31527,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939145,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939145\\result\\run.json",
+            "sha256": "0176412cdda1141c5ef71335d77c715ac2bba93b446d6c42ee06b8b21f4146db"
+          },
+          "counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31529,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 266,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939146,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939146\\result\\run.json",
+            "sha256": "025d76f5f9ad1618ad32bb262a3f2815d24e4342ff31bf2bc864bf0cfdad548e"
+          },
+          "counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31519,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 266,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939147,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939147\\result\\run.json",
+            "sha256": "37225561a3d9f9ea5ec2922e43d3a041d4015d5a011c01cf9d96c9b4d1c87e5d"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31528,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939148,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939148\\result\\run.json",
+            "sha256": "e664c384eefd1db2ac176190ad51ec21d4535cb68958fa634172e99e28576248"
+          },
+          "counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31544,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 266,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939149,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939149\\result\\run.json",
+            "sha256": "78cc681ac0c65c6f74988036e3a45fafac27e6be583125d0334709e817010290"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939150,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939150\\result\\run.json",
+            "sha256": "114f53d186cd9cb8342876eff4cc07b2888cfe423caf7873804e0978090b7846"
+          },
+          "counts": {
+            "boundary_events": 269,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 269,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939151,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939151\\result\\run.json",
+            "sha256": "96df4d527c4d75925c57e99dd990885e863233a8d5305fcc15c0349f32176a09"
+          },
+          "counts": {
+            "boundary_events": 262,
+            "failure_events": 0,
+            "frame_rows": 31530,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 262,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939152,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939152\\result\\run.json",
+            "sha256": "0fa6031fefd646f42743423efd572c2162f4725c6a98f58519f09976ab459d8e"
+          },
+          "counts": {
+            "boundary_events": 261,
+            "failure_events": 0,
+            "frame_rows": 31501,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 261,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939153,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939153\\result\\run.json",
+            "sha256": "4a25915a3728a35314fba86651645a462bbf37b8609f637c2cf0b1acde84447d"
+          },
+          "counts": {
+            "boundary_events": 265,
+            "failure_events": 0,
+            "frame_rows": 31520,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 265,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939154,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939154\\result\\run.json",
+            "sha256": "7caf0d35e94c6984a3581166a6e8241fb99a1f71a27981fe3ad7e792ee8ef480"
+          },
+          "counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31518,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 266,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939155,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939155\\result\\run.json",
+            "sha256": "716b4435edf0be6f41404b11aa5ded3706a01fb405c38932a7eb2a870a578993"
+          },
+          "counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 266,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939156,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939156\\result\\run.json",
+            "sha256": "e30068d5aa3e7b5d50a5879905fa43ee471c1e77e6ac9313f1fd1c09445a21b9"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31519,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939157,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939157\\result\\run.json",
+            "sha256": "fa547cac84089c5a84709e755b55011846df708c75ef48f1ee7e4eb1d0511ef2"
+          },
+          "counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31519,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 264,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939158,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939158\\result\\run.json",
+            "sha256": "638675d88d24a9d24d3a62130ba7887e8566b7c18e944b43c7cfdc09b111a144"
+          },
+          "counts": {
+            "boundary_events": 264,
+            "failure_events": 0,
+            "frame_rows": 31527,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 264,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939159,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939159\\result\\run.json",
+            "sha256": "31b65a464f414f257bc3e399e59e43329cec382d736db1c0b9ecd621ad6d19a1"
+          },
+          "counts": {
+            "boundary_events": 261,
+            "failure_events": 0,
+            "frame_rows": 31539,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 261,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939160,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939160\\result\\run.json",
+            "sha256": "7a3920f795abcd1d1098310bc8ff04f0fe7f4c90a6128d14330a3708a6f9e786"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31531,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939161,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939161\\result\\run.json",
+            "sha256": "5e9cbc3d384a3996aa40b2567709eba8f8a79fa5d012650d4d8aaafa4f73d0fb"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939162,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939162\\result\\run.json",
+            "sha256": "f80c9005c56860df115eb643859bfe86f1eefdcbc6e3ab1a7f95212d9136e537"
+          },
+          "counts": {
+            "boundary_events": 263,
+            "failure_events": 0,
+            "frame_rows": 31535,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 263,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939163,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseA\\levels\\macro_coarse\\seed_939163\\result\\run.json",
+            "sha256": "514a06dba90d1aa3d76114428e76e86a3d449ed9d39d011d38e9ddf626c2a502"
+          },
+          "counts": {
+            "boundary_events": 266,
+            "failure_events": 0,
+            "frame_rows": 31523,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 266,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        }
+      ],
+      "reported_status": "PASS",
+      "initial_source_identity": {
+        "canonical_input": {
+          "content_hash": "sha256:4e1739a4b7f39f5047506f30d7c453e9023c3c9ec8a411937968dbeaaf35b483",
+          "path": "candidate_caseA/candidate_input.h5",
+          "sha256": "7e1c9c7df6b855c40cb3083cca2c4ec9d7a464758af1fe9bb5875ed349c145a2"
+        },
+        "comparison": "canonical_source_hash_and_fixed_particle_ids_plus_t0_position_exact_and_velocity_charge_roundoff_bounded",
+        "maximum_absolute_dynamic_difference_by_component": {
+          "charge_number_e": 1.1102230246251565e-16,
+          "velocity_r_m_per_s": 1.9220736113823023e-15,
+          "velocity_z_m_per_s": 8.604228440844963e-16
+        },
+        "maximum_roundoff_budget_fraction": 0.13525390625,
+        "mismatch_count": 0,
+        "mismatches": [],
+        "particle_count": 287,
+        "position_rule": "exact_float64_by_particle_id_for_r_m_and_z_m",
+        "replica_level_states_compared": 64,
+        "status": "PASS",
+        "velocity_charge_epsilon_factor": 64.0,
+        "velocity_charge_rule": "absolute_difference_le_64_eps_times_max_1_abs_values"
+      },
+      "terminal_population_gate": {
+        "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+        "confidence": 0.9875,
+        "critical_radius": 0.03501066711816651,
+        "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+        "curves": [
+          "stuck",
+          "held",
+          "escaped",
+          "any_terminal"
+        ],
+        "familywise_alpha": 0.0125,
+        "first_arrival_role": "represented_once_as_any_terminal",
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin": 0.05,
+        "maximum_absolute_difference": 0.005117595818815324,
+        "maximum_absolute_difference_by_curve": {
+          "any_terminal": 0.005117595818815324,
+          "escaped": 0.004899825783972189,
+          "held": 0.0,
+          "stuck": 0.003919860627177701
+        },
+        "maximum_point_difference_that_can_pass": 0.014989332881833496,
+        "method": "two_sample_union_hoeffding",
+        "observations_per_participant": 9184,
+        "role": "confirmatory_terminal_population_gate",
+        "simultaneous_confidence_bound": 0.04012826293698183,
+        "simultaneous_endpoint_count": 484,
+        "status": "PASS",
+        "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+      },
+      "rz_distribution_gate": {
+        "active_position_bins": {
+          "axial_bins": 8,
+          "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes",
+          "bounds_m": [
+            0.0,
+            0.25,
+            0.0,
+            0.13
+          ],
+          "radial_bins": 10
+        },
+        "category_count": 83,
+        "confidence": 0.9875,
+        "familywise_alpha": 0.0125,
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin_total_variation": 0.15,
+        "maximum_empirical_total_variation": 0.009581881533101043,
+        "maximum_empirical_total_variation_by_time": [
+          0.0,
+          0.00021777003484316215,
+          0.0011977351916376555,
+          0.0007621951219512341,
+          0.0006533101045296252,
+          0.0013066202090592505,
+          0.0008710801393728429,
+          0.0007621951219512063,
+          0.0006533101045296252,
+          0.0006533101045296252,
+          0.0006533101045296669,
+          0.0005444250871080303,
+          0.0006533101045296114,
+          0.00010888501742158108,
+          0.00043554006968640757,
+          0.0003266550522648126,
+          0.0003266550522648126,
+          0.0003266550522648126,
+          0.00021777003484321766,
+          0.0003266550522648126,
+          0.0002177700348431899,
+          0.00010888501742165047,
+          0.00021777003484316215,
+          0.0003266550522648126,
+          0.00021777003484316215,
+          0.00010888501742165047,
+          0.00010888501742165047,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.003919860627177712,
+          0.0,
+          0.005117595818815298,
+          0.0007621951219512614,
+          0.00010888501742158541,
+          0.0006533101045295905,
+          0.005335365853658503,
+          0.0,
+          0.0018510452961672443,
+          0.0,
+          0.001197735191637629,
+          0.0006533101045295628,
+          0.0,
+          0.0,
+          0.00337543554006969,
+          0.00239547038327527,
+          0.005770905923344946,
+          0.0016332752613240427,
+          0.004790940766550556,
+          0.003375435540069699,
+          0.0008710801393728351,
+          0.0026132404181184728,
+          0.0015243902439024677,
+          0.0030487804878048803,
+          0.0019599303135888683,
+          0.005662020905923343,
+          0.0022865853658536454,
+          0.00250435540069686,
+          0.0008710801393728299,
+          0.0016332752613240436,
+          0.0028310104529616995,
+          0.0018510452961672287,
+          0.003048780487804889,
+          0.003919860627177713,
+          0.005335365853658538,
+          0.005770905923344966,
+          0.004137630662020932,
+          0.005444250871080131,
+          0.005879790940766558,
+          0.009581881533101043,
+          0.0074041811846690085,
+          0.0063153310104529774,
+          0.005553135888501748,
+          0.007295296167247372,
+          0.004790940766550546,
+          0.0030487804878048925,
+          0.004355400696864113,
+          0.000979965156794421,
+          0.0014155052264808502,
+          0.002722125435540087,
+          0.0032665505226480884,
+          0.004137630662020897,
+          0.003702090592334517,
+          0.0018510452961672534,
+          0.0032665505226480967,
+          0.007839721254355395,
+          0.00315766550522649,
+          0.004899825783972104,
+          0.0041376306620209136,
+          0.0038109756097561044,
+          0.0030487804878049063,
+          0.0013066202090592145,
+          0.004464285714285712,
+          0.005879790940766599,
+          0.0033754355400696587,
+          0.002613240418118487,
+          0.0009799651567944379,
+          0.0011977351916376208,
+          0.0007621951219512688,
+          0.001524390243902475,
+          0.002177700348432069,
+          0.0006533101045296252,
+          0.0006533101045295871,
+          0.0011977351916376208,
+          0.0026132404181184784
+        ],
+        "maximum_empirical_tv_that_can_pass": 0.028846481013794473,
+        "method": "two_sample_union_multinomial_l1",
+        "observable": "full_population_fixed_geometry_rz_fate_partition",
+        "observations_per_participant_per_time": 9184,
+        "one_sample_critical_radius": 0.06057675949310276,
+        "one_sample_critical_radius_formula": "sqrt((K*ln(2)+ln(2*T/alpha))/(2*N))",
+        "output_time_count": 121,
+        "participant_union_count": 2,
+        "role": "confirmatory_full_population_distribution_gate",
+        "simultaneous_confidence_bound": 0.13073540051930657,
+        "status": "PASS",
+        "terminal_categories": [
+          "stuck",
+          "held",
+          "escaped"
+        ],
+        "two_sample_critical_radius": 0.12115351898620552,
+        "within_unit_dependence": "time_dependence_retained"
+      },
+      "claim_policy": {
+        "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+        "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+        "continuous_noise_time_law": "NOT_TESTED",
+        "disappear_boundary_identity": "NOT_TESTED",
+        "escape_boundary_cause_identity": "NOT_TESTED",
+        "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+      },
+      "note": "Reported scientific metrics remain evaluator-owned; CSV/HDF5 data were not reread by this audit."
+    },
+    "P": {
+      "candidate": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\candidate_campaign_manifest.json",
+        "sha256": "6cbc244f83c205c1a239b247875e2e2710ef21bf92609e5c21c554b3155b31af"
+      },
+      "assembled_campaign": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\caseP_final_campaign.json",
+        "sha256": "223575e30be9c76f47b35e42f64f7f4de6e1056b7397eaf612c5d9cce17a07ba"
+      },
+      "evaluation": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\caseP_final_evaluation\\evaluation_manifest.json",
+        "sha256": "e0a0ec2bbd0f9c25e50496b43307d19fc8385085a20ad84fb299c28a7bf0bb72"
+      },
+      "current_executor": {
+        "identity": {
+          "distribution_version": "0.3.0",
+          "python_version": "3.12.13",
+          "source_sha256": "8c8c3100539e0defc607a8923ed7138db5cd57677ffb2cccdb845213c3892635",
+          "uv_lock_sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281"
+        },
+        "revisions": {
+          "boundary_algorithm_revision": "contact_wall_laws_v7",
+          "brownian_charge_dense_revision": "macro_root_affine_exponential_v2",
+          "brownian_composition_revision": "stochastic_exponential_midpoint_v1",
+          "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
+          "brownian_tree_policy_revision": "conditional_boundary_refinement_absolute_target_v2",
+          "case_schema_version": 3,
+          "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+          "engine_algorithm_revision": "particle_engine_v62",
+          "joint_ou_revision": "inertial_joint_ou_v1",
+          "joint_ou_split_revision": "conditional_gaussian_half_split_v1",
+          "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+          "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+          "result_algorithm_revision": "durable_segmented_result_v6",
+          "result_schema_version": 3,
+          "rng_algorithm_revision": "philox4x32_10_v2"
+        }
+      },
+      "checked_run_manifests": [
+        {
+          "seed": 939032,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939032\\result\\run.json",
+            "sha256": "2bd8a05a5068e8d55bc5677dccaf55026fcd3a9412a12eac0a2d6f4eee36fa60"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939033,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939033\\result\\run.json",
+            "sha256": "64251fa1bbd59e80c5904af9b566baf5a64084942fcd0eee672ecb4244105198"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939034,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939034\\result\\run.json",
+            "sha256": "df0c0d384b5f3333e3d34221b1d764cc4000c36e6c2c47dac6bd560c78db05e7"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939035,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939035\\result\\run.json",
+            "sha256": "ea47f303d17f404c4cd9c2ecfeebc2f652f35300847792136dc5aaea8721a24c"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939036,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939036\\result\\run.json",
+            "sha256": "ea06cfbe823a4fecdb000dcc551c8a0c81e8336cdda0f5c15201a8f90b722e5a"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939037,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939037\\result\\run.json",
+            "sha256": "3e0b9741e6be2f64e8d4129b6686336f4daed6b3a6209f8199dd7cfecf9ce746"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939038,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939038\\result\\run.json",
+            "sha256": "fc27f5cc66d94d42e2b88e06188c52c36c4b45fd991e33087872b41cdf1c82d3"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939039,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939039\\result\\run.json",
+            "sha256": "892ab812680d12d9e8efdbf7e69c77b9ff651c6d34e59006f9d2502387d4511c"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939040,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939040\\result\\run.json",
+            "sha256": "f78356c46b84cb5060a7d154f4c9934a33aa77ace8d26b3950e48d4d4f98acf4"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939041,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939041\\result\\run.json",
+            "sha256": "b078dd0770b572a7e8fac4558199b942bb6cce2deaf76681a8355bb2f431e269"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939042,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939042\\result\\run.json",
+            "sha256": "6145e5314b808bf70dd45f562f08fa929abe3dba121207a3f4eb9014bd229650"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939043,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939043\\result\\run.json",
+            "sha256": "38c59e11ab839a7618dbeb1eb731694f990c2d7ff061b612e12936b90741d3fd"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939044,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939044\\result\\run.json",
+            "sha256": "fa06d76d6e8d5034ba3554f3f87a7697e0e5299ca182644377e4e1e466b46adf"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939045,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939045\\result\\run.json",
+            "sha256": "5a23ef6d7cb735d779d75f58ec0f227342e779b448f473fd345147b708826bdf"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939046,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939046\\result\\run.json",
+            "sha256": "bcf601d8a8493976ca4519a4cb680c6643cff633abf2e622e54e4504553badab"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939047,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939047\\result\\run.json",
+            "sha256": "65a41913253aa07ed30748640ef513aeb0e58eee22dfd44ac7428251d8fab2f6"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939048,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939048\\result\\run.json",
+            "sha256": "bc5ab7a8fd89687050e57680e6bda7426b917c157c38d2ca9cd1fdd793780b2a"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939049,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939049\\result\\run.json",
+            "sha256": "4e7e485da80825550a502724d8f6bbbe84db5c50a60f6c215101bf166a566282"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939050,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939050\\result\\run.json",
+            "sha256": "12cfb66f672cf71d0368f3716a08cf8a43a06e02eda1da2788a1cb805d60e84a"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939051,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939051\\result\\run.json",
+            "sha256": "d583771491d6a35131ccabdf3a669e2ba9cbb37e1de338944d2b8a577d8112b2"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939052,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939052\\result\\run.json",
+            "sha256": "86b93951bb3ffbb1b63f8e3f3d9696a824412a3dc94c737a625c8d3f7d0e4d5e"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939053,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939053\\result\\run.json",
+            "sha256": "74792762f50830d8dc7ac9ed7035ef6d57170c723a1b8c25b6703c3d0c36e499"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939054,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939054\\result\\run.json",
+            "sha256": "6658b33953be46959e2e6aaf92fce8882a103c2405ec3729d2309175c1408c2c"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939055,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939055\\result\\run.json",
+            "sha256": "76173dfb8a1c1ae480ce1a8fae658b106ccdc15293f63afb64963b8401a68d0a"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939056,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939056\\result\\run.json",
+            "sha256": "25e54ae47c4c7f0e942cb243245709a86941cd03e3d418cdea3033b78e98a4aa"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939057,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939057\\result\\run.json",
+            "sha256": "b59e1e4e5a6a4f9755261ae2e599bdfaa03c34925db437e5dc4557d48de1a2a6"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939058,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939058\\result\\run.json",
+            "sha256": "86be95de90a3b1d29b29b8b12149800778db0fe75d6edd5c8a55cad0e55669b2"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939059,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939059\\result\\run.json",
+            "sha256": "5c124d61eba79722ba06be835199d16b8d6d1e0a6f88033ddbd98de6e7fbcd90"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939060,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939060\\result\\run.json",
+            "sha256": "aa98f1c82b19a04521c4b22aa1b7fa32468e2500ab43ace16bc8a70300583e13"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939061,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939061\\result\\run.json",
+            "sha256": "4e37cdfe2e7512a84b71048295d7adfc6e990b110e0224679554dfa770ab7093"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939062,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939062\\result\\run.json",
+            "sha256": "33f61c46c56577c7703ef73b60539c6f9b471e95c15b39176c78ab535ef078f3"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        },
+        {
+          "seed": 939063,
+          "result_manifest": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r65_2026_10_12\\candidate_caseP\\levels\\macro_coarse\\seed_939063\\result\\run.json",
+            "sha256": "3023a6d49b0f882c3e939fa64632e915ce2021feb72e5d4b0f579a5374c409c5"
+          },
+          "counts": {
+            "boundary_events": 0,
+            "failure_events": 0,
+            "frame_rows": 34727,
+            "frames": 121,
+            "macro_steps": 1500,
+            "particles": 287,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 287,
+            "series": 1500
+          },
+          "events": 0,
+          "normalization": "dense_schedule_escape_nan_suffix_v1"
+        }
+      ],
+      "reported_status": "PASS",
+      "initial_source_identity": {
+        "canonical_input": {
+          "content_hash": "sha256:77def27e6e1ca069c7f6b3e6f42134186896cc690a0673288017206dbb8d2fe4",
+          "path": "candidate_caseP/candidate_input.h5",
+          "sha256": "3d9c4a585b867824e5ea6d2fda2bbcbb2e5a2402fc951ec0934cf799d776a296"
+        },
+        "comparison": "canonical_source_hash_and_fixed_particle_ids_plus_t0_position_exact_and_velocity_charge_roundoff_bounded",
+        "maximum_absolute_dynamic_difference_by_component": {
+          "charge_number_e": 1.1102230246251565e-16,
+          "velocity_r_m_per_s": 1.9220736113823023e-15,
+          "velocity_z_m_per_s": 8.604228440844963e-16
+        },
+        "maximum_roundoff_budget_fraction": 0.13525390625,
+        "mismatch_count": 0,
+        "mismatches": [],
+        "particle_count": 287,
+        "position_rule": "exact_float64_by_particle_id_for_r_m_and_z_m",
+        "replica_level_states_compared": 64,
+        "status": "PASS",
+        "velocity_charge_epsilon_factor": 64.0,
+        "velocity_charge_rule": "absolute_difference_le_64_eps_times_max_1_abs_values"
+      },
+      "terminal_population_gate": {
+        "active_curve_role": "derived_as_one_minus_any_terminal_not_double_counted",
+        "confidence": 0.9875,
+        "critical_radius": 0.03501066711816651,
+        "critical_radius_formula": "sqrt(log(2*K/alpha)/N)",
+        "curves": [
+          "stuck",
+          "held",
+          "escaped",
+          "any_terminal"
+        ],
+        "familywise_alpha": 0.0125,
+        "first_arrival_role": "represented_once_as_any_terminal",
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin": 0.05,
+        "maximum_absolute_difference": 0.0,
+        "maximum_absolute_difference_by_curve": {
+          "any_terminal": 0.0,
+          "escaped": 0.0,
+          "held": 0.0,
+          "stuck": 0.0
+        },
+        "maximum_point_difference_that_can_pass": 0.014989332881833496,
+        "method": "two_sample_union_hoeffding",
+        "observations_per_participant": 9184,
+        "role": "confirmatory_terminal_population_gate",
+        "simultaneous_confidence_bound": 0.03501066711816651,
+        "simultaneous_endpoint_count": 484,
+        "status": "PASS",
+        "within_unit_dependence": "time_and_terminal_curve_dependence_retained"
+      },
+      "rz_distribution_gate": {
+        "active_position_bins": {
+          "axial_bins": 8,
+          "bounds_authority": "campaign_scope_geometry_bounds_m_fixed_before_outcomes",
+          "bounds_m": [
+            0.0,
+            0.25,
+            0.0,
+            0.13
+          ],
+          "radial_bins": 10
+        },
+        "category_count": 83,
+        "confidence": 0.9875,
+        "familywise_alpha": 0.0125,
+        "independent_unit": "seed_x_fixed_source_particle_trajectory",
+        "margin_total_variation": 0.15,
+        "maximum_empirical_total_variation": 0.008384146341463419,
+        "maximum_empirical_total_variation_by_time": [
+          0.0,
+          0.003919860627177751,
+          0.002831010452961677,
+          0.001088850174216019,
+          0.001306620209059181,
+          0.00010888501742158108,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.00021777003484321766,
+          0.00021777003484321766,
+          0.0,
+          0.00010888501742163659,
+          0.00010888501742159842,
+          0.00010888501742160189,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0002177700348432246,
+          0.0005444250871080025,
+          0.0,
+          0.00010888501742159842,
+          0.000979965156794431,
+          0.00043554006968642145,
+          0.0,
+          0.001742160278745672,
+          0.004137630662020889,
+          0.000979965156794404,
+          0.003810975609756094,
+          0.0015243902439024473,
+          0.0025043554006968782,
+          0.0008710801393728151,
+          0.0002177700348432246,
+          0.0008710801393728212,
+          0.0014155052264808263,
+          0.005988675958188171,
+          0.00435540069686409,
+          0.000871080139372829,
+          0.004028745644599307,
+          0.00032665505226480915,
+          0.0002177700348431899,
+          0.000871080139372829,
+          0.0018510452961672495,
+          0.008384146341463419,
+          0.0011977351916376416,
+          0.002613240418118473,
+          0.001959930313588841,
+          0.0009799651567944483,
+          0.0022865853658536675,
+          0.0015243902439024274,
+          0.00032665505226480915,
+          0.003919860627177724,
+          0.00043554006968643533,
+          0.002504355400696854,
+          0.001851045296167253,
+          0.0023954703832752304,
+          0.001742160278745639,
+          0.005770905923344945,
+          0.003375435540069676,
+          0.00195993031358886,
+          0.00642421602787456,
+          0.001415505226480835,
+          0.0047909407665504885,
+          0.0031576655052264566,
+          0.005553135888501772,
+          0.0035932055749128724,
+          0.004464285714285726,
+          0.002613240418118456,
+          0.0021777003484320704,
+          0.005008710801393739,
+          0.0021777003484320517,
+          0.0038109756097560975,
+          0.004028745644599324,
+          0.0041376306620209,
+          0.006968641114982568,
+          0.002286585365853657,
+          0.00250435540069686,
+          0.004246515679442502,
+          0.0035932055749128603,
+          0.005226480836236911,
+          0.0030487804878048946,
+          0.007077526132404193,
+          0.0045731707317073,
+          0.005117595818815355,
+          0.003048780487804893,
+          0.00577090592334489,
+          0.005117595818815308,
+          0.001633275261324051,
+          0.002831010452961691
+        ],
+        "maximum_empirical_tv_that_can_pass": 0.028846481013794473,
+        "method": "two_sample_union_multinomial_l1",
+        "observable": "full_population_fixed_geometry_rz_fate_partition",
+        "observations_per_participant_per_time": 9184,
+        "one_sample_critical_radius": 0.06057675949310276,
+        "one_sample_critical_radius_formula": "sqrt((K*ln(2)+ln(2*T/alpha))/(2*N))",
+        "output_time_count": 121,
+        "participant_union_count": 2,
+        "role": "confirmatory_full_population_distribution_gate",
+        "simultaneous_confidence_bound": 0.12953766532766894,
+        "status": "PASS",
+        "terminal_categories": [
+          "stuck",
+          "held",
+          "escaped"
+        ],
+        "two_sample_critical_radius": 0.12115351898620552,
+        "within_unit_dependence": "time_dependence_retained"
+      },
+      "claim_policy": {
+        "compared": "fixed_source_observed_lifecycle_terminal_time_and_registered_rz_fate_population",
+        "continuous_discretization_bias": "NOT_RESOLVED_BY_PILOT_SCREENING",
+        "continuous_noise_time_law": "NOT_TESTED",
+        "disappear_boundary_identity": "NOT_TESTED",
+        "escape_boundary_cause_identity": "NOT_TESTED",
+        "semantic_boundary_event_parity": "NOT_TESTED_BY_POPULATION_GATES"
+      },
+      "note": "Reported scientific metrics remain evaluator-owned; CSV/HDF5 data were not reread by this audit."
+    }
+  },
+  "limitations": [
+    "COMSOL population current qualification is W1 serial 32-seed per side. W2/W4 bitwise identity is actual three selected seeds per anchor only.",
+    "r,z initial identity is exact; initial v,Z uses registered roundoff budget, not bitwise native equality.",
+    "Trajectory population qualification covers registered RZ/fate and terminal/time. Later velocity/charge ensemble law, full native RHS, Disappear cause/ID and CaseP wall response remain untested.",
+    "Previously observed seeds and fixed existing confidence family; no fresh unseen confirmation or native solve.",
+    "Any path-only pilot/authorization projection must preserve original bytes/chronology and all non-locator scientific values; evaluator must retain its strict authorization checks."
+  ],
+  "issues": []
+}

@@ -5,6 +5,7 @@ import pytest
 
 from chamber_particles.coordinates import (
     canonicalize_rz_enclosure,
+    canonicalize_rz_enclosure_into,
     fold_rz_position_vector,
     rz_canonical_vector_to_signed,
     rz_signed_stage_to_canonical,
@@ -59,6 +60,25 @@ def test_batched_rz_transforms_reject_invalid_shapes_signs_and_bounds() -> None:
             np.asarray([[1.0, 0.0]]),
             np.asarray([[0.0, 1.0]]),
         )
+
+
+def test_rz_box_mapping_reuses_aliased_buffers_at_zero_and_extreme_scales() -> None:
+    lower = np.asarray([[-0.0, -1.0], [-1e-300, 0.0], [-1e300, 1.0], [1e-300, 2.0]], dtype="<f8")
+    upper = np.asarray([[0.0, 1.0], [1e-300, 0.0], [-1e-300, 2.0], [1e300, 3.0]], dtype="<f8")
+    expected_lower = np.asarray([[0.0, -1.0], [0.0, 0.0], [1e-300, 1.0], [1e-300, 2.0]])
+    expected_upper = np.asarray([[0.0, 1.0], [1e-300, 0.0], [1e300, 2.0], [1e300, 3.0]])
+    lower.setflags(write=False)
+    upper.setflags(write=False)
+    reused_lower = np.full((7, 2), 123.0)
+    reused_upper = np.full((7, 2), 456.0)
+    canonicalize_rz_enclosure_into(lower, upper, reused_lower, reused_upper)
+    np.testing.assert_array_equal(reused_lower[:4].view("<u8"), expected_lower.view("<u8"))
+    np.testing.assert_array_equal(reused_upper[:4].view("<u8"), expected_upper.view("<u8"))
+    np.testing.assert_array_equal(reused_lower[4:], np.full((3, 2), 123.0))
+    np.testing.assert_array_equal(reused_upper[4:], np.full((3, 2), 456.0))
+    canonicalize_rz_enclosure_into(reused_lower[:4], reused_upper[:4], reused_lower, reused_upper)
+    np.testing.assert_array_equal(reused_lower[:4].view("<u8"), expected_lower.view("<u8"))
+    np.testing.assert_array_equal(reused_upper[:4].view("<u8"), expected_upper.view("<u8"))
 
 
 @pytest.mark.parametrize(

@@ -168,6 +168,15 @@ def test_waldmann_global_bound_and_path_gates_fail_closed() -> None:
     assert applicable.tolist() == [True, False, False]
     assert status.tolist() == [0, 0, 0]
 
+    with pytest.raises(PhysicsEvaluationError, match="shape"):
+        waldmann_gallis_continuous_applicability_batch(
+            static_applicable=np.asarray([[True, False]]),
+            velocity_abs_upper_m_s=np.zeros((2, 2)),
+            gas_velocity_abs_upper_m_s=np.zeros(2),
+            gas_temperature_lower_K=250.0,
+            gas_molecular_mass_kg=_ARGON_MASS_KG,
+        )
+
     with pytest.raises(PhysicsEvaluationError, match="must be finite"):
         waldmann_gallis_thermophoresis(
             mass_kg=np.asarray([1.0e-15]),
@@ -253,7 +262,10 @@ def test_waldmann_catalog_and_compiled_runtime_share_one_formula(
         np.asarray([0], dtype=np.int64),
         np.asarray([[0.0, 0.0]]),
     ).tolist() == [True]
-    assert runtime.bound_array_nbytes == 41
+    # Resident model bounds plus one prepared rule byte per primitive component.
+    assert runtime.bound_array_nbytes == 41 + sum(
+        len(item.components) for item in plan.required_fields
+    )
 
 
 def test_waldmann_and_drag_require_one_compatible_neutral_background() -> None:

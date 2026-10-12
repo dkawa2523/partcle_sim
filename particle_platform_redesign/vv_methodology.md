@@ -922,3 +922,72 @@ ballistic、定電場、線形drag、surface departure、specular、Stick、Free
 
 性能、全12 package、追加粒径、第2 ion-drag、native-field、3D、時間依存場はこの終了条件に含めない。詳細Gate、内部step probe、
 多数の統計表は、四つの必須判断のどこで差が始まるか不明な場合だけ使用し、通常比較の常設要件やsolver coreの依存物にしない。
+
+## 12. v62のCase A/P Brownian full-step再評価（2026-10-12）
+
+利用者の指定により、現行`particle_engine_v62`でCase A/PのBrownian-onを30 msまで実行し、保存COMSOL referenceとの
+登録人口比較と、同一run内の1/2/4process性能を別々に評価した。ここでの速度結果は[並列性能の第9.28節](solver/docs/parallel_execution_plan.md#928-case-ap-brownian-full-stepの同一run並列評価r65)が所有し、
+比較証拠は[`comsol_brownian_fullstep_parallel_2026_10_12`](solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/README.md)へ保存する。
+v45/v46の結果はそのsourceに限定した履歴のまま保持し、今回の結果で過去のexecutorを現行版へ読み替えない。
+今回の採否は[最終verdict](solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/verdict.json)、
+数値gateは[Case A評価](solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/caseA_final_evaluation/evaluation_manifest.json)と
+[Case P評価](solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/caseP_final_evaluation/evaluation_manifest.json)、
+説明図は[derived一覧](solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/raw/r65/derived/index.html)に結び付ける。
+
+| 固定条件 | Case A | Case P |
+|---|---|---|
+| geometry/field/運動 | 共通canonical P1場、RZ meridional 2自由度、100 nm、point contact | 同左 |
+| sourceと時間 | 287固定粒子、0--30 ms、20 µs、1500 macro interval | 同左 |
+| Brownian | `ou_langevin`、midpoint FDT/Epstein v2、base depth 3（各root 8区間） | 同左 |
+| 決定論寄与 | 連続二電流帯電、静電力、Epstein drag、ion drag、熱泳動、DEP、lift、重力/浮力 | 同左。元`auxq`どおりの二電流same-formで負イオン電流は省略 |
+| ensemble arm | 保存native 32 seedと現行candidate 32 seedを独立armとして比較 | 同左 |
+| 保存時刻 | 元の非一様121時刻。積分刻みを出力時刻へ分割しない | 同左 |
+
+新しいrecipe/登録でexecutor source stream SHA
+`8c8c3100539e0defc607a8923ed7138db5cd57677ffb2cccdb845213c3892635`、Python3.12.13、package metadata0.3.0、
+lock SHA`3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281`と実revisionを固定した。
+production27-file map SHAは`49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2`で、
+登録sourceを実行前後に照合した。runnerのsource streamとfile-mapは異なるhash算法なので混同しない。
+現行compiled tile31、physics runtime24、Brownian absolute-target tree policy2を結果manifestで照合し、
+物理係数、入力、seed、20 µs/depth3/geometry rtol1e-9、元のalpha・bin・許容幅を変更していない。
+
+COMSOL 6.4.0.429の共通P1 companionは、保存済み32seedのnormalized状態/event、actual seed・20 µs・UserDefined readback、
+source model/canonical field/producer hashとのschema-2 meaning bindingを再検査して使用した。新しいnative solveは実行していない。
+これは既に観測済みcohortとv45の数値選択を使う現行版回帰であり、新しい未使用seed confirmation・信頼familyではない。
+評価用locatorを新campaignへ移す際はpilot3pointer・selection3pointerだけのpath/fingerprint viewを作り、
+旧科学値・型・選択日時・`final_outcomes_inspected=false`を保持した。viewは今回のcandidate実行開始後に作成したことを明示し、
+それを新しい盲検選択とは呼ばない。独立JSON/hash監査後に元の厳格assembler/evaluatorを実行した。
+
+両candidate arm、計64runが1500macro/121frameを完了し、粒子failureは0だった。
+Case Pの途中で実行sessionが利用不能となった時点では11seed完成・12番目のseed939043がpartialだった。
+原因は未確定のまま保存し、公開`simulate`でそのdurable prefixから再開した。再開後のfull結果を別のfresh 30 ms実行と
+全科学payload・全frame/probe・件数・仕事量で照合して一致した。中断したrunの時間を性能baselineとして採用していない。
+
+| 登録人口gate | Case A | Case P | 元の許容幅 |
+|---|---:|---:|---:|
+| stuck/held/escaped/any-terminalの121時刻同時上限 | 0.040128262937 | 0.035010667118 | 0.05 |
+| 固定83区分RZ/fateの121時刻同時TV上限 | 0.130735400519 | 0.129537665328 | 0.15 |
+| 現行workers1での登録人口回帰 | PASS | PASS | 元の統計式・alpha配分を維持 |
+
+統計unitは各armの32×287=9184であり、121保存時刻をsample数へ乗算しない。
+Case Pは全unitがactiveで、終端gateは非情報的である。時刻ごとのRZ/fate gateは別にPASSした。
+今回の四判断は次の範囲で確定する。
+
+| 判断 | 今回の結論 |
+|---|---|
+| 初期条件 | PASS：登録した粒子ID/source、初期位置・速度・電荷・model意味とhash bindingのscope |
+| 場と右辺 | 完全なnative RHSはNOT_TESTED。共通P1と登録model意味の検査、既存のSI係数形成等の限定証拠を保持し、個別native force・auxq assembled RHS・全stageへ拡張しない |
+| 境界応答 | 完全な応答はNOT_TESTED。Case AのDisappearは観測status/time人口だけで原因/IDを認証しない。Case Pのzero eventは壁則の正例ではない |
+| 時間軌道 | PASS：元の121時刻の終端曲線とRZ/fate人口観測量のみ。時間発展する速度/電荷ensemble law、COMSOLとのpathwise RNG一致はNOT_TESTED |
+
+1/2/4processの科学identityは、事前に固定したA/P各3seedについて、coldを含む24性能結果と対応する現行serial結果6件を
+全public payload・全emitted frame/probe・件数・仕事量で再読して確認した。32seedのCOMSOL人口資格はworkers1 armであり、
+workers2/4の全32seed campaignを実施したとは扱わない。少粒子1500macroの現行同一run並列では高速化せず、
+性能上はこの入力をworkers1で扱う。独立seed間の外部並列処理は別の運用・計測scopeである。
+
+四つの図は保存結果だけから生成した。人口曲線は全9184unitを含み、原evaluatorの同時confidence radiusとmarginを表示する。
+RZ図は全287 IDの32seed平均を同じgeometry範囲・equal aspectへ重ねる説明図で、finiteな観測座標だけを平均する。
+Case Aのescaped欠損suffixを再構成せず、平均の分母が32未満になる時刻/IDをreceiptへ保存した。
+図の重なりをpathwise一致や境界hit位置のauthorityにせず、numeric gateを正本とする。
+native FE end-to-end、continuous SDE bias/noise time-law、species-resolved物理真値、実験的validation、一般COMSOL同等性は非主張である。
+今回の外部評価はproduction code/test・物理式・許容幅を変更せず、0.3.0の正式tag/publish/pushを意味しない。

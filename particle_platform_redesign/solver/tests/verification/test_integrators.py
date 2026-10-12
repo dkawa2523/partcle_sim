@@ -7,6 +7,7 @@ from itertools import pairwise
 
 import numpy as np
 import pytest
+from numba import njit
 
 from chamber_particles.integrators import (
     RK4_DENSE_PATH_REVISION,
@@ -14,6 +15,11 @@ from chamber_particles.integrators import (
     CurvedPathEnclosure,
     DynamicsEvaluation,
     RelaxationEvaluation,
+    allocate_proposal_prefix_workspace,
+    allocate_proposal_sample_buffer,
+    allocate_relaxation_advance_workspace,
+    allocate_rk4_advance_workspace,
+    allocate_stage_advance_workspace,
     cubic_hermite_step,
     curved_chord_deviation_bound,
     curved_chord_deviation_bounds,
@@ -25,6 +31,7 @@ from chamber_particles.integrators import (
     exponential_midpoint_step,
     restrict_cubic_hermite_proposal,
     rk4_step,
+    step_proposal_dense_state_into,
 )
 from chamber_particles.numerical_status import (
     INTEGRATOR_NUMERICAL_FAILURE,
@@ -35,6 +42,140 @@ from chamber_particles.numerical_status import (
 
 def _valid_bound(value: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return value, np.zeros(value.shape[0], dtype=np.uint8)
+
+
+@njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
+def _native_proposal_sample(projection, rows, times, outputs) -> None:
+    step_proposal_dense_state_into(projection, rows, times, outputs)
+
+
+@pytest.mark.parametrize("path_kind", ("hermite_linear", "hermite_affine", "rk4"))
+def test_native_dense_sampling_reuses_buffer_and_preserves_original_path(path_kind: str) -> None:
+    particles = np.asarray([11, 22, 33], dtype=np.int64)
+    starts = np.asarray([0.0, 0.25, 0.5])
+    targets = starts + 1.0
+    position = np.asarray([[0.25, -0.5], [-2.0, 4.0], [1.0e12, -1.0e12]])
+    velocity = np.asarray([[0.5, 0.25], [-0.25, 0.5], [1.0, -0.5]])
+    acceleration = np.asarray([[0.25, -0.5], [0.5, 0.25], [-0.5, 0.5]])
+    charge = np.asarray([1.0, -2.0, 0.5])
+
+    def evaluate(ids, time, x, v, z) -> DynamicsEvaluation:
+        del time, x, v, z
+        source = np.asarray([int(np.flatnonzero(particles == particle)[0]) for particle in ids])
+        return DynamicsEvaluation(
+            acceleration[source],
+            np.zeros(ids.size),
+            np.ones(ids.size, dtype=np.bool_),
+            np.ones(ids.size, dtype=np.bool_),
+            np.zeros(ids.size, dtype=np.uint8),
+        )
+
+    options = {}
+    end_charge = charge.copy()
+    if path_kind == "hermite_affine":
+        derivative = np.asarray([0.0, -1.2, -0.4])
+        rate = np.asarray([0.25, -0.2, 0.5])
+        end_charge = np.asarray(
+            [
+                charge[row] + rate[row]
+                if derivative[row] == 0.0
+                else charge[row] + rate[row] * math.expm1(derivative[row]) / derivative[row]
+                for row in range(3)
+            ]
+        )
+        options = {
+            "charge_root_time_s": starts,
+            "charge_root_number": charge,
+            "charge_affine_rate_number_s": rate,
+            "charge_rate_derivative_s_inv": derivative,
+        }
+    if path_kind == "rk4":
+        proposal = rk4_step(
+            particles,
+            starts,
+            targets,
+            position,
+            velocity,
+            charge,
+            requires_stage_evaluation=True,
+            evaluator=evaluate,
+        )
+    else:
+        proposal = cubic_hermite_step(
+            particles,
+            starts,
+            targets,
+            position,
+            velocity,
+            charge,
+            position + velocity + 0.5 * acceleration,
+            velocity + acceleration,
+            end_charge_number=end_charge,
+            support_inside=np.asarray([True, False, True]),
+            applicability_inside=np.asarray([True, True, False]),
+            numerical_status=np.asarray([0, 0, 1], dtype=np.uint8),
+            **options,
+        )
+    preserved = [
+        value.copy()
+        for value in (
+            proposal.start_position_m,
+            proposal.start_velocity_m_s,
+            proposal.end_position_m,
+            proposal.end_velocity_m_s,
+            proposal.end_charge_number,
+        )
+    ]
+    rows = np.asarray([2, 0, 1], dtype=np.int64)
+    elapsed = np.asarray([0.37, 0.61, 0.0])
+    times = starts[rows] + elapsed
+    buffer = allocate_proposal_sample_buffer(5)
+    _native_proposal_sample(proposal.numeric_projection(), rows, times, buffer.state)
+    expected_position = (
+        position[rows]
+        + elapsed[:, None] * velocity[rows]
+        + 0.5 * (elapsed * elapsed)[:, None] * acceleration[rows]
+    )
+    tolerance = np.maximum(2.0 * np.abs(np.spacing(expected_position)), 2.0e-15)
+    assert np.all(np.abs(buffer.state.position_m[:3] - expected_position) <= tolerance)
+    np.testing.assert_allclose(
+        buffer.state.velocity_m_s[:3],
+        velocity[rows] + elapsed[:, None] * acceleration[rows],
+        rtol=0.0,
+        atol=2.0e-15,
+    )
+    expected_charge = charge[rows].copy()
+    if path_kind == "hermite_affine":
+        expected_charge = np.asarray(
+            [
+                charge[source] + rate[source] * elapsed[row]
+                if derivative[source] == 0.0
+                else charge[source]
+                + rate[source] * math.expm1(derivative[source] * elapsed[row]) / derivative[source]
+                for row, source in enumerate(rows)
+            ]
+        )
+    np.testing.assert_allclose(
+        buffer.state.charge_number[:3], expected_charge, rtol=0.0, atol=2e-15
+    )
+    for field in ("support_inside", "applicability_inside", "numerical_status"):
+        np.testing.assert_array_equal(
+            getattr(buffer.state, field)[:3], getattr(proposal, field)[rows]
+        )
+    endpoint = proposal.state_at_times_into(rows[:1], targets[rows[:1]], buffer)
+    np.testing.assert_array_equal(endpoint.position_m, proposal.end_position_m[rows[:1]])
+    for expected, actual in zip(
+        preserved,
+        (
+            proposal.start_position_m,
+            proposal.start_velocity_m_s,
+            proposal.end_position_m,
+            proposal.end_velocity_m_s,
+            proposal.end_charge_number,
+        ),
+        strict=True,
+    ):
+        np.testing.assert_array_equal(actual.view(np.uint8), expected.view(np.uint8))
 
 
 def _table_acceleration_bounder(
@@ -496,6 +637,137 @@ class _FailingDynamicsStage:
         )
 
 
+@njit(cache=True, fastmath=False, error_model="numpy")
+def _native_failing_stage(
+    context: tuple[int, np.ndarray, np.ndarray],
+    workspace: tuple,
+    particle_index: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    incoming_status: np.ndarray,
+) -> tuple:
+    failure_call, calls, times = context
+    acceleration, charge_rate, support, applicable, status, cells = workspace
+    for row in range(particle_index.size):
+        particle = particle_index[row]
+        call = calls[particle]
+        calls[particle] = call + 1
+        times[particle, call] = time_s[row]
+        status[row] = incoming_status[row]
+        if particle == 22 and call == failure_call:
+            status[row] = PHYSICS_NUMERICAL_FAILURE
+        acceleration[row, 0] = (
+            0.3 * position_m[row, 0] - 0.1 * velocity_m_s[row, 0] + 0.02 * time_s[row]
+        )
+        acceleration[row, 1] = (
+            -0.2 * position_m[row, 1] + 0.15 * velocity_m_s[row, 1] - 0.01 * time_s[row]
+        )
+        charge_rate[row] = 0.01 * charge_number[row]
+        support[row] = True
+        applicable[row] = True
+        cells[row] = particle
+    count = particle_index.size
+    return (
+        acceleration[:count],
+        charge_rate[:count],
+        support[:count],
+        applicable[:count],
+        status[:count],
+        cells[:count],
+    )
+
+
+class _NativeFailingDynamicsStage:
+    def __init__(self, failure_call: int) -> None:
+        capacity = 6
+        self.calls = np.zeros(34, dtype=np.int64)
+        self.times = np.full((34, 5), np.nan, dtype=np.float64)
+        self.native_context = (failure_call, self.calls, self.times)
+        # Every actual stage overwrites this bank; the integrator must retain
+        # derivatives and verdicts before calling the next stage.
+        self.native_workspace = (
+            np.empty((capacity, 2), dtype=np.float64),
+            np.empty(capacity, dtype=np.float64),
+            np.empty(capacity, dtype=np.bool_),
+            np.empty(capacity, dtype=np.bool_),
+            np.empty(capacity, dtype=np.uint8),
+            np.empty(capacity, dtype=np.int64),
+        )
+        self.native_rk4_workspace = allocate_rk4_advance_workspace(capacity)
+
+    @property
+    def native_stage_evaluator(self) -> Callable:
+        return _native_failing_stage
+
+    def __call__(
+        self,
+        particle_index: np.ndarray,
+        time_s: np.ndarray,
+        position_m: np.ndarray,
+        velocity_m_s: np.ndarray,
+        charge_number: np.ndarray,
+    ) -> DynamicsEvaluation:
+        raise AssertionError("a native RK4 advance must not call its Python stage boundary")
+
+
+@pytest.mark.parametrize("failure_call", range(-1, 5))
+def test_native_rk4_retains_stage_values_and_compacts_failures(failure_call: int) -> None:
+    particles = np.asarray([11, 22, 33], dtype="<i8")
+    starts = np.asarray([0.0, 0.1, 0.2], dtype="<f8")
+    targets = np.asarray([0.4, 0.5, 0.2], dtype="<f8")
+    position = np.asarray([[0.2, -0.3], [-0.4, 0.5], [-0.0, 1.0]], dtype="<f8")
+    velocity = np.asarray([[0.6, -0.2], [0.1, 0.7], [0.2, -0.0]], dtype="<f8")
+    charge = np.asarray([1.5, -0.5, 0.0], dtype="<f8")
+    evaluator = _NativeFailingDynamicsStage(failure_call)
+    native = rk4_step(
+        particles,
+        starts,
+        targets,
+        position,
+        velocity,
+        charge,
+        requires_stage_evaluation=True,
+        evaluator=evaluator,
+    )
+    reference = rk4_step(
+        particles,
+        starts,
+        targets,
+        position,
+        velocity,
+        charge,
+        requires_stage_evaluation=True,
+        evaluator=_FailingDynamicsStage(failure_call),
+    )
+    for name in (
+        "end_position_m",
+        "end_velocity_m_s",
+        "end_charge_number",
+        "end_field_cell_id",
+        "support_inside",
+        "applicability_inside",
+        "numerical_status",
+    ):
+        actual, expected = getattr(native, name), getattr(reference, name)
+        np.testing.assert_array_equal(actual.view(np.uint8), expected.view(np.uint8))
+    assert evaluator.calls[11] == 5
+    assert evaluator.calls[22] == (5 if failure_call < 0 else failure_call + 1)
+    assert evaluator.calls[33] == 1
+    np.testing.assert_array_equal(evaluator.times[11], [0.0, 0.2, 0.2, 0.4, 0.4])
+    np.testing.assert_array_equal(evaluator.times[33, :1], [0.2])
+    rows = np.asarray([2, 0, 0, 1], dtype="<i8")
+    start = starts[rows]
+    target = targets[rows]
+    enclosure = native.rk4_dense_subinterval(rows, start, target)
+    reference_enclosure = reference.rk4_dense_subinterval(rows, start, target)
+    for name in enclosure.__dataclass_fields__:
+        actual = getattr(enclosure, name)
+        expected = getattr(reference_enclosure, name)
+        np.testing.assert_array_equal(actual.view(np.uint8), expected.view(np.uint8))
+
+
 class _FailingRelaxationStage:
     def __init__(self, failure_call: int, failed_particle: int = 22) -> None:
         self.failure_call = failure_call
@@ -532,6 +804,382 @@ class _FailingRelaxationStage:
             status,
             particle_index.copy(),
         )
+
+
+class _CoupledRelaxationReference(_FailingRelaxationStage):
+    def __call__(
+        self,
+        particle_index: np.ndarray,
+        time_s: np.ndarray,
+        position_m: np.ndarray,
+        velocity_m_s: np.ndarray,
+        charge_number: np.ndarray,
+    ) -> RelaxationEvaluation:
+        base = super().__call__(particle_index, time_s, position_m, velocity_m_s, charge_number)
+        support = np.asarray([not (p == 11 and self.calls[int(p)] == 2) for p in particle_index])
+        applicable = np.asarray([not (p == 22 and self.calls[int(p)] == 3) for p in particle_index])
+        additive = base.additive_acceleration_m_s2.copy()
+        additive[:, 0] += 0.05 * charge_number
+        return RelaxationEvaluation(
+            base.linear_drag_rate_s_inv,
+            base.target_velocity_m_s,
+            additive,
+            -0.75 * (charge_number - 1.0),
+            np.full(particle_index.size, -0.75),
+            support,
+            applicable,
+            base.numerical_status,
+            particle_index + (100.0 * time_s).astype(np.int64),
+        )
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
+def _native_relaxation_reference_stage(
+    context: tuple,
+    workspace: tuple,
+    particle_index: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    incoming_status: np.ndarray,
+) -> tuple:
+    failure_call, calls = context
+    rate, target, additive, zrate, derivative, support, applicable, status, cells = workspace
+    for row in range(particle_index.size):
+        particle = particle_index[row]
+        call = calls[particle]
+        calls[particle] = call + 1
+        rate[row] = 0.4 + 0.01 * particle
+        target[row, 0] = 0.02 * particle
+        target[row, 1] = -0.01 * particle
+        additive[row, 0] = (0.03 + 0.01 * time_s[row]) + 0.05 * charge_number[row]
+        additive[row, 1] = -0.04 + 0.02 * time_s[row]
+        zrate[row] = -0.75 * (charge_number[row] - 1.0)
+        derivative[row] = -0.75
+        support[row] = not (particle == 11 and call == 1)
+        applicable[row] = not (particle == 22 and call == 2)
+        status[row] = incoming_status[row]
+        if particle == 22 and call == failure_call:
+            status[row] = PHYSICS_NUMERICAL_FAILURE
+        cells[row] = particle + int(100.0 * time_s[row])
+    count = particle_index.size
+    return (
+        rate[:count],
+        target[:count],
+        additive[:count],
+        zrate[:count],
+        derivative[:count],
+        support[:count],
+        applicable[:count],
+        status[:count],
+        cells[:count],
+    )
+
+
+class _NativeRelaxationReference:
+    def __init__(self, failure_call: int) -> None:
+        capacity = 7
+        self.calls = np.zeros(34, dtype=np.int64)
+        self.native_context = (failure_call, self.calls)
+        bank = (
+            np.empty(capacity),
+            np.empty((capacity, 2)),
+            np.empty((capacity, 2)),
+            np.empty(capacity),
+            np.empty(capacity),
+            np.empty(capacity, dtype=np.bool_),
+            np.empty(capacity, dtype=np.bool_),
+            np.empty(capacity, dtype=np.uint8),
+            np.empty(capacity, dtype=np.int64),
+        )
+        # Reuse one bank: the integrator must retain frozen values
+        # independently of the next actual stage's field/physics projection.
+        self.native_workspace = bank
+        self.native_relaxation_workspace = allocate_relaxation_advance_workspace(capacity)
+
+    @property
+    def native_relaxation_stage_evaluator(self) -> Callable:
+        return _native_relaxation_reference_stage
+
+    def evaluate_relaxation(
+        self,
+        particle_index: np.ndarray,
+        time_s: np.ndarray,
+        position_m: np.ndarray,
+        velocity_m_s: np.ndarray,
+        charge_number: np.ndarray,
+    ) -> RelaxationEvaluation:
+        raise AssertionError("native relaxation must not return through a Python evaluator")
+
+
+@pytest.mark.parametrize("failure_call", range(-1, 3))
+def test_native_relaxation_preserves_coupled_state_failures_and_reused_capacity(
+    failure_call: int,
+) -> None:
+    particles = np.asarray([11, 22, 33], dtype=np.int64)
+    starts = np.asarray([0.0, 0.1, 0.2])
+    targets = np.asarray([0.4, 0.5, 0.2])
+    position = np.asarray([[0.2, -0.3], [-0.4, 0.5], [-0.0, 1.0]])
+    velocity = np.asarray([[0.6, -0.2], [0.1, 0.7], [0.2, -0.0]])
+    charge = np.asarray([1.5, -0.5, -0.0])
+    evaluator = _NativeRelaxationReference(failure_call)
+    native = exponential_midpoint_step(
+        particles,
+        starts,
+        targets,
+        position,
+        velocity,
+        charge,
+        evaluator=evaluator.evaluate_relaxation,
+    )
+    reference = exponential_midpoint_step(
+        particles,
+        starts,
+        targets,
+        position,
+        velocity,
+        charge,
+        evaluator=_CoupledRelaxationReference(failure_call),
+    )
+    for name in (
+        "end_position_m",
+        "end_velocity_m_s",
+        "end_charge_number",
+        "end_field_cell_id",
+        "support_inside",
+        "applicability_inside",
+        "numerical_status",
+    ):
+        actual, expected = getattr(native, name), getattr(reference, name)
+        np.testing.assert_array_equal(actual.view(np.uint8), expected.view(np.uint8))
+    retained_endpoint = native.end_position_m.copy()
+    evaluator.calls[:] = 0
+    small = exponential_midpoint_step(
+        particles[[2]],
+        starts[[2]],
+        targets[[2]],
+        position[[2]],
+        velocity[[2]],
+        charge[[2]],
+        evaluator=evaluator.evaluate_relaxation,
+    )
+    np.testing.assert_array_equal(small.end_position_m.view(np.uint8), position[[2]].view(np.uint8))
+    np.testing.assert_array_equal(
+        native.end_position_m.view(np.uint8), retained_endpoint.view(np.uint8)
+    )
+    np.testing.assert_array_equal(
+        small.end_charge_number.view(np.uint8), charge[[2]].view(np.uint8)
+    )
+    predictor = exponential_frozen_start_predictor(
+        particles,
+        starts,
+        targets - starts,
+        position,
+        velocity,
+        charge,
+        evaluator=evaluator.evaluate_relaxation,
+    )
+    oracle = exponential_frozen_start_predictor(
+        particles,
+        starts,
+        targets - starts,
+        position,
+        velocity,
+        charge,
+        evaluator=_CoupledRelaxationReference(failure_call),
+    )
+    for name in ("position_m", "velocity_m_s", "charge_number", "numerical_status"):
+        np.testing.assert_array_equal(
+            getattr(predictor, name).view(np.uint8), getattr(oracle, name).view(np.uint8)
+        )
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
+def _native_constant_stage(
+    context: tuple,
+    workspace: tuple,
+    particle_index: np.ndarray,
+    time_s: np.ndarray,
+    position_m: np.ndarray,
+    velocity_m_s: np.ndarray,
+    charge_number: np.ndarray,
+    incoming_status: np.ndarray,
+) -> tuple:
+    acceleration, zrate, support, applicable, status, cells = workspace
+    failure_call, calls, _ = context
+    for row in range(particle_index.size):
+        particle = particle_index[row]
+        call = calls[particle]
+        calls[particle] = call + 1
+        acceleration[row, 0] = 0.03 * particle
+        acceleration[row, 1] = -0.1
+        zrate[row] = 0.0
+        support[row] = True
+        applicable[row] = True
+        status[row] = incoming_status[row]
+        if particle == 22 and call == failure_call:
+            status[row] = PHYSICS_NUMERICAL_FAILURE
+        cells[row] = particle + int(100.0 * time_s[row])
+    count = particle_index.size
+    return (
+        acceleration[:count],
+        zrate[:count],
+        support[:count],
+        applicable[:count],
+        status[:count],
+        cells[:count],
+    )
+
+
+class _NativeConstantStage(_NativeFailingDynamicsStage):
+    def __init__(self, failure_call: int) -> None:
+        super().__init__(failure_call)
+        self.native_stage_advance_workspace = allocate_stage_advance_workspace(6)
+
+    @property
+    def native_stage_evaluator(self) -> Callable:
+        return _native_constant_stage
+
+
+@pytest.mark.parametrize("method", ("quadratic", "relaxation"))
+def test_prefix_sample_buffer_keeps_inputs_separate_from_native_stages(method: str) -> None:
+    particles = np.asarray([11, 22, 33], dtype=np.int64)
+    starts = np.asarray([0.0, 0.1, 0.2])
+    targets = starts + 0.8
+    position = np.asarray([[0.2, -0.3], [-0.4, 0.5], [-0.0, 1.0]])
+    velocity = np.asarray([[0.6, -0.2], [0.1, 0.7], [0.2, -0.0]])
+    charge = np.asarray([1.5, -0.5, 0.0])
+    if method == "quadratic":
+        native_evaluator = _NativeConstantStage(-1)
+        reference_evaluator = _FailingDynamicsStage(-1)
+
+        def reference_stage(ids, time, x, v, z) -> DynamicsEvaluation:
+            base = reference_evaluator(ids, time, x, v, z)
+            return DynamicsEvaluation(
+                base.acceleration_m_s2,
+                np.zeros(ids.size),
+                base.support_inside,
+                base.applicability_inside,
+                base.numerical_status,
+                base.field_cell_id,
+            )
+
+        acceleration = np.column_stack((0.03 * particles, np.full(3, -0.1)))
+        native = rk4_step(
+            particles,
+            starts,
+            targets,
+            position,
+            velocity,
+            charge,
+            requires_stage_evaluation=True,
+            evaluator=native_evaluator,
+            constant_acceleration_m_s2=acceleration,
+        )
+        reference = rk4_step(
+            particles,
+            starts,
+            targets,
+            position,
+            velocity,
+            charge,
+            requires_stage_evaluation=True,
+            evaluator=reference_stage,
+            constant_acceleration_m_s2=acceleration,
+        )
+    else:
+        native_evaluator = _NativeRelaxationReference(-1)
+        reference_evaluator = _CoupledRelaxationReference(-1)
+        native = exponential_midpoint_step(
+            particles,
+            starts,
+            targets,
+            position,
+            velocity,
+            charge,
+            evaluator=native_evaluator.evaluate_relaxation,
+        )
+        reference = exponential_midpoint_step(
+            particles,
+            starts,
+            targets,
+            position,
+            velocity,
+            charge,
+            evaluator=reference_evaluator,
+        )
+    native_evaluator.calls.fill(0)
+    reference_evaluator.calls.clear()
+    rows = np.asarray([2, 0, 1], dtype=np.int64)
+    times = starts[rows] + np.asarray([0.37, 0.0, 0.61])
+    buffer = allocate_proposal_sample_buffer(7)
+    prefix = allocate_proposal_prefix_workspace(7)
+    actual = native.state_at_times_into(rows, times, buffer, prefix)
+    samples = [
+        reference.state_at_rows(float(times[row]), rows[row : row + 1]) for row in range(rows.size)
+    ]
+    for field in (
+        "particle_index",
+        "position_m",
+        "velocity_m_s",
+        "charge_number",
+        "support_inside",
+        "applicability_inside",
+        "numerical_status",
+    ):
+        expected = np.concatenate([getattr(sample, field) for sample in samples])
+        np.testing.assert_array_equal(
+            getattr(actual, field).view(np.uint8), expected.view(np.uint8)
+        )
+    np.testing.assert_array_equal(native.start_position_m.view(np.uint8), position.view(np.uint8))
+    np.testing.assert_array_equal(prefix.position_m[:3], position[rows])
+    np.testing.assert_array_equal(prefix.velocity_m_s[:3], velocity[rows])
+
+
+@pytest.mark.parametrize("failure_call", range(-1, 3))
+def test_native_constant_acceleration_retains_exact_endpoint_and_row_failure(
+    failure_call: int,
+) -> None:
+    particles = np.asarray([11, 22, 33], dtype=np.int64)
+    starts = np.asarray([0.0, 0.1, 0.2])
+    targets = np.asarray([0.4, 0.5, 0.2])
+    position = np.asarray([[0.2, -0.3], [-0.4, 0.5], [-0.0, 1.0]])
+    velocity = np.asarray([[0.6, -0.2], [0.1, 0.7], [0.2, -0.0]])
+    charge = np.asarray([1.5, -0.5, 0.0])
+    acceleration = np.column_stack((0.03 * particles, np.full(3, -0.1)))
+    proposal = rk4_step(
+        particles,
+        starts,
+        targets,
+        position,
+        velocity,
+        charge,
+        requires_stage_evaluation=True,
+        evaluator=_NativeConstantStage(failure_call),
+        constant_acceleration_m_s2=acceleration,
+    )
+    step = targets - starts
+    expected_position = (
+        position + step[:, None] * velocity + 0.5 * (step * step)[:, None] * acceleration
+    )
+    expected_velocity = velocity + step[:, None] * acceleration
+    expected_position[2], expected_velocity[2] = position[2], velocity[2]
+    np.testing.assert_array_equal(
+        proposal.end_position_m.view(np.uint8), expected_position.view(np.uint8)
+    )
+    np.testing.assert_array_equal(
+        proposal.end_velocity_m_s.view(np.uint8), expected_velocity.view(np.uint8)
+    )
+    expected_status = np.asarray(
+        [0, PHYSICS_NUMERICAL_FAILURE if failure_call >= 0 else 0, 0], dtype=np.uint8
+    )
+    np.testing.assert_array_equal(proposal.numerical_status, expected_status)
+    np.testing.assert_array_equal(proposal.end_charge_number, charge)
+    expected_cells = particles + (100.0 * targets).astype(np.int64)
+    if 0 <= failure_call < 2:
+        expected_cells[1] = -1
+    np.testing.assert_array_equal(proposal.end_field_cell_id, expected_cells)
 
 
 class _FailingAccelerationBounder:

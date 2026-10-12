@@ -14,6 +14,10 @@ from chamber_particles.events import (
     CURVED_STATUS_CLEAR,
     CURVED_STATUS_SPLIT,
     CURVED_STATUS_WALL,
+    EVENT_QUERY_CANDIDATE_CAPACITY,
+    EVENT_QUERY_INVALID_RANGE,
+    EVENT_QUERY_OK,
+    EVENT_QUERY_ROW_CAPACITY,
     EXACT_DEPARTURE_FINITE_CONTACT_SET,
     EXACT_FAILURE_INDETERMINATE_EVENT,
     EXACT_PATH_LINEAR,
@@ -35,22 +39,124 @@ from chamber_particles.events import (
     CurvedCandidateCapacityError,
     EventLocationError,
     ExactCandidateCapacityError,
+    allocate_event_arena,
+    certify_event_point_interiors,
     classify_event_point,
     classify_surface_release_batch,
-    count_curved_event_candidates,
-    count_exact_event_candidates,
+    curved_event_result_view,
+    exact_event_result_view,
     inspect_rk4_axis_piece,
     inspect_rk4_piece,
     locate_ballistic_first_hit,
     locate_constant_acceleration_first_hit,
     locate_curved_first_event_batch,
+    locate_curved_first_event_into,
     locate_exact_first_event_batch,
+    locate_exact_first_event_into,
     preclassify_rk4_piece_batch,
+    prepare_curved_event_batch,
+    prepare_event_geometry,
+    prepare_exact_event_batch,
     resolve_event_budget,
 )
-from chamber_particles.geometry import prepare_geometry
+from chamber_particles.geometry import points_inside_volume, prepare_geometry
 from chamber_particles.integrators import DynamicsEvaluation, enclose_rk4_path, rk4_step
 from tests.verification.microcases import materialize_microcase
+
+
+@pytest.mark.parametrize(
+    ("scale_m", "shift_m"),
+    ((1.0e-9, 0.0), (1.0, 0.0), (1.0e9, 0.0), (1.0, 1.0e9)),
+)
+def test_event_interior_certificates_respect_boundary_budgets_across_scales(
+    tmp_path: Path,
+    scale_m: float,
+    shift_m: float,
+) -> None:
+    paths = materialize_microcase("C07", tmp_path / "point-classification")
+    case = load_case(paths.case_path)
+    geometry = prepare_geometry(
+        replace(case.data.geometry, nodes_m=case.data.geometry.nodes_m * scale_m + shift_m),
+        "cartesian_xy",
+    )
+    right = shift_m + scale_m
+    position = np.asarray(
+        [
+            [shift_m + 0.5 * scale_m, shift_m + 0.5 * scale_m],
+            [right, shift_m + 0.5 * scale_m],
+            [np.nextafter(right, -np.inf), shift_m + 0.5 * scale_m],
+            [shift_m + 1.1 * scale_m, shift_m + 0.5 * scale_m],
+            [shift_m + 0.25 * scale_m, shift_m + 0.5 * scale_m],
+        ],
+        dtype="<f8",
+    )
+    velocity = np.zeros_like(position)
+    time = np.arange(position.shape[0], dtype="<f8")
+    eligible = np.asarray([True, True, True, True, False])
+    contained = points_inside_volume(geometry, position)
+    certified = certify_event_point_interiors(
+        geometry,
+        position,
+        velocity,
+        time,
+        eligible,
+        contained,
+        interval_s=0.25,
+        geometry_rtol=1.0e-12,
+        roundoff_ulps=64,
+    )
+    np.testing.assert_array_equal(certified, [True, False, False, False, False])
+    classifications = [
+        classify_event_point(
+            geometry,
+            position[row],
+            speed_m_s=0.0,
+            interval_s=0.25,
+            time_s=float(time[row]),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+            volume_containment=bool(contained[row]),
+        )
+        for row in range(position.shape[0])
+    ]
+    assert classifications == ["inside", "boundary", "boundary", "outside", "inside"]
+
+
+@pytest.mark.parametrize("overflow", ("speed", "time"))
+def test_event_interior_certificate_does_not_accept_invalid_scalar_budgets(
+    tmp_path: Path,
+    overflow: str,
+) -> None:
+    paths = materialize_microcase("C07", tmp_path / "budget-overflow")
+    case = load_case(paths.case_path)
+    geometry = prepare_geometry(case.data.geometry, "cartesian_xy")
+    position = np.asarray([[0.5, 0.5]], dtype="<f8")
+    velocity = np.asarray([[1.7e308, 1.7e308] if overflow == "speed" else [0.0, 0.0]])
+    time = np.asarray([0.0 if overflow == "speed" else 1.0e308])
+    ulps = 64 if overflow == "speed" else 2**53
+    certified = certify_event_point_interiors(
+        geometry,
+        position,
+        velocity,
+        time,
+        np.ones(1, dtype=np.bool_),
+        np.ones(1, dtype=np.bool_),
+        interval_s=0.25,
+        geometry_rtol=1.0e-12,
+        roundoff_ulps=ulps,
+    )
+    assert not certified[0]
+    with pytest.raises(ValueError if overflow == "speed" else EventLocationError):
+        classify_event_point(
+            geometry,
+            position[0],
+            speed_m_s=math.hypot(*velocity[0]),
+            interval_s=0.25,
+            time_s=float(time[0]),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=ulps,
+            volume_containment=True,
+        )
 
 
 def test_compiled_surface_release_classifies_rows_and_preserves_event_budget(
@@ -248,7 +354,7 @@ def test_compiled_exact_batch_matches_scalar_line_and_quadratic_rows(tmp_path: P
     target = np.asarray([2.0, 0.25, 2.0, 1.0, 1.1, 1.0], dtype="<f8")
     departing = np.asarray([-1, -1, -1, -1, 3, -1], dtype="<i8")
 
-    actual = locate_exact_first_event_batch(
+    prepared = prepare_exact_event_batch(
         geometry,
         path_kind,
         position,
@@ -259,8 +365,13 @@ def test_compiled_exact_batch_matches_scalar_line_and_quadratic_rows(tmp_path: P
         contact_radius_m=np.zeros(path_kind.size, dtype="<f8"),
         geometry_rtol=1.0e-12,
         roundoff_ulps=64,
-        candidate_capacity=geometry.facet_count * path_kind.size,
         certified_departing_facet_id=departing,
+    )
+    preparation_failure = prepared.path.failure_reason.copy()
+    actual = locate_exact_first_event_batch(
+        geometry,
+        prepared,
+        candidate_capacity=geometry.facet_count * path_kind.size,
     )
 
     assert actual.status.tolist() == [
@@ -305,9 +416,43 @@ def test_compiled_exact_batch_matches_scalar_line_and_quadratic_rows(tmp_path: P
         begin, end = actual.candidate_offsets[row : row + 2]
         assert tuple(actual.candidate_facet_ids[begin:end]) == expected.candidate_facet_ids
     assert actual.failure_reason[5] == EXACT_FAILURE_INDETERMINATE_EVENT
+    arena = allocate_event_arena(
+        path_kind.size, geometry.facet_count * path_kind.size, exact_enabled=True
+    )
+    context = prepare_event_geometry(geometry)
+    for begin, end in ((0, 2), (2, 5), (5, 6), (6, 6)):
+        status, rows, candidates, _ = locate_exact_first_event_into(
+            context, prepared, arena, begin, end
+        )
+        assert status == EVENT_QUERY_OK
+        assert rows == end - begin
+        prefix = exact_event_result_view(arena, rows, candidates)
+        for name in (
+            "status",
+            "failure_reason",
+            "time_s",
+            "position_m",
+            "primary_facet_id",
+            "normal",
+            "position_budget_m",
+            "time_budget_s",
+            "localization_residual_m",
+        ):
+            np.testing.assert_array_equal(
+                getattr(prefix, name).view(np.uint8),
+                getattr(actual, name)[begin:end].view(np.uint8),
+            )
+        first, last = actual.candidate_offsets[[begin, end]]
+        np.testing.assert_array_equal(
+            prefix.candidate_offsets, actual.candidate_offsets[begin : end + 1] - first
+        )
+        np.testing.assert_array_equal(
+            prefix.candidate_facet_ids, actual.candidate_facet_ids[first:last]
+        )
+    np.testing.assert_array_equal(prepared.path.failure_reason, preparation_failure)
 
 
-def test_exact_candidate_count_fails_closed_before_dense_batch_exceeds_capacity(
+def test_prepared_exact_candidates_fail_closed_before_dense_batch_exceeds_capacity(
     tmp_path: Path,
 ) -> None:
     paths = materialize_microcase("C07", tmp_path / "C07-exact-capacity")
@@ -320,7 +465,7 @@ def test_exact_candidate_count_fails_closed_before_dense_batch_exceeds_capacity(
     acceleration = np.zeros((row_count, 2), dtype="<f8")
     start_time = np.zeros(row_count, dtype="<f8")
     target_time = np.ones(row_count, dtype="<f8")
-    counts = count_exact_event_candidates(
+    prepared = prepare_exact_event_batch(
         geometry,
         path_kind,
         position,
@@ -333,19 +478,11 @@ def test_exact_candidate_count_fails_closed_before_dense_batch_exceeds_capacity(
         roundoff_ulps=64,
     )
 
-    np.testing.assert_array_equal(counts, [4, 4, 4])
+    np.testing.assert_array_equal(prepared.broad_counts, [4, 4, 4])
     with pytest.raises(ExactCandidateCapacityError) as batch_error:
         locate_exact_first_event_batch(
             geometry,
-            path_kind,
-            position,
-            velocity,
-            acceleration,
-            start_time_s=start_time,
-            target_time_s=target_time,
-            contact_radius_m=np.zeros(row_count, dtype="<f8"),
-            geometry_rtol=1.0e-12,
-            roundoff_ulps=64,
+            prepared,
             candidate_capacity=11,
         )
     assert batch_error.value.required_count == 12
@@ -355,36 +492,121 @@ def test_exact_candidate_count_fails_closed_before_dense_batch_exceeds_capacity(
     with pytest.raises(ExactCandidateCapacityError) as row_error:
         locate_exact_first_event_batch(
             geometry,
-            path_kind[:1],
-            position[:1],
-            velocity[:1],
-            acceleration[:1],
-            start_time_s=start_time[:1],
-            target_time_s=target_time[:1],
-            contact_radius_m=np.zeros(1, dtype="<f8"),
-            geometry_rtol=1.0e-12,
-            roundoff_ulps=64,
+            prepared,
             candidate_capacity=3,
+            row_start=0,
+            row_stop=1,
         )
     assert row_error.value.required_count == 4
     assert row_error.value.oversized_row == 0
 
     fitted = locate_exact_first_event_batch(
         geometry,
-        path_kind,
-        position,
-        velocity,
-        acceleration,
-        start_time_s=start_time,
-        target_time_s=target_time,
-        contact_radius_m=np.zeros(row_count, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepared,
         candidate_capacity=12,
     )
     np.testing.assert_array_equal(fitted.status, np.full(row_count, EXACT_STATUS_WALL))
     np.testing.assert_array_equal(fitted.candidate_offsets, [0, 2, 4, 6])
     np.testing.assert_array_equal(fitted.candidate_facet_ids, [1, 2, 1, 2, 1, 2])
+    context = prepare_event_geometry(geometry)
+    for rows, capacity, begin, end, query_status in (
+        (2, 12, 0, 3, EVENT_QUERY_ROW_CAPACITY),
+        (3, 8, 0, 3, EVENT_QUERY_CANDIDATE_CAPACITY),
+        (3, 12, -1, 1, EVENT_QUERY_INVALID_RANGE),
+        (3, 12, 2, 1, EVENT_QUERY_INVALID_RANGE),
+        (3, 12, 0, 4, EVENT_QUERY_INVALID_RANGE),
+    ):
+        arena = allocate_event_arena(rows, capacity, exact_enabled=True)
+        status, count, candidates, _ = locate_exact_first_event_into(context, prepared, arena, 0, 1)
+        assert status == EVENT_QUERY_OK
+        result = exact_event_result_view(arena, count, candidates)
+        columns = (
+            result.status,
+            result.failure_reason,
+            result.time_s,
+            result.position_m,
+            result.primary_facet_id,
+            result.normal,
+            result.position_budget_m,
+            result.time_budget_s,
+            result.localization_residual_m,
+            result.candidate_offsets,
+            result.candidate_facet_ids,
+        )
+        before = tuple(column.tobytes() for column in columns)
+        status, count, candidates, _ = locate_exact_first_event_into(
+            context, prepared, arena, begin, end
+        )
+        assert status == query_status
+        assert count == candidates == 0
+        assert tuple(column.tobytes() for column in columns) == before
+
+
+def test_prepared_exact_prefixes_preserve_center_and_surface_contact(tmp_path: Path) -> None:
+    paths = materialize_microcase("C07", tmp_path / "C07-exact-contact-prefix")
+    case = load_case(paths.case_path)
+    geometry = prepare_geometry(case.data.geometry, case.data.coordinate_system)
+    finite_mask = geometry.facet_contact_enabled.copy()
+    finite_mask[1] = False
+    kinds = np.asarray(
+        [EXACT_PATH_LINEAR, EXACT_PATH_LINEAR, EXACT_PATH_LINEAR, EXACT_PATH_QUADRATIC],
+        dtype=np.uint8,
+    )
+    position = np.repeat([[0.5, 0.5]], 4, axis=0)
+    velocity = np.asarray([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 0.0]])
+    acceleration = np.asarray([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 2.0]])
+    prepared = prepare_exact_event_batch(
+        geometry,
+        kinds,
+        position,
+        velocity,
+        acceleration,
+        start_time_s=np.zeros(4),
+        target_time_s=np.ones(4),
+        contact_radius_m=np.asarray([0.0, 0.1, 0.1, 0.1]),
+        geometry_rtol=1.0e-12,
+        roundoff_ulps=64,
+        finite_contact_enabled=finite_mask,
+    )
+    full = locate_exact_first_event_batch(
+        geometry, prepared, candidate_capacity=int(prepared.broad_counts.sum())
+    )
+    np.testing.assert_array_equal(full.status, np.full(4, EXACT_STATUS_WALL))
+    np.testing.assert_allclose(full.time_s, [0.5, 0.5, 0.4, math.sqrt(0.4)], rtol=0.0, atol=3.0e-12)
+    np.testing.assert_array_equal(full.primary_facet_id, [1, 1, 2, 2])
+    arena = allocate_event_arena(
+        4, int(prepared.broad_counts.sum()), exact_enabled=True, separate_finite_mask=True
+    )
+    context = prepare_event_geometry(geometry)
+    for begin, end in ((0, 4), (0, 2), (2, 4), (3, 4), (1, 2), (0, 1)):
+        status, rows, candidates, _ = locate_exact_first_event_into(
+            context, prepared, arena, begin, end
+        )
+        assert status == EVENT_QUERY_OK
+        assert rows == end - begin
+        prefix = exact_event_result_view(arena, rows, candidates)
+        for name in (
+            "status",
+            "failure_reason",
+            "time_s",
+            "position_m",
+            "primary_facet_id",
+            "normal",
+            "position_budget_m",
+            "time_budget_s",
+            "localization_residual_m",
+        ):
+            np.testing.assert_array_equal(
+                getattr(prefix, name).view(np.uint8),
+                getattr(full, name)[begin:end].view(np.uint8),
+            )
+        first, last = full.candidate_offsets[[begin, end]]
+        np.testing.assert_array_equal(
+            prefix.candidate_offsets, full.candidate_offsets[begin : end + 1] - first
+        )
+        np.testing.assert_array_equal(
+            prefix.candidate_facet_ids, full.candidate_facet_ids[first:last]
+        )
 
 
 def test_compiled_exact_batch_preserves_corner_candidate_identity(tmp_path: Path) -> None:
@@ -394,15 +616,18 @@ def test_compiled_exact_batch_preserves_corner_candidate_identity(tmp_path: Path
 
     actual = locate_exact_first_event_batch(
         geometry,
-        np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
-        np.asarray([[1.0, 0.25]], dtype="<f8"),
-        np.asarray([[0.0, 1.0]], dtype="<f8"),
-        np.zeros((1, 2), dtype="<f8"),
-        start_time_s=np.asarray([0.0]),
-        target_time_s=np.asarray([1.0]),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
+            np.asarray([[1.0, 0.25]], dtype="<f8"),
+            np.asarray([[0.0, 1.0]], dtype="<f8"),
+            np.zeros((1, 2), dtype="<f8"),
+            start_time_s=np.asarray([0.0]),
+            target_time_s=np.asarray([1.0]),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count,
     )
 
@@ -421,15 +646,18 @@ def test_finite_radius_exact_paths_hit_the_wall_at_particle_center_clearance(
 
     actual = locate_exact_first_event_batch(
         geometry,
-        path_kind,
-        np.asarray([[0.25, 0.5], [0.25, 0.5]], dtype="<f8"),
-        np.asarray([[1.0, 0.0], [0.0, 0.0]], dtype="<f8"),
-        np.asarray([[0.0, 0.0], [2.0, 0.0]], dtype="<f8"),
-        start_time_s=np.zeros(2, dtype="<f8"),
-        target_time_s=np.ones(2, dtype="<f8"),
-        contact_radius_m=np.full(2, 0.2, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            path_kind,
+            np.asarray([[0.25, 0.5], [0.25, 0.5]], dtype="<f8"),
+            np.asarray([[1.0, 0.0], [0.0, 0.0]], dtype="<f8"),
+            np.asarray([[0.0, 0.0], [2.0, 0.0]], dtype="<f8"),
+            start_time_s=np.zeros(2, dtype="<f8"),
+            target_time_s=np.ones(2, dtype="<f8"),
+            contact_radius_m=np.full(2, 0.2, dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=2 * geometry.facet_count,
     )
 
@@ -445,6 +673,61 @@ def test_finite_radius_exact_paths_hit_the_wall_at_particle_center_clearance(
     assert bool((actual.localization_residual_m <= actual.position_budget_m).all())
 
 
+def test_finite_radius_exact_preserves_zero_path_clear_failure_and_axis_decisions(
+    tmp_path: Path,
+) -> None:
+    paths = materialize_microcase("C07", tmp_path / "C07-finite-zero-path")
+    raw = load_case(paths.case_path).data.geometry
+    geometry = prepare_geometry(
+        replace(
+            raw,
+            boundary=replace(
+                raw.boundary,
+                line2=raw.boundary.line2[:3],
+                boundary_id=raw.boundary.boundary_id[:3],
+                group_id=raw.boundary.group_id[:3],
+                material_id=raw.boundary.material_id[:3],
+                owner_cell_type=raw.boundary.owner_cell_type[:3],
+                owner_cell_local_index=raw.boundary.owner_cell_local_index[:3],
+                orientation=raw.boundary.orientation[:3],
+            ),
+        ),
+        "axisymmetric_rz",
+    )
+    prepared = prepare_exact_event_batch(
+        geometry,
+        np.full(4, EXACT_PATH_LINEAR, dtype=np.uint8),
+        np.asarray([[0.5, 0.5]] * 3 + [[0.0, 0.5]], dtype="<f8"),
+        np.asarray([[0.0, 0.0], [1.0, 0.0], [np.finfo(np.float64).max, 0.0], [-1.0, 0.0]]),
+        np.zeros((4, 2), dtype="<f8"),
+        start_time_s=np.zeros(4, dtype="<f8"),
+        target_time_s=np.asarray([1.0, 1.0, 2.0, 1.0]),
+        contact_radius_m=np.full(4, 0.1, dtype="<f8"),
+        geometry_rtol=1.0e-12,
+        roundoff_ulps=64,
+    )
+    actual = locate_exact_first_event_batch(
+        geometry, prepared, candidate_capacity=4 * geometry.facet_count
+    )
+
+    np.testing.assert_array_equal(
+        actual.status,
+        [
+            EXACT_STATUS_CLEAR,
+            EXACT_STATUS_WALL,
+            EXACT_STATUS_FAILURE,
+            EXACT_STATUS_AXIS,
+        ],
+    )
+    np.testing.assert_array_equal(
+        actual.failure_reason, [0, 0, EXACT_FAILURE_INDETERMINATE_EVENT, 0]
+    )
+    np.testing.assert_allclose(actual.time_s[[1, 3]], [0.4, 0.0], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_allclose(actual.position_m[[1, 3]], [[0.9, 0.5], [0.0, 0.5]], atol=2.0e-12)
+    np.testing.assert_array_equal(actual.primary_facet_id[[1, 3]], [1, -1])
+    np.testing.assert_array_equal(np.diff(actual.candidate_offsets), [0, 1, 0, 0])
+
+
 def test_finite_radius_exact_corner_keeps_both_simultaneous_facets(tmp_path: Path) -> None:
     paths = materialize_microcase("C07", tmp_path / "C07-finite-corner")
     case = load_case(paths.case_path)
@@ -452,15 +735,18 @@ def test_finite_radius_exact_corner_keeps_both_simultaneous_facets(tmp_path: Pat
 
     actual = locate_exact_first_event_batch(
         geometry,
-        np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
-        np.asarray([[0.5, 0.5]], dtype="<f8"),
-        np.asarray([[1.0, 1.0]], dtype="<f8"),
-        np.zeros((1, 2), dtype="<f8"),
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.ones(1, dtype="<f8"),
-        contact_radius_m=np.asarray([0.2], dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
+            np.asarray([[0.5, 0.5]], dtype="<f8"),
+            np.asarray([[1.0, 1.0]], dtype="<f8"),
+            np.zeros((1, 2), dtype="<f8"),
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.ones(1, dtype="<f8"),
+            contact_radius_m=np.asarray([0.2], dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count,
     )
 
@@ -484,40 +770,46 @@ def test_finite_radius_corner_departure_omits_all_certified_start_contacts(
 
     exact = locate_exact_first_event_batch(
         geometry,
-        np.asarray([EXACT_PATH_LINEAR, EXACT_PATH_QUADRATIC], dtype=np.uint8),
-        np.repeat(start, 2, axis=0),
-        np.repeat(velocity, 2, axis=0),
-        np.zeros((2, 2), dtype="<f8"),
-        start_time_s=np.zeros(2, dtype="<f8"),
-        target_time_s=np.full(2, 0.1, dtype="<f8"),
-        contact_radius_m=np.full(2, radius[0], dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
-        candidate_capacity=2 * geometry.facet_count,
-        certified_departing_facet_id=np.asarray(
-            [EXACT_DEPARTURE_FINITE_CONTACT_SET, EXACT_DEPARTURE_FINITE_CONTACT_SET],
-            dtype="<i8",
+        prepare_exact_event_batch(
+            geometry,
+            np.asarray([EXACT_PATH_LINEAR, EXACT_PATH_QUADRATIC], dtype=np.uint8),
+            np.repeat(start, 2, axis=0),
+            np.repeat(velocity, 2, axis=0),
+            np.zeros((2, 2), dtype="<f8"),
+            start_time_s=np.zeros(2, dtype="<f8"),
+            target_time_s=np.full(2, 0.1, dtype="<f8"),
+            contact_radius_m=np.full(2, radius[0], dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+            certified_departing_facet_id=np.asarray(
+                [EXACT_DEPARTURE_FINITE_CONTACT_SET, EXACT_DEPARTURE_FINITE_CONTACT_SET],
+                dtype="<i8",
+            ),
         ),
+        candidate_capacity=2 * geometry.facet_count,
     )
     curved = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity,
-        end,
-        velocity,
-        np.minimum(start, end),
-        np.maximum(start, end),
-        velocity,
-        velocity,
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.asarray([0.1], dtype="<f8"),
-        root_interval_s=np.asarray([0.1], dtype="<f8"),
-        contact_radius_m=radius,
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            np.minimum(start, end),
+            np.maximum(start, end),
+            velocity,
+            velocity,
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.asarray([0.1], dtype="<f8"),
+            root_interval_s=np.asarray([0.1], dtype="<f8"),
+            contact_radius_m=radius,
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            certify_start_contact_departure=np.asarray([True]),
+            chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
+        ),
         candidate_capacity=geometry.facet_count,
-        certify_start_contact_departure=np.asarray([True]),
-        chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
     )
 
     np.testing.assert_array_equal(exact.status, [EXACT_STATUS_CLEAR, EXACT_STATUS_CLEAR])
@@ -534,20 +826,23 @@ def test_finite_radius_contact_set_departure_preserves_a_later_adjacent_hit(
 
     actual = locate_exact_first_event_batch(
         geometry,
-        np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
-        np.asarray([[0.1, 0.5]], dtype="<f8"),
-        np.asarray([[1.0, 1.0]], dtype="<f8"),
-        np.zeros((1, 2), dtype="<f8"),
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.asarray([0.45], dtype="<f8"),
-        contact_radius_m=np.asarray([0.1], dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
-        candidate_capacity=geometry.facet_count,
-        certified_departing_facet_id=np.asarray(
-            [EXACT_DEPARTURE_FINITE_CONTACT_SET],
-            dtype="<i8",
+        prepare_exact_event_batch(
+            geometry,
+            np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
+            np.asarray([[0.1, 0.5]], dtype="<f8"),
+            np.asarray([[1.0, 1.0]], dtype="<f8"),
+            np.zeros((1, 2), dtype="<f8"),
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.asarray([0.45], dtype="<f8"),
+            contact_radius_m=np.asarray([0.1], dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+            certified_departing_facet_id=np.asarray(
+                [EXACT_DEPARTURE_FINITE_CONTACT_SET],
+                dtype="<i8",
+            ),
         ),
+        candidate_capacity=geometry.facet_count,
     )
 
     np.testing.assert_array_equal(actual.status, [EXACT_STATUS_WALL])
@@ -602,28 +897,34 @@ def test_compiled_exact_batch_rejects_simultaneous_disconnected_facets_per_row()
 
     actual = locate_exact_first_event_batch(
         geometry,
-        path_kind,
-        position,
-        velocity,
-        acceleration,
-        start_time_s=start_time,
-        target_time_s=target_time,
-        contact_radius_m=np.zeros(2, dtype="<f8"),
-        geometry_rtol=1.0e-6,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            path_kind,
+            position,
+            velocity,
+            acceleration,
+            start_time_s=start_time,
+            target_time_s=target_time,
+            contact_radius_m=np.zeros(2, dtype="<f8"),
+            geometry_rtol=1.0e-6,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count * 2,
     )
     expected = locate_exact_first_event_batch(
         geometry,
-        path_kind[1:],
-        position[1:],
-        velocity[1:],
-        acceleration[1:],
-        start_time_s=start_time[1:],
-        target_time_s=target_time[1:],
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-6,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            path_kind[1:],
+            position[1:],
+            velocity[1:],
+            acceleration[1:],
+            start_time_s=start_time[1:],
+            target_time_s=target_time[1:],
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1.0e-6,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count,
     )
 
@@ -666,15 +967,18 @@ def test_compiled_exact_batch_preserves_near_grazing_quadratic_verdict(
 
     actual = locate_exact_first_event_batch(
         geometry,
-        np.asarray([EXACT_PATH_QUADRATIC], dtype=np.uint8),
-        np.asarray([[start_x_m, 0.5]], dtype="<f8"),
-        np.asarray([[1.0, 0.0]], dtype="<f8"),
-        np.asarray([[-2.0, 0.0]], dtype="<f8"),
-        start_time_s=np.asarray([0.0]),
-        target_time_s=np.asarray([1.0]),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            np.asarray([EXACT_PATH_QUADRATIC], dtype=np.uint8),
+            np.asarray([[start_x_m, 0.5]], dtype="<f8"),
+            np.asarray([[1.0, 0.0]], dtype="<f8"),
+            np.asarray([[-2.0, 0.0]], dtype="<f8"),
+            start_time_s=np.asarray([0.0]),
+            target_time_s=np.asarray([1.0]),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count,
     )
 
@@ -701,15 +1005,18 @@ def test_compiled_exact_batch_reports_rz_axis_as_a_chart_event() -> None:
     geometry = prepare_geometry(raw_geometry, "axisymmetric_rz")
     actual = locate_exact_first_event_batch(
         geometry,
-        np.full(4, EXACT_PATH_LINEAR, dtype=np.uint8),
-        np.asarray([[0.5, 0.5], [0.0, 0.25], [0.5, 0.5], [0.5, 0.5]], dtype="<f8"),
-        np.asarray([[-1.0, 0.2], [-1.0, 0.0], [0.1, 0.0], [-1.0, -2.0]], dtype="<f8"),
-        np.zeros((4, 2), dtype="<f8"),
-        start_time_s=np.zeros(4, dtype="<f8"),
-        target_time_s=np.ones(4, dtype="<f8"),
-        contact_radius_m=np.zeros(4, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            np.full(4, EXACT_PATH_LINEAR, dtype=np.uint8),
+            np.asarray([[0.5, 0.5], [0.0, 0.25], [0.5, 0.5], [0.5, 0.5]], dtype="<f8"),
+            np.asarray([[-1.0, 0.2], [-1.0, 0.0], [0.1, 0.0], [-1.0, -2.0]], dtype="<f8"),
+            np.zeros((4, 2), dtype="<f8"),
+            start_time_s=np.zeros(4, dtype="<f8"),
+            target_time_s=np.ones(4, dtype="<f8"),
+            contact_radius_m=np.zeros(4, dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count * 4,
     )
 
@@ -746,15 +1053,18 @@ def test_finite_radius_rz_sphere_hits_material_before_its_center(tmp_path: Path)
 
     actual = locate_exact_first_event_batch(
         geometry,
-        np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
-        np.asarray([[0.5, 0.5]], dtype="<f8"),
-        np.asarray([[1.0, 0.0]], dtype="<f8"),
-        np.zeros((1, 2), dtype="<f8"),
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.asarray([2.0], dtype="<f8"),
-        contact_radius_m=np.asarray([0.2], dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_exact_event_batch(
+            geometry,
+            np.asarray([EXACT_PATH_LINEAR], dtype=np.uint8),
+            np.asarray([[0.5, 0.5]], dtype="<f8"),
+            np.asarray([[1.0, 0.0]], dtype="<f8"),
+            np.zeros((1, 2), dtype="<f8"),
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.asarray([2.0], dtype="<f8"),
+            contact_radius_m=np.asarray([0.2], dtype="<f8"),
+            geometry_rtol=1.0e-12,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count,
     )
 
@@ -1192,7 +1502,7 @@ def test_compiled_curved_batch_matches_scalar_wall_decisions(tmp_path: Path) -> 
     chord_bound = np.asarray([[0.0, 0.0], [1.0e-4, 1.0e-4], [0.0, 0.0], [0.0, 0.0]])
     departure = np.asarray([False, False, False, True])
 
-    actual = locate_curved_first_event_batch(
+    prepared = prepare_curved_event_batch(
         geometry,
         start,
         velocity_lower,
@@ -1206,12 +1516,44 @@ def test_compiled_curved_batch_matches_scalar_wall_decisions(tmp_path: Path) -> 
         target_time_s=target_time,
         root_interval_s=root_interval,
         contact_radius_m=np.zeros(start.shape[0], dtype="<f8"),
-        geometry_rtol=1.0e-12,
+        geometry_rtol=1e-12,
         roundoff_ulps=64,
-        candidate_capacity=geometry.facet_count * start.shape[0],
         certify_start_contact_departure=departure,
         chord_deviation_bound_m=chord_bound,
     )
+    actual = locate_curved_first_event_batch(
+        geometry, prepared, candidate_capacity=geometry.facet_count * start.shape[0]
+    )
+    # Capacity partitioning must retain each row verdict and the complete
+    # incident facet set; a second projection from state is not required.
+    for row in range(start.shape[0]):
+        prefix = locate_curved_first_event_batch(
+            geometry,
+            prepared,
+            candidate_capacity=geometry.facet_count,
+            row_start=row,
+            row_stop=row + 1,
+        )
+        for column in (
+            "status",
+            "failure_reason",
+            "start_contact_departure_certified",
+            "time_s",
+            "position_m",
+            "primary_facet_id",
+            "normal",
+            "position_budget_m",
+            "time_budget_s",
+            "localization_residual_m",
+        ):
+            np.testing.assert_array_equal(
+                getattr(prefix, column).view(np.uint8),
+                getattr(actual, column)[row : row + 1].view(np.uint8),
+            )
+        begin, stop = actual.candidate_offsets[row : row + 2]
+        np.testing.assert_array_equal(
+            prefix.candidate_facet_ids, actual.candidate_facet_ids[begin:stop]
+        )
 
     np.testing.assert_array_equal(
         actual.status,
@@ -1269,20 +1611,23 @@ def test_curved_batch_default_chord_bound_matches_scalar(tmp_path: Path) -> None
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity_lower,
-        end,
-        velocity_upper,
-        lower,
-        upper,
-        velocity_lower,
-        velocity_upper,
-        start_time_s=np.asarray([0.25]),
-        target_time_s=np.asarray([0.250002]),
-        root_interval_s=np.asarray([1.0]),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity_lower,
+            end,
+            velocity_upper,
+            lower,
+            upper,
+            velocity_lower,
+            velocity_upper,
+            start_time_s=np.asarray([0.25]),
+            target_time_s=np.asarray([0.250002]),
+            root_interval_s=np.asarray([1.0]),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+        ),
         candidate_capacity=geometry.facet_count,
     )
     expected = inspect_rk4_piece(
@@ -1331,22 +1676,25 @@ def test_monotone_approach_is_clear_inside_the_localization_budget(
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity,
-        end,
-        velocity,
-        start,
-        np.asarray([[1.01, 0.5]], dtype="<f8"),
-        np.asarray([[0.09, 0.0]], dtype="<f8"),
-        np.asarray([[0.11, 0.0]], dtype="<f8"),
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.ones(1, dtype="<f8"),
-        root_interval_s=np.ones(1, dtype="<f8"),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            start,
+            np.asarray([[1.01, 0.5]], dtype="<f8"),
+            np.asarray([[0.09, 0.0]], dtype="<f8"),
+            np.asarray([[0.11, 0.0]], dtype="<f8"),
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.ones(1, dtype="<f8"),
+            root_interval_s=np.ones(1, dtype="<f8"),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            certify_monotone_approach=certify_monotone,
+        ),
         candidate_capacity=geometry.facet_count,
-        certify_monotone_approach=certify_monotone,
     )
 
     # The tolerance is a localization budget, not a wall thickness. The broad
@@ -1370,22 +1718,25 @@ def test_monotone_certificate_does_not_clear_an_exit_and_return_path(tmp_path: P
     assert peak > 1.0 and end[0, 0] < 1.0
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        np.asarray([[slope, 0.0]], dtype="<f8"),
-        end,
-        np.asarray([[slope - 0.4, 0.0]], dtype="<f8"),
-        start,
-        np.asarray([[peak, 0.5]], dtype="<f8"),
-        np.asarray([[slope - 0.4, 0.0]], dtype="<f8"),
-        np.asarray([[slope, 0.0]], dtype="<f8"),
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.ones(1, dtype="<f8"),
-        root_interval_s=np.ones(1, dtype="<f8"),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            np.asarray([[slope, 0.0]], dtype="<f8"),
+            end,
+            np.asarray([[slope - 0.4, 0.0]], dtype="<f8"),
+            start,
+            np.asarray([[peak, 0.5]], dtype="<f8"),
+            np.asarray([[slope - 0.4, 0.0]], dtype="<f8"),
+            np.asarray([[slope, 0.0]], dtype="<f8"),
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.ones(1, dtype="<f8"),
+            root_interval_s=np.ones(1, dtype="<f8"),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            certify_monotone_approach=True,
+        ),
         candidate_capacity=geometry.facet_count,
-        certify_monotone_approach=True,
     )
     np.testing.assert_array_equal(actual.status, [CURVED_STATUS_SPLIT])
 
@@ -1410,26 +1761,29 @@ def test_rk4_bernstein_controls_clear_correlated_inside_path_per_row(
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity_lower,
-        start,
-        velocity_upper,
-        position_lower,
-        position_upper,
-        velocity_lower,
-        velocity_upper,
-        start_time_s=np.zeros(2, dtype="<f8"),
-        target_time_s=np.full(2, 0.1, dtype="<f8"),
-        root_interval_s=np.full(2, 0.1, dtype="<f8"),
-        contact_radius_m=np.zeros(2, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity_lower,
+            start,
+            velocity_upper,
+            position_lower,
+            position_upper,
+            velocity_lower,
+            velocity_upper,
+            start_time_s=np.zeros(2, dtype="<f8"),
+            target_time_s=np.full(2, 0.1, dtype="<f8"),
+            root_interval_s=np.full(2, 0.1, dtype="<f8"),
+            contact_radius_m=np.zeros(2, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((2, 2), dtype="<f8"),
+            use_position_controls=np.asarray([True, False]),
+            position_control_origin_m=control_origin,
+            relative_position_control_lower_m=relative_controls,
+            relative_position_control_upper_m=relative_controls,
+        ),
         candidate_capacity=2 * geometry.facet_count,
-        chord_deviation_bound_m=np.zeros((2, 2), dtype="<f8"),
-        use_position_controls=np.asarray([True, False]),
-        position_control_origin_m=control_origin,
-        relative_position_control_lower_m=relative_controls,
-        relative_position_control_upper_m=relative_controls,
     )
 
     # The component box overlaps the right wall for both rows.  Only the row
@@ -1450,25 +1804,28 @@ def test_rk4_bernstein_controls_do_not_clear_touching_or_outside_path(tmp_path: 
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity_lower,
-        start,
-        velocity_upper,
-        np.repeat(np.asarray([[0.9, 0.49]], dtype="<f8"), 2, axis=0),
-        np.asarray([[1.1, 0.51], [1.2, 0.51]], dtype="<f8"),
-        velocity_lower,
-        velocity_upper,
-        start_time_s=np.zeros(2, dtype="<f8"),
-        target_time_s=np.full(2, 0.1, dtype="<f8"),
-        root_interval_s=np.full(2, 0.1, dtype="<f8"),
-        contact_radius_m=np.zeros(2, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity_lower,
+            start,
+            velocity_upper,
+            np.repeat(np.asarray([[0.9, 0.49]], dtype="<f8"), 2, axis=0),
+            np.asarray([[1.1, 0.51], [1.2, 0.51]], dtype="<f8"),
+            velocity_lower,
+            velocity_upper,
+            start_time_s=np.zeros(2, dtype="<f8"),
+            target_time_s=np.full(2, 0.1, dtype="<f8"),
+            root_interval_s=np.full(2, 0.1, dtype="<f8"),
+            contact_radius_m=np.zeros(2, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((2, 2), dtype="<f8"),
+            position_control_origin_m=start,
+            relative_position_control_lower_m=relative_controls,
+            relative_position_control_upper_m=relative_controls,
+        ),
         candidate_capacity=2 * geometry.facet_count,
-        chord_deviation_bound_m=np.zeros((2, 2), dtype="<f8"),
-        position_control_origin_m=start,
-        relative_position_control_lower_m=relative_controls,
-        relative_position_control_upper_m=relative_controls,
     )
 
     np.testing.assert_array_equal(actual.status, [CURVED_STATUS_SPLIT, CURVED_STATUS_SPLIT])
@@ -1486,25 +1843,28 @@ def test_rk4_bernstein_controls_preserve_true_wall_hit(tmp_path: Path) -> None:
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity,
-        end,
-        velocity,
-        start,
-        end,
-        velocity,
-        velocity,
-        start_time_s=np.asarray([0.0]),
-        target_time_s=np.asarray([1.0]),
-        root_interval_s=np.asarray([1.0]),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            start,
+            end,
+            velocity,
+            velocity,
+            start_time_s=np.asarray([0.0]),
+            target_time_s=np.asarray([1.0]),
+            root_interval_s=np.asarray([1.0]),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
+            position_control_origin_m=start,
+            relative_position_control_lower_m=relative_controls,
+            relative_position_control_upper_m=relative_controls,
+        ),
         candidate_capacity=geometry.facet_count,
-        chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
-        position_control_origin_m=start,
-        relative_position_control_lower_m=relative_controls,
-        relative_position_control_upper_m=relative_controls,
     )
 
     assert actual.status[0] == CURVED_STATUS_WALL
@@ -1525,6 +1885,50 @@ def test_finite_radius_curved_path_preserves_surface_clearance(
 
     actual = locate_curved_first_event_batch(
         geometry,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            np.minimum(start, end),
+            np.maximum(start, end),
+            velocity,
+            velocity,
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.ones(1, dtype="<f8"),
+            root_interval_s=np.ones(1, dtype="<f8"),
+            contact_radius_m=np.asarray([0.2], dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
+        ),
+        candidate_capacity=geometry.facet_count,
+    )
+
+    np.testing.assert_array_equal(actual.status, [CURVED_STATUS_WALL])
+    np.testing.assert_allclose(actual.time_s, [0.55], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_allclose(actual.position_m, [[0.8, 0.5]], rtol=0.0, atol=2.0e-12)
+    np.testing.assert_array_equal(actual.candidate_facet_ids, [1])
+
+
+@pytest.mark.parametrize("center_opening", [False, True])
+def test_prepared_curved_prefixes_preserve_contact_modes_and_incident_sets(
+    tmp_path: Path, center_opening: bool
+) -> None:
+    paths = materialize_microcase("C07", tmp_path / "C07-prepared-prefix")
+    case = load_case(paths.case_path)
+    geometry = prepare_geometry(case.data.geometry, case.data.coordinate_system)
+    start = np.asarray([[0.25, 0.5], [0.25, 0.5], [0.5, 0.25], [0.25, 0.5]])
+    end = np.asarray([[1.25, 0.5], [1.25, 0.5], [0.5, 1.25], [0.35, 0.5]])
+    velocity = end - start
+    finite_mask = geometry.facet_contact_enabled.copy()
+    if center_opening:
+        finite_mask[1] = False
+    controls = np.asarray([fraction * velocity for fraction in (0.0, 1 / 3, 2 / 3, 1.0)])
+    controls = controls.transpose(1, 0, 2).copy()
+    prepared = prepare_curved_event_batch(
+        geometry,
         start,
         velocity,
         end,
@@ -1533,20 +1937,67 @@ def test_finite_radius_curved_path_preserves_surface_clearance(
         np.maximum(start, end),
         velocity,
         velocity,
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.ones(1, dtype="<f8"),
-        root_interval_s=np.ones(1, dtype="<f8"),
-        contact_radius_m=np.asarray([0.2], dtype="<f8"),
+        start_time_s=np.zeros(4),
+        target_time_s=np.ones(4),
+        root_interval_s=np.ones(4),
+        contact_radius_m=np.asarray([0.0, 0.2, 0.2, 0.2]),
         geometry_rtol=1.0e-12,
         roundoff_ulps=64,
-        candidate_capacity=geometry.facet_count,
-        chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
+        chord_deviation_bound_m=np.zeros((4, 2)),
+        certify_monotone_approach=True,
+        use_position_controls=np.asarray([True, False, True, False]),
+        position_control_origin_m=start,
+        relative_position_control_lower_m=controls,
+        relative_position_control_upper_m=controls,
+        finite_contact_enabled=finite_mask,
     )
-
-    np.testing.assert_array_equal(actual.status, [CURVED_STATUS_WALL])
-    np.testing.assert_allclose(actual.time_s, [0.55], rtol=0.0, atol=2.0e-12)
-    np.testing.assert_allclose(actual.position_m, [[0.8, 0.5]], rtol=0.0, atol=2.0e-12)
-    np.testing.assert_array_equal(actual.candidate_facet_ids, [1])
+    actual = locate_curved_first_event_batch(
+        geometry, prepared, candidate_capacity=4 * geometry.facet_count
+    )
+    np.testing.assert_array_equal(
+        actual.status,
+        [CURVED_STATUS_WALL, CURVED_STATUS_WALL, CURVED_STATUS_WALL, CURVED_STATUS_CLEAR],
+    )
+    np.testing.assert_allclose(
+        actual.time_s[:3],
+        [0.75, 0.75 if center_opening else 0.55, 0.55],
+        rtol=0.0,
+        atol=2.0e-12,
+    )
+    np.testing.assert_array_equal(actual.candidate_offsets, [0, 1, 2, 3, 3])
+    np.testing.assert_array_equal(actual.candidate_facet_ids, [1, 1, 2])
+    arena = allocate_event_arena(4, 4 * geometry.facet_count, separate_finite_mask=center_opening)
+    context = prepare_event_geometry(geometry)
+    for first, last in ((0, 4), (0, 2), (2, 4), (3, 4), (1, 2), (0, 1)):
+        status, rows, candidates, _ = locate_curved_first_event_into(
+            context, prepared, arena, first, last
+        )
+        assert status == EVENT_QUERY_OK
+        assert rows == last - first
+        prefix = curved_event_result_view(arena, rows, candidates)
+        for column in (
+            "status",
+            "failure_reason",
+            "start_contact_departure_certified",
+            "time_s",
+            "position_m",
+            "primary_facet_id",
+            "normal",
+            "position_budget_m",
+            "time_budget_s",
+            "localization_residual_m",
+        ):
+            np.testing.assert_array_equal(
+                getattr(prefix, column).view(np.uint8),
+                getattr(actual, column)[first:last].view(np.uint8),
+            )
+        begin, stop = actual.candidate_offsets[[first, last]]
+        np.testing.assert_array_equal(
+            prefix.candidate_offsets, actual.candidate_offsets[first : last + 1] - begin
+        )
+        np.testing.assert_array_equal(
+            prefix.candidate_facet_ids, actual.candidate_facet_ids[begin:stop]
+        )
 
 
 def test_curved_candidate_capacity_fails_closed_before_fill(tmp_path: Path) -> None:
@@ -1563,7 +2014,7 @@ def test_curved_candidate_capacity_fails_closed_before_fill(tmp_path: Path) -> N
     times = np.zeros(row_count, dtype="<f8")
     targets = np.ones(row_count, dtype="<f8")
 
-    counts = count_curved_event_candidates(
+    prepared = prepare_curved_event_batch(
         geometry,
         start,
         velocity_lower,
@@ -1577,52 +2028,46 @@ def test_curved_candidate_capacity_fails_closed_before_fill(tmp_path: Path) -> N
         target_time_s=targets,
         root_interval_s=targets,
         contact_radius_m=np.zeros(row_count, dtype="<f8"),
-        geometry_rtol=1.0e-12,
+        geometry_rtol=1e-12,
         roundoff_ulps=64,
     )
-    np.testing.assert_array_equal(counts, [4, 4])
+    np.testing.assert_array_equal(prepared.broad_counts, [4, 4])
     with pytest.raises(CurvedCandidateCapacityError) as batch_error:
-        locate_curved_first_event_batch(
-            geometry,
-            start,
-            velocity_lower,
-            end,
-            velocity_upper,
-            lower,
-            upper,
-            velocity_lower,
-            velocity_upper,
-            start_time_s=times,
-            target_time_s=targets,
-            root_interval_s=targets,
-            contact_radius_m=np.zeros(row_count, dtype="<f8"),
-            geometry_rtol=1.0e-12,
-            roundoff_ulps=64,
-            candidate_capacity=7,
-        )
+        locate_curved_first_event_batch(geometry, prepared, candidate_capacity=7)
     assert batch_error.value.required_count == 8
     assert batch_error.value.oversized_row is None
     with pytest.raises(CurvedCandidateCapacityError) as row_error:
-        locate_curved_first_event_batch(
-            geometry,
-            start[:1],
-            velocity_lower[:1],
-            end[:1],
-            velocity_upper[:1],
-            lower[:1],
-            upper[:1],
-            velocity_lower[:1],
-            velocity_upper[:1],
-            start_time_s=times[:1],
-            target_time_s=targets[:1],
-            root_interval_s=targets[:1],
-            contact_radius_m=np.zeros(1, dtype="<f8"),
-            geometry_rtol=1.0e-12,
-            roundoff_ulps=64,
-            candidate_capacity=3,
-        )
+        locate_curved_first_event_batch(geometry, prepared, candidate_capacity=3, row_stop=1)
     assert row_error.value.required_count == 4
     assert row_error.value.oversized_row == 0
+    context = prepare_event_geometry(geometry)
+    for row_capacity, query_status in (
+        (1, EVENT_QUERY_ROW_CAPACITY),
+        (2, EVENT_QUERY_CANDIDATE_CAPACITY),
+    ):
+        arena = allocate_event_arena(row_capacity, 4)
+        status, rows, candidates, _ = locate_curved_first_event_into(context, prepared, arena, 0, 1)
+        assert status == EVENT_QUERY_OK
+        result = curved_event_result_view(arena, rows, candidates)
+        columns = (
+            result.status,
+            result.failure_reason,
+            result.start_contact_departure_certified,
+            result.time_s,
+            result.position_m,
+            result.primary_facet_id,
+            result.normal,
+            result.position_budget_m,
+            result.time_budget_s,
+            result.localization_residual_m,
+            result.candidate_offsets,
+            result.candidate_facet_ids,
+        )
+        before = tuple(column.tobytes() for column in columns)
+        status, rows, candidates, _ = locate_curved_first_event_into(context, prepared, arena, 0, 2)
+        assert status == query_status
+        assert rows == candidates == 0
+        assert tuple(column.tobytes() for column in columns) == before
 
 
 def test_rk4_axis_piece_localizes_certified_inward_crossing() -> None:
@@ -1676,22 +2121,25 @@ def test_compiled_curved_batch_preserves_rz_axis_and_wall_ordering() -> None:
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity,
-        end,
-        velocity,
-        lower,
-        upper,
-        velocity,
-        velocity,
-        start_time_s=np.zeros(3, dtype="<f8"),
-        target_time_s=target,
-        root_interval_s=target,
-        contact_radius_m=np.zeros(3, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            lower,
+            upper,
+            velocity,
+            velocity,
+            start_time_s=np.zeros(3, dtype="<f8"),
+            target_time_s=target,
+            root_interval_s=target,
+            contact_radius_m=np.zeros(3, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((3, 2), dtype="<f8"),
+        ),
         candidate_capacity=geometry.facet_count * start.shape[0],
-        chord_deviation_bound_m=np.zeros((3, 2), dtype="<f8"),
     )
 
     np.testing.assert_array_equal(
@@ -1715,22 +2163,25 @@ def test_compiled_curved_batch_preserves_simultaneous_corner_facets(tmp_path: Pa
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity,
-        end,
-        velocity,
-        np.minimum(start, end),
-        np.maximum(start, end),
-        velocity,
-        velocity,
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.asarray([interval_s], dtype="<f8"),
-        root_interval_s=np.asarray([1.0], dtype="<f8"),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            np.minimum(start, end),
+            np.maximum(start, end),
+            velocity,
+            velocity,
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.asarray([interval_s], dtype="<f8"),
+            root_interval_s=np.asarray([1.0], dtype="<f8"),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
+        ),
         candidate_capacity=geometry.facet_count,
-        chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
     )
 
     np.testing.assert_array_equal(actual.status, [CURVED_STATUS_WALL])
@@ -1756,26 +2207,29 @@ def test_compiled_curved_batch_discards_broad_but_certified_clear_facet(
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity,
-        end,
-        velocity,
-        np.asarray([[0.5, 0.4]], dtype="<f8"),
-        np.asarray([[2.5, 0.6]], dtype="<f8"),
-        velocity,
-        velocity,
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.asarray([0.2], dtype="<f8"),
-        root_interval_s=np.asarray([0.2], dtype="<f8"),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            np.asarray([[0.5, 0.4]], dtype="<f8"),
+            np.asarray([[2.5, 0.6]], dtype="<f8"),
+            velocity,
+            velocity,
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.asarray([0.2], dtype="<f8"),
+            root_interval_s=np.asarray([0.2], dtype="<f8"),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
+            use_position_controls=np.asarray([True]),
+            position_control_origin_m=start,
+            relative_position_control_lower_m=relative_controls,
+            relative_position_control_upper_m=relative_controls,
+        ),
         candidate_capacity=geometry.facet_count,
-        chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
-        use_position_controls=np.asarray([True]),
-        position_control_origin_m=start,
-        relative_position_control_lower_m=relative_controls,
-        relative_position_control_upper_m=relative_controls,
     )
 
     np.testing.assert_array_equal(actual.status, [CURVED_STATUS_WALL])
@@ -1794,22 +2248,25 @@ def test_compiled_curved_corner_budget_covers_accepted_shared_node(tmp_path: Pat
 
     actual = locate_curved_first_event_batch(
         geometry,
-        start,
-        velocity,
-        end,
-        velocity,
-        np.minimum(start, end),
-        np.maximum(start, end),
-        velocity,
-        velocity,
-        start_time_s=np.zeros(1, dtype="<f8"),
-        target_time_s=np.asarray([1.0e-12], dtype="<f8"),
-        root_interval_s=np.asarray([1.0], dtype="<f8"),
-        contact_radius_m=np.zeros(1, dtype="<f8"),
-        geometry_rtol=1.0e-12,
-        roundoff_ulps=64,
+        prepare_curved_event_batch(
+            geometry,
+            start,
+            velocity,
+            end,
+            velocity,
+            np.minimum(start, end),
+            np.maximum(start, end),
+            velocity,
+            velocity,
+            start_time_s=np.zeros(1, dtype="<f8"),
+            target_time_s=np.asarray([1e-12], dtype="<f8"),
+            root_interval_s=np.asarray([1.0], dtype="<f8"),
+            contact_radius_m=np.zeros(1, dtype="<f8"),
+            geometry_rtol=1e-12,
+            roundoff_ulps=64,
+            chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
+        ),
         candidate_capacity=geometry.facet_count,
-        chord_deviation_bound_m=np.zeros((1, 2), dtype="<f8"),
     )
 
     node_distance_m = float(np.linalg.norm(actual.position_m[0] - np.asarray([1.0, 1.0])))

@@ -1,0 +1,87 @@
+{
+  "status": "PASS",
+  "passed": true,
+  "utc": "2026-10-12T11:17:02.240188+00:00",
+  "seed": 939043,
+  "source_binding_sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b",
+  "resumed": {
+    "payload": "sha256:0dd93dea030beb7bfb392dccfd710dd0fc88add176146388c937dca399272db2",
+    "frames": {
+      "count": 121,
+      "sha256": "56a502738d2dfe5cab79ff9abfc5ffed2312f7bd5ed5e5a2f2d81813b72b6ebd"
+    },
+    "probes": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "counts": {
+      "boundary_events": 0,
+      "failure_events": 0,
+      "frame_rows": 34727,
+      "frames": 121,
+      "macro_steps": 1500,
+      "particles": 287,
+      "probe_rows": 0,
+      "probes": 0,
+      "release_events": 287,
+      "series": 1500
+    },
+    "event_work": {
+      "accepted_particle_pieces": 3444000,
+      "candidate_queries": 3444000,
+      "maximum_refinement_depth": 0,
+      "refinements": 0
+    },
+    "lifecycle": {
+      "active": 287,
+      "escaped": 0,
+      "failed": 0,
+      "held": 0,
+      "pending": 0,
+      "stuck": 0
+    }
+  },
+  "fresh": {
+    "payload": "sha256:0dd93dea030beb7bfb392dccfd710dd0fc88add176146388c937dca399272db2",
+    "frames": {
+      "count": 121,
+      "sha256": "56a502738d2dfe5cab79ff9abfc5ffed2312f7bd5ed5e5a2f2d81813b72b6ebd"
+    },
+    "probes": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "counts": {
+      "boundary_events": 0,
+      "failure_events": 0,
+      "frame_rows": 34727,
+      "frames": 121,
+      "macro_steps": 1500,
+      "particles": 287,
+      "probe_rows": 0,
+      "probes": 0,
+      "release_events": 287,
+      "series": 1500
+    },
+    "event_work": {
+      "accepted_particle_pieces": 3444000,
+      "candidate_queries": 3444000,
+      "maximum_refinement_depth": 0,
+      "refinements": 0
+    },
+    "lifecycle": {
+      "active": 287,
+      "escaped": 0,
+      "failed": 0,
+      "held": 0,
+      "pending": 0,
+      "stuck": 0
+    }
+  },
+  "resumed_manifest_sha256": "38c59e11ab839a7618dbeb1eb731694f990c2d7ff061b612e12936b90741d3fd",
+  "fresh_manifest_sha256": "38c59e11ab839a7618dbeb1eb731694f990c2d7ff061b612e12936b90741d3fd",
+  "scope": "Complete scientific payload and all frames/probes of actual interruption/resume versus fresh full30ms run; no new stochastic confirmation",
+  "script_sha256": "498f8d6e49a2d781e92ba060cbc573387eff3a2a7e084339d9f52424cec41107"
+}

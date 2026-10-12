@@ -1,0 +1,3122 @@
+{
+  "scope": "One predeclared case; root owns all-case adoption, final quality, OS and wheel qualification",
+  "script_sha256": "b2f9f98ff772c02a8a01def361bad651b929a26778a8cac1f3f9bdc8b3b42d43",
+  "policy_sha256": "68a5a0ff1d45f9a09a57bfc464f186800c9f17f510867b7461c2f01e64303878",
+  "source_bindings": {
+    "candidate": {
+      "path": ".artifacts/r65_2026_10_12/source_binding.json",
+      "sha256": "97eeb06893aff389c7551523e7baf93cc8c7cac327ff4bd05c63c449a3a9c81b"
+    }
+  },
+  "case_id": "p14_none_10k_320",
+  "family": "p14u-none",
+  "rows": 10000,
+  "primary": false,
+  "complete_workers_group": true,
+  "groups": {
+    "candidate1": {
+      "receipt_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\receipt.json",
+      "receipt_sha256": "db358837dda8d69c2b1620fdbd9c6418091702153c9769861bcc7445c54b279b",
+      "case_id": "p14_none_10k_320",
+      "family": "p14u-none",
+      "rows": 10000,
+      "source_role": "candidate",
+      "digest_owner": "p14u",
+      "workers": 1,
+      "cache_mode": "fresh",
+      "source_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver",
+      "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+      "runs": {
+        "cold": {
+          "observation": {
+            "rows": 10000,
+            "label": "cold",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.020120900124311447,
+            "simulate_s": 85.8760513998568,
+            "open_s": 0.033921499736607075,
+            "public_s": 85.93009379971772,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 15049282,
+                "slab_certificate_work": 13520000,
+                "slab_dense_path": 8510000,
+                "slab_event_staging": 23017232,
+                "slab_event_work": 15520000,
+                "slab_failure_staging": 520000,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 20480000,
+                "slab_release_work": 2720000,
+                "slab_stage_composition_work": 3820000,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 135443535
+              },
+              "planned_bytes": 135443535,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 10000,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 1
+            },
+            "process_sample_report": {
+              "path": "cold_process_samples.json",
+              "sha256": "00154d5827556abd44aa048d594ed01ce9d428ba28e3d1aa0e805710b43861d0"
+            },
+            "process_cpu_s": 97.4375,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 823357440,
+              "sampled_peak_private_commit_sum_bytes": 816152576
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold_process_samples.json",
+            "sha256": "00154d5827556abd44aa048d594ed01ce9d428ba28e3d1aa0e805710b43861d0",
+            "sample_count": 573,
+            "sampled_private_peak_bytes": 816152576,
+            "sampled_working_set_sum_peak_bytes": 823357440,
+            "seen_direct_child_pids": [],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold"
+        },
+        "warm-0": {
+          "observation": {
+            "rows": 10000,
+            "label": "warm-0",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.01174050010740757,
+            "simulate_s": 27.38098660018295,
+            "open_s": 0.03384369984269142,
+            "public_s": 27.42657080013305,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 15049282,
+                "slab_certificate_work": 13520000,
+                "slab_dense_path": 8510000,
+                "slab_event_staging": 23017232,
+                "slab_event_work": 15520000,
+                "slab_failure_staging": 520000,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 20480000,
+                "slab_release_work": 2720000,
+                "slab_stage_composition_work": 3820000,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 135443535
+              },
+              "planned_bytes": 135443535,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 10000,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 1
+            },
+            "process_sample_report": {
+              "path": "warm-0_process_samples.json",
+              "sha256": "6da02ed73169ac0ddd1c269b615de14b63f7ee8803139ce7c7ff5f2faa07fba1"
+            },
+            "process_cpu_s": 31.65625,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 836784128,
+              "sampled_peak_private_commit_sum_bytes": 828723200
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0_process_samples.json",
+            "sha256": "6da02ed73169ac0ddd1c269b615de14b63f7ee8803139ce7c7ff5f2faa07fba1",
+            "sample_count": 216,
+            "sampled_private_peak_bytes": 828723200,
+            "sampled_working_set_sum_peak_bytes": 836784128,
+            "seen_direct_child_pids": [],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0"
+        },
+        "warm-1": {
+          "observation": {
+            "rows": 10000,
+            "label": "warm-1",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.011899400036782026,
+            "simulate_s": 27.31038480019197,
+            "open_s": 0.039235000032931566,
+            "public_s": 27.361519200261682,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 15049282,
+                "slab_certificate_work": 13520000,
+                "slab_dense_path": 8510000,
+                "slab_event_staging": 23017232,
+                "slab_event_work": 15520000,
+                "slab_failure_staging": 520000,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 20480000,
+                "slab_release_work": 2720000,
+                "slab_stage_composition_work": 3820000,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 135443535
+              },
+              "planned_bytes": 135443535,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 10000,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 1
+            },
+            "process_sample_report": {
+              "path": "warm-1_process_samples.json",
+              "sha256": "3ca105e9ef84bc2d6e210ca57e961ab3f2fffd83b25c951234dd9497c53a01ec"
+            },
+            "process_cpu_s": 31.828125,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 837038080,
+              "sampled_peak_private_commit_sum_bytes": 829054976
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1_process_samples.json",
+            "sha256": "3ca105e9ef84bc2d6e210ca57e961ab3f2fffd83b25c951234dd9497c53a01ec",
+            "sample_count": 214,
+            "sampled_private_peak_bytes": 829054976,
+            "sampled_working_set_sum_peak_bytes": 837038080,
+            "seen_direct_child_pids": [],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1"
+        },
+        "warm-2": {
+          "observation": {
+            "rows": 10000,
+            "label": "warm-2",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.012797100003808737,
+            "simulate_s": 27.29747060034424,
+            "open_s": 0.03256079973652959,
+            "public_s": 27.34282850008458,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 15049282,
+                "slab_certificate_work": 13520000,
+                "slab_dense_path": 8510000,
+                "slab_event_staging": 23017232,
+                "slab_event_work": 15520000,
+                "slab_failure_staging": 520000,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 20480000,
+                "slab_release_work": 2720000,
+                "slab_stage_composition_work": 3820000,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 135443535
+              },
+              "planned_bytes": 135443535,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 10000,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 1
+            },
+            "process_sample_report": {
+              "path": "warm-2_process_samples.json",
+              "sha256": "11a2af782c6e60f369738e2220106f0d40abeefbd396bece8f7f378e9a6b23d8"
+            },
+            "process_cpu_s": 32.0625,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 834256896,
+              "sampled_peak_private_commit_sum_bytes": 827494400
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2_process_samples.json",
+            "sha256": "11a2af782c6e60f369738e2220106f0d40abeefbd396bece8f7f378e9a6b23d8",
+            "sample_count": 208,
+            "sampled_private_peak_bytes": 827494400,
+            "sampled_working_set_sum_peak_bytes": 834256896,
+            "seen_direct_child_pids": [],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2"
+        }
+      },
+      "warm_public_s": [
+        27.42657080013305,
+        27.361519200261682,
+        27.34282850008458
+      ],
+      "warm_median_s": 27.361519200261682
+    },
+    "candidate4": {
+      "receipt_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\receipt.json",
+      "receipt_sha256": "b136e17f4bb5a113feac21bbd839eb6e189be531c28d685db9dc6be9fd07d242",
+      "case_id": "p14_none_10k_320",
+      "family": "p14u-none",
+      "rows": 10000,
+      "source_role": "candidate",
+      "digest_owner": "p14u",
+      "workers": 4,
+      "cache_mode": "fresh",
+      "source_directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver",
+      "source_map_sha256": "49906998c297d23c9be8578fb8c5a757168fa8b7c2dddecc0695290c5df263a2",
+      "runs": {
+        "cold": {
+          "observation": {
+            "rows": 10000,
+            "label": "cold",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.017812900245189667,
+            "simulate_s": 75.95845519984141,
+            "open_s": 0.02837730012834072,
+            "public_s": 76.00464540021494,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "process_handoff_serialization": 68818928,
+                "process_private_query": 125829200,
+                "process_private_scratch_and_handoff": 106176785,
+                "process_shared_transport": 29141293,
+                "process_transport_page_padding": 872319,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 48045113,
+                "slab_certificate_work": 845000,
+                "slab_dense_path": 531875,
+                "slab_event_staging": 17167232,
+                "slab_event_work": 970000,
+                "slab_failure_staging": 32500,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 1280000,
+                "slab_release_work": 170000,
+                "slab_stage_composition_work": 238750,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 432406016
+              },
+              "planned_bytes": 432406016,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 625,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 4
+            },
+            "process_sample_report": {
+              "path": "cold_process_samples.json",
+              "sha256": "ecaa7e88087a4763edac148957da811f9e8babdd2d18788dd8da68e7204940b6"
+            },
+            "process_cpu_s": 297.5625,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 3138424832,
+              "sampled_peak_private_commit_sum_bytes": 2923343872
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\checkpoints\\A.h5": "bb0037e97dd4336671b8000ff674e95b8a2bcb0128bc46c2024a69575dd35f50",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\checkpoints\\B.h5": "53f5302889787df06d6e5b3f401b12c02b0b984e8d41efd70891510da156ae1f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\LATEST": "3cae84fc248a6d9777745f7a2701aff98a4a2bb9f72bbbb0d1a20891f428cd3c",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000004.h5": "fc1bb307f456910c509e163255657b446cd276100096405a15c8e85f97dfdc33",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000005.h5": "f3abbc2e89aaba3b6900c52ba25a9d90a52f6b7174d792a05e8d3cffc417375e"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold_process_samples.json",
+            "sha256": "ecaa7e88087a4763edac148957da811f9e8babdd2d18788dd8da68e7204940b6",
+            "sample_count": 574,
+            "sampled_private_peak_bytes": 2923343872,
+            "sampled_working_set_sum_peak_bytes": 3138424832,
+            "seen_direct_child_pids": [
+              31560,
+              34800,
+              80336,
+              85732
+            ],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold"
+        },
+        "warm-0": {
+          "observation": {
+            "rows": 10000,
+            "label": "warm-0",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.011796799954026937,
+            "simulate_s": 13.86772740026936,
+            "open_s": 0.04982549976557493,
+            "public_s": 13.929349699988961,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "process_handoff_serialization": 68818928,
+                "process_private_query": 125829200,
+                "process_private_scratch_and_handoff": 106176785,
+                "process_shared_transport": 29141293,
+                "process_transport_page_padding": 872319,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 48045113,
+                "slab_certificate_work": 845000,
+                "slab_dense_path": 531875,
+                "slab_event_staging": 17167232,
+                "slab_event_work": 970000,
+                "slab_failure_staging": 32500,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 1280000,
+                "slab_release_work": 170000,
+                "slab_stage_composition_work": 238750,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 432406016
+              },
+              "planned_bytes": 432406016,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 625,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 4
+            },
+            "process_sample_report": {
+              "path": "warm-0_process_samples.json",
+              "sha256": "5a07c061f5c62decf00ff53eb736ee4bcfd1840f0c2a412a903adcec18ddd8f1"
+            },
+            "process_cpu_s": 52.0,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 1096302592,
+              "sampled_peak_private_commit_sum_bytes": 858865664
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\checkpoints\\A.h5": "3e82406e15d75fbd748941c038974d9c742fcaff77d65ac72b3fac17c0b0ddf6",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\checkpoints\\B.h5": "49d45f7e905134f14e84335f4c38a4991b25df7ac35060258dc005d3260bd88c",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\LATEST": "e669172b989406ff716df7a5e51638802f9de933b50a652a924e051109136dee",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000004.h5": "0de7a59d4446250c430496a970e3636da115f381f179b9d1c563d534fbf31093",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000005.h5": "d246508a1119b511d474f2dc2c18bd148c6b1fba11be5b2afd4d6b4aeeceae4d"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0_process_samples.json",
+            "sha256": "5a07c061f5c62decf00ff53eb736ee4bcfd1840f0c2a412a903adcec18ddd8f1",
+            "sample_count": 105,
+            "sampled_private_peak_bytes": 858865664,
+            "sampled_working_set_sum_peak_bytes": 1096302592,
+            "seen_direct_child_pids": [
+              13028,
+              17352,
+              61828,
+              91944
+            ],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0"
+        },
+        "warm-1": {
+          "observation": {
+            "rows": 10000,
+            "label": "warm-1",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.01900930004194379,
+            "simulate_s": 13.731189999729395,
+            "open_s": 0.054537900257855654,
+            "public_s": 13.804737200029194,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "process_handoff_serialization": 68818928,
+                "process_private_query": 125829200,
+                "process_private_scratch_and_handoff": 106176785,
+                "process_shared_transport": 29141293,
+                "process_transport_page_padding": 872319,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 48045113,
+                "slab_certificate_work": 845000,
+                "slab_dense_path": 531875,
+                "slab_event_staging": 17167232,
+                "slab_event_work": 970000,
+                "slab_failure_staging": 32500,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 1280000,
+                "slab_release_work": 170000,
+                "slab_stage_composition_work": 238750,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 432406016
+              },
+              "planned_bytes": 432406016,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 625,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 4
+            },
+            "process_sample_report": {
+              "path": "warm-1_process_samples.json",
+              "sha256": "6ba6a0f27a39d899ae3b7c7c45d23c3cf154f05034b2b006a46e5b1c26e6cf15"
+            },
+            "process_cpu_s": 51.703125,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 1097502720,
+              "sampled_peak_private_commit_sum_bytes": 859533312
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\checkpoints\\A.h5": "92b96db1bc39f016191311b7731bf2022a33c5fdaed36158e7887d4fdab356ac",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\checkpoints\\B.h5": "7fe0eb27e88646e8ff6da2752a2aea89f1de6a10c1881f482f6e336642d17bb3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\LATEST": "143c18866c00a775df624708bdfef707012192b2752ddbfb6f621f0460ecf6c8",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000004.h5": "116493c434e99928f83b881d46cd8a342ca1a145233f91a73337297b7973f8df",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000005.h5": "5788700053ada7fc3b1811f33156aa76692abaa9cbc2b4a8a04af183edbf9f9e"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1_process_samples.json",
+            "sha256": "6ba6a0f27a39d899ae3b7c7c45d23c3cf154f05034b2b006a46e5b1c26e6cf15",
+            "sample_count": 106,
+            "sampled_private_peak_bytes": 859533312,
+            "sampled_working_set_sum_peak_bytes": 1097502720,
+            "seen_direct_child_pids": [
+              50352,
+              70776,
+              76512,
+              90932
+            ],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1"
+        },
+        "warm-2": {
+          "observation": {
+            "rows": 10000,
+            "label": "warm-2",
+            "input_yaml_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "load_s": 0.016943899914622307,
+            "simulate_s": 14.093367000110447,
+            "open_s": 0.03775790007784963,
+            "public_s": 14.14806880010292,
+            "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+            "frames": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "probes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "counts": {
+              "boundary_events": 10000,
+              "failure_events": 0,
+              "frame_rows": 0,
+              "frames": 0,
+              "macro_steps": 320,
+              "particles": 10000,
+              "probe_rows": 0,
+              "probes": 0,
+              "release_events": 10000,
+              "series": 320
+            },
+            "event_work": {
+              "accepted_particle_pieces": 3144057,
+              "candidate_queries": 3304830,
+              "maximum_refinement_depth": 15,
+              "refinements": 160773
+            },
+            "memory_plan": {
+              "certificate_work_bytes_per_particle": 1352,
+              "components": {
+                "active_index": 80000,
+                "canonical_data": 1099660,
+                "field_runtime": 58,
+                "geometry_query_scratch": 25165840,
+                "output_buffer": 90000,
+                "particle_schedule": 1280000,
+                "physics_runtime": 400023,
+                "prepared_geometry": 15712,
+                "probe_index": 0,
+                "process_handoff_serialization": 68818928,
+                "process_private_query": 125829200,
+                "process_private_scratch_and_handoff": 106176785,
+                "process_shared_transport": 29141293,
+                "process_transport_page_padding": 872319,
+                "replay_work": 0,
+                "resident_state": 1010000,
+                "safety_margin": 48045113,
+                "slab_certificate_work": 845000,
+                "slab_dense_path": 531875,
+                "slab_event_staging": 17167232,
+                "slab_event_work": 970000,
+                "slab_failure_staging": 32500,
+                "slab_proposal_replay_work": 0,
+                "slab_proposal_scratch": 1280000,
+                "slab_release_work": 170000,
+                "slab_stage_composition_work": 238750,
+                "slab_stochastic_tree_work": 0,
+                "writer_reserve": 3145728
+              },
+              "dense_path_bytes_per_particle": 851,
+              "event_candidate_capacity": 1048576,
+              "event_staging_bytes_per_row": 624,
+              "event_staging_capacity": 524288,
+              "event_staging_fixed_bytes": 16777232,
+              "event_work_bytes_per_particle": 1552,
+              "failure_staging_bytes_per_particle": 52,
+              "field_preparation_transient_bytes": 0,
+              "geometry_preparation_transient_bytes": 141072,
+              "limit_bytes": 8589934592,
+              "phase_peaks": {
+                "load_case": 1237118,
+                "prepare": 4743591,
+                "run": 432406016
+              },
+              "planned_bytes": 432406016,
+              "proposal_replay_work_bytes_per_particle": 0,
+              "release_work_bytes_per_particle": 272,
+              "replay_work_bytes": 0,
+              "revision": "solver_owned_memory_plan_v25",
+              "runtime_layout_revision": "resident_soa_process_slab_v14",
+              "scratch_bytes_per_particle": 2048,
+              "semantics": "predicted peak of solver-owned arrays; not process RSS",
+              "slab_particles": 625,
+              "stage_composition_work_bytes_per_particle": 382,
+              "stochastic_tree_work_bytes_per_particle": 0,
+              "worker_count": 4
+            },
+            "process_sample_report": {
+              "path": "warm-2_process_samples.json",
+              "sha256": "e6923fa6480fac478782c8de4cd67402b20123ec02e8df5ea39d14feb6f26619"
+            },
+            "process_cpu_s": 53.21875,
+            "memory": {
+              "sampled_peak_working_set_sum_bytes": 1096998912,
+              "sampled_peak_private_commit_sum_bytes": 861184000
+            },
+            "artifact_files": {
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\checkpoints\\A.h5": "6ddd1eaa2dde947133d2d725b1eb74c83a84b48d2c85183f4d6539cc2fd45614",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\checkpoints\\B.h5": "c425086a14b4bcfa0e57f3b842b3f87f06a0e0cda580e5c35dd76e5491e0c59c",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\LATEST": "254b8ddba3fdbff4e28e3874c145761246533dd86a9f2b242ee6938ebf42e502",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000004.h5": "ab445e5faa7aaaec151c80fb847f916ceb8ad7e87a79207571b95853a03ac2e5",
+              "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000005.h5": "61b43e1ff17d6eef9ed3008e4759b0ee37b6fd1d30300cca6aaf140be4bf51bc"
+            }
+          },
+          "manifest_facts": {
+            "boundary_algorithm_revision": "contact_wall_laws_v7",
+            "brownian_adaptive_max_depth": null,
+            "brownian_charge_dense_revision": null,
+            "brownian_composition_revision": null,
+            "brownian_interval_tree_depth": null,
+            "brownian_rng_revision": null,
+            "brownian_tree_policy_revision": null,
+            "case_file_hash": "sha256:2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+            "case_schema_version": 3,
+            "checkpoint_schema_version": 2,
+            "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+            "data_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191",
+            "data_coordinate_system": "cartesian_xy",
+            "event": {
+              "corner_policy": "priority_then_combined_normal_v1",
+              "geometry_rtol": 1e-12,
+              "max_interactions_per_step": 8,
+              "max_refinements": 48,
+              "roundoff_ulps": 64
+            },
+            "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+            "exponential_midpoint_enclosure_revision": null,
+            "exponential_midpoint_revision": null,
+            "field_location_revision": "field_location_v5",
+            "field_time_revision": "fixed_topology_linear_time_v2",
+            "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+            "joint_ou_revision": null,
+            "joint_ou_split_revision": null,
+            "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
+            "physics_runtime_revision": "prepared_native_physics_runtime_v24",
+            "random_draw_kinds": {
+              "brownian_root_normal": null,
+              "brownian_split_normal": null,
+              "wall_maxwell_diffuse": 1463897090,
+              "wall_maxwell_normal": 1463897091,
+              "wall_maxwell_tangential": 1463897092,
+              "wall_probabilistic_stick": 1463897089
+            },
+            "required_field_revision": "required_field_time_linear_v6",
+            "resolved": {
+              "backend": "cpu",
+              "boundary_laws": [
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "caps",
+                  "law": "escape",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "target",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                },
+                {
+                  "contact_geometry": "particle_surface",
+                  "diffuse_reflection_fraction": null,
+                  "group": "source",
+                  "law": "stick",
+                  "normal_restitution": null,
+                  "otherwise_law": null,
+                  "priority": 10,
+                  "stick_probability": null,
+                  "tangential_restitution": null,
+                  "wall_temperature_K": null,
+                  "wall_velocity_m_s": null
+                }
+              ],
+              "brownian_coefficient_policy": null,
+              "integrator": "rk4_fixed",
+              "path_kind": "rk4_dense",
+              "physics_models": {
+                "charge": {
+                  "model": "fixed",
+                  "revision": "fixed_charge_v1"
+                },
+                "drag": {
+                  "model": "epstein_linear",
+                  "revision": "epstein_linear_v1"
+                },
+                "electric": {
+                  "model": "coulomb",
+                  "revision": "electric_coulomb_v1"
+                },
+                "gravity_buoyancy": {
+                  "model": "standard",
+                  "revision": "gravity_buoyancy_standard_v1"
+                }
+              },
+              "required_fields": [
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "electric_field",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "V/m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_density",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "kg/m^3"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_mean_free_path",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "m"
+                },
+                {
+                  "components": [
+                    "value"
+                  ],
+                  "layout": "field",
+                  "name": "gas_temperature",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "scalar",
+                  "time_interpolation": "static",
+                  "unit": "K"
+                },
+                {
+                  "components": [
+                    "x",
+                    "y"
+                  ],
+                  "layout": "field",
+                  "name": "gas_velocity",
+                  "snapshot_count": 1,
+                  "snapshot_range_s": null,
+                  "stored_basis": "cartesian_xy",
+                  "time_interpolation": "static",
+                  "unit": "m/s"
+                }
+              ],
+              "sources": [
+                {
+                  "name": "part_surface_release",
+                  "source_id": 0,
+                  "type": "surface"
+                }
+              ]
+            },
+            "result_algorithm_revision": "durable_segmented_result_v6",
+            "result_schema_version": 3,
+            "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+            "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+            "rng_algorithm_revision": "philox4x32_10_v2",
+            "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+            "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+            "time": {
+              "dt_s": 0.0125,
+              "end_s": 4.0,
+              "field_snapshot_splits_s": [],
+              "start_s": 0.0
+            },
+            "topology_algorithm_revision": null,
+            "requested_numerics": {
+              "integrator": "rk4_fixed",
+              "backend": "cpu",
+              "seed": 0
+            }
+          },
+          "sample": {
+            "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2_process_samples.json",
+            "sha256": "e6923fa6480fac478782c8de4cd67402b20123ec02e8df5ea39d14feb6f26619",
+            "sample_count": 107,
+            "sampled_private_peak_bytes": 861184000,
+            "sampled_working_set_sum_peak_bytes": 1096998912,
+            "seen_direct_child_pids": [
+              19628,
+              27500,
+              49900,
+              58332
+            ],
+            "child_process_cleanup": true
+          },
+          "directory": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2"
+        }
+      },
+      "warm_public_s": [
+        13.929349699988961,
+        13.804737200029194,
+        14.14806880010292
+      ],
+      "warm_median_s": 13.929349699988961
+    }
+  },
+  "checks": {
+    "metadata_and_receipt_identity": true,
+    "candidate1_nonregression": null,
+    "candidate4_nonregression": null,
+    "primary_4worker_2x": null,
+    "closed_scientific_reread": true,
+    "complete_declared_roles": true
+  },
+  "candidate1_vs_baseline1_ratio": null,
+  "candidate4_vs_baseline4_ratio": null,
+  "candidate_speedup_observations": {
+    "4": 1.9643070056804852
+  },
+  "scientific_reread": {
+    "passed": true,
+    "result_count": 8,
+    "results": [
+      {
+        "role": "candidate1",
+        "label": "cold",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      },
+      {
+        "role": "candidate1",
+        "label": "warm-0",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      },
+      {
+        "role": "candidate1",
+        "label": "warm-1",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      },
+      {
+        "role": "candidate1",
+        "label": "warm-2",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      },
+      {
+        "role": "candidate4",
+        "label": "cold",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      },
+      {
+        "role": "candidate4",
+        "label": "warm-0",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      },
+      {
+        "role": "candidate4",
+        "label": "warm-1",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      },
+      {
+        "role": "candidate4",
+        "label": "warm-2",
+        "science": {
+          "payload": "sha256:caa9a19d3625d3f3daa7b0d74a445a5f687c98bd77c5dfbe2c0cbf0e78666d0d",
+          "frames": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "probes": {
+            "count": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "frame_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "probe_payload": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "counts": {
+            "boundary_events": 10000,
+            "failure_events": 0,
+            "frame_rows": 0,
+            "frames": 0,
+            "macro_steps": 320,
+            "particles": 10000,
+            "probe_rows": 0,
+            "probes": 0,
+            "release_events": 10000,
+            "series": 320
+          },
+          "event_work": {
+            "accepted_particle_pieces": 3144057,
+            "candidate_queries": 3304830,
+            "maximum_refinement_depth": 15,
+            "refinements": 160773
+          },
+          "canonical_content_hash": "sha256:61fa8d5439d56bbd9c3dd565236e95d9bd29defdef47bf97132cb644176db191"
+        }
+      }
+    ],
+    "artifact_files": {
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\cold\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-0\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-1\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\checkpoints\\A.h5": "62366363eec44475039d9e80c21afe400945273c9cda32230a6b44ad46199e42",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\checkpoints\\B.h5": "69b6126369627802787985e3c0550c6d7de99c3c8080838dfc59f56c4357108a",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\LATEST": "b93abff6a6ea1c654d5382002634c569c13616dec3996f0bb48a5a019a5ddcaf",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\run.json": "f13fb50fdd55bb07dd32cfd16b24877ae4cebdec961880fed4a40d62a563de5f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000000.h5": "1b4e16c4e699c694173572f2d8a818c646f6731f293c7e2d5eca90c59c16d545",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000004.h5": "5385841936050a652b7b0105e288e4af44d5960b97e45a9fc968972dcdd1e9d6",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w1\\warm-2\\segments\\epoch-000005.h5": "43a03213b57e5bf448e07405d3706002f017aa146462016622533afb2ba80a71",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\checkpoints\\A.h5": "bb0037e97dd4336671b8000ff674e95b8a2bcb0128bc46c2024a69575dd35f50",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\checkpoints\\B.h5": "53f5302889787df06d6e5b3f401b12c02b0b984e8d41efd70891510da156ae1f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\LATEST": "3cae84fc248a6d9777745f7a2701aff98a4a2bb9f72bbbb0d1a20891f428cd3c",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000004.h5": "fc1bb307f456910c509e163255657b446cd276100096405a15c8e85f97dfdc33",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\cold\\segments\\epoch-000005.h5": "f3abbc2e89aaba3b6900c52ba25a9d90a52f6b7174d792a05e8d3cffc417375e",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\checkpoints\\A.h5": "3e82406e15d75fbd748941c038974d9c742fcaff77d65ac72b3fac17c0b0ddf6",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\checkpoints\\B.h5": "49d45f7e905134f14e84335f4c38a4991b25df7ac35060258dc005d3260bd88c",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\LATEST": "e669172b989406ff716df7a5e51638802f9de933b50a652a924e051109136dee",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000004.h5": "0de7a59d4446250c430496a970e3636da115f381f179b9d1c563d534fbf31093",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-0\\segments\\epoch-000005.h5": "d246508a1119b511d474f2dc2c18bd148c6b1fba11be5b2afd4d6b4aeeceae4d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\checkpoints\\A.h5": "92b96db1bc39f016191311b7731bf2022a33c5fdaed36158e7887d4fdab356ac",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\checkpoints\\B.h5": "7fe0eb27e88646e8ff6da2752a2aea89f1de6a10c1881f482f6e336642d17bb3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\LATEST": "143c18866c00a775df624708bdfef707012192b2752ddbfb6f621f0460ecf6c8",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000004.h5": "116493c434e99928f83b881d46cd8a342ca1a145233f91a73337297b7973f8df",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-1\\segments\\epoch-000005.h5": "5788700053ada7fc3b1811f33156aa76692abaa9cbc2b4a8a04af183edbf9f9e",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\_SUCCESS": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\checkpoints\\A.h5": "6ddd1eaa2dde947133d2d725b1eb74c83a84b48d2c85183f4d6539cc2fd45614",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\checkpoints\\B.h5": "c425086a14b4bcfa0e57f3b842b3f87f06a0e0cda580e5c35dd76e5491e0c59c",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\final.h5": "8bfef4d6d7ee462dd709dbe19c9ed21d8f1752d067d258664d3a1d6a8ac37fe2",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\LATEST": "254b8ddba3fdbff4e28e3874c145761246533dd86a9f2b242ee6938ebf42e502",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\run.json": "26ef903503deefc35ee2e85c8185bf4d307d5f8f30fc23bf4d4e82c4cc405dc4",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000000.h5": "b1bdc69312433b44f937e1f7032031d9c96465e15ef36fb09d84ecf2524b233f",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000001.h5": "f47f47c0b0ec4ad4a8c544c301facbdec20b9524f9907b4147a9440bd8af10b3",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000002.h5": "58cc1ed81b67c3a57ce334521d6ed16f90719a247ff20323fbac5147e150bc93",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000003.h5": "dc5fa2bb34e662df4f89edfd8e668fcc14af175d80cd1592d6455a155ade572d",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000004.h5": "ab445e5faa7aaaec151c80fb847f916ceb8ad7e87a79207571b95853a03ac2e5",
+      "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\r66_2026_10_13\\w4\\warm-2\\segments\\epoch-000005.h5": "61b43e1ff17d6eef9ed3008e4759b0ee37b6fd1d30300cca6aaf140be4bf51bc"
+    },
+    "artifact_file_map_sha256": "68fb0a0441359ee10c823b7bc88e8b77825740cd2ee7bf003360ca2d224047a5",
+    "method": "Held v59/R62 ResultView digest owners; no simulate or JIT"
+  },
+  "metadata_preconditions_passed": true,
+  "timing_conditions_passed": false,
+  "case_observation_qualified": false,
+  "cold_public_s_observations": {
+    "candidate1": 85.93009379971772,
+    "candidate4": 76.00464540021494
+  },
+  "limits": [
+    "Sampler may miss transients; WS sum is not unique physical RSS",
+    "Per-process lifetime peaks are not a simultaneous peak",
+    "Fresh cache and warm calls do not prove each dispatcher hit",
+    "Every simulate includes new workers",
+    "8/20-worker speedups are observations, not proportional-scaling guarantees",
+    "No OS, installed-wheel, full quality or release qualification inferred"
+  ]
+}

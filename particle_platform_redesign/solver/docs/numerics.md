@@ -732,11 +732,14 @@ holdはhit状態を保持したinactive terminalで、残時間や後続macroで
 
 ## 8. P08 particle-local failureと出力schedule
 
-engine v14で導入し、現行engine v46が維持する規則は、有限な開始stateから一粒子へ再現可能に局在できる
+engine v14で導入し、現行sourceが維持する規則は、有限な開始stateから一粒子へ再現可能に局在できる
 event budget枯渇、event/boundary/departure不決定、
 動的field support/model applicability逸脱、particle physicsの非有限導出値だけをfailed terminalへ変換する。
 field、physics、integrator、enclosureは同じbatch pass内のrow statusへ最初のfailure ownerを書き、有限placeholderで
-後段配列のshapeを保つ。phase barrierが失敗rowだけをparticle-local failureへ変換し、productionでscalar再実行しない。
+後段配列のshapeを保つ。phase barrierが失敗rowだけをparticle-local failureへ変換する。
+field/physics/RK4とOU covariance/splitはbatchのrow statusを使い、scalar再評価を必要としない。
+Brownian deterministic meanもnative row statusを一回のbatch評価で返し、例外後のrow再評価は行わない。
+root/guard/base/DFSとeventの全driverをnativeへ移す工程は残っている。
 共有shape、model revision、field layout/conditioning、global coefficient/bound、topology、I/O不変条件は局在させず
 run-fatalである。support不成立行をmodel評価へ流さず、accepted wall prefixは後続policyが失敗してもframe replayと
 `accepted_particle_pieces`集計の双方へ一度だけ残す。
@@ -941,9 +944,9 @@ host幅は大規模regular/event-lightを同機で
 
 ## 15. P14-P serial convergence（完了）
 
-上記P12～P14はv20までの数値意味と履歴実装を記録する。現行engine v46 / compiled tile v21 / proposal v10 /
-event v22 / CPU runtime layout v6 / memory plan v16 / geometry v7では、力の式、積分順、first-event意味、
-accepted-state規則を変えず、外側`ThreadPoolExecutor`、future wave、worker別scratch、thread maskを削除した。
+上記P12～P14はv20までの数値意味と履歴実装を記録する。現行sourceもP14-Pで確定した直列runtime境界を維持する。
+P14-Pでは力の式、積分順、first-event意味、accepted-state規則を変えず、外側`ThreadPoolExecutor`、future wave、
+worker別scratch、thread maskを削除した。後続のtree clock v2とevent v23の数値修正は各節で別に識別する。
 field/physics/integratorはbounded slabとpreallocated workspaceへの`*_into` pass、boundary BVHはpreorder + skipの
 stackless traversalを使う。writerは同期single-ownerである。
 
@@ -958,7 +961,7 @@ memory plan v11は各bounded bufferをnamed componentへ分離し、pack時だ�
 
 field locator microkernelは約3.75xにscaleしたが、proposal/enclosureのPython/NumPy調停がend-to-endを支配した。
 enclosureだけの理想並列化もAmdahl上約1.47xであり、巨大融合kernelは責務分離を損なう。case schema v2は
-`resources.threads`を拒否し、single-thread compiled engineだけを残す。測定と再検討条件は
+`resources.threads`を拒否し、当時はsingle-thread compiled engineだけを残した。このP14-P closeoutの測定と再検討条件は
 [`parallel_execution_plan.md`](parallel_execution_plan.md)を権威とする。
 
 ## 16. P15 continuous charge（完了）
@@ -1150,9 +1153,10 @@ prepare時に`gamma*dt<=1e6`、全rootで有限な
 
 設定depthを`D in [0,10]`とすると、root joint OU incrementをB01のconditional Gaussian half-splitで深さ`D`まで
 二分し、`2^D`個のleafを物理時刻順に処理する。counter identityは
-`(seed, particle_id, macro_interval, root_interval=0, tree_level, tree_index, component, root-or-split stream)`で、
+`(seed, particle_id, macro_interval, root_interval, tree_level, tree_index, component, root-or-split stream)`で、
 slab幅、output schedule、checkpoint/resumeから独立する。treeはdepth-firstに走査し、各levelで未処理right childを
-一つだけ保持するため、stochastic tree workは一slab粒子あたり`32*(D+4)` byteである。memory plan v12はこれを
+一つだけ保持する。最初のroot intervalは0で、wall/axis/guard後のrestartでは既存規則に従って更新する。
+B02初回実装のstochastic tree workは一slab粒子あたり`32*(D+4)` byteだった。memory plan v12はこれを
 `stochastic_tree_work_bytes_per_particle`と`slab_stochastic_tree_work`へ明示し、runtime layout v6のslab幅決定へ含める。
 
 各leafのOU endpoint `(x_1,v_1)`を得た後、`integrators.py`は始終点位置と速度から一つのcubic Hermite polynomialを
@@ -1169,22 +1173,18 @@ Hermite wall event、平面first-passageのdepth 6/7/8安定化、slab幅不変�
 数値pathのauthorityでなく、比較はcore外のV&Vだけが所有する。
 
 `gamma*h<=1e6`は指数関数の範囲だけを制限し、極端な`theta`、状態、分割正規化のfloat64表現可能性を保証しない。
-engine v30はroot covariance、各conditional split、deterministic mean適用を実際に検査する。通常経路は従来どおり
-slab vector演算とし、数値例外が出た時だけrow別再評価で不良粒子を同定する。不良粒子はそのleaf開始、すなわち最後の
+engine v30はroot covariance、各conditional split、deterministic mean適用を実際に検査する方式を導入した。
+現行sourceではcovariance、split、deterministic meanがstrict native row statusを一回のbatch評価で返す。
+例外後のrow再計算を削除し、不良粒子はそのleaf開始、すなわち最後の
 accepted stateで`nonfinite_physics`となり、同じslabの正常粒子と独立なright subtreeは継続する。shape不一致や
 内部不変条件破損まで粒子failureへ隠さない。
 
-現行revisionは`particle_engine_v46`、`coupled_fixed_step_proposal_v10`、
-`inertial_langevin_2d_catalog_v23`、`signed_ion_compiled_physics_runtime_v22`、
-`resident_soa_serial_slab_v6`、`solver_owned_memory_plan_v16`である。result algorithm v6、canonical case/data/result schema 3、
-checkpoint schema 2、compiled tile v21、event `line_quadratic_curved_capsule_periodic_first_hit_v22`、
-field location v4、field time v2、required field v6、geometry v7、boundary v7、
-source `realized_internal_surface_contact_schedule_v5`を使う。event v22はevent v20のcontact-set継続とevent v19の周期first-event意味と
+現行revision一覧は[`result_format_v3.md`](result_format_v3.md)へ集約する。event v23はevent v20のcontact-set継続とevent v19の周期first-event意味と
 event v18 / geometry v6の独立`contact_radius_m`を維持する。有限半径exact残時間では同時接触集合を暗黙に保持し、
 各candidateについて接触位置と離脱方向を証明できた時だけzero-time再接触を除外する。位置nudgeは使わず、
 後続impactと材料/周期混在cornerは通常のfirst-event判定へ残す。0半径ではpoint意味を維持する。Brownian manifestは
 `philox4x32_10_brownian_interval_tree_v1`、`inertial_joint_ou_v1`、
-`conditional_gaussian_half_split_v1`、`conditional_boundary_refinement_v1`、`macro_root_frozen_midpoint_v1`、base/max depth、root/split stream、resolved noise model/revision、
+`conditional_gaussian_half_split_v1`、`conditional_boundary_refinement_absolute_target_v2`、`macro_root_frozen_midpoint_v1`、base/max depth、root/split stream、resolved noise model/revision、
 `path_kind=cubic_hermite`を記録する。resume identityはBrownian RNG/OU/split/tree-policy revision、coefficient policy、base/max depth、
 resolved noise model/revisionを含み、stream IDとpath kindを同名keyで重複させない。
 
@@ -1220,7 +1220,6 @@ slab/output/checkpoint identityを受け入れた。continuous chargeのaffine-e
 独立2×2行列指数・Green積分へ照合した。各caseの試験内で固定したMonte Carlo幅と離散化budgetを使い、
 noise変位を流速評価へ反映しない反例を識別する。これは当該resolutionの精度であり、一般SDEの次数、
 連続first-passage、背景流体modelの物理validationへ拡張しない。
-現行revisionはcatalog v23 / engine v46 / proposal v10 / event v22 / runtime v22 / compiled tile v21 / memory plan v16である。
 B03 path arrayの静的な保守上限は`648 B/row`で、`2048 B/row`上限内にある。正式characterizationは24/24実行を
 全粒子active・failure 0で完了し、計時、process RSS、solver plan、stochastic/event workを
 [`evidence/b03/`](../evidence/b03/README.md)へmachine-local・non-gating証跡として保存した。これは初回B03
@@ -1239,7 +1238,7 @@ control payloadは`144 B/row`、構築時追加peakは`128 B/row`で、保守的
 `2048 B/row`一般stage scratch上限内に収まるため、event v16導入時点ではmemory plan v13を維持した。memory plan v14は
 exponential local-stage/applicability範囲探索にも最大64 cellの候補arena 544 B/rowを明示計上する。broad AABB pre-countはこの
 facet-local clearより前の保守的なperformance work量であり、accepted event数を表さない。
-現行event v22はevent v19 / v18の曲線path認証を維持し、最初のhit時刻と局在budget内で同時かつ共有nodeへincidentな
+現行event v23はevent v19 / v18の曲線path認証を維持し、最初のhit時刻と局在budget内で同時かつ共有nodeへincidentな
 facet集合を保持する。exact、一般RK4、exponential midpoint、Brownianの材料hitは同じcandidate table、priority、
 combined-normal応答を使い、証明不能なcornerを任意の一面へ丸めない。周期hitは上記6.1のcentre-crossing arbitrationを使う。
 exact有限半径pathの反射後残時間では、接触集合を追加配列へ複製せず、各broad candidateについて接触位置と離脱方向を
@@ -1271,7 +1270,7 @@ force、axis→wall順序、実noiseのcontainment/depth/slab不変性、checkpo
 surface sourceは入力でrealize済みの初期速度を使う。Brownian surface releaseでは明確に内向く速度を要求し、
 零速度や接線速度をposition nudgeで通さない。
 任意の一般SDE、等方3-D Brownian、surface charging、resuspension、rolling/slidingはこのrevisionの対象外である。
-有限半径接触はevent v18で導入したHermite leaf locatorをevent v22でも維持し、同じfresh-root active-wall規則を使って、連続OU trajectoryのexact
+有限半径接触はevent v18で導入したHermite leaf locatorをevent v23でも維持し、同じfresh-root active-wall規則を使って、連続OU trajectoryのexact
 first-passageを追加で主張しない。
 
 ### 22.3 B05 conditional Brownian boundary refinement（完了）
@@ -1281,8 +1280,9 @@ first-passageを追加で主張しない。
 証明したrowはそのままcommitする。wall、RZ axis、surface contact、または証明不能なrowだけ、保存済み親endpointを
 B01のconditional Gaussian half-splitで`adaptive_max_depth=D_max`まで時間順に二分する。active wallまたはaxisで
 prefixをcommitした後は、B04と同じfresh root規則を使う。fresh rootのrow・開始時刻・post-event state・ordinalは
-同一slab幅の数値SoAへstable順で積み、現在のgenerator/tree/proposal frameが全て解放された後のiterationだけが
-次rootを開始する。反射回数に比例するroot再帰や第二schedulerは持たない。
+同一slab幅の数値SoAへstable順で積む。現在rootのcursor/tree/proposalの生きた継続状態を完全にunwindした後だけ
+pending bankを交換して次rootを開始する。v47のDFS workspaceと二つのpending bankはslab内で再利用し、
+毎waveの解放・再確保は行わない。反射回数に比例するroot再帰や第二schedulerは持たない。
 
 `D_base=D_max`は追加事前分類を通らず従来固定depth pathへ退化し、同じRNG key、科学payload、output/slab/resume
 identityを維持する。`D_max>D_base`でもroot/split counter keyを変えず、独立乱数の引き直しをしない。この選択は
@@ -1290,9 +1290,9 @@ identityを維持する。`D_max>D_base`でもroot/split counter keyを変えず
 probability、またはuniform `D_max`と同じ全空間path解像度は主張しない。精度は`D_base`の収束で評価し、adaptive
 効果は同一build・同一caseでcandidate query、hit数、到達depth、wall timeを固定depth退化と対にして測る。
 
-memory plan v16は実行時の候補率に依存せず、到達可能な`D_max`からstochastic tree workを
+v16で導入し現行memory planも維持する会計は、実行時の候補率に依存せず、到達可能な`D_max`からstochastic tree workを
 `128*(D_max+4) B/row`として保守的に計画する。tree policy revisionは
-`conditional_boundary_refinement_v1`で、base/max depthとともにmanifest/resume identityへ入る。新しいscheduler、
+`conditional_boundary_refinement_absolute_target_v2`で、base/max depthとともにmanifest/resume identityへ入る。新しいscheduler、
 第二Brownian engine、確率的clear診断は追加しない。
 
 ### 22.4 Charge-stable deterministic pathとdurable cadence（完了）
@@ -1498,7 +1498,7 @@ memory plan v13はdense path 176 B/row、split budget 2の現設定でinterval s
 非gating観測であり、portableな速度保証ではない。P19-L完了revisionはengine v31、proposal v8、event v12、field location v4、
 memory plan v13、dense path `rk4_position_hermite_state_extension_v2`である。これは履歴的なP19-L完了revisionである。
 P19-L性能artifactはruntime v16を記録し、v17との差は上記DEP上限の1 ULP境界意味論だけである。
-現行runtime v22はv20のcharge Jacobian、optional aggregate three-current、relative-flow ion dragのinterval boundと
+開発source runtime v24はv20のcharge Jacobian、optional aggregate three-current、relative-flow ion dragのinterval boundと
 prepared charge invariantを維持し、同じstage passへ選択式のTalbot熱泳動とSaffman liftを追加する。
 
 Case-A 100 nm・287粒子・1 stepの後続profileでは、P19 certificateは80 call・13,120 rowをすべて分割なしで局所証明し、
@@ -1584,3 +1584,53 @@ family alphaを一つの同時保証へ合算せず、scopeと信頼幅をそれ
 原登録、初回failure、修正版raw result、追加確認の観測前登録・scopeは
 [壁精度検証receipt](../../reviews/brownian_wall_accuracy_extension_2026-10-10.json)が所有する。
 一般可変係数SDE、任意wall law、連続OUのexact first-passage/zero-miss、一般弱/強次数はこの資格に含めない。
+
+### 0.3.0 native owner移行の数値境界
+
+現行sourceはstage/dense/OUの算術、field静的metric、Brownian継続配列、指数/exact/affine charge、
+局所物理適用域・加速度上限を同じownerのstrict serial JITへ収束する。
+RK4の順序、五回目のendpoint、同じmethodによるhit prefix、128eps/TwoDiff/outwardのenclosure、
+conditional OU右子の代数remainder、particle/root/macro addressingとaccepted-only hint commitを保持する。
+field/physics/native stageの借用bankは一組とし、stage値を積分器の保持配列へ消費してから次評価で再利用する。
+Brownian root係数とproposalの所有copyは寿命境界として維持し、式・stage時刻・評価順を変更しない。
+geometry v8では既存count/fill・canonical sort・clearance kernelを一つのcompiled callerへ組成し、全wave CSR確保を削除する。
+全queryのAABB有限性を距離計算前に検査し、元の候補順・predicate・tolerance・例外優先を保持する。
+RZのsigned intervalからcanonical radiusへの写像はcoordinatesの一つの数値bodyを使い、
+regular field/domain関係はprepareで一度計算する。local field rangeのavailabilityは連続support証明を代替しない。
+curved queryのtyped context/workspaceをprepare時に固定し、seed/pop/split、accepted commit、failure batchの
+数値処理をnativeへ移す。proposalのnumeric projection、dense/Hermite samplingとrestrictionも単一bodyを使う。
+通常の返却wrapperは配列を所有し、into wrapperはcaller-owned scratchを借りる。restrictionが返すproposal/enclosureは
+original rootを含む配列を所有し、その寿命を保持する。出力replayのsample/prefix/selection/scatter workは同じslabで再利用する。
+exact残時間のcurrent state・target/depth/interaction stackとselectorもslab内で再利用し、一round一popの順序を保つ。
+queryを一度prepareして容量内のcontiguous prefixへ借用投影する。gatherした入力は応答commitから独立に保持し、
+ballistic root originと物理応答後の新originを区別する。v51ではexact result/CSR/candidateも固定arenaを使い、
+phase selectorとclear/axisのstate・replay commitをnativeへ移す。exact/curved resultと材料壁のboundary response bankは借用であり、
+同じqueryの応答・staging転記が完了するまで再利用しない。pointとfiniteの同時arbitrationには別のresult bankを使う。
+Brownian cursor/DFSは処理の継続stateであり、新しいmutable RNG cursorではない。現行checkpointは
+macro/epoch barrierで継続workをdrainした後だけ保存し、途中yieldを永続化するschemaは追加していない。
+OU transition/split、RNG、dense、field、first-hitの式・丸め・候補順は保持する。
+Brownian rootの時計はv48で`conditional_boundary_refinement_absolute_target_v2`へ変更し、現行sourceでも維持する。rootのdurationは
+OU transitionと等分conditional treeのauthorityであり、絶対targetはleaf clockのauthorityである。
+guardで短縮しなかったrootは要求macro終端を直接保持し、短縮rootは`start+guarded_duration`を保持する。
+base/adaptiveとも最後のdyadic nodeだけをこの絶対targetで閉じ、内部nodeは従来のfraction時刻を使う。
+残rootのqueueはresolved targetとmacro終端の比較で決める。非格子releaseやwall restart後の丸めによる
+終端不足・超過を追加のnoise root、frame clamp、時刻の近似比較で吸収しない。
+chargeのroot elapsedと最終Hermite区間もこの時計へ整合するため、この修正は数値方針変更である。
+v49～v53のowner内移行はこの時計、式とRNG addressingを変更しない。event v23の静止finite exact修正はv50で行った別の数値変更である。
+有効なzero-displacement pathに対する探索不要のpoint verdictを有限半径側で維持し、無効pathと初期接触の判定を迂回しない。
+endpoint prefix再評価の配列確保、failureのhost list、wall/periodic commit wrapper、query generatorは残る。proposal/event/lawとBrownian root/guard/base/DFSの
+driverのhost制御は現行process workerが既存処理のまま実行する。追加JIT化、leaf途中yieldとnative teamは休止し、
+process並列の先行条件にしない。親はmacro/release/writer/checkpointを所有する。
+現行v62のprocess配分・shared replay・科学/用途性能・memory・Windows/Linux検査は
+[`parallel_execution_plan.md`](parallel_execution_plan.md)が所有する。現行と将来の作業は
+[`implementation_plan.md`](../../implementation_plan.md)へ集約する。
+過去の実装・試作・不採用結果は[保存済み性能記録](../evidence/comsol_brownian_fullstep_parallel_2026_10_12/current_docs/solver/docs/parallel_execution_plan.md)に保持し、
+本文中の履歴V&Vと同じく元のsourceに限定する。
+
+v62はv61の既存444 njitのbody・signature・decoratorを全て保持し、新しいJIT関数を追加しない。
+到着順のhandoff・完了workerへの再配分・活動量別task幅は、排他的global rowの数値評価順を変えない。
+accepted-only state/hint commit、same-method hit prefix、Brownian絶対時計と条件付き増分、RNG/physical ordinalを維持する。
+canonical eventの並べ替えは既存output readerのownerを使い、arrival順を物理的event順へ読み替えない。
+標準品質は944件合格だが、その実行時間や既存invalid-budget warningをcold性能・用途速度の証拠にしない。
+最終品質C4と測定C3のproduction数値sourceは同一で、二外部synthetic fixtureの五expected revision literal差を別bindingへ記録する。
+OS/installed-wheelのfunctional確認とWindows用途別scalingを分け、native COMSOL全用途やNUMA・全CPU数への速度保証を追加しない。

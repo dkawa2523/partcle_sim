@@ -1,0 +1,6 @@
+# Solver payload and evidence attributes are owned by solver/.gitattributes.
+particle_platform_redesign/reviews/** -text whitespace=trailing-space,space-before-tab,cr-at-eol
+particle_platform_redesign/*.md text eol=lf
+.github/workflows/solver-release.yml text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf

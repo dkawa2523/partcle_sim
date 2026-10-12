@@ -245,10 +245,10 @@ def _current_revisions() -> dict[str, object]:
         "case_schema_version": 3,
         "result_schema_version": 3,
         "result_algorithm_revision": "durable_segmented_result_v6",
-        "engine_algorithm_revision": "particle_engine_v46",
-        "compiled_cpu_tile_revision": "compiled_cpu_tile_v21",
+        "engine_algorithm_revision": "particle_engine_v62",
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
         "physics_catalog_revision": "inertial_langevin_2d_catalog_v23",
-        "physics_runtime_revision": "signed_ion_compiled_physics_runtime_v22",
+        "physics_runtime_revision": "prepared_native_physics_runtime_v24",
         "rng_algorithm_revision": "philox4x32_10_v2",
         "boundary_algorithm_revision": "contact_wall_laws_v7",
         "brownian_rng_revision": "philox4x32_10_brownian_interval_tree_v1",
@@ -256,7 +256,7 @@ def _current_revisions() -> dict[str, object]:
         "joint_ou_split_revision": "conditional_gaussian_half_split_v1",
         "brownian_composition_revision": "stochastic_exponential_midpoint_v1",
         "brownian_charge_dense_revision": "macro_root_affine_exponential_v2",
-        "brownian_tree_policy_revision": "conditional_boundary_refinement_v1",
+        "brownian_tree_policy_revision": "conditional_boundary_refinement_absolute_target_v2",
     }
 
 
