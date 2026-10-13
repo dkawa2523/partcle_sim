@@ -387,8 +387,10 @@ uv run --locked python tools/vv/comsol/compare_matched_case.py preflight `
 Do not unblock that manifest by pointing it at the later companion. The
 exact-connectivity result is owned by `prepare_matched_candidate.py`,
 `run_comsol_matched_p1_reference.ps1`, and the three-phase
-`evaluate_matched_trajectory.py` workflow used for the result above. It keeps the
-  historical decision and the separately generated reference identities intact.
+historical v1 `evaluate_matched_trajectory.py` workflow used for the result above.
+That v1 implementation and its policy have been replaced; the saved result and
+reference identities remain historical evidence. Use the current generic
+section below for new evaluations rather than these historical input assumptions.
 At this historical matched-slice checkpoint Freeze/event mapping was untested.
 The later isolated M3-C0 boundary probe below characterizes COMSOL semantics;
 production boundary parity remains untested.
@@ -409,12 +411,14 @@ blocked. It was not used to produce the exact-P1 PASS reported here.
 
 Results produced by that legacy comparator carry
 `comsol_equal_accuracy=NOT_CLAIMED` and `golden_truth=NOT_CLAIMED`. The accepted
-three-phase evaluator instead records the narrower
+historical v1 three-phase evaluator recorded the narrower
 `same_accuracy_for_hashed_case_and_time_window` claim. In either workflow, a
 PASS means only “within the preregistered tolerances for these hashed
 artifacts.” COMSOL and candidate time-step convergence, field/export
 uncertainty, and boundary-event convergence remain separate accuracy evidence;
 absent evidence stays `NOT_TESTED`.
+The current generic evaluator does not issue that same-accuracy claim and does not
+provide a historical compatibility route.
 
 ## F02 historical field-production closeout and schema-v2 fixture
 
@@ -866,28 +870,42 @@ uv run --locked python tools/vv/comsol/evaluate_existing_30ms_reference.py `
 The compact authority is
 [`evidence/m3c1/existing_30ms_reference_v1/`](../../../evidence/m3c1/existing_30ms_reference_v1/).
 
-## External R-Z trajectory overlays
+## External observed XY/RZ trajectory overlays
 
-`plot_matched_trajectories.py` is an external V&V renderer. It imports no
-solver package and reads only normalized long-form trajectory CSVs. It first
+`plot_matched_trajectories.py` v5 is an external V&V renderer. It reads normalized
+long-form trajectory CSVs and can read optional canonical geometry through
+`chamber_particles.case_format`; it does not execute the solver. It first
 requires exact particle-ID identity, then draws each side's finite observed
 path independently: COMSOL as a solid orange line and the solver as a dashed
-blue line in physical R-Z space. Missing escape suffix coordinates are never
-fabricated. Metrics use only the intersection of finite
-`(particle_id, time_s)` keys. Coordinates are displayed in millimetres while
-recorded metrics remain in SI.
+blue line in physical XY or RZ space. Missing suffix coordinates are never
+fabricated. Nonfinite coordinate rows break paths, but omitted CSV rows must
+first be normalized onto the expected clock or handled by an explicit gap rule.
+Saved-point chords do not reconstruct curved flight or unsaved collisions.
+Metrics use finite common-active rows, additionally requiring both participants'
+explicit precontact flags when supplied; missing flags do not prove event-free
+propagation. Coordinates are displayed in millimetres while metrics remain SI.
 
-Each invocation creates one all-particle R-Z SVG/PNG, one R-Z-only SVG for
-every particle ID, an HTML atlas, and a hash-bearing receipt. It intentionally
+Each invocation creates one all-particle XY/RZ overlay SVG (PNG is optional),
+one spatial SVG for every particle ID, an HTML atlas, and a hash-bearing receipt.
+It does not provide an all-particle side-by-side layout or unpaired-ensemble
+evaluation. A narrow renderer can reuse the bound tables for that layout. It
 does not create difference, `r(t)`, or `z(t)` figures:
 
 ```powershell
 uv run --locked python tools/vv/comsol/plot_matched_trajectories.py `
   --candidate <solver_trajectory.csv> `
   --reference <normalized_comsol_trajectory.csv> `
+  --geometry <canonical_case.h5> `
   --output-directory <new_output_directory> `
   --label "<matched-case label>"
 ```
+
+`--geometry` is optional and draws the explicitly supplied canonical geometry;
+the CSVs alone do not prove case/result ownership or native geometry equality.
+Verify those bindings separately. The renderer does not consume an event ledger.
+Its alignment receipt `status: PASS` means ID alignment succeeded, not scientific
+agreement. Available path metrics are descriptive unless their physics, masks,
+coverage and uncertainty are qualified by the comparison workflow.
 
 Scientifically matched inputs include the separate reduced Case-A 100 nm
 deterministic companion and the full-physics common-P1 pre-event diagnostic.
@@ -1406,3 +1424,123 @@ Time/point converge at order 2.003, normal at 0.998, and reflected velocity at
 0.997.  These two workflows do not certify COMSOL event-table values, native
 curved elements, finite-radius contact, grazing/corner/multiple-hit cases, or
 arbitrary COMSOL models.
+
+## Generic deterministic pre-event evaluator (v3)
+
+`evaluate_matched_trajectory.py` now consumes explicit series descriptors. The
+former 287-particle, 41-frame, fixed-charge evaluator and its precision-parity
+policy have been replaced; historical v1 evidence is retained unchanged and
+cannot be passed through a compatibility branch. The current scope is Cartesian
+XY or RZ meridional **two-component deterministic pre-event** propagation.
+Third DOF, stochastic population inference and event/post-event accuracy need
+their corresponding external evaluations.
+
+Each descriptor selects stable IDs and an explicit, strictly increasing common
+observation clock. Absolute times may have a nonzero origin and nonuniform
+spacing. Integration steps belong to the three actual input/run levels, not to
+the observation clock. For example (choose real paths, IDs, times and steps):
+
+```json
+{
+  "label": "requested deterministic case",
+  "coordinate_mode": "axisymmetric_rz_meridional",
+  "particle_ids": [7, 101, 3099],
+  "observation_times_s": [3.0, 3.003, 3.014, 3.031],
+  "levels": {
+    "coarse": {"step_s": 0.004, "case_path": "coarse.yaml", "result_path": "coarse_result"},
+    "medium": {"step_s": 0.002, "case_path": "medium.yaml", "result_path": "medium_result"},
+    "fine": {"step_s": 0.001, "case_path": "fine.yaml", "result_path": "fine_result"}
+  }
+}
+```
+
+Paths resolve relative to the descriptor. Public `open_result` readback binds
+the actual completed manifest, case/data hashes, integration step, motion mode,
+algorithm revisions and selected states. Frames/probes must already contain
+the requested times; the evaluator neither interpolates missing observations
+nor starts a solve. Initial x/v/Z, ID and time equality, unchanged physical
+problem/method across levels, lifecycle, coverage and pre-event scope are
+reported. The first observation must be the actual common release state for
+the supported deterministic slice. Declaring a step, a label or `deterministic`
+in external metadata is not execution proof.
+
+An external normalized CSV level instead specifies `csv_path` and an explicit
+`columns` mapping: `particle_id`, `time`, two-name `position`, two-name `velocity`,
+`charge`, `lifecycle`, and optional `support_inside`. Position is in metres,
+velocity in m/s, charge in elementary-charge numbers; lifecycle transport rows
+use `active`. Support accepts `true`/`false`/`unknown` or `1`/`0`. Missing and
+nonfinite rows remain in the denominator. An optional `metadata` record with
+`path`, `sha256` and `integration_step_pointer` binds an actual JSON readback;
+it is explicitly labelled `BOUND_METADATA_NOT_EXECUTION_PROOF`. CSV-only native
+authenticity, deterministic/event-free execution and support meaning remain
+unqualified. Useful raw finite-active differences are still emitted.
+
+```console
+uv run --locked python -m tools.vv.comsol.evaluate_matched_trajectory characterize --series candidate_series.json --output candidate_self.json
+uv run --locked python -m tools.vv.comsol.evaluate_matched_trajectory characterize --series reference_series.json --output reference_self.json
+uv run --locked python -m tools.vv.comsol.evaluate_matched_trajectory register --candidate candidate_self.json --reference reference_self.json --policy physical_policy.json --output budget.json
+uv run --locked python -m tools.vv.comsol.evaluate_matched_trajectory compare --budget budget.json --output comparison.json
+```
+
+The policy contains `physical_budgets` for `position`, `velocity` and `charge`,
+each with nonnegative `rms` and `maximum` values in the units above. Select these
+allowances from the physical decision before inspecting cross differences;
+the tool does not derive them from step changes or tune them to the reference.
+Optional `meaning_preflight_inventory: {path, sha256}` and `comparison_question`
+reuse the existing meaning owner, rechecking its supported conditions against
+the actual fine artifact identities. Missing/unsupported meaning leaves
+`qualified_solver_parity=NOT_TESTED`, separately from the descriptive
+physical-budget PASS/FAIL. CSV metadata alone cannot promote that claim.
+
+Qualified parity also needs optional, independently selected
+`self_sensitivity_budgets` in the registered policy. This record has
+`candidate` and `reference` entries, each containing position/velocity/charge
+`rms` and `maximum` absolute SI allowances. The comparator checks each genuine
+medium/fine change against its own allowance. An omitted or exceeded
+prerequisite keeps qualified parity `NOT_TESTED` without suppressing raw cross
+differences. Do not derive these allowances from observed changes or aim to
+match reference precision. Meeting them is empirical resolution evidence,
+never a guaranteed absolute error bound.
+
+For public results, the prerequisite also checks actual accepted macro counts,
+common run start/end, and more than one coarsest base step in the selected
+observation window. Three dt labels with the same single macro partition do
+not establish refinement. Missing partition evidence (including CSV-only
+metadata) remains `NOT_TESTED`; no production step history is added for this
+check. Current v3 reports replace the v2 qualification policy, so regenerate
+current reports with the final evaluator source; historical reports are not
+silently upgraded.
+
+Reports include component and Euclidean-vector x/v differences, scalar charge
+differences, per-ID/per-time coverage and statistics, exact initial-state
+checks and explicit coarse/medium/fine step ratios. RMS uses equal retained
+particle-observation rows, not time weighting. Observed order is reported only
+for equal refinement ratios and nonzero changes; it is not a smooth-order gate
+for nonsmooth transferred fields. Neither finest-pair difference nor a
+comparison PASS is a rigorous error bound, physical validation, universal
+COMSOL accuracy or a reason to match COMSOL integration steps. Source hashes
+are refreshed at consumption, output reports are created without overwriting,
+and CLI exit zero means that the requested report was produced, not numerical
+or physical qualification.
+
+For original saved data or any two available participants, use `compare-pair`.
+It needs **two actual levels**, and does not require a third convergence level
+or new solves. Each participant descriptor uses the same label/mode/ID/clock
+fields as above and a single `level` instead of `levels`. That level can be a
+public result or mapped CSV. The policy must name an explicit
+`comparison_question`, and may record `comparison_intent` and
+`known_model_differences` (including noise, force law and native FE versus
+transferred-field differences). Its physical budgets have the same structure.
+
+```console
+uv run --locked python -m tools.vv.comsol.evaluate_matched_trajectory compare-pair --candidate candidate_pair.json --reference original_pair.json --policy physical_policy.json --output raw_pair.json
+```
+
+This saved-pair route always records `qualified_solver_parity=NOT_TESTED`;
+raw same-ID x/v/Z differences remain useful for a stochastic original versus
+deterministic analogue. Equal IDs or seeds do not pair stochastic histories.
+Missing/terminal rows keep their coverage denominator and prevent a full-cohort
+descriptive PASS, even if retained rows lie within the budgets. A CSV lifecycle
+mapping can specify `active_value` explicitly when the producer uses a value
+other than `active`. Neither route evaluates event/post-event accuracy or
+requires an artificial reference precision target.

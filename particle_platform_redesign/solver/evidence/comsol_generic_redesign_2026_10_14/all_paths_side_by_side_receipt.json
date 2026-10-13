@@ -1,0 +1,106 @@
+{
+  "scope": "All saved paths in separate side-by-side panels; no new simulation or particle subsampling",
+  "line_width_px": 0.85,
+  "line_opacity": 0.35,
+  "shared_path_color": "#2563EB",
+  "cases": [
+    {
+      "case": "caseA",
+      "particles_each_panel": 287,
+      "time_range_s": [
+        0,
+        0.03
+      ],
+      "position_points": {
+        "solver": 32602,
+        "COMSOL": 30835
+      },
+      "x_range_mm": [
+        -6.554347826086996,
+        256.554347826087
+      ],
+      "y_range_mm": [
+        -3.25,
+        133.25000000000003
+      ],
+      "equal_aspect": true,
+      "input": [
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseA\\rk4_fine.csv",
+          "sha256": "b8639799d7139cf1f08a1ed3148929d49d84c02e5596f517181a670575407d28"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseA\\native10.csv",
+          "sha256": "df23481956a8b5b5463670684e5ea6a7bc64a46742264bf9382d1fe4cd1425ae"
+        }
+      ],
+      "geometry": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseA\\prepared\\case.h5",
+        "sha256": "bd5bdf3e7e7f48d449f5e5702e72d770ce824e1071a1567b0e38c97fe2e300fa"
+      },
+      "case_result_binding": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseA\\figure_case_result_binding.json",
+        "sha256": "df30d8ed98aaff747c46948da903ced0a62bb1524cd355076254cee9a9f5547e"
+      },
+      "svg": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseA_all_paths_side_by_side.svg",
+        "sha256": "8bf3e64070e4a7ce1fffe726067b4616a90cc377eb8c52bb8915d37757b40db8"
+      },
+      "png": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseA_all_paths_side_by_side.png",
+        "sha256": "8dfcd600bd3e6c72cd3a3b5881ffb5a95735bb625f78f89e1272c9c23240e74f"
+      }
+    },
+    {
+      "case": "caseP",
+      "particles_each_panel": 287,
+      "time_range_s": [
+        0,
+        0.03
+      ],
+      "position_points": {
+        "solver": 34165,
+        "COMSOL": 34020
+      },
+      "x_range_mm": [
+        -6.554347826086996,
+        256.554347826087
+      ],
+      "y_range_mm": [
+        -3.25,
+        133.25000000000003
+      ],
+      "equal_aspect": true,
+      "input": [
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseP\\rk4_fine.csv",
+          "sha256": "5e4a58ac4018b30f914d29ec2a8d406bb2062f6e9c8a5270df9a1323620494ad"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseP\\native10.csv",
+          "sha256": "b684c07108773113439938b347025c69532c7a33ae0d61cbf6853b4f7b453723"
+        }
+      ],
+      "geometry": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP\\prepared\\case.h5",
+        "sha256": "cb16bb430ead9182df93c6e93753254eb399cd4baba0808bfdc23f819816503d"
+      },
+      "case_result_binding": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseP\\figure_case_result_binding.json",
+        "sha256": "2e58d8496934efda09ff3d39680384fc4357d69e50dda9f762986683c0f5500f"
+      },
+      "svg": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP_all_paths_side_by_side.svg",
+        "sha256": "005cc8fe5921fe9e7dae39623fdaaa896326f896c8c1c05c234baec9efecffd3"
+      },
+      "png": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP_all_paths_side_by_side.png",
+        "sha256": "cb5309d9a7e9555aed82dd3eb7162928d341135728c6acc380977be66490a190"
+      }
+    }
+  ],
+  "producer": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\render_side_by_side_paths.py",
+    "sha256": "5b60d02856edaab3c7c6705e699bc28bf2abceb69c64f9d4deeba5a2fe00110b"
+  }
+}

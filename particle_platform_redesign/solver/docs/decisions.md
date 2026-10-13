@@ -65,8 +65,8 @@
 
 ## P17 axisymmetric field / Cartesian 3-D implementation decision
 
-P17は未公開`0.2.0`へ部分実装せず、case/canonical/result schema v4とcheckpoint schema v3を伴う`0.3.0`候補の
-単一work packageとして実装する。次を同じchangeで閉じられない限り、production selectorや幅3の配列だけを
+P17は現行`0.3.0`へ実装済みではない。case/canonical/result schema v4とcheckpoint schema v3を伴う
+将来の単一work packageとして実装する。提供versionは実装完了後に決める。次を同じchangeで閉じられない限り、production selectorや幅3の配列だけを
 先行追加しない。
 
 | 項目 | 判断 |
@@ -1395,6 +1395,25 @@ A4の修正前後を同じ10,000粒子×4 macrostepのTalbot＋Stokes＋Saffman 
 particle配列を進める前のprepare errorにする。snapshot端点は閉区間で、gridと一致するknotは重複macro境界を作らない。
 resume identityとmanifestはfield time revisionおよび追加split時刻を保持する。canonical data schema v1はv2 coreで
 読めず、checked-in examples/tests/adapter writerはv2 writerで再生成する。
+
+## G3/G4 physical gas collision and nonlinear noise research decision（未実装）
+
+| 項目 | 将来実装の着手条件 |
+|---|---|
+| 解く利用case | 有限gas-relative driftで抵抗と揺らぎを物理的に整合させる。COMSOL一致は外部V&Vの一工程とする |
+| 既存modelで解けない理由 | mean finite-speed lawはあるが、現行noiseはlinear Epsteinのfrozen OUである。速度依存抵抗へのscalar FDT代入は同じcollision dynamicsの証明にならない |
+| 所有module | pure collision/force/rateは`physics`の既存owner、選択/連成はcatalog/runtime/compiled、SDE proposal/splitはintegrators/stochastic、first hitと応答はevents/boundaries、唯一のloopはengine |
+| 必要field/state | 種ごとのgas n/m/T/uとsphere径・粒子mass・accommodation/温度のauthority、A/Qの連続適用範囲。非平衡熱泳動は追加分布/heat-flux closureが必要。未確定primitiveはdefaultで埋めない |
+| 対応座標・integrator | 現行XY/RZは制約付き2D scopeとして別認定。物理3D thermal/noiseはP17 XYZ state/event完成が必要。Itô等のconventionを明示し、nonlinear noiseをOU exactとして受理しない |
+| 解析解またはreference | technical research第12節のcollision angular/quadrature、低drift OU、独立jump/collision oracle、mass-ratio/高次moment/tail・arrivalの近似誤差、SDE弱収束と必要なcoupled強収束 |
+| 性能・memory影響 | 同じbounded SoA/stage passで評価し、species数・tensor・split scratch/IPCを既存予算へ入れる。kernel tabulationは誤差/費用が必要性を示した場合だけ。追加JIT/第二engine/Python粒子callbackなし |
+| 置換・削除する旧経路 | 新modelを完成させる場合、そのmodelの旧rate/bound/compiled/case/testを同じchangeで置換する。検証済みlinear OUは別適用域として維持。COMSOL専用分岐、gate bypass、適用外Waldmann流用、noiseの暗黙省略を作らない |
+
+研究式・限界は[technical_research 第12節](../../technical_research.md)、実装順と完了条件は
+[implementation_plan 第22節](../../implementation_plan.md)が所有する。
+A/Qを導出できても連続diffusion近似のqualificationが不足すれば、production selectorは追加しない。
+local accuracy controllerは独立精度検証と費用が必要性を示した時だけ同じproposalへ統合する。
+本decisionは新しいphysics/integrator/schemaの実装完了を示さない。
 
 ## H2 boundary group contact geometry
 

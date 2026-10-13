@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "review_date_local": "2026-10-14",
+  "reviewer": "original_model_mapping",
+  "review_kind": "independent_read_only_skill_and_tool_contract_review",
+  "scope": {
+    "skills": [
+      {
+        "path": ".agents/skills/inspect-comsol-model/SKILL.md",
+        "sha256": "e92a029d76e482e36da6cebd0db68a21fe66384626d74f9e3bc7a87545d8349d"
+      },
+      {
+        "path": ".agents/skills/prepare-comsol-field-case/SKILL.md",
+        "sha256": "5305dae161f336e09a113d06cb1f3c550b8eb01f7e11e993344ef3be6365151f"
+      },
+      {
+        "path": ".agents/skills/validate-comsol-trajectories/SKILL.md",
+        "sha256": "81c47ecb4a9301f6332577a3cadf8891e463021109200fc67fb44f97f68bbfe3"
+      },
+      {
+        "path": ".agents/skills/visualize-particle-trajectories/SKILL.md",
+        "sha256": "be22eccc59b12854c0fec2d2781fffddbd2034960629c88e05d573365cdf7ff5"
+      }
+    ],
+    "supporting_artifacts": [
+      {
+        "path": ".agents/skills/inspect-comsol-model/references/api-extraction.md",
+        "sha256": "115895ab3628b6cc290e2565f8d35b50a9e88097e27dc739077dd7d9e1adc03a"
+      },
+      {
+        "path": ".agents/skills/inspect-comsol-model/references/particle-semantics.md",
+        "sha256": "6dc771d028fd99d271673dc68df6692eeb2b6d76c78f0fec440f6b62da62aec6"
+      },
+      {
+        "path": ".agents/skills/prepare-comsol-field-case/references/initial-conditions.md",
+        "sha256": "130eb7643724a631361824534917e3a8a9e58355d3df42ba196d7732aa2f3261"
+      },
+      {
+        "path": ".agents/skills/prepare-comsol-field-case/references/model-mapping.md",
+        "sha256": "c5f18f83cf588f31b28658dff842a4ae8da50c5cb25bbdf1caad71bc7a918aee"
+      },
+      {
+        "path": ".agents/skills/prepare-comsol-field-case/references/numerical-plan.md",
+        "sha256": "f1abb57e1a98fd250f333931f551e798518a329b9367a33c7a18ae18cdb58f20"
+      },
+      {
+        "path": ".agents/skills/validate-comsol-trajectories/references/evaluation-and-attribution.md",
+        "sha256": "55a48c4252ba73e34a53a4808e0aa052d968a4cf6431471e0a98028aa02d2c4d"
+      },
+      {
+        "path": "particle_platform_redesign/solver/tools/source_builder/README.md",
+        "sha256": "98da2ad31ccb4e66f48ad0cd008263395298ce2fd4f8fed23538208517bc8cb1"
+      },
+      {
+        "path": "particle_platform_redesign/solver/tools/comsol_adapter/README.md",
+        "sha256": "68f95cb18dbfac00d85c5433930abece56c707e26cb85b93f33a8235aa9a7795"
+      },
+      {
+        "path": "particle_platform_redesign/solver/tools/vv/comsol/README.md",
+        "sha256": "e9ac8e8f844bb5775b84c4a3f67a4d5926f1cb2a0934f264a16ff48825471fe2"
+      },
+      {
+        "path": "particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py",
+        "sha256": "ac1ff45cdc1f5c5ef51303e00d2246c809ca628b42c7546f4a4342ef57c3a1e0"
+      },
+      {
+        "path": "particle_platform_redesign/solver/tools/vv/comsol/tests/test_matched_trajectory_evaluation.py",
+        "sha256": "58bbdfcef0327aa74a1c7d3a87f3846d7f747fcf78ea766fe3d7268a0c501e1a"
+      },
+      {
+        "path": "particle_platform_redesign/solver/evidence/comsol_generic_redesign_2026_10_14/skill_review/independent_numeric_review.json",
+        "sha256": "cc1acf192c707d1143b362d38bb25feded77a57e67642f552a36abb11e1a4f16"
+      },
+      {
+        "path": "particle_platform_redesign/solver/evidence/comsol_generic_redesign_2026_10_14/skill_review/reproduce_numeric_review.py",
+        "sha256": "5dd066adc38ba46f95be5875c11268c769982c40f9ecd6383c7f3889d097517e"
+      }
+    ],
+    "activities": [
+      "Read the four current skill files and targeted references.",
+      "Compared G1/G2/G4 documentation with current source-builder, field-adapter and evaluator code.",
+      "Checked claims against existing original-model and generic-campaign evidence; did not create a native COMSOL run.",
+      "Created only this review receipt; no production, skill, authority-document or peer-owned changes."
+    ]
+  },
+  "result": "BOUNDED_REVIEW_PASS",
+  "findings": [
+    {
+      "id": "native_hierarchy",
+      "status": "FIXED_AND_READBACK_VERIFIED",
+      "locations": [
+        "particle_platform_redesign/solver/tools/comsol_adapter/README.md:70",
+        "particle_platform_redesign/solver/tools/comsol_adapter/README.md:71",
+        ".agents/skills/inspect-comsol-model/references/api-extraction.md:63"
+      ],
+      "issue": "The old example implied that native datasets and solutions belong under component-qualified paths.",
+      "correction": "Current example preserves actual model-level dataset/solution tags and observed parent links. Component ownership is linked evidence, not an invented native collection path."
+    },
+    {
+      "id": "domain_witness_authentication",
+      "status": "FIXED_DOCUMENTATION_AND_READBACK_VERIFIED",
+      "locations": [
+        "particle_platform_redesign/solver/tools/comsol_adapter/README.md:85",
+        ".agents/skills/prepare-comsol-field-case/references/model-mapping.md:325",
+        "particle_platform_redesign/solver/tools/comsol_adapter/workflow.py:385"
+      ],
+      "issue": "The converter accepts a nonempty caller evidence string; it does not dereference or authenticate an embedded witness path/hash. Canonical containment or equality to an old case cannot alone prove the native selection/export side.",
+      "correction": "Current documents explicitly assign witness file/hash and native domain/side/export verification to existing inspection/preparation. Unresolved native scope permits a declared numerical conversion/analogue only.",
+      "evidence_limit": "This documentation repair does not supply the missing native scope witness or promote legacy converted data to native-field reproduction."
+    },
+    {
+      "id": "temperature_closure",
+      "status": "FIXED_AND_SCOPE_REVIEWED",
+      "locations": [
+        ".agents/skills/prepare-comsol-field-case/references/model-mapping.md:82",
+        ".agents/skills/inspect-comsol-model/references/particle-semantics.md"
+      ],
+      "issue": "Disabling a native particle-temperature auxiliary equation does not establish T_surface=T_gas.",
+      "correction": "Current preparation guidance records the equal-temperature collision-law closure explicitly. Missing heat capacity, initial/internal temperature or energy exchange inputs block a physical thermal claim; these are not mandatory inputs for every extraction or numerical conversion.",
+      "scope_limit": "Mean-force or collision-moment agreement remains conditional on the specified bath/surface closure and does not validate particle heating or phase stability."
+    },
+    {
+      "id": "generic_field_scope",
+      "status": "FIXED_AND_READBACK_VERIFIED",
+      "locations": [
+        ".agents/skills/prepare-comsol-field-case/SKILL.md:83",
+        ".agents/skills/prepare-comsol-field-case/references/model-mapping.md:325"
+      ],
+      "issue": "A stale thermal-only RZ inventory description contradicted the current selected-field v3 adapter.",
+      "correction": "Current description states static nodal XY/RZ, one selected volume, explicit field mapping and unsupported layouts. Reduced electrostatic construction is separately identified as RZ and does not define the adapter's general scope."
+    },
+    {
+      "id": "parity_requires_self_resolution",
+      "status": "FIXED_AND_FINAL_SOURCE_READBACK_VERIFIED",
+      "locations": [
+        "particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py:643",
+        "particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py:668",
+        "particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py:723",
+        "particle_platform_redesign/solver/tools/vv/comsol/README.md:1481",
+        ".agents/skills/validate-comsol-trajectories/SKILL.md:150"
+      ],
+      "issue": "The initially reviewed evaluator could report scoped parity using supported meaning/cohort and finest cross-solver differences without qualifying each participant's self-sensitivity.",
+      "consequence": "Two unresolved but mutually agreeing finest samples could receive this scoped parity PASS. The tool already denies rigorous error bounds and same-accuracy claims; the gap is numerical qualification of the parity label.",
+      "remaining_manual_requirement": "The gate is a conservative empirical prerequisite. It does not reconstruct hidden particle/event/safety subdivisions, authenticate a CSV-native execution, or supply native accepted-step/reference uncertainty evidence. A source-bound native evaluation remains necessary for its qualified comparison.",
+      "acceptance_limit": "Even after this gate, step-pair changes are empirical sensitivity, not certified error bounds, physical validity, event accuracy or stochastic equivalence.",
+      "correction": "Final v3 gates parity on separately registered candidate/reference self_sensitivity_budgets, both medium-to-fine target verdicts, common run start/end, strictly increasing actual accepted macro counts, and more than one coarsest base step in the selected observation window. Missing/exceeded allowances or unsupported macro evidence leave qualified parity NOT_TESTED.",
+      "regressions": {
+        "source_readback_verified": true,
+        "owner_reported_dedicated_tests_passed": 14,
+        "tests_read": [
+          "identical finest paths cannot hide failed self allowances",
+          "public result actual macro counts support the empirical gate",
+          "distinct dt labels with one macro remain NOT_TESTED",
+          "globally refined runs with one late-release interval remain NOT_TESTED"
+        ],
+        "reviewer_did_not_rerun_owner_tests": true
+      }
+    },
+    {
+      "id": "late_release_selected_window",
+      "status": "FIXED_AND_FINAL_SOURCE_READBACK_VERIFIED",
+      "locations": [
+        "particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py:654",
+        "particle_platform_redesign/solver/tools/vv/comsol/tests/test_matched_trajectory_evaluation.py:365"
+      ],
+      "issue": "Increasing full-run macro counts and a refined finest step alone did not establish three useful refinements for a cohort released late in the run.",
+      "correction": "The coarsest base step must cover the selected observation window more than once. The public-API regression keeps the 6.5-to-8-second late cohort NOT_TESTED despite full-run macro counts [2,4,8]. This does not affect the current A/P full 30 ms cohorts."
+    }
+  ],
+  "reviewed_checks": [
+    {
+      "topic": "Skill division and requested scope",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "Extraction, case preparation, trajectory evaluation and visualization have separate owners and independently useful completion scopes. Reuse of verified identities prevents redundant complete workflows."
+    },
+    {
+      "topic": "Initial-condition semantics",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "Active selector, velocity/momentum/energy conversion, component basis, moving-frame uncertainty, realized mass, distributions and release time are distinguished. The current builder's numeric static two-component scope is explicit."
+    },
+    {
+      "topic": "Unsupported source distributions and DOF",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "Documentation does not imply implemented thermal/angle/surface sampling. Nonzero third components and dynamic/unknown frames need explicit resolution or an unsupported verdict."
+    },
+    {
+      "topic": "Three-level self sensitivity versus saved-pair comparison",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "Three actual input/run levels serve self sensitivity; two saved participants serve raw comparison. No artificial third native resolution or reference precision target is required."
+    },
+    {
+      "topic": "Brownian and analogous-model inference",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "Equal seed/ID does not establish coupled random histories. Noise/model differences preserve raw descriptive comparisons while full parity and statistical equivalence remain unqualified."
+    },
+    {
+      "topic": "Statuses, contact and visual meaning",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "Native final status is not instantaneous lifecycle. Frozen tails, missing rows, terminal cause, axis seams and joint pre-contact masks are distinguished; point versus particle-surface contact is explicit."
+    },
+    {
+      "topic": "Case-specific defaults",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "No source diameter, population count, charge, boundary ID, seed or step from A/P is adopted as a new-case default. Historical hard-coded tools are identified as case-bound."
+    },
+    {
+      "topic": "Physical-model validity and ownership",
+      "result": "PASS_IN_REVIEWED_SCOPE",
+      "basis": "Configured mathematical reproduction, physical applicability policy, external field/initial-condition conversion and production processing are separate. A/P differences alone do not prove an integrator/event defect."
+    }
+  ],
+  "not_claimed": [
+    "New native domain-selection or export-side verification.",
+    "Full original COMSOL trajectory parity.",
+    "Physical validation of high-drift heating, nonlinear diffusion or thermophoresis.",
+    "New core algorithm tests or campaign execution performed by this review.",
+    "Exact reconstruction of all accepted particle/stochastic/event stage partitions from macro counts."
+  ],
+  "independent_numeric_review": {
+    "status": "PASS",
+    "artifacts": [
+      "particle_platform_redesign/solver/evidence/comsol_generic_redesign_2026_10_14/skill_review/independent_numeric_review.json",
+      "particle_platform_redesign/solver/evidence/comsol_generic_redesign_2026_10_14/skill_review/reproduce_numeric_review.py"
+    ],
+    "recomputed_from": "Normalized CSV using Python standard library and NumPy only; no repository analysis, evaluator or solver imports.",
+    "checked": "Both cases, six participants, explicit 287 IDs x 121 saved clocks; all seven comparisons, global precontact maxima/ID/time, equal-row RMS and retained counts, selected-time metrics, exact x/v/Z initial equality, missingness, separate named final lifecycle histograms, and shared-three-level RMS ratios.",
+    "complete_saved_summary_matches": true,
+    "quality": {
+      "ruff_lint": "PASS",
+      "ruff_format": "PASS",
+      "pyrefly": "PASS",
+      "radon_max_complexity": 13
+    },
+    "interpretation": "Observed numerical sensitivity and original-versus-analogue differences only. No fate-to-accuracy inference, stochastic path pairing, physical validation or strict error bound."
+  },
+  "final_source_review": {
+    "status": "BOUNDED_PASS",
+    "bound_artifacts": 17,
+    "unresolved_findings": 0,
+    "conclusion": "Current reviewed skill/document/tool contracts separate extraction, numeric transfer, model correspondence, empirical resolution and descriptive comparisons. No additional concrete defect was found after the recorded corrections.",
+    "g4_revision": "v3",
+    "source_freeze_sha256": "ac1ff45cdc1f5c5ef51303e00d2246c809ca628b42c7546f4a4342ef57c3a1e0",
+    "test_source_sha256": "58bbdfcef0327aa74a1c7d3a87f3846d7f747fcf78ea766fe3d7268a0c501e1a",
+    "execution_limit": "No core change, new COMSOL run or simulation was performed by this final review.",
+    "report_claim_review": {
+      "status": "BOUNDED_STATIC_PASS",
+      "report_path": "particle_platform_redesign/solver/evidence/comsol_generic_redesign_2026_10_14/trajectory_comparison_report.html",
+      "verified_claim_limits": [
+        "Original-model qualified parity remains NOT_TESTED.",
+        "Joint precontact mask is stated as first material contact.",
+        "Same-h method changes are separated from different-h comparisons.",
+        "Finite-difference sensitivity is not an absolute error bound or physical validation.",
+        "Single Maxwell pseudogas, sigma=0.9 and prescribed Tw=Tg explicitly qualify collision-moment ratios.",
+        "Unresolved native frame, native-field transfer scope, nonlinear noise/thermal closure and physical 3D remain explicit."
+      ],
+      "excluded": "Visual rendering, all HTML link/image execution, and future regeneration of the report are root-owned QA."
+    }
+  }
+}

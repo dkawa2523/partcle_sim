@@ -1,4 +1,4 @@
-format_version: 2
+format_version: 3
 source:
   vertices_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/mesh_vertices_si.csv
   triangles_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/geometry/domain_triangles.csv
@@ -7,36 +7,218 @@ source:
   field_values_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/input_fields/background_fields_mesh_points.csv
   field_columns_path: ../../../../../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/cases/formal_iondrag_theory_consistent/caseA_100nm/external_reproduction/config/background_field_column_dictionary.csv
 domain:
+  coordinate_system: axisymmetric_rz
   external_id: 3
   layout_name: plasma
   quadrilateral_order: q1_reference
-  excluded_boundary_ids: [5]
+  excluded_boundary_ids:
+  - 5
 boundary_groups:
-  - name: wafer
-    external_ids: [6, 28, 29]
-    material_id: 0
-  - name: grounded_wall
-    external_ids: [8, 36, 38, 40, 41, 47]
-    material_id: 0
-  - name: focus_transition
-    external_ids: [32, 33, 45]
-    material_id: 0
-  - name: outer_dielectric
-    external_ids: [34, 46]
-    material_id: 0
-  - name: pump_outlet
-    external_ids: [35]
-    material_id: 0
-  - name: gas_inlet
-    external_ids: [37]
-    material_id: 0
+- name: wafer
+  external_ids:
+  - 6
+  - 28
+  - 29
+  material_id: 0
+- name: grounded_wall
+  external_ids:
+  - 8
+  - 36
+  - 38
+  - 40
+  - 41
+  - 47
+  material_id: 0
+- name: focus_transition
+  external_ids:
+  - 32
+  - 33
+  - 45
+  material_id: 0
+- name: outer_dielectric
+  external_ids:
+  - 34
+  - 46
+  material_id: 0
+- name: pump_outlet
+  external_ids:
+  - 35
+  material_id: 0
+- name: gas_inlet
+  external_ids:
+  - 37
+  material_id: 0
 fields:
-  coordinate_columns: [r_m, z_m]
+  coordinate_columns:
+  - r_m
+  - z_m
   inside_column: inside_model_domain
-  gas_velocity_columns: [gas_velocity_r_m_per_s, gas_velocity_z_m_per_s]
-  gas_temperature_column: gas_temperature_K
-  gas_density_column: gas_density_kg_per_m3
-  gas_dynamic_viscosity_column: dynamic_viscosity_Pa_s
-  gas_mean_free_path_column: gas_mean_free_path_m
+  node_id_column: null
   coordinate_match_tolerance_m: 1.5e-14
-  axis_radial_velocity_tolerance_m_s: 2.0e-4
+  mappings:
+  - name: gas_velocity
+    columns:
+    - gas_velocity_r_m_per_s
+    - gas_velocity_z_m_per_s
+    components:
+    - r
+    - z
+    stored_basis: axisymmetric_rz
+    association: node
+    unit: m/s
+    input_unit: m/s
+    scale: 1.0
+    offset: 0.0
+    producer_record:
+      producer: existing COMSOL field CSV export
+      dataset: not recorded in existing export
+      solution: not recorded in existing export
+      member:
+        indexing: not recorded in existing export
+        selection: existing single export
+      time:
+        representation: static
+        selection: existing steady export; native member not independently identified
+      domain_ids:
+      - 3
+      side: domain
+      recovery: not recorded in existing export
+      continuity: continuous
+      authority: supplied exported nodal primitive
+      topology: fixed
+      support: full_selected_domain
+      evidence: source CSV bytes and column dictionary; native qualification incomplete
+    axis_transform:
+      component: r
+      max_abs_correction: 0.0002
+      reason: Explicit parity correction of this exported RZ gas velocity; modifies
+        incident P1 cells.
+  - name: gas_temperature
+    columns:
+    - gas_temperature_K
+    components:
+    - value
+    stored_basis: scalar
+    association: node
+    unit: K
+    input_unit: K
+    scale: 1.0
+    offset: 0.0
+    producer_record:
+      producer: existing COMSOL field CSV export
+      dataset: not recorded in existing export
+      solution: not recorded in existing export
+      member:
+        indexing: not recorded in existing export
+        selection: existing single export
+      time:
+        representation: static
+        selection: existing steady export; native member not independently identified
+      domain_ids:
+      - 3
+      side: domain
+      recovery: not recorded in existing export
+      continuity: continuous
+      authority: supplied exported nodal primitive
+      topology: fixed
+      support: full_selected_domain
+      evidence: source CSV bytes and column dictionary; native qualification incomplete
+    axis_transform: null
+  - name: gas_density
+    columns:
+    - gas_density_kg_per_m3
+    components:
+    - value
+    stored_basis: scalar
+    association: node
+    unit: kg/m^3
+    input_unit: kg/m^3
+    scale: 1.0
+    offset: 0.0
+    producer_record:
+      producer: existing COMSOL field CSV export
+      dataset: not recorded in existing export
+      solution: not recorded in existing export
+      member:
+        indexing: not recorded in existing export
+        selection: existing single export
+      time:
+        representation: static
+        selection: existing steady export; native member not independently identified
+      domain_ids:
+      - 3
+      side: domain
+      recovery: not recorded in existing export
+      continuity: continuous
+      authority: supplied exported nodal primitive
+      topology: fixed
+      support: full_selected_domain
+      evidence: source CSV bytes and column dictionary; native qualification incomplete
+    axis_transform: null
+  - name: gas_dynamic_viscosity
+    columns:
+    - dynamic_viscosity_Pa_s
+    components:
+    - value
+    stored_basis: scalar
+    association: node
+    unit: Pa*s
+    input_unit: Pa*s
+    scale: 1.0
+    offset: 0.0
+    producer_record:
+      producer: existing COMSOL field CSV export
+      dataset: not recorded in existing export
+      solution: not recorded in existing export
+      member:
+        indexing: not recorded in existing export
+        selection: existing single export
+      time:
+        representation: static
+        selection: existing steady export; native member not independently identified
+      domain_ids:
+      - 3
+      side: domain
+      recovery: not recorded in existing export
+      continuity: continuous
+      authority: supplied exported nodal primitive
+      topology: fixed
+      support: full_selected_domain
+      evidence: source CSV bytes and column dictionary; native qualification incomplete
+    axis_transform: null
+  - name: gas_mean_free_path
+    columns:
+    - gas_mean_free_path_m
+    components:
+    - value
+    stored_basis: scalar
+    association: node
+    unit: m
+    input_unit: m
+    scale: 1.0
+    offset: 0.0
+    producer_record:
+      producer: existing COMSOL field CSV export
+      dataset: not recorded in existing export
+      solution: not recorded in existing export
+      member:
+        indexing: not recorded in existing export
+        selection: existing single export
+      time:
+        representation: static
+        selection: existing steady export; native member not independently identified
+      domain_ids:
+      - 3
+      side: domain
+      recovery: not recorded in existing export
+      continuity: continuous
+      authority: supplied exported nodal primitive
+      topology: fixed
+      support: full_selected_domain
+      evidence: source CSV bytes and column dictionary; native qualification incomplete
+    axis_transform: null
+  domain_scope:
+    column: gas_temperature_K
+    mode: finite
+    evidence: Existing gas-only finite thermal export scope; required mesh-node coordinate
+      bijection verifies full selected-domain coverage.

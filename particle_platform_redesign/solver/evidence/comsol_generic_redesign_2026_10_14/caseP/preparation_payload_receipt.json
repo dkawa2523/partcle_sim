@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "scope": "Scientific geometry/field/source payload equality; provenance changes. No physical/frame/accuracy certification.",
+  "field_count": 16,
+  "particle_count": 287,
+  "bindings": {
+    "old_case": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_speed10000_comparison_2026_10_13\\caseP\\prepared\\full_h0p25us.yaml",
+      "sha256": "5b2f1549b12ea0583d5089451126c26b3117427e6f7983559b14a38183973573"
+    },
+    "old_data": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_speed10000_comparison_2026_10_13\\caseP\\prepared\\candidate_input.h5",
+      "sha256": "300abc5265746ace4bc277108536ef847027177eb5edc8173f87b194f413bcdd"
+    },
+    "adapter": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP\\adapter\\selected_fields.h5",
+      "sha256": "d1857383fd9214254d93b74862d7004db7cf3a457afb6b75dea8f67519051107"
+    },
+    "native_initial_rows": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_speed10000_comparison_2026_10_13\\native\\caseP_native_t0_state_normalized.csv",
+      "sha256": "a9e22e4bf069781c334cf199a1b0eabfc1acd372f51d20fcf5a0a6da0f5a764d"
+    },
+    "source_configuration": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP\\source_configuration.json",
+      "sha256": "d5efa134c5e529ab9a839ad02d0625ab12adb28e80fccb16c079fedd06fa19a8"
+    },
+    "new_case": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP\\prepared\\case.yaml",
+      "sha256": "93da2fea881609e5d95eb69e86061ff55ce75cefe0f642e622fcf4214705a00e"
+    },
+    "new_data": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP\\prepared\\case.h5",
+      "sha256": "cb16bb430ead9182df93c6e93753254eb399cd4baba0808bfdc23f819816503d"
+    }
+  }
+}

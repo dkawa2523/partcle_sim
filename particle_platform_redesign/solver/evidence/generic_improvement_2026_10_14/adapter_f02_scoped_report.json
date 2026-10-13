@@ -1,0 +1,418 @@
+{
+  "adapter_revision": "comsol_selected_nodal_csv_adapter_v3",
+  "axis_transformations": [
+    {
+      "affected_p1_cell_indices": [
+        123,
+        159,
+        160,
+        201,
+        202,
+        252,
+        253,
+        311,
+        312,
+        394,
+        395,
+        503,
+        504,
+        607,
+        608,
+        703,
+        704,
+        800,
+        801,
+        923,
+        924,
+        1042,
+        1043,
+        1148,
+        1149,
+        1240,
+        1241,
+        2127,
+        2128,
+        2133,
+        2134,
+        2141,
+        2142,
+        2151,
+        2152,
+        2163,
+        2164,
+        2177,
+        2178,
+        2197,
+        2198,
+        2229,
+        2230,
+        2273,
+        2274,
+        2343,
+        2344,
+        2415,
+        2416,
+        2489,
+        2490,
+        2567,
+        2568,
+        2639,
+        2640,
+        2717,
+        2718,
+        3411,
+        3412,
+        3441,
+        3442,
+        3475,
+        3476,
+        3503,
+        3504,
+        3523,
+        3524
+      ],
+      "axis_node_external_ids": [
+        55,
+        71,
+        89,
+        112,
+        139,
+        171,
+        229,
+        297,
+        363,
+        429,
+        499,
+        567,
+        632,
+        697,
+        765,
+        838,
+        910,
+        990,
+        1070,
+        1150,
+        1232,
+        1312,
+        1399,
+        1501,
+        1629,
+        1779,
+        1952,
+        2140,
+        2359,
+        2616,
+        2896,
+        3207,
+        3548,
+        3875
+      ],
+      "changed_node_count": 34,
+      "component": "r",
+      "field": "gas_velocity",
+      "limit": 0.0002,
+      "maximum_abs_correction": 0.00015312853079596514,
+      "off_axis_effect": "P1 interpolation changes inside every listed incident cell",
+      "raw_axis_values": [
+        -7.038408663385992e-08,
+        2.8384942508146887e-07,
+        1.2515822935625896e-06,
+        2.2472181902666472e-06,
+        3.4381387845957156e-06,
+        4.7712971847407645e-06,
+        6.1939633309126705e-06,
+        7.659026529411494e-06,
+        9.131935262699297e-06,
+        1.0599725603543263e-05,
+        1.2085075423393365e-05,
+        1.367310733524985e-05,
+        1.5569365360841658e-05,
+        1.823734359444386e-05,
+        1.0610422422046346e-05,
+        1.9558929957928804e-05,
+        4.339833771730916e-05,
+        4.0890883557934706e-05,
+        4.3358662256416326e-05,
+        4.401825116779942e-05,
+        4.890812485589542e-05,
+        5.5843214910662624e-05,
+        6.498753941928298e-05,
+        8.773614433431086e-05,
+        0.00012508290559163797,
+        0.00015312853079596514,
+        0.00013128535987501876,
+        3.0860825136430034e-05,
+        1.117416710912423e-05,
+        6.810833342235823e-06,
+        1.0301622740048475e-05,
+        5.826194911791726e-06,
+        3.1338384650851383e-06,
+        2.136451669481787e-06
+      ],
+      "reason": "Explicit parity correction of this exported RZ gas velocity; modifies incident P1 cells.",
+      "squared_nodal_correction_sum": 8.41497619010896e-08,
+      "unit": "m/s"
+    }
+  ],
+  "boundary_group_facet_counts": {
+    "focus_transition": 28,
+    "gas_inlet": 15,
+    "grounded_wall": 58,
+    "outer_dielectric": 8,
+    "pump_outlet": 9,
+    "wafer": 42
+  },
+  "domain_external_id": 3,
+  "excluded_boundary_facet_count": 33,
+  "field_join_method": "coordinate_bijection",
+  "fields": [
+    "gas_velocity",
+    "gas_temperature",
+    "gas_density",
+    "gas_dynamic_viscosity",
+    "gas_mean_free_path"
+  ],
+  "layout": "plasma",
+  "maximum_coordinate_match_distance_m": 5.721958498152797e-17,
+  "minimum_triangle_quality": 0.04238782600001075,
+  "node_count": 1987,
+  "output_content_hash": "sha256:5df6b322aeab53891a77c62e250f32f31fbfa488a444411558545d990cb69347",
+  "output_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\generic_improvement_2026_10_14\\adapter_f02_scoped.h5",
+  "p1_triangle_count": 3779,
+  "physical_boundary_facet_count": 160,
+  "provider_field_row_count": 33449,
+  "scope": "selected-field conversion and canonical validation only",
+  "selected_field_lineage": [
+    {
+      "association": "node",
+      "columns": [
+        "gas_velocity_r_m_per_s",
+        "gas_velocity_z_m_per_s"
+      ],
+      "components": [
+        "r",
+        "z"
+      ],
+      "conversion": {
+        "formula": "canonical = scale * input + offset",
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "expressions": [
+        "AS_ugr",
+        "AS_ugz"
+      ],
+      "input_unit": "m/s",
+      "name": "gas_velocity",
+      "producer_record": {
+        "authority": "supplied exported nodal primitive",
+        "continuity": "continuous",
+        "dataset": "not recorded in existing export",
+        "domain_ids": [
+          3
+        ],
+        "evidence": "source CSV bytes and column dictionary; native qualification incomplete",
+        "member": {
+          "indexing": "not recorded in existing export",
+          "selection": "existing single export"
+        },
+        "producer": "existing COMSOL field CSV export",
+        "recovery": "not recorded in existing export",
+        "side": "domain",
+        "solution": "not recorded in existing export",
+        "support": "full_selected_domain",
+        "time": {
+          "representation": "static",
+          "selection": "existing steady export; native member not independently identified"
+        },
+        "topology": "fixed"
+      },
+      "stored_basis": "axisymmetric_rz",
+      "unit": "m/s"
+    },
+    {
+      "association": "node",
+      "columns": [
+        "gas_temperature_K"
+      ],
+      "components": [
+        "value"
+      ],
+      "conversion": {
+        "formula": "canonical = scale * input + offset",
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "expressions": [
+        "AS_Tg"
+      ],
+      "input_unit": "K",
+      "name": "gas_temperature",
+      "producer_record": {
+        "authority": "supplied exported nodal primitive",
+        "continuity": "continuous",
+        "dataset": "not recorded in existing export",
+        "domain_ids": [
+          3
+        ],
+        "evidence": "source CSV bytes and column dictionary; native qualification incomplete",
+        "member": {
+          "indexing": "not recorded in existing export",
+          "selection": "existing single export"
+        },
+        "producer": "existing COMSOL field CSV export",
+        "recovery": "not recorded in existing export",
+        "side": "domain",
+        "solution": "not recorded in existing export",
+        "support": "full_selected_domain",
+        "time": {
+          "representation": "static",
+          "selection": "existing steady export; native member not independently identified"
+        },
+        "topology": "fixed"
+      },
+      "stored_basis": "scalar",
+      "unit": "K"
+    },
+    {
+      "association": "node",
+      "columns": [
+        "gas_density_kg_per_m3"
+      ],
+      "components": [
+        "value"
+      ],
+      "conversion": {
+        "formula": "canonical = scale * input + offset",
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "expressions": [
+        "AS_rhog"
+      ],
+      "input_unit": "kg/m^3",
+      "name": "gas_density",
+      "producer_record": {
+        "authority": "supplied exported nodal primitive",
+        "continuity": "continuous",
+        "dataset": "not recorded in existing export",
+        "domain_ids": [
+          3
+        ],
+        "evidence": "source CSV bytes and column dictionary; native qualification incomplete",
+        "member": {
+          "indexing": "not recorded in existing export",
+          "selection": "existing single export"
+        },
+        "producer": "existing COMSOL field CSV export",
+        "recovery": "not recorded in existing export",
+        "side": "domain",
+        "solution": "not recorded in existing export",
+        "support": "full_selected_domain",
+        "time": {
+          "representation": "static",
+          "selection": "existing steady export; native member not independently identified"
+        },
+        "topology": "fixed"
+      },
+      "stored_basis": "scalar",
+      "unit": "kg/m^3"
+    },
+    {
+      "association": "node",
+      "columns": [
+        "dynamic_viscosity_Pa_s"
+      ],
+      "components": [
+        "value"
+      ],
+      "conversion": {
+        "formula": "canonical = scale * input + offset",
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "expressions": [
+        "AS_mug"
+      ],
+      "input_unit": "Pa*s",
+      "name": "gas_dynamic_viscosity",
+      "producer_record": {
+        "authority": "supplied exported nodal primitive",
+        "continuity": "continuous",
+        "dataset": "not recorded in existing export",
+        "domain_ids": [
+          3
+        ],
+        "evidence": "source CSV bytes and column dictionary; native qualification incomplete",
+        "member": {
+          "indexing": "not recorded in existing export",
+          "selection": "existing single export"
+        },
+        "producer": "existing COMSOL field CSV export",
+        "recovery": "not recorded in existing export",
+        "side": "domain",
+        "solution": "not recorded in existing export",
+        "support": "full_selected_domain",
+        "time": {
+          "representation": "static",
+          "selection": "existing steady export; native member not independently identified"
+        },
+        "topology": "fixed"
+      },
+      "stored_basis": "scalar",
+      "unit": "Pa*s"
+    },
+    {
+      "association": "node",
+      "columns": [
+        "gas_mean_free_path_m"
+      ],
+      "components": [
+        "value"
+      ],
+      "conversion": {
+        "formula": "canonical = scale * input + offset",
+        "offset": 0.0,
+        "scale": 1.0
+      },
+      "expressions": [
+        "AS_lambdag"
+      ],
+      "input_unit": "m",
+      "name": "gas_mean_free_path",
+      "producer_record": {
+        "authority": "supplied exported nodal primitive",
+        "continuity": "continuous",
+        "dataset": "not recorded in existing export",
+        "domain_ids": [
+          3
+        ],
+        "evidence": "source CSV bytes and column dictionary; native qualification incomplete",
+        "member": {
+          "indexing": "not recorded in existing export",
+          "selection": "existing single export"
+        },
+        "producer": "existing COMSOL field CSV export",
+        "recovery": "not recorded in existing export",
+        "side": "domain",
+        "solution": "not recorded in existing export",
+        "support": "full_selected_domain",
+        "time": {
+          "representation": "static",
+          "selection": "existing steady export; native member not independently identified"
+        },
+        "topology": "fixed"
+      },
+      "stored_basis": "scalar",
+      "unit": "m"
+    }
+  ],
+  "selected_field_row_count": 1987,
+  "source_quadrilateral_count": 826,
+  "source_sha256": "sha256:ab110cd07a7ac55672d047304966806f8ff7fff8c0482ed106b7503d7de6165e",
+  "source_triangle_count": 2127,
+  "split_diagonal_03_count": 561,
+  "split_diagonal_12_count": 265,
+  "status": "complete",
+  "unselected_provider_row_count": 31462
+}

@@ -40,6 +40,7 @@ from .boundaries import (
 from .case import CASE_FORMAT_VERSION, SimulationCase, TimeSpec
 from .case_format import resident_array_bytes
 from .coordinates import (
+    canonicalize_rz_enclosure,
     canonicalize_rz_enclosure_into,
     canonicalize_rz_velocity_enclosure_into,
     fold_rz_position_vector,
@@ -103,6 +104,7 @@ from .events import (
     prepare_curved_event_batch,
     prepare_event_geometry,
     prepare_exact_event_batch,
+    resolve_event_budget,
 )
 from .fields import (
     FIELD_LOCATION_REVISION,
@@ -271,7 +273,7 @@ from .topology import (
 
 type _PathInput = str | PathLike[str]
 
-ENGINE_ALGORITHM_REVISION = "particle_engine_v62"
+ENGINE_ALGORITHM_REVISION = "particle_engine_v64"
 COMPILED_CPU_TILE_REVISION = "compiled_cpu_tile_v31"
 DURABLE_COMMIT_CADENCE_REVISION = "cumulative_solver_work_v1"
 BROWNIAN_TREE_POLICY_REVISION = "conditional_boundary_refinement_absolute_target_v2"
@@ -5631,6 +5633,17 @@ def _tighten_exponential_midpoint_enclosure(
     if not bool(valid.any()):
         return fallback
 
+    # Predictor support flags certify the frozen accepted start, not its
+    # advanced position. Local field ranges cover supported cells only;
+    # provisional nearest-cell projection outside support can use another
+    # cell. Prove support for the whole box of shortened half predictors
+    # before using those ranges as a numerical-path coefficient bound.
+    valid &= _exponential_predictor_box_inside_support(
+        prepared, predictor_position_lower, predictor_position_upper
+    )
+    if not bool(valid.any()):
+        return fallback
+
     try:
         local_bound, local_applicable, local_status, range_available = (
             prepared.dynamics.local_additive_acceleration_abs_upper_batch(
@@ -5698,6 +5711,55 @@ def _tighten_exponential_midpoint_enclosure(
         result.velocity_lower_m_s[accepted] = local_velocity_lower[ordered]
         result.velocity_upper_m_s[accepted] = local_velocity_upper[ordered]
     return result
+
+
+def _exponential_predictor_box_inside_support(
+    prepared: _PreparedRun,
+    position_lower_m: np.ndarray,
+    position_upper_m: np.ndarray,
+) -> np.ndarray:
+    """Certify every shortened midpoint's field support without event slack.
+
+    The caller already requires a supported start contained in each box.
+    Required unstructured fields exactly match the fully supported volume
+    mesh, and geometry preparation audits every exterior edge when facets
+    exist. A connected box disjoint from all exterior boundaries therefore
+    cannot leave that support. The canonical RZ image stays in r>=0, where
+    an omitted axis seam is not an exit. An enclosing disk's strict segment
+    clearance, strengthened by the existing event budget, proves that box
+    disjointness without rejecting a sloping segment's AABB false positive.
+    """
+    lower, upper = position_lower_m, position_upper_m
+    if prepared.support_context.axisymmetric_rz:
+        lower, upper = canonicalize_rz_enclosure(lower, upper)
+    support_box = prepared.fields.regular_support_box()
+    if support_box is not None:
+        support_lower, support_upper = support_box
+        return (lower >= support_lower).all(axis=1) & (upper <= support_upper).all(axis=1)
+    geometry = prepared.event_geometry
+    if not geometry.facet_count or not bool(geometry.facet_contact_enabled.all()):
+        return np.zeros(lower.shape[0], dtype=np.bool_)
+    # The event view retains the complete exterior inventory, including
+    # particle-centre and periodic faces disabled in the capsule view.
+    center = 0.5 * lower + 0.5 * upper
+    component_reach = np.nextafter(
+        np.maximum(np.abs(center - lower), np.abs(upper - center)), np.inf
+    )
+    radius = np.nextafter(np.hypot(component_reach[:, 0], component_reach[:, 1]), np.inf)
+    event = prepared.case.spec.solver.event
+    budget = resolve_event_budget(
+        facet_length_m=float(geometry.facet_length_m.max()),
+        geometry_bbox_diagonal_m=geometry.bbox_diagonal_m,
+        position_m=np.max(np.abs(center), axis=0),
+        speed_m_s=0.0,
+        interval_s=1.0,
+        time_s=0.0,
+        geometry_rtol=event.geometry_rtol,
+        roundoff_ulps=event.roundoff_ulps,
+    )
+    return centers_respect_contact_radius(
+        geometry, center, radius, tolerance_m=budget.position_m, allow_contact=False
+    )
 
 
 def _build_step_proposal(

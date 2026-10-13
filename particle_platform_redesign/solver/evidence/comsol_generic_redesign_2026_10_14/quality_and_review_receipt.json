@@ -1,0 +1,183 @@
+{
+  "completed_utc": "2026-10-13T19:43:27.675633+00:00",
+  "scope": "Recorded actual command outcomes in this turn plus independent scientific reviews; numerical and physical limits remain in scope_and_source_binding.json",
+  "quality_commands": {
+    "uv lock --check": "PASS",
+    "uv run --locked ruff format --check src tests tools scripts examples": "PASS",
+    "uv run --locked ruff check src tests tools scripts examples": "PASS",
+    "uv run --locked pyrefly check --summarize-errors": "PASS, 0 errors",
+    "uv run --locked lint-imports": "PASS, all 3 contracts kept",
+    "uv run --locked python scripts/check_complexity.py": "PASS, all CC<16",
+    "uv run --locked python -m pytest tests/verification tests/scenarios -q": "976 passed, 1 existing invalid-budget overflow warning; 320.96s",
+    "changed external adapter/evaluator/collision-reference/renderer focused tests": "61 passed; final evaluator regression tests included",
+    "skill-creator quick_validate.py on four skills with -X utf8": "PASS"
+  },
+  "test_counts": {
+    "verification_and_scenarios": 976,
+    "focused_external_tools": 61
+  },
+  "reviews": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\skill_review\\review_receipt.json",
+      "sha256": "5990ca6cfa661afa58ee99fadbeed6148de3f1e5decaedb655cf1bfcac18d11a",
+      "bytes": 16338
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\skill_review\\independent_numeric_review.json",
+      "sha256": "cc1acf192c707d1143b362d38bb25feded77a57e67642f552a36abb11e1a4f16",
+      "bytes": 88553
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\figure_receipt.json",
+      "sha256": "b68f8c4bcc8e37de3112b9db92e6811b883dc5562a294d46ab52fb4ef2c9ba16",
+      "bytes": 10667
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\difference_figures\\difference_receipt.json",
+      "sha256": "fde1ab7c4b2e44e64312fd3db431add0a3295721507535683b0130d197cdd8af",
+      "bytes": 56362
+    }
+  ],
+  "tools_and_executor": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\source_builder\\producer.py",
+      "sha256": "370ecb68726db073db68696178a8d74303fc5a8a1cbd0fc8c0cd3fe69e6f6f36",
+      "bytes": 17544
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\comsol_adapter\\workflow.py",
+      "sha256": "10781ae42bb94a3cdce889032d2ca211a09b08275eeccc026a7de493cce10a3e",
+      "bytes": 55400
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\gas_collision\\collision_reference.py",
+      "sha256": "6e478ae45db71f1826c56eb0b0e5fdec5daab4b03b14b98abce9967252f8d087",
+      "bytes": 13599
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\gas_collision\\qualify.py",
+      "sha256": "5cd57df5cd956609b7c267faf3847678254ff5a31cae556df36ceb6995464382",
+      "bytes": 16653
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\evaluate_matched_trajectory.py",
+      "sha256": "ac1ff45cdc1f5c5ef51303e00d2246c809ca628b42c7546f4a4342ef57c3a1e0",
+      "bytes": 38536
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tools\\vv\\comsol\\plot_matched_trajectories.py",
+      "sha256": "a6ebe7048ce95535473860b6db9e07aa4b2231f5e29ded6304a4f6182418b16b",
+      "bytes": 45733
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\engine.py",
+      "sha256": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+      "bytes": 443254
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles\\physics\\forces.py",
+      "sha256": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+      "bytes": 133844
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\uv.lock",
+      "sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+      "bytes": 40452
+    }
+  ],
+  "skills_and_references": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\inspect-comsol-model\\references\\api-extraction.md",
+      "sha256": "115895ab3628b6cc290e2565f8d35b50a9e88097e27dc739077dd7d9e1adc03a",
+      "bytes": 10917
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\inspect-comsol-model\\references\\extraction-record.md",
+      "sha256": "453ceacc8ffb3f7545fb8ebec5f89526d6bb4be99e739fd3f3b21257779cace1",
+      "bytes": 10523
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\inspect-comsol-model\\references\\particle-semantics.md",
+      "sha256": "6dc771d028fd99d271673dc68df6692eeb2b6d76c78f0fec440f6b62da62aec6",
+      "bytes": 12018
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\inspect-comsol-model\\SKILL.md",
+      "sha256": "e92a029d76e482e36da6cebd0db68a21fe66384626d74f9e3bc7a87545d8349d",
+      "bytes": 7644
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\prepare-comsol-field-case\\references\\initial-conditions.md",
+      "sha256": "130eb7643724a631361824534917e3a8a9e58355d3df42ba196d7732aa2f3261",
+      "bytes": 8505
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\prepare-comsol-field-case\\references\\model-mapping.md",
+      "sha256": "c5f18f83cf588f31b28658dff842a4ae8da50c5cb25bbdf1caad71bc7a918aee",
+      "bytes": 31963
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\prepare-comsol-field-case\\references\\numerical-plan.md",
+      "sha256": "f1abb57e1a98fd250f333931f551e798518a329b9367a33c7a18ae18cdb58f20",
+      "bytes": 15370
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\prepare-comsol-field-case\\SKILL.md",
+      "sha256": "5305dae161f336e09a113d06cb1f3c550b8eb01f7e11e993344ef3be6365151f",
+      "bytes": 9701
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\validate-comsol-trajectories\\references\\evaluation-and-attribution.md",
+      "sha256": "55a48c4252ba73e34a53a4808e0aa052d968a4cf6431471e0a98028aa02d2c4d",
+      "bytes": 17677
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\validate-comsol-trajectories\\SKILL.md",
+      "sha256": "81c47ecb4a9301f6332577a3cadf8891e463021109200fc67fb44f97f68bbfe3",
+      "bytes": 12976
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.agents\\skills\\visualize-particle-trajectories\\SKILL.md",
+      "sha256": "be22eccc59b12854c0fec2d2781fffddbd2034960629c88e05d573365cdf7ff5",
+      "bytes": 8827
+    }
+  ],
+  "essential_evidence": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\scientific_run_plan.json",
+      "sha256": "6f38dc95d08a64980e30358b8fdd4d1bda8ccc21692322cb6620737505993bf6",
+      "bytes": 21658
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\scope_and_source_binding.json",
+      "sha256": "745a1fc919b8bd741b8f097aa9842aec3e00ed5ce40a31040387984df05033fe",
+      "bytes": 1890
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseA\\execution_receipt.json",
+      "sha256": "140dc9d152d251e43db806d316966f2e33203ebad838c7f9334ce951d26f386e",
+      "bytes": 4781
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\caseP\\execution_receipt.json",
+      "sha256": "78c626aa6ab4762dc142cf7500a7360ce919fd39c92021ad089e610b16aabcd5",
+      "bytes": 4775
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\trajectory_review_summary.json",
+      "sha256": "ca49408598bd2ee2914c44266f00608b8714f6d5a8177bad91cdd43b81f7f5c0",
+      "bytes": 804197
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\early_window\\receipt.json",
+      "sha256": "f88e05966911e59aef25072f6b99c7ac65dd533e7f6835ce2e57b5a25dd3858f",
+      "bytes": 1482
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_comparison_report.html",
+      "sha256": "67bf88f279b0bf0a12edde155e934832ad9ba7014bfaf0a9a86644e362fed3dc",
+      "bytes": 24294
+    }
+  ],
+  "interpretation": "No new native solve, production noise/temperature/3D implementation, or qualified original-COMSOL parity is claimed. Empirical step changes are not absolute error bounds."
+}

@@ -1,0 +1,8 @@
+{
+  "registered_before_same_step_differences": true,
+  "question": "On the preserved scientific source/field/model payload, compare old exponential midpoint0.25us with new RK4 medium0.25us, so method and path selection change is separated from step refinement.",
+  "comparison_key": "old_exp_fine_minus_rk4_medium",
+  "scope": "All287 IDs/case,121 common observations; same conservative precontact and descriptive postcontact masks as the original analysis plan.",
+  "claim": "Observed method sensitivity only. No new solve, physical model change, absolute error bound or original COMSOL parity claim.",
+  "separate_question": "old_exp_fine_minus_rk4_fine changes both method and integration step and remains separately labelled."
+}

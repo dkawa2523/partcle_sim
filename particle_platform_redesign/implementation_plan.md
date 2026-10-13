@@ -30,7 +30,7 @@ module ownershipや依存方向のauthorityではない。物理式と数値的�
 
 ## 1. 現行製品と実装範囲
 
-packageは`chamber-particles 0.3.0`、production engineはv62である。全revision一覧は
+packageは`chamber-particles 0.3.0`である。production engineを含む現行revision一覧は
 [result形式](solver/docs/result_format_v3.md)と実行manifestが所有する。
 公開済み0.1.0/0.2.0のtag、資格、証跡は固定した履歴として維持する。
 
@@ -811,10 +811,11 @@ COMSOL人口gateからnative FE、全RHS、全boundary、後続velocity/charge�
 
 | 項目 | 着手条件 | 完了条件 |
 |---|---|---|
+| 汎用source・外部場・物理/数値qualification | 第22節のG1〜G4の入力・独立referenceがある | realized source/場転送/物理/積分を別判定し、既存ownerへ統合 |
 | 多macro連続実行 | 小N・多step用途で通信/同期費が支配するとprofileで確認 | 第21.3節の不変条件、科学一致、同一条件の時間/memory改善 |
 | 別出力量・時間場・CPU構成 | 対象case、hardware、accuracy/SLAを指定 | 観測前policyとsource binding、科学/速度/memoryを別判定 |
 | NUMA/SMT配置 | 対応hostのtopologyと利用caseがある | actual affinity/page配置と費用を測り、共有memoryだけで保証しない |
-| P17/完全3D | 独立利用case、座標/field/geometryのreferenceを用意 | tet4/tri3、surface/normal/corner、収束・memory・性能 |
+| P17/RZ場・Cartesian 3D粒子 | 第22.7節と既存P17 decisionの独立referenceを用意 | RZ場・回転面を使うXYZ state、normal/corner、収束・memory・性能。一般3D meshは別利用case |
 | surface charging/再飛散 | wall state・保存則・lifecycle・release authorityを定義 | event/output/checkpointを同じownerへ統合、terminal rowを暗黙再活性化しない |
 | GPU/別言語/out-of-core | 現行profileと具体的用途が必要性を示す | 一つのproduction経路、意味論parity、転送込み費用、旧経路削除 |
 
@@ -915,3 +916,259 @@ warm中央値W1/W4は1.964倍、全8runの科学出力が一致した。
 0.3.0は検証済み用途に限定したprocess実行と既存数値機能を提供する。
 小N・event短case・時間場補足の遅化、cold費用、parallel memory増加、20worker非比例を制約として残す。
 今回のGit提供操作と公開状況はrelease記録が所有し、未実行tag/registry公開を製品機能の完成と混同しない。
+
+## 22. 汎用的な改良計画：初期条件・場・物理・精度（2026-10-14）
+
+### 22.1 目的と現時点の判断
+
+本節は改良計画と実装範囲を所有する。目的は物理・数値的に正しい粒子追跡である。
+COMSOLの設定された数学問題の再現は、入力と方程式を照合する検証の一工程とする。
+COMSOL保存結果への一致を製品の物理的正しさ、実験検証、あるいはmodel選択のauthorityにしない。
+2026-10-14の実装では外部G1/G2/G4を置換し、G3の独立衝突referenceを追加した。
+production physics、integrator、schema、engine v64は変更していない。
+既存の連成RK4を選択した新caseで再計算し、数値設定の効果をmodel差から分離する。
+実装・実行結果は
+[再評価campaign](solver/evidence/comsol_generic_redesign_2026_10_14/scientific_run_plan.json)と
+[衝突qualification](solver/evidence/generic_improvement_2026_10_14/gas_collision/scientific_conclusion.json)に束ねる。
+G3のnonlinear noise/熱状態、G5の物理3D、G6の新性能施策は未実装である。
+
+| 調査結果 | 汎用的な判断・改良owner |
+|---|---|
+| A/P各287粒子の初期位置・速度ベクトルはcanonical入力と全行一致 | 今回の主要差を初期条件変換ミスとは判断しない。将来のsource意味解釈と生成はG1で外部producerを整える |
+| 元のlinear dragとcandidate finite-speed dragの初期力の比は約1.018〜4.922。candidateは元のBrownian/Waldmannを含まない | 設定値だけで同じ方程式にならない。物理選択・適用域・揺らぎとの整合性をG3で扱う。元式再現を優先してlinear適用gateを緩めない |
+| t0全粒子の同一状態でnativeの7決定論的外力とcharge式を再構成できたが、native FE→P1で力/chargeの差が残る | native式の読取りと場転送を分けられる。G2はsolution・演算子・unit・sideを束ね、off-nodeで検証する。全歴史stageの再構成を主張しない |
+| 初めの10 µsで原結果/candidateの位置RMS差はA/Pとも約127 µm、candidate細分化差より大きい | 壁後の最終値だけでなく接触前の状態/RHSを使う。時間stepの模倣や際限ない細分化は原因識別にならない |
+| candidateの3刻みでfinal fate・event列のidentity/件数は一致するが、event時刻/状態には差があり、PのPID11/30に最大約174/151 µmの接触前細分化感度が残る | fateの安定と軌道精度は別。G4で位置・速度・charge・eventごとの誤差予算を判断する。これは追加core defectの証明ではない |
+| 不適切な局所field enclosureは既に修正・独立回帰検証済み | 修正済み事実を未解決課題へ戻さない。G4の試験は原因となる非一様場とsupport証明を維持する |
+
+数値値のauthorityは保存済み
+[軌道評価](solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/particle_trajectory_review/trajectory_review_report.html)、
+[同一状態の方程式監査](solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/equation_audit/equation_audit_summary.json)、
+[今回の初期条件監査](analysis/generic_improvement_2026_10_14/initial_condition_audit.json)である。
+自己収束、原COMSOLとの方程式同等性、物理妥当性、製造予測資格の判定を混ぜない。
+現行modelの0.1/1等のdrift gateはそのrevisionの受理policyであり、普遍的な物理境界ではない。
+
+### 22.2 実装単位・依存関係
+
+| package | 具体的変更とowner | 着手/完了条件 | 置換・削除対象 |
+|---|---|---|---|
+| G1 joint sourceの抽出・生成 | 既存`tools/comsol_adapter`がnative active設定と実現値を取り込む。外部`tools/source_builder`が物理的なsourceを実現し、既存canonical writerへ渡す。`sources.py`はscheduleだけ維持 | native/canonical全行照合、moment/measure検証、相関・ID・release・weight固定。未対応DOF/式は明示 | 有効性を見ないproperty読み、caseごとの速度/単位変換、runtime sampling。source builderは必要な実用modeだけ実装 |
+| G2 native場とgeometryの転送 | 既存adapterのthermal固定inventoryを明示field mappingへ置換。`fields.py`はSI場sample/support、geometryはcontainment/first hitのownerを維持 | 同一状態のprimitive→force/rate、mesh/時間/geometry精度を独立に確認。高次/不連続拡張は条件付き | 同じ変換責務を持つcase-bound preparation helper、固定tag/287行/5場仮定、根拠のないaxis修復 |
+| G3 gas interactionの物理整合 | `physics/forces.py`等のpure物理ownerと既存catalog/runtime/compiledを一経路で更新。平均抵抗、速度拡散、熱泳動の仮定を閉じる | collision oracle・漸近・保存則・近似誤差のqualificationを先行。新modelは第22.5節のstop条件を満たす | finite抵抗へのlinear FDT代入、適用外Waldmannの流用、COMSOL専用force分岐を作らない |
+| G4 精度qualificationと必要時の積分改良 | `integrators.py`/`stochastic.py`/`events.py`の既存owner。比較器はcore外で既存ResultViewを使う | deterministic、spatial、event、SDEの誤差を分離。accuracy controllerは必要性と費用を実測してから | failureをaccuracyへ読み替える評価、chargeだけの別積分、独立乱数によるsplit、常時stage trace |
+| G5 P17/RZ場・XYZ粒子 | 既存P17を一つのengine/schema/output/event/memory変更として実装。G3物理noiseの3D資格に連動 | 3D回転共変、円筒/円錐/平面hit、方位運動、source面積、RNG/resumeを検証 | 幅3配列だけの部分追加、2D結果へのphi sidecar、非零第三成分drop。一般3D meshは必須化しない |
+| G6 精度を固定した性能 | 既存process所有境界と第21.3節。外部producer/exportはfield・sourceをhash再利用 | 同じ科学条件でend-to-end時間・memory・identityを測る。多macro化はIPC支配を確認した時だけ | 追加JIT、第二engine、model別scheduler、未計測の自動tunerを作らない |
+
+G1/G2とG3の理論qualificationは並行できる。G4の既存手法の独立検証は先行できるが、
+新しいmultiplicative-noise積分はG3の式・適用域が閉じてから実装する。
+物理3D thermal/noiseの軌道認定はG5のstate/event完成が必要である。
+G6はaccuracy/model/inputを固定した後に進める。日数を先に約束せず、各packageの完了条件で区切る。
+
+#### 22.2.1 実装済み範囲
+
+| package | 2026-10-14の成果と限界 |
+|---|---|
+| G1 | `tools/source_builder`にrealized CSV、vector、speed/direction、非相対論momentum/energy、明示static基底変換を実装。canonical writerとpublic load_caseを使う一経路で、入力bytesのparse/hashは同じsnapshot。任意式・分布sampler・source RNG・非零第三成分・dynamic frameは未対応 |
+| G2 | `tools/comsol_adapter`のthermal固定v2 dialectをselected static nodal XY/RZ v3へ置換しF02設定/testを移行。domain witnessとprimitive有限性を別検査。時間snapshot、cell/不連続場、multi-domain union、高次native FE再現は未対応 |
+| G3 | `tools/vv/gas_collision`に独立collision quadrature/jump/frozen参考過程を実装。平均法則を明示仮定内で確認。nonlinear SDE、粒子熱状態、high-drift熱泳動、physical3D軌道は未認定・未追加 |
+| G4 | 既存`evaluate_matched_trajectory`の固定ID/時計/電荷仮定を置換。実在3刻みの自己感度と2保存参加者のraw比較を分離。既存連成RK4でA/P再計算。図はcanonical geometry、joint precontact、欠測/terminal意味を保持。精度controllerや第二engineは追加しない |
+| G5/G6 | 本節と既存P17/第21.3節の将来項目。今回の成果に含めない |
+
+外部toolの変換・評価検証とproduction engineの方程式qualificationを区別する。
+初期条件・場payloadを従来入力と全行照合した後に既存integratorだけを変更したため、
+今回の軌道数値感度にsource/fieldの再生成差を混ぜない。
+
+### 22.3 G1：今回の初期条件と取り込みの実態
+
+今回のactive featureはA=`comp1/fptas/relg1`、P=`comp1/fpt/relg1`のReleaseGridである。
+AllCombinationsにより41個のr座標×7個のz座標、全粒子t=0に放出される。
+raw位置の14〜18、2.3〜2.6はgeometryのcmであり、canonicalではr=0.14〜0.18 m、
+z=0.023〜0.026 mである。ID順をgrid列順から推測せず、native実現IDを使って確認した。
+
+有効な初速度はSpecifyVelocity/Expressionで、成分式はnativeの`[r,phi,z]`として保持される。
+phi式は0でありout-of-plane DOFは使わない。実際のretained velocityは次である。
+
+```text
+theta(r,z) = (15 deg)*sin(2*pi*(0.61803398875*(r-0.14 m)/(0.001 m)
+                              +0.41421356237*(z-0.023 m)/(0.0005 m)))
+s(r,z)     = 10000 * release_speed_multiplier * |u_g(r,z)|
+v_r        = s*sin(theta)
+v_z        = release_axial_sign*s*cos(theta)
+```
+
+ここではmultiplier=1、axial_sign=1であり、10000は10 nmに対する100×100の条件式から生じる。
+AはAS_release_speed→AS_ugr/z→withsol(sol2, RF=100 V)、Pはrelease_speed_P→u/wを使う。
+背景primitiveの実際のsolution/memberとsource評価の依存先を別々にbindする。
+ガス速度の大きさを使用しても、速度方向をガス流方向に合わせたりガス速度を加算したりしていない。
+角度は位置に相関した決定論的値であり、uniform coneやMaxwellianではない。
+保存初速は両caseとも約90.16〜2478.19 m/s、thetaは約±14.9998°であった。
+
+stored `T0=293.15 K`、`Ep0=1 keV`、`alphac=pi/3`、`M=50`、`mp0=1e-9 kg`、`dp0=1 µm`は
+このactive選択の初速度/粒子質量/径ではない。慣性質量はdensity/diameter選択の
+1.1519173063162575e-21 kg、drag径10 nm、electrostatic半径5 nm、point contact、Z0=-1、weight=1である。
+SubtractMovingFrameVelocity=0だけから慣性系を断定しない。今回のinventoryにはrotating-frame featureがない。
+保存vector値の一致とlaboratory-frame意味の認定は別であり、datasetのframetypeも運動frameの証明ではない。
+point contact・weight/material等のcandidate解釈と直接保存された状態を区別する。
+
+gas抵抗で用いる分子と粒子表面のdiffuse/accommodation fraction（今回candidateは0.9）と、
+粒子がチャンバー壁で付着する確率（今回material wallは0.5）は別の量である。
+後者の残り0.5は鏡面反射であり、gas collision modelのdiffuse fractionへ転記しない。
+
+監査では保存t0とcanonicalの位置・速度の最大成分差はいずれも0、別のprimitive probeを使う
+式の再計算の最大成分差は5.573e-11 m/s以下であった。export座標/演算roundoffを含む。
+既存exportを再使用した算術検証であり、独立した二回目のnative抽出や統計的source妥当性の検証ではない。
+
+### 22.4 G1：汎用source producerの具体的な仕様
+
+coreへ任意expression、分布名、COMSOL propertyや新source RNGを足さない。
+現在のcanonical `position_m[N,2]`、`velocity_m_s[N,2]`、release、mass、各径/半径、volume、Z、weightで
+2D realized sourceを表現できる。G1だけではcore schema変更は不要である。
+surface sourceの位置はfacetと厳密な内部parameterを使い、現在のcontact geometry ownerが中心を解決する。
+速度は常にcanonical基底へ変換済みとする。固定nudgeを導入しない。
+
+外部producerは、まず実用modeとして(1)実現tableの取り込み、(2)明示vectorまたはspeed+direction、
+(3)非相対論momentum/energyの変換を実装する。native complex expressionはproducer側で評価・exportする。
+任意式DSLは作らない。thermal/角度/物理flux modeは利用caseと以下のreferenceがあるものだけ順次追加する。
+
+| 与え方 | 正しい意味・変換 | 必要な検証 |
+|---|---|---|
+| vector | unit・成分順・基底・frameを指定して変換。速度の大きさだけでは不足 | 非軸方向vector、回転基底、符号、全行比較 |
+| speed+direction | `v=s*l/|l|`、zero directionは拒否。場所・時刻・粒子径等との相関を保持 | norm/directionとconditional correlation |
+| momentum / kinetic energy | 非相対論慣性modelで`v=p/m`、`s=sqrt(2E/m)`。EはJ、mはrowのmass_kg | energy/momentum、異なるmassのrow、eV→J |
+| 流れを基準にする | `v=u_g`、`v=u_g+w`、`v=s*n`を別々に指定。release時刻/位置の場を使う | 一様/非一様/時間場の既知値、絶対/相対の区別 |
+| volume thermal | 保持Cartesian各成分の分散`kBT/m`。speed PDFは次元に依存 | 平均・covariance・`E[|v-u|²]=d*kBT/m`、size/temperatureとの相関 |
+| 球面/半球/cone | 3D等方はcos(theta)を一様、2D arcはsigned angleを一様。決定論quadratureと乱数sampleを別記 | solid-angle moment、cone支持、粒子数/multiplicity |
+| Lambertian / surface thermal flux | angular cosine lawとspeed lawを別指定。物理的平衡fluxはnormal正向きRayleigh、tangent Gaussian。native thermal lawとは式を照合してから対応 | inward normal・right-handed基底、normal/energy moment、flux-weighting |
+| RZ体積/表面 | 物理率なら`2*pi*r dr dz`/`2*pi*r ds`、meridional診断なら`dr dz`/`ds`。annulus一様体積ではr²を一様 | total area/volume、weighted数/率、半径moment |
+| 放出時刻・weight | list、time quadrature、Poisson rateは別。計算粒子数と物理粒子数/質量/電流を区別 | realized release list、rate積分、曝露時間、weight合計 |
+| 第三成分・moving frame | 非零phi/面外成分、旋回frameの運動は現行2DOFでは完全再現不能 | reduction明示またはunsupported。初値変換だけで動的frameを対応済みとしない |
+
+sourceの成果物は一つのrealized tableと、既存`producer_metadata`に収める小さい生成記録とする。
+入力hash、sampler/変換revision、対象measure、基底/frame、active expression依存、
+release/position/velocity/propertyのjoint意味、seedとdraw identity、native実現との対応を記録する。
+属性ごとに別validator/manifestを増やさない。生成後のtableを固定し、workers/tile/output/resumeで再sampleしない。
+source RNGとBrownian/wall RNGは別streamである。
+
+nativeとの再現はactual realized rowを全IDで比較する。独立にsampleしたsourceでは、
+joint/conditional分布とweighted observableを比較し、同じIDの軌道差を再現誤差にしない。
+初期thermal速度と運動中Brownian forcingは異なる仕組みであり、片方が他方を代替しない。
+詳しい運用は準備skillの
+[initial-conditions.md](../.agents/skills/prepare-comsol-field-case/references/initial-conditions.md)が所有する。
+
+### 22.5 G2/G3：場転送と物理modelを別々に閉じる
+
+G2では既存adapterのFieldSpecificationを、必要なfieldだけの有限listへ置換する。
+各量にcanonical名/quantity/unit/components/basis、native expressionとqualified scope、
+solution/member/time、domain/side、association、recovery/PPR/smoothing、sampling位置と変換根拠を持たせる。
+hash済み`producer_metadata`と既存extraction recordを使い、coreへnative演算子を渡さない。
+node IDがある時はIDを使い、座標joinは一意性と誤差を検査する。regularというfilenameから格子reshapeしない。
+quad→triによる近似、axis parity変更、heat-flux再構成は変換記録と対象観測量への誤差を必要とする。
+
+検証はnative→canonicalのnode確認に加え、cell内部・interface近傍・source・代表trajectory位置を含める。
+primitiveのSI差と同一状態のforce/charge差を測り、mesh h/h2/h4、field snapshot、wall facetingを別々に調べる。
+場とgeometryは別責務だが、現行productionのrequired場は一つのfully-supported nodal layoutを要求する。
+unstructured P1/Q1ではparticle volume meshとの完全一致が必要である。regular場は独立gridを使える。
+一般のcell-associated/discontinuous required場は現行対応済みではない。
+P1/Q1凸補間のnodal extrema証明を高次overshootへ流用しない。
+mesh refinementで物理budgetに届かない場合だけ、side-aware表現、高次/曲面、internal wallを個別提案する。
+いずれもsupport、保守bound、stage/eventとgeometryを同時に閉じることが着手条件である。
+
+G3は次の順で進める。式の根拠と未確定事項は
+[technical_research.md 第12節](technical_research.md)が所有する。
+
+1. finite-speed mean dragを、gas組成、温度、sphere/accommodation、mass/size conventionまで独立確認する。
+   mixtureはspecies sumが根拠になる場合だけ採用し、平均分子質量一つで必ず等価とはしない。
+2. 同じcollision kernelから速度drift Aとcovariance-rate Qを導出し、低速OUへの極限を検証する。
+   Qの正定性だけでは高速度SDE近似を認定しない。jump/collision oracleで質量比・高次moment・tail/eventを調べる。
+3. Qが速度依存なら既存frozen-linear OUとは別の明示SDE revisionが必要である。
+   Itô/Stratonovich、drift補正、stage評価、conditional increments、event residualをG4と一緒に閉じる。
+4. 高drift熱泳動はWaldmannの式へ上限変更を施して流用しない。gas分布/heat-flux closureを導出するか、
+   当該範囲の熱泳動を未対応として、物理的不確実性と対象observable感度を残す。
+
+不均一・非Maxwellian gas、混合/熱非平衡、collision memory、near-wall、非球形、rotation、
+charge/ion collisionの影響は必要性が示されたmodelだけを追加する。係数fitや万能regime blendを先行しない。
+原COMSOLのlinear数学問題をそのまま解く検証が必要なら、外部のmanufactured/reference testとして扱う。
+productionへ追加する場合もCOMSOL固有名やgate bypassではなく独立した根拠と利用caseを必要とする。
+
+### 22.6 G4：独立した精度判定と最小の原因識別
+
+現行のdtは固定であり、support/event/applicabilityのsplitはsafety制御である。
+それをtruncation-error adaptivityやaccuracy保証と呼ばない。exponential chargeは同じmidpointで
+凍結する連成式であり、chargeの安定性と長時間の連成accuracyも別である。
+
+最小検証は次とする。既存の解析/OU/charge/dense/corner/grazing/axis試験を再使用し、
+不足する原因例だけを追加する。case/observationはCOMSOLなしで作る。
+
+| 検証 | referenceと判定 |
+|---|---|
+| 非一様deterministic force/charge | 解析またはmanufactured trajectory、独立高精度reference、h/h2/h4。x/v/Zを別budgetで評価。P1の非滑らかさで形式次数を強制しない |
+| 空間/時間field | polynomial既知場とrefined representation、off-node/各stage/field knotを検査。dtで転送biasを隠さない |
+| 境界 | ballistic/加速度/曲線のplane/corner/grazing first hit、同じ積分器でhitまで再評価、反射energy/残時間。連続noiseの未sample first passageはexactとしない |
+| frozen linear noise | OUの平均・covariance・速度相関・MSD、joint位置速度とconditional splitのreference。source thermalと独立に検査 |
+| 新nonlinear noise | G3が閉じたcollision oracleのmoment/relaxation/energy/tailと弱収束。強収束比較では同じBrownian incrementをcoupleする。seed整数だけでは不足 |
+| 再現性/費用 | 出力時刻/worker/tile/checkpoint変更で同じ科学payload。state/scratch/IPCを同じmemory budgetに計上 |
+
+外部比較は(1)joint initial source、(2)同一状態のnative式、(3)primitive転送、(4)candidate pure/compiled、
+(5)candidate数値細分化、(6)reference数値/確率、(7)event前後の順で最初の差を切り分ける。
+完全な順番を毎回やり直さず、hashで有効な証拠を再使用する。
+第一差のpacketは選択ID・時刻・状態・cell/support・primitive・force/rate・model/revision・event bracketだけに限定する。
+input/code/algorithm hash、直前accepted checkpoint、例外原因、観測した最初の保存intervalもbindする。
+現行probesはx/v/Z/lifecycleであり、歴史的なprimitive/force stage traceではない。
+必要なprimitive/rateは別に識別したfrozen-state probeとし、取得不能な値を埋めない。
+現行probes、checkpoint、例外context、ResultViewを使い、第二engine/常時stage保存/診断frameworkを作らない。
+native Brownianの保存時再評価を歴史的RK stage drawと呼ばない。
+
+PASS前にreference自身の細分化と物理目的からの許容誤差を登録する。最細二段階差は経験的感度であり、
+漸近性を示さず誤差上界にしない。Monte Carloの不確実性、source分布、場/model biasは数値感度と別に記載する。
+
+現行外部評価器`deterministic_pre_event_trajectory_v3`はcross budgetと独立した
+candidate/referenceの`self_sensitivity_budgets`を消費する。未登録・超過・実partition証拠不足では
+qualified parityを`NOT_TESTED`に保ち、raw差分は出す。public manifestの共通runspan、
+増加するmacro counts、選択窓にcoarsest base stepが1つより多いことを保守的な必要条件とする。
+この条件は全accepted particle stageの再構成でも絶対誤差保証でもない。
+CSV-only native provenanceをpublic resultとして偽装せず、nativeの実行・解像度資格は別に根拠を得る。
+
+軌道は全粒子のjoint pre-contact x/v/Z、first arrival、semantic surface、impact energy/angle、
+event列、survival/weighted fateを評価する。最初のevent/乱数分岐後のID軌道差はその原因を併記し、
+coverage/censoringを保持する。今回PのPID11/30は細分化pilot対象であり、新caseのdefault IDにはしない。
+rare wafer hitは今回の少数例だけで精密な率を認定しない。
+
+既存methodで予算を満たせないことと費用支配が実測された場合だけ、local accuracy controlを提案する。
+比較する状態はcoupled x/v/Z、scaleは目的から決めたabsolute/relative budgetであり、
+既存safety/event認証を維持する。導入時は一つのproposal/accepted-state/engineへ統合し、
+RNG再draw・charge-only subcycle・output時刻による積分step変更を導入しない。
+
+### 22.7 G5：物理3D追跡に必要なstateとsource
+
+場が軸対称であることは、粒子の方位速度が常に0であることを意味しない。
+非零phi初速や3D thermal/Brownianは、radial dynamicsと衝突方向を変える。
+meridionalのnoise投影は制約付き2D modelであり、full3D Brownian輸送の認定に使わない。
+sourceだけに第三速度を足す改良では解けない。
+
+既存P17のRZ field/geometry→Cartesian XYZ粒子を進める。一般tet mesh、voxel複製や次元pluginを前提にしない。
+最初はdeterministic・fixed charge・検証済みforceと回転面eventで閉じ、続いてfinite-speed、continuous charge、
+3D collision/noiseを**各組合せの根拠が閉じた順に**同じengineへ追加する。
+元の2DOF COMSOLの再現と物理3D拡張は異なるcomparison intentである。
+releaseでのphi/azimuth、場basis、軸極限、3D normal、schema/result/checkpoint、memoryを同じchangeで閉じる。
+軸上からの平均0・等方transverse Gaussian displacementのradial momentは、3DのRayleighと
+2D投影のfolded-normalを区別する独立microcaseになる。軸から離れた初期位置や非零平均は
+同じRayleigh則にはならない。単なる回転可視化では3D dynamicsを検証できない。
+
+### 22.8 次の担当agentへ渡すものと終了条件
+
+実装者はこの第22節から一つのpackageを選び、そのowner文書、必要な小さいreference、
+既存extraction/case/result hashを読む。A/P・tag・boundary ID・速度・seed・dtを次のchamberのdefaultにしない。
+未実装modelをskillsに対応済みとして記述しない。skillsは既存の四単位を維持する。
+
+- inspect：native active設定、依存式、実現source、solution、unit、selectionを一回抽出。
+- prepare：物理model対応、source生成、geometry/field変換、独立numerical plan。
+- validate：同一実現/分布比較、独立精度、差のownerと限界。
+- visualize：保存済みの状態/eventとgeometryを使い、比較のmask・未知を表示。
+
+新しい巨大統合skillやcase別skillは作らない。詳細調査資料は
+[field/adapter設計レビュー](analysis/generic_improvement_2026_10_14/field_adapter_design.json)、
+[physics設計レビュー](analysis/generic_improvement_2026_10_14/physics_design.json)、
+[数値/V&V設計レビュー](analysis/generic_improvement_2026_10_14/numerical_vv_design.json)にある。
+これらは調査記録であり、本節の実装順、technical researchの式、architectureのownerを上書きしない。
+各実装は第18〜20節のquality/verification/性能条件と置換削除を満たした時だけ完了とする。
+資料・skillsだけの更新をsolver改良やCOMSOL軌道一致の完了とは報告しない。

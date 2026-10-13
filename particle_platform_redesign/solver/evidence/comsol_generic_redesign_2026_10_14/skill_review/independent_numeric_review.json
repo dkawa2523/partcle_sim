@@ -1,0 +1,2906 @@
+{
+  "schema_version": 1,
+  "review_date_local": "2026-10-14",
+  "reviewer": "original_model_mapping",
+  "review_kind": "independent_normalized_csv_numeric_review",
+  "imports": "Python standard library and numpy only; no repository analysis/evaluator/solver imports.",
+  "reproducer_sha256": "5dd066adc38ba46f95be5875c11268c769982c40f9ecd6383c7f3889d097517e",
+  "status": "PASS",
+  "definitions": {
+    "mask": "Both rows observed, all x/v/Z components finite, lifecycle active, and explicitly precontact_eligible.",
+    "RMS": "sqrt(mean(Euclidean vector difference squared)) or scalar absolute Z; equal weight per retained ID/time row.",
+    "denominator": "Actual explicit 287 IDs x 121 saved clock, including missing or terminal rows.",
+    "missing": "No fill, interpolation, padding or substitute state.",
+    "native_disappeared": "Kept distinct from candidate escaped; no inferred boundary cause."
+  },
+  "cases": {
+    "caseA": {
+      "case": "caseA",
+      "normalized_csv": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseA_all_states.csv",
+        "sha256": "3276350d1e57ca89694b39f2ad4f1c151befd229d585173b4787e8fdd68f0ef5",
+        "records": 208362,
+        "particle_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269,
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287
+        ],
+        "observation_times_s": [
+          0.0,
+          1e-05,
+          2e-05,
+          3.0000000000000004e-05,
+          4e-05,
+          5e-05,
+          6.000000000000001e-05,
+          7.000000000000001e-05,
+          8e-05,
+          9e-05,
+          0.0001,
+          0.00011,
+          0.00012000000000000002,
+          0.00013000000000000002,
+          0.00014000000000000001,
+          0.00015000000000000001,
+          0.00016,
+          0.00017,
+          0.00018,
+          0.00019,
+          0.0002,
+          0.00021,
+          0.00022,
+          0.00023,
+          0.00024000000000000003,
+          0.00025,
+          0.00026000000000000003,
+          0.00027,
+          0.00028000000000000003,
+          0.00029,
+          0.00030000000000000003,
+          0.00031,
+          0.00032,
+          0.00033000000000000005,
+          0.00034,
+          0.00035000000000000005,
+          0.00036,
+          0.00037000000000000005,
+          0.00038,
+          0.00039000000000000005,
+          0.0004,
+          0.00041000000000000005,
+          0.00042,
+          0.00043000000000000004,
+          0.00044,
+          0.00045000000000000004,
+          0.00046,
+          0.00047000000000000004,
+          0.00048000000000000007,
+          0.0004900000000000001,
+          0.0005,
+          0.0006,
+          0.0007,
+          0.0007999999999999999,
+          0.0009,
+          0.001,
+          0.0010999999999999998,
+          0.0012000000000000001,
+          0.0013,
+          0.0014,
+          0.0015,
+          0.0015999999999999999,
+          0.0017000000000000001,
+          0.0018,
+          0.0019000000000000002,
+          0.002,
+          0.0021,
+          0.0022,
+          0.0023,
+          0.0024000000000000002,
+          0.0025,
+          0.0026,
+          0.0027,
+          0.0028,
+          0.0029,
+          0.003,
+          0.0031,
+          0.0032,
+          0.0033,
+          0.0034,
+          0.0035,
+          0.0036,
+          0.0037,
+          0.0038,
+          0.0039,
+          0.004,
+          0.0041,
+          0.004200000000000001,
+          0.0043,
+          0.0044,
+          0.0045000000000000005,
+          0.0046,
+          0.0047,
+          0.0048000000000000004,
+          0.0049,
+          0.005,
+          0.006,
+          0.007,
+          0.008,
+          0.009000000000000001,
+          0.01,
+          0.011,
+          0.012,
+          0.013000000000000001,
+          0.014,
+          0.015000000000000001,
+          0.016,
+          0.017,
+          0.018000000000000002,
+          0.019000000000000003,
+          0.02,
+          0.020999999999999998,
+          0.022,
+          0.023,
+          0.024,
+          0.025,
+          0.026000000000000002,
+          0.027000000000000003,
+          0.027999999999999997,
+          0.028999999999999998,
+          0.03
+        ],
+        "explicit_key_grid_complete": true,
+        "meaning": "Explicit normalized keys are not proof of observed coordinate states."
+      },
+      "saved_summary": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseA_summary.json",
+        "sha256": "056cd315adf087823bac5cc17b68478f9d74cbcb42334ab1be3e806d76fc1aa5"
+      },
+      "coverage_and_final_lifecycle": {
+        "native10": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34727,
+          "state_records_missing": 0,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "active": 92,
+            "stuck": 79,
+            "disappeared": 116
+          }
+        },
+        "native5": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34727,
+          "state_records_missing": 0,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "stuck": 75,
+            "active": 97,
+            "disappeared": 114,
+            "held": 1
+          }
+        },
+        "old_exp_fine": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 32602,
+          "state_records_missing": 2125,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "stuck": 77,
+            "escaped": 35,
+            "active": 175
+          }
+        },
+        "rk4_coarse": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 32602,
+          "state_records_missing": 2125,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "stuck": 77,
+            "escaped": 35,
+            "active": 175
+          }
+        },
+        "rk4_medium": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 32602,
+          "state_records_missing": 2125,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "stuck": 77,
+            "escaped": 35,
+            "active": 175
+          }
+        },
+        "rk4_fine": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 32602,
+          "state_records_missing": 2125,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "stuck": 77,
+            "escaped": 35,
+            "active": 175
+          }
+        }
+      },
+      "initial_against_native10": {
+        "native10": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "native5": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "old_exp_fine": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "rk4_coarse": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "rk4_medium": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "rk4_fine": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        }
+      },
+      "pairs": {
+        "rk4_coarse_minus_medium": {
+          "left": "rk4_coarse",
+          "right": "rk4_medium",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 20146,
+              "rms": 6.195396276714384e-07,
+              "maximum": 2.7952683129109374e-05,
+              "maximum_location": {
+                "particle_id": 221,
+                "time_s": 0.0039
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 20146,
+              "rms": 0.003481874435546345,
+              "maximum": 0.36389555582011796,
+              "maximum_location": {
+                "particle_id": 221,
+                "time_s": 0.0039
+              }
+            },
+            "charge_number": {
+              "count": 20146,
+              "rms": 3.446770154981956e-05,
+              "maximum": 0.0009280391415202871,
+              "maximum_location": {
+                "particle_id": 114,
+                "time_s": 0.0021
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 6.664793770988093e-09,
+              "maximum": 3.082466478800056e-08,
+              "maximum_particle_id": 275
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.0008752315995772228,
+              "maximum": 0.0032370744789281696,
+              "maximum_particle_id": 36
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 4.930858806403236e-05,
+              "maximum": 0.00020328666111812943,
+              "maximum_particle_id": 263
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 20146,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "rk4_medium_minus_fine": {
+          "left": "rk4_medium",
+          "right": "rk4_fine",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 20146,
+              "rms": 1.6466885081122253e-07,
+              "maximum": 5.389094096735528e-06,
+              "maximum_location": {
+                "particle_id": 221,
+                "time_s": 0.0039
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 20146,
+              "rms": 0.0007449235292774457,
+              "maximum": 0.0701418830667069,
+              "maximum_location": {
+                "particle_id": 221,
+                "time_s": 0.0039
+              }
+            },
+            "charge_number": {
+              "count": 20146,
+              "rms": 6.782461226978441e-06,
+              "maximum": 0.0001241537103098267,
+              "maximum_location": {
+                "particle_id": 94,
+                "time_s": 0.03
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 1.8555595172311393e-09,
+              "maximum": 1.0364458161452599e-08,
+              "maximum_particle_id": 275
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.00023428703183884288,
+              "maximum": 0.0010507465761286888,
+              "maximum_particle_id": 275
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 1.2478326805775814e-05,
+              "maximum": 5.1698002807576415e-05,
+              "maximum_particle_id": 277
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 20146,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "rk4_fine_minus_native10": {
+          "left": "rk4_fine",
+          "right": "native10",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 17578,
+              "rms": 0.009118225900451239,
+              "maximum": 0.11590936549415941,
+              "maximum_location": {
+                "particle_id": 116,
+                "time_s": 0.025
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 17578,
+              "rms": 32.84533467764854,
+              "maximum": 421.0410141419928,
+              "maximum_location": {
+                "particle_id": 175,
+                "time_s": 0.00031
+              }
+            },
+            "charge_number": {
+              "count": 17578,
+              "rms": 0.1758937347922925,
+              "maximum": 1.6966650238292615,
+              "maximum_location": {
+                "particle_id": 142,
+                "time_s": 0.0026
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 0.00012679234229722087,
+              "maximum": 0.0008563039183868995,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 23.710618561129543,
+              "maximum": 159.407126472935,
+              "maximum_particle_id": 287
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 0.023538213478511802,
+              "maximum": 0.060833006689295255,
+              "maximum_particle_id": 29
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 17578,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "rk4_fine_minus_native5": {
+          "left": "rk4_fine",
+          "right": "native5",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 17390,
+              "rms": 0.012057921589275667,
+              "maximum": 0.11958265562954977,
+              "maximum_location": {
+                "particle_id": 206,
+                "time_s": 0.014
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 17390,
+              "rms": 32.666225118991385,
+              "maximum": 401.946170781667,
+              "maximum_location": {
+                "particle_id": 188,
+                "time_s": 0.00032
+              }
+            },
+            "charge_number": {
+              "count": 17390,
+              "rms": 0.21702346204524675,
+              "maximum": 3.892575076560348,
+              "maximum_location": {
+                "particle_id": 206,
+                "time_s": 0.0031
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 0.00012650248542922025,
+              "maximum": 0.0008570135191580676,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 23.69749884128875,
+              "maximum": 159.41859493892312,
+              "maximum_particle_id": 287
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 0.009679679522855573,
+              "maximum": 0.027984916562227236,
+              "maximum_particle_id": 239
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 17390,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "native5_minus_native10": {
+          "left": "native5",
+          "right": "native10",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 17283,
+              "rms": 0.010217077451446116,
+              "maximum": 0.11710483998555608,
+              "maximum_location": {
+                "particle_id": 109,
+                "time_s": 0.011
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 17283,
+              "rms": 5.195921721240813,
+              "maximum": 74.08175781481995,
+              "maximum_location": {
+                "particle_id": 87,
+                "time_s": 0.00038
+              }
+            },
+            "charge_number": {
+              "count": 17283,
+              "rms": 0.15211006654934361,
+              "maximum": 2.8545638742517667,
+              "maximum_location": {
+                "particle_id": 206,
+                "time_s": 0.0033
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 3.526408005987853e-06,
+              "maximum": 9.930205954721933e-06,
+              "maximum_particle_id": 29
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.5211616638362493,
+              "maximum": 1.205690074021272,
+              "maximum_particle_id": 44
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 0.022957983734748715,
+              "maximum": 0.07104087626813715,
+              "maximum_particle_id": 29
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 17283,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "old_exp_fine_minus_rk4_fine": {
+          "left": "old_exp_fine",
+          "right": "rk4_fine",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 20146,
+              "rms": 4.744460214403207e-07,
+              "maximum": 1.2433781456805328e-05,
+              "maximum_location": {
+                "particle_id": 170,
+                "time_s": 0.022
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 20146,
+              "rms": 0.002293857494377476,
+              "maximum": 0.15645170294184643,
+              "maximum_location": {
+                "particle_id": 221,
+                "time_s": 0.0039
+              }
+            },
+            "charge_number": {
+              "count": 20146,
+              "rms": 3.1032566028412804e-05,
+              "maximum": 0.0008356944053815596,
+              "maximum_location": {
+                "particle_id": 114,
+                "time_s": 0.0021
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 1.328491597713414e-08,
+              "maximum": 4.9020492075617235e-08,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.0010822601096349596,
+              "maximum": 0.004250129440753207,
+              "maximum_particle_id": 275
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 4.016581052623222e-05,
+              "maximum": 0.00019476038815491314,
+              "maximum_particle_id": 277
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 20146,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "old_exp_fine_minus_rk4_medium": {
+          "left": "old_exp_fine",
+          "right": "rk4_medium",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 20146,
+              "rms": 3.966109894720452e-07,
+              "maximum": 9.528520351512293e-06,
+              "maximum_location": {
+                "particle_id": 98,
+                "time_s": 0.025
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 20146,
+              "rms": 0.001819492687811713,
+              "maximum": 0.08630982097230809,
+              "maximum_location": {
+                "particle_id": 221,
+                "time_s": 0.0039
+              }
+            },
+            "charge_number": {
+              "count": 20146,
+              "rms": 3.004497346108279e-05,
+              "maximum": 0.0008709502988821782,
+              "maximum_location": {
+                "particle_id": 114,
+                "time_s": 0.0021
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 1.267380146641129e-08,
+              "maximum": 4.775679156498641e-08,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.0009777519222312048,
+              "maximum": 0.0031993888472739286,
+              "maximum_particle_id": 275
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 3.418707743969683e-05,
+              "maximum": 0.00014467438942156186,
+              "maximum_particle_id": 272
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 20146,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        }
+      },
+      "common_three_level_self_sensitivity": {
+        "shared_precontact_rows": 20146,
+        "denominator": 34727,
+        "step_ratio_basis": "Declared twofold ratios in the bound saved summary; CSV states alone do not authenticate actual integration partitions.",
+        "step_ratios": [
+          2.0,
+          2.0
+        ],
+        "position_vector_m": {
+          "coarse_medium_rms": 6.195396276714384e-07,
+          "medium_fine_rms": 1.6466885081122253e-07,
+          "observed_rms_ratio": 3.7623364990971044,
+          "log2_ratio_diagnostic": 1.9116288876352348,
+          "meaning": "Observed saved-row diagnostic; not formal convergence order or an error bound."
+        },
+        "velocity_vector_m_s": {
+          "coarse_medium_rms": 0.003481874435546345,
+          "medium_fine_rms": 0.0007449235292774457,
+          "observed_rms_ratio": 4.67413673846987,
+          "log2_ratio_diagnostic": 2.2246999397319556,
+          "meaning": "Observed saved-row diagnostic; not formal convergence order or an error bound."
+        },
+        "charge_number": {
+          "coarse_medium_rms": 3.446770154981956e-05,
+          "medium_fine_rms": 6.782461226978441e-06,
+          "observed_rms_ratio": 5.081887001833224,
+          "log2_ratio_diagnostic": 2.3453642967397017,
+          "meaning": "Observed saved-row diagnostic; not formal convergence order or an error bound."
+        },
+        "saved_summary_matches": {
+          "position_vector_m": true,
+          "velocity_vector_m_s": true,
+          "charge_number": true
+        },
+        "all_checked_saved_summary_values_match": true
+      },
+      "coverage_and_final_lifecycle_summary_matches": {
+        "native10": true,
+        "native5": true,
+        "old_exp_fine": true,
+        "rk4_coarse": true,
+        "rk4_medium": true,
+        "rk4_fine": true
+      },
+      "all_checked_saved_summary_values_match": true
+    },
+    "caseP": {
+      "case": "caseP",
+      "normalized_csv": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseP_all_states.csv",
+        "sha256": "d0d6006661e7db573ed89bfebb0ebe2fc05d4c0b679fb355a05b3155dc922ba0",
+        "records": 208362,
+        "particle_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269,
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287
+        ],
+        "observation_times_s": [
+          0.0,
+          1e-05,
+          2e-05,
+          3.0000000000000004e-05,
+          4e-05,
+          5e-05,
+          6.000000000000001e-05,
+          7.000000000000001e-05,
+          8e-05,
+          9e-05,
+          0.0001,
+          0.00011,
+          0.00012000000000000002,
+          0.00013000000000000002,
+          0.00014000000000000001,
+          0.00015000000000000001,
+          0.00016,
+          0.00017,
+          0.00018,
+          0.00019,
+          0.0002,
+          0.00021,
+          0.00022,
+          0.00023,
+          0.00024000000000000003,
+          0.00025,
+          0.00026000000000000003,
+          0.00027,
+          0.00028000000000000003,
+          0.00029,
+          0.00030000000000000003,
+          0.00031,
+          0.00032,
+          0.00033000000000000005,
+          0.00034,
+          0.00035000000000000005,
+          0.00036,
+          0.00037000000000000005,
+          0.00038,
+          0.00039000000000000005,
+          0.0004,
+          0.00041000000000000005,
+          0.00042,
+          0.00043000000000000004,
+          0.00044,
+          0.00045000000000000004,
+          0.00046,
+          0.00047000000000000004,
+          0.00048000000000000007,
+          0.0004900000000000001,
+          0.0005,
+          0.0006,
+          0.0007,
+          0.0007999999999999999,
+          0.0009,
+          0.001,
+          0.0010999999999999998,
+          0.0012000000000000001,
+          0.0013,
+          0.0014,
+          0.0015,
+          0.0015999999999999999,
+          0.0017000000000000001,
+          0.0018,
+          0.0019000000000000002,
+          0.002,
+          0.0021,
+          0.0022,
+          0.0023,
+          0.0024000000000000002,
+          0.0025,
+          0.0026,
+          0.0027,
+          0.0028,
+          0.0029,
+          0.003,
+          0.0031,
+          0.0032,
+          0.0033,
+          0.0034,
+          0.0035,
+          0.0036,
+          0.0037,
+          0.0038,
+          0.0039,
+          0.004,
+          0.0041,
+          0.004200000000000001,
+          0.0043,
+          0.0044,
+          0.0045000000000000005,
+          0.0046,
+          0.0047,
+          0.0048000000000000004,
+          0.0049,
+          0.005,
+          0.006,
+          0.007,
+          0.008,
+          0.009000000000000001,
+          0.01,
+          0.011,
+          0.012,
+          0.013000000000000001,
+          0.014,
+          0.015000000000000001,
+          0.016,
+          0.017,
+          0.018000000000000002,
+          0.019000000000000003,
+          0.02,
+          0.020999999999999998,
+          0.022,
+          0.023,
+          0.024,
+          0.025,
+          0.026000000000000002,
+          0.027000000000000003,
+          0.027999999999999997,
+          0.028999999999999998,
+          0.03
+        ],
+        "explicit_key_grid_complete": true,
+        "meaning": "Explicit normalized keys are not proof of observed coordinate states."
+      },
+      "saved_summary": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_generic_redesign_2026_10_14\\trajectory_review\\caseP_summary.json",
+        "sha256": "e7e35b7d7819103925cb6dfb5609967a202b42c052ba95bfbe70b8e88ad86bdd"
+      },
+      "coverage_and_final_lifecycle": {
+        "native10": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34727,
+          "state_records_missing": 0,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "active": 213,
+            "stuck": 67,
+            "disappeared": 7
+          }
+        },
+        "native5": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34727,
+          "state_records_missing": 0,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "active": 204,
+            "stuck": 79,
+            "disappeared": 4
+          }
+        },
+        "old_exp_fine": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34165,
+          "state_records_missing": 562,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "active": 244,
+            "stuck": 37,
+            "escaped": 6
+          }
+        },
+        "rk4_coarse": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34165,
+          "state_records_missing": 562,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "active": 244,
+            "stuck": 37,
+            "escaped": 6
+          }
+        },
+        "rk4_medium": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34165,
+          "state_records_missing": 562,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "active": 244,
+            "stuck": 37,
+            "escaped": 6
+          }
+        },
+        "rk4_fine": {
+          "IDs": 287,
+          "times": 121,
+          "state_records_expected": 34727,
+          "state_records_observed": 34165,
+          "state_records_missing": 562,
+          "active_nonfinite_or_missing": 0,
+          "final_named_status": {
+            "active": 244,
+            "stuck": 37,
+            "escaped": 6
+          }
+        }
+      },
+      "initial_against_native10": {
+        "native10": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "native5": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "old_exp_fine": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "rk4_coarse": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "rk4_medium": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        },
+        "rk4_fine": {
+          "full_287_initial_rows_observed_finite": true,
+          "exact_x_v_Z_equality": true,
+          "maximum_absolute_component_difference": {
+            "r_m": 0.0,
+            "z_m": 0.0,
+            "velocity_r_m_per_s": 0.0,
+            "velocity_z_m_per_s": 0.0,
+            "charge_number": 0.0
+          }
+        }
+      },
+      "pairs": {
+        "rk4_coarse_minus_medium": {
+          "left": "rk4_coarse",
+          "right": "rk4_medium",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 28289,
+              "rms": 1.5136585659205151e-06,
+              "maximum": 8.41848829784075e-05,
+              "maximum_location": {
+                "particle_id": 11,
+                "time_s": 0.03
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 28289,
+              "rms": 0.0011744956988904143,
+              "maximum": 0.04113294456874005,
+              "maximum_location": {
+                "particle_id": 30,
+                "time_s": 0.013000000000000001
+              }
+            },
+            "charge_number": {
+              "count": 28289,
+              "rms": 0.00024796975795853216,
+              "maximum": 0.019010643883099476,
+              "maximum_location": {
+                "particle_id": 11,
+                "time_s": 0.03
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 1.6278313336546813e-09,
+              "maximum": 1.113599588675865e-08,
+              "maximum_particle_id": 286
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.0002118581836092004,
+              "maximum": 0.0012333953478835741,
+              "maximum_particle_id": 286
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 1.4809997802537457e-05,
+              "maximum": 5.268592512064352e-05,
+              "maximum_particle_id": 49
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 28289,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "rk4_medium_minus_fine": {
+          "left": "rk4_medium",
+          "right": "rk4_fine",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 28289,
+              "rms": 1.7041601765156907e-07,
+              "maximum": 8.854457854762367e-06,
+              "maximum_location": {
+                "particle_id": 11,
+                "time_s": 0.03
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 28289,
+              "rms": 0.00024265777662549416,
+              "maximum": 0.003722757933278959,
+              "maximum_location": {
+                "particle_id": 45,
+                "time_s": 0.0007
+              }
+            },
+            "charge_number": {
+              "count": 28289,
+              "rms": 2.8122417072804803e-05,
+              "maximum": 0.0020042288803168162,
+              "maximum_location": {
+                "particle_id": 11,
+                "time_s": 0.03
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 4.074146305739748e-10,
+              "maximum": 2.316173481834012e-09,
+              "maximum_particle_id": 281
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 5.1600645544653717e-05,
+              "maximum": 0.00023916891777539393,
+              "maximum_particle_id": 281
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 3.6663210692202803e-06,
+              "maximum": 1.74397295387152e-05,
+              "maximum_particle_id": 69
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 28289,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "rk4_fine_minus_native10": {
+          "left": "rk4_fine",
+          "right": "native10",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 21676,
+              "rms": 0.01191812099006873,
+              "maximum": 0.07072138368663806,
+              "maximum_location": {
+                "particle_id": 71,
+                "time_s": 0.028999999999999998
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 21676,
+              "rms": 29.768698240242625,
+              "maximum": 369.4765872218062,
+              "maximum_location": {
+                "particle_id": 287,
+                "time_s": 3.0000000000000004e-05
+              }
+            },
+            "charge_number": {
+              "count": 21676,
+              "rms": 1.4404679052396667,
+              "maximum": 9.025076103178776,
+              "maximum_location": {
+                "particle_id": 71,
+                "time_s": 0.019000000000000003
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 0.0001268190178720349,
+              "maximum": 0.0008559253145999545,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 23.731848028651452,
+              "maximum": 159.36895984033777,
+              "maximum_particle_id": 287
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 0.008142131953398087,
+              "maximum": 0.026468696419293503,
+              "maximum_particle_id": 154
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 21676,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "rk4_fine_minus_native5": {
+          "left": "rk4_fine",
+          "right": "native5",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 21285,
+              "rms": 0.011424118100341166,
+              "maximum": 0.06155523869230797,
+              "maximum_location": {
+                "particle_id": 80,
+                "time_s": 0.03
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 21285,
+              "rms": 28.753393822180595,
+              "maximum": 369.47123401395817,
+              "maximum_location": {
+                "particle_id": 287,
+                "time_s": 3.0000000000000004e-05
+              }
+            },
+            "charge_number": {
+              "count": 21285,
+              "rms": 1.3230458761060389,
+              "maximum": 8.915641184146637,
+              "maximum_location": {
+                "particle_id": 145,
+                "time_s": 0.028999999999999998
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 0.00012653870920713105,
+              "maximum": 0.0008563953567039251,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 23.70556527676476,
+              "maximum": 159.3563121811799,
+              "maximum_particle_id": 287
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 0.008108951470850848,
+              "maximum": 0.028863488175538965,
+              "maximum_particle_id": 182
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 21285,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "native5_minus_native10": {
+          "left": "native5",
+          "right": "native10",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 21280,
+              "rms": 0.006730298248009776,
+              "maximum": 0.04099592487853931,
+              "maximum_location": {
+                "particle_id": 159,
+                "time_s": 0.011
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 21280,
+              "rms": 6.06897011884172,
+              "maximum": 42.721690922714885,
+              "maximum_location": {
+                "particle_id": 90,
+                "time_s": 0.002
+              }
+            },
+            "charge_number": {
+              "count": 21280,
+              "rms": 0.9834130898911391,
+              "maximum": 6.247113858578189,
+              "maximum_location": {
+                "particle_id": 159,
+                "time_s": 0.009000000000000001
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 3.8701675897214695e-06,
+              "maximum": 8.65579221539684e-06,
+              "maximum_particle_id": 201
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.6926107467672691,
+              "maximum": 1.6375691263871721,
+              "maximum_particle_id": 178
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 0.004141959679869435,
+              "maximum": 0.016873436485538518,
+              "maximum_particle_id": 249
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 21280,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "old_exp_fine_minus_rk4_fine": {
+          "left": "old_exp_fine",
+          "right": "rk4_fine",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 28289,
+              "rms": 4.2796028671386683e-07,
+              "maximum": 1.7727857049123326e-05,
+              "maximum_location": {
+                "particle_id": 30,
+                "time_s": 0.014
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 28289,
+              "rms": 0.0009173627502832222,
+              "maximum": 0.012767742005939086,
+              "maximum_location": {
+                "particle_id": 65,
+                "time_s": 0.00022
+              }
+            },
+            "charge_number": {
+              "count": 28289,
+              "rms": 6.575464967145703e-05,
+              "maximum": 0.0032324649313792975,
+              "maximum_location": {
+                "particle_id": 11,
+                "time_s": 0.03
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 6.3387761742684885e-09,
+              "maximum": 4.731263394531922e-08,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.00029703258431545596,
+              "maximum": 0.0023042202763031,
+              "maximum_particle_id": 287
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 1.4992835904973957e-05,
+              "maximum": 5.761334181531019e-05,
+              "maximum_particle_id": 69
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 28289,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        },
+        "old_exp_fine_minus_rk4_medium": {
+          "left": "old_exp_fine",
+          "right": "rk4_medium",
+          "initial": {
+            "full_287_initial_rows_observed_finite": true,
+            "exact_x_v_Z_equality": true,
+            "maximum_absolute_component_difference": {
+              "r_m": 0.0,
+              "z_m": 0.0,
+              "velocity_r_m_per_s": 0.0,
+              "velocity_z_m_per_s": 0.0,
+              "charge_number": 0.0
+            }
+          },
+          "all_saved_joint_precontact": {
+            "position_vector_m": {
+              "count": 28289,
+              "rms": 4.919521975952168e-07,
+              "maximum": 2.3127313699581747e-05,
+              "maximum_location": {
+                "particle_id": 11,
+                "time_s": 0.03
+              }
+            },
+            "velocity_vector_m_s": {
+              "count": 28289,
+              "rms": 0.0008191391196047323,
+              "maximum": 0.011759731799157095,
+              "maximum_location": {
+                "particle_id": 65,
+                "time_s": 0.00022
+              }
+            },
+            "charge_number": {
+              "count": 28289,
+              "rms": 7.922662659768941e-05,
+              "maximum": 0.005236693811696114,
+              "maximum_location": {
+                "particle_id": 11,
+                "time_s": 0.03
+              }
+            }
+          },
+          "at_10us_joint_precontact": {
+            "position_vector_m": {
+              "count": 287,
+              "rms": 6.305587229644773e-09,
+              "maximum": 4.6142231508569885e-08,
+              "maximum_particle_id": 287
+            },
+            "velocity_vector_m_s": {
+              "count": 287,
+              "rms": 0.000279714713634238,
+              "maximum": 0.0022241337413808587,
+              "maximum_particle_id": 287
+            },
+            "charge_number": {
+              "count": 287,
+              "rms": 1.3233337719149402e-05,
+              "maximum": 4.505518643171946e-05,
+              "maximum_particle_id": 42
+            }
+          },
+          "full_saved_denominator": 34727,
+          "joint_precontact_rows": 28289,
+          "saved_summary_verification": {
+            "initial_equality_summary_matches": true,
+            "all_saved_maximum_and_ID_time_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "selected_time_population_count_rms_max_ID_match": {
+              "0.0": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "1e-05": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.0005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.001": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.005": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              },
+              "0.03": {
+                "position_vector_m": true,
+                "velocity_vector_m_s": true,
+                "charge_number": true
+              }
+            },
+            "aggregate_precontact_count_denominator_rms_max_match": {
+              "position_vector_m": true,
+              "velocity_vector_m_s": true,
+              "charge_number": true
+            },
+            "all_checked_values_match": true
+          }
+        }
+      },
+      "common_three_level_self_sensitivity": {
+        "shared_precontact_rows": 28289,
+        "denominator": 34727,
+        "step_ratio_basis": "Declared twofold ratios in the bound saved summary; CSV states alone do not authenticate actual integration partitions.",
+        "step_ratios": [
+          2.0,
+          2.0
+        ],
+        "position_vector_m": {
+          "coarse_medium_rms": 1.5136585659205151e-06,
+          "medium_fine_rms": 1.7041601765156907e-07,
+          "observed_rms_ratio": 8.88213788104899,
+          "log2_ratio_diagnostic": 3.1509069670223915,
+          "meaning": "Observed saved-row diagnostic; not formal convergence order or an error bound."
+        },
+        "velocity_vector_m_s": {
+          "coarse_medium_rms": 0.0011744956988904143,
+          "medium_fine_rms": 0.00024265777662549416,
+          "observed_rms_ratio": 4.840132120319688,
+          "log2_ratio_diagnostic": 2.27504642905534,
+          "meaning": "Observed saved-row diagnostic; not formal convergence order or an error bound."
+        },
+        "charge_number": {
+          "coarse_medium_rms": 0.00024796975795853216,
+          "medium_fine_rms": 2.8122417072804803e-05,
+          "observed_rms_ratio": 8.817512282695152,
+          "log2_ratio_diagnostic": 3.1403716803108455,
+          "meaning": "Observed saved-row diagnostic; not formal convergence order or an error bound."
+        },
+        "saved_summary_matches": {
+          "position_vector_m": true,
+          "velocity_vector_m_s": true,
+          "charge_number": true
+        },
+        "all_checked_saved_summary_values_match": true
+      },
+      "coverage_and_final_lifecycle_summary_matches": {
+        "native10": true,
+        "native5": true,
+        "old_exp_fine": true,
+        "rk4_coarse": true,
+        "rk4_medium": true,
+        "rk4_fine": true
+      },
+      "all_checked_saved_summary_values_match": true
+    }
+  },
+  "not_claimed": [
+    "Physical or statistical equivalence between original native and deterministic candidate.",
+    "Shared Brownian or wall RNG histories from matching IDs or seeds.",
+    "Converged trajectory accuracy from equal terminal fate counts.",
+    "Error bounds from coarse/medium/fine sampled changes.",
+    "Independent re-verification of native status/storage meaning beyond the supplied normalized CSV."
+  ]
+}

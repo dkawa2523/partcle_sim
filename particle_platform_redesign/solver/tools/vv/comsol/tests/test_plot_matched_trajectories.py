@@ -5,358 +5,311 @@ import hashlib
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import cast
+from typing import Literal, cast
 
+import numpy as np
 import pytest
 from tools.vv.comsol.plot_matched_trajectories import (
-    TOOL_REVISION,
     create_trajectory_figures,
     read_matched_trajectories,
 )
 
+from chamber_particles.case_format import BoundaryData, DataBundle, GeometryData, write
 
-def _write_trajectory(
+
+def _write_rows(
     path: Path,
+    rows: list[list[object]],
     *,
-    offset_m: float = 0.0,
-    particle_ids: tuple[int, ...] = (1, 4),
-    status_column: str = "lifecycle",
+    xy: bool = False,
+    precontact: bool = False,
+    native: bool = False,
 ) -> None:
+    columns = [
+        "particle_id",
+        "time_s",
+        *(("x_m", "y_m") if xy else ("r_m", "z_m")),
+        "current_status" if native else "lifecycle",
+    ]
+    if precontact:
+        columns.append("precontact_eligible")
     with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream, lineterminator="\n")
-        writer.writerow(["particle_id", "time_s", "r_m", "z_m", status_column])
-        for particle_id in particle_ids:
-            for frame in range(3):
-                time_s = frame * 1.0e-5
-                writer.writerow(
-                    [
-                        particle_id,
-                        time_s,
-                        0.1 + particle_id * 1.0e-3 + time_s + offset_m,
-                        0.02 + particle_id * 2.0e-3 + 2.0 * time_s - offset_m,
-                        "active",
-                    ]
-                )
+        writer = csv.writer(stream)
+        writer.writerow(columns)
+        writer.writerows(rows)
 
 
-def test_external_plot_receipt_covers_every_aligned_particle(tmp_path: Path) -> None:
+def _geometry(path: Path, *, xy: bool = False) -> None:
+    nodes = np.asarray([[0, 0], [0.2, 0], [0.2, 0.04], [0, 0.04]], dtype="<f8")
+    lines = [[0, 1], [1, 2], [2, 3], [3, 0]] if xy else [[0, 1], [1, 2], [2, 3]]
+    count = len(lines)
+    boundary = BoundaryData(
+        np.asarray(lines, dtype="<i8"),
+        np.arange(count, dtype="<i4"),
+        np.zeros(count, dtype="<i4"),
+        np.zeros(count, dtype="<i4"),
+        np.ones(count, dtype="<u1"),
+        np.asarray([0, 0, 1, 1][:count], dtype="<i8"),
+        np.ones(count, dtype="<i1"),
+    )
+    coordinates: Literal["cartesian_xy", "axisymmetric_rz"] = (
+        "cartesian_xy" if xy else "axisymmetric_rz"
+    )
+    provenance = {
+        "producer": "manufactured rectangular chamber",
+        "producer_version": "1",
+        "source_sha256": "sha256:" + "0" * 64,
+        "field_semantics_revision": "geometry_only",
+        "producer_metadata": {},
+    }
+    write(
+        path,
+        DataBundle(
+            coordinates,
+            json.dumps(provenance),
+            GeometryData(
+                nodes,
+                boundary,
+                ("wall",),
+                tri3=np.asarray([[0, 1, 2], [0, 2, 3]], dtype="<i8"),
+                tri3_domain_id=np.ones(2, dtype="<i4"),
+            ),
+        ),
+    )
+
+
+def _create(
+    tmp_path: Path,
+    candidate_rows: list[list[object]],
+    reference_rows: list[list[object]],
+    *,
+    precontact: bool = False,
+    geometry: bool = False,
+    xy: bool = False,
+) -> tuple[dict[str, object], Path]:
     candidate = tmp_path / "candidate.csv"
     reference = tmp_path / "reference.csv"
-    _write_trajectory(candidate, offset_m=1.0e-12)
-    _write_trajectory(reference, status_column="current_status")
+    _write_rows(candidate, candidate_rows, precontact=precontact, xy=xy)
+    _write_rows(reference, reference_rows, precontact=precontact, xy=xy, native=True)
+    geometry_path = tmp_path / "geometry.h5" if geometry else None
+    if geometry_path is not None:
+        _geometry(geometry_path, xy=xy)
     output = tmp_path / "figures"
-
-    receipt = create_trajectory_figures(
+    return create_trajectory_figures(
         candidate,
         reference,
         output,
-        label="synthetic matched case",
+        label="manufactured comparison",
         render_png=False,
-    )
-
-    scope = cast(dict[str, object], receipt["scope"])
-    rendering = cast(dict[str, object], receipt["rendering"])
-    figures = cast(list[object], receipt["figures"])
-    observed = {
-        "tool_revision": receipt["tool_revision"],
-        "alignment": receipt["alignment"],
-        "scope_types": (type(scope), type(rendering), type(figures)),
-        "external_only": scope["external_only"],
-        "solver_imported": scope["solver_imported"],
-        "figure_role": scope["figure_role"],
-        "metric_population": scope["metric_population"],
-        "png": rendering["png"],
-        "particle_files": {path.name for path in (output / "particles").glob("*.svg")},
-        "schema_version": receipt["schema_version"],
-        "particle_svg_count": receipt["particle_svg_count"],
-        "figure_count": len(figures),
-    }
-    assert observed == {
-        "tool_revision": TOOL_REVISION,
-        "alignment": {
-            "status": "PASS",
-            "particle_identity": "EXACT",
-            "observed_state_key": ["particle_id", "time_s"],
-            "metric_state_key": ["particle_id", "time_s", "active_on_both_sides"],
-            "particles": 2,
-            "first_particle_id": 1,
-            "last_particle_id": 4,
-            "candidate_status_column": "lifecycle",
-            "reference_status_column": "current_status",
-            "candidate_input_rows": 6,
-            "reference_input_rows": 6,
-            "candidate_missing_coordinate_rows": 0,
-            "reference_missing_coordinate_rows": 0,
-            "candidate_finite_rows": 6,
-            "reference_finite_rows": 6,
-            "common_observed_finite_rows": 6,
-            "candidate_only_observed_finite_rows": 0,
-            "reference_only_observed_finite_rows": 0,
-            "candidate_active_finite_rows": 6,
-            "reference_active_finite_rows": 6,
-            "candidate_terminal_finite_rows": 0,
-            "reference_terminal_finite_rows": 0,
-            "candidate_unobserved_escaped_rows": 0,
-            "reference_unobserved_escaped_rows": 0,
-            "common_active_finite_rows": 6,
-            "candidate_only_active_finite_rows": 0,
-            "reference_only_active_finite_rows": 0,
-            "candidate_observed_coordinate_rows_per_particle_min": 3,
-            "candidate_observed_coordinate_rows_per_particle_max": 3,
-            "reference_observed_coordinate_rows_per_particle_min": 3,
-            "reference_observed_coordinate_rows_per_particle_max": 3,
-            "candidate_observed_coordinate_time_s_min": 0.0,
-            "candidate_observed_coordinate_time_s_max": 2.0e-5,
-            "reference_observed_coordinate_time_s_min": 0.0,
-            "reference_observed_coordinate_time_s_max": 2.0e-5,
-            "candidate_last_observed_coordinate_time_s_min": 2.0e-5,
-            "candidate_last_observed_coordinate_time_s_max": 2.0e-5,
-            "reference_last_observed_coordinate_time_s_min": 2.0e-5,
-            "reference_last_observed_coordinate_time_s_max": 2.0e-5,
-            "common_active_time_s_min": 0.0,
-            "common_active_time_s_max": 2.0e-5,
-        },
-        "scope_types": (dict, dict, list),
-        "external_only": True,
-        "solver_imported": False,
-        "figure_role": "NON_GATING_DIAGNOSTIC",
-        "metric_population": (
-            "exact candidate/reference intersection of finite pre-terminal active "
-            "particle/time rows"
-        ),
-        "png": "SKIPPED",
-        "particle_files": {"particle_000001.svg", "particle_000004.svg"},
-        "schema_version": 4,
-        "particle_svg_count": 2,
-        "figure_count": 3,
-    }
-    ET.parse(output / "overview_rz.svg")
-    ET.parse(output / "particles" / "particle_000004.svg")
-    overview = (output / "overview_rz.svg").read_text(encoding="utf-8")
-    particle = (output / "particles" / "particle_000004.svg").read_text(encoding="utf-8")
-    assert (
-        "r (mm)" in overview,
-        "z (mm)" in overview,
-        "R-Z trajectory" in particle,
-        (
-            "candidate path points=6, reference path points=6, common active metric rows=6"
-            in overview
-        ),
-        "Observed paths are drawn independently and are non-gating" in overview,
-        "solver observed path points=3, COMSOL observed path points=3" in particle,
-        "common finite active states=3" in particle,
-        "aligned states=" not in overview,
-        (output / "position_difference_heatmap.svg").exists(),
-    ) == (True, True, True, True, True, True, True, True, False)
-
-    persisted = json.loads((output / "receipt.json").read_text(encoding="utf-8"))
-    expected_hash = hashlib.sha256(candidate.read_bytes()).hexdigest()
-    assert (
-        persisted["inputs"]["candidate"]["sha256"],
-        "Particle 4" in (output / "index.html").read_text(encoding="utf-8"),
-        "independently and is non-gating" in (output / "index.html").read_text(encoding="utf-8"),
-    ) == (expected_hash, True, True)
+        geometry_path=geometry_path,
+    ), output
 
 
-def test_external_plot_rejects_unaligned_particle_ids(tmp_path: Path) -> None:
-    candidate = tmp_path / "candidate.csv"
-    reference = tmp_path / "reference.csv"
-    _write_trajectory(candidate)
-    _write_trajectory(reference, particle_ids=(1, 5))
-
-    with pytest.raises(ValueError, match="particle IDs do not align"):
-        read_matched_trajectories(candidate, reference)
+def _alignment(receipt: dict[str, object]) -> dict[str, object]:
+    return cast(dict[str, object], receipt["alignment"])
 
 
-def test_external_plot_metrics_exclude_finite_terminal_tails(tmp_path: Path) -> None:
-    candidate = tmp_path / "candidate.csv"
-    reference = tmp_path / "reference.csv"
-    with candidate.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream, lineterminator="\n")
-        writer.writerow(["particle_id", "time_s", "r_m", "z_m", "lifecycle"])
-        writer.writerows(
-            [
-                [1, 0.0, 0.100001, 0.019999, "active"],
-                [1, 1.0e-5, 0.110001, 0.020999, "active"],
-                [1, 2.0e-5, 9.0, 9.0, "stuck"],
-            ]
-        )
-    with reference.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream, lineterminator="\n")
-        writer.writerow(["particle_id", "time_s", "r_m", "z_m", "current_status"])
-        writer.writerows(
-            [
-                [1, 0.0, 0.1, 0.02, "active"],
-                [1, 1.0e-5, 0.11, 0.021, "active"],
-                [1, 2.0e-5, -9.0, -9.0, "held"],
-            ]
-        )
-
-    output = tmp_path / "terminal_tail_figures"
-    receipt = create_trajectory_figures(
-        candidate,
-        reference,
-        output,
-        label="finite terminal tails",
-        render_png=False,
-    )
-
-    alignment = cast(dict[str, object], receipt["alignment"])
-    metrics = cast(dict[str, object], receipt["metrics"])
-    position = cast(dict[str, object], metrics["position_difference_m"])
-    assert position["comparison_rows"] == 2
-    assert float(cast(float, position["maximum"])) == pytest.approx(2.0**0.5 * 1.0e-6)
-    assert (
-        alignment["candidate_finite_rows"],
-        alignment["reference_finite_rows"],
-        alignment["common_observed_finite_rows"],
-        alignment["candidate_active_finite_rows"],
-        alignment["reference_active_finite_rows"],
-        alignment["common_active_finite_rows"],
-        alignment["candidate_terminal_finite_rows"],
-        alignment["reference_terminal_finite_rows"],
-    ) == (3, 3, 3, 2, 2, 2, 1, 1)
-    overview = (output / "overview_rz.svg").read_text(encoding="utf-8")
-    particle = (output / "particles" / "particle_000001.svg").read_text(encoding="utf-8")
-    assert (
-        "candidate path points=3, reference path points=3, common active metric rows=2" in overview
-    )
-    assert "common finite active states=2" in particle
+def _position(receipt: dict[str, object]) -> dict[str, object]:
+    return cast(dict[str, dict[str, object]], receipt["metrics"])["position_difference_m"]
 
 
 @pytest.mark.parametrize(
-    ("candidate_rows", "message"),
-    [
-        ([[1, 0.0, "NaN", "", "active"]], "active position must be observed"),
-        (
-            [
-                [1, 0.0, 0.1, 0.02, "active"],
-                [1, 1.0e-5, "NaN", "", "escaped"],
-                [1, 2.0e-5, 0.2, 0.03, "active"],
-            ],
-            "lifecycle changes after terminal state",
-        ),
-    ],
+    ("xy", "coordinate_system", "physical_facets", "axis_facets"),
+    [(False, "axisymmetric_rz", 3, 1), (True, "cartesian_xy", 4, 0)],
 )
-def test_external_plot_rejects_invalid_missing_coordinate_lifecycle(
+def test_geometry_receipt_binds_units_identity_and_nonmaterial_axis(
+    tmp_path: Path, xy: bool, coordinate_system: str, physical_facets: int, axis_facets: int
+) -> None:
+    rows: list[list[object]] = [[1, 0, 0, 0, "active"], [1, 0.001, 0.1, 0.02, "active"]]
+    receipt, _ = _create(tmp_path, rows, rows, geometry=True, xy=xy)
+    geometry = cast(dict[str, object], cast(dict[str, object], receipt["inputs"])["geometry"])
+    assert geometry["unit"] == "m"
+    assert geometry["coordinate_system"] == coordinate_system
+    assert geometry["axis_seam_facet_count"] == axis_facets
+    assert geometry["boundary_facet_count"] == physical_facets
+    assert geometry["sha256"] == hashlib.sha256((tmp_path / "geometry.h5").read_bytes()).hexdigest()
+
+
+@pytest.mark.parametrize("xy", [False, True])
+def test_spatial_overlay_preserves_coordinate_alignment_si_scale_and_equal_aspect(
+    tmp_path: Path, xy: bool
+) -> None:
+    rows: list[list[object]] = [[1, 0, 0, 0, "active"], [1, 0.001, 0.1, 0.02, "active"]]
+    receipt, output = _create(tmp_path, rows, rows, geometry=True, xy=xy)
+    rendering = cast(dict[str, object], receipt["rendering"])
+    ranges = cast(dict[str, list[float]], rendering["overview_and_particle_ranges_mm"])
+    assert (ranges["axis0"][1] - ranges["axis0"][0]) / 1370 == pytest.approx(
+        (ranges["axis1"][1] - ranges["axis1"][0]) / 760
+    )
+    assert ranges["axis0"][0] < 0 and ranges["axis0"][1] > 200
+    svg = ET.parse(output / "particles/particle_000001.svg")
+    boundaries = [
+        item
+        for item in svg.iter()
+        if item.tag.endswith("polyline") and item.attrib.get("stroke") == "#475569"
+    ]
+    starts = [
+        item
+        for item in svg.iter()
+        if item.tag.endswith("circle") and item.attrib.get("stroke") == "#1D4ED8"
+    ]
+    x, y = map(float, boundaries[0].attrib["points"].split()[0].split(","))
+    assert (float(starts[0].attrib["cx"]), float(starts[0].attrib["cy"])) == (x, y)
+    assert _position(receipt)["maximum"] == 0
+    ET.parse(output / ("overview_xy.svg" if xy else "overview_rz.svg"))
+
+
+def test_joint_precontact_metrics_exclude_postreflection_but_preserve_observed_path(
     tmp_path: Path,
-    candidate_rows: list[list[object]],
-    message: str,
+) -> None:
+    candidate: list[list[object]] = [
+        [1, 0, 0.1, 0.02, "active", 1],
+        [1, 0.001, 0.11, 0.02, "active", 1],
+        [1, 0.002, 9, 9, "active", 0],
+    ]
+    reference: list[list[object]] = [
+        [1, 0, 0.1, 0.02, "active", 1],
+        [1, 0.001, 0.11, 0.02, "active", 0],
+        [1, 0.002, -9, -9, "active", 0],
+    ]
+    receipt, output = _create(tmp_path, candidate, reference, precontact=True)
+    assert _alignment(receipt)["common_active_finite_rows"] == 3
+    assert _alignment(receipt)["common_eligible_metric_rows"] == 1
+    assert _position(receipt)["comparison_rows"] == 1
+    assert _position(receipt)["maximum"] == 0
+    svg = ET.parse(output / "particles/particle_000001.svg")
+    candidate_paths = [
+        item
+        for item in svg.iter()
+        if item.tag.endswith("polyline") and item.attrib.get("stroke") == "#1D4ED8"
+    ]
+    assert len(candidate_paths[0].attrib["points"].split()) == 3
+    assert "joint precontact" in (output / "overview_rz.svg").read_text(encoding="utf-8")
+
+
+def test_status_and_missing_coverage_do_not_infer_native_disappearance_cause(
+    tmp_path: Path,
+) -> None:
+    candidate: list[list[object]] = [
+        [1, 0, 0.1, 0.02, "active"],
+        [1, 0.001, "NaN", "", "escaped"],
+        [2, 0, "", "", "pending"],
+        [2, 0.001, "", "", "failed"],
+    ]
+    reference: list[list[object]] = [
+        [1, 0, 0.1, 0.02, "active"],
+        [1, 0.001, "", "", "disappeared"],
+        [1, 0.002, "", "", "disappeared"],
+        [2, 0, "", "", "pending"],
+        [2, 0.001, "", "", "unobserved"],
+    ]
+    receipt, output = _create(tmp_path, candidate, reference, geometry=True)
+    alignment = _alignment(receipt)
+    candidate_coverage = cast(dict[str, object], alignment["candidate"])
+    reference_coverage = cast(dict[str, object], alignment["reference"])
+    assert candidate_coverage["missing_coordinate_rows_by_observed_status"] == {
+        "escaped": 1,
+        "pending": 1,
+        "failed": 1,
+    }
+    assert reference_coverage["missing_coordinate_rows_by_observed_status"] == {
+        "disappeared": 2,
+        "pending": 1,
+        "unobserved": 1,
+    }
+    assert alignment["reference_only_input_keys"] == 1
+    assert "unobserved_escaped_rows" not in str(alignment)
+    assert receipt["particle_svg_count"] == 2
+    assert _position(receipt)["comparison_rows"] == 1
+    cause = cast(str, cast(dict[str, object], receipt["scope"])["native_disappeared_cause"])
+    assert cause.startswith("unknown")
+    ET.parse(output / "particles/particle_000002.svg")
+
+
+def test_internal_missing_span_breaks_the_visual_path(tmp_path: Path) -> None:
+    rows: list[list[object]] = [
+        [1, 0, 0.1, 0.02, "active"],
+        [1, 0.001, "", "", "unobserved"],
+        [1, 0.002, 0.2, 0.04, "active"],
+    ]
+    receipt, output = _create(tmp_path, rows, rows)
+    assert _position(receipt)["comparison_rows"] == 2
+    svg = ET.parse(output / "particles/particle_000001.svg")
+    paths = [
+        item
+        for item in svg.iter()
+        if item.tag.endswith("polyline") and item.attrib.get("stroke") == "#1D4ED8"
+    ]
+    assert len(paths) == 2
+    assert all(len(item.attrib["points"].split()) == 1 for item in paths)
+
+
+def test_no_common_eligible_rows_is_reported_without_fabricated_error(tmp_path: Path) -> None:
+    rows: list[list[object]] = [[1, 0, "", "", "pending", 0]]
+    receipt, _ = _create(tmp_path, rows, rows, precontact=True, geometry=True)
+    assert _position(receipt) == {
+        "comparison_rows": 0,
+        "rms": None,
+        "maximum": None,
+        "reason": "no jointly eligible finite active observations",
+    }
+
+
+def test_observed_held_tail_is_displayed_but_excluded_from_position_metrics(tmp_path: Path) -> None:
+    candidate: list[list[object]] = [[1, 0, 0.1, 0.02, "active"], [1, 0.001, 9.0, 9.0, "held"]]
+    reference: list[list[object]] = [[1, 0, 0.1, 0.02, "active"], [1, 0.001, -9.0, -9.0, "stuck"]]
+    receipt, output = _create(tmp_path, candidate, reference)
+    assert _position(receipt)["comparison_rows"] == 1
+    assert _position(receipt)["maximum"] == 0
+    coverage = cast(dict[str, object], _alignment(receipt)["candidate"])
+    assert coverage["observed_status_counts"] == {"active": 1, "held": 1}
+    assert coverage["non_active_finite_rows"] == 1
+    svg = ET.parse(output / "particles/particle_000001.svg")
+    paths = [
+        item
+        for item in svg.iter()
+        if item.tag.endswith("polyline") and item.attrib.get("stroke") == "#1D4ED8"
+    ]
+    assert len(paths[0].attrib["points"].split()) == 2
+
+
+@pytest.mark.parametrize(
+    "failure", ["identity", "basis", "one_sided_eligibility", "active_missing", "terminal_return"]
+)
+def test_ambiguous_identity_basis_eligibility_or_lifecycle_is_rejected(
+    tmp_path: Path, failure: str
 ) -> None:
     candidate = tmp_path / "candidate.csv"
     reference = tmp_path / "reference.csv"
-    with candidate.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream, lineterminator="\n")
-        writer.writerow(["particle_id", "time_s", "r_m", "z_m", "lifecycle"])
-        writer.writerows(candidate_rows)
-    _write_trajectory(reference, particle_ids=(1,), status_column="current_status")
-
-    with pytest.raises(ValueError, match=message):
+    rows: list[list[object]] = [[1, 0, 0.1, 0.02, "active"]]
+    _write_rows(candidate, rows)
+    _write_rows(reference, rows, native=True)
+    if failure == "identity":
+        _write_rows(reference, [[2, 0, 0.1, 0.02, "active"]], native=True)
+    elif failure == "basis":
+        _write_rows(reference, rows, native=True, xy=True)
+    elif failure == "one_sided_eligibility":
+        _write_rows(candidate, [[1, 0, 0.1, 0.02, "active", 1]], precontact=True)
+    elif failure == "active_missing":
+        _write_rows(candidate, [[1, 0, "", "", "active"]])
+    else:
+        _write_rows(
+            candidate, [*rows, [1, 0.001, "", "", "escaped"], [1, 0.002, 0.1, 0.02, "active"]]
+        )
+    with pytest.raises(ValueError):
         read_matched_trajectories(candidate, reference)
 
 
-def test_external_plot_preserves_ragged_and_dense_missing_escape_suffixes(
-    tmp_path: Path,
-) -> None:
+def test_geometry_basis_mismatch_is_rejected_before_publishing_figures(tmp_path: Path) -> None:
     candidate = tmp_path / "candidate.csv"
     reference = tmp_path / "reference.csv"
-    candidate_header = ["particle_id", "time_s", "r_m", "z_m", "lifecycle"]
-    reference_header = ["particle_id", "time_s", "r_m", "z_m", "current_status"]
-    with candidate.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream, lineterminator="\n")
-        writer.writerow(candidate_header)
-        for particle_id in (1, 4):
-            last_frame = 3 if particle_id == 1 else 1
-            for frame in range(last_frame + 1):
-                writer.writerow(
-                    [
-                        particle_id,
-                        frame * 1.0e-5,
-                        0.1 + particle_id * 1.0e-3,
-                        0.02 + frame * 1.0e-4,
-                        "active",
-                    ]
-                )
-    with reference.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.writer(stream, lineterminator="\n")
-        writer.writerow(reference_header)
-        for particle_id in (1, 4):
-            for frame in range(4):
-                if particle_id == 4 and frame >= 2:
-                    writer.writerow([particle_id, frame * 1.0e-5, "NaN", "", "escaped"])
-                else:
-                    writer.writerow(
-                        [
-                            particle_id,
-                            frame * 1.0e-5,
-                            0.1 + particle_id * 1.0e-3,
-                            0.02 + frame * 1.0e-4,
-                            "active",
-                        ]
-                    )
-
-    output = tmp_path / "ragged_dense_figures"
-    receipt = create_trajectory_figures(
-        candidate,
-        reference,
-        output,
-        label="ragged candidate and dense missing reference",
-        render_png=False,
-    )
-
-    alignment = cast(dict[str, object], receipt["alignment"])
-    metrics = cast(dict[str, object], receipt["metrics"])
-    position = cast(dict[str, object], metrics["position_difference_m"])
-    assert alignment == {
-        "status": "PASS",
-        "particle_identity": "EXACT",
-        "observed_state_key": ["particle_id", "time_s"],
-        "metric_state_key": ["particle_id", "time_s", "active_on_both_sides"],
-        "particles": 2,
-        "first_particle_id": 1,
-        "last_particle_id": 4,
-        "candidate_status_column": "lifecycle",
-        "reference_status_column": "current_status",
-        "candidate_input_rows": 6,
-        "reference_input_rows": 8,
-        "candidate_missing_coordinate_rows": 0,
-        "reference_missing_coordinate_rows": 2,
-        "candidate_finite_rows": 6,
-        "reference_finite_rows": 6,
-        "common_observed_finite_rows": 6,
-        "candidate_only_observed_finite_rows": 0,
-        "reference_only_observed_finite_rows": 0,
-        "candidate_active_finite_rows": 6,
-        "reference_active_finite_rows": 6,
-        "candidate_terminal_finite_rows": 0,
-        "reference_terminal_finite_rows": 0,
-        "candidate_unobserved_escaped_rows": 0,
-        "reference_unobserved_escaped_rows": 2,
-        "common_active_finite_rows": 6,
-        "candidate_only_active_finite_rows": 0,
-        "reference_only_active_finite_rows": 0,
-        "candidate_observed_coordinate_rows_per_particle_min": 2,
-        "candidate_observed_coordinate_rows_per_particle_max": 4,
-        "reference_observed_coordinate_rows_per_particle_min": 2,
-        "reference_observed_coordinate_rows_per_particle_max": 4,
-        "candidate_observed_coordinate_time_s_min": 0.0,
-        "candidate_observed_coordinate_time_s_max": 3.0000000000000004e-5,
-        "reference_observed_coordinate_time_s_min": 0.0,
-        "reference_observed_coordinate_time_s_max": 3.0000000000000004e-5,
-        "candidate_last_observed_coordinate_time_s_min": 1.0e-5,
-        "candidate_last_observed_coordinate_time_s_max": 3.0000000000000004e-5,
-        "reference_last_observed_coordinate_time_s_min": 1.0e-5,
-        "reference_last_observed_coordinate_time_s_max": 3.0000000000000004e-5,
-        "common_active_time_s_min": 0.0,
-        "common_active_time_s_max": 3.0000000000000004e-5,
-    }
-    assert position["comparison_rows"] == 6
-    assert cast(dict[str, object], receipt["scope"])["missing_coordinate_policy"] == (
-        "escaped_nan_unobserved_excluded_without_reconstruction"
-    )
-    assert receipt["particle_svg_count"] == 2
-    assert not (output / "position_difference_heatmap.svg").exists()
-    ET.parse(output / "overview_rz.svg")
-    ET.parse(output / "particles" / "particle_000004.svg")
-    overview = (output / "overview_rz.svg").read_text(encoding="utf-8")
-    assert "escaped NaN positions are unobserved and never reconstructed" in overview
+    _write_rows(candidate, [[1, 0, 0.1, 0.02, "active"]])
+    _write_rows(reference, [[1, 0, 0.1, 0.02, "active"]], native=True)
+    geometry = tmp_path / "geometry.h5"
+    _geometry(geometry, xy=True)
+    output = tmp_path / "figures"
+    with pytest.raises(ValueError, match="geometry and trajectory"):
+        create_trajectory_figures(
+            candidate, reference, output, label="mismatch", render_png=False, geometry_path=geometry
+        )
+    assert not output.exists()

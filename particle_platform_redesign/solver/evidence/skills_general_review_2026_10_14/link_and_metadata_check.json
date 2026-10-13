@@ -1,0 +1,31 @@
+{
+  "local_links": 41,
+  "errors": [],
+  "metadata": [
+    {
+      "skill": "inspect-comsol-model",
+      "name_matches": true,
+      "short_description_length": 51,
+      "implicit_invocation": true
+    },
+    {
+      "skill": "prepare-comsol-field-case",
+      "name_matches": true,
+      "short_description_length": 52,
+      "implicit_invocation": true
+    },
+    {
+      "skill": "validate-comsol-trajectories",
+      "name_matches": true,
+      "short_description_length": 55,
+      "implicit_invocation": true
+    },
+    {
+      "skill": "visualize-particle-trajectories",
+      "name_matches": true,
+      "short_description_length": 55,
+      "implicit_invocation": true
+    }
+  ],
+  "unicode_readback": "UTF-8 PASS"
+}

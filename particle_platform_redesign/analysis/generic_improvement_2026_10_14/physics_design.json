@@ -1,0 +1,543 @@
+{
+  "schema_revision": "generic_particle_physics_design_note_v1",
+  "date": "2026-10-14",
+  "status": "PROPOSAL_ONLY_NOT_IMPLEMENTED_OR_PHYSICALLY_VALIDATED",
+  "scope": "Read-only investigation of engine v64 and independent formulation design. This file does not change production code, case settings, or authoritative specifications. No new simulation or COMSOL study was run for this proposal.",
+  "objective": {
+    "primary": "Physically and numerically correct particle tracking in externally supplied chamber fields, including correctly realized initial velocity and release conditions.",
+    "comsol_role": "Input provenance and an external mathematical/numerical comparison. Matching a COMSOL trajectory does not establish the physical validity of either model.",
+    "priority_correction": "The previous unchanged-original comparison requires a high-drift linear constitutive capability only if that mathematical reproduction remains the requested goal. Under the clarified physical-tracking goal, adding it is optional qualification work and is not the primary product improvement.",
+    "forbidden_shortcuts": [
+      "Do not change the actual injected velocity to force a model gate to pass.",
+      "Do not relax existing physical applicability gates or introduce ignore/clip/fallback flags.",
+      "Do not attach isotropic low-speed FDT noise to a nonlinear finite-speed drag solely by substituting its instantaneous drag rate.",
+      "Do not fit physics coefficients, initialization, or field interpolation to the COMSOL trajectory.",
+      "Do not add a COMSOL-specific solver route, general plugin framework, second engine, or second source of neutral-gas truth."
+    ]
+  },
+  "baseline_bindings": [
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py",
+      "sha256": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5"
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+      "sha256": "b1511fcf1b3e12b7d5b21e829ef52c518fe5eca8045bdeec9c28851a95845f7c"
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/compiled.py",
+      "sha256": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358"
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/forces.py",
+      "sha256": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609"
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/charge.py",
+      "sha256": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405"
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/stochastic.py",
+      "sha256": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10"
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/engine.py",
+      "sha256": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3"
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/integrators.py",
+      "sha256": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d"
+    },
+    {
+      "path": "particle_platform_redesign/technical_research.md",
+      "sha256": "d462f837961ed3f3e6899b6432dcd8a6f7eb104799afadaaa4ede1a3eddc478f"
+    },
+    {
+      "path": "particle_platform_redesign/solver/docs/physics_models.md",
+      "sha256": "d2073deefb8596978973883d63212aedb8d66f66042f1354281bac5cc1cd506f"
+    },
+    {
+      "path": "particle_platform_redesign/architecture_proposal.md",
+      "sha256": "59d25bd9126d5d2cbde218ed0e0fd6e4f1e8047641e0eca69ff17b56d66aa507"
+    },
+    {
+      "path": "particle_platform_redesign/product_specification.md",
+      "sha256": "2520278f6bb08e9ae99e56ad2e38c4b4e53dd25a931b6c5dce78bd7c728880df"
+    }
+  ],
+  "existing_evidence": [
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/equation_audit/equation_audit_summary.json",
+      "sha256": "1100f44b69057a303e3dc0271524703b3c4f1f26061b5e57ddcbcec616fd268a",
+      "use": "Frozen native state and primitive equation reconstruction; no historical random draws or full-trajectory reproduction."
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/particle_trajectory_review/ownership_decision.json",
+      "sha256": "70e12b0947029dbb18e19774f996d34af583cad5b7f5dfe5f76f5eafd1af2944",
+      "use": "Configuration, adapter, model capability, and established algorithm-fix ownership. Its earlier reproduction priority is qualified by the new primary objective."
+    },
+    {
+      "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/initial_condition_audit.json",
+      "sha256": "6bb93b5577edf43a661b4f8521a75e845349bf8b7251c25f904f54865d84bd23",
+      "use": "Authoritative investigation of realized initial velocity and active release semantics; do not duplicate its source arithmetic here."
+    },
+    {
+      "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/quality_v64.json",
+      "use": "Existing 945-test pass binds the current engine hash. This is not a validation of the proposed stochastic or 3D models."
+    }
+  ],
+  "current_code_findings": [
+    {
+      "id": "C1",
+      "conclusion": "Finite-speed mean drag already has a concrete supported public model.",
+      "refs": [
+        "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py:108",
+        "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py:1080",
+        "particle_platform_redesign/solver/src/chamber_particles/physics/compiled.py:1883",
+        "particle_platform_redesign/technical_research.md:123"
+      ],
+      "detail": "The equal-temperature Maxwell mixed spherical model evaluates G(S)+sigma*pi/8, uses actual stage relative velocity, and separates drag-rate bounds from the radial velocity Jacobian. It assumes one local Maxwellian, a nonrotating isolated sphere, free-molecular flow and Tw=Tg. It computes mean momentum transfer; it does not compute finite-speed collision diffusion."
+    },
+    {
+      "id": "C2",
+      "conclusion": "Current Brownian composition is deliberately restricted to linear Epstein.",
+      "refs": [
+        "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py:828",
+        "particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py:626",
+        "particle_platform_redesign/solver/src/chamber_particles/stochastic.py:68",
+        "particle_platform_redesign/solver/docs/numerics.md:1191"
+      ],
+      "detail": "Catalog rejects the finite-speed drag/noise composition; runtime extracts kBT/m only from EpsteinDragPlan. The stochastic owner is an exact scalar-rate frozen-coefficient joint OU transition in two stored components. Its conditional OU split is not an all-purpose bridge for a velocity-dependent diffusion tensor."
+    },
+    {
+      "id": "C3",
+      "conclusion": "The existing stage and accepted-state ownership should be preserved.",
+      "refs": [
+        "particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py:665",
+        "particle_platform_redesign/solver/src/chamber_particles/engine.py:1733",
+        "particle_platform_redesign/solver/src/chamber_particles/engine.py:1810",
+        "particle_platform_redesign/solver/src/chamber_particles/integrators.py:3889"
+      ],
+      "detail": "One prepared physics pass receives the actual sampled primitive, velocity and charge state. Motion and charge are coupled at the integrator stages. Trial state and cell hints commit only after acceptance. No evidence here establishes an additional current integrator or wall-processing defect."
+    },
+    {
+      "id": "C4",
+      "conclusion": "One neutral-background authority already exists as an invariant.",
+      "refs": [
+        "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py:1471",
+        "particle_platform_redesign/solver/docs/physics_models.md:32"
+      ],
+      "detail": "Enabled neutral models must share field names and molecular mass exactly. A future species representation must strengthen this invariant, rather than provide separate drag, noise and thermal gas records."
+    },
+    {
+      "id": "C5",
+      "conclusion": "Current thermal input is translational heat flux, not arbitrary conductivity times a temperature gradient.",
+      "refs": [
+        "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py:160",
+        "particle_platform_redesign/solver/src/chamber_particles/physics/compiled.py:575",
+        "particle_platform_redesign/technical_research.md:230",
+        "particle_platform_redesign/solver/docs/physics_models.md:976"
+      ],
+      "detail": "The current Waldmann-Gallis revision consumes q_tr and has explicit conservative speed/Kn policies. Native PPR gradients and native conductivity reproduce the original expression mathematically, but the native total mixture conductivity has not been shown to be the required translational conductivity. High-speed additivity is not qualified."
+    },
+    {
+      "id": "C6",
+      "conclusion": "Physical 3D stochastic transport is a separate missing capability.",
+      "refs": [
+        "particle_platform_redesign/product_specification.md:903",
+        "particle_platform_redesign/architecture_proposal.md:507",
+        "particle_platform_redesign/implementation_plan.md:338",
+        "particle_platform_redesign/solver/src/chamber_particles/stochastic.py:5"
+      ],
+      "detail": "Only XY and meridional RZ production motion are present. The planned axisymmetric_field_cartesian3d mode already has a legitimate generic use case: isotropic noise or nonzero azimuthal velocity in an axisymmetric chamber field. Full 3D field meshes are not needed for that mode."
+    },
+    {
+      "id": "C7",
+      "conclusion": "Existing acceptance thresholds are revision policies, not universal COMSOL or kinetic-theory discontinuities.",
+      "refs": [
+        "particle_platform_redesign/technical_research.md:244",
+        "particle_platform_redesign/solver/docs/physics_models.md:100",
+        "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py:1934"
+      ],
+      "detail": "Do not infer a physically invalid COMSOL calculation solely because initial slip/cbar exceeds 0.1 or 1. The frozen-state finite/linear force discrepancy is measured separately and is physically meaningful under the selected constitutive assumptions."
+    },
+    {
+      "id": "C8",
+      "conclusion": "Continuous charge and deterministic ion momentum transfer do not automatically define a thermodynamic noise bath.",
+      "refs": [
+        "particle_platform_redesign/solver/src/chamber_particles/physics/charge.py:68",
+        "particle_platform_redesign/solver/src/chamber_particles/physics/compiled.py:118",
+        "particle_platform_redesign/solver/docs/physics_models.md:23"
+      ],
+      "detail": "Do not apply neutral-gas FDT to Coulomb, ion-drag or aggregate-current charge rates. Discrete collection/charge-jump fluctuations and their momentum correlations would require their own collision/current reference and a separate justified use case."
+    }
+  ],
+  "measured_case_implications": {
+    "scope": "These measured A/P numbers motivate generic work packages; none is a default or a new model acceptance threshold.",
+    "initial_speed_m_s": [
+      90.161,
+      2478.192
+    ],
+    "initial_slip_over_mean_thermal_speed": [
+      0.3135448147,
+      8.3159647757
+    ],
+    "initial_S_over_most_probable_thermal_speed": [
+      0.3537974369,
+      9.3835614072
+    ],
+    "pseudogas_mass_kg": 1.2753471408396638e-25,
+    "particle_mass_kg": 1.1519173063162575e-21,
+    "molecular_to_particle_mass_ratio": 0.00011071516,
+    "original_linear_vs_selected_finite_drag_norm_ratio": [
+      1.0183339948,
+      4.9215985874
+    ],
+    "max_component_drag_acceleration_delta_m_s2": 19809487.121,
+    "rms_component_drag_acceleration_delta_m_s2": 2093802.7483,
+    "omitted_native_Waldmann_max_component_acceleration_m_s2": 20461.300678,
+    "native_frozen_Brownian_force_impulse_10us_component_velocity_rms_m_s": [
+      0.3959671,
+      0.4031778
+    ],
+    "qualification": "The Brownian number is sqrt(2*kBT*beta*h)/mass from the original frozen force variance, not an OU endpoint, an actual saved random draw, or the drag-filtered RK4 trajectory variance. The case uses one pseudogas; actual species-resolved and surface-temperature physics remain unverified.",
+    "numerical_issue": "Case P's registered precontact position step-sensitivity target is not met by the existing 1/0.5/0.25 us set; this is a remaining accuracy investigation, not proof of a new processing bug."
+  },
+  "formulation_conventions": {
+    "dimension": "The following collision-kernel derivation is physically three-dimensional. Projection into two stored components is a separately qualified constrained model.",
+    "variables": {
+      "particle_mass_M": "particle mass_kg, the inertia authority",
+      "drag_radius_a": "drag_diameter_m/2 for the spherical geometric model; not electrostatic/contact radius",
+      "m_s": "molecular mass of gas species s",
+      "n_s": "species number density [1/m^3]",
+      "u": "shared local neutral mean velocity [m/s]",
+      "T_g": "shared neutral translational temperature [K]",
+      "T_w": "particle surface temperature [K], explicitly prescribed/equilibrated/dynamically solved",
+      "c": "incident molecular laboratory velocity",
+      "g": "c-v",
+      "normal": "outward surface unit normal n_hat",
+      "f_s": "normalized incident velocity probability density, integral f_s dc=1",
+      "sigma_s": "probability of fully diffuse flux-Maxwell reflection, not an arbitrary energy accommodation coefficient",
+      "theta_g_s": "kB*T_g/m_s",
+      "theta_w_s": "kB*T_w/m_s",
+      "mu_s": "m_s*M/(m_s+M)",
+      "velocity_drift_A": "collision mean velocity rate [m/s^2]",
+      "velocity_covariance_rate_Q": "collision covariance RATE [m^2/s^3]; Q=BB^T",
+      "D_FPE": "Q/2, not Q",
+      "q_tr": "translational conductive heat flux in the gas mass-average frame [W/m^2]"
+    },
+    "stochastic_definition": "Itô dv = (A_collision + a_other) dt + B(x,v,t) dW, dx=v dt, BB^T=Q. This is a candidate diffusion approximation only after its domain and observables pass collision/jump-reference qualification.",
+    "FPE": "partial_t p = -partial_vi(A_i p) + 0.5*partial_vi partial_vj(Q_ij p). Spatial streaming and coupled charge must be included in the joint state when active.",
+    "do_not_mix": "A is the actual first collision moment. An extra 'spurious drift' must not be inserted merely to force an assumed stationary distribution. A Stratonovich model would have a different specified drift and must not be introduced by calling an algorithm 'midpoint'."
+  },
+  "independent_collision_kernel_design": {
+    "status": "INDEPENDENT_DERIVATION_FOR_RESEARCH_ORACLE_NOT_VALIDATED_PRODUCTION_MODEL",
+    "collision_rate_measure": "dnu_s = n_s*a^2*[-g dot n_hat]_+*f_s(c) d^3c dOmega",
+    "moments": "A_s=integral dnu_s E[Delta v | c,n_hat]; Q_s=integral dnu_s E[Delta v Delta v^T | c,n_hat]. The compound Poisson covariance rate uses the raw jump second moment; do not subtract the squared mean per collision.",
+    "specular_finite_recoil": {
+      "delta_v": "Delta v=2*(mu_s/M)*(g dot n_hat)*n_hat",
+      "A": "A_spec_s=n_s*pi*a^2*(mu_s/M)*E[|g| g]",
+      "Q": "Q_spec_s=(n_s*pi*a^2/3)*(mu_s/M)^2*E[|g|^3*I+3*|g|*g*g^T]",
+      "limits": "In the heavy-particle limit mu_s approximately m_s, the first moment reduces to the existing finite-speed specular mean force divided by M. At v=u its Q is isotropic and approaches 2*gamma_s*kBT_g/M I. Finite mass recoil produces O(m_s/M) differences in the diffusion truncation; the exact jump kernel, not a forced pointwise FDT, owns equilibrium.",
+      "analytic_angular_checks": "For a fixed g, the hemisphere integrals give pi*|g|g for the first moment and (pi/3)*(|g|^3*I+3*|g|*g*g^T) for the second after applying the specular impulse. This direction-free form is zero at g=0. At large slip compared with molecular thermal speed, the jump second-moment longitudinal/transverse ratio approaches 4; this is not proof of a high-speed diffusion trajectory law. Verify the surface integrals independently using quadrature."
+    },
+    "fully_diffuse_heavy_particle": {
+      "assumptions": "Prescribed nonrotating heavy sphere; outgoing molecules drawn independently from the flux Maxwellian at Tw in the instantaneous particle frame. Finite-recoil diffuse scattering and particle internal-energy correlations are NOT supplied by this approximation.",
+      "outgoing_distribution": "p(eta|n_hat) proportional to (eta dot n_hat)_+ exp(-|eta|^2/(2*theta_w_s)), normalized on the outgoing hemisphere.",
+      "outgoing_moments": "E[eta]=b_s*n_hat; E[eta eta^T]=theta_w_s*(I+n_hat*n_hat^T); b_s=sqrt(pi*theta_w_s/2).",
+      "delta_v": "Delta v=(m_s/M)*(g-eta)",
+      "A": "A_diff_s=n_s*pi*a^2*(m_s/M)*(E[|g|g]+(2*b_s/3)*E[g])",
+      "Q": "Q_diff_s=n_s*pi*a^2*(m_s/M)^2*{E[|g|g g^T]+(4*b_s/3)*E[g g^T]+(5*theta_w_s/4)*E[|g|]*I+(theta_w_s/4)*E[|g|*g_hat*g_hat^T]}",
+      "relation_to_current_drag": "For a Maxwellian incoming gas, the outgoing term contributes sigma_s*pi/8*sqrt(Tw/Tg) times the low-speed specular base rate. Tw=Tg recovers the current equal-temperature Maxwell mixed mean law in the heavy limit.",
+      "low_speed_equal_temperature_check": "At v=u and Tw=Tg: Q_diff_s=n_s*pi*a^2*(m_s/M)^2*theta_g_s*cbar_s*(8+pi)/3*I. The heavy specular limit has coefficient 8/3; mixing gives delta=1+sigma_s*pi/8 and Q=2*gamma_s*kBT_g/M*I.",
+      "STOP": "Do not label this a finite-recoil or thermally self-consistent surface model until collision/energy-conservation oracles and the prescribed-vs-dynamic Tw closure have been qualified. The |g|*g_hat*g_hat^T integrand has continuous zero limit at g=0; implement this limit without inventing a preferred direction or an epsilon."
+    },
+    "maxwell_mixture": "Use A_s=(1-sigma_s)A_spec_s+sigma_s A_diff_s and Q_s=(1-sigma_s)Q_spec_s+sigma_s Q_diff_s only with consistently matched heavy/recoil assumptions. Independent species contribute A=sum_s A_s and Q=sum_s Q_s. A mixed finite-recoil specular plus approximate diffuse expression must disclose its order of approximation and pass the finite-mass oracle.",
+    "isotropic_bath_tensor": "For common u and scalar T, rotational symmetry gives Q=Q_perp*I+(Q_parallel-Q_perp)*w_hat*w_hat^T, w=v-u. The w=0 limit is isotropic. Positive parallel/perpendicular eigenvalues follow from the collision integral; do not fix an inaccurate approximation by clipping negative eigenvalues.",
+    "mass_ratio_and_high_speed": "Small m_s/M alone is insufficient to certify a diffusion law, especially for high velocity, tails and wall first passage. Record typical jump scales, higher jump moments, collision counts per interval, and comparison error for the requested observables. There is no proposed universal S or mass-ratio cutoff."
+  },
+  "fdt_and_equilibrium_qualification": {
+    "homogeneous_equilibrium_identity": "For zero probability current in a homogeneous equilibrium Maxwellian bath with theta_p=kBT/M, a candidate Itô diffusion satisfies A_i=0.5*partial_vj Q_ij - Q_ij*(v_j-u_j)/(2*theta_p). This is an independently derived FPE consistency test for that target equilibrium, not a constitutive prescription for arbitrary driven or thermally nonequilibrium gas.",
+    "invalid_substitution_counterexample": "Setting Q=2*theta_p*gamma(|w|)*I with A=-gamma(|w|)*w fails the zero-current identity by theta_p*grad_w gamma. Even repairing this identity would not prove that the process reproduces the collision kernel or high-speed transient/tail distribution.",
+    "preferred_validation": "First derive A and Q from the same scattering kernel. Check the low-speed equilibrium limit and its error as m/M decreases. Compare distributions and wall fluxes to a collision/jump reference. If the diffusion approximation fails, retain the accurate mean model within its qualification and stop the stochastic release; do not modify A to fit COMSOL or force Maxwell equilibrium.",
+    "primary_support": {
+      "url": "https://arxiv.org/pdf/cond-mat/0401327",
+      "locator": "Section III, Eqs.20-24, pp.5-7",
+      "bounded_summary": "The paper separates first/second collision moments from the validity of a Fokker-Planck distribution. High-speed use requires more than small momentum jumps; master-equation moments remain meaningful when the diffusion approximation fails. Its illustrative interpolation is not a production constitutive law."
+    }
+  },
+  "thermophoresis_design": {
+    "existing_formula": "F_th=(32/15)*a^2*q_tr/cbar for the current low-drift single/pseudogas revision.",
+    "external_inputs_required": [
+      "Full-domain accepted-unit q_tr or a verified translational conductivity tensor and the specified recovered temperature gradient.",
+      "Gas frame, solution/time and interpolation/recovery authority; heat flux must exclude convective, internal-mode, electron, ion, radiative and solid contributions unless the selected theory explicitly includes them.",
+      "Mixture species-resolved q_tr,s or a quantitatively qualified effective mixture closure.",
+      "The sphere surface reflection/temperature closure and gas distribution validity/near-wall limits."
+    ],
+    "immediate_action": "Repair and characterize the external field adapter before adding a thermal core model. Native PPR q reconstructed at t0 proves the original expression arithmetic, not the physical meaning or whole-domain transfer accuracy of q_tr.",
+    "physical_extension": "At finite slip, a non-Maxwellian incident distribution generates coupled changes in both drift and diffusion. A generalized collision response must integrate that distribution; simply summing current Waldmann force onto a nonlinear Maxwellian bath is an explicitly approximate model and needs an independent error study.",
+    "limited_closure": "A first-order Chapman-Enskog/heat-flux perturbation can be a separate small-nonequilibrium research case. It is not a positive probability distribution at arbitrarily large molecular velocities and cannot automatically serve as a collision Monte Carlo sampling density. Use a positive kinetic/DSMC reference for physical qualification.",
+    "STOP": [
+      "Missing or ambiguous translational conductivity/heat flux.",
+      "Unqualified finite-slip thermophoretic response or near-wall/nonlocal gas distribution.",
+      "Tw unknown with no justified prescribed/equilibrium/dynamic closure.",
+      "Using a motionless-particle heat-flux approximation to claim arbitrary-speed accuracy."
+    ],
+    "source": {
+      "url": "https://www.tandfonline.com/doi/pdf/10.1080/02786820490490001",
+      "doi": "10.1080/02786820490490001",
+      "bounded_summary": "Gallis, Rader and Torczynski study an approximate translational-heat-flux response for a motionless sphere in a quiescent gas, including specified mixtures and noncontinuum cases. This is not an unrestricted finite-drift stochastic model.",
+      "access": "Primary publisher search text available; direct full HTML returned 403. No uninspected equation detail is adopted."
+    }
+  },
+  "coordinate_design": {
+    "current_qualification": "Meridional RZ is useful for the native two-DOF mathematical comparison and deterministically no-swirl tracking. Projected RZ noise is a constrained two-dimensional stochastic model.",
+    "physical_need": "Isotropic molecular collisions generate v_phi even if its initial value is zero. In cylindrical inertial coordinates, dr=v_r dt, dv_r includes v_phi^2/r dt, and dv_phi includes -v_r*v_phi/r dt. Dropping v_phi suppresses geometric radial transport.",
+    "target": "Implement and qualify the already planned axisymmetric_field_cartesian3d motion mode using XYZ particle state, r=hypot(x,y) for field sampling, and basis rotation. Geometry remains the authoritative RZ generating surface; do not materialize a voxel field or a second 3D geometry representation.",
+    "analytic_counterexample": "From the axis, equal independent Cartesian Gaussian displacements with component variance sigma_x^2 yield a Rayleigh radius with E[r^2]=2*sigma_x^2. Folding one Gaussian meridional coordinate yields E[r^2]=sigma_x^2. Thus current projected RZ is not physical axisymmetric 3D Brownian radial motion.",
+    "force_scope": "Current no-swirl rarefied-vorticity lift cannot automatically extend to arbitrary XYZ/v_phi. Extend a force only after a covariant three-dimensional physical law is independently qualified; otherwise reject that composition explicitly.",
+    "proposed_initial_basis": "For XYZ motion in RZ data, canonical realized source must contain full Cartesian vectors or an explicitly converted (r,phi,z) vector and azimuthal position. The physical relative speed uses all three velocity components.",
+    "owners": {
+      "coordinates": "basis rotation, axis limits and motion mode",
+      "fields": "existing RZ locator/sample with shared support",
+      "geometry": "RZ surface-of-revolution first hit from the XYZ proposal",
+      "integrators": "dimension-aware state and same-method prefix",
+      "events": "earliest hit/residual ownership",
+      "boundaries": "rotated normal and physical 3D response",
+      "sources": "realized rows and release clocks",
+      "rng_stochastic": "third component stream and declared numerical revision"
+    },
+    "STOP": "A plot obtained by revolving a meridional path is a visualization, not a 3D stochastic solver or azimuthal physical validation. Stochastic rotation covariance is a distribution statement unless the underlying Wiener driver is rotated together with the problem; equal seed integers alone do not establish rotated pathwise equality."
+  },
+  "initialization_contract_requirements": {
+    "owner_reference": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/initial_condition_audit.json",
+    "authority": "The realized particle velocity vector, position and release time are the initial state authority; magnitude is derived. Metadata describing a distribution does not replace the realized rows.",
+    "required_meaning": [
+      "Active source node and property group; inactive GUI values excluded.",
+      "Velocity magnitude or vector as actually selected, lab versus relative-gas/moving-frame convention, vector basis/component order and sign.",
+      "Distribution family, normalization/weighting measure, parameters/units, correlations and sampling realization/RNG identity when externally generated.",
+      "Release-time distribution/schedule, position distribution and actual selected regions/facets.",
+      "Mass, drag diameter, electrostatic radius, contact radius, displaced volume and model weights as distinct quantities.",
+      "For physical 3D surface injection, rotated area measure 2*pi*r*ds and azimuthal/normal/tangential direction conventions."
+    ],
+    "consequences": "A filename such as speed10000 is not a speed in m/s. A thermal-source Maxwell distribution must not replace a specified energetic injection to make linear drag admissible. Release times are independent of the solver timestep."
+  },
+  "optional_formal_reference_capability": {
+    "recommendation": "DEFER_AS_PRODUCT_FEATURE_UNLESS_A_SECOND_GENERIC_CONSTITUTIVE_USE_CASE_JUSTIFIES_IT. Existing frozen-state equation audits and independent analytical linear references already answer mathematical mapping questions without relaxing physical models.",
+    "legitimate_if_required": "An explicitly defined scalar linear constitutive law F=beta(x,t)*(u-v), with its chosen FDT SDE, can mathematically reproduce the configured original equations even at high drift. It would carry a mathematical-reference qualification and no claim of finite-speed molecular accuracy.",
+    "candidate_definition": "For a spherical area law beta=pi*a^2*K(x,t), K [kg/(m^2*s)] is the prescribed momentum-transfer coefficient; source linear Epstein corresponds to K=(4/3)*rho*cbar*delta. This avoids a beta field that silently encodes one particle diameter.",
+    "FDT": "gamma=beta/M, theta=kBT/M, Q=2*gamma*theta*I. The existing frozen joint OU equations then remain mathematically applicable, subject to field/support/coefficient-change numerical accuracy.",
+    "limits": "Do not generalize this area law into Stokes scaling, arbitrary size exponents or callbacks. A low-Re Stokes/FDT composition would need its own supported temperature authority and applicability qualification. A prescribed heat-flux response reference must likewise be separated from physical finite-drift thermophoresis.",
+    "ownership_if_approved": "Concrete plan in physics/catalog.py; one neutral authority; equation in physics/forces.py and existing compiled owner; runtime returns scalar relaxation/noise coefficients; existing integrator/stochastic/engine route. No producer name is a dispatch input.",
+    "revision_policy": "Any changed constitutive meaning requires a new explicit model revision. Working design names are not public selectors or stubs. Existing physical gates stay unchanged.",
+    "acceptance": "Independent constant-coefficient analytic mean/covariance and variable-field numerical convergence; never accept solely from COMSOL path agreement."
+  },
+  "proposed_generic_work_packages": [
+    {
+      "id": "PHYS-0",
+      "priority": "FIRST",
+      "title": "Lock physical problem and qualify current deterministic finite-speed path",
+      "use_case": "Energetic injection into an externally supplied chamber field.",
+      "current_capability": "Existing finite-speed mean drag plus supported charge and additive forces; external fields and initial conditions still need physical qualification.",
+      "owners": [
+        "Adapter/canonical input author for source and field meaning",
+        "Existing physics and integrator owners for deterministic qualification"
+      ],
+      "deliverable": "A producer-independent problem statement and qualification table binding actual initial velocity, mass/dimensions, gas species approximation, scattering law, fields and numerical targets.",
+      "verification": "Extend independent collision quadrature to the actual stated S envelope including approximately 9.4, and use an independently converged ODE reference on a controlled field/charge case. Diagnose Case P step sensitivity separately from field transfer and physics selection.",
+      "stage_gate": "No new core algorithm is inferred from the existing full-case discrepancy. Resolve whether nonconvergence arises from temporal resolution, field regularity/transfer, dynamics or a reproducible minimal algorithm defect."
+    },
+    {
+      "id": "PHYS-1",
+      "priority": "PHYSICAL_MODEL_RESEARCH_BEFORE_NEW_NOISE_RELEASE",
+      "title": "One free-molecular collision-moment owner and explicit species/temperature authority",
+      "use_case": "Mixtures and finite slip where a one-pseudogas linear/noiseless approximation is insufficient.",
+      "missing": "Species-resolved first/second moments and finite-speed noise; current one-Maxwellian mean drag has no matching diffusion tensor.",
+      "proposed_public_composition": "Concrete free-molecular sphere drag revision plus a specifically paired collision-moment noise revision, only after qualification. Noise-off may consume the same drift owner without computing Q. Do not expose a general arbitrary-SDE/plugin interface.",
+      "minimal_first_domain": "One spherical nonrotating heavy particle, common local u and Tg for neutral species, specular kernel first, explicit free-molecular assumptions. Fully diffuse/mixed Tw closure follows only after its own reference passes.",
+      "fields_state": "One resolved neutral record: common u,Tg; number-density fields n_s, masses m_s, and scattering fractions sigma_s; gas mean-free-path/kinetic applicability authority. Tw explicitly prescribed or equilibrated initially; a dynamic Tp state is deferred until an energy-balance use case is specified. Existing mass_kg and drag_diameter_m remain particle authorities.",
+      "neutral_authority": "Total neutral density is sum_s(m_s*n_s) from the same species authority for buoyancy and collision moments. A producer density may be used to check consistency externally, but must not be silently used as a second competing density. Existing single/pseudogas models resolve to their current declared background; no automatic recovery of species from average molecular mass.",
+      "core_owners": {
+        "catalog": "concrete finite model plans and compatible paired composition; single neutral authority",
+        "forces": "collision drift/diffusion formula and limits from sampled primitives",
+        "compiled": "same prepared physics pass, fixed-rank SoA numeric outputs",
+        "runtime": "stage sampling/binding, requested moment coefficients and conservative bounds; no mesh or COMSOL in physics",
+        "case_format": "only needed canonical species/initial-state schema revision"
+      },
+      "integrator_support": "Deterministic RK4/exponential means initially. Stochastic support is blocked on PHYS-2 and a stated coordinate qualification; RZ two-DOF must remain explicitly constrained.",
+      "performance": "Common u,T lets species share the relative-velocity direction; Q needs Q_parallel and Q_perp for an isotropic incident bath. Stage work grows O(number_of_species). Store immutable species parameters once and partial-density primitives in bounded tile scratch, not a particle-by-species resident trajectory or online 64^3 quadrature.",
+      "replacement": "Consolidate the new physical formula into one moment owner and use the same pure/compiled numerical body family. Remove superseded duplicate formula paths and stale meaning tests in the implementing change; retain scientifically distinct existing revisions until a documented replacement is actually equivalent."
+    },
+    {
+      "id": "PHYS-2",
+      "priority": "CONDITIONAL_ON_COLLISION_AND_COORDINATE_QUALIFICATION",
+      "title": "A declared Itô finite-speed stochastic strategy with a valid refinement driver",
+      "use_case": "Collision-induced fluctuations materially affect trajectories/deposition, including nonthermal initial slip.",
+      "missing": "Velocity-dependent anisotropic Q and its numerical path law; current exact frozen scalar OU split cannot be reused as an exact nonlinear SDE split.",
+      "candidate_numerical_vertical_slice": "A first-order weak / one-half strong Itô baseline may be researched using start-state collision coefficients and a stable frozen-relaxation update, before any higher-order claim. Orders must be derived/tested, not assumed from the deterministic midpoint method.",
+      "frozen_tensor_arithmetic": "For scalar gamma>0 and frozen Q: Cvv=Q*(1-exp(-2*gamma*h))/(2*gamma); Cxv=Q*(1-exp(-gamma*h))^2/(2*gamma^2); Cxx=Q/gamma^2*(h-2*(1-exp(-gamma*h))/gamma+(1-exp(-2*gamma*h))/(2*gamma)). At gamma=0: Cvv=Q*h, Cxv=Q*h^2/2, Cxx=Q*h^3/3. This is exact only for the frozen linear problem, not the full velocity-dependent SDE.",
+      "refinement_driver": "Specify one counter-keyed underlying Wiener driver and its conditional splits. Existing OU conditional composition is exact only while parent and children use the same frozen transition/coefficient law. Re-evaluating nonlinear coefficients in children changes that law; a new numerical revision and proof are needed. Do not redraw on rejected/refined intervals or call the existing split exact for the new SDE.",
+      "owners": [
+        "stochastic.py: random increment algebra and conditional driver",
+        "integrators.py: stage rule/proposal/prefix",
+        "rng.py: ID/model stream/physical ordinal",
+        "engine.py: sole loop and bounded work"
+      ],
+      "stage_constraints": "Actual stage x,v,Z,T and additive forces; no charge-only subcycle. Accepted-only commit, independent output/release clocks, same-method hit prefix, active-wall restart and residual time all remain mandatory.",
+      "verification": "Use low-speed constant-coefficient OU analytic mean/full covariance; velocity-dependent manufactured SDE with independent exact/numerical reference; common-driver h/h2/h4 strong error and independent replicas weak/distribution error; collision-jump transient/cumulant/tail/wall flux reference. Test worker/tile/output/resume identity.",
+      "STOP": "Do not ship if the model's stochastic law, refinement driver, accuracy order, path first-passage qualification or accepted-state coupling cannot be stated independently of implementation details."
+    },
+    {
+      "id": "PHYS-3",
+      "priority": "REQUIRED_FOR_PHYSICAL_3D_NOISE",
+      "title": "Axisymmetric field with Cartesian 3D particle motion",
+      "use_case": "Physical isotropic fluctuation and/or azimuthal injection in a chamber whose fields are axisymmetric.",
+      "missing": "Third particle component and surface-of-revolution hit semantics; full 3D field/mesh is not needed.",
+      "owner_reference": "particle_platform_redesign/architecture_proposal.md:507",
+      "verification": "Rotation covariance; ballistic and drag-only 3D trajectories; cylinder/disk/cone first hit; Rayleigh vs folded-normal analytic counterexample; isotropic OU covariance; rotated wall response; real-noise deposition distributions and coordinate convergence.",
+      "memory": "Resident position/velocity each gain one float64 per particle: a lower-bound increase of 16*N bytes before additional checkpoints, shared-memory padding, replay and writer buffers. Each worker's proposal/event/stochastic scratch must be budgeted at three components and maximum adaptive depth; do not quote the 16*N lower bound as total cost.",
+      "replacement": "Use dimension-aware existing state/physics/proposal owners in one engine; do not build a parallel 3D engine or duplicate geometry/field store."
+    },
+    {
+      "id": "PHYS-4",
+      "priority": "EXTERNAL_FIELD_WORK_NOW_CORE_THERMAL_EXTENSION_ONLY_IF_JUSTIFIED",
+      "title": "Translational heat-flux and finite-drift thermal response",
+      "use_case": "Thermophoretic acceleration is material to chamber transport.",
+      "missing": "Whole-domain q_tr and a qualified mixture/finite-slip thermal response; current native t0 expression replay is insufficient.",
+      "owners": [
+        "External kinetic/COMSOL adapter: species/translational heat flux and transfer",
+        "physics/forces.py and catalog: only an independently qualified physical thermal model",
+        "fields.py: sample/support, no hidden gradient recovery"
+      ],
+      "verification": "Known constant/linear manufactured q_tr, coordinate rotation and scaling; held-particle kinetic reference for current heat-flux law; finite-slip/mixture/Tw/near-wall DSMC or molecular-collision study before a generalized law.",
+      "STOP": "A scalar Tg and total kappa cannot identify a general non-Maxwellian collision distribution. If the required closure is not physically specified, return an explicit model-capability limitation instead of a fitted force."
+    }
+  ],
+  "verification_and_release_gates": [
+    {
+      "gate": "G0_PROBLEM",
+      "required": "Source vector, basis, release schedule, particle dimensions, neutral composition/distribution, surface kernel/Tw and observable accuracy target are stated and bound to evidence.",
+      "fail_action": "Stop dependent preparation; no model or initial-state substitution."
+    },
+    {
+      "gate": "G1_COLLISION_MOMENTS",
+      "required": "Independent surface plus molecular quadrature or direct collision sampling verifies A,Q, symmetry, PSD, low-speed/higher-speed limits, recoil order and species sums. Oracle must not reuse production G(S), interpolation tables or coefficient algebra.",
+      "type": "Numerical collision oracle plus independent analytic limits.",
+      "fail_action": "No new model selector or paired noise implementation."
+    },
+    {
+      "gate": "G2_DIFFUSION_VALIDITY",
+      "required": "Finite-recoil jump/master-equation reference agrees for the requested transient distribution, moments, tails and wall/deposition observables on the stated domain. Confidence intervals separate reference sampling error from closure error.",
+      "type": "Physical approximation qualification; matching A,Q and PSD alone does not pass.",
+      "fail_action": "Do not release SDE; retain only qualified mean capability or propose a separately justified jump process use case."
+    },
+    {
+      "gate": "G3_NUMERICS",
+      "required": "Analytic OU and independent manufactured/nonlinear references establish numerical accuracy and declared orders. Noise and coefficient refinements have a documented conditional driver and are distinguished from finite-depth wall path accuracy.",
+      "type": "Analytic oracle where available; otherwise independent converged solver/reference with reported uncertainty.",
+      "fail_action": "No claims of high-order SDE, exact continuous first passage, or automatic dt convergence."
+    },
+    {
+      "gate": "G4_COORDINATES_EVENTS",
+      "required": "The selected physical dimension is correct; Cartesian3D in RZ fields passes rotation, axis, surface and first-hit tests. Current RZ projected tests qualify only a 2DOF constrained problem.",
+      "type": "Geometry analytic microcases plus statistical wall flux reference.",
+      "fail_action": "Explicitly reject unqualified model/coordinate compositions."
+    },
+    {
+      "gate": "G5_PUBLIC_COMPOSITION",
+      "required": "The same load_case/simulate/open_result route passes small public scenarios with continuous charge/additive forces, field support, output/release clocks, accepted checkpoint and worker/tile identity.",
+      "type": "One-engine end-to-end verification without COMSOL.",
+      "fail_action": "No alternate API/runtime or hidden compatibility route."
+    },
+    {
+      "gate": "G6_PERFORMANCE_QUALITY",
+      "required": "Standard uv/Ruff/Pyrefly/import-linter/Radon and focused tests; measured time/peak memory on physical matched baseline, species count and 3D/noise cases. Bound worker scratch, IPC and simultaneous live memory. Additional JIT is not a prerequisite.",
+      "type": "Current authoritative quality/performance ownership.",
+      "fail_action": "Do not claim scaling or speedup from microkernel timings."
+    },
+    {
+      "gate": "G7_EXTERNAL_VV",
+      "required": "Only after internal model/numerical qualification, compare like physical problems to native COMSOL and other references; use deterministic path comparisons or stochastic ensembles as appropriate, and attribute each residual to source/field/model/numerical differences.",
+      "type": "External comparison, not a core golden test.",
+      "fail_action": "No physical validation or processing-defect conclusion from path mismatch alone."
+    }
+  ],
+  "reused_current_verification_scope": [
+    {
+      "path": "particle_platform_redesign/solver/tests/scenarios/test_force_coupled_run.py:3090",
+      "test": "test_finite_speed_epstein_converges_with_both_production_integrators",
+      "scope": "Uniform XY fixed-charge drag-only, initial S=1, sigma=0.6, independent 32768-step classical RK4 nonlinear ODE reference; observed RK4 and exponential orders. It is a numerical reference, not an analytic solution or collision quadrature.",
+      "not_qualified": "S approximately 9.4, nonuniform chamber fields, all-force charge coupling, or finite-speed noise."
+    },
+    {
+      "path": "particle_platform_redesign/solver/tests/scenarios/test_force_coupled_run.py:2899",
+      "test": "test_finite_speed_epstein_reuses_rz_axis_and_material_wall_path",
+      "scope": "Small deterministic RZ axis/material-wall public scenario with existing drag model and both integrators.",
+      "not_qualified": "Full-case chamber high-drift physics or physical 3D isotropic noise."
+    },
+    {
+      "path": "particle_platform_redesign/solver/tests/verification/test_physics.py:726",
+      "test": "test_finite_speed_epstein_specular_factor_matches_velocity_integral",
+      "scope": "Independent 3D Gauss-Hermite first molecular moment at S=0.2,0.5,1,2, plus existing limit/Jacobian checks.",
+      "not_qualified": "Collision second moments or all-speed SDE/heat-flux response."
+    }
+  ],
+  "primary_literature": [
+    {
+      "id": "EPSTEIN1924",
+      "url": "https://authors.library.caltech.edu/records/3dxz2-4rt66",
+      "use": "Original low-speed spherical free-molecular resistance and surface-reflection dependence. Current authority cites it; not an all-speed stochastic qualification."
+    },
+    {
+      "id": "FINITE_SPHERE_ARC",
+      "url": "https://reports.aerade.cranfield.ac.uk/bitstream/handle/1826.2/536/arc-cp-0523.pdf?sequence=1",
+      "use": "Primary archived free-molecular spherical finite-speed mean drag reference used by current authority.",
+      "limit": "Mean drag does not determine collision diffusion or physical 3D coordinate correctness."
+    },
+    {
+      "id": "TRIGGER2004_2005",
+      "url": "https://arxiv.org/pdf/cond-mat/0401327",
+      "doi": "https://doi.org/10.1016/j.physa.2004.08.080",
+      "use": "Primary master-equation/Fokker-Planck distinctions and tensor moment conventions, especially Section III Eqs.20-24.",
+      "limit": "Do not adopt its illustrative interpolation as a validated all-speed noise law. Its scattering and distribution assumptions must be matched."
+    },
+    {
+      "id": "GALKIN_RUSAKOV2007",
+      "url": "https://www.pleiades.online/abstract/fldyn/7/fldyn0330_abstract.pdf",
+      "doi": "https://doi.org/10.1134/S0015462807020184",
+      "use": "Primary publisher abstract confirms thermally nonequilibrium diffusion depends on Tp/T and specular-diffuse scattering.",
+      "limit": "Only the abstract was accessible here. Its model assumes small relative phase velocity, monatomic gas, first Chapman-Enskog distribution and spherical rigid particles; it cannot justify this high-speed mixture model."
+    },
+    {
+      "id": "GALLIS_RADER_TORCZYNSKI2004",
+      "url": "https://www.tandfonline.com/doi/pdf/10.1080/02786820490490001",
+      "doi": "https://doi.org/10.1080/02786820490490001",
+      "use": "Primary thermal heat-flux response scope and mixture/translational distinction.",
+      "limit": "Motionless particle approximation; bounded studied cases do not qualify arbitrary finite slip or particle stochastic dynamics."
+    },
+    {
+      "id": "UHLENBECK_ORNSTEIN1930",
+      "url": "https://journals.aps.org/pr/abstract/10.1103/PhysRev.36.823",
+      "doi": "https://doi.org/10.1103/PhysRev.36.823",
+      "use": "Original OU reference identity. The frozen mean/covariance equations in this design are independently derived and checked by current code tests.",
+      "limit": "A linear OU reference does not validate multiplicative finite-speed noise."
+    }
+  ],
+  "deferred_physical_questions": [
+    "Actual material scattering/accommodation and particle surface temperature are not established by a native reflection coefficient alone.",
+    "One average molecular mass does not determine species-resolved momentum or translational heat-flux closure.",
+    "Particle-scale free molecular flow does not prove local equilibrium of the background gas on chamber/gradient/near-wall scales.",
+    "A molecular point-scatterer, spherical rigid-particle approximation may need scrutiny at 10 nm; an effective drag radius must have physical authority rather than absorb model error by fitting.",
+    "Rotational motion, particle internal energy, species-dependent accommodation, energy/momentum recoil and chemical interactions are outside the first proposed vertical slice.",
+    "Continuous charge and ion-drag mean models may need discrete collection/shot-noise correlation studies when the requested observable is sensitive; neutral FDT cannot supply these fluctuations.",
+    "A prescribed Tp or Tw=Tg closure must be justified. If a dynamic particle energy state is needed, heat-transfer moments, heat capacity and energy conservation require a separate concrete model reference.",
+    "Independent field transfer error and Case P time-resolution sensitivity must be resolved without fitting physical coefficients or changing the source."
+  ],
+  "ownership_conclusion": {
+    "settings": "Declare the actual source/basis/release times, physical input authorities, supported selected model and independent timestep/path-depth targets. A finer setting can resolve a numerical target only after a justified convergence study.",
+    "adapter": "Export and qualify correct geometry/support, native field semantics and full-domain translational thermal quantities; quantify interpolation/recovery differences separately.",
+    "core_model_capability": "Species-resolved collision moments, qualified finite-speed stochastic law and physical axisymmetric-field Cartesian3D are legitimate generic extensions if their research gates pass. Optional prescribed linear reproduction is a different mathematical goal.",
+    "core_algorithm": "Current evidence establishes the prior support-enclosure defect was fixed in v64; it does not establish a new wall/integrator processing bug. Any further algorithm fix needs an independent minimal reproducer before a production change.",
+    "not_claimed": "No proposed model, 3D mode, nonlinear stochastic scheme, physical truth, or unchanged-original full trajectory reproduction has been implemented or validated by this note."
+  }
+}

@@ -1,6 +1,6 @@
 # Result format v3
 
-この文書は0.3.0のresult schema 3、engine v62 process実装、result algorithm v6、checkpoint schema 2の永続resultと
+この文書は0.3.0のresult schema 3、engine v64、result algorithm v6、checkpoint schema 2の永続resultと
 `ResultView`の契約です。軌道計算の入力契約は
 [`case_format_v3.md`](case_format_v3.md)が所有し、集計、可視化、COMSOL比較はこのresultを読むcore外の
 toolが所有します。
@@ -289,7 +289,7 @@ manifestは少なくとも次を記録します。
 P06 revision 3bの数値pathはengine `coupled_rk4_engine_v6`で確立した。現行algorithm revisionは次である。
 
 ```text
-engine          particle_engine_v62
+engine          particle_engine_v64
 compiled tile   compiled_cpu_tile_v31
 runtime layout  resident_soa_process_slab_v14
 memory plan     solver_owned_memory_plan_v25
@@ -312,7 +312,7 @@ result          durable_segmented_result_v6
 checkpoint      schema version 2
 ```
 
-現行v62は同じslab数値処理を使い、親macro/単一writer/barrierを維持する。
+現行v64はv62のslab数値処理を使い、親macro/単一writer/barrierを維持する。
 event/failureは到着順にsingle writerへappendし、workerごとの一batch ACKで容量を制限する。
 公開canonical event順は既存readerが所有し、storage batch順・HDF5 byte列を物理順のauthorityにしない。
 非空replayの一shared root、永続reader、macro/slab viewとprivate scratch template解放はruntime所有の変更であり、
@@ -323,6 +323,12 @@ result/checkpoint形式へ共有memory名や未完taskを永続化しない。
 公開工程はimplementation plan第21.4節を参照する。過去の実装・採否は
 [保存済み性能記録](../evidence/comsol_brownian_fullstep_parallel_2026_10_12/current_docs/solver/docs/parallel_execution_plan.md)に保持する。
 compiled tile、result/checkpoint schemaと他の数値method revisionは維持し、process数を科学RNG identityへ加えない。
+
+v64はexponential midpointのlocal enclosureを採用する条件へ、全shortened half predictor boxのfield support証明を追加する。
+局所field rangeは支持cellだけを囲い、支持外のtrialに対するnearest-cell projectionを囲う保証を持たないためである。
+証明できないrowは既存global enclosureを保持し、endpoint containment、first-hit prefix、支持/適用判定は変更しない。
+unstructured boxは全exterior facetを有効に保つevent geometry viewへ、外向きに囲ったdiskと既存event budgetによる厳密clearanceを要求する。
+engine revisionはresume identityに含まれるため、v62/v63のpartialをv64で再開しない。integrator式とそのrevision、物理式、RNG、result schemaは維持する。
 
 `rk4_enclosure_revision`と`rk4_dense_path_revision`は一般stage RK4を実際に使うrunだけに記録し、ballistic、
 `quadratic_exact`、exponential midpoint、OUへ実行していないrevisionを付けません。

@@ -1,0 +1,459 @@
+{
+  "proposal_status": "DESIGN_ONLY_NO_IMPLEMENTATION",
+  "scope": "Geometry, external field producers, COMSOL inspection/export, canonical conversion, field transfer qualification and release-data handoff. No native invocation, solve, solver-core edit or authoritative-document edit was performed for this proposal.",
+  "scientific_objective": "The product must calculate physically and numerically defensible particle motion from explicitly owned external data. Reproduction of COMSOL's configured mathematical problem is useful intermediate evidence; it is neither the physics specification nor experimental validation. Do not add unrestricted high-speed linear drag merely to fit an existing COMSOL result.",
+  "main_decision": "Improve the existing external adapter and one scoped extraction/transfer handoff before expanding field interpolation order. Canonical H5v3 already represents the essential current runtime facts. The immediate gap is the per-quantity meaning and tested conversion, not the absence of another solver or a universal import framework.",
+  "current_code_findings": [
+    {
+      "owner": "particle_platform_redesign/solver/tools/comsol_adapter/workflow.py",
+      "references": [
+        "FieldSpecification:86",
+        "adapt_from_configuration:140",
+        "_parse_fields:303",
+        "_build_mesh:341",
+        "_read_fields:703",
+        "_field_column_indices:826",
+        "_project_axis_radial_velocity:888",
+        "_match_coordinates:917",
+        "_snapshot_sources:945",
+        "_provenance:982"
+      ],
+      "finding": "The existing adapter correctly owns COMSOL syntax and immutable-byte conversion, but its active contract is five static thermal primitives, one RZ domain and P1 output. All quadrilaterals are split. The field specification requires named thermal columns and strict SI strings; field IDs, multiple selected solution members, derivative recovery and general per-field mappings are not part of that contract. Axis gas velocity projection is a numeric setting rather than a complete physical transformation record.",
+      "consequence": "The recent A/P campaign had to add plasma and derivative fields in a separate case-bound preparation script, duplicating conversion/mapping responsibilities. A future chamber again invites local mappings, assumed tags and repeated prompts. Replace this gap in the existing adapter owner."
+    },
+    {
+      "owner": "particle_platform_redesign/solver/src/chamber_particles/case_format.py",
+      "references": [
+        "BoundaryData:46",
+        "GeometryData:60",
+        "RegularLayout:77",
+        "P1TriLayout:87",
+        "Q1QuadLayout:97",
+        "FieldData:110",
+        "RealizedTableSource:127",
+        "RealizedSurfaceSource:146",
+        "DataBundle:169",
+        "_validate_provenance:416",
+        "_validate_field:739",
+        "_field_records:947"
+      ],
+      "finding": "H5v3 already holds units, component order/basis, static or fixed-topology time snapshots, node/cell association, geometry cell/domain IDs, boundary ownership, realized source states and extensible hash-bound producer_metadata. It does not encode native solution/recovery semantics as runtime operators, which is appropriate.",
+      "consequence": "Use producer_metadata and a linked external extraction record for native ownership and conversion lineage. Do not add COMSOL tags, native defaults, a second validation schema or a field-expression DSL to the core format."
+    },
+    {
+      "owner": "particle_platform_redesign/solver/src/chamber_particles/fields.py",
+      "references": [
+        "PreparedFieldSet.component_bounds:374",
+        "local_component_bounds:412",
+        "sample:478",
+        "spatial_gradient:537",
+        "_prepare_numeric_field_context:631",
+        "prepare_required_fields:1293",
+        "certify_rz_axis_field_regularity:1684",
+        "_certify_particle_domain_coverage:1723",
+        "sample_field:1778",
+        "_interpolate_snapshot_values:1813",
+        "_select_supported_containing:2323"
+      ],
+      "finding": "Production required fields currently share one fully supported node layout; unstructured fields must exactly match the particle volume mesh. Scalar/low-level interpolation can represent cell values and NumericFieldContext has an association flag, but production preparation explicitly rejects cell-associated required fields. Static nodal spatial_gradient already exists. Local range availability is explicitly separate from complete support proof.",
+      "consequence": "No claim that production already supports arbitrary discontinuous fields, multiple unrelated FE meshes or moving meshes. Future extensions must maintain stage support, time-knot behavior, axis traces and conservative bounds in this owner."
+    },
+    {
+      "owner": "particle_platform_redesign/solver/src/chamber_particles/geometry.py",
+      "references": [
+        "prepare_geometry:108",
+        "_audit_boundary_inventory:705",
+        "contact_normals_for_candidates:290"
+      ],
+      "finding": "Geometry is straight line2 facets over tri3/quad4 volume cells. Every supplied physical boundary must be an exterior cell edge; internal volume edges cannot be material boundaries. Axis seams are excluded from material walls. Facet normals are computed from oriented straight edges.",
+      "consequence": "Curved walls are an explicit approximation. Native internal membranes/walls cannot be silently dropped or represented as ordinary continuous domain interfaces."
+    },
+    {
+      "owner": "particle_platform_redesign/solver/src/chamber_particles/topology.py",
+      "references": [
+        "TOPOLOGY_ALGORITHM_REVISION:23",
+        "prepare_periodic_topology:148"
+      ],
+      "finding": "The implemented topology transfer is static Cartesian XY translation. Native identity pairs, rotational periodicity, moving geometry and general COMSOL pair features are not synonymous with that capability.",
+      "consequence": "Extraction records exact pair maps and active particle actions; unsupported transforms remain scoped capability limits."
+    },
+    {
+      "owner": "particle_platform_redesign/solver/tools/electrostatic_builder/workflow.py",
+      "references": [
+        "build_from_configuration:109",
+        "_generated_fields:255",
+        "_ion_velocity:360",
+        "_producer_metadata:542"
+      ],
+      "finding": "The independent reduced producer solves a specified static RZ P1 closure and projects cell gradients to nodal electric fields. This is a separate physical/numerical field production route, not an adapter for a general plasma solution.",
+      "consequence": "Preserve producer-model and discretization lineage. Adapter error, native FE error and reduced-closure error require different experiments and owners."
+    }
+  ],
+  "recent_evidence_that_changes_the_design": [
+    {
+      "artifact": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/fresh_native_missing_source_transfer.json",
+      "observation": "At the same 287 realized source positions, native-versus-imported-P1 gradient(mean E squared) vector differences are 18.07% of the fixed native cohort scale in A and 90.49% in P; azimuthal vorticity differs by 16.91% in both. Recovery/operator meanings differ as well as representation.",
+      "interpretation": "A node-copy or hash check does not establish off-node derivative parity. These percentages are descriptive fixed-scale discrepancies, not acceptance thresholds or evidence that these small force terms dominate final outcome error."
+    },
+    {
+      "artifact": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/equation_audit/equation_audit_summary.json",
+      "observation": "Same-state native equation replay and production pure formulas locate separate model-form and transfer effects. Coulomb-force source-point transfer reaches 3.48%/7.41% of the fixed A/P native scale, while finite-speed versus original linear drag produces a much larger model change. Native Waldmann needs actual PPR gradients, not ordinary recovered-off gradients.",
+      "interpretation": "Field accuracy must be judged both in primitive units and through the requested force/charge effects at identical states; do not tune a field or coefficient to absorb a changed drag law."
+    },
+    {
+      "artifact": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/native_thermal_checks.json",
+      "observation": "Native PPR gradients accept K/m and conductivity accepts W/(m*K). A full native heat-flux bracket containing untyped pprint(0) returned blank unit readback. Its values exactly equal the independently measured negative conductivity times PPR gradient at source points.",
+      "interpretation": "Preserve requested versus observed units separately. Explicit dimensional/conversion evidence can justify SI values; a requested unit string alone cannot."
+    },
+    {
+      "artifact": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/native_receipt.json",
+      "observation": "The working reader was a different installed COMSOL copy than the first checked executable. Native Java file IO was blocked, whereas console capture and controlled DataExport worked without changing security preferences. Some particle Eval expressions were unsupported despite successful native model load.",
+      "interpretation": "Discover actual reader/version/access once, use a successful saved-data route and retain failures as evidence. Compilation and process exit zero are not sufficient completion signals."
+    }
+  ],
+  "immediate_adapter_replacement": {
+    "owner": "particle_platform_redesign/solver/tools/comsol_adapter/workflow.py",
+    "scope": "Replace the thermal-only FieldSpecification with an explicit finite list of selected field mappings, extend the existing source snapshot/parser/writer path and retain one canonical publication route. Migrate active adapter configurations/tests in the same change; no parallel thermal-versus-generic engine or compatibility framework.",
+    "proposed_adapter_format": "A replacement adapter configuration revision is warranted because the existing five-column dialect cannot express the needed selected fields. H5v3 does not need a revision for this work.",
+    "field_mapping_required_items": [
+      "canonical name, quantity meaning, component names/order, stored basis and exact canonical SI unit",
+      "raw expression and original unit, actually accepted native evaluation unit, conversion formula and coefficient source",
+      "qualified component and producer/reader identity; background expression dependency graph reference",
+      "dataset type/chain, owning solver solution, selected inner/outer member tuples with parameter names/values/units and indexing convention",
+      "selected physical time or static/phase/RF mean convention; fixed-topology snapshot times when applicable",
+      "mesh identity and original element order; stable mesh-node/element IDs or separately identified probe IDs",
+      "domain selection and side; continuity class; native derivative/recovery/smoothing settings; actual support/missing mask",
+      "authority choice: imported native primitive, explicitly reconstructed external primitive, or selected canonical derivative; derivation inputs and operator revision",
+      "declared approximation/reduction and targeted transfer-probe receipt reference"
+    ],
+    "implementation_operations": [
+      {
+        "existing_functions": [
+          "_parse_fields",
+          "_field_column_indices",
+          "_read_fields"
+        ],
+        "change": "Parse the selected mappings once; read only selected expressions/snapshots; map scalar/vector rows to FieldData consistently. Use the physics catalog's requirements as the canonical metadata authority. No field selection from COMSOL feature labels alone."
+      },
+      {
+        "existing_functions": [
+          "_snapshot_sources",
+          "_match_coordinates"
+        ],
+        "change": "Join new mesh-node exports by explicit scoped node IDs using a sorted ID lookup with uniqueness/coverage checks. Keep the current bijective coordinate proof only for identified legacy exports without IDs; never promote probe_id or CSV row index to node_id. Hash and parse the same captured bytes."
+      },
+      {
+        "existing_functions": [
+          "_parse_domain",
+          "_build_mesh",
+          "_build_boundary",
+          "_collect_boundary_rows"
+        ],
+        "change": "Select the inspected gas-domain ID or explicit union of gas domains, retain original domain IDs and distinguish continuous internal interfaces from actual particle walls. Reject unsupported internal material boundaries rather than deleting them. Preserve native ID to canonical cell/facet maps."
+      },
+      {
+        "existing_functions": [
+          "_project_axis_radial_velocity",
+          "_provenance",
+          "_report"
+        ],
+        "change": "Make axis correction an explicit selected producer transformation with raw values, affected nodes/cells, norm, parity rationale and off-axis effect. Prefer native symmetry-consistent re-export. Default to rejection when required regularity is unproved; never silently project electric/ion/derivative fields from a tolerance inferred after observing the values."
+      },
+      {
+        "existing_functions": [
+          "adapt_from_configuration",
+          "case_format.write"
+        ],
+        "change": "Publish one checked H5 with provenance links to the extraction/mapping record and one adapter report. Use existing canonical validation rather than a copied geometry/field validator. Preserve unavailable raw values outside the selected usable domain; do not fill them with zeros or nearest neighbors."
+      }
+    ],
+    "time_handling": "Map each field's actual owning solution to selected fixed-topology snapshots. Retain every required snapshot knot and test between knots. Reject extrapolation, unnoticed remeshing, moving geometry and unsupported phase conventions. Static RF averages are explicit model reductions; averaging nonlinear primitives before a force is generally a different model.",
+    "unit_handling": "Request SI from native evaluation where possible and read units back after setting expressions. For non-SI input use explicit finite scale/offset conversion, including temperature offsets and energy-versus-thermal-voltage semantics. Avoid a general unit-expression framework; unknown dimensional meaning remains unresolved.",
+    "provenance_minimum": "Keep raw native evidence in the extraction record. Store compact selected per-field semantic lineage under DataBundle.provenance_json.producer_metadata and references/hashes to the record. Producer_version remains the converter/producer version; native source and reader versions are separate fields. Do not duplicate the native inventory into several ledgers."
+  },
+  "primitive_authority_rules": {
+    "default": "A supplied canonical primitive has one authority. Record how it was produced and test it at the same physical points; do not independently recompute a similarly named quantity with another convention.",
+    "electric": "Choose imported native E or a declared gradient of the chosen potential representation. A mass-lumped/recovered nodal E is a different operator from cellwise -grad(P1 potential). Stored E and potential need not satisfy the same discrete derivative identity; any required consistency claim needs its own probe rather than silently changing E.",
+    "DEP": "Declare DC squared magnitude, RF RMS or cycle mean first. Distinguish imported native grad(mean E squared), derivative of an imported mean-E-squared scalar and 2E dot grad(E) of a canonical vector. These operations do not generally commute with averaging, recovery or resampling.",
+    "thermophoresis": "Bind the required translational conductive heat flux or the explicit effective/native conductivity variant. Native Fourier/PPR heat flux, total/internal-mode conductivity and translational conductivity are different physical facts. Preserve tensor components and one-sided gradients. Never derive a missing heat flux by inverting the measured thermophoretic force.",
+    "vorticity": "Retain the signed component and frame: RZ azimuthal curl is d(u_r)/dz-d(u_z)/dr. A magnitude, an XY curl convention or omitted swirl components is not an equivalent primitive. Axis parity is part of the representation.",
+    "existing_derivative_support": "PreparedFieldSet.spatial_gradient already differentiates static nodal data at an existing sampled stage. Reuse it for canonical-operator checks. It does not make an externally projected nodal gradient equal to the exact stage gradient, nor provide a general time-dependent derivative recipe.",
+    "new_runtime_derivations": "Do not immediately add a derivative DSL or automatic gradient dispatch. If a quantified important use case requires exact stage derivatives, propose one named producer-neutral operation in the fields/physics owners with valid coefficient bounds, stage scratch and an independent microcase. Imported-primitives and derived-primitives must not become two competing automatic authorities."
+  },
+  "release_handoff_boundary": {
+    "owners": [
+      "native extraction record",
+      "external preparation/adapter",
+      "case_format.RealizedTableSource or RealizedSurfaceSource",
+      "sources.py for runtime release meaning"
+    ],
+    "required_native_facts": [
+      "release feature type/active selection, time expression/schedule, stored actual release time and stable identity/generation",
+      "position definition, spatial frame/origin/units, geometry/domain side and whether internal or surface launch",
+      "full velocity component expressions and units, not only a scalar speed or filename; out-of-plane DOFs and actual realized components",
+      "velocity frame: absolute lab, flow-relative, normal/tangent or local rotated coordinates; source flow owner at release point/time",
+      "position, speed, angle, temperature and size distributions; dependencies/correlations, sampling algorithm/RNG arguments and realized rows",
+      "native mass specification and evaluated mass, charge/Z convention, drag diameter, electrostatic radius, point/finite contact, displaced volume",
+      "weight or release-rate meaning and sampling measure, including RZ annular/volume versus uniform-r sampling"
+    ],
+    "conversion": "Normalize position and velocity by an explicitly bound transform. For a normal/tangent launch, use the oriented source surface's physical frame and retain the native geometry-to-facet error; for a flow-relative launch add the inspected local flow vector at the actual release time. Verify speed=norm(full velocity) and the unit/frame transformation independently. Nonzero native azimuthal motion cannot be discarded to obtain a meridional case.",
+    "realization": "For mathematical reproduction use exported actual release rows; a common seed number is insufficient. For prediction, preparation realizes the selected source distribution once with a declared sampling measure and records the realization. Core sources consume those rows and do not re-sample hidden distributions. A speed multiplier is evaluated from its dependencies, never interpreted as a constant speed.",
+    "scope": "H5v3 already contains the normalized per-particle vector, timing and properties. Native distribution definitions belong in linked provenance. Variable mass/size, new source DOFs or moving sources require physics/runtime capabilities; they are not recovered by adding metadata or copying one final value."
+  },
+  "transfer_validation_before_trajectory_comparison": {
+    "owner": "particle_platform_redesign/solver/tools/vv/comsol, using the existing adapter output and field owner",
+    "consolidation_target": "Promote the reusable same-point logic from evaluate_m3c1_field_localization.py and the recent check_missing_source_transfer.py into one externally scoped field-transfer evaluator. Consume selected quantities/probes from the mapping record; remove duplicated active mapping/recovery tables when callers migrate. Keep case-specific historical recipes as evidence, not defaults.",
+    "probe_selection": [
+      "actual release points and release times with stable IDs",
+      "off-node points inside selected cells, not only export nodes",
+      "selected extrema/large-gradient and first-divergence regions important to the requested force/charge observable",
+      "paired points on each declared interface side and near selected wall/axis locations",
+      "snapshot knots and intermediate times for time-dependent inputs"
+    ],
+    "native_evaluation": "Use an explicit native dataset/member, selected geometry dimension/entity, recovery/smoothing, phase convention, full precision and actual units. Interp can project points onto lower-dimensional geometry and normally allows an extrapolation distance; explicitly set and read the intended settings and export returned coordinates/support. Native finite values are not by themselves proof of containment or correct side.",
+    "measurements": "Report coordinate/domain/support agreement separately from value agreement, component and vector SI max/RMS differences, fixed-scale relative differences, derivative identities only when the same operator is declared, and selected identical-state force/charge effects. A field mismatch should be assigned to source/adapter/operator/representation before a whole-trajectory core claim.",
+    "budgets": "Register the physical observables and an SI budget before acceptance. Separate source realization, field production, spatial/temporal transfer, geometry, integration/event and statistical uncertainties. Derive important primitive budgets through identical-state delta(F/m) and delta(dZ/dt), or a bounded sensitivity experiment, rather than granting every field a universal percentage. For near-zero fields use absolute or fixed cohort/physical scales. Empirical refinement differences are sensitivity bands until an asymptotic or independently bounded error is established.",
+    "stop_rule": "If a transfer/operator/model error floor is already larger than the intended trajectory budget, preserve useful results and resolve that owner. Do not keep reducing the particle timestep or changing coefficients to make the comparison appear converged."
+  },
+  "representation_decision": {
+    "first_choice": "Keep the current supported P1/Q1/regular representations and measure their error. Refine canonical sampling of the unchanged native field operator, holding the boundary polygon fixed where possible. This reduces adapter approximation; it does not refine or validate the native FE solution itself.",
+    "Q1": "For a confirmed pure-Q1 domain retain Q1 mapping when it satisfies the existing runtime same-mesh restriction; do not split it solely because the adapter currently only emits P1. A bilinear cross term is not reproduced by a two-triangle P1 split. Mixed tri/quad input currently requires an explicit P1 conversion or a separately justified future capability.",
+    "P1_sufficiency_test": "Use the selected physical metrics, off-node/side/derivative probes and at least enough spatial levels to decide their registered budgets. Refinement is sufficient only if the observed native-to-canonical discrepancies decrease adequately within practical node/time/memory cost. A native high-order solution can be accurately sampled by refined low-order fields; its existence alone is not a requirement for a P2 solver.",
+    "when_low_order_refinement_is_insufficient": [
+      "A genuine physical or FE derivative jump is smoothed by a shared nodal field and the required one-sided/near-interface metric cannot meet its budget.",
+      "Important smooth high-order structure needs unacceptable P1/Q1 resolution and a measured high-order option would materially reduce total cost.",
+      "Curved geometry normal/contact errors dominate the selected arrival/reflection metric despite practical facet refinement.",
+      "Moving/remeshed topology or unsupported DOFs change the mathematical problem; fixed-topology snapshot interpolation cannot represent it."
+    ],
+    "cell_or_discontinuous_future_gate": "First test the smallest legitimate case, such as a scalar piecewise-constant primitive on a common mesh. FieldData cell association already exists, so an initial capability may need no H5 change. However prepare_required_fields, local_component_bounds, axis trace checks and core event/stage evaluation must be extended together. At a discontinuity, choosing the lowest cell ID is not a physical side rule; define one-sided evaluation and crossing behavior. Do not enable the gate merely because a low-level sampler accepts cell data.",
+    "high_order_future_gate": "A high-order extension requires evidence of accuracy/cost benefit and one independent polynomial/geometry case. Lagrange P2 weights can be negative, interior values can exceed node extrema and positive nodal values can generate invalid interior primitives. Current P1/Q1 convex bounds cannot be reused. Add conservative polynomial/control-coefficient bounds, support/Jacobian certification, axis traces, dense/event interaction and memory/performance evidence in the existing field owner. No parallel high-order engine or generic FE plugin framework.",
+    "schema_changes_only_if_exercised": "A genuine cell-local discontinuous linear representation requires explicit cell-local DOF/value ownership rather than coordinate duplicate tricks. Curved facets need actual curved geometry/control data rather than a larger line2 tolerance. Those are future canonical schema decisions with one case, version migration and removed superseded paths; they are not needed for the immediate export/mapping/validation improvement."
+  },
+  "geometry_and_topology_plan": {
+    "immediate": "Export actual selected solution mesh connectivity/entity IDs and physical boundary selections. Retain native geometry/order/curvature evidence and the canonical line2 approximation. Check holes/disconnected regions, exterior coverage, orientation, semantic groups, point versus finite-radius contact and axis exclusion. Never replace a chamber by its bounding rectangle or infer a particle wall law from an electric/gas boundary name.",
+    "geometry_budget": "Measure wall-position/Hausdorff and normal discrepancies over relevant curved surfaces. For a non-grazing impact, distance error informs time error through incident normal speed, and normal error informs reflected velocity error. Near grazing or a corner, this simple bound is inadequate; use an independent geometric impact/refinement case and retain corner identity uncertainty. Integration tolerance cannot remove facet-curvature error.",
+    "refinement": "Use the existing analytic circle/line2 convergence tool as evidence for the method, then case-specific native wall probes for the actual chamber. Hold boundary polygons fixed during field-only refinement. Boundary refinement requires conforming volume re-tessellation and resampled fields under the current same-mesh restriction; quantify both changes rather than pretending they are independent.",
+    "internal_interfaces": "A selected union of gas domains with ordinary transmission can preserve interior edges without assigning wall laws. A native membrane/internal particle wall or a field jump needs explicit geometry/side semantics and remains unsupported until its owner is implemented and independently tested.",
+    "periodic": "Reuse topology.py only for its static XY translation meaning and matching field seams. Inspect actual native pair transforms; rotational/RZ periodicity and moving walls are future work, not an adapter default."
+  },
+  "scoped_pipeline_to_reduce_prompt_retries": [
+    {
+      "stage": "inspect",
+      "owner": "inspect-comsol-model plus one version-checked native reader",
+      "input": "MPH and requested scope, or verified extraction record",
+      "output": "One extraction record with raw typed facts and links; actual access/source/member/dependency identity; release/formulation/active equation inventory; exact missing observations.",
+      "completion": "Finish discovery alone when requested. For a full run, hand off only facts required to choose a supported physical scope; do not export every variable."
+    },
+    {
+      "stage": "map and specify exports",
+      "owner": "prepare-comsol-field-case and physics catalog",
+      "input": "Inspected equations/DOFs/fields/releases/boundaries and scientific observable",
+      "output": "One compact case plan containing explicit equivalent/approximate/unsupported/unresolved choices, selected per-field/release contracts and numerical/transfer budgets.",
+      "completion": "Original mathematical reproduction and physical prediction are different questions. Continue supported scopes without relabeling a model reduction as an original match."
+    },
+    {
+      "stage": "obtain selected exports",
+      "owner": "inspect-comsol-model native route",
+      "input": "The case plan's native export specification",
+      "output": "Only the selected native topology, primitives, realized sources/states and essential same-point/RHS probes, with raw requested/observed units and member/side lineage.",
+      "completion": "Check actual artifacts and markers after a one-field smoke export. A changed executable, member, dependency or operator invalidates only affected evidence. Keep the source unchanged and use a separately identified companion for any solve."
+    },
+    {
+      "stage": "convert and qualify transfer",
+      "owner": "existing comsol_adapter plus one external transfer evaluator",
+      "input": "Selected exports and locked plan",
+      "output": "Checked canonical H5, one conversion report and one targeted transfer result bound by hashes/pointers.",
+      "completion": "Use existing canonical validation and meaning_preflight for their actual questions. Metadata/hash binding is not field accuracy; canonical check is not successful runtime."
+    },
+    {
+      "stage": "run and evaluate",
+      "owner": "public load_case/simulate/open_result plus validate-comsol-trajectories",
+      "input": "Prepared case with independently selected timestep/event/noise/spatial plan",
+      "output": "Actual run revisions/integrity, physical metrics, per-ID path/event evidence and bounded discrepancy owner.",
+      "completion": "Use only needed pilots/levels; refine the identified owner until the relevant budget is decided or a precise capability/error-floor limitation is established. No endless prompt loop or automatic coefficient fitting."
+    },
+    {
+      "stage": "visualize",
+      "owner": "visualize-particle-trajectories",
+      "input": "Saved states/events and declared comparison meaning",
+      "output": "Geometry-aligned per-ID paths and full-population observables with masks/censoring/model differences visible.",
+      "completion": "Never reconnect missing Disappear tails, interpolate through impacts, or claim stochastic path parity without realized increment correspondence."
+    }
+  ],
+  "independent_acceptance_microcases": [
+    {
+      "case": "unit and frame conversion",
+      "owner": "tools/comsol_adapter/tests",
+      "evidence": "Synthetic mesh/fields in mm and m, Celsius and Kelvin, a rotated XY vector, RZ r/z component order and a normal/tangent surface launch. Verify exact SI vectors, source speed norms, mass/charge/weight authority and rejection of a lost nonzero out-of-plane component."
+    },
+    {
+      "case": "solution-member and time binding",
+      "owner": "external extraction/adapter tests with synthetic saved observations",
+      "evidence": "Two parameter members with different fields and an affine-in-time field sampled between knots; wrong member, unit, topology or extrapolation must be rejected. A valid t-array must not be inferred from an unrelated parameter list."
+    },
+    {
+      "case": "topology and identity",
+      "owner": "tools/comsol_adapter/tests and existing geometry verification",
+      "evidence": "Shuffled stable node IDs, duplicate coordinates with distinct IDs, a domain hole, two transmitting gas domains, inverted boundary and axis seam. No nearest/row-order join; no missing exterior wall or silently deleted membrane."
+    },
+    {
+      "case": "derivative operator meaning",
+      "owner": "existing external transfer evaluator; fields.py verification only when changed",
+      "evidence": "Analytic polynomial potential/temperature/velocity. Check native or prescribed reference derivative, canonical interpolant derivative, externally projected gradient, tensor heat flux and signed curl separately. A bilinear xy field distinguishes Q1 from a P1 split; a smooth polynomial refinement establishes representational convergence."
+    },
+    {
+      "case": "curved impact",
+      "owner": "evaluate_curved_wall_line2_convergence.py and geometry/events verification",
+      "evidence": "Analytic circle impacts at several nonvertex and grazing angles; measure hit time/location/normal/reflected velocity as facets refine. Do not replace geometry error by event tolerance."
+    },
+    {
+      "case": "discontinuous field future capability",
+      "owner": "fields.py plus existing event/integrator owners",
+      "evidence": "Only if that capability is selected: a two-region scalar or electric primitive with known piecewise trajectory and one-sided values. Verify side selection, crossing timing, partial-stage evaluation, bounds, output invariance and cell-ID reordering independence through the public API."
+    },
+    {
+      "case": "high-order future capability",
+      "owner": "case_format.py, fields.py, geometry.py as actually selected",
+      "evidence": "Only if selected: a polynomial whose interior extremum exceeds nodal extrema and a curved-cell/axis case. Verify conservative coefficient bounds, positivity/support/Jacobian handling, derivative accuracy and same-engine performance/memory before broadening the representation."
+    }
+  ],
+  "consolidation_and_removal": {
+    "retain_owners": [
+      "case_format.py for canonical facts/hash/validation",
+      "fields.py for interpolation/support/bounds",
+      "geometry.py for domain/contact geometry",
+      "topology.py for implemented topology transfer",
+      "tools/comsol_adapter for COMSOL conversion",
+      "tools/electrostatic_builder for reduced field production",
+      "meaning_preflight.py for the existing seven-layer binding classification"
+    ],
+    "replace_active_duplication": "Move useful explicit multi-field mapping, release-table handoff and native-to-canonical probe selection out of recent case-bound preparation scripts into the current adapter/transfer owners. Replace thermal-only active settings/examples/tests together. Consolidate duplicated active field tables and coordinate/recovery conversions; do not add a second model catalog or another meaning gate.",
+    "historical_evidence": "Keep immutable readback/run/export receipts as evidence and distinguish them from current execution recipes. Git history retains replaced code. Old case names, 287 particles, domain3, wall IDs, sigma/seed/step values and chamber dimensions are never generic defaults.",
+    "avoid": [
+      "COMSOL imports in src/chamber_particles",
+      "a new general plugin/DI/ODE framework",
+      "a second trajectory engine",
+      "a new universal field-expression language",
+      "blanket metadata or contract suites",
+      "case-name-specific core branches",
+      "clipping/applicability relaxation to reproduce a reference",
+      "a mandatory full campaign for a discovery-only request"
+    ]
+  },
+  "primary_references": [
+    {
+      "title": "COMSOL6.4 Interp",
+      "url": "https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/comsol_api_results.52.082.html",
+      "used_for": "Expression/solution/point ordering, lower-dimension coordinate projection, explicit member/recovery/extrapolation/units and unit reset behavior."
+    },
+    {
+      "title": "COMSOL6.4 SolutionInfo API",
+      "url": "https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/api/com/comsol/model/SolutionInfo.html",
+      "used_for": "Named parameter/member tuples, one-based inner/outer indices versus zero-based multisolution indices and remeshing-dependent ownership."
+    },
+    {
+      "title": "COMSOL6.4 SolverSequence API",
+      "url": "https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/api/com/comsol/model/SolverSequence.html",
+      "used_for": "Solution-associated mesh and extended mesh information; current global mesh is not automatically the saved solution mesh."
+    },
+    {
+      "title": "COMSOL6.4 Sectionwise Data Format",
+      "url": "https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/comsol_api_fileformats.53.06.html",
+      "used_for": "Exact imported interpolation triangulation, unlike coordinate-only spreadsheet triangulation."
+    },
+    {
+      "title": "COMSOL6.4 mphinterp reference",
+      "url": "https://doc.comsol.com/6.4/doc/com.comsol.help.llmatlab/llmatlab_ug_ref.9.37.html",
+      "used_for": "pprint means recovery inside domains and ppr also includes boundaries; phase/evaluation methods and selected members are separate settings. Use the matching installed API, not a copied cross-version property list."
+    },
+    {
+      "title": "COMSOL6.4 Thermophoretic Force settings",
+      "url": "https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.16.html",
+      "used_for": "Selected thermal-conductivity tensor, gas molar mass and optional PPR inputs; do not infer them from a force label."
+    }
+  ],
+  "reviewed_code_identity": [
+    {
+      "solver_relative_path": "src/chamber_particles/fields.py",
+      "sha256": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f"
+    },
+    {
+      "solver_relative_path": "src/chamber_particles/case_format.py",
+      "sha256": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c"
+    },
+    {
+      "solver_relative_path": "src/chamber_particles/geometry.py",
+      "sha256": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b"
+    },
+    {
+      "solver_relative_path": "src/chamber_particles/topology.py",
+      "sha256": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861"
+    },
+    {
+      "solver_relative_path": "tools/comsol_adapter/workflow.py",
+      "sha256": "a523c49ef3ab20b7b0887ad48e6fcecff994fc2e41ede9e1d54a66ca3519e0c9"
+    },
+    {
+      "solver_relative_path": "tools/electrostatic_builder/workflow.py",
+      "sha256": "4aeec7b7cf11e29fadf1b74de241bd08140bd5cc6a2ef3f13b737513e9d821dc"
+    },
+    {
+      "solver_relative_path": "tools/vv/comsol/meaning_preflight.py",
+      "sha256": "37e7c149e4ea1bfae5c6fa97cedbf6c4b4a8abf5fdd1afbc3f2815c1aa05be0b"
+    },
+    {
+      "solver_relative_path": "tools/vv/comsol/evaluate_m3c1_field_localization.py",
+      "sha256": "6a6e6470ccbe0a812d2e12a8350507a49b3c5015de8f3ced35fb7d6d1c79a9ce"
+    },
+    {
+      "solver_relative_path": "tools/vv/comsol/prepare_comsol_p1_tables.py",
+      "sha256": "872f3f47dbce78cd07b795d47a8cbec85190a3a8e6a85dd44d7725bb86c369ed"
+    },
+    {
+      "solver_relative_path": "tools/vv/comsol/prepare_m3c1_common_p1_tables.py",
+      "sha256": "d118c2b735317a211fe999558f2641ba09d263c5ea53605b85c3f18cf8da02df"
+    },
+    {
+      "solver_relative_path": "tools/vv/comsol/evaluate_curved_wall_line2_convergence.py",
+      "sha256": "0489bde39c2b3db5c6fb3e2c47995c79faf02759bc9ec065dc20acbc72af386b"
+    }
+  ],
+  "consumed_evidence_identity": [
+    {
+      "solver_relative_path": "evidence/comsol_speed10000_comparison_2026_10_13/native/fresh_native_missing_source_transfer.json",
+      "sha256": "94a32b071353e868e95c7aeea33e7e75936251310051e4c1398c25ed2b728f39"
+    },
+    {
+      "solver_relative_path": "evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/equation_audit/equation_audit_summary.json",
+      "sha256": "1100f44b69057a303e3dc0271524703b3c4f1f26061b5e57ddcbcec616fd268a"
+    },
+    {
+      "solver_relative_path": "evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/native_thermal_checks.json",
+      "sha256": "bd97d9a875d6702b12924799d959537ad64de133d8a04059e2f56a6f10f5aab4"
+    },
+    {
+      "solver_relative_path": "evidence/comsol_speed10000_comparison_2026_10_13/native/native_receipt.json",
+      "sha256": "e5ffed3869fce38396873752f954d3fc992e21ec0837ae2f1dcf2fa3b8a58f8f"
+    }
+  ],
+  "targeted_future_work_order": [
+    {
+      "order": 1,
+      "work": "One selected-field and realized-source handoff in the existing adapter",
+      "deliverable": "Replace the active five-thermal-column dialect with selected mappings and scoped source/member/unit/frame contracts. Existing H5v3 remains. Demonstrate on one synthetic non-A/P chamber and the verified existing snapshots, with no all-module export promise.",
+      "migration": "Migrate active tools/comsol_adapter/cases and tests, then replace the recent preparation multi-field mapping caller. Remove replaced active mapping/axis conversion paths in the same change; immutable evidence receipts and old_code remain untouched."
+    },
+    {
+      "order": 2,
+      "work": "One meaning-matched field transfer check before full trajectories",
+      "deliverable": "Use planned fields/probes, current native operator and canonical samples at the same IDs/points/times/sides. Separate primitive/RHS/geometry errors and decide the registered observable budget. Validate units, exact mesh correspondence, derivatives and time interpolation.",
+      "migration": "Consolidate reusable transfer selection/alignment from existing field-localization and recent transfer scripts only after their intended scopes pass. Keep meaning_preflight as the binding owner, not an accuracy test."
+    },
+    {
+      "order": 3,
+      "work": "Measured representation/producer upgrade only where it resolves the important error floor",
+      "deliverable": "Try current P1/Q1 sampling/refinement and line2 geometry budgets first. Decide native producer mesh/model error separately. Admit cell-side, high-order or curved geometry only with a concrete required case, conservative bounds, one public analytic/manufactured test and measured cost.",
+      "migration": "No schema bump or new runtime representation in orders1–2. A future representation change follows a single-owner schema/numerical revision and removes superseded active paths; it does not create another engine."
+    }
+  ]
+}

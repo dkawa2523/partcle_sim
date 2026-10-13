@@ -562,7 +562,7 @@ physics:
     model: fixed
   thermophoresis:
     model: talbot
-    revision: talbot_cross_regime_diameter_knudsen_v1
+    revision: talbot_cross_regime_radius_knudsen_v1
     gas_temperature_field: gas_temperature
     gas_temperature_gradient_field: gas_temperature_gradient
     gas_density_field: gas_density
@@ -579,8 +579,8 @@ physics:
 temperature、gradient、density、viscosity、gas conductivity、mean free pathのunitは順に`K`、`K/m`、
 `kg/m^3`、`Pa*s`、`W/(m*K)`、`m`です。gradientはcase座標basisの2成分vector、他はscalarです。
 particle conductivityと三係数は有限正値を省略せず明示します。COMSOL 6.4相当の係数を使う場合も暗黙defaultにはせず、
-resolved manifestへ保存します。Knudsen数は`gas_mean_free_path/drag_diameter_m`で、Waldmannとの自動blendは行いません。
-v1は正の有限primitive以外を拒否しますが、`Kn_d`の数値cutoffは持ちません。これは別modelへの自動切替えを
+resolved manifestへ保存します。Knudsen数は半径基準`Kn_R=2*gas_mean_free_path/drag_diameter_m`で、Waldmannとの自動blendは行いません。
+v1は正の有限primitive以外を拒否しますが、`Kn_R`の数値cutoffは持ちません。これは別modelへの自動切替えを
 避けた明示的なmodel-form契約であり、任意のKnで物理検証済みであることを意味しません。
 
 Stokes--Cunninghamと併用する場合は`density/dynamic_viscosity/mean_free_path`、Epsteinと併用する場合は

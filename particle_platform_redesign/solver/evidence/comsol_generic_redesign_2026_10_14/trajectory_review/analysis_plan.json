@@ -1,0 +1,18 @@
+{
+  "scope": "All 287 stable IDs and 121 actual saved observations in each A/P case, 0 to 30 ms. New genuine RK4 .5/.25/.125 us levels, preserved original COMSOL native10/native5 and previous exponential-midpoint .25 us result.",
+  "registered_before_new_differences": true,
+  "comparison_intent": "Deterministic numerical sensitivity and method comparison on preserved scientific inputs; original COMSOL versus deterministic analogous physics is descriptive only.",
+  "read_boundary": "Public load_case/open_result, verified immutable native normalized tables and source-bound pure external evaluation helpers. No solve, historical writes or old_code imports.",
+  "provisional_computational_targets": {
+    "position_vector_m": 0.0001,
+    "velocity_vector_m_s": 1.0,
+    "absolute_charge_number": 0.1,
+    "first_material_hit_time_s": 0.000001,
+    "fate_count_difference": 1
+  },
+  "budget_meaning": "Empirical sensitivity targets from the campaign plan, not rigorous error bounds, COMSOL matching tolerances or physical prediction qualification.",
+  "masks": "Observed finite active x/v/Z, strictly before candidate accepted first boundary event and native conservative first-material saved interval lower endpoint or terminal time. Postcontact is descriptive; missing positions are never filled. Native disappeared remains unknown-cause disappeared, distinct from candidate escaped.",
+  "summaries": "Per-ID/time/population vector and component x/v/Z discrepancies; event identity and paired candidate first-hit timing/state; terminal confusion/stick identity; PID11/PID30 late event-free sensitivity; native10/5 sensitivity; original-vs-new-fine and old-exp-vs-new-fine.",
+  "claim_policy": "Original Brownian plus linear drag plus Waldmann differs from deterministic finite-speed drag without those terms and from transferred P1 fields. Qualified original solver parity remains NOT_TESTED. Initial equality and comparable numerical-method results do not certify original physical validity.",
+  "rendering": "Normalized per-series CSVs and all_states feed another owner's plotter. This analysis produces no SVG/HTML."
+}

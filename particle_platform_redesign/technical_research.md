@@ -286,11 +286,20 @@ F_th = -(12*pi*a*mu^2/rho)
 ```
 
 とする。これは`6*pi*d_drag`をprefactorに使う形と同値であり、慣性mass、electrostatic半径、contact半径は
-再構成しない。原著のmean free pathは粘性基準`lambda=2*mu/(rho*c_bar)`であり、producerのprimitiveはこの定義に
-対応する必要がある。coreはlambdaを二倍に加工せず、sample済み値をそのまま半径Knへ使用する。
+再構成しない。原著のmean free pathは粘性基準`lambda_old=2*mu/(rho*c_bar)`であり、原著係数を未換算で使うproducerの
+primitiveはこの定義に対応する。中性気体model間で一つの`lambda_common`を共有する時、選択した全domain・時刻で
+`alpha=lambda_old/lambda_common`が一定であることを証明できれば、caseの明示係数を`Cm_common=alpha*Cm_old`、
+`Ct_common=alpha*Ct_old`、`Cs_common=Cs_old`とすることで`Cm*Kn`と`Ct*Kn`を保存し、同じ力式を表せる。
+両規約・元と換算係数・比の根拠・独立point-force確認をproducer provenanceへ残す。比が空間・時間で変わる場合は現在の
+scalar係数で原式を全域保存できず、明示した近似または非対応scopeとして扱う。coreはlambdaを二倍に加工せず、sample済み値を
+そのまま半径Knへ使用する。Allen–Raabeの固定係数を使う時はその校正air規約を共通primitive側で保持し、Talbot側を
+必要に応じて換算する。`mu=0.491*rho*c_bar*lambda_common`と同じprimitiveから作る場合だけ比は0.982であり、別の
+校正`lambda0`や温度・圧力lawへ無条件に適用しない。
 `Cs,Cm,Ct`はcase必須で、pure evaluatorにもdefaultを持たせない。原著の推奨値は`1.17,1.14,2.18`である。
 `1.17,1.146,2.2`はCOMSOL記載のcoefficient variantとして選択できるが、原著の推奨値と同一とは呼ばない。
-producerが同じ温度solutionから`grad(T)`を形成する。v1は有限gradientと正の有限scalar primitive・係数を要求し、
+原著の理論背景の脚注に従い、多原子気体の原著再現では`k_g`を並進熱伝導率として用意する。native式が全熱伝導率を使う
+場合はその式の再現と原著Talbot再現を区別し、実際のfield定義・model-form差をproducer provenanceへ残す。coreは並進成分を
+推定せず入力値を使う。producerが同じ温度solutionから`grad(T)`を形成する。v1は有限gradientと正の有限scalar primitive・係数を要求し、
 `Kn_R`の数値cutoffは設けない。これはcross-regime model-formの明示選択であり、任意のKnでの物理検証を
 主張するものではない。旧径Kn revisionの自動変換や再解釈は行わない。
 Saffmanは`w=u-v`、`omega=curl(u)`、`L=w cross omega`として
@@ -1043,3 +1052,123 @@ builderとparticle solverを分けることで、Poisson収束失敗をparticle�
 
 この選択は「最速の単一kernel」ではなく、物理を増やしても正しさの責務と性能経路を追えることを
 優先している。高速化は同じV&V gateを通過した計算同士でのみ評価する。
+
+## 12. 有限速度gas interactionの研究計画（2026-10-14、未実装）
+
+本節は将来modelの研究条件であり、現行catalogの受理条件を変更しない。
+利用caseは有限gas-relative速度、微粒子の熱的揺らぎ、混合gas/非一様温度である。
+元COMSOLにあるlinear dragとBrownianを再現する数学問題、物理的に妥当なcollision model、
+実験/製造予測のvalidationは別に扱う。作業順とownerは
+[implementation_plan 第22節](implementation_plan.md)が所有する。
+
+### 12.1 平均抵抗と速度拡散は一つのcollision仮定から求める
+
+粒子質量をM、gas分子質量をm、粒子速度をv、gas分子速度をc、g=c-vとする。
+半径aの球、表面の外向き単位法線n、数密度n_g、正規化速度分布f_g(c)に対して、
+入射collision rateのmeasureは次である。
+
+```text
+dR = n_g*a^2 * (-(c-v) dot n)_+ * f_g(c) d^3c dOmega
+A(v) = integral dR * E[Delta v | c,n]                 [m/s^2]
+Q(v) = integral dR * E[Delta v Delta v^T | c,n]       [m^2/s^3]
+```
+
+これは衝突過程のfirst/second increment momentを定義する研究出発点である。
+Qは速度covarianceの時間rateであり、Fokker–Planckのdiffusion tensor D=Q/2、
+位置の拡散係数[m²/s]とは異なる。mixtureでは各speciesのn,m,T,drift,kernelを分け、
+rateをsumする。単一effective massで常に同じA/Qになるとは仮定しない。
+
+specular sphereの独立oracle候補では、reduced mass mu_red=mM/(m+M)とし、
+Delta v=2*(mu_red/M)*(g dot n)*nを使う。nの解析積分から次を独立に導出した。
+
+```text
+A_spec = n_g*pi*a^2*(mu_red/M) * E_g[|g| g]
+Q_spec = (n_g*pi*a^2/3)*(mu_red/M)^2 * E_g[|g|^3*I + 3*|g|*g*g^T]
+```
+
+この形はg=0でもintegrandが0となり、未定義のunit directionやepsilon補正を必要としない。
+この解析積分とgas速度quadrature/collision sampleを照合する。
+diffuse成分は粒子surface温度、outgoing flux law、recoil/accommodationのauthorityを要する。
+current finite-speed mean lawと同じ仮定ならそのmeanを再現し、equal-temperature・低drift・heavy limitで
+Q→2*gamma*k_B*T/M*Iを確認する。gammaは速度の線形緩和rate[1/s]、抵抗係数beta/Mである。
+finite-speedでQが一般にlongitudinal/transverseに分かれるため、
+抵抗係数をlinear FDTのscalarへ置き換えるだけの実装を採用しない。
+式の詳細・独立導出・前提は
+[physics設計レビュー](analysis/generic_improvement_2026_10_14/physics_design.json)に記録する。
+
+### 12.2 SDEとして採用できる条件は別に検証する
+
+一般のItô速度過程`dv=A dt+B dW`でQ=B B^T、D=Q/2とすれば、
+Fokker–Planckは`-partial_i(A_i f)+partial_i partial_j(D_ij f)`である。
+一様温度・gas rest frameでMaxwellianにzero probability currentを要求した場合に限り、
+次の関係が必要になる。
+
+```text
+theta = k_B*T/M
+A_i = partial_{v_j} D_ij - D_ij*w_j/theta,  w=v-u_g
+```
+
+これは本節でFokker–Planckから導いた整合性条件であり、物理的Qを一意に決めない。
+isotropic D=theta*gamma(v)*Iならgammaのvelocity derivative項が必要になる。
+PSD、平衡moment、上式の成立だけでは非平衡high-speed軌道、tail、rare arrivalを認定できない。
+collision first/second momentが定義できることと、second-order Kramers–Moyal truncationによる
+連続diffusion近似が十分であることは別である。有限mass ratioでもexact detailed balanceを無条件に主張しない。
+この区別と高速粒子に対するFokker–Planck適用制限は一次論文でも扱われる。
+[Trigger et al., velocity-dependent friction/diffusion, §III](https://arxiv.org/pdf/cond-mat/0401327)
+
+production追加前に、独立jump/collision（必要ならDSMC）referenceと以下を比較する。
+
+- mass ratio、drift、温度比、collision頻度/field変化時間、single-collision jumpと高次moment。
+- A/Qのquadrature収束、低速漸近、energy relaxation、covariance、確率tailと目的のfirst arrival。
+- 採用した連続近似の観測量別誤差、gas分布/熱流束closureの不確実性。
+
+妥当な範囲を示せなければnonlinear SDEは未対応のままにする。平均抵抗だけを検証して使う
+決定論的scopeは別に有用だが、揺らぎ無視の物理影響を認定済みとしない。
+高drift熱泳動はgas分布のnonequilibrium correctionを必要とし、heat-flux一つから
+任意速度の一意なforceが決まるとは仮定しない。Waldmannのcutoff拡大や熱泳動/noiseの暗黙削除で解決しない。
+
+### 12.3 座標・積分・評価への接続条件
+
+state-dependent Qには明示Itô/Stratonovich conventionと対応するdriftが必要である。
+現在のmidpoint frozen-linear OUをnonlinear processのexact methodと呼ばない。
+候補SDE schemeは同じstage/evaluation/accepted-state/event残時間/RNG ownerに統合し、
+weak convergenceとboundary sensitivity、coupled noise incrementによる必要なstrong検証を行う。
+sourceのthermal実現はruntime forcingとは別ownerである。
+
+現行RZの二速度成分はmeridional dynamicsである。3D等方collision noiseや非零phi速度は
+方位運動を生み、円柱慣性式ではdv_rにv_phi²/r、dv_phiに-v_r*v_phi/rが現れる。
+単にphi成分を捨てると同じ問題ではない。既存P17のRZ場/Cartesian XYZ粒子を使えば、
+軸で特異な円柱stateを追加せずfield基底・回転面normalを変換できる。
+軸上・平均0のisotropic transverse Gaussian displacementについて、3Dのradial分布はRayleigh、
+meridional投影はfolded-normalとなり、radial二次momentが異なる。
+これは数学的microcaseであり、COMSOLの2DOF保存結果との一致からfull3D transportを認定しない。
+
+source extractionのactive selector、frame、momentum/energy/角度samplingは
+[COMSOL Release](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_math.06.17.html)、
+[Inlet](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_math.06.19.html)を版付きで確認する。
+これらを製品のsource分布の自動defaultにはしない。
+
+### 12.4 独立衝突referenceの実装範囲と熱状態
+
+外部`solver/tools/vv/gas_collision/`はMaxwellian incident gas、球面入射、outgoing fluxを
+独立quadratureと衝突jump sampleで検証する。A/Pの574初期状態に対し、選択した
+one-pseudogas・heavy sphere・Maxwell mixed・prescribed Tw=Tgの平均抵抗を確認した。
+数値結果と入力hashのauthorityは
+[scientific_conclusion.json](solver/evidence/generic_improvement_2026_10_14/gas_collision/scientific_conclusion.json)である。
+方向別Q、frozen compound-Poissonのatom/tail、観測量scale別generator差も記録するが、
+非線形軌道、連続diffusion、壁first passage、物理3Dのqualificationには拡張しない。
+
+Tw=Tgは仮定であり、native `ComputeParticleTemperature=0`から導けない。
+同じheavy diffuse kernelの内部heat input候補は次となる。
+
+```text
+P_internal = sigma*n_g*pi*a^2*(m/2)*E_g[|g|*(|g|^2 - 4*k_B*Tw/m)]
+```
+
+入射energyとflux-weighted出射energyを差し引いた式であり、zero slip/Tw=Tgでは0、
+high slipのequal-temperature bathでは正となる。finite recoilや内部stateの補正は未検証である。
+初期相対運動energy/massは熱への全変換量ではなく、熱分配前の利用可能energyである。
+粒子heat capacity、初期温度、energy accommodation、熱交換closureが無ければ温度上昇を計算しない。
+密度2200からmaterialやCpを推定しない。COMSOLのauxiliary温度計算にもCpとheat source/sinkが必要である
+([COMSOL 6.4 temperature theory](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.52.html))。
+prescribed温度下の決定論的平均軌道は有用な限定問題だが、熱的に自己整合した実粒子予測とは区別する。

@@ -1,0 +1,391 @@
+{
+  "scope": "Read-only independent source-expression arithmetic and public load_case canonical readback.",
+  "inventory_binding": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/native_readback.jsonl",
+    "sha256": "631bcb483aced2f95b887b99e0b95206d03f77e9a8f4b7b9394dd4b506b56e39"
+  },
+  "arithmetic_program_binding": {
+    "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/audit_initial_conditions.py",
+    "sha256": "ec10bb312c0c66b252f0f739cbc5fc65713a28d225f58c24f58a92d57af4985a"
+  },
+  "cases": {
+    "caseA": {
+      "bindings": [
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/caseA_primitive_probes.json",
+          "sha256": "4952fdcaa34974db505b588f1bdfc2f4082434d9a312981af447673f1fae6a88"
+        },
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseA/prepared/full_h0p25us.yaml",
+          "sha256": "f2b85ae209a99656936e5755ed3c23f71f7c1887027c4cb90f26d480d173640e"
+        },
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseA/prepared/candidate_input.h5",
+          "sha256": "dd0bf6f0716032ee6bf2bd81ae083b87d6314a84f3ef8496fd78aed134a78cc5"
+        },
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/particle_trajectory_review/caseA_all_states.csv",
+          "sha256": "e6b58b6c9123338c3091dfbb03dcc65abcdb7bf98894a1c4f85440f07a0da319"
+        },
+        {
+          "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/caseA_initial_condition_audit.csv",
+          "sha256": "30c10e4b75af68704b6873df50d490b112ed5201a26ef7426ab8ba5926b673b3"
+        }
+      ],
+      "canonical_logical_content_hash": "sha256:f5dff4c33219b9f79ec58a858f138a13f3f36862860bfe1108944bac8698cad3",
+      "source_feature_path": "comp1/fptas/relg1",
+      "active": true,
+      "selected_settings": {
+        "GridType": "AllCombinations",
+        "VelocitySpecification": "SpecifyVelocity",
+        "InitialVelocity": "Expression",
+        "v0": [
+          "if(d0==10[nm],100,1)*(if(d0==10[nm],100,1)*(root.comp1.AS_release_speed*sin(root.comp1.release_theta)))",
+          "if(d0==10[nm],100,1)*(if(d0==10[nm],100,1)*(0[m/s]))",
+          "if(d0==10[nm],100,1)*(if(d0==10[nm],100,1)*(release_axial_sign*root.comp1.AS_release_speed*cos(root.comp1.release_theta)))"
+        ],
+        "rt": [
+          0.0
+        ],
+        "SubtractMovingFrameVelocity": "0",
+        "ReleasedParticleProperties": "pp1",
+        "aux0_auxq": "AS_Z0"
+      },
+      "inactive_values_not_used": {
+        "Ep0": "1[keV]",
+        "T0": "293.15[K]",
+        "alphac": "pi/3",
+        "M": [
+          50.0
+        ],
+        "mp0": "1E-9[kg]",
+        "dp0": "1[um]"
+      },
+      "native_geometry_unit": "cm",
+      "native_geometry_unit_to_m": 0.01,
+      "parameters": {
+        "release_speed_multiplier": {
+          "name": "release_speed_multiplier",
+          "expression": "1",
+          "value": 1.0,
+          "unit": null,
+          "status": "observed"
+        },
+        "release_axial_sign": {
+          "name": "release_axial_sign",
+          "expression": "1",
+          "value": 1.0,
+          "unit": null,
+          "status": "observed"
+        },
+        "release_half_angle": {
+          "name": "release_half_angle",
+          "expression": "15[deg]",
+          "value": 0.2617993877991494,
+          "unit": "rad",
+          "status": "observed"
+        },
+        "release_rmin": {
+          "name": "release_rmin",
+          "expression": "14[cm]",
+          "value": 0.14,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_dr": {
+          "name": "release_dr",
+          "expression": "0.1[cm]",
+          "value": 0.001,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_zmin": {
+          "name": "release_zmin",
+          "expression": "2.3[cm]",
+          "value": 0.023,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_dz": {
+          "name": "release_dz",
+          "expression": "0.05[cm]",
+          "value": 0.0005,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_phase_r": {
+          "name": "release_phase_r",
+          "expression": "0.61803398875",
+          "value": 0.61803398875,
+          "unit": null,
+          "status": "observed"
+        },
+        "release_phase_z": {
+          "name": "release_phase_z",
+          "expression": "0.41421356237",
+          "value": 0.41421356237,
+          "unit": null,
+          "status": "observed"
+        }
+      },
+      "expressions": {
+        "comp1/variable/varReleaseIC/release_theta": "release_half_angle*sin(2*pi*(release_phase_r*(r-release_rmin)/release_dr+release_phase_z*(z-release_zmin)/release_dz))",
+        "comp1/variable/varReleaseIC/release_speed_P": "release_speed_multiplier*sqrt(root.comp1.u^2+root.comp1.w^2)",
+        "comp1/variable/varAS/AS_ugr": "withsol('sol2',u,setval(Vrf,100[V]))",
+        "comp1/variable/varAS/AS_ugz": "withsol('sol2',w,setval(Vrf,100[V]))",
+        "comp1/variable/varAS/AS_release_speed": "release_speed_multiplier*sqrt(AS_ugr^2+AS_ugz^2)"
+      },
+      "count": 287,
+      "range_by_quantity": {
+        "r_m": [
+          0.14,
+          0.18
+        ],
+        "z_m": [
+          0.023,
+          0.025999999999999995
+        ],
+        "theta_expression_rad": [
+          -0.26179623163152094,
+          0.26179627268365097
+        ],
+        "theta_saved_rad": [
+          -0.26179623163152094,
+          0.2617962726836511
+        ],
+        "gas_speed_m_s": [
+          0.009016124290855411,
+          0.2478192439169687
+        ],
+        "speed_saved_m_s": [
+          90.16124290855412,
+          2478.1924391696866
+        ],
+        "gas_slip_m_s": [
+          90.16363595036356,
+          2478.27001725477
+        ],
+        "expression_vector_residual_max_component_m_s": [
+          0.0,
+          5.5720761338307057e-11
+        ],
+        "canonical_velocity_residual_max_component_m_s": [
+          0.0,
+          0.0
+        ],
+        "canonical_position_residual_max_component_m": [
+          0.0,
+          0.0
+        ],
+        "mass_kg": [
+          1.1519173063162575e-21,
+          1.1519173063162575e-21
+        ],
+        "charge_number": [
+          -1.0,
+          -1.0
+        ],
+        "release_time_s": [
+          0.0,
+          0.0
+        ]
+      },
+      "rotating_frame_feature_count": 0,
+      "limitations": [
+        "287 realized initial rows only; no simulation, RNG reconstruction or population-validity claim.",
+        "10000 is the evaluated diameter-conditional multiplier in these bound files, never a new-case default.",
+        "Saved state and canonical comparisons share existing extraction lineage; the expression replay is independent arithmetic, not independent native extraction.",
+        "No general guarantee about laboratory-frame velocity from SubtractMovingFrameVelocity=0; native frame dynamics must also be inspected."
+      ]
+    },
+    "caseP": {
+      "bindings": [
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/caseP_primitive_probes.json",
+          "sha256": "9760e5f03a19d5e9f915141da89c795fcd3075e424cd3749ecf02805247410c7"
+        },
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseP/prepared/full_h0p25us.yaml",
+          "sha256": "5b2f1549b12ea0583d5089451126c26b3117427e6f7983559b14a38183973573"
+        },
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseP/prepared/candidate_input.h5",
+          "sha256": "300abc5265746ace4bc277108536ef847027177eb5edc8173f87b194f413bcdd"
+        },
+        {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/particle_trajectory_review/caseP_all_states.csv",
+          "sha256": "400f97668740e12ad8f3d1cc415be3a935c07fca70273641663f7c16f2b56937"
+        },
+        {
+          "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/caseP_initial_condition_audit.csv",
+          "sha256": "8ef9fe4002ede3f9f0a3047a21fc6123178f0454b530dc3d68605777db179d5d"
+        }
+      ],
+      "canonical_logical_content_hash": "sha256:0fbe4f1c17d89249a2d115691064f2da6a36e7a6a461ef1c56cf6b2ced701a48",
+      "source_feature_path": "comp1/fpt/relg1",
+      "active": true,
+      "selected_settings": {
+        "GridType": "AllCombinations",
+        "VelocitySpecification": "SpecifyVelocity",
+        "InitialVelocity": "Expression",
+        "v0": [
+          "if(d0==10[nm],100,1)*(if(d0==10[nm],100,1)*(root.comp1.release_speed_P*sin(root.comp1.release_theta)))",
+          "if(d0==10[nm],100,1)*(if(d0==10[nm],100,1)*(0[m/s]))",
+          "if(d0==10[nm],100,1)*(if(d0==10[nm],100,1)*(release_axial_sign*root.comp1.release_speed_P*cos(root.comp1.release_theta)))"
+        ],
+        "rt": [
+          0.0
+        ],
+        "SubtractMovingFrameVelocity": "0",
+        "ReleasedParticleProperties": "pp1",
+        "aux0_auxq": "Z0_P"
+      },
+      "inactive_values_not_used": {
+        "Ep0": "1[keV]",
+        "T0": "293.15[K]",
+        "alphac": "pi/3",
+        "M": [
+          50.0
+        ],
+        "mp0": "1E-9[kg]",
+        "dp0": "1[um]"
+      },
+      "native_geometry_unit": "cm",
+      "native_geometry_unit_to_m": 0.01,
+      "parameters": {
+        "release_speed_multiplier": {
+          "name": "release_speed_multiplier",
+          "expression": "1",
+          "value": 1.0,
+          "unit": null,
+          "status": "observed"
+        },
+        "release_axial_sign": {
+          "name": "release_axial_sign",
+          "expression": "1",
+          "value": 1.0,
+          "unit": null,
+          "status": "observed"
+        },
+        "release_half_angle": {
+          "name": "release_half_angle",
+          "expression": "15[deg]",
+          "value": 0.2617993877991494,
+          "unit": "rad",
+          "status": "observed"
+        },
+        "release_rmin": {
+          "name": "release_rmin",
+          "expression": "14[cm]",
+          "value": 0.14,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_dr": {
+          "name": "release_dr",
+          "expression": "0.1[cm]",
+          "value": 0.001,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_zmin": {
+          "name": "release_zmin",
+          "expression": "2.3[cm]",
+          "value": 0.023,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_dz": {
+          "name": "release_dz",
+          "expression": "0.05[cm]",
+          "value": 0.0005,
+          "unit": "m",
+          "status": "observed"
+        },
+        "release_phase_r": {
+          "name": "release_phase_r",
+          "expression": "0.61803398875",
+          "value": 0.61803398875,
+          "unit": null,
+          "status": "observed"
+        },
+        "release_phase_z": {
+          "name": "release_phase_z",
+          "expression": "0.41421356237",
+          "value": 0.41421356237,
+          "unit": null,
+          "status": "observed"
+        }
+      },
+      "expressions": {
+        "comp1/variable/varReleaseIC/release_theta": "release_half_angle*sin(2*pi*(release_phase_r*(r-release_rmin)/release_dr+release_phase_z*(z-release_zmin)/release_dz))",
+        "comp1/variable/varReleaseIC/release_speed_P": "release_speed_multiplier*sqrt(root.comp1.u^2+root.comp1.w^2)",
+        "comp1/variable/varAS/AS_ugr": "withsol('sol2',u,setval(Vrf,100[V]))",
+        "comp1/variable/varAS/AS_ugz": "withsol('sol2',w,setval(Vrf,100[V]))",
+        "comp1/variable/varAS/AS_release_speed": "release_speed_multiplier*sqrt(AS_ugr^2+AS_ugz^2)"
+      },
+      "count": 287,
+      "range_by_quantity": {
+        "r_m": [
+          0.14,
+          0.18
+        ],
+        "z_m": [
+          0.023,
+          0.025999999999999995
+        ],
+        "theta_expression_rad": [
+          -0.26179623163152094,
+          0.26179627268365097
+        ],
+        "theta_saved_rad": [
+          -0.26179623163152094,
+          0.26179627268365113
+        ],
+        "gas_speed_m_s": [
+          0.009016124290855411,
+          0.2478192439169687
+        ],
+        "speed_saved_m_s": [
+          90.16124290855412,
+          2478.1924391696866
+        ],
+        "gas_slip_m_s": [
+          90.16363595036356,
+          2478.27001725477
+        ],
+        "expression_vector_residual_max_component_m_s": [
+          0.0,
+          5.5720761338307057e-11
+        ],
+        "canonical_velocity_residual_max_component_m_s": [
+          0.0,
+          0.0
+        ],
+        "canonical_position_residual_max_component_m": [
+          0.0,
+          0.0
+        ],
+        "mass_kg": [
+          1.1519173063162575e-21,
+          1.1519173063162575e-21
+        ],
+        "charge_number": [
+          -1.0,
+          -1.0
+        ],
+        "release_time_s": [
+          0.0,
+          0.0
+        ]
+      },
+      "rotating_frame_feature_count": 0,
+      "limitations": [
+        "287 realized initial rows only; no simulation, RNG reconstruction or population-validity claim.",
+        "10000 is the evaluated diameter-conditional multiplier in these bound files, never a new-case default.",
+        "Saved state and canonical comparisons share existing extraction lineage; the expression replay is independent arithmetic, not independent native extraction.",
+        "No general guarantee about laboratory-frame velocity from SubtractMovingFrameVelocity=0; native frame dynamics must also be inspected."
+      ]
+    }
+  }
+}

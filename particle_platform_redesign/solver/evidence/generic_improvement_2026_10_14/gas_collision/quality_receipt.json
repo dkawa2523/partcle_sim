@@ -1,0 +1,353 @@
+{
+  "status": "PASS_FOR_THIS_TOOL_AND_MEAN_LAW_VERIFICATION",
+  "scope": "External collision-reference tool and focused pure mean-law verification; no production-model/integrator change or COMSOL run.",
+  "focused_tests": 22,
+  "current_mean_law_parameter_tests": 15,
+  "commands": [
+    {
+      "command": "uv lock --check",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "9f9cb1",
+          "wall_time_seconds": 0.2181592,
+          "exit_code": 0,
+          "original_token_count": 7,
+          "output": "Resolved 24 packages in 1ms\n"
+        }
+      }
+    },
+    {
+      "command": "uv run --locked ruff format --check tools/vv/gas_collision tests/verification/test_gas_collision_mean.py",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "f8324e",
+          "wall_time_seconds": 0.2733224,
+          "exit_code": 0,
+          "original_token_count": 7,
+          "output": "6 files already formatted\n"
+        }
+      }
+    },
+    {
+      "command": "uv run --locked ruff check tools/vv/gas_collision tests/verification/test_gas_collision_mean.py",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "4604a9",
+          "wall_time_seconds": 0.2495431,
+          "exit_code": 0,
+          "original_token_count": 5,
+          "output": "All checks passed!\n"
+        }
+      }
+    },
+    {
+      "command": "uv run --locked pyrefly check --summarize-errors",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "edc96f",
+          "wall_time_seconds": 1.5596955000000001,
+          "exit_code": 0,
+          "original_token_count": 57,
+          "output": " INFO Checking project configured at `C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\pyproject.toml`\n=== Error Summary ===\nNo errors found!\n INFO 0 errors (58 suppressed, 244 warnings not shown)\n"
+        }
+      }
+    },
+    {
+      "command": "uv run --locked lint-imports",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "faa348",
+          "wall_time_seconds": 0.6282704,
+          "exit_code": 0,
+          "original_token_count": 97,
+          "output": "=============\r\nImport Linter\r\n=============\r\n\r\n\r\n---------\r\nContracts\r\n---------\r\n\r\nAnalyzed 27 files, 52 dependencies.\r\n-----------------------------------\r\n\r\nLow-level numerics stay independent of orchestration and I/O KEPT\r\nIntegrator proposals stay independent of geometry and wall response KEPT\r\nPhysics models consume sampled primitives only KEPT\r\n\r\nContracts: 3 kept, 0 broken.\r\n"
+        }
+      }
+    },
+    {
+      "command": "uv run --locked python scripts/check_complexity.py",
+      "phase": "final_global_recheck",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "3beb4f",
+          "wall_time_seconds": 1.2922981,
+          "exit_code": 0,
+          "original_token_count": 16,
+          "output": "Complexity gate passed: every function and method has CC < 16.\r\n"
+        }
+      }
+    },
+    {
+      "command": "uv run --locked python -m pytest tests/verification/test_gas_collision_mean.py tools/vv/gas_collision/tests -q",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "76ab5f",
+          "wall_time_seconds": 2.041766,
+          "exit_code": 0,
+          "original_token_count": 26,
+          "output": "......................                                                   [100%]\r\n22 passed in 1.38s\r\n"
+        }
+      }
+    }
+  ],
+  "new_tool_complexity": {
+    "maximum_cc": 13,
+    "rows": [
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "outgoing_flux_moments",
+        "line": 79,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "surface_moment_coefficients",
+        "line": 93,
+        "cc": 2
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "collision_moments",
+        "line": 156,
+        "cc": 3
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "_tangent_frame",
+        "line": 208,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "_incident_velocity_proposal",
+        "line": 215,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "flux_weighted_incident_velocities",
+        "line": 226,
+        "cc": 2
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "sample_collision_jumps",
+        "line": 243,
+        "cc": 5
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "compound_poisson_cumulants",
+        "line": 284,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "sample_frozen_collision_increments",
+        "line": 301,
+        "cc": 6
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "__post_init__",
+        "line": 40,
+        "cc": 6
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "thermal_speed_m_s",
+        "line": 55,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "mass_ratio",
+        "line": 60,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\collision_reference.py",
+        "name": "rate_scale_s_inv",
+        "line": 64,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "read_regimes",
+        "line": 45,
+        "cc": 5
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "production_mean",
+        "line": 71,
+        "cc": 2
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "_linear_rate",
+        "line": 92,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "compare_moments",
+        "line": 98,
+        "cc": 2
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "_characteristic_probe",
+        "line": 162,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "_frozen_distribution_probe",
+        "line": 187,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "_binomial_wilson_interval",
+        "line": 220,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "qualify_jumps",
+        "line": 231,
+        "cc": 2
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "run_qualification",
+        "line": 279,
+        "cc": 5
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\qualify.py",
+        "name": "main",
+        "line": 316,
+        "cc": 13
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\tests\\test_collision_reference.py",
+        "name": "test_outgoing_flux_moments_match_rayleigh_and_gaussian_limits",
+        "line": 18,
+        "cc": 4
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\tests\\test_collision_reference.py",
+        "name": "test_specular_hemisphere_impulse_moments_have_independent_analytic_coefficients",
+        "line": 25,
+        "cc": 4
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\tests\\test_collision_reference.py",
+        "name": "test_heavy_equal_temperature_zero_slip_reproduces_linear_fdt",
+        "line": 35,
+        "cc": 1
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\tests\\test_collision_reference.py",
+        "name": "test_flux_weighted_collision_sampling_recovers_quadrature_moments",
+        "line": 45,
+        "cc": 3
+      },
+      {
+        "path": "tools\\vv\\gas_collision\\tests\\test_collision_reference.py",
+        "name": "test_frozen_poisson_increments_reproduce_independent_mean_and_covariance_rate",
+        "line": 59,
+        "cc": 3
+      }
+    ]
+  },
+  "transient_global_complexity_failure": {
+    "path": "tools/vv/comsol/evaluate_matched_trajectory.py:368",
+    "cc": 17,
+    "ownership": "Concurrent root-owned change outside this task. Final global recheck passed."
+  },
+  "bindings": [
+    {
+      "path": "tools/vv/gas_collision/collision_reference.py",
+      "sha256": "6e478ae45db71f1826c56eb0b0e5fdec5daab4b03b14b98abce9967252f8d087",
+      "bytes": 13599
+    },
+    {
+      "path": "tools/vv/gas_collision/qualify.py",
+      "sha256": "5cd57df5cd956609b7c267faf3847678254ff5a31cae556df36ceb6995464382",
+      "bytes": 16653
+    },
+    {
+      "path": "tools/vv/gas_collision/README.md",
+      "sha256": "e5aed05e62747afc0ccd5061aa4e65516af7110ab64d39d2afc31438062948bb",
+      "bytes": 3743
+    },
+    {
+      "path": "tools/vv/gas_collision/tests/test_collision_reference.py",
+      "sha256": "358d626a662fa02941ca69cd6b24ce71f23d9cd9f847e576cf291830d6bb5ab5",
+      "bytes": 3655
+    },
+    {
+      "path": "tests/verification/test_gas_collision_mean.py",
+      "sha256": "516c42cec49b66c75cd715d434224549efa04b488eeacec17afe6885d9067caa",
+      "bytes": 959
+    },
+    {
+      "path": "evidence/generic_improvement_2026_10_14/gas_collision/prepare_regimes.py",
+      "sha256": "c14beec75f349220d9431044f80111d214b0db3fb1c0093f85faaaef2faa997c",
+      "bytes": 3638
+    },
+    {
+      "path": "evidence/generic_improvement_2026_10_14/gas_collision/source_regimes.csv",
+      "sha256": "dd876b630d8da3b6caf64b784fee0134f3c381f407e6e25bab038a86bd9db183",
+      "bytes": 95975
+    },
+    {
+      "path": "evidence/generic_improvement_2026_10_14/gas_collision/source_regime_receipt.json",
+      "sha256": "7c384dcbe1e57413bc81825a4ebb61dbbf108a4fc82523a6c6d74bbcdba2b094",
+      "bytes": 1836
+    },
+    {
+      "path": "evidence/generic_improvement_2026_10_14/gas_collision/actual_t0/qualification.json",
+      "sha256": "49df71c21c577f46b5666a05059ae8021b5f60e221b51f5bdbb817b7af29c167",
+      "bytes": 845660
+    },
+    {
+      "path": "evidence/generic_improvement_2026_10_14/gas_collision/actual_t0/moment_comparison.csv",
+      "sha256": "5f231a6ef03e353b9c582102529dbf88f2e3907daac5f82743366c593b302c65",
+      "bytes": 262738
+    },
+    {
+      "path": "src/chamber_particles/physics/forces.py",
+      "sha256": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+      "bytes": 133844
+    },
+    {
+      "path": "src/chamber_particles/engine.py",
+      "sha256": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+      "bytes": 443254
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+      "bytes": 40452
+    }
+  ],
+  "production_unchanged": {
+    "force_sha256": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+    "engine_sha256": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+    "new_public_selectors": 0,
+    "new_dependencies": 0,
+    "new_JIT": 0
+  },
+  "reproducible_command": "uv run --locked python -m tools.vv.gas_collision.qualify --regimes evidence/generic_improvement_2026_10_14/gas_collision/source_regimes.csv --output evidence/generic_improvement_2026_10_14/gas_collision/actual_t0 --jump-labels caseA_p134,caseA_p254,caseA_p287 --jump-count 400000 --durations-s 2.5e-7,5e-7,1e-6,1e-5 --interval-count 50000"
+}

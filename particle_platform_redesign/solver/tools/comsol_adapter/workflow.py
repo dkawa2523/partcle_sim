@@ -15,7 +15,7 @@ import re
 from dataclasses import dataclass
 from importlib.metadata import version
 from pathlib import Path
-from typing import Final, cast
+from typing import Final, Literal, cast
 
 import numpy as np
 
@@ -32,9 +32,9 @@ from chamber_particles.yaml_input import parse_document
 type _BoundaryOwner = tuple[int, tuple[int, int]]
 type _BoundaryRow = tuple[int, int, int, int, int, int]
 
-ADAPTER_FORMAT_VERSION: Final = 2
-ADAPTER_REVISION: Final = "comsol_axisymmetric_csv_adapter_v2"
-FIELD_SEMANTICS_REVISION: Final = "axisymmetric_thermal_flow_primitives_v1"
+ADAPTER_FORMAT_VERSION: Final = 3
+ADAPTER_REVISION: Final = "comsol_selected_nodal_csv_adapter_v3"
+FIELD_SEMANTICS_REVISION: Final = "explicit_selected_field_lineage_v1"
 PRODUCER_VERSION: Final = version("chamber-particles")
 _FINITE_NUMBER_TOKEN: Final = re.compile(r"[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?")
 _EXPECTED_SOURCE_KEYS: Final = {
@@ -76,6 +76,7 @@ class BoundaryGroup:
 
 @dataclass(frozen=True, slots=True)
 class DomainSpecification:
+    coordinate_system: str
     external_id: int
     layout_name: str
     quadrilateral_order: str
@@ -83,16 +84,31 @@ class DomainSpecification:
 
 
 @dataclass(frozen=True, slots=True)
+class FieldMapping:
+    name: str
+    columns: tuple[str, ...]
+    components: tuple[str, ...]
+    stored_basis: str
+    unit: str
+    input_unit: str
+    scale: float
+    offset: float
+    producer_record: dict[str, object]
+    axis_zero_component: str | None
+    axis_correction_limit: float
+    axis_reason: str | None
+
+
+@dataclass(frozen=True, slots=True)
 class FieldSpecification:
     coordinate_columns: tuple[str, str]
     inside_column: str
-    gas_velocity_columns: tuple[str, str]
-    gas_temperature_column: str
-    gas_density_column: str
-    gas_dynamic_viscosity_column: str
-    gas_mean_free_path_column: str
+    node_id_column: str | None
     coordinate_match_tolerance_m: float
-    axis_radial_velocity_tolerance_m_s: float
+    mappings: tuple[FieldMapping, ...]
+    scope_column: str | None
+    scope_mode: str | None
+    scope_evidence: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,8 +149,10 @@ class _FieldResult:
     fields: tuple[FieldData, ...]
     selected_row_count: int
     maximum_match_distance_m: float
-    corrected_axis_node_count: int
-    maximum_axis_radial_correction_m_s: float
+    join_method: str
+    axis_transformations: list[dict[str, object]]
+    selected_field_lineage: list[dict[str, object]]
+    provider_row_count: int
 
 
 def adapt_from_configuration(
@@ -143,7 +161,7 @@ def adapt_from_configuration(
     *,
     report_path: str | Path | None = None,
 ) -> dict[str, object]:
-    """Create one canonical thermal-flow bundle without replacing files."""
+    """Create one checked selected-field bundle without replacing files."""
 
     config_path = Path(configuration_path).expanduser().resolve()
     output = Path(output_path).expanduser().resolve()
@@ -169,7 +187,9 @@ def adapt_from_configuration(
         fields=field_result,
     )
     bundle = DataBundle(
-        coordinate_system="axisymmetric_rz",
+        coordinate_system=cast(
+            Literal["cartesian_xy", "axisymmetric_rz"], specification.domain.coordinate_system
+        ),
         provenance_json=json.dumps(
             provenance,
             allow_nan=False,
@@ -232,7 +252,20 @@ def parse_configuration(raw: bytes, *, base_directory: Path) -> AdapterSpecifica
     domain = _parse_domain(_mapping(root["domain"], "domain"))
     groups = _parse_boundary_groups(root["boundary_groups"], domain.excluded_boundary_ids)
     fields = _parse_fields(_mapping(root["fields"], "fields"))
+    _validate_selected_meanings(domain, fields)
     return AdapterSpecification(source, domain, groups, fields)
+
+
+def _validate_selected_meanings(domain: DomainSpecification, fields: FieldSpecification) -> None:
+    for item in fields.mappings:
+        if item.producer_record["domain_ids"] != [domain.external_id]:
+            raise ValueError(
+                f"field {item.name} producer domain_ids must match the selected domain"
+            )
+        if item.stored_basis not in ("scalar", domain.coordinate_system):
+            raise ValueError(f"field {item.name} stored_basis does not match the coordinates")
+        if item.axis_zero_component is not None and domain.coordinate_system != "axisymmetric_rz":
+            raise ValueError("axis transforms require axisymmetric_rz")
 
 
 def _parse_source(value: dict[str, object], base_directory: Path) -> SourceFiles:
@@ -255,19 +288,30 @@ def _parse_source(value: dict[str, object], base_directory: Path) -> SourceFiles
 def _parse_domain(value: dict[str, object]) -> DomainSpecification:
     _exact_keys(
         value,
-        {"external_id", "layout_name", "quadrilateral_order", "excluded_boundary_ids"},
+        {
+            "coordinate_system",
+            "external_id",
+            "layout_name",
+            "quadrilateral_order",
+            "excluded_boundary_ids",
+        },
         "domain",
     )
     order = _text(value["quadrilateral_order"], "domain.quadrilateral_order")
     if order != "q1_reference":
         raise ValueError("domain.quadrilateral_order must be q1_reference")
+    coordinates = _text(value["coordinate_system"], "domain.coordinate_system")
+    if coordinates not in ("cartesian_xy", "axisymmetric_rz"):
+        raise ValueError("domain.coordinate_system must be cartesian_xy or axisymmetric_rz")
+    excluded = _integer_tuple(value["excluded_boundary_ids"], "domain.excluded_boundary_ids")
+    if coordinates == "cartesian_xy" and excluded:
+        raise ValueError("Cartesian XY cannot exclude axis boundaries")
     return DomainSpecification(
+        coordinate_system=coordinates,
         external_id=_integer(value["external_id"], "domain.external_id"),
         layout_name=_name(value["layout_name"], "domain.layout_name"),
         quadrilateral_order=order,
-        excluded_boundary_ids=_integer_tuple(
-            value["excluded_boundary_ids"], "domain.excluded_boundary_ids"
-        ),
+        excluded_boundary_ids=excluded,
     )
 
 
@@ -301,45 +345,164 @@ def _parse_boundary_groups(
 
 
 def _parse_fields(value: dict[str, object]) -> FieldSpecification:
-    required = {
-        "coordinate_columns",
-        "inside_column",
-        "gas_velocity_columns",
-        "gas_temperature_column",
-        "gas_density_column",
-        "gas_dynamic_viscosity_column",
-        "gas_mean_free_path_column",
-        "coordinate_match_tolerance_m",
-        "axis_radial_velocity_tolerance_m_s",
-    }
-    _exact_keys(value, required, "fields")
-    coordinate_columns = _name_pair(value["coordinate_columns"], "fields.coordinate_columns")
-    velocity_columns = _name_pair(value["gas_velocity_columns"], "fields.gas_velocity_columns")
-    match_tolerance = _positive_number(
-        value["coordinate_match_tolerance_m"], "fields.coordinate_match_tolerance_m"
+    _exact_keys(
+        value,
+        {
+            "coordinate_columns",
+            "inside_column",
+            "node_id_column",
+            "domain_scope",
+            "coordinate_match_tolerance_m",
+            "mappings",
+        },
+        "fields",
     )
-    axis_tolerance = _nonnegative_number(
-        value["axis_radial_velocity_tolerance_m_s"],
-        "fields.axis_radial_velocity_tolerance_m_s",
+    raw_mappings = value["mappings"]
+    if not isinstance(raw_mappings, list) or not raw_mappings:
+        raise ValueError("fields.mappings must be a nonempty list")
+    mappings = tuple(
+        _parse_field_mapping(_mapping(raw, f"fields.mappings[{index}]"), index)
+        for index, raw in enumerate(raw_mappings)
     )
+    if len({item.name for item in mappings}) != len(mappings):
+        raise ValueError("fields.mappings must have unique canonical names")
+    node_column = value["node_id_column"]
+    scope_column, scope_mode, scope_evidence = _parse_domain_scope(value["domain_scope"])
     return FieldSpecification(
-        coordinate_columns,
+        _name_pair(value["coordinate_columns"], "fields.coordinate_columns"),
         _name(value["inside_column"], "fields.inside_column"),
-        velocity_columns,
-        _name(value["gas_temperature_column"], "fields.gas_temperature_column"),
-        _name(value["gas_density_column"], "fields.gas_density_column"),
-        _name(
-            value["gas_dynamic_viscosity_column"],
-            "fields.gas_dynamic_viscosity_column",
+        None if node_column is None else _name(node_column, "fields.node_id_column"),
+        _positive_number(
+            value["coordinate_match_tolerance_m"], "fields.coordinate_match_tolerance_m"
         ),
-        _name(value["gas_mean_free_path_column"], "fields.gas_mean_free_path_column"),
-        match_tolerance,
-        axis_tolerance,
+        mappings,
+        scope_column,
+        scope_mode,
+        scope_evidence,
+    )
+
+
+def _parse_domain_scope(value: object) -> tuple[str | None, str | None, str | None]:
+    if value is None:
+        return None, None, None
+    item = _mapping(value, "fields.domain_scope")
+    _exact_keys(item, {"column", "mode", "evidence"}, "fields.domain_scope")
+    mode = _text(item["mode"], "fields.domain_scope.mode")
+    if mode not in ("finite", "equals_domain_id"):
+        raise ValueError("domain_scope.mode must be finite or equals_domain_id")
+    return (
+        _name(item["column"], "fields.domain_scope.column"),
+        mode,
+        _text(item["evidence"], "fields.domain_scope.evidence"),
+    )
+
+
+def _parse_field_mapping(value: dict[str, object], index: int) -> FieldMapping:
+    label = f"fields.mappings[{index}]"
+    _exact_keys(
+        value,
+        {
+            "name",
+            "columns",
+            "components",
+            "stored_basis",
+            "association",
+            "unit",
+            "input_unit",
+            "scale",
+            "offset",
+            "producer_record",
+            "axis_transform",
+        },
+        label,
+    )
+    if value["association"] != "node":
+        raise ValueError(f"{label}: only node association is supported")
+    columns = _names(value["columns"], f"{label}.columns")
+    components = _names(value["components"], f"{label}.components")
+    if len(columns) != len(components):
+        raise ValueError(f"{label}: columns/components lengths differ")
+    producer = _parse_producer_record(_mapping(value["producer_record"], label), label)
+    component, limit, reason = _parse_axis_transform(value["axis_transform"], components, label)
+    return FieldMapping(
+        _name(value["name"], f"{label}.name"),
+        columns,
+        components,
+        _text(value["stored_basis"], f"{label}.stored_basis"),
+        _text(value["unit"], f"{label}.unit"),
+        _text(value["input_unit"], f"{label}.input_unit"),
+        _positive_number(value["scale"], f"{label}.scale"),
+        _number(value["offset"], f"{label}.offset"),
+        producer,
+        component,
+        limit,
+        reason,
+    )
+
+
+def _parse_producer_record(value: dict[str, object], label: str) -> dict[str, object]:
+    required = {
+        "producer",
+        "dataset",
+        "solution",
+        "member",
+        "time",
+        "domain_ids",
+        "side",
+        "recovery",
+        "continuity",
+        "authority",
+        "topology",
+        "support",
+        "evidence",
+    }
+    missing = required.difference(value)
+    if missing:
+        raise ValueError(f"{label}.producer_record missing keys: {sorted(missing)}")
+    if value["topology"] != "fixed" or value["support"] != "full_selected_domain":
+        raise ValueError(
+            f"{label}: only fixed topology and full selected-domain support are supported"
+        )
+    time = _mapping(value["time"], f"{label}.producer_record.time")
+    if time.get("representation") != "static":
+        raise ValueError(f"{label}: time snapshots must use a separate qualified producer")
+    _text(time.get("selection"), f"{label}.producer_record.time.selection")
+    member = _mapping(value["member"], f"{label}.producer_record.member")
+    if not member:
+        raise ValueError(f"{label}.producer_record.member must state a selection or its absence")
+    if value["continuity"] != "continuous" or value["side"] != "domain":
+        raise ValueError(f"{label}: one-sided/discontinuous fields are not supported")
+    _integer_tuple(value["domain_ids"], f"{label}.producer_record.domain_ids")
+    for key in ("producer", "dataset", "solution", "recovery", "authority", "evidence"):
+        _text(value[key], f"{label}.producer_record.{key}")
+    try:
+        json.dumps(value, allow_nan=False)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label}.producer_record must be finite JSON data") from error
+    return value
+
+
+def _parse_axis_transform(
+    value: object, components: tuple[str, ...], label: str
+) -> tuple[str | None, float, str | None]:
+    if value is None:
+        return None, 0.0, None
+    item = _mapping(value, f"{label}.axis_transform")
+    _exact_keys(item, {"component", "max_abs_correction", "reason"}, f"{label}.axis_transform")
+    component = _name(item["component"], f"{label}.axis_transform.component")
+    if component not in components:
+        raise ValueError(f"{label}: axis transform component is absent")
+    return (
+        component,
+        _nonnegative_number(item["max_abs_correction"], f"{label}.max_abs_correction"),
+        _text(item["reason"], f"{label}.axis_transform.reason"),
     )
 
 
 def _build_mesh(specification: AdapterSpecification, contents: _SourceContents) -> _MeshResult:
-    vertices = _read_vertices(specification.source.vertices, contents.vertices)
+    vertices = _read_vertices(
+        specification.source.vertices, contents.vertices, specification.domain.coordinate_system
+    )
     source_triangles = _read_cells(
         specification.source.triangles,
         contents.triangles,
@@ -413,18 +576,21 @@ def _build_mesh(specification: AdapterSpecification, contents: _SourceContents) 
     )
 
 
-def _read_vertices(path: Path, content: bytes) -> dict[int, tuple[float, float]]:
-    rows = _csv_rows(path, content, ("vertex_id", "r_m", "z_m"))
+def _read_vertices(
+    path: Path, content: bytes, coordinate_system: str
+) -> dict[int, tuple[float, float]]:
+    coordinates = ("r_m", "z_m") if coordinate_system == "axisymmetric_rz" else ("x_m", "y_m")
+    rows = _csv_rows(path, content, ("vertex_id", *coordinates))
     result: dict[int, tuple[float, float]] = {}
     for row_number, row in rows:
         identifier = _csv_int(row["vertex_id"], path, row_number, "vertex_id")
         coordinate = (
-            _csv_float(row["r_m"], path, row_number, "r_m"),
-            _csv_float(row["z_m"], path, row_number, "z_m"),
+            _csv_float(row[coordinates[0]], path, row_number, coordinates[0]),
+            _csv_float(row[coordinates[1]], path, row_number, coordinates[1]),
         )
         if identifier in result:
             raise ValueError(f"{path}: duplicate vertex_id {identifier}")
-        if coordinate[0] < 0.0:
+        if coordinate_system == "axisymmetric_rz" and coordinate[0] < 0.0:
             raise ValueError(f"{path}: radial coordinate must be nonnegative")
         result[identifier] = coordinate
     if not result:
@@ -542,6 +708,7 @@ def _build_boundary(
         specification.boundary_groups,
         external_nodes,
         coordinates,
+        specification.domain.coordinate_system,
     )
     boundary = _make_boundary_data(rows, specification.boundary_groups)
     names = tuple(group.name for group in specification.boundary_groups)
@@ -591,6 +758,7 @@ def _collect_boundary_rows(
     groups: tuple[BoundaryGroup, ...],
     external_nodes: list[int],
     coordinates: np.ndarray,
+    coordinate_system: str,
 ) -> tuple[list[_BoundaryRow], int, dict[str, int]]:
     rows: list[_BoundaryRow] = []
     group_counts = {group.name: 0 for group in groups}
@@ -607,7 +775,9 @@ def _collect_boundary_rows(
         record = exported_by_edge[external_edge]
         encountered_ids.add(record.boundary_id)
         is_axis = bool(
-            coordinates[local_edge[0], 0] == 0.0 and coordinates[local_edge[1], 0] == 0.0
+            coordinate_system == "axisymmetric_rz"
+            and coordinates[local_edge[0], 0] == 0.0
+            and coordinates[local_edge[1], 0] == 0.0
         )
         if record.boundary_id in excluded:
             if not is_axis:
@@ -705,7 +875,7 @@ def _read_fields(
     mesh: _MeshResult,
     contents: _SourceContents,
 ) -> _FieldResult:
-    names, units = _read_column_dictionary(
+    names, units, expressions = _read_column_dictionary(
         specification.source.field_columns, contents.field_columns
     )
     fields = specification.fields
@@ -713,78 +883,144 @@ def _read_fields(
     try:
         field_text = contents.field_values.decode("utf-8-sig")
     except UnicodeDecodeError as error:
-        raise ValueError(
-            f"{specification.source.field_values}: field table is not valid UTF-8"
-        ) from error
+        raise ValueError("field table is not valid UTF-8") from error
     values = _numeric_csv_matrix(
-        field_text,
-        expected_columns=len(names),
-        label=str(specification.source.field_values),
+        field_text, expected_columns=len(names), label=str(specification.source.field_values)
     )
-    coordinate_ids = [index[name] for name in fields.coordinate_columns]
-    velocity_ids = [index[name] for name in fields.gas_velocity_columns]
-    temperature_id = index[fields.gas_temperature_column]
-    scalar_ids = [
-        temperature_id,
-        index[fields.gas_density_column],
-        index[fields.gas_dynamic_viscosity_column],
-        index[fields.gas_mean_free_path_column],
-    ]
-    inside_id = index[fields.inside_column]
-    selected_coordinates, selected_thermal = _select_thermal_rows(
-        values, coordinate_ids, velocity_ids, scalar_ids, inside_id
-    )
-    if selected_coordinates.shape[0] != mesh.nodes_m.shape[0]:
-        raise ValueError(
-            "selected thermal rows do not match domain node count: "
-            f"{selected_coordinates.shape[0]} != {mesh.nodes_m.shape[0]}"
+    selected = _select_field_rows(values, fields, index, specification.domain.external_id)
+    coordinates = selected[:, [index[name] for name in fields.coordinate_columns]]
+    matched, distance = _match_field_rows(mesh, selected, coordinates, fields, index)
+    ordered = selected[matched]
+    _validate_selected_rows(ordered, fields, index)
+    converted: list[FieldData] = []
+    transforms: list[dict[str, object]] = []
+    for item in fields.mappings:
+        raw = ordered[:, [index[name] for name in item.columns]]
+        with np.errstate(over="ignore", invalid="ignore"):
+            mapped = np.ascontiguousarray(raw * item.scale + item.offset, dtype="<f8")
+        if not bool(np.isfinite(mapped).all()):
+            raise ValueError(f"field {item.name} conversion produced nonfinite values")
+        receipt = _apply_axis_transform(item, mapped, mesh, specification.domain.coordinate_system)
+        if receipt is not None:
+            transforms.append(receipt)
+        converted.append(
+            FieldData(
+                item.name,
+                specification.domain.layout_name,
+                "node",
+                item.components,
+                item.stored_basis,
+                mapped,
+                item.unit,
+            )
         )
-    matched, maximum_distance = _match_coordinates(
-        mesh.nodes_m,
-        selected_coordinates,
-        fields.coordinate_match_tolerance_m,
-    )
-    ordered = np.ascontiguousarray(selected_thermal[matched], dtype="<f8")
-    if bool((ordered[:, 2:] <= 0.0).any()):
-        raise ValueError("thermal scalar primitives must be positive")
-    corrected_count, maximum_axis = _project_axis_radial_velocity(
-        ordered, mesh.nodes_m[:, 0] == 0.0, fields.axis_radial_velocity_tolerance_m_s
-    )
-    layout = specification.domain.layout_name
-    gas_velocity = FieldData(
-        "gas_velocity",
-        layout,
-        "node",
-        ("r", "z"),
-        "axisymmetric_rz",
-        np.ascontiguousarray(ordered[:, :2], dtype="<f8"),
-        "m/s",
-    )
-    gas_temperature = FieldData(
-        "gas_temperature",
-        layout,
-        "node",
-        ("value",),
-        "scalar",
-        np.ascontiguousarray(ordered[:, 2:3], dtype="<f8"),
-        "K",
-    )
-    gas_density = _scalar_field("gas_density", layout, ordered[:, 3:4], "kg/m^3")
-    gas_dynamic_viscosity = _scalar_field("gas_dynamic_viscosity", layout, ordered[:, 4:5], "Pa*s")
-    gas_mean_free_path = _scalar_field("gas_mean_free_path", layout, ordered[:, 5:6], "m")
     return _FieldResult(
-        (
-            gas_velocity,
-            gas_temperature,
-            gas_density,
-            gas_dynamic_viscosity,
-            gas_mean_free_path,
-        ),
-        selected_coordinates.shape[0],
-        maximum_distance,
-        corrected_count,
-        maximum_axis,
+        tuple(converted),
+        ordered.shape[0],
+        distance,
+        "scoped_node_id" if fields.node_id_column is not None else "coordinate_bijection",
+        transforms,
+        [_field_lineage(item, expressions) for item in fields.mappings],
+        values.shape[0],
     )
+
+
+def _validate_selected_rows(
+    ordered: np.ndarray, fields: FieldSpecification, index: dict[str, int]
+) -> None:
+    selected_columns = [index[name] for item in fields.mappings for name in item.columns]
+    if not bool(np.isfinite(ordered[:, selected_columns]).all()):
+        raise ValueError("selected domain nodes have missing or partially missing primitives")
+    if bool((ordered[:, index[fields.inside_column]] != 1.0).any()):
+        raise ValueError("selected domain nodes must be inside the exported model domain")
+
+
+def _field_lineage(item: FieldMapping, expressions: dict[str, str]) -> dict[str, object]:
+    return {
+        "name": item.name,
+        "columns": list(item.columns),
+        "components": list(item.components),
+        "stored_basis": item.stored_basis,
+        "association": "node",
+        "unit": item.unit,
+        "input_unit": item.input_unit,
+        "expressions": [expressions[column] for column in item.columns],
+        "conversion": {
+            "formula": "canonical = scale * input + offset",
+            "scale": item.scale,
+            "offset": item.offset,
+        },
+        "producer_record": item.producer_record,
+    }
+
+
+def _match_field_rows(
+    mesh: _MeshResult,
+    selected: np.ndarray,
+    coordinates: np.ndarray,
+    fields: FieldSpecification,
+    index: dict[str, int],
+) -> tuple[np.ndarray, float]:
+    if fields.node_id_column is None:
+        return _match_coordinates(mesh.nodes_m, coordinates, fields.coordinate_match_tolerance_m)
+    identifiers = selected[:, index[fields.node_id_column]]
+    if not bool(np.isfinite(identifiers).all()) or bool(
+        (identifiers != np.floor(identifiers)).any()
+    ):
+        raise ValueError("field node IDs must be finite integers")
+    if bool((np.abs(identifiers) > 2**53).any()):
+        raise ValueError("numeric field node IDs must be exactly representable integers")
+    provider = identifiers.astype(np.int64)
+    order = np.argsort(provider)
+    sorted_ids = provider[order]
+    if np.unique(sorted_ids).size != sorted_ids.size:
+        raise ValueError("field node IDs must be unique for a bijection")
+    locations = np.searchsorted(sorted_ids, mesh.node_external_id)
+    if bool((locations >= sorted_ids.size).any()):
+        raise ValueError("field node IDs cannot form a bijection to selected mesh vertex IDs")
+    matched = order[locations]
+    if not np.array_equal(provider[matched], mesh.node_external_id):
+        raise ValueError("field node IDs cannot form a bijection to selected mesh vertex IDs")
+    distance = np.linalg.norm(coordinates[matched] - mesh.nodes_m, axis=1)
+    maximum = float(np.max(distance, initial=0.0))
+    if maximum > fields.coordinate_match_tolerance_m:
+        raise ValueError("field node ID coordinates disagree with the mesh")
+    return matched, maximum
+
+
+def _apply_axis_transform(
+    item: FieldMapping,
+    mapped: np.ndarray,
+    mesh: _MeshResult,
+    coordinate_system: str,
+) -> dict[str, object] | None:
+    if item.axis_zero_component is None:
+        return None
+    if coordinate_system != "axisymmetric_rz":
+        raise ValueError("axis transformation requires RZ geometry")
+    component = item.components.index(item.axis_zero_component)
+    axis = mesh.nodes_m[:, 0] == 0.0
+    original = mapped[axis, component].copy()
+    maximum = float(np.max(np.abs(original), initial=0.0))
+    if maximum > item.axis_correction_limit:
+        raise ValueError(f"field {item.name} axis correction exceeds the explicit limit")
+    changed_nodes = np.flatnonzero(axis)[original != 0.0]
+    affected_cells = np.flatnonzero(np.isin(mesh.triangles, changed_nodes).any(axis=1))
+    mapped[axis, component] = 0.0
+    return {
+        "field": item.name,
+        "component": item.axis_zero_component,
+        "unit": item.unit,
+        "reason": item.axis_reason,
+        "limit": item.axis_correction_limit,
+        "maximum_abs_correction": maximum,
+        "axis_node_external_ids": mesh.node_external_id[axis].tolist(),
+        "raw_axis_values": original.tolist(),
+        "changed_node_count": int(changed_nodes.size),
+        "affected_p1_cell_indices": affected_cells.tolist(),
+        "squared_nodal_correction_sum": float(np.dot(original, original)),
+        "off_axis_effect": "P1 interpolation changes inside every listed incident cell",
+    }
 
 
 def _numeric_csv_matrix(text: str, *, expected_columns: int, label: str) -> np.ndarray:
@@ -826,92 +1062,64 @@ def _numeric_csv_matrix(text: str, *, expected_columns: int, label: str) -> np.n
 def _field_column_indices(
     names: list[str], units: dict[str, str], fields: FieldSpecification
 ) -> dict[str, int]:
-    required_units = {
-        fields.coordinate_columns[0]: "m",
-        fields.coordinate_columns[1]: "m",
-        fields.inside_column: "1",
-        fields.gas_velocity_columns[0]: "m/s",
-        fields.gas_velocity_columns[1]: "m/s",
-        fields.gas_temperature_column: "K",
-        fields.gas_density_column: "kg/m^3",
-        fields.gas_dynamic_viscosity_column: "Pa*s",
-        fields.gas_mean_free_path_column: "m",
-    }
-    index = {name: position for position, name in enumerate(names)}
-    missing = set(required_units).difference(index)
+    required_units = list(zip(fields.coordinate_columns, ("m", "m"), strict=True))
+    required_units.append((fields.inside_column, "1"))
+    if fields.node_id_column is not None:
+        required_units.append((fields.node_id_column, "1"))
+    if fields.scope_column is not None:
+        scope_unit = (
+            "1" if fields.scope_mode == "equals_domain_id" else units.get(fields.scope_column, "")
+        )
+        required_units.append((fields.scope_column, scope_unit))
+    required_units.extend(
+        (column, item.input_unit) for item in fields.mappings for column in item.columns
+    )
+    index = dict(zip(names, range(len(names)), strict=True))
+    missing = set(dict(required_units)).difference(index)
     if missing:
         raise ValueError(f"field column dictionary is missing columns: {sorted(missing)}")
     wrong_units = {
         name: (units[name], expected)
-        for name, expected in required_units.items()
+        for name, expected in required_units
         if units[name] != expected
     }
     if wrong_units:
-        raise ValueError(f"field column units do not match the adapter contract: {wrong_units}")
+        raise ValueError(f"field column units disagree with selected input units: {wrong_units}")
     return index
 
 
-def _select_thermal_rows(
-    values: np.ndarray,
-    coordinate_ids: list[int],
-    velocity_ids: list[int],
-    scalar_ids: list[int],
-    inside_id: int,
-) -> tuple[np.ndarray, np.ndarray]:
-    coordinates = values[:, coordinate_ids]
-    thermal = values[:, [*velocity_ids, *scalar_ids]]
-    any_thermal = np.isfinite(thermal).any(axis=1)
-    complete_thermal = np.isfinite(thermal).all(axis=1)
-    if bool((any_thermal & ~complete_thermal).any()):
-        raise ValueError("field value table has partially missing thermal primitives")
-    selected = complete_thermal
-    if bool((values[selected, inside_id] != 1.0).any()):
-        raise ValueError("finite thermal rows must be inside the exported model domain")
-    selected_coordinates = coordinates[selected]
-    if not bool(np.isfinite(selected_coordinates).all()):
-        raise ValueError("selected field coordinates must be finite")
-    return selected_coordinates, thermal[selected]
-
-
-def _scalar_field(name: str, layout: str, values: np.ndarray, unit: str) -> FieldData:
-    return FieldData(
-        name,
-        layout,
-        "node",
-        ("value",),
-        "scalar",
-        np.ascontiguousarray(values, dtype="<f8"),
-        unit,
-    )
-
-
-def _project_axis_radial_velocity(
-    ordered: np.ndarray, axis: np.ndarray, tolerance_m_s: float
-) -> tuple[int, float]:
-    axis_values = np.abs(ordered[axis, 0])
-    maximum_axis = float(np.max(axis_values, initial=0.0))
-    if maximum_axis > tolerance_m_s:
-        raise ValueError(
-            "axis radial gas velocity exceeds the configured projection tolerance: "
-            f"{maximum_axis} > {tolerance_m_s}"
+def _select_field_rows(
+    values: np.ndarray, fields: FieldSpecification, index: dict[str, int], domain_id: int
+) -> np.ndarray:
+    coordinates = values[:, [index[name] for name in fields.coordinate_columns]]
+    selected = np.isfinite(coordinates).all(axis=1)
+    if fields.scope_column is not None:
+        scope_values = values[:, index[fields.scope_column]]
+        scope_mask = (
+            np.isfinite(scope_values)
+            if fields.scope_mode == "finite"
+            else scope_values == domain_id
         )
-    corrected_count = int(np.count_nonzero(ordered[axis, 0]))
-    ordered[axis, 0] = 0.0
-    return corrected_count, maximum_axis
+        selected &= scope_mask
+    return values[selected]
 
 
-def _read_column_dictionary(path: Path, content: bytes) -> tuple[list[str], dict[str, str]]:
+def _read_column_dictionary(
+    path: Path, content: bytes
+) -> tuple[list[str], dict[str, str], dict[str, str]]:
     names: list[str] = []
     units: dict[str, str] = {}
+    expressions: dict[str, str] = {}
     for row_number, row in _csv_rows(path, content, ("column", "COMSOL_expression", "unit")):
         name = row["column"]
         if not name or name in units:
             raise ValueError(f"{path}:{row_number}: duplicate or empty column name")
         names.append(name)
         units[name] = row["unit"]
+        expressions[name] = row["COMSOL_expression"]
     if not names:
         raise ValueError(f"{path}: empty field column dictionary")
-    return names, units
+    return names, units, expressions
 
 
 def _match_coordinates(
@@ -1019,11 +1227,17 @@ def _provenance(
             "group_facet_counts": mesh.group_counts,
             "coordinate_match_tolerance_m": specification.fields.coordinate_match_tolerance_m,
             "maximum_coordinate_match_distance_m": fields.maximum_match_distance_m,
-            "axis_radial_velocity_projection": {
-                "configured_tolerance_m_s": specification.fields.axis_radial_velocity_tolerance_m_s,
-                "corrected_node_count": fields.corrected_axis_node_count,
-                "maximum_correction_m_s": fields.maximum_axis_radial_correction_m_s,
+            "coordinate_system": specification.domain.coordinate_system,
+            "field_join_method": fields.join_method,
+            "selected_field_lineage": fields.selected_field_lineage,
+            "provider_field_row_count": fields.provider_row_count,
+            "selected_domain_field_row_count": fields.selected_row_count,
+            "provider_domain_scope": {
+                "column": specification.fields.scope_column,
+                "mode": specification.fields.scope_mode,
+                "evidence": specification.fields.scope_evidence,
             },
+            "axis_transformations": fields.axis_transformations,
         },
     }
 
@@ -1038,6 +1252,7 @@ def _report(
 ) -> dict[str, object]:
     return {
         "status": "complete",
+        "scope": "selected-field conversion and canonical validation only",
         "adapter_revision": ADAPTER_REVISION,
         "source_sha256": source_hash,
         "output_path": str(output),
@@ -1055,9 +1270,12 @@ def _report(
         "excluded_boundary_facet_count": mesh.excluded_boundary_count,
         "boundary_group_facet_counts": mesh.group_counts,
         "selected_field_row_count": fields.selected_row_count,
+        "provider_field_row_count": fields.provider_row_count,
+        "unselected_provider_row_count": fields.provider_row_count - fields.selected_row_count,
         "maximum_coordinate_match_distance_m": fields.maximum_match_distance_m,
-        "corrected_axis_node_count": fields.corrected_axis_node_count,
-        "maximum_axis_radial_correction_m_s": fields.maximum_axis_radial_correction_m_s,
+        "field_join_method": fields.join_method,
+        "axis_transformations": fields.axis_transformations,
+        "selected_field_lineage": fields.selected_field_lineage,
         "fields": [field.name for field in fields.fields],
     }
 
@@ -1153,6 +1371,15 @@ def _name_pair(value: object, label: str) -> tuple[str, str]:
     if not isinstance(value, list) or len(value) != 2:
         raise ValueError(f"{label} must contain exactly two names")
     return _name(value[0], f"{label}[0]"), _name(value[1], f"{label}[1]")
+
+
+def _names(value: object, label: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{label} must be a nonempty list")
+    result = tuple(_name(item, f"{label}[]") for item in value)
+    if len(set(result)) != len(result):
+        raise ValueError(f"{label} must contain unique names")
+    return result
 
 
 def _number(value: object, label: str) -> float:

@@ -1621,7 +1621,7 @@ v49～v53のowner内移行はこの時計、式とRNG addressingを変更しな�
 endpoint prefix再評価の配列確保、failureのhost list、wall/periodic commit wrapper、query generatorは残る。proposal/event/lawとBrownian root/guard/base/DFSの
 driverのhost制御は現行process workerが既存処理のまま実行する。追加JIT化、leaf途中yieldとnative teamは休止し、
 process並列の先行条件にしない。親はmacro/release/writer/checkpointを所有する。
-現行v62のprocess配分・shared replay・科学/用途性能・memory・Windows/Linux検査は
+v62で確立したprocess配分・shared replay・科学/用途性能・memory・Windows/Linux検査は
 [`parallel_execution_plan.md`](parallel_execution_plan.md)が所有する。現行と将来の作業は
 [`implementation_plan.md`](../../implementation_plan.md)へ集約する。
 過去の実装・試作・不採用結果は[保存済み性能記録](../evidence/comsol_brownian_fullstep_parallel_2026_10_12/current_docs/solver/docs/parallel_execution_plan.md)に保持し、
@@ -1634,3 +1634,22 @@ canonical eventの並べ替えは既存output readerのownerを使い、arrival�
 標準品質は944件合格だが、その実行時間や既存invalid-budget warningをcold性能・用途速度の証拠にしない。
 最終品質C4と測定C3のproduction数値sourceは同一で、二外部synthetic fixtureの五expected revision literal差を別bindingへ記録する。
 OS/installed-wheelのfunctional確認とWindows用途別scalingを分け、native COMSOL全用途やNUMA・全CPU数への速度保証を追加しない。
+
+### Exponential midpointの局所囲い込みと支持外trial
+
+engine v64は局所加速度boundを採用する前に、frozen accepted-start predictorの全短縮半区間を囲うboxがfield supportに含まれることを要求する。
+predictor sampleのsupport flagは係数を評価したstartの情報であり、予測先の支持証明として使わない。
+RegularLayoutでは既存の完全支持boxへの包含を検査する。unstructured layoutは準備時に全cell支持とparticle-volume meshとの完全一致を要求するため、
+支持startを含む連結boxが全exterior boundaryから離れていれば、box全体が同じ支持領域内にある。
+geometry準備はholeを含む全exterior edgeを監査する。RZは既存coordinate ownerでboxをcanonical r>=0へ写すので、省略可能なaxis seamを支持外への出口としない。
+canonical boxの中心から各成分の最大到達距離とhypotを外向きに丸め、boxを囲うdiskを作る。
+既存の`centers_respect_contact_radius`へ`allow_contact=False`と既存event budgetの正の位置余裕を渡し、disk全体が全segmentから厳密に離れていることを要求する。
+最大facet長と全中心の座標scaleから解いたbudgetはclearance条件を強めるために使い、衝突判定を緩めない。
+particle-center/periodic faceがcapsule viewで無効でも、全facetが有効なevent geometry viewを使う。完全inventory・全facet有効・clearanceのいずれかを証明できないrowは既存global enclosureを保持する。
+この距離証明は斜めsegmentのAABB false positiveを回避し、実際に境界へ届くboxを許可しない。支持外nearest-cell projectionを局所boundの証明へ流用しない。
+
+支持された全短縮midpointで補間に使うcellは既存local range queryに含まれ、P1/Q1の節点範囲が係数を囲う。
+これによりlocal boundは数値proposalのendpointとsame-integratorの全短縮prefixを囲う。global fallbackは同じ既存boundを保ち、
+first-hit探索と実際の支持/適用判定がaccepted prefixを決める。支持外trialを受理する変更ではない。
+独立verificationは二つの離れた完全支持P1領域を使う。左領域では一定weak drag、右領域では逆向き電場とし、粗いstepの半区間trialが右領域へ投影されても、
+左領域のx=1への最初のstickと衝突前frameが解析的drag解に一致することを公開APIで検査する。

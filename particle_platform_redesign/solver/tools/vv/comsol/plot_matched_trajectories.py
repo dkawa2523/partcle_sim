@@ -1,16 +1,9 @@
-"""Render external COMSOL/solver R-Z trajectory overlays without solver imports.
+"""Render observed COMSOL/solver XY or RZ paths with optional canonical geometry.
 
-The input files are the normalized long-form CSVs produced by the external
-COMSOL V&V workflow.  Particle identities are aligned before any figure is
-written.  Finite coordinates are plotted independently on each side, while
-numeric differences use the exact common finite pre-terminal active
-``(particle_id, time_s)`` population used by the formal evaluator.  Held or
-stuck tails never enter those metrics, and missing escaped suffixes are never
-reconstructed. SVG is rendered directly with the Python standard library.
-The deliverable is deliberately limited to physical-space trajectories: the
-horizontal axis is ``r`` and the vertical axis is ``z``.  Summary PNGs are
-optional browser screenshots of SVGs so the solver does not acquire a plotting
-dependency.
+Normalized CSVs own row identity, status and optional precontact eligibility.
+The renderer never simulates missing positions or treats native disappeared as
+candidate escaped. Geometry is read through the canonical format owner. SVG
+rendering stays in this one external tool; browser PNG export remains optional.
 """
 
 from __future__ import annotations
@@ -26,16 +19,20 @@ import struct
 import subprocess
 import tempfile
 import time
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
 import numpy as np
 
-TOOL_REVISION: Final = "m3v_matched_rz_trajectory_plot_v4"
-_REQUIRED_COLUMNS: Final = ("particle_id", "time_s", "r_m", "z_m")
+TOOL_REVISION: Final = "matched_xy_rz_observed_trajectory_plot_v5"
+_REQUIRED_COLUMNS: Final = ("particle_id", "time_s")
 _STATUS_COLUMNS: Final = ("lifecycle", "current_status")
-_LIFECYCLES: Final = frozenset(("active", "held", "stuck", "escaped"))
+_LIFECYCLES: Final = frozenset(
+    ("pending", "active", "held", "stuck", "escaped", "failed", "disappeared", "unobserved")
+)
+_TERMINAL: Final = frozenset(("held", "stuck", "escaped", "failed", "disappeared"))
 _BLUE: Final = "#1D4ED8"
 _ORANGE: Final = "#D97706"
 _INK: Final = "#1F2937"
@@ -61,15 +58,23 @@ class TrajectoryTable:
     status_column: str
     input_row_count: int
     missing_coordinate_row_count: int
+    input_row_keys: tuple[tuple[int, float], ...]
+    metric_row_keys: tuple[tuple[int, float], ...]
+    precontact_column: str | None
+    coordinate_system: str
+    status_counts: dict[str, int]
+    missing_coordinate_by_status: dict[str, int]
 
 
 @dataclass(frozen=True)
 class MatchedTrajectories:
-    """Two tables with identical IDs and common finite active metric states."""
+    """Identical particle IDs, observed active rows and explicit metric eligibility."""
 
     candidate: TrajectoryTable
     reference: TrajectoryTable
     common_active_row_keys: tuple[tuple[int, float], ...]
+    metric_row_keys: tuple[tuple[int, float], ...]
+    metric_population: str
 
 
 @dataclass(frozen=True)
@@ -92,6 +97,77 @@ class _TrajectoryRows:
     status_column: str
     input_count: int
     missing_coordinate_count: int
+    input_keys: set[tuple[int, float]]
+    metric_keys: set[tuple[int, float]]
+    precontact_column: str | None
+    coordinate_system: str
+    status_counts: dict[str, int]
+    missing_by_status: dict[str, int]
+
+
+@dataclass(frozen=True)
+class GeometryOverlay:
+    path: Path
+    sha256: str
+    content_hash: str
+    coordinate_system: str
+    nodes_m: np.ndarray
+    line2: np.ndarray
+    group_names: tuple[str, ...]
+    group_id: np.ndarray
+    axis_line2: np.ndarray
+
+
+def _load_geometry(path: Path | None, coordinate_system: str) -> GeometryOverlay | None:
+    if path is None:
+        return None
+    from chamber_particles.case_format import read_with_info
+
+    resolved = path.expanduser().resolve()
+    bundle, identity = read_with_info(resolved)
+    if bundle.coordinate_system != coordinate_system:
+        raise ValueError("canonical geometry and trajectory coordinate systems do not align")
+    geometry = bundle.geometry
+    axis = _axis_seam_edges(
+        geometry.nodes_m, geometry.tri3, geometry.quad4, geometry.boundary.line2, coordinate_system
+    )
+    return GeometryOverlay(
+        resolved,
+        _sha256(resolved),
+        identity.content_hash,
+        coordinate_system,
+        geometry.nodes_m,
+        geometry.boundary.line2,
+        geometry.group_names,
+        geometry.boundary.group_id,
+        axis,
+    )
+
+
+def _axis_seam_edges(
+    nodes: np.ndarray,
+    triangles: np.ndarray | None,
+    quads: np.ndarray | None,
+    physical: np.ndarray,
+    coordinate_system: str,
+) -> np.ndarray:
+    if coordinate_system != "axisymmetric_rz":
+        return np.empty((0, 2), dtype=np.int64)
+    incidence: Counter[tuple[int, int]] = Counter()
+    cells: list[list[int]] = []
+    if triangles is not None:
+        cells.extend(triangles.tolist())
+    if quads is not None:
+        cells.extend(quads[:, [0, 1, 3, 2]].tolist())
+    for cell in cells:
+        for first, second in zip(cell, (*cell[1:], cell[0]), strict=True):
+            incidence[(min(first, second), max(first, second))] += 1
+    walls = set(map(tuple, np.sort(physical, axis=1).tolist()))
+    edges = np.asarray(
+        [edge for edge, count in incidence.items() if count == 1 and edge not in walls],
+        dtype=np.int64,
+    ).reshape(-1, 2)
+    return edges[(nodes[edges, 0] == 0.0).all(axis=1)]
 
 
 class SvgCanvas:
@@ -237,7 +313,11 @@ def _optional_coordinate(value: str, path: Path, line_number: int, column: str) 
 
 
 def _trajectory_row(
-    row: dict[str, str], path: Path, line_number: int, status_column: str
+    row: dict[str, str],
+    path: Path,
+    line_number: int,
+    status_column: str,
+    coordinate_columns: tuple[str, str],
 ) -> tuple[int, float, float | None, float | None, str]:
     try:
         particle_id = int(row["particle_id"])
@@ -246,100 +326,125 @@ def _trajectory_row(
     if particle_id < 0:
         raise ValueError(f"{path}:{line_number}: particle_id must be nonnegative")
     time_s = _finite_float(row["time_s"], path, line_number, "time_s")
-    r_m = _optional_coordinate(row["r_m"], path, line_number, "r_m")
-    z_m = _optional_coordinate(row["z_m"], path, line_number, "z_m")
-    if (r_m is None) != (z_m is None):
-        raise ValueError(f"{path}:{line_number}: r_m and z_m must both be observed or missing")
-    status = row[status_column].strip()
+    x_m = _optional_coordinate(row[coordinate_columns[0]], path, line_number, coordinate_columns[0])
+    y_m = _optional_coordinate(row[coordinate_columns[1]], path, line_number, coordinate_columns[1])
+    if (x_m is None) != (y_m is None):
+        raise ValueError(f"{path}:{line_number}: coordinate pair must both be observed or missing")
+    status = row[status_column].strip().lower()
     if status not in _LIFECYCLES:
         raise ValueError(f"{path}:{line_number}: unsupported lifecycle {status!r}")
-    if status in {"active", "held", "stuck"} and r_m is None:
-        raise ValueError(f"{path}:{line_number}: {status} position must be observed")
-    if status == "escaped" and r_m is not None:
-        raise ValueError(f"{path}:{line_number}: escaped position must remain unobserved")
-    return particle_id, time_s, r_m, z_m, status
+    if status == "active" and x_m is None:
+        raise ValueError(f"{path}:{line_number}: active position must be observed")
+    return particle_id, time_s, x_m, y_m, status
 
 
 def _status_column(path: Path, fieldnames: list[str]) -> str:
     present = [name for name in _STATUS_COLUMNS if name in fieldnames]
     if len(present) != 1:
-        raise ValueError(
-            f"{path}: expected exactly one lifecycle column from {list(_STATUS_COLUMNS)}"
-        )
+        raise ValueError(f"{path}: expected exactly one lifecycle column")
     return present[0]
 
 
-def _read_trajectory_rows(resolved: Path) -> _TrajectoryRows:
-    """Parse one CSV and retain only coordinates that were directly observed."""
+def _coordinate_columns(fieldnames: list[str]) -> tuple[str, tuple[str, str]]:
+    candidates = [("axisymmetric_rz", ("r_m", "z_m")), ("cartesian_xy", ("x_m", "y_m"))]
+    available = [
+        (basis, columns) for basis, columns in candidates if set(columns).issubset(fieldnames)
+    ]
+    if len(available) != 1:
+        raise ValueError("trajectory must contain exactly one explicit XY or RZ SI coordinate pair")
+    return available[0]
 
-    grouped: dict[int, list[tuple[float, float, float]]] = {}
-    lifecycle_rows: dict[int, list[tuple[float, str]]] = {}
-    particle_ids_seen: set[int] = set()
-    input_keys: set[tuple[int, float]] = set()
-    finite_keys: set[tuple[int, float]] = set()
-    active_keys: set[tuple[int, float]] = set()
-    input_row_count = 0
-    missing_coordinate_row_count = 0
+
+def _precontact_value(row: dict[str, str], column: str | None) -> bool:
+    if column is None:
+        return True
+    value = row[column].strip().lower()
+    if value not in ("0", "1", "true", "false"):
+        raise ValueError(f"{column} must contain explicit 0/1 or true/false values")
+    return value in ("1", "true")
+
+
+def _append_trajectory_row(
+    rows: _TrajectoryRows,
+    row: dict[str, str],
+    resolved: Path,
+    line_number: int,
+    columns: tuple[str, str],
+) -> None:
+    if None in row or any(value is None for value in row.values()):
+        raise ValueError("trajectory CSV row width does not match its header")
+    particle_id, time_s, x_m, y_m, status = _trajectory_row(
+        row, resolved, line_number, rows.status_column, columns
+    )
+    key = (particle_id, time_s)
+    if key in rows.input_keys:
+        raise ValueError(f"{resolved}:{line_number}: duplicate key {key}")
+    rows.input_keys.add(key)
+    rows.input_count += 1
+    rows.particle_ids.add(particle_id)
+    rows.status_counts[status] = rows.status_counts.get(status, 0) + 1
+    rows.lifecycle.setdefault(particle_id, []).append((time_s, status))
+    eligible = _precontact_value(row, rows.precontact_column)
+    rows.grouped.setdefault(particle_id, []).append(
+        (
+            time_s,
+            math.nan if x_m is None else x_m,
+            math.nan if y_m is None else y_m,
+        )
+    )
+    if x_m is None:
+        rows.missing_coordinate_count += 1
+        rows.missing_by_status[status] = rows.missing_by_status.get(status, 0) + 1
+        return
+    rows.finite_keys.add(key)
+    if status == "active":
+        rows.active_keys.add(key)
+        if eligible:
+            rows.metric_keys.add(key)
+
+
+def _read_trajectory_rows(resolved: Path, precontact_column: str) -> _TrajectoryRows:
     with resolved.open(encoding="utf-8-sig", newline="") as stream:
         reader = csv.DictReader(stream)
-        missing = set(_REQUIRED_COLUMNS).difference(reader.fieldnames or ())
-        if missing:
-            raise ValueError(f"{resolved}: missing columns {sorted(missing)}")
-        status_column = _status_column(resolved, list(reader.fieldnames or ()))
-        for line_number, row in enumerate(reader, start=2):
-            particle_id, time_s, r_m, z_m, status = _trajectory_row(
-                row, resolved, line_number, status_column
-            )
-            key = (particle_id, time_s)
-            if key in input_keys:
-                raise ValueError(f"{resolved}:{line_number}: duplicate key {key}")
-            input_keys.add(key)
-            input_row_count += 1
-            particle_ids_seen.add(particle_id)
-            lifecycle_rows.setdefault(particle_id, []).append((time_s, status))
-            if r_m is None:
-                missing_coordinate_row_count += 1
-                continue
-            if z_m is None:
-                raise AssertionError("coordinate-pair validation failed")
-            finite_keys.add(key)
-            if status == "active":
-                active_keys.add(key)
-            grouped.setdefault(particle_id, []).append((time_s, r_m, z_m))
-    if not particle_ids_seen:
-        raise ValueError(f"{resolved}: trajectory is empty")
-    missing_particles = sorted(particle_ids_seen.difference(grouped))
-    if missing_particles:
-        raise ValueError(
-            f"{resolved}: particles have no observed coordinates: {missing_particles[:3]}"
+        names = list(reader.fieldnames or ())
+        if len(set(names)) != len(names) or not set(_REQUIRED_COLUMNS).issubset(names):
+            raise ValueError("trajectory CSV requires unique identity/time column headers")
+        basis, columns = _coordinate_columns(names)
+        rows = _TrajectoryRows(
+            {},
+            {},
+            set(),
+            set(),
+            set(),
+            _status_column(resolved, names),
+            0,
+            0,
+            set(),
+            set(),
+            precontact_column if precontact_column in names else None,
+            basis,
+            {},
+            {},
         )
-    return _TrajectoryRows(
-        grouped=grouped,
-        lifecycle=lifecycle_rows,
-        particle_ids=particle_ids_seen,
-        finite_keys=finite_keys,
-        active_keys=active_keys,
-        status_column=status_column,
-        input_count=input_row_count,
-        missing_coordinate_count=missing_coordinate_row_count,
-    )
+        for line_number, row in enumerate(reader, start=2):
+            _append_trajectory_row(rows, row, resolved, line_number, columns)
+    if not rows.input_keys:
+        raise ValueError(f"{resolved}: trajectory is empty")
+    return rows
 
 
 def _validate_lifecycle(rows: _TrajectoryRows, path: Path) -> None:
-    """Reject a particle that returns to active or changes terminal fate."""
-
     for particle_id, status_rows in rows.lifecycle.items():
-        terminal_status: str | None = None
+        terminal: str | None = None
         for _, status in sorted(status_rows):
-            if terminal_status is None and status == "active":
+            if status == "unobserved":
                 continue
-            if terminal_status is None:
-                terminal_status = status
-                continue
-            if status != terminal_status:
+            if terminal is not None and status != terminal:
                 raise ValueError(
                     f"{path}: particle {particle_id} lifecycle changes after terminal state"
                 )
+            if status in _TERMINAL:
+                terminal = status
 
 
 def _coordinate_arrays(
@@ -358,11 +463,13 @@ def _coordinate_arrays(
     return tuple(times), tuple(radial), tuple(axial)
 
 
-def read_trajectory(path: Path) -> TrajectoryTable:
+def read_trajectory(
+    path: Path, *, precontact_column: str = "precontact_eligible"
+) -> TrajectoryTable:
     """Read one normalized long-form CSV and reject ambiguous row identity."""
 
     resolved = path.expanduser().resolve()
-    rows = _read_trajectory_rows(resolved)
+    rows = _read_trajectory_rows(resolved, precontact_column)
     _validate_lifecycle(rows, resolved)
     particle_ids = np.asarray(sorted(rows.particle_ids), dtype=np.int64)
     times, radial, axial = _coordinate_arrays(rows.grouped, particle_ids)
@@ -378,26 +485,34 @@ def read_trajectory(path: Path) -> TrajectoryTable:
         status_column=rows.status_column,
         input_row_count=rows.input_count,
         missing_coordinate_row_count=rows.missing_coordinate_count,
+        input_row_keys=tuple(sorted(rows.input_keys)),
+        metric_row_keys=tuple(sorted(rows.metric_keys)),
+        precontact_column=rows.precontact_column,
+        coordinate_system=rows.coordinate_system,
+        status_counts=rows.status_counts,
+        missing_coordinate_by_status=rows.missing_by_status,
     )
 
 
-def read_matched_trajectories(candidate_path: Path, reference_path: Path) -> MatchedTrajectories:
-    """Read inputs and align IDs plus the common finite active metric population."""
-
-    candidate = read_trajectory(candidate_path)
-    reference = read_trajectory(reference_path)
+def read_matched_trajectories(
+    candidate_path: Path, reference_path: Path, *, precontact_column: str = "precontact_eligible"
+) -> MatchedTrajectories:
+    candidate = read_trajectory(candidate_path, precontact_column=precontact_column)
+    reference = read_trajectory(reference_path, precontact_column=precontact_column)
     if not np.array_equal(candidate.particle_ids, reference.particle_ids):
         raise ValueError("particle IDs do not align")
+    if candidate.coordinate_system != reference.coordinate_system:
+        raise ValueError("candidate/reference coordinate systems do not align")
+    if candidate.precontact_column != reference.precontact_column:
+        raise ValueError("precontact eligibility must be supplied on both sides or neither")
     common = tuple(sorted(set(candidate.active_row_keys).intersection(reference.active_row_keys)))
-    common_particles = {particle_id for particle_id, _ in common}
-    missing_common = [
-        int(particle_id)
-        for particle_id in candidate.particle_ids
-        if int(particle_id) not in common_particles
-    ]
-    if missing_common:
-        raise ValueError(f"particles have no common finite active state: {missing_common[:3]}")
-    return MatchedTrajectories(candidate, reference, common)
+    metric = tuple(sorted(set(candidate.metric_row_keys).intersection(reference.metric_row_keys)))
+    population = (
+        "joint precontact finite active rows"
+        if candidate.precontact_column is not None
+        else "common finite active rows; contact eligibility is unobserved"
+    )
+    return MatchedTrajectories(candidate, reference, common, metric, population)
 
 
 def _range_with_margin(values: np.ndarray, fraction: float = 0.05) -> tuple[float, float]:
@@ -491,177 +606,262 @@ def _draw_axes(
 
 def _draw_legend(canvas: SvgCanvas, x: float, y: float) -> None:
     canvas.line(x, y, x + 42, y, stroke=_ORANGE, width=2.5)
-    canvas.text(x + 50, y + 5, "COMSOL reference", css_class="label")
+    canvas.text(x + 50, y + 5, "reference observations", css_class="label")
     canvas.line(x + 190, y, x + 232, y, stroke=_BLUE, width=2.0, dash="8 5")
-    canvas.text(x + 240, y + 5, "solver candidate", css_class="label")
+    canvas.text(x + 240, y + 5, "candidate observations", css_class="label")
 
 
 def _all_values(series: tuple[np.ndarray, ...]) -> np.ndarray:
-    return np.concatenate(series)
+    values = np.concatenate(series)
+    return values[np.isfinite(values)]
 
 
-def _time_extent(table: TrajectoryTable) -> tuple[float, float]:
-    values = _all_values(table.times_by_particle)
-    return float(np.min(values)), float(np.max(values))
+def _observed_times(table: TrajectoryTable) -> np.ndarray:
+    return np.asarray([key[1] for key in table.row_keys], dtype=np.float64)
 
 
-def _particle_end_extent(table: TrajectoryTable) -> tuple[float, float]:
-    endings = np.asarray([times[-1] for times in table.times_by_particle], dtype=np.float64)
-    return float(np.min(endings)), float(np.max(endings))
+def _time_extent(table: TrajectoryTable) -> tuple[float | None, float | None]:
+    values = _observed_times(table)
+    return (float(np.min(values)), float(np.max(values))) if values.size else (None, None)
 
 
-def _render_rz_overview(data: MatchedTrajectories, label: str, path: Path) -> None:
-    canvas = SvgCanvas(1600, 1000, f"{label}: all-particle R-Z trajectories")
-    canvas.text(80, 55, f"{label}: all-particle R-Z trajectories", css_class="title")
+def _particle_end_extent(table: TrajectoryTable) -> tuple[float | None, float | None]:
+    endings = [
+        max(key[1] for key in table.row_keys if key[0] == int(pid))
+        for pid in table.particle_ids
+        if any(key[0] == int(pid) for key in table.row_keys)
+    ]
+    return (min(endings), max(endings)) if endings else (None, None)
+
+
+def _plot_ranges(
+    data: MatchedTrajectories,
+    geometry: GeometryOverlay | None,
+    box: PlotBox,
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    x = np.concatenate(
+        [_all_values(data.candidate.r_by_particle), _all_values(data.reference.r_by_particle)]
+    )
+    y = np.concatenate(
+        [_all_values(data.candidate.z_by_particle), _all_values(data.reference.z_by_particle)]
+    )
+    if geometry is not None:
+        x = np.concatenate([x, geometry.nodes_m[:, 0]])
+        y = np.concatenate([y, geometry.nodes_m[:, 1]])
+    if x.size == 0:
+        raise ValueError("no observed coordinates or geometry are available to render")
+    x_range = _range_with_margin(_M_TO_MM * x, 0.025)
+    y_range = _range_with_margin(_M_TO_MM * y, 0.025)
+    scale = max((x_range[1] - x_range[0]) / box.width, (y_range[1] - y_range[0]) / box.height)
+    x_center = (x_range[0] + x_range[1]) / 2
+    y_center = (y_range[0] + y_range[1]) / 2
+    return (
+        (x_center - scale * box.width / 2, x_center + scale * box.width / 2),
+        (y_center - scale * box.height / 2, y_center + scale * box.height / 2),
+    )
+
+
+def _draw_geometry(
+    canvas: SvgCanvas,
+    geometry: GeometryOverlay | None,
+    box: PlotBox,
+    x_range: tuple[float, float],
+    y_range: tuple[float, float],
+) -> None:
+    if geometry is None:
+        return
+    for edge in geometry.line2:
+        points = _project(
+            _M_TO_MM * geometry.nodes_m[edge, 0],
+            _M_TO_MM * geometry.nodes_m[edge, 1],
+            x_range,
+            y_range,
+            box,
+        )
+        canvas.polyline(points, stroke="#475569", width=2.0, opacity=0.65)
+    for edge in geometry.axis_line2:
+        points = _project(
+            _M_TO_MM * geometry.nodes_m[edge, 0],
+            _M_TO_MM * geometry.nodes_m[edge, 1],
+            x_range,
+            y_range,
+            box,
+        )
+        canvas.polyline(points, stroke="#94A3B8", width=1.5, dash="3 6")
+    legend = "Canonical boundaries: grey"
+    if geometry.coordinate_system == "axisymmetric_rz":
+        legend += "; axis seam: dotted, nonmaterial"
+    canvas.text(150, 114, legend, css_class="small")
+
+
+def _draw_observed_path(
+    canvas: SvgCanvas,
+    table: TrajectoryTable,
+    index: int,
+    box: PlotBox,
+    x_range: tuple[float, float],
+    y_range: tuple[float, float],
+    *,
+    stroke: str,
+    dash: str | None,
+    markers: bool,
+) -> None:
+    x = table.r_by_particle[index]
+    y = table.z_by_particle[index]
+    observed = np.isfinite(x) & np.isfinite(y)
+    endpoints = np.flatnonzero(observed)
+    split = np.flatnonzero(np.diff(observed.astype(np.int8)) != 0) + 1
+    for segment in np.split(np.arange(x.size), split):
+        if segment.size and observed[segment[0]]:
+            points = _project(_M_TO_MM * x[segment], _M_TO_MM * y[segment], x_range, y_range, box)
+            canvas.polyline(points, stroke=stroke, width=1.8, opacity=0.65, dash=dash)
+            if segment.size == 1:
+                canvas.circle(*points[0], 2.5, fill=stroke)
+    if markers and endpoints.size:
+        points = _project(
+            _M_TO_MM * x[endpoints[[0, -1]]],
+            _M_TO_MM * y[endpoints[[0, -1]]],
+            x_range,
+            y_range,
+            box,
+        )
+        canvas.circle(*points[0], 5.0, fill=_BACKGROUND, stroke=stroke)
+        canvas.circle(*points[1], 5.0, fill=stroke)
+
+
+def _coordinate_labels(coordinate_system: str) -> tuple[str, str, str]:
+    return (
+        ("r (mm)", "z (mm)", "R-Z")
+        if coordinate_system == "axisymmetric_rz"
+        else ("x (mm)", "y (mm)", "X-Y")
+    )
+
+
+def _render_overview(
+    data: MatchedTrajectories,
+    label: str,
+    path: Path,
+    geometry: GeometryOverlay | None,
+) -> None:
+    x_label, y_label, basis = _coordinate_labels(data.candidate.coordinate_system)
+    canvas = SvgCanvas(1600, 1000, f"{label}: all-particle {basis} trajectories")
+    canvas.text(80, 55, f"{label}: all-particle {basis} trajectories", css_class="title")
     canvas.text(
         80,
         82,
-        (
-            "Observed paths are drawn independently and are non-gating; "
-            "COMSOL solid orange, solver dashed blue"
-        ),
+        "Observed paths are drawn independently and are non-gating; missing spans are not reconstructed",
         css_class="subtitle",
     )
     _draw_legend(canvas, 1080, 62)
-    box = PlotBox(150, 130, 1370, 790)
-    r_all_mm = _M_TO_MM * np.concatenate(
-        [_all_values(data.reference.r_by_particle), _all_values(data.candidate.r_by_particle)]
-    )
-    z_all_mm = _M_TO_MM * np.concatenate(
-        [_all_values(data.reference.z_by_particle), _all_values(data.candidate.z_by_particle)]
-    )
-    r_range = _range_with_margin(r_all_mm, 0.025)
-    z_range = _range_with_margin(z_all_mm, 0.025)
-    _draw_axes(canvas, box, r_range, z_range, x_label="r (mm)", y_label="z (mm)")
-    for index in range(len(data.reference.particle_ids)):
-        canvas.polyline(
-            _project(
-                _M_TO_MM * data.reference.r_by_particle[index],
-                _M_TO_MM * data.reference.z_by_particle[index],
-                r_range,
-                z_range,
-                box,
-            ),
+    box = PlotBox(150, 140, 1370, 760)
+    x_range, y_range = _plot_ranges(data, geometry, box)
+    _draw_axes(canvas, box, x_range, y_range, x_label=x_label, y_label=y_label)
+    _draw_geometry(canvas, geometry, box, x_range, y_range)
+    for index in range(len(data.candidate.particle_ids)):
+        _draw_observed_path(
+            canvas,
+            data.reference,
+            index,
+            box,
+            x_range,
+            y_range,
             stroke=_ORANGE,
-            width=1.35,
-            opacity=0.48,
+            dash=None,
+            markers=False,
         )
-        canvas.polyline(
-            _project(
-                _M_TO_MM * data.candidate.r_by_particle[index],
-                _M_TO_MM * data.candidate.z_by_particle[index],
-                r_range,
-                z_range,
-                box,
-            ),
+        _draw_observed_path(
+            canvas,
+            data.candidate,
+            index,
+            box,
+            x_range,
+            y_range,
             stroke=_BLUE,
-            width=1.0,
-            opacity=0.72,
             dash="5 4",
+            markers=False,
         )
-    candidate_time = _time_extent(data.candidate)
-    reference_time = _time_extent(data.reference)
     canvas.text(
         150,
-        946,
-        (
-            "Held/stuck tails may be displayed but are excluded from metrics; "
-            "escaped NaN positions are unobserved and never reconstructed"
-        ),
+        945,
+        f"Position metrics: {data.metric_population}; rows={len(data.metric_row_keys)}",
         css_class="small",
     )
     canvas.text(
         150,
         970,
-        (
-            f"solver observed coordinates t={candidate_time[0] * _S_TO_MS:.3f}.."
-            f"{candidate_time[1] * _S_TO_MS:.3f} ms; "
-            f"COMSOL observed coordinates t={reference_time[0] * _S_TO_MS:.3f}.."
-            f"{reference_time[1] * _S_TO_MS:.3f} ms"
-        ),
+        f"particles={len(data.candidate.particle_ids)}; candidate observed points={len(data.candidate.row_keys)}; reference observed points={len(data.reference.row_keys)}; equal geometric aspect",
         css_class="small",
-    )
-    canvas.text(
-        1520,
-        970,
-        (
-            f"particles={len(data.candidate.particle_ids)}, "
-            f"candidate path points={len(data.candidate.row_keys)}, "
-            f"reference path points={len(data.reference.row_keys)}, "
-            f"common active metric rows={len(data.common_active_row_keys)}"
-        ),
-        css_class="small",
-        anchor="end",
     )
     canvas.write(path)
 
 
-def _render_particle(data: MatchedTrajectories, label: str, index: int, path: Path) -> None:
+def _render_particle(
+    data: MatchedTrajectories,
+    label: str,
+    index: int,
+    path: Path,
+    geometry: GeometryOverlay | None,
+) -> None:
     particle_id = int(data.candidate.particle_ids[index])
-    reference_t = data.reference.times_by_particle[index]
-    candidate_t = data.candidate.times_by_particle[index]
-    candidate_r_mm = _M_TO_MM * data.candidate.r_by_particle[index]
-    reference_r_mm = _M_TO_MM * data.reference.r_by_particle[index]
-    candidate_z_mm = _M_TO_MM * data.candidate.z_by_particle[index]
-    reference_z_mm = _M_TO_MM * data.reference.z_by_particle[index]
-
-    canvas = SvgCanvas(1600, 1000, f"{label}: particle {particle_id} R-Z trajectory")
-    canvas.text(80, 55, f"{label}: particle {particle_id} R-Z trajectory", css_class="title")
+    x_label, y_label, basis = _coordinate_labels(data.candidate.coordinate_system)
+    canvas = SvgCanvas(1600, 1000, f"{label}: particle {particle_id} {basis} trajectory")
+    canvas.text(80, 55, f"{label}: particle {particle_id} {basis} trajectory", css_class="title")
     canvas.text(
         80,
         82,
-        (
-            f"solver observed coordinates t={candidate_t[0] * _S_TO_MS:.3f}.."
-            f"{candidate_t[-1] * _S_TO_MS:.3f} ms; "
-            f"COMSOL observed coordinates t={reference_t[0] * _S_TO_MS:.3f}.."
-            f"{reference_t[-1] * _S_TO_MS:.3f} ms; candidate markers show first/last "
-            "observed coordinate"
-        ),
-        css_class="subtitle",
-    )
-    canvas.text(
-        80,
-        106,
-        (
-            "Observed path lines are independent and non-gating; "
-            "escaped NaN positions are unobserved and never reconstructed"
-        ),
+        "Complete observed paths; circles mark first/last observations, not inferred terminal locations",
         css_class="subtitle",
     )
     _draw_legend(canvas, 1080, 62)
-    box = PlotBox(150, 140, 1370, 780)
-    r_range = _range_with_margin(
-        np.concatenate([reference_r_mm, candidate_r_mm]),
-        0.08,
+    box = PlotBox(150, 140, 1370, 760)
+    x_range, y_range = _plot_ranges(data, geometry, box)
+    _draw_axes(canvas, box, x_range, y_range, x_label=x_label, y_label=y_label)
+    _draw_geometry(canvas, geometry, box, x_range, y_range)
+    _draw_observed_path(
+        canvas,
+        data.reference,
+        index,
+        box,
+        x_range,
+        y_range,
+        stroke=_ORANGE,
+        dash=None,
+        markers=True,
     )
-    z_range = _range_with_margin(
-        np.concatenate([reference_z_mm, candidate_z_mm]),
-        0.08,
+    _draw_observed_path(
+        canvas,
+        data.candidate,
+        index,
+        box,
+        x_range,
+        y_range,
+        stroke=_BLUE,
+        dash="10 6",
+        markers=True,
     )
-    _draw_axes(canvas, box, r_range, z_range, x_label="r (mm)", y_label="z (mm)")
-    reference_points = _project(reference_r_mm, reference_z_mm, r_range, z_range, box)
-    candidate_points = _project(candidate_r_mm, candidate_z_mm, r_range, z_range, box)
-    canvas.polyline(reference_points, stroke=_ORANGE, width=3.0)
-    canvas.polyline(candidate_points, stroke=_BLUE, width=2.4, dash="10 6")
-    start_x, start_y = candidate_points[0]
-    end_x, end_y = candidate_points[-1]
-    canvas.circle(start_x, start_y, 6.0, fill=_BACKGROUND, stroke=_INK)
-    canvas.circle(end_x, end_y, 6.0, fill=_INK, stroke=_INK)
+    count = sum(key[0] == particle_id for key in data.metric_row_keys)
+    canvas.text(
+        150,
+        945,
+        f"Position metrics: {data.metric_population}; this particle rows={count}",
+        css_class="small",
+    )
     canvas.text(
         150,
         970,
         (
-            f"solver observed path points={len(candidate_t)}, "
-            f"COMSOL observed path points={len(reference_t)}; "
-            f"common finite active states={sum(1 for key in data.common_active_row_keys if key[0] == particle_id)}; "
-            "metrics in SI"
+            f"Observed candidate points={int(np.isfinite(data.candidate.r_by_particle[index]).sum())}, "
+            f"reference points={int(np.isfinite(data.reference.r_by_particle[index]).sum())}; "
+            "missing intervals and collision paths are not reconstructed"
         ),
         css_class="small",
     )
     canvas.write(path)
 
 
-def _write_atlas(label: str, particle_files: list[tuple[int, Path]], output: Path) -> None:
+def _write_atlas(
+    label: str, particle_files: list[tuple[int, Path]], output: Path, overview: str, population: str
+) -> None:
     cards = []
     for particle_id, path in particle_files:
         relative = path.relative_to(output.parent).as_posix()
@@ -690,11 +890,11 @@ nav a{{margin-right:18px;color:#1d4ed8}}
 </head>
 <body>
 <header><h1>{html.escape(label)} trajectory atlas</h1>
-<p>Every common particle ID is included. Each side's observed finite R-Z path is
-drawn independently and is non-gating; held/stuck tails may be shown. Receipt
-metrics use only exact common finite active states. Escaped NaN positions are
-unobserved and never reconstructed. Each particle view uses its own range.</p>
-<nav><a href="overview_rz.svg">All-particle R-Z overview</a></nav></header>
+<p>Every common particle ID is included. Each side's observed finite spatial path is
+drawn independently and is non-gating; observed terminal tails may be shown.
+Missing spans are never reconstructed. Receipt metrics use {html.escape(population)}.
+All particle views share the same spatial range and equal geometric aspect.</p>
+<nav><a href="{overview}">All-particle spatial overview</a></nav></header>
 <main class="grid">{"".join(cards)}</main>
 </body></html>
 """
@@ -740,17 +940,11 @@ def _wait_for_png(path: Path, timeout_s: float = 10.0) -> None:
 
 
 def _rasterize(svg_paths: list[Path], browser: Path) -> dict[str, str]:
-    version = subprocess.run(
-        [str(browser), "--version"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
     with tempfile.TemporaryDirectory(
         prefix="trajectory_plot_browser_", ignore_cleanup_errors=True
     ) as profile:
         for svg_path in svg_paths:
-            png_path = svg_path.with_suffix(".png")
+            png_path = svg_path.with_suffix(".png").resolve()
             command = [
                 str(browser),
                 "--headless=new",
@@ -764,7 +958,14 @@ def _rasterize(svg_paths: list[Path], browser: Path) -> dict[str, str]:
                 "--window-size=1600,1000",
                 svg_path.resolve().as_uri(),
             ]
-            completed = subprocess.run(command, capture_output=True, text=True, timeout=60)
+            completed = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=60,
+            )
             if completed.returncode != 0:
                 raise RuntimeError(
                     f"PNG rasterization failed for {svg_path}: {completed.stderr.strip()}"
@@ -773,7 +974,11 @@ def _rasterize(svg_paths: list[Path], browser: Path) -> dict[str, str]:
             dimensions = _png_dimensions(png_path)
             if dimensions != (1600, 1000):
                 raise RuntimeError(f"unexpected PNG dimensions for {png_path}: {dimensions}")
-    return {"executable": str(browser), "version": version}
+    return {
+        "executable": str(browser),
+        "executable_sha256": _sha256(browser),
+        "version": "not queried; executable bytes are hash-bound",
+    }
 
 
 def _coordinate_map(table: TrajectoryTable) -> dict[tuple[int, float], tuple[float, float]]:
@@ -799,12 +1004,21 @@ def _metrics(data: MatchedTrajectories) -> dict[str, object]:
                 candidate[key][0] - reference[key][0],
                 candidate[key][1] - reference[key][1],
             )
-            for key in data.common_active_row_keys
+            for key in data.metric_row_keys
         ],
         dtype=np.float64,
     )
+    if values.size == 0:
+        return {
+            "position_difference_m": {
+                "comparison_rows": 0,
+                "rms": None,
+                "maximum": None,
+                "reason": "no jointly eligible finite active observations",
+            }
+        }
     worst_index = int(np.argmax(values))
-    worst_particle_id, worst_time_s = data.common_active_row_keys[worst_index]
+    worst_particle_id, worst_time_s = data.metric_row_keys[worst_index]
     return {
         "position_difference_m": {
             "comparison_rows": int(values.size),
@@ -828,6 +1042,66 @@ def _artifact(path: Path, root: Path, role: str) -> dict[str, object]:
     }
 
 
+def _table_coverage(table: TrajectoryTable) -> dict[str, object]:
+    finite = set(table.row_keys)
+    active = set(table.active_row_keys)
+    counts = [sum(key[0] == int(pid) for key in finite) for pid in table.particle_ids]
+    return {
+        "input_rows": table.input_row_count,
+        "finite_coordinate_rows": len(finite),
+        "missing_coordinate_rows": table.missing_coordinate_row_count,
+        "observed_status_counts": table.status_counts,
+        "missing_coordinate_rows_by_observed_status": table.missing_coordinate_by_status,
+        "active_finite_rows": len(active),
+        "eligible_metric_rows": len(table.metric_row_keys),
+        "non_active_finite_rows": len(finite - active),
+        "observed_coordinate_rows_per_particle_min": min(counts),
+        "observed_coordinate_rows_per_particle_max": max(counts),
+        "observed_coordinate_time_s": list(_time_extent(table)),
+        "last_observed_coordinate_time_s_range": list(_particle_end_extent(table)),
+        "precontact_column": table.precontact_column,
+    }
+
+
+def _alignment_receipt(data: MatchedTrajectories) -> dict[str, object]:
+    candidate = set(data.candidate.input_row_keys)
+    reference = set(data.reference.input_row_keys)
+    finite_candidate = set(data.candidate.row_keys)
+    finite_reference = set(data.reference.row_keys)
+    return {
+        "status": "PASS",
+        "particle_identity": "EXACT",
+        "observed_state_key": ["particle_id", "time_s"],
+        "metric_population": data.metric_population,
+        "particles": len(data.candidate.particle_ids),
+        "candidate_only_input_keys": len(candidate - reference),
+        "reference_only_input_keys": len(reference - candidate),
+        "omitted_row_reason": "unobserved; absence of a CSV row does not identify an escape or disappearance cause",
+        "common_observed_finite_rows": len(finite_candidate & finite_reference),
+        "common_active_finite_rows": len(data.common_active_row_keys),
+        "common_eligible_metric_rows": len(data.metric_row_keys),
+        "candidate": _table_coverage(data.candidate),
+        "reference": _table_coverage(data.reference),
+    }
+
+
+def _geometry_receipt(geometry: GeometryOverlay | None) -> dict[str, object] | None:
+    if geometry is None:
+        return None
+    return {
+        "path": str(geometry.path),
+        "sha256": geometry.sha256,
+        "canonical_content_hash": geometry.content_hash,
+        "coordinate_system": geometry.coordinate_system,
+        "unit": "m",
+        "boundary_facet_count": int(geometry.line2.shape[0]),
+        "boundary_group_names": list(geometry.group_names),
+        "axis_seam_facet_count": int(geometry.axis_line2.shape[0]),
+        "axis_seam_meaning": "dotted symmetry/support seam excluded from material boundary facets",
+        "binding_scope": "explicit supplied canonical geometry; normalized CSVs do not contain result/case hashes, so result ownership is not inferred",
+    }
+
+
 def create_trajectory_figures(
     candidate_path: Path,
     reference_path: Path,
@@ -836,157 +1110,100 @@ def create_trajectory_figures(
     label: str,
     render_png: bool,
     browser_path: Path | None = None,
+    geometry_path: Path | None = None,
+    precontact_column: str = "precontact_eligible",
 ) -> dict[str, object]:
-    """Create one immutable external comparison atlas and its receipt."""
-
+    """Create observed spatial figures and an explicit coverage/metric receipt."""
     output = output_directory.expanduser().resolve()
     if output.exists():
         raise FileExistsError(f"output directory already exists: {output}")
+    data = read_matched_trajectories(
+        candidate_path, reference_path, precontact_column=precontact_column
+    )
+    geometry = _load_geometry(geometry_path, data.candidate.coordinate_system)
+    _plot_ranges(data, geometry, PlotBox(150, 140, 1370, 760))
     output.mkdir(parents=True)
     particle_directory = output / "particles"
     particle_directory.mkdir()
-    data = read_matched_trajectories(candidate_path, reference_path)
-
-    summary_path = output / "overview_rz.svg"
-    _render_rz_overview(data, label, summary_path)
-
+    overview_name = (
+        "overview_rz.svg"
+        if data.candidate.coordinate_system == "axisymmetric_rz"
+        else "overview_xy.svg"
+    )
+    summary_path = output / overview_name
+    _render_overview(data, label, summary_path, geometry)
     particle_files: list[tuple[int, Path]] = []
     for index, raw_id in enumerate(data.candidate.particle_ids):
         particle_id = int(raw_id)
         path = particle_directory / f"particle_{particle_id:06d}.svg"
-        _render_particle(data, label, index, path)
+        _render_particle(data, label, index, path, geometry)
         particle_files.append((particle_id, path))
     atlas_path = output / "index.html"
-    _write_atlas(label, particle_files, atlas_path)
-
-    rasterizer: dict[str, str] | None = None
+    _write_atlas(label, particle_files, atlas_path, overview_name, data.metric_population)
+    rasterizer = _rasterize([summary_path], _browser_path(browser_path)) if render_png else None
+    figures = [_artifact(summary_path, output, "all_particle_spatial_svg")]
+    figures.extend(_artifact(path, output, "particle_svg") for _, path in particle_files)
     if render_png:
-        rasterizer = _rasterize([summary_path], _browser_path(browser_path))
-
-    figures = [_artifact(summary_path, output, "all_particle_rz_svg")] + [
-        _artifact(path, output, "particle_svg") for _, path in particle_files
-    ]
-    if render_png:
-        figures.append(_artifact(summary_path.with_suffix(".png"), output, "all_particle_rz_png"))
-    candidate_keys = set(data.candidate.row_keys)
-    reference_keys = set(data.reference.row_keys)
-    candidate_active_keys = set(data.candidate.active_row_keys)
-    reference_active_keys = set(data.reference.active_row_keys)
-    candidate_observed_counts = [len(times) for times in data.candidate.times_by_particle]
-    reference_observed_counts = [len(times) for times in data.reference.times_by_particle]
-    candidate_time = _time_extent(data.candidate)
-    reference_time = _time_extent(data.reference)
-    candidate_end = _particle_end_extent(data.candidate)
-    reference_end = _particle_end_extent(data.reference)
-    common_active_times = np.asarray(
-        [key[1] for key in data.common_active_row_keys], dtype=np.float64
-    )
+        figures.append(
+            _artifact(summary_path.with_suffix(".png"), output, "all_particle_spatial_png")
+        )
+    x_range, y_range = _plot_ranges(data, geometry, PlotBox(150, 140, 1370, 760))
     receipt: dict[str, object] = {
-        "schema_version": 4,
+        "schema_version": 5,
         "tool_revision": TOOL_REVISION,
         "report_kind": "external_trajectory_figure_receipt",
+        "label": label,
         "tool": {
             "path": str(Path(__file__).resolve()),
             "sha256": _sha256(Path(__file__).resolve()),
         },
-        "label": label,
         "scope": {
             "external_only": True,
-            "solver_imported": False,
-            "comparison": (
-                "non-gating independently observed trajectories in physical R-Z space; "
-                "numeric position differences on exact common finite active rows"
-            ),
-            "trajectory_rendering_population": (
-                "each side's observed finite coordinates independently, including held/stuck tails"
-            ),
-            "missing_coordinate_policy": ("escaped_nan_unobserved_excluded_without_reconstruction"),
-            "metric_population": (
-                "exact candidate/reference intersection of finite pre-terminal active "
-                "particle/time rows"
-            ),
+            "simulation_executed": False,
+            "comparison": "observed spatial paths and descriptive position differences",
+            "trajectory_rendering_population": "all observed finite positions; missing spans break path lines",
+            "missing_coordinate_policy": "unobserved coordinates are excluded without reconstruction; reasons retain supplied status",
+            "metric_population": data.metric_population,
+            "precontact_eligibility_authority": "normalized input flags; renderer does not infer unsaved collision times",
+            "native_disappeared_cause": "unknown; not equated to candidate escaped",
             "figure_role": "NON_GATING_DIAGNOSTIC",
             "physical_model_validity": "NOT_CLAIMED",
             "boundary_accuracy": "NOT_TESTED_BY_FIGURE",
         },
         "inputs": {
-            "candidate": {
-                "path": str(data.candidate.path),
-                "sha256": data.candidate.sha256,
-            },
-            "reference": {
-                "path": str(data.reference.path),
-                "sha256": data.reference.sha256,
-            },
+            "candidate": {"path": str(data.candidate.path), "sha256": data.candidate.sha256},
+            "reference": {"path": str(data.reference.path), "sha256": data.reference.sha256},
+            "geometry": _geometry_receipt(geometry),
         },
-        "alignment": {
-            "status": "PASS",
-            "particle_identity": "EXACT",
-            "observed_state_key": ["particle_id", "time_s"],
-            "metric_state_key": ["particle_id", "time_s", "active_on_both_sides"],
-            "particles": len(data.candidate.particle_ids),
-            "first_particle_id": int(data.candidate.particle_ids[0]),
-            "last_particle_id": int(data.candidate.particle_ids[-1]),
-            "candidate_status_column": data.candidate.status_column,
-            "reference_status_column": data.reference.status_column,
-            "candidate_input_rows": data.candidate.input_row_count,
-            "reference_input_rows": data.reference.input_row_count,
-            "candidate_missing_coordinate_rows": data.candidate.missing_coordinate_row_count,
-            "reference_missing_coordinate_rows": data.reference.missing_coordinate_row_count,
-            "candidate_finite_rows": len(candidate_keys),
-            "reference_finite_rows": len(reference_keys),
-            "common_observed_finite_rows": len(candidate_keys.intersection(reference_keys)),
-            "candidate_only_observed_finite_rows": len(candidate_keys.difference(reference_keys)),
-            "reference_only_observed_finite_rows": len(reference_keys.difference(candidate_keys)),
-            "candidate_active_finite_rows": len(candidate_active_keys),
-            "reference_active_finite_rows": len(reference_active_keys),
-            "candidate_terminal_finite_rows": len(candidate_keys.difference(candidate_active_keys)),
-            "reference_terminal_finite_rows": len(reference_keys.difference(reference_active_keys)),
-            "candidate_unobserved_escaped_rows": data.candidate.missing_coordinate_row_count,
-            "reference_unobserved_escaped_rows": data.reference.missing_coordinate_row_count,
-            "common_active_finite_rows": len(data.common_active_row_keys),
-            "candidate_only_active_finite_rows": len(
-                candidate_active_keys.difference(reference_active_keys)
-            ),
-            "reference_only_active_finite_rows": len(
-                reference_active_keys.difference(candidate_active_keys)
-            ),
-            "candidate_observed_coordinate_rows_per_particle_min": min(candidate_observed_counts),
-            "candidate_observed_coordinate_rows_per_particle_max": max(candidate_observed_counts),
-            "reference_observed_coordinate_rows_per_particle_min": min(reference_observed_counts),
-            "reference_observed_coordinate_rows_per_particle_max": max(reference_observed_counts),
-            "candidate_observed_coordinate_time_s_min": candidate_time[0],
-            "candidate_observed_coordinate_time_s_max": candidate_time[1],
-            "reference_observed_coordinate_time_s_min": reference_time[0],
-            "reference_observed_coordinate_time_s_max": reference_time[1],
-            "candidate_last_observed_coordinate_time_s_min": candidate_end[0],
-            "candidate_last_observed_coordinate_time_s_max": candidate_end[1],
-            "reference_last_observed_coordinate_time_s_min": reference_end[0],
-            "reference_last_observed_coordinate_time_s_max": reference_end[1],
-            "common_active_time_s_min": float(np.min(common_active_times)),
-            "common_active_time_s_max": float(np.max(common_active_times)),
-        },
+        "alignment": _alignment_receipt(data),
         "metrics": _metrics(data),
         "rendering": {
-            "svg": "native_dependency_free",
+            "svg": "standard_library",
             "png": rasterizer if rasterizer is not None else "SKIPPED",
+            "coordinate_system": data.candidate.coordinate_system,
+            "coordinate_view": (
+                "RZ meridional projection; no 3D orbit is reconstructed"
+                if data.candidate.coordinate_system == "axisymmetric_rz"
+                else "Cartesian XY observations; out-of-plane motion is not inferred"
+            ),
+            "display_unit": "mm",
+            "source_and_metric_units": "m and s",
+            "overview_and_particle_ranges_mm": {"axis0": list(x_range), "axis1": list(y_range)},
+            "equal_geometric_aspect": True,
+            "path_rule": "straight visual segments join consecutive observed CSV rows; missing and collision paths are not reconstructed",
             "style": {
                 "reference": "solid orange",
                 "candidate": "dashed blue",
-                "redundant_encoding": True,
+                "geometry": "grey",
+                "axis_seam": "dotted grey",
             },
-            "display_coordinates": "millimetres",
-            "source_and_metrics_coordinates": "SI metres and seconds",
-            "path_comparison_is_gating": False,
         },
         "atlas": _artifact(atlas_path, output, "html_atlas"),
         "particle_svg_count": len(particle_files),
         "figures": figures,
     }
-    receipt_path = output / "receipt.json"
-    receipt_path.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
-        encoding="utf-8",
+    (output / "receipt.json").write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
     )
     return receipt
 
@@ -999,6 +1216,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--label", required=True)
     parser.add_argument("--skip-png", action="store_true")
     parser.add_argument("--browser", type=Path)
+    parser.add_argument("--geometry", type=Path)
+    parser.add_argument("--precontact-column", default="precontact_eligible")
     return parser
 
 
@@ -1011,6 +1230,8 @@ def main() -> int:
         label=args.label,
         render_png=not args.skip_png,
         browser_path=args.browser,
+        geometry_path=args.geometry,
+        precontact_column=args.precontact_column,
     )
     print(json.dumps(receipt["alignment"], sort_keys=True))
     return 0

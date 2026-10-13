@@ -1,0 +1,69 @@
+{
+  "purpose": "before skill revision; existing local changes retained",
+  "files": [
+    {
+      "path": ".agents/skills/inspect-comsol-model/SKILL.md",
+      "sha256": "e92a029d76e482e36da6cebd0db68a21fe66384626d74f9e3bc7a87545d8349d"
+    },
+    {
+      "path": ".agents/skills/inspect-comsol-model/agents/openai.yaml",
+      "sha256": "eb909e7687b8798c61df00628bb900ca8bcc52373157263a1512849ac64e70bb"
+    },
+    {
+      "path": ".agents/skills/inspect-comsol-model/references/api-extraction.md",
+      "sha256": "115895ab3628b6cc290e2565f8d35b50a9e88097e27dc739077dd7d9e1adc03a"
+    },
+    {
+      "path": ".agents/skills/inspect-comsol-model/references/extraction-record.md",
+      "sha256": "453ceacc8ffb3f7545fb8ebec5f89526d6bb4be99e739fd3f3b21257779cace1"
+    },
+    {
+      "path": ".agents/skills/inspect-comsol-model/references/particle-semantics.md",
+      "sha256": "6dc771d028fd99d271673dc68df6692eeb2b6d76c78f0fec440f6b62da62aec6"
+    },
+    {
+      "path": ".agents/skills/inspect-comsol-model/scripts/snapshot_inputs.py",
+      "sha256": "e6bd683826bbcdbf2f387c66b986747eaa0a0fcbfa29a04b9395830395811a40"
+    },
+    {
+      "path": ".agents/skills/prepare-comsol-field-case/SKILL.md",
+      "sha256": "5305dae161f336e09a113d06cb1f3c550b8eb01f7e11e993344ef3be6365151f"
+    },
+    {
+      "path": ".agents/skills/prepare-comsol-field-case/agents/openai.yaml",
+      "sha256": "1a9f00e3b748e73e575393142dbde8d8de8726c372ebacf49f55b16814702412"
+    },
+    {
+      "path": ".agents/skills/prepare-comsol-field-case/references/initial-conditions.md",
+      "sha256": "130eb7643724a631361824534917e3a8a9e58355d3df42ba196d7732aa2f3261"
+    },
+    {
+      "path": ".agents/skills/prepare-comsol-field-case/references/model-mapping.md",
+      "sha256": "c5f18f83cf588f31b28658dff842a4ae8da50c5cb25bbdf1caad71bc7a918aee"
+    },
+    {
+      "path": ".agents/skills/prepare-comsol-field-case/references/numerical-plan.md",
+      "sha256": "f1abb57e1a98fd250f333931f551e798518a329b9367a33c7a18ae18cdb58f20"
+    },
+    {
+      "path": ".agents/skills/validate-comsol-trajectories/SKILL.md",
+      "sha256": "81c47ecb4a9301f6332577a3cadf8891e463021109200fc67fb44f97f68bbfe3"
+    },
+    {
+      "path": ".agents/skills/validate-comsol-trajectories/agents/openai.yaml",
+      "sha256": "3b17ac355bd67c8c3319283f302ffab89cbd7c81e53008092a3bc121167bb050"
+    },
+    {
+      "path": ".agents/skills/validate-comsol-trajectories/references/evaluation-and-attribution.md",
+      "sha256": "55a48c4252ba73e34a53a4808e0aa052d968a4cf6431471e0a98028aa02d2c4d"
+    },
+    {
+      "path": ".agents/skills/visualize-particle-trajectories/SKILL.md",
+      "sha256": "be22eccc59b12854c0fec2d2781fffddbd2034960629c88e05d573365cdf7ff5"
+    },
+    {
+      "path": ".agents/skills/visualize-particle-trajectories/agents/openai.yaml",
+      "sha256": "77f978ede473a32e2a8f0054efa1af141f5f8a271039e8707317a56ed75712a4"
+    }
+  ]
+}

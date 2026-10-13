@@ -1,0 +1,354 @@
+{
+  "record_kind": "read_only_generic_numerical_and_performance_improvement_proposal",
+  "date_jst": "2026-10-14",
+  "implementation_status": "PROPOSED_NOT_IMPLEMENTED",
+  "author_scope": "Numerical accuracy, integrator/event/output ownership, particle trajectory V&V, bounded reproduction and performance architecture. Physical equation selection and detailed source extraction are integrated by the parent review.",
+  "objective": "Physically correct particle propagation with independently qualified numerical error. Agreement with COMSOL is an intermediate external validation observation, not the definition of physical correctness.",
+  "constraints": {
+    "production_owner": "particle_platform_redesign/solver/",
+    "public_entry_points": ["load_case", "simulate", "open_result"],
+    "one_engine": true,
+    "extra_jit": false,
+    "no_new_solves_in_this_review": true,
+    "authoritative_documents_edited": false,
+    "core_or_test_sources_edited": false,
+    "excluded": [
+      "COMSOL-dependent core or model_dataset golden tests",
+      "second integrator engine, generic ODE framework, backend/plugin/DI framework",
+      "general diagnostic subsystem, extra permanent result format or full stage-history output",
+      "additional JIT, ThreadPool/Numba parallel team, automatic performance tuner",
+      "retuning source distribution, wall probabilities or time step solely to match one external outcome"
+    ]
+  },
+  "source_identity": {
+    "engine_revision_context": "Current v64, independent solver 0.3.0; hashes below bind this inspection, not future implementation or performance qualification.",
+    "files_sha256": {
+      "solver/src/chamber_particles/integrators.py": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d",
+      "solver/src/chamber_particles/engine.py": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+      "solver/src/chamber_particles/fields.py": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f",
+      "solver/src/chamber_particles/cpu.py": "bc2b64bb401e96d5f3aca6c3df84bd84c4a1ec01b782ad905b03a1d9d4fa66fb",
+      "solver/src/chamber_particles/output.py": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+      "solver/src/chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+      "solver/src/chamber_particles/rng.py": "fff6f67cf1dc1243fb20f9221103f0c339e62280be0a7ea90640614016feb0ba",
+      "solver/src/chamber_particles/events.py": "4d3eb12273419ab97cc12b9b8e6f8f6d03076ab37a34dbc1b567f586073348f7"
+    }
+  },
+  "inspected_current_facts": [
+    {
+      "source": "implementation_plan.md:490; solver/src/chamber_particles/integrators.py:2189,2340",
+      "fact": "RK4 and exponential midpoint use a fixed base step. Existing geometry/support/applicability restrictions and Brownian candidate refinements serve safety or declared path resolution; they are not a general local truncation-error controller.",
+      "implication": "Selecting dt independently and qualifying h/h2/h4 remains necessary. A safe accepted path is not thereby an accurate approximation to the continuous physical equations."
+    },
+    {
+      "source": "solver/src/chamber_particles/integrators.py:3890; solver/docs/numerics.md section 22.4; implementation_plan.md:438",
+      "fact": "Charge-stable exponential midpoint evaluates accepted-start coefficients, advances a coupled predictor, evaluates midpoint coefficients using midpoint charge/velocity/position, applies the affine exponential charge update, and validates the endpoint. RK4 retains its explicit charge stability condition; exponential midpoint is not qualified by the same h L_Z threshold.",
+      "implication": "Do not introduce charge-only subcycling or clip charge to hide stiffness. Test coupled charge feedback and physical invariant assumptions, separately from stability."
+    },
+    {
+      "source": "solver/src/chamber_particles/integrators.py:400,486; solver/docs/numerics.md section 27",
+      "fact": "StepProposal owns one immutable selected path. Dense RK4/finite-Hermite roots are evaluated directly; other supported paths use same-rule prefix evaluation. RK4 dense position is a position-Hermite polynomial; its independently constructed velocity extension need not equal the position polynomial derivative.",
+      "implication": "Preserve the revision-specific path definition. Kinematic consistency defects, dense approximation error and event localization error are different quantities; derivative inequality alone is not proof of a bug."
+    },
+    {
+      "source": "solver/src/chamber_particles/engine.py:5515,5567,6220; solver/src/chamber_particles/fields.py:43,421,962",
+      "fact": "Global certificates can be tightened using bounded overlapping-cell primitive ranges. The local candidate cap is 64 cells per row. v64 admits the full shortened-half predictor box before local exponential bounds; local range availability alone is not a support proof. Unavailable or exhausted proof remains distinct from a witnessed invalid state.",
+      "implication": "Retain v64 support premise and fail-closed semantics. Do not replace a conservative proof with an endpoint-only sample or silently increase tolerances until a case runs."
+    },
+    {
+      "source": "solver/src/chamber_particles/fields.py:399,1813; solver/src/chamber_particles/cpu.py:1017,1101,1243,1604; solver/src/chamber_particles/engine.py:2207",
+      "fact": "Prepared production fields use indexed/hinted location and snapshot interpolation. Scalar full-cell searches are reference/fallback paths, not a basis for claiming that production scans every mesh cell. Required field snapshot knots participate in the macro clock.",
+      "implication": "Profile the prepared production locator before changing its architecture. Spatial approximation and cell/interface history require their own qualification; a smaller dt does not remove the transferred-field error floor."
+    },
+    {
+      "source": "solver/docs/numerics.md sections 22.3,22.5; solver/src/chamber_particles/stochastic.py; solver/src/chamber_particles/rng.py",
+      "fact": "Brownian base depth is uniform path-resolution authority; adaptive maximum depth is conditional boundary/axis/proof refinement using conditional increments without redraw. Finite Hermite paths do not give continuous OU exact first passage. RZ meridional folded signed OU is not a general three-dimensional radial Brownian law.",
+      "implication": "Base-step, base-depth, boundary-depth, Monte Carlo and coordinate-model errors must remain separate. A boundary refinement PASS does not establish arbitrary position-dependent SDE weak order or physical 3D diffusion."
+    },
+    {
+      "source": "solver/src/chamber_particles/engine.py:2033,2098,2133,2180; solver/src/chamber_particles/output.py:684,816,877",
+      "fact": "The sole macro loop activates individual releases without splitting every particle's step, obtains frames/probes from accepted replay, drains outputs before accepted-macro checkpoint commits, and resumes only with strict identity. ResultView provides lazy frame/probe iteration and bounded storage-order event batches.",
+      "implication": "Accuracy or performance changes must preserve observation independence, drained checkpoint semantics and canonical reader ownership. Changed output/probe schedules require a separately identified run, not modification of a matching partial result."
+    },
+    {
+      "source": "solver/src/chamber_particles/engine.py:1162,1209; solver/src/chamber_particles/cpu.py:1818; implementation_plan.md section 21.3",
+      "fact": "Persistent spawn workers update exclusive slabs, with one boundary/failure batch in flight per worker and parent ACK after single-writer consumption. CPU memory includes resident state, shared transport, startup overlap, private scratch/template, replay and serialization reserve. All-worker synchronization currently occurs each macro.",
+      "implication": "The next plausible performance work is measured coordination/output lifetime reduction under these owners, not extra JIT or a second scheduler. Small, fine-step workloads can remain faster with workers=1."
+    },
+    {
+      "source": "solver/src/chamber_particles/engine.py:5817,5842,2846; solver/docs/support_and_errors.md",
+      "fact": "Root proposal construction can raise a generic batch exception; one Langevin guard exhaustion maps to the existing integrator_accuracy reason. This name is not evidence of an embedded local error estimate.",
+      "implication": "Clarify the reason's algorithmic cause and retain bounded failed-PID/interval context in the current owner. A safety/certificate failure must not be reported as a measured physical trajectory error."
+    }
+  ],
+  "case_evidence_used_as_motivation_only": {
+    "authority": "solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/particle_trajectory_review/trajectory_review_summary.json",
+    "scope": "Existing saved results, all 287 IDs per case, five participants and 121 common saved times. No new solve or pathwise COMSOL equivalence claim.",
+    "early_10us_all_ID_precontact": {
+      "A_candidate_0p5_minus_0p25": {"position_vector_RMS_um": 0.0396473, "velocity_vector_RMS_m_s": 0.00338847},
+      "P_candidate_0p5_minus_0p25": {"position_vector_RMS_um": 0.0191397, "velocity_vector_RMS_m_s": 0.000877977},
+      "original_minus_candidate_context": "Original-vs-candidate position RMS approximately 126.8 um and velocity RMS approximately 23.7 m/s at 10 us. Much larger than this finest-pair sensitivity, consistent with already documented model/field/source differences; this does not bound numerical error or uniquely attribute a 30 ms outcome."
+    },
+    "late_event_free_candidate_P": [
+      {"particle_id": 11, "time_s": 0.03, "position_vector_fine_pair_difference_um": 173.7403966, "first_saved_100um_flag_time_s": 0.024, "all_three_levels_material_events": 0, "final_field_cell": 1918},
+      {"particle_id": 30, "time_s": 0.014, "position_vector_fine_pair_difference_um": 151.2198104, "first_saved_100um_flag_time_s": 0.014, "all_three_levels_material_events": 0}
+    ],
+    "interpretation": [
+      "These event-free IDs isolate a deterministic numerical-sensitivity question from wall RNG. They do not prove a particular integrator defect or need for adaptive integration.",
+      "PID11 finest-pair endpoints lie in the same supported final cell. Different final-cell selection is excluded; different earlier cell history, global accumulated error and transferred-field error remain possible.",
+      "Candidate h=1,0.5,0.25 us have the same final statuses and event identities, while trajectories and event times differ. Stable aggregate counts alone are insufficient numerical qualification.",
+      "The 100 um, 1 m/s and 0.1 charge flags were illustrative case-specific scales. They are not reusable physical accuracy defaults or COMSOL equivalence margins.",
+      "Different coarse/fine argmax particle IDs and nonuniform saved times forbid deriving a universal Richardson order from the maximum or treating saved-row RMS as time-weighted error."
+    ]
+  },
+  "error_separation_required": [
+    {"layer": "source realization", "comparison": "Same realized release rows including velocity vector and basis, or independently characterized source-population distributions", "not_sufficient": "Same mean speed, diameter, seed integer, nominal cone or case name"},
+    {"layer": "physical closure", "comparison": "Primitive-matched force and charge rates, physical applicability and independent physical reference", "not_sufficient": "Matching particle end counts after compensating parameter changes"},
+    {"layer": "geometry and field transfer", "comparison": "Support/semantic-boundary binding, withheld-point primitive/gradient/rate checks and spatial refinement on unchanged physical problem", "not_sufficient": "Small time step in one canonical P1 mesh"},
+    {"layer": "deterministic propagation", "comparison": "Coupled x/v/Z convergence and independent trajectory/event reference on fixed realized sources, model and field", "not_sufficient": "No numerical failure or a safe path enclosure"},
+    {"layer": "stochastic path and distribution", "comparison": "Specified SDE, coordinate law, noise coupling, base/depth convergence and independent ensemble reference with sampling uncertainty", "not_sufficient": "Same seed value across tools or pathwise particle-ID agreement"},
+    {"layer": "observation and evaluation", "comparison": "Explicit lifecycle/missingness/continuity masks, physical weights, full denominator and source-bound output semantics", "not_sufficient": "Finite exported row or population count coincidence"},
+    {"layer": "implementation and execution", "comparison": "Same scientific payload across supported slab/worker/output/resume choices plus measured runtime/memory", "not_sufficient": "Kernel-only speedup or an old source's release receipt"}
+  ],
+  "work_packages": [
+    {
+      "id": "N1",
+      "root_package": "G1 source/extraction and G4 independent numerical/SDE validation",
+      "priority": "P0 prerequisite",
+      "title": "Bind source realization before testing propagation",
+      "owners": {
+        "extraction_and_sampling": "Existing external input preparation / COMSOL adapter, not solver source RNG",
+        "canonical_schema_and_schedule": "case_format.py and sources.py",
+        "external_comparison": "Existing validation tool / validate-comsol-trajectories skill",
+        "documentation_authority": "vv_methodology.md; implementation_plan.md section 10.1"
+      },
+      "action": [
+        "For a propagation test, bind exact realized ID, source ID, release time, location and velocity vector/basis, charge, inertial mass, drag diameter, electrostatic/contact radii, displaced volume and statistical weight. Preserve the external release measure and initial finite-radius contact semantics.",
+        "Classify the release instruction separately from its actual realization: total speed, Cartesian components, local normal/tangent/cone, gas-relative speed, random direction and thermal velocity produce different vector populations.",
+        "When exact realization cannot be shared, compare source marginals and dependence structure, angular/flux-weighted distributions and release schedules scientifically; use independent ensemble propagation and state that paired trajectory differences also contain source-realization uncertainty.",
+        "Do not add a core source distribution catalog or RNG. Existing external preparation owns sampling; sources.py only resolves and releases the realized schedule."
+      ],
+      "minimum_gate": "Public release-event readback reproduces the canonical realization; a small independent manufactured source population verifies vector/basis and surface sampling measure. Reuse test_sources.py and existing wall-source scenarios; add only the missing physical trigger.",
+      "independent_reference": "Explicit analytic vectors and the externally specified source probability measure; native initial rows are provenance evidence rather than a universal physical reference.",
+      "cost_and_memory": "Input/preparation and bounded release readback only; no propagation kernel cost or extra resident distribution state.",
+      "failure_disposition": "Repair extraction or preparation before attributing a trajectory difference to the engine."
+    },
+    {
+      "id": "N2",
+      "root_package": "G2 field transfer and G4 independent numerical/SDE validation",
+      "priority": "P0",
+      "title": "Qualify coupled deterministic accuracy on fixed physical inputs",
+      "owners": {
+        "coupled_proposal": "integrators.py, existing P06/P11/P15 numerical work",
+        "sampled_rates": "physics/",
+        "stage_binding_and_commit": "engine.py",
+        "field_sampling_and_support": "fields.py / cpu.py",
+        "verification": "Existing tests/verification and a small public scenario",
+        "documentation_authority": "technical_research.md and solver/docs/numerics.md"
+      },
+      "action": [
+        "Reuse existing affine drag/charge exact limits, nonlinear coupled charge-motion second-order exponential and fourth-order RK4 tests. Extend only a demonstrated unqualified combination, rather than creating a duplicate integrator verification suite.",
+        "Use smooth coupled x/v/Z manufactured problems and an independently coded high-accuracy ODE reference that does not call production physics/integrator helpers. Refine the reference separately until its uncertainty is below the declared numerical allowance.",
+        "For one fixed canonical field, compare h,h/2,h/4 at common observation times using all IDs, event-free cohorts, component and vector x/v differences, Z, first-hit time/location/semantic group and retained denominator. Choose dt from physical decision allowances, not from the native saved interval.",
+        "Run a separate spatial/field-transfer ladder with identical source realization and physical closure. Audit primitive and gradient errors at withheld points and rate errors at the same physical states. If source refinement is unavailable, report a bounded diagnostic transfer discrepancy and unresolved spatial error instead of claiming a converged continuum field.",
+        "Target P1 cell edges, Q1 distorted cells, snapshot knots and gradient-driven force jumps in a small generic manufactured crossing. Distinguish continuous primitive interpolation from discontinuous primitive derivatives or derivative-based acceleration. Do not demand smooth-method order across nonsmooth interfaces.",
+        "Keep physical invariant checks conditional on the equations' assumptions. Do not force global monotonic charge, energy conservation or a universal low-speed threshold for every model."
+      ],
+      "minimum_gate": [
+        "Independent smooth references verify coupled endpoint and observation accuracy at their declared order away from roundoff and events.",
+        "A minimal cell/interface crossing checks trajectory/charge/first event convergence without relying on one COMSOL chamber.",
+        "Safety/certificate PASS, model applicability, estimator/step sensitivity and physical validation receive separate statements.",
+        "Registered physical tolerances plus the independently qualified reference allowance determine acceptance; finest-pair difference alone is not a certified error bound."
+      ],
+      "independent_reference": "Analytic affine solutions, manufactured smooth and piecewise fields with independently integrated equations; external tightly controlled DOP853/Radau can serve as a verification oracle only after its own tolerance refinement. No production dispatch to that oracle.",
+      "cost_and_memory": "External small reference runs and streamed result comparisons. Production remains fixed-step until the qualification shows an unmet requirement; no always-on full force or stage history.",
+      "failure_disposition": "Separate wrong equations/units or field transfer from numerical insufficiency before selecting a core algorithm change. If only dt must change within qualified cost, repair the numerical case setting."
+    },
+    {
+      "id": "N3",
+      "root_package": "G4 independent numerical/SDE validation",
+      "priority": "P0 safeguard",
+      "title": "Keep path certificates, physical validity and event accuracy distinct",
+      "owners": {
+        "path_and_enclosure": "integrators.py, existing P19-L",
+        "support_and_primitive_ranges": "fields.py",
+        "first_hit_and_residual": "events.py and geometry.py",
+        "axis_and_basis": "coordinates.py",
+        "response": "boundaries.py",
+        "admission_and_commit": "engine.py"
+      },
+      "action": [
+        "Retain the whole-predictor support premise, outward bounds, accepted-only hints and actual-sample versus unavailable-proof distinction. A certificate of the discrete path never certifies its distance from the true ODE/SDE solution.",
+        "Preserve first-event/valid-prefix admission before rejecting a later unsupported tail. Reevaluate hit prefixes using the revision-defined method and propagate residual time after the physical response; keep simultaneous-facet/corner policy under the existing event owner.",
+        "Use the selected proposal's geometric path derivative for path geometry and its physical velocity for momentum/response. Verify dense x/v/Z approximation and the size/convergence of any kinematic defect independently; do not silently replace one by the other.",
+        "Reuse existing turning, grazing, corner, source departure and axis checks. Add one minimal causal regression only when a new failure mechanism is identified. RZ axis parity is not a material reflection, and point versus finite-radius contact must remain explicit.",
+        "For field-interface first hits, reduce the integration step and event-localization budget separately. A tighter event locator cannot correct a wrong numerical trajectory.",
+        "Clarify existing numerical failure descriptions at their owning reason without adding a large error-code taxonomy. A witnessed support/model failure and exhausted enclosure/refinement budget need different scientific interpretations."
+      ],
+      "minimum_gate": "Analytic constant-acceleration first hit, manufactured returning/grazing path, axis crossing and event-before-invalid-tail examples retain correct earliest event/normal/candidate semantics and converge in time/position. Output schedule and slab/worker/resume changes retain scientific identity.",
+      "independent_reference": "Analytic geometry and elementary physical trajectories; numerical-root refinement outside the production event locator where needed. scipy.solve_ivp sign-change event detection is not an adequate replacement for the existing conservative multiple-root locator.",
+      "cost_and_memory": "Bounded existing certificate/event arrays only. Larger local cell/depth budgets require a measured failing use case and full maximum-depth scratch accounting, not a blanket increase.",
+      "failure_disposition": "Fix a demonstrated certificate/event owner defect in the sole path; do not relax endpoint/support acceptance or nudge coordinates to make a chamber finish."
+    },
+    {
+      "id": "N4",
+      "root_package": "G4 independent numerical/SDE validation",
+      "priority": "P1 conditional after N2/N3",
+      "title": "Introduce local accuracy control only if qualified fixed steps cannot meet cost and accuracy",
+      "owners": {
+        "error_indicator_and_selected_path": "integrators.py",
+        "bounded_local_piece_progression": "engine.py using the existing residual wavefront",
+        "memory": "cpu.py",
+        "decision": "Existing solver/docs/decisions.md entry followed by numerical and implementation authorities"
+      },
+      "necessity_gate": "A varied, source-bound workload set shows that a scientifically qualified uniform fixed step misses a required observable tolerance or costs materially more than localized resolution. P11/P30 sensitivity motivates this measurement but does not satisfy it by itself.",
+      "preferred_first_candidate": [
+        "Deterministic same-method full-step versus two-half-step comparison of the entire x/v/Z state, using one integrator owner. Only in a smooth asymptotic regime can their difference be scaled by the method's order as an estimate; it remains an indicator, not a rigorous bound.",
+        "Use per-particle component or physical-block tolerances in SI. Position relative scaling must use a defined physical local length/displacement so that a changed world-coordinate origin cannot relax the tolerance. Velocity uses a declared physical speed scale; charge uses its own absolute/relative scale. A slab or population RMS must not hide one bad particle.",
+        "One accepted proposal representation must own output and events. If two-half propagation is selected, its accepted piece sequence and prefixes must be explicit; do not detect events on a discarded full-step path or obtain output from a different dense polynomial.",
+        "Rejecting a deterministic trial may subdivide only the particle's numerical work, preserving macro/release/field-knot clocks and output independence. Full certificate, stage support/model checks and event-before-invalid-tail semantics still apply.",
+        "Treat minimum representable time, finite retry/depth and unresolved accuracy as explicit failures. Do not add implicit model fallback, charge-only subcycles or runtime switching to a second method.",
+        "If an embedded exponential or coupled implicit method is needed instead, first demonstrate why the simpler candidate is inadequate and independently derive its coupled x/v/Z update, dense/event path, invariant/stiffness assumptions and bounded cost. Do not adopt a generic solver framework."
+      ],
+      "minimum_gate": [
+        "Smooth manufactured endpoint and dense-reference tests show estimator behavior; independently known field kinks test false-small indicators.",
+        "First-event/residual and support-proof examples remain correct under rejection and local subdivisions.",
+        "Same-case output/slab/worker/resume identity and source/RNG separation are preserved within the new declared numerical revision.",
+        "A registered accuracy-cost curve beats the qualified fixed-step baseline at the same physical error allowance and includes cold/warm overhead and peak simultaneous-live memory."
+      ],
+      "stochastic_exclusion": "Do not apply deterministic step doubling to independent Brownian redraws. A stochastic adaptive error method is a separate conditional proposal requiring preserved noise coupling and independent weak/strong/distribution qualification under state-dependent stopping.",
+      "cost_and_memory": "Additional coupled proposals/rate evaluations and retained accepted pieces increase scratch per active row and can increase event/replay work. Reuse bounded banks sequentially where lifetime permits; account all retained root/half states, maximum retry stack and every worker/template. No O(N times steps) cache.",
+      "replacement_rule": "Adopt only one production implementation of the affected selected numerical strategy; remove the superseded path and stale tests/docs in the same change. Do not pre-add unused settings, flags, tolerance fields or StepProposal placeholders."
+    },
+    {
+      "id": "N5",
+      "root_package": "G3 physical collision/thermal closure and G4 independent numerical/SDE validation",
+      "priority": "P0 for any stochastic physical use; extensions conditional on the declared model",
+      "title": "Qualify the specified SDE and boundary path separately from deterministic accuracy",
+      "owners": {
+        "noise_law_and_diffusion_coefficients": "physics/ under the selected physical closure",
+        "joint_OU_and_conditional_path": "stochastic.py, existing B01-B05",
+        "counter_identity": "rng.py",
+        "restart_and_clock": "engine.py",
+        "independent_reference": "Existing tests/verification/ou_reference.py and external ensemble comparison"
+      },
+      "action": [
+        "Declare the intended stochastic process, coordinate law, coefficient convention and any noise-induced drift. A thermal diffusion law must be consistent with the selected drag/collision model; these are physics decisions, not dt tuning.",
+        "Reuse existing independent joint OU mean/covariance, non-dyadic finite-Hermite law, stationary OML/charge-electric reference and absorbing planar/RZ two-barrier Kramers checks.",
+        "Where the selected physical model requires velocity/position-dependent nonlinear coefficients, add the smallest independent weak-observable reference covering that coupling and physical validity. Existing frozen/affine OU evidence does not establish arbitrary nonlinear SDE order or thermal equilibrium.",
+        "Vary macro dt, uniform base depth and candidate-only maximum depth independently. Register what each changes; extra boundary depth cannot be described as uniform base-path refinement or continuous OU exact first passage.",
+        "Use independent replications and report sampling uncertainty beside numerical/reference/spatial sensitivity. Pair noise paths only when actual counter/conditional-increment coupling is proved; equal seed integers or particle IDs across unrelated RNG implementations do not pair Brownian histories.",
+        "After differing wall events/draw histories, per-ID spatial differences remain descriptive. Distributional arrival/deposition/residence/charge observables require physical weights and independent ensemble precision, not a trajectory equality gate."
+      ],
+      "minimum_gate": "Analytic OU moments and refined independent Kramers/declared nonlinear reference pass their registered observation tolerances with justified Monte Carlo precision. Coefficient coupling and fluctuation/dissipation assumptions are stated. Base/depth and event/active-wall scopes are separately reported; no order claim when sampling bands dominate.",
+      "independent_reference": "Green-integral moments, independently implemented covariance, and a refined Fokker-Planck/Kramers or alternative declared SDE reference. Refine grid/time/domain tails and verify positivity/mass balance rather than assigning an arbitrary reference-error bound.",
+      "cost_and_memory": "Reference PDE/ensemble work is external and selected. Runtime conditional increments remain in the current SoA tree with worst-case reachable maximum-depth memory, not observed refined-row count. No stored universal Brownian path archive.",
+      "failure_disposition": "A wrong physical diffusion/coordinate closure belongs to physics; incorrect conditional increments/restarts belong to stochastic/engine; insufficient base resolution belongs to numerical settings until a method limitation is demonstrated."
+    },
+    {
+      "id": "N6",
+      "root_package": "G4 independent numerical/SDE validation",
+      "priority": "P0 when a run fails or a physical tolerance is exceeded",
+      "title": "Reproduce the first divergence with existing outputs and a bounded context",
+      "owners": {
+        "accepted_state_and_exception_context": "engine.py",
+        "durable_epoch": "output.py",
+        "selected_probes": "Existing case output.probes and ResultView.iter_probes",
+        "failure_packet_and_difference_localization": "Existing external run/validation script, not a new production subsystem"
+      },
+      "packet": [
+        "Exact case/canonical input hashes, source realization identity, command, uv.lock/environment, code/algorithm revisions, worker count and exception chain or failure event.",
+        "Existing latest accepted checkpoint and committed epoch identity; a rejected proposal is not relabeled accepted state.",
+        "A bounded selected-ID list, first saved divergence interval and last common trustworthy states, including time, lifecycle, x/v/Z, known boundary-event bracket, accepted field hint and available support/model/numerical verdict.",
+        "For a root-construction exception, preserve the existing cause and bounded affected-row/particle/interval metadata at that owner. If an exact failed row is unavailable, report the cohort honestly; do not dump every proposal or reconstruct a fake failed stage.",
+        "Only if necessary, perform a separately identified diagnostic run with selected existing probes around the interval. Changing probe schedules changes run identity and cannot be appended to an existing partial run."
+      ],
+      "localization_rules": [
+        "First threshold observation is a saved-time bound, not an exact continuous crossing time. Refine observations only in a declared follow-up; do not interpolate through an unobserved event or terminal tail.",
+        "Do not re-release one selected particle under a new ID/clock and claim identical stochastic reproduction. Preserve original particle ID, macro/root/event ordinal, physical draw streams and preparation/global bounds, or label the subset as a different diagnostic problem.",
+        "Separate selected-PID canonical field samples and cell-history/interface mechanisms from numerical-law probes. The same final cell does not establish the same prior field history.",
+        "A failure-specific manufactured microcase must reproduce the causal mechanism, not chamber geometry or all native exports. Remove ad hoc debug paths after the owning fix."
+      ],
+      "minimum_gate": "Existing simulate(case, same_output) reproduces or resumes the identical input/algorithm partial according to the current strict writer contract; the packet can locate a bounded cause without full tracing. A demonstrated defect adds one causal public scenario or verification example and all existing relevant gates.",
+      "cost_and_memory": "O(selected IDs times selected observation times) external data, bounded exception note and current checkpoints. No new diagnostic stream, per-step all-particle snapshots or extra engine state.",
+      "failure_disposition": "Use proof/field/physics/numerical evidence to choose the owner; generic batch errors are observability limitations, not evidence that every particle or the physical model is invalid."
+    },
+    {
+      "id": "N7",
+      "root_package": "G1/G2 external correspondence and G4 independent numerical/SDE validation",
+      "priority": "P0 for any external trajectory claim",
+      "title": "Reuse an external per-ID comparison with explicit masks and population inference",
+      "owners": {
+        "data_access": "Public open_result/ResultView and canonical/native normalized artifacts",
+        "comparison_and_plot": "Existing external comparison/visualization tools and corresponding skills",
+        "native_semantics": "inspect-comsol-model extraction record",
+        "conclusion": "validate-comsol-trajectories record; vv_methodology.md"
+      },
+      "action": [
+        "Carry all released IDs and physical weights as denominator, with absent row, row observed but nonfinite, state unknown, active transport and terminal state separately masked. Never fill vanished native coordinates or treat last incident velocity as post-stick motion.",
+        "Compare r/z or Cartesian components, physical velocity components and vector differences, and Z at common observation times. Specify equal-saved-point versus time-weighted RMS and units. Each maximum packet includes value, PID, time, unit and mask.",
+        "Separate jointly precontact, postcontact descriptive, terminal/censoring mismatch and accepted event identities. Native counter changes bound event time by saved observations; candidate exact accepted events can break saved-line segments. Respect right/left continuity at jumps.",
+        "Include per-ID terminal confusion and stick-ID intersection/different-ID counts so equal totals do not imply the same particles. Preserve unknown disappearance causes instead of mapping them silently to escaped/pumped particles.",
+        "Use exact source realization plus deterministic settings for paired algorithm verification. For stochastic or unmatched source populations, use registered physical distribution observables with independent replications, statistical precision and reference/numerical allowances.",
+        "Parameterize the existing comparison for a second meaningfully different dataset rather than cloning this campaign or introducing a universal comparison framework. Keep native producer normalization in the adapter and scientific masks in one evaluation owner.",
+        "Scale beyond the present 574-path study by streaming frames/event batches and retaining requested summaries/windows/IDs. Bounded storage-order event batches are not globally canonical; invoke existing canonical ordering only when needed and affordable, or merge externally without changing result storage."
+      ],
+      "minimum_gate": "A small fixture with missing rows, terminal incident values, delayed releases, one jump and a known counter bracket reproduces manually calculated metrics. A second chamber/producer can use the same evaluator without case dimensions, tags, wall IDs, seeds or dt defaults. No model_dataset dependency enters core tests.",
+      "conservation_qualification": "Validated integer native counters can support cumulative ever-hit counts through explicit all-observation conservation evidence. This does not recover unobserved reflection times, surfaces, positions or disappearance causes; round validated counters before gap detection to avoid floating-point false event segments.",
+      "cost_and_memory": "External streamed analysis; detailed all-ID output is an explicit scientific request, not a default at one million particles. Store coverage counts and selected summaries even when detailed timeseries is omitted."
+    },
+    {
+      "id": "P1",
+      "root_package": "G6 performance gated",
+      "priority": "P2 after qualified physics and numerical allowance",
+      "title": "Optimize cost at qualified physical accuracy under existing bounded process owners",
+      "owners": {
+        "coordination_and_macro_clock": "engine.py",
+        "slab_and_memory_accounting": "cpu.py",
+        "single_writer_and_canonical_reader": "output.py",
+        "authority": "solver/docs/parallel_execution_plan.md; implementation_plan.md sections 12 and 21.3"
+      },
+      "action": [
+        "Measure cold/warm end-to-end runtime, total process CPU, owned arrays and sampled private/peak memory on the same physical input, source realization, model, numerical resolution and output. Record startup/import/JIT, per-macro compute, coordination, field/event work and writer costs through current aggregate timing; no new profiler subsystem.",
+        "Retain workers=1 when coordination dominates small fine-step cases. Do not increase dt, weaken error allowances or suppress required output to claim process speedup.",
+        "If measurements isolate per-macro synchronization overhead, evaluate the existing section 21.3 multi-macro continuation design. K affects resource scheduling only; dt, field/release clocks, physical RNG addresses, every-macro lifecycle and accepted output semantics stay unchanged.",
+        "Keep one event/failure batch per worker, ACK after the parent writer consumes it, readonly prepared fields/geometry, exclusive state rows, shared replay lifetime and accepted barrier checkpoints. Never allocate K times N state/proposal/output history or add a second scheduler/worker writer.",
+        "Use bounded macro/output windows for any continuation. A child failure publishes no unfinished block and resume agrees with the baseline. Particle interaction/field feedback cases may not cross their required coupling barrier.",
+        "If adaptive local accuracy is adopted later, profile rejection/cell/event cost and slab imbalance with the existing process distribution. Account each worker's maximum estimator/depth scratch, templates, shared transport, handoff and startup overlap before widening slabs.",
+        "Only change prepared field location, copying or replay lifetime when a source-bound profile identifies the expensive production owner. Existing scalar location complexity alone is not a performance defect."
+      ],
+      "minimum_gate": [
+        "All public scientific payloads retain same-source worker/slab/output/resume identity and physical draw addresses.",
+        "The target-use accuracy allowance passes independently before and after optimization; a performance PASS cannot replace numerical qualification.",
+        "Same-case end-to-end improvement and conservative simultaneous-live memory accounting pass their registered budgets, including failure/cleanup and selected outputs.",
+        "No extra JIT, new public execution API, automatic tuner or second scheduler is introduced. Replaced code/settings/tests/docs are removed together."
+      ],
+      "cost_and_memory": "Benefits depend on work per macro, active population, stochastic depth, event rate and output density. New scheduling buffers must have a fixed bounded lifetime and be included in the existing CPU memory owner; no universal all-CPU scaling claim."
+    }
+  ],
+  "minimum_implementation_sequence": [
+    "G1/N1 bind source realization and physical objective before calling any trajectory error a propagation error.",
+    "G2/N2 separate field/geometry transfer from time integration; G3 independently qualifies physical collision/thermal closure.",
+    "G4/N2,N3,N5 reuse existing independent tests and close only demonstrated numerical/event/SDE gaps with a small causal reference.",
+    "G4/N6,N7 make failed-run reproduction and per-ID/ensemble comparisons reusable through existing owners.",
+    "If qualified fixed-step cost or error is unacceptable, make one bounded N4 decision and replace the affected production strategy with qualified local accuracy control.",
+    "G6/P1 optimize measured end-to-end coordination/memory only at the same qualified physical accuracy. G5/P17 full 3D requires its separate source/geometry/coordinate/SDE reference and is not a numerical shortcut for this review."
+  ],
+  "primary_method_sources": [
+    {
+      "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html",
+      "used_for": "Independent external ODE oracle options, embedded method/error scaling and the documented limitation of sign-change-only events. Does not justify replacing the production event locator or adding a scipy production engine."
+    },
+    {
+      "url": "https://sundials.readthedocs.io/en/latest/cvode/Mathematics_link.html",
+      "used_for": "Reference documentation for separating error-control norms, local error tests and integration strategy. A prospective coupled controller still needs its own derivation, event path and physical qualification."
+    }
+  ],
+  "review_verdict": {
+    "core_algorithm_defect_proven_by_late_fine_pair_difference": false,
+    "production_accuracy_controller_present": false,
+    "fixed_step_method_replacement_required_now": false,
+    "independent_accuracy_and_physical_model_qualification_required": true,
+    "generic_first_action": "Bind sources and objective, qualify the selected coupled equations/field/event/SDE independently, then classify differences and decide whether case settings, preparation, physical core, numerical core or external tool must change.",
+    "limits": "This is a source-backed design review and proposal only. No new implementation, test pass, solve, error bound, runtime gain or validated future capability is claimed."
+  }
+}

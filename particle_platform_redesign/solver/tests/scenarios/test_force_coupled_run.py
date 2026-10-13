@@ -2069,7 +2069,7 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
         assert plan["planned_bytes"] <= plan["limit_bytes"]
 
     reference = results[1]
-    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v62"
+    assert reference.manifest["engine_algorithm_revision"] == "particle_engine_v64"
     assert reference.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert reference.manifest["geometry_algorithm_revision"] == (
         "line_boundary_capsule_contact_bvh_v8"
@@ -2569,7 +2569,7 @@ def test_constant_acceleration_surface_uses_the_first_nonzero_normal_derivative(
         [frame.velocity_m_s[0] for frame in frames],
         [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]],
     )
-    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v62"
+    assert result.manifest["engine_algorithm_revision"] == "particle_engine_v64"
     assert result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert result.manifest["event_algorithm_revision"] == (
         "line_quadratic_curved_capsule_periodic_first_hit_v23"

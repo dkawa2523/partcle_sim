@@ -1,0 +1,254 @@
+{
+  "date": "2026-10-14",
+  "work_package": "implementation_plan section 22 G3: leading collision qualification",
+  "completed_scope": "Independent 3D incident/surface/outgoing collision moment quadrature, conditional collision jump samples, and frozen compound-Poisson increment characterization.",
+  "interpretation_status": {
+    "current_finite_speed_mean": "PASS under the explicitly selected one-Maxwellian, spherical, heavy-particle, Maxwell-mixed, Tw=Tg assumptions.",
+    "first_and_second_collision_moments": "NUMERICALLY_CHECKED as an external research reference; not a released production noise model.",
+    "continuous_diffusion_approximation": "NOT_QUALIFIED for nonlinear trajectories, tails or wall first arrival. Frozen references show observable/velocity-scale dependence.",
+    "high_drift_thermophoresis": "NOT_SUPPORTED without the required incident-distribution/translational heat-flux closure.",
+    "physical_3D_stochastic_transport": "NOT_IMPLEMENTED by the current meridional 2DOF solver."
+  },
+  "source_motivation": {
+    "rows": 574,
+    "cases": "287 actual native t0 rows each for A/P; no native forces used as oracle.",
+    "assumptions": [
+      "Supplied effective one-pseudogas molecular mass; not species-resolved mixture truth.",
+      "sigma=0.9 is the selected candidate's Maxwell diffuse fraction.",
+      "Tw=Tg is an explicit assumed closure, not a measured/native evolved particle temperature.",
+      "The source has no initial phi velocity; the collision integral is 3D but no 3D particle trajectory was simulated."
+    ]
+  },
+  "numerical_ranges": {
+    "speed_ratio_S": [
+      0.353797436895557,
+      9.38356140715572
+    ],
+    "mass_ratio": [
+      0.00011071516452149898,
+      0.00011071516452149898
+    ],
+    "mean_residual_normalized": [
+      4.442489094688652e-15,
+      8.348232633708612e-13
+    ],
+    "gas_quadrature_mean_change_normalized": [
+      6.071401762741157e-15,
+      1.1926668523631336e-12
+    ],
+    "gas_quadrature_Q_change_relative_max": [
+      1.4356912718445088e-14,
+      1.2035993568873437e-12
+    ],
+    "Q_parallel_over_transverse": [
+      1.1777614685305364,
+      24.92736461843272
+    ],
+    "Q_parallel_over_linear_FDT": [
+      1.208604762795565,
+      478.3256983662002
+    ],
+    "Q_transverse_over_linear_FDT": [
+      1.0261880653164097,
+      19.188779306918743
+    ],
+    "Q_parallel_over_instantaneous_rate_FDT": [
+      1.1868451500077555,
+      97.18909209455647
+    ],
+    "Q_transverse_over_instantaneous_rate_FDT": [
+      1.0077126665457585,
+      3.8988915828947794
+    ],
+    "collision_rate_s_inv": [
+      11367650.452634612,
+      88103989.23803195
+    ],
+    "specular_only_recoil_mean_change_normalized": [
+      0.000004194093667423255,
+      0.000010482910063151344
+    ],
+    "specular_only_recoil_Q_change_relative_max": [
+      0.000017148365123682397,
+      0.00016407279958183555
+    ]
+  },
+  "independent_sampling": {
+    "selected_regimes": 3,
+    "conditional_jumps_each": 400000,
+    "frozen_intervals_each": 50000,
+    "initial_frozen_interval_s": 2.5e-7,
+    "max_mean_or_second_moment_discrepancy_in_estimated_SE": 1.4955945017960226
+  },
+  "distribution_examples": [
+    {
+      "label": "caseA_p134",
+      "collisions_per_0p25us": 2.841912613158653,
+      "skewness_0p25us": [
+        -0.5809331668608786,
+        -0.00029739753334064056,
+        0.003959843920404272
+      ],
+      "excess_kurtosis_0p25us": [
+        0.860379277124994,
+        0.8885347355757246,
+        0.8897617595779699
+      ],
+      "no_collision_atom": 0.058314027062023086,
+      "negative_3sigma_tail": [
+        0.00612,
+        0.00334,
+        0.00338
+      ],
+      "negative_3sigma_tail_Wilson95": [
+        [
+          0.005473309735338194,
+          0.00684257322193127
+        ],
+        [
+          0.0028710174589404447,
+          0.0038852926357332666
+        ],
+        [
+          0.002908014169545255,
+          0.003928289779266525
+        ]
+      ],
+      "gaussian_each_3sigma_tail": 0.0013498980316301035,
+      "generator_relative_error_at_particle_thermal_width": [
+        0.00017527673185888923,
+        0.0000826354696096871,
+        0.00009193497821739144
+      ],
+      "generator_relative_error_at_tenth_thermal_width": [
+        0.017027518461443594,
+        0.008248692098893007,
+        0.008284743191789118
+      ]
+    },
+    {
+      "label": "caseA_p254",
+      "collisions_per_0p25us": 5.316866493111065,
+      "skewness_0p25us": [
+        -0.5133148144990943,
+        -0.002581367349376227,
+        -0.00006910196122789344
+      ],
+      "excess_kurtosis_0p25us": [
+        0.2840829729131099,
+        0.5357394237753811,
+        0.5375253912498112
+      ],
+      "no_collision_atom": 0.0049081092484978515,
+      "negative_3sigma_tail": [
+        0.00514,
+        0.00226,
+        0.00294
+      ],
+      "negative_3sigma_tail_Wilson95": [
+        [
+          0.00455009378976367,
+          0.005805939741123118
+        ],
+        [
+          0.0018802782541554785,
+          0.002716197778790386
+        ],
+        [
+          0.002502103273426747,
+          0.0034542682798662802
+        ]
+      ],
+      "gaussian_each_3sigma_tail": 0.0013498980316301035,
+      "generator_relative_error_at_particle_thermal_width": [
+        0.0003798685414816833,
+        0.0000890553801706544,
+        0.00008257886273528261
+      ],
+      "generator_relative_error_at_tenth_thermal_width": [
+        0.03681018175501218,
+        0.008230412887532153,
+        0.008215846819392685
+      ]
+    },
+    {
+      "label": "caseA_p287",
+      "collisions_per_0p25us": 22.025997309507986,
+      "skewness_0p25us": [
+        -0.22410158362150234,
+        -0.006793884783530063,
+        0.0018067189941265392
+      ],
+      "excess_kurtosis_0p25us": [
+        0.05210854331472339,
+        0.476055694925239,
+        0.4767002310845914
+      ],
+      "no_collision_atom": 2.717883956661435e-10,
+      "negative_3sigma_tail": [
+        0.0031,
+        0.00282,
+        0.0027
+      ],
+      "negative_3sigma_tail_Wilson95": [
+        [
+          0.002649429080211857,
+          0.0036269178896334436
+        ],
+        [
+          0.002391837234315821,
+          0.003324552756563001
+        ],
+        [
+          0.002281780769930756,
+          0.0031946276585338614
+        ]
+      ],
+      "gaussian_each_3sigma_tail": 0.0013498980316301035,
+      "generator_relative_error_at_particle_thermal_width": [
+        0.004068828923446996,
+        0.0008603228532366985,
+        0.0008044688194885535
+      ],
+      "generator_relative_error_at_tenth_thermal_width": [
+        0.30567970482148227,
+        0.0760106882879691,
+        0.07621583977742857
+      ]
+    }
+  ],
+  "recoil_scope": "The measured recoil changes apply ONLY to the specular branch while the diffuse branch remains heavy/prescribed Tw. They do not qualify a full finite-recoil diffuse process or its energy balance.",
+  "particle_temperature_uncertainty": {
+    "status": "PRESCRIBED_Tw_EQUALS_Tg_ASSUMPTION_NOT_PHYSICAL_TEMPERATURE_VALIDATION",
+    "independent_heavy_kernel_heat_formula": "P_internal=sigma*n*pi*a^2*(m/2)*E[|g|*(|g|^2-4*kBTw/m)]. This is zero at zero slip/Tw=Tg and positive for the high-slip equal-temperature bath; finite-recoil/internal-state corrections are not qualified here.",
+    "maximum_initial_relative_kinetic_specific_energy_J_kg_approximate": 3070000,
+    "meaning": "Available relative kinetic energy before heat partition, not a computed particle temperature or a guaranteed heat deposit.",
+    "missing": ["Particle heat capacity and initial/internal temperature", "Surface energy accommodation and thermal boundary/heat-transfer closure"],
+    "consequence": "A disabled native particle-temperature calculation does not establish Tw=Tg. Do not infer a temperature rise without material/energy inputs or silently release a thermally self-consistent noise model."
+  },
+  "measured_cost": {
+    "seconds": 22.292590199998813,
+    "peak_traced_allocation_bytes": 132051029,
+    "scope": "Input parsing and numerical probes; final JSON/CSV writing excluded. Traced Python/NumPy allocations, not process RSS or production-engine memory."
+  },
+  "production_decision": {
+    "legitimate_now": "Use the existing deterministic finite-speed mean law under its stated assumptions and unchanged applicability gates. The independent reference found no concrete mean-law processing bug.",
+    "not_a_configuration_fix": "The current public catalog cannot combine finite-speed mean drag with the collision tensor computed here. Replacing gamma inside the existing scalar linear FDT is quantitatively wrong and cannot be repaired by a smaller timestep.",
+    "before_any_noise_selector": [
+      "Qualify the physical incident gas/species/surface-temperature/scattering closure.",
+      "Establish a nonlinear collision/jump trajectory reference and observable-specific diffusion-approximation error, including wall tails.",
+      "Select and verify an explicit Itô numerical rule with conditional increments, coupled state and same-method event residuals.",
+      "Complete physical axisymmetric-field Cartesian3D motion, or deliberately declare a constrained 2DOF reference problem."
+    ],
+    "thermophoresis_stop": "Missing/nonqualified high-drift distribution and translational thermal primitives remain an explicit limitation; do not omit or substitute an active native force silently.",
+    "algorithm_ownership": "This study does not demonstrate a new wall/integrator processing defect. The previously documented v64 support-enclosure fix is independent. Case P temporal/field accuracy remains a separate owner."
+  },
+  "primary_reference": {
+    "url": "https://arxiv.org/pdf/cond-mat/0401327",
+    "locator": "Section III, collision moments versus Fokker-Planck trajectory applicability",
+    "qualification": "The angular impulse reductions and numerical implementation are independently derived. A/Q agreement, PSD or low-speed FDT alone does not establish a high-speed diffusion law."
+  },
+  "quality_receipt": "quality_receipt.json",
+  "detailed_data": "actual_t0/qualification.json",
+  "all_source_rows": "actual_t0/moment_comparison.csv"
+}

@@ -1,0 +1,27 @@
+{
+  "production_engine": {
+    "revision": "particle_engine_v64",
+    "sha256": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3"
+  },
+  "preserved_native_sources": {
+    "caseA": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\comsol_10nm_speed10000_20261012_182133\\caseA_10nm_speed10000_stick50_reflect50.mph",
+      "sha256": "59555cfc4b16b23b6fa4cb58225b5ed373f234e01db416b2a909d6386007902d",
+      "bytes": 549938968
+    },
+    "caseP": {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\comsol_10nm_speed10000_20261012_182133\\caseP_10nm_speed10000_stick50_reflect50.mph",
+      "sha256": "5f2ee75071878b289799667437c3c951e0e175e295f1115cdb11061eb631c189",
+      "bytes": 550068195
+    }
+  },
+  "new_native_solve": false,
+  "new_production_physics_or_schema": false,
+  "native_original_solver_parity": "NOT_TESTED",
+  "canonical_payload_parity": "PASS: all scientific source/field/geometry/boundary arrays retained",
+  "native_domain_anchor_authenticity": "UNRESOLVED: retained caller scope text and previous canonical geometry checks do not independently authenticate native domain exclusivity",
+  "domain_scope_owner": "Existing native inspection/preparation; adapter records text and validates a numerical nodal bijection, not native authenticity",
+  "physical_scope": "Prescribed Tw=Tg, one-effective-Maxwellian, deterministic finite-speed mean and constrained meridional 2DOF; physical nonlinear noise, high-drift thermophoresis, temperature and physical3D are not qualified",
+  "numerical_scope": "Genuine .5/.25/.125us RK4 empirical step sensitivity; no rigorous error bound or native precision target",
+  "model_input_limits": "Initial native frame meaning and particle material/thermal energy accommodation remain unresolved; numeric initial vectors are transferred exactly"
+}

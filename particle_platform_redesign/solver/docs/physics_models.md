@@ -1056,13 +1056,27 @@ COMSOL記載の`1.17,1.146,2.2`を選ぶ場合はcoefficient variantとして扱
 径Knで同じ式を表すには`Cm_d=2*Cm_R`、`Ct_d=2*Ct_R`が必要だが、productionは半径Knの一経路だけを持つ。
 旧径Kn revisionは拒否し、自動変換や旧checkpointの再解釈はしない。
 
-原著のmean free pathは粘性基準`lambda=2*mu/(rho*c_bar)`である。producerはこの定義に対応するprimitiveを
-用意する。coreはsample済みlambdaを変更せず、Knを計算する。prefactorの`12*pi*a`は`6*pi*d_drag`と同値で、
+原著のmean free pathは粘性基準`lambda_old=2*mu/(rho*c_bar)`であり、原著係数を未換算で使うproducerは
+この定義に対応するprimitiveを用意する。他のmodelと一つの`lambda_common`を共有する場合、選択した全domain・時刻で
+`alpha=lambda_old/lambda_common`が一定である根拠を持つ時だけ、caseの明示係数を
+`Cm_common=alpha*Cm_old`、`Ct_common=alpha*Ct_old`、`Cs_common=Cs_old`とすることで同じ力式を表せる。
+これは`Cm*Kn`、`Ct*Kn`を保存する入力規約換算であり、fitでも別物理modelでもない。両規約、比の根拠と元・換算係数を
+producer provenanceへ残し、point-forceを独立に確認する。例えば同じ`mu,rho,c_bar`から
+`lambda_common=mu/(0.491*rho*c_bar)`を作る場合だけ`alpha=0.982`となる。Allen–Raabeの校正`lambda0`を含む
+実際の温度・圧力lawでもこの比が一定か別に確認し、0.982を汎用defaultにしない。比が空間・時間で変わる場合、現在の
+scalar係数では原式を全域で保存できず、明示した近似または非対応scopeとして扱う。coreはsample済みlambdaを変更せず、
+Knを計算する。prefactorの`12*pi*a`は`6*pi*d_drag`と同値で、
 mass、electrostatic半径、contact半径をdrag径から再構成しない。
 
 必須fieldはtemperature `[K]`、temperature gradient `[K/m]`、density `[kg/m^3]`、dynamic viscosity `[Pa*s]`、
 gas thermal conductivity `[W/(m*K)]`、mean free path `[m]`で、particle thermal conductivity
-`[W/(m*K)]`はcase scalarである。gradientはproducerが同じ温度solutionと明示した回復規則から形成し、coreは温度を
+`[W/(m*K)]`はcase scalarである。原著の理論背景の脚注は多原子気体の`k_g`に並進熱伝導率を指定するため、原著再現には
+`gas_thermal_conductivity_field`をその意味で用意する。単純な希薄気体のkinetic closure
+`k_tr=(15/4)*mu*(k_B/m_molecule)`による再構成もproducer側の仮定・適用域・誤差を明示して行い、混合気体の汎用ruleには
+しない。[COMSOL Thermophoretic Force](https://doc.comsol.com/6.4/doc/com.comsol.help.particle/particle_ug_fluid_flow.08.48.html)
+等のnative式が全熱伝導率を使う場合、そのnative式の再現と原著Talbotの再現を区別する。coreは正の入力conductivityを
+そのまま式へ使い、並進成分を推定しない。material property名だけで両者を等価と呼ばず、実際のfield定義とmodel-form差を
+provenanceへ残す。gradientはproducerが同じ温度solutionと明示した回復規則から形成し、coreは温度を
 微分しない。gradientは有限値、scalar primitiveと係数は有限正値に限定し、XY/RZ basisのgradientを
 stage位置・時刻でsampleする。
 

@@ -1,0 +1,33 @@
+{
+  "source_bindings": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_speed10000_comparison_2026_10_13\\original_comparison\\native\\caseA_saved_states_0_to_200us_normalized.csv",
+      "sha256": "b5675b63330d67a425d7d1fbbd05b35614548fa205f4b725537845edd000342d"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_speed10000_comparison_2026_10_13\\original_comparison\\native\\caseA_native_force_coefficients_normalized.csv",
+      "sha256": "c6ae8a1d1aaf40692f13cfee2a538abba70b2d23a3a6e28c261e25349b3e7189"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_speed10000_comparison_2026_10_13\\original_comparison\\native\\caseP_saved_states_0_to_200us_normalized.csv",
+      "sha256": "0ee70a10a2b1cfbe8e8e5e8a36e7f97e1e835c43fa640eb0438de74cca4dfed1"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\comsol_speed10000_comparison_2026_10_13\\original_comparison\\native\\caseP_native_force_coefficients_normalized.csv",
+      "sha256": "6f6318f9d39fd0e4e85d934c16ceb10ba76725fbf1ce77401d4dc403c4d426dd"
+    }
+  ],
+  "rows": 574,
+  "jump_labels": [
+    "caseA_p134",
+    "caseA_p254",
+    "caseA_p287"
+  ],
+  "assumptions": [
+    "One supplied pseudogas, not species-resolved CF4/O2 truth.",
+    "sigma=.9 copied from the selected Maxwell mixed mean law.",
+    "Tw=Tg is a candidate model assumption, not a native measured particle temperature.",
+    "The native source is 2DOF r/z; no phi velocity is supplied.",
+    "Source rows motivate the regime; COMSOL force values are not the oracle."
+  ]
+}

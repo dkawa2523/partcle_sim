@@ -1,0 +1,302 @@
+{
+  "completed_at_utc": "2026-10-13T18:09:55.599649+00:00",
+  "scope": "Design, scoped skill update and read-only saved initial-condition arithmetic. No new simulation, native solve or production implementation.",
+  "changed_current_documents": [
+    {
+      "path": ".agents/skills/inspect-comsol-model/SKILL.md",
+      "sha256": "e92a029d76e482e36da6cebd0db68a21fe66384626d74f9e3bc7a87545d8349d"
+    },
+    {
+      "path": ".agents/skills/inspect-comsol-model/references/particle-semantics.md",
+      "sha256": "5941208712c2ab9f0dcb08dac8865cf436d5d5468becf2989447b31fd2e3b97c"
+    },
+    {
+      "path": ".agents/skills/prepare-comsol-field-case/SKILL.md",
+      "sha256": "8f0525d2f509c022bd9ebff3909dc5c2f4964dc5d9d5fbaaf5176e63cfda0afe"
+    },
+    {
+      "path": ".agents/skills/prepare-comsol-field-case/references/initial-conditions.md",
+      "sha256": "5ab37cfe4b01c86d60c06b27f7402d723404d485022d65197d0b67ba3f0432a6"
+    },
+    {
+      "path": ".agents/skills/validate-comsol-trajectories/references/evaluation-and-attribution.md",
+      "sha256": "6d704848a9cbed08eb6652d4801303d97e3c2b6e8824eee2100594de16cd8a67"
+    },
+    {
+      "path": "particle_platform_redesign/implementation_plan.md",
+      "sha256": "4f9486114bf7f488b6f42f9a58d8c2cc6f72f6f0e1dc4a16ea87d84aad150536"
+    },
+    {
+      "path": "particle_platform_redesign/technical_research.md",
+      "sha256": "d462f837961ed3f3e6899b6432dcd8a6f7eb104799afadaaa4ede1a3eddc478f"
+    },
+    {
+      "path": "particle_platform_redesign/solver/docs/decisions.md",
+      "sha256": "ee85acd5078803252c2b71e5abe2cb27627fb9cafea4c9c6539de1020cb68c68"
+    },
+    {
+      "path": "particle_platform_redesign/solver/docs/case_format_v3.md",
+      "sha256": "a77b94e5e6634c2b6cc7bce20ee83a439b517d5d49a69912d3769e9752601129"
+    }
+  ],
+  "json_artifacts": [
+    {
+      "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/field_adapter_design.json",
+      "sha256": "7499771e572f1c0708278b638a2a20f7b6eaa605e2c882f9c045ff80bfffb703"
+    },
+    {
+      "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/initial_condition_audit.json",
+      "sha256": "6bb93b5577edf43a661b4f8521a75e845349bf8b7251c25f904f54865d84bd23"
+    },
+    {
+      "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/numerical_vv_design.json",
+      "sha256": "81ad098bbc193ec10b7d8d2ac4f5824753bc4cb1ef9613abd669f2efdd7220e8"
+    },
+    {
+      "path": "particle_platform_redesign/analysis/generic_improvement_2026_10_14/physics_design.json",
+      "sha256": "38b4d6872974fa2c80549deac974dd3699d51a6ffe378162a046ce95e06af449"
+    }
+  ],
+  "local_markdown_link_check": {
+    "checked": 79,
+    "missing": []
+  },
+  "bound_production_sources": {
+    "checked": 20,
+    "unique_files": 16,
+    "all_match": true,
+    "checks": [
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py",
+        "expected": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+        "observed": "32f7014571ac2799cf06bcf2f086e3f53a02b123e61142d4bd6c34d49c5405d5",
+        "match": true
+      },
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+        "expected": "b1511fcf1b3e12b7d5b21e829ef52c518fe5eca8045bdeec9c28851a95845f7c",
+        "observed": "b1511fcf1b3e12b7d5b21e829ef52c518fe5eca8045bdeec9c28851a95845f7c",
+        "match": true
+      },
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/physics/compiled.py",
+        "expected": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+        "observed": "1400bcf083e494246bb0a2c834e1576e96f3133d6899e0e8ebd56c24c1f01358",
+        "match": true
+      },
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/physics/forces.py",
+        "expected": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+        "observed": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+        "match": true
+      },
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/physics/charge.py",
+        "expected": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+        "observed": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+        "match": true
+      },
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/stochastic.py",
+        "expected": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+        "observed": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+        "match": true
+      },
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/engine.py",
+        "expected": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+        "observed": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+        "match": true
+      },
+      {
+        "owner": "physics_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/integrators.py",
+        "expected": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d",
+        "observed": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d",
+        "match": true
+      },
+      {
+        "owner": "field_adapter_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/fields.py",
+        "expected": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f",
+        "observed": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f",
+        "match": true
+      },
+      {
+        "owner": "field_adapter_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/case_format.py",
+        "expected": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+        "observed": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+        "match": true
+      },
+      {
+        "owner": "field_adapter_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/geometry.py",
+        "expected": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+        "observed": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+        "match": true
+      },
+      {
+        "owner": "field_adapter_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/topology.py",
+        "expected": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+        "observed": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/integrators.py",
+        "expected": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d",
+        "observed": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/engine.py",
+        "expected": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+        "observed": "b0a0599d437f841607c0b72d421b3854d5f67617a2782bc5b48d581c9dd7e0a3",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/fields.py",
+        "expected": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f",
+        "observed": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/cpu.py",
+        "expected": "bc2b64bb401e96d5f3aca6c3df84bd84c4a1ec01b782ad905b03a1d9d4fa66fb",
+        "observed": "bc2b64bb401e96d5f3aca6c3df84bd84c4a1ec01b782ad905b03a1d9d4fa66fb",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/output.py",
+        "expected": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+        "observed": "1dfb285e62dffaa2ae38065797ccc44742dc80e42a72adf0fdb054b81bfcc94d",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/stochastic.py",
+        "expected": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+        "observed": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/rng.py",
+        "expected": "fff6f67cf1dc1243fb20f9221103f0c339e62280be0a7ea90640614016feb0ba",
+        "observed": "fff6f67cf1dc1243fb20f9221103f0c339e62280be0a7ea90640614016feb0ba",
+        "match": true
+      },
+      {
+        "owner": "numerical_vv_design.json",
+        "path": "particle_platform_redesign/solver/src/chamber_particles/events.py",
+        "expected": "4d3eb12273419ab97cc12b9b8e6f8f6d03076ab37a34dbc1b567f586073348f7",
+        "observed": "4d3eb12273419ab97cc12b9b8e6f8f6d03076ab37a34dbc1b567f586073348f7",
+        "match": true
+      }
+    ]
+  },
+  "other_snapshot_bindings": {
+    "physics_checked": 15,
+    "all_match": true,
+    "changed_artifact_snapshots": []
+  },
+  "initial_condition_audit": "Public load_case source readback and independent expression arithmetic completed for A/P 287 IDs each. No historical RNG/frame or physical-population validity certification.",
+  "independent_reviews": [
+    {
+      "agent": "original_native_rhs_plan",
+      "scope": "field/geometry/canonical/adapter source investigation",
+      "verdict": "proposal completed; no immediate H5v3 change needed; representation upgrades conditional"
+    },
+    {
+      "agent": "original_model_mapping",
+      "scope": "physics source investigation and technical_research section12",
+      "verdict": "PASS after direction-free g=0 Q correction; nonlinear SDE remains qualification research"
+    },
+    {
+      "agent": "original_comparison_metrics",
+      "scope": "numerics/integrator/event/performance investigation and implementation_plan section22",
+      "verdict": "review corrections applied: regular vs unstructured mesh gate, event identity vs time, centered-axis Rayleigh, P17 future version and reuse"
+    },
+    {
+      "agent": "source_skill_forward_review",
+      "scope": "fresh-context use of inspect/prepare with raw native inventory, source probes, saved t0 and canonical cases; excluded new audit/design answers",
+      "verdict": "Source selectors/formula/value interpretation successful; x/v/Z replay exact. Frame/history limitations retained; focused-source scope clarified in inspect skill"
+    }
+  ],
+  "checks": {
+    "skill_quick_validate": [
+      "inspect-comsol-model PASS UTF8",
+      "prepare-comsol-field-case PASS UTF8",
+      "validate-comsol-trajectories PASS UTF8"
+    ],
+    "audit_script_ruff": "PASS",
+    "audit_script_pyrefly": "0 errors isolated basic preset; not full production project gate",
+    "audit_script_radon": "max CC13; Python module invocation succeeded after executable launcher unavailable",
+    "full_core_suite": "not rerun: production unchanged in this design turn"
+  },
+  "implementation_state": "All G1-G6 planned. Existing v64 enclosure correction predates this design turn; source hash matches reviewed baseline. Existing unrelated working-tree changes were retained.",
+  "external_tool_bindings": [
+    {
+      "owner": "field_adapter_design.json",
+      "path": "particle_platform_redesign/solver/tools/comsol_adapter/workflow.py",
+      "expected": "a523c49ef3ab20b7b0887ad48e6fcecff994fc2e41ede9e1d54a66ca3519e0c9",
+      "observed": "a523c49ef3ab20b7b0887ad48e6fcecff994fc2e41ede9e1d54a66ca3519e0c9",
+      "match": true
+    },
+    {
+      "owner": "field_adapter_design.json",
+      "path": "particle_platform_redesign/solver/tools/electrostatic_builder/workflow.py",
+      "expected": "4aeec7b7cf11e29fadf1b74de241bd08140bd5cc6a2ef3f13b737513e9d821dc",
+      "observed": "4aeec7b7cf11e29fadf1b74de241bd08140bd5cc6a2ef3f13b737513e9d821dc",
+      "match": true
+    },
+    {
+      "owner": "field_adapter_design.json",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/meaning_preflight.py",
+      "expected": "37e7c149e4ea1bfae5c6fa97cedbf6c4b4a8abf5fdd1afbc3f2815c1aa05be0b",
+      "observed": "37e7c149e4ea1bfae5c6fa97cedbf6c4b4a8abf5fdd1afbc3f2815c1aa05be0b",
+      "match": true
+    },
+    {
+      "owner": "field_adapter_design.json",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/evaluate_m3c1_field_localization.py",
+      "expected": "6a6e6470ccbe0a812d2e12a8350507a49b3c5015de8f3ced35fb7d6d1c79a9ce",
+      "observed": "6a6e6470ccbe0a812d2e12a8350507a49b3c5015de8f3ced35fb7d6d1c79a9ce",
+      "match": true
+    },
+    {
+      "owner": "field_adapter_design.json",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/prepare_comsol_p1_tables.py",
+      "expected": "872f3f47dbce78cd07b795d47a8cbec85190a3a8e6a85dd44d7725bb86c369ed",
+      "observed": "872f3f47dbce78cd07b795d47a8cbec85190a3a8e6a85dd44d7725bb86c369ed",
+      "match": true
+    },
+    {
+      "owner": "field_adapter_design.json",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/prepare_m3c1_common_p1_tables.py",
+      "expected": "d118c2b735317a211fe999558f2641ba09d263c5ea53605b85c3f18cf8da02df",
+      "observed": "d118c2b735317a211fe999558f2641ba09d263c5ea53605b85c3f18cf8da02df",
+      "match": true
+    },
+    {
+      "owner": "field_adapter_design.json",
+      "path": "particle_platform_redesign/solver/tools/vv/comsol/evaluate_curved_wall_line2_convergence.py",
+      "expected": "0489bde39c2b3db5c6fb3e2c47995c79faf02759bc9ec065dc20acbc72af386b",
+      "observed": "0489bde39c2b3db5c6fb3e2c47995c79faf02759bc9ec065dc20acbc72af386b",
+      "match": true
+    }
+  ]
+}

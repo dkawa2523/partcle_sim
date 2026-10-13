@@ -1,0 +1,3 @@
+interface:
+  display_name: "Inspect COMSOL Model"
+  short_description: "Discover COMSOL equations, data, and reuse evidence"

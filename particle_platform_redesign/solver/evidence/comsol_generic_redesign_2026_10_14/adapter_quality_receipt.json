@@ -1,0 +1,42 @@
+{
+  "completed_utc": "2026-10-13T18:37:33.112753+00:00",
+  "scope": "G2 selected-field adapter implementation and controlled A/P conversion; no COMSOL native invocation or trajectory execution by this agent.",
+  "adapter_revision": "comsol_selected_nodal_csv_adapter_v3",
+  "canonical_schema_revision": "H5v3 unchanged",
+  "implementation_file_sha256": {
+    "tools\\comsol_adapter\\workflow.py": "sha256:10781ae42bb94a3cdce889032d2ca211a09b08275eeccc026a7de493cce10a3e",
+    "tools\\comsol_adapter\\tests\\test_adapter.py": "sha256:a4684c8a7ba6254abe36ea0e9cb37cb4f6ca2364f87dbec1096fae11e23e5c60",
+    "tools\\comsol_adapter\\cases\\f02_case_a_100nm.yaml": "sha256:f9f1fc27add1f5f4aae6b35061e502753faf0ab461ba8a31a054cf535f267ecc",
+    "tools\\comsol_adapter\\README.md": "sha256:f5544f723404a5b0d2701c3eb2d2f9b327e87466df9230f2586fad099d0d39cd",
+    "tools\\comsol_adapter\\__init__.py": "sha256:df139263115d4bd92cd9021098224d1e81807c8c811dcd08bdaf614be2bf91cb"
+  },
+  "checks": {
+    "ruff_format": "PASS",
+    "ruff_check": "PASS",
+    "pyrefly_targeted": "PASS; 0 errors (7 warnings not shown)",
+    "adapter_and_electrostatic_builder_tests": "PASS;35tests",
+    "git_diff_check": "PASS",
+    "radon": "New functions CC<=10; whole existing adapter max15; no new diagnostic framework"
+  },
+  "independent_numerical_checks": [
+    "XY affine electric vector evaluated off-node with negative x, kV/m to V/m scale and degC to K offset",
+    "RZ vector component/axis source values retained or changed only by explicit transform",
+    "Scoped node IDs prove coverage and coordinates; duplicate/probe IDs are rejected",
+    "Outside-domain partially finite values are tolerated; inside-domain missing values are rejected",
+    "Explicit finite-domain witness resolves old side duplicates; surviving ambiguous coordinates are rejected",
+    "Explicit domain ID column selects the correct owner at equal coordinates"
+  ],
+  "external_acceptance": {
+    "caseA": "evidence\\comsol_generic_redesign_2026_10_14\\caseA\\adapter\\conversion_parity_receipt.json",
+    "caseP": "evidence\\comsol_generic_redesign_2026_10_14\\caseP\\adapter\\conversion_parity_receipt.json"
+  },
+  "actual_A_P_selected_field_count": 16,
+  "limitations": [
+    "Static node-associated single-domain XY/RZ P1 only",
+    "No native FE mesh convergence or trajectory parity certified by conversion",
+    "Per-export recovery/member gaps remain explicitly recorded; native source probes do not certify all off-node values",
+    "Axis transformation changes P1 values in incident cells and remains a declared model reduction",
+    "Time snapshots, cell/one-sided discontinuities, moving/remeshed geometry and domain unions require their own future qualified owner change"
+  ],
+  "tool_invocation_note": "Windows application policy blocked pytest/radon executable wrappers; identical locked Python modules were invoked with uv run --locked python -m pytest / radon."
+}

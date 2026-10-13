@@ -1,0 +1,3 @@
+# These design-review receipts bind exact producer bytes, including CRLF.
+# Keep their hashes stable in Git and recognize CR as a line ending.
+*.json -text -eol diff merge whitespace=trailing-space,space-before-tab,cr-at-eol

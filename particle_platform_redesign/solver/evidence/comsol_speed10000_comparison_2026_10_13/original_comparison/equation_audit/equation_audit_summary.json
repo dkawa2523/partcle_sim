@@ -1,0 +1,1821 @@
+{
+  "schema_version": 1,
+  "scope": "Frozen-state postprocessed original native equations, 0..200us active saved states and actual native t0 source primitives. No trajectory recomputation, native edit, or core edit.",
+  "roundoff_equation_target_over_fixed_native_cohort_scale": 1e-12,
+  "law_model_effect_meaning": "Candidate constitutive law with production constants minus original native force at identical realized t0 state/native primitives. It contains declared drag substitution and thermophoresis omission; small constant differences are separately identified.",
+  "field_transfer_effect_meaning": "Same candidate law and production constants at identical native t0 states, candidate P1 primitive evaluation minus direct native primitive evaluation.",
+  "native_source": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/native_rhs_checks.json",
+    "sha256": "293370178262b07cbc52591c1f39b9052351b44f9383b35ec1506e989aa38f1d",
+    "bytes": 150886
+  },
+  "native_fundamental_constant_source": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/native_readback.jsonl",
+    "sha256": "631bcb483aced2f95b887b99e0b95206d03f77e9a8f4b7b9394dd4b506b56e39",
+    "bytes": 815025
+  },
+  "executor": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/equation_audit.py",
+    "sha256": "d218aa5667bc72344bb1b575c80859199c8be90819795e9e2b22b1c028b3f6d7",
+    "bytes": 34777
+  },
+  "uv_lock": {
+    "path": "particle_platform_redesign/solver/uv.lock",
+    "sha256": "3d17596b3c607649fe60ab2f3caed85aac25f4820d2cd6d54aa2eabc65cc3281",
+    "bytes": 40452
+  },
+  "pure_formula_owners": [
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/forces.py",
+      "sha256": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+      "bytes": 133844
+    },
+    {
+      "path": "particle_platform_redesign/solver/src/chamber_particles/physics/charge.py",
+      "sha256": "634a684eabe87dae33c983dafd51e7fec9ad44a14837ba8a0b8186cd385f7405",
+      "bytes": 76440
+    }
+  ],
+  "python": {
+    "executable": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Scripts\\python.exe",
+    "version": "3.12.13 (main, May 10 2026, 19:35:37) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "cases": {
+    "caseA": {
+      "source_bindings": {
+        "saved_states_0_to_200us": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseA_saved_states_0_to_200us_normalized.csv",
+          "sha256": "b5675b63330d67a425d7d1fbbd05b35614548fa205f4b725537845edd000342d",
+          "bytes": 1232435
+        },
+        "deterministic_force_components": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseA_deterministic_force_components_normalized.csv",
+          "sha256": "3576021994ddc89f42bfcef5ab27acce0ac9db8d050c7a3ef1e2305e42e6633b",
+          "bytes": 1927802
+        },
+        "native_force_coefficients": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseA_native_force_coefficients_normalized.csv",
+          "sha256": "c6ae8a1d1aaf40692f13cfee2a538abba70b2d23a3a6e28c261e25349b3e7189",
+          "bytes": 2150148
+        },
+        "charge_rate": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseA_charge_rate_normalized.csv",
+          "sha256": "18e382baf8083ef1d4488472c247a341ce766f57f9bfffd689400d789d1edc53",
+          "bytes": 227283
+        }
+      },
+      "native_primitive_binding": {
+        "file": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/caseA_primitive_probes.json",
+          "sha256": "4952fdcaa34974db505b588f1bdfc2f4082434d9a312981af447673f1fae6a88",
+          "bytes": 311612
+        },
+        "coordinate_maximum_difference_m": 5.551115123125783e-17,
+        "point_ids_match_saved_source": true
+      },
+      "native_Waldmann_PPR_binding": {
+        "file": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseA_native_Waldmann_heat_flux_t0_normalized.csv",
+          "sha256": "c61cff3ae5e9953c04aa68b91bf6c64c0466b10d3ba6f55ac110334ef4ff564e",
+          "bytes": 31179
+        },
+        "native_thermal_receipt": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/native_thermal_receipt.json",
+          "sha256": "5d6d7e5942c246bc24d72d2df13b4595b33357265e3398a35d79039da07d28ff",
+          "bytes": 5514
+        },
+        "native_thermal_checks": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/native_thermal_checks.json",
+          "sha256": "bd97d9a875d6702b12924799d959537ad64de133d8a04059e2f56a6f10f5aab4",
+          "bytes": 12013
+        },
+        "heat_flux_SI_derivation": "Native accepted \u03ba [W/(m K)] times native accepted pprint temperature gradient [K/m]; original isotropic \u03ba diagonal, zero cross terms. Direct heatflux bracket API unit was blank and is not silently treated as an accepted readback.",
+        "heat_flux_product_vs_native_bracket": {
+          "observations": 287,
+          "unit": "W/m^2",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 127.42621439536464,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        }
+      },
+      "candidate_binding": {
+        "case": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseA/prepared/full_h0p25us.yaml",
+          "sha256": "f2b85ae209a99656936e5755ed3c23f71f7c1887027c4cb90f26d480d173640e",
+          "bytes": 6752
+        },
+        "input": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseA/prepared/candidate_input.h5",
+          "sha256": "dd0bf6f0716032ee6bf2bd81ae083b87d6314a84f3ef8496fd78aed134a78cc5",
+          "bytes": 720571
+        },
+        "logical_content_hash": "sha256:f5dff4c33219b9f79ec58a858f138a13f3f36862860bfe1108944bac8698cad3",
+        "support_all_source_points": true,
+        "canonical_position_velocity_charge_diameter_mass_release_electrostatic_radius_exact_native_identity": true,
+        "cell_ids": [
+          2493,
+          2571,
+          2572,
+          2643,
+          2723,
+          2723,
+          2810,
+          2491,
+          2569,
+          2570,
+          2642,
+          2721,
+          2721,
+          2807,
+          2491,
+          2569,
+          2570,
+          2642,
+          2721,
+          2722,
+          2807,
+          2492,
+          2569,
+          2570,
+          2641,
+          2722,
+          2722,
+          2808,
+          2501,
+          2579,
+          2580,
+          2652,
+          2719,
+          2719,
+          2806,
+          2501,
+          2579,
+          2580,
+          2651,
+          2719,
+          2720,
+          2805,
+          2501,
+          2579,
+          2579,
+          2651,
+          2720,
+          2720,
+          2805,
+          2581,
+          2653,
+          2654,
+          2732,
+          2753,
+          2754,
+          2803,
+          2581,
+          2653,
+          2654,
+          2731,
+          2753,
+          2754,
+          2803,
+          82,
+          95,
+          125,
+          124,
+          162,
+          161,
+          191,
+          109,
+          136,
+          166,
+          164,
+          205,
+          205,
+          204,
+          172,
+          170,
+          209,
+          208,
+          207,
+          256,
+          255,
+          168,
+          210,
+          210,
+          258,
+          258,
+          258,
+          327,
+          143,
+          177,
+          212,
+          259,
+          259,
+          327,
+          327,
+          179,
+          216,
+          218,
+          264,
+          264,
+          328,
+          328,
+          214,
+          214,
+          262,
+          262,
+          331,
+          331,
+          330,
+          189,
+          220,
+          227,
+          267,
+          329,
+          329,
+          335,
+          225,
+          226,
+          271,
+          272,
+          336,
+          337,
+          337,
+          268,
+          269,
+          270,
+          339,
+          340,
+          340,
+          436,
+          277,
+          278,
+          338,
+          338,
+          435,
+          435,
+          435,
+          280,
+          280,
+          349,
+          349,
+          435,
+          446,
+          446,
+          279,
+          282,
+          350,
+          354,
+          354,
+          447,
+          447,
+          235,
+          284,
+          352,
+          352,
+          354,
+          447,
+          449,
+          274,
+          283,
+          353,
+          353,
+          445,
+          445,
+          448,
+          276,
+          346,
+          346,
+          445,
+          445,
+          445,
+          445,
+          275,
+          348,
+          348,
+          442,
+          442,
+          444,
+          545,
+          287,
+          345,
+          357,
+          443,
+          443,
+          453,
+          453,
+          286,
+          356,
+          356,
+          357,
+          453,
+          453,
+          452,
+          285,
+          358,
+          358,
+          358,
+          450,
+          450,
+          452,
+          343,
+          355,
+          355,
+          440,
+          451,
+          451,
+          544,
+          342,
+          342,
+          440,
+          440,
+          440,
+          451,
+          544,
+          344,
+          344,
+          439,
+          439,
+          441,
+          541,
+          543,
+          341,
+          412,
+          438,
+          441,
+          441,
+          541,
+          541,
+          412,
+          412,
+          438,
+          520,
+          520,
+          542,
+          542,
+          411,
+          421,
+          519,
+          520,
+          520,
+          520,
+          620,
+          421,
+          421,
+          519,
+          519,
+          519,
+          529,
+          621,
+          420,
+          420,
+          528,
+          529,
+          529,
+          529,
+          621,
+          423,
+          423,
+          528,
+          528,
+          528,
+          528,
+          621,
+          422,
+          422,
+          528,
+          530,
+          530,
+          530,
+          627,
+          424,
+          424,
+          525,
+          525,
+          530,
+          530,
+          627,
+          416,
+          418,
+          526,
+          526,
+          526,
+          625,
+          629
+        ]
+      },
+      "native_constants": {
+        "rho_p*pi*d0^3/6": 1.1519173063162575e-21,
+        "d0/2": 5e-09,
+        "Mmix/N_A_const": 1.275347140839664e-25,
+        "e_const": 1.602176634e-19,
+        "epsilon0_const": 8.854187818826713e-12,
+        "k_B_const": 1.380649e-23,
+        "me_const": 9.109383713928e-31,
+        "N_A_const": 6.02214076e+23,
+        "R_const": 8.31446261815324,
+        "g_const": 9.80665
+      },
+      "constant_differences": {
+        "epsilon0_native": 8.854187818826713e-12,
+        "epsilon0_candidate": 8.8541878128e-12,
+        "electron_mass_native": 9.109383713928e-31,
+        "electron_mass_candidate": 9.1093837139e-31
+      },
+      "all_saved_active_checks": {
+        "drag": {
+          "observations": 5764,
+          "unit": "N",
+          "maximum_absolute_difference": 1.5777218104420236e-30,
+          "RMS_difference": 1.3752715218680286e-31,
+          "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+          "maximum_difference_over_fixed_native_scale": 2.7114339655637196e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "electric": {
+          "observations": 5764,
+          "unit": "N",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 2.3867756947233353e-14,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "gravity": {
+          "observations": 5764,
+          "unit": "N",
+          "maximum_absolute_difference": 3.009265538105056e-36,
+          "RMS_difference": 8.452494161400866e-37,
+          "native_cohort_maximum_absolute_scale": 1.1296449665259823e-20,
+          "maximum_difference_over_fixed_native_scale": 2.663903816930646e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "beta_coefficient": {
+          "observations": 5764,
+          "unit": "kg/s",
+          "maximum_absolute_difference": 1.1555579666323415e-33,
+          "RMS_difference": 3.3261490045269216e-34,
+          "native_cohort_maximum_absolute_scale": 2.5345241350908447e-18,
+          "maximum_difference_over_fixed_native_scale": 4.559269926190396e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "uncorrected_response_time": {
+          "observations": 5764,
+          "unit": "s",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 6.875230409532359e-10,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "Brownian_variance_times_timestep": {
+          "observations": 5764,
+          "unit": "N^2 s",
+          "maximum_absolute_difference": 1.566073072319646e-53,
+          "RMS_difference": 3.935807668352385e-54,
+          "native_cohort_maximum_absolute_scale": 2.709309110377719e-38,
+          "maximum_difference_over_fixed_native_scale": 5.780341070426296e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "Brownian_effective_viscosity": {
+          "observations": 5764,
+          "unit": "Pa s",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 2.6892136299027907e-11,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        }
+      },
+      "source_equation_checks": {
+        "drag": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 7.888609052210118e-31,
+          "RMS_difference": 1.7555280804919433e-31,
+          "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+          "maximum_difference_over_fixed_native_scale": 1.3557169827818598e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "gravity": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 3.009265538105056e-36,
+          "RMS_difference": 7.404265274083207e-37,
+          "native_cohort_maximum_absolute_scale": 1.129644955724193e-20,
+          "maximum_difference_over_fixed_native_scale": 2.663903842403187e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "electric": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 3.857722716808697e-15,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "DEP": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 1.1935286401773212e-24,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "lift": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 1.925929944387236e-34,
+          "RMS_difference": 1.7831037328134582e-35,
+          "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+          "maximum_difference_over_fixed_native_scale": 1.0995891174784652e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "ion_drag": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 9.62964972193618e-35,
+          "RMS_difference": 1.7758287690098233e-35,
+          "native_cohort_maximum_absolute_scale": 3.018933672458867e-19,
+          "maximum_difference_over_fixed_native_scale": 3.189752000776156e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "charge_rate": {
+          "observations": 287,
+          "unit": "1/s",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 84518.29886594499,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "thermophoresis": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 9.244463733058732e-33,
+          "RMS_difference": 1.7852013403164506e-33,
+          "native_cohort_maximum_absolute_scale": 2.3569726361009644e-17,
+          "maximum_difference_over_fixed_native_scale": 3.922176944892937e-16,
+          "roundoff_equation_check": "PASS"
+        }
+      },
+      "selected_pure_catalog_vs_independent_formula_checks": {
+        "charge_rate_independent_formula_vs_selected_pure_catalog": {
+          "observations": 287,
+          "unit": "1/s",
+          "maximum_absolute_difference": 4.547473508864641e-13,
+          "RMS_difference": 2.910666815675748e-14,
+          "native_cohort_maximum_absolute_scale": 84518.29886190448,
+          "maximum_difference_over_fixed_native_scale": 5.380460290965884e-18,
+          "roundoff_equation_check": "PASS"
+        },
+        "ion_drag_independent_formula_vs_selected_pure_catalog": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 7.222237291452134e-35,
+          "RMS_difference": 1.6524039229692446e-35,
+          "native_cohort_maximum_absolute_scale": 3.0189336724686974e-19,
+          "maximum_difference_over_fixed_native_scale": 2.392314000574327e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "all_source_applicability_passed": true
+      },
+      "source_model_and_transfer_effects": {
+        "drag": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.2818891043511114e-14,
+            "RMS_difference": 2.4118876218077863e-15,
+            "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+            "maximum_difference_over_fixed_native_scale": 3.921598587430277
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 9.558344414925142e-18,
+            "RMS_difference": 6.705000366610965e-19,
+            "native_cohort_maximum_absolute_scale": 2.8637663805377024e-14,
+            "maximum_difference_over_fixed_native_scale": 0.0003337683017680535
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.2818891043511114e-14,
+            "RMS_difference": 2.4118876218077863e-15,
+            "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+            "maximum_difference_over_fixed_native_scale": 3.921598587430277
+          }
+        },
+        "gravity": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 3.009265538105056e-36,
+            "RMS_difference": 7.404265274083207e-37,
+            "native_cohort_maximum_absolute_scale": 1.129644955724193e-20,
+            "maximum_difference_over_fixed_native_scale": 2.663903842403187e-16
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.2517190469024886e-31,
+            "RMS_difference": 2.933650050904128e-32,
+            "native_cohort_maximum_absolute_scale": 1.1296449557241928e-20,
+            "maximum_difference_over_fixed_native_scale": 1.1080641227668179e-11
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.1296449557241928e-20,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.1296449557241928e-20,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "electric": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 3.857722716808697e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.3420364145235429e-16,
+            "RMS_difference": 3.496958403800119e-17,
+            "native_cohort_maximum_absolute_scale": 3.857722716808697e-15,
+            "maximum_difference_over_fixed_native_scale": 0.03478830680795387
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 3.857722716808697e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 3.857722716808697e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "DEP": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 8.123896559830524e-34,
+            "RMS_difference": 1.8388375500131287e-34,
+            "native_cohort_maximum_absolute_scale": 1.1935286401773212e-24,
+            "maximum_difference_over_fixed_native_scale": 6.806620542112476e-10
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.1890375374062017e-25,
+            "RMS_difference": 3.403823333361255e-26,
+            "native_cohort_maximum_absolute_scale": 1.1935286393649315e-24,
+            "maximum_difference_over_fixed_native_scale": 0.1834088823013894
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 8.123896559830524e-34,
+            "RMS_difference": 1.8388375500131287e-34,
+            "native_cohort_maximum_absolute_scale": 1.1935286401773212e-24,
+            "maximum_difference_over_fixed_native_scale": 6.806620542112476e-10
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.1935286393649315e-24,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "thermophoresis": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.3569726361009644e-17,
+            "RMS_difference": 1.3920014633024918e-17,
+            "native_cohort_maximum_absolute_scale": 2.3569726361009644e-17,
+            "maximum_difference_over_fixed_native_scale": 1.0
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 0.0,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 2.356972636100964e-17,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.356972636100964e-17,
+            "RMS_difference": 1.3920014633024918e-17,
+            "native_cohort_maximum_absolute_scale": 2.356972636100964e-17,
+            "maximum_difference_over_fixed_native_scale": 1.0
+          }
+        },
+        "lift": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.925929944387236e-34,
+            "RMS_difference": 1.7831037328134582e-35,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 1.0995891174784652e-16
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.6514355119341347e-19,
+            "RMS_difference": 2.6461586301362984e-20,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 0.1513808767092162
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "ion_drag": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.1221466932158687e-29,
+            "RMS_difference": 3.925724350267203e-30,
+            "native_cohort_maximum_absolute_scale": 3.018933672458867e-19,
+            "maximum_difference_over_fixed_native_scale": 3.7170299680744574e-11
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 5.1774213868152085e-20,
+            "RMS_difference": 4.510278018916468e-21,
+            "native_cohort_maximum_absolute_scale": 3.0189336724686974e-19,
+            "maximum_difference_over_fixed_native_scale": 0.17149834837482314
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.1221466932158687e-29,
+            "RMS_difference": 3.925725075103018e-30,
+            "native_cohort_maximum_absolute_scale": 3.018933672458866e-19,
+            "maximum_difference_over_fixed_native_scale": 3.717029968074459e-11
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 3.0189336724686974e-19,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "charge_rate": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 4.040513886138797e-06,
+            "RMS_difference": 1.9269773701391745e-06,
+            "native_cohort_maximum_absolute_scale": 84518.29886594499,
+            "maximum_difference_over_fixed_native_scale": 4.780637968763997e-11
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 6453.505206142545,
+            "RMS_difference": 1978.9722986977079,
+            "native_cohort_maximum_absolute_scale": 84518.29886190448,
+            "maximum_difference_over_fixed_native_scale": 0.076356307368266
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 4.040513886138797e-06,
+            "RMS_difference": 1.9269773701391745e-06,
+            "native_cohort_maximum_absolute_scale": 84518.29886594499,
+            "maximum_difference_over_fixed_native_scale": 4.780637968763997e-11
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 84518.29886190448,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "deterministic_total": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.2802561157767625e-14,
+            "RMS_difference": 2.4065110647065386e-15,
+            "native_cohort_maximum_absolute_scale": 5.7798824929850464e-15,
+            "maximum_difference_over_fixed_native_scale": 3.9451599899206844
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.33747627254321e-16,
+            "RMS_difference": 3.473527752808807e-17,
+            "native_cohort_maximum_absolute_scale": 2.858244365075267e-14,
+            "maximum_difference_over_fixed_native_scale": 0.004679362929516314
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.1241267899399418e-29,
+            "RMS_difference": 3.918992427230666e-30,
+            "native_cohort_maximum_absolute_scale": 5.7798824929850464e-15,
+            "maximum_difference_over_fixed_native_scale": 1.9448955775559055e-15
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.280256115776762e-14,
+            "RMS_difference": 2.406511064706537e-15,
+            "native_cohort_maximum_absolute_scale": 5.7798824929850535e-15,
+            "maximum_difference_over_fixed_native_scale": 3.945159989920678
+          }
+        }
+      },
+      "source_applicability": {
+        "cohort": 287,
+        "slip_over_mean_thermal_speed_range": [
+          0.31354481473301565,
+          8.315964775660769
+        ],
+        "above_linear_native_0p1": 287,
+        "above_effective_linear_1": 221,
+        "finite_to_original_linear_drag_norm_ratio_range": [
+          1.018333994782443,
+          4.921598587430277
+        ]
+      },
+      "native_rows": 6027,
+      "active_rows_audited": 5764,
+      "source_Brownian_velocity_and_diffusion_scales": {
+        "frozen_force_impulse_10us_component_velocity_RMS_m_per_s_range": [
+          0.39596710281772446,
+          0.4031777904909148
+        ],
+        "impulse_meaning": "sqrt(native Brownian force variance times dt * 10us)/native mass. Unattenuated frozen-force impulse coefficient scale, not native historical RK draws, drag-filtered velocity, or OU endpoint variance.",
+        "equilibrium_component_velocity_standard_deviation_m_per_s_range": [
+          1.8951860711139341,
+          1.965060223772011
+        ],
+        "local_diffusivity_kBT_over_beta_m2_per_s_range": [
+          0.0016455637278564611,
+          0.0018345952052879453
+        ],
+        "scope": "Native source-point FDT coefficient scales only; not inhomogeneous chamber trajectory/arrival prediction, uncertainty band, or recovered native random draws."
+      }
+    },
+    "caseP": {
+      "source_bindings": {
+        "saved_states_0_to_200us": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseP_saved_states_0_to_200us_normalized.csv",
+          "sha256": "0ee70a10a2b1cfbe8e8e5e8a36e7f97e1e835c43fa640eb0438de74cca4dfed1",
+          "bytes": 1191282
+        },
+        "deterministic_force_components": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseP_deterministic_force_components_normalized.csv",
+          "sha256": "c786b654c7a8963fc63b343a349ecc62fc404d6a4436c93bed7f5fcd719a6274",
+          "bytes": 1927781
+        },
+        "native_force_coefficients": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseP_native_force_coefficients_normalized.csv",
+          "sha256": "6f6318f9d39fd0e4e85d934c16ceb10ba76725fbf1ce77401d4dc403c4d426dd",
+          "bytes": 2136068
+        },
+        "charge_rate": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseP_charge_rate_normalized.csv",
+          "sha256": "b173e6cea4099491051f3290bcd6ff9f24fc9a0b33479261673ad5e159c80d1e",
+          "bytes": 229242
+        }
+      },
+      "native_primitive_binding": {
+        "file": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/native/caseP_primitive_probes.json",
+          "sha256": "9760e5f03a19d5e9f915141da89c795fcd3075e424cd3749ecf02805247410c7",
+          "bytes": 298332
+        },
+        "coordinate_maximum_difference_m": 5.551115123125783e-17,
+        "point_ids_match_saved_source": true
+      },
+      "native_Waldmann_PPR_binding": {
+        "file": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/caseP_native_Waldmann_heat_flux_t0_normalized.csv",
+          "sha256": "43fe729cce428a363c686a6f17a54db7b283bacb4938bc487715df3a0d20ba50",
+          "bytes": 31193
+        },
+        "native_thermal_receipt": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/native_thermal_receipt.json",
+          "sha256": "5d6d7e5942c246bc24d72d2df13b4595b33357265e3398a35d79039da07d28ff",
+          "bytes": 5514
+        },
+        "native_thermal_checks": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/native/native_thermal_checks.json",
+          "sha256": "bd97d9a875d6702b12924799d959537ad64de133d8a04059e2f56a6f10f5aab4",
+          "bytes": 12013
+        },
+        "heat_flux_SI_derivation": "Native accepted \u03ba [W/(m K)] times native accepted pprint temperature gradient [K/m]; original isotropic \u03ba diagonal, zero cross terms. Direct heatflux bracket API unit was blank and is not silently treated as an accepted readback.",
+        "heat_flux_product_vs_native_bracket": {
+          "observations": 287,
+          "unit": "W/m^2",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 127.4262143953722,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        }
+      },
+      "candidate_binding": {
+        "case": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseP/prepared/full_h0p25us.yaml",
+          "sha256": "5b2f1549b12ea0583d5089451126c26b3117427e6f7983559b14a38183973573",
+          "bytes": 6751
+        },
+        "input": {
+          "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/caseP/prepared/candidate_input.h5",
+          "sha256": "300abc5265746ace4bc277108536ef847027177eb5edc8173f87b194f413bcdd",
+          "bytes": 720563
+        },
+        "logical_content_hash": "sha256:0fbe4f1c17d89249a2d115691064f2da6a36e7a6a461ef1c56cf6b2ced701a48",
+        "support_all_source_points": true,
+        "canonical_position_velocity_charge_diameter_mass_release_electrostatic_radius_exact_native_identity": true,
+        "cell_ids": [
+          2493,
+          2571,
+          2572,
+          2643,
+          2723,
+          2723,
+          2810,
+          2491,
+          2569,
+          2570,
+          2642,
+          2721,
+          2721,
+          2807,
+          2491,
+          2569,
+          2570,
+          2642,
+          2721,
+          2722,
+          2807,
+          2492,
+          2569,
+          2570,
+          2641,
+          2722,
+          2722,
+          2808,
+          2501,
+          2579,
+          2580,
+          2652,
+          2719,
+          2719,
+          2806,
+          2501,
+          2579,
+          2580,
+          2651,
+          2719,
+          2720,
+          2805,
+          2501,
+          2579,
+          2579,
+          2651,
+          2720,
+          2720,
+          2805,
+          2581,
+          2653,
+          2654,
+          2732,
+          2753,
+          2754,
+          2803,
+          2581,
+          2653,
+          2654,
+          2731,
+          2753,
+          2754,
+          2803,
+          82,
+          95,
+          125,
+          124,
+          162,
+          161,
+          191,
+          109,
+          136,
+          166,
+          164,
+          205,
+          205,
+          204,
+          172,
+          170,
+          209,
+          208,
+          207,
+          256,
+          255,
+          168,
+          210,
+          210,
+          258,
+          258,
+          258,
+          327,
+          143,
+          177,
+          212,
+          259,
+          259,
+          327,
+          327,
+          179,
+          216,
+          218,
+          264,
+          264,
+          328,
+          328,
+          214,
+          214,
+          262,
+          262,
+          331,
+          331,
+          330,
+          189,
+          220,
+          227,
+          267,
+          329,
+          329,
+          335,
+          225,
+          226,
+          271,
+          272,
+          336,
+          337,
+          337,
+          268,
+          269,
+          270,
+          339,
+          340,
+          340,
+          436,
+          277,
+          278,
+          338,
+          338,
+          435,
+          435,
+          435,
+          280,
+          280,
+          349,
+          349,
+          435,
+          446,
+          446,
+          279,
+          282,
+          350,
+          354,
+          354,
+          447,
+          447,
+          235,
+          284,
+          352,
+          352,
+          354,
+          447,
+          449,
+          274,
+          283,
+          353,
+          353,
+          445,
+          445,
+          448,
+          276,
+          346,
+          346,
+          445,
+          445,
+          445,
+          445,
+          275,
+          348,
+          348,
+          442,
+          442,
+          444,
+          545,
+          287,
+          345,
+          357,
+          443,
+          443,
+          453,
+          453,
+          286,
+          356,
+          356,
+          357,
+          453,
+          453,
+          452,
+          285,
+          358,
+          358,
+          358,
+          450,
+          450,
+          452,
+          343,
+          355,
+          355,
+          440,
+          451,
+          451,
+          544,
+          342,
+          342,
+          440,
+          440,
+          440,
+          451,
+          544,
+          344,
+          344,
+          439,
+          439,
+          441,
+          541,
+          543,
+          341,
+          412,
+          438,
+          441,
+          441,
+          541,
+          541,
+          412,
+          412,
+          438,
+          520,
+          520,
+          542,
+          542,
+          411,
+          421,
+          519,
+          520,
+          520,
+          520,
+          620,
+          421,
+          421,
+          519,
+          519,
+          519,
+          529,
+          621,
+          420,
+          420,
+          528,
+          529,
+          529,
+          529,
+          621,
+          423,
+          423,
+          528,
+          528,
+          528,
+          528,
+          621,
+          422,
+          422,
+          528,
+          530,
+          530,
+          530,
+          627,
+          424,
+          424,
+          525,
+          525,
+          530,
+          530,
+          627,
+          416,
+          418,
+          526,
+          526,
+          526,
+          625,
+          629
+        ]
+      },
+      "native_constants": {
+        "rho_p*pi*d0^3/6": 1.1519173063162575e-21,
+        "d0/2": 5e-09,
+        "Mmix/N_A_const": 1.275347140839664e-25,
+        "e_const": 1.602176634e-19,
+        "epsilon0_const": 8.854187818826713e-12,
+        "k_B_const": 1.380649e-23,
+        "me_const": 9.109383713928e-31,
+        "N_A_const": 6.02214076e+23,
+        "R_const": 8.31446261815324,
+        "g_const": 9.80665
+      },
+      "constant_differences": {
+        "epsilon0_native": 8.854187818826713e-12,
+        "epsilon0_candidate": 8.8541878128e-12,
+        "electron_mass_native": 9.109383713928e-31,
+        "electron_mass_candidate": 9.1093837139e-31
+      },
+      "all_saved_active_checks": {
+        "drag": {
+          "observations": 5804,
+          "unit": "N",
+          "maximum_absolute_difference": 1.5777218104420236e-30,
+          "RMS_difference": 1.3444800399421546e-31,
+          "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+          "maximum_difference_over_fixed_native_scale": 2.7114339655637196e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "electric": {
+          "observations": 5804,
+          "unit": "N",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 3.4234690206544514e-14,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "gravity": {
+          "observations": 5804,
+          "unit": "N",
+          "maximum_absolute_difference": 3.009265538105056e-36,
+          "RMS_difference": 8.274985301008715e-37,
+          "native_cohort_maximum_absolute_scale": 1.1296449670598606e-20,
+          "maximum_difference_over_fixed_native_scale": 2.663903815671666e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "beta_coefficient": {
+          "observations": 5804,
+          "unit": "kg/s",
+          "maximum_absolute_difference": 1.1555579666323415e-33,
+          "RMS_difference": 3.2918382532098448e-34,
+          "native_cohort_maximum_absolute_scale": 2.540629281506507e-18,
+          "maximum_difference_over_fixed_native_scale": 4.548313974981564e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "uncorrected_response_time": {
+          "observations": 5804,
+          "unit": "s",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 6.89966883437709e-10,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "Brownian_variance_times_timestep": {
+          "observations": 5804,
+          "unit": "N^2 s",
+          "maximum_absolute_difference": 1.566073072319646e-53,
+          "RMS_difference": 3.8660052500576265e-54,
+          "native_cohort_maximum_absolute_scale": 2.748948199549115e-38,
+          "maximum_difference_over_fixed_native_scale": 5.696990116352556e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "Brownian_effective_viscosity": {
+          "observations": 5804,
+          "unit": "Pa s",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 2.6956913914384737e-11,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        }
+      },
+      "source_equation_checks": {
+        "drag": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 7.888609052210118e-31,
+          "RMS_difference": 1.7416938169964912e-31,
+          "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+          "maximum_difference_over_fixed_native_scale": 1.3557169827818598e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "gravity": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 3.009265538105056e-36,
+          "RMS_difference": 7.404265274083207e-37,
+          "native_cohort_maximum_absolute_scale": 1.129644955724193e-20,
+          "maximum_difference_over_fixed_native_scale": 2.663903842403187e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "electric": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 2.357628615619009e-15,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "DEP": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 0.0,
+          "RMS_difference": 0.0,
+          "native_cohort_maximum_absolute_scale": 1.59082373160589e-24,
+          "maximum_difference_over_fixed_native_scale": 0.0,
+          "roundoff_equation_check": "PASS"
+        },
+        "lift": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 1.925929944387236e-34,
+          "RMS_difference": 1.984605468747583e-35,
+          "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+          "maximum_difference_over_fixed_native_scale": 1.0995891174784652e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "ion_drag": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 9.62964972193618e-35,
+          "RMS_difference": 1.6186276585173826e-35,
+          "native_cohort_maximum_absolute_scale": 3.730680996843211e-19,
+          "maximum_difference_over_fixed_native_scale": 2.581204270771073e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "charge_rate": {
+          "observations": 287,
+          "unit": "1/s",
+          "maximum_absolute_difference": 1.8189894035458565e-12,
+          "RMS_difference": 2.657310277712793e-13,
+          "native_cohort_maximum_absolute_scale": 30108.36843415501,
+          "maximum_difference_over_fixed_native_scale": 6.041474507407683e-17,
+          "roundoff_equation_check": "PASS"
+        },
+        "thermophoresis": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 6.162975822039155e-33,
+          "RMS_difference": 1.7247980490320315e-33,
+          "native_cohort_maximum_absolute_scale": 2.3569726361011003e-17,
+          "maximum_difference_over_fixed_native_scale": 2.614784629928474e-16,
+          "roundoff_equation_check": "PASS"
+        }
+      },
+      "selected_pure_catalog_vs_independent_formula_checks": {
+        "charge_rate_independent_formula_vs_selected_pure_catalog": {
+          "observations": 287,
+          "unit": "1/s",
+          "maximum_absolute_difference": 9.094947017729282e-13,
+          "RMS_difference": 7.592315079179409e-14,
+          "native_cohort_maximum_absolute_scale": 30108.368432229636,
+          "maximum_difference_over_fixed_native_scale": 3.020737253897012e-17,
+          "roundoff_equation_check": "PASS"
+        },
+        "ion_drag_independent_formula_vs_selected_pure_catalog": {
+          "observations": 287,
+          "unit": "N",
+          "maximum_absolute_difference": 1.925929944387236e-34,
+          "RMS_difference": 2.3102429501962615e-35,
+          "native_cohort_maximum_absolute_scale": 3.730680996863879e-19,
+          "maximum_difference_over_fixed_native_scale": 5.162408541513546e-16,
+          "roundoff_equation_check": "PASS"
+        },
+        "all_source_applicability_passed": true
+      },
+      "source_model_and_transfer_effects": {
+        "drag": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.2818891043511114e-14,
+            "RMS_difference": 2.4118876218077863e-15,
+            "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+            "maximum_difference_over_fixed_native_scale": 3.921598587430277
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 9.558344414925142e-18,
+            "RMS_difference": 6.705000366610406e-19,
+            "native_cohort_maximum_absolute_scale": 2.8637663805377024e-14,
+            "maximum_difference_over_fixed_native_scale": 0.0003337683017680535
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.2818891043511114e-14,
+            "RMS_difference": 2.4118876218077863e-15,
+            "native_cohort_maximum_absolute_scale": 5.818772761865908e-15,
+            "maximum_difference_over_fixed_native_scale": 3.921598587430277
+          }
+        },
+        "gravity": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 3.009265538105056e-36,
+            "RMS_difference": 7.404265274083207e-37,
+            "native_cohort_maximum_absolute_scale": 1.129644955724193e-20,
+            "maximum_difference_over_fixed_native_scale": 2.663903842403187e-16
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.2517190469024886e-31,
+            "RMS_difference": 2.933650050904128e-32,
+            "native_cohort_maximum_absolute_scale": 1.1296449557241928e-20,
+            "maximum_difference_over_fixed_native_scale": 1.1080641227668179e-11
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.1296449557241928e-20,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.1296449557241928e-20,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "electric": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 2.357628615619009e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.7474255781756955e-16,
+            "RMS_difference": 4.830558843447093e-17,
+            "native_cohort_maximum_absolute_scale": 2.357628615619009e-15,
+            "maximum_difference_over_fixed_native_scale": 0.07411793217130166
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 2.357628615619009e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 2.357628615619009e-15,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "DEP": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.0828132334156735e-33,
+            "RMS_difference": 9.845398716599556e-35,
+            "native_cohort_maximum_absolute_scale": 1.59082373160589e-24,
+            "maximum_difference_over_fixed_native_scale": 6.806619815273973e-10
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.4268491234409828e-24,
+            "RMS_difference": 1.5399267260026463e-25,
+            "native_cohort_maximum_absolute_scale": 1.5908237305230768e-24,
+            "maximum_difference_over_fixed_native_scale": 0.8969247164623464
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.0828132334156735e-33,
+            "RMS_difference": 9.845398716599556e-35,
+            "native_cohort_maximum_absolute_scale": 1.59082373160589e-24,
+            "maximum_difference_over_fixed_native_scale": 6.806619815273973e-10
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.5908237305230768e-24,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "thermophoresis": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.3569726361011003e-17,
+            "RMS_difference": 1.3920014633024902e-17,
+            "native_cohort_maximum_absolute_scale": 2.3569726361011003e-17,
+            "maximum_difference_over_fixed_native_scale": 1.0
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 0.0,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 2.3569726361011e-17,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.3569726361011e-17,
+            "RMS_difference": 1.3920014633024902e-17,
+            "native_cohort_maximum_absolute_scale": 2.3569726361011e-17,
+            "maximum_difference_over_fixed_native_scale": 1.0
+          }
+        },
+        "lift": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.925929944387236e-34,
+            "RMS_difference": 1.984605468747583e-35,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 1.0995891174784652e-16
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.6514355119341347e-19,
+            "RMS_difference": 2.6461586301362993e-20,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 0.1513808767092162
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 1.75149964088741e-18,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "ion_drag": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.066859868067772e-30,
+            "RMS_difference": 5.283576529772618e-31,
+            "native_cohort_maximum_absolute_scale": 3.730680996843211e-19,
+            "maximum_difference_over_fixed_native_scale": 5.540167786569493e-12
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.98995233490775e-20,
+            "RMS_difference": 4.633778019425461e-21,
+            "native_cohort_maximum_absolute_scale": 3.7306809968638794e-19,
+            "maximum_difference_over_fixed_native_scale": 0.053340190077376295
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.066859868067772e-30,
+            "RMS_difference": 5.283576307051619e-31,
+            "native_cohort_maximum_absolute_scale": 3.730680996843211e-19,
+            "maximum_difference_over_fixed_native_scale": 5.540167786569493e-12
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 3.7306809968638794e-19,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "charge_rate": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 1.9253748178016394e-06,
+            "RMS_difference": 4.2952032485995757e-07,
+            "native_cohort_maximum_absolute_scale": 30108.36843415501,
+            "maximum_difference_over_fixed_native_scale": 6.394816185447928e-11
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 2592.182012330475,
+            "RMS_difference": 614.9864281537749,
+            "native_cohort_maximum_absolute_scale": 30108.368432229636,
+            "maximum_difference_over_fixed_native_scale": 0.08609506749477872
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 1.9253748178016394e-06,
+            "RMS_difference": 4.295203422997258e-07,
+            "native_cohort_maximum_absolute_scale": 30108.36843415501,
+            "maximum_difference_over_fixed_native_scale": 6.394816185447928e-11
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "1/s",
+            "maximum_absolute_difference": 0.0,
+            "RMS_difference": 0.0,
+            "native_cohort_maximum_absolute_scale": 30108.368432229636,
+            "maximum_difference_over_fixed_native_scale": 0.0
+          }
+        },
+        "deterministic_total": {
+          "candidate_minus_original_same_native_primitives": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.2802561157767622e-14,
+            "RMS_difference": 2.4065110647065374e-15,
+            "native_cohort_maximum_absolute_scale": 5.699813929626157e-15,
+            "maximum_difference_over_fixed_native_scale": 4.00057992055597
+          },
+          "P1_transfer_effect_same_candidate_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 1.7443569888759856e-16,
+            "RMS_difference": 4.821099229127966e-17,
+            "native_cohort_maximum_absolute_scale": 2.850237508739378e-14,
+            "maximum_difference_over_fixed_native_scale": 0.006120040815993231
+          },
+          "constant_effect_same_original_law": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.3665827156630354e-30,
+            "RMS_difference": 5.37678947590809e-31,
+            "native_cohort_maximum_absolute_scale": 5.699813929626157e-15,
+            "maximum_difference_over_fixed_native_scale": 4.1520350398846376e-16
+          },
+          "model_change_effect_same_candidate_constants": {
+            "observations": 287,
+            "unit": "N",
+            "maximum_absolute_difference": 2.280256115776762e-14,
+            "RMS_difference": 2.4065110647065374e-15,
+            "native_cohort_maximum_absolute_scale": 5.699813929626159e-15,
+            "maximum_difference_over_fixed_native_scale": 4.0005799205559684
+          }
+        }
+      },
+      "source_applicability": {
+        "cohort": 287,
+        "slip_over_mean_thermal_speed_range": [
+          0.31354481473301565,
+          8.315964775660769
+        ],
+        "above_linear_native_0p1": 287,
+        "above_effective_linear_1": 221,
+        "finite_to_original_linear_drag_norm_ratio_range": [
+          1.018333994782443,
+          4.921598587430277
+        ]
+      },
+      "native_rows": 6027,
+      "active_rows_audited": 5804,
+      "source_Brownian_velocity_and_diffusion_scales": {
+        "frozen_force_impulse_10us_component_velocity_RMS_m_per_s_range": [
+          0.39596710281772446,
+          0.40317779049091457
+        ],
+        "impulse_meaning": "sqrt(native Brownian force variance times dt * 10us)/native mass. Unattenuated frozen-force impulse coefficient scale, not native historical RK draws, drag-filtered velocity, or OU endpoint variance.",
+        "equilibrium_component_velocity_standard_deviation_m_per_s_range": [
+          1.8951860711139334,
+          1.9650602237720085
+        ],
+        "local_diffusivity_kBT_over_beta_m2_per_s_range": [
+          0.0016455637278564596,
+          0.0018345952052879384
+        ],
+        "scope": "Native source-point FDT coefficient scales only; not inhomogeneous chamber trajectory/arrival prediction, uncertainty band, or recovered native random draws."
+      }
+    }
+  },
+  "trajectory_parity": "NOT_TESTED",
+  "original_full_physical_validation": "NOT_TESTED",
+  "limits": [
+    "No historical integrator-stage or stochastic draw reconstruction; native saved-time randomnormal and timestep are postprocessed observations.",
+    "A same-source equation replay PASS does not qualify full native-FE trajectory reproduction or the extrapolated physical model.",
+    "DEP gradients, vorticity and plasma primitives are native source-point samples; derivatives and field transfer away from these points are not certified.",
+    "Whole-population original linear Epstein/Waldmann remains outside accepted production applicability; the audit does not change selectors or run a substituted original trajectory.",
+    "Candidate source law evaluations are frozen pure formulas, not a second trajectory engine or the historical numerical proposal."
+  ],
+  "pointwise_source_table": {
+    "path": "particle_platform_redesign/solver/evidence/comsol_speed10000_comparison_2026_10_13/original_comparison/equation_audit/source_equation_and_transfer.csv",
+    "sha256": "597f0868e70f65e05cba4c30f2e0ca0b61b267cd29e21b574b13d49359be1d75",
+    "bytes": 1852978
+  }
+}
