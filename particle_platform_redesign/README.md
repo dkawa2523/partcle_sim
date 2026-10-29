@@ -53,6 +53,9 @@ COMSOL Case A/P Brownianの現行版回帰は、保存参照に対する登録�
 
 ## 参照資料と履歴
 
+3D化と背景場の時間変化について、2D定常計算の完成を前提にした追加実装の検討表と4区分の図版は、
+[3D粒子軌道・非定常背景場の拡張検討](reviews/3d_transient_trajectory_extensions/README.md)を参照してください。
+
 `../model_dataset/`は入力provenanceと外部V&V用の参照資料です。物理modelの正解やsolver dependencyにはしません。
 `../old_code/`はread-only archiveで、旧package・環境・実行経路を新solverへ復活させません。
 新production codeの置き場は`solver/`だけです。
