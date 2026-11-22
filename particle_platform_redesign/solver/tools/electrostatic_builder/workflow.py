@@ -32,7 +32,7 @@ from .numerics import (
 type PotentialProfile = ConstantPotential | RadialExponentialPotential
 
 BUILDER_FORMAT_VERSION: Final = 2
-BUILDER_REVISION: Final = "reduced_electrostatic_builder_v2"
+BUILDER_REVISION: Final = "reduced_electrostatic_builder_v3"
 MODEL_REVISION: Final = "boltzmann_bohm_sheath_c2_v1"
 FIELD_SEMANTICS_REVISION: Final = "reduced_electrostatic_fields_v1"
 PRODUCER_VERSION: Final = version("chamber-particles")
@@ -484,13 +484,17 @@ def _resolve_boundaries(
     priority = np.full(layout.nodes_m.shape[0], np.iinfo(np.int64).min, dtype=np.int64)
     selected = np.zeros(layout.nodes_m.shape[0], dtype=np.bool_)
     target = np.zeros(layout.nodes_m.shape[0], dtype="<f8")
+    facets = data.geometry.boundary.line2
+    non_axis = np.any(layout.nodes_m[facets, 0] != 0.0, axis=1)
+    prescribed = np.zeros(facets.shape[0], dtype=np.bool_)
     for condition in conditions:
         if condition.group not in names:
             raise ValueError(f"unknown boundary group: {condition.group}")
-        rows = data.geometry.boundary.group_id == names[condition.group]
+        rows = (data.geometry.boundary.group_id == names[condition.group]) & non_axis
         if not bool(rows.any()):
-            raise ValueError(f"boundary group has no facets: {condition.group}")
-        nodes = np.unique(data.geometry.boundary.line2[rows].reshape(-1))
+            raise ValueError(f"boundary group has no non-axis facets: {condition.group}")
+        prescribed |= rows
+        nodes = np.unique(facets[rows].reshape(-1))
         values = _potential_values(condition.potential, layout.nodes_m[nodes, 0])
         _merge_boundary_values(
             nodes,
@@ -501,10 +505,37 @@ def _resolve_boundaries(
             target,
             condition.group,
         )
+    _require_perimeter_potentials(layout, facets, prescribed)
     ids = np.flatnonzero(selected).astype("<i8", copy=False)
     if ids.size == 0:
         raise ValueError("at least one semantic boundary group must prescribe potential")
     return np.ascontiguousarray(ids), np.ascontiguousarray(target[ids], dtype="<f8")
+
+
+def _require_perimeter_potentials(
+    layout: P1TriLayout, facets: np.ndarray, prescribed: np.ndarray
+) -> None:
+    """Require explicit potentials on the actual non-axis triangle perimeter."""
+
+    cells = layout.connectivity
+    edges = np.sort(np.concatenate((cells[:, [0, 1]], cells[:, [1, 2]], cells[:, [2, 0]])), axis=1)
+    unique, counts = np.unique(edges, axis=0, return_counts=True)
+    if bool((counts > 2).any()):
+        raise ValueError("builder mesh contains a nonmanifold edge")
+    perimeter_edges = unique[counts == 1]
+    perimeter = set(map(tuple, perimeter_edges))
+    listed = list(map(tuple, np.sort(facets, axis=1)))
+    if len(set(listed)) != len(listed) or not set(listed).issubset(perimeter):
+        raise ValueError("builder boundary facets must be unique triangle perimeter edges")
+    non_axis = np.any(layout.nodes_m[perimeter_edges, 0] != 0.0, axis=1)
+    required = set(map(tuple, perimeter_edges[non_axis]))
+    covered = set(map(tuple, np.sort(facets[prescribed], axis=1)))
+    missing = required - covered
+    if missing:
+        raise ValueError(
+            "every non-axis perimeter facet must have an explicit potential condition; "
+            f"missing {len(missing)} facet(s), first edge {min(missing)}"
+        )
 
 
 def _merge_boundary_values(

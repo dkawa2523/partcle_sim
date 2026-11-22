@@ -18,7 +18,7 @@ type Int32Array = NDArray[np.int32]
 type Int64Array = NDArray[np.int64]
 type UInt8Array = NDArray[np.uint8]
 
-BOUNDARY_ALGORITHM_REVISION = "contact_wall_laws_v7"
+BOUNDARY_ALGORITHM_REVISION = "contact_wall_laws_v8"
 
 _FLOAT64_EPS = float(np.finfo(np.float64).eps)
 
@@ -35,6 +35,7 @@ BOUNDARY_LAW_RESTITUTION = np.uint8(4)
 BOUNDARY_LAW_PROBABILISTIC_STICK = np.uint8(5)
 BOUNDARY_LAW_HOLD = np.uint8(6)
 BOUNDARY_LAW_MAXWELL_THERMAL = np.uint8(7)
+BOUNDARY_LAW_ISOTROPIC = np.uint8(8)
 
 _BOUNDARY_LAW_CODES = {
     "stick": BOUNDARY_LAW_STICK,
@@ -44,6 +45,7 @@ _BOUNDARY_LAW_CODES = {
     "probabilistic_stick": BOUNDARY_LAW_PROBABILISTIC_STICK,
     "hold": BOUNDARY_LAW_HOLD,
     "maxwell_thermal": BOUNDARY_LAW_MAXWELL_THERMAL,
+    "isotropic": BOUNDARY_LAW_ISOTROPIC,
 }
 
 BOUNDARY_OUTCOME_NONE = np.uint8(0)
@@ -109,7 +111,7 @@ def prepare_boundary_rule(
 
     if group_id < 0 or priority < 0:
         raise BoundaryLawError("boundary group ID and priority must be nonnegative")
-    if law_id in {"stick", "escape", "specular", "hold"}:
+    if law_id in {"stick", "escape", "specular", "hold", "isotropic"}:
         return _prepare_parameterless_rule(group_id, priority, law_id, parameters)
     if law_id == "restitution":
         return _prepare_restitution_rule(group_id, priority, parameters)
@@ -205,8 +207,8 @@ def _prepare_nested_reflection(
     law_id: object,
     parameters: Mapping[str, object],
 ) -> BoundaryRule:
-    if law_id == "specular":
-        return _prepare_parameterless_rule(0, 0, "specular", parameters)
+    if law_id in {"specular", "isotropic"}:
+        return _prepare_parameterless_rule(0, 0, str(law_id), parameters)
     if law_id == "restitution":
         normal, tangential = _restitution_parameters(
             parameters,
@@ -233,7 +235,8 @@ def _prepare_nested_reflection(
             wall_velocity_m_s=wall_velocity,
         )
     raise BoundaryLawError(
-        "probabilistic_stick.otherwise law must be specular, restitution, or maxwell_thermal"
+        "probabilistic_stick.otherwise law must be specular, restitution, maxwell_thermal, "
+        "or isotropic"
     )
 
 
@@ -267,6 +270,7 @@ def _pack_boundary_reflection(
             "specular",
             "restitution",
             "maxwell_thermal",
+            "isotropic",
         }:
             raise BoundaryLawError("prepared probabilistic law lost its nested reflection law")
         probability[group_id] = rule.stick_probability
@@ -846,6 +850,8 @@ def _same_reflection_signature(
     first_group: int,
     second_group: int,
 ) -> bool:
+    if first_reflection == BOUNDARY_LAW_ISOTROPIC:
+        return second_reflection == BOUNDARY_LAW_ISOTROPIC
     deterministic_reflection = (
         BOUNDARY_LAW_SPECULAR,
         BOUNDARY_LAW_RESTITUTION,
@@ -910,6 +916,7 @@ def _same_rule_signature(
         BOUNDARY_LAW_SPECULAR,
         BOUNDARY_LAW_RESTITUTION,
         BOUNDARY_LAW_MAXWELL_THERMAL,
+        BOUNDARY_LAW_ISOTROPIC,
     )
     if first_law in deterministic_reflection:
         return second_law in deterministic_reflection and reflection_equal
@@ -1139,6 +1146,8 @@ def _combined_boundary_normal(
 def _reflected_boundary_velocity(
     normal_restitution: float,
     tangential_restitution: float,
+    isotropic: bool,
+    direction_uniform_open: float,
     candidate_facet_ids: Int64Array,
     candidate_contact_normal: FloatArray,
     begin: int,
@@ -1149,15 +1158,23 @@ def _reflected_boundary_velocity(
     normal_y: float,
     roundoff_ulps: int,
 ) -> tuple[np.uint8, float, float]:
-    normal_speed = _two_term_sum(velocity_x * normal_x, velocity_y * normal_y)
-    normal_velocity_x = normal_speed * normal_x
-    normal_velocity_y = normal_speed * normal_y
-    post_x = -normal_restitution * normal_velocity_x + tangential_restitution * (
-        velocity_x - normal_velocity_x
-    )
-    post_y = -normal_restitution * normal_velocity_y + tangential_restitution * (
-        velocity_y - normal_velocity_y
-    )
+    if isotropic:
+        speed = _stable_hypot(velocity_x, velocity_y)
+        angle = math.pi * (direction_uniform_open - 0.5)
+        inward = -speed * math.cos(angle)
+        tangent = speed * math.sin(angle)
+        post_x = inward * normal_x - tangent * normal_y
+        post_y = inward * normal_y + tangent * normal_x
+    else:
+        normal_speed = _two_term_sum(velocity_x * normal_x, velocity_y * normal_y)
+        normal_velocity_x = normal_speed * normal_x
+        normal_velocity_y = normal_speed * normal_y
+        post_x = -normal_restitution * normal_velocity_x + tangential_restitution * (
+            velocity_x - normal_velocity_x
+        )
+        post_y = -normal_restitution * normal_velocity_y + tangential_restitution * (
+            velocity_y - normal_velocity_y
+        )
     if not math.isfinite(post_x) or not math.isfinite(post_y):
         return BOUNDARY_STATUS_INDETERMINATE_POLICY, 0.0, 0.0
     if not _post_velocity_is_inward(
@@ -1380,6 +1397,7 @@ def _resolve_boundary_response_row(
         BOUNDARY_LAW_SPECULAR,
         BOUNDARY_LAW_RESTITUTION,
         BOUNDARY_LAW_MAXWELL_THERMAL,
+        BOUNDARY_LAW_ISOTROPIC,
     ):
         return (
             BOUNDARY_STATUS_INVALID_REFERENCE,
@@ -1442,6 +1460,8 @@ def _resolve_boundary_response_row(
         status, post_x, post_y = _reflected_boundary_velocity(
             normal_restitution[primary_group],
             tangential_restitution[primary_group],
+            reflection_law == BOUNDARY_LAW_ISOTROPIC,
+            thermal_normal_uniform_open,
             candidate_facet_ids,
             candidate_contact_normal,
             begin,

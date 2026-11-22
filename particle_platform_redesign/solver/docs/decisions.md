@@ -1216,6 +1216,11 @@ builder/runtimeへmixed topologyを追加しない。P15 stationary OMLまたは
 F02で代表P1 meshのlinear solve、fixed charge/electricのfield-production integration、同一export node上の外部field比較まで
 完了した。P15-Dはその後、field producerから独立したproduction physics revisionとして追加した。
 
+builder v3は、実際のtriangle外周の全非軸facetへ明示potential条件を要求し、未指定の外面を自然zero-fluxへ
+読み替えない。軸facetはDirichlet合成から除外し、各連結成分のDirichlet anchorを低位数値入口でも検査する。
+正常な複数のanchored成分は許す。入力構文format 2、closure、FEM離散式を維持し、非軸Neumann条件や全材料問題へ
+拡張しない。低位interfaceの自然条件と公開YAMLの範囲は[builder README](../tools/electrostatic_builder/README.md)を参照する。
+
 ## F02：provider adapter / representative integration decision
 
 | 項目 | 判断 |
@@ -1414,6 +1419,44 @@ resume identityとmanifestはfield time revisionおよび追加split時刻を保
 A/Qを導出できても連続diffusion近似のqualificationが不足すれば、production selectorは追加しない。
 local accuracy controllerは独立精度検証と費用が必要性を示した時だけ同じproposalへ統合する。
 本decisionは新しいphysics/integrator/schemaの実装完了を示さない。
+
+## Explicit coefficient reference models
+
+| 項目 | 判断 |
+|---|---|
+| 解く利用case | 外部で同定した線形摩擦、独立white-force拡散、指数＋線形charge、charge多項式force、signed rotationの数学的輸送を再現する |
+| 既存modelで解けない理由 | 既存Epstein/FDT/OML/kinetic ion/liftの式と適用域を、異なるsource式のために変更できない |
+| 所有module | catalogが明示revisionとrequired field、physicsの既存ownerが式・bounds・stage評価、既存integrator/OU/event/engineが連成と継続を所有する |
+| 必要field/state | beta[kg/s]、D[N²s]、Aeとfinite exponent offset/alpha/Ai/betaZ、三つのforce[N]、rotation[kg/s]。新stateなし。全モデルにmass/drag径/電気半径/排除体積のbindingが必要 |
+| 対応範囲 | XY/RZの既存2DOF、均一物性cohort。係数生成は外部producerが所有する。reference対応はFDT、kinetic近似、高Kn liftの物理認定を意味しない |
+| 解析解またはreference | Decimal局所代数、G/Jとfinite invariant、一定係数joint OU full covariance、scalar charge極限、charge-force coupling、正負Zとrotation符号、公開runのevent/出力不変性 |
+| 性能・memory影響 | 既存bounded sampled primitive/stage passとscratchを利用し、追加fieldとprepared boundsを既存memory planへ含める。第二engineなし |
+| 置換・削除する旧経路 | 式の違う標準modelの代用やnoise温度倍率調整をreference入力で置換する。通常の原始場modelとその適用域は維持する |
+
+`electric_coulomb_charge_cap_v1`は明示した正の上限で**電気力に使うZだけ**を制限する。
+resident Z、charge rateとion多項式は制限しない。既存`electric_coulomb_v1`は無制限のままである。
+
+外部`prepare_vigus_transport`はBrownian入力の意味を必須選択にする。
+`continuous_white_force`はsourceの`D=6*pi*mu*d*kB*T`をそのまま使う。
+`fixed_rk4_white_limit`は、固定古典RK4、同時刻で同じ乱数、実stepとforce正規化parameterの一致を
+同定した別caseに限り、共有midpoint/endpointの重みから導く`5*D/9`を使う。
+定数係数COMSOL microcaseのfull covarianceはこの離散化差を支持するが、有限stepのx/v共分散や
+壁first passageの同値性は保証しない。原caseを保持し、native有限step/RNGの模倣engineや
+観測結果に合わせたnoise倍率をcoreへ追加しない。導出・条件・証拠と制約は外部producerのmanifestと
+[外部tool説明](../tools/vv/comsol/README.md)が所有する。
+
+## Two dimensional isotropic stationary wall
+
+| 項目 | 判断 |
+|---|---|
+| 解く利用case | 静止壁で速さを保存し、内向き半円上の角度を一様に選ぶ2自由度の散乱を、単独lawまたは確率付着の非付着branchとして扱う |
+| 既存modelで解けない理由 | 鏡面反射、cosine分布、Maxwell熱再放出とは角度分布とenergyの意味が異なる |
+| 所有module | `boundaries.py`が明示law、同時facetの内向き検査と応答を所有し、既存engineがhit prefixと残時間、RNGがcounterを所有する |
+| 必要field/state | 追加field/stateなし。静止壁、入射速度、選択法線、既存の独立したopen normal-direction uniform drawを使う |
+| 対応座標・integrator | XY/RZ meridionalの既存event経路。RZ軸はwallではない。3D等方散乱とは別のlaw |
+| 解析解またはreference | `phi=pi*(U-1/2)`、`v_post=-s*cos(phi)*n+s*sin(phi)*(-n_y,n_x)`。角度分位、平均、二次moment、速さ、全incident facetの内向き性、公開runの残時間と出力不変性 |
+| 性能・memory影響 | 既存wall passとopen uniform draw bankを再利用する。追加resident配列、RNG draw、schedulerなし |
+| 置換・削除する旧経路 | 非付着時の鏡面・熱壁代用は設定で明示的に切り替える。独立に定義された既存lawは維持し、corner失敗を再抽選やnudgeで隠さない |
 
 ## H2 boundary group contact geometry
 

@@ -7,6 +7,7 @@ from numba import njit
 from chamber_particles.boundaries import (
     BOUNDARY_LAW_ESCAPE,
     BOUNDARY_LAW_HOLD,
+    BOUNDARY_LAW_ISOTROPIC,
     BOUNDARY_LAW_MAXWELL_THERMAL,
     BOUNDARY_LAW_PROBABILISTIC_STICK,
     BOUNDARY_LAW_RESTITUTION,
@@ -86,6 +87,85 @@ def test_corner_policy_rejects_incompatible_laws_at_the_same_priority() -> None:
     )
 
     assert response.status[0] == BOUNDARY_STATUS_AMBIGUOUS_LAW
+
+
+def test_isotropic_wall_preserves_speed_and_uniform_inward_angle() -> None:
+    count = 20_000
+    angle_draw = (np.arange(count, dtype="<f8") + 0.5) / count
+    response = resolve_boundary_responses_batch(
+        prepare_boundary_rules((prepare_boundary_rule(0, 10, "isotropic", {}),)),
+        np.arange(count + 1, dtype="<i8"),
+        np.zeros(count, dtype="<i8"),
+        np.asarray([10], dtype="<i4"),
+        np.asarray([0], dtype="<i4"),
+        np.tile([1.0, 0.0], (count, 1)),
+        np.tile([3.0, 4.0], (count, 1)),
+        np.ones(count, dtype="<f8"),
+        np.zeros(count, dtype="<f8"),
+        np.zeros(count, dtype="<f8"),
+        angle_draw,
+        np.zeros(count, dtype="<f8"),
+        roundoff_ulps=64,
+    )
+    assert np.all(response.status == BOUNDARY_STATUS_OK)
+    assert np.all(response.law == BOUNDARY_LAW_ISOTROPIC)
+    velocity = response.velocity_post_m_s
+    assert np.all(velocity[:, 0] < 0.0)
+    np.testing.assert_allclose(np.linalg.norm(velocity, axis=1), 5.0, rtol=3e-16)
+    np.testing.assert_allclose(velocity.mean(axis=0), [-10 / np.pi, 0.0], atol=1e-8)
+    np.testing.assert_allclose(np.mean(velocity**2, axis=0), [12.5, 12.5], atol=1e-12)
+    angle = np.arctan2(velocity[:, 1], -velocity[:, 0])
+    np.testing.assert_allclose(
+        np.quantile(angle, [0.1, 0.5, 0.9]), [-0.4 * np.pi, 0.0, 0.4 * np.pi], atol=1e-4
+    )
+    with pytest.raises(BoundaryLawError, match="does not accept parameters"):
+        prepare_boundary_rule(0, 10, "isotropic", {"temperature": 300.0})
+
+
+def test_isotropic_probabilistic_stick_uses_the_declared_probability() -> None:
+    rule = prepare_boundary_rule(
+        0,
+        10,
+        "probabilistic_stick",
+        {
+            "probability": 0.2,
+            "otherwise": {"law": "isotropic"},
+        },
+    )
+    response = _resolve_boundary_responses(
+        prepare_boundary_rules((rule,)),
+        np.asarray([0, 1, 2], dtype="<i8"),
+        np.asarray([0, 0], dtype="<i8"),
+        np.asarray([10], dtype="<i4"),
+        np.asarray([0], dtype="<i4"),
+        np.asarray([[1.0, 0.0]], dtype="<f8"),
+        np.asarray([[3.0, 4.0], [3.0, 4.0]], dtype="<f8"),
+        np.asarray([0.1, 0.3], dtype="<f8"),
+        roundoff_ulps=64,
+    )
+    np.testing.assert_array_equal(
+        response.outcome, [BOUNDARY_OUTCOME_STUCK, BOUNDARY_OUTCOME_REFLECTED]
+    )
+    np.testing.assert_array_equal(response.velocity_post_m_s, [[0.0, 0.0], [-5.0, 0.0]])
+
+
+def test_isotropic_corner_does_not_redraw_an_outward_response() -> None:
+    response = resolve_boundary_responses_batch(
+        prepare_boundary_rules((prepare_boundary_rule(0, 10, "isotropic", {}),)),
+        np.asarray([0, 2], dtype="<i8"),
+        np.asarray([0, 1], dtype="<i8"),
+        np.asarray([10, 11], dtype="<i4"),
+        np.asarray([0, 0], dtype="<i4"),
+        np.asarray([[1.0, 0.0], [0.0, 1.0]], dtype="<f8"),
+        np.asarray([[1.0, 1.0]], dtype="<f8"),
+        np.ones(1, dtype="<f8"),
+        np.zeros(1, dtype="<f8"),
+        np.zeros(1, dtype="<f8"),
+        np.asarray([0.9], dtype="<f8"),
+        np.zeros(1, dtype="<f8"),
+        roundoff_ulps=64,
+    )
+    assert response.status[0] == BOUNDARY_STATUS_INDETERMINATE_POLICY
 
 
 def test_priority_response_cannot_exit_through_an_ignored_candidate() -> None:

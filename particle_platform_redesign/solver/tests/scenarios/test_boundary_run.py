@@ -14,7 +14,9 @@ from chamber_particles.case_format import BoundaryData, write
 from chamber_particles.rng import (
     WALL_MAXWELL_NORMAL_STREAM,
     WALL_MAXWELL_TANGENTIAL_STREAM,
+    WALL_PROBABILISTIC_STICK_STREAM,
     wall_standard_normal_batch,
+    wall_uniform_batch,
     wall_uniform_open_batch,
 )
 from tests.verification.microcases import materialize_microcase
@@ -70,11 +72,42 @@ def test_c07_stick_event_and_terminal_state_are_published_by_public_api(
     assert result.manifest["event_algorithm_revision"] == (
         "line_quadratic_curved_capsule_periodic_first_hit_v23"
     )
-    assert result.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v7"
+    assert result.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v8"
     memory_plan = result.manifest["memory_plan"]
     assert isinstance(memory_plan, dict)
     assert memory_plan["geometry_preparation_transient_bytes"] > 0
     assert memory_plan["components"]["prepared_geometry"] > 0
+
+
+def test_isotropic_public_run_preserves_hit_remainder_and_output_identity(tmp_path: Path) -> None:
+    results = []
+    for name, times in (("frames", [1.0, 1.5, 2.0]), ("no-frames", None)):
+        paths = materialize_microcase("C07", tmp_path / name)
+        _set_terminal_case(paths.case_path, law="isotropic", frame_times=times)
+        output = tmp_path / f"{name}-result"
+        simulate(load_case(paths.case_path), output)
+        results.append(open_result(output))
+    event = results[0].read_boundary_events()
+    np.testing.assert_array_equal(event.law_id, ["isotropic"])
+    np.testing.assert_array_equal(event.outcome, ["reflected"])
+    np.testing.assert_array_equal(event.time_s, [1.5])
+    speed = np.sqrt(0.5**2 + 0.25**2)
+    draw = wall_uniform_open_batch(
+        0, np.asarray([701], dtype="<u8"), np.asarray([0], dtype="<u8"), WALL_MAXWELL_NORMAL_STREAM
+    )[0]
+    angle = np.pi * (draw - 0.5)
+    expected = speed * np.asarray([-np.cos(angle), np.sin(angle)])
+    np.testing.assert_allclose(event.velocity_post_m_s[0], expected, rtol=2e-15)
+    np.testing.assert_allclose(
+        results[0].read_final().position_m[0], event.position_m[0] + 0.5 * expected, atol=5e-16
+    )
+    np.testing.assert_array_equal(
+        results[0].read_final().position_m, results[1].read_final().position_m
+    )
+    np.testing.assert_array_equal(
+        event.velocity_post_m_s, results[1].read_boundary_events().velocity_post_m_s
+    )
+    assert not any(results[0].manifest["failure_reason_counts"].values())
 
 
 def test_escape_is_right_continuous_and_independent_of_trajectory_output(
@@ -215,7 +248,7 @@ def test_maxwell_thermal_reflection_is_output_schedule_independent(
         scheduled.read_final().velocity_m_s,
         disabled.read_final().velocity_m_s,
     )
-    assert scheduled.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v7"
+    assert scheduled.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v8"
     assert scheduled.manifest["rng_algorithm_revision"] == "philox4x32_10_v2"
     assert scheduled.manifest["random_draw_kinds"]["wall_maxwell_normal"] == (
         WALL_MAXWELL_NORMAL_STREAM
@@ -491,3 +524,65 @@ def _make_rz_axis_seam_case(
     document["time"]["end_s"] = 0.5
     document["time"]["dt_s"] = 0.5
     path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+
+def test_probabilistic_isotropic_public_draws_are_independent_of_workers_and_output(
+    tmp_path: Path,
+) -> None:
+    count = 64
+    ids = np.asarray([1009 + 17 * index for index in range(count)], dtype="<i8")
+    results = []
+    for workers, times in ((1, [1.0, 1.5, 2.0]), (2, None)):
+        paths = materialize_microcase("C07", tmp_path / f"case-{workers}")
+        case = load_case(paths.case_path)
+        original = case.data.sources[0]
+        source = replace(
+            original,
+            particle_id=ids,
+            release_time_s=np.repeat(original.release_time_s, count),
+            position_m=np.repeat(original.position_m, count, axis=0),
+            velocity_m_s=np.repeat(original.velocity_m_s, count, axis=0),
+            charge_number=np.repeat(original.charge_number, count),
+            mass_kg=np.repeat(original.mass_kg, count),
+            drag_diameter_m=np.repeat(original.drag_diameter_m, count),
+            contact_radius_m=np.repeat(original.contact_radius_m, count),
+            electrostatic_radius_m=np.repeat(original.electrostatic_radius_m, count),
+            displaced_volume_m3=np.repeat(original.displaced_volume_m3, count),
+            model_weight=np.repeat(original.model_weight, count),
+            material_id=np.repeat(original.material_id, count),
+        )
+        data_path = paths.case_path.parent / "population.h5"
+        info = write(data_path, replace(case.data, sources=(source,)))
+        _set_terminal_case(paths.case_path, law="probabilistic_stick", frame_times=times)
+        document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+        document["case"]["data_path"] = data_path.name
+        document["case"]["expected_content_hash"] = info.content_hash
+        document["boundaries"][0].update(probability=0.2, otherwise={"law": "isotropic"})
+        paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+        output = tmp_path / f"result-{workers}"
+        simulate(load_case(paths.case_path), output, workers=workers)
+        results.append(open_result(output))
+    particles = ids.astype("<u8")
+    ordinals = np.zeros(count, dtype="<u8")
+    stuck = wall_uniform_batch(0, particles, ordinals, WALL_PROBABILISTIC_STICK_STREAM) < 0.2
+    angles = np.pi * (
+        wall_uniform_open_batch(0, particles, ordinals, WALL_MAXWELL_NORMAL_STREAM) - 0.5
+    )
+    expected = np.sqrt(0.5**2 + 0.25**2) * np.column_stack((-np.cos(angles), np.sin(angles)))
+    expected[stuck] = 0.0
+    assert 0 < np.count_nonzero(stuck) < count
+    for result in results:
+        events = result.read_boundary_events()
+        final = result.read_final()
+        np.testing.assert_array_equal(events.particle_id, ids)
+        np.testing.assert_array_equal(events.outcome, np.where(stuck, "stuck", "reflected"))
+        np.testing.assert_allclose(events.velocity_post_m_s, expected, rtol=2e-15, atol=2e-16)
+        np.testing.assert_allclose(final.position_m, [1.0, 0.625] + 0.5 * expected, atol=5e-16)
+        assert not any(result.manifest["failure_reason_counts"].values())
+    np.testing.assert_array_equal(
+        results[0].read_final().position_m, results[1].read_final().position_m
+    )
+    np.testing.assert_array_equal(
+        results[0].read_boundary_events().velocity_post_m_s,
+        results[1].read_boundary_events().velocity_post_m_s,
+    )

@@ -32,6 +32,7 @@ Record these independently in `numerical_plan.json` or a short equivalent table:
 | Requested observation times | Output/probe and comparison sampling; accepted proposals evaluate state without changing production integration |
 | COMSOL requested output times | Saved/observed solution schedule; not evidence of every internal integrator step |
 | COMSOL solver controls | Actual time-stepping method, tolerances, max-step/step policy and, when available, actual accepted times; native source controls remain a separate refinement axis |
+| Noise force normalization | Bound amplitude normalization expression/parameter and repeated-time random-value sharing; do not assume a parameter named `timestep` tracks the accepted integrator step |
 | Worker count | Execution resource through CLI/API; no physics or time-step role |
 | Event localization/refinement | Numerical first-hit tolerance and path subdivisions; separate from saved output and physical wall parameters |
 | Brownian root and tree resolution | Actual root intervals, uniform base depth and candidate-only maximum depth; do not identify a saved frame with a stochastic root |
@@ -48,7 +49,7 @@ times from row order.
 |---|---|
 | `rk4_fixed` | Smooth nonstochastic coupled motion/charge with acceptable explicit stability cost. Fields, force, and charge are evaluated at the actual stage positions/times. Ballistic or proven constant-acceleration cases can resolve to an exact specialization internally. |
 | `exponential_midpoint` | Linear relaxation or locally frozen relaxation dominates. The drag update is exact for frozen coefficients; source/midpoint evaluation controls the error when coefficients or additive force vary. Current charge-stable affine exponential coupling handles continuous charge in the same proposal; do not apply an obsolete charge-only prohibition from historical P11 text. |
-| `ou_langevin` | Only with `inertial_langevin_fdt_epstein_linear_midpoint_2d_v2` and compatible linear Epstein. Midpoint-frozen joint OU position/velocity plus coupled charge uses a finite-depth Hermite numerical path. Noise is a stochastic model choice, not a stabilizer for deterministic physics. |
+| `ou_langevin` | Only with a supported inertial-noise/linear-friction pairing in the [model owner](../../../../particle_platform_redesign/solver/docs/physics_models.md). Midpoint-frozen joint OU position/velocity plus coupled charge uses a finite-depth Hermite numerical path. The selected model determines FDT or independently prescribed diffusion; noise is a stochastic model choice, not a stabilizer for deterministic physics. |
 
 Never substitute adaptive stepping, an unregistered integrator, charge-only
 subcycling, frozen-charge history replay, or an equilibrium charge replacement
@@ -178,10 +179,18 @@ smaller particle step with correcting the latter.
 
 ## 6. Brownian accuracy and uncertainty
 
-The current noise model uses inertial FDT OU with midpoint-frozen coefficients.
+The supported inertial-noise models use joint OU with midpoint-frozen coefficients;
+FDT versus independent force diffusion and compatible friction are defined by
+the selected [model revision](../../../../particle_platform_redesign/solver/docs/physics_models.md).
 Its Hermite path at finite depth is not exact continuous OU first passage and
 does not certify zero missed wall crossings. Different RNGs/seeds between
 COMSOL and candidate do not define matched stochastic trajectories.
+
+When native force normalization depends on a fixed parameter, changing its
+integrator step alone may change the effective noise rather than refine a fixed
+stochastic problem. Recheck the bound amplitude/correlation meaning before
+registering a native refinement; a weak-limit coefficient mapping does not prove
+finite-step joint covariance or first-passage equivalence.
 
 Treat four controls independently:
 

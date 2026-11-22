@@ -6,6 +6,8 @@ import hashlib
 import json
 import math
 import os
+import sys
+import time
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from os import PathLike
@@ -35,6 +37,8 @@ RESULT_WRITER_RESERVE_BYTES: Final = 3 * 1024 * 1024
 _RAW_CHUNK_CACHE_BYTES: Final = 64 * 1024
 _DEFAULT_BOUNDARY_BATCH_ROWS: Final = 4096
 _FINAL_VALIDATION_BLOCK_ROWS: Final = 4096
+_DIRECTORY_PUBLICATION_TIMEOUT_S: Final = 1.0
+_DIRECTORY_PUBLICATION_RETRY_S: Final = 0.025
 
 _LATEST_FORMAT_VERSION: Final = 1
 _SEGMENT_DIRECTORY: Final = Path("segments")
@@ -778,9 +782,7 @@ class ResultWriter:
         )
         _atomic_json(self.partial_path / "run.json", complete_manifest)
         _atomic_bytes(self.partial_path / "_SUCCESS", b"")
-        if self.output_path.exists():
-            raise ResultWriteError(f"result appeared during publication: {self.output_path}")
-        os.rename(self.partial_path, self.output_path)
+        _publish_result_directory(self.partial_path, self.output_path)
         self._closed = True
         return _summary_from_counts(
             self.output_path,
@@ -821,7 +823,7 @@ class ResultWriter:
         if (self.partial_path / "_SUCCESS").is_file():
             view = _open_completed_path(self.partial_path)
             summary = _summary_from_manifest(self.output_path, view.manifest)
-            os.rename(self.partial_path, self.output_path)
+            _publish_result_directory(self.partial_path, self.output_path)
             self._completed_summary = summary
             self._closed = True
             return
@@ -1056,6 +1058,29 @@ def _require_resume_identity(
         raise ResultWriteError("partial result algorithm revision is incompatible")
     if manifest.get("checkpoint_schema_version") != CHECKPOINT_SCHEMA_VERSION:
         raise ResultWriteError("partial checkpoint schema version is incompatible")
+
+
+def _publish_result_directory(partial: Path, output: Path) -> None:
+    """Atomically publish, allowing only bounded Windows sharing/denial recovery."""
+    deadline = time.monotonic() + _DIRECTORY_PUBLICATION_TIMEOUT_S
+    original_error: OSError | None = None
+    while True:
+        if output.exists():
+            raise ResultWriteError(f"result appeared during publication: {output}")
+        if not partial.is_dir():
+            raise ResultWriteError(f"complete partial result disappeared: {partial}")
+        try:
+            os.rename(partial, output)
+            return
+        except OSError as error:
+            if sys.platform != "win32" or getattr(error, "winerror", None) not in (5, 32, 33):
+                raise
+            if original_error is None:
+                original_error = error
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise original_error from None
+            time.sleep(min(_DIRECTORY_PUBLICATION_RETRY_S, remaining))
 
 
 def _atomic_json(path: Path, value: Mapping[str, object]) -> None:

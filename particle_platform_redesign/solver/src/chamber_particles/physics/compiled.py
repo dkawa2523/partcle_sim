@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from typing import NamedTuple
 
 import numpy as np
 from numba import njit
@@ -53,17 +54,20 @@ DRAG_NONE = 0
 DRAG_EPSTEIN = 1
 DRAG_STOKES_CUNNINGHAM = 2
 DRAG_EPSTEIN_FINITE_SPEED = 3
+DRAG_PRESCRIBED_LINEAR = 4
 
 CHARGE_FIXED = 0
 CHARGE_OML_STATIONARY_MAXWELLIAN_DEBYE_HUCKEL = 1
 CHARGE_OML_SHIFTED_MAXWELLIAN_SINGLE_ION_NEGATIVE_DEBYE_HUCKEL = 2
 CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_TWO_CURRENT = 3
 CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT = 4
+CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR = 5
 
 ION_DRAG_NONE = 0
 ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED = 1
 ION_DRAG_RELATIVE_FLOW_SCREENED = 2
 ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE = 3
+ION_DRAG_PRESCRIBED_POLYNOMIAL = 4
 
 THERMOPHORESIS_NONE = 0
 THERMOPHORESIS_WALDMANN_GALLIS = 1
@@ -73,12 +77,29 @@ LIFT_NONE = 0
 LIFT_RAREFIED_VORTICITY_RZ = 1
 LIFT_SAFFMAN_XY = 2
 LIFT_SAFFMAN_RZ = 3
+LIFT_PRESCRIBED_ROTATIONAL = 4
 
 ERROR_NONE = 0
 ERROR_RATE = 1
 ERROR_DERIVED_VALUE = 2
 ERROR_ACCELERATION = 3
 ERROR_CHARGE_INVARIANT = 4
+
+
+class PrescribedPhysicsBindings(NamedTuple):
+    """Prepared column offsets into the existing sampled primitive slab."""
+
+    friction: int
+    force_diffusion: int
+    electron_reference: float
+    electron_offset: int
+    electron_slope: int
+    ion_rate: int
+    ion_slope: int
+    ion_constant: int
+    ion_linear: int
+    ion_quadratic: int
+    rotation: int
 
 
 @njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
@@ -174,6 +195,9 @@ def evaluate_physics_tile_into(
     target_velocity: FloatArray,
     additive_acceleration: FloatArray,
     error_code: UInt8Array,
+    prescribed: PrescribedPhysicsBindings,
+    prescribed_values: FloatArray,
+    electric_maximum_abs_charge: float,
 ) -> None:
     """Evaluate physics into caller-owned, disjoint row buffers."""
 
@@ -227,6 +251,8 @@ def evaluate_physics_tile_into(
             velocity_x,
             velocity_y,
             row,
+            prescribed,
+            prescribed_values,
         )
         charge_rate[row] = row_charge_rate
         charge_rate_derivative[row] = row_charge_rate_derivative
@@ -251,6 +277,8 @@ def evaluate_physics_tile_into(
             epstein_diffuse_reflection_fraction,
             epstein_maximum_speed_ratio,
             row,
+            prescribed_values,
+            prescribed.friction,
         )
         acceleration[row, 0] = drag_x
         acceleration[row, 1] = drag_y
@@ -313,6 +341,8 @@ def evaluate_physics_tile_into(
             ion_drag_electric_field_V_m,
             ion_drag_maximum_relative_ion_speed_m_s,
             row,
+            prescribed,
+            prescribed_values,
         )
         applicable[row] = applicable[row] and row_applicable
         error_code[row] = row_error
@@ -348,6 +378,8 @@ def evaluate_physics_tile_into(
             lift_azimuthal_gas_vorticity_s_inv,
             lift_coefficient,
             row,
+            prescribed_values,
+            prescribed.rotation,
         )
         applicable[row] = applicable[row] and row_applicable
         additive_acceleration[row, 0] += lift_x
@@ -361,6 +393,7 @@ def evaluate_physics_tile_into(
             mass,
             electric_field_V_m,
             row,
+            electric_maximum_abs_charge,
         )
         additive_acceleration[row, 0] += electric_x
         additive_acceleration[row, 1] += electric_y
@@ -420,6 +453,8 @@ def _charge_row(
     velocity_x_m_s: float,
     velocity_y_m_s: float,
     row: int,
+    prescribed: PrescribedPhysicsBindings,
+    prescribed_values: FloatArray,
 ) -> tuple[float, float, bool, int]:
     """Dispatch the selected continuous-charge revision for one row."""
 
@@ -427,6 +462,8 @@ def _charge_row(
         return 0.0, 0.0, True, ERROR_NONE
     if charge_number < charge_number_lower or charge_number > charge_number_upper:
         return 0.0, 0.0, True, ERROR_CHARGE_INVARIANT
+    if charge_code == CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR:
+        return _prescribed_charge_row(charge_number, prescribed, prescribed_values, row)
     if charge_code == CHARGE_OML_STATIONARY_MAXWELLIAN_DEBYE_HUCKEL:
         return _oml_charge_row(
             charge_number,
@@ -497,6 +534,27 @@ def _charge_row(
 
 
 @njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _prescribed_charge_row(
+    charge: float, model: PrescribedPhysicsBindings, values: FloatArray, row: int
+) -> tuple[float, float, bool, int]:
+    electron = 0.0
+    if model.electron_reference > 0.0:
+        electron = np.exp(
+            math.log(model.electron_reference)
+            + values[row, model.electron_offset]
+            + values[row, model.electron_slope] * charge
+        )
+    ion = values[row, model.ion_rate]
+    beta = values[row, model.ion_slope]
+    alpha = values[row, model.electron_slope]
+    rate = -electron + ion * (1.0 - beta * charge)
+    derivative = -alpha * electron - beta * ion
+    finite = math.isfinite(rate) and math.isfinite(derivative) and derivative <= 0.0
+    finite = finite and ion >= 0.0 and alpha >= 0.0 and beta >= 0.0
+    return rate, derivative, True, ERROR_NONE if finite else ERROR_RATE
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
 def _drag_row(
     drag_code: int,
     mass_kg: float,
@@ -513,9 +571,21 @@ def _drag_row(
     epstein_diffuse_reflection_fraction: float,
     epstein_maximum_speed_ratio: float,
     row: int,
+    prescribed_values: FloatArray,
+    friction_offset: int,
 ) -> tuple[float, float, float, bool, int]:
     """Dispatch the selected drag law for one row."""
 
+    if drag_code == DRAG_PRESCRIBED_LINEAR:
+        rate = prescribed_values[row, friction_offset] / mass_kg
+        ax = rate * (gas_velocity_m_s[row, 0] - velocity_x_m_s)
+        ay = rate * (gas_velocity_m_s[row, 1] - velocity_y_m_s)
+        error = (
+            ERROR_NONE
+            if math.isfinite(rate) and rate > 0.0 and math.isfinite(ax) and math.isfinite(ay)
+            else ERROR_RATE
+        )
+        return ax, ay, rate, True, error
     if drag_code == DRAG_EPSTEIN:
         return _epstein_drag_row(
             mass_kg,
@@ -733,11 +803,18 @@ def _lift_row(
     azimuthal_gas_vorticity_s_inv: FloatArray,
     lift_coefficient: float,
     row: int,
+    prescribed_values: FloatArray,
+    rotation_offset: int,
 ) -> tuple[float, float, bool]:
     """Evaluate the selected planar lift revision for one row."""
 
     if lift_code == LIFT_NONE:
         return 0.0, 0.0, True
+    if lift_code == LIFT_PRESCRIBED_ROTATIONAL:
+        rate = prescribed_values[row, rotation_offset] / particle_mass_kg
+        ax = rate * (gas_velocity_m_s[row, 1] - velocity_z_m_s)
+        ay = -rate * (gas_velocity_m_s[row, 0] - velocity_r_m_s)
+        return ax, ay, math.isfinite(ax) and math.isfinite(ay)
     if lift_code == LIFT_SAFFMAN_XY or lift_code == LIFT_SAFFMAN_RZ:
         return _saffman_lift_row(
             lift_code,
@@ -851,12 +928,15 @@ def _electric_row(
     particle_mass_kg: float,
     electric_field_V_m: FloatArray,
     row: int,
+    maximum_abs_charge: float,
 ) -> tuple[float, float]:
     """Evaluate the optional Coulomb contribution for one row."""
 
     if not enabled:
         return 0.0, 0.0
-    charge_coulomb = charge_number * ELEMENTARY_CHARGE_C
+    charge_coulomb = (
+        min(max(charge_number, -maximum_abs_charge), maximum_abs_charge) * ELEMENTARY_CHARGE_C
+    )
     return (
         charge_coulomb * electric_field_V_m[row, 0] / particle_mass_kg,
         charge_coulomb * electric_field_V_m[row, 1] / particle_mass_kg,
@@ -904,11 +984,26 @@ def _ion_drag_row(
     electric_field_V_m: FloatArray,
     maximum_relative_ion_speed_m_s: float,
     row: int,
+    prescribed: PrescribedPhysicsBindings,
+    prescribed_values: FloatArray,
 ) -> tuple[float, float, bool, int]:
     """Evaluate the selected ion-drag revision for one stage row."""
 
     if ion_drag_code == ION_DRAG_NONE:
         return 0.0, 0.0, True, ERROR_NONE
+    if ion_drag_code == ION_DRAG_PRESCRIBED_POLYNOMIAL:
+        ax = (
+            prescribed_values[row, prescribed.ion_constant]
+            + charge_number * prescribed_values[row, prescribed.ion_linear]
+            + charge_number * charge_number * prescribed_values[row, prescribed.ion_quadratic]
+        ) / particle_mass_kg
+        ay = (
+            prescribed_values[row, prescribed.ion_constant + 1]
+            + charge_number * prescribed_values[row, prescribed.ion_linear + 1]
+            + charge_number * charge_number * prescribed_values[row, prescribed.ion_quadratic + 1]
+        ) / particle_mass_kg
+        error = ERROR_NONE if math.isfinite(ax) and math.isfinite(ay) else ERROR_ACCELERATION
+        return ax, ay, True, error
     if ion_drag_code == ION_DRAG_RELATIVE_FLOW_SCREENED:
         return _relative_flow_screened_ion_drag_row(
             particle_mass_kg,

@@ -1,5 +1,96 @@
 # M3-V: external COMSOL reference-case evaluation
 
+`prepare_vigus_transport.py` prepares the explicit Vigus coefficient equations
+from an inspected static canonical primitive case. It preserves realized
+particles, geometry, wall laws, time grid and observation clocks, adds the
+reference force/charge/noise bindings and selects the existing OU integrator.
+It reads no MPH and replays no saved force or charge history.
+
+```console
+uv run --locked python -m tools.vv.comsol.prepare_vigus_transport PRIMITIVE_CASE NEW_DIRECTORY --parameters PARAMETERS_YAML --interval-tree-depth BASE_DEPTH --adaptive-max-depth MAX_DEPTH
+uv run --locked chamber-particles check NEW_DIRECTORY/case.yaml
+uv run --locked chamber-particles run NEW_DIRECTORY/case.yaml -o NEW_RESULT
+uv run --locked chamber-particles inspect NEW_RESULT
+```
+
+Depths and `time.dt_s` belong to the independent numerical plan; the command
+does not inherit a historical Vigus step or use the saved output spacing.
+An unused output directory is required. `check` is a static input check; the
+full model/bounds/support preparation still runs during `run`.
+
+The primitive case contains homogeneous particle properties and these static
+nodal fields on one layout, with canonical SI units/basis:
+
+| Fields | Unit |
+|---|---|
+| `gas_velocity`, `ion_speed` | m/s (vector, scalar respectively) |
+| `electric_field` | V/m, vector |
+| `gas_density`, `gas_viscosity`, `gas_pressure` | kg/m³, Pa s, Pa |
+| `gas_temperature`, `ion_temperature` | K |
+| `electron_density`, `ion_density` | 1/m³ |
+| `electron_temperature_V`, `ion_mass` | V, kg |
+| `rotation_rate` | 1/s, specifically d(ug_z)/dr − d(ug_r)/dz in RZ |
+
+The initial YAML separately retains the inspected Talbot, DEP and gravity
+bindings, when active. Their PPR gradients, thermal conductivity and mean-free
+path are required by those models. The producer does not infer missing forces
+or wall laws from filenames. The source-dependent near-zero Saffman
+regularization and native-to-P1 transfer require explicit correspondence
+evidence; the signed-rotation formula alone does not prove native parity.
+
+The parameter YAML uses exactly `format_version: 2`,
+`cmd_slip_coefficients: [C1, C2, C3]`,
+`native_particle_density_kg_m3`, `native_capacitance_F`,
+`maximum_abs_charge_number`, `brownian`, and a nonempty `native_binding` mapping linking
+the inspected source/solution/export receipts. Supply actual native values.
+The producer computes friction, independent force diffusion, finite electron
+log offset, collection coefficients, ion force polynomial and signed rotation.
+Zero E is an error for the literal ion direction; there is no density floor
+or substitute direction. Coulomb alone uses the explicit charge cap.
+
+Brownian interpretation is mandatory. For the source force's continuous
+white-noise interpretation, use:
+
+```yaml
+brownian:
+  interpretation: continuous_white_force
+```
+
+This generates `D = 6*pi*mu*d*kB*T`. A time-keyed random force evaluated by
+classical fixed-step RK4 is a different numerical process. If the same random
+value is reused at identical physical times, the velocity increment has
+weights `(1/6, 2/3, 1/6)` and adjacent increments share an endpoint value.
+For `h = force_normalization_step`, its N-step undamped variance is
+`D*h/m^2 * (5*N/9 - 1/18)`, so the long-time white-force limit is `5*D/9`.
+Select that external mathematical correspondence explicitly, in a separate case:
+
+```yaml
+brownian:
+  interpretation: fixed_rk4_white_limit
+  step_s: 1.0e-6
+  force_normalization_step_s: 1.0e-6
+  evidence: "Actual method/time-key readback and constant-coefficient covariance receipt with hashes"
+```
+
+The numbers are illustrative; supply inspected values. Unequal normalization
+and native steps are rejected. The independent candidate `time.dt_s` need
+not equal the native step. The multiplier is derived, never fitted to final
+counts or trajectories; the primitive inputs and original continuous case
+remain available. The manifest records the interpretation, derivation and
+evidence. This limit does not reproduce finite-step joint x/v covariance,
+native random paths, shortened event intervals, variable steps or arbitrary
+state-dependent noise. It is neither an FDT repair nor physical validation.
+In particular, a native parameter named `timestep` must not be assumed to be
+the integrator's actual step, and changing only that step can change the
+native stochastic problem. Parameter format v1 is historical execution
+evidence; rebuild current inputs with an explicit v2 interpretation.
+
+`build_manifest.json` binds source/parameter bytes, primitive provenance,
+particle properties, coefficient inventory and canonical logical hash.
+The reference models check their particle-property bindings during run
+preparation. A descriptive native comparison and physically validated
+transport remain separate claims.
+
 M3-V is an external target-applicability and relevance gate. It does **not**
 make `model_dataset/` a golden truth, and it is not imported by
 `chamber_particles`. Its purpose is to decide which production physics should
@@ -284,11 +375,13 @@ mismatch. The retained deterministic physics is therefore exactly:
 ### External trajectory figures
 
 `plot_matched_trajectories.py` reads only the normalized candidate/reference
-CSVs.  It does not import `chamber_particles`, COMSOL, or `model_dataset`.
+CSVs. It does not execute the solver, COMSOL, or `model_dataset`; optional
+geometry is read through `chamber_particles.case_format`.
 Before rendering, it requires exact particle-ID identity. Each side's finite
 R-Z path is drawn independently; missing escape suffixes are excluded without
-reconstruction, and receipt metrics use only common finite
-`(particle_id, time_s)` keys. Both input SHA-256 values are recorded in
+reconstruction, and receipt metrics use only common finite active
+`(particle_id, time_s)` keys, additionally requiring both precontact flags when
+supplied. Both input SHA-256 values are recorded in
 `receipt.json`.
 
 For the accepted exact-P1 fine-step pair:
@@ -302,8 +395,10 @@ uv run --locked python tools/vv/comsol/plot_matched_trajectories.py `
 ```
 
 The immutable output directory contains one all-particle R-Z overview SVG and
-optional PNG. `particles/` contains one R-Z-only SVG for every aligned
-particle ID, while `index.html` is a lazy-loading atlas over all of them.
+optional PNG. Individual SVGs are opt-in: repeat `--particle-id <stable ID>` for
+the desired details. `particles/` and its lazy-loading atlas entries contain
+only those selected IDs. Omitting the option still renders every aligned
+particle in the overview and retains the full comparison/coverage metrics.
 It intentionally creates no difference, `r(t)`, or `z(t)` plots. COMSOL is a
 solid orange line and the candidate is a dashed blue line so the encoding
 remains distinguishable without relying on color. PNG creation uses an
@@ -872,7 +967,7 @@ The compact authority is
 
 ## External observed XY/RZ trajectory overlays
 
-`plot_matched_trajectories.py` v5 is an external V&V renderer. It reads normalized
+`plot_matched_trajectories.py` v6 is an external V&V renderer. It reads normalized
 long-form trajectory CSVs and can read optional canonical geometry through
 `chamber_particles.case_format`; it does not execute the solver. It first
 requires exact particle-ID identity, then draws each side's finite observed
@@ -886,7 +981,14 @@ explicit precontact flags when supplied; missing flags do not prove event-free
 propagation. Coordinates are displayed in millimetres while metrics remain SI.
 
 Each invocation creates one all-particle XY/RZ overlay SVG (PNG is optional),
-one spatial SVG for every particle ID, an HTML atlas, and a hash-bearing receipt.
+an HTML index, and a hash-bearing receipt. Individual spatial SVGs are generated
+only for repeated `--particle-id` selections, recorded in the receipt; the
+default no longer creates a file for every ID. Detail selection never filters
+the overview or metrics. Common spatial bounds are resolved once, coverage is
+computed from the existing per-particle arrays, and metric alignment avoids
+duplicating the full coordinate tables as Python dictionaries. CSVs and the
+all-particle SVG still require memory proportional to the retained observations;
+this renderer is not an out-of-core tool.
 It does not provide an all-particle side-by-side layout or unpaired-ensemble
 evaluation. A narrow renderer can reuse the bound tables for that layout. It
 does not create difference, `r(t)`, or `z(t)` figures:
@@ -896,6 +998,7 @@ uv run --locked python tools/vv/comsol/plot_matched_trajectories.py `
   --candidate <solver_trajectory.csv> `
   --reference <normalized_comsol_trajectory.csv> `
   --geometry <canonical_case.h5> `
+  --particle-id <stable_particle_ID> `
   --output-directory <new_output_directory> `
   --label "<matched-case label>"
 ```
@@ -916,6 +1019,59 @@ support particle-wise identity. Core model availability and candidate
 self-convergence must not be reported as cross-representation agreement.
 
 ## Interpretation limits
+
+### Saved whole-population descriptions
+
+`evaluate_saved_population.py` describes a saved native RZ population and an
+optional completed public solver result. It is separate from the deterministic
+pre-event evaluator: terminal outcomes, Brownian populations and unknown native
+disappearance causes remain visible. It assigns no numerical/statistical
+agreement verdict and uses no fitted allowance.
+
+The native long-form CSV contract requires `particle_id`, `time_s`, `r_m`, `z_m`,
+`vr_m_s`, `vz_m_s`, `charge_number`, `native_status`, `release_time_s`,
+`stop_time_s` and `native_final_status`. Status codes are the bound COMSOL
+0/unreleased, 1/in-domain, 2/frozen, 3/stuck and 4/disappeared meanings. Current
+status owns each saved time; final status is checked only as terminal metadata.
+Rows may be shuffled, but duplicate ID/time keys or inconsistent source/terminal
+metadata are rejected. Missing coordinates are retained in coverage rather than
+extended, and `disappeared_unknown` is never relabelled `escaped`.
+
+```powershell
+uv run --locked python -m tools.vv.comsol.evaluate_saved_population `
+  --reference <normalized_native_particles_long.csv> `
+  --candidate <completed_solver_result> `
+  --reference-terminal-times `
+  --output <new_population_description.json>
+```
+
+Omit `--candidate` for saved-native characterization. Use
+`--reference-terminal-times` only when native inspection independently confirms
+that `stop_time_s` is terminal stopping time. The tool checks it against the
+last-active/first-terminal observation bracket; this is not first wall arrival.
+Without that declaration it reports observation brackets and leaves exact
+terminal-time/lifetime summaries unknown. Candidate capture times come from its
+terminal event ledger; numerical failures are separate.
+
+The candidate must request whole-population frames from the start through the
+end of its executed RZ window, and a pair must share the same stable source IDs
+and complete window. Public frames legitimately omit escaped/failed particles
+after their kinematics become invalid. Only lifecycle is recovered at/after the
+recorded terminal or failure timestamp (or before an unreleased particle's
+release); position, velocity and charge remain missing. Final status is never
+applied to earlier observations. An omitted active/pre-terminal state with no
+such explanation is rejected. Coverage separates observed state rows, missing
+states, and known versus unknown lifecycle; fewer frame rows do not imply fewer
+registered particles or an unknown terminal population.
+Population curves use exact common saved times without interpolation and report
+unmatched clock counts. Counts/fractions, nonuniform-clock active-fraction
+integrals, terminal capture quantiles, censored active lifetime, active speed and
+charge quantiles, and state/observation coverage are descriptive. Speed/charge
+quantiles use each participant's own active cohort. Same-ID finite-active RMS
+uses equal retained rows, not time weights, and does not couple independent
+Brownian paths. Computational counts do not establish source flux, physical
+deposition or adhesion. Native boundary/first-hit accuracy, mesh/time/path
+convergence, sampling uncertainty and physical validity require separate evidence.
 
 ### P18-C saved-primitive charge-rate parity
 

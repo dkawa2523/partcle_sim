@@ -84,6 +84,13 @@ snapshot間を線形補間し、run内のsnapshot knotではmacro intervalを分
 solverはcategoryごとに一つのrevisionを選び、指定された寄与を同じstage stateで合成します。適用域外で別モデルへ
 自動切替、値のclamp、producer名に基づく分岐は行いません。
 
+外部指定の数学式を扱う`prescribed_linear_friction_v1`、`prescribed_force_diffusion_midpoint_2d_v1`、
+`prescribed_exponential_linear_collection_v1`、`prescribed_charge_polynomial_v1`、
+`prescribed_rotational_lift_v1`も、均一粒子物性bindingを持つ明示referenceとして選択できます。
+入力係数・組合せ・物性照合は[reference契約](physics_models.md#explicit-coefficient-reference-revisions)に従います。
+`electric_coulomb_charge_cap_v1`の明示capは電気力だけに作用し、resident chargeを制限しません。
+これらの数学referenceを既存物理modelの認証や任意native方程式の認定へ拡張しません。
+
 ### 境界則
 
 静的2-D geometryのwallについて次を受理します。粒子ごとの`contact_radius_m=0`はpoint particle、正値は
@@ -96,13 +103,14 @@ XY disk / RZ sphereの中心とmaterial `line2`のfinite-radius first contactで
 | `escape` | `escaped`終端 |
 | `hold` | hit時の位置・速度・電荷を保持する`held`終端。再飛散待ちではない |
 | `specular` | 完全鏡面反射。係数指定不可 |
+| `isotropic` | 静止壁で速さ保存、内向き半円の角度一様な2自由度散乱。parameterなし |
 | `restitution` | 明示した法線・接線反発係数による反射 |
 | `maxwell_thermal` | 壁frame鏡面と壁温度のhalf-range Maxwell flux再放出を明示率で混合。wall velocityは静的facetへ接線方向だけ |
-| `probabilistic_stick` | 定数付着確率。非付着時はspecular、restitution、またはmaxwell_thermal |
+| `probabilistic_stick` | 定数付着確率。非付着時はspecular、restitution、maxwell_thermal、またはisotropic |
 
 同時hitは`priority_then_combined_normal_v1`だけを使用します。最小priorityの候補で応答が一意にならない場合は、
 任意の法線を選ばず粒子単位failureにします。B04以降のBrownian runもterminal lawに加えて`specular`、
-`restitution`、`maxwell_thermal`、`probabilistic_stick`を受理します。active hitでは使用済みOU rootのtailを
+`restitution`、`maxwell_thermal`、`isotropic`、`probabilistic_stick`を受理します。active hitでは使用済みOU rootのtailを
 継続せず、hit prefixとwall応答をcommitして残時間をfresh stochastic rootから進めます。
 surface sourceのvelocityはcanonical HDF5の粒子rowに明示します。Brownianはsurface contactを係数midpoint評価より
 先に解決し、zero-time active response後はpost-wall stateからfresh rootを開始します。熱的な初速度や任意分布は外部入力作成側で

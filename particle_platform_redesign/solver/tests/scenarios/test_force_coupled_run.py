@@ -25,11 +25,13 @@ from chamber_particles.case_format import (
     RegularLayout,
     write,
 )
+from chamber_particles.physics.catalog import PHYSICS_CATALOG_REVISION
 from chamber_particles.physics.forces import (
     BOLTZMANN_J_K,
     ELEMENTARY_CHARGE_C,
     VACUUM_PERMITTIVITY_F_M,
 )
+from chamber_particles.physics.runtime import PHYSICS_RUNTIME_REVISION
 from tests.verification.microcases import materialize_microcase
 
 _CONTINUOUS_CHARGE_ION_MASS_KG = 6.6335209e-26
@@ -2792,7 +2794,7 @@ def test_force_coupled_axisymmetric_rz_matches_cartesian_away_from_axis(
     )
     np.testing.assert_array_equal(rz.read_final().charge_number, xy.read_final().charge_number)
     assert rz.manifest["resolved"]["path_kind"] == "rk4_dense"
-    assert rz.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
+    assert rz.manifest["physics_catalog_revision"] == PHYSICS_CATALOG_REVISION
 
 
 def test_epstein_rz_axis_crossing_folds_and_continues_the_residual_time(tmp_path: Path) -> None:
@@ -4172,8 +4174,8 @@ def test_barnes_ion_drag_constant_field_time_convergence(
         "revision": _BARNES_ION_DRAG_REVISION,
     }
     assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
-    assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
-    assert last_result.manifest["physics_runtime_revision"] == "prepared_native_physics_runtime_v24"
+    assert last_result.manifest["physics_catalog_revision"] == PHYSICS_CATALOG_REVISION
+    assert last_result.manifest["physics_runtime_revision"] == PHYSICS_RUNTIME_REVISION
 
 
 def test_barnes_ion_drag_xy_and_rz_use_the_same_stage_physics(tmp_path: Path) -> None:

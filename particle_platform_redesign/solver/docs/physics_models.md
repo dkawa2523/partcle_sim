@@ -3,8 +3,8 @@
 この文書はproductionで実装したversioned modelを扱う。model選択とfield参照はYAMLへ明示し、field名の自動探索、
 適用域外での別modelへの自動切替、backend固有の係数を認めない。runtime contributionはdragを、stageで
 凍結した正の`linear_relaxation(rate, target_velocity)`、その他の力を`explicit_acceleration`として返す。
-現行physics catalog revisionは`inertial_langevin_2d_catalog_v23`、physics runtime revisionは
-`prepared_native_physics_runtime_v24`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
+現行physics catalog revisionは`inertial_langevin_2d_catalog_v24`、physics runtime revisionは
+`prepared_native_physics_runtime_v25`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
 v17はDEP認証上限の直列化丸めを一つのfloat64 successorまで外向きに扱い、v18は各charge stageへ
 `charge_rate_derivative_s_inv=J`を追加し、v19はoptional aggregate three-currentを同じstage payloadへ統合した。
 v20はrelative-flow ion dragの局所interval上界とprepared charge invariantを同じruntime ownerへ追加した。
@@ -19,6 +19,8 @@ runtime v23はvalidated planからstageのmodel code、primitive offset、適用
 runtime v24は同じownerのglobal/local適用域・加速度包絡をnative intoへ収束し、
 prepared contextとpacked primitive rangeから評価する。range unavailableをcertifiedへ読み替えず、
 非有限・適用外のfailureと最初のstatusを維持する。
+catalog v24/runtime v25は以下の明示reference係数とCoulombだけのcharge capを同じstageへ接続し、
+既存のFDT・物理modelの適用域、integrator、RNG、result schemaを維持する。
 
 ## Particle authority
 
@@ -28,6 +30,47 @@ prepared contextとpacked primitive rangeから評価する。range unavailable�
 - Barnes ion dragの粒子半径も`electrostatic_radius_m`だけを使い、drag径から再構成しない。
 - 初期電荷数`Z0`はrealized internal/surface tableの粒子rowにある`charge_number`だけが所有する。
 - `charge: {model: fixed}`は`dZ/dt=0`だけを意味する。電荷Coulomb値は常に`q=Z*e`から求める。
+
+## Explicit coefficient reference revisions
+
+以下は外部指定の数学的方程式を既存stageで評価するreference modelである。係数の生成・native式との対応は
+producerが所有する。通常のEpstein/FDT/OML/kinetic modelの適用域や物理認定を変更しない。
+
+| category / model | revision | 必須係数・式 |
+|---|---|---|
+| drag / `prescribed_linear_friction` | `prescribed_linear_friction_v1` | `gas_velocity_field` [m/s]、`friction_coefficient_field` beta [kg/s]>0。F=beta(u-v)、gamma=beta/m |
+| noise / `prescribed_force_diffusion` | `prescribed_force_diffusion_midpoint_2d_v1` | `force_spectral_density_field` D [N²s]>0、`interval_tree_depth`、optional `adaptive_max_depth`。theta=D/(2 beta m)を同じjoint OUへ渡す |
+| charge / `prescribed_exponential_linear` | `prescribed_exponential_linear_collection_v1` | `electron_rate_reference_number_s` Ae>=0、`electron_exponent_offset_field` c [1]、`electron_charge_slope_field` alpha [1]>=0、`ion_rate_field` Ai [1/s]>=0、`ion_charge_slope_field` betaZ [1]>=0 |
+| ion_drag / `prescribed_charge_polynomial` | `prescribed_charge_polynomial_v1` | `constant_force_field` F0、`linear_charge_force_field` F1、`quadratic_charge_force_field` F2（各[N]）。F=F0+Z F1+Z² F2 |
+| lift / `prescribed_rotational_lift` | `prescribed_rotational_lift_v1` | `gas_velocity_field` [m/s]、`rotation_coefficient_field` c_rot [kg/s]。F=c_rot*(u_y-v_y,-(u_x-v_x)) |
+
+chargeは`G=-Ae*exp(c+alpha*Z)+Ai*(1-betaZ*Z)`、
+`J=-alpha*Ae*exp(c+alpha*Z)-betaZ*Ai`を運動と同じstageで評価する。
+有限のforward-invariant charge範囲をprepareし、連続pathのforce/charge boundsへ同じ範囲を用いる。
+電子rateへfloorを足してoffsetを作らず、外部producerは元rateとの節点再構成とoff-node転送差を検証する。
+RZで到達可能な軸のrotationは厳密に0である。各vector係数も通常の基底・axis規則に従う。
+
+各reference modelは次の`particle_properties`を必須とする。prepareは全source rowの同名authorityと完全一致を
+要求し、同時に選んだreference modelsのbindingも一致させる。このrevisionは均一物性cohortに限定する。
+同じ物性のsource subsetは使える。元の実現ID集合・solution・mesh・primitive・生成式・定数の由来は
+producer provenanceへ保持し、数値bindingだけをnative真正性の証明にはしない。
+
+```yaml
+particle_properties:
+  mass_kg: 2.0
+  drag_diameter_m: 1.0e-6
+  electrostatic_radius_m: 5.0e-7
+  displaced_volume_m3: 5.235987755982989e-19
+```
+
+上は構文を示す独立な検証用の値で、装置caseのdefaultではない。contact radiusはこのbindingから再構成しない。
+prescribed noiseはprescribed linear frictionと組み合わせ、FDT noiseは既存のlinear Epstein条件を維持する。
+ion polynomialはfixed chargeまたはprescribed chargeと組み合わせる。速度・電荷の保存履歴を再生しない。
+
+`electric_coulomb_charge_cap_v1`は`model: coulomb`、`electric_field`に加えて正かつfiniteな
+`maximum_abs_charge_number`を必須とし、`F=e*clip(Z,-cap,cap)*E`を評価する。
+capはCoulomb寄与だけに作用する明示model parameterで、resident Z、charge rate、ion dragを変更しない。
+`electric_coulomb_v1`にcap parameterを与える入力は拒否する。
 
 ## Neutral-gas background authority
 
@@ -1152,8 +1195,8 @@ machine-local・non-gating観測であり、統合後engineの性能値や物理
 ## B04 Brownian active-wall restart
 
 B04で導入したactive-wall規則は、現行2-D midpoint revisionのOU endpoint、conditional tree、cubic Hermite numerical pathを変更せず、既存first-hitと
-`contact_wall_laws_v7`を接続する。terminal `stick`/`escape`/`hold`に加え、activeな`specular`、`restitution`、
-`maxwell_thermal`と`probabilistic_stick`の明示fallbackをXY/RZで受理する。wall lawの温度、係数、確率、counter
+`contact_wall_laws_v8`を接続する。terminal `stick`/`escape`/`hold`に加え、activeな`specular`、`restitution`、
+`maxwell_thermal`、`isotropic`と`probabilistic_stick`の明示fallbackをXY/RZで受理する。wall lawの温度、係数、確率、counter
 identityは決定論runと同じownerを使い、Brownian専用の反射式やmutable RNG cursorを作らない。
 
 active hitでは現在のHermite leafをhitまでだけcommitし、post-wall position/velocity/chargeからmacro残時間をfresh

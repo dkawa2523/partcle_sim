@@ -36,8 +36,9 @@ P10/P14のregular compiled locator、P1/Q1 previous-cell strict-interior hint、
 outside/masked full-search fallbackも内部runtime詳細である。hintはaccepted endpointだけが更新し、YAML/HDF5 keyや
 producer責務を追加しない。geometry volume-cell BVH、局所float64解像性gate、準備済みedge長も内部prepare責務であり、
 producerがindexやtoleranceを指定するkeyは追加しない。
-P11の線形緩和分解、指数更新、path enclosureも内部numericsであり、producerはCOMSOL固有設定や事前計算した
-drag係数をHDF5へ追加しない。
+P11の線形緩和分解、指数更新、path enclosureも内部numericsである。通常の物理modelではproducerはCOMSOL固有設定や
+事前計算したdrag係数を原始背景場の代用にしない。明示した`prescribed_*` reference revisionだけは、
+`physics_models.md`の物性bindingと係数契約に従い同じcanonical field形式へ保存する。
 
 ## 所有境界
 
@@ -70,7 +71,7 @@ drag係数をHDF5へ追加しない。
   全force/RK stage/debug traceを常時記録しない。
 - final particle表とrelease eventは必須resultであり、enable flagを持たない。
 - table release timeはfiniteかつ`[start_s,end_s]`内とし、時刻原点を0へ固定しない。
-- engineはtable/surface source、fixed charge、P15の`plasma_continuous` charge、CPU固定stepを受理する。
+- engineはtable/surface source、fixed charge、`plasma_continuous`または明示reference charge、CPU固定stepを受理する。
   無力場は厳密なballistic退化形、
   dragなし・空間的に一定な加速度は証明済み`quadratic_exact` pathを使う。P06 revision 3a以降は、
   全cell supportedな`RegularLayout`に限り、`epstein_linear_v1`、
@@ -86,11 +87,13 @@ drag係数をHDF5へ追加しない。
    B01の数値primitiveをproductionへ接続したBrownian経路は、`physics.noise`と
   `solver.integrator: ou_langevin`を同時に選ぶ場合だけ受理する。現行revision
   `inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`はCartesian XYとRZ meridional、native/effective-gas
-  線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを一つのengineで扱う。一様base-depth
+  線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを一つのengineで扱う。
+  `prescribed_force_diffusion_midpoint_2d_v1`は物性bindingを持つprescribed linear frictionと独立Dを使う。
+  一様base-depth
   interval treeの各leafはcubic Hermite numerical pathとしてevent/replayへ渡すが、連続OU first-passageの厳密解とは
   扱わない。係数はdeterministic half-stepで得たroot midpointだけで評価し、support/applicabilityをRNG draw前に
   fail-closedで確定する。B04はこのnoise revisionへ既存terminal `stick`/`escape`/`hold`とactiveな
-  `specular`/`restitution`/`maxwell_thermal`/`probabilistic_stick`を接続する。active hitでは認証済みprefixだけを
+  `specular`/`restitution`/`maxwell_thermal`/`isotropic`/`probabilistic_stick`を接続する。active hitでは認証済みprefixだけを
   commitし、post-wall stateからmacro残時間を新しい`root_stochastic_interval`として再開する。元rootのcubic tailを
   fold/restrictせず、連続OU exact first-passageを主張しない。
   B05では一様base depthを全rootの精度authorityとして維持し、wall、RZ axis、証明不能候補だけを
@@ -665,11 +668,11 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
 - `solver.integrator`は`rk4_fixed`、`exponential_midpoint`、または`ou_langevin`、`solver.backend`は現行`cpu`だけを許可する。
   dragに対する`maximum_dt_over_tau < 2.5`は`rk4_fixed`だけのprepare gateである。線形dragでは最大rate、
   finite-speed Epsteinでは速度Jacobianの最大固有値上界を使う。`exponential_midpoint`は各stageで凍結した
-  正のrelaxationを解析更新するため同じ上限を課さない。両continuous-charge revisionは
+  正のrelaxationを解析更新するため同じ上限を課さない。continuous-charge modelは
   `rk4_fixed`では同じ4 stage、`exponential_midpoint`では同じpredictor時刻のexplicit midpointにより運動と
-  同時更新する。どちらも`dt * charge_lipschitz <= 0.5`、charge invariant、continuous applicabilityを必須とし、
-  別integratorへのfallbackやcharge-only subcycleを行わない。
-- 全ion-drag revisionは両integratorで`explicit_acceleration`として同じstage評価を使う。加速度包絡と、
+  同時更新する。`dt * charge_lipschitz <= 0.5`は`rk4_fixed`の安定性gateであり、全methodで
+  charge invariantと連続適用域を検査する。別integratorへのfallbackやcharge-only subcycleを行わない。
+- 全ion-drag revisionは選択したintegratorで`explicit_acceleration`として同じstage評価を使う。加速度包絡と、
   Barnesおよびrelative-flow revisionの連続drift gateは
   既存proposal/enclosureへ統合するが、現revisionはmodel固有の時間step設定を追加しない。利用caseは`dt`系列で
   trajectory収束を確認し、適用域違反をstep subdivision、floor、scaleで隠さない。
@@ -701,16 +704,20 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
   linear EpsteinとWaldmann--Gallisの組合せはnative single-species同士またはeffective-gas sensitivity同士だけを
   受理する。有限速度Epsteinとeffective-gas heat-flux revisionの既存組合せは、一つのproducer認証済みpseudogasを
   全bindingとprovenanceで共有する場合に限る。
-- `ou_langevin`と`physics.noise`は必ず同時に指定する。noise mappingは`model`、`revision`、
+- `ou_langevin`と`physics.noise`は必ず同時に指定する。FDT noise mappingは`model`、`revision`、
   `interval_tree_depth`とoptional `adaptive_max_depth`だけを持つ。modelは`inertial_langevin_fdt`、base depthは
   整数`0..10`、max depthは省略時base、指定時は整数`base..10`とする。
-  revisionは`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`だけを受理し、Cartesian XY / RZ meridional、
+  FDT revisionは`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`を受理し、Cartesian XY / RZ meridional、
   native/effective-gas線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを許す。B04により、全boundary
   groupへ`stick`、`escape`、`hold`、`specular`、`restitution`、`maxwell_thermal`、または
-  `probabilistic_stick`を設定できる。各law parameterとfallbackは下記の通常boundary契約をそのまま使う。
+  `probabilistic_stick`、`isotropic`を設定できる。reference noiseの追加係数と物性bindingは
+  [`physics_models.md`](physics_models.md#explicit-coefficient-reference-revisions)が所有する。
+  各law parameterとfallbackは下記の通常boundary契約をそのまま使う。
   FDT温度はdragの`gas_temperature_field`から`theta=k_B*T_g/mass_kg`として導き、noise側の第二温度を許可しない。
-- continuous chargeは上記いずれかの正確なmappingだけを許し、`model=plasma_continuous`、対応する明示
-  `revision`、`applicability=error`を必須とする。shifted-Maxwellian revisionだけが正かつfiniteな
+- physicsのmodel固有mappingは[physics model所有文書](physics_models.md)に従う。
+  明示係数referenceには同文書のrequired fieldsと`particle_properties`を必須とし、標準modelのkeyを混在させない。
+  標準のcontinuous chargeは`model=plasma_continuous`、対応する明示`revision`、`applicability=error`を必須とする。
+  shifted-Maxwellian revisionだけが正かつfiniteな
   `maximum_ion_drift_ratio`を必須とし、stationary revisionへこのkeyを追加することも、省略時の既定値も許可しない。
   P15二式の`positive_ion_mass_kg`は正かつfiniteである。4本のscalar fieldはそれぞれ
   electron/positive-ion number densityが`unit=1/m^3`、temperatureが`unit=K`で、
@@ -740,9 +747,11 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
 - `boundaries[].law`は入力model selectorである。PreparedRunの非公開dense codeや結果schemaの列名ではない。
   eventには選択されたtop-level lawの安定semantic IDを`law_id`として保存し、compound lawの分岐結果は
   `outcome`と必要なdraw referenceで表す。`law_name`はv1 schemaに設けない。
-- `stick`、`escape`、`hold`、`specular`は`boundary_group`、`priority`、`law`以外のmodel parameterを持たない。
+- `stick`、`escape`、`hold`、`specular`、`isotropic`は`boundary_group`、`priority`、`law`以外のmodel parameterを持たない。
   `hold`はhit位置、hit時速度、hit時電荷を保持するinactiveな`held` terminalであり、paused particleや再飛散を表さない。
   `specular`は法線係数・接線係数がともに1の完全鏡面を意味し、反発係数を指定した入力は拒否する。
+  `isotropic`は静止壁で入射速さを保存し、内向き半円上の角度を一様に選ぶ2自由度の散乱である。
+  cosine角度分布、熱再放出、3D等方散乱を意味しない。
   `restitution`は`normal_restitution`を`(0,1]`、`tangential_restitution`を`[0,1]`でともに必須とし、
   それ以外のparameterを持たない。
   `maxwell_thermal`は正かつfiniteな`wall_temperature_K`、`[0,1]`の
@@ -752,7 +761,8 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
   なければならず、法線成分を持つmoving wallは拒否する。
   `probabilistic_stick`は定数`probability`を`[0,1]`で必須とし、これと`otherwise`以外のparameterを持たない。
   `otherwise`はparameterなしの`{law: specular}`、上記二つの反発係数をともに持つ
-  `{law: restitution, ...}`、または上記3 parameterを持つ`{law: maxwell_thermal, ...}`だけを受理する。
+  `{law: restitution, ...}`、上記3 parameterを持つ`{law: maxwell_thermal, ...}`、
+  またはparameterなしの`{law: isotropic}`を受理する。
   速度・温度依存付着確率とmoving geometryは未対応である。
 
   ```yaml

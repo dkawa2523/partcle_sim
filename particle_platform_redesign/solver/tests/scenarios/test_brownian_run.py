@@ -20,6 +20,7 @@ from chamber_particles.case_format import (
     RegularLayout,
     write,
 )
+from chamber_particles.physics.catalog import PHYSICS_CATALOG_REVISION
 from chamber_particles.physics.charge import oml_stationary_maxwellian_debye_huckel_v1
 from chamber_particles.physics.forces import BOLTZMANN_J_K
 from chamber_particles.stochastic import joint_ou_covariance
@@ -608,7 +609,7 @@ def test_rz_brownian_constant_gravity_matches_joint_ou_mean_covariance_and_charg
     assert result.manifest["brownian_charge_dense_revision"] == ("macro_root_affine_exponential_v2")
     assert result.manifest["engine_algorithm_revision"] == "particle_engine_v64"
     assert result.manifest["step_proposal_revision"] == "coupled_fixed_step_proposal_v10"
-    assert result.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
+    assert result.manifest["physics_catalog_revision"] == PHYSICS_CATALOG_REVISION
     resume_identity = result.manifest["resume_identity"]
     assert (
         resume_identity["brownian_coefficient_policy"],

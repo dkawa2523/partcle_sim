@@ -29,6 +29,11 @@ from .catalog import (
     LiftPlan,
     PhysicsPlan,
     PlasmaContinuousChargePlan,
+    PrescribedChargePolynomialIonDragPlan,
+    PrescribedExponentialLinearChargePlan,
+    PrescribedForceDiffusionNoisePlan,
+    PrescribedLinearFrictionPlan,
+    PrescribedRotationalLiftPlan,
     QuasistaticSphericalDielectrophoresisPlan,
     RarefiedVorticityLiftPlan,
     RelativeFlowScreenedIonDragPlan,
@@ -43,10 +48,12 @@ from .charge import (
     OML_MAX_RADIUS_OVER_DEBYE,
     AggregateChargeBounds,
     OmlChargeBounds,
+    PrescribedChargeBounds,
     aggregate_relative_drift_global_bounds,
     aggregate_relative_drift_three_current_global_bounds,
     oml_shifted_maxwellian_global_bounds,
     oml_stationary_global_bounds,
+    prescribed_exponential_linear_global_bounds,
 )
 from .compiled import (
     CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT,
@@ -54,22 +61,27 @@ from .compiled import (
     CHARGE_FIXED,
     CHARGE_OML_SHIFTED_MAXWELLIAN_SINGLE_ION_NEGATIVE_DEBYE_HUCKEL,
     CHARGE_OML_STATIONARY_MAXWELLIAN_DEBYE_HUCKEL,
+    CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR,
     DRAG_EPSTEIN,
     DRAG_EPSTEIN_FINITE_SPEED,
     DRAG_NONE,
+    DRAG_PRESCRIBED_LINEAR,
     DRAG_STOKES_CUNNINGHAM,
     ERROR_CHARGE_INVARIANT,
     ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED,
     ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE,
     ION_DRAG_NONE,
+    ION_DRAG_PRESCRIBED_POLYNOMIAL,
     ION_DRAG_RELATIVE_FLOW_SCREENED,
     LIFT_NONE,
+    LIFT_PRESCRIBED_ROTATIONAL,
     LIFT_RAREFIED_VORTICITY_RZ,
     LIFT_SAFFMAN_RZ,
     LIFT_SAFFMAN_XY,
     THERMOPHORESIS_NONE,
     THERMOPHORESIS_TALBOT,
     THERMOPHORESIS_WALDMANN_GALLIS,
+    PrescribedPhysicsBindings,
     evaluate_physics_tile_into,
 )
 from .forces import (
@@ -132,7 +144,7 @@ type UInt8Array = NDArray[np.uint8]
 # global-bound convention and is applied before the final directed rounding.
 _LOCAL_BOUND_ROUNDOFF_FACTOR = 1.0 + 64.0 * np.finfo(np.float64).eps
 
-PHYSICS_RUNTIME_REVISION = "prepared_native_physics_runtime_v24"
+PHYSICS_RUNTIME_REVISION = "prepared_native_physics_runtime_v25"
 
 _EMPTY_VECTOR = np.empty((0, 2), dtype=np.float64)
 _EMPTY_BOUND_SCALAR = np.empty(0, dtype=np.float64)
@@ -275,7 +287,13 @@ class _StokesCunninghamBounds:
     mean_free_path_upper_m: float
 
 
-type _DragBounds = _EpsteinBounds | _StokesCunninghamBounds
+@dataclass(frozen=True, slots=True)
+class _PrescribedDragBounds:
+    rate_upper_s_inv: FloatArray
+    target_velocity_abs_upper_m_s: FloatArray
+
+
+type _DragBounds = _EpsteinBounds | _StokesCunninghamBounds | _PrescribedDragBounds
 
 
 @dataclass(frozen=True, slots=True)
@@ -292,7 +310,14 @@ class _AggregateChargeRuntimeBounds:
     negative_ion_velocity_abs_upper_m_s: FloatArray
 
 
-type _ChargeRuntimeBounds = _OmlRuntimeBounds | _AggregateChargeRuntimeBounds
+@dataclass(frozen=True, slots=True)
+class _PrescribedChargeRuntimeBounds:
+    model: PrescribedChargeBounds
+
+
+type _ChargeRuntimeBounds = (
+    _OmlRuntimeBounds | _AggregateChargeRuntimeBounds | _PrescribedChargeRuntimeBounds
+)
 
 
 class _ChargeStageBindings(NamedTuple):
@@ -394,7 +419,14 @@ class _SaffmanLiftBounds:
     gas_dynamic_viscosity_lower_Pa_s: float
 
 
-type _LiftRuntimeBounds = _RarefiedVorticityLiftBounds | _SaffmanLiftBounds
+@dataclass(frozen=True, slots=True)
+class _PrescribedLiftBounds:
+    coupling_rate_abs_upper_s_inv: FloatArray
+    gas_velocity_abs_upper_m_s: FloatArray
+    static_applicable: BoolArray
+
+
+type _LiftRuntimeBounds = _RarefiedVorticityLiftBounds | _SaffmanLiftBounds | _PrescribedLiftBounds
 
 
 class _ThermophoresisStageBindings(NamedTuple):
@@ -489,6 +521,8 @@ class PhysicsStageBindings(NamedTuple):
     gravity_density: int
     gravity_vector: tuple[float, float]
     primitive_rules: NDArray[np.int8]
+    prescribed: PrescribedPhysicsBindings
+    electric_maximum_abs_charge: float
 
 
 class PhysicsNumericContext(NamedTuple):
@@ -599,7 +633,7 @@ class PhysicsRuntime:
         particle_index: Int64Array,
         sampled_values: Mapping[str, FloatArray],
     ) -> FloatArray:
-        """Return strict FDT variance ``k_B T / m`` for verification callers."""
+        """Return the selected noise model's scalar joint-OU velocity variance."""
 
         result, status = self.brownian_thermal_velocity_variance_batch(
             particle_index,
@@ -616,14 +650,14 @@ class PhysicsRuntime:
         particle_index: Int64Array,
         sampled_values: Mapping[str, FloatArray],
     ) -> tuple[FloatArray, UInt8Array]:
-        """Return FDT variance and particle-local numerical status.
+        """Return the selected variance and particle-local numerical status.
 
         Shape/schema errors remain run-fatal.  A sampled value or arithmetic
         result that is invalid for only one row is represented by the shared
         numerical-status vocabulary so a valid neighbour can continue.
         """
 
-        if self.plan.noise is None or not isinstance(self.plan.drag, EpsteinDragPlan):
+        if self.plan.noise is None:
             raise PhysicsEvaluationError(
                 "Brownian thermal variance requires resolved inertial Langevin noise"
             )
@@ -634,10 +668,26 @@ class PhysicsRuntime:
             raise PhysicsEvaluationError("physics particle indices are outside resident state")
         count = int(indices.size)
         status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
+        result = np.empty(count, dtype=np.float64)
+        if isinstance(self.plan.noise, PrescribedForceDiffusionNoisePlan):
+            drag = self.plan.drag
+            if not isinstance(drag, PrescribedLinearFrictionPlan):
+                raise PhysicsEvaluationError("prescribed diffusion requires prescribed friction")
+            diffusion = sampled_values[self.plan.noise.force_spectral_density_field]
+            friction = sampled_values[drag.friction_coefficient_field]
+            if diffusion.shape != (count, 1) or friction.shape != (count, 1):
+                raise PhysicsEvaluationError(
+                    "sampled prescribed noise coefficients have invalid shapes"
+                )
+            prescribed_force_variance_into(
+                self.mass_kg, indices, friction[:, 0], diffusion[:, 0], result, status
+            )
+            return result, status
+        if not isinstance(self.plan.drag, EpsteinDragPlan):
+            raise PhysicsEvaluationError("FDT variance requires linear Epstein drag")
         temperature = sampled_values.get(self.plan.drag.gas_temperature_field)
         if temperature is None or temperature.shape != (count, 1):
             raise PhysicsEvaluationError("sampled Brownian temperature has an invalid shape")
-        result = np.empty(count, dtype=np.float64)
         brownian_thermal_variance_into(self.mass_kg, indices, temperature[:, 0], result, status)
         return result, status
 
@@ -1042,11 +1092,15 @@ class PhysicsRuntime:
         if self.drag_bounds is not None:
             total += int(self.drag_bounds.rate_upper_s_inv.nbytes)
             total += int(self.drag_bounds.target_velocity_abs_upper_m_s.nbytes)
-        if self.charge_bounds is not None:
+        if self.charge_bounds is not None and not isinstance(
+            self.charge_bounds, _PrescribedChargeRuntimeBounds
+        ):
             total += int(self.charge_bounds.positive_ion_velocity_abs_upper_m_s.nbytes)
             if isinstance(self.charge_bounds, _AggregateChargeRuntimeBounds):
                 total += int(self.charge_bounds.negative_ion_velocity_abs_upper_m_s.nbytes)
             total += 9 * np.dtype(np.float64).itemsize
+        if isinstance(self.charge_bounds, _PrescribedChargeRuntimeBounds):
+            total += 4 * np.dtype(np.float64).itemsize
         if self.thermophoresis_bounds is not None:
             total += int(self.thermophoresis_bounds.static_applicable.nbytes)
             if isinstance(self.thermophoresis_bounds, _WaldmannGallisBounds):
@@ -1167,6 +1221,12 @@ def _charge_stage_bindings(
         return _NO_CHARGE_STAGE_INPUTS
     if bounds is None:
         raise PhysicsEvaluationError("continuous charge bounds were not prepared")
+    if isinstance(plan, PrescribedExponentialLinearChargePlan):
+        return _NO_CHARGE_STAGE_INPUTS._replace(
+            code=CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR,
+            charge_number_lower=bounds.model.charge_number_lower,
+            charge_number_upper=bounds.model.charge_number_upper,
+        )
     electron_density = _primitive_binding(sampled_values, plan.electron_number_density_field)
     ion_density = _primitive_binding(sampled_values, plan.positive_ion_number_density_field)
     ion_velocity = _primitive_binding(sampled_values, plan.positive_ion_velocity_field)
@@ -1357,6 +1417,11 @@ def _lift_stage_bindings(
     """Bind lift primitives while reusing an already sampled neutral background."""
     if plan is None:
         return _NO_LIFT_STAGE_INPUTS
+    if isinstance(plan, PrescribedRotationalLiftPlan):
+        return _NO_LIFT_STAGE_INPUTS._replace(
+            code=LIFT_PRESCRIBED_ROTATIONAL,
+            gas_velocity_m_s=_primitive_binding(sampled_values, plan.gas_velocity_field),
+        )
     if isinstance(plan, SaffmanLiftPlan):
         return _saffman_stage_bindings(
             plan,
@@ -1369,7 +1434,7 @@ def _lift_stage_bindings(
             drag_gas_mean_free_path_m,
             thermophoresis_inputs,
         )
-    if drag_plan is not None:
+    if drag_plan is not None and not isinstance(drag_plan, PrescribedLinearFrictionPlan):
         gas_velocity = drag_gas_velocity_m_s
         gas_density = drag_gas_density_kg_m3
         mean_free_path = drag_gas_mean_free_path_m
@@ -1451,6 +1516,8 @@ def _ion_drag_stage_bindings(
     """Bind one stage's ion background without duplicating coupled charge samples."""
     if plan is None:
         return _NO_ION_DRAG_STAGE_INPUTS
+    if isinstance(plan, PrescribedChargePolynomialIonDragPlan):
+        return _NO_ION_DRAG_STAGE_INPUTS._replace(code=ION_DRAG_PRESCRIBED_POLYNOMIAL)
     if not isinstance(plan, BarnesCollisionlessIonDragPlan):
         return _aggregate_ion_drag_stage_bindings(
             plan, charge_plan, charge_inputs, sampled_values, electric_field_V_m
@@ -1545,7 +1612,9 @@ def _aggregate_ion_drag_stage_bindings(
     )
 
 
-def _charge_kernel_selection(plan: ChargePlan) -> tuple[int, float]:
+def _charge_kernel_selection(
+    plan: PlasmaContinuousChargePlan | AggregateRelativeDriftChargePlan,
+) -> tuple[int, float]:
     """Resolve one catalog-validated charge revision for the compiled pass."""
 
     if isinstance(plan, AggregateRelativeDriftChargePlan):
@@ -1573,7 +1642,7 @@ def _local_certificate_offsets(bindings: PhysicsStageBindings) -> set[int]:
 
     result = _local_drag_offsets(bindings)
     charge = bindings.charge_inputs
-    if charge.code != CHARGE_FIXED:
+    if charge.code not in (CHARGE_FIXED, CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR):
         result.add(charge.positive_ion_velocity_m_s)
     if charge.code == CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT:
         result.add(charge.aggregate_negative_ion_velocity_m_s)
@@ -1604,7 +1673,7 @@ def _local_certificate_offsets(bindings: PhysicsStageBindings) -> set[int]:
             )
         )
     lift = bindings.lift_inputs
-    if lift.code != LIFT_NONE:
+    if lift.code not in (LIFT_NONE, LIFT_PRESCRIBED_ROTATIONAL):
         result.add(lift.gas_mean_free_path_m)
     if lift.code in (LIFT_SAFFMAN_XY, LIFT_SAFFMAN_RZ):
         result.update(
@@ -1619,7 +1688,7 @@ def _local_certificate_offsets(bindings: PhysicsStageBindings) -> set[int]:
 
 
 def _local_drag_offsets(bindings: PhysicsStageBindings) -> set[int]:
-    if bindings.drag_code == DRAG_NONE:
+    if bindings.drag_code in (DRAG_NONE, DRAG_PRESCRIBED_LINEAR):
         return set()
     result = {bindings.gas_velocity, bindings.gas_mean_free_path}
     if bindings.drag_code == DRAG_STOKES_CUNNINGHAM:
@@ -1773,7 +1842,7 @@ def _local_drag_applicability_row(
     upper: FloatArray,
 ) -> tuple[bool, bool]:
     model = context.bindings
-    if model.drag_code == DRAG_NONE:
+    if model.drag_code in (DRAG_NONE, DRAG_PRESCRIBED_LINEAR):
         return True, True
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.gas_velocity, velocity_lower, velocity_upper
@@ -1827,7 +1896,7 @@ def _local_charge_applicability_row(
     upper: FloatArray,
 ) -> tuple[bool, bool]:
     model = context.bindings.charge_inputs
-    if model.code == CHARGE_FIXED:
+    if model.code in (CHARGE_FIXED, CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR):
         return True, True
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.positive_ion_velocity_m_s, velocity_lower, velocity_upper
@@ -2062,7 +2131,11 @@ def _local_ion_drag_applicability_row(
     upper: FloatArray,
 ) -> tuple[bool, bool]:
     model = context.bindings.ion_drag_inputs
-    if model.code == ION_DRAG_NONE or model.code == ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE:
+    if model.code in (
+        ION_DRAG_NONE,
+        ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE,
+        ION_DRAG_PRESCRIBED_POLYNOMIAL,
+    ):
         return True, True
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.positive_ion_velocity_m_s, velocity_lower, velocity_upper
@@ -2107,7 +2180,7 @@ def _local_lift_applicability_row(
     upper: FloatArray,
 ) -> tuple[bool, bool]:
     model = context.bindings.lift_inputs
-    if model.code == LIFT_NONE:
+    if model.code in (LIFT_NONE, LIFT_PRESCRIBED_ROTATIONAL):
         return True, True
     radius = 0.5 * context.drag_diameter_m[particle]
     mean_free_path_lo, mean_free_path_hi = _local_scalar_range_row(
@@ -2317,6 +2390,7 @@ def _local_electric_acceleration_bound_row(
     field_x_hi = _local_nonnegative_upper(max(abs(field_x_lo), abs(field_x_hi)))
     field_y_hi = _local_nonnegative_upper(max(abs(field_y_lo), abs(field_y_hi)))
     charge_hi = _local_nonnegative_upper(max(abs(charge_lower[row]), abs(charge_upper[row])))
+    charge_hi = min(charge_hi, context.bindings.electric_maximum_abs_charge)
     x_hi = _local_nonnegative_upper(
         charge_hi * ELEMENTARY_CHARGE_C * field_x_hi / context.mass_kg[particle]
     )
@@ -2435,6 +2509,11 @@ def prepare_physics_runtime(
         raise PhysicsEvaluationError(
             "particle electrostatic radius and displaced volume must be nonnegative"
         )
+    _require_reference_particle_properties(
+        plan, mass_kg, drag_diameter_m, electrostatic_radius_m, displaced_volume_m3
+    )
+    if isinstance(plan.noise, PrescribedForceDiffusionNoisePlan):
+        _positive_scalar_range(primitive_ranges, plan.noise.force_spectral_density_field)
 
     charge_bounds = _prepare_charge_bounds(
         plan,
@@ -2553,6 +2632,43 @@ def prepare_physics_runtime(
     )
 
 
+def _require_reference_particle_properties(
+    plan: PhysicsPlan,
+    mass: FloatArray,
+    diameter: FloatArray,
+    radius: FloatArray,
+    volume: FloatArray,
+) -> None:
+    """Reject coefficients produced for a different homogeneous particle cohort."""
+
+    for model in (plan.charge, plan.drag, plan.noise, plan.ion_drag, plan.lift):
+        if isinstance(
+            model,
+            (
+                PrescribedExponentialLinearChargePlan,
+                PrescribedLinearFrictionPlan,
+                PrescribedForceDiffusionNoisePlan,
+                PrescribedChargePolynomialIonDragPlan,
+                PrescribedRotationalLiftPlan,
+            ),
+        ):
+            bound = model.particle_properties
+            actual = (mass, diameter, radius, volume)
+            expected = (
+                bound.mass_kg,
+                bound.drag_diameter_m,
+                bound.electrostatic_radius_m,
+                bound.displaced_volume_m3,
+            )
+            if any(
+                not bool(np.all(values == value))
+                for values, value in zip(actual, expected, strict=True)
+            ):
+                raise PhysicsEvaluationError(
+                    "prescribed coefficients do not match the source particle_properties"
+                )
+
+
 def _prepare_continuous_applicability_context(
     native: PhysicsNumericContext,
     plan: PhysicsPlan,
@@ -2598,6 +2714,10 @@ def _prepare_drag_applicability_context(
 ) -> _DragApplicabilityContext:
     if plan is None and bounds is None and code == DRAG_NONE:
         return _DragApplicabilityContext(code, _EMPTY_BOUND_SCALAR, 0.0, 0.0, 0.0, 0.0, 0.0)
+    if isinstance(plan, PrescribedLinearFrictionPlan) and isinstance(bounds, _PrescribedDragBounds):
+        return _DragApplicabilityContext(
+            code, bounds.target_velocity_abs_upper_m_s, 0.0, 0.0, 0.0, 0.0, 0.0
+        )
     if isinstance(plan, EpsteinDragPlan | FiniteSpeedEpsteinDragPlan) and isinstance(
         bounds, _EpsteinBounds
     ):
@@ -2635,6 +2755,19 @@ def _prepare_charge_applicability_context(
     bounds: _ChargeRuntimeBounds | None,
     code: int,
 ) -> _ChargeApplicabilityContext:
+    if isinstance(plan, PrescribedExponentialLinearChargePlan) and isinstance(
+        bounds, _PrescribedChargeRuntimeBounds
+    ):
+        return _ChargeApplicabilityContext(
+            code,
+            _EMPTY_BOUND_SCALAR,
+            _EMPTY_BOUND_SCALAR,
+            0.0,
+            0.0,
+            0.0,
+            bounds.model.charge_number_lower,
+            bounds.model.charge_number_upper,
+        )
     if plan is None and bounds is None and code == CHARGE_FIXED:
         return _ChargeApplicabilityContext(
             code,
@@ -2725,6 +2858,10 @@ def _prepare_ion_drag_applicability_context(
     bounds: _IonDragRuntimeBounds | None,
     code: int,
 ) -> _IonDragApplicabilityContext:
+    if isinstance(plan, PrescribedChargePolynomialIonDragPlan) and bounds is None:
+        return _IonDragApplicabilityContext(
+            code, _EMPTY_BOUND_APPLICABLE, _EMPTY_BOUND_SCALAR, 0.0, 0.0
+        )
     if (plan is None or isinstance(plan, ElectricFieldDirectedImageIonDragPlan)) and bounds is None:
         return _IonDragApplicabilityContext(
             code,
@@ -2764,6 +2901,16 @@ def _prepare_lift_applicability_context(
     bounds: _LiftRuntimeBounds | None,
     code: int,
 ) -> _LiftApplicabilityContext:
+    if isinstance(plan, PrescribedRotationalLiftPlan) and isinstance(bounds, _PrescribedLiftBounds):
+        return _LiftApplicabilityContext(
+            code,
+            bounds.static_applicable,
+            bounds.gas_velocity_abs_upper_m_s,
+            0.0,
+            0.0,
+            _EMPTY_BOUND_SCALAR,
+            _EMPTY_BOUND_SCALAR,
+        )
     if plan is None and bounds is None and code == LIFT_NONE:
         return _LiftApplicabilityContext(
             code,
@@ -2806,6 +2953,12 @@ def _drag_continuous_applicability_row(
     vx: float,
     vy: float,
 ) -> tuple[bool, np.uint8]:
+    if bounds.code == DRAG_PRESCRIBED_LINEAR:
+        valid = _continuous_velocity_is_finite(vx, vy) and vx >= 0.0 and vy >= 0.0
+        return (
+            valid,
+            CONTINUOUS_APPLICABILITY_OK if valid else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE,
+        )
     if bounds.code == DRAG_NONE:
         return True, CONTINUOUS_APPLICABILITY_OK
     ux, uy = bounds.flow_abs_upper_m_s[0], bounds.flow_abs_upper_m_s[1]
@@ -2861,7 +3014,7 @@ def _charge_continuous_applicability_row(
     vx: float,
     vy: float,
 ) -> tuple[bool, np.uint8]:
-    if bounds.code == CHARGE_FIXED:
+    if bounds.code in (CHARGE_FIXED, CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR):
         return True, CONTINUOUS_APPLICABILITY_OK
     ux, uy = bounds.positive_flow_abs_upper_m_s[0], bounds.positive_flow_abs_upper_m_s[1]
     if bounds.code in (
@@ -2940,7 +3093,11 @@ def _ion_drag_continuous_applicability_row(
     vx: float,
     vy: float,
 ) -> tuple[bool, np.uint8]:
-    if bounds.code in (ION_DRAG_NONE, ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE):
+    if bounds.code in (
+        ION_DRAG_NONE,
+        ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE,
+        ION_DRAG_PRESCRIBED_POLYNOMIAL,
+    ):
         return True, CONTINUOUS_APPLICABILITY_OK
     flow = bounds.flow_abs_upper_m_s
     if bounds.code == ION_DRAG_RELATIVE_FLOW_SCREENED:
@@ -2972,7 +3129,7 @@ def _lift_continuous_applicability_row(
 ) -> tuple[bool, np.uint8]:
     if bounds.code == LIFT_NONE:
         return True, CONTINUOUS_APPLICABILITY_OK
-    if bounds.code == LIFT_RAREFIED_VORTICITY_RZ:
+    if bounds.code in (LIFT_RAREFIED_VORTICITY_RZ, LIFT_PRESCRIBED_ROTATIONAL):
         valid = _continuous_velocity_is_finite(vx, vy) and vx >= 0.0 and vy >= 0.0
         status = (
             CONTINUOUS_APPLICABILITY_OK if valid else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
@@ -3076,6 +3233,8 @@ def _prepare_charge_bounds(
     charge = plan.charge
     if charge is None:
         return None
+    if isinstance(charge, PrescribedExponentialLinearChargePlan):
+        return _prepare_prescribed_charge_bounds(charge, charge_number, ranges)
     electron_density = _positive_scalar_range(ranges, charge.electron_number_density_field)
     ion_density = _positive_scalar_range(ranges, charge.positive_ion_number_density_field)
     ion_velocity = _primitive_range(ranges, charge.positive_ion_velocity_field, 2)
@@ -3176,6 +3335,27 @@ def _prepare_charge_bounds(
     )
 
 
+def _prepare_prescribed_charge_bounds(
+    model: PrescribedExponentialLinearChargePlan,
+    charge_number: FloatArray,
+    ranges: Mapping[str, PrimitiveRange],
+) -> _PrescribedChargeRuntimeBounds:
+    values = [
+        _primitive_range(ranges, name, 1)
+        for name in (
+            model.electron_exponent_offset_field,
+            model.electron_charge_slope_field,
+            model.ion_rate_field,
+            model.ion_charge_slope_field,
+        )
+    ]
+    intervals = [(float(value.lower[0]), float(value.upper[0])) for value in values]
+    bound = prescribed_exponential_linear_global_bounds(
+        charge_number, model.electron_rate_reference_number_s, *intervals
+    )
+    return _PrescribedChargeRuntimeBounds(bound)
+
+
 def _prepare_drag_bounds(
     plan: PhysicsPlan,
     mass_kg: FloatArray,
@@ -3185,6 +3365,15 @@ def _prepare_drag_bounds(
     drag = plan.drag
     if drag is None:
         return None
+    if isinstance(drag, PrescribedLinearFrictionPlan):
+        beta = _positive_scalar_range(ranges, drag.friction_coefficient_field)
+        velocity = _primitive_range(ranges, drag.gas_velocity_field, 2)
+        rate = np.nextafter(float(beta.upper[0]) / mass_kg * _LOCAL_BOUND_ROUNDOFF_FACTOR, np.inf)
+        target = np.nextafter(np.maximum(np.abs(velocity.lower), np.abs(velocity.upper)), np.inf)
+        if not bool(np.isfinite(rate).all()):
+            raise PhysicsEvaluationError("prescribed friction rate bound is not finite")
+        _freeze(rate, target)
+        return _PrescribedDragBounds(rate, target)
     velocity = _primitive_range(ranges, drag.gas_velocity_field, 2)
     target_abs = np.nextafter(np.maximum(np.abs(velocity.lower), np.abs(velocity.upper)), np.inf)
 
@@ -3359,6 +3548,23 @@ def _prepare_ion_drag_bounds(
     if ion_drag is None:
         return None, None
     charge_lower, charge_upper = _ion_drag_charge_interval(charge_number, charge_bounds)
+    if isinstance(ion_drag, PrescribedChargePolynomialIonDragPlan):
+        coefficients = [
+            _primitive_range(ranges, name, 2)
+            for name in (
+                ion_drag.constant_force_field,
+                ion_drag.linear_charge_force_field,
+                ion_drag.quadratic_charge_force_field,
+            )
+        ]
+        bounds = [np.maximum(np.abs(value.lower), np.abs(value.upper)) for value in coefficients]
+        z = np.maximum(np.abs(charge_lower), np.abs(charge_upper))[:, None]
+        with np.errstate(over="ignore", invalid="ignore"):
+            acceleration = (bounds[0] + z * bounds[1] + z * z * bounds[2]) / mass_kg[:, None]
+            acceleration = np.nextafter(acceleration * _LOCAL_BOUND_ROUNDOFF_FACTOR, np.inf)
+        if not bool(np.isfinite(acceleration).all()):
+            raise PhysicsEvaluationError("prescribed ion force bound is not finite")
+        return None, acceleration
     if isinstance(ion_drag, BarnesCollisionlessIonDragPlan):
         return _prepare_barnes_ion_drag_bounds(
             ion_drag,
@@ -3547,6 +3753,22 @@ def _prepare_lift_bounds(
 ) -> _LiftRuntimeBounds | None:
     if lift is None:
         return None
+    if isinstance(lift, PrescribedRotationalLiftPlan):
+        rotation = _primitive_range(ranges, lift.rotation_coefficient_field, 1)
+        velocity = _primitive_range(ranges, lift.gas_velocity_field, 2)
+        rate = np.nextafter(
+            max(abs(rotation.lower[0]), abs(rotation.upper[0]))
+            / mass_kg
+            * _LOCAL_BOUND_ROUNDOFF_FACTOR,
+            np.inf,
+        )
+        target = np.nextafter(np.maximum(np.abs(velocity.lower), np.abs(velocity.upper)), np.inf)
+        if not bool(np.isfinite(rate).all()):
+            raise PhysicsEvaluationError("prescribed rotation rate bound is not finite")
+        applicable = np.ones(mass_kg.size, dtype=np.bool_)
+        _freeze(rate, target)
+        applicable.setflags(write=False)
+        return _PrescribedLiftBounds(rate, target, applicable)
     if isinstance(lift, SaffmanLiftPlan):
         gas_velocity = _primitive_range(ranges, lift.gas_velocity_field, 2)
         gas_density = _positive_scalar_range(ranges, lift.gas_density_field)
@@ -3653,6 +3875,12 @@ def _prepare_external_acceleration_bound(
                 abs(charge_bounds.model.charge_number_upper),
             )
             electric_charge = np.full(charge_number.size, maximum_abs_charge, dtype=np.float64)
+        if electric.maximum_abs_charge_number is not None:
+            electric_charge = np.clip(
+                electric_charge,
+                -electric.maximum_abs_charge_number,
+                electric.maximum_abs_charge_number,
+            )
         contribution = electric_acceleration_abs_upper(
             charge_number=electric_charge,
             mass_kg=mass_kg,
@@ -3773,7 +4001,15 @@ def _constant_acceleration(
             return None
         add_electric_coulomb_acceleration(
             acceleration,
-            charge_number=charge_number,
+            charge_number=(
+                charge_number
+                if electric.maximum_abs_charge_number is None
+                else np.clip(
+                    charge_number,
+                    -electric.maximum_abs_charge_number,
+                    electric.maximum_abs_charge_number,
+                )
+            ),
             mass_kg=mass_kg,
             electric_field_V_m=np.broadcast_to(field, (count, 2)),
         )
@@ -3919,6 +4155,9 @@ def _prepare_physics_stage_bindings(
         gas_density = _primitive_binding(sampled_values, drag.gas_density_field)
         gas_viscosity = _primitive_binding(sampled_values, drag.gas_dynamic_viscosity_field)
         gas_mean_free_path = _primitive_binding(sampled_values, drag.gas_mean_free_path_field)
+    elif isinstance(drag, PrescribedLinearFrictionPlan):
+        drag_code = DRAG_PRESCRIBED_LINEAR
+        gas_velocity = _primitive_binding(sampled_values, drag.gas_velocity_field)
     thermophoresis_inputs = _thermophoresis_stage_bindings(
         plan.thermophoresis,
         drag,
@@ -3967,11 +4206,8 @@ def _prepare_physics_stage_bindings(
         -1 if gravity is None else _primitive_binding(sampled_values, gravity.gas_density_field)
     )
     gravity_vector = (0.0, 0.0) if gravity is None else gravity.gravity_m_s2
-    negative = plan.charge
-    if isinstance(negative, AggregateRelativeDriftChargePlan) and negative.has_negative_ion_current:
-        rules[sampled_values[cast(str, negative.negative_ion_number_density_field)]] = 2
-    primitive_rules = np.asarray(rules, dtype=np.int8)
-    primitive_rules.setflags(write=False)
+    prescribed = _prepare_prescribed_stage_bindings(plan, sampled_values)
+    primitive_rules = _prepare_nonnegative_primitive_rules(plan, sampled_values, prescribed, rules)
     return PhysicsStageBindings(
         charge_inputs,
         drag_code,
@@ -3997,7 +4233,66 @@ def _prepare_physics_stage_bindings(
         gravity_density,
         gravity_vector,
         primitive_rules,
+        prescribed,
+        math.inf
+        if electric is None or electric.maximum_abs_charge_number is None
+        else electric.maximum_abs_charge_number,
     )
+
+
+def _prepare_prescribed_stage_bindings(
+    plan: PhysicsPlan, offsets: Mapping[str, int]
+) -> PrescribedPhysicsBindings:
+    friction, diffusion, reference, offset, alpha, ion, beta = -1, -1, 0.0, -1, -1, -1, -1
+    constant, linear, quadratic, rotation = -1, -1, -1, -1
+    if isinstance(plan.drag, PrescribedLinearFrictionPlan):
+        friction = offsets[plan.drag.friction_coefficient_field]
+    if isinstance(plan.noise, PrescribedForceDiffusionNoisePlan):
+        diffusion = offsets[plan.noise.force_spectral_density_field]
+    if isinstance(plan.charge, PrescribedExponentialLinearChargePlan):
+        reference = plan.charge.electron_rate_reference_number_s
+        offset = offsets[plan.charge.electron_exponent_offset_field]
+        alpha = offsets[plan.charge.electron_charge_slope_field]
+        ion = offsets[plan.charge.ion_rate_field]
+        beta = offsets[plan.charge.ion_charge_slope_field]
+    if isinstance(plan.ion_drag, PrescribedChargePolynomialIonDragPlan):
+        constant = offsets[plan.ion_drag.constant_force_field]
+        linear = offsets[plan.ion_drag.linear_charge_force_field]
+        quadratic = offsets[plan.ion_drag.quadratic_charge_force_field]
+    if isinstance(plan.lift, PrescribedRotationalLiftPlan):
+        rotation = offsets[plan.lift.rotation_coefficient_field]
+    return PrescribedPhysicsBindings(
+        friction,
+        diffusion,
+        reference,
+        offset,
+        alpha,
+        ion,
+        beta,
+        constant,
+        linear,
+        quadratic,
+        rotation,
+    )
+
+
+def _prepare_nonnegative_primitive_rules(
+    plan: PhysicsPlan,
+    offsets: Mapping[str, int],
+    prescribed: PrescribedPhysicsBindings,
+    rules: list[int],
+) -> NDArray[np.int8]:
+    """Keep selected nonnegative current coefficients distinct from positive fields."""
+
+    charge = plan.charge
+    if isinstance(charge, AggregateRelativeDriftChargePlan) and charge.has_negative_ion_current:
+        rules[offsets[cast(str, charge.negative_ion_number_density_field)]] = 2
+    for offset in (prescribed.electron_slope, prescribed.ion_rate, prescribed.ion_slope):
+        if offset >= 0:
+            rules[offset] = 2
+    result = np.asarray(rules, dtype=np.int8)
+    result.setflags(write=False)
+    return result
 
 
 def _primitive_binding(bindings: Mapping[str, int], name: str) -> int:
@@ -4161,6 +4456,9 @@ def evaluate_prepared_physics_into(
         outputs.target_velocity_m_s,
         outputs.additive_acceleration_m_s2,
         error_code,
+        bindings.prescribed,
+        sampled_values,
+        bindings.electric_maximum_abs_charge,
     )
     # Raw physics codes overlap the shared status vocabulary; normalize only
     # rows that entered the force kernel without a field/state failure.
@@ -4219,6 +4517,28 @@ def brownian_thermal_variance_into(
         temperature = temperature_K[row]
         value = BOLTZMANN_J_K * temperature / mass_kg[particle_index[row]]
         valid = np.isfinite(temperature) and temperature > 0.0
+        valid = valid and np.isfinite(value) and value > 0.0
+        if not valid and numerical_status[row] == NUMERICAL_STATUS_OK:
+            numerical_status[row] = PHYSICS_NUMERICAL_FAILURE
+        variance_m2_s2[row] = value if numerical_status[row] == NUMERICAL_STATUS_OK else 0.0
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def prescribed_force_variance_into(
+    mass_kg: FloatArray,
+    particle_index: Int64Array,
+    friction_kg_s: FloatArray,
+    diffusion_N2_s: FloatArray,
+    variance_m2_s2: FloatArray,
+    numerical_status: UInt8Array,
+) -> None:
+    """Convert an independent white-force spectral density to the joint OU variance."""
+
+    for row in range(particle_index.size):
+        beta, diffusion = friction_kg_s[row], diffusion_N2_s[row]
+        mass = mass_kg[particle_index[row]]
+        value = (diffusion / beta) / (2.0 * mass)
+        valid = np.isfinite(beta) and beta > 0.0 and np.isfinite(diffusion) and diffusion > 0.0
         valid = valid and np.isfinite(value) and value > 0.0
         if not valid and numerical_status[row] == NUMERICAL_STATUS_OK:
             numerical_status[row] = PHYSICS_NUMERICAL_FAILURE

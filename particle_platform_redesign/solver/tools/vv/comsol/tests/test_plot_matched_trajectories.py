@@ -86,6 +86,7 @@ def _create(
     precontact: bool = False,
     geometry: bool = False,
     xy: bool = False,
+    particle_ids: tuple[int, ...] = (1,),
 ) -> tuple[dict[str, object], Path]:
     candidate = tmp_path / "candidate.csv"
     reference = tmp_path / "reference.csv"
@@ -102,6 +103,7 @@ def _create(
         label="manufactured comparison",
         render_png=False,
         geometry_path=geometry_path,
+        particle_ids=particle_ids,
     ), output
 
 
@@ -203,7 +205,7 @@ def test_status_and_missing_coverage_do_not_infer_native_disappearance_cause(
         [2, 0, "", "", "pending"],
         [2, 0.001, "", "", "unobserved"],
     ]
-    receipt, output = _create(tmp_path, candidate, reference, geometry=True)
+    receipt, output = _create(tmp_path, candidate, reference, geometry=True, particle_ids=(1, 2))
     alignment = _alignment(receipt)
     candidate_coverage = cast(dict[str, object], alignment["candidate"])
     reference_coverage = cast(dict[str, object], alignment["reference"])
@@ -313,3 +315,101 @@ def test_geometry_basis_mismatch_is_rejected_before_publishing_figures(tmp_path:
             candidate, reference, output, label="mismatch", render_png=False, geometry_path=geometry
         )
     assert not output.exists()
+
+
+def test_overview_keeps_unselected_particles_and_metrics_with_sparse_shuffled_clocks(
+    tmp_path: Path,
+) -> None:
+    candidate: list[list[object]] = [
+        [91, 0.002, 0.003, 0.004, "active", 1],
+        [7, 0, 0, 0, "active", 1],
+        [91, 0, 0, 0, "active", 1],
+        [7, 0.002, "", "", "unobserved", 0],
+        [503, 0, "", "", "pending", 0],
+    ]
+    reference: list[list[object]] = [
+        [7, 0.001, 0.01, 0.02, "active", 1],
+        [91, 0, 0, 0, "active", 1],
+        [7, 0, 0, 0, "active", 1],
+        [503, 0, "", "", "pending", 0],
+        [91, 0.002, 0, 0, "active", 1],
+    ]
+    receipt, output = _create(tmp_path, candidate, reference, precontact=True, particle_ids=(7,))
+    assert receipt["particle_svg_count"] == 1
+    assert sorted(path.name for path in (output / "particles").iterdir()) == ["particle_000007.svg"]
+    position = _position(receipt)
+    assert (
+        position["comparison_rows"],
+        position["worst_particle_id"],
+        position["worst_time_s"],
+    ) == (
+        3,
+        91,
+        0.002,
+    )
+    assert position["rms"] == pytest.approx(0.005 / np.sqrt(3))
+    assert position["maximum"] == pytest.approx(0.005)
+    assert (_alignment(receipt)["particles"], _alignment(receipt)["reference_only_input_keys"]) == (
+        3,
+        1,
+    )
+    coverage = cast(dict[str, object], _alignment(receipt)["candidate"])
+    assert (
+        coverage["observed_coordinate_rows_per_particle_min"],
+        coverage["observed_coordinate_rows_per_particle_max"],
+        coverage["observed_coordinate_time_s"],
+        coverage["last_observed_coordinate_time_s_range"],
+    ) == (0, 2, [0, 0.002], [0, 0.002])
+    overview = ET.parse(output / "overview_rz.svg")
+    paths = [item for item in overview.iter() if item.tag.endswith("polyline")]
+    assert len(paths) == 4  # Both observed participants for IDs 7 and 91.
+
+
+def test_overview_is_default_and_cli_selects_only_explicit_stable_ids(
+    tmp_path: Path,
+) -> None:
+    import subprocess
+    import sys
+
+    rows: list[list[object]] = [[pid, 0, pid * 0.001, 0, "active"] for pid in (503, 7, 91)]
+    receipt, output = _create(tmp_path, rows, rows, particle_ids=())
+    assert receipt["particle_svg_count"] == 0
+    assert not (output / "particles").exists()
+    assert cast(dict[str, object], receipt["rendering"])["individual_particle_ids"] == []
+    selected = tmp_path / "selected"
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "tools.vv.comsol.plot_matched_trajectories",
+            "--candidate",
+            str(tmp_path / "candidate.csv"),
+            "--reference",
+            str(tmp_path / "reference.csv"),
+            "--output-directory",
+            str(selected),
+            "--label",
+            "explicit details",
+            "--skip-png",
+            "--particle-id",
+            "503",
+            "--particle-id",
+            "7",
+        ],
+        check=True,
+        capture_output=True,
+    )
+    report = json.loads((selected / "receipt.json").read_text(encoding="utf-8"))
+    assert report["rendering"]["individual_particle_ids"] == [7, 503]
+    assert report["alignment"] == receipt["alignment"]
+    assert report["metrics"] == receipt["metrics"]
+
+
+@pytest.mark.parametrize("particle_ids", [(2,), (1, 1), (True,)])
+def test_invalid_detail_selection_is_rejected_before_publishing(
+    tmp_path: Path, particle_ids: tuple[int, ...]
+) -> None:
+    rows: list[list[object]] = [[1, 0, 0, 0, "active"]]
+    with pytest.raises(ValueError, match="individual particle IDs"):
+        _create(tmp_path, rows, rows, particle_ids=particle_ids)
+    assert not (tmp_path / "figures").exists()

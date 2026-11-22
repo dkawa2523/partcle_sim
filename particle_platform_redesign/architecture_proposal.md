@@ -374,21 +374,27 @@ accuracy、support、geometry判定はstep-local resultとrun counterで持ち�
 
 ## 5. Canonical DataBundleとSimulationSpec
 
-### 5.1 物理量は原始量だけを保存する
+### 5.1 原始背景場とreference係数の所有
 
-背景場には、粒子を変えても不変な原始量だけを保存する。
+通常の物理modelの背景場には、粒子を変えても不変な原始量だけを保存する。
 
 - gas velocity、temperature、pressure、density、viscosity、mean free path
 - electric potential/field、density、species state、temperature gradient、vorticity
 - 場を作ったsolution/time/parameter index
 
-次は粒子状態と原始場からruntimeで求める。
+通常の物理modelでは、次は粒子状態と原始場からruntimeで求める。
 
 - Knudsen数
 - Epstein response time
 - Brownian diffusivity
 - Reynolds数、drag coefficient
 - charge依存force、screeningに粒子情報が入る派生量
+
+外部指定の数学式を評価する`prescribed_*` revisionだけは、明示した一様粒子物性に対する係数fieldを
+同じcanonical field形式で保持できる。係数は一般背景primitiveとは呼ばず、選択modelの限定入力として
+catalog/runtimeが解決する。各reference modelが宣言する`particle_properties`をprepareで全source rowへ
+照合し、複数reference modelのbindingも一致させる。生成式・元primitive・source identityは外部producerが
+所有する。単なるcontent hashや自由記述を物性照合の代用にせず、coreへCOMSOL tagや第二engineを入れない。
 
 `model_dataset`では背景CSVの10/30/100 nm版が数値的に同じで、粒子派生列が実質10 nm相当
 のまま複製されている。これを「入力値」として信じる設計は、粒径を変えても一部物理が

@@ -37,6 +37,11 @@ identity不一致、未知version、参照artifactのhash/構造破損はfail-cl
 final、complete manifest、`_SUCCESS`、directory renameの途中で失敗したpartialは、次の同一identityの`simulate`が
 検査して最終化を再実行します。`_SUCCESS`まで確定したpartialは再計算せず完成directoryへ公開します。
 
+Windowsの完成directory公開に限り、renameのWinError 5/32/33は25 ms間隔・最大1 sのI/O期限で再試行します。
+finalizeと完成partialの再公開は同じ処理を使い、成功は実際のatomic renameによってのみ確定します。
+出力先の出現、partialの消失、他のerrorと他OSの拒否は再試行しません。恒常的な拒否は元のerrorで失敗し、
+完成partialを保持します。この期限は粒子の時間刻みや数値許容値ではなく、物理計算を再実行するものでもありません。
+
 ## `segments/epoch-NNNNNN.h5`
 
 root attributeは次のとおりです。
@@ -299,11 +304,11 @@ RK4 dense path  rk4_position_hermite_state_extension_v3
 exponential     charge_stable_exponential_midpoint_v3
 exp enclosure   exponential_midpoint_local_stage_enclosure_v4
 event           line_quadratic_curved_capsule_periodic_first_hit_v23
-boundary        contact_wall_laws_v7
+boundary        contact_wall_laws_v8
 topology        translation_periodic_xy_v1
 source          realized_internal_surface_contact_schedule_v5
-physics catalog inertial_langevin_2d_catalog_v23
-physics runtime prepared_native_physics_runtime_v24
+physics catalog inertial_langevin_2d_catalog_v24
+physics runtime prepared_native_physics_runtime_v25
 required field  required_field_time_linear_v6
 field location  field_location_v5
 field time      fixed_topology_linear_time_v2
@@ -337,10 +342,11 @@ required field entryは`time_interpolation`、snapshot数・範囲を、time sec
 `field_snapshot_splits_s`を記録する。静的場だけなら追加splitは空で、result dataset/schemaは増えない。
 resume identityにもfield time revisionとsplit時刻を含めるため、異なる時間partitionのpartialを再開しない。
 
-`contact_wall_laws_v7`では`specular`はparameterなしの完全鏡面で、`restitution`だけが法線・接線の反発係数を持つ。
+`contact_wall_laws_v8`では`specular`はparameterなしの完全鏡面で、`restitution`だけが法線・接線の反発係数を持つ。
 `maxwell_thermal`はwall temperature、Maxwell拡散混合率、接線wall-frame velocityをmanifestへ記録する。
-`probabilistic_stick`のfallbackはparameterなしの`specular`、両係数を持つ`restitution`、または完全なparameterを持つ
-`maxwell_thermal`である。eventの`law_id`は選択されたtop-level lawを保持し、compound lawの実現分岐は既存の
+`probabilistic_stick`のfallbackはparameterなしの`specular`/`isotropic`、両係数を持つ`restitution`、または完全なparameterを持つ
+`maxwell_thermal`である。`isotropic`は静止壁で速さを保存した内向き半円一様角の2自由度散乱を表す。
+eventの`law_id`は選択されたtop-level lawを保持し、compound lawの実現分岐は既存の
 `outcome`とdraw referenceで表す。v5はparameterなしの`hold`と`held` outcomeを追加し、v6は既存event列を変えず
 Maxwell thermal反射を追加した。lifecycle seriesへ`held`を一列追加したためresult/checkpoint schemaを
 2、result algorithmをv4へ一度だけ更新した。case schema v2は不変で、v1 result/checkpointの互換readerやmigration shimは

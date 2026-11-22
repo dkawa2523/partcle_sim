@@ -12,7 +12,7 @@ from .forces import (
     WALDMANN_GALLIS_MAX_SPEED_OVER_MEAN_THERMAL,
 )
 
-PHYSICS_CATALOG_REVISION = "inertial_langevin_2d_catalog_v23"
+PHYSICS_CATALOG_REVISION = "inertial_langevin_2d_catalog_v24"
 
 BROWNIAN_MIDPOINT_2D_REVISION = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
 
@@ -46,6 +46,61 @@ class RequiredField:
     stored_basis: str
     positive: bool = False
     zero_on_rz_axis: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class ReferenceParticleProperties:
+    """Particle authorities used to produce a homogeneous reference coefficient set."""
+
+    mass_kg: float
+    drag_diameter_m: float
+    electrostatic_radius_m: float
+    displaced_volume_m3: float
+
+
+@dataclass(frozen=True, slots=True)
+class PrescribedLinearFrictionPlan:
+    revision: str
+    gas_velocity_field: str
+    friction_coefficient_field: str
+    particle_properties: ReferenceParticleProperties
+
+
+@dataclass(frozen=True, slots=True)
+class PrescribedForceDiffusionNoisePlan:
+    revision: str
+    force_spectral_density_field: str
+    interval_tree_depth: int
+    adaptive_max_depth: int
+    particle_properties: ReferenceParticleProperties
+
+
+@dataclass(frozen=True, slots=True)
+class PrescribedExponentialLinearChargePlan:
+    revision: str
+    electron_rate_reference_number_s: float
+    electron_exponent_offset_field: str
+    electron_charge_slope_field: str
+    ion_rate_field: str
+    ion_charge_slope_field: str
+    particle_properties: ReferenceParticleProperties
+
+
+@dataclass(frozen=True, slots=True)
+class PrescribedChargePolynomialIonDragPlan:
+    revision: str
+    constant_force_field: str
+    linear_charge_force_field: str
+    quadratic_charge_force_field: str
+    particle_properties: ReferenceParticleProperties
+
+
+@dataclass(frozen=True, slots=True)
+class PrescribedRotationalLiftPlan:
+    revision: str
+    gas_velocity_field: str
+    rotation_coefficient_field: str
+    particle_properties: ReferenceParticleProperties
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,7 +142,11 @@ class AggregateRelativeDriftChargePlan:
         return self.revision == _AGGREGATE_THREE_CURRENT_REVISION
 
 
-type ChargePlan = PlasmaContinuousChargePlan | AggregateRelativeDriftChargePlan
+type ChargePlan = (
+    PlasmaContinuousChargePlan
+    | AggregateRelativeDriftChargePlan
+    | PrescribedExponentialLinearChargePlan
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,7 +186,12 @@ class StokesCunninghamDragPlan:
     gas_mean_free_path_field: str
 
 
-type DragPlan = EpsteinDragPlan | FiniteSpeedEpsteinDragPlan | StokesCunninghamDragPlan
+type DragPlan = (
+    EpsteinDragPlan
+    | FiniteSpeedEpsteinDragPlan
+    | StokesCunninghamDragPlan
+    | PrescribedLinearFrictionPlan
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -144,6 +208,15 @@ class ElectricPlan:
     """Resolved field name for ``electric_coulomb_v1``."""
 
     electric_field: str
+    maximum_abs_charge_number: float | None = None
+
+    @property
+    def revision(self) -> str:
+        return (
+            "electric_coulomb_v1"
+            if self.maximum_abs_charge_number is None
+            else "electric_coulomb_charge_cap_v1"
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -232,6 +305,7 @@ type IonDragPlan = (
     BarnesCollisionlessIonDragPlan
     | RelativeFlowScreenedIonDragPlan
     | ElectricFieldDirectedImageIonDragPlan
+    | PrescribedChargePolynomialIonDragPlan
 )
 
 
@@ -266,7 +340,7 @@ class SaffmanLiftPlan:
     out_of_plane_gas_vorticity_field: str
 
 
-type LiftPlan = RarefiedVorticityLiftPlan | SaffmanLiftPlan
+type LiftPlan = RarefiedVorticityLiftPlan | SaffmanLiftPlan | PrescribedRotationalLiftPlan
 
 
 @dataclass(frozen=True, slots=True)
@@ -275,7 +349,7 @@ class PhysicsPlan:
 
     charge: ChargePlan | None
     drag: DragPlan | None
-    noise: InertialLangevinNoisePlan | None
+    noise: InertialLangevinNoisePlan | PrescribedForceDiffusionNoisePlan | None
     thermophoresis: ThermophoresisPlan | None
     ion_drag: IonDragPlan | None
     dielectrophoresis: QuasistaticSphericalDielectrophoresisPlan | None
@@ -322,51 +396,32 @@ class PhysicsPlan:
         else:
             result = {
                 "charge": {
-                    "model": "plasma_continuous",
+                    "model": (
+                        "prescribed_exponential_linear"
+                        if isinstance(self.charge, PrescribedExponentialLinearChargePlan)
+                        else "plasma_continuous"
+                    ),
                     "revision": self.charge.revision,
                 }
             }
-        if isinstance(self.drag, EpsteinDragPlan):
-            result["drag"] = {
-                "model": "epstein_linear",
-                "revision": self.drag.revision,
-            }
-        elif isinstance(self.drag, FiniteSpeedEpsteinDragPlan):
-            result["drag"] = {
-                "model": "epstein_finite_speed",
-                "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
-            }
-        elif isinstance(self.drag, StokesCunninghamDragPlan):
-            result["drag"] = {
-                "model": "stokes_cunningham",
-                "revision": "stokes_cunningham_allen_raabe_air_v1",
-            }
+        drag_model = _resolved_drag_model(self.drag)
+        if drag_model is not None:
+            result["drag"] = drag_model
         if self.noise is not None:
             result["noise"] = {
-                "model": "inertial_langevin_fdt",
+                "model": (
+                    "prescribed_force_diffusion"
+                    if isinstance(self.noise, PrescribedForceDiffusionNoisePlan)
+                    else "inertial_langevin_fdt"
+                ),
                 "revision": self.noise.revision,
             }
         thermophoresis_model = _resolved_thermophoresis_model(self.thermophoresis)
         if thermophoresis_model is not None:
             result["thermophoresis"] = thermophoresis_model
-        if isinstance(self.ion_drag, BarnesCollisionlessIonDragPlan):
-            result["ion_drag"] = {
-                "model": "barnes_collisionless",
-                "revision": (
-                    "barnes_collisionless_effective_speed_single_positive_ion_"
-                    "negative_debye_huckel_v1"
-                ),
-            }
-        elif isinstance(self.ion_drag, RelativeFlowScreenedIonDragPlan):
-            result["ion_drag"] = {
-                "model": "screened_collection_orbital",
-                "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
-            }
-        elif isinstance(self.ion_drag, ElectricFieldDirectedImageIonDragPlan):
-            result["ion_drag"] = {
-                "model": "image_orbital_sensitivity",
-                "revision": "electric_field_directed_image_orbital_sensitivity_v1",
-            }
+        ion_drag_model = _resolved_ion_drag_model(self.ion_drag)
+        if ion_drag_model is not None:
+            result["ion_drag"] = ion_drag_model
         if self.dielectrophoresis is not None:
             result["dielectrophoresis"] = {
                 "model": "quasistatic_spherical",
@@ -376,16 +431,68 @@ class PhysicsPlan:
         if lift_model is not None:
             result["lift"] = lift_model
         if self.electric is not None:
-            result["electric"] = {
+            electric_model: dict[str, str | float] = {
                 "model": "coulomb",
-                "revision": "electric_coulomb_v1",
+                "revision": self.electric.revision,
             }
+            if self.electric.maximum_abs_charge_number is not None:
+                electric_model["maximum_abs_charge_number"] = (
+                    self.electric.maximum_abs_charge_number
+                )
+            result["electric"] = electric_model
         if self.gravity_buoyancy is not None:
             result["gravity_buoyancy"] = {
                 "model": "standard",
                 "revision": "gravity_buoyancy_standard_v1",
             }
         return result
+
+
+def _resolved_drag_model(plan: DragPlan | None) -> dict[str, str | float] | None:
+    if isinstance(plan, EpsteinDragPlan):
+        return {
+            "model": "epstein_linear",
+            "revision": plan.revision,
+        }
+    elif isinstance(plan, FiniteSpeedEpsteinDragPlan):
+        return {
+            "model": "epstein_finite_speed",
+            "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
+        }
+    elif isinstance(plan, StokesCunninghamDragPlan):
+        return {
+            "model": "stokes_cunningham",
+            "revision": "stokes_cunningham_allen_raabe_air_v1",
+        }
+    elif isinstance(plan, PrescribedLinearFrictionPlan):
+        return {"model": "prescribed_linear_friction", "revision": plan.revision}
+    return None
+
+
+def _resolved_ion_drag_model(plan: IonDragPlan | None) -> dict[str, str | float] | None:
+    if isinstance(plan, BarnesCollisionlessIonDragPlan):
+        return {
+            "model": "barnes_collisionless",
+            "revision": (
+                "barnes_collisionless_effective_speed_single_positive_ion_negative_debye_huckel_v1"
+            ),
+        }
+    elif isinstance(plan, RelativeFlowScreenedIonDragPlan):
+        return {
+            "model": "screened_collection_orbital",
+            "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+        }
+    elif isinstance(plan, ElectricFieldDirectedImageIonDragPlan):
+        return {
+            "model": "image_orbital_sensitivity",
+            "revision": "electric_field_directed_image_orbital_sensitivity_v1",
+        }
+    elif isinstance(plan, PrescribedChargePolynomialIonDragPlan):
+        return {
+            "model": "prescribed_charge_polynomial",
+            "revision": plan.revision,
+        }
+    return None
 
 
 def _resolved_thermophoresis_model(
@@ -418,6 +525,8 @@ def _resolved_lift_model(plan: LiftPlan | None) -> dict[str, str | float] | None
         }
     if isinstance(plan, SaffmanLiftPlan):
         return {"model": "saffman", "revision": _SAFFMAN_REVISION}
+    if isinstance(plan, PrescribedRotationalLiftPlan):
+        return {"model": "prescribed_rotational_lift", "revision": plan.revision}
     return None
 
 
@@ -455,41 +564,11 @@ def resolve_physics_plan(
     gravity = _resolve_gravity(models.get("gravity_buoyancy"), coordinate_system)
     _require_matching_neutral_gas(drag, thermophoresis, lift, gravity)
     _require_noise_compatibility(noise, drag)
+    _require_matching_reference_particles(charge, drag, noise, ion_drag, lift)
     vector_components, vector_basis = _vector_metadata(coordinate_system)
 
     requirements = _charge_requirements(charge, vector_components, vector_basis)
-    if isinstance(drag, EpsteinDragPlan | FiniteSpeedEpsteinDragPlan):
-        requirements.extend(
-            (
-                _vector_field(
-                    drag.gas_velocity_field,
-                    "m/s",
-                    vector_components,
-                    vector_basis,
-                ),
-                _scalar_field(drag.gas_density_field, "kg/m^3", positive=True),
-                _scalar_field(drag.gas_temperature_field, "K", positive=True),
-                _scalar_field(drag.gas_mean_free_path_field, "m", positive=True),
-            )
-        )
-    elif isinstance(drag, StokesCunninghamDragPlan):
-        requirements.extend(
-            (
-                _vector_field(
-                    drag.gas_velocity_field,
-                    "m/s",
-                    vector_components,
-                    vector_basis,
-                ),
-                _scalar_field(drag.gas_density_field, "kg/m^3", positive=True),
-                _scalar_field(
-                    drag.gas_dynamic_viscosity_field,
-                    "Pa*s",
-                    positive=True,
-                ),
-                _scalar_field(drag.gas_mean_free_path_field, "m", positive=True),
-            )
-        )
+    requirements.extend(_drag_requirements(drag, vector_components, vector_basis))
     if isinstance(thermophoresis, WaldmannGallisThermophoresisPlan):
         requirements.extend(
             (
@@ -545,7 +624,110 @@ def resolve_physics_plan(
                 ),
             )
         )
-    if ion_drag is not None:
+    if isinstance(noise, PrescribedForceDiffusionNoisePlan):
+        requirements.append(
+            _scalar_field(noise.force_spectral_density_field, "N^2*s", positive=True)
+        )
+    requirements.extend(_ion_drag_requirements(ion_drag, vector_components, vector_basis))
+    if dielectrophoresis is not None:
+        requirements.append(
+            _vector_field(
+                dielectrophoresis.gradient_mean_e_squared_field,
+                "V^2/m^3",
+                vector_components,
+                vector_basis,
+            )
+        )
+    requirements.extend(_lift_requirements(lift, vector_components, vector_basis))
+    if electric is not None:
+        requirements.append(
+            _vector_field(
+                electric.electric_field,
+                "V/m",
+                vector_components,
+                vector_basis,
+            )
+        )
+    if gravity is not None:
+        requirements.append(_scalar_field(gravity.gas_density_field, "kg/m^3", positive=True))
+    return PhysicsPlan(
+        charge,
+        drag,
+        noise,
+        thermophoresis,
+        ion_drag,
+        dielectrophoresis,
+        lift,
+        electric,
+        gravity,
+        _deduplicate_requirements(requirements),
+    )
+
+
+def _drag_requirements(
+    drag: DragPlan | None,
+    vector_components: tuple[str, str],
+    vector_basis: str,
+) -> list[RequiredField]:
+    requirements: list[RequiredField] = []
+    if isinstance(drag, PrescribedLinearFrictionPlan):
+        requirements.extend(
+            (
+                _vector_field(drag.gas_velocity_field, "m/s", vector_components, vector_basis),
+                _scalar_field(drag.friction_coefficient_field, "kg/s", positive=True),
+            )
+        )
+    elif isinstance(drag, EpsteinDragPlan | FiniteSpeedEpsteinDragPlan):
+        requirements.extend(
+            (
+                _vector_field(
+                    drag.gas_velocity_field,
+                    "m/s",
+                    vector_components,
+                    vector_basis,
+                ),
+                _scalar_field(drag.gas_density_field, "kg/m^3", positive=True),
+                _scalar_field(drag.gas_temperature_field, "K", positive=True),
+                _scalar_field(drag.gas_mean_free_path_field, "m", positive=True),
+            )
+        )
+    elif isinstance(drag, StokesCunninghamDragPlan):
+        requirements.extend(
+            (
+                _vector_field(
+                    drag.gas_velocity_field,
+                    "m/s",
+                    vector_components,
+                    vector_basis,
+                ),
+                _scalar_field(drag.gas_density_field, "kg/m^3", positive=True),
+                _scalar_field(
+                    drag.gas_dynamic_viscosity_field,
+                    "Pa*s",
+                    positive=True,
+                ),
+                _scalar_field(drag.gas_mean_free_path_field, "m", positive=True),
+            )
+        )
+    return requirements
+
+
+def _ion_drag_requirements(
+    ion_drag: IonDragPlan | None,
+    vector_components: tuple[str, str],
+    vector_basis: str,
+) -> list[RequiredField]:
+    requirements: list[RequiredField] = []
+    if isinstance(ion_drag, PrescribedChargePolynomialIonDragPlan):
+        requirements.extend(
+            _vector_field(name, "N", vector_components, vector_basis)
+            for name in (
+                ion_drag.constant_force_field,
+                ion_drag.linear_charge_force_field,
+                ion_drag.quadratic_charge_force_field,
+            )
+        )
+    elif ion_drag is not None:
         if isinstance(ion_drag, BarnesCollisionlessIonDragPlan):
             requirements.extend(
                 (
@@ -644,16 +826,28 @@ def resolve_physics_plan(
                         ),
                     )
                 )
-    if dielectrophoresis is not None:
-        requirements.append(
-            _vector_field(
-                dielectrophoresis.gradient_mean_e_squared_field,
-                "V^2/m^3",
-                vector_components,
-                vector_basis,
+    return requirements
+
+
+def _lift_requirements(
+    lift: LiftPlan | None,
+    vector_components: tuple[str, str],
+    vector_basis: str,
+) -> list[RequiredField]:
+    requirements: list[RequiredField] = []
+    if isinstance(lift, PrescribedRotationalLiftPlan):
+        requirements.extend(
+            (
+                _vector_field(lift.gas_velocity_field, "m/s", vector_components, vector_basis),
+                _scalar_field(
+                    lift.rotation_coefficient_field,
+                    "kg/s",
+                    positive=False,
+                    zero_on_rz_axis=vector_basis == "axisymmetric_rz",
+                ),
             )
         )
-    if isinstance(lift, RarefiedVorticityLiftPlan):
+    elif isinstance(lift, RarefiedVorticityLiftPlan):
         requirements.extend(
             (
                 _vector_field(
@@ -696,29 +890,7 @@ def resolve_physics_plan(
                 ),
             )
         )
-    if electric is not None:
-        requirements.append(
-            _vector_field(
-                electric.electric_field,
-                "V/m",
-                vector_components,
-                vector_basis,
-            )
-        )
-    if gravity is not None:
-        requirements.append(_scalar_field(gravity.gas_density_field, "kg/m^3", positive=True))
-    return PhysicsPlan(
-        charge,
-        drag,
-        noise,
-        thermophoresis,
-        ion_drag,
-        dielectrophoresis,
-        lift,
-        electric,
-        gravity,
-        _deduplicate_requirements(requirements),
-    )
+    return requirements
 
 
 def _charge_requirements(
@@ -728,6 +900,13 @@ def _charge_requirements(
 ) -> list[RequiredField]:
     """Return canonical primitive fields owned by the selected charge revision."""
 
+    if isinstance(charge, PrescribedExponentialLinearChargePlan):
+        return [
+            _scalar_field(charge.electron_exponent_offset_field, "1", positive=False),
+            _scalar_field(charge.electron_charge_slope_field, "1", positive=False),
+            _scalar_field(charge.ion_rate_field, "1/s", positive=False),
+            _scalar_field(charge.ion_charge_slope_field, "1", positive=False),
+        ]
     if isinstance(charge, AggregateRelativeDriftChargePlan):
         requirements = [
             _scalar_field(charge.electron_number_density_field, "1/m^3", positive=True),
@@ -788,9 +967,11 @@ def _charge_requirements(
 
 def _resolve_noise(
     model: Mapping[str, object] | None,
-) -> InertialLangevinNoisePlan | None:
+) -> InertialLangevinNoisePlan | PrescribedForceDiffusionNoisePlan | None:
     if model is None:
         return None
+    if model.get("model") == "prescribed_force_diffusion":
+        return _resolve_prescribed_noise(model)
     required_keys = {"model", "revision", "interval_tree_depth"}
     extra_keys = set(model) - required_keys - {"adaptive_max_depth"}
     missing_keys = required_keys - set(model)
@@ -826,10 +1007,16 @@ def _resolve_noise(
 
 
 def _require_noise_compatibility(
-    noise: InertialLangevinNoisePlan | None,
+    noise: InertialLangevinNoisePlan | PrescribedForceDiffusionNoisePlan | None,
     drag: DragPlan | None,
 ) -> None:
     if noise is None:
+        return
+    if isinstance(noise, PrescribedForceDiffusionNoisePlan):
+        if not isinstance(drag, PrescribedLinearFrictionPlan):
+            raise PhysicsConfigurationError(
+                "prescribed_force_diffusion requires prescribed_linear_friction"
+            )
         return
     if not isinstance(drag, EpsteinDragPlan) or drag.revision not in {
         _EPSTEIN_LINEAR_REVISION,
@@ -847,6 +1034,8 @@ def _resolve_charge(
     if model is None:
         raise PhysicsConfigurationError("physics.charge must select a charge model")
     model_id = _text(model.get("model"), "physics.charge.model")
+    if model_id == "prescribed_exponential_linear":
+        return _resolve_prescribed_charge(model)
     if model_id == "fixed":
         _exact_keys(model, {"model"}, "physics.charge")
         return None
@@ -1014,6 +1203,8 @@ def _resolve_drag(model: Mapping[str, object] | None) -> DragPlan | None:
     if model is None:
         return None
     model_id = _text(model.get("model"), "physics.drag.model")
+    if model_id == "prescribed_linear_friction":
+        return _resolve_prescribed_drag(model)
     if model_id == "stokes_cunningham":
         return _resolve_stokes_cunningham_drag(model)
     if model_id == "epstein_finite_speed":
@@ -1161,6 +1352,8 @@ def _resolve_ion_drag(
     if model is None:
         return None
     model_id = _text(model.get("model"), "physics.ion_drag.model")
+    if model_id == "prescribed_charge_polynomial":
+        return _resolve_prescribed_ion_drag(model)
     if model_id == "screened_collection_orbital":
         return _resolve_relative_flow_screened_ion_drag(model)
     if model_id == "image_orbital_sensitivity":
@@ -1538,6 +1731,16 @@ def _require_matching_ion_species(
 ) -> None:
     if charge is None or ion_drag is None:
         return
+    if isinstance(charge, PrescribedExponentialLinearChargePlan) or isinstance(
+        ion_drag, PrescribedChargePolynomialIonDragPlan
+    ):
+        if not isinstance(charge, PrescribedExponentialLinearChargePlan) or not isinstance(
+            ion_drag, PrescribedChargePolynomialIonDragPlan
+        ):
+            raise PhysicsConfigurationError(
+                "prescribed charge and ion drag must use their declared reference pair or fixed charge"
+            )
+        return
     if isinstance(charge, AggregateRelativeDriftChargePlan):
         _require_matching_aggregate_ion_background(charge, ion_drag)
         return
@@ -1575,7 +1778,7 @@ def _require_matching_aggregate_ion_background(
     charge: AggregateRelativeDriftChargePlan,
     ion_drag: IonDragPlan,
 ) -> None:
-    if isinstance(ion_drag, BarnesCollisionlessIonDragPlan):
+    if isinstance(ion_drag, BarnesCollisionlessIonDragPlan | PrescribedChargePolynomialIonDragPlan):
         raise PhysicsConfigurationError(
             "aggregate charge revisions do not compose with barnes_collisionless ion drag"
         )
@@ -1592,7 +1795,7 @@ def _aggregate_ion_background_fields(
     charge: AggregateRelativeDriftChargePlan,
     ion_drag: IonDragPlan,
 ) -> tuple[tuple[str, object, object], ...]:
-    if isinstance(ion_drag, BarnesCollisionlessIonDragPlan):
+    if isinstance(ion_drag, BarnesCollisionlessIonDragPlan | PrescribedChargePolynomialIonDragPlan):
         raise PhysicsConfigurationError("Barnes ion drag has no aggregate-ion background")
     shared: tuple[tuple[str, object, object], ...] = (
         (
@@ -1720,6 +1923,8 @@ def _resolve_lift(
     if model is None:
         return None
     model_id = _text(model.get("model"), "physics.lift.model")
+    if model_id == "prescribed_rotational_lift":
+        return _resolve_prescribed_lift(model)
     if model_id == "saffman":
         return _resolve_saffman_lift(model, coordinate_system)
     _exact_keys(
@@ -1816,12 +2021,21 @@ def _resolve_saffman_lift(
 def _resolve_electric(model: Mapping[str, object] | None) -> ElectricPlan | None:
     if model is None:
         return None
-    _exact_keys(model, {"model", "revision", "electric_field"}, "physics.electric")
+    revision = _text(model.get("revision"), "physics.electric.revision")
+    keys = {"model", "revision", "electric_field"}
+    if revision == "electric_coulomb_charge_cap_v1":
+        keys.add("maximum_abs_charge_number")
+    _exact_keys(model, keys, "physics.electric")
     if _text(model["model"], "physics.electric.model") != "coulomb":
         raise PhysicsConfigurationError("P06 supports only electric model=coulomb")
-    if _text(model["revision"], "physics.electric.revision") != "electric_coulomb_v1":
-        raise PhysicsConfigurationError("physics.electric revision must be electric_coulomb_v1")
-    return ElectricPlan(_name(model["electric_field"], "electric_field"))
+    if revision not in {"electric_coulomb_v1", "electric_coulomb_charge_cap_v1"}:
+        raise PhysicsConfigurationError("unsupported Coulomb model revision")
+    cap = (
+        _positive_number(model["maximum_abs_charge_number"], "maximum_abs_charge_number")
+        if revision == "electric_coulomb_charge_cap_v1"
+        else None
+    )
+    return ElectricPlan(_name(model["electric_field"], "electric_field"), cap)
 
 
 def _resolve_gravity(
@@ -1851,6 +2065,150 @@ def _resolve_gravity(
             "a nonzero radial body acceleration is not a spatially uniform gravity vector"
         )
     return GravityBuoyancyPlan(_name(model["gas_density_field"], "gas_density_field"), gravity)
+
+
+def _reference_particle_properties(value: object) -> ReferenceParticleProperties:
+    if not isinstance(value, Mapping):
+        raise PhysicsConfigurationError(
+            "particle_properties must bind the reference coefficient authorities"
+        )
+    _exact_keys(
+        value,
+        {"mass_kg", "drag_diameter_m", "electrostatic_radius_m", "displaced_volume_m3"},
+        "particle_properties",
+    )
+    return ReferenceParticleProperties(
+        _positive_number(value["mass_kg"], "particle_properties.mass_kg"),
+        _positive_number(value["drag_diameter_m"], "particle_properties.drag_diameter_m"),
+        _nonnegative_number(
+            value["electrostatic_radius_m"], "particle_properties.electrostatic_radius_m"
+        ),
+        _nonnegative_number(
+            value["displaced_volume_m3"], "particle_properties.displaced_volume_m3"
+        ),
+    )
+
+
+def _reference_model_properties(
+    model: Mapping[str, object],
+    keys: set[str],
+    revision: str,
+) -> ReferenceParticleProperties:
+    _exact_keys(model, keys | {"model", "revision", "particle_properties"}, str(model.get("model")))
+    if model["revision"] != revision:
+        raise PhysicsConfigurationError(f"{model['model']} revision must be {revision}")
+    return _reference_particle_properties(model["particle_properties"])
+
+
+def _require_matching_reference_particles(*models: object) -> None:
+    bindings = {
+        model.particle_properties
+        for model in models
+        if isinstance(
+            model,
+            PrescribedLinearFrictionPlan
+            | PrescribedForceDiffusionNoisePlan
+            | PrescribedExponentialLinearChargePlan
+            | PrescribedChargePolynomialIonDragPlan
+            | PrescribedRotationalLiftPlan,
+        )
+    }
+    if len(bindings) > 1:
+        raise PhysicsConfigurationError("reference models must bind the same particle_properties")
+
+
+def _resolve_prescribed_drag(model: Mapping[str, object]) -> PrescribedLinearFrictionPlan:
+    revision = "prescribed_linear_friction_v1"
+    properties = _reference_model_properties(
+        model,
+        {"gas_velocity_field", "friction_coefficient_field"},
+        revision,
+    )
+    return PrescribedLinearFrictionPlan(
+        revision,
+        _name(model["gas_velocity_field"], "gas_velocity_field"),
+        _name(model["friction_coefficient_field"], "friction_coefficient_field"),
+        properties,
+    )
+
+
+def _resolve_prescribed_noise(model: Mapping[str, object]) -> PrescribedForceDiffusionNoisePlan:
+    revision = "prescribed_force_diffusion_midpoint_2d_v1"
+    keys = {"force_spectral_density_field", "interval_tree_depth"}
+    if "adaptive_max_depth" in model:
+        keys.add("adaptive_max_depth")
+    properties = _reference_model_properties(model, keys, revision)
+    depth = _bounded_integer(
+        model["interval_tree_depth"], "interval_tree_depth", minimum=0, maximum=10
+    )
+    maximum = _bounded_integer(
+        model.get("adaptive_max_depth", depth), "adaptive_max_depth", minimum=depth, maximum=10
+    )
+    return PrescribedForceDiffusionNoisePlan(
+        revision,
+        _name(model["force_spectral_density_field"], "force_spectral_density_field"),
+        depth,
+        maximum,
+        properties,
+    )
+
+
+def _resolve_prescribed_charge(
+    model: Mapping[str, object],
+) -> PrescribedExponentialLinearChargePlan:
+    revision = "prescribed_exponential_linear_collection_v1"
+    keys = {
+        "electron_rate_reference_number_s",
+        "electron_exponent_offset_field",
+        "electron_charge_slope_field",
+        "ion_rate_field",
+        "ion_charge_slope_field",
+    }
+    properties = _reference_model_properties(model, keys, revision)
+    return PrescribedExponentialLinearChargePlan(
+        revision,
+        _nonnegative_number(
+            model["electron_rate_reference_number_s"], "electron_rate_reference_number_s"
+        ),
+        _name(model["electron_exponent_offset_field"], "electron_exponent_offset_field"),
+        _name(model["electron_charge_slope_field"], "electron_charge_slope_field"),
+        _name(model["ion_rate_field"], "ion_rate_field"),
+        _name(model["ion_charge_slope_field"], "ion_charge_slope_field"),
+        properties,
+    )
+
+
+def _resolve_prescribed_ion_drag(
+    model: Mapping[str, object],
+) -> PrescribedChargePolynomialIonDragPlan:
+    revision = "prescribed_charge_polynomial_v1"
+    properties = _reference_model_properties(
+        model,
+        {"constant_force_field", "linear_charge_force_field", "quadratic_charge_force_field"},
+        revision,
+    )
+    return PrescribedChargePolynomialIonDragPlan(
+        revision,
+        _name(model["constant_force_field"], "constant_force_field"),
+        _name(model["linear_charge_force_field"], "linear_charge_force_field"),
+        _name(model["quadratic_charge_force_field"], "quadratic_charge_force_field"),
+        properties,
+    )
+
+
+def _resolve_prescribed_lift(model: Mapping[str, object]) -> PrescribedRotationalLiftPlan:
+    revision = "prescribed_rotational_lift_v1"
+    properties = _reference_model_properties(
+        model,
+        {"gas_velocity_field", "rotation_coefficient_field"},
+        revision,
+    )
+    return PrescribedRotationalLiftPlan(
+        revision,
+        _name(model["gas_velocity_field"], "gas_velocity_field"),
+        _name(model["rotation_coefficient_field"], "rotation_coefficient_field"),
+        properties,
+    )
 
 
 def _scalar_field(
@@ -1929,6 +2287,18 @@ def _positive_number(value: object, location: str) -> float:
     if not math.isfinite(number) or number <= 0.0:
         raise PhysicsConfigurationError(f"{location} must be a positive finite number")
     return number
+
+
+def _nonnegative_number(value: object, location: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise PhysicsConfigurationError(f"{location} must be a nonnegative finite number")
+    try:
+        result = float(value)
+    except OverflowError as exc:
+        raise PhysicsConfigurationError(f"{location} must be a nonnegative finite number") from exc
+    if not math.isfinite(result) or result < 0.0:
+        raise PhysicsConfigurationError(f"{location} must be a nonnegative finite number")
+    return result
 
 
 def _maximum_speed_ratio(value: object, location: str) -> float:

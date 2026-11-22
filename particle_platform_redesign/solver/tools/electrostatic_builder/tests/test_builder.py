@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -173,6 +174,37 @@ def test_axisymmetric_annular_laplace_converges_to_logarithmic_solution() -> Non
     assert errors[2] < 0.35 * errors[1]
 
 
+def test_disconnected_component_without_potential_anchor_is_rejected() -> None:
+    first_nodes, first_cells = _grid(3, 3)
+    second_nodes = first_nodes + _f8([0.0, 0.04])
+    nodes = _f8(np.concatenate((first_nodes, second_nodes)))
+    cells = _i8(np.concatenate((first_cells, first_cells + first_nodes.shape[0])))
+
+    with pytest.raises(ValueError, match=r"every connected mesh component.*Dirichlet"):
+        solve_axisymmetric_p1(nodes, cells, _i8([0]), _f8([0.0]), _closure(), _settings())
+
+
+def test_disconnected_anchored_components_recover_independent_affine_fields() -> None:
+    first_nodes, first_cells = _grid(3, 3)
+    second_nodes = first_nodes + _f8([0.0, 0.04])
+    nodes = _f8(np.concatenate((first_nodes, second_nodes)))
+    cells = _i8(np.concatenate((first_cells, first_cells + first_nodes.shape[0])))
+    boundary = (first_nodes[:, 0] == 0.02) | (first_nodes[:, 1] != 0.01)
+    fixed = np.flatnonzero(np.tile(boundary, 2)).astype("<i8", copy=False)
+    expected = _f8(
+        np.concatenate((2.0 + 30.0 * first_nodes[:, 1], 4.0 + 20.0 * second_nodes[:, 1]))
+    )
+
+    solution = solve_axisymmetric_p1(
+        nodes, cells, fixed, _f8(expected[fixed]), _closure(), _settings()
+    )
+
+    np.testing.assert_allclose(solution.potential_V, expected, rtol=0.0, atol=2.0e-10)
+    np.testing.assert_allclose(solution.electric_field_V_m[:, 0], 0.0, atol=2.0e-10)
+    np.testing.assert_allclose(solution.electric_field_V_m[:9, 1], -30.0, atol=2.0e-9)
+    np.testing.assert_allclose(solution.electric_field_V_m[9:, 1], -20.0, atol=2.0e-9)
+
+
 def test_closure_rejects_nonfinite_derived_quantities() -> None:
     with pytest.raises(ValueError, match="non-finite derived quantity"):
         evaluate_closure(_f8([-np.finfo(np.float64).max]), _closure())
@@ -237,6 +269,112 @@ def test_canonical_workflow_preserves_input_and_adds_particle_ready_fields(
     assert provenance["producer"] == "chamber_particles.electrostatic_builder"
     assert provenance["producer_metadata"]["model_revision"] == ("boltzmann_bohm_sheath_c2_v1")
     assert provenance["producer_metadata"]["boundary_conditions"][0]["group"] == "wafer"
+
+
+@pytest.mark.parametrize("missing_facet", [False, True])
+def test_builder_rejects_unprescribed_perimeter_even_when_all_nodes_are_fixed(
+    tmp_path: Path, missing_facet: bool
+) -> None:
+    source = tmp_path / "thermal.h5"
+    data = _thermal_bundle()
+    configuration = _configuration_text(source.name)
+    if missing_facet:
+        boundary = data.geometry.boundary
+        retained = [0, 2, 3]
+        boundary = replace(
+            boundary,
+            line2=_i8(boundary.line2[retained]),
+            boundary_id=_i4(boundary.boundary_id[retained]),
+            group_id=_i4([0, 1, 0]),  # Bottom and omitted right edge share the wall group.
+            material_id=_i4(boundary.material_id[retained]),
+            owner_cell_type=_u1(boundary.owner_cell_type[retained]),
+            owner_cell_local_index=_i8(boundary.owner_cell_local_index[retained]),
+            orientation=_i1(boundary.orientation[retained]),
+        )
+        data = replace(
+            data,
+            geometry=replace(data.geometry, boundary=boundary, group_names=("wall", "bulk")),
+        )
+        configuration = configuration.replace(
+            "  - group: wafer\n    priority: 20\n    potential: {kind: constant, value_V: -20.0}\n",
+            "",
+        )
+    else:
+        configuration = configuration.replace(
+            "  - group: wall\n    priority: 10\n    potential: {kind: constant, value_V: 0.0}\n",
+            "",
+        )
+    write(source, data)
+    config = tmp_path / "builder.yaml"
+    config.write_text(
+        configuration,
+        encoding="utf-8",
+    )
+    output = tmp_path / "augmented.h5"
+    report = tmp_path / "report.json"
+
+    with pytest.raises(ValueError, match=r"non-axis perimeter.*potential"):
+        build_from_configuration(config, output, report_path=report)
+
+    assert not output.exists()
+    assert not report.exists()
+
+
+def test_builder_axis_facets_do_not_impose_a_material_groups_potential(tmp_path: Path) -> None:
+    original = _thermal_bundle()
+    nodes, cells = _grid(2, 3)
+    boundary = BoundaryData(
+        line2=_i8([[0, 3], [3, 4], [4, 5], [5, 2], [2, 1], [1, 0]]),
+        boundary_id=_i4([10, 20, 20, 30, 20, 20]),
+        group_id=_i4([0, 1, 1, 2, 1, 1]),
+        material_id=_i4([1] * 6),
+        owner_cell_type=_u1([1] * 6),
+        owner_cell_local_index=_i8([0, 0, 2, 3, 3, 1]),
+        orientation=_i1([1] * 6),
+    )
+    geometry = replace(
+        original.geometry, nodes_m=nodes, tri3=cells, tri3_domain_id=_i4([3] * 4), boundary=boundary
+    )
+    data = replace(
+        original,
+        geometry=geometry,
+        layouts=(P1TriLayout("plasma", nodes, cells, _u1([1] * 4)),),
+        fields=tuple(
+            replace(field, values=_f8(np.tile(field.values[0], (6, 1))))
+            for field in original.fields
+        ),
+    )
+    potentials = []
+    for include_axis in (True, False):
+        source = tmp_path / f"thermal-{include_axis}.h5"
+        write(source, data)
+        configuration = tmp_path / f"builder-{include_axis}.yaml"
+        configuration.write_text(
+            _configuration_text(source.name)
+            .replace("value_V: -20.0", "value_V: 15.0")
+            .replace("value_V: 0.0", "value_V: 20.0"),
+            encoding="utf-8",
+        )
+        output = tmp_path / f"augmented-{include_axis}.h5"
+        build_from_configuration(configuration, output)
+        built = read(output)
+        potentials.append(
+            next(field.values for field in built.fields if field.name == "electric_potential")
+        )
+        boundary = replace(
+            boundary,
+            line2=_i8(boundary.line2[:4]),
+            boundary_id=_i4(boundary.boundary_id[:4]),
+            group_id=_i4(boundary.group_id[:4]),
+            material_id=_i4(boundary.material_id[:4]),
+            owner_cell_type=_u1(boundary.owner_cell_type[:4]),
+            owner_cell_local_index=_i8(boundary.owner_cell_local_index[:4]),
+            orientation=_i1(boundary.orientation[:4]),
+        )
+        data = replace(data, geometry=replace(geometry, boundary=boundary))
+
+    np.testing.assert_array_equal(potentials[0], potentials[1])
+    assert 15.0 < potentials[0][1, 0] < 20.0
 
 
 @pytest.mark.parametrize(

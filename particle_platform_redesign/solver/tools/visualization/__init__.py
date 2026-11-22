@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import heapq
 import html
 import json
-import math
+import struct
 from collections.abc import Callable, Iterable
 from os import PathLike
 from pathlib import Path
@@ -15,7 +16,10 @@ import numpy as np
 
 from chamber_particles import open_result
 
-VISUALIZATION_REVISION = "result_trajectory_boundary_svg_v2"
+VISUALIZATION_REVISION = "result_trajectory_boundary_svg_v3"
+
+type _EventPoint = tuple[float, float, str, int]
+type _RankedEvent = tuple[int, float, int, int, _EventPoint]
 
 _WIDTH = 900
 _HEIGHT = 620
@@ -57,32 +61,11 @@ def render_result(
 
     counts = result.manifest.get("counts")
     event_count = int(counts.get("boundary_events", 0)) if isinstance(counts, dict) else 0
-    stride = max(1, math.ceil(event_count / max_event_points))
-    event_points: list[tuple[float, float, str, int]] = []
-    trajectory_events: list[tuple[float, float, str]] = []
-    seen = 0
-    for batch in result.iter_boundary_event_batches(batch_rows=event_batch_rows):
-        rows = np.arange(batch.particle_id.size, dtype=np.int64)
-        sampled = rows[(rows + seen) % stride == 0]
-        event_points.extend(
-            (
-                float(batch.position_m[index, 0]),
-                float(batch.position_m[index, 1]),
-                str(batch.outcome[index]),
-                int(batch.boundary_id[index]),
-            )
-            for index in sampled
-        )
-        selected = np.flatnonzero(batch.particle_id == selected_particle)
-        trajectory_events.extend(
-            (
-                float(batch.position_m[index, 0]),
-                float(batch.position_m[index, 1]),
-                str(batch.outcome[index]),
-            )
-            for index in selected[: max(0, max_event_points - len(trajectory_events))]
-        )
-        seen += int(batch.particle_id.size)
+    event_points, trajectory_events = _boundary_points(
+        result.iter_boundary_event_batches(batch_rows=event_batch_rows),
+        selected_particle,
+        max_event_points,
+    )
 
     manifest_json = json.dumps(
         dict(result.manifest),
@@ -122,6 +105,12 @@ def render_result(
         "trajectory_points": len(trajectory),
         "boundary_events": event_count,
         "rendered_boundary_points": len(event_points),
+        "event_selection": {
+            "boundary_map": "smallest BLAKE2b-128 ranks of little-endian time_s/particle_id/event_ordinal",
+            "trajectory": "first physical events by time_s/particle_id/event_ordinal",
+            "display_order": "time_s/particle_id/event_ordinal",
+            "max_points_per_view": max_event_points,
+        },
         "trajectory_svg": str(trajectory_path),
         "boundary_events_svg": str(event_path),
         "metadata_json": str(metadata_path),
@@ -131,6 +120,42 @@ def render_result(
         encoding="utf-8",
     )
     return report
+
+
+def _retain_event(heap: list[_RankedEvent], entry: _RankedEvent, limit: int) -> None:
+    """Keep the smallest physical ranks using a bounded reversed-rank heap."""
+    if len(heap) < limit:
+        heapq.heappush(heap, entry)
+    elif entry > heap[0]:
+        heapq.heapreplace(heap, entry)
+
+
+def _boundary_points(
+    batches: Iterable[Any], selected_particle: int, limit: int
+) -> tuple[list[_EventPoint], list[tuple[float, float, str]]]:
+    sampled: list[_RankedEvent] = []
+    selected: list[_RankedEvent] = []
+    for batch in batches:
+        for index in range(batch.particle_id.size):
+            time_s = float(batch.time_s[index])
+            particle_id = int(batch.particle_id[index])
+            ordinal = int(batch.event_ordinal[index])
+            identity = struct.pack("<dqI", time_s, particle_id, ordinal)
+            rank = int.from_bytes(hashlib.blake2b(identity, digest_size=16).digest(), "little")
+            point = (
+                float(batch.position_m[index, 0]),
+                float(batch.position_m[index, 1]),
+                str(batch.outcome[index]),
+                int(batch.boundary_id[index]),
+            )
+            key = (-time_s, -particle_id, -ordinal)
+            _retain_event(sampled, (-rank, *key, point), limit)
+            if particle_id == selected_particle:
+                _retain_event(selected, (0, *key, point), limit)
+    return (
+        [entry[4] for entry in sorted(sampled, key=lambda entry: entry[1:4], reverse=True)],
+        [entry[4][:3] for entry in sorted(selected, key=lambda entry: entry[1:4], reverse=True)],
+    )
 
 
 def _trajectory_points(

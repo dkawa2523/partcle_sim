@@ -224,6 +224,7 @@ from .physics.runtime import (
     evaluate_prepared_physics_into,
     local_additive_acceleration_abs_upper_into,
     prepare_physics_runtime,
+    prescribed_force_variance_into,
 )
 from .rng import (
     BROWNIAN_RNG_REVISION,
@@ -338,6 +339,7 @@ _BOUNDARY_LAW_OUTPUT = np.asarray(
         "probabilistic_stick",
         "hold",
         "maxwell_thermal",
+        "isotropic",
     ),
     dtype="<U32",
 )
@@ -1419,7 +1421,7 @@ def _evaluate_langevin_coefficients_into(
     charge_number: np.ndarray,
     workspace: _LangevinCoefficientWorkspace,
 ) -> None:
-    """Compose sampled relaxation and the FDT owner before any Brownian draw."""
+    """Compose sampled relaxation and the selected noise before any draw."""
 
     count = particle_index.size
     thermal_status = workspace.numerical_status[:count]
@@ -1436,13 +1438,24 @@ def _evaluate_langevin_coefficients_into(
             thermal_status,
         )
     )
-    brownian_thermal_variance_into(
-        context.physics.mass_kg,
-        particle_index,
-        stage_workspace.fields.packed_values[:count, context.physics.bindings.gas_temperature],
-        workspace.thermal_variance_m2_s2[:count],
-        thermal_status,
-    )
+    prescribed = context.physics.bindings.prescribed
+    if prescribed.force_diffusion >= 0:
+        prescribed_force_variance_into(
+            context.physics.mass_kg,
+            particle_index,
+            stage_workspace.fields.packed_values[:count, prescribed.friction],
+            stage_workspace.fields.packed_values[:count, prescribed.force_diffusion],
+            workspace.thermal_variance_m2_s2[:count],
+            thermal_status,
+        )
+    else:
+        brownian_thermal_variance_into(
+            context.physics.mass_kg,
+            particle_index,
+            stage_workspace.fields.packed_values[:count, context.physics.bindings.gas_temperature],
+            workspace.thermal_variance_m2_s2[:count],
+            thermal_status,
+        )
     for row in range(count):
         invalid = not (
             np.isfinite(rate[row])
@@ -2795,7 +2808,10 @@ def _langevin_root_coefficients(
     noise = prepared.physics.noise
     if noise is None:
         raise EngineError("Langevin coefficients require a resolved noise model")
-    if noise.revision != BROWNIAN_MIDPOINT_2D_REVISION:
+    if noise.revision not in (
+        BROWNIAN_MIDPOINT_2D_REVISION,
+        "prescribed_force_diffusion_midpoint_2d_v1",
+    ):
         raise EngineError("Langevin coefficients require the resolved 2-D midpoint revision")
     guarded_duration_s, predictor, guard_valid, guard_failure = _guard_langevin_root_duration(
         prepared,
@@ -5438,8 +5454,7 @@ def _validate_langevin_configuration(case: SimulationCase, physics: PhysicsPlan)
     selected = physics.noise is not None
     if (case.spec.solver.integrator == "ou_langevin") != selected:
         raise EngineError(
-            "integrator=ou_langevin and physics.noise=inertial_langevin_fdt "
-            "must be selected together"
+            "integrator=ou_langevin and a supported physics.noise model must be selected together"
         )
     if not selected:
         return

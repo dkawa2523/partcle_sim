@@ -602,7 +602,7 @@ near-parallelなline separation、交差parameterは各候補facetの長さか�
 
 ## 6. corner policy revision 1
 
-現行wall-law algorithmは`contact_wall_laws_v7`である。corner selector
+現行wall-law algorithmは`contact_wall_laws_v8`である。corner selector
 `priority_then_combined_normal_v1`は次で固定する。
 
 1. 最早hitとの差がresolved time budget内で、局在点がposition budget内の全facetをcandidateに残す。
@@ -614,16 +614,22 @@ near-parallelなline separation、交差parameterは各候補facetの長さか�
    決定論的な`specular`と`restitution`は、解決済み`normal_restitution`と`tangential_restitution`が
    ともに同じ場合に限り互換である。このためparameterなしの`specular`は`restitution`の1/1と互換になる。
    `maxwell_thermal`同士は`wall_temperature_K`、`diffuse_reflection_fraction`、`wall_velocity_m_s`がすべて
-   同じ時だけ互換である。`probabilistic_stick`はtop-level law、`probability`、fallback law、そのfallbackの
+   同じ時だけ互換である。parameterなしの`isotropic`同士は互換とする。
+   `probabilistic_stick`はtop-level law、`probability`、fallback law、そのfallbackの
    解決済み反発係数またはMaxwell parameterを含む完全なsignatureを一致させる。`stick`と`escape`も互いに
    別signatureである。
 4. 互換なlaw responseは一回だけ適用する。反射responseでは、安定sort済みfacet順に入射中の外向き
-   unit normalを加算し、正規化したeffective normalへ解決済み反発係数またはMaxwell transformを一回だけ適用する。
+   unit normalを加算し、正規化したeffective normalへ選択したreflection transformを一回だけ適用する。
 5. normal和が丸め範囲で0、または非terminal lawの応答後速度がpriorityで除外した面も含む
    **全candidate facet**のいずれかへ外向きなら
    `indeterminate_boundary_policy`とする。
 6. priorityで選ばなかったものを含む全candidate集合をstable順でeventへ保存し、physical boundary event
    ordinalは一回だけ進める。`primary_facet_id`は選択subsetの先頭とする。
+
+`isotropic`は`phi=pi*(U-1/2)`、`t=(-n_y,n_x)`として
+`v_post=-|v|*cos(phi)*n+|v|*sin(phi)*t`を使う。`U`は既存のopen normal-direction draw
+（manifestの`wall_maxwell_normal`）であり、付着判定とは独立である。同じeventではMaxwellとisotropicは
+排他的なlawなのでdraw bankを共有する。全candidateへ内向きでなければ再抽選せずfailureを残す。
 
 これは非滑らかcornerの唯一の物理法則を主張するものではなく、初期製品の明示的で再現可能なpolicyである。
 別policyが必要になった場合はrevisionを分け、同名の意味を変更しない。
@@ -1142,14 +1148,21 @@ terminalなstick/escapeだけのproduction接続はB02で完了した。一般�
 
 ## 22. Inertial Brownian production path
 
-現行は`solver.integrator=ou_langevin`と、model `inertial_langevin_fdt`、revision
-`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`の`physics.noise`を同時に選ぶ。Cartesian XY / RZ meridional、
+`solver.integrator=ou_langevin`と対応する`physics.noise`を同時に選ぶ。FDT modelは
+`inertial_langevin_fdt`、revision `inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`である。Cartesian XY / RZ meridional、
 fixed/continuous charge、native/effective-gas線形Epstein、適用域が交わる既存additive forceを同じ経路で扱う。
 線形緩和率`gamma`、平衡速度`u_g`、`theta=k_B T_g/mass_kg`、additive accelerationとcharge affine係数は、
 deterministic half-stepで得た各macro-root midpointで一度評価して固定する。`T_g`のauthorityはEpstein dragが参照する
 `gas_temperature_field`だけであり、noise専用温度は持たない。support/applicabilityはRNG draw前にfail-closedで確定し、
 prepare時に`gamma*dt<=1e6`、全rootで有限な
 `0 < gamma*h <= 1e6`を要求する。
+
+数学的reference modelの`prescribed_force_diffusion_midpoint_2d_v1`は、明示した
+`prescribed_linear_friction_v1`との組合せだけを受理する。同じcoupled midpointの摩擦`beta`、
+force spectral density `D`から`gamma=beta/mass_kg`、`theta=D/(2*beta*mass_kg)`を形成し、下記の同じ
+joint OU・conditional tree・Hermite path・event/restartへ渡す。FDTの温度や適用域を変更しない。
+particle依存係数は生成時と同じ均一物性へのbindingをprepareで検査し、別粒径の係数を再利用しない。
+モデルの式・入力単位・物理認定の制限は[physics models](physics_models.md)が所有する。
 
 設定depthを`D in [0,10]`とすると、root joint OU incrementをB01のconditional Gaussian half-splitで深さ`D`まで
 二分し、`2^D`個のleafを物理時刻順に処理する。counter identityは

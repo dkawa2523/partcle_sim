@@ -215,7 +215,12 @@ def solve_axisymmetric_p1(
     closure: ClosureParameters,
     settings: SolverSettings,
 ) -> ElectrostaticSolution:
-    """Solve the v1 reduced electrostatic model on one RZ P1 mesh."""
+    """Solve the reduced model with zero normal displacement on unfixed edges.
+
+    This numerical interface accepts explicit nodal Dirichlet data; callers
+    therefore own the physical meaning of the remaining natural boundaries.
+    Each connected mesh component must have a Dirichlet potential anchor.
+    """
 
     _validate_closure(closure)
     _validate_settings(settings)
@@ -223,6 +228,7 @@ def solve_axisymmetric_p1(
     fixed, target = _prepare_dirichlet(
         mesh.nodes_m.shape[0], dirichlet_node_ids, target_potential_V
     )
+    _require_anchored_components(mesh.connectivity, fixed)
     free = np.flatnonzero(~fixed)
     potential = np.full(mesh.nodes_m.shape[0], closure.bulk_potential_V, dtype=_F8)
     reports: list[ContinuationStepReport] = []
@@ -616,6 +622,29 @@ def _prepare_dirichlet(
     target = np.zeros(node_count, dtype=_F8)
     target[ids] = values
     return fixed, target
+
+
+def _require_anchored_components(connectivity: Int64Array, fixed: NDArray[np.bool_]) -> None:
+    """Reject a disconnected Neumann component before a zero residual can pass."""
+
+    parent = np.arange(fixed.size, dtype=_I8)
+    for cell in connectivity:
+        for first, second in ((cell[0], cell[1]), (cell[0], cell[2])):
+            while parent[first] != first:
+                parent[first] = parent[parent[first]]
+                first = parent[first]
+            while parent[second] != second:
+                parent[second] = parent[parent[second]]
+                second = parent[second]
+            parent[max(first, second)] = min(first, second)
+    while bool(np.any(parent != parent[parent])):
+        parent = parent[parent]
+    unanchored = np.setdiff1d(np.unique(parent), parent[fixed])
+    if unanchored.size:
+        raise ValueError(
+            "every connected mesh component must have a Dirichlet potential anchor; "
+            f"unanchored component includes node {int(unanchored[0])}"
+        )
 
 
 def _negative_sheath_gate(raw_V: FloatArray, width_V: float) -> tuple[FloatArray, FloatArray]:

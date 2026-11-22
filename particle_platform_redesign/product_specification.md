@@ -184,7 +184,7 @@ solverの一般的なRK4や壁則を選ぶが、`if comsol_case:` のような�
 
 ### 3.1 原始場と粒子依存量を分ける
 
-入力場には、粒径や電荷を変えても変わらない原始量を保存する。
+通常の物理modelの入力場には、粒径や電荷を変えても変わらない原始量を保存する。
 
 - ガス速度、温度、圧力、密度、粘度、熱伝導率、組成
 - 電位、電場、電場二乗またはその元となる複素電場
@@ -193,7 +193,13 @@ solverの一般的なRK4や壁則を選ぶが、`if comsol_case:` のような�
 - 場の有効領域、時刻、mesh topology、単位、座標系
 
 粒子Knudsen数、緩和時間、Brownian拡散係数、表面電位、drag係数のように粒径・速度・電荷へ
-依存する値は、実行時に物理moduleが計算する。これを背景CSVへ保存しない。
+依存する値は、実行時に物理moduleが計算する。通常の背景CSVを粒子依存係数のauthorityにしない。
+
+明示的な`prescribed_*` reference revisionは、外部で指定された数学的方程式を検査するため、
+粒子物性に結び付けた係数fieldを受け取る。これは原始背景場とは区別する限定入力契約である。
+係数生成に用いた一様なmass、drag径、電気半径、排除体積をYAMLへ宣言し、prepareは全source rowと
+照合する。producerは元primitive・式・定数・sourceの由来を保持し、物性を変えた場合は係数も再生成する。
+この数学referenceの対応を、元の物理modelの適用域認証や実験的妥当性へ拡張しない。
 
 ### 3.2 無次元数で適用域を記録する
 
@@ -736,8 +742,9 @@ snapしない。linear/quadratic exact、RK4、exponential midpoint、Brownian�
 
 P05 production profileはparameterを持たない`stick`と`escape`だけを受理した。
 P07 exact-path sliceはspecular、probabilistic stick、複数candidateのcorner応答を追加した。
-現行`contact_wall_laws_v7`は、parameterを持たない完全鏡面`specular`、係数付き`restitution`、
-壁frameの鏡面／完全熱適応half-range Maxwell flux混合`maxwell_thermal`、明示した反射fallbackを持つ
+現行`contact_wall_laws_v8`は、parameterを持たない完全鏡面`specular`、係数付き`restitution`、
+壁frameの鏡面／完全熱適応half-range Maxwell flux混合`maxwell_thermal`、静止壁で速さ保存・内向き半円角一様の
+2自由度散乱`isotropic`、明示した反射fallbackを持つ
 `probabilistic_stick`、非deposition終端の`hold`を別の意味として受理する。
 
 #### Stick / deposit

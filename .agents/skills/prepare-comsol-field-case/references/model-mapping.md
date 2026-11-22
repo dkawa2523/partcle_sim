@@ -69,8 +69,28 @@ The catalog additionally requires shared neutral-gas fields/constant molecular
 mass to match wherever categories share a primitive. Charge and ion drag must
 share the same ion background and compatible model family. Fixed charge can
 be used where a compatible continuous-charge family is absent, but that is an
-explicit model change. Noise requires supported linear Epstein, so it cannot
+explicit model change. FDT noise requires supported linear Epstein, so it cannot
 be combined with Saffman or Stokes drag by relabeling a model.
+
+The separate [explicit coefficient reference revisions](../../../../particle_platform_redesign/solver/docs/physics_models.md#explicit-coefficient-reference-revisions)
+support prescribed friction, independent force diffusion, exponential-linear
+charge, charge-polynomial force and signed rotational lift on the existing
+stage/integrator path. Read their required fields, compatibility and homogeneous
+particle-property bindings at that owner; these mathematical inputs do not
+inherit the physical certification of the standard models above. The explicit
+Coulomb-cap revision limits electric force charge only, not the resident charge
+state or ion force. Do not replay saved force/charge histories or force these
+equations through a differently defined standard model.
+
+For Brownian correspondence, distinguish the force normalization expression from
+the actual native integration step, active method and repeated-time random-value
+sharing. The [external coefficient producer](../../../../particle_platform_redesign/solver/tools/vv/comsol/README.md)
+requires an explicit continuous-white-force or fixed-RK4 weak-limit meaning.
+The latter requires bound method/normalization/covariance evidence and remains
+an approximation to finite-step native joint states and wall events; it is not
+a generic noise multiplier or an `EQUIVALENT` native-path declaration. Inspection
+owns native evidence, preparation owns this model choice, and validation owns
+the separately scoped observable comparison.
 
 For every selected model, list each required field's exact unit/components/
 basis/layout, source expression, conversion formula, domain side, and snapshot
@@ -204,7 +224,10 @@ not a reason to change every particle's macro grid.
 
 Resolve the source boundary behavior before choosing a law. Current material
 laws are `stick`, `escape`, `hold`, `specular`, `restitution`, `maxwell_thermal`,
-and `probabilistic_stick` with an explicit nonstick response. `stick` saves zero
+`isotropic`, and `probabilistic_stick` with an explicit nonstick response.
+`isotropic` is speed-preserving uniform angle on the inward 2-D semicircle,
+including its nonstick branch; it is not cosine diffuse or thermal reemission.
+`stick` saves zero
 velocity; `hold` preserves hit state, including velocity/charge. Determine
 whether the source's frozen trajectory continues charging or reporting an
 auxiliary state before calling it equivalent to either. Disappearance needs a

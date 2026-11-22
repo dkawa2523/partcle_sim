@@ -66,6 +66,155 @@ class OmlChargeBounds:
 
 
 @dataclass(frozen=True, slots=True)
+class PrescribedChargeBounds:
+    """Finite invariant for the literal exponential-plus-linear reference law."""
+
+    charge_number_lower: float
+    charge_number_upper: float
+    charge_rate_abs_upper_number_s: float
+    charge_rate_derivative_abs_upper_s_inv: float
+
+
+def prescribed_exponential_linear_collection(
+    charge_number: FloatArray,
+    electron_rate_reference_number_s: float,
+    electron_exponent_offset: FloatArray,
+    electron_charge_slope: FloatArray,
+    ion_rate_number_s: FloatArray,
+    ion_charge_slope: FloatArray,
+) -> tuple[FloatArray, FloatArray]:
+    """Evaluate a declared reference equation without clipping either current."""
+
+    columns = (
+        charge_number,
+        electron_exponent_offset,
+        electron_charge_slope,
+        ion_rate_number_s,
+        ion_charge_slope,
+    )
+    if any(value.shape != charge_number.shape or not np.isfinite(value).all() for value in columns):
+        raise PhysicsEvaluationError("prescribed charge columns must be matching finite arrays")
+    if (
+        not math.isfinite(electron_rate_reference_number_s)
+        or electron_rate_reference_number_s < 0.0
+        or bool((electron_charge_slope < 0.0).any())
+        or bool((ion_charge_slope < 0.0).any())
+        or bool((ion_rate_number_s < 0.0).any())
+    ):
+        raise PhysicsEvaluationError("prescribed charge requires nonnegative rates and slopes")
+    electron = np.zeros_like(charge_number)
+    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+        if electron_rate_reference_number_s > 0.0:
+            electron = np.exp(
+                math.log(electron_rate_reference_number_s)
+                + electron_exponent_offset
+                + electron_charge_slope * charge_number
+            )
+        rate = -electron + ion_rate_number_s * (1.0 - ion_charge_slope * charge_number)
+        derivative = -electron_charge_slope * electron - ion_charge_slope * ion_rate_number_s
+    if not bool(np.isfinite(rate).all() and np.isfinite(derivative).all()):
+        raise PhysicsEvaluationError("prescribed charge produced non-finite rates")
+    return rate, derivative
+
+
+def prescribed_exponential_linear_global_bounds(
+    initial_charge_number: FloatArray,
+    electron_rate_reference_number_s: float,
+    electron_offset_range: tuple[float, float],
+    electron_slope_range: tuple[float, float],
+    ion_rate_range: tuple[float, float],
+    ion_slope_range: tuple[float, float],
+) -> PrescribedChargeBounds:
+    """Find inward endpoint rates for every combination of coefficient ranges."""
+
+    ranges = (electron_offset_range, electron_slope_range, ion_rate_range, ion_slope_range)
+    _validate_prescribed_charge_ranges(
+        initial_charge_number, electron_rate_reference_number_s, ranges
+    )
+    # Initial states must be strictly inside the certified interval: an
+    # outward numerical-path enclosure includes rounding beyond its start.
+    # Enlarge a physical bracket, rather than weakening an event tolerance.
+    lower = min(-1.0, 2.0 * float(np.min(initial_charge_number, initial=0.0)))
+    upper = max(1.0, 2.0 * float(np.max(initial_charge_number, initial=0.0)))
+    if electron_rate_reference_number_s == 0.0 and ion_rate_range[1] == 0.0:
+        return PrescribedChargeBounds(
+            math.nextafter(lower * _BOUND_ROUNDOFF_FACTOR, -math.inf),
+            math.nextafter(upper * _BOUND_ROUNDOFF_FACTOR, math.inf),
+            0.0,
+            0.0,
+        )
+    for _ in range(1024):
+        g_lower, _ = _prescribed_charge_rate_range(lower, electron_rate_reference_number_s, ranges)
+        _, g_upper = _prescribed_charge_rate_range(upper, electron_rate_reference_number_s, ranges)
+        if g_lower > 0.0 and g_upper < 0.0:
+            break
+        lower = lower if g_lower > 0.0 else 2.0 * lower - 1.0
+        upper = upper if g_upper < 0.0 else 2.0 * upper + 1.0
+    else:
+        raise PhysicsEvaluationError("prescribed charge has no finite certified invariant")
+    lower = math.nextafter(lower * _BOUND_ROUNDOFF_FACTOR, -math.inf)
+    upper = math.nextafter(upper * _BOUND_ROUNDOFF_FACTOR, math.inf)
+    endpoint_rates = [
+        _prescribed_charge_rate_range(z, electron_rate_reference_number_s, ranges)
+        for z in (lower, upper)
+    ]
+    exponent_upper = electron_offset_range[1] + max(
+        electron_slope_range[0] * lower,
+        electron_slope_range[1] * lower,
+        electron_slope_range[0] * upper,
+        electron_slope_range[1] * upper,
+    )
+    electron_upper = _prescribed_electron_rate(electron_rate_reference_number_s, exponent_upper)
+    rate_bound = max(abs(value) for interval in endpoint_rates for value in interval)
+    derivative_bound = (
+        electron_slope_range[1] * electron_upper + ion_slope_range[1] * ion_rate_range[1]
+    )
+    bounds = (
+        math.nextafter(rate_bound * _BOUND_ROUNDOFF_FACTOR, math.inf),
+        math.nextafter(derivative_bound * _BOUND_ROUNDOFF_FACTOR, math.inf),
+    )
+    if not all(math.isfinite(value) for value in (lower, upper, *bounds)):
+        raise PhysicsEvaluationError("prescribed charge invariant or rate bound is not finite")
+    return PrescribedChargeBounds(lower, upper, *bounds)
+
+
+def _validate_prescribed_charge_ranges(
+    initial: FloatArray, reference: float, ranges: tuple[tuple[float, float], ...]
+) -> None:
+    if (
+        not np.isfinite(initial).all()
+        or not math.isfinite(reference)
+        or reference < 0.0
+        or any(not math.isfinite(lo) or not math.isfinite(hi) or lo > hi for lo, hi in ranges)
+        or any(lo < 0.0 for lo, _ in ranges[1:])
+    ):
+        raise PhysicsEvaluationError("prescribed charge coefficient ranges are invalid")
+
+
+def _prescribed_electron_rate(reference: float, exponent: float) -> float:
+    if reference == 0.0:
+        return 0.0
+    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+        return float(np.exp(math.log(reference) + exponent))
+
+
+def _prescribed_charge_rate_range(
+    charge: float, reference: float, ranges: tuple[tuple[float, float], ...]
+) -> tuple[float, float]:
+    offset, alpha, ion, beta = ranges
+    electron_lower = _prescribed_electron_rate(
+        reference, offset[0] + min(alpha[0] * charge, alpha[1] * charge)
+    )
+    electron_upper = _prescribed_electron_rate(
+        reference, offset[1] + max(alpha[0] * charge, alpha[1] * charge)
+    )
+    ion_values = [a * (1.0 - b * charge) for a in ion for b in beta]
+    scale = max(electron_upper, max(abs(value) for value in ion_values))
+    margin = 64.0 * np.finfo(np.float64).eps * scale
+    return -electron_upper + min(ion_values) - margin, -electron_lower + max(ion_values) + margin
+
+
+@dataclass(frozen=True, slots=True)
 class AggregateChargeEvaluation:
     """Local rate and revision-owned quantities for aggregate charging."""
 

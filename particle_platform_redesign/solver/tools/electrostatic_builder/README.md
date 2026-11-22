@@ -5,13 +5,15 @@
 engineとは独立しており、COMSOLや`model_dataset/`へ依存しません。旧workflowの`Case A`はこの利用形態を
 調べる参照名であり、設定やsolver分岐の名前ではありません。
 
-## v2の範囲
+## 現行revisionの範囲
 
-`reduced_electrostatic_builder_v2`は意図的に次へ限定します。
+`reduced_electrostatic_builder_v3`は意図的に次へ限定します。
 
 設定は`format_version: 2`を要求します。共通YAML parserは全階層の重複keyとmerge key（`<<`）を拒否するため、
 mergeを使った設定はkeyを明記して移行します。通常のaliasは利用でき、元のUTF-8 bytesのhashを保存します。
 この変更は設定解釈を一意にするもので、closureとfield semanticsの物理revisionは維持します。
+builder v3は外周条件と成分ごとの電位anchorを検査します。入力構文の`format_version: 2`、closure、
+FEMの離散式は変更しません。
 
 - `axisymmetric_rz`
 - 静的、単一gas domain
@@ -129,9 +131,24 @@ solver:
   minimum_line_search_factor: 0.0009765625
 ```
 
-`r=0`は自然な軸対称条件であり、Dirichlet groupや材料壁へ含めません。異なる電位groupが共有するcorner
+`r=0`は自然な軸対称条件です。軸facetがcanonical boundary表に含まれていても、Dirichlet条件の合成から
+除外します。軸だけのgroupへ電位を指定すると拒否します。他の物理facetと共有する軸端点には、その物理facetの
+電位条件が適用されます。軸以外の全外周facetには、明示したsemantic groupの電位条件が必要です。
+triangleのedge incidenceから実際の外周を調べるため、boundary表から外周facet自体が抜けている場合や、
+端点が他のgroupで固定されていてもfacetの条件が未指定の場合は、solve・出力前に拒否します。
+未指定の物理外面を絶縁面や対称面へ読み替えません。YAMLは非軸のzero-flux/Neumann条件を表現しないため、
+その問題はこの公開builderの対応外です。
+
+meshの各連結成分には少なくとも一つのDirichlet電位nodeが必要です。bulk potentialや非線形closureは
+電位anchorの代わりにしません。複数の連結成分がそれぞれ固定電位を持つ場合は受理します。
+異なる電位groupが共有するcorner
 nodeは大きい`priority`を採用します。同じpriorityで値が異なる場合は拒否します。この解決結果と入力条件は
 provenanceへ保存され、mapping順には依存しません。
+
+低位の`numerics.solve_axisymmetric_p1`は、呼出し側がDirichlet nodeを明示する数値interfaceです。
+そこで未固定の辺はzero normal displacementの自然条件となります。annular Laplaceや非線形sheathの
+解析testは、この明示した数値問題を使います。public YAMLの外周条件検査を迂回して、未確認の物理条件を
+成功扱いにする入口ではありません。成分ごとのanchor検査は、この低位入口にも適用します。
 
 ## 実行と出力
 
@@ -172,6 +189,7 @@ uv run --locked python -m pytest tools/electrostatic_builder/tests -q
 現行testはclosure/Jacobian、準中性bulk、軸方向affine Laplace解、非線形sheath、nested 2-D mesh
 self-convergence、annular `A log(r)+B` Laplace解の約2次収束、global charge balance、axis regularity、
 canonical write/read、非有限な派生closure量のfail-closedを検査します。
+外周facet/条件の欠落、無anchor連結成分の拒否、正常な複数連結成分、軸facet表現による電位不変性も検査します。
 
 `model_dataset`の参照Case-A domainはtriangle 2,127個とquad 826個のmixed meshです。F02ではCOMSOL adapter側で
 domain抽出、node再採番、品質基準付きの決定論的quad分割、boundary owner再構築、semantic group付与、thermal

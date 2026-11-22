@@ -10,7 +10,9 @@ import yaml
 
 from chamber_particles import load_case, open_result, simulate
 from chamber_particles.case_format import BoundaryData, FieldData, RegularLayout, write
+from chamber_particles.physics.catalog import PHYSICS_CATALOG_REVISION
 from chamber_particles.physics.forces import BOLTZMANN_J_K
+from chamber_particles.physics.runtime import PHYSICS_RUNTIME_REVISION
 from tests.verification.microcases import materialize_microcase
 
 _ARGON_MASS_KG = 6.6335209e-26
@@ -60,8 +62,8 @@ def test_waldmann_affine_heat_flux_time_convergence(
         "revision": _REVISION,
     }
     assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
-    assert last_result.manifest["physics_catalog_revision"] == "inertial_langevin_2d_catalog_v23"
-    assert last_result.manifest["physics_runtime_revision"] == "prepared_native_physics_runtime_v24"
+    assert last_result.manifest["physics_catalog_revision"] == PHYSICS_CATALOG_REVISION
+    assert last_result.manifest["physics_runtime_revision"] == PHYSICS_RUNTIME_REVISION
 
 
 def test_waldmann_xy_and_rz_use_the_same_stage_physics(tmp_path: Path) -> None:

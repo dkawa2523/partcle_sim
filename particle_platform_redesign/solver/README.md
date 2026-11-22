@@ -25,7 +25,11 @@ uv run --locked python -m tools.visualization .artifacts/quickstart/result --out
 ```
 
 正常結果は1粒子、境界イベント2件、failure 0件、最終状態`stuck`です。
-analysisは状態・到達集計を、visualizationは形状と軌道・境界イベントのSVGを保存します。
+analysisは状態・到達集計を、visualizationは代表軌道と境界イベントのSVGを保存します。
+visualizationの境界図は最大`--max-event-points`件を、時刻・粒子ID・event ordinalの
+安定hash順位で選びます。代表軌道のevent markerは同じ上限内の最初の物理eventです。
+保存batch・worker完了順を変えても同じevent集合なら選択と表示順は変わりません。
+選択規則は`visualization.json`に記録します。これは表示用の抽出であり統計推定用sampleではありません。
 `tools/`と`examples/`はsource checkoutの付属機能であり、wheelには含みません。
 
 ## Python APIと並列実行

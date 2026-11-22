@@ -63,7 +63,7 @@ Physical conversion and the current solver's limits are covered by
 | Term | Read and resolve |
 |---|---|
 | Drag | Continuum base law, rarefaction switch and selected slip/free-molecular law; gas velocity/density/temperature/viscosity, mean-free-path definition, molecular species, accommodation, near-wall/turbulence corrections, and size convention. Compare coefficient/equation at matched states rather than feature labels. |
-| Brownian | Noise amplitude law and units, gas temperature/viscosity or other background inputs, fluctuation-dissipation partner, random argument mode/feature arguments, time discretization and wall/release handling. Equal seed integers do not share RNG streams. |
+| Brownian | Noise amplitude law and units, gas temperature/viscosity or other background inputs, fluctuation-dissipation partner, random argument mode/feature arguments, time discretization and wall/release handling. Distinguish a force-normalization parameter from the actual step and identify the active method rather than inactive retained properties. Record whether repeated physical times reuse random values. Equal seed integers do not share RNG streams. |
 | Electric / magnetic | Actual force expression and charge variable; sign, charge units, E/B component basis, static/time/phasor convention and whether all selected terms use the same charge state. |
 | Gravity / buoyancy | Acceleration vector versus force, particle mass versus density/volume, gas density and whether buoyancy is included once. |
 | Thermophoresis / lift / DEP / ion drag | Actual law/constants/applicability, gradient/recovery and species/transport properties. Similar names and scalar magnitudes do not establish equation equivalence. |

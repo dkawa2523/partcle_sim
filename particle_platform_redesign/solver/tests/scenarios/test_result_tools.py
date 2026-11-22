@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+from shutil import copytree
 
+import h5py
+import numpy as np
 import pytest
 import yaml
 from tools.analysis import summarize_result
 from tools.visualization import render_result
 
-from chamber_particles import load_case, simulate
+from chamber_particles import load_case, open_result, simulate
 from tests.verification.microcases import materialize_microcase
 
 
@@ -62,7 +65,7 @@ def test_summary_and_svg_tools_read_one_completed_result(tmp_path: Path) -> None
         max_event_points=1,
     )
 
-    assert report["visualization_revision"] == "result_trajectory_boundary_svg_v2"
+    assert report["visualization_revision"] == "result_trajectory_boundary_svg_v3"
     assert report["parameters"] == {
         "event_batch_rows": 1,
         "max_event_points": 1,
@@ -78,7 +81,7 @@ def test_summary_and_svg_tools_read_one_completed_result(tmp_path: Path) -> None
     metadata_json = Path(str(report["metadata_json"]))
     assert "Representative trajectory: particle 801" in trajectory_svg.read_text(encoding="utf-8")
     assert "Boundary events: 1 rendered of 2" in events_svg.read_text(encoding="utf-8")
-    assert '"visualization_revision": "result_trajectory_boundary_svg_v2"' in (
+    assert '"visualization_revision": "result_trajectory_boundary_svg_v3"' in (
         metadata_json.read_text(encoding="utf-8")
     )
 
@@ -113,3 +116,53 @@ def test_hold_is_a_terminal_fate_but_not_deposition(tmp_path: Path) -> None:
             "weighted_mean_time_s": 1.0,
         }
     ]
+
+
+def test_bounded_event_views_are_independent_of_storage_order_and_batch_size(
+    tmp_path: Path,
+) -> None:
+    paths = materialize_microcase("C08", tmp_path / "case")
+    document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+    document["output"]["trajectories"] = {
+        "selection": "all",
+        "schedule": {"explicit_times_s": [0.0, 2.25]},
+    }
+    paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    source = tmp_path / "result"
+    simulate(load_case(paths.case_path), source)
+    reordered = tmp_path / "reordered"
+    copytree(source, reordered)
+    reversed_rows = 0
+    for segment in (reordered / "segments").glob("*.h5"):
+        with h5py.File(segment, "r+") as handle:
+            group = handle["events/boundary"]
+            count = group["particle_id"].shape[0]
+            permutation = np.arange(count - 1, -1, -1)
+            offsets = group["candidate_offset"][...]
+            facets = group["candidate_facet_id"][...]
+            candidates = [facets[offsets[row] : offsets[row + 1]] for row in permutation]
+            for name in group:
+                if name not in {"candidate_offset", "candidate_facet_id"}:
+                    group[name][...] = group[name][...][permutation]
+            if count:
+                group["candidate_offset"][...] = np.concatenate(
+                    ([0], np.cumsum([row.size for row in candidates]))
+                )
+                group["candidate_facet_id"][...] = np.concatenate(candidates)
+            reversed_rows += count if count > 1 else 0
+    assert reversed_rows == 2
+    original_events = open_result(source).read_boundary_events()
+    reordered_events = open_result(reordered).read_boundary_events()
+    np.testing.assert_array_equal(original_events.time_s, reordered_events.time_s)
+    np.testing.assert_array_equal(original_events.event_ordinal, reordered_events.event_ordinal)
+    original = render_result(source, tmp_path / "first", event_batch_rows=1, max_event_points=1)
+    changed = render_result(reordered, tmp_path / "second", event_batch_rows=3, max_event_points=1)
+    assert original["rendered_boundary_points"] == changed["rendered_boundary_points"] == 1
+    assert original["event_selection"] == changed["event_selection"]
+    for figure in ("trajectory_svg", "boundary_events_svg"):
+        assert Path(str(original[figure])).read_text(encoding="utf-8") == Path(
+            str(changed[figure])
+        ).read_text(encoding="utf-8")
+    trajectory = Path(str(original["trajectory_svg"])).read_text(encoding="utf-8")
+    assert "<title>reflected</title>" in trajectory
+    assert "<title>stuck</title>" not in trajectory
