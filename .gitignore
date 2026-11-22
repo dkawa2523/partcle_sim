@@ -25,6 +25,7 @@
 **/build/
 **/dist/
 **/node_modules/
+/particle_platform_redesign/report_app/.data-app-offline/
 **/*.log
 **/*.status
 tmp*/

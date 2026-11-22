@@ -150,9 +150,20 @@ Preserve original MPH bytes. Re-solve a copy only for requested missing referenc
 companion or convergence evidence; valid bound saved evidence can replace a new
 solve. Start unfamiliar execution with representative particles/surfaces, then
 enlarge only as needed for the physical/statistical claim. Candidate execution
-uses `load_case -> simulate -> open_result` or public `check/run/inspect`, from
-the independent uv project with `uv run --locked`. Inspect integrity, failures,
-population coverage and revisions; `check` alone is no runtime/convergence proof.
+uses `load_case -> check_case -> simulate -> open_result` or the installed
+`check/run/inspect` CLI. Source work uses the independent uv project's locked
+environment; ordinary case/results do not require a checkout. `check_case`
+uses the same full prepare as execution without starting workers or updating
+particles. Inspect integrity, failures, population coverage and revisions;
+readiness alone is no runtime/convergence proof.
+
+Normal result schema 4 carries immutable geometry/boundary/source semantics,
+bound to the original case/data hashes. Use public `read_context()` and the
+installed `analyze`, `export` and `view` clients for result-only reuse.
+Context does not contain background fields or native equation evidence;
+field/RHS diagnosis still needs the bound canonical/native artifacts. Older
+results require their original environment for export or explicit rerunning,
+not a private compatibility path or relabeled manifest.
 
 Existing exporters/evaluators are case-bound until their source/CLI prove
 otherwise. `diagnose_matched_layers.py`, for example, hard-codes `287 * 41` rows

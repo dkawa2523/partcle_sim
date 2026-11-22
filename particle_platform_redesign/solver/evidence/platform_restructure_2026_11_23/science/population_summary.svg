@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000"><rect width="1600" height="1000" fill="white"/>
+<text x="45.00" y="39.00" font-family="Arial,sans-serif" font-size="27" text-anchor="start" fill="#172033">Population comparison without random-path matching</text>
+<text x="45.00" y="67.00" font-family="Arial,sans-serif" font-size="15" text-anchor="start" fill="#172033">Blue: 40 solver replicas, seeds21-60. Orange: one saved COMSOL realization. Each replica starts with the same 287 particles.</text>
+<text x="45.00" y="91.00" font-family="Arial,sans-serif" font-size="15" text-anchor="start" fill="#172033">Active curves use common saved times. Shading is empirical replica min/max, not a confidence or simultaneous95% band.</text>
+<text x="45.00" y="120.00" font-family="Arial,sans-serif" font-size="22" text-anchor="start" fill="#172033">Case A</text>
+<rect x="90" y="190" width="400" height="230" fill="none" stroke="#94a3b8"/>
+<text x="90.00" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">0</text>
+<text x="223.33" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">500</text>
+<text x="356.67" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">1e+03</text>
+<text x="490.00" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">1.5e+03</text>
+<text x="82.00" y="424.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0</text>
+<text x="82.00" y="309.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0.5</text>
+<text x="82.00" y="194.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">1</text>
+<text x="290.00" y="468.00" font-family="Arial,sans-serif" font-size="14" text-anchor="middle" fill="#172033">time [us] (0-1.5ms detail)</text>
+<text x="90.00" y="177.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">active / released287</text>
+<text x="90.00" y="147.00" font-family="Arial,sans-serif" font-size="18" text-anchor="start" fill="#172033">Active fraction</text>
+<polygon points="90.00,190.00 92.67,202.82 95.33,226.86 98.00,244.49 100.67,252.51 103.33,257.32 106.00,261.32 108.67,265.33 111.33,272.54 114.00,276.55 116.67,278.15 119.33,283.76 122.00,290.17 124.67,299.79 127.33,302.20 130.00,310.21 132.67,317.42 135.33,322.23 138.00,329.44 140.67,334.25 143.33,339.86 146.00,343.07 148.67,348.68 151.33,353.48 154.00,359.09 156.67,364.70 159.33,367.91 162.00,370.31 164.67,375.12 167.33,379.93 170.00,381.53 172.67,383.14 175.33,387.14 178.00,388.75 180.67,389.55 183.33,391.15 186.00,391.15 188.67,393.55 191.33,395.16 194.00,399.16 196.67,399.16 199.33,399.16 202.00,400.77 204.67,403.17 207.33,404.77 210.00,404.77 212.67,406.38 215.33,407.18 218.00,407.98 220.67,407.98 223.33,408.78 250.00,415.99 276.67,417.60 303.33,420.00 330.00,420.00 356.67,420.00 383.33,420.00 410.00,420.00 436.67,420.00 463.33,420.00 490.00,420.00 490.00,419.20 463.33,419.20 436.67,419.20 410.00,418.40 383.33,418.40 356.67,417.60 330.00,414.39 303.33,413.59 276.67,409.58 250.00,403.17 223.33,395.96 220.67,394.36 218.00,394.36 215.33,394.36 212.67,392.75 210.00,391.15 207.33,387.94 204.67,384.74 202.00,383.94 199.33,382.33 196.67,379.93 194.00,378.33 191.33,376.72 188.67,375.92 186.00,373.52 183.33,370.31 180.67,368.71 178.00,365.51 175.33,362.30 172.67,361.50 170.00,355.89 167.33,355.89 164.67,351.88 162.00,348.68 159.33,343.07 156.67,339.86 154.00,334.25 151.33,331.05 148.67,327.84 146.00,320.63 143.33,317.42 140.67,310.21 138.00,304.60 135.33,297.39 132.67,289.37 130.00,284.56 127.33,278.15 124.67,268.54 122.00,263.73 119.33,257.32 116.67,253.31 114.00,246.90 111.33,245.30 108.67,242.89 106.00,238.08 103.33,233.28 100.67,224.46 98.00,217.25 95.33,211.64 92.67,194.01 90.00,190.00" fill="#c4d8fc" opacity=".65"/>
+<polyline points="90.00,190.00 92.67,198.05 95.33,219.81 98.00,233.36 100.67,241.85 103.33,247.52 106.00,251.77 108.67,255.53 111.33,258.82 114.00,262.77 116.67,267.21 119.33,272.64 122.00,278.19 124.67,285.35 127.33,292.18 130.00,298.69 132.67,305.64 135.33,310.95 138.00,316.76 140.67,322.31 143.33,327.64 146.00,332.47 148.67,337.06 151.33,341.56 154.00,345.53 156.67,349.66 159.33,353.76 162.00,357.93 164.67,361.30 167.33,364.20 170.00,366.83 172.67,369.89 175.33,372.60 178.00,375.20 180.67,377.43 183.33,379.63 186.00,381.77 188.67,383.76 191.33,385.72 194.00,387.92 196.67,389.67 199.33,391.21 202.00,392.75 204.67,394.32 207.33,395.74 210.00,396.92 212.67,398.38 215.33,399.46 218.00,400.59 220.67,401.43 223.33,402.33 250.00,410.12 276.67,414.29 303.33,416.73 330.00,418.12 356.67,419.16 383.33,419.64 410.00,419.72 436.67,419.88 463.33,419.94 490.00,419.98" fill="none" stroke="#2563eb" stroke-width="2.5" opacity="1"/>
+<polyline points="90.00,190.00 92.67,198.82 95.33,217.25 98.00,232.47 100.67,236.48 103.33,240.49 106.00,244.49 108.67,250.10 111.33,251.71 114.00,254.91 116.67,258.92 119.33,263.73 122.00,270.14 124.67,274.95 127.33,284.56 130.00,291.78 132.67,296.59 135.33,304.60 138.00,311.81 140.67,316.62 143.33,328.64 146.00,333.45 148.67,335.85 151.33,341.46 154.00,348.68 156.67,353.48 159.33,355.09 162.00,359.09 164.67,361.50 167.33,366.31 170.00,367.91 172.67,371.92 175.33,374.32 178.00,375.12 180.67,379.93 183.33,382.33 186.00,383.14 188.67,385.54 191.33,391.95 194.00,393.55 196.67,394.36 199.33,395.96 202.00,395.96 204.67,396.76 207.33,397.56 210.00,401.57 212.67,402.37 215.33,404.77 218.00,406.38 220.67,407.18 223.33,407.98 250.00,414.39 276.67,418.40 303.33,418.40 330.00,418.40 356.67,419.20 383.33,419.20 410.00,419.20 436.67,419.20 463.33,419.20 490.00,420.00" fill="none" stroke="#d97706" stroke-width="2.5" opacity="1"/>
+<text x="90.00" y="492.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">Lines connect saved observations for display.</text>
+<rect x="620" y="190" width="400" height="230" fill="none" stroke="#94a3b8"/>
+<text x="620.00" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">170</text>
+<text x="753.33" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">190</text>
+<text x="886.67" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">210</text>
+<text x="1020.00" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">230</text>
+<text x="612.00" y="424.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0</text>
+<text x="612.00" y="309.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">4.5</text>
+<text x="612.00" y="194.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">9</text>
+<text x="820.00" y="468.00" font-family="Arial,sans-serif" font-size="14" text-anchor="middle" fill="#172033">cohort mean [us], horizon5ms</text>
+<text x="620.00" y="177.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">replicas (of40)</text>
+<rect x="621.00" y="420.00" width="31.33" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="654.33" y="420.00" width="31.33" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="687.67" y="343.33" width="31.33" height="76.67" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="721.00" y="368.89" width="31.33" height="51.11" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="754.33" y="368.89" width="31.33" height="51.11" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="787.67" y="241.11" width="31.33" height="178.89" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="821.00" y="190.00" width="31.33" height="230.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="854.33" y="292.22" width="31.33" height="127.78" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="887.67" y="215.56" width="31.33" height="204.44" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="921.00" y="394.44" width="31.33" height="25.56" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="954.33" y="343.33" width="31.33" height="76.67" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="987.67" y="420.00" width="31.33" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<path d="M822.65,420.00L822.65,190.00" stroke="#d97706" stroke-width="3"/>
+<text x="620.00" y="147.00" font-family="Arial,sans-serif" font-size="18" text-anchor="start" fill="#172033">Restricted mean active lifetime</text>
+<text x="620.00" y="492.00" font-family="Arial,sans-serif" font-size="14" text-anchor="start" fill="#172033">Native 200.397; solver mean 203.489</text>
+<rect x="1150" y="190" width="400" height="230" fill="none" stroke="#94a3b8"/>
+<text x="1150.00" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">39.5</text>
+<text x="1283.33" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">52.8</text>
+<text x="1416.67" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">66.2</text>
+<text x="1550.00" y="443.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">79.5</text>
+<text x="1142.00" y="424.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0</text>
+<text x="1142.00" y="309.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">6.5</text>
+<text x="1142.00" y="194.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">13</text>
+<text x="1350.00" y="468.00" font-family="Arial,sans-serif" font-size="14" text-anchor="middle" fill="#172033">particles of287 at z=22mm surface</text>
+<text x="1150.00" y="177.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">replicas (of40)</text>
+<rect x="1151.00" y="420.00" width="48.00" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1201.00" y="384.62" width="48.00" height="35.38" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1251.00" y="243.08" width="48.00" height="176.92" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1301.00" y="313.85" width="48.00" height="106.15" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1351.00" y="278.46" width="48.00" height="141.54" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1401.00" y="260.77" width="48.00" height="159.23" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1451.00" y="331.54" width="48.00" height="88.46" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1501.00" y="420.00" width="48.00" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<path d="M1495.00,420.00L1495.00,190.00" stroke="#d97706" stroke-width="3"/>
+<text x="1150.00" y="147.00" font-family="Arial,sans-serif" font-size="18" text-anchor="start" fill="#172033">Retained capture at boundary33</text>
+<text x="1150.00" y="492.00" font-family="Arial,sans-serif" font-size="14" text-anchor="start" fill="#172033">Native 74.000; solver mean 60.450</text>
+<text x="45.00" y="510.00" font-family="Arial,sans-serif" font-size="22" text-anchor="start" fill="#172033">Case P</text>
+<rect x="90" y="580" width="400" height="230" fill="none" stroke="#94a3b8"/>
+<text x="90.00" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">0</text>
+<text x="223.33" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">500</text>
+<text x="356.67" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">1e+03</text>
+<text x="490.00" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">1.5e+03</text>
+<text x="82.00" y="814.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0</text>
+<text x="82.00" y="699.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0.5</text>
+<text x="82.00" y="584.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">1</text>
+<text x="290.00" y="858.00" font-family="Arial,sans-serif" font-size="14" text-anchor="middle" fill="#172033">time [us] (0-1.5ms detail)</text>
+<text x="90.00" y="567.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">active / released287</text>
+<text x="90.00" y="537.00" font-family="Arial,sans-serif" font-size="18" text-anchor="start" fill="#172033">Active fraction</text>
+<polygon points="90.00,580.00 92.67,594.43 95.33,617.67 98.00,633.69 100.67,645.71 103.33,650.52 106.00,653.73 108.67,657.74 111.33,662.54 114.00,667.35 116.67,671.36 119.33,676.97 122.00,683.38 124.67,690.59 127.33,696.20 130.00,702.61 132.67,710.63 135.33,716.24 138.00,721.05 140.67,725.05 143.33,732.26 146.00,735.47 148.67,739.48 151.33,744.29 154.00,750.70 156.67,754.70 159.33,757.91 162.00,760.31 164.67,761.92 167.33,765.12 170.00,769.93 172.67,772.33 175.33,774.74 178.00,777.14 180.67,779.55 183.33,780.35 186.00,781.15 188.67,783.55 191.33,786.76 194.00,787.56 196.67,788.36 199.33,789.16 202.00,789.16 204.67,791.57 207.33,793.97 210.00,794.77 212.67,794.77 215.33,796.38 218.00,797.18 220.67,797.18 223.33,797.98 250.00,805.99 276.67,808.40 303.33,809.20 330.00,809.20 356.67,810.00 383.33,810.00 410.00,810.00 436.67,810.00 463.33,810.00 490.00,810.00 490.00,809.20 463.33,809.20 436.67,809.20 410.00,808.40 383.33,807.60 356.67,806.79 330.00,803.59 303.33,803.59 276.67,798.78 250.00,794.77 223.33,785.16 220.67,784.36 218.00,784.36 215.33,781.95 212.67,781.95 210.00,779.55 207.33,777.94 204.67,776.34 202.00,773.94 199.33,772.33 196.67,772.33 194.00,769.13 191.33,765.92 188.67,763.52 186.00,762.72 183.33,757.91 180.67,754.70 178.00,750.70 175.33,749.90 172.67,747.49 170.00,742.68 167.33,741.08 164.67,740.28 162.00,736.27 159.33,730.66 156.67,726.66 154.00,725.85 151.33,721.85 148.67,717.84 146.00,713.03 143.33,709.02 140.67,702.61 138.00,695.40 135.33,690.59 132.67,681.78 130.00,676.97 127.33,669.76 124.67,662.54 122.00,653.73 119.33,648.12 116.67,644.91 114.00,639.30 111.33,634.49 108.67,632.89 106.00,627.28 103.33,625.68 100.67,616.06 98.00,608.05 95.33,602.44 92.67,584.01 90.00,580.00" fill="#c4d8fc" opacity=".65"/>
+<polyline points="90.00,580.00 92.67,588.47 95.33,610.85 98.00,624.38 100.67,633.19 103.33,639.18 106.00,643.29 108.67,647.08 111.33,650.24 114.00,654.59 116.67,658.98 119.33,664.57 122.00,670.40 124.67,677.51 127.33,684.28 130.00,690.97 132.67,697.74 135.33,703.21 138.00,708.24 140.67,713.39 143.33,718.24 146.00,723.35 148.67,727.84 151.33,731.98 154.00,736.25 156.67,739.74 159.33,743.74 162.00,747.31 164.67,751.12 167.33,753.80 170.00,756.65 172.67,759.49 175.33,762.00 178.00,764.28 180.67,766.30 183.33,768.57 186.00,771.09 188.67,773.02 191.33,775.12 194.00,777.18 196.67,779.01 199.33,780.53 202.00,781.89 204.67,783.39 207.33,784.98 210.00,786.30 212.67,787.38 215.33,788.62 218.00,789.42 220.67,790.53 223.33,791.71 250.00,799.98 276.67,804.11 303.33,806.69 330.00,808.00 356.67,809.06 383.33,809.48 410.00,809.72 436.67,809.84 463.33,809.98 490.00,809.98" fill="none" stroke="#2563eb" stroke-width="2.5" opacity="1"/>
+<polyline points="90.00,580.00 92.67,586.41 95.33,612.06 98.00,633.69 100.67,641.71 103.33,644.11 106.00,648.12 108.67,653.73 111.33,656.13 114.00,660.14 116.67,662.54 119.33,667.35 122.00,672.96 124.67,678.57 127.33,684.18 130.00,693.80 132.67,698.61 135.33,706.62 138.00,712.23 140.67,717.04 143.33,723.45 146.00,729.86 148.67,730.66 151.33,736.27 154.00,740.28 156.67,743.48 159.33,746.69 162.00,752.30 164.67,753.90 167.33,757.91 170.00,759.51 172.67,762.72 175.33,765.92 178.00,768.33 180.67,770.73 183.33,772.33 186.00,777.14 188.67,782.75 191.33,784.36 194.00,785.16 196.67,788.36 199.33,789.16 202.00,790.77 204.67,792.37 207.33,793.97 210.00,795.57 212.67,796.38 215.33,796.38 218.00,797.18 220.67,797.98 223.33,797.98 250.00,803.59 276.67,805.19 303.33,808.40 330.00,809.20 356.67,809.20 383.33,809.20 410.00,810.00 436.67,810.00 463.33,810.00 490.00,810.00" fill="none" stroke="#d97706" stroke-width="2.5" opacity="1"/>
+<text x="90.00" y="882.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">Lines connect saved observations for display.</text>
+<rect x="620" y="580" width="400" height="230" fill="none" stroke="#94a3b8"/>
+<text x="620.00" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">170</text>
+<text x="753.33" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">190</text>
+<text x="886.67" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">210</text>
+<text x="1020.00" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">230</text>
+<text x="612.00" y="814.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0</text>
+<text x="612.00" y="699.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">4.5</text>
+<text x="612.00" y="584.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">9</text>
+<text x="820.00" y="858.00" font-family="Arial,sans-serif" font-size="14" text-anchor="middle" fill="#172033">cohort mean [us], horizon5ms</text>
+<text x="620.00" y="567.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">replicas (of40)</text>
+<rect x="621.00" y="810.00" width="31.33" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="654.33" y="784.44" width="31.33" height="25.56" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="687.67" y="733.33" width="31.33" height="76.67" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="721.00" y="758.89" width="31.33" height="51.11" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="754.33" y="707.78" width="31.33" height="102.22" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="787.67" y="682.22" width="31.33" height="127.78" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="821.00" y="656.67" width="31.33" height="153.33" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="854.33" y="656.67" width="31.33" height="153.33" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="887.67" y="605.56" width="31.33" height="204.44" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="921.00" y="707.78" width="31.33" height="102.22" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="954.33" y="784.44" width="31.33" height="25.56" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="987.67" y="810.00" width="31.33" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<path d="M735.89,810.00L735.89,580.00" stroke="#d97706" stroke-width="3"/>
+<text x="620.00" y="537.00" font-family="Arial,sans-serif" font-size="18" text-anchor="start" fill="#172033">Restricted mean active lifetime</text>
+<text x="620.00" y="882.00" font-family="Arial,sans-serif" font-size="14" text-anchor="start" fill="#172033">Native 187.383; solver mean 203.055</text>
+<rect x="1150" y="580" width="400" height="230" fill="none" stroke="#94a3b8"/>
+<text x="1150.00" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">39.5</text>
+<text x="1283.33" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">52.8</text>
+<text x="1416.67" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">66.2</text>
+<text x="1550.00" y="833.00" font-family="Arial,sans-serif" font-size="13" text-anchor="middle" fill="#172033">79.5</text>
+<text x="1142.00" y="814.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">0</text>
+<text x="1142.00" y="699.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">6.5</text>
+<text x="1142.00" y="584.00" font-family="Arial,sans-serif" font-size="13" text-anchor="end" fill="#172033">13</text>
+<text x="1350.00" y="858.00" font-family="Arial,sans-serif" font-size="14" text-anchor="middle" fill="#172033">particles of287 at z=22mm surface</text>
+<text x="1150.00" y="567.00" font-family="Arial,sans-serif" font-size="13" text-anchor="start" fill="#172033">replicas (of40)</text>
+<rect x="1151.00" y="810.00" width="48.00" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1201.00" y="756.92" width="48.00" height="53.08" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1251.00" y="686.15" width="48.00" height="123.85" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1301.00" y="703.85" width="48.00" height="106.15" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1351.00" y="721.54" width="48.00" height="88.46" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1401.00" y="580.00" width="48.00" height="230.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1451.00" y="703.85" width="48.00" height="106.15" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<rect x="1501.00" y="810.00" width="48.00" height="0.00" fill="#93b6f7" stroke="#2563eb" stroke-width=".7"/>
+<path d="M1485.00,810.00L1485.00,580.00" stroke="#d97706" stroke-width="3"/>
+<text x="1150.00" y="537.00" font-family="Arial,sans-serif" font-size="18" text-anchor="start" fill="#172033">Retained capture at boundary33</text>
+<text x="1150.00" y="882.00" font-family="Arial,sans-serif" font-size="14" text-anchor="start" fill="#172033">Native 73.000; solver mean 61.325</text>
+<text x="45.00" y="936.00" font-family="Arial,sans-serif" font-size="15" text-anchor="start" fill="#172033">Histogram bin widths: 5us and5 particles, for display only, not agreement gates. Histogram heights count whole-cohort replicas.</text>
+<text x="45.00" y="961.00" font-family="Arial,sans-serif" font-size="15" text-anchor="start" fill="#172033">Native disappearance cause stays unknown; it is not relabeled escape. Numerical capture is not certified physical adhesion.</text>
+<text x="45.00" y="984.00" font-family="Arial,sans-serif" font-size="15" text-anchor="start" fill="#172033">The weak-limit model, field-transfer and finite-step limitations remain. No individual stochastic trajectory is used as a matching gate.</text>
+</svg>

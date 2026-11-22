@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 import os
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -480,6 +480,19 @@ def test_brownian_default_max_is_identical_to_explicit_base_depth(tmp_path: Path
     explicit_resume = dict(explicit_manifest["resume_identity"])
     default_resume.pop("case_file_hash")
     explicit_resume.pop("case_file_hash")
+    # Contexts bind their own YAML bytes; numerical interpretation must agree
+    # when the only difference is spelling out an optional default.
+    default_context = default.read_context()
+    explicit_context = explicit.read_context()
+    assert default_context.case_file_hash != explicit_context.case_file_hash
+    np.testing.assert_equal(
+        asdict(replace(default_context, case_file_hash=explicit_context.case_file_hash)),
+        asdict(explicit_context),
+    )
+    default_manifest.pop("context")
+    explicit_manifest.pop("context")
+    default_resume.pop("result_context")
+    explicit_resume.pop("result_context")
     default_manifest["resume_identity"] = default_resume
     explicit_manifest["resume_identity"] = explicit_resume
     assert default_manifest == explicit_manifest

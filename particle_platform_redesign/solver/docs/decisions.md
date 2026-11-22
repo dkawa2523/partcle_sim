@@ -1227,7 +1227,7 @@ builder v3は、実際のtriangle外周の全非軸facetへ明示potential条件
 |---|---|
 | 解く利用case | COMSOL等の外部producerが出したaxisymmetric mixed triangle/Q1-quad mesh、boundary entity、thermal-flow node fieldをcanonical P1へ変換し、F01 builderと既存particle solverへ一貫して渡す |
 | 既存modelで解けない理由 | F01はcanonical triangle-only P1を前提とし、参照packageは2,127 triangle＋826 quad、producer固有ID/列/axis seamを持つ。これをbuilder/coreへ直接読ませるとprovider syntaxと数値責務が混ざる |
-| 所有module | `tools/comsol_adapter`がstrict CSV/YAML、domain抽出、P1化、boundary再構築、field転記を所有する。F01 builderがfield equation、`tools/vv/comsol/compare_reduced_fields.py`が外部差分、既存三APIが完成fieldの粒子計算を所有する |
+| 所有module | `chamber_particles_tools.csv_import`がstrict CSV/YAML、domain抽出、P1化、boundary再構築、field転記を所有する。F01 builderがfield equation、`tools/vv/comsol/compare_reduced_fields.py`が外部差分、core公開APIが完成fieldの粒子計算を所有する |
 | 数値規則 | Q1 node順を明示し、二対角の最小triangle品質が高い方を選び、完全同点だけexternal node IDでtie-breakする。外周/ownerはP1 incidenceから再構築する。新規exportはtopology ID結合を原則とし、node IDがないlegacy CSVだけは設定tolerance内のexactly-one全単射を証明して許可する。補間・埋めはしない。axis radial velocityは明示上限内だけ0へ投影する |
 | representative gate | 1,987 node / 3,779 P1 cell、1,826 free nodeで最終relative residual `1.8441e-13`、charge-balance error `5.8498e-21 C`、GMRES storage 1,235,088 B、solve-only 0.689/0.737 s。現GMRESを維持し、fallbackを追加しない |
 | integration | wafer surfaceから32粒子をfixed charge＋Coulombだけで10 macro step進め、3 frame/96 row、failure/wall event 0。これは生成fieldが既存RZ solverで消費されることのsmokeであり、COMSOL trajectoryまたはFreeze parityではない |
@@ -1296,7 +1296,7 @@ P09の`solver_owned_memory_plan_v1`がこの下限をload/prepare/run phase plan
 release eventは`(release_time_s, particle_id)`順、frameとfinalの行は`particle_id`順とする。ballistic
 proposalはmacro-step開始状態からの累積演算ではなくtableの解析的release原点を保持し、`dt_s`やframe
 scheduleを変えても共通時刻の状態をbitwiseで変えない。resultのdataset、dtype、公開readerは
-[`result_format_v3.md`](result_format_v3.md)が所有する。
+[`result_format_v4.md`](result_format_v4.md)が所有する。
 
 HDF5側のdata座標表現とYAML側のparticle motion modeは別のauthorityにする。v1で有効な組合せは
 `cartesian_xy + cartesian_xy`と`axisymmetric_rz + axisymmetric_rz_meridional`だけで、prepareが一度だけ

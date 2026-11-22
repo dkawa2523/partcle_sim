@@ -27,9 +27,7 @@ from chamber_particles.fields import (
     PreparedFieldSet,
     RequiredFieldMetadata,
     local_prepared_field_ranges_into,
-    locate_field_cell,
     prepare_required_fields,
-    sample_field,
     sample_prepared_field_gradient_into,
     sample_prepared_fields_into,
 )
@@ -37,6 +35,7 @@ from chamber_particles.numerical_status import (
     FIELD_NUMERICAL_FAILURE,
     NUMERICAL_STATUS_OK,
 )
+from tests.verification.field_reference import locate_field_cell, sample_field
 
 type LayoutKind = Literal["regular", "p1", "q1"]
 

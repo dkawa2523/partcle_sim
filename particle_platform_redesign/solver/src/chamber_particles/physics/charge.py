@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import cast
 
 import numpy as np
+from numba import njit
+from numba.core.registry import CPUDispatcher
 from numpy.typing import NDArray
 
 from .forces import (
@@ -1056,14 +1059,17 @@ def shifted_maxwellian_ion_factors(
         raise PhysicsEvaluationError("thermal_shift_ratio must be finite, nonnegative, and 1-D")
     neutral = np.empty_like(ratio)
     attraction = np.empty_like(ratio)
+    # Preparation uses the same scalar body without introducing a JIT entry.
+    scalar_factors = cast(CPUDispatcher, shifted_maxwellian_ion_factors_row).py_func
     for index, drift in enumerate(ratio):
-        neutral[index], attraction[index] = _shifted_maxwellian_ion_factors_scalar(float(drift))
+        neutral[index], attraction[index] = scalar_factors(float(drift))
     _require_positive_derived(neutral, "shifted-Maxwellian neutral ion factor")
     _require_positive_derived(attraction, "shifted-Maxwellian attraction factor")
     return neutral, attraction
 
 
-def _shifted_maxwellian_ion_factors_scalar(thermal_shift_ratio: float) -> tuple[float, float]:
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def shifted_maxwellian_ion_factors_row(thermal_shift_ratio: float) -> tuple[float, float]:
     if thermal_shift_ratio <= _SMALL_SHIFT_RATIO:
         square = thermal_shift_ratio * thermal_shift_ratio
         fourth = square * square
@@ -1385,7 +1391,8 @@ def oml_shifted_maxwellian_global_bounds(
         "ion flux-coefficient upper bound",
     )
     maximum_shift = maximum_drift * math.sqrt(8.0 / math.pi)
-    neutral_max, attraction_min = _shifted_maxwellian_ion_factors_scalar(maximum_shift)
+    scalar_factors = cast(CPUDispatcher, shifted_maxwellian_ion_factors_row).py_func
+    neutral_max, attraction_min = scalar_factors(maximum_shift)
     if not (
         math.isfinite(neutral_max)
         and neutral_max > 0.0

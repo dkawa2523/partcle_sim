@@ -1,0 +1,1644 @@
+{
+  "id": "report:c9a85c07-6c83-42c2-9aa3-5d3037be4638",
+  "title": "半導体チャンバー粒子輸送基盤 — 製品仕様と詳細実装計画",
+  "surface": "report",
+  "status": "complete",
+  "buildStatus": "complete",
+  "generatedAt": "2026-11-22T23:45:54.938643+00:00",
+  "filters": [],
+  "report": {
+    "asOf": null,
+    "originalQuestion": "COMSOL比較を本体から分離し、表面発生から壁到達までを高速かつ持続的に拡張できる粒子輸送基盤を、実装者が着手できる段階・責務・受入条件へ具体化する。",
+    "evidenceScope": "Current source-bound design snapshot; optional execution receipts only when explicitly supplied"
+  },
+  "queries": {
+    "case_audit": {
+      "label": "A/P287粒子・候補各40実現",
+      "rows": [
+        {
+          "case": "A",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 251.0,
+          "capture_candidate_mean": 249.675,
+          "capture_candidate_sd": 6.014459073658906,
+          "restricted_mean_active_native_us": 200.3969264894903,
+          "restricted_mean_active_candidate_us": 203.4885515137035,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
+          "qualification": "Numerical/native parity and physical adhesion not certified"
+        },
+        {
+          "case": "P",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 254.0,
+          "capture_candidate_mean": 251.775,
+          "capture_candidate_sd": 5.5214616236589436,
+          "restricted_mean_active_native_us": 187.38328244202265,
+          "restricted_mean_active_candidate_us": 203.05462371889976,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
+          "qualification": "Numerical/native parity and physical adhesion not certified"
+        }
+      ],
+      "source": {
+        "label": "A/P287粒子・候補各40実現",
+        "files": [
+          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "A/P287粒子・候補各40実現",
+            "definition": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      }
+    },
+    "trajectory_divergence": {
+      "label": "探索的な局所差",
+      "rows": [
+        {
+          "case": "A",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 74.0,
+          "candidate_replica_mean": 60.45,
+          "difference_percentage_points": -4.7212543554006965,
+          "scope": "全287粒子分母、探索的局所留保"
+        },
+        {
+          "case": "A",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 759.0827702014865,
+          "candidate_replica_mean_of_medians": 861.3178894844634,
+          "relative_difference_percent": 13.468243951294046,
+          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保"
+        },
+        {
+          "case": "P",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 73.0,
+          "candidate_replica_mean": 61.325,
+          "difference_percentage_points": -4.067944250871079,
+          "scope": "全287粒子分母、探索的局所留保"
+        },
+        {
+          "case": "P",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 737.5076919491495,
+          "candidate_replica_mean_of_medians": 866.9236448676853,
+          "relative_difference_percent": 17.547742800689182,
+          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保"
+        }
+      ],
+      "source": {
+        "label": "探索的な局所差",
+        "files": [
+          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "探索的な局所差",
+            "definition": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      }
+    },
+    "design_decisions": {
+      "label": "design decisions",
+      "rows": [
+        {
+          "area": "core_api",
+          "decision": "load_case / check_case / simulate / open_result",
+          "reason": "One execution preparation and engine",
+          "count": 4
+        },
+        {
+          "area": "normal_clients",
+          "decision": "source_builder / csv_import / field_preprocessor / electrostatic_builder / analysis / visualization",
+          "reason": "Same wheel, CLI and Python; no checkout dependency",
+          "count": 6
+        },
+        {
+          "area": "test_layers",
+          "decision": "verification / scenarios / performance",
+          "reason": "Independent mathematics, public flows, measured resources",
+          "count": 3
+        },
+        {
+          "area": "publication",
+          "decision": "One inputs.create_case publisher",
+          "reason": "Canonical hash and shared check before publication"
+        },
+        {
+          "area": "native_boundary",
+          "decision": "Live COMSOL and developer V&V remain external",
+          "reason": "Core never imports native adapters or comparisons"
+        },
+        {
+          "area": "result_reuse",
+          "decision": "Result schema 4 with immutable context.h5",
+          "reason": "Interpret results without original case or background fields"
+        }
+      ],
+      "source": {
+        "label": "Current reviewed design; execution evidence is separate",
+        "files": [
+          "AGENTS.md",
+          "product_specification.md",
+          "architecture_proposal.md",
+          "implementation_plan.md",
+          "vv_methodology.md",
+          "solver/pyproject.toml",
+          "solver/docs/case_format_v3.md",
+          "solver/docs/result_format_v4.md",
+          "solver/docs/physics_models.md",
+          "solver/docs/numerics.md",
+          "solver/src/chamber_particles/physics/catalog.py",
+          "solver/src/chamber_particles_tools/inputs.py"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "design decisions",
+            "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
+            "componentIds": [
+              "metric-api",
+              "metric-extension",
+              "metric-tests",
+              "executive-decision",
+              "decision-table",
+              "coordinates",
+              "boundary-numerics",
+              "single-loop",
+              "complexity"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Reproduce design snapshot",
+            "detail": "Run analysis/build_report_snapshot.py from the locked solver environment; authority and catalog hashes are bound in snapshot.reproducibility."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "language": "shell",
+          "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+        }
+      ]
+    },
+    "physics_scope": {
+      "label": "physics scope",
+      "rows": [
+        {
+          "capability": "charge / fixed",
+          "current": "fixed_charge_v1",
+          "limits": "Source charge_number is constant; omit revision in the input selector.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "model"
+          ],
+          "field_parameters": []
+        },
+        {
+          "capability": "charge / plasma_continuous",
+          "current": "oml_stationary_maxwellian_debye_huckel_v1",
+          "limits": "Electron and ion temperature fields use K; applicability must be error.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "electron_number_density_field",
+            "electron_temperature_field",
+            "model",
+            "positive_ion_mass_kg",
+            "positive_ion_number_density_field",
+            "positive_ion_temperature_field",
+            "positive_ion_velocity_field",
+            "revision"
+          ],
+          "field_parameters": [
+            "electron_number_density_field",
+            "electron_temperature_field",
+            "positive_ion_number_density_field",
+            "positive_ion_temperature_field",
+            "positive_ion_velocity_field"
+          ]
+        },
+        {
+          "capability": "charge / plasma_continuous",
+          "current": "oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1",
+          "limits": "Electron and ion temperature fields use K; applicability must be error.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "electron_number_density_field",
+            "electron_temperature_field",
+            "maximum_ion_drift_ratio",
+            "model",
+            "positive_ion_mass_kg",
+            "positive_ion_number_density_field",
+            "positive_ion_temperature_field",
+            "positive_ion_velocity_field",
+            "revision"
+          ],
+          "field_parameters": [
+            "electron_number_density_field",
+            "electron_temperature_field",
+            "positive_ion_number_density_field",
+            "positive_ion_temperature_field",
+            "positive_ion_velocity_field"
+          ]
+        },
+        {
+          "capability": "charge / plasma_continuous",
+          "current": "aggregate_relative_drift_regularized_two_current_v1",
+          "limits": "Aggregate thermal voltage fields use V; applicability must be error.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "effective_positive_ion_mass_field",
+            "electron_number_density_field",
+            "electron_thermal_voltage_field",
+            "maximum_relative_ion_speed_m_s",
+            "model",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "revision",
+            "screening_length_field"
+          ],
+          "field_parameters": [
+            "effective_positive_ion_mass_field",
+            "electron_number_density_field",
+            "electron_thermal_voltage_field",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "screening_length_field"
+          ]
+        },
+        {
+          "capability": "charge / plasma_continuous",
+          "current": "aggregate_relative_drift_regularized_three_current_v1",
+          "limits": "Aggregate thermal voltage fields use V; applicability must be error.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "effective_negative_ion_mass_field",
+            "effective_positive_ion_mass_field",
+            "electron_number_density_field",
+            "electron_thermal_voltage_field",
+            "maximum_relative_ion_speed_m_s",
+            "model",
+            "negative_ion_number_density_field",
+            "negative_ion_thermal_voltage_field",
+            "negative_ion_velocity_field",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "revision",
+            "screening_length_field"
+          ],
+          "field_parameters": [
+            "effective_negative_ion_mass_field",
+            "effective_positive_ion_mass_field",
+            "electron_number_density_field",
+            "electron_thermal_voltage_field",
+            "negative_ion_number_density_field",
+            "negative_ion_thermal_voltage_field",
+            "negative_ion_velocity_field",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "screening_length_field"
+          ]
+        },
+        {
+          "capability": "charge / prescribed_exponential_linear",
+          "current": "prescribed_exponential_linear_collection_v1",
+          "limits": "Explicit mathematical reference coefficients; not a physical-model certification.; particle_properties must exactly match every realized particle and every selected reference model.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "electron_charge_slope_field",
+            "electron_exponent_offset_field",
+            "electron_rate_reference_number_s",
+            "ion_charge_slope_field",
+            "ion_rate_field",
+            "model",
+            "particle_properties",
+            "revision"
+          ],
+          "field_parameters": [
+            "electron_charge_slope_field",
+            "electron_exponent_offset_field",
+            "ion_charge_slope_field",
+            "ion_rate_field"
+          ]
+        },
+        {
+          "capability": "drag / epstein_linear",
+          "current": "epstein_linear_v1",
+          "limits": "Declared coordinate/integrator and parameter requirements apply",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "delta",
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_molecular_mass_kg",
+            "gas_temperature_field",
+            "gas_velocity_field",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_temperature_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "drag / epstein_linear",
+          "current": "epstein_linear_effective_gas_sensitivity_v1",
+          "limits": "Producer-owned effective-gas sensitivity; no implicit single-species equivalence.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "delta",
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_molecular_mass_kg",
+            "gas_temperature_field",
+            "gas_velocity_field",
+            "maximum_speed_ratio",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_temperature_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "drag / epstein_finite_speed",
+          "current": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
+          "limits": "Nonlinear finite-speed drag cannot be paired with the current OU noise models.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint"
+          ],
+          "required_parameters": [
+            "applicability",
+            "diffuse_reflection_fraction",
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_molecular_mass_kg",
+            "gas_temperature_field",
+            "gas_velocity_field",
+            "maximum_speed_ratio",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_temperature_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "drag / stokes_cunningham",
+          "current": "stokes_cunningham_allen_raabe_air_v1",
+          "limits": "Air-slip validity gates are unchanged; no fallback to a rarefied-gas model.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint"
+          ],
+          "required_parameters": [
+            "applicability",
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_mean_free_path_field",
+            "gas_velocity_field",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_mean_free_path_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "drag / prescribed_linear_friction",
+          "current": "prescribed_linear_friction_v1",
+          "limits": "Explicit mathematical reference coefficients; not a physical-model certification.; particle_properties must exactly match every realized particle and every selected reference model.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "friction_coefficient_field",
+            "gas_velocity_field",
+            "model",
+            "particle_properties",
+            "revision"
+          ],
+          "field_parameters": [
+            "friction_coefficient_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "noise / inertial_langevin_fdt",
+          "current": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2",
+          "limits": "Requires a supported linear Epstein drag revision, not finite-speed or Stokes drag.; Uses same-stage gas temperature and the existing joint position/velocity OU path.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "interval_tree_depth",
+            "model",
+            "revision"
+          ],
+          "field_parameters": []
+        },
+        {
+          "capability": "noise / prescribed_force_diffusion",
+          "current": "prescribed_force_diffusion_midpoint_2d_v1",
+          "limits": "Explicit mathematical reference coefficients; not a physical-model certification.; particle_properties must exactly match every realized particle and every selected reference model.; Requires prescribed_linear_friction; diffusion is independent of FDT temperature.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "force_spectral_density_field",
+            "interval_tree_depth",
+            "model",
+            "particle_properties",
+            "revision"
+          ],
+          "field_parameters": [
+            "force_spectral_density_field"
+          ]
+        },
+        {
+          "capability": "thermophoresis / waldmann_gallis",
+          "current": "waldmann_gallis_free_molecular_single_species_heat_flux_v1",
+          "limits": "Declared coordinate/integrator and parameter requirements apply",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "gas_mean_free_path_field",
+            "gas_molecular_mass_kg",
+            "gas_temperature_field",
+            "gas_translational_heat_flux_field",
+            "gas_velocity_field",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_mean_free_path_field",
+            "gas_temperature_field",
+            "gas_translational_heat_flux_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "thermophoresis / waldmann_gallis",
+          "current": "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1",
+          "limits": "Producer-owned effective-gas sensitivity; applicability must be error.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "gas_mean_free_path_field",
+            "gas_molecular_mass_kg",
+            "gas_temperature_field",
+            "gas_translational_heat_flux_field",
+            "gas_velocity_field",
+            "maximum_speed_ratio",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_mean_free_path_field",
+            "gas_temperature_field",
+            "gas_translational_heat_flux_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "thermophoresis / talbot",
+          "current": "talbot_cross_regime_radius_knudsen_v1",
+          "limits": "Uses radius-based Knudsen number; coefficients are explicit, not universal defaults.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_mean_free_path_field",
+            "gas_temperature_field",
+            "gas_temperature_gradient_field",
+            "gas_thermal_conductivity_field",
+            "model",
+            "momentum_exchange_coefficient",
+            "particle_thermal_conductivity_W_m_K",
+            "revision",
+            "thermal_exchange_coefficient",
+            "thermal_slip_coefficient"
+          ],
+          "field_parameters": [
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_mean_free_path_field",
+            "gas_temperature_field",
+            "gas_temperature_gradient_field",
+            "gas_thermal_conductivity_field"
+          ]
+        },
+        {
+          "capability": "ion_drag / barnes_collisionless",
+          "current": "barnes_collisionless_effective_speed_single_positive_ion_negative_debye_huckel_v1",
+          "limits": "Declared coordinate/integrator and parameter requirements apply",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "electron_number_density_field",
+            "electron_temperature_field",
+            "ion_neutral_mean_free_path_field",
+            "maximum_ion_drift_ratio",
+            "model",
+            "positive_ion_mass_kg",
+            "positive_ion_number_density_field",
+            "positive_ion_temperature_field",
+            "positive_ion_velocity_field",
+            "revision"
+          ],
+          "field_parameters": [
+            "electron_number_density_field",
+            "electron_temperature_field",
+            "ion_neutral_mean_free_path_field",
+            "positive_ion_number_density_field",
+            "positive_ion_temperature_field",
+            "positive_ion_velocity_field"
+          ]
+        },
+        {
+          "capability": "ion_drag / screened_collection_orbital",
+          "current": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+          "limits": "Declared coordinate/integrator and parameter requirements apply",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "effective_positive_ion_mass_field",
+            "ion_neutral_mean_free_path_field",
+            "maximum_relative_ion_speed_m_s",
+            "model",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "revision",
+            "screening_length_field"
+          ],
+          "field_parameters": [
+            "effective_positive_ion_mass_field",
+            "ion_neutral_mean_free_path_field",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "screening_length_field"
+          ]
+        },
+        {
+          "capability": "ion_drag / image_orbital_sensitivity",
+          "current": "electric_field_directed_image_orbital_sensitivity_v1",
+          "limits": "Sensitivity model; its E binding must agree with any selected Coulomb model.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "effective_positive_ion_mass_field",
+            "electric_field",
+            "electron_thermal_voltage_field",
+            "model",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "revision",
+            "screening_length_field"
+          ],
+          "field_parameters": [
+            "effective_positive_ion_mass_field",
+            "electric_field",
+            "electron_thermal_voltage_field",
+            "positive_ion_number_density_field",
+            "positive_ion_thermal_voltage_field",
+            "positive_ion_velocity_field",
+            "screening_length_field"
+          ]
+        },
+        {
+          "capability": "ion_drag / prescribed_charge_polynomial",
+          "current": "prescribed_charge_polynomial_v1",
+          "limits": "Explicit mathematical reference coefficients; not a physical-model certification.; particle_properties must exactly match every realized particle and every selected reference model.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "constant_force_field",
+            "linear_charge_force_field",
+            "model",
+            "particle_properties",
+            "quadratic_charge_force_field",
+            "revision"
+          ],
+          "field_parameters": [
+            "constant_force_field",
+            "linear_charge_force_field",
+            "quadratic_charge_force_field"
+          ]
+        },
+        {
+          "capability": "dielectrophoresis / quasistatic_spherical",
+          "current": "quasistatic_spherical_gradient_e2_v1",
+          "limits": "Consumes grad(|E|^2), not E itself; the point-dipole radius bound is explicit.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "gradient_mean_e_squared_field",
+            "maximum_point_dipole_radius_m",
+            "medium_relative_permittivity",
+            "model",
+            "real_clausius_mossotti_factor",
+            "revision"
+          ],
+          "field_parameters": [
+            "gradient_mean_e_squared_field"
+          ]
+        },
+        {
+          "capability": "lift / rarefied_vorticity_sensitivity",
+          "current": "rarefied_vorticity_sensitivity_rz_v1",
+          "limits": "Rarefied-gas sensitivity; signed azimuthal vorticity is an explicit primitive.",
+          "coordinates": [
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "azimuthal_gas_vorticity_field",
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_velocity_field",
+            "lift_coefficient",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "azimuthal_gas_vorticity_field",
+            "gas_density_field",
+            "gas_mean_free_path_field",
+            "gas_velocity_field"
+          ]
+        },
+        {
+          "capability": "lift / saffman",
+          "current": "saffman_unbounded_creeping_shear_v1",
+          "limits": "Creeping/shear/slip validity gates must overlap all co-selected models.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "applicability",
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_mean_free_path_field",
+            "gas_velocity_field",
+            "model",
+            "out_of_plane_gas_vorticity_field",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_density_field",
+            "gas_dynamic_viscosity_field",
+            "gas_mean_free_path_field",
+            "gas_velocity_field",
+            "out_of_plane_gas_vorticity_field"
+          ]
+        },
+        {
+          "capability": "lift / prescribed_rotational_lift",
+          "current": "prescribed_rotational_lift_v1",
+          "limits": "Explicit mathematical reference coefficients; not a physical-model certification.; particle_properties must exactly match every realized particle and every selected reference model.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "gas_velocity_field",
+            "model",
+            "particle_properties",
+            "revision",
+            "rotation_coefficient_field"
+          ],
+          "field_parameters": [
+            "gas_velocity_field",
+            "rotation_coefficient_field"
+          ]
+        },
+        {
+          "capability": "electric / coulomb",
+          "current": "electric_coulomb_v1",
+          "limits": "Declared coordinate/integrator and parameter requirements apply",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "electric_field",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "electric_field"
+          ]
+        },
+        {
+          "capability": "electric / coulomb",
+          "current": "electric_coulomb_charge_cap_v1",
+          "limits": "Caps Coulomb force only; continuous charge and ion drag keep the uncapped stage charge.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "electric_field",
+            "maximum_abs_charge_number",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "electric_field"
+          ]
+        },
+        {
+          "capability": "gravity_buoyancy / standard",
+          "current": "gravity_buoyancy_standard_v1",
+          "limits": "RZ requires zero radial gravity; displaced volume is an independent particle authority.",
+          "coordinates": [
+            "cartesian_xy",
+            "axisymmetric_rz"
+          ],
+          "integrators": [
+            "rk4_fixed",
+            "exponential_midpoint",
+            "ou_langevin"
+          ],
+          "required_parameters": [
+            "gas_density_field",
+            "gravity_m_s2",
+            "model",
+            "revision"
+          ],
+          "field_parameters": [
+            "gas_density_field"
+          ]
+        }
+      ],
+      "source": {
+        "label": "Current reviewed design; execution evidence is separate",
+        "files": [
+          "AGENTS.md",
+          "product_specification.md",
+          "architecture_proposal.md",
+          "implementation_plan.md",
+          "vv_methodology.md",
+          "solver/pyproject.toml",
+          "solver/docs/case_format_v3.md",
+          "solver/docs/result_format_v4.md",
+          "solver/docs/physics_models.md",
+          "solver/docs/numerics.md",
+          "solver/src/chamber_particles/physics/catalog.py",
+          "solver/src/chamber_particles_tools/inputs.py"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "physics scope",
+            "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
+            "componentIds": [
+              "executive-decision",
+              "governing-equations",
+              "physics-table",
+              "coordinates",
+              "boundary-numerics",
+              "start-gate"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Reproduce design snapshot",
+            "detail": "Run analysis/build_report_snapshot.py from the locked solver environment; authority and catalog hashes are bound in snapshot.reproducibility."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "language": "shell",
+          "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+        }
+      ]
+    },
+    "module_responsibilities": {
+      "label": "module responsibilities",
+      "rows": [
+        {
+          "module": "chamber_particles.case / case_format",
+          "owns": "Settings, canonical schema and logical hash",
+          "must_not": "Provider interpretation or particle integration"
+        },
+        {
+          "module": "chamber_particles.fields / field_numerics",
+          "owns": "Support, stage sampling and one numerical field owner",
+          "must_not": "Field production or mesh repair"
+        },
+        {
+          "module": "chamber_particles.physics / integrators / stochastic",
+          "owns": "Rates, coupled stages and conditional OU path",
+          "must_not": "I/O, field location or wall policy"
+        },
+        {
+          "module": "chamber_particles.geometry / events / boundaries",
+          "owns": "First hit, event continuation and explicit post-hit law",
+          "must_not": "Endpoint-only passage, nudge or invented event"
+        },
+        {
+          "module": "chamber_particles.engine / transport / execution",
+          "owns": "One engine, parent clocks and exclusive worker slabs",
+          "must_not": "Producer-specific engines or worker HDF5 writers"
+        },
+        {
+          "module": "chamber_particles.output",
+          "owns": "Result, immutable context and durable checkpoint",
+          "must_not": "Population interpretation or plotting"
+        },
+        {
+          "module": "chamber_particles_tools.inputs / four input clients",
+          "owns": "Import, source conversion, field production and one case publisher",
+          "must_not": "Duplicated physics validation or trajectory solver"
+        },
+        {
+          "module": "chamber_particles_tools.analysis / visualization",
+          "owns": "Public ResultView consumers",
+          "must_not": "Private case access or implicit new simulation"
+        },
+        {
+          "module": "tools/vv / native COMSOL",
+          "owns": "External observation, companions and qualified comparison",
+          "must_not": "Normal wheel runtime dependency"
+        }
+      ],
+      "source": {
+        "label": "Current reviewed design; execution evidence is separate",
+        "files": [
+          "AGENTS.md",
+          "product_specification.md",
+          "architecture_proposal.md",
+          "implementation_plan.md",
+          "vv_methodology.md",
+          "solver/pyproject.toml",
+          "solver/docs/case_format_v3.md",
+          "solver/docs/result_format_v4.md",
+          "solver/docs/physics_models.md",
+          "solver/docs/numerics.md",
+          "solver/src/chamber_particles/physics/catalog.py",
+          "solver/src/chamber_particles_tools/inputs.py"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "module responsibilities",
+            "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
+            "componentIds": [
+              "module-table"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Reproduce design snapshot",
+            "detail": "Run analysis/build_report_snapshot.py from the locked solver environment; authority and catalog hashes are bound in snapshot.reproducibility."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "language": "shell",
+          "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+        }
+      ]
+    },
+    "numerical_contracts": {
+      "label": "numerical contracts",
+      "rows": [
+        {
+          "topic": "check_case",
+          "decision": "Same prepare as simulate; no worker/writer/update",
+          "acceptance": "Readiness is not convergence"
+        },
+        {
+          "topic": "x/v/Z",
+          "decision": "All forces and charge use actual coupled stages",
+          "acceptance": "Independent rate/Jacobian and integration limits"
+        },
+        {
+          "topic": "Brownian",
+          "decision": "Joint x/v OU with conditional splits",
+          "acceptance": "Covariances and numerical-path resolution; no exact first-passage claim"
+        },
+        {
+          "topic": "wall",
+          "decision": "Earliest path hit and remaining-time continuation",
+          "acceptance": "Hit geometry, incoming/outgoing state and multi-hit microcases"
+        },
+        {
+          "topic": "identity",
+          "decision": "Stable particle IDs, physical RNG streams and observation-independent production steps",
+          "acceptance": "Worker/tile/output/resume scientific identity"
+        }
+      ],
+      "source": {
+        "label": "Current reviewed design; execution evidence is separate",
+        "files": [
+          "AGENTS.md",
+          "product_specification.md",
+          "architecture_proposal.md",
+          "implementation_plan.md",
+          "vv_methodology.md",
+          "solver/pyproject.toml",
+          "solver/docs/case_format_v3.md",
+          "solver/docs/result_format_v4.md",
+          "solver/docs/physics_models.md",
+          "solver/docs/numerics.md",
+          "solver/src/chamber_particles/physics/catalog.py",
+          "solver/src/chamber_particles_tools/inputs.py"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "numerical contracts",
+            "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
+            "componentIds": [
+              "numerics-table"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Reproduce design snapshot",
+            "detail": "Run analysis/build_report_snapshot.py from the locked solver environment; authority and catalog hashes are bound in snapshot.reproducibility."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "language": "shell",
+          "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+        }
+      ]
+    },
+    "result_layers": {
+      "label": "result layers",
+      "rows": [
+        {
+          "layer": "context.h5",
+          "contents": "Geometry, semantic source/boundary labels, topology, units and basis",
+          "rule": "Immutable once; bound case/data hashes; no background fields or full source"
+        },
+        {
+          "layer": "ResultView",
+          "contents": "Final, streamed interactions, saved frames/probes and context",
+          "rule": "Public consumer interface; strict result schema 4"
+        },
+        {
+          "layer": "analysis",
+          "contents": "Fates, first hit, terminal and repeated interactions",
+          "rule": "Exact cohort and computational count/weight meaning; no inferred adhesion/flux"
+        },
+        {
+          "layer": "visualization / report",
+          "contents": "Geometry, bounded views and reviewed exported evidence",
+          "rule": "No simulation or invented missing states; presentation stays separate"
+        }
+      ],
+      "source": {
+        "label": "Current reviewed design; execution evidence is separate",
+        "files": [
+          "AGENTS.md",
+          "product_specification.md",
+          "architecture_proposal.md",
+          "implementation_plan.md",
+          "vv_methodology.md",
+          "solver/pyproject.toml",
+          "solver/docs/case_format_v3.md",
+          "solver/docs/result_format_v4.md",
+          "solver/docs/physics_models.md",
+          "solver/docs/numerics.md",
+          "solver/src/chamber_particles/physics/catalog.py",
+          "solver/src/chamber_particles_tools/inputs.py"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "result layers",
+            "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
+            "componentIds": [
+              "result-store",
+              "result-table"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Reproduce design snapshot",
+            "detail": "Run analysis/build_report_snapshot.py from the locked solver environment; authority and catalog hashes are bound in snapshot.reproducibility."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "language": "shell",
+          "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+        }
+      ]
+    },
+    "implementation_work_packages": {
+      "label": "利用フローの実行と性能観測",
+      "rows": [
+        {
+          "package": "Installed flow",
+          "capability": "独自CSV→最初の内部/surface source→create/check/run",
+          "deliverable": "同じwheelのCLIとPython",
+          "gate": "Windows/Linuxの13 CLI経路と5例題を実行済み"
+        },
+        {
+          "package": "Reusable result4",
+          "capability": "元caseなしで解析・CSV・形状付きSVG",
+          "deliverable": "immutable context、cohort/weights/terminal",
+          "gate": "case移動・破損/recovery/resume・finite/periodic等を確認済み"
+        },
+        {
+          "package": "P14 event-20",
+          "capability": "simulate [s]: 0.111970 → 0.165336",
+          "deliverable": "process peakRSS [MiB]: 484.66 → 484.82",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "P14 p1-cross",
+          "capability": "simulate [s]: 0.054852 → 0.071660",
+          "deliverable": "process peakRSS [MiB]: 742.36 → 751.05",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "P14 p1-initial",
+          "capability": "simulate [s]: 0.053969 → 0.055984",
+          "deliverable": "process peakRSS [MiB]: 742.95 → 751.72",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "P14 q1-cross",
+          "capability": "simulate [s]: 0.048719 → 0.061193",
+          "deliverable": "process peakRSS [MiB]: 744.40 → 749.88",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "P14 q1-initial",
+          "capability": "simulate [s]: 0.044212 → 0.059822",
+          "deliverable": "process peakRSS [MiB]: 740.21 → 750.41",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "P14 regular-cold",
+          "capability": "simulate [s]: 32.857075 → 34.553693",
+          "deliverable": "process peakRSS [MiB]: 611.73 → 572.59",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "P14 regular-time",
+          "capability": "simulate [s]: 0.050002 → 0.059508",
+          "deliverable": "process peakRSS [MiB]: 596.53 → 571.60",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "P14 regular-warm-all",
+          "capability": "simulate [s]: 0.048028 → 0.057891",
+          "deliverable": "process peakRSS [MiB]: 608.87 → 572.45",
+          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+        },
+        {
+          "package": "10k/320macro workers1",
+          "capability": "load+simulate+open [s]: 28.487 → 29.913",
+          "deliverable": "同じ入力・全7系統science一致、failure/残存worker0",
+          "gate": "他のsimulation/testを止めた逐次1観測。SLA/scaling資格にしない。"
+        },
+        {
+          "package": "10k/320macro workers4",
+          "capability": "load+simulate+open [s]: 18.310 → 18.184",
+          "deliverable": "同じ入力・全7系統science一致、failure/残存worker0",
+          "gate": "他のsimulation/testを止めた逐次1観測。SLA/scaling資格にしない。"
+        }
+      ],
+      "source": {
+        "label": "利用フローの実行と性能観測",
+        "files": [
+          "solver/evidence/platform_restructure_2026_11_23/performance/comparison.json",
+          "solver/evidence/platform_restructure_2026_11_23/performance/current_matrix.json",
+          "solver/evidence/platform_restructure_2026_11_23/performance/baseline_matrix.json",
+          "solver/evidence/platform_restructure_2026_11_23/checks/verification.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "利用フローの実行と性能観測",
+            "definition": "Matrix uses simulate seconds with cold/warm separation; process workload uses full public time. Storage features differ intentionally. One observation per condition; no portable speedup guarantee.",
+            "componentIds": [
+              "implementation-sequence",
+              "work-package-table"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/performance/comparison.json\", \"sha256\": \"sha256:21f81bd4b2f54278f4c2d1cb61318d65b0b04dae06d48a168461b8f2807bb4be\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/performance/current_matrix.json\", \"sha256\": \"sha256:c862100ce8c77c6e6a76084ba956cf0f4882f39bd42eb49d9c5399cdc5321b02\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/performance/baseline_matrix.json\", \"sha256\": \"sha256:f665be40cfd591af6f6c6f1a78c5a1f8bd047a2226ee72657ac540bf4fa4d18b\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/verification.json\", \"sha256\": \"sha256:57bf7e160610800b73193d86697c90cd4630942a4469a430c73823eb611fa70e\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Matrix uses simulate seconds with cold/warm separation; process workload uses full public time. Storage features differ intentionally. One observation per condition; no portable speedup guarantee."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      }
+    },
+    "quality_findings": {
+      "label": "実行した確認と限定した判断",
+      "rows": [
+        {
+          "severity": "実行済",
+          "finding": "verification/scenarios 1,201件、portable V&V 101件成功",
+          "disposition": "同じproduction sourceに限定。invalid budget拒否試験のwarning1件は保持。"
+        },
+        {
+          "severity": "実行済",
+          "finding": "Windows/Linux runtime-only wheelで13 CLI経路・5例題・独自CSV/source・結果単独利用",
+          "disposition": "両packageのsource/wheel/install Python bytes・METADATA、2-worker科学identity/cleanupも照合。"
+        },
+        {
+          "severity": "実行済",
+          "finding": "lock/Ruff/Pyrefly、6依存契約、CC、文書33件・技能4件、snapshot/helper7試験",
+          "disposition": "予定commitだけの隔離checkoutでも文書/技能/report接続と保護234ファイルを確認。remote CIとは区別。"
+        },
+        {
+          "severity": "保持確認",
+          "finding": "A/P各40の全80候補計算、7系統の全科学payloadが変更前とbitwise一致、failure0",
+          "disposition": "元seed/window/clockを保持。nativeの乱数path一致や標本数追加を意味しない。"
+        },
+        {
+          "severity": "実用的対応",
+          "finding": "Case A: 保持停止数 251 / 候補平均 249.675、5ms平均active時間 200.397 / 203.489 µs",
+          "disposition": "各287粒子、候補40実現。大局的輸送の目的では適切に対応。formal equivalenceには拡張しない。"
+        },
+        {
+          "severity": "実用的対応",
+          "finding": "Case P: 保持停止数 254 / 候補平均 251.775、5ms平均active時間 187.383 / 203.055 µs",
+          "disposition": "各287粒子、候補40実現。大局的輸送の目的では適切に対応。formal equivalenceには拡張しない。"
+        },
+        {
+          "severity": "局所留保",
+          "finding": "境界33の停止割合差 A−4.72/P−4.07 pp、100us survivor速度中央値 A+13.5/P+17.5%",
+          "disposition": "観測後に選んだ探索的な局所差。charging/wall bugや乱数だけへ原因を帰属しない。"
+        },
+        {
+          "severity": "独立レビュー",
+          "finding": "parent identity、ASCII JSON、非収束エラー、installed経路、軽量CI、配布リンクの必須指摘を修正",
+          "disposition": "独立complete/recovery/resume破損probeと影響確認を再実行。"
+        },
+        {
+          "severity": "認定外",
+          "finding": "全release規模matrix、一般path/mesh/SDE収束、native新solve、実機付着量",
+          "disposition": "今回の成功に含めない。既存の条件付きbacklogと必要な外部入力を保持する。"
+        }
+      ],
+      "source": {
+        "label": "実行した確認と限定した判断",
+        "files": [
+          "solver/evidence/platform_restructure_2026_11_23/checks/verification.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
+          "solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_windows.json",
+          "solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_linux.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "実行した確認と限定した判断",
+            "definition": "Local executed checks and reviewed practical evidence; no inherited historical PASS or remote-CI claim.",
+            "componentIds": [
+              "dataset-role",
+              "quality-table"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/verification.json\", \"sha256\": \"sha256:57bf7e160610800b73193d86697c90cd4630942a4469a430c73823eb611fa70e\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_windows.json\", \"sha256\": \"sha256:f06b69cbdc7c914144b20fd8680b63dec94a78d0c3cbe04073858e8594cf1ffa\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_linux.json\", \"sha256\": \"sha256:b1bd4d245f95002b84880782ebe8fc7d947b47529c8fb1130ee311ed819ac5d5\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Local executed checks and reviewed practical evidence; no inherited historical PASS or remote-CI claim."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      }
+    },
+    "roadmap": {
+      "label": "roadmap",
+      "rows": [
+        {
+          "phase": "current",
+          "name": "0.4 CLI/Python input → result reuse",
+          "exit": "Bound final quality and installed-wheel receipts",
+          "example_count": 5
+        },
+        {
+          "phase": "conditional",
+          "name": "Native field/particle correspondence",
+          "exit": "Inspect equations, prepare primitives, independent comparison; no fitted defaults"
+        },
+        {
+          "phase": "future",
+          "name": "Full materials/floating V/Q, 3D, moving geometry, GPU",
+          "exit": "Separate model/design and independent scientific/resource evidence"
+        }
+      ],
+      "source": {
+        "label": "Current reviewed design; execution evidence is separate",
+        "files": [
+          "AGENTS.md",
+          "product_specification.md",
+          "architecture_proposal.md",
+          "implementation_plan.md",
+          "vv_methodology.md",
+          "solver/pyproject.toml",
+          "solver/docs/case_format_v3.md",
+          "solver/docs/result_format_v4.md",
+          "solver/docs/physics_models.md",
+          "solver/docs/numerics.md",
+          "solver/src/chamber_particles/physics/catalog.py",
+          "solver/src/chamber_particles_tools/inputs.py"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "roadmap",
+            "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
+            "componentIds": [
+              "metric-stages",
+              "implementation-sequence",
+              "implementation",
+              "roadmap-table",
+              "start-gate"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Reproduce design snapshot",
+            "detail": "Run analysis/build_report_snapshot.py from the locked solver environment; authority and catalog hashes are bound in snapshot.reproducibility."
+          },
+          {
+            "title": "Bound authority snapshot and catalog",
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+          }
+        ]
+      },
+      "methods": [
+        {
+          "language": "shell",
+          "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+        }
+      ]
+    }
+  },
+  "reproducibility": {
+    "snapshot_revision": "platform_design_report_v1",
+    "producer": {
+      "path": "analysis/build_report_snapshot.py",
+      "sha256": "sha256:580e5b6e875d958af3b339d2fe5a3743a219365111c26e66ef297c2cb32d47d7"
+    },
+    "authorities": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6"
+      },
+      {
+        "path": "product_specification.md",
+        "sha256": "sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86"
+      },
+      {
+        "path": "architecture_proposal.md",
+        "sha256": "sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858"
+      },
+      {
+        "path": "implementation_plan.md",
+        "sha256": "sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa"
+      },
+      {
+        "path": "vv_methodology.md",
+        "sha256": "sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84"
+      },
+      {
+        "path": "solver/pyproject.toml",
+        "sha256": "sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3"
+      },
+      {
+        "path": "solver/docs/case_format_v3.md",
+        "sha256": "sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05"
+      },
+      {
+        "path": "solver/docs/result_format_v4.md",
+        "sha256": "sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c"
+      },
+      {
+        "path": "solver/docs/physics_models.md",
+        "sha256": "sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b"
+      },
+      {
+        "path": "solver/docs/numerics.md",
+        "sha256": "sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98"
+      },
+      {
+        "path": "solver/src/chamber_particles/physics/catalog.py",
+        "sha256": "sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d"
+      },
+      {
+        "path": "solver/src/chamber_particles_tools/inputs.py",
+        "sha256": "sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a"
+      }
+    ],
+    "catalog_sha256": "sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002",
+    "optional_inputs": [
+      {
+        "path": "solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json",
+        "sha256": "sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6"
+      },
+      {
+        "path": "solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json",
+        "sha256": "sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77"
+      },
+      {
+        "path": "solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json",
+        "sha256": "sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce"
+      }
+    ],
+    "optional_evidence_policy": "Missing is unavailable, never zero; source receipts do not imply rerunning scientific calculations"
+  }
+}

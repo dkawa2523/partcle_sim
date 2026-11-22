@@ -1,4 +1,18 @@
-# chamber-particles 0.3.0
+# chamber-particles 0.4.0
+
+利用者がwheelだけで入力の準備から結果の再利用まで進めるように、通常clientを同じ配布物へ統合しました。
+
+- `models`でモデルとfieldの単位・成分・基底を調べ、`init`の5例を編集し、`create`で自分の粒子源と設定を公開できます。
+- CSV取込み、field cache、限定された静的RZ電場生成を`inputs`へ統合しました。COMSOL固有の抽出・比較は外部V&Vです。
+- coreの4操作は`load_case`、`check_case`、`simulate`、`open_result`です。`check_case`は実行と同じ準備を使い、計算を開始しません。
+- `analyze`、`export`、`view`はresult単独で使えます。源・重み・分母を保持し、接触回数、最初の材料接触、終端、最終停止を区別します。
+- 必須のgeometry・源・境界contextをresult4へ保存します。result3と旧途中結果は読み込みません。入力schema3、checkpoint配列schema2は維持します。
+- 親時計・writer、process実行、粒子slab更新の責務を分離しました。数値処理とRNGの意味は一つのengineに維持します。
+
+最新の実行済み範囲と外部条件は[再構成の確認記録](evidence/platform_restructure_2026_11_23/README.md)を参照してください。
+過去の認定を新しいsourceへ自動適用しません。基本操作は[README](README.md)にまとめています。
+
+## 0.3.0の履歴
 
 0.3.0は、既存の2-D数値処理を一つのengineのまま高速化し、同一runのCPU process並列を追加した版です。
 Python 3.12、Cartesian XY/RZ meridional、canonical case/data/result schema 3、checkpoint schema 2を維持します。

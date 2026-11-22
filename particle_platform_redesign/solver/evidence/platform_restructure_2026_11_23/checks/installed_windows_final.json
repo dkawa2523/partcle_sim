@@ -1,0 +1,83 @@
+{
+  "status": "complete",
+  "package_paths": [
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\rt04w\\Lib\\site-packages\\chamber_particles\\__init__.py",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\rt04w\\Lib\\site-packages\\chamber_particles_tools\\__init__.py"
+  ],
+  "cwd_uses_checkout": false,
+  "fixture_imports": [],
+  "entrypoints": {
+    "module": "passed",
+    "commands": [
+      "models",
+      "init",
+      "inputs import-csv",
+      "inputs cache",
+      "create",
+      "check",
+      "run",
+      "inspect",
+      "analyze",
+      "export",
+      "view",
+      "inputs electrostatic check",
+      "inputs electrostatic build"
+    ],
+    "console": "passed"
+  },
+  "own_csv_first_source": "analytic field trajectory and hit verified",
+  "cache_and_surface": "passed",
+  "examples": "five passed",
+  "summary": {
+    "selected_particles": 1,
+    "model_weight": 2.5,
+    "count_unit": "computational_particles",
+    "weight_meaning": "input model_weight; no inferred physical rate"
+  },
+  "view": {
+    "visualization_revision": "result_context_population_svg_v4",
+    "parameters": {
+      "event_batch_rows": 4096,
+      "max_event_points": 5000,
+      "requested_particle_id": 1,
+      "particle_ids": null,
+      "source_ids": null,
+      "max_particle_points": 5000,
+      "max_trajectory_points": 5000,
+      "detail": true
+    },
+    "source_manifest_sha256": "sha256:cf1b6f49cf579374c4474654bea2c22349490dd3624ff96eb2619dc1ac388ca6",
+    "context": {
+      "content_hash": "sha256:a9efef109f57e2722b14d5e47dd81b669a15e18716cf5debcc3181f0542870a1",
+      "file_sha256": "sha256:24a51685635451de1c48d3e010ac54654cc62837688e4b8191d774ee67a5379d",
+      "path": "context.h5"
+    },
+    "particle_id": 1,
+    "trajectory_source": "frames",
+    "trajectory_points": 4,
+    "trajectory_truncated": false,
+    "boundary_events": 1,
+    "rendered_boundary_points": 1,
+    "population": {
+      "selected_particles": 1,
+      "finite_valid_positions": 1,
+      "omitted_nonspatial_or_pending": 0,
+      "binned_positions": 1,
+      "outside_geometry_bounds": 0,
+      "rendered_cells": 1,
+      "cells_per_axis": 70,
+      "meaning": "all finite active/stuck/held final positions binned; dominant lifecycle color; computational counts, not concentration"
+    },
+    "event_selection": {
+      "boundary_map": "smallest BLAKE2b-128 ranks of time_s/particle_id/event_ordinal",
+      "trajectory": "first physical events by time_s/particle_id/event_ordinal",
+      "display_order": "time_s/particle_id/event_ordinal",
+      "max_points_per_view": 5000
+    },
+    "trajectory_meaning": "saved positions only; gaps and recorded interactions break chords; no reconstructed Brownian path",
+    "population_svg": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-jk0ologz\\view\\population.svg",
+    "trajectory_svg": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-jk0ologz\\view\\trajectory.svg",
+    "boundary_events_svg": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-jk0ologz\\view\\boundary_events.svg",
+    "metadata_json": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-jk0ologz\\view\\visualization.json"
+  }
+}

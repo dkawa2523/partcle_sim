@@ -1,0 +1,31 @@
+{
+  "source_population_assessment_sha256": "sha256:dfdbbf7d0d71ae6d751d43fbbd4f4a46a4fccc9069d48253bbffadad84de018f",
+  "source_spatial_assessment_sha256": "sha256:fcfe8af223c554e1ba83231af692c2153a6705759a686bdf03cd1243af89f289",
+  "figures": [
+    {
+      "file": "population_summary.png",
+      "sha256": "sha256:f1f07dd0ec649f803b4829b254cc682088b1e8458d15a5544d1560d067e7e2e4",
+      "bytes": 100292
+    },
+    {
+      "file": "population_summary.svg",
+      "sha256": "sha256:086dfd4d95e312dc8f85e73ff14e68001355de8a5fa025e4e09b519f8e2964c6",
+      "bytes": 22767
+    },
+    {
+      "file": "spatial_clouds.png",
+      "sha256": "sha256:fb7399fc7bbcef447c25fc21b7fbd5866ee65d737a0ca962af6f12db452b32a5",
+      "bytes": 122510
+    },
+    {
+      "file": "spatial_marginal_cdfs.png",
+      "sha256": "sha256:b6272520af08d90edca31d1fe2e6a695268e69e768a7c08c59dd32c36fbeda59",
+      "bytes": 136833
+    }
+  ],
+  "population_renderer_sha256": "sha256:a08eb6a194508f7ef1897f3d7fdbbda7f0ab0d91a5c1c7fa451928c7bd364cbf",
+  "spatial_renderer_sha256": "sha256:ace3b67b43514eab478e2f58fe9e624b48bd7cd296f798db51d1b855bbca1ac4",
+  "spatial_geometry_authority": "new result4 context; original fields/initial source arrays not loaded",
+  "display_qa": "all3 rendered PNGs inspected: panel boundaries, same axes/equal aspect, counts, own-survivor conditioning, minmax-band meaning, footer non-clipping",
+  "spatial_scope": "seed21 illustrates clouds; seeds21-24 enter spatial/CDF diagnostics. Forty percase enter population comparison."
+}

@@ -1,0 +1,96 @@
+{
+  "reviewer": "/root/platform_final_review",
+  "recorded_utc": "2026-11-22T23:16:28.895802+00:00",
+  "scope": "Independent read-only whole-platform user/developer integration review after owner implementation, not scientific/full-suite certification.",
+  "source_commit": "ade0c8e700f594d181f098259dddb4dd2cb778ac",
+  "source_sha256": {
+    "AGENTS.md": "bff556206e565444559b38d5f36b10a3d2706ebcaa529c8b6f18cf966d499874",
+    "particle_platform_redesign/AGENTS.md": "38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6",
+    "particle_platform_redesign/product_specification.md": "bbc4560b213004f15574ab05bde6688defb869a6091b3bcaa05e942b923b3c4c",
+    "particle_platform_redesign/architecture_proposal.md": "2e065eeb3a7ead940613490e79bfdd68356afee0d7ce5be79a14b21d59904f92",
+    "particle_platform_redesign/implementation_plan.md": "121de1b0a5bfb33fc4f1bf930d236b8f0de225dc03473df3ecaf294d7c72f7ce",
+    "particle_platform_redesign/quality_tooling_plan.md": "61a687db59859ac33fcae797722cec98fbc29a17668d483031fc9bc9574a73ba",
+    "particle_platform_redesign/solver/README.md": "34e9598706b7d6eafe2abc72f50218b599fbde75815c4a3fd1558e783e33cf0f",
+    "particle_platform_redesign/solver/src/chamber_particles/api.py": "cfbeac0e96557931f1ef8f3849bba68195419140be63b9fca0049e7e2fc81466",
+    "particle_platform_redesign/solver/src/chamber_particles/output.py": "70d09c2ac0e2040c9e0792c449e1a1031c71d639626127897ac05a8615d41601",
+    "particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py": "f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d",
+    "particle_platform_redesign/solver/src/chamber_particles_tools/cli.py": "a727daf22b1026d12f1b9559a937b7e025b46fec358f684f804a5722e061794e",
+    "particle_platform_redesign/solver/src/chamber_particles_tools/inputs.py": "34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a",
+    "particle_platform_redesign/solver/src/chamber_particles_tools/selection.py": "78a924b9b88b748e70b2dbf0572a06225b0e58ac8603e95a50c398faa838fcfd",
+    "particle_platform_redesign/solver/src/chamber_particles_tools/analysis/__init__.py": "3313b4f03c2c3280a70f7784ab5680695ef132eb2bd0d2bcd8e11a538738d6ba",
+    "particle_platform_redesign/solver/src/chamber_particles_tools/visualization/__init__.py": "66106b558389cf77de03352c691e82318382b6a8e4087cb7ec4fad6ded4cc0ab",
+    "particle_platform_redesign/solver/tests/release_workflow.py": "9e24d48c5f2dd20ca07f99870e3a3d538ec19b989d60772cc0091b7708ed2a07",
+    "particle_platform_redesign/solver/scripts/check_documentation.py": "a0761cd7a9e66b20d7decd82a3176760136d46ea95699e7b8e13b3bbce27e62c",
+    ".github/workflows/solver-release.yml": "3be53c891892b750fa7140aeb6a36aaad5af163e6f57a391a1fd95702838d478",
+    ".github/workflows/platform-docs.yml": "798592fb1a9f83cef3b3d5305d4fde3f8a2933a77604c3788507d07064d15482",
+    "particle_platform_redesign/solver/docs/numerics.md": "bb64450833e322c091f2a11d068089354a30ee3850ed0c727f50d62304b345e0",
+    "particle_platform_redesign/solver/docs/result_format_v4.md": "3fbddda1560048386299aea4fa74a1c2fbaa9b6f63349dbd3d96d103f9835215",
+    "particle_platform_redesign/vv_methodology.md": "921dcf2f0b84be1ab5bc03ef73ae311f5b45617bd02d082040036428f6e68493"
+  },
+  "reviewed_behaviors": [
+    "Single installed dispatcher routes normal input/model/check/run/result workflows; generic CSV provider separated from native provenance.",
+    "Case publisher uses canonical writer/load/shared prepare, sources have complete explicit properties or requested exact-ID inheritance.",
+    "Numerical core has no client dependency; model descriptors bind SI/components/basis from RequiredField owner, paired model/applicability remains prepare authority.",
+    "Result4 context records sources/geometry/boundary/topology and parent hashes; strict identity includes actual canonical digest and checkpoint binding.",
+    "Analysis keeps selected cohort/count/weights, first wall hit vs all interaction vs terminal/deposition, bounded frame/ledger curves.",
+    "Result consumers preserve original result directory and geometry/finite/gap/periodic meanings; display reduction is reported separately from whole-population statistics.",
+    "Installed acceptance exercises own analytic CSV/first source/cache/surface, five examples, detached result consumers, thirteen actual module CLI operations and strict console.",
+    "CI runtime-only/no-checkout installed acceptance and light docs/skills/report job are connected.",
+    "Extension/removal ownership and conditional backlog are explicit; no hidden compatibility reader or second numerical engine found in reviewed paths."
+  ],
+  "executed_by_this_reviewer": [
+    {
+      "operation": "Maintained Markdown targets vs git ls-files inventory via locked uv script",
+      "outcome": "12 existing historical V&V targets untracked; other untracked linked targets belong to planned new files."
+    },
+    {
+      "operation": "Current authority old-tool/CLI/result3 reference search",
+      "outcome": "One stale bare field-preprocessor README path in numerics.md:430; no other obsolete normal-entry references outside historical decisions."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "priority": "P2",
+      "owner": "vv_methodology.md/documentation distribution",
+      "finding": "New clean CI link gate relies on 12 historical evidence files present only as unknown local untracked artifacts.",
+      "required_action": "At owning authority mark these as explicitly non-distributed archive paths, or deliberately distribute exact evidence; do not import unrelated trees or weaken gate. Validate planned clean checkout.",
+      "parent_notified": true
+    },
+    {
+      "id": "F2",
+      "priority": "P2 documentation",
+      "owner": "solver/docs/numerics.md:430",
+      "finding": "Current numerical authority directs readers to removed tools/field_preprocessor/README.md.",
+      "required_action": "Use current installed-client README link.",
+      "parent_notified": true
+    }
+  ],
+  "observed_other_executor_receipts": [
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/platform_restructure_20261123/installed_windows_final.json",
+      "sha256": "b17cb31ea3b51b9e688a7ffbac380fe27475fa34b5db02605782d6fab6c99107",
+      "observed_status": "complete",
+      "executed_by_this_reviewer": false
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/platform_restructure_20261123/installed_linux_final.json",
+      "sha256": "bc0d6a251c3ac73149ad73d26cbcd9b60830c5140115b2b490f2ef0ae80235b1",
+      "observed_status": "complete",
+      "executed_by_this_reviewer": false
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/platform_restructure_20261123/release_smoke_windows.json",
+      "sha256": "05609dd36946668d40ce7defea34483755d36d5324e85e1a71e916f9e3c23076",
+      "observed_status": "complete",
+      "executed_by_this_reviewer": false
+    }
+  ],
+  "limits": [
+    "No heavy tests or simulation campaign executed by this reviewer; root owns full suite, performance, 80-case regeneration and final report regeneration.",
+    "Clean staged checkout has not yet been exported by this reviewer; planned new client/result/report files must be included deliberately.",
+    "Scientific numerical parity, arbitrary selector combinations, continuous OU first passage and physical adhesion/device accuracy are not newly certified.",
+    "F1/F2 closure is tracked by parent integration; no production source edited by this reviewer."
+  ],
+  "verdict": "No additional production blocker found in reviewed public/client/result paths; close the two documentation/distribution findings and complete root integration evidence before platform completion."
+}

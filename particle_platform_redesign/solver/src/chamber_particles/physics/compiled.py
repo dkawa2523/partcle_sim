@@ -10,7 +10,6 @@ from numba import njit
 from numpy.typing import NDArray
 
 from .charge import (
-    _SMALL_SHIFT_RATIO,
     AGGREGATE_EXPONENT_MAX,
     AGGREGATE_EXPONENT_MIN,
     AGGREGATE_MINIMUM_ION_ENERGY_V,
@@ -18,6 +17,7 @@ from .charge import (
     ELECTRON_MASS_KG,
     OML_MAX_ION_DRIFT_RATIO,
     OML_MAX_RADIUS_OVER_DEBYE,
+    shifted_maxwellian_ion_factors_row,
 )
 from .forces import (
     _ALLEN_RAABE_A1,
@@ -1482,7 +1482,7 @@ def _oml_shifted_charge_row(
     )
     ion_drift_ratio = ion_relative_speed / ion_mean_thermal_speed
     shift_ratio = ion_drift_ratio * math.sqrt(8.0 / math.pi)
-    neutral_factor, attraction_factor = _shifted_ion_factors_row(shift_ratio)
+    neutral_factor, attraction_factor = shifted_maxwellian_ion_factors_row(shift_ratio)
     electron_collection = electron_amplitude * math.exp(potential / electron_voltage)
     ion_collection = ion_amplitude * (neutral_factor - potential / ion_voltage * attraction_factor)
     charge_rate = ion_collection - electron_collection
@@ -1872,23 +1872,6 @@ def _aggregate_charge_derived_values_are_valid(
         and math.isfinite(charge_rate_derivative_s_inv)
         and charge_rate_derivative_s_inv < 0.0
     )
-
-
-@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
-def _shifted_ion_factors_row(thermal_shift_ratio: float) -> tuple[float, float]:
-    if thermal_shift_ratio <= _SMALL_SHIFT_RATIO:
-        square = thermal_shift_ratio * thermal_shift_ratio
-        fourth = square * square
-        return 1.0 + square / 6.0 - fourth / 120.0, 1.0 - square / 6.0 + fourth / 40.0
-    error_function = math.erf(thermal_shift_ratio / math.sqrt(2.0))
-    neutral = (
-        0.5 * math.exp(-0.5 * thermal_shift_ratio * thermal_shift_ratio)
-        + math.sqrt(math.pi / 8.0)
-        * (thermal_shift_ratio + 1.0 / thermal_shift_ratio)
-        * error_function
-    )
-    attraction = math.sqrt(math.pi / 2.0) * error_function / thermal_shift_ratio
-    return neutral, attraction
 
 
 @njit(inline="always", fastmath=False, parallel=False, error_model="numpy")

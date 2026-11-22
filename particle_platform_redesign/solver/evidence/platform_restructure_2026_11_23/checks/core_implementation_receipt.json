@@ -1,0 +1,57 @@
+{
+  "recorded_utc": "2026-11-22T23:03:55.948430+00:00",
+  "scope": "core prepare/execution/numerical owner restructuring; not a full platform qualification",
+  "source_sha256": {
+    "src\\chamber_particles\\api.py": "cfbeac0e96557931f1ef8f3849bba68195419140be63b9fca0049e7e2fc81466",
+    "src\\chamber_particles\\__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+    "src\\chamber_particles\\case.py": "8c129705ae09e3a318f133663ac4e82165835d74a63cbcc843e448e7d1de09e4",
+    "src\\chamber_particles\\cpu.py": "9eb98d3de3d6f91f40b98ebb29f725cc03c9f838cad1c7e02438272e91c1bf30",
+    "src\\chamber_particles\\engine.py": "925ede1234773ce4d9251be38e99784d484e07206248cbd84405f705d1faf68c",
+    "src\\chamber_particles\\transport.py": "d6cd4b09c027c9568adf5400b330b2858f76bca98e076148e4db4ee6e88fa496",
+    "src\\chamber_particles\\execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+    "src\\chamber_particles\\fields.py": "06fb89b3b9ebe431a24958100e7052721b204f4ef91d48247eb37773513b6035",
+    "src\\chamber_particles\\field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+    "src\\chamber_particles\\integrators.py": "1fcbbb09b39356a71c9f1cf8338693dfa955476b8b75fc7402f38d33d2d93d69",
+    "src\\chamber_particles\\physics\\catalog.py": "f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d",
+    "src\\chamber_particles\\physics\\charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+    "src\\chamber_particles\\physics\\compiled.py": "3b83f477baf684f1144900f155105cb00726f81f3cb919ee2b3d38b310b7d885"
+  },
+  "targeted_final": {
+    "command": "uv run --locked python -m pytest tests/verification/test_integrators.py tests/verification/test_cpu.py tests/verification/test_process_arrays.py tests/verification/test_workspace_ownership.py tests/scenarios/test_check_case.py tests/scenarios/test_process_run.py tests/scenarios/test_prescribed_run.py tests/scenarios/test_boundary_run.py::test_probabilistic_isotropic_public_draws_are_independent_of_workers_and_output -q",
+    "passed": 135,
+    "failed": 0,
+    "elapsed_s": 61.09,
+    "numba_cache": "task-specific OS temporary directory cp_platform_20261123"
+  },
+  "initial_targeted": {
+    "passed": 134,
+    "failed": 1,
+    "elapsed_s": 201.13,
+    "failure": "fault-injection test still patched engine worker/cpu SharedMemory after their move to execution; fixed test ownership and targeted rerun passed"
+  },
+  "additional_evidence": {
+    "field_tests": {
+      "passed": 121,
+      "elapsed_s": 5.49
+    },
+    "metadata_physics_tests": {
+      "passed": 130,
+      "elapsed_s": 6.83
+    },
+    "independent_review": "No blocking finding. 41 engine JIT AST bodies unchanged;87 allocation combinations match baseline shapes/dtypes/bytes;13 physical state columns and16 worker-private owners preserved. No new JIT.",
+    "prepare_identity": "prepare_identity_comparison.json",
+    "catalog_identity": "catalog_baseline_comparison.json",
+    "field_role_identity": "field_roles_after.json",
+    "field_jit_identity": "field_kernel_move_comparison.json",
+    "scalar_physics_identity": "scalar_physics_after.json"
+  },
+  "owner_quality": {
+    "ruff": "passed",
+    "format": "passed",
+    "pyrefly": "0 errors",
+    "complexity": "all CC <16",
+    "import_linter": "4 kept at time of core check; root subsequently added2 directional contracts"
+  },
+  "intentional_memory_change": "memory_plan_v26 adds result_context_validation bytes and corresponding safety margin, excluded from shared worker copies; all other9example components/capacities unchanged",
+  "not_run": "No final all-platform suite, performance campaign or external/native scientific rerun by this core task. Parent coordinates integrated acceptance."
+}

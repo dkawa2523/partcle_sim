@@ -34,15 +34,11 @@ RK4_ENCLOSURE_REVISION = "rk4_global_abs_enclosure_v2"
 RK4_DENSE_PATH_REVISION = "rk4_position_hermite_state_extension_v3"
 # Ten numeric arrays in Rk4AdvanceWorkspace; persistent slot scratch is separate
 # from proposal-owned endpoint and dense controls.
-RK4_ADVANCE_WORK_BYTES_PER_PARTICLE = 209
 # Ten frozen arrays retained by each full-interval dense enclosure.
 RK4_DENSE_FULL_ENCLOSURE_BYTES_PER_PARTICLE = 225
-STAGE_ADVANCE_WORK_BYTES_PER_PARTICLE = 65
-RELAXATION_ADVANCE_WORK_BYTES_PER_PARTICLE = 169
 # Sample buffers are borrowed until their next use; retained proposals/events
 # keep their own copies. Prefix input and stage scratch must be distinct.
 PROPOSAL_SAMPLE_WORK_BYTES_PER_PARTICLE = 59
-PROPOSAL_PREFIX_WORK_BYTES_PER_PARTICLE = 80
 EXPONENTIAL_MIDPOINT_REVISION = "charge_stable_exponential_midpoint_v3"
 EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION = "exponential_midpoint_local_stage_enclosure_v4"
 # With unit roundoff u=eps/2, 16*eps=32u exceeds the dense expression's gamma_6,
@@ -304,6 +300,24 @@ class Rk4AdvanceWorkspace(NamedTuple):
     acceleration_m_s2: FloatArray
     charge_rate_number_s: FloatArray
 
+    @staticmethod
+    def allocation_layout(capacity: int) -> tuple[tuple[tuple[int, ...], str], ...]:
+        """Declare this finite workspace's concrete shapes and storage types."""
+        return (
+            *StageAdvanceWorkspace.allocation_layout(capacity),
+            ((3, capacity, 2), "<f8"),
+            ((4, capacity, 2), "<f8"),
+            ((4, capacity), "<f8"),
+        )
+
+    @classmethod
+    def bytes_for(cls, capacity: int) -> int:
+        """Count the same columns used by allocation, without allocating rows."""
+        return sum(
+            math.prod(shape) * np.dtype(dtype).itemsize
+            for shape, dtype in cls.allocation_layout(capacity)
+        )
+
 
 class _Rk4AdvanceOutputs(NamedTuple):
     """Proposal-owned arrays retained after the scratch slot is reused."""
@@ -331,6 +345,27 @@ class StageAdvanceWorkspace(NamedTuple):
     charge_number: FloatArray
     incoming_status: UInt8Array
 
+    @staticmethod
+    def allocation_layout(capacity: int) -> tuple[tuple[tuple[int, ...], str], ...]:
+        """Declare this finite workspace's concrete shapes and storage types."""
+        return (
+            ((capacity,), "<i8"),
+            ((capacity,), "<i8"),
+            ((capacity,), "<f8"),
+            ((capacity, 2), "<f8"),
+            ((capacity, 2), "<f8"),
+            ((capacity,), "<f8"),
+            ((capacity,), "<u1"),
+        )
+
+    @classmethod
+    def bytes_for(cls, capacity: int) -> int:
+        """Count the same columns used by allocation, without allocating rows."""
+        return sum(
+            math.prod(shape) * np.dtype(dtype).itemsize
+            for shape, dtype in cls.allocation_layout(capacity)
+        )
+
 
 class RelaxationAdvanceWorkspace(NamedTuple):
     """Bounded predictor state and frozen coefficients for exponential advance."""
@@ -345,6 +380,29 @@ class RelaxationAdvanceWorkspace(NamedTuple):
     additive_acceleration_m_s2: FloatArray
     charge_rate_number_s: FloatArray
     charge_rate_derivative_s_inv: FloatArray
+
+    @staticmethod
+    def allocation_layout(capacity: int) -> tuple[tuple[tuple[int, ...], str], ...]:
+        """Declare this finite workspace's concrete shapes and storage types."""
+        return (
+            ((capacity, 2), "<f8"),
+            ((capacity, 2), "<f8"),
+            ((capacity,), "<f8"),
+            ((capacity,), "<f8"),
+            ((capacity,), "<f8"),
+            ((capacity, 2), "<f8"),
+            ((capacity, 2), "<f8"),
+            ((capacity,), "<f8"),
+            ((capacity,), "<f8"),
+        )
+
+    @classmethod
+    def bytes_for(cls, capacity: int) -> int:
+        """Count the same columns used by allocation, without allocating rows."""
+        return sum(
+            math.prod(shape) * np.dtype(dtype).itemsize
+            for shape, dtype in cls.allocation_layout(capacity)
+        )
 
 
 class _StageAdvanceOutputs(NamedTuple):
@@ -376,6 +434,35 @@ class ProposalPrefixWorkspace(NamedTuple):
     velocity_m_s: FloatArray
     charge_number: FloatArray
     acceleration_m_s2: FloatArray
+
+    @staticmethod
+    def allocation_layout(capacity: int) -> tuple[tuple[tuple[int, ...], str], ...]:
+        """Declare this finite workspace's concrete shapes and storage types."""
+        return (
+            ((capacity,), "<i8"),
+            ((capacity,), "<f8"),
+            ((capacity,), "<f8"),
+            ((capacity, 2), "<f8"),
+            ((capacity, 2), "<f8"),
+            ((capacity,), "<f8"),
+            ((capacity, 2), "<f8"),
+        )
+
+    @classmethod
+    def bytes_for(cls, capacity: int) -> int:
+        """Count the same columns used by allocation, without allocating rows."""
+        return sum(
+            math.prod(shape) * np.dtype(dtype).itemsize
+            for shape, dtype in cls.allocation_layout(capacity)
+        )
+
+
+RK4_ADVANCE_WORK_BYTES_PER_PARTICLE = Rk4AdvanceWorkspace.bytes_for(1)
+STAGE_ADVANCE_WORK_BYTES_PER_PARTICLE = StageAdvanceWorkspace.bytes_for(1)
+RELAXATION_ADVANCE_WORK_BYTES_PER_PARTICLE = StageAdvanceWorkspace.bytes_for(
+    1
+) + RelaxationAdvanceWorkspace.bytes_for(1)
+PROPOSAL_PREFIX_WORK_BYTES_PER_PARTICLE = ProposalPrefixWorkspace.bytes_for(1)
 
 
 class StepProposalProjection(NamedTuple):
@@ -688,13 +775,10 @@ def allocate_proposal_sample_buffer(capacity: int) -> ProposalSampleBuffer:
 
 def allocate_proposal_prefix_workspace(capacity: int) -> ProposalPrefixWorkspace:
     return ProposalPrefixWorkspace(
-        np.empty(capacity, dtype=np.int64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
+        *(
+            np.empty(shape, dtype=dtype)
+            for shape, dtype in ProposalPrefixWorkspace.allocation_layout(capacity)
+        )
     )
 
 
@@ -3570,32 +3654,22 @@ def _advance_with_initial_status(
 
 def allocate_stage_advance_workspace(capacity: int) -> StageAdvanceWorkspace:
     """Allocate one compact input bank, reusable across native stages."""
-
     return StageAdvanceWorkspace(
-        np.empty(capacity, dtype=np.int64),
-        np.empty(capacity, dtype=np.int64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty(capacity, dtype=np.uint8),
+        *(
+            np.empty(shape, dtype=dtype)
+            for shape, dtype in StageAdvanceWorkspace.allocation_layout(capacity)
+        )
     )
 
 
 def allocate_relaxation_advance_workspace(capacity: int) -> RelaxationAdvanceWorkspace:
     """Allocate the compact bank, predictor state and reusable coefficients."""
-
     return RelaxationAdvanceWorkspace(
         allocate_stage_advance_workspace(capacity),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
+        *(
+            np.empty(shape, dtype=dtype)
+            for shape, dtype in RelaxationAdvanceWorkspace.allocation_layout(capacity)
+        ),
     )
 
 
@@ -4490,18 +4564,11 @@ def _degenerate_rk4_dense_controls(
 
 def allocate_rk4_advance_workspace(capacity: int) -> Rk4AdvanceWorkspace:
     """Allocate scratch once for one exclusive bounded advance slot."""
-
     return Rk4AdvanceWorkspace(
-        np.empty(capacity, dtype=np.int64),
-        np.empty(capacity, dtype=np.int64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty((capacity, 2), dtype=np.float64),
-        np.empty(capacity, dtype=np.float64),
-        np.empty(capacity, dtype=np.uint8),
-        np.empty((3, capacity, 2), dtype=np.float64),
-        np.empty((4, capacity, 2), dtype=np.float64),
-        np.empty((4, capacity), dtype=np.float64),
+        *(
+            np.empty(shape, dtype=dtype)
+            for shape, dtype in Rk4AdvanceWorkspace.allocation_layout(capacity)
+        )
     )
 
 

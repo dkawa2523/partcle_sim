@@ -1,0 +1,101 @@
+{
+  "scope": "regenerated result4 inputs; old scientific payload and all practical metric identities preserved",
+  "new_assessment": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\population_predictive40\\assessment.json",
+    "sha256": "dfdbbf7d0d71ae6d751d43fbbd4f4a46a4fccc9069d48253bbffadad84de018f"
+  },
+  "prior_assessment": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\population_predictive40\\assessment.json",
+    "sha256": "bfdc53d66e13fba24c4d7ce9c2ea157a0ca52b827034a3e767824ed26615a931"
+  },
+  "same_native_reference": true,
+  "metric_equalities": {
+    "A": {
+      "restricted_mean_active_lifetime_s": true,
+      "capture_count": true,
+      "capture_terminal_median_s": true,
+      "boundaries": true,
+      "destination_composition_global_tv": true,
+      "active_curve_global_maximum": true,
+      "capture_curve_global_maximum": true,
+      "clock_s": true,
+      "native_active_count_curve": true,
+      "candidate_mean_active_count_curve": true,
+      "candidate_minimum_active_count_curve": true,
+      "candidate_maximum_active_count_curve": true,
+      "native_capture_count_curve": true,
+      "candidate_mean_capture_count_curve": true,
+      "early_active": true
+    },
+    "P": {
+      "restricted_mean_active_lifetime_s": true,
+      "capture_count": true,
+      "capture_terminal_median_s": true,
+      "boundaries": true,
+      "destination_composition_global_tv": true,
+      "active_curve_global_maximum": true,
+      "capture_curve_global_maximum": true,
+      "clock_s": true,
+      "native_active_count_curve": true,
+      "candidate_mean_active_count_curve": true,
+      "candidate_minimum_active_count_curve": true,
+      "candidate_maximum_active_count_curve": true,
+      "native_capture_count_curve": true,
+      "candidate_mean_capture_count_curve": true,
+      "early_active": true
+    }
+  },
+  "spatial_metric_equalities": {
+    "A": true,
+    "P": true
+  },
+  "spatial_metrics": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\spatial_metrics.json",
+    "sha256": "fcfe8af223c554e1ba83231af692c2153a6705759a686bdf03cd1243af89f289"
+  },
+  "full_scientific_payload_equality": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\completion.json",
+    "sha256": "1a54e57a5f5157611b6dc6da56ee7224e2f837d32192afafda84ed5100775ec8"
+  },
+  "numerical_sources_at_analysis": {
+    "__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+    "__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+    "api.py": "cfbeac0e96557931f1ef8f3849bba68195419140be63b9fca0049e7e2fc81466",
+    "boundaries.py": "bb1fa5283019a4f20ee790eb8d9e748f190778942bd6dbdb9e5a37aca85295c2",
+    "case.py": "8c129705ae09e3a318f133663ac4e82165835d74a63cbcc843e448e7d1de09e4",
+    "case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+    "cpu.py": "9eb98d3de3d6f91f40b98ebb29f725cc03c9f838cad1c7e02438272e91c1bf30",
+    "engine.py": "925ede1234773ce4d9251be38e99784d484e07206248cbd84405f705d1faf68c",
+    "events.py": "4d3eb12273419ab97cc12b9b8e6f8f6d03076ab37a34dbc1b567f586073348f7",
+    "execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+    "field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+    "fields.py": "06fb89b3b9ebe431a24958100e7052721b204f4ef91d48247eb37773513b6035",
+    "geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+    "integrators.py": "1fcbbb09b39356a71c9f1cf8338693dfa955476b8b75fc7402f38d33d2d93d69",
+    "numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "output.py": "70d09c2ac0e2040c9e0792c449e1a1031c71d639626127897ac05a8615d41601",
+    "physics\\__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "physics\\catalog.py": "f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d",
+    "physics\\charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+    "physics\\compiled.py": "3b83f477baf684f1144900f155105cb00726f81f3cb919ee2b3d38b310b7d885",
+    "physics\\forces.py": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+    "physics\\runtime.py": "aad4b9f23a2ad3a2133251fc7f14aad72972d7a6fd05083cdde8a4e3d6a59050",
+    "rng.py": "fff6f67cf1dc1243fb20f9221103f0c339e62280be0a7ea90640614016feb0ba",
+    "sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "transport.py": "d6cd4b09c027c9568adf5400b330b2858f76bca98e076148e4db4ee6e88fa496",
+    "yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+  },
+  "new_result_schema_version": 4,
+  "native_new_simulations": 0,
+  "statistical_replica_count_per_case": 40,
+  "regeneration_is_not_additional_independent_replicas": true,
+  "limitations": [
+    "A/P same-seed joint dependence not pooled",
+    "exploratory non-rejection is not formal margin equivalence",
+    "boundary33 and100us conditional speed limits preserved",
+    "no claim of numerical native parity or physical adhesion validation"
+  ]
+}

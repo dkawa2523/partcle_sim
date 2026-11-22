@@ -427,7 +427,7 @@ stored componentのXY/RZ偏微分であり、3D共変微分やCOMSOL recoveryで
 preprocessor v3はP1/regular/exact affine Q1→full regularのstatic/linear-time cacheを共通partitionで認証する。
 weighted value/gradient/support-boundary normにroundoff allowanceを加え、全時間区間のerror/reference二次norm比を
 bounded Bernstein上界で判定する。stationary rootはreport-only。warped Q1/partial target、解像不能patch、coverage
-不整合、reference下界不足、資源超過は無公開。詳細はtools/field_preprocessor/README.mdを参照する。
+不整合、reference下界不足、資源超過は無公開。詳細は[field cache](../src/chamber_particles_tools/field_preprocessor/README.md)を参照する。
 
 ### Stage 4A fixed-topology linear time interpolation
 
@@ -1192,7 +1192,7 @@ engine v30はroot covariance、各conditional split、deterministic mean適用�
 accepted stateで`nonfinite_physics`となり、同じslabの正常粒子と独立なright subtreeは継続する。shape不一致や
 内部不変条件破損まで粒子failureへ隠さない。
 
-現行revision一覧は[`result_format_v3.md`](result_format_v3.md)へ集約する。event v23はevent v20のcontact-set継続とevent v19の周期first-event意味と
+現行revision一覧は[`result_format_v4.md`](result_format_v4.md)へ集約する。event v23はevent v20のcontact-set継続とevent v19の周期first-event意味と
 event v18 / geometry v6の独立`contact_radius_m`を維持する。有限半径exact残時間では同時接触集合を暗黙に保持し、
 各candidateについて接触位置と離脱方向を証明できた時だけzero-time再接触を除外する。位置nudgeは使わず、
 後続impactと材料/周期混在cornerは通常のfirst-event判定へ残す。0半径ではpoint意味を維持する。Brownian manifestは

@@ -18,13 +18,14 @@ from email import policy
 from email.parser import BytesParser
 from importlib.metadata import Distribution, distribution
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import yaml
 
 import chamber_particles
-from chamber_particles import load_case, open_result, simulate
+import chamber_particles_tools
+from chamber_particles import check_case, load_case, open_result, simulate
 from chamber_particles.case_format import RealizedTableSource, write
 from tests.verification.microcases import materialize_microcase
 
@@ -57,7 +58,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         payload = {
             "package": "chamber-particles",
             "status": "complete",
-            "public_operations": ["load_case", "simulate", "open_result"],
+            "public_operations": ["load_case", "check_case", "simulate", "open_result"],
             "wheel_identity": identity,
             "time_field": {"status": "complete", "snapshot_splits_s": [0.15]},
             "contact_geometry": contact_records,
@@ -86,22 +87,26 @@ def _wheel_identity(wheel: Path) -> dict[str, Any]:
     project = Path(__file__).resolve().parents[1]
     installed = distribution("chamber-particles")
     package = Path(str(chamber_particles.__file__)).resolve()
-    if not package.is_relative_to(Path(sys.prefix).resolve()):
+    client = Path(str(chamber_particles_tools.__file__)).resolve()
+    if not all(path.is_relative_to(Path(sys.prefix).resolve()) for path in (package, client)):
         raise RuntimeError("release smoke requires the clean-installed wheel, not editable source")
     expected_version = tomllib.loads((project / "pyproject.toml").read_text(encoding="utf-8"))[
         "project"
     ]["version"]
     if installed.version != expected_version:
         raise RuntimeError("installed wheel version differs from the project metadata")
-    source = _python_payload(project / "src/chamber_particles")
+    source = _python_payload(project / "src/chamber_particles") | _python_payload(
+        project / "src/chamber_particles_tools"
+    )
     with zipfile.ZipFile(wheel) as archive:
         archived = {
             name: hashlib.sha256(archive.read(name)).hexdigest()
             for name in archive.namelist()
-            if name.startswith("chamber_particles/") and name.endswith(".py")
+            if name.startswith(("chamber_particles/", "chamber_particles_tools/"))
+            and name.endswith(".py")
         }
         metadata_identity = _metadata_identity(project, installed, archive)
-    observed = _python_payload(package.parent)
+    observed = _python_payload(package.parent) | _python_payload(client.parent)
     if not source or source != archived or source != observed:
         raise RuntimeError("source, built wheel and installed Python payload differ")
     return {
@@ -109,6 +114,7 @@ def _wheel_identity(wheel: Path) -> dict[str, Any]:
         "python": sys.version,
         "platform": sys.platform,
         "package_path": str(package),
+        "client_package_path": str(client),
         "wheel_sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),
         "uv_lock_sha256": hashlib.sha256((project / "uv.lock").read_bytes()).hexdigest(),
         "production_python_sha256": observed,
@@ -145,7 +151,7 @@ def _metadata_identity(
 
 def _python_payload(package: Path) -> dict[str, str]:
     return {
-        "chamber_particles/" + path.relative_to(package).as_posix(): hashlib.sha256(
+        package.name + "/" + path.relative_to(package).as_posix(): hashlib.sha256(
             path.read_bytes()
         ).hexdigest()
         for path in sorted(package.rglob("*.py"))
@@ -154,13 +160,14 @@ def _python_payload(package: Path) -> dict[str, str]:
 
 def _run_case(case_path: Path, output: Path, *, workers: int = 1) -> tuple[Any, Any]:
     case = load_case(case_path)
+    check_case(case, workers=workers)
     simulate(case, output, workers=workers)
     if multiprocessing.active_children():
         raise RuntimeError("wheel smoke left live API worker processes after simulate returned")
     result = open_result(output)
     if result.manifest.get("status") != "complete" or result.read_failure_events().particle_id.size:
         raise RuntimeError("wheel smoke produced an incomplete or failed particle result")
-    if result.manifest["execution"]["worker_count"] != workers:
+    if cast(dict[str, Any], result.manifest["execution"])["worker_count"] != workers:
         raise RuntimeError("wheel smoke did not execute with the requested process count")
     return case, result
 
@@ -170,14 +177,12 @@ def _parallel_case(directory: Path) -> Path:
     case = load_case(paths.case_path)
     source = case.data.sources[0]
     assert isinstance(source, RealizedTableSource)
-    source = replace(
-        source,
-        **{
-            item.name: np.repeat(value, 32, axis=0)
-            for item in fields(source)
-            if isinstance(value := getattr(source, item.name), np.ndarray)
-        },
-    )
+    repeated: dict[str, Any] = {
+        item.name: np.repeat(value, 32, axis=0)
+        for item in fields(source)
+        if isinstance(value := getattr(source, item.name), np.ndarray)
+    }
+    source = replace(source, **repeated)
     source = replace(source, particle_id=np.arange(101, 133, dtype="<i8"))
     info = write(directory / "parallel.h5", replace(case.data, sources=(source,)))
     document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
@@ -345,6 +350,7 @@ def _check_cli(case_path: Path, output: Path, reference: Any) -> dict[str, Any]:
         ),
     )
     for command, expected in commands:
+        command = [*command, "--json"]
         process = subprocess.run(
             command, env=environment, capture_output=True, check=False, timeout=180
         )
@@ -356,7 +362,7 @@ def _check_cli(case_path: Path, output: Path, reference: Any) -> dict[str, Any]:
             raise RuntimeError("clean-wheel CLI did not preserve the public error category")
     for entry in ("console", "module"):
         result = open_result(output / entry)
-        if result.manifest["execution"]["worker_count"] != 2:
+        if cast(dict[str, Any], result.manifest["execution"])["worker_count"] != 2:
             raise RuntimeError(f"clean-wheel {entry} CLI did not execute with two workers")
         _check_identity(reference, result)
     return {

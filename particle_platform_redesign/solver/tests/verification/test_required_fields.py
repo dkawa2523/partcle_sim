@@ -17,15 +17,14 @@ from chamber_particles.case_format import (
     Q1QuadLayout,
     RegularLayout,
 )
+from chamber_particles.field_numerics import FIELD_LOCATION_ULPS
 from chamber_particles.fields import (
-    FIELD_LOCATION_ULPS,
     FieldLocationError,
     PreparedFieldSet,
     RequiredFieldMetadata,
-    locate_field_cell,
     prepare_required_fields,
-    sample_field,
 )
+from tests.verification.field_reference import locate_field_cell, sample_field
 
 
 def _boundary() -> BoundaryData:

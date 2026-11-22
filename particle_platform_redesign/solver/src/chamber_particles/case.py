@@ -20,6 +20,7 @@ from .case_format import (
     RealizedTableSource,
     read_with_info,
 )
+from .physics.catalog import SUPPORTED_PHYSICS_CATEGORIES
 from .yaml_input import parse_document
 
 type _PathInput = str | PathLike[str]
@@ -27,19 +28,6 @@ type _PathInput = str | PathLike[str]
 _CONTENT_HASH = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _INT64_MAX = 2**63 - 1
 CASE_FORMAT_VERSION = 3
-_PHYSICS_CATEGORIES = frozenset(
-    {
-        "charge",
-        "dielectrophoresis",
-        "drag",
-        "electric",
-        "gravity_buoyancy",
-        "ion_drag",
-        "lift",
-        "noise",
-        "thermophoresis",
-    }
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -363,7 +351,7 @@ def _parse_sources(value: object) -> tuple[SourceSpec, ...]:
 
 def _parse_physics(value: object) -> PhysicsSpec:
     section = _mapping(value, "physics")
-    unknown = set(section) - _PHYSICS_CATEGORIES
+    unknown = set(section) - SUPPORTED_PHYSICS_CATEGORIES
     if unknown:
         raise ValueError(f"physics has unsupported categories: {sorted(unknown)}")
     if "charge" not in section:

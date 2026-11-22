@@ -33,6 +33,7 @@ from chamber_particles.integrators import (
     StepProposal,
 )
 from chamber_particles.numerical_status import INTEGRATOR_NUMERICAL_FAILURE
+from chamber_particles.output import RESULT_ALGORITHM_REVISION
 from tests.verification.microcases import materialize_microcase
 
 
@@ -134,7 +135,7 @@ def test_c01_runs_through_all_three_public_operations(tmp_path: Path) -> None:
         "line_quadratic_curved_capsule_periodic_first_hit_v23"
     )
     assert result.manifest["boundary_algorithm_revision"] is None
-    assert result.manifest["result_algorithm_revision"] == "durable_segmented_result_v6"
+    assert result.manifest["result_algorithm_revision"] == RESULT_ALGORITHM_REVISION
     assert result.manifest["counts"] == {
         "particles": summary.particle_count,
         "release_events": summary.release_event_count,

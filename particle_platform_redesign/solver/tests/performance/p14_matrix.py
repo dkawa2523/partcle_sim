@@ -40,7 +40,15 @@ from chamber_particles.case_format import (
     Q1QuadLayout,
     write,
 )
+from chamber_particles.cpu import CPU_RUNTIME_LAYOUT_REVISION, MEMORY_PLAN_REVISION
+from chamber_particles.engine import COMPILED_CPU_TILE_REVISION, ENGINE_ALGORITHM_REVISION
+from chamber_particles.events import EVENT_ALGORITHM_REVISION
+from chamber_particles.fields import FIELD_LOCATION_REVISION
+from chamber_particles.geometry import GEOMETRY_ALGORITHM_REVISION
+from chamber_particles.integrators import STEP_PROPOSAL_REVISION
+from chamber_particles.output import RESULT_ALGORITHM_REVISION
 from chamber_particles.physics.compiled import evaluate_physics_tile_into
+from chamber_particles.physics.runtime import PHYSICS_RUNTIME_REVISION
 from tests.performance.p06_baseline import (
     _expanded_definition,
     _nonuniform_electric_data,
@@ -63,17 +71,17 @@ type _FieldTime = Literal["static", "fixed_topology_linear"]
 
 _PROBE_PARTICLE_IDS = tuple(range(1, 33))
 _EXPECTED_REVISIONS = {
-    "engine_algorithm_revision": "particle_engine_v62",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
-    "physics_runtime_revision": "prepared_native_physics_runtime_v24",
-    "step_proposal_revision": "coupled_fixed_step_proposal_v10",
-    "field_location_revision": "field_location_v5",
-    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
-    "result_algorithm_revision": "durable_segmented_result_v6",
-    "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+    "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
+    "compiled_cpu_tile_revision": COMPILED_CPU_TILE_REVISION,
+    "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
+    "step_proposal_revision": STEP_PROPOSAL_REVISION,
+    "field_location_revision": FIELD_LOCATION_REVISION,
+    "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
+    "result_algorithm_revision": RESULT_ALGORITHM_REVISION,
+    "geometry_algorithm_revision": GEOMETRY_ALGORITHM_REVISION,
 }
-_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v25"
-_EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_process_slab_v14"
+_EXPECTED_MEMORY_PLAN_REVISION = MEMORY_PLAN_REVISION
+_EXPECTED_RUNTIME_LAYOUT_REVISION = CPU_RUNTIME_LAYOUT_REVISION
 
 
 @dataclass(frozen=True, slots=True)

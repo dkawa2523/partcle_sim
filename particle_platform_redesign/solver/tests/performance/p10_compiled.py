@@ -25,7 +25,17 @@ from pathlib import Path
 from typing import Any
 
 from chamber_particles import load_case, open_result, simulate
-from chamber_particles.physics.compiled import evaluate_physics_tile_into
+from chamber_particles.cpu import CPU_RUNTIME_LAYOUT_REVISION, MEMORY_PLAN_REVISION
+from chamber_particles.engine import COMPILED_CPU_TILE_REVISION, ENGINE_ALGORITHM_REVISION
+from chamber_particles.events import EVENT_ALGORITHM_REVISION
+from chamber_particles.fields import FIELD_LOCATION_REVISION
+from chamber_particles.integrators import (
+    STEP_PROPOSAL_REVISION,
+    _compiled_relaxation_advance_into,
+    _compiled_rk4_advance_into,
+)
+from chamber_particles.output import RESULT_ALGORITHM_REVISION
+from chamber_particles.physics.runtime import PHYSICS_RUNTIME_REVISION
 from tests.performance.p06_baseline import _build_scenarios
 from tests.performance.p09_memory import (
     _directory_bytes,
@@ -37,16 +47,16 @@ from tests.performance.p09_memory import (
 _SCENARIOS = ("field", "event")
 _MODES = ("cold", "warm")
 _EXPECTED_REVISIONS = {
-    "engine_algorithm_revision": "particle_engine_v62",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
-    "physics_runtime_revision": "prepared_native_physics_runtime_v24",
-    "step_proposal_revision": "coupled_fixed_step_proposal_v10",
-    "field_location_revision": "field_location_v5",
-    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
-    "result_algorithm_revision": "durable_segmented_result_v6",
+    "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
+    "compiled_cpu_tile_revision": COMPILED_CPU_TILE_REVISION,
+    "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
+    "step_proposal_revision": STEP_PROPOSAL_REVISION,
+    "field_location_revision": FIELD_LOCATION_REVISION,
+    "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
+    "result_algorithm_revision": RESULT_ALGORITHM_REVISION,
 }
-_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v25"
-_EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_process_slab_v14"
+_EXPECTED_MEMORY_PLAN_REVISION = MEMORY_PLAN_REVISION
+_EXPECTED_RUNTIME_LAYOUT_REVISION = CPU_RUNTIME_LAYOUT_REVISION
 
 
 def main() -> None:
@@ -128,7 +138,7 @@ def _driver(arguments: argparse.Namespace) -> None:
         _validate_observations(observations, scenarios, arguments.repeats)
         summaries = _summaries(observations)
         report = {
-            "benchmark": "p10_compiled_cpu_cold_warm_v1",
+            "benchmark": "p10_compiled_cpu_cold_warm_v2",
             "captured_at_utc": datetime.now(UTC).isoformat(),
             "non_gating": True,
             "conditions": {
@@ -327,16 +337,27 @@ def _execute_run(
         raise RuntimeError(f"{scenario}: unexpected boundary-event count")
     if summary.frame_count != 0:
         raise RuntimeError(f"{scenario}: timing case unexpectedly wrote frames")
-    path_kind = str(result.manifest["resolved"]["path_kind"])
+    resolved = _mapping_value(result.manifest, "resolved")
+    path_kind = str(resolved["path_kind"])
     if path_kind != expected_path_kind:
         raise RuntimeError(f"{scenario}: unexpected path kind {path_kind!r}")
     memory_plan = result.manifest["memory_plan"]
     if not isinstance(memory_plan, Mapping):
         raise RuntimeError(f"{scenario}: result memory plan is not a mapping")
     algorithms = {key: value for key, value in result.manifest.items() if key.endswith("_revision")}
-    physics_signature_count = len(evaluate_physics_tile_into.signatures)
-    if physics_signature_count == 0:
-        raise RuntimeError(f"{scenario}: compiled physics tile did not execute")
+    # A nested cached kernel can execute without registering a specialization
+    # on its Python dispatcher. Observe the actual Python-entered advance;
+    # its signature registration works for both compiled and disk-cached code.
+    if path_kind == "rk4_dense":
+        stage_dispatcher = _compiled_rk4_advance_into
+    elif path_kind == "exponential_midpoint_reintegrated":
+        stage_dispatcher = _compiled_relaxation_advance_into
+    else:
+        raise RuntimeError(f"{scenario}: unsupported compiled benchmark path {path_kind!r}")
+    dispatcher_metadata: Any = stage_dispatcher
+    stage_signature_count = len(dispatcher_metadata.signatures)
+    if stage_signature_count == 0:
+        raise RuntimeError(f"{scenario}: compiled stage advance did not execute")
     return {
         "scenario": scenario,
         "mode": mode,
@@ -371,12 +392,12 @@ def _execute_run(
         },
         "algorithms": algorithms,
         "resolved_execution": {
-            "integrator": result.manifest["resolved"]["integrator"],
-            "backend": result.manifest["resolved"]["backend"],
+            "integrator": resolved["integrator"],
+            "backend": resolved["backend"],
             "path_kind": path_kind,
         },
         "compiled_execution": {
-            "physics_tile_signature_count": physics_signature_count,
+            "stage_advance_signature_count": stage_signature_count,
             "numba_disable_jit": os.environ.get("NUMBA_DISABLE_JIT"),
             "numba_num_threads": os.environ.get("NUMBA_NUM_THREADS"),
         },
@@ -387,7 +408,7 @@ def _execute_run(
 
 
 def _validate_observations(
-    observations: Sequence[Mapping[str, object]],
+    observations: Sequence[Mapping[str, Any]],
     scenarios: tuple[str, ...],
     repeats: int,
 ) -> None:
@@ -418,14 +439,14 @@ def _validate_observations(
             if plan.get("runtime_layout_revision") != _EXPECTED_RUNTIME_LAYOUT_REVISION:
                 raise RuntimeError(f"P10 {scenario}: unexpected runtime-layout revision")
             compiled = _mapping_value(item, "compiled_execution")
-            if int(compiled["physics_tile_signature_count"]) < 1:
-                raise RuntimeError(f"P10 {scenario}: compiled physics tile did not execute")
+            if int(compiled["stage_advance_signature_count"]) < 1:
+                raise RuntimeError(f"P10 {scenario}: compiled stage advance did not execute")
             if compiled.get("numba_disable_jit") != "0":
                 raise RuntimeError(f"P10 {scenario}: Numba JIT was not enabled")
 
 
-def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
-    summaries: list[dict[str, object]] = []
+def _summaries(observations: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    summaries: list[dict[str, Any]] = []
     keys = sorted({(str(item["scenario"]), str(item["mode"])) for item in observations})
     for scenario, mode in keys:
         selected = [
@@ -465,8 +486,8 @@ def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, o
     return summaries
 
 
-def _comparisons(summaries: Sequence[Mapping[str, object]]) -> dict[str, object]:
-    comparisons: dict[str, object] = {}
+def _comparisons(summaries: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    comparisons: dict[str, Any] = {}
     scenarios = sorted({str(item["scenario"]) for item in summaries})
     for scenario in scenarios:
         cold = next(
@@ -491,8 +512,8 @@ def _comparisons(summaries: Sequence[Mapping[str, object]]) -> dict[str, object]
     return comparisons
 
 
-def _identity_summary(observations: Sequence[Mapping[str, object]]) -> dict[str, object]:
-    by_scenario: dict[str, object] = {}
+def _identity_summary(observations: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    by_scenario: dict[str, Any] = {}
     for scenario in sorted({str(item["scenario"]) for item in observations}):
         selected = [item for item in observations if item["scenario"] == scenario]
         by_scenario[scenario] = {
@@ -508,14 +529,14 @@ def _identity_summary(observations: Sequence[Mapping[str, object]]) -> dict[str,
     }
 
 
-def _mapping_value(value: Mapping[str, object], key: str) -> Mapping[str, object]:
+def _mapping_value(value: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     result = value[key]
     if not isinstance(result, Mapping):
         raise RuntimeError(f"observation {key} is not a mapping")
     return result
 
 
-def _compiled_machine_metadata() -> dict[str, object]:
+def _compiled_machine_metadata() -> dict[str, Any]:
     machine = _machine_metadata()
     machine["numba"] = metadata.version("numba")
     return machine

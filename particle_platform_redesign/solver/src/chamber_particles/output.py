@@ -19,6 +19,19 @@ import h5py
 import numpy as np
 from numpy.typing import NDArray
 
+from .case_format import (
+    CoordinateSystem,
+    DataBundle,
+    GeometryData,
+    resident_array_bytes,
+)
+from .case_format import (
+    read_with_info as read_canonical,
+)
+from .case_format import (
+    write as write_canonical,
+)
+
 type FloatArray = NDArray[np.float64]
 type Int64Array = NDArray[np.int64]
 type Int32Array = NDArray[np.int32]
@@ -29,8 +42,8 @@ type UInt8Array = NDArray[np.uint8]
 type StringArray = NDArray[np.str_]
 type _PathInput = str | PathLike[str]
 
-RESULT_SCHEMA_VERSION: Final = 3
-RESULT_ALGORITHM_REVISION: Final = "durable_segmented_result_v6"
+RESULT_SCHEMA_VERSION: Final = 4
+RESULT_ALGORITHM_REVISION: Final = "durable_context_segmented_result_v7"
 CHECKPOINT_SCHEMA_VERSION: Final = 2
 RESULT_WRITER_RESERVE_BYTES: Final = 3 * 1024 * 1024
 
@@ -55,6 +68,338 @@ class ResultOpenError(RuntimeError):
 
 class IncompleteResult(RuntimeError):
     """A result lacks its successful completion marker."""
+
+
+@dataclass(frozen=True, slots=True)
+class ResultBoundaryCondition:
+    """Resolved group label, contact meaning and wall law, without field arrays."""
+
+    group_name: str
+    priority: int
+    law: str
+    contact_geometry: str
+    parameters_json: str = "{}"
+
+
+@dataclass(frozen=True, slots=True)
+class ResultPeriodicPair:
+    """A labelled translational seam in physical SI coordinates."""
+
+    first_boundary_group: str
+    second_boundary_group: str
+    first_to_second_m: tuple[float, float]
+
+
+@dataclass(frozen=True, slots=True)
+class ResultTopology:
+    """Static topology meaning needed to interpret discontinuous saved paths."""
+
+    model: str
+    field_match_rtol: float
+    pairs: tuple[ResultPeriodicPair, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ResultSource:
+    """Resolved source identity, canonical table and realization kind."""
+
+    source_id: int
+    name: str
+    table: str
+    kind: str
+
+
+@dataclass(frozen=True, slots=True)
+class ResultContext:
+    """Immutable, field-free spatial and semantic context of a result."""
+
+    coordinate_system: CoordinateSystem
+    geometry: GeometryData
+    case_file_hash: str
+    data_content_hash: str
+    motion_mode: str
+    sources: tuple[ResultSource, ...]
+    boundaries: tuple[ResultBoundaryCondition, ...]
+    topology: ResultTopology | None = None
+    axis_policy: str = "none"
+    unit_system: str = "SI"
+
+    @property
+    def source_names(self) -> tuple[str, ...]:
+        """Names indexed by the resolved source IDs stored in particle results."""
+
+        return tuple(source.name for source in self.sources)
+
+
+def make_result_context(
+    data: DataBundle,
+    *,
+    case_file_hash: str,
+    data_content_hash: str,
+    motion_mode: str,
+    sources: tuple[ResultSource, ...],
+    boundaries: tuple[ResultBoundaryCondition, ...],
+    topology: ResultTopology | None = None,
+) -> ResultContext:
+    """Select geometry and resolved labels, retaining no fields or source arrays."""
+
+    context = ResultContext(
+        data.coordinate_system,
+        data.geometry,
+        case_file_hash,
+        data_content_hash,
+        motion_mode,
+        tuple(sources),
+        tuple(boundaries),
+        topology,
+        "rz_chart_fold" if data.coordinate_system == "axisymmetric_rz" else "none",
+    )
+    _context_bundle(context)
+    return context
+
+
+def result_context_array_bytes(data: DataBundle) -> int:
+    """Peak extra numeric bytes when validating a stored geometry-only context."""
+
+    return resident_array_bytes(
+        DataBundle(data.coordinate_system, data.provenance_json, data.geometry)
+    )
+
+
+def _context_metadata(context: ResultContext) -> dict[str, object]:
+    boundaries = [
+        {
+            "group_name": item.group_name,
+            "priority": item.priority,
+            "law": item.law,
+            "contact_geometry": item.contact_geometry,
+            "parameters": json.loads(item.parameters_json),
+        }
+        for item in context.boundaries
+    ]
+    topology = None
+    if context.topology is not None:
+        topology = {
+            "model": context.topology.model,
+            "field_match_rtol": context.topology.field_match_rtol,
+            "pairs": [
+                {
+                    "first_boundary_group": pair.first_boundary_group,
+                    "second_boundary_group": pair.second_boundary_group,
+                    "first_to_second_m": list(pair.first_to_second_m),
+                }
+                for pair in context.topology.pairs
+            ],
+        }
+    return {
+        "context_revision": "result_context_v1",
+        "case_file_hash": context.case_file_hash,
+        "data_content_hash": context.data_content_hash,
+        "motion_mode": context.motion_mode,
+        "sources": [
+            {
+                "source_id": source.source_id,
+                "name": source.name,
+                "table": source.table,
+                "kind": source.kind,
+            }
+            for source in context.sources
+        ],
+        "boundaries": boundaries,
+        "topology": topology,
+        "axis_policy": context.axis_policy,
+        "unit_system": context.unit_system,
+    }
+
+
+def _context_bundle(context: ResultContext) -> DataBundle:
+    metadata = _context_metadata(context)
+    _validate_context_metadata(metadata, context.geometry, context.coordinate_system)
+    provenance = {
+        "producer": "chamber_particles.output",
+        "producer_version": "result_context_v1",
+        "source_sha256": context.case_file_hash,
+        "field_semantics_revision": "geometry_only_result_context_v1",
+        "producer_metadata": metadata,
+    }
+    return DataBundle(
+        context.coordinate_system, json.dumps(provenance, allow_nan=False), context.geometry
+    )
+
+
+def _validate_context_metadata(
+    value: dict[str, Any], geometry: GeometryData, coordinate_system: str
+) -> None:
+    _validate_context_identity(value, coordinate_system)
+    _validate_context_labels(value, geometry)
+    topology = value.get("topology")
+    if topology is not None:
+        _validate_context_topology(topology, geometry.group_names)
+
+
+def _validate_context_identity(value: dict[str, Any], coordinate_system: str) -> None:
+    if value.get("context_revision") != "result_context_v1" or value.get("unit_system") != "SI":
+        raise ValueError("unsupported result context revision or units")
+    for name in ("case_file_hash", "data_content_hash"):
+        digest = value.get(name)
+        if not isinstance(digest, str) or not _is_sha256(digest):
+            raise ValueError(f"result context {name} is invalid")
+    axis = "rz_chart_fold" if coordinate_system == "axisymmetric_rz" else "none"
+    expected_mode = (
+        "axisymmetric_rz_meridional" if coordinate_system == "axisymmetric_rz" else "cartesian_xy"
+    )
+    if value.get("axis_policy") != axis or value.get("motion_mode") != expected_mode:
+        raise ValueError("result context motion or axis meaning is invalid")
+
+
+def _validate_context_labels(value: dict[str, Any], geometry: GeometryData) -> None:
+    _validate_context_sources(value.get("sources"))
+    records = value.get("boundaries")
+    if not isinstance(records, list):
+        raise ValueError("result context boundary labels are missing")
+    for item in records:
+        _validate_context_boundary(item, geometry.group_names)
+
+
+def _validate_context_sources(sources: Any) -> None:
+    if not isinstance(sources, list):
+        raise ValueError("result context source labels are invalid")
+    for index, source in enumerate(sources):
+        if (
+            not isinstance(source, dict)
+            or type(source.get("source_id")) is not int
+            or source["source_id"] != index
+        ):
+            raise ValueError("result context source IDs must preserve resolved contiguous order")
+        if not all(
+            isinstance(source.get(key), str) and source[key] for key in ("name", "table", "kind")
+        ):
+            raise ValueError("result context source label/table/type is invalid")
+        if source["kind"] not in ("table", "surface"):
+            raise ValueError("result context source kind is unsupported")
+
+
+def _validate_context_boundary(item: Any, groups: tuple[str, ...]) -> None:
+    if not isinstance(item, dict) or item.get("group_name") not in groups:
+        raise ValueError("result context boundary group is invalid")
+    if not isinstance(item.get("priority"), int) or not isinstance(item.get("parameters"), dict):
+        raise ValueError("result context boundary configuration is invalid")
+    if not all(isinstance(item.get(key), str) and item[key] for key in ("law", "contact_geometry")):
+        raise ValueError("result context boundary law/contact is invalid")
+
+
+def _validate_context_topology(value: Any, group_names: tuple[str, ...]) -> None:
+    if not isinstance(value, dict) or not isinstance(value.get("model"), str):
+        raise ValueError("result context topology is invalid")
+    tolerance = value.get("field_match_rtol")
+    if not isinstance(tolerance, (int, float)) or not math.isfinite(tolerance) or tolerance < 0:
+        raise ValueError("result context topology tolerance is invalid")
+    pairs = value.get("pairs")
+    if not isinstance(pairs, list):
+        raise ValueError("result context topology pairs are invalid")
+    for pair in pairs:
+        _validate_context_pair(pair, group_names)
+
+
+def _validate_context_pair(pair: Any, group_names: tuple[str, ...]) -> None:
+    if not isinstance(pair, dict) or any(
+        pair.get(key) not in group_names
+        for key in ("first_boundary_group", "second_boundary_group")
+    ):
+        raise ValueError("result context topology group is invalid")
+    offset = pair.get("first_to_second_m")
+    if (
+        not isinstance(offset, list)
+        or len(offset) != 2
+        or not all(isinstance(x, (int, float)) and math.isfinite(x) for x in offset)
+    ):
+        raise ValueError("result context topology translation is invalid")
+
+
+def _context_from_bundle(bundle: DataBundle) -> ResultContext:
+    if bundle.fields or bundle.layouts or bundle.sources:
+        raise ValueError("result context must contain geometry without fields or source arrays")
+    value = json.loads(bundle.provenance_json)["producer_metadata"]
+    _validate_context_metadata(value, bundle.geometry, bundle.coordinate_system)
+    boundaries = tuple(
+        ResultBoundaryCondition(
+            item["group_name"],
+            item["priority"],
+            item["law"],
+            item["contact_geometry"],
+            json.dumps(item["parameters"], sort_keys=True, allow_nan=False),
+        )
+        for item in value["boundaries"]
+    )
+    raw_topology = value["topology"]
+    topology = (
+        None
+        if raw_topology is None
+        else ResultTopology(
+            raw_topology["model"],
+            raw_topology["field_match_rtol"],
+            tuple(
+                ResultPeriodicPair(
+                    pair["first_boundary_group"],
+                    pair["second_boundary_group"],
+                    tuple(pair["first_to_second_m"]),
+                )
+                for pair in raw_topology["pairs"]
+            ),
+        )
+    )
+    return ResultContext(
+        bundle.coordinate_system,
+        bundle.geometry,
+        value["case_file_hash"],
+        value["data_content_hash"],
+        value["motion_mode"],
+        tuple(
+            ResultSource(source["source_id"], source["name"], source["table"], source["kind"])
+            for source in value["sources"]
+        ),
+        boundaries,
+        topology,
+        value["axis_policy"],
+    )
+
+
+def _read_context(path: Path, manifest: Mapping[str, object]) -> ResultContext:
+    binding = manifest.get("context")
+    if not isinstance(binding, dict) or binding.get("path") != "context.h5":
+        raise ResultOpenError("result context binding is missing")
+    identity = _validated_manifest_identity(manifest)
+    try:
+        if _sha256_file(path / "context.h5") != binding.get("file_sha256"):
+            raise ResultOpenError("result context file hash does not match manifest")
+        bundle, info = read_canonical(path / "context.h5")
+        if info.content_hash != binding.get("content_hash"):
+            raise ResultOpenError("result context logical hash does not match manifest")
+        context = _context_from_bundle(bundle)
+        for key in ("case_file_hash", "data_content_hash"):
+            if identity[key] != getattr(context, key):
+                raise ResultOpenError("result context parent identity does not match run")
+        return context
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise ResultOpenError("result context cannot be read") from error
+
+
+def _validated_manifest_identity(manifest: Mapping[str, object]) -> dict[str, object]:
+    stored = manifest.get("resume_identity")
+    if not isinstance(stored, dict):
+        raise ResultOpenError("result resume identity object is missing")
+    try:
+        encoded, identity = _canonical_identity(stored)
+    except ResultWriteError as error:
+        raise ResultOpenError("result resume identity is invalid") from error
+    if _sha256_bytes(encoded.encode("utf-8")) != manifest.get("resume_identity_hash"):
+        raise ResultOpenError("result resume identity hash does not match its actual content")
+    if identity.get("result_context") != manifest.get("context"):
+        raise ResultOpenError("result resume identity does not bind the context")
+    for key in ("case_file_hash", "data_content_hash"):
+        if manifest.get(key) != identity[key]:
+            raise ResultOpenError("result manifest parent identity does not match the run")
+    return identity
 
 
 @dataclass(frozen=True, slots=True)
@@ -629,6 +974,8 @@ class ResultWriter:
         self._completed_summary: RunSummary | None = None
         self._sink: _SegmentSink | None = None
         self._closed = False
+        self._context_binding: dict[str, object] | None = None
+        self._context_source_count = 0
 
         if self.output_path.exists():
             raise ResultWriteError(f"result already exists: {self.output_path}")
@@ -649,6 +996,44 @@ class ResultWriter:
     def completed_summary(self) -> RunSummary | None:
         return self._completed_summary
 
+    @property
+    def context_initialized(self) -> bool:
+        """Whether the immutable context was published or validated on resume."""
+
+        return self._context_binding is not None
+
+    def initialize_context(self, context: ResultContext) -> None:
+        """Atomically publish a new run's context before any epoch can begin."""
+
+        self._require_running()
+        if self._context_binding is not None or self._next_segment_index or self._sink is not None:
+            raise ResultWriteError("result context is immutable and cannot be initialized twice")
+        try:
+            for key in ("case_file_hash", "data_content_hash"):
+                if key in self._identity_value and self._identity_value[key] != getattr(
+                    context, key
+                ):
+                    raise ValueError("result context parent identity does not match run")
+            bundle = _context_bundle(context)
+            info = write_canonical(self.partial_path / "context.h5", bundle)
+            self._context_source_count = len(context.sources)
+            self._bind_context(
+                {
+                    "path": "context.h5",
+                    "content_hash": info.content_hash,
+                    "file_sha256": _sha256_file(self.partial_path / "context.h5"),
+                }
+            )
+            self._create_manifest()
+        except (OSError, ValueError, TypeError) as error:
+            raise ResultWriteError("result context cannot be initialized") from error
+
+    def _bind_context(self, binding: dict[str, object]) -> None:
+        self._context_binding = binding
+        self._identity_value["result_context"] = binding
+        self._identity_json, self._identity_value = _canonical_identity(self._identity_value)
+        self._identity_hash = _sha256_bytes(self._identity_json.encode("utf-8"))
+
     def __enter__(self) -> ResultWriter:
         return self
 
@@ -659,6 +1044,8 @@ class ResultWriter:
         """Open the next uncommitted segment."""
 
         self._require_running()
+        if self._context_binding is None:
+            raise ResultWriteError("initialize the result context before beginning an epoch")
         if self._sink is not None:
             raise ResultWriteError("cannot begin an epoch while another segment is open")
         self._sink = _SegmentSink(
@@ -713,6 +1100,7 @@ class ResultWriter:
             segment_sha256=segment_sha256,
             counts=committed_counts,
             resume_identity_hash=self._identity_hash,
+            context_binding=self._context_binding,
         )
         _sync_file(checkpoint_temp)
         os.replace(checkpoint_temp, checkpoint_path)
@@ -745,6 +1133,9 @@ class ResultWriter:
         if final.particle_id.size != particle_count:
             raise ResultWriteError("final particle count does not match the prepared capacity")
         _validate_final_shapes(final, particle_count)
+        for key in ("case_file_hash", "data_content_hash"):
+            if key in manifest and manifest[key] != self._identity_value[key]:
+                raise ResultWriteError("final manifest parent identity does not match the run")
         try:
             latest = _read_latest(self.partial_path)
         except ResultOpenError as error:
@@ -757,7 +1148,7 @@ class ResultWriter:
         _write_final(final_temp, final)
         try:
             with h5py.File(final_temp, "r", rdcc_nbytes=_RAW_CHUNK_CACHE_BYTES) as handle:
-                _validate_final_file(handle, particle_count)
+                _validate_final_file(handle, particle_count, self._context_source_count)
         except (ResultOpenError, OSError, KeyError) as error:
             raise ResultWriteError(f"final result artifact is inconsistent: {error}") from error
         _sync_file(final_temp)
@@ -773,6 +1164,9 @@ class ResultWriter:
                 "latest_commit_id": latest.commit_id,
                 "resume_identity": self._identity_value,
                 "resume_identity_hash": self._identity_hash,
+                "case_file_hash": self._identity_value["case_file_hash"],
+                "data_content_hash": self._identity_value["data_content_hash"],
+                "context": self._context_binding,
                 "counts": {
                     "particles": particle_count,
                     **self._counts.as_dict(),
@@ -803,6 +1197,9 @@ class ResultWriter:
         self.partial_path.mkdir(parents=False, exist_ok=False)
         (self.partial_path / _SEGMENT_DIRECTORY).mkdir()
         (self.partial_path / _CHECKPOINT_DIRECTORY).mkdir()
+        self._create_manifest()
+
+    def _create_manifest(self) -> None:
         _atomic_json(
             self.partial_path / "run.json",
             {
@@ -812,6 +1209,9 @@ class ResultWriter:
                 "checkpoint_schema_version": CHECKPOINT_SCHEMA_VERSION,
                 "resume_identity": self._identity_value,
                 "resume_identity_hash": self._identity_hash,
+                "case_file_hash": self._identity_value["case_file_hash"],
+                "data_content_hash": self._identity_value["data_content_hash"],
+                "context": self._context_binding,
             },
         )
 
@@ -819,6 +1219,13 @@ class ResultWriter:
         if not self.partial_path.is_dir():
             raise ResultWriteError(f"partial result is not a directory: {self.partial_path}")
         manifest = _read_manifest(self.partial_path)
+        if manifest.get("result_schema_version") != RESULT_SCHEMA_VERSION:
+            raise ResultWriteError("partial result schema version is incompatible")
+        self._context_source_count = len(_read_context(self.partial_path, manifest).sources)
+        binding = manifest.get("context")
+        if not isinstance(binding, dict):
+            raise ResultWriteError("partial result context binding is missing")
+        self._bind_context(binding)
         _require_resume_identity(manifest, self._identity_json, self._identity_hash)
         if (self.partial_path / "_SUCCESS").is_file():
             view = _open_completed_path(self.partial_path)
@@ -844,6 +1251,7 @@ class ResultWriter:
             expected_identity_hash=self._identity_hash,
             expected_commit_id=latest.commit_id,
             expected_segment_index=latest.segment_index,
+            context_binding=binding,
         )
         if metadata_counts != latest.counts:
             raise ResultWriteError("checkpoint counts do not match LATEST")
@@ -883,13 +1291,19 @@ class ResultView:
     manifest: Mapping[str, object]
     segment_paths: tuple[Path, ...]
     complete: bool
+    context_source_count: int
+
+    def read_context(self) -> ResultContext:
+        """Read validated geometry and semantic labels independently of input files."""
+
+        return _read_context(self.path, self.manifest)
 
     def read_final(self) -> FinalParticles:
         if not self.complete:
             raise ResultOpenError("an incomplete recovery result has no authoritative final state")
         particle_count = _summary_from_manifest(self.path, self.manifest).particle_count
         with h5py.File(self.path / "final.h5", "r") as handle:
-            _validate_final_file(handle, particle_count)
+            _validate_final_file(handle, particle_count, self.context_source_count)
             group = handle["particles"]
             return FinalParticles(
                 particle_id=_read_only(group["particle_id"][...]),
@@ -961,6 +1375,12 @@ def open_result_store(path: _PathInput, *, recovery: bool = False) -> ResultView
     if not partial_path.is_dir():
         raise IncompleteResult(f"result has no recoverable partial directory: {result_path}")
     manifest = _read_manifest(partial_path)
+    if manifest.get("result_schema_version") != RESULT_SCHEMA_VERSION:
+        raise ResultOpenError("unsupported partial result schema version")
+    context_source_count = len(_read_context(partial_path, manifest).sources)
+    context_binding = manifest.get("context")
+    if not isinstance(context_binding, dict):
+        raise ResultOpenError("partial result context binding is missing")
     latest = _read_latest(partial_path)
     if latest is None:
         raise IncompleteResult(f"result has no committed checkpoint: {result_path}")
@@ -975,6 +1395,7 @@ def open_result_store(path: _PathInput, *, recovery: bool = False) -> ResultView
         identity_hash,
         latest.commit_id,
         latest.segment_index,
+        context_binding,
     )
     if checkpoint_counts != latest.counts:
         raise ResultOpenError("checkpoint counts do not match LATEST")
@@ -998,6 +1419,7 @@ def open_result_store(path: _PathInput, *, recovery: bool = False) -> ResultView
         MappingProxyType(recovery_manifest),
         paths,
         False,
+        context_source_count,
     )
 
 
@@ -1031,6 +1453,10 @@ def _canonical_identity(identity: Mapping[str, object]) -> tuple[str, dict[str, 
         raise ResultWriteError("resume identity must be finite JSON data") from error
     if not isinstance(decoded, dict) or not decoded:
         raise ResultWriteError("resume identity must be one non-empty object")
+    for key in ("case_file_hash", "data_content_hash"):
+        value = decoded.get(key)
+        if not isinstance(value, str) or not _is_sha256(value):
+            raise ResultWriteError(f"resume identity requires a valid {key}")
     return encoded, decoded
 
 
@@ -1246,7 +1672,10 @@ def _write_checkpoint(
     segment_sha256: str,
     counts: _ResultCounts,
     resume_identity_hash: str,
+    context_binding: Mapping[str, object] | None,
 ) -> None:
+    if context_binding is None:
+        raise ResultWriteError("checkpoint requires an immutable result context")
     with h5py.File(path, "w") as handle:
         handle.attrs["checkpoint_schema_version"] = CHECKPOINT_SCHEMA_VERSION
         handle.attrs["result_schema_version"] = RESULT_SCHEMA_VERSION
@@ -1255,6 +1684,8 @@ def _write_checkpoint(
         handle.attrs["segment_index"] = segment_index
         handle.attrs["segment_sha256"] = segment_sha256
         handle.attrs["resume_identity_hash"] = resume_identity_hash
+        handle.attrs["context_content_hash"] = context_binding["content_hash"]
+        handle.attrs["context_file_sha256"] = context_binding["file_sha256"]
         handle.attrs["macro_time_s"] = state.macro_time_s
         handle.attrs["macro_step_count"] = state.macro_step_count
         handle.attrs["release_cursor"] = state.release_cursor
@@ -1303,6 +1734,7 @@ def _read_checkpoint(
     expected_identity_hash: str,
     expected_commit_id: int,
     expected_segment_index: int,
+    context_binding: Mapping[str, object],
 ) -> tuple[CheckpointState, _ResultCounts]:
     try:
         with h5py.File(path, "r") as handle:
@@ -1311,6 +1743,7 @@ def _read_checkpoint(
                 expected_identity_hash,
                 expected_commit_id,
                 expected_segment_index,
+                context_binding,
             )
             counts = _checkpoint_counts(handle)
             group = handle["state"]
@@ -1366,6 +1799,7 @@ def _validate_checkpoint_metadata(
     expected_identity_hash: str,
     expected_commit_id: int,
     expected_segment_index: int,
+    context_binding: Mapping[str, object],
 ) -> None:
     expected = {
         "checkpoint_schema_version": CHECKPOINT_SCHEMA_VERSION,
@@ -1374,6 +1808,8 @@ def _validate_checkpoint_metadata(
         "commit_id": expected_commit_id,
         "segment_index": expected_segment_index,
         "resume_identity_hash": expected_identity_hash,
+        "context_content_hash": context_binding["content_hash"],
+        "context_file_sha256": context_binding["file_sha256"],
     }
     if any(handle.attrs.get(name) != value for name, value in expected.items()):
         raise ResultOpenError("checkpoint identity or revision is incompatible")
@@ -1394,10 +1830,13 @@ def _validate_checkpoint_reference(
     identity_hash: str,
     commit_id: int,
     segment_index: int,
+    context_binding: Mapping[str, object],
 ) -> _ResultCounts:
     try:
         with h5py.File(path, "r") as handle:
-            _validate_checkpoint_metadata(handle, identity_hash, commit_id, segment_index)
+            _validate_checkpoint_metadata(
+                handle, identity_hash, commit_id, segment_index, context_binding
+            )
             return _checkpoint_counts(handle)
     except (OSError, KeyError, TypeError, ValueError) as error:
         raise ResultOpenError("checkpoint reference cannot be read") from error
@@ -1504,10 +1943,12 @@ def _open_completed_path(path: Path) -> ResultView:
         raise ResultOpenError("unsupported result schema version")
     if manifest.get("result_algorithm_revision") != RESULT_ALGORITHM_REVISION:
         raise ResultOpenError("unsupported result algorithm revision")
+    context_source_count = len(_read_context(path, manifest).sources)
     summary = _summary_from_manifest(path, manifest)
     latest = _read_latest(path)
     if latest is None:
         raise ResultOpenError("completed result has no LATEST commit")
+    _validate_completed_checkpoint(path, manifest, latest)
     paths = _committed_segment_paths(path, latest)
     counts = _validate_segments(paths)
     if counts != latest.counts:
@@ -1523,10 +1964,27 @@ def _open_completed_path(path: Path) -> ResultView:
             raise ResultOpenError("completed manifest counts do not match segments")
     try:
         with h5py.File(path / "final.h5", "r") as final:
-            _validate_final_file(final, summary.particle_count)
+            _validate_final_file(final, summary.particle_count, context_source_count)
     except (OSError, KeyError) as error:
         raise ResultOpenError("final result artifact cannot be read") from error
-    return ResultView(path, MappingProxyType(manifest), paths, True)
+    return ResultView(path, MappingProxyType(manifest), paths, True, context_source_count)
+
+
+def _validate_completed_checkpoint(
+    path: Path, manifest: Mapping[str, object], latest: _LatestCommit
+) -> None:
+    checkpoint_path = path / _CHECKPOINT_DIRECTORY / latest.checkpoint_name
+    if _sha256_file(checkpoint_path) != latest.checkpoint_sha256:
+        raise ResultOpenError("checkpoint content hash does not match LATEST")
+    binding = manifest.get("context")
+    identity_hash = manifest.get("resume_identity_hash")
+    if not isinstance(binding, dict) or not isinstance(identity_hash, str):
+        raise ResultOpenError("completed result context identity is missing")
+    counts = _validate_checkpoint_reference(
+        checkpoint_path, identity_hash, latest.commit_id, latest.segment_index, binding
+    )
+    if counts != latest.counts:
+        raise ResultOpenError("checkpoint counts do not match LATEST")
 
 
 def _summary_from_counts(
@@ -2311,7 +2769,7 @@ def _validate_ragged_state_group(group: h5py.Group, label: str) -> None:
         raise ResultOpenError(f"{label} columns have inconsistent shapes")
 
 
-def _validate_final_file(final: h5py.File, expected_particle_count: int) -> None:
+def _validate_final_file(final: h5py.File, expected_particle_count: int, source_count: int) -> None:
     if final.attrs.get("result_schema_version") != RESULT_SCHEMA_VERSION:
         raise ResultOpenError("final schema version is invalid")
     particles = final["particles"]
@@ -2343,10 +2801,12 @@ def _validate_final_file(final: h5py.File, expected_particle_count: int) -> None
         for name, (shape, dtype) in expected_shapes.items()
     ):
         raise ResultOpenError("final particle columns have inconsistent shapes")
-    _validate_final_particle_blocks(particles, particle_count)
+    _validate_final_particle_blocks(particles, particle_count, source_count)
 
 
-def _validate_final_particle_blocks(particles: h5py.Group, particle_count: int) -> None:
+def _validate_final_particle_blocks(
+    particles: h5py.Group, particle_count: int, source_count: int
+) -> None:
     """Check final row values without allocating a particle-sized validation array."""
 
     previous_id = -1
@@ -2358,6 +2818,9 @@ def _validate_final_particle_blocks(particles: h5py.Group, particle_count: int) 
         ):
             raise ResultOpenError("final particle_id must be nonnegative and strictly increasing")
         previous_id = int(particle_ids[-1])
+        source_ids = particles["source_id"][begin:end]
+        if bool(((source_ids < 0) | (source_ids >= source_count)).any()):
+            raise ResultOpenError("final source_id is not present in the immutable result context")
         contact_radius = particles["contact_radius_m"][begin:end]
         if not bool(np.isfinite(contact_radius).all()) or bool((contact_radius < 0.0).any()):
             raise ResultOpenError("final contact_radius_m must be finite and nonnegative")

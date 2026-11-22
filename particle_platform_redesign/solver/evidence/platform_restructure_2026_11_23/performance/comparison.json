@@ -1,0 +1,141 @@
+{
+  "baseline_commit": "ade0c8e700f594d181f098259dddb4dd2cb778ac",
+  "matrix": [
+    {
+      "row": "event-20",
+      "mode": "warm",
+      "baseline_simulate_s": 0.11196999996900558,
+      "current_simulate_s": 0.16533610003534704,
+      "current_over_baseline": 1.4766107000188777,
+      "baseline_peak_rss_bytes": 508207104,
+      "current_peak_rss_bytes": 508366848,
+      "baseline_result_bytes": 580124,
+      "current_result_bytes": 599585,
+      "science_core_and_full_equal": true
+    },
+    {
+      "row": "p1-cross",
+      "mode": "warm",
+      "baseline_simulate_s": 0.05485169996973127,
+      "current_simulate_s": 0.0716600000159815,
+      "current_over_baseline": 1.306431706866433,
+      "baseline_peak_rss_bytes": 778420224,
+      "current_peak_rss_bytes": 787533824,
+      "baseline_result_bytes": 111374,
+      "current_result_bytes": 130836,
+      "science_core_and_full_equal": true
+    },
+    {
+      "row": "p1-initial",
+      "mode": "warm",
+      "baseline_simulate_s": 0.05396869999822229,
+      "current_simulate_s": 0.05598440009634942,
+      "current_over_baseline": 1.037349428431545,
+      "baseline_peak_rss_bytes": 779042816,
+      "current_peak_rss_bytes": 788238336,
+      "baseline_result_bytes": 111374,
+      "current_result_bytes": 130836,
+      "science_core_and_full_equal": true
+    },
+    {
+      "row": "q1-cross",
+      "mode": "warm",
+      "baseline_simulate_s": 0.04871850006747991,
+      "current_simulate_s": 0.061192700057290494,
+      "current_over_baseline": 1.2560464704892924,
+      "baseline_peak_rss_bytes": 780558336,
+      "current_peak_rss_bytes": 786309120,
+      "baseline_result_bytes": 111373,
+      "current_result_bytes": 130835,
+      "science_core_and_full_equal": true
+    },
+    {
+      "row": "q1-initial",
+      "mode": "warm",
+      "baseline_simulate_s": 0.0442124999826774,
+      "current_simulate_s": 0.0598216000944376,
+      "current_over_baseline": 1.3530472178202069,
+      "baseline_peak_rss_bytes": 776167424,
+      "current_peak_rss_bytes": 786866176,
+      "baseline_result_bytes": 111373,
+      "current_result_bytes": 130835,
+      "science_core_and_full_equal": true
+    },
+    {
+      "row": "regular-cold",
+      "mode": "cold",
+      "baseline_simulate_s": 32.8570748999482,
+      "current_simulate_s": 34.55369329999667,
+      "current_over_baseline": 1.0516363189728475,
+      "baseline_peak_rss_bytes": 641441792,
+      "current_peak_rss_bytes": 600403968,
+      "baseline_result_bytes": 110245,
+      "current_result_bytes": 129706,
+      "science_core_and_full_equal": true
+    },
+    {
+      "row": "regular-time",
+      "mode": "warm",
+      "baseline_simulate_s": 0.05000249994918704,
+      "current_simulate_s": 0.05950799991842359,
+      "current_over_baseline": 1.1901004945531948,
+      "baseline_peak_rss_bytes": 625508352,
+      "current_peak_rss_bytes": 599367680,
+      "baseline_result_bytes": 136970,
+      "current_result_bytes": 156431,
+      "science_core_and_full_equal": true
+    },
+    {
+      "row": "regular-warm-all",
+      "mode": "warm",
+      "baseline_simulate_s": 0.04802830005064607,
+      "current_simulate_s": 0.05789109994657338,
+      "current_over_baseline": 1.205353924363905,
+      "baseline_peak_rss_bytes": 638447616,
+      "current_peak_rss_bytes": 600260608,
+      "baseline_result_bytes": 136938,
+      "current_result_bytes": 156399,
+      "science_core_and_full_equal": true
+    }
+  ],
+  "process_10k_320macro": [
+    {
+      "workers": 1,
+      "baseline_public_s": 28.486970300087705,
+      "current_public_s": 29.912936899927445,
+      "current_over_baseline": 1.050056800874867,
+      "baseline_planned_array_bytes": 135443535,
+      "current_planned_array_bytes": 135454767,
+      "science_all7_equal": true,
+      "live_children_after_return": 0,
+      "failure_events": 0
+    },
+    {
+      "workers": 4,
+      "baseline_public_s": 18.309837999986485,
+      "current_public_s": 18.184113800060004,
+      "current_over_baseline": 0.9931335165321193,
+      "baseline_planned_array_bytes": 432406016,
+      "current_planned_array_bytes": 432417248,
+      "science_all7_equal": true,
+      "live_children_after_return": 0,
+      "failure_events": 0
+    }
+  ],
+  "all_matrix_and_process_scientific_payloads_equal": true,
+  "source_files": {
+    "baseline_matrix.json": "f665be40cfd591af6f6c6f1a78c5a1f8bd047a2226ee72657ac540bf4fa4d18b",
+    "current_matrix.json": "c862100ce8c77c6e6a76084ba956cf0f4882f39bd42eb49d9c5399cdc5321b02",
+    "baseline_process.json": "0fdfc861623239721ce487ed7749e2be23c264266a96d03039c93ca78919a5e4",
+    "current_process.json": "1c50ba8ebca10e8f2e053cfea6815d7c8f56be2099627a4d198373883705ed41",
+    "baseline_harness_binding.json": "3724b9f3146cb160ea3aed358523930493d7e1edeffe06ff5b9e194a4b895743"
+  },
+  "process_driver_sha256": "e6e0b8a8a81581b3906acf4326bb30670b65faa8643b8fa4efd2fbe784ff9532",
+  "conditions": {
+    "matrix": "8 complete smoke rows, 64particles, single fresh process/private empty cache per observation,1sample, warm rows have1untimed warmup; simulate seconds and process peakRSS",
+    "matrix_baseline_timing_limit": "Baseline matrix was captured while some implementation tests ran; timings are descriptive and not an isolated old/new regression qualification",
+    "process": "Same original R66 case/data bytes,10000particles/320macros,1untimed workers1warmup then1sample atworkers1/4 per source; baseline then current sequential, no other simulations/tests running",
+    "process_timed_scope": "load_case+simulate(including worker startup and output)+open_result, science hashing excluded",
+    "limits": "Different result3/result4 storage cost is included. One sample is not a confidence interval, portable SLA or full release/scaling qualification. Input/fullresults remain external. No threshold was enlarged."
+  }
+}

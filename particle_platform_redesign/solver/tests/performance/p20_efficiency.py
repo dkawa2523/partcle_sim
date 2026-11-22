@@ -34,7 +34,13 @@ import yaml
 
 import chamber_particles.engine as engine_module
 from chamber_particles import load_case, open_result, simulate
-from chamber_particles.case_format import write
+from chamber_particles.case_format import RealizedTableSource, write
+from chamber_particles.cpu import CPU_RUNTIME_LAYOUT_REVISION, MEMORY_PLAN_REVISION
+from chamber_particles.engine import COMPILED_CPU_TILE_REVISION, ENGINE_ALGORITHM_REVISION
+from chamber_particles.events import EVENT_ALGORITHM_REVISION
+from chamber_particles.integrators import EXPONENTIAL_MIDPOINT_REVISION, STEP_PROPOSAL_REVISION
+from chamber_particles.output import RESULT_ALGORITHM_REVISION
+from chamber_particles.physics.runtime import PHYSICS_RUNTIME_REVISION
 from tests.performance.p06_baseline import _expanded_definition, _materialize, _repeat_source
 from tests.scenarios.test_force_coupled_run import _continuous_charge_case
 from tests.verification.microcases import build_microcase
@@ -42,16 +48,16 @@ from tests.verification.microcases import build_microcase
 _CADENCE_DT_S = 1.0e-3
 _CHARGE_DENSITY_M3 = 1.0e9
 _FIXED_64_MACRO_STEPS = 64
-_CHARGE_REVISION = "charge_stable_exponential_midpoint_v3"
+_CHARGE_REVISION = EXPONENTIAL_MIDPOINT_REVISION
 _EXPECTED_PRODUCTION_REVISIONS = {
-    "engine_algorithm_revision": "particle_engine_v62",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
-    "step_proposal_revision": "coupled_fixed_step_proposal_v10",
-    "physics_runtime_revision": "prepared_native_physics_runtime_v24",
-    "result_algorithm_revision": "durable_segmented_result_v6",
-    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
-    "memory_plan_revision": "solver_owned_memory_plan_v25",
-    "runtime_layout_revision": "resident_soa_process_slab_v14",
+    "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
+    "compiled_cpu_tile_revision": COMPILED_CPU_TILE_REVISION,
+    "step_proposal_revision": STEP_PROPOSAL_REVISION,
+    "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
+    "result_algorithm_revision": RESULT_ALGORITHM_REVISION,
+    "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
+    "memory_plan_revision": MEMORY_PLAN_REVISION,
+    "runtime_layout_revision": CPU_RUNTIME_LAYOUT_REVISION,
 }
 
 
@@ -106,7 +112,7 @@ def _positive_float(value: str) -> float:
     return result
 
 
-def _run(arguments: argparse.Namespace) -> dict[str, object]:
+def _run(arguments: argparse.Namespace) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="chamber-particles-p20-") as temporary:
         root = Path(temporary)
         cadence_path = _materialize_cadence_case(
@@ -223,7 +229,10 @@ def _materialize_charge_cases(
         output=False,
     )
     base = load_case(base_path)
-    source = _repeat_source(base.data.sources[0], particles)
+    base_source = base.data.sources[0]
+    if not isinstance(base_source, RealizedTableSource):
+        raise RuntimeError("P20 charge case requires the realized internal table")
+    source = _repeat_source(base_source, particles)
     source = replace(source, velocity_m_s=np.zeros_like(source.velocity_m_s))
     data_path = directory / "p20-charge.h5"
     info = write(data_path, replace(base.data, sources=(source,)))
@@ -253,7 +262,7 @@ def _measure_pair(
     warmups: int,
     repeats: int,
     fixed_64_particles: Mapping[str, int],
-) -> dict[str, list[dict[str, object]]]:
+) -> dict[str, list[dict[str, Any]]]:
     observations = {name: [] for name in cases}
     for name, case in cases.items():
         for index in range(warmups):
@@ -284,7 +293,7 @@ def _execute(
     *,
     fixed_64_particle_count: int | None,
     measured: bool,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     gc.collect()
     with _fixed_64_cadence(fixed_64_particle_count):
         started = time.perf_counter()
@@ -293,7 +302,7 @@ def _execute(
     result = open_result(output)
     if summary.failure_event_count != 0 or summary.boundary_event_count != 0:
         raise RuntimeError("P20 benchmark case produced an unexpected event or failure")
-    manifest = result.manifest
+    manifest: Mapping[str, Any] = result.manifest
     memory_plan = _mapping(manifest, "memory_plan")
     cadence = _mapping(manifest, "durable_commit_cadence")
     resolved = _mapping(manifest, "resolved")
@@ -322,7 +331,7 @@ def _execute(
             raise RuntimeError(
                 "P20 fixed-64 emulation requires W=(N+1)*macro on an exact boundaryless path"
             )
-    observation: dict[str, object] = {
+    observation: dict[str, Any] = {
         "elapsed_s": elapsed_s if measured else None,
         "particle_count": summary.particle_count,
         "macro_step_count": summary.macro_step_count,
@@ -361,7 +370,7 @@ def _fixed_64_cadence(particle_count: int | None) -> Iterator[None]:
         engine_module._DURABLE_COMMIT_WORK_PER_PARTICLE,
     )
     engine_module._DURABLE_COMMIT_MINIMUM_WORK = _FIXED_64_MACRO_STEPS * (particle_count + 1)
-    engine_module._DURABLE_COMMIT_WORK_PER_PARTICLE = 0
+    vars(engine_module)["_DURABLE_COMMIT_WORK_PER_PARTICLE"] = 0
     try:
         yield
     finally:
@@ -372,10 +381,10 @@ def _fixed_64_cadence(particle_count: int | None) -> Iterator[None]:
 
 
 def _cadence_report(
-    observations: Mapping[str, list[dict[str, object]]],
+    observations: Mapping[str, list[dict[str, Any]]],
     particles: int,
     macro_steps: int,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     current = _summarize(observations["current_work_scaled"])
     fixed = _summarize(observations["fixed_64_emulation"])
     work_per_macro = particles + 1
@@ -446,10 +455,10 @@ def _cadence_report(
 
 
 def _charge_report(
-    observations: Mapping[str, list[dict[str, object]]],
+    observations: Mapping[str, list[dict[str, Any]]],
     particles: int,
     end_s: float,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     old = _summarize(observations["old_admissible_step"])
     large = _summarize(observations["stable_larger_step"])
     old_hl = float(old["maximum_dt_charge_lipschitz"])
@@ -512,7 +521,7 @@ def _charge_report(
     }
 
 
-def _summarize(observations: list[dict[str, object]]) -> dict[str, object]:
+def _summarize(observations: list[dict[str, Any]]) -> dict[str, Any]:
     if not observations:
         raise RuntimeError("P20 observation group is empty")
     stable_keys = (
@@ -585,10 +594,10 @@ def _latest_checkpoint_work(output: Path) -> dict[str, int]:
 
 
 def _production_revision_tuple(
-    manifest: Mapping[str, object],
-    memory_plan: Mapping[str, object],
-    resolved: Mapping[str, object],
-) -> dict[str, object]:
+    manifest: Mapping[str, Any],
+    memory_plan: Mapping[str, Any],
+    resolved: Mapping[str, Any],
+) -> dict[str, Any]:
     integrator = resolved["integrator"]
     if integrator == "exponential_midpoint":
         expected_exponential: str | None = _CHARGE_REVISION
@@ -596,11 +605,11 @@ def _production_revision_tuple(
         expected_exponential = None
     else:
         raise RuntimeError(f"P20 benchmark resolved unexpected integrator {integrator!r}")
-    expected: dict[str, object] = {
+    expected: dict[str, Any] = {
         **_EXPECTED_PRODUCTION_REVISIONS,
         "exponential_midpoint_revision": expected_exponential,
     }
-    actual: dict[str, object] = {
+    actual: dict[str, Any] = {
         name: manifest[name]
         for name in (
             "engine_algorithm_revision",
@@ -674,14 +683,14 @@ def _digest_dataclass(digest: Any, name: str, value: Any) -> None:
             digest.update(np.ascontiguousarray(array).tobytes())
 
 
-def _mapping(value: Mapping[str, object], key: str) -> Mapping[str, object]:
+def _mapping(value: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     result = value[key]
     if not isinstance(result, Mapping):
         raise RuntimeError(f"P20 value {key} is not a mapping")
     return result
 
 
-def _machine_metadata() -> dict[str, object]:
+def _machine_metadata() -> dict[str, Any]:
     project = Path(__file__).resolve().parents[2]
     return {
         "platform": platform.platform(),

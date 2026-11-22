@@ -31,8 +31,10 @@ step; a configurable multi-step window is a future proposal.
 These serial harnesses do not implement another parallel engine. For same-run
 process comparisons use the preserved R64/R65/R66 external measurement scripts
 and receipts linked below; do not relabel serial harness timings as worker scaling.
-Harness-specific revision expectations reject stale results rather than silently
-reusing them. Check the module's `--help` before changing a preset.
+Generic harnesses compare manifest revisions with their actual code owners;
+their independent scientific assertions remain mandatory. Historical campaign
+guards keep the exact registered revisions. Neither kind reuses stale results.
+Check the module's `--help` before changing a preset.
 
 ## Quick measurements
 

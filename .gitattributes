@@ -2,5 +2,11 @@
 particle_platform_redesign/reviews/** -text whitespace=trailing-space,space-before-tab,cr-at-eol
 particle_platform_redesign/*.md text eol=lf
 .github/workflows/solver-release.yml text eol=lf
+.github/workflows/platform-docs.yml text eol=lf
+AGENTS.md text eol=lf
+README.md text eol=lf
+.agents/skills/** text eol=lf
 .gitignore text eol=lf
 .gitattributes text eol=lf
+# Data runtime integrity binds exact source bytes across Windows/Linux checkouts.
+particle_platform_redesign/report_app/** -text -eol whitespace=trailing-space,space-before-tab,cr-at-eol

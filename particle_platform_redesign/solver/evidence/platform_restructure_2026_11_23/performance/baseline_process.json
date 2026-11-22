@@ -1,0 +1,979 @@
+{
+  "scope": "Existing R66 10k, 320 macro steps; same input bytes; descriptive one warm sample per worker count",
+  "timed_scope": "load_case + simulate including spawn/output + open_result; scientific hashing excluded",
+  "cache_policy": "One untimed workers1 public run; persistent disk JIT cache, fresh workers per simulate",
+  "no_portable_speedup_or_scaling_certification": true,
+  "source": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\.artifacts\\platform_baseline_ade0c8e\\particle_platform_redesign\\solver\\src\\chamber_particles",
+  "source_sha256": {
+    "api.py": "d2202b64ca56fd35863b9c713dd81bd7663b92526cc5158397a7e19043e6c952",
+    "boundaries.py": "bb1fa5283019a4f20ee790eb8d9e748f190778942bd6dbdb9e5a37aca85295c2",
+    "case.py": "22f868985ed347030091f8a5e30e03a5e2dcadf2b338e37a1169847e01fec797",
+    "case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "cli.py": "574e90eaecad5f9209bef12c0caec3be625e17bd52f9961ca0f54ddc248dbf50",
+    "coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+    "cpu.py": "bc2b64bb401e96d5f3aca6c3df84bd84c4a1ec01b782ad905b03a1d9d4fa66fb",
+    "engine.py": "7cc0ca327ff8f430d3a2675b61e1eb2e8cb3d6e622d6cbb3510f97b67bf9b10f",
+    "events.py": "4d3eb12273419ab97cc12b9b8e6f8f6d03076ab37a34dbc1b567f586073348f7",
+    "fields.py": "52df85344926c91b07477486c19b932b0166f1f2a8ccd90a6cd9dc375060730f",
+    "geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+    "integrators.py": "7dd003cafcb0d616f61c9f987ddcf93c3efbb4e8a860faaa2ca308f5c004ac1d",
+    "numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "output.py": "7850d25c92f4df5df4dd53eb157a22520dd48b04aebe882f923deecdc39ba219",
+    "rng.py": "fff6f67cf1dc1243fb20f9221103f0c339e62280be0a7ea90640614016feb0ba",
+    "sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+    "__init__.py": "20d7743ea4795b23af0c18f0b4ff88d2f5585a373b354c2b958e3a3a1312f63a",
+    "__main__.py": "f8122cfa72770c411e9f70dcba29a4bc89c21176692c00afb092d7b7e92d20ed",
+    "physics/catalog.py": "883efd08bfee7b6e3fbab77fb268d9ad92919e4dd09aa60df936bb42eb2dc482",
+    "physics/charge.py": "bde74e3b2c276c61f4602382dfd680e49d4ddf2fd13c9a4e2c76e2691ab1ccc3",
+    "physics/compiled.py": "9add5d2cf56fd1c42b4205cd4b413df248c12152660ba3d2acfa628a2648bafc",
+    "physics/forces.py": "8bae990a99a5c2dd545380ee1b17cda399a13e503b21ac037639332aab24f609",
+    "physics/runtime.py": "aad4b9f23a2ad3a2133251fc7f14aad72972d7a6fd05083cdde8a4e3d6a59050",
+    "physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539"
+  },
+  "case_sha256": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+  "data_sha256": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641",
+  "rows": [
+    {
+      "workers": 1,
+      "elapsed_s": 28.486970300087705,
+      "memory_plan": {
+        "certificate_work_bytes_per_particle": 1352,
+        "components": {
+          "active_index": 80000,
+          "canonical_data": 1099660,
+          "field_runtime": 58,
+          "geometry_query_scratch": 25165840,
+          "output_buffer": 90000,
+          "particle_schedule": 1280000,
+          "physics_runtime": 400023,
+          "prepared_geometry": 15712,
+          "probe_index": 0,
+          "replay_work": 0,
+          "resident_state": 1010000,
+          "safety_margin": 15049282,
+          "slab_certificate_work": 13520000,
+          "slab_dense_path": 8510000,
+          "slab_event_staging": 23017232,
+          "slab_event_work": 15520000,
+          "slab_failure_staging": 520000,
+          "slab_proposal_replay_work": 0,
+          "slab_proposal_scratch": 20480000,
+          "slab_release_work": 2720000,
+          "slab_stage_composition_work": 3820000,
+          "slab_stochastic_tree_work": 0,
+          "writer_reserve": 3145728
+        },
+        "dense_path_bytes_per_particle": 851,
+        "event_candidate_capacity": 1048576,
+        "event_staging_bytes_per_row": 624,
+        "event_staging_capacity": 524288,
+        "event_staging_fixed_bytes": 16777232,
+        "event_work_bytes_per_particle": 1552,
+        "failure_staging_bytes_per_particle": 52,
+        "field_preparation_transient_bytes": 0,
+        "geometry_preparation_transient_bytes": 141072,
+        "limit_bytes": 8589934592,
+        "phase_peaks": {
+          "load_case": 1237118,
+          "prepare": 4743591,
+          "run": 135443535
+        },
+        "planned_bytes": 135443535,
+        "proposal_replay_work_bytes_per_particle": 0,
+        "release_work_bytes_per_particle": 272,
+        "replay_work_bytes": 0,
+        "revision": "solver_owned_memory_plan_v25",
+        "runtime_layout_revision": "resident_soa_process_slab_v14",
+        "scratch_bytes_per_particle": 2048,
+        "semantics": "predicted peak of solver-owned arrays; not process RSS",
+        "slab_particles": 10000,
+        "stage_composition_work_bytes_per_particle": 382,
+        "stochastic_tree_work_bytes_per_particle": 0,
+        "worker_count": 1
+      },
+      "science": {
+        "final": {
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "3b9441cb53cecf35b807d2c1855295a915511fbbee555f9a31974e7b9960b69e"
+          },
+          "source_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          },
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "666fd42a54869b2f5f640e67fbd2958d8a56d963b6f0182d5171f719f0101318"
+          },
+          "position_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "f570b05acbf307f914980dddd41ca922716860b1e7479a0cfb2e3f004d300c3c"
+          },
+          "velocity_m_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "b9ce164d30e4101b009fe4be765a070593cfbdd48f897853de159a8c177fabe8"
+          },
+          "charge_number": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f2cf4449672db8aae8089dbbc723ca493d1f82d017e23e92ef181e45516a2674"
+          },
+          "lifecycle": {
+            "dtype": "|u1",
+            "shape": [
+              10000
+            ],
+            "sha256": "77d19643a1cf13e6027e53283399f41c7d9bb4a1ee49ec4f716819cba3a38319"
+          },
+          "kinematics_valid": {
+            "dtype": "|u1",
+            "shape": [
+              10000
+            ],
+            "sha256": "684ad25fdc2bbb80cbc910dd1bde6d5499ccf860ca6ee44704b77ec445271353"
+          },
+          "failure_reason_code": {
+            "dtype": "<u2",
+            "shape": [
+              10000
+            ],
+            "sha256": "28b4f41a7f3ee6d8cc87272db6e09c6d3566551fd4d18702b041a21658272a85"
+          },
+          "mass_kg": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "1cca93beabc9d182aacdc4b80cc069ae206805decc4008fdc126f99d3f938078"
+          },
+          "drag_diameter_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "a30fed80f804d52f5028ed32e18c649ad28c1496136e18c9e4679bc659ca3cd8"
+          },
+          "contact_radius_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "electrostatic_radius_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "4eaba023ae2f7029ff2a7660611d0a648de232acec77ea4b3a21c9fb0bbaec52"
+          },
+          "displaced_volume_m3": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "model_weight": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "37895d84a413e2ff48ab788e8d576c42d7511ab125de1f5feb225d15ca7c8e59"
+          },
+          "material_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          }
+        },
+        "release": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "3b9441cb53cecf35b807d2c1855295a915511fbbee555f9a31974e7b9960b69e"
+          },
+          "event_ordinal": {
+            "dtype": "<u4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          },
+          "source_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          }
+        },
+        "boundary": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "334f8258b6f46a5cf045f8a49f4feb056600a42752eee45c1d1f0dc6ed676278"
+          },
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "5884e5b6e2c89e9a34c7d028ef11a77929bfa69ec7bfb96f76c2c968bfcc460c"
+          },
+          "event_ordinal": {
+            "dtype": "<u4",
+            "shape": [
+              10000
+            ],
+            "sha256": "0f4c548fa72acc4a4914076721d11d7ed8d738653b6c38fbc5270e5cc6b3f432"
+          },
+          "interaction_kind": {
+            "dtype": "<U4",
+            "shape": [
+              10000
+            ],
+            "sha256": "588e5a2546a8a28982359b93b949c733304041196bab9d7b08821cbe8495191f"
+          },
+          "primary_facet_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "ab3044d3754c6f8000b131f005bcbc1dfa8a9054c36145a3bb4cd37157c3591f"
+          },
+          "destination_facet_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "1f03e851c1a311847b3f633780f6c82eb6f89354ac1f432641c8ca502340c870"
+          },
+          "boundary_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "159dde2d47bfc7b1d1e17d3f517ed664375f4736259a08c08d0fa37ebcbf3c49"
+          },
+          "material_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          },
+          "contact_radius_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "position_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "95bef6937036d5443325f259799b5475edaec8e785d94f19ac2a055d273292db"
+          },
+          "position_post_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "95bef6937036d5443325f259799b5475edaec8e785d94f19ac2a055d273292db"
+          },
+          "normal": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "507d3828eba08a614bed680d9e481b327f02c86f8cf32bfd1b78b36db997a741"
+          },
+          "velocity_pre_m_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "991e27ec24afc4ad1b09f0d6970bf0adf18782d966423ac93b51bd20168ad36e"
+          },
+          "velocity_post_m_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "b9ce164d30e4101b009fe4be765a070593cfbdd48f897853de159a8c177fabe8"
+          },
+          "charge_number_pre": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f2cf4449672db8aae8089dbbc723ca493d1f82d017e23e92ef181e45516a2674"
+          },
+          "charge_number_post": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f2cf4449672db8aae8089dbbc723ca493d1f82d017e23e92ef181e45516a2674"
+          },
+          "model_weight": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "37895d84a413e2ff48ab788e8d576c42d7511ab125de1f5feb225d15ca7c8e59"
+          },
+          "law_id": {
+            "dtype": "<U5",
+            "shape": [
+              10000
+            ],
+            "sha256": "b44bff279b2b225d750667c32a640e052ac2c2271bce9861fd81aac997082a50"
+          },
+          "outcome": {
+            "dtype": "<U5",
+            "shape": [
+              10000
+            ],
+            "sha256": "be7c23d9070dd0bf539a65dbafebef9a0cb7be47cbe2be7858529385c4a29a22"
+          },
+          "localization_residual_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "8c535a79114ca65c0a09dd0b8379451907324dbc1a1039080b38bcb4b7bc69e0"
+          },
+          "position_budget_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "d7ff22cfad6be36b210f04dcb5ef5178ff7ac147ca5cfc400db7137c3e5556dc"
+          },
+          "time_budget_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "b2362b0a27fe09358ae703e6b2e45184056e8cd297bb0add35d948315de926a9"
+          },
+          "candidate_offset": {
+            "dtype": "<i8",
+            "shape": [
+              10001
+            ],
+            "sha256": "bfa51082c985807664172f8108ff1df0c4ffe05e1fc5d93327a6f25244c7cef7"
+          },
+          "candidate_facet_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "ab3044d3754c6f8000b131f005bcbc1dfa8a9054c36145a3bb4cd37157c3591f"
+          }
+        },
+        "failure": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "event_ordinal": {
+            "dtype": "<u4",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "reason_code": {
+            "dtype": "<u2",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "series": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              320
+            ],
+            "sha256": "defcc2644ba643fa958384e9c3dc6f2d345f5ea830d3692308e9adafd4804214"
+          },
+          "pending": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          },
+          "active": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "110e2f69dcdcdfc34f5225a6379d52903f56d35a4e4c22d3523f2499dec9a582"
+          },
+          "stuck": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "700ff2e1efdc0580556ae1b4228dd60c232ea9c87aa14d85b59c636113f19258"
+          },
+          "held": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          },
+          "escaped": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          },
+          "failed": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          }
+        },
+        "frames": [],
+        "probes": []
+      },
+      "failure_events": 0,
+      "live_children_after_return": 0
+    },
+    {
+      "workers": 4,
+      "elapsed_s": 18.309837999986485,
+      "memory_plan": {
+        "certificate_work_bytes_per_particle": 1352,
+        "components": {
+          "active_index": 80000,
+          "canonical_data": 1099660,
+          "field_runtime": 58,
+          "geometry_query_scratch": 25165840,
+          "output_buffer": 90000,
+          "particle_schedule": 1280000,
+          "physics_runtime": 400023,
+          "prepared_geometry": 15712,
+          "probe_index": 0,
+          "process_handoff_serialization": 68818928,
+          "process_private_query": 125829200,
+          "process_private_scratch_and_handoff": 106176785,
+          "process_shared_transport": 29141293,
+          "process_transport_page_padding": 872319,
+          "replay_work": 0,
+          "resident_state": 1010000,
+          "safety_margin": 48045113,
+          "slab_certificate_work": 845000,
+          "slab_dense_path": 531875,
+          "slab_event_staging": 17167232,
+          "slab_event_work": 970000,
+          "slab_failure_staging": 32500,
+          "slab_proposal_replay_work": 0,
+          "slab_proposal_scratch": 1280000,
+          "slab_release_work": 170000,
+          "slab_stage_composition_work": 238750,
+          "slab_stochastic_tree_work": 0,
+          "writer_reserve": 3145728
+        },
+        "dense_path_bytes_per_particle": 851,
+        "event_candidate_capacity": 1048576,
+        "event_staging_bytes_per_row": 624,
+        "event_staging_capacity": 524288,
+        "event_staging_fixed_bytes": 16777232,
+        "event_work_bytes_per_particle": 1552,
+        "failure_staging_bytes_per_particle": 52,
+        "field_preparation_transient_bytes": 0,
+        "geometry_preparation_transient_bytes": 141072,
+        "limit_bytes": 8589934592,
+        "phase_peaks": {
+          "load_case": 1237118,
+          "prepare": 4743591,
+          "run": 432406016
+        },
+        "planned_bytes": 432406016,
+        "proposal_replay_work_bytes_per_particle": 0,
+        "release_work_bytes_per_particle": 272,
+        "replay_work_bytes": 0,
+        "revision": "solver_owned_memory_plan_v25",
+        "runtime_layout_revision": "resident_soa_process_slab_v14",
+        "scratch_bytes_per_particle": 2048,
+        "semantics": "predicted peak of solver-owned arrays; not process RSS",
+        "slab_particles": 625,
+        "stage_composition_work_bytes_per_particle": 382,
+        "stochastic_tree_work_bytes_per_particle": 0,
+        "worker_count": 4
+      },
+      "science": {
+        "final": {
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "3b9441cb53cecf35b807d2c1855295a915511fbbee555f9a31974e7b9960b69e"
+          },
+          "source_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          },
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "666fd42a54869b2f5f640e67fbd2958d8a56d963b6f0182d5171f719f0101318"
+          },
+          "position_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "f570b05acbf307f914980dddd41ca922716860b1e7479a0cfb2e3f004d300c3c"
+          },
+          "velocity_m_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "b9ce164d30e4101b009fe4be765a070593cfbdd48f897853de159a8c177fabe8"
+          },
+          "charge_number": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f2cf4449672db8aae8089dbbc723ca493d1f82d017e23e92ef181e45516a2674"
+          },
+          "lifecycle": {
+            "dtype": "|u1",
+            "shape": [
+              10000
+            ],
+            "sha256": "77d19643a1cf13e6027e53283399f41c7d9bb4a1ee49ec4f716819cba3a38319"
+          },
+          "kinematics_valid": {
+            "dtype": "|u1",
+            "shape": [
+              10000
+            ],
+            "sha256": "684ad25fdc2bbb80cbc910dd1bde6d5499ccf860ca6ee44704b77ec445271353"
+          },
+          "failure_reason_code": {
+            "dtype": "<u2",
+            "shape": [
+              10000
+            ],
+            "sha256": "28b4f41a7f3ee6d8cc87272db6e09c6d3566551fd4d18702b041a21658272a85"
+          },
+          "mass_kg": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "1cca93beabc9d182aacdc4b80cc069ae206805decc4008fdc126f99d3f938078"
+          },
+          "drag_diameter_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "a30fed80f804d52f5028ed32e18c649ad28c1496136e18c9e4679bc659ca3cd8"
+          },
+          "contact_radius_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "electrostatic_radius_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "4eaba023ae2f7029ff2a7660611d0a648de232acec77ea4b3a21c9fb0bbaec52"
+          },
+          "displaced_volume_m3": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "model_weight": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "37895d84a413e2ff48ab788e8d576c42d7511ab125de1f5feb225d15ca7c8e59"
+          },
+          "material_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          }
+        },
+        "release": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "3b9441cb53cecf35b807d2c1855295a915511fbbee555f9a31974e7b9960b69e"
+          },
+          "event_ordinal": {
+            "dtype": "<u4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          },
+          "source_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          }
+        },
+        "boundary": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "334f8258b6f46a5cf045f8a49f4feb056600a42752eee45c1d1f0dc6ed676278"
+          },
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "5884e5b6e2c89e9a34c7d028ef11a77929bfa69ec7bfb96f76c2c968bfcc460c"
+          },
+          "event_ordinal": {
+            "dtype": "<u4",
+            "shape": [
+              10000
+            ],
+            "sha256": "0f4c548fa72acc4a4914076721d11d7ed8d738653b6c38fbc5270e5cc6b3f432"
+          },
+          "interaction_kind": {
+            "dtype": "<U4",
+            "shape": [
+              10000
+            ],
+            "sha256": "588e5a2546a8a28982359b93b949c733304041196bab9d7b08821cbe8495191f"
+          },
+          "primary_facet_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "ab3044d3754c6f8000b131f005bcbc1dfa8a9054c36145a3bb4cd37157c3591f"
+          },
+          "destination_facet_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "1f03e851c1a311847b3f633780f6c82eb6f89354ac1f432641c8ca502340c870"
+          },
+          "boundary_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "159dde2d47bfc7b1d1e17d3f517ed664375f4736259a08c08d0fa37ebcbf3c49"
+          },
+          "material_id": {
+            "dtype": "<i4",
+            "shape": [
+              10000
+            ],
+            "sha256": "e7e2dcff542de95352682dc186432e98f0188084896773f1973276b0577d5305"
+          },
+          "contact_radius_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f8c784aa6b57396e7c5e094c34d079d8252473e46e2f60593a921dbebf941fcc"
+          },
+          "position_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "95bef6937036d5443325f259799b5475edaec8e785d94f19ac2a055d273292db"
+          },
+          "position_post_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "95bef6937036d5443325f259799b5475edaec8e785d94f19ac2a055d273292db"
+          },
+          "normal": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "507d3828eba08a614bed680d9e481b327f02c86f8cf32bfd1b78b36db997a741"
+          },
+          "velocity_pre_m_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "991e27ec24afc4ad1b09f0d6970bf0adf18782d966423ac93b51bd20168ad36e"
+          },
+          "velocity_post_m_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000,
+              2
+            ],
+            "sha256": "b9ce164d30e4101b009fe4be765a070593cfbdd48f897853de159a8c177fabe8"
+          },
+          "charge_number_pre": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f2cf4449672db8aae8089dbbc723ca493d1f82d017e23e92ef181e45516a2674"
+          },
+          "charge_number_post": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "f2cf4449672db8aae8089dbbc723ca493d1f82d017e23e92ef181e45516a2674"
+          },
+          "model_weight": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "37895d84a413e2ff48ab788e8d576c42d7511ab125de1f5feb225d15ca7c8e59"
+          },
+          "law_id": {
+            "dtype": "<U5",
+            "shape": [
+              10000
+            ],
+            "sha256": "b44bff279b2b225d750667c32a640e052ac2c2271bce9861fd81aac997082a50"
+          },
+          "outcome": {
+            "dtype": "<U5",
+            "shape": [
+              10000
+            ],
+            "sha256": "be7c23d9070dd0bf539a65dbafebef9a0cb7be47cbe2be7858529385c4a29a22"
+          },
+          "localization_residual_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "8c535a79114ca65c0a09dd0b8379451907324dbc1a1039080b38bcb4b7bc69e0"
+          },
+          "position_budget_m": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "d7ff22cfad6be36b210f04dcb5ef5178ff7ac147ca5cfc400db7137c3e5556dc"
+          },
+          "time_budget_s": {
+            "dtype": "<f8",
+            "shape": [
+              10000
+            ],
+            "sha256": "b2362b0a27fe09358ae703e6b2e45184056e8cd297bb0add35d948315de926a9"
+          },
+          "candidate_offset": {
+            "dtype": "<i8",
+            "shape": [
+              10001
+            ],
+            "sha256": "bfa51082c985807664172f8108ff1df0c4ffe05e1fc5d93327a6f25244c7cef7"
+          },
+          "candidate_facet_id": {
+            "dtype": "<i8",
+            "shape": [
+              10000
+            ],
+            "sha256": "ab3044d3754c6f8000b131f005bcbc1dfa8a9054c36145a3bb4cd37157c3591f"
+          }
+        },
+        "failure": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "particle_id": {
+            "dtype": "<i8",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "event_ordinal": {
+            "dtype": "<u4",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "reason_code": {
+            "dtype": "<u2",
+            "shape": [
+              0
+            ],
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "series": {
+          "time_s": {
+            "dtype": "<f8",
+            "shape": [
+              320
+            ],
+            "sha256": "defcc2644ba643fa958384e9c3dc6f2d345f5ea830d3692308e9adafd4804214"
+          },
+          "pending": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          },
+          "active": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "110e2f69dcdcdfc34f5225a6379d52903f56d35a4e4c22d3523f2499dec9a582"
+          },
+          "stuck": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "700ff2e1efdc0580556ae1b4228dd60c232ea9c87aa14d85b59c636113f19258"
+          },
+          "held": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          },
+          "escaped": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          },
+          "failed": {
+            "dtype": "<u8",
+            "shape": [
+              320
+            ],
+            "sha256": "8ce8ba8e726ee8925e6560d86ac35be1097691d1cfac888e6bd20e804ea9eb15"
+          }
+        },
+        "frames": [],
+        "probes": []
+      },
+      "failure_events": 0,
+      "live_children_after_return": 0
+    }
+  ]
+}

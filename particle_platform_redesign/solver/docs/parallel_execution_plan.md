@@ -1,7 +1,8 @@
-# CPU実行・性能：0.3.0
+# CPU実行・性能
 
-この文書は現行v62の実行構造、用途別の実測、source別の品質・配布資格を所有する。
-数値methodは[`numerics.md`](numerics.md)、revision一覧は[`result_format_v3.md`](result_format_v3.md)、
+この文書は単一engineの実行構造、用途別の実測、source別の品質・配布資格を所有する。
+0.3.0/v62等の実測は当時のsourceに限定する。0.4.0の再構成・再実行は[今回の記録](../evidence/platform_restructure_2026_11_23/README.md)で区別する。
+数値methodは[`numerics.md`](numerics.md)、revision一覧は[`result_format_v4.md`](result_format_v4.md)、
 COMSOL比較の科学的意味は[`vv_methodology.md`](../../vv_methodology.md)を参照する。
 版ごとの変更は[`RELEASE_NOTES.md`](../RELEASE_NOTES.md)、今回のsource・配布入口の照合は
 [0.3.0 branch検証記録](../../reviews/v0_3_branch_2026_10_13/source_qualification.json)を参照する。
@@ -12,7 +13,7 @@ COMSOL比較の科学的意味は[`vv_methodology.md`](../../vv_methodology.md)�
 
 ## 実行資源と同期
 
-公開APIは`load_case`、`simulate`、`open_result`の三つである。
+公開APIは`load_case`、`check_case`、`simulate`、`open_result`の四つである。
 `simulate(case, output, *, workers=1)`とCLI `--workers`でprocess数を明示する。
 caseの数値設定には混ぜず、旧`resources.threads`、自動worker縮小、tunerを持たない。
 複数workerを使うPython scriptにはimport可能なmain moduleとmain guardが必要である。
@@ -20,7 +21,9 @@ caseの数値設定には混ぜず、旧`resources.threads`、自動worker縮小
 
 | owner | 現行の責務 |
 |---|---|
-| 親engine | macro時計、release、活動粒子の整理、仕事配分、単一writer、checkpoint |
+| 親engine | prepare、macro時計、release、活動粒子の整理、単一writer、checkpoint |
+| execution | process起動・仕事配分・共有transport・bounded IPC/ACK |
+| transport | serial/process共通のslab更新・有限workspace容量 |
 | 永続spawn worker | 排他的なparticle rowの既存stage/proposal/hit/prefix/wall law/remainder |
 | 共有配列 | read-only prepared factsと、担当rowだけを更新するstate/accepted hint/replay |
 | worker専用scratch | bounded slab、query、Brownian tree、event/failure staging |

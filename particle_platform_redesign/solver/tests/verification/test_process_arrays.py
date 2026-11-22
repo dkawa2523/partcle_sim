@@ -10,7 +10,7 @@ from typing import NamedTuple
 import numpy as np
 import pytest
 
-from chamber_particles.cpu import (
+from chamber_particles.execution import (
     ProcessArrayReader,
     ProcessArrayStore,
     process_array_views,

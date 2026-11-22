@@ -4,6 +4,7 @@ from chamber_particles import (
     CaseError,
     IncompleteResultError,
     SimulationError,
+    check_case,
     load_case,
     open_result,
     simulate,
@@ -11,7 +12,7 @@ from chamber_particles import (
 
 
 def test_public_api_is_importable() -> None:
-    operations = (load_case, simulate, open_result)
+    operations = (load_case, check_case, simulate, open_result)
     exception_types = (CaseError, SimulationError, IncompleteResultError)
 
     assert all(callable(operation) for operation in operations)

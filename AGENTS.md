@@ -18,6 +18,9 @@ following ownership rules.
 
 - New production code belongs only in the independent uv project at
   `particle_platform_redesign/solver/`.
+- `src/chamber_particles` owns the numerical core. Installed normal input,
+  analysis, export, visualization clients and the sole CLI belong to
+  `src/chamber_particles_tools`; core dependencies never point back to clients.
 - Do not restore an archived root `pyproject.toml`, `uv.lock`, package, test
   tree, or tool configuration.
 - The old implementation may be inspected only for failure cases, candidate

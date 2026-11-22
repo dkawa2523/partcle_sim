@@ -184,7 +184,11 @@ gates; Talbot's algebra is not permission to rescale arbitrary model coefficient
 
 ## 3. Particle, release, and boundary authority
 
-The v3 `tools.comsol_adapter` reads selected static nodal mappings. Domain scope
+The format-4 installed `chamber_particles_tools.csv_import` reads selected
+static nodal mappings. `provider: comsol` retains native dataset/solution/member
+identity; `provider: csv` accepts caller-owned numeric data without fabricated
+native provenance. Both preserve explicit unit/basis/domain/side/support meaning.
+Domain scope
 and finite field support are separate facts: first bind the export's selected
 domain/side and mesh identity, then check every required primitive on that scope.
 Prefer scoped node/domain IDs. For an older multi-domain coordinate CSV, an
@@ -193,7 +197,7 @@ it identifies the selected producer domain, followed by mesh coverage and strict
 coordinate bijection. It is not a general NaN-to-support rule. Reject surviving
 duplicate coordinates or missing values inside that scope; retain outside raw
 rows/hashes without filling them. Converter success does not establish field
-convergence, axis regularity, `run` preparation or trajectory agreement.
+convergence, axis regularity, shared `check_case` preparation or trajectory agreement.
 
 Map independently:
 

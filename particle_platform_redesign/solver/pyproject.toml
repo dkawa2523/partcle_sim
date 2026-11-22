@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "chamber-particles"
-version = "0.3.0"
+version = "0.4.0"
 description = "Particle trajectory solver for externally supplied chamber fields and geometry"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
@@ -23,7 +23,10 @@ dependencies = [
 ]
 
 [project.scripts]
-chamber-particles = "chamber_particles.cli:main"
+chamber-particles = "chamber_particles_tools.cli:main"
+
+[tool.uv.build-backend]
+module-name = ["chamber_particles", "chamber_particles_tools"]
 
 [project.urls]
 Repository = "https://github.com/dkawa2523/partcle_sim"
@@ -62,7 +65,7 @@ select = [
 ]
 
 [tool.pyrefly]
-project-includes = ["src/chamber_particles", "tools"]
+project-includes = ["src/chamber_particles", "src/chamber_particles_tools", "tools"]
 project-excludes = []
 search-path = ["src", "."]
 python-version = "3.12"
@@ -71,7 +74,7 @@ infer-return-types = "never"
 preset = "default"
 
 [tool.importlinter]
-root_package = "chamber_particles"
+root_packages = ["chamber_particles", "chamber_particles_tools"]
 include_external_packages = false
 exclude_type_checking_imports = false
 
@@ -80,6 +83,7 @@ name = "Low-level numerics stay independent of orchestration and I/O"
 type = "forbidden"
 source_modules = [
   "chamber_particles.cpu",
+  "chamber_particles.field_numerics",
   "chamber_particles.coordinates",
   "chamber_particles.geometry",
   "chamber_particles.topology",
@@ -96,6 +100,7 @@ forbidden_modules = [
   "chamber_particles.engine",
   "chamber_particles.output",
   "chamber_particles.yaml_input",
+  "chamber_particles_tools",
 ]
 
 [[tool.importlinter.contracts]]
@@ -125,4 +130,23 @@ forbidden_modules = [
   "chamber_particles.boundaries",
   "chamber_particles.sources",
   "chamber_particles.yaml_input",
+  "chamber_particles_tools",
 ]
+
+[[tool.importlinter.contracts]]
+name = "Computational API stays independent of installed workflow clients"
+type = "forbidden"
+source_modules = ["chamber_particles.api", "chamber_particles.engine"]
+forbidden_modules = ["chamber_particles_tools"]
+
+[[tool.importlinter.contracts]]
+name = "Particle transport stays independent of coordinator and process management"
+type = "forbidden"
+source_modules = ["chamber_particles.transport"]
+forbidden_modules = ["chamber_particles.engine", "chamber_particles.execution", "chamber_particles.api", "chamber_particles_tools"]
+
+[[tool.importlinter.contracts]]
+name = "Process execution stays independent of parent coordinator"
+type = "forbidden"
+source_modules = ["chamber_particles.execution"]
+forbidden_modules = ["chamber_particles.engine", "chamber_particles.api", "chamber_particles_tools"]

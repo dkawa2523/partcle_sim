@@ -1,0 +1,62 @@
+name: platform-docs
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/platform-docs.yml"
+      - "README.md"
+      - "AGENTS.md"
+      - ".gitattributes"
+      - ".agents/skills/**"
+      - "particle_platform_redesign/*.md"
+      - "particle_platform_redesign/solver/README.md"
+      - "particle_platform_redesign/solver/docs/**"
+      - "particle_platform_redesign/solver/src/chamber_particles_tools/**/README.md"
+      - "particle_platform_redesign/solver/scripts/check_documentation.py"
+      - "particle_platform_redesign/solver/tests/verification/test_documentation.py"
+      - "particle_platform_redesign/analysis/build_report_snapshot.py"
+      - "particle_platform_redesign/report_app/**"
+  push:
+    paths:
+      - ".github/workflows/platform-docs.yml"
+      - "README.md"
+      - "AGENTS.md"
+      - ".gitattributes"
+      - ".agents/skills/**"
+      - "particle_platform_redesign/*.md"
+      - "particle_platform_redesign/solver/README.md"
+      - "particle_platform_redesign/solver/docs/**"
+      - "particle_platform_redesign/solver/src/chamber_particles_tools/**/README.md"
+      - "particle_platform_redesign/solver/scripts/check_documentation.py"
+      - "particle_platform_redesign/solver/tests/verification/test_documentation.py"
+      - "particle_platform_redesign/analysis/build_report_snapshot.py"
+      - "particle_platform_redesign/report_app/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation-and-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: particle_platform_redesign/solver
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+          cache-dependency-glob: particle_platform_redesign/solver/uv.lock
+      - run: uv sync --locked
+      - name: Check maintained links, skills and report bindings
+        run: uv run --locked python scripts/check_documentation.py
+      - name: Test snapshot reproduction and document checks
+        run: uv run --locked pytest tests/verification/test_documentation.py ../report_app/tests/test_reviewed_snapshot.py -q
+      - name: Verify the preserved report runtime
+        run: node ../report_app/scripts/verify-protected-runtime.mjs

@@ -23,7 +23,17 @@ from typing import Any
 
 import yaml
 
-from chamber_particles.integrators import _compiled_exponential_update
+from chamber_particles.cpu import CPU_RUNTIME_LAYOUT_REVISION, MEMORY_PLAN_REVISION
+from chamber_particles.engine import COMPILED_CPU_TILE_REVISION, ENGINE_ALGORITHM_REVISION
+from chamber_particles.events import EVENT_ALGORITHM_REVISION
+from chamber_particles.fields import FIELD_LOCATION_REVISION
+from chamber_particles.integrators import (
+    EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION,
+    EXPONENTIAL_MIDPOINT_REVISION,
+    STEP_PROPOSAL_REVISION,
+)
+from chamber_particles.output import RESULT_ALGORITHM_REVISION
+from chamber_particles.physics.runtime import PHYSICS_RUNTIME_REVISION
 from tests.performance.p06_baseline import _expanded_definition, _materialize
 from tests.performance.p10_compiled import (
     _compiled_machine_metadata,
@@ -35,19 +45,19 @@ from tests.verification.microcases import build_microcase
 
 _MODES = ("fresh", "warm")
 _EXPECTED_REVISIONS: dict[str, str | None] = {
-    "engine_algorithm_revision": "particle_engine_v62",
-    "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
-    "physics_runtime_revision": "prepared_native_physics_runtime_v24",
-    "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+    "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
+    "compiled_cpu_tile_revision": COMPILED_CPU_TILE_REVISION,
+    "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
+    "step_proposal_revision": STEP_PROPOSAL_REVISION,
     "rk4_enclosure_revision": None,
-    "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
-    "exponential_midpoint_enclosure_revision": ("exponential_midpoint_local_stage_enclosure_v4"),
-    "field_location_revision": "field_location_v5",
-    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
-    "result_algorithm_revision": "durable_segmented_result_v6",
+    "exponential_midpoint_revision": EXPONENTIAL_MIDPOINT_REVISION,
+    "exponential_midpoint_enclosure_revision": EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION,
+    "field_location_revision": FIELD_LOCATION_REVISION,
+    "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
+    "result_algorithm_revision": RESULT_ALGORITHM_REVISION,
 }
-_EXPECTED_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v25"
-_EXPECTED_RUNTIME_LAYOUT_REVISION = "resident_soa_process_slab_v14"
+_EXPECTED_MEMORY_PLAN_REVISION = MEMORY_PLAN_REVISION
+_EXPECTED_RUNTIME_LAYOUT_REVISION = CPU_RUNTIME_LAYOUT_REVISION
 
 
 def main() -> None:
@@ -109,7 +119,7 @@ def _driver(arguments: argparse.Namespace) -> None:
         _validate_observations(observations, arguments.repeats)
         summaries = _summaries(observations)
         report = {
-            "benchmark": "p11_exponential_midpoint_fresh_warm_v1",
+            "benchmark": "p11_exponential_midpoint_fresh_warm_v2",
             "captured_at_utc": datetime.now(UTC).isoformat(),
             "non_gating": True,
             "conditions": {
@@ -126,7 +136,7 @@ def _driver(arguments: argparse.Namespace) -> None:
                     "NUMBA_CACHE_DIR"
                 ),
                 "compiled_execution": (
-                    "compiled_cpu_tile_v31 with NUMBA_DISABLE_JIT=0, fastmath=False, "
+                    f"{COMPILED_CPU_TILE_REVISION} with NUMBA_DISABLE_JIT=0, fastmath=False, "
                     "serial compiled kernels, NUMBA_NUM_THREADS=1"
                 ),
             },
@@ -253,17 +263,10 @@ def _worker(arguments: argparse.Namespace) -> None:
         include_digest=True,
         expected_path_kind="exponential_midpoint_reintegrated",
     )
-    exponential_signature_count = len(_compiled_exponential_update.signatures)
-    if exponential_signature_count == 0:
-        raise RuntimeError("P11 compiled exponential update did not execute")
-    compiled = observation["compiled_execution"]
-    if not isinstance(compiled, dict):
-        raise RuntimeError("P11 compiled execution record is not mutable")
-    compiled["exponential_update_signature_count"] = exponential_signature_count
     print(json.dumps(observation, allow_nan=False, sort_keys=True))
 
 
-def _validate_observations(observations: Sequence[Mapping[str, object]], repeats: int) -> None:
+def _validate_observations(observations: Sequence[Mapping[str, Any]], repeats: int) -> None:
     if len(observations) != repeats * len(_MODES):
         raise RuntimeError("P11 observation count is incomplete")
     digests = {item["semantic_result_sha256"] for item in observations}
@@ -294,17 +297,15 @@ def _validate_observations(observations: Sequence[Mapping[str, object]], repeats
         if plan.get("runtime_layout_revision") != _EXPECTED_RUNTIME_LAYOUT_REVISION:
             raise RuntimeError("P11 unexpected runtime-layout revision")
         compiled = _require_mapping(item, "compiled_execution")
-        if int(compiled["physics_tile_signature_count"]) < 1:
-            raise RuntimeError("P11 compiled physics tile did not execute")
-        if int(compiled["exponential_update_signature_count"]) < 1:
-            raise RuntimeError("P11 compiled exponential update did not execute")
+        if int(compiled["stage_advance_signature_count"]) < 1:
+            raise RuntimeError("P11 compiled stage advance did not execute")
         if compiled.get("numba_disable_jit") != "0":
             raise RuntimeError("P11 Numba JIT was not enabled")
 
 
 def _fresh_warm_comparison(
-    summaries: Sequence[Mapping[str, object]],
-) -> dict[str, object]:
+    summaries: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
     fresh = next(item for item in summaries if item["mode"] == "fresh")
     warm = next(item for item in summaries if item["mode"] == "warm")
     fresh_timing = _require_mapping(fresh, "median_timing_s")
@@ -324,7 +325,7 @@ def _fresh_warm_comparison(
     }
 
 
-def _require_mapping(value: Mapping[str, object], key: str) -> Mapping[str, object]:
+def _require_mapping(value: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     result = value[key]
     if not isinstance(result, Mapping):
         raise RuntimeError(f"P11 observation {key} is not a mapping")

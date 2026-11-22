@@ -20,7 +20,7 @@ the unresolved choices that materially change the problem.
 | Scope | Required input | Minimum useful output and stopping point |
 |---|---|---|
 | Plan | Source evidence or its access limits, intended physical question | Model mapping, targeted export specification, numerical intent, and exact missing evidence; no execution claim |
-| Preparation only | Required geometry/fields and particle/boundary requirements for a runnable case | Canonical HDF5/YAML, hashes, conversion/geometry/field checks, `check` result, numerical plan; full preparation during `run` remains untested |
+| Preparation only | Required geometry/fields and particle/boundary requirements for a runnable case | Canonical HDF5/YAML, hashes, conversion/geometry/field checks, shared execution-preparation `check` result, numerical plan; particle execution and accuracy remain untested |
 | Smoke | Checked inputs and a bounded representative run | Separate smoke derivative, command/result identity, resolved models and failure/lifecycle counts; no accuracy or agreement claim |
 | Scientific execution | Checked case, relevant observables/error budget and run scope | Requested run and registered numerical experiments, measured resolution evidence and limitations; route external comparison to validate |
 
@@ -33,9 +33,11 @@ practical comparison. Use the numerical plan's appropriate independent evidence.
 
 ## Bind evidence to the current solver
 
-Locate the repository using `particle_platform_redesign/solver/pyproject.toml`.
-Read the applicable `AGENTS.md`; run commands from that independent uv project
-with `uv run --locked`. Reuse verified source/export records; discover COMSOL
+For source work locate `particle_platform_redesign/solver/pyproject.toml`, read
+the applicable `AGENTS.md`, and use that independent uv project with
+`uv run --locked`. Normal input clients and CLI also ship in the installed
+wheel; source checkout is needed only for development/native V&V work.
+Reuse verified source/export records; discover COMSOL
 access only for missing native observations or authorized new reference runs.
 Record package/source revision and dirty state, lock identity, case schema, and
 the selected model/numerical revisions. Read the chosen model sections of
@@ -82,13 +84,18 @@ derivatives require an explicit recovery method; an unrelated diagnostic or
 similarly named COMSOL variable is not a substitute.
 
 Classify field production as direct export, independently checked reconstruction,
-explicit reduced-field model, or unsupported. The current `tools.comsol_adapter`
-v3 converts explicitly selected static nodal XY/RZ fields on one volume domain;
+explicit reduced-field model, or unsupported. The installed
+`chamber_particles_tools.csv_import` format-4 client converts explicitly
+selected static nodal XY/RZ fields on one volume domain;
 it records units, basis, producer meaning and explicit axis transforms. Read its
-README/config schema before use. It is not an MPH reader, time/cell/discontinuous
-field converter or physical-model selector. Other layouts need a small external
-converter under `solver/tools/`, using the canonical writer. Read the reduced electrostatic
-builder's README before choosing that particular closure. Neither path chooses
+README/config schema before use. `provider: comsol` requires native dataset,
+solution and member lineage; `provider: csv` handles caller-owned numeric CSV
+without inventing native provenance. It is not an MPH reader,
+time/cell/discontinuous field converter or physical-model selector. Other
+representations need an explicit producer using the canonical writer, without
+core branches. Read the reduced electrostatic builder's README before choosing
+its gas-only RZ closure; full-material/floating-conductor V/Q capability is not
+implemented by this builder. Neither path chooses
 the YAML physics models or proves COMSOL-field equivalence.
 
 Use the scope-aware preflight interpretation in
@@ -108,13 +115,23 @@ interface. A shared-node P1/Q1 field cannot retain a jump that particles cross;
 selecting one side is valid only when that is the accessible domain. Otherwise
 register unsupported representation or a quantified approximation.
 
-Author YAML from the current schema and `examples/quickstart/create_case.py`.
-Use the canonical writer's logical content hash. Canonical tables own realized
-particles and distinct size authorities; YAML owns models, boundaries,
-numerics/output and memory budget. Worker count is a CLI/API resource.
-Run `chamber-particles check <case.yaml>` for preparation-only deliverables.
-`check` covers input/hash/references and early memory; full model/support/
-topology/stability/memory preparation occurs during `run`.
+Use `chamber-particles models` for current model requirements and `init` for
+editable installed examples, not a chamber-specific template. Publish through
+`chamber_particles_tools.inputs.create_case(bundle, settings, sources, output)`
+or CLI `create RECIPE -o OUTPUT`. Recipe format 1 binds an `input_bundle`,
+explicit CSV `sources` and normal case `settings`; the publisher owns data
+path/hash and calls public `load_case` and `check_case` before publication.
+It can add the first source to a bundle with no existing particle tables.
+Source format 2 supports internal and surface realized CSV rows; independent
+properties are explicit unless `inherit_from` requests an exact-ID join.
+Canonical tables own physical facts, YAML owns model/wall/numerical choices,
+and worker count is an API/CLI resource. Never infer inherited physical
+authority from equal integer IDs alone.
+
+Run `chamber-particles check <case.yaml> --workers N` for a preparation-only
+deliverable. It uses the same model/support/topology/stability/memory prepare
+as `run`, without workers, writer or particle updates. This is readiness for
+the requested worker count, not runtime completion or accuracy evidence.
 
 ## Choose numerics and execute the requested scope
 
@@ -135,6 +152,11 @@ uv run --locked chamber-particles check <case.smoke.yaml>
 uv run --locked chamber-particles run <case.smoke.yaml> -o <smoke-result> --workers 1
 uv run --locked chamber-particles inspect <smoke-result>
 ```
+
+`python -m chamber_particles` is the same installed dispatcher. Normal result
+schema 4 includes immutable geometry/semantic context; `analyze`, `export` and
+`view` reuse RESULT alone through `ResultView.read_context()`. Input case/data
+remain schema 3. No old-result reader or silent migration is provided.
 
 Inspect actual resolved model/numerical revisions, lifecycle and
 `failure_reason_counts` even after a successful CLI exit. Diagnose input,

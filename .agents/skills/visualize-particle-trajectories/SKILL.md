@@ -16,15 +16,18 @@ start inspection, simulation, or a new comparison campaign.
 
 | Scope | Minimum input | Deliverable and completion |
 |---|---|---|
-| Spatial paths/events | Result and matching case geometry; normalized reference only for a requested overlay | Same-space figure with starts, valid path segments, outcomes and observed events; complete after visual QA |
+| Spatial paths/events | Schema-4 result including immutable context; normalized reference only for a requested overlay | Same-space figure with starts, valid path segments, outcomes and observed events; complete after visual QA |
 | Population or evaluation figures | Saved population/states/events with identities, coverage and the relevant metric definition | Primary arrival/fate/occupancy distribution and its denominator/weight meaning; report quantities that are unobserved instead of recomputing them |
 | Animation | Saved frames or probes, matching static geometry and requested time/particle coverage | Streaming animation plus static companion and sampling receipt; no reconstruction of unsaved simulation states |
 
 Read the repository guidance and inspect the result with `open_result` or
-`chamber-particles inspect`. For a geometry overlay, require the corresponding
-case YAML/HDF5: a result stores case hashes, not the geometry itself. Load the
-case with the public `load_case` interface and confirm its hashes match the
-result. For a comparison, use normalized COMSOL tables prepared by
+`chamber-particles inspect`. Read result geometry, units, boundary semantics
+and source labels using public `ResultView.read_context()`. Schema-4 results
+include this immutable context and do not require the original case or its
+background fields. The reader validates its identity against the manifest.
+Older results need export with their baseline environment or regeneration;
+do not silently relabel or add a compatibility reader. For a comparison, use
+normalized COMSOL tables prepared by
 `$validate-comsol-trajectories` or reuse already verified normalized exports.
 
 Confirm coordinate system and SI units, simulated time range, particle-ID
@@ -104,14 +107,21 @@ from only two resolutions.
 
 ## Reuse existing external tools
 
-Run from `particle_platform_redesign/solver/` with uv.
+Ordinary clients ship in the wheel and use one dispatcher; source work runs
+from `particle_platform_redesign/solver/` with uv.
 
-- `uv run --locked python -m tools.visualization RESULT --output-directory
-  DERIVED` creates the current lightweight one-particle SVG and boundary-event
-  view. It does not currently provide geometry overlay or a general
-  all-particle renderer.
-- `uv run --locked python -m tools.analysis RESULT --output
-  DERIVED/summary.json` creates the current full-population summary.
+- `uv run --locked python -m chamber_particles view RESULT -o DERIVED` creates
+  geometry-overlaid final population occupancy and observed boundary-event
+  views. Every selected valid position contributes to occupancy bins; render
+  bounds are stated in the receipt. `--detail` or `--particle-id` adds bounded
+  saved-trajectory detail. This is not an all-particle path animation.
+- `uv run --locked python -m chamber_particles analyze RESULT -o
+  DERIVED/summary.json` creates full-selected-population summaries, separating
+  repeated interactions, first hit, terminal outcomes and saved active curves.
+  `export RESULT -o DIRECTORY` streams public saved tables with identity.
+- Python equivalents are `chamber_particles_tools.visualization.render_result`
+  and `chamber_particles_tools.analysis.summarize_result` / `export_result`.
+  Cohorts use exact `particle_ids` / resolved `source_ids`, not display samples.
 - `uv run --locked python -m tools.vv.comsol.plot_matched_trajectories` renders
   normalized solver/COMSOL XY or RZ overlays, including canonical geometry
   and supplied precontact flags. It expects identical ID sets and has no

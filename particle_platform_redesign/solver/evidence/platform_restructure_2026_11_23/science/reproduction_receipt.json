@@ -1,0 +1,51 @@
+{
+  "scope": "one-shot archived evidence scripts, not new scientific simulations",
+  "metric_reproduction": {
+    "script_sha256": "sha256:9525f1f443d833e5557dd5ebd21dc4ca432a160a3ddd706cd76664c344678c74",
+    "all15_metric_groups_equal": {
+      "A": {
+        "restricted_mean_active_lifetime_s": true,
+        "capture_count": true,
+        "capture_terminal_median_s": true,
+        "boundaries": true,
+        "destination_composition_global_tv": true,
+        "active_curve_global_maximum": true,
+        "capture_curve_global_maximum": true,
+        "clock_s": true,
+        "native_active_count_curve": true,
+        "candidate_mean_active_count_curve": true,
+        "candidate_minimum_active_count_curve": true,
+        "candidate_maximum_active_count_curve": true,
+        "native_capture_count_curve": true,
+        "candidate_mean_capture_count_curve": true,
+        "early_active": true
+      },
+      "P": {
+        "restricted_mean_active_lifetime_s": true,
+        "capture_count": true,
+        "capture_terminal_median_s": true,
+        "boundaries": true,
+        "destination_composition_global_tv": true,
+        "active_curve_global_maximum": true,
+        "capture_curve_global_maximum": true,
+        "clock_s": true,
+        "native_active_count_curve": true,
+        "candidate_mean_active_count_curve": true,
+        "candidate_minimum_active_count_curve": true,
+        "candidate_maximum_active_count_curve": true,
+        "native_capture_count_curve": true,
+        "candidate_mean_capture_count_curve": true,
+        "early_active": true
+      }
+    },
+    "assessment_sha256": "sha256:c6823abad735a6df6c82d25db441acd27714d57971ab978eaa69dcb54e7705ac"
+  },
+  "summary_rendering": {
+    "script_sha256": "sha256:d0ab5a336e148435a98b0491d8b6520627d10371d3356c8054b62c8a078d05eb",
+    "compact_summary_sha256": "sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4",
+    "svg_bitwise_equal": true,
+    "svg_sha256": "sha256:086dfd4d95e312dc8f85e73ff14e68001355de8a5fa025e4e09b519f8e2964c6"
+  },
+  "external_full_results_required_for_metric_recomputation": true,
+  "clone_only_summary_svg_reproduction": true
+}

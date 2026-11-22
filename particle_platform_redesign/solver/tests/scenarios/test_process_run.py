@@ -6,14 +6,14 @@ import os
 from dataclasses import dataclass, fields, replace
 from multiprocessing.shared_memory import SharedMemory
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pytest
 import yaml
 
-import chamber_particles.cpu as cpu_module
 import chamber_particles.engine as engine_module
+import chamber_particles.execution as execution_module
 import chamber_particles.output as output_module
 from chamber_particles import (
     IncompleteResultError,
@@ -112,7 +112,9 @@ def test_process_checkpoint_resumes_with_a_different_worker_count(
     simulate(case, reference_path, workers=1)
     original_replace = os.replace
 
-    def replace_then_fail(source: object, destination: object) -> None:
+    def replace_then_fail(
+        source: str | os.PathLike[str], destination: str | os.PathLike[str]
+    ) -> None:
         original_replace(source, destination)
         if Path(destination).name == "LATEST":
             raise OSError("injected interruption after process macro commit")
@@ -163,8 +165,8 @@ def test_abrupt_child_exit_preserves_only_the_last_complete_macro_and_can_resume
         return handle
 
     with monkeypatch.context() as patch:
-        patch.setattr(engine_module, "_process_particle_worker", _AbruptBoundaryWorker(marker))
-        patch.setattr(cpu_module, "SharedMemory", record_shared_memory)
+        patch.setattr(execution_module, "_process_particle_worker", _AbruptBoundaryWorker(marker))
+        patch.setattr(execution_module, "SharedMemory", record_shared_memory)
         with pytest.raises(SimulationError):
             simulate(case, interrupted_path, workers=2)
 
@@ -197,9 +199,7 @@ def test_abrupt_child_exit_preserves_only_the_last_complete_macro_and_can_resume
 
 
 @pytest.mark.parametrize("workers", (0, True, 1.5))
-def test_invalid_process_count_fails_before_output_creation(
-    tmp_path: Path, workers: object
-) -> None:
+def test_invalid_process_count_fails_before_output_creation(tmp_path: Path, workers: Any) -> None:
     case = load_case(materialize_microcase("C01", tmp_path / "case").case_path)
     output = tmp_path / "result"
     with pytest.raises(SimulationError):
@@ -276,8 +276,8 @@ class _AbruptBoundaryWorker:
 
     def __call__(self, connection: Any, payload: bytes) -> None:
         # Spawn imports the ordinary production worker; this target is only test material.
-        engine_module._process_particle_worker(
-            _ExitAfterBoundaryHandoff(connection, self.marker), payload
+        execution_module._process_particle_worker(
+            cast(Any, _ExitAfterBoundaryHandoff(connection, self.marker)), payload
         )
 
 

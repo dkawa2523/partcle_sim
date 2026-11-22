@@ -1,5 +1,11 @@
 # COMSOL比較・検証・原因特定方法
 
+
+配布と履歴の区別：本書中で「別管理の履歴」と記すpathは、当時のローカル監査記録でありcloneには同梱しない。
+履歴の数値は当時のsourceと参照解に限定する。再集計には記載したartifactと当時のreader環境の引渡しが必要であり、
+現行sourceの合格や、cloneだけでの再実行可能性を意味しない。今回の再構成の実行済み証拠は
+[現行確認記録](solver/evidence/platform_restructure_2026_11_23/README.md)に分けて保存する。
+
 ## 1. この文書の目的
 
 本書は、粒子追跡コードをCOMSOLと比較するときの検証（verification）、妥当性確認（validation）、差異原因の切り分け方法を定める。対象は現在の `model_dataset` と、今後作成する比較ケースである。
@@ -99,12 +105,12 @@ producer側でone-sided domain-3境界値を定義した同じcanonical節点順
 
 監査結果は次のファイルに固定した。
 
-- [dataset_audit.json](evidence/dataset_audit.json)：ケース、表、列、幾何、状態整合性の詳細
-- [case_audit_summary.csv](evidence/case_audit_summary.csv)：12ケースの行数、粒子数、時刻数、欠損数の要約
-- [population_time_series.csv](evidence/population_time_series.csv)：時刻別の粒子状態集計
-- [variant_divergence_time_series.csv](evidence/variant_divergence_time_series.csv)：二つのイオンドラッグ定義間の時刻別差異
-- [variant_particle_divergence_summary.csv](evidence/variant_particle_divergence_summary.csv)：粒子別の差異発生時刻と最大差
-- [field_redundancy_audit.json](evidence/field_redundancy_audit.json)：粒径別背景場の重複と粒子依存列の監査
+- `evidence/dataset_audit.json`（別管理の履歴）：ケース、表、列、幾何、状態整合性の詳細
+- `evidence/case_audit_summary.csv`（別管理の履歴）：12ケースの行数、粒子数、時刻数、欠損数の要約
+- `evidence/population_time_series.csv`（別管理の履歴）：時刻別の粒子状態集計
+- `evidence/variant_divergence_time_series.csv`（別管理の履歴）：二つのイオンドラッグ定義間の時刻別差異
+- `evidence/variant_particle_divergence_summary.csv`（別管理の履歴）：粒子別の差異発生時刻と最大差
+- `evidence/field_redundancy_audit.json`（別管理の履歴）：粒径別背景場の重複と粒子依存列の監査
 
 各ケースは287粒子、121保存時刻、34,727行で、粒子・時刻キーの重複はない。初期行は放出表と一致し、最終要約は最後の保存行と一致する。欠損値は主に消失後の状態4に対応しており、活動中粒子の必須状態には欠損がない。したがって、保存済みの時間列は外部producerの挙動を記述する基礎データとして利用できる。ただし、同じ物理、field表現、boundary、確率意味論が確認されるまではsolverの数値合否を決めるreferenceにはしない。
 
@@ -116,7 +122,7 @@ producer側でone-sided domain-3境界値を定義した同じcanonical節点順
 
 Case Aでは1 ms時点で位置差中央値が約0.61–1.16 mm、5 ms時点では約6.81–25.3 mmである。30 msでは消失済み粒子の位置が欠損になるため、有限座標を持つ粒子だけを比較すると選択バイアスが生じる。したがって「両者で最後まで座標が残った粒子だけ」の終点差は、系全体の一致度を表さない。
 
-この実例はCOMSOLと新ソルバーの差そのものではないが、物理式の小さな違いが早期に軌道を分岐させ、最終状態集計だけではその分岐を検出できないことを示す。根拠となる値は [variant_divergence_time_series.csv](evidence/variant_divergence_time_series.csv) と [variant_particle_divergence_summary.csv](evidence/variant_particle_divergence_summary.csv) にある。
+この実例はCOMSOLと新ソルバーの差そのものではないが、物理式の小さな違いが早期に軌道を分岐させ、最終状態集計だけではその分岐を検出できないことを示す。根拠となる値は `evidence/variant_divergence_time_series.csv`（別管理の履歴） と `evidence/variant_particle_divergence_summary.csv`（別管理の履歴） にある。
 
 ### 2.3 現在のデータを使う際の重要な制約
 
@@ -904,9 +910,9 @@ Brownianを比較する時だけ`ensemble_metrics.parquet`を追加する。最�
 
 以下のanchor closeoutは、その時点の登録revisionと保存referenceに限定した履歴である。2026-10-09のC2/C3 binding改修後に新しく比較する場合は、現行consumerがsource model、canonical field、実receipt集合に結び付くschema-2 preflightを再検査する。履歴PASSを、新しい共通β・軸設定のensemble認証へ引き継がない。
 
-今回の[現行RZ境界microcase](solver/evidence/m3c0/critical_axis_native_2026_10_09_v1/README.md)は、force-freeのsurface departure、単一specular hitと残時間、axis passageについて132/132 gateを合格した。
-[初期Case-P限定probe](solver/evidence/m3c2/actual_binding_probe_2026_10_09_v1/scoped_probe_receipt.json)の単位/wrapper未解決は、
-後続の[現行native closeout](solver/evidence/comsol_binding_recert_2026_10_09_v1/native_unit_and_completion_closeout.json)で別scopeとして解消した。
+今回の`solver/evidence/m3c0/critical_axis_native_2026_10_09_v1/README.md`（別管理の履歴）は、force-freeのsurface departure、単一specular hitと残時間、axis passageについて132/132 gateを合格した。
+`solver/evidence/m3c2/actual_binding_probe_2026_10_09_v1/scoped_probe_receipt.json`（別管理の履歴）の単位/wrapper未解決は、
+後続の`solver/evidence/comsol_binding_recert_2026_10_09_v1/native_unit_and_completion_closeout.json`（別管理の履歴）で別scopeとして解消した。
 実controlはInterpolation.importDataによるargument unit消去を観測し、import後のunit再設定でβ kg/sとμ kg/(m*s)を確認した。
 正常なkeep/remove/return-model controlでも.class.statusがErrorになるprofileでは、この値を正常完了のauthorityにしない。
 実native controlが正しいrun_passを出力後throwしてexit0となる場合にも、現行wrapperはfatal logで拒否する。
@@ -914,15 +920,15 @@ Brownianを比較する時だけ`ensemble_metrics.parquet`を追加する。最�
 source MPHはloadCopy/-nosaveでhash不変である。
 
 2026-10-09のv45 C3は明示axis-odd Ω補正後の共通P1、共有Z0、Brownian-off、100 nm・287粒子・30 msで、両実装3刻み収束と141 stick eventを
-[固定条件評価](solver/evidence/comsol_binding_recert_2026_10_09_v1/c3_axis_normalized_after_projection_evaluation.json)でPASSした。
+`solver/evidence/comsol_binding_recert_2026_10_09_v1/c3_axis_normalized_after_projection_evaluation.json`（別管理の履歴）でPASSした。
 元のcandidate event semantic欠落によるBLOCKEDとraw結果は保持し、ID8→grounded_wallのreporting-only再projection receiptを別途結合した。
 状態の直接差の一部は絶対floorだけでは不合格であり、合格は事前登録した4×fine-pairの経験的数値感度幅を使う。これは厳密誤差上限ではない。
 同一fine solveの保存common-active stateではnative named total Ftr/FtzをN単位で実観測し、独立成分和とrelL2 7.83e-17で一致した。
 configured formula診断とは別証拠であり、個別native force、auxq RHS、全内部stageのassembly認証はNOT_TESTEDのままである。
 Freeze/Stickの保持終端IDはcontrolで観測できるが、Disappear ID/原因とescapedの意味境界event一致は未認証である。
 同日のv45 C2は独立監査済みpilot screeningとpost-pilot設定選択を経て、両anchorで当時未使用native32+candidate32seedを完了した。
-[Case-A final](solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_final_evaluation/evaluation_manifest.json)と
-[Case-P final](solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_final_evaluation/evaluation_manifest.json)は登録人口gateをPASSした。
+`solver/evidence/comsol_binding_recert_2026_10_09_v1/caseA_axis_normalized_final_evaluation/evaluation_manifest.json`（別管理の履歴）と
+`solver/evidence/comsol_binding_recert_2026_10_09_v1/caseP_axis_normalized_final_evaluation/evaluation_manifest.json`（別管理の履歴）は登録人口gateをPASSした。
 終端曲線の同時信頼上限はA/P `0.040128262937/0.035010667118`（上限0.05）、RZ/fate TVは`0.130735400519/0.129537665328`（上限0.15）である。
 alpha/seed/bin/許容幅は結果後に変更せず、独立監査は128 CSV・4,445,056行の人口再集計と3,904 expected/observed bindingを確認した。
 全64 native replicaの実numeric seed、20 µs step、SI time unit、UserDefined getterを確認した。これは固定source・一方向背景・粒子間非相互作用と標準PRNG sampling条件付きの有限algorithm人口同等性である。

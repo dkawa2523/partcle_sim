@@ -13,10 +13,9 @@ from chamber_particles.fields import (
     LOCAL_FIELD_RANGE_MAX_CELLS_PER_ROW,
     FieldLocationError,
     PreparedFieldSet,
-    locate_field_cell,
-    sample_field,
 )
 from chamber_particles.numerical_status import FIELD_NUMERICAL_FAILURE, NUMERICAL_STATUS_OK
+from tests.verification.field_reference import locate_field_cell, sample_field
 from tests.verification.microcases import materialize_microcase
 
 
@@ -568,6 +567,7 @@ def test_p1_and_nonaffine_q1_are_continuous_across_shared_edges(tmp_path: Path) 
     paths = materialize_microcase("C06", tmp_path / "C06")
     case = load_case(paths.case_path)
     p1_layout = next(layout for layout in case.data.layouts if layout.name == "p1")
+    assert isinstance(p1_layout, P1TriLayout)
     p1_values = next(field.values for field in case.data.fields if field.name == "p1_affine")
     p1_point = np.asarray([0.01, 0.005])
     for cell_id in (0, 1):

@@ -1,44 +1,13 @@
 # Canonical case format v3
 
-この文書は、外部producerとsolverの間で受け渡す`case.yaml`と`case.h5`の実装契約です。
-COMSOL固有の列名、study、selectionはここへ持ち込まず、adapterがSIとcanonical semanticsへ変換します。
+この文書はproducerとsolverの間のcase.yaml/case.h5の現行入力契約を所有します。
+COMSOL tag・列名・native selectionはadapter側でSIとcanonical意味へ変換します。
+input/data schema3、static/固定topology linear-time、realized internal/surface、独立接触半径、XY translation periodicを扱います。
+旧data1や曖昧なaliasを読まず、未知key/schemaは拒否します。
 
-現記載はcase/canonical data schema v3とsource algorithm
-`realized_internal_surface_contact_schedule_v5`の入力契約である。完全な現行algorithm rosterは
-[`implementation_plan.md`](../../implementation_plan.md)と実行manifestをauthorityとし、ここへ複製しない。
-case schema v2は実測で製品価値を示せなかった粒子内multithreading設定を削除し、`resources`をmemory budgetだけへ
-戻した。schema v3は固定meshの時間依存field、canonical realized surface table、drag径・静電半径から独立した
-`contact_radius_m`、static Cartesian XYのpure-translation periodic topologyを一つの現行形式へ統合する。
-cumulative solver workで決めるdurable epoch、checkpoint、resume identity、
-同期single-owner writerはsolver内部とresult formatの責務であり、YAML/HDF5へcheckpoint cadenceやresume modeの
-設定keyを追加しない。format v1は未releaseの試作schemaとして拒否し、過去の`resources.threads`を受ける
-compatibility aliasや二重parserは作らない。
-
-engine v7以降の一般曲線材料壁refinement batchとengine v8のaccepted replay保持選択は内部work partitionであり、
-YAMLに選択子を追加しない。現行event `line_quadratic_curved_capsule_periodic_first_hit_v22`の
-transverse/start-contact/finite-contact-set departure/axis/corner/capsule/periodic certificateとrow-local statusも内部数値判定であり、`case.yaml`、`case.h5`、
-case schema v3へcertificate専用keyを要求しない。groupごとの接触位置は、後述の`contact_geometry`で明示する。
-P19-Lのglobal-first/local-fallback applicability certificate、64-cell候補上限、dense path、failure code 9、
-`solver.event.max_refinements`を共有する分割budgetも内部数値判定である。producerが局所認証方式、cell上限、第二の
-refinement設定を選ぶYAML/HDF5 keyは追加しない。
-event v16のquery authorityも内部実装である。global enclosureはshortened-stage、field support、applicability、acceptance
-safetyを所有し、global supportを独立に証明済みのvalid `rk4_dense` rowだけcurrent dense Bernstein boundでevent broad-phase
-queryを行う。Hermite pathでは物理position budgetとroundoff budgetを加算し、facet-local offset dotは補償演算、評価・包絡は
-root-relative TwoDiffを使う。validなRK4 dense rowのposition Bernstein control enclosureがfacetの既存budget込みinside
-half-spaceへ全4点で厳密に入る時だけ候補をclearし、証明不能なら保持してsplitする。このcertificateをproducerが選ぶ
-YAML/HDF5 keyは追加しない。monotone clearはcubic Hermite derivative-Bernstein enclosureの明示opt-inだけとし、一般
-RK4/exponential/scalarは証明不能時にfail-closedとする。この選択をcase入力へ公開しない。event v22は
-event v19 / v18の曲線pathにおける最初のhitと局在budget内の同時incident facet集合を維持し、材料facetならexact pathと同じ
-`corner_policy`へ渡す。周期facetならwall lawを使わず対応facetへtransferする。candidate順で一面へ丸める設定keyは追加しない。
-dense path v3の原点相対Bernstein enclosure、TwoDiff残差、方向付き外向き座標変換も内部丸め規則であり、
-endpoint・path・event意味やcase keyを増やさない。
-P10/P14のregular compiled locator、P1/Q1 previous-cell strict-interior hint、supported-containment BVHと
-outside/masked full-search fallbackも内部runtime詳細である。hintはaccepted endpointだけが更新し、YAML/HDF5 keyや
-producer責務を追加しない。geometry volume-cell BVH、局所float64解像性gate、準備済みedge長も内部prepare責務であり、
-producerがindexやtoleranceを指定するkeyは追加しない。
-P11の線形緩和分解、指数更新、path enclosureも内部numericsである。通常の物理modelではproducerはCOMSOL固有設定や
-事前計算したdrag係数を原始背景場の代用にしない。明示した`prescribed_*` reference revisionだけは、
-`physics_models.md`の物性bindingと係数契約に従い同じcanonical field形式へ保存する。
+通常利用者は配布clientの`init`、`inputs`、`create`を使い、canonical hashを手で更新する必要はありません。
+`load_case`は構文/hash/静的参照、`check_case`は実行と同じprepareを担当します。
+完全な解決revisionは実runのmanifestがauthorityで、本書にruntime rosterや過去工程を重複転記しません。
 
 ## 所有境界
 

@@ -25,6 +25,7 @@ from chamber_particles.case_format import (
     RegularLayout,
     write,
 )
+from chamber_particles.cpu import MEMORY_PLAN_REVISION
 from chamber_particles.physics.catalog import PHYSICS_CATALOG_REVISION
 from chamber_particles.physics.forces import (
     BOLTZMANN_J_K,
@@ -640,7 +641,7 @@ def test_exponential_midpoint_uses_local_enclosure_for_unused_extreme_cell(
     assert np.isfinite(final.velocity_m_s).all()
     assert np.isfinite(final.charge_number).all()
     memory_plan = result.manifest["memory_plan"]
-    assert memory_plan["revision"] == "solver_owned_memory_plan_v25"
+    assert memory_plan["revision"] == MEMORY_PLAN_REVISION
     assert memory_plan["certificate_work_bytes_per_particle"] == 544
     assert memory_plan["components"]["slab_certificate_work"] == (
         544 * memory_plan["slab_particles"]
@@ -2076,7 +2077,7 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
     assert reference.manifest["geometry_algorithm_revision"] == (
         "line_boundary_capsule_contact_bvh_v8"
     )
-    assert plans[1]["revision"] == "solver_owned_memory_plan_v25"
+    assert plans[1]["revision"] == MEMORY_PLAN_REVISION
     assert plans[1]["runtime_layout_revision"] == "resident_soa_process_slab_v14"
     assert reference.manifest["resolved"]["physics_models"]["electric"]["model"] == "coulomb"
     reference_boundary = reference.read_boundary_events()

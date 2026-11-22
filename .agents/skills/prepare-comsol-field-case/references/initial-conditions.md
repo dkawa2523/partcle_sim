@@ -99,26 +99,34 @@ existing zero-time departure law rather than adding a positional nudge.
 
 ## Use the implemented numeric producer when it fits
 
-Read `solver/tools/source_builder/README.md` and use the existing external CLI:
+Read `solver/src/chamber_particles_tools/source_builder/README.md`. The
+installed source client accepts configuration format 2 and feeds the shared
+case publisher. A format-1 case recipe can start from a source-free bundle:
 
 ```console
-uv run --locked python -m tools.source_builder TEMPLATE.yaml INITIAL.csv SOURCE.json NEW_DIRECTORY
+uv run --locked python -m chamber_particles create RECIPE.yaml -o NEW_DIRECTORY
 ```
 
 It supports numeric vector, speed/direction, nonrelativistic momentum/energy,
 explicit SI conversion and static/per-row orthonormal two-component velocity
-bases for internal XY/RZ tables. Position already uses the template's coordinate
-basis/origin. Missing properties can be inherited only by exact existing particle
-ID, after verifying the same bound cohort and every inherited authority; the
+bases for internal and surface XY/RZ tables. Internal position already uses the
+bundle's coordinate basis/origin. Surface locations use canonical facet row
+indices and strict-interior facet parameters, not native boundary numbers.
+Properties are explicitly supplied by default. Only an explicit
+`inherit_from: {table: existing, join: particle_id}` may inherit missing
+properties by exact existing ID, after verifying every inherited authority; the
 same numeric ID in another MPH is no such evidence. For another population,
 supply all independent property columns rather than inherit chamber defaults.
-The current CLI matches IDs but does not authenticate that provenance. Select actual
+The client matches IDs but does not authenticate that provenance. Select actual
 release rows explicitly before conversion. The producer keeps numeric correlations,
-snapshots its CSV/config bytes for parsing/hashing, and uses the canonical writer
-and public `load_case`; it neither solves nor verifies the physical source law.
+records CSV/config identities, and uses the single publisher's canonical writer,
+public `load_case` and shared `check_case`. It neither solves trajectories nor
+verifies the physical source law. The Python `read_csv_source` returns rows
+without writes; `inputs.create_case` publishes the complete intended source set.
 
 This producer does not evaluate native expressions, sample thermal/angular/time
-distributions, generate surface releases or handle nonzero third DOF/dynamic frames.
+distributions or handle nonzero third DOF/dynamic frames. It converts supplied
+surface rows rather than sampling new surface releases.
 `frame: inertial` declares the candidate frame; it is not a way to resolve missing
 native evidence. An explicitly scoped same-component numeric replay can retain
 unresolved native-frame metadata, but cannot claim physical frame equivalence.

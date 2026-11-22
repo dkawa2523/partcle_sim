@@ -1,0 +1,86 @@
+{
+  "app_identity_preserved": true,
+  "block_ids_and_order_preserved": true,
+  "query_ids_preserved": true,
+  "snapshot_tests": "4 passed",
+  "source_ruff": "passed",
+  "publication": "not requested or performed",
+  "authoring_status": "complete",
+  "evidence": "Final bound assessment/quality/performance projections imported;10query IDs preserved",
+  "protected_234_files_unchanged": true,
+  "historical_windows_attempt": {
+    "prepare": "blocked",
+    "build": "blocked",
+    "reason": "blocked: Invalid prebuilt Data runtime: Invalid prebuilt source path: assets\\visualize-data\\assets\\cdn.json",
+    "dist_was_unchanged_before_linux_build": true
+  },
+  "official_linux": {
+    "prepare": "passed",
+    "build": "passed",
+    "route": "same installed Data script, official prebuilt, WSL/Linux Node; no Vite/node_modules/source fallback/protected changes",
+    "build_metadata": {
+      "version": 1,
+      "kind": "separate-data-v1",
+      "html": {
+        "path": "index.html",
+        "sha256": "df38d3ff218aaaeed7749e855e25ef94589f6d2b5fa07f3b6edf82dcc12c186e",
+        "bytes": 2401355
+      },
+      "snapshot": {
+        "path": "snapshot.712a792dea2b88afa1a1a4e1f730f0d705b6ef553ba1813037441ede9695620b.json",
+        "sha256": "712a792dea2b88afa1a1a4e1f730f0d705b6ef553ba1813037441ede9695620b",
+        "bytes": 73656
+      },
+      "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+      "sourceSnapshotSha256": "712a792dea2b88afa1a1a4e1f730f0d705b6ef553ba1813037441ede9695620b"
+    },
+    "local_html_and_snapshot_hash_readback": "passed"
+  },
+  "visual_qa": {
+    "observer": "root coordinator",
+    "desktop": "verified",
+    "narrow_390px": "final snapshot screenshot; documentWidth375<=viewport390; temporary viewport reset",
+    "source_overview_and_data_preview": "verified",
+    "evidence_origin": "coordinator observed rendered app; this agent independently checked official build metadata and file hashes",
+    "final_snapshot": "verified after explicit reload",
+    "quality_rows": "1201/101,13CLI,80identity,A/Pmeans,localreservations and ninth not-certified row verified",
+    "performance_pagination": "secondpage workers1/4 exact times verified",
+    "source_actions": "final overview files and reviewed data preview verified"
+  },
+  "final_build_pending": false,
+  "preview": "Final split build refreshed in same IAB tab, sameapp/block/presentation identity;marked deliverable. Localhost only, no publication.",
+  "final_official_build": {
+    "prebuilt": true,
+    "platform": "WSL Ubuntu / official Node24.22.3",
+    "html_sha256": "8241ab7e8831b6c6dd287dae9c1e884e7d49ce2def7805358d28e2f7ec41d8e2",
+    "snapshot_sha256": "64cc6af350576b935958327f92174a013f75b030813c90623b5e596efd7832bc",
+    "runtime_sha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "compiler_sha256": "ec65601079c80bef7210f2c9760ff7f2db6adef28516ffff280d4c86f91d4078",
+    "build_manifest": {
+      "version": 1,
+      "kind": "separate-data-v1",
+      "html": {
+        "path": "index.html",
+        "sha256": "8241ab7e8831b6c6dd287dae9c1e884e7d49ce2def7805358d28e2f7ec41d8e2",
+        "bytes": 2401355
+      },
+      "snapshot": {
+        "path": "snapshot.64cc6af350576b935958327f92174a013f75b030813c90623b5e596efd7832bc.json",
+        "sha256": "64cc6af350576b935958327f92174a013f75b030813c90623b5e596efd7832bc",
+        "bytes": 89385
+      },
+      "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+      "sourceSnapshotSha256": "64cc6af350576b935958327f92174a013f75b030813c90623b5e596efd7832bc"
+    }
+  },
+  "offline_export": {
+    "html_sha256": "73254629d174aebdc2a58ba13e6c035a1b0a8e8e29351c9b275ace91d061627b",
+    "bytes": 2490442,
+    "requires_cdn": false,
+    "locator": "particle_platform_redesign/report_app/.data-app-offline/exports/report.html",
+    "distributed_via_git": false
+  },
+  "app_id": "report:c9a85c07-6c83-42c2-9aa3-5d3037be4638",
+  "snapshot_query_count": 10,
+  "source_snapshot_sha256": "64cc6af350576b935958327f92174a013f75b030813c90623b5e596efd7832bc"
+}

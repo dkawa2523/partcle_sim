@@ -15,8 +15,8 @@ uv run --locked chamber-particles inspect NEW_RESULT
 
 Depths and `time.dt_s` belong to the independent numerical plan; the command
 does not inherit a historical Vigus step or use the saved output spacing.
-An unused output directory is required. `check` is a static input check; the
-full model/bounds/support preparation still runs during `run`.
+An unused output directory is required. `check` uses the same complete
+model/bounds/support preparation as `run`, without starting workers or advancing particles.
 
 The primitive case contains homogeneous particle properties and these static
 nodal fields on one layout, with canonical SI units/basis:
@@ -576,9 +576,9 @@ The focused external-tool test gate is:
 
 ```powershell
 uv run --locked python -m pytest `
-  tools/comsol_adapter/tests `
-  tools/electrostatic_builder/tests `
-  tools/vv/comsol/tests
+  tests/verification/test_csv_adapter.py `
+  tests/verification/test_electrostatic_builder.py `
+  tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py
 ```
 
 ## M3-C0a offline reference lock

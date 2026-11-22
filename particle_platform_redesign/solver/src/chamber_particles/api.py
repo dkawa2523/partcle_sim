@@ -1,10 +1,13 @@
 """Stable public entry points and public exception translation."""
 
+from dataclasses import dataclass
 from os import PathLike
+from pathlib import Path
+from typing import Literal
 
 from .case import SimulationCase
 from .case import load_case as _load_case
-from .engine import EngineError, run_simulation
+from .engine import _prepare, run_simulation
 from .output import (
     IncompleteResult,
     ResultOpenError,
@@ -13,6 +16,7 @@ from .output import (
     RunSummary,
     open_result_store,
 )
+from .transport import EngineError
 
 type _PathInput = str | PathLike[str]
 
@@ -29,12 +33,96 @@ class IncompleteResultError(SimulationError):
     """A result is incomplete and was opened without recovery mode."""
 
 
+@dataclass(frozen=True, slots=True)
+class CheckedModel:
+    """One resolved scientific model, without mutable execution bindings."""
+
+    category: str
+    model: str
+    revision: str
+
+
+@dataclass(frozen=True, slots=True)
+class CaseCheckReport:
+    """Immutable execution-preparation summary; no particles have advanced."""
+
+    case_name: str
+    case_path: Path
+    data_path: Path
+    case_file_hash: str
+    data_content_hash: str
+    coordinate_system: str
+    motion_mode: str
+    particle_count: int
+    integrator: str
+    backend: str
+    workers: int
+    start_time_s: float
+    end_time_s: float
+    dt_s: float
+    required_fields: tuple[str, ...]
+    models: tuple[CheckedModel, ...]
+    field_time_knots_s: tuple[float, ...]
+    boundary_groups: tuple[str, ...]
+    memory_limit_bytes: int
+    planned_memory_bytes: int
+    slab_particles: int
+    load_peak_bytes: int
+    prepare_peak_bytes: int
+    run_peak_bytes: int
+    status: Literal["valid"] = "valid"
+
+
 def load_case(path: _PathInput) -> SimulationCase:
     """Load and statically validate a canonical YAML/HDF5 case."""
     try:
         return _load_case(path)
     except (OSError, ValueError) as exc:
         raise CaseError(f"cannot load case {path!s}: {exc}") from exc
+
+
+def check_case(case: SimulationCase, *, workers: int = 1) -> CaseCheckReport:
+    """Use simulation's complete prepare without starting workers or a writer.
+
+    This resolves numerical support and solver-owned memory for this machine.
+    It does not qualify physical accuracy or reserve operating-system resources.
+    """
+    try:
+        prepared = _prepare(case, workers=workers)
+    except (EngineError, OSError, ValueError) as exc:
+        raise CaseError(f"cannot prepare case {case.spec.name}: {exc}") from exc
+    spec = case.spec
+    memory = prepared.memory_plan
+    models = tuple(
+        CheckedModel(category, str(model["model"]), str(model["revision"]))
+        for category, model in prepared.physics.resolved_models().items()
+    )
+    return CaseCheckReport(
+        spec.name,
+        case.case_path,
+        case.data_path,
+        case.case_file_hash,
+        case.content_hash,
+        case.data.coordinate_system,
+        spec.motion.mode,
+        prepared.schedule.particle_count,
+        spec.solver.integrator,
+        spec.solver.backend,
+        memory.worker_count,
+        spec.time.start_s,
+        spec.time.end_s,
+        spec.time.dt_s,
+        tuple(item.name for item in prepared.physics.required_fields),
+        models,
+        prepared.field_time_split_s,
+        case.data.geometry.group_names,
+        memory.limit_bytes,
+        memory.planned_bytes,
+        memory.slab_particles,
+        memory.load_peak_bytes,
+        memory.prepare_peak_bytes,
+        memory.run_peak_bytes,
+    )
 
 
 def simulate(case: SimulationCase, output: _PathInput, *, workers: int = 1) -> RunSummary:

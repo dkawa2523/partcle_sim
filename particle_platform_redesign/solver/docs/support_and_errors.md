@@ -1,13 +1,13 @@
-# v0.3.0 support, qualification, limitations, and error guide
+# v0.4.0 support, qualification, limitations, and error guide
 
-この文書は、`0.3.0`の固定topology 2-D版を利用する時の入口です。過去版の仕様は各tagに保持します。
+この文書は、`0.4.0`の固定topology 2-D版を利用する時の入口です。過去版の仕様は各tagに保持します。
 対応する設定、明示的な非対応範囲、失敗時の最初の確認先を
 一か所にまとめます。式、適用域、数値許容差、永続形式の詳細を再定義する文書ではありません。厳密な正本は次です。
 
 - 入力：[`case_format_v3.md`](case_format_v3.md)
 - 物理モデル：[`physics_models.md`](physics_models.md)
 - 数値計算：[`numerics.md`](numerics.md)
-- 結果：[`result_format_v3.md`](result_format_v3.md)
+- 結果：[`result_format_v4.md`](result_format_v4.md)
 - 並列化・性能判断：[`parallel_execution_plan.md`](parallel_execution_plan.md)
 
 COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行には不要であり、本表の「対応」は
@@ -19,7 +19,7 @@ COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行�
 対応selectorの全組合せや、任意のチャンバーの予測精度を一括して認定しません。個別profileの入力、SI誤差budget、
 粒子数・seed・刻み・depth、独立reference、適用域は
 [0.2.0の用途別受入条件](../../reviews/v0_2_release_use_case_acceptance_2026-10-10.json)に固定されています。
-その証拠は元のsourceに限定して保持します。現行0.3.0の科学出力・用途性能・配布検査は
+その証拠は元のsourceに限定して保持します。0.3.0の科学出力・用途性能・配布履歴は
 [並列実行・性能](parallel_execution_plan.md)、現行COMSOL回帰は[評価方法](../../vv_methodology.md)が所有します。
 
 | 用途 | 保証の範囲と判定 |
@@ -28,9 +28,9 @@ COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行�
 | 可変係数・連成Brownian | B01/B02/B03：時間線形drag/flow、位置affine flow、一様stationary OML＋Coulombの指定ensembleで平均・共分散・電荷を独立Green/scalar referenceと比較。境界の一般first-passageや一般SDE次数へ拡張しない |
 | Brownian吸収・反復反射・RZ到達 | C01–C04：一定係数・point particleの登録h/depthごとにCDF誤差、MC幅、経験的reference幅を分離して判定。RZの元N16k D2判定未達は保持し、別登録N64k追試のPASSと区別 |
 | 物理式とmodel適用域 | D01/D02：Talbot/Saffman原著式、drag/charge/ion drag等の独立極限・解析運動・pure/compiled・適用外拒否。model-form感度の数値確認であり、species混合・付着・発生源の実験的validationではない |
-| 限定COMSOL比較 | 現行v62の共通P1・100nm・BrownianありCase A/P各32 seedで、保存native参照に対する登録位置・終端人口分布を再評価。以前の決定論三電流caseの証拠は元sourceに限定する。新しい独立cohortや一般native右辺・境界応答の認証ではない |
+| 限定COMSOL比較 | 履歴v62の共通P1・100nm・BrownianありCase A/P各32 seedで、保存native参照に対する登録位置・終端人口分布を再評価。以前の決定論三電流caseの証拠は元sourceに限定する。新しい独立cohortや一般native右辺・境界応答の認証ではない |
 | 規模・性能・再現性 | 登録P14、B03、P14-U等でprocess数別の科学payload、failure、memory plan、時間・実メモリを評価。小粒子数や早期終端では遅化も記録し、未指定のSLAやOS hard RSS capを保証しない |
-| 配布 | 同一tagのWindows/Linux CIで品質gate、Quick Start、wheel、runtime-only installを検査。source/wheel/install全Python bytesとREADME由来METADATA、三API・CLI・time-field・接触modeを照合 |
+| 配布 | 同一tagのWindows/Linux CIで品質gate、Quick Start、wheel、runtime-only installを検査。source/wheel/install全Python bytesとREADME由来METADATA、四API・CLI・time-field・接触modeを照合 |
 
 背景場のmesh/time解像度、回復gradient/curl、source・wall parameter、実験的製造KPI、追加modelの精度は、
 実際の用途入力と独立referenceを伴って別途評価します。有限depth Hermite pathの連続OU exact first-passageや
@@ -38,16 +38,14 @@ zero-miss probabilityは保証に含めません。
 
 ## 公開する実行境界
 
-利用者向けPython APIは`load_case(path)`、`simulate(case, output, *, workers=1)`、`open_result(path)`の三つです。CLIの
+計算coreのPython APIは`load_case(path)`、`check_case(case, *, workers=1)`、`simulate(case, output, *, workers=1)`、`open_result(path)`です。通常の入力作成・解析・表示は同じwheelの`chamber_particles_tools`が公開します。CLIの
 `check`、`run`、`inspect`も同じ経路を使います。最初の実行方法は[Quick Start](../README.md#quick-start)を参照してください。
 
-`check`はYAML、canonical HDF5、hash、source/boundary参照と早期memory gateを検査します。物理モデルの組合せ、
-field support、geometry topology、積分器安定性、完全なmemory planは`run`のprepareで解決します。このため
-`check`の成功だけで計算可能とは判定しません。
+`load_case`はYAML/HDF5・hash・静的参照を検査します。`check`は`check_case`を呼び、`run`と同じprepareでmodelの組合せ、field support、geometry/topology、数値条件、指定workersのmemory planまで解決します。worker・writer・粒子更新は開始せず、小さいimmutable reportを返します。成功は準備完了であり、用途精度やOS資源の予約を意味しません。
 
 ## 対応範囲
 
-| 項目 | `0.3.0`の対応範囲 |
+| 項目 | `0.4.0`の対応範囲 |
 |---|---|
 | 座標 | `cartesian_xy`の2自由度運動、または`axisymmetric_rz`場中の`axisymmetric_rz_meridional` 2自由度運動 |
 | geometry | 静的2-D volume meshと`line2`材料境界。RZの`r=0`は壁でなくaxis event |
@@ -180,7 +178,7 @@ failureをepsilon、tolerance拡大、clampで消して成功扱いにしませ�
 
 正式公開版`0.1.0`はYAML case schema 2、canonical HDF5 data schema 1、result schema 2、checkpoint schema 2です。
 `0.2.0`/`0.3.0`はYAML case schema 3、canonical HDF5 data schema 3、
-result schema 3、checkpoint schema 2です。現行readerは旧data/result schemaを互換読込しません。
+result schema 3、checkpoint schema 2でした。0.4.0はinput/data3を維持し、resultは必須immutable context付きschema4、checkpoint配列形式は2です。現行readerは旧result3のcompleted/partialを互換読込しません。
 
 - readerは現行versionだけを受け、未知version・未知key・未知datasetをfail-closedで拒否します。
 - YAMLはraw file hash、HDF5はcanonical logical content hashを使います。編集後に古いhashを流用しません。
@@ -189,5 +187,4 @@ result schema 3、checkpoint schema 2です。現行readerは旧data/result sche
 - 旧reader、migration shim、compatibility aliasをproductionへ併存させません。旧resultを保持する場合は、それを作成した
   package、lock、入力、manifestを一緒に保存します。変換が必要ならcore外の明示的な一回変換にします。
 
-現行algorithm IDの一覧をこの文書へ複製しません。実行ごとの正確な値は`run.json`、開発上の現行rosterは
-[`implementation_plan.md`](../../implementation_plan.md)をauthorityとします。
+現行algorithm IDの一覧をこの文書へ複製しません。実行ごとの正確な値は`run.json`、開発上のrevisionは各ownerの定数をauthorityとします。

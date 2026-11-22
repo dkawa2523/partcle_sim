@@ -40,6 +40,9 @@ the repository guidance and `particle_platform_redesign/AGENTS.md` in full.
 Record the source revision/relevant local changes and actual imported solver
 location/version when candidate preparation or results are in scope. A native
 inspection alone needs no solver import. Never activate `old_code/`.
+Ordinary input creation/check/run/analysis is installed with the solver wheel;
+native COMSOL inspection remains external. Do not require live COMSOL merely
+to inspect an already bound public result.
 
 Reuse verified access evidence; discover access only for a new native observation.
 Discover the exact COMSOL producer/reader versions, executable/API, licenses,
@@ -118,6 +121,12 @@ scoped settings/readback hashes and JSON pointers are distinct bindings.
 `expected` and `observed` must refer to real artifacts; copying expectations is
 not readback. Candidate bindings remain unresolved until candidate data exist.
 Preflight classifies meaning, not transfer accuracy or successful execution.
+
+The ordinary CSV client is `chamber_particles_tools.csv_import`, with
+format-4 `provider: comsol` retaining dataset/solution/member lineage.
+`provider: csv` is a caller-declared source and creates no evidence of a COMSOL
+solve. Publish runnable inputs through `chamber_particles_tools.inputs`; native
+inspection does not choose particle models or author a second case writer.
 
 Deliver the record, relevant raw readback/exports and receipts, repeatable
 commands, and one next action per missing fact. Unresolved identity, equation,

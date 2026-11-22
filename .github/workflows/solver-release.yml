@@ -58,13 +58,15 @@ jobs:
         run: uv run --locked python -m pytest tests/verification tests/scenarios -q
       - name: Verify external workflows without COMSOL
         run: >-
-          uv run --locked python -m pytest tools/comsol_adapter/tests tools/electrostatic_builder/tests tools/field_preprocessor/tests
+          uv run --locked python -m pytest
           tools/vv/comsol/tests/test_meaning_preflight.py tools/vv/comsol/tests/test_boundary_response_mapping.py
-          tools/vv/comsol/tests/test_curved_wall_line2_convergence.py tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py -q
+          tools/vv/comsol/tests/test_curved_wall_line2_convergence.py tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py
+          tools/vv/comsol/tests/test_vigus_transport.py tools/vv/comsol/tests/test_saved_population_evaluation.py
+          tools/vv/comsol/tests/test_plot_matched_trajectories.py tools/vv/comsol/tests/test_matched_trajectory_evaluation.py -q
       - name: Generate producer-neutral Quick Start
         run: |
           $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
-          uv run --locked python examples/quickstart/create_case.py (Join-Path $quickstartRoot "input")
+          uv run --locked python -m chamber_particles init (Join-Path $quickstartRoot "input") --example xy-ballistic
       - name: Check producer-neutral Quick Start
         run: |
           $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
@@ -80,11 +82,11 @@ jobs:
       - name: Analyze producer-neutral Quick Start
         run: |
           $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
-          uv run --locked python -m tools.analysis (Join-Path $quickstartRoot "result") --output (Join-Path $quickstartRoot "derived/summary.json")
+          uv run --locked python -m chamber_particles analyze (Join-Path $quickstartRoot "result") --output (Join-Path $quickstartRoot "derived/summary.json")
       - name: Visualize producer-neutral Quick Start
         run: |
           $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
-          uv run --locked python -m tools.visualization (Join-Path $quickstartRoot "result") --output-directory (Join-Path $quickstartRoot "derived/visualization")
+          uv run --locked python -m chamber_particles view (Join-Path $quickstartRoot "result") --output (Join-Path $quickstartRoot "derived/visualization")
       - name: Run warm performance smoke
         run: |
           $report = Join-Path "${{ runner.temp }}" "p14-smoke.json"
@@ -123,6 +125,23 @@ jobs:
           }
           $receipt = Join-Path "${{ runner.temp }}" "clean-wheel-smoke.json"
           & $python -m tests.release_smoke --wheel $wheel[0].FullName --json $receipt
+      - name: Verify installed workflow without checkout fixtures
+        run: |
+          $runtimeDirectory = Join-Path "${{ runner.temp }}" "chamber-particles-runtime"
+          $python = if ($IsWindows) {
+            Join-Path $runtimeDirectory "Scripts/python.exe"
+          } else {
+            Join-Path $runtimeDirectory "bin/python"
+          }
+          $isolated = Join-Path "${{ runner.temp }}" "installed-particle-workflow"
+          New-Item -ItemType Directory -Path $isolated -Force | Out-Null
+          Copy-Item -LiteralPath tests/release_workflow.py -Destination (Join-Path $isolated "verify.py")
+          Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
+          Push-Location $isolated
+          try {
+            & $python verify.py --output (Join-Path "${{ runner.temp }}" "installed-workflow.json")
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally { Pop-Location }
       - name: Retain verification evidence
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -130,6 +149,7 @@ jobs:
           path: |
             ${{ runner.temp }}/p14-smoke.json
             ${{ runner.temp }}/clean-wheel-smoke.json
+            ${{ runner.temp }}/installed-workflow.json
             particle_platform_redesign/solver/uv.lock
           if-no-files-found: error
           retention-days: 90

@@ -7,12 +7,6 @@ import numpy as np
 import pytest
 from numba import njit
 
-from chamber_particles.engine import (
-    _FAILURE_MODEL_APPLICABILITY,
-    _curved_row_failure_codes,
-    _NumericSupportContext,
-    _StageDynamics,
-)
 from chamber_particles.fields import PreparedFieldSet
 from chamber_particles.integrators import cubic_hermite_step
 from chamber_particles.physics.catalog import resolve_physics_plan
@@ -29,6 +23,12 @@ from chamber_particles.physics.runtime import (
     evaluate_local_continuous_applicability_into,
     local_additive_acceleration_abs_upper_into,
     prepare_physics_runtime,
+)
+from chamber_particles.transport import (
+    _FAILURE_MODEL_APPLICABILITY,
+    _curved_row_failure_codes,
+    _NumericSupportContext,
+    _StageDynamics,
 )
 
 _GAS_MOLECULAR_MASS_KG = 1.2753471408396638e-25
@@ -171,8 +171,8 @@ def test_cubic_hermite_dense_charge_crossing_prepared_invariant_fails_closed() -
         np.asarray([[0.0, 0.0]]),
         np.asarray([[0.0, 0.0]]),
         end_charge_number=np.asarray([np.nextafter(charge_upper, np.inf)]),
-        support_inside=np.asarray([True]),
-        applicability_inside=np.asarray([True]),
+        support_inside=np.asarray([True], dtype=np.bool_),
+        applicability_inside=np.asarray([True], dtype=np.bool_),
         numerical_status=np.zeros(1, dtype=np.uint8),
     )
     prepared = cast(
@@ -390,7 +390,7 @@ def test_native_local_additive_bound_preserves_unavailable_and_invalid_state_mea
         charge,
         lower,
         lower,
-        np.asarray([True, True, False]),
+        np.asarray([True, True, False], dtype=np.bool_),
         result[:3],
         applicable[:3],
         status[:3],

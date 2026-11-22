@@ -33,7 +33,7 @@ v45追加機能認定時の保存revisionはengine `particle_engine_v45`、compi
 性能値は置換前baselineとして残し、開発runtime名と混同しない。result algorithm v6、result schema 3、checkpoint schema 2である。
 0.2.0の公開sourceはv46である。過去の移行・試作・不採用・品質logの詳細は
 [凍結した検証記録](../evidence/process_dispatch_memory_2026_10_12/current_docs/solver/docs/stage1b_validation.md)に保持する。
-現行0.3.0のrevisionは[`result_format_v3.md`](result_format_v3.md)、科学・用途性能・OS/wheel検査は
+現行0.3.0のrevisionは[`result_format_v4.md`](result_format_v4.md)、科学・用途性能・OS/wheel検査は
 [`parallel_execution_plan.md`](parallel_execution_plan.md)、今後の作業は[`implementation_plan.md`](../../implementation_plan.md)を参照する。
 serialとprocess workerは同じslab数値処理を使い、親macro/単一writer/checkpoint、bounded event ACKを維持する。
 追加JIT化・leaf途中yield・native teamの旧工程は現在の必須作業ではない。

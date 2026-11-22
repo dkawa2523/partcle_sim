@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from chamber_particles.case_format import content_hash
 from chamber_particles.output import (
     RESULT_ALGORITHM_REVISION,
     RESULT_SCHEMA_VERSION,
@@ -17,10 +18,143 @@ from chamber_particles.output import (
     FinalParticles,
     LifecycleSeries,
     ProbeFrame,
+    ResultBoundaryCondition,
+    ResultOpenError,
+    ResultSource,
     ResultWriteError,
     ResultWriter,
+    make_result_context,
     open_result_store,
 )
+from tests.verification.microcases import build_microcase
+
+
+def _identity(label: str) -> dict[str, object]:
+    return {
+        "case": label,
+        "case_file_hash": "sha256:" + "0" * 64,
+        "data_content_hash": content_hash(build_microcase("C08").data),
+    }
+
+
+def _initialize_context(writer: ResultWriter) -> None:
+    if writer.context_initialized:
+        return
+    definition = build_microcase("C08")
+    writer.initialize_context(
+        make_result_context(
+            definition.data,
+            case_file_hash="sha256:" + "0" * 64,
+            data_content_hash=content_hash(definition.data),
+            motion_mode="cartesian_xy",
+            sources=tuple(
+                ResultSource(index, name, name + "_table", "table")
+                for index, name in enumerate(("first", "second", "third"))
+            ),
+            boundaries=tuple(
+                ResultBoundaryCondition(
+                    row["boundary_group"], row["priority"], row["law"], "particle_center"
+                )
+                for row in definition.spec["boundaries"]
+            ),
+        )
+    )
+
+
+def test_result_context_is_required_and_is_geometry_only_immutable(tmp_path: Path) -> None:
+    import h5py
+
+    output = tmp_path / "context-result"
+    with ResultWriter(output, 3, _identity("context")) as writer:
+        with pytest.raises(ResultWriteError, match="context"):
+            writer.begin_epoch()
+        _initialize_context(writer)
+        partial = output.with_name(output.name + ".partial")
+        manifest = json.loads((partial / "run.json").read_text())
+        assert manifest["context"] == manifest["resume_identity"]["result_context"]
+        assert (partial / "context.h5").is_file() and not (partial / "LATEST").exists()
+        with pytest.raises(ResultWriteError, match="immutable"):
+            writer.initialize_context(
+                make_result_context(
+                    build_microcase("C08").data,
+                    case_file_hash="sha256:" + "0" * 64,
+                    data_content_hash="sha256:" + "1" * 64,
+                    motion_mode="cartesian_xy",
+                    sources=(),
+                    boundaries=(),
+                )
+            )
+        writer.begin_epoch()
+        writer.commit_epoch(_checkpoint_state(macro_step_count=1))
+        writer.finalize(_final_particles(), {}, macro_step_count=1)
+    context = open_result_store(output).read_context()
+    assert context.source_names == ("first", "second", "third")
+    assert context.unit_system == "SI" and context.axis_policy == "none"
+    np.testing.assert_array_equal(context.geometry.quad4, [[0, 1, 2, 3]])
+    with pytest.raises(ValueError):
+        context.geometry.nodes_m[0, 0] = 4
+    with h5py.File(output / "context.h5", "r") as handle:
+        assert not len(handle["fields"]) and not len(handle["sources"])
+
+
+@pytest.mark.parametrize("complete", [False, True])
+@pytest.mark.parametrize("damage", ["missing", "file_bytes", "logical_hash", "old_version"])
+def test_context_damage_and_old_results_are_rejected_without_regeneration(
+    tmp_path: Path, complete: bool, damage: str
+) -> None:
+    output = tmp_path / "context-result"
+    with ResultWriter(output, 3, _identity("context")) as writer:
+        _initialize_context(writer)
+        writer.begin_epoch()
+        writer.commit_epoch(_checkpoint_state(macro_step_count=1))
+        if complete:
+            writer.finalize(_final_particles(), {}, macro_step_count=1)
+    directory = output if complete else output.with_name(output.name + ".partial")
+    if damage == "missing":
+        (directory / "context.h5").unlink()
+    elif damage == "file_bytes":
+        with (directory / "context.h5").open("ab") as stream:
+            stream.write(b"unexpected bytes")
+    else:
+        manifest = json.loads((directory / "run.json").read_text())
+        if damage == "old_version":
+            manifest["result_schema_version"] = 3
+        else:
+            manifest["context"]["content_hash"] = "sha256:" + "f" * 64
+        (directory / "run.json").write_text(json.dumps(manifest))
+    with pytest.raises((ResultOpenError, OSError)):
+        open_result_store(output, recovery=not complete)
+    if not complete:
+        with pytest.raises(ResultWriteError):
+            ResultWriter(output, 3, _identity("context"))
+
+
+@pytest.mark.parametrize("source_id", [-1, 3])
+def test_final_source_ids_require_immutable_context_labels(tmp_path: Path, source_id: int) -> None:
+    output = tmp_path / "unknown-source"
+    with ResultWriter(output, 3, _identity("source-identity")) as writer:
+        _initialize_context(writer)
+        writer.begin_epoch()
+        writer.commit_epoch(_checkpoint_state(macro_step_count=1))
+        final = replace(_final_particles(), source_id=np.asarray([0, 1, source_id], dtype="<i4"))
+        with pytest.raises(ResultWriteError, match="source_id"):
+            writer.finalize(final, {}, macro_step_count=1)
+
+
+def test_context_does_not_sort_or_renumber_source_identity() -> None:
+    definition = build_microcase("C08")
+    with pytest.raises(ValueError, match="resolved contiguous order"):
+        make_result_context(
+            definition.data,
+            case_file_hash="sha256:" + "0" * 64,
+            data_content_hash=content_hash(definition.data),
+            motion_mode="cartesian_xy",
+            sources=(
+                ResultSource(1, "second", "second_table", "table"),
+                ResultSource(0, "first", "first_table", "surface"),
+            ),
+            boundaries=(),
+        )
 
 
 def _final_particles() -> FinalParticles:
@@ -149,8 +283,9 @@ def test_boundary_batches_rebase_ragged_candidates_and_bulk_reader_sorts(tmp_pat
     with ResultWriter(
         output,
         particle_capacity=3,
-        resume_identity={"case": "ragged-boundary-test"},
+        resume_identity=_identity("ragged-boundary-test"),
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         writer.write_boundary_events(first)
         writer.write_boundary_events(second)
@@ -198,8 +333,9 @@ def test_periodic_translation_boundary_event_round_trip(tmp_path: Path) -> None:
     with ResultWriter(
         output,
         particle_capacity=3,
-        resume_identity={"case": "periodic-output-test"},
+        resume_identity=_identity("periodic-output-test"),
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         writer.write_boundary_events(events)
         writer.commit_epoch(_checkpoint_state(macro_step_count=1))
@@ -220,8 +356,9 @@ def test_extended_result_columns_round_trip(tmp_path: Path) -> None:
     with ResultWriter(
         output,
         particle_capacity=3,
-        resume_identity={"case": "output-test"},
+        resume_identity=_identity("output-test"),
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         writer.write_failure_events(
             FailureEvents(
@@ -263,7 +400,7 @@ def test_extended_result_columns_round_trip(tmp_path: Path) -> None:
     assert summary.probe_row_count == 1
 
     manifest = json.loads((output / "run.json").read_text(encoding="utf-8"))
-    assert manifest["result_schema_version"] == RESULT_SCHEMA_VERSION == 3
+    assert manifest["result_schema_version"] == RESULT_SCHEMA_VERSION == 4
     assert manifest["result_algorithm_revision"] == RESULT_ALGORITHM_REVISION
     assert "epoch_macro_steps" not in manifest
     assert manifest["counts"]["failure_events"] == 1
@@ -301,8 +438,9 @@ def test_failure_reason_codes_are_nonzero_and_match_failed_final_state(tmp_path:
     with ResultWriter(
         tmp_path / "failure-result",
         particle_capacity=3,
-        resume_identity={"case": "failure-test"},
+        resume_identity=_identity("failure-test"),
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         with pytest.raises(ResultWriteError, match="nonzero uint16"):
             writer.write_failure_events(
@@ -324,8 +462,9 @@ def test_result_contact_radius_must_be_finite_and_nonnegative(tmp_path: Path) ->
     with ResultWriter(
         tmp_path / "contact-radius-result",
         particle_capacity=3,
-        resume_identity={"case": "contact-radius-test"},
+        resume_identity=_identity("contact-radius-test"),
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         invalid_events = _boundary_events([0.5], [10], [1], [4], [[4]])
         invalid_events.contact_radius_m[0] = -1.0
@@ -353,8 +492,9 @@ def test_final_publication_requires_capacity_and_canonical_particle_ids(
         ids = {"negative": [-1, 20, 30], "duplicate": [10, 10, 30], "reversed": [30, 20, 10]}
         final = replace(final, particle_id=np.asarray(ids[damage], dtype="<i8"))
     with ResultWriter(
-        output, particle_capacity=3, resume_identity={"case": "invalid-final"}
+        output, particle_capacity=3, resume_identity=_identity("invalid-final")
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         writer.commit_epoch(_checkpoint_state(macro_step_count=1))
         with pytest.raises(ResultWriteError):
@@ -370,8 +510,9 @@ def test_final_ids_accept_sparse_values_up_to_int64_limit(tmp_path: Path) -> Non
         particle_id=np.asarray([0, 2, np.iinfo(np.int64).max], dtype="<i8"),
     )
     with ResultWriter(
-        output, particle_capacity=3, resume_identity={"case": "sparse-final"}
+        output, particle_capacity=3, resume_identity=_identity("sparse-final")
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         writer.commit_epoch(_checkpoint_state(macro_step_count=1))
         writer.finalize(final, {}, macro_step_count=1)
@@ -412,8 +553,9 @@ def test_boundary_interaction_requires_canonical_encoding(
     with ResultWriter(
         tmp_path / f"invalid-{interaction_kind}-{destination_facet_id}-{law_id[0]}",
         particle_capacity=1,
-        resume_identity={"case": "invalid-boundary-interaction"},
+        resume_identity=_identity("invalid-boundary-interaction"),
     ) as writer:
+        _initialize_context(writer)
         writer.begin_epoch()
         with pytest.raises(ResultWriteError, match="interaction columns"):
             writer.write_boundary_events(events)

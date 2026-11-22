@@ -3,24 +3,11 @@
 この文書はproductionで実装したversioned modelを扱う。model選択とfield参照はYAMLへ明示し、field名の自動探索、
 適用域外での別modelへの自動切替、backend固有の係数を認めない。runtime contributionはdragを、stageで
 凍結した正の`linear_relaxation(rate, target_velocity)`、その他の力を`explicit_acceleration`として返す。
-現行physics catalog revisionは`inertial_langevin_2d_catalog_v24`、physics runtime revisionは
-`prepared_native_physics_runtime_v25`である。runtime v16はP19-Lの局所range認証を追加した実装・性能snapshot、
-v17はDEP認証上限の直列化丸めを一つのfloat64 successorまで外向きに扱い、v18は各charge stageへ
-`charge_rate_derivative_s_inv=J`を追加し、v19はoptional aggregate three-currentを同じstage payloadへ統合した。
-v20はrelative-flow ion dragの局所interval上界とprepared charge invariantを同じruntime ownerへ追加した。
-catalog v18/runtime v21/compiled tile v19は、Talbot熱泳動とSaffman liftを既存の一つのstage passへ追加した。
-catalog v19はBrownianの必須base depthとoptional adaptive max depthを解決し、物理式とruntime v21は変更しない。
-catalog v20で、同時に選択した中性気体modelの重複primitive authorityとnative/effective-gas意味を
-prepare時に一度だけ照合する。力式、runtime、case schemaは変更しない。
-catalog v23/runtime v22/compiled tile v21で、Talbotの原著bindingを半径Knへ修正し、pure/boundの暗黙係数を削除する。
-continuous modelはfiniteな`J<=0`、fixed chargeは`J=0`を返す。
-runtime v23はvalidated planからstageのmodel code、primitive offset、適用条件をprepare時に一度だけ投影し、
-従来の単一compiled physics passへnative contextから渡す。新しい物理式、適用域、係数は導入しない。
-runtime v24は同じownerのglobal/local適用域・加速度包絡をnative intoへ収束し、
-prepared contextとpacked primitive rangeから評価する。range unavailableをcertifiedへ読み替えず、
-非有限・適用外のfailureと最初のstatusを維持する。
-catalog v24/runtime v25は以下の明示reference係数とCoulombだけのcharge capを同じstageへ接続し、
-既存のFDT・物理modelの適用域、integrator、RNG、result schemaを維持する。
+モデルの選択・required field・単位・成分・基底は`physics/catalog.py`が一つのownerである。
+`chamber-particles models`は同じdescriptorを表示し、stageの実行bindingも同じfield仕様を使う。
+現行方程式と適用域を以下に記す。過去revisionの導入順はGit履歴と保存receiptに保持する。
+実行に採用した正確なcatalog/runtime/compiled revisionは各`run.json`を参照する。
+continuous modelは有限の`J<=0`、fixed chargeは`J=0`を返し、運動と同じstageで評価する。
 
 ## Particle authority
 
@@ -1179,7 +1166,7 @@ resolved modelにはnoise model/revisionを記録し、manifestにはBrownian RN
 base/max depth、root/split draw stream、`macro_root_frozen_midpoint_v1`、`stochastic_exponential_midpoint_v1`、
 `path_kind=cubic_hermite`を残す。checkpoint resume
 identityはRNG/OU/split/tree-policy revision、coefficient policy、base/max depth、resolved modelを含み、mutable RNG cursorを保存しない。
-0.3.0の全体revisionは[`result_format_v3.md`](result_format_v3.md)の現行revision一覧を参照する。
+0.3.0の全体revisionは[`result_format_v4.md`](result_format_v4.md)の現行revision一覧を参照する。
 root covariance、conditional split、mean updateがfloat64で表現不能なrowは`nonfinite_physics`となり、同一batchの
 正常rowは継続する。`gamma*h`上限をこの実表現可能性検査の代用にはしない。
 COMSOLまたは`model_dataset`との比較は物理式のauthorityでなく、core外のV&Vだけが所有する。

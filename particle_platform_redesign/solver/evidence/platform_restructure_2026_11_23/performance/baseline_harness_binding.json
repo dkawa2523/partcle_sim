@@ -1,0 +1,9 @@
+{
+  "purpose": "Run unchanged baseline numerical package with current-source-owned revision assertions; initial original harness failed on stale engine_v62 literal, baseline actually v64. No numerical input, expected science, budget, or runtime is patched.",
+  "baseline_commit": "ade0c8e700f594d181f098259dddb4dd2cb778ac",
+  "harness_source": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\tests\\performance\\p14_matrix.py",
+  "harness_source_sha256": "700ceb576db38e07bc5d02d2fdca4ec2c19005da89e33b087481386cf7bf8b1f",
+  "binding_view_sha256": "f39f3173412d3878cf828f0725585b85b7aa099aec6cb90594686b1abb90d467",
+  "only_view_rewrite": "child module name points to this same source-bound harness",
+  "package_loaded_from": "isolated baseline uv project"
+}

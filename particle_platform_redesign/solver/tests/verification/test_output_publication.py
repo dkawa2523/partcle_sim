@@ -13,13 +13,19 @@ import pytest
 
 import chamber_particles.output as output_module
 from chamber_particles.output import ResultWriteError, ResultWriter, open_result_store
-from tests.verification.test_output import _checkpoint_state, _final_particles
+from tests.verification.test_output import (
+    _checkpoint_state,
+    _final_particles,
+    _identity,
+    _initialize_context,
+)
 
-_IDENTITY = {"case": "directory-publication"}
+_IDENTITY = _identity("directory-publication")
 
 
 def _committed_writer(output: Path) -> ResultWriter:
     writer = ResultWriter(output, particle_capacity=3, resume_identity=_IDENTITY)
+    _initialize_context(writer)
     writer.begin_epoch()
     writer.commit_epoch(_checkpoint_state(macro_step_count=1))
     return writer

@@ -36,6 +36,9 @@ import numpy as np
 import yaml
 
 from chamber_particles import load_case, open_result, simulate
+from chamber_particles.cpu import MEMORY_PLAN_REVISION
+from chamber_particles.engine import BROWNIAN_TREE_POLICY_REVISION, ENGINE_ALGORITHM_REVISION
+from chamber_particles.events import EVENT_ALGORITHM_REVISION
 from tests.scenarios.test_brownian_run import _brownian_case, _brownian_rz_case
 
 _B02 = "b02_xy_fixed_drag"
@@ -48,10 +51,10 @@ _NOISE_REVISION = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
 _NATIVE_DRAG_REVISION = "epstein_linear_v1"
 _EFFECTIVE_DRAG_REVISION = "epstein_linear_effective_gas_sensitivity_v1"
 _CONTINUOUS_CHARGE_REVISION = "oml_stationary_maxwellian_debye_huckel_v1"
-_ENGINE_REVISION = "particle_engine_v62"
-_EVENT_REVISION = "line_quadratic_curved_capsule_periodic_first_hit_v23"
-_TREE_POLICY_REVISION = "conditional_boundary_refinement_absolute_target_v2"
-_MEMORY_PLAN_REVISION = "solver_owned_memory_plan_v25"
+_ENGINE_REVISION = ENGINE_ALGORITHM_REVISION
+_EVENT_REVISION = EVENT_ALGORITHM_REVISION
+_TREE_POLICY_REVISION = BROWNIAN_TREE_POLICY_REVISION
+_MEMORY_PLAN_REVISION = MEMORY_PLAN_REVISION
 
 _DEFAULT_PARTICLES = (2_000, 20_000)
 _DEFAULT_REPEATS = 3
@@ -609,14 +612,14 @@ def _observation(
     }
 
 
-def _mapping(value: Mapping[str, object], key: str) -> Mapping[str, object]:
+def _mapping(value: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     result = value[key]
     if not isinstance(result, Mapping):
         raise RuntimeError(f"B03 manifest {key} is not a mapping")
     return result
 
 
-def _revisions(manifest: Mapping[str, object]) -> dict[str, object]:
+def _revisions(manifest: Mapping[str, Any]) -> dict[str, Any]:
     names = (
         "engine_algorithm_revision",
         "compiled_cpu_tile_revision",
@@ -636,7 +639,7 @@ def _revisions(manifest: Mapping[str, object]) -> dict[str, object]:
 
 
 def _validate_observations(
-    observations: Sequence[Mapping[str, object]],
+    observations: Sequence[Mapping[str, Any]],
     particle_counts: tuple[int, ...],
     repeats: int,
     tree_depth: int,
@@ -700,7 +703,7 @@ def _validate_observations(
             _validate_scenario_contract(representative)
 
 
-def _validate_scenario_contract(observation: Mapping[str, object]) -> None:
+def _validate_scenario_contract(observation: Mapping[str, Any]) -> None:
     scenario = str(observation["scenario"])
     resolved = observation["resolved"]
     models = resolved["physics_models"]
@@ -759,7 +762,7 @@ def _paired_characterization(
     outputs: Mapping[tuple[int, int, str], Path],
     particle_counts: tuple[int, ...],
     repeats: int,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     comparisons = []
     for count in particle_counts:
         for repeat in range(repeats):
@@ -823,9 +826,9 @@ def _maximum_abs(values: np.ndarray) -> float:
     return float(np.max(np.abs(values)))
 
 
-def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+def _summaries(observations: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     keys = sorted({(str(item["scenario"]), int(item["particle_count"])) for item in observations})
-    result: list[dict[str, object]] = []
+    result: list[dict[str, Any]] = []
     for scenario, count in keys:
         selected = [
             item
@@ -869,7 +872,7 @@ def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, o
     return result
 
 
-def _array_accounting(observations: Sequence[Mapping[str, object]]) -> dict[str, object]:
+def _array_accounting(observations: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     columns = {
         # particle id + position/velocity/charge + the three one-byte verdicts
         "predictor_return": {"float64": 5, "int64": 1, "byte": 3},
@@ -975,7 +978,7 @@ def _array_accounting(observations: Sequence[Mapping[str, object]]) -> dict[str,
     }
 
 
-def _case_matrix() -> list[dict[str, object]]:
+def _case_matrix() -> list[dict[str, Any]]:
     return [
         {
             "scenario": _B02,
@@ -1022,7 +1025,9 @@ def _process_memory_bytes() -> tuple[int, int | None, str]:
         )
     import resource
 
-    maximum = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    # Windows type information has no Unix resource attributes.
+    unix_resource: Any = resource
+    maximum = int(unix_resource.getrusage(unix_resource.RUSAGE_SELF).ru_maxrss)
     peak_bytes = maximum if sys.platform == "darwin" else maximum * 1_024
     if sys.platform.startswith("linux"):
         fields_value = Path("/proc/self/statm").read_text(encoding="ascii").split()
@@ -1083,7 +1088,7 @@ def _scientific_payload_digest(result: Any) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
-def _machine_metadata() -> dict[str, object]:
+def _machine_metadata() -> dict[str, Any]:
     repository = Path(__file__).resolve().parents[2]
     return {
         "platform": platform.platform(),

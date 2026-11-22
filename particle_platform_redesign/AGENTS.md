@@ -6,8 +6,8 @@
 
 ## 1. 目的
 
-外部で計算された場とgeometryを入力し、半導体製造チャンバー内の粒子軌道、粒子電荷、境界eventを
-高速かつ再現可能に計算する基盤を作る。
+利用者が機能を選び、自分の外部場・geometry・粒子源を準備し、検査・計算・結果の解釈と再利用まで
+CLIとPythonで完結できる粒子輸送基盤を作る。通常の利用は配布wheelだけで完結させる。
 
 優先順位は次のとおり。
 
@@ -39,7 +39,8 @@ COMSOLは入力adapterと外部V&Vの一つであり、solver coreの目的で�
 |---|---|
 | 製品目的、範囲、非目標、stage | `product_specification.md` |
 | module責務、dependency、runtime境界 | `architecture_proposal.md`（権威）、`architecture_review.md`（review記録） |
-| 方程式、物理model、数値method、適用域 | `technical_research.md` |
+| 現行の方程式、物理model、数値method、適用域 | `solver/docs/physics_models.md`、`solver/docs/numerics.md` |
+| 導出・文献調査・研究根拠 | `technical_research.md` |
 | file責務、work package、実装順、完了条件 | `implementation_plan.md` |
 | P14-Pの否定的closeout履歴、同一runのprocess並列、source別の品質・用途性能・配布資格 | `solver/docs/parallel_execution_plan.md` |
 | 品質toolとgate | `quality_tooling_plan.md` |
@@ -57,28 +58,33 @@ COMSOLは入力adapterと外部V&Vの一つであり、solver coreの目的で�
 - 旧コードをcopyしない。
 - 旧コードは失敗例、式候補、既知caseの調査対象としてのみ読む。
 - 採用する式や考え方は独立した根拠とmicrocaseで再検証する。
-- coreから`tools/`、COMSOL、比較器、analysis、visualizationをimportしない。
+- 数値core/APIから`chamber_particles_tools`、`tools/`、COMSOL、比較器、analysis、visualizationをimportしない。
+- 同じuv projectの`src/chamber_particles_tools/`が通常の入力作成・場変換/生成・解析・表示と唯一のCLIを所有する。
+  consoleと`python -m chamber_particles`はそのdispatcherへ接続する。live COMSOLと開発V&Vは外部に置く。
 - adapterはcanonical形式へ変換し、producer専用のsolver分岐を作らない。
 - `model_dataset`をcore testのgolden truthにしない。
 
 ## 5. 公開境界
 
-利用者向けPython APIは次の三つだけとする。
+計算coreの公開Python APIは次の四つとする。通常clientの公開操作は`chamber_particles_tools`が所有する。
 
 ```python
 load_case(path)
-simulate(case, output)
+check_case(case, *, workers=1)
+simulate(case, output, *, workers=1)
 open_result(path)
 ```
 
-0.3.0の`simulate`は実行資源keyword `workers=1`を持つ。複数process数はAPI/CLIで指定し、
-caseの数値設定へ混ぜない。追加の公開APIは作らない。
+`simulate`の実行資源keyword `workers=1`でprocess数をAPI/CLIから指定し、
+caseの数値設定へ混ぜない。
 
-CLIの`check`、`run`、`inspect`もこの三操作を呼び、別の検査・実行経路を作らない。公開例外は原則
+`check_case`は実行と同じprepareを使い、小さいimmutableな解決結果・制限・memory planを返す。
+worker、writer、粒子更新を開始せず、mutableなPreparedRunは公開しない。
+CLIの`check`、`run`、`inspect`も同じ操作を呼び、別の検査・実行経路を作らない。公開例外は原則
 `CaseError`、`SimulationError`、`IncompleteResultError`の三分類に留める。
 
 importer向けcanonical writerは`case_format`が所有するが、package rootの利用者向けAPIには増やさない。
-`PreparedRun`、backend、writer、preflight reportを公開しない。
+`PreparedRun`、backend、writer、mutableなpreflight workspaceを公開しない。
 
 ## 6. file責務とdependency
 
@@ -99,9 +105,12 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 | `stochastic.py` | joint OU、conditional split、stochastic tree | wall law、出力、第二engine |
 | `events.py` | earliest hit、残時間work | hit後の物理応答 |
 | `boundaries.py` | stick/escape/hold/reflection/probability | 交差探索、位置押戻し |
-| `engine.py` | prepare、唯一のproduction loop | importer、plot、COMSOL比較 |
+| `engine.py` | prepare、親時計・release・checkpoint・single writer | importer、plot、COMSOL比較 |
+| `transport.py` | serial/process共通の粒子slab更新 | 親時計、writer、process管理 |
+| `execution.py` | worker、共有transport、bounded IPC・ACK | 物理式、第二engine、worker側writer |
 | `cpu.py` | SoA、bounded slab、compiled kernel、memory plan | model意味、永続形式 |
-| `output.py` | epoch、checkpoint、`ResultView` | 科学集計、描画 |
+| `output.py` | epoch、checkpoint、immutable解釈context、`ResultView` | 科学集計、描画 |
+| `chamber_particles_tools` | 通常入力publisher、解析・export・表示、唯一のCLI | 数値coreの再実装、native専用engine |
 
 `models.py`、`helpers.py`、`utils.py`、`contracts.py`のような一般置き場を作らない。型と関数は、その事実を
 所有するmoduleへ置く。fileは行数だけで分割せず、独立した変更理由が二つ現れた時に分ける。
@@ -168,7 +177,7 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
   計算engineは一つとし、親がmacro/release/output/checkpoint、永続workerが排他的particle slabを所有する。
   `ThreadPoolExecutor`、Numba内部parallel mask、model別engine、backend選択frameworkは導入しない。
   共有入力・state/replay、worker専用scratch、IPCと移送時の同時live容量を一つの予算へ入れる。
-- 現行v62の親coordinatorは全workerのconnection/sentinelを監視し、完了したworkerへ次の排他的slabを渡す。
+- 親coordinatorは全workerのconnection/sentinelを監視し、完了したworkerへ次の排他的slabを渡す。
   event/failureはworkerごとに高々一batchを送信し、親single writerの同期消費後にACKする。
   storage batchは到着順を許し、公開canonical event順は既存output reader一箇所が所有する。
   macro-wide並べ替えbuffer、別scheduler、worker側HDF5 writerを追加しない。
@@ -196,15 +205,15 @@ P12/P14のouter worker-waveとP14-PのNumba内部parallel試行は履歴baseline
 独立caseのprocess並列はsolver外の運用とする。同一runは明示workers数で実行し、追加JIT化を前提にしない。
 自動tuner、experimental flag、第二scheduler、互換aliasで失敗経路を復活させない。
 
-現行v62は用途matrix、Windows/Linux公開前local gate、runtime-only installed-wheel入口を完了した。
+過去の用途matrixと配布資格は、その実行sourceに限定する。現行変更の品質・性能・配布は変更後の実行receiptで確認する。
 品質・用途性能・source別bindingと制約は性能文書が所有する。
 Git branch push、remote CI、tag、Release/registry公開の実施状況はrelease記録が所有し、local gateから推定しない。
 追加JIT、NUMA、全CPU数比例効果を今回の必須工程へ追加しない。
 
 全worker同期は1 macroごとの固定仕様であり、同期間隔設定はない。
-複数macro連続実行は`implementation_plan.md`第21.3節の将来項目とし、dt、field/release時計、
+複数macro連続実行は`implementation_plan.md`の将来項目とし、dt、field/release時計、
 RNG、毎macro集計、bounded output、single writer、accepted checkpoint/resumeを維持して評価する。
-0.3.0へ設定やstubを先行追加しない。
+必要な利用と検証が定まる前に設定やstubを先行追加しない。
 
 ## 10. 開発tool
 
@@ -241,8 +250,9 @@ import-linterをdependency方向の唯一の自動検査にする。同じ内容
 uv run --locked lint-imports
 ```
 
-既存三契約でphysics純粋性、integrator純粋性、低位numericsからouter layerへの
-逆依存禁止だけを固定する。契約を満たすためのempty moduleやfacadeを作らない。
+import契約はphysics純粋性、integrator純粋性、低位numericsの境界、計算APIから通常clientへの
+逆依存禁止を固定する。module入口だけがCLIを呼び、計算APIは外層をimportしない。
+契約を満たすためのempty moduleやfacadeを作らない。
 
 ### Pyrefly
 
@@ -317,7 +327,7 @@ install、wheel、Windows/Linux、cold JIT、failure injection、10^4/10^5/10^6�
 testは三層だけにする。
 
 - `tests/verification/`：解析解、manufactured solution、収束、event geometry
-- `tests/scenarios/`：三公開APIを通る小型end-to-end
+- `tests/scenarios/`：core公開APIと通常clientを通る小型end-to-end
 - `tests/performance/`：規模、memory、同一runのprocess数別throughput・科学identity・cleanup。独立caseのprocess scalingは必要時だけcore外で測る
 
 次をtestしない。
@@ -365,7 +375,7 @@ full trace、stage値、局所probeは明示particle IDだけで有効化する�
 
 - 目的と所有moduleが一意である。
 - 物理・数値結果を検証するcaseがある。
-- 三公開APIとsingle engineを壊していない。
+- 四つのcore公開API、通常clientの公開経路、single engineが整合する。
 - `uv.lock`が意図したdependencyと一致する。
 - Ruff、import-linter、Pyrefly、Radon gateが合格する。
 - 該当verificationと公開API scenarioが合格する。

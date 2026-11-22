@@ -1,0 +1,85 @@
+{
+  "recorded_utc": "2026-11-22T23:09:04.383810+00:00",
+  "command": "uv run --locked python .artifacts/platform_restructure_20261123/probe_manifest_identity.py",
+  "baseline_public_simulation": "installed xy-ballistic example; fresh init_example \u2192 simulate \u2192 open_result",
+  "source_sha256": {
+    "output.py": "70d09c2ac0e2040c9e0792c449e1a1031c71d639626127897ac05a8615d41601",
+    "engine.py": "925ede1234773ce4d9251be38e99784d484e07206248cbd84405f705d1faf68c",
+    "api.py": "cfbeac0e96557931f1ef8f3849bba68195419140be63b9fca0049e7e2fc81466"
+  },
+  "results": [
+    {
+      "damage": "top_case_hash",
+      "recovery": false,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\top_case_hash_complete: result manifest parent identity does not match the run",
+      "context_unchanged": true
+    },
+    {
+      "damage": "remove_identity",
+      "recovery": false,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\remove_identity_complete: result resume identity object is missing",
+      "context_unchanged": true
+    },
+    {
+      "damage": "remove_parent_keys_rehashed",
+      "recovery": false,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\remove_parent_keys_rehashed_complete: result resume identity is invalid",
+      "context_unchanged": true
+    },
+    {
+      "damage": "seed_without_rehash",
+      "recovery": false,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\seed_without_rehash_complete: result resume identity hash does not match its actual content",
+      "context_unchanged": true
+    },
+    {
+      "damage": "top_case_hash",
+      "recovery": true,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\top_case_hash_recovery: result manifest parent identity does not match the run",
+      "resume_rejected": true,
+      "resume_error": "simulation failed: partial result is not safely resumable",
+      "context_unchanged": true
+    },
+    {
+      "damage": "remove_identity",
+      "recovery": true,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\remove_identity_recovery: result resume identity object is missing",
+      "resume_rejected": true,
+      "resume_error": "simulation failed: partial result is not safely resumable",
+      "context_unchanged": true
+    },
+    {
+      "damage": "remove_parent_keys_rehashed",
+      "recovery": true,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\remove_parent_keys_rehashed_recovery: result resume identity is invalid",
+      "resume_rejected": true,
+      "resume_error": "simulation failed: partial result is not safely resumable",
+      "context_unchanged": true
+    },
+    {
+      "damage": "seed_without_rehash",
+      "recovery": true,
+      "valid_control_opened": true,
+      "rejected": true,
+      "error": "cannot open result C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\manifest_identity_public_probe_v2\\seed_without_rehash_recovery: result resume identity hash does not match its actual content",
+      "resume_rejected": true,
+      "resume_error": "simulation failed: partial result is not safely resumable",
+      "context_unchanged": true
+    }
+  ],
+  "all_rejected": true
+}

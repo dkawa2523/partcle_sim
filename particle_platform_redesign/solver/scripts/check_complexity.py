@@ -20,7 +20,7 @@ def _function_blocks(blocks: Iterable[Any]) -> Iterator[Any]:
 
 def main() -> int:
     project_root = Path(__file__).resolve().parents[1]
-    source_roots = (project_root / "src" / "chamber_particles", project_root / "tools")
+    source_roots = (project_root / "src", project_root / "tools")
     failures: list[str] = []
 
     for source_root in source_roots:

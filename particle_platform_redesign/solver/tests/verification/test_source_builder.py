@@ -10,7 +10,6 @@ from pathlib import Path
 import numpy as np
 import pytest
 import yaml
-from tools.source_builder import convert_velocity, prepare_case, read_csv_source
 
 from chamber_particles import load_case
 from chamber_particles.case_format import (
@@ -20,6 +19,7 @@ from chamber_particles.case_format import (
     RealizedTableSource,
     write,
 )
+from chamber_particles_tools.source_builder import convert_velocity, prepare_case, read_csv_source
 
 
 def _source() -> RealizedTableSource:
@@ -71,8 +71,10 @@ def _bundle() -> DataBundle:
 
 def _config() -> dict:
     return {
-        "format_version": 1,
+        "format_version": 2,
+        "kind": "table",
         "table": "particles",
+        "inherit_from": {"table": "particles", "join": "particle_id"},
         "columns": {"particle_id": "id", "release_time_s": "t", "position_m": ["x", "y"]},
         "units": {"release_time_s": "ms", "position_m": "cm"},
         "velocity_mode": "vector",
