@@ -27,6 +27,12 @@
           "gate": "新規30 targeted checks。動的tree/pending-bankの実allocation照合と全体RSS/精度/scale保証を区別"
         },
         {
+          "package": "guard text削除後の現行P10確認",
+          "capability": "field/event/relaxation各N8 × cold/warm、計6 observations",
+          "deliverable": "全てexit0・failure0。同じworkloadのmode間で科学payloadが完全一致",
+          "gate": "cold/warm差はJIT償却の観測。algorithm speedup・scale性能・新規物理資格とはしない"
+        },
+        {
           "package": "資源と観測",
           "capability": "P19 global/local identity、B03 conservative temporary bound、現行work counts",
           "deliverable": "P19 allocator verificationとbenchmarkの資源観測を分離",
@@ -40,18 +46,20 @@
         }
       ],
       "source": {
-        "label": "以前の5 modules実行と継続変更後B03の4 scenarios",
+        "label": "以前の5 modules実行、継続B03とguard削除後P10の限定確認",
         "files": [
           "solver/.artifacts/current_only_bench_20261123/receipt.json",
           "solver/tests/performance/README.md",
           "solver/evidence/current_only_2026_11_23/execution/memory_retirement.json",
           "solver/evidence/current_only_2026_11_23/execution/b03_current.json",
-          "solver/evidence/current_only_2026_11_23/execution/b03_comparison.json"
+          "solver/evidence/current_only_2026_11_23/execution/b03_comparison.json",
+          "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+          "solver/evidence/current_only_2026_11_23/execution/guard_cleanup_p10.json"
         ],
         "metricDefinitions": [
           {
             "label": "Benchmark inventory and executed subset",
-            "definition": "Eight executable modules remain the inventory. Execution at 8883e3a covered five affected modules, including six P10 observations. This continuation newly executes four 32-particle B03 rows and compares scientific hashes. No portable SLA, new independent ensemble or full release matrix is claimed.",
+            "definition": "Eight executable modules remain the inventory. Execution at 8883e3a covered five affected modules. The continuation added four 32-particle B03 rows; after guard text cleanup, P10 newly ran all three workloads at N8 in cold/warm modes for six observations. These tiny controls establish the stated scientific identities, not algorithm speedup, scaling, a portable SLA or a full release matrix.",
             "componentIds": [
               "work-package-table",
               "implementation-sequence"
@@ -70,6 +78,10 @@
           {
             "title": "Fresh continuation B03 and allocator-owner receipts",
             "detail": "[{\"path\": \"solver/evidence/current_only_2026_11_23/execution/memory_retirement.json\", \"sha256\": \"sha256:c37601b333a9964af771f665fa5788b23818ef9e6f373459e7b258027111ceb3\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_current.json\", \"sha256\": \"sha256:0a2c9b6a47d5f510f9055686edaacdf9e0eae01bc0b1a043048e438c69490a98\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_comparison.json\", \"sha256\": \"sha256:0ae6d5adf32ce5ddd5507e162d61c3cf3a7af81b543b46ac7bcc12cd2c8f41cb\"}]"
+          },
+          {
+            "title": "Fresh P10 after producer-role guard cleanup",
+            "detail": "{\"receipts\": [{\"path\": \"solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json\", \"sha256\": \"sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/guard_cleanup_p10.json\", \"sha256\": \"sha256:51b0bc73611604041c6baf30c20005fa51963b8ae9552bb9f934212d304a95a3\"}], \"scope\": \"Tinygeneratedcontrol afterdebugmetadata removal; cold/warmJITamortization, not productionscaling/improvementspeedup or newphysicalqualification\", \"observations\": 6, \"particles_each\": 8, \"workloads\": [\"field\", \"event\", \"relaxation\"]}"
           }
         ]
       }

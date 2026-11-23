@@ -1,0 +1,389 @@
+{
+  "audit": "Role-based preflight for explicitly scoped completed syntheticP10guard-debug siblings",
+  "recorded_utc": "2026-11-23T07:07:11.526488+00:00",
+  "status": "SAFE_TEXT_CANDIDATES_BINARY_DELETION_BLOCKED",
+  "scope_roots": [
+    ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case",
+    ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed"
+  ],
+  "scope_single_report": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed.json",
+  "role_assessment": {
+    "actualpurpose": "tiny warm worker counter/type/algorithm-guard maintenance debug, not independentphysics/reference or matchedbeforeafterperformance",
+    "current_P10_producer_retained": "tests/performance/p10_compiled.py",
+    "current_P06_input_construction_retained": "tests/performance/p06_baseline.py:_build_scenarios",
+    "current_independent_truth_retained": "C04/C07 analytic/exact event verification; currentfullP10/P06 benchmark receipts",
+    "old_debug_observation": "2particles,1warmmeasuredobservationafter1untimedwarmup; no pre-change matched timing observation",
+    "historical_record_retained": ".artifacts/platform_restructure_20261123/performance_guard_maintenance_receipt.json",
+    "historical_consumer_scope": "Only datedmaintenance receipt has rawobservationlocator; no currenttrackedCLI/docs/report/evaluator consumer found",
+    "historical_claim_after_removal": "Datedrecordcanstate its rawdebuglocator retired; does not become currentperformancequalification"
+  },
+  "input_correspondence": [
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/quadratic_no_frames/case.h5",
+      "current_canonical_content_hash": "sha256:4ad58352bc8df5cecb3b13fe07ab33329c32879058475af14a6a695896724f0b",
+      "old_content_hash": "sha256:4ad58352bc8df5cecb3b13fe07ab33329c32879058475af14a6a695896724f0b",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C04",
+      "particles": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_no_frames/case.h5",
+      "current_canonical_content_hash": "sha256:4d5329199490ae6594f19274ec502c6f25c7ad183d94dee26871f459efa75b81",
+      "old_content_hash": "sha256:4d5329199490ae6594f19274ec502c6f25c7ad183d94dee26871f459efa75b81",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C04",
+      "particles": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_macro_end_frames/case.h5",
+      "current_canonical_content_hash": "sha256:4d5329199490ae6594f19274ec502c6f25c7ad183d94dee26871f459efa75b81",
+      "old_content_hash": "sha256:4d5329199490ae6594f19274ec502c6f25c7ad183d94dee26871f459efa75b81",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C04",
+      "particles": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_interior_frames/case.h5",
+      "current_canonical_content_hash": "sha256:4d5329199490ae6594f19274ec502c6f25c7ad183d94dee26871f459efa75b81",
+      "old_content_hash": "sha256:4d5329199490ae6594f19274ec502c6f25c7ad183d94dee26871f459efa75b81",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C04",
+      "particles": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_boundaryless/case.h5",
+      "current_canonical_content_hash": "sha256:a7eb41ce0efb5b9eb4a6f6ed7a7ca62e36398147990e166ec7bae960731ec1ae",
+      "old_content_hash": "sha256:a7eb41ce0efb5b9eb4a6f6ed7a7ca62e36398147990e166ec7bae960731ec1ae",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C07",
+      "particles": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_material_hits/case.h5",
+      "current_canonical_content_hash": "sha256:da4688a3f6bf43d18d112aea18461cf83f1d317a9d981ec72b5b096820b34f14",
+      "old_content_hash": "sha256:da4688a3f6bf43d18d112aea18461cf83f1d317a9d981ec72b5b096820b34f14",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C07",
+      "particles": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits/case.h5",
+      "current_canonical_content_hash": "sha256:9a6ec2f9fdcf1e721dd6b51c5f8b2e0914d3c6b2c9594b9c23c18c1bc04900eb",
+      "old_content_hash": "sha256:9a6ec2f9fdcf1e721dd6b51c5f8b2e0914d3c6b2c9594b9c23c18c1bc04900eb",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C04",
+      "particles": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits_interior_frame/case.h5",
+      "current_canonical_content_hash": "sha256:9a6ec2f9fdcf1e721dd6b51c5f8b2e0914d3c6b2c9594b9c23c18c1bc04900eb",
+      "old_content_hash": "sha256:9a6ec2f9fdcf1e721dd6b51c5f8b2e0914d3c6b2c9594b9c23c18c1bc04900eb",
+      "all_settings_equal_current_P06_materialization": true,
+      "synthetic_case_id": "C04",
+      "particles": 2
+    }
+  ],
+  "current_benchmark_execution_reference": {
+    "path": ".artifacts/current_only_bench_20261123/receipt.json",
+    "sha256": "4a16f5545ae115b78dfed8d2f095b8d0a0ffbaab5813d845442c54391ad2d6b5",
+    "p10": {
+      "exit_code": 0,
+      "observations": 6,
+      "field_particles": 256,
+      "event_particles": 32,
+      "relaxation_particles": 256,
+      "cold_warm_identity": true,
+      "failures": 0
+    }
+  },
+  "candidate_text_files": [
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_boundaryless/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\ballistic_boundaryless\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 678,
+      "sha256": "638276d307bb294fe9ca2d630b0f0f265442ea2dc3d66fc8ab06ca3ea0dc8492",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_material_hits/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\ballistic_material_hits\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 730,
+      "sha256": "0797b4916b7f14a08685e5117070a138c4a3a01c5173de11c1905c4ce48b50b3",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/quadratic_no_frames/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\quadratic_no_frames\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 781,
+      "sha256": "3d527011aa4fd0c27d166f022bc1c9fc25c501e907077c3be0d9d5440dccd0f2",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_interior_frames/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_enclosed_interior_frames\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 909,
+      "sha256": "b00ccfc69a692badc52da2923c87c8f95241c0893ce906ce789676c9e8c04046",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_macro_end_frames/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_enclosed_macro_end_frames\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 903,
+      "sha256": "6ac42a94283c6c404e4c319caa89748a83adb1ec04f7561e58d7ee07fc8e8cfc",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_no_frames/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_enclosed_no_frames\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 784,
+      "sha256": "230bff880fa587f8530b95e1bf45b74ecd5e26dc127734ea8b04320b95060995",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_material_hits\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 830,
+      "sha256": "e4385e60d4bec6cff3ccf2d116d8d9303b054286f91262f685ddedf6a1be3013",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits_interior_frame/case.yaml",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_material_hits_interior_frame\\case.yaml",
+      "name": "case.yaml",
+      "bytes": 914,
+      "sha256": "8d649ab4cd47c661cc99397f0dcfff418ad1be4c136aa6968416be035ad31b31",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/LATEST",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\measured\\LATEST",
+      "name": "LATEST",
+      "bytes": 439,
+      "sha256": "8ed5afbcdb78123851aaf0a63250e81d6d73987a424001f4c14b70fd9a0a3df2",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/run.json",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\measured\\run.json",
+      "name": "run.json",
+      "bytes": 10477,
+      "sha256": "51abb5c785512d3e4bb3e6b112b697eb3dec92289d5dae88f19a92e75801e565",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/_SUCCESS",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\measured\\_SUCCESS",
+      "name": "_SUCCESS",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/LATEST",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\warmup-000\\LATEST",
+      "name": "LATEST",
+      "bytes": 439,
+      "sha256": "8ed5afbcdb78123851aaf0a63250e81d6d73987a424001f4c14b70fd9a0a3df2",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/run.json",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\warmup-000\\run.json",
+      "name": "run.json",
+      "bytes": 10477,
+      "sha256": "51abb5c785512d3e4bb3e6b112b697eb3dec92289d5dae88f19a92e75801e565",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/_SUCCESS",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\warmup-000\\_SUCCESS",
+      "name": "_SUCCESS",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed.json",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed.json",
+      "name": "p10_worker_fixed.json",
+      "bytes": 4247,
+      "sha256": "6ce8a616e2aabd327765253f227fe9894a4398386a1033397242d08ec2eea04e",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    }
+  ],
+  "candidate_text_count": 15,
+  "candidate_text_bytes": 32608,
+  "text_name_counts": {
+    "case.yaml": 8,
+    "LATEST": 2,
+    "run.json": 2,
+    "_SUCCESS": 2,
+    "p10_worker_fixed.json": 1
+  },
+  "blocked_binary_files": [
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_boundaryless/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\ballistic_boundaryless\\case.h5",
+      "name": "case.h5",
+      "bytes": 24216,
+      "sha256": "866067c004577476b91ac5198b218f03d06fe1b3648309f15c2955ae270fac00",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_material_hits/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\ballistic_material_hits\\case.h5",
+      "name": "case.h5",
+      "bytes": 24216,
+      "sha256": "3edf6f41f12ef52702d39efea7b15789788ea7d2e45fdf30600c06d2bc4b53e5",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/quadratic_no_frames/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\quadratic_no_frames\\case.h5",
+      "name": "case.h5",
+      "bytes": 31816,
+      "sha256": "9eac1890ae43c48fa5cee2c58526399e95ee5ccd7e3804ffd67b291398d6f65d",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_interior_frames/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_enclosed_interior_frames\\case.h5",
+      "name": "case.h5",
+      "bytes": 31816,
+      "sha256": "ca2d84f9408d78ed2d1f97f72f74b8deebd6d55ff3f8fea69750adc57dfddd36",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_macro_end_frames/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_enclosed_macro_end_frames\\case.h5",
+      "name": "case.h5",
+      "bytes": 31816,
+      "sha256": "ca2d84f9408d78ed2d1f97f72f74b8deebd6d55ff3f8fea69750adc57dfddd36",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_no_frames/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_enclosed_no_frames\\case.h5",
+      "name": "case.h5",
+      "bytes": 31816,
+      "sha256": "ca2d84f9408d78ed2d1f97f72f74b8deebd6d55ff3f8fea69750adc57dfddd36",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_material_hits\\case.h5",
+      "name": "case.h5",
+      "bytes": 31816,
+      "sha256": "ccbfd3df43c4845b94366ff3fc4e234fd35fcd34e775a9125978312b6d4e1607",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits_interior_frame/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_case\\field\\rk4_material_hits_interior_frame\\case.h5",
+      "name": "case.h5",
+      "bytes": 31816,
+      "sha256": "ccbfd3df43c4845b94366ff3fc4e234fd35fcd34e775a9125978312b6d4e1607",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/context.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\measured\\context.h5",
+      "name": "context.h5",
+      "bytes": 18736,
+      "sha256": "e27f04144f7e8198d4629928cef4656c4194b7565921408ae11ef3a567c22c44",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/final.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\measured\\final.h5",
+      "name": "final.h5",
+      "bytes": 9840,
+      "sha256": "e9f7694d5aaec728260570de3009451efa0b1cfb976b6d5897ffaa4996a5088b",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/context.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\warmup-000\\context.h5",
+      "name": "context.h5",
+      "bytes": 18736,
+      "sha256": "e27f04144f7e8198d4629928cef4656c4194b7565921408ae11ef3a567c22c44",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/final.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\warmup-000\\final.h5",
+      "name": "final.h5",
+      "bytes": 9840,
+      "sha256": "e9f7694d5aaec728260570de3009451efa0b1cfb976b6d5897ffaa4996a5088b",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/checkpoints/A.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\measured\\checkpoints\\A.h5",
+      "name": "A.h5",
+      "bytes": 15528,
+      "sha256": "960325fd1b0d2b0ef6a665b375e2fae7a290f13e50f9b0784aa98e42e869b721",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/segments/epoch-000000.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\measured\\segments\\epoch-000000.h5",
+      "name": "epoch-000000.h5",
+      "bytes": 59288,
+      "sha256": "71bf86264fe4e4218ea2870d677eeb12d501d1c3343620dea3ef83c5fb08f7f4",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/checkpoints/A.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\warmup-000\\checkpoints\\A.h5",
+      "name": "A.h5",
+      "bytes": 15528,
+      "sha256": "960325fd1b0d2b0ef6a665b375e2fae7a290f13e50f9b0784aa98e42e869b721",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/segments/epoch-000000.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p10_worker_fixed\\warmup-000\\segments\\epoch-000000.h5",
+      "name": "epoch-000000.h5",
+      "bytes": 59288,
+      "sha256": "71bf86264fe4e4218ea2870d677eeb12d501d1c3343620dea3ef83c5fb08f7f4",
+      "role": "completed synthetic P10guard-debug fixture/output, not unique scientific or before/after reference"
+    }
+  ],
+  "blocked_binary_count": 16,
+  "blocked_binary_bytes": 446112,
+  "preservation_boundary": {
+    "publication_native_authority_paths": 479,
+    "overlapping_selected_paths": 0,
+    "environment_or_source_files": 0,
+    "outside_workspace_symlink_junction": 0,
+    "retained": [
+      "currentP10/P06productionbenchmarkcode",
+      "currentexecutedbenchmarkreceipts",
+      "independentanalyticoracles",
+      "historicalmaintenanceworkrecord",
+      "release-index/sourcecopies/actualexecutionenvironments",
+      "allnative/inputauthority"
+    ]
+  },
+  "live_use_check": {
+    "windows_processes": 621,
+    "wsl_processes": 45,
+    "path_mentions": [],
+    "scope": "Current absolute/relative/WSL-mappedcommandlines; revalidateimmediatelybeforeexplicitpatch"
+  },
+  "safety_judgment": "Exacttexttargets are role-finisheddebugartifacts; HDF5 arealso obsolete duplicate syntheticfixtures/results but remain pendingbinarypolicy. No deletionbythisreviewer.",
+  "limits": [
+    "Read-onlyreview; no simulation,newfixture,sourcechange,nativerun orbinarydeletion",
+    "No broader historicalcampaigncleanup inferred",
+    "Data/context/revisionformat4 alone wasnotusedtoretirethese; actualpurpose/currentinput/oracle retention verified",
+    "Only auditJSONcreated; no new helper/framework"
+  ]
+}

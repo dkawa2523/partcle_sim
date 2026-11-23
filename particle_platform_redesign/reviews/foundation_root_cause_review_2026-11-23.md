@@ -262,6 +262,9 @@ S3-Mのfield差4%等を現行実装の精度や配布機能の証拠として転
 
 また旧campaignにはcandidate結果、nativeが実際に使ったsource、nativeの刻み選択記録、環境が混在する。
 静的未参照だけで消すとnativeの根拠を失う。今回も196 native authorityのhashを保持し、旧candidate層だけを整理した。
+形式の新旧だけでも撤去対象は決められない。実際に、現行形式の旧P10/P11 worker debug生成物も残っていた。
+producerの役割、現行生成処理とのcanonical値・設定の同一性、実consumerと保護authorityを照合して整理し、
+現行benchmark・独立oracle・dated maintenance記録・実行環境は保持した。単なる形式cutoffや名前の一致を廃止判定にしない。
 以後は既存の出力先・manifestの役割区分を使い、参照入力、実験記録、生成candidate結果、配布説明を分ける。
 benchmarkの実行code/input/独立reference/評価/生成結果を同一の正解データとして扱わない。
 新しいcleanup frameworkは不要。今回の物理削除blockは設計課題や未使用資産の必要性とは別の実行条件である。

@@ -1,0 +1,228 @@
+{
+  "audit": "Independent post-removal verification of explicitly retired P10/P11 debug artifacts",
+  "recorded_utc": "2026-11-23T07:12:19.253243+00:00",
+  "status": "PASS_WITH_BINARY_CLEANUP_BLOCKED",
+  "preflights": [
+    {
+      "path": ".artifacts\\current_only_20261123\\p11_artifact_preflight.json",
+      "sha256": "b45c1c7e2c669c9289b7ebacd859b6e4462c87f878a536eeb776a487ca7277d7"
+    },
+    {
+      "path": ".artifacts\\current_only_20261123\\p10_debug_artifact_preflight.json",
+      "sha256": "d3c9e0e8f054a450d39c808565c3616889d1001eb890ed4a115a1d2d0db9ffff"
+    }
+  ],
+  "text_removal": {
+    "exact_candidates": 24,
+    "removed_bytes": 68989,
+    "all_exact_paths_absent": true,
+    "remaining_paths": []
+  },
+  "binary_preservation": {
+    "files": 29,
+    "bytes": 796680,
+    "all_exact_paths_exist": true,
+    "all_SHA256_match_preflight": true,
+    "missing": [],
+    "changed": [],
+    "records": [
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_case/case.h5",
+        "bytes": 40392,
+        "sha256": "100628eeaf4a947ce128aaa68622704077f83dfed38543e9ea307ca2c0879ba7"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/context.h5",
+        "bytes": 18736,
+        "sha256": "2050982624cc5d6e116b8dff11a8765f254709c0f494c7f5ada94e7bbbfaa089"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/final.h5",
+        "bytes": 9840,
+        "sha256": "ff5cf1797c758792f26e02d41d1b9a05d1f072dadf63ebbbcc56eafc52e6963c"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/checkpoints/A.h5",
+        "bytes": 15528,
+        "sha256": "76c4f3a07788b4e76af44fede7bc6255034bc807f575b077c8dc16b7517b4e1f"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/segments/epoch-000000.h5",
+        "bytes": 59288,
+        "sha256": "c8263b74138a644dbe0a7fb5571d5c6c2a9907eee4acecb22009e8cab83d4695"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/context.h5",
+        "bytes": 18736,
+        "sha256": "2050982624cc5d6e116b8dff11a8765f254709c0f494c7f5ada94e7bbbfaa089"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/final.h5",
+        "bytes": 9840,
+        "sha256": "ff5cf1797c758792f26e02d41d1b9a05d1f072dadf63ebbbcc56eafc52e6963c"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/checkpoints/A.h5",
+        "bytes": 15528,
+        "sha256": "76c4f3a07788b4e76af44fede7bc6255034bc807f575b077c8dc16b7517b4e1f"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/segments/epoch-000000.h5",
+        "bytes": 59288,
+        "sha256": "c8263b74138a644dbe0a7fb5571d5c6c2a9907eee4acecb22009e8cab83d4695"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/context.h5",
+        "bytes": 18736,
+        "sha256": "2050982624cc5d6e116b8dff11a8765f254709c0f494c7f5ada94e7bbbfaa089"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/final.h5",
+        "bytes": 9840,
+        "sha256": "ff5cf1797c758792f26e02d41d1b9a05d1f072dadf63ebbbcc56eafc52e6963c"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/checkpoints/A.h5",
+        "bytes": 15528,
+        "sha256": "76c4f3a07788b4e76af44fede7bc6255034bc807f575b077c8dc16b7517b4e1f"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/segments/epoch-000000.h5",
+        "bytes": 59288,
+        "sha256": "c8263b74138a644dbe0a7fb5571d5c6c2a9907eee4acecb22009e8cab83d4695"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_boundaryless/case.h5",
+        "bytes": 24216,
+        "sha256": "866067c004577476b91ac5198b218f03d06fe1b3648309f15c2955ae270fac00"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/ballistic_material_hits/case.h5",
+        "bytes": 24216,
+        "sha256": "3edf6f41f12ef52702d39efea7b15789788ea7d2e45fdf30600c06d2bc4b53e5"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/quadratic_no_frames/case.h5",
+        "bytes": 31816,
+        "sha256": "9eac1890ae43c48fa5cee2c58526399e95ee5ccd7e3804ffd67b291398d6f65d"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_interior_frames/case.h5",
+        "bytes": 31816,
+        "sha256": "ca2d84f9408d78ed2d1f97f72f74b8deebd6d55ff3f8fea69750adc57dfddd36"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_macro_end_frames/case.h5",
+        "bytes": 31816,
+        "sha256": "ca2d84f9408d78ed2d1f97f72f74b8deebd6d55ff3f8fea69750adc57dfddd36"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_enclosed_no_frames/case.h5",
+        "bytes": 31816,
+        "sha256": "ca2d84f9408d78ed2d1f97f72f74b8deebd6d55ff3f8fea69750adc57dfddd36"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits/case.h5",
+        "bytes": 31816,
+        "sha256": "ccbfd3df43c4845b94366ff3fc4e234fd35fcd34e775a9125978312b6d4e1607"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_case/field/rk4_material_hits_interior_frame/case.h5",
+        "bytes": 31816,
+        "sha256": "ccbfd3df43c4845b94366ff3fc4e234fd35fcd34e775a9125978312b6d4e1607"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/context.h5",
+        "bytes": 18736,
+        "sha256": "e27f04144f7e8198d4629928cef4656c4194b7565921408ae11ef3a567c22c44"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/final.h5",
+        "bytes": 9840,
+        "sha256": "e9f7694d5aaec728260570de3009451efa0b1cfb976b6d5897ffaa4996a5088b"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/context.h5",
+        "bytes": 18736,
+        "sha256": "e27f04144f7e8198d4629928cef4656c4194b7565921408ae11ef3a567c22c44"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/final.h5",
+        "bytes": 9840,
+        "sha256": "e9f7694d5aaec728260570de3009451efa0b1cfb976b6d5897ffaa4996a5088b"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/checkpoints/A.h5",
+        "bytes": 15528,
+        "sha256": "960325fd1b0d2b0ef6a665b375e2fae7a290f13e50f9b0784aa98e42e869b721"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/measured/segments/epoch-000000.h5",
+        "bytes": 59288,
+        "sha256": "71bf86264fe4e4218ea2870d677eeb12d501d1c3343620dea3ef83c5fb08f7f4"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/checkpoints/A.h5",
+        "bytes": 15528,
+        "sha256": "960325fd1b0d2b0ef6a665b375e2fae7a290f13e50f9b0784aa98e42e869b721"
+      },
+      {
+        "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p10_worker_fixed/warmup-000/segments/epoch-000000.h5",
+        "bytes": 59288,
+        "sha256": "71bf86264fe4e4218ea2870d677eeb12d501d1c3343620dea3ef83c5fb08f7f4"
+      }
+    ]
+  },
+  "explicit_debug_parent": {
+    "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke",
+    "remaining_files": 29,
+    "remaining_bytes": 796680,
+    "all_hdf5": true,
+    "remaining_text_or_executable_files": 0
+  },
+  "older_retired_results": {
+    "198_roots_hdf5_files": 77633,
+    "198_roots_hdf5_bytes": 4400775595,
+    "brownian_hdf5_files": 95,
+    "brownian_hdf5_bytes": 152994704,
+    "combined_files": 77728,
+    "combined_bytes": 4553770299
+  },
+  "global_retired_hdf5_remaining": {
+    "files": 77757,
+    "bytes": 4554566979
+  },
+  "native_authority": {
+    "path": "evidence\\comsol_v0_2_0_release_requalification_v2\\publication_saved_native_closure.json",
+    "sha256": "dac2b4dd815619161c366979784ffb1b98f2445d8eca899d9b844ac6975664a8",
+    "files_rehashed": 479,
+    "missing": [],
+    "sha256_mismatches": []
+  },
+  "retained_history_and_environment": {
+    "maintenance_worklog_path": ".artifacts/platform_restructure_20261123/performance_guard_maintenance_receipt.json",
+    "maintenance_worklog_sha256": "3464b246a18a913d42f8db2b39b94e026f73607b35338376161e5c1ad658e5ae",
+    "currentP10P06code_and_oracles": "untouched by this reviewer",
+    "old_code_model_dataset_tracked_diff_vs8883e3a": "none",
+    "execution_environment_sourcecopies": "outside selected paths; not modified by this reviewer"
+  },
+  "R14_review": {
+    "document": "..\\reviews\\foundation_root_cause_review_2026-11-23.md",
+    "sha256": "e9f59928ae55e39e4d4c77426a30942b53181fe53eaedcfa57bbaf0cf2ef64f9",
+    "reviewed_utc": "2026-11-23T07:13:19.568430+00:00",
+    "existing_R14_scope_supported": true,
+    "new_P10_P11_format4_role_note_present": true,
+    "actual_amendment_read_and_reviewed": true,
+    "mandatory_findings": [],
+    "verdict": "PASS",
+    "judgment": "Actual3-lineamendment accuratelydescribes role-basedP10/P11debugclassification, currentcanonical/settingscorrespondence, actualconsumer/protectedauthoritychecks, and retentionofcurrentbenchmark/oracles/datedmaintenance/environment. It doesnotclaimbinaryphysicalcleanupcomplete or alter scientific/numericalproofs."
+  },
+  "limits": [
+    "Reviewer performed no deletion,rename,simulation,native solve or sourcechange",
+    "29P10P11binary exactSHA matched; older77728binary residuals confirmed bycounts/types/bytes, not full historicalcontenthash roster",
+    "Outsidepreservation bound to479knownauthorities+protectedtrackedareas+exactselectedscope, not universal unknownfilesysteminventory",
+    "Policyblock remains; no binaryworkaround attempted",
+    "Only this JSON auditrecord created; no cleanuphelper/framework",
+    "R14reviewupdatedafteractualamendmentread; priornative/binary/textpostchecksnotrerunforthiswording-onlyupdate"
+  ]
+}

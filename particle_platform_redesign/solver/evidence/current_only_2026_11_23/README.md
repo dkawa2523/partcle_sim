@@ -52,7 +52,12 @@ recursive削除2回と、旧result3を確認した9,840 bytesの単一HDF5への
 返却理由は`blocked by policy`のみであり、削除は未実行である。
 別途198の旧result subtree（inventory時78,204 files /4,403,705,627 bytes）から、旧engineのUTF-8 metadata571件・2,930,032 bytesを撤去した。
 16件のpartialもhash検証済みnested engine identityと当時writerに照合した。これらにはHDF577,633件・4,400,775,595 bytesだけが残る。
-Brownianと合わせた実残存はHDF577,728件・4,553,770,299 bytes。198ルートのバイナリ削除は試行していない。
+この旧形式群の実残存はHDF577,728件・4,553,770,299 bytes。198ルートのバイナリ削除は試行していない。
+形式cutoffでは拾えなかった現行形式のP10/P11 guard debugも、producer由来・合成入力の現行生成処理との完全一致・実consumerに照合した。
+そのtext24件・68,989 bytes（8 YAMLを含む）を撤去し、29 HDF5・796,680 bytesは残存する。
+現行P10/P06/C03と独立oracle、dated maintenance記録、実行環境を保持した。P10のfield/event/relaxation各8粒子をcold/warm計6行で再実行し、failure0・各scenario科学payload一致を確認。
+既知の全撤去対象の残存はHDF577,757件・4,554,566,979 bytes。合成P11 fixture一つにもhash guard付き削除を試したが同じpolicyで拒否され、具体的拒否は計5操作となった。
+詳細は[producerの役割による追加撤去](execution/guard_artifact_cleanup.json)。全バイナリを個別に試したという意味ではない。
 分類rootの重複・包含と保護資産の混入は検出されなかった。実行時には再確認が必要である。
 対象・留保は[blocked cleanup](blocked_cleanup.json)に記録する。回収容量の実績とは扱わない。
 

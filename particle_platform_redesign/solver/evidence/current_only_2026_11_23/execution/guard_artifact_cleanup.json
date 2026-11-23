@@ -1,0 +1,103 @@
+{
+  "scope": "Role-based retirement of current-format synthetic P11/P10 guarddebug artifacts omitted by earlier oldformat inventory; independentnative/input/experiment/environment records retained",
+  "base_head": "08ac61bcaf887fdd150e5d9f5a0e6ed2e99a387b",
+  "cause": "Formatversion alone cannot identifyretiredproducer outputs; validateactualproducer/use/currentfactoryidentity/authority",
+  "completed_text": {
+    "p11_files": 9,
+    "p11_bytes": 36381,
+    "p10_debug_files": 15,
+    "p10_debug_bytes": 32608,
+    "total_files": 24,
+    "total_bytes": 68989,
+    "includes_configuration_fixtures": 8,
+    "all_exact_paths_absent": true,
+    "method": "Explicitapply_patch afterSHA/live-use/knownsyntheticproducer evidence; no binaryremoval"
+  },
+  "remaining_guard_hdf5": {
+    "p11_files": 13,
+    "p11_bytes": 350568,
+    "p10_debug_files": 16,
+    "p10_debug_bytes": 446112,
+    "total_files": 29,
+    "total_bytes": 796680,
+    "all_preflight_binary_shas_match": true,
+    "binary_deletion_attempted": true,
+    "binary_requests_rejected": 1,
+    "other_binary_files_unattempted": 28
+  },
+  "total_continuation_text_retirement": {
+    "files": 623,
+    "bytes": 3005242,
+    "scope": "28Brownian+571oldresultmetadata+24syntheticdebugtext; includes8YAML, excludes9finishedhelper sources"
+  },
+  "global_confirmed_remaining_hdf5": {
+    "files": 77757,
+    "bytes": 4554566979,
+    "components": "77728oldschema resultH5 +29currentformatobsoleteproducer debug H5",
+    "scope": "Knownretiredtargetset, not allworkspaceHDF5data"
+  },
+  "preserved": {
+    "current_p10_p06_c03_producers_and_oracles": true,
+    "dated_maintenance_worklog": true,
+    "release_execution_environments": true,
+    "known_native_authority_files": 479,
+    "missing_or_hash_mismatches": 0,
+    "old_code_model_dataset_diff": false
+  },
+  "fresh_p10_execution": {
+    "command": "uv run --locked python -m tests.performance.p10_compiled --scenarios field event relaxation --field-particles 8 --event-particles 8 --relaxation-particles 8 --repeats 1 --warmups 1 --json .artifacts/current_only_20261123/guard_cleanup_p10.json",
+    "exit_code": 0,
+    "observations": 6,
+    "workloads": [
+      "field",
+      "event",
+      "relaxation"
+    ],
+    "particles_each": 8,
+    "modes": [
+      "cold",
+      "warm"
+    ],
+    "failure_events": 0,
+    "identity": {
+      "by_scenario": {
+        "event": {
+          "exact_match": true,
+          "observations_compared": 2,
+          "semantic_result_sha256": "sha256:57e811140b129b34bddebf491c76b507c02b086ff330231012a2a5527321c1a6"
+        },
+        "field": {
+          "exact_match": true,
+          "observations_compared": 2,
+          "semantic_result_sha256": "sha256:b7bec5398ef7974cf81850ae1b2b9bca0f0091c2c6f0320553f49864d2582580"
+        },
+        "relaxation": {
+          "exact_match": true,
+          "observations_compared": 2,
+          "semantic_result_sha256": "sha256:65228db38f6b8dda1f2c87274aab9e4cf362fe37956281d42e68a5fc3c0511f7"
+        }
+      },
+      "definition": "stable manifest semantics plus final/events/series/frames/probes; timing and RSS excluded"
+    },
+    "interpretation": "Tinygeneratedcontrol afterdebugmetadata removal; cold/warmJITamortization, not productionscaling/improvementspeedup or newphysicalqualification"
+  },
+  "independent_review": "guard_artifact_postreview.json",
+  "receipts": {
+    "p11_artifact_preflight.json": "b45c1c7e2c669c9289b7ebacd859b6e4462c87f878a536eeb776a487ca7277d7",
+    "p10_debug_artifact_preflight.json": "d3c9e0e8f054a450d39c808565c3616889d1001eb890ed4a115a1d2d0db9ffff",
+    "guard_artifact_postreview.json": "dd76d7e6d48eb8221da84ae45fd171796e44807f096adae1114747a88b0e589e",
+    "guard_artifact_recheck.json": "648b79477c6321623316bbe0bdb2a859df29b126fb6d35db6bc5b57d68cc2770",
+    "guard_cleanup_p10.json": "51b0bc73611604041c6baf30c20005fa51963b8ae9552bb9f934212d304a95a3"
+  },
+  "production_and_test_source_changed": false,
+  "goal": "not_complete:binarydeletionpolicyblock;5concrete rejectedoperations across2goalturns",
+  "binary_delete_attempt": {
+    "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_case/case.h5",
+    "expected_raw_sha256": "100628eeaf4a947ce128aaa68622704077f83dfed38543e9ea307ca2c0879ba7",
+    "operation": "Hash-guarded literal-path nonrecursive PowerShell Remove-Item",
+    "result": "blocked by policy; process was not started",
+    "executed": false,
+    "scope": "One regenerable currentC03-equivalent P11fixture, not all29binaryfiles"
+  },
+  "record_phase": "Finalproducer-role cleanup/validation evidence; frozen beforefinalreport update"
+}

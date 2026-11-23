@@ -1,0 +1,300 @@
+{
+  "audit": "Role-based retirement preflight for obsolete P11 benchmark artifacts despite current result schema4",
+  "recorded_utc": "2026-11-23T07:04:28.055088+00:00",
+  "status": "SAFE_TEXT_CANDIDATES_BINARY_DELETION_BLOCKED",
+  "scope_roots": [
+    ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_case",
+    ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000",
+    ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured",
+    ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000"
+  ],
+  "producer_role": {
+    "old_runner": "tests/performance/p11_exponential.py retired in8883e3a",
+    "old_runner_source": "git75100e74f1243b527e065c9e6a68121221408b39:_materialize_case and _launch_worker",
+    "old_purpose": "syntheticC03 constant-relaxation JIT/timing/memory smoke; not independent reference",
+    "current_owner": "tests/performance/p10_compiled.py:_materialize_cases relaxation workload",
+    "current_independent_science": "tests/verification C03 closed-form mean/position and wide-range/variable-coefficient tests retained"
+  },
+  "synthetic_input_correspondence": {
+    "particle_count": 2,
+    "canonical_content_hash": "sha256:66b3a1c627393765b80f2cd310f83726030984fe0403ad23ab2b853220388d14",
+    "current_in_memory_C03_expansion_content_hash": "sha256:66b3a1c627393765b80f2cd310f83726030984fe0403ad23ab2b853220388d14",
+    "exact_canonical_match": true,
+    "provenance": {
+      "field_semantics_revision": "microcase-primitive-v1",
+      "producer": "analytic-microcase-pack",
+      "producer_metadata": {
+        "case_id": "C03"
+      },
+      "producer_version": "1",
+      "source_sha256": "sha256:786671de3cd018f1b21b3fcd2728c55d80a0d0d1279512ddba61f9eaeb7ad7c4"
+    },
+    "dt_s": 0.75,
+    "tau_s": 0.25,
+    "configured_dt_over_tau": 3.0,
+    "no_fixture_or_simulation_written_for_this_check": true
+  },
+  "retained_existing_correspondence_receipts": [
+    {
+      "path": ".artifacts\\current_only_bench_20261123\\old_report_role_mapping.json",
+      "sha256": "118bb351ac1adf7d0fdc40c22cd53d139dbc9757ea15d62674c503d4023c7c5b"
+    },
+    {
+      "path": ".artifacts\\current_only_bench_20261123\\relaxation_input_correspondence.json",
+      "sha256": "5d1242b56c45d9b1b94739f6cbd1785f597ff82c1aaca6e0847a83ac5439fbbe"
+    }
+  ],
+  "run_evidence": [
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/run.json",
+      "case_name": "p11_exponential_midpoint",
+      "result_schema_version": 4,
+      "engine_algorithm_revision": "particle_engine_v64",
+      "data_content_hash": "sha256:66b3a1c627393765b80f2cd310f83726030984fe0403ad23ab2b853220388d14",
+      "requested_integrator": "exponential_midpoint",
+      "resolved_integrator": "exponential_midpoint",
+      "time": {
+        "dt_s": 0.75,
+        "end_s": 0.75,
+        "field_snapshot_splits_s": [],
+        "start_s": 0.0
+      },
+      "particle_count": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/run.json",
+      "case_name": "p11_exponential_midpoint",
+      "result_schema_version": 4,
+      "engine_algorithm_revision": "particle_engine_v64",
+      "data_content_hash": "sha256:66b3a1c627393765b80f2cd310f83726030984fe0403ad23ab2b853220388d14",
+      "requested_integrator": "exponential_midpoint",
+      "resolved_integrator": "exponential_midpoint",
+      "time": {
+        "dt_s": 0.75,
+        "end_s": 0.75,
+        "field_snapshot_splits_s": [],
+        "start_s": 0.0
+      },
+      "particle_count": 2
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/run.json",
+      "case_name": "p11_exponential_midpoint",
+      "result_schema_version": 4,
+      "engine_algorithm_revision": "particle_engine_v64",
+      "data_content_hash": "sha256:66b3a1c627393765b80f2cd310f83726030984fe0403ad23ab2b853220388d14",
+      "requested_integrator": "exponential_midpoint",
+      "resolved_integrator": "exponential_midpoint",
+      "time": {
+        "dt_s": 0.75,
+        "end_s": 0.75,
+        "field_snapshot_splits_s": [],
+        "start_s": 0.0
+      },
+      "particle_count": 2
+    }
+  ],
+  "candidate_text_files": [
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/run.json",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker\\warmup-000\\run.json",
+      "name": "run.json",
+      "bytes": 11688,
+      "sha256": "4a812519ee681c4bab310583b8167ae3e18a2e8d530523fed20f4c5b7e04ef4f",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/LATEST",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker\\warmup-000\\LATEST",
+      "name": "LATEST",
+      "bytes": 439,
+      "sha256": "bc9affd603814e5128f02e32de25857f310678747ed858afa79837d2674acb06",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/_SUCCESS",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker\\warmup-000\\_SUCCESS",
+      "name": "_SUCCESS",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/run.json",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\measured\\run.json",
+      "name": "run.json",
+      "bytes": 11688,
+      "sha256": "4a812519ee681c4bab310583b8167ae3e18a2e8d530523fed20f4c5b7e04ef4f",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/LATEST",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\measured\\LATEST",
+      "name": "LATEST",
+      "bytes": 439,
+      "sha256": "bc9affd603814e5128f02e32de25857f310678747ed858afa79837d2674acb06",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/_SUCCESS",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\measured\\_SUCCESS",
+      "name": "_SUCCESS",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/run.json",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\warmup-000\\run.json",
+      "name": "run.json",
+      "bytes": 11688,
+      "sha256": "4a812519ee681c4bab310583b8167ae3e18a2e8d530523fed20f4c5b7e04ef4f",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/LATEST",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\warmup-000\\LATEST",
+      "name": "LATEST",
+      "bytes": 439,
+      "sha256": "bc9affd603814e5128f02e32de25857f310678747ed858afa79837d2674acb06",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/_SUCCESS",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\warmup-000\\_SUCCESS",
+      "name": "_SUCCESS",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "obsolete P11 timing/smoke workflow result metadata, not current P10/reference/native authority"
+    }
+  ],
+  "candidate_text_count": 9,
+  "candidate_text_bytes": 36381,
+  "blocked_binary_files": [
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_case/case.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_case\\case.h5",
+      "bytes": 40392,
+      "sha256": "100628eeaf4a947ce128aaa68622704077f83dfed38543e9ea307ca2c0879ba7",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/context.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker\\warmup-000\\context.h5",
+      "bytes": 18736,
+      "sha256": "2050982624cc5d6e116b8dff11a8765f254709c0f494c7f5ada94e7bbbfaa089",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/final.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker\\warmup-000\\final.h5",
+      "bytes": 9840,
+      "sha256": "ff5cf1797c758792f26e02d41d1b9a05d1f072dadf63ebbbcc56eafc52e6963c",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/checkpoints/A.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker\\warmup-000\\checkpoints\\A.h5",
+      "bytes": 15528,
+      "sha256": "76c4f3a07788b4e76af44fede7bc6255034bc807f575b077c8dc16b7517b4e1f",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/segments/epoch-000000.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker\\warmup-000\\segments\\epoch-000000.h5",
+      "bytes": 59288,
+      "sha256": "c8263b74138a644dbe0a7fb5571d5c6c2a9907eee4acecb22009e8cab83d4695",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/context.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\measured\\context.h5",
+      "bytes": 18736,
+      "sha256": "2050982624cc5d6e116b8dff11a8765f254709c0f494c7f5ada94e7bbbfaa089",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/final.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\measured\\final.h5",
+      "bytes": 9840,
+      "sha256": "ff5cf1797c758792f26e02d41d1b9a05d1f072dadf63ebbbcc56eafc52e6963c",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/checkpoints/A.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\measured\\checkpoints\\A.h5",
+      "bytes": 15528,
+      "sha256": "76c4f3a07788b4e76af44fede7bc6255034bc807f575b077c8dc16b7517b4e1f",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/segments/epoch-000000.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\measured\\segments\\epoch-000000.h5",
+      "bytes": 59288,
+      "sha256": "c8263b74138a644dbe0a7fb5571d5c6c2a9907eee4acecb22009e8cab83d4695",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/context.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\warmup-000\\context.h5",
+      "bytes": 18736,
+      "sha256": "2050982624cc5d6e116b8dff11a8765f254709c0f494c7f5ada94e7bbbfaa089",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/final.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\warmup-000\\final.h5",
+      "bytes": 9840,
+      "sha256": "ff5cf1797c758792f26e02d41d1b9a05d1f072dadf63ebbbcc56eafc52e6963c",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/checkpoints/A.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\warmup-000\\checkpoints\\A.h5",
+      "bytes": 15528,
+      "sha256": "76c4f3a07788b4e76af44fede7bc6255034bc807f575b077c8dc16b7517b4e1f",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    },
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/segments/epoch-000000.h5",
+      "absolute_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\performance_guard_smoke\\p11_worker_fixed\\warmup-000\\segments\\epoch-000000.h5",
+      "bytes": 59288,
+      "sha256": "c8263b74138a644dbe0a7fb5571d5c6c2a9907eee4acecb22009e8cab83d4695",
+      "role": "obsolete synthetic C03 P11 input or derived timing output; not native/source environment"
+    }
+  ],
+  "blocked_binary_count": 13,
+  "blocked_binary_bytes": 350568,
+  "preservation_boundary": {
+    "publication_native_authority_paths": 479,
+    "overlapping_selected_paths": 0,
+    "environment_or_source_files": 0,
+    "symlinks_junctions_or_outside_workspace": 0,
+    "excluded_protected_roots": [
+      ".artifacts/release-index-*",
+      "actual execution environments/source copies"
+    ]
+  },
+  "live_use_check": {
+    "windows_processes": 621,
+    "wsl_processes": 45,
+    "path_mentions": [],
+    "meaning": "Exact absolute/relative/WSL-mapped commandlinepath inspection; revalidate immediately before explicittextremoval"
+  },
+  "targeted_search": {
+    "meaning": "Only explicit case_name p11_exponential_midpoint in run.json under.artifacts, excluding protectedrelease-index/environment/sourcecopies",
+    "matching_runs": [
+      ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker/warmup-000/run.json",
+      ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/measured/run.json",
+      ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_worker_fixed/warmup-000/run.json"
+    ],
+    "additional_runs_found": false
+  },
+  "safety_judgment": "The9UTF8metadata and13HDF5 are role-finished oldP11 artifacts. Root may safely remove exacttexttargets afterhash/liveuse recheck; no binarydeletion,bypass,rename orenvironmentcleanup authorized by this preflight.",
+  "limits": [
+    "Read-only inspection; no deletion, simulation or native solve performed",
+    "No other experimental/native parent directories classified or swept",
+    "Currentformat4 does not imply active role; classification uses actualretiredproducer and preservedcurrentC03input/oracle roles",
+    "JSON auditrecord only, no helper/framework created"
+  ]
+}

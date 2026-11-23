@@ -1,0 +1,35 @@
+{
+  "scope": "Remote fullCI for code/test state08ac61b; subsequent producer-role cleanup changes onlyoldgenerated text/documentation/reportmetadata",
+  "head_sha": "08ac61bcaf887fdd150e5d9f5a0e6ed2e99a387b",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45127770171",
+  "jobs": [
+    {
+      "id": 137535994988,
+      "name": "windows-latest / Python 3.12",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45127770171/job/137535994988"
+    },
+    {
+      "id": 137535995426,
+      "name": "ubuntu-latest / Python 3.12",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45127770171/job/137535995426"
+    },
+    {
+      "id": 137548003872,
+      "name": "Publish GitHub release",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45127770171/job/137548003872"
+    }
+  ],
+  "limits": [
+    "Doesnot claim latestmetadata commitCI ran",
+    "Currentproduction/test/benchmark source remainsunchanged after08ac61b",
+    "No release/registrypublication requested"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-11-23T06:51:22.069963+00:00",
+  "captured_at_utc": "2026-11-23T07:29:53.534592+00:00",
   "baseline": "75100e74f1243b527e065c9e6a68121221408b39",
   "source": {
     "path": "solver/.artifacts/current_only_20261123/assets_review.json",
@@ -10,9 +10,9 @@
     "status": "blocked_unexecuted_remaining_binary",
     "source": {
       "path": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
-      "sha256": "sha256:c56685c11522059bc07e68d20645c11b010fb419d4bf298780e8c93ed590e95b"
+      "sha256": "sha256:fc9d552c5e4368fc427a790ddb63438df4ee2339c8e16db98fc62259c7f97bdb"
     },
-    "reported_automatic_approval_review_rejections": 4,
+    "reported_automatic_approval_review_rejections": 5,
     "reported_tool_reason": "blocked by policy",
     "known_remaining_scope": {
       "path": "evidence/brownian_wall_accuracy_extension_2026_10_10",
@@ -64,11 +64,63 @@
       }
     },
     "total_retired_hdf5_remaining": {
+      "files": 77757,
+      "bytes": 4554566979,
+      "scope": "Known retired target set:77728 oldschema resultHDF5 +29 currentformat synthetic P10/P11guard HDF5; not all workspace HDF5",
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+        "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+      }
+    },
+    "binary_rejection_scope": "Four Brownian operations and one hash-guarded regenerable P11fixture request were rejected beforeprocessstart. The other28 guard HDF5 files and binary deletions in198 oldresult roots were not attempted; not all known remaining files were individually rejected.",
+    "old_schema_remaining_subset": {
       "files": 77728,
       "bytes": 4553770299,
       "receipt": {
         "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
         "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+      },
+      "scope": "Confirmed oldschema subset from the earlier599-text-removal phase; not all known retired binary targets"
+    },
+    "current_format_guard_artifacts": {
+      "p11_files": 13,
+      "p11_bytes": 350568,
+      "p10_debug_files": 16,
+      "p10_debug_bytes": 446112,
+      "total_files": 29,
+      "total_bytes": 796680,
+      "all_preflight_binary_shas_match": true,
+      "binary_deletion_attempted": true,
+      "binary_requests_rejected": 1,
+      "other_binary_files_unattempted": 28,
+      "producer_role": "Verified obsolete synthetic P10/P11guard/debug outputs; current format alone does not make them native/current evidence",
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+        "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+      }
+    },
+    "completed_guard_text_removal": {
+      "p11_files": 9,
+      "p11_bytes": 36381,
+      "p10_debug_files": 15,
+      "p10_debug_bytes": 32608,
+      "total_files": 24,
+      "total_bytes": 68989,
+      "includes_configuration_fixtures": 8,
+      "all_exact_paths_absent": true,
+      "method": "Explicitapply_patch afterSHA/live-use/knownsyntheticproducer evidence; no binaryremoval",
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+        "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+      }
+    },
+    "completed_text_removal_total": {
+      "files": 623,
+      "bytes": 3005242,
+      "scope": "UTF8 text including8YAML;28Brownianmarkers+571oldresultmetadata+24guarddebugtext; excludes9finishedhelpers",
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+        "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
       }
     }
   },
@@ -83,7 +135,7 @@
     "source_record": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json",
     "scope": "Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples."
   },
-  "current_execution_receipts": "Current continuation full core suite:1240 passed,473.507 JUnit seconds;30 targeted checks and four32-particle B03 identity rows. After599 text-metadata removals, installed Windows/Linux workflows each completed13 operations and5 examples with console/module entrypoints. Wheel build and156 external tests remain bound to8883e3a and unchanged production source. Remaining77728 HDF5 files are not deleted; open improvement findings persist.",
+  "current_execution_receipts": "Full core suite1240/473.507 JUnit seconds,30 targeted checks and four32-particle B03 rows retain their execution-source scopes; no production/test change after08ac61b. Windows/Linux workflows each completed13 operations and5 examples after the earlier599 metadata removals. After the additional24 guard text removals, current P10 field/event/relaxation each N8 ran cold/warm for6 observations with exact per-workload scientific identity and0 failures.623UTF8text files and9helpers removed; known77757HDF5 remain under5 concrete policy refusals with limited attempted scope. No new fullsuite/A-P/scaling claim.",
   "report_role": "Consumer of reviewed scope, observations and verdicts; no solver or V&V verdict engine",
   "continuation_base_head": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
   "prior_cleanup_observation": {
@@ -143,5 +195,22 @@
       "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
     }
   },
-  "receipt_document_hash_scope": "Document hashes inside earlier execution receipts bind their capture phase. Current document identity is owned by the final generated report authority snapshot, not inferred from an older receipt."
+  "receipt_document_hash_scope": "Document hashes inside earlier execution receipts bind their capture phase. Current document identity is owned by the final generated report authority snapshot, not inferred from an older receipt.",
+  "guard_cleanup_base_head": "08ac61bcaf887fdd150e5d9f5a0e6ed2e99a387b",
+  "latest_native_preservation": {
+    "known_files": 479,
+    "missing_or_sha256_mismatches": 0,
+    "scope": "Known native/input authorities, not all untracked workspace assets; checked after the guard text cleanup",
+    "receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+      "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+    }
+  },
+  "producer_role_retirement": {
+    "classification": "Owner/use/current-producer correspondence decides retirement; schema version alone is insufficient",
+    "receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+      "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+    }
+  }
 }

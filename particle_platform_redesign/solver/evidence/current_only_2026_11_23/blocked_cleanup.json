@@ -21,6 +21,12 @@
       "scope": "Goal continuation reverified the same9840byte result3 leaf and123 remaining generated files; no protected descendants",
       "operation": "nonrecursive literal-path PowerShell Remove-Item",
       "result": "blocked by policy; process was not started"
+    },
+    {
+      "scope": "One regenerated-currentC03-equivalent P11synthetic fixture; rawSHA guarded and old producerrole independentlyverified",
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_case/case.h5",
+      "operation": "Hash-guarded nonrecursive literal-path PowerShell Remove-Item",
+      "result": "blocked by policy; process was not started"
     }
   ],
   "brownian_confirmed_remaining": {
@@ -2251,8 +2257,19 @@
     "binary_deletion": false
   },
   "total_confirmed_remaining_hdf5": {
-    "files": 77728,
-    "bytes": 4553770299,
-    "scope": "95Brownian +77633 in198separateclassifiedresults; freshcounts/types/sizes, not allbinarycontenthashes"
+    "files": 77757,
+    "bytes": 4554566979,
+    "scope": "95Brownian +77633in198oldresultroots +29retiredcurrentformatP10/P11debugH5; knownscope, not allworkspaceH5"
+  },
+  "producer_role_guard_cleanup": {
+    "evidence": "execution/guard_artifact_cleanup.json",
+    "text_files_removed": 24,
+    "text_bytes_removed": 68989,
+    "current_format_hdf5_remaining": 29,
+    "hdf5_bytes": 796680,
+    "binary_deletion_attempted": true,
+    "scope": "RetiredP11/P10syntheticdebugoutside198oldformatroots; currentformat doesnotmakeobsoleteproducer active",
+    "binary_requests_rejected": 1,
+    "other_binary_files_unattempted": 28
   }
 }

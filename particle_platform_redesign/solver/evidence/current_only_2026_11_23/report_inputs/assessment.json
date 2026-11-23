@@ -58,7 +58,7 @@
         "evidenceFlow": [
           {
             "title": "Prior reference reused in current-only report",
-            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:8462eba3311b64504913354ccfe5f2d69a9cd0c16b9f84a62563e3d7ad5168e3\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
+            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:b1d7c74fceea5d6439816161f71e21de08538df70696ae38f101816383b22d39\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
           },
           {
             "title": "Prior resolved_semantics candidate replay and unchanged native scope",
@@ -145,7 +145,7 @@
         "evidenceFlow": [
           {
             "title": "Prior reference reused in current-only report",
-            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:8462eba3311b64504913354ccfe5f2d69a9cd0c16b9f84a62563e3d7ad5168e3\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
+            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:b1d7c74fceea5d6439816161f71e21de08538df70696ae38f101816383b22d39\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
           },
           {
             "title": "Prior resolved_semantics candidate replay and unchanged native scope",

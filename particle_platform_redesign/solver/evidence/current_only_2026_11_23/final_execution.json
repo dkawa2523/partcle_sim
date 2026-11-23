@@ -154,6 +154,34 @@
     "execution/ci_8883e3a.json": {
       "source": "Finalpostcleanupretainedexecutionreceipt",
       "sha256": "9b5914b410d84cf5b821540264157575fb0ebe1159da7167d4a6a48734faaad3"
+    },
+    "execution/p11_artifact_preflight.json": {
+      "source": "Producer-role currentformatolddebug retirement evidence",
+      "sha256": "b45c1c7e2c669c9289b7ebacd859b6e4462c87f878a536eeb776a487ca7277d7"
+    },
+    "execution/p10_debug_artifact_preflight.json": {
+      "source": "Producer-role currentformatolddebug retirement evidence",
+      "sha256": "d3c9e0e8f054a450d39c808565c3616889d1001eb890ed4a115a1d2d0db9ffff"
+    },
+    "execution/guard_artifact_cleanup.json": {
+      "source": "Producer-role currentformatolddebug retirement evidence",
+      "sha256": "154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+    },
+    "execution/guard_artifact_postreview.json": {
+      "source": "Producer-role currentformatolddebug retirement evidence",
+      "sha256": "dd76d7e6d48eb8221da84ae45fd171796e44807f096adae1114747a88b0e589e"
+    },
+    "execution/guard_artifact_recheck.json": {
+      "source": "Producer-role currentformatolddebug retirement evidence",
+      "sha256": "648b79477c6321623316bbe0bdb2a859df29b126fb6d35db6bc5b57d68cc2770"
+    },
+    "execution/guard_cleanup_p10.json": {
+      "source": "Producer-role currentformatolddebug retirement evidence",
+      "sha256": "51b0bc73611604041c6baf30c20005fa51963b8ae9552bb9f934212d304a95a3"
+    },
+    "execution/ci_08ac61b.json": {
+      "source": "Remote source-statequalification for08ac61b; laterchangesmetadataonly",
+      "sha256": "ac521276b9f5ed96a9441eca459c14c4fa3ec2df0eadc8e44884e2b220ab3bd1"
     }
   },
   "limits": [
@@ -234,10 +262,10 @@
     "tools/vv/gas_collision/collision_reference.py": "6e478ae45db71f1826c56eb0b0e5fdec5daab4b03b14b98abce9967252f8d087",
     "tools/vv/gas_collision/qualify.py": "5cd57df5cd956609b7c267faf3847678254ff5a31cae556df36ceb6995464382"
   },
-  "foundation_review_sha256": "c0b272076246ab965c4158f8d992f55e8fd9d22dfc2a1be9ef375a013d6c5481",
+  "foundation_review_sha256": "e9f59928ae55e39e4d4c77426a30942b53181fe53eaedcfa57bbaf0cf2ef64f9",
   "report_verification": "report_verification.json",
-  "report_verification_sha256": "7fec32b512f154561cabf4b29573288a30d6b8af16598b33ffaf662fc227d94d",
-  "new_review_status": "R13memoryretirement and generatedtextscope independentlyreviewed; othernewarchitectureproposals notimplemented",
+  "report_verification_sha256": "1cc48468820203cf858a96ade809c1921ed3947d9d7db26dabbeff35c1239bd4",
+  "new_review_status": "ActualR14role-vs-format amendment reviewed; fullreviewdocSHA retainedinguard_artifact_postreview; no new numerical/proofclaims",
   "historical_core_full_8883e3a": {
     "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q",
     "junit_source": ".artifacts\\current_only_20261123\\core_scenarios_clean.xml",
@@ -256,22 +284,23 @@
     ]
   },
   "completion_audit": {
-    "physicalbinaryretirement": "not achieved:77728HDF5 /4553770299bytes remain;4 policyrejections; other198binaryremovalunattempted",
+    "physicalbinaryretirement": "not achieved:known77757HDF5/4554566979Bremain;5concreterejections (4Brownian+1syntheticP11); otherbinaryunattempted",
     "current_full_core": "1240passed",
     "current_targeted": "30passed",
     "freshB03": "4same-input rows scientificpayloadunchanged",
     "production67": "unchanged from8883",
     "installedwheel": "Exact49source/METADATA/READMEbinding unchanged; priorWindows/Linux execution retained",
-    "report": "complete: officialprebuiltbuild, Edge desktop/mobile/sources, protected234, snapshot4, exactevidencebindings",
-    "generatedtextretirement": "599metadatafiles removed thiscontinuation; finishedtaskhelpers9",
+    "report": "complete: producer-role scope/R14correction,623UTF8retirements/77757knownHDF5remaining/5concretedenials, officialbuild/Edge/source/protected234 checks",
+    "generatedtextretirement": "623UTF8files/3005242B removed thiscontinuation; finishedtaskhelpers9",
     "current_public_workflows": "Afterall571metadataremovals, Windows/Linuxexistingcleanwheel13operations/5examples complete",
-    "remaining_required_work": "Onlypolicy-blocked retiredHDF5 removal aftertheidentifiedsoftware/generatedtext/helper/test cleanup; no goalcompletionclaimed",
-    "current_goal_status": "active; sameblockobserved2consecutivegoalturns, belowblockedthreshold; no completionclaim"
+    "remaining_required_work": "Onlyidentifiedretiredbinary removal afterallknownsafe text/code/test/fixturecleanup; policyblock persists",
+    "current_goal_status": "active asrecordedendofsecondgoalturn; no completionclaim; blockedthreshold requires3goalturns",
+    "current_p10_after_guard_cleanup": "6observations:field/event/relaxation8particles cold/warm allfailure0; eachscenariopayloadsame"
   },
   "documentation_after_r13_verification": {
     "path": "README.md",
     "as_captured_in_r13_receipt_sha256": "659b24a032b964b3ff7f2ebc6bef0e0520d18bd8a48842bec8a2a835b50a04ce",
-    "latest_sha256": "6729c702741b24404beca3ff3009e6a3e4821c747305e9b1e4ab203a05ae90f3",
-    "reason": "Execution-only history amended afterR13 tests torecord571 additionaltextremovals/helper9/current1240/aftercleanupinstalledworkflows; no numeric/test/benchmark sourcechanged bythisdocumentation edit"
+    "latest_sha256": "71e339c556524c15419919490b35ac445df455dba6683334a2ed9a79d9143a29",
+    "reason": "Workhistory updatedafterR13execution with599-stage then24additional producer-role textremovals,9helper/current1240/aftercleanuproutes; no production/test/benchmark source change after08ac"
   }
 }

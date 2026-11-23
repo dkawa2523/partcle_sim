@@ -110,7 +110,7 @@
       "module": "passed",
       "cwd_uses_checkout": false
     },
-    "source_scope": "Fresh public workflows after all599 metadata deletions using existing clean installations of the unchanged wheel; no new wheel build or environment upgrade."
+    "source_scope": "Fresh public workflows after the earlier599 text metadata deletions using existing clean installations; later24 guard text removals changed no production/test source. No second full workflow or new wheel build is claimed."
   },
   "assets_review": {
     "path": "solver/.artifacts/current_only_20261123/final_assets_review.json",
@@ -122,7 +122,7 @@
   },
   "physical_cleanup": {
     "path": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
-    "sha256": "sha256:c56685c11522059bc07e68d20645c11b010fb419d4bf298780e8c93ed590e95b"
+    "sha256": "sha256:fc9d552c5e4368fc427a790ddb63438df4ee2339c8e16db98fc62259c7f97bdb"
   },
   "prior_execution_source_commit": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
   "continuation": {
@@ -174,17 +174,56 @@
       "sha256": "sha256:0b77fde7ca01f4e95da4661bb967e05d9b2f514da061d28d9a174639c43d2885"
     },
     "completed_text_cleanup": {
-      "files": 599,
-      "bytes": 2936253,
+      "files": 623,
+      "bytes": 3005242,
       "brownian_markers": 28,
       "other_result_metadata": 571,
+      "guard_debug_text": 24,
+      "yaml_included": 8,
+      "finished_helpers_separate": 9,
       "binary_removal_claim": false
     },
     "other_result_text_cleanup": {
       "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
       "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
     },
-    "document_hash_scope": "Document hashes inside earlier execution receipts bind their capture phase. Current document identity is owned by the final generated report authority snapshot, not inferred from an older receipt."
+    "document_hash_scope": "Document hashes inside earlier execution receipts bind their capture phase. Current document identity is owned by the final generated report authority snapshot, not inferred from an older receipt.",
+    "previous_completed_text_cleanup": {
+      "files": 599,
+      "bytes": 2936253,
+      "brownian_markers": 28,
+      "other_result_metadata": 571,
+      "binary_removal_claim": false,
+      "source_scope": "Earlier599text phase; guard text was added later"
+    },
+    "guard_artifact_cleanup": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+      "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+    },
+    "fresh_p10_after_guard_text_cleanup": {
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/guard_cleanup_p10.json",
+        "sha256": "sha256:51b0bc73611604041c6baf30c20005fa51963b8ae9552bb9f934212d304a95a3"
+      },
+      "owner_receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
+        "sha256": "sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d"
+      },
+      "observations": 6,
+      "workloads": [
+        "field",
+        "event",
+        "relaxation"
+      ],
+      "particles_each": 8,
+      "modes": [
+        "cold",
+        "warm"
+      ],
+      "failure_events": 0,
+      "science_exact_by_workload": true,
+      "interpretation": "Tiny generated control; cold/warm JIT amortization, not algorithm speedup, scaling or new physical qualification"
+    }
   },
   "prior_core": {
     "tests": 1228,
@@ -246,5 +285,6 @@
       "own_csv_first_source": "analytic field trajectory and hit verified"
     },
     "source_scope": "Execution at 8883e3a; all 49 installed source files unchanged in this continuation. No new reinstall."
-  }
+  },
+  "guard_cleanup_source_base": "08ac61bcaf887fdd150e5d9f5a0e6ed2e99a387b"
 }
