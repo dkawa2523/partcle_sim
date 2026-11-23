@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 import math
 from collections.abc import Iterator
 from dataclasses import dataclass, replace
@@ -21,6 +19,8 @@ from chamber_particles.case_format import (
     P1TriLayout,
     Q1QuadLayout,
     RegularLayout,
+    field_sha256,
+    layout_sha256,
 )
 from chamber_particles.fields import (
     FIELD_SPATIAL_GRADIENT_REVISION,
@@ -766,56 +766,18 @@ def _regular_node_ids(layout: RegularLayout, cell_id: int) -> Int64Array:
     )
 
 
-def field_sha256(field: FieldData) -> str:
-    metadata = json.dumps(
-        {
-            "association": field.association,
-            "components": field.components,
-            "layout": field.layout,
-            "name": field.name,
-            "stored_basis": field.stored_basis,
-            "unit": field.unit,
-        },
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
-    digest = hashlib.sha256(metadata)
-    digest.update(memoryview(np.ascontiguousarray(field.values)).cast("B"))
-    if field.time_s is not None:
-        digest.update(memoryview(np.ascontiguousarray(field.time_s)).cast("B"))
-    return f"sha256:{digest.hexdigest()}"
-
-
 def layout_summary(layout: Layout) -> dict[str, object]:
     nodes = _layout_nodes(layout)
     return {
         "name": layout.name,
         "kind": _layout_kind(layout),
-        "layout_sha256": _layout_sha256(layout),
+        "layout_sha256": layout_sha256(layout),
         "node_count": int(nodes.shape[0]),
         "cell_count": int(layout.cell_support.size),
         "supported_cell_count": int(np.count_nonzero(layout.cell_support)),
         "coordinate_min_m": np.min(nodes, axis=0).tolist(),
         "coordinate_max_m": np.max(nodes, axis=0).tolist(),
     }
-
-
-def _layout_sha256(layout: Layout) -> str:
-    digest = hashlib.sha256(_layout_kind(layout).encode("ascii"))
-    arrays = (
-        (layout.axis0_m, layout.axis1_m, layout.cell_support)
-        if isinstance(layout, RegularLayout)
-        else (layout.nodes_m, layout.connectivity, layout.cell_support)
-    )
-    for array in arrays:
-        contiguous = np.ascontiguousarray(array)
-        descriptor = json.dumps(
-            {"dtype": contiguous.dtype.str, "shape": contiguous.shape}, separators=(",", ":")
-        ).encode("ascii")
-        digest.update(len(descriptor).to_bytes(8, "little"))
-        digest.update(descriptor)
-        digest.update(memoryview(contiguous).cast("B"))
-    return f"sha256:{digest.hexdigest()}"
 
 
 def _layout_kind(layout: Layout) -> str:

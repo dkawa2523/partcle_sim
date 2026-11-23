@@ -1,0 +1,60 @@
+{
+  "baseline": "6555ce3abfb8c2eb5580115c6976d77878bacc85",
+  "scope": "Independent user, implementation and scientific reviews of the foundation change; execution qualification is recorded separately",
+  "reviews": [
+    {
+      "perspective": "user",
+      "reviewer": "plan_foundation_results_validation",
+      "independence": "Reviewed normal clients/core/result5, which this reviewer did not implement; own external/report work excluded",
+      "executed": "Fresh rz-charged CSV, exact ID 9007199254740993, release name chip, edge, source case moved away, result-only Python/CLI analyze/export/view, inspect source count and focus; finite weight corruption rejected with public JSON error and no new output",
+      "mandatory_findings": [],
+      "limits": "Does not qualify every model combination, performance or native parity"
+    },
+    {
+      "perspective": "implementation",
+      "reviewer": "retirement_review",
+      "independence": "Read-only review of the new change, not an implementation owner",
+      "inspected": "Parent/worker boundary, concrete model facts, persistent state, common material commit, result5 prefix and same-handle reads, source snapshots, generation handoff, streaming evaluator, report producer, affected tests",
+      "mandatory_findings": [
+        {
+          "finding": "External candidate lifecycle names duplicated their canonical owner",
+          "resolution": "Evaluator imports lifecycle.NAMES; native status mapping remains separate",
+          "verification": "18 saved population tests passed after the change"
+        }
+      ],
+      "limits": "Reviewer did not execute tests or infer A/P, performance or UI success"
+    },
+    {
+      "perspective": "science_and_numerics",
+      "reviewer": "causality_audit",
+      "independence": "Read-only review and independent existing oracles; not a core implementation owner",
+      "executed_before_final_fixes": "81 independent physics/OU/event/worker/generation/evaluator tests; exploratory 300 extreme finite-input comparisons with baseline",
+      "mandatory_findings": [
+        {
+          "finding": "Python scalar arithmetic exceptions escaped array physics entry points after scalar-law sharing",
+          "resolution": "All 14 affected array entry points restore PhysicsEvaluationError; negative-only OML gate precedes collection exponentials",
+          "verification": "Five overflow/underflow/domain regression cases, 154 related tests passed"
+        },
+        {
+          "finding": "Prescribed G/J allocations inherited integer input dtype and truncated real rates",
+          "resolution": "G/J outputs explicitly use float64",
+          "verification": "Integer, float32 and float64 inputs checked against independent 60-digit Decimal G/J"
+        }
+      ],
+      "followup": "Reviewer confirmed the dtype correction and dense-path test correction; four selected tests passed. Dense-law tolerance, monotonicity, nonlinear shape and depth identity were preserved; a rounded oracle point is not treated as a directed lower bound",
+      "limits": "Specific surface response-commit then departure-failure branch checked by code tracing, not independently executed by this reviewer. No new native solve, numerical parity or physical validation claimed"
+    }
+  ],
+  "mandatory_findings_open": 0,
+  "integration_followup": "Root completes the full gates, wheel workflows, whole-use matrix, benchmark runs, A/P population runs and report build separately",
+  "ap_population_followup": {
+    "reviewer": "causality_audit",
+    "independence": "Independent read-only re-computation from raw native observations and all 80 public current-source results; not the assessment or renderer author",
+    "executed": "Recomputed initial joint state/release for all 287 IDs, failures, counts, all 40 RMST and boundary33 values per case, 100us own-active speed/Z means, exact 96 common clocks, all terminal times before the endpoint, active leave-one-out ranks, and old40/current40 summary equality",
+    "native_surface_identity": "Boundary33 raw mesh 20 edges at r=153.5..179mm,z=22mm; retained coordinate ID sets exactly match bndenv(dom) observations, A74/P73. Unknown disappearances excluded",
+    "judgment": "Large-scale transport/stopping shows practical correspondence; boundary33 and 100us velocity retain local reservations. Qualified parity NOT_TESTED and physical validation NOT_CERTIFIED remain appropriate",
+    "publication_finding": "Summary figure receipt hash changed after rendering QA; refresh both assessment references and quality reference before final snapshot/build",
+    "scientific_mandatory_findings_open": 0,
+    "limits": "One native realization per case, 40 candidate replicas per case; exploratory comparison, no fresh native solve, preregistered equivalence budget, physical weights or experimental validation"
+  }
+}

@@ -343,10 +343,12 @@ def test_shifted_charge_catalog_requires_explicit_finite_drift_envelope() -> Non
     assert plan.charge is not None
     assert plan.charge.revision == _REVISION
     assert plan.charge.maximum_ion_drift_ratio == 3.0
-    assert plan.resolved_models()["charge"] == {
-        "model": "plasma_continuous",
-        "revision": _REVISION,
-    }
+    assert (
+        {
+            "model": "plasma_continuous",
+            "revision": _REVISION,
+        }
+    ).items() <= (plan.resolved_models()["charge"]).items()
 
     invalid = _charge_model()
     invalid.pop("maximum_ion_drift_ratio")
@@ -357,3 +359,46 @@ def test_shifted_charge_catalog_requires_explicit_finite_drift_envelope() -> Non
             {"charge": _charge_model(math.inf)},
             "cartesian_xy",
         )
+
+
+@pytest.mark.parametrize("charge_number", [1.0, 1.0e6])
+def test_shifted_array_rejects_positive_potential_before_electron_exponential(
+    charge_number: float,
+) -> None:
+    # Positive potential is outside this revision, including when exp(phi/Te) would overflow.
+    with pytest.raises(PhysicsEvaluationError, match="nonpositive surface potential"):
+        oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1(
+            charge_number=np.asarray([charge_number]),
+            electrostatic_radius_m=np.asarray([1.0e-8]),
+            electron_number_density_m3=np.asarray([1.0e14]),
+            positive_ion_number_density_m3=np.asarray([1.0e14]),
+            electron_temperature_K=np.asarray([2.0e4]),
+            positive_ion_temperature_K=np.asarray([500.0]),
+            particle_velocity_m_s=np.zeros((1, 2)),
+            positive_ion_velocity_m_s=np.zeros((1, 2)),
+            positive_ion_mass_kg=_ION_MASS_KG,
+            maximum_ion_drift_ratio=2.0,
+        )
+
+
+@pytest.mark.parametrize("shifted", [False, True])
+def test_oml_array_owns_underflow_of_finite_positive_debye_inputs(shifted: bool) -> None:
+    # ne/Te and ni/Ti underflow even though every declared primitive is finite and positive.
+    arguments = {
+        "charge_number": np.asarray([-1.0]),
+        "electrostatic_radius_m": np.asarray([1.0e-8]),
+        "electron_number_density_m3": np.asarray([1.0e-300]),
+        "positive_ion_number_density_m3": np.asarray([1.0e-300]),
+        "electron_temperature_K": np.asarray([1.0e300]),
+        "positive_ion_temperature_K": np.asarray([1.0e300]),
+        "particle_velocity_m_s": np.zeros((1, 2)),
+        "positive_ion_velocity_m_s": np.zeros((1, 2)),
+        "positive_ion_mass_kg": _ION_MASS_KG,
+    }
+    with pytest.raises(PhysicsEvaluationError, match="non-finite derived value"):
+        if shifted:
+            oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1(
+                **arguments, maximum_ion_drift_ratio=2.0
+            )
+        else:
+            oml_stationary_maxwellian_debye_huckel_v1(**arguments)

@@ -23,18 +23,22 @@ def test_talbot_and_saffman_compose_in_one_public_run(tmp_path: Path) -> None:
 
     assert bool(np.isfinite(final.position_m).all())
     assert bool(np.isfinite(final.velocity_m_s).all())
-    assert result.manifest["resolved"]["physics_models"]["thermophoresis"] == {
-        "model": "talbot",
-        "revision": "talbot_cross_regime_radius_knudsen_v1",
-        "particle_thermal_conductivity_W_m_K": 0.2,
-        "thermal_slip_coefficient": 1.17,
-        "momentum_exchange_coefficient": 1.14,
-        "thermal_exchange_coefficient": 2.18,
-    }
-    assert result.manifest["resolved"]["physics_models"]["lift"] == {
-        "model": "saffman",
-        "revision": "saffman_unbounded_creeping_shear_v1",
-    }
+    assert (
+        {
+            "model": "talbot",
+            "revision": "talbot_cross_regime_radius_knudsen_v1",
+            "particle_thermal_conductivity_W_m_K": 0.2,
+            "thermal_slip_coefficient": 1.17,
+            "momentum_exchange_coefficient": 1.14,
+            "thermal_exchange_coefficient": 2.18,
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["thermophoresis"]).items()
+    assert (
+        {
+            "model": "saffman",
+            "revision": "saffman_unbounded_creeping_shear_v1",
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["lift"]).items()
 
 
 @pytest.mark.parametrize(

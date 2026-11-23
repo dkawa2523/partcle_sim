@@ -16,15 +16,21 @@ start inspection, simulation, or a new comparison campaign.
 
 | Scope | Minimum input | Deliverable and completion |
 |---|---|---|
-| Spatial paths/events | Schema-4 result including immutable context; normalized reference only for a requested overlay | Same-space figure with starts, valid path segments, outcomes and observed events; complete after visual QA |
+| Spatial paths/events | Current schema-5 result including immutable context; normalized reference only for a requested overlay | Same-space figure with starts, valid path segments, outcomes and observed events; complete after visual QA |
 | Population or evaluation figures | Saved population/states/events with identities, coverage and the relevant metric definition | Primary arrival/fate/occupancy distribution and its denominator/weight meaning; report quantities that are unobserved instead of recomputing them |
 | Animation | Saved frames or probes, matching static geometry and requested time/particle coverage | Streaming animation plus static companion and sampling receipt; no reconstruction of unsaved simulation states |
 
 Read the repository guidance and inspect the result with `open_result` or
 `chamber-particles inspect`. Read result geometry, units, boundary semantics
-and source labels using public `ResultView.read_context()`. Schema-4 results
+and source labels using public `ResultView.read_context()`. Schema-5 results
 include this immutable context and do not require the original case or its
-background fields. The reader validates its identity against the manifest.
+background fields. `inspect` lists release ID/name/table/kind/computational count and boundary
+ID/group/material/law mappings; names refer to releases, independently of source
+table names. The reader checks each consumed payload's content hash on the same
+open handle. Identity and verification scope are separate receipt fields;
+use `inspect RESULT --verify` or `ResultView.verify_contents()` when full-payload
+verification is needed. These checks do not establish native authenticity or
+physical validity.
 Older results need export with their baseline environment or regeneration;
 do not silently relabel or add a compatibility reader. For a comparison, use
 normalized COMSOL tables prepared by
@@ -113,15 +119,22 @@ from `particle_platform_redesign/solver/` with uv.
 - `uv run --locked python -m chamber_particles view RESULT -o DERIVED` creates
   geometry-overlaid final population occupancy and observed boundary-event
   views. Every selected valid position contributes to occupancy bins; render
-  bounds are stated in the receipt. `--detail` or `--particle-id` adds bounded
-  saved-trajectory detail. This is not an all-particle path animation.
+  bounds are stated in the receipt. `--detail` or `--focus-particle-id ID` adds
+  bounded saved-trajectory detail from within the selected population. Focus
+  does not change the population. This is not an all-particle path animation.
 - `uv run --locked python -m chamber_particles analyze RESULT -o
   DERIVED/summary.json` creates full-selected-population summaries, separating
   repeated interactions, first hit, terminal outcomes and saved active curves.
   `export RESULT -o DIRECTORY` streams public saved tables with identity.
 - Python equivalents are `chamber_particles_tools.visualization.render_result`
   and `chamber_particles_tools.analysis.summarize_result` / `export_result`.
-  Cohorts use exact `particle_ids` / resolved `source_ids`, not display samples.
+  All three clients share `--source-names` (a CSV list of release names) or
+  `--source-ids`, intersected with `--particle-ids` or `--particle-ids-file`.
+  The UTF-8 ID file has one `particle_id` header and one exact nonnegative int64
+  per row; duplicates and unknown IDs are errors. Its receipt binds the exact
+  bytes and row count. Python uses `source_names`/`source_ids` and
+  `particle_ids_file`/`particle_ids`; cohorts use these exact populations, never
+  display samples. `render_result(..., focus_particle_id=ID)` selects detail.
   Reuse a public `ResultView` or a cohort from
   `chamber_particles_tools.selection.select_result` across these clients;
   the result identity and selected rows are resolved once. Export/view publish

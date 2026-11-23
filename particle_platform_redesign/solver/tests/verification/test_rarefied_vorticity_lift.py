@@ -200,11 +200,13 @@ def test_rarefied_lift_catalog_and_compiled_runtime_share_one_rz_formula() -> No
     assert requirements["rho"].unit == "kg/m^3"
     assert requirements["mfp"].unit == "m"
     assert requirements["omega"].unit == "1/s"
-    assert plan.resolved_models()["lift"] == {
-        "model": "rarefied_vorticity_sensitivity",
-        "revision": _REVISION,
-        "lift_coefficient": _LIFT_COEFFICIENT,
-    }
+    assert (
+        {
+            "model": "rarefied_vorticity_sensitivity",
+            "revision": _REVISION,
+            "lift_coefficient": _LIFT_COEFFICIENT,
+        }
+    ).items() <= (plan.resolved_models()["lift"]).items()
 
     mass = np.asarray([2.0e-15, 2.0e-15])
     diameter = np.asarray([2.0e-7, 4.0e-4])

@@ -10,3 +10,4 @@ README.md text eol=lf
 .gitattributes text eol=lf
 # Data runtime integrity binds exact source bytes across Windows/Linux checkouts.
 particle_platform_redesign/report_app/** -text -eol whitespace=trailing-space,space-before-tab,cr-at-eol
+particle_platform_redesign/analysis/build_report_snapshot.py -text -eol whitespace=trailing-space,space-before-tab,cr-at-eol

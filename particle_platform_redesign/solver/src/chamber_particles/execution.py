@@ -11,7 +11,7 @@ import pickle
 import traceback
 import weakref
 from collections.abc import Iterable, Iterator, Mapping, Sequence
-from dataclasses import dataclass, fields, is_dataclass, replace
+from dataclasses import dataclass, fields, is_dataclass
 from dataclasses import fields as dataclass_fields
 from multiprocessing.connection import Connection, wait
 from multiprocessing.process import BaseProcess
@@ -23,6 +23,7 @@ import numpy as np
 
 from .cpu import (
     ActiveIndex,
+    CpuMemoryPlan,
     ParticleState,
 )
 from .output import (
@@ -138,20 +139,8 @@ def _process_worker_slab(
             interval,
             start,
             end,
-            state.position_m,
-            state.velocity_m_s,
-            state.charge_number,
-            state.active,
-            state.lifecycle,
-            state.terminal_time_s,
-            state.event_ordinal,
-            state.physical_boundary_event_ordinal,
-            state.exact_origin_time_s,
-            state.exact_origin_position_m,
-            state.exact_origin_velocity_m_s,
-            state.start_contact_state,
+            state,
             replay,
-            state.failure_reason_code,
             sink,
         )
     finally:
@@ -180,8 +169,13 @@ class ProcessTeam:
         state: ParticleState,
         active_index: ActiveIndex,
         event_statistics: _EventStatistics,
+        *,
+        memory_plan: CpuMemoryPlan,
+        probe_particle_index: np.ndarray,
     ) -> None:
         self.prepared = prepared
+        self.memory_plan = memory_plan
+        self.probe_particle_index = probe_particle_index
         self.state = state
         self.active_index = active_index
         self.event_statistics = event_statistics
@@ -193,7 +187,7 @@ class ProcessTeam:
 
     def __enter__(self) -> ProcessTeam:
         try:
-            if self.prepared.memory_plan.worker_count > 1:
+            if self.memory_plan.worker_count > 1:
                 self._start()
             return self
         except BaseException:
@@ -215,21 +209,19 @@ class ProcessTeam:
             (prepared, _process_state(self.state)),
             private_arrays=_process_private_arrays(prepared),
         )
-        plan = prepared.memory_plan.reserve_process_padding(
+        plan = self.memory_plan.reserve_process_padding(
             self.store.page_padding_bytes + 7 * mmap.PAGESIZE
         )
-        prepared = replace(prepared, memory_plan=plan)
-        self.prepared = prepared
-        payload = self.store.dumps((prepared, _process_state(self.state)))
-        components = prepared.memory_plan.components
+        self.memory_plan = plan
+        components = self.memory_plan.components
         reserve = sum(value for name, value in components.items() if name.startswith("process_"))
         required = self.store.shared_bytes + (
-            prepared.memory_plan.worker_count * self.store.private_bytes
+            self.memory_plan.worker_count * self.store.private_bytes
         )
         if required > reserve:
             raise EngineError("process storage exceeds its predicted array reserve")
         context = multiprocessing.get_context("spawn")
-        for _ in range(prepared.memory_plan.worker_count):
+        for _ in range(self.memory_plan.worker_count):
             parent, child = context.Pipe()
             process = context.Process(target=_process_particle_worker, args=(child, payload))
             # Windows PipeConnection implements the same documented Connection interface.
@@ -267,12 +259,12 @@ class ProcessTeam:
         if self.workers and time_s and self.replay_storage is None:
             self.replay_store = ProcessArrayStore()
             self.replay_storage = self.replay_store.share(
-                np.empty(self.prepared.memory_plan.replay_work_bytes, dtype=np.uint8)
+                np.empty(self.memory_plan.replay_work_bytes, dtype=np.uint8)
             )
         return _allocate_replay_buffer(
             time_s,
             self.prepared.schedule,
-            self.prepared.probe_particle_index,
+            self.probe_particle_index,
             include_all_particles=include_all_particles,
             storage=self.replay_storage,
         )
@@ -293,21 +285,9 @@ class ProcessTeam:
                 interval,
                 start,
                 end,
-                state.position_m,
-                state.velocity_m_s,
-                state.charge_number,
-                state.active,
-                state.lifecycle,
-                state.terminal_time_s,
-                state.event_ordinal,
-                state.physical_boundary_event_ordinal,
-                state.exact_origin_time_s,
-                state.exact_origin_position_m,
-                state.exact_origin_velocity_m_s,
-                state.start_contact_state,
+                state,
                 replay,
                 self.event_statistics,
-                state.failure_reason_code,
                 writer,
             )
             return
@@ -333,7 +313,7 @@ class ProcessTeam:
         writer: ResultWriter,
     ) -> None:
         rows = self.active_index.rows
-        width = self.prepared.memory_plan.active_slab_particles(rows.size)
+        width = self.memory_plan.active_slab_particles(rows.size)
         pending: dict[Connection, _ProcessWorker] = {}
         next_row = 0
         for worker in self.workers:

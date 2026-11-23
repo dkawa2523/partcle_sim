@@ -105,16 +105,26 @@ def prescribed_exponential_linear_collection(
         or bool((ion_rate_number_s < 0.0).any())
     ):
         raise PhysicsEvaluationError("prescribed charge requires nonnegative rates and slopes")
-    electron = np.zeros_like(charge_number)
-    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
-        if electron_rate_reference_number_s > 0.0:
-            electron = np.exp(
-                math.log(electron_rate_reference_number_s)
-                + electron_exponent_offset
-                + electron_charge_slope * charge_number
-            )
-        rate = -electron + ion_rate_number_s * (1.0 - ion_charge_slope * charge_number)
-        derivative = -electron_charge_slope * electron - ion_charge_slope * ion_rate_number_s
+    rate = np.empty(charge_number.shape, dtype=np.float64)
+    derivative = np.empty(charge_number.shape, dtype=np.float64)
+    scalar = cast(CPUDispatcher, prescribed_collection_row).py_func
+    try:
+        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+            for index in np.ndindex(charge_number.shape):
+                rate[index], derivative[index] = scalar(
+                    charge_number[index],
+                    electron_rate_reference_number_s,
+                    electron_exponent_offset[index],
+                    electron_charge_slope[index],
+                    ion_rate_number_s[index],
+                    ion_charge_slope[index],
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "prescribed exponential linear collection produced a non-finite derived value"
+        ) from error
     if not bool(np.isfinite(rate).all() and np.isfinite(derivative).all()):
         raise PhysicsEvaluationError("prescribed charge produced non-finite rates")
     return rate, derivative
@@ -348,104 +358,52 @@ def aggregate_relative_drift_regularized_two_current_v1(
         "positive_ion_velocity_m_s",
     )
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        relative_speed = np.hypot(
-            ion_velocity[:, 0] - particle_velocity[:, 0],
-            ion_velocity[:, 1] - particle_velocity[:, 1],
-        )
-        effective_speed_squared = (
-            relative_speed**2
-            + 8.0
-            * ELEMENTARY_CHARGE_C
-            * positive_ion_thermal_voltage_V
-            / (math.pi * effective_positive_ion_mass_kg)
-            + AGGREGATE_RELATIVE_SPEED_REGULARIZATION_M_S**2
-        )
-        effective_speed = np.sqrt(effective_speed_squared)
-        effective_ion_energy = np.maximum(
-            effective_positive_ion_mass_kg * effective_speed_squared / (2.0 * ELEMENTARY_CHARGE_C),
-            AGGREGATE_MINIMUM_ION_ENERGY_V,
-        )
-        effective_screening = np.maximum(electrostatic_radius_m, screening_length_m)
-        capacitance = (
-            4.0
-            * math.pi
-            * VACUUM_PERMITTIVITY_F_M
-            * electrostatic_radius_m
-            * (1.0 + electrostatic_radius_m / effective_screening)
-        )
-        potential_per_charge = ELEMENTARY_CHARGE_C / capacitance
-        surface_potential = charge_number * potential_per_charge
-        ion_amplitude = (
-            math.pi * electrostatic_radius_m**2 * positive_ion_number_density_m3 * effective_speed
-        )
-        electron_amplitude = (
-            math.pi
-            * electrostatic_radius_m**2
-            * electron_number_density_m3
-            * np.sqrt(
-                8.0
-                * ELEMENTARY_CHARGE_C
-                * electron_thermal_voltage_V
-                / (math.pi * ELECTRON_MASS_KG)
-            )
-        )
-
-        nonpositive = surface_potential <= 0.0
-        positive = ~nonpositive
-        electron_argument = surface_potential / electron_thermal_voltage_V
-        ion_argument = -surface_potential / effective_ion_energy
-        electron_factor = np.empty(count, dtype=np.float64)
-        ion_factor = np.empty(count, dtype=np.float64)
-        electron_factor[nonpositive] = np.exp(
-            np.clip(
-                electron_argument[nonpositive],
-                AGGREGATE_EXPONENT_MIN,
-                AGGREGATE_EXPONENT_MAX,
-            )
-        )
-        electron_factor[positive] = 1.0 + electron_argument[positive]
-        ion_factor[nonpositive] = 1.0 + ion_argument[nonpositive]
-        ion_factor[positive] = np.exp(
-            np.clip(
-                ion_argument[positive],
-                AGGREGATE_EXPONENT_MIN,
-                AGGREGATE_EXPONENT_MAX,
-            )
-        )
-        ion_collection = ion_amplitude * ion_factor
-        electron_collection = electron_amplitude * electron_factor
-        charge_rate = ion_collection - electron_collection
-
-        electron_unclipped = (electron_argument > AGGREGATE_EXPONENT_MIN) & (
-            electron_argument < AGGREGATE_EXPONENT_MAX
-        )
-        ion_unclipped = (ion_argument > AGGREGATE_EXPONENT_MIN) & (
-            ion_argument < AGGREGATE_EXPONENT_MAX
-        )
-        electron_factor_derivative = np.empty(count, dtype=np.float64)
-        ion_factor_derivative = np.empty(count, dtype=np.float64)
-        electron_factor_derivative[nonpositive] = np.where(
-            electron_unclipped[nonpositive],
-            electron_factor[nonpositive]
-            * potential_per_charge[nonpositive]
-            / electron_thermal_voltage_V[nonpositive],
-            0.0,
-        )
-        electron_factor_derivative[positive] = (
-            potential_per_charge[positive] / electron_thermal_voltage_V[positive]
-        )
-        ion_factor_derivative[nonpositive] = (
-            -potential_per_charge[nonpositive] / effective_ion_energy[nonpositive]
-        )
-        ion_factor_derivative[positive] = np.where(
-            ion_unclipped[positive],
-            -ion_factor[positive] * potential_per_charge[positive] / effective_ion_energy[positive],
-            0.0,
-        )
-        rate_derivative = (
-            ion_amplitude * ion_factor_derivative - electron_amplitude * electron_factor_derivative
-        )
+    parameters = np.empty((count, 8), dtype=np.float64)
+    currents = np.empty((count, 4), dtype=np.float64)
+    scalar_parameters = cast(CPUDispatcher, aggregate_point_parameters_row).py_func
+    scalar_collection = cast(CPUDispatcher, aggregate_collection_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(count):
+                parameters[row] = scalar_parameters(
+                    charge_number[row],
+                    electrostatic_radius_m[row],
+                    electron_number_density_m3[row],
+                    positive_ion_number_density_m3[row],
+                    electron_thermal_voltage_V[row],
+                    positive_ion_thermal_voltage_V[row],
+                    particle_velocity[row, 0],
+                    particle_velocity[row, 1],
+                    ion_velocity[row, 0],
+                    ion_velocity[row, 1],
+                    effective_positive_ion_mass_kg[row],
+                    screening_length_m[row],
+                )
+                currents[row] = scalar_collection(
+                    parameters[row, 5],
+                    parameters[row, 4],
+                    electron_thermal_voltage_V[row],
+                    parameters[row, 2],
+                    parameters[row, 6],
+                    parameters[row, 7],
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "aggregate relative drift regularized two current v1 produced a non-finite derived value"
+        ) from error
+    (
+        relative_speed,
+        effective_speed,
+        effective_ion_energy,
+        effective_screening,
+        capacitance,
+        surface_potential,
+        _,
+        _,
+    ) = parameters.T
+    ion_collection, electron_collection, charge_rate, rate_derivative = currents.T
 
     _require_aggregate_derived_finite(
         relative_speed,
@@ -535,60 +493,44 @@ def aggregate_relative_drift_regularized_three_current_v1(
         "maximum_relative_ion_speed_m_s",
     )
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        relative_speed = np.hypot(
-            negative_ion_velocity[:, 0] - particle_velocity[:, 0],
-            negative_ion_velocity[:, 1] - particle_velocity[:, 1],
-        )
-        effective_speed_squared = (
-            relative_speed**2
-            + 8.0
-            * ELEMENTARY_CHARGE_C
-            * negative_ion_thermal_voltage_V
-            / (math.pi * effective_negative_ion_mass_kg)
-            + AGGREGATE_RELATIVE_SPEED_REGULARIZATION_M_S**2
-        )
-        effective_speed = np.sqrt(effective_speed_squared)
-        effective_energy = np.maximum(
-            effective_negative_ion_mass_kg * effective_speed_squared / (2.0 * ELEMENTARY_CHARGE_C),
-            AGGREGATE_MINIMUM_ION_ENERGY_V,
-        )
-        potential_per_charge = ELEMENTARY_CHARGE_C / base.capacitance_F
-        amplitude = (
-            math.pi * electrostatic_radius_m**2 * negative_ion_number_density_m3 * effective_speed
-        )
-        nonpositive = base.surface_potential_V <= 0.0
-        argument = base.surface_potential_V / effective_energy
-        factor = np.empty(count, dtype=np.float64)
-        factor[nonpositive] = np.exp(
-            np.clip(
-                argument[nonpositive],
-                AGGREGATE_EXPONENT_MIN,
-                AGGREGATE_EXPONENT_MAX,
-            )
-        )
-        factor[~nonpositive] = 1.0 + argument[~nonpositive]
-        unclipped = (argument > AGGREGATE_EXPONENT_MIN) & (argument < AGGREGATE_EXPONENT_MAX)
-        factor_derivative = np.empty(count, dtype=np.float64)
-        factor_derivative[nonpositive] = np.where(
-            unclipped[nonpositive],
-            factor[nonpositive] * potential_per_charge[nonpositive] / effective_energy[nonpositive],
-            0.0,
-        )
-        factor_derivative[~nonpositive] = (
-            potential_per_charge[~nonpositive] / effective_energy[~nonpositive]
-        )
-        negative_collection = amplitude * factor
-        negative_collection_derivative = amplitude * factor_derivative
-        charge_rate = base.charge_rate_number_s - negative_collection
-        rate_derivative = base.charge_rate_derivative_s_inv - negative_collection_derivative
+    negative = np.empty((count, 5), dtype=np.float64)
+    scalar_negative = cast(CPUDispatcher, _aggregate_negative_ion_collection_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(count):
+                collection, derivative, relative, speed, energy, _ = scalar_negative(
+                    charge_number[row],
+                    electrostatic_radius_m[row],
+                    negative_ion_number_density_m3[row],
+                    negative_ion_thermal_voltage_V[row],
+                    particle_velocity[row, 0],
+                    particle_velocity[row, 1],
+                    negative_ion_velocity[row, 0],
+                    negative_ion_velocity[row, 1],
+                    effective_negative_ion_mass_kg[row],
+                    screening_length_m[row],
+                )
+                negative[row] = collection, derivative, relative, speed, energy
+            (
+                negative_collection,
+                negative_collection_derivative,
+                relative_speed,
+                effective_speed,
+                effective_energy,
+            ) = negative.T
+            charge_rate = base.charge_rate_number_s - negative_collection
+            rate_derivative = base.charge_rate_derivative_s_inv - negative_collection_derivative
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "aggregate relative drift regularized three current v1 produced a non-finite derived value"
+        ) from error
 
     _require_aggregate_derived_finite(
         relative_speed,
         effective_speed,
         effective_energy,
-        amplitude,
-        factor,
         negative_collection,
         charge_rate,
         rate_derivative,
@@ -835,66 +777,59 @@ def oml_stationary_maxwellian_debye_huckel_v1(
     particle_velocity = _velocity(particle_velocity_m_s, count, "particle_velocity_m_s")
     ion_velocity = _velocity(positive_ion_velocity_m_s, count, "positive_ion_velocity_m_s")
 
-    debye_length = oml_debye_length_m(
-        electron_number_density_m3=electron_number_density_m3,
-        positive_ion_number_density_m3=positive_ion_number_density_m3,
-        electron_temperature_K=electron_temperature_K,
-        positive_ion_temperature_K=positive_ion_temperature_K,
-    )
-    capacitance = debye_huckel_capacitance_F(
-        electrostatic_radius_m=electrostatic_radius_m,
-        debye_length_m=debye_length,
-    )
-    electron_amplitude, ion_amplitude, electron_voltage, ion_voltage = _oml_rates(
-        electrostatic_radius_m=electrostatic_radius_m,
-        electron_number_density_m3=electron_number_density_m3,
-        positive_ion_number_density_m3=positive_ion_number_density_m3,
-        electron_temperature_K=electron_temperature_K,
-        positive_ion_temperature_K=positive_ion_temperature_K,
-        positive_ion_mass_kg=ion_mass,
-    )
+    parameters = np.empty((count, 7), dtype=np.float64)
+    scalar_parameters = cast(CPUDispatcher, oml_point_parameters_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(count):
+                parameters[row] = scalar_parameters(
+                    charge_number[row],
+                    electrostatic_radius_m[row],
+                    electron_number_density_m3[row],
+                    positive_ion_number_density_m3[row],
+                    electron_temperature_K[row],
+                    positive_ion_temperature_K[row],
+                    ion_mass,
+                )
+        (
+            debye_length,
+            capacitance,
+            surface_potential,
+            electron_voltage,
+            ion_voltage,
+            electron_amplitude,
+            ion_amplitude,
+        ) = parameters.T
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-        electron_collection = np.empty(count, dtype=np.float64)
-        ion_collection = np.empty(count, dtype=np.float64)
-        rate_derivative = np.empty(count, dtype=np.float64)
-        nonpositive = surface_potential <= 0.0
-        positive = ~nonpositive
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            currents = np.empty((count, 4), dtype=np.float64)
+            scalar_collection = cast(CPUDispatcher, oml_stationary_collection_row).py_func
+            for row in range(count):
+                currents[row] = scalar_collection(
+                    surface_potential[row],
+                    capacitance[row],
+                    electron_voltage[row],
+                    ion_voltage[row],
+                    electron_amplitude[row],
+                    ion_amplitude[row],
+                )
+            electron_collection, ion_collection, charge_rate, rate_derivative = currents.T
 
-        electron_collection[nonpositive] = electron_amplitude[nonpositive] * np.exp(
-            surface_potential[nonpositive] / electron_voltage[nonpositive]
-        )
-        ion_collection[nonpositive] = ion_amplitude[nonpositive] * (
-            1.0 - surface_potential[nonpositive] / ion_voltage[nonpositive]
-        )
-        electron_collection[positive] = electron_amplitude[positive] * (
-            1.0 + surface_potential[positive] / electron_voltage[positive]
-        )
-        ion_collection[positive] = ion_amplitude[positive] * np.exp(
-            -surface_potential[positive] / ion_voltage[positive]
-        )
-        charge_rate = ion_collection - electron_collection
-
-        potential_per_charge = ELEMENTARY_CHARGE_C / capacitance
-        rate_derivative[nonpositive] = -potential_per_charge[nonpositive] * (
-            ion_amplitude[nonpositive] / ion_voltage[nonpositive]
-            + electron_collection[nonpositive] / electron_voltage[nonpositive]
-        )
-        rate_derivative[positive] = -potential_per_charge[positive] * (
-            ion_collection[positive] / ion_voltage[positive]
-            + electron_amplitude[positive] / electron_voltage[positive]
-        )
-
-        radius_over_debye = electrostatic_radius_m / debye_length
-        ion_mean_thermal_speed = np.sqrt(
-            8.0 * BOLTZMANN_J_K * positive_ion_temperature_K / (math.pi * ion_mass)
-        )
-        ion_relative_speed = np.hypot(
-            ion_velocity[:, 0] - particle_velocity[:, 0],
-            ion_velocity[:, 1] - particle_velocity[:, 1],
-        )
-        ion_drift_ratio = ion_relative_speed / ion_mean_thermal_speed
+            radius_over_debye = electrostatic_radius_m / debye_length
+            ion_mean_thermal_speed = np.sqrt(
+                8.0 * BOLTZMANN_J_K * positive_ion_temperature_K / (math.pi * ion_mass)
+            )
+            ion_relative_speed = np.hypot(
+                ion_velocity[:, 0] - particle_velocity[:, 0],
+                ion_velocity[:, 1] - particle_velocity[:, 1],
+            )
+            ion_drift_ratio = ion_relative_speed / ion_mean_thermal_speed
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "oml stationary maxwellian debye huckel v1 produced a non-finite derived value"
+        ) from error
 
     _require_derived_finite(
         surface_potential,
@@ -965,48 +900,68 @@ def oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1(
     particle_velocity = _velocity(particle_velocity_m_s, count, "particle_velocity_m_s")
     ion_velocity = _velocity(positive_ion_velocity_m_s, count, "positive_ion_velocity_m_s")
 
-    debye_length = oml_debye_length_m(
-        electron_number_density_m3=electron_number_density_m3,
-        positive_ion_number_density_m3=positive_ion_number_density_m3,
-        electron_temperature_K=electron_temperature_K,
-        positive_ion_temperature_K=positive_ion_temperature_K,
-    )
-    capacitance = debye_huckel_capacitance_F(
-        electrostatic_radius_m=electrostatic_radius_m,
-        debye_length_m=debye_length,
-    )
-    electron_amplitude, ion_amplitude, electron_voltage, ion_voltage = _oml_rates(
-        electrostatic_radius_m=electrostatic_radius_m,
-        electron_number_density_m3=electron_number_density_m3,
-        positive_ion_number_density_m3=positive_ion_number_density_m3,
-        electron_temperature_K=electron_temperature_K,
-        positive_ion_temperature_K=positive_ion_temperature_K,
-        positive_ion_mass_kg=ion_mass,
-    )
+    parameters = np.empty((count, 7), dtype=np.float64)
+    scalar_parameters = cast(CPUDispatcher, oml_point_parameters_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(count):
+                parameters[row] = scalar_parameters(
+                    charge_number[row],
+                    electrostatic_radius_m[row],
+                    electron_number_density_m3[row],
+                    positive_ion_number_density_m3[row],
+                    electron_temperature_K[row],
+                    positive_ion_temperature_K[row],
+                    ion_mass,
+                )
+        (
+            debye_length,
+            capacitance,
+            surface_potential,
+            electron_voltage,
+            ion_voltage,
+            electron_amplitude,
+            ion_amplitude,
+        ) = parameters.T
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-        ion_mean_thermal_speed = np.sqrt(
-            8.0 * BOLTZMANN_J_K * positive_ion_temperature_K / (math.pi * ion_mass)
-        )
-        ion_relative_speed = np.hypot(
-            ion_velocity[:, 0] - particle_velocity[:, 0],
-            ion_velocity[:, 1] - particle_velocity[:, 1],
-        )
-        ion_drift_ratio = ion_relative_speed / ion_mean_thermal_speed
-        neutral_factor, attraction_factor = shifted_maxwellian_ion_factors(
-            ion_drift_ratio * math.sqrt(8.0 / math.pi)
-        )
-        electron_collection = electron_amplitude * np.exp(surface_potential / electron_voltage)
-        ion_collection = ion_amplitude * (
-            neutral_factor - surface_potential / ion_voltage * attraction_factor
-        )
-        charge_rate = ion_collection - electron_collection
-        potential_per_charge = ELEMENTARY_CHARGE_C / capacitance
-        rate_derivative = -potential_per_charge * (
-            ion_amplitude * attraction_factor / ion_voltage + electron_collection / electron_voltage
-        )
-        radius_over_debye = electrostatic_radius_m / debye_length
+        if not bool((surface_potential <= 0.0).all()):
+            raise PhysicsEvaluationError(
+                "shifted-Maxwellian OML revision requires nonpositive surface potential"
+            )
+
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            ion_mean_thermal_speed = np.sqrt(
+                8.0 * BOLTZMANN_J_K * positive_ion_temperature_K / (math.pi * ion_mass)
+            )
+            ion_relative_speed = np.hypot(
+                ion_velocity[:, 0] - particle_velocity[:, 0],
+                ion_velocity[:, 1] - particle_velocity[:, 1],
+            )
+            ion_drift_ratio = ion_relative_speed / ion_mean_thermal_speed
+            neutral_factor, attraction_factor = shifted_maxwellian_ion_factors(
+                ion_drift_ratio * math.sqrt(8.0 / math.pi)
+            )
+            currents = np.empty((count, 4), dtype=np.float64)
+            scalar_collection = cast(CPUDispatcher, oml_shifted_collection_row).py_func
+            for row in range(count):
+                currents[row] = scalar_collection(
+                    surface_potential[row],
+                    capacitance[row],
+                    electron_voltage[row],
+                    ion_voltage[row],
+                    electron_amplitude[row],
+                    ion_amplitude[row],
+                    neutral_factor[row],
+                    attraction_factor[row],
+                )
+            electron_collection, ion_collection, charge_rate, rate_derivative = currents.T
+            radius_over_debye = electrostatic_radius_m / debye_length
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "oml shifted maxwellian single ion negative debye huckel v1 produced a non-finite derived value"
+        ) from error
 
     _require_derived_finite(
         surface_potential,
@@ -1017,10 +972,6 @@ def oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1(
         radius_over_debye,
         ion_drift_ratio,
     )
-    if not bool((surface_potential <= 0.0).all()):
-        raise PhysicsEvaluationError(
-            "shifted-Maxwellian OML revision requires nonpositive surface potential"
-        )
     if not bool((electron_collection >= 0.0).all() and (ion_collection >= 0.0).all()):
         raise PhysicsEvaluationError("OML collection rate is negative")
     if not bool((rate_derivative < 0.0).all()):
@@ -1988,3 +1939,298 @@ def _outward_nonnegative_upper(value: float, name: str) -> float:
     if not math.isfinite(result):
         raise PhysicsEvaluationError(f"{name} is not finite")
     return result
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def oml_point_parameters_row(
+    charge_number: float,
+    radius_m: float,
+    electron_density_m3: float,
+    ion_density_m3: float,
+    electron_temperature_K: float,
+    ion_temperature_K: float,
+    ion_mass_kg: float,
+) -> tuple[float, float, float, float, float, float, float]:
+    inverse_debye_square = (
+        ELEMENTARY_CHARGE_C
+        * ELEMENTARY_CHARGE_C
+        / (VACUUM_PERMITTIVITY_F_M * BOLTZMANN_J_K)
+        * (electron_density_m3 / electron_temperature_K + ion_density_m3 / ion_temperature_K)
+    )
+    debye_length = 1.0 / math.sqrt(inverse_debye_square)
+    capacitance = (
+        4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * radius_m * (1.0 + radius_m / debye_length)
+    )
+    potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
+    electron_voltage = BOLTZMANN_J_K * electron_temperature_K / ELEMENTARY_CHARGE_C
+    ion_voltage = BOLTZMANN_J_K * ion_temperature_K / ELEMENTARY_CHARGE_C
+    electron_amplitude = (
+        math.pi
+        * radius_m
+        * radius_m
+        * electron_density_m3
+        * math.sqrt(8.0 * BOLTZMANN_J_K * electron_temperature_K / (math.pi * ELECTRON_MASS_KG))
+    )
+    ion_amplitude = (
+        math.pi
+        * radius_m
+        * radius_m
+        * ion_density_m3
+        * math.sqrt(8.0 * BOLTZMANN_J_K * ion_temperature_K / (math.pi * ion_mass_kg))
+    )
+    return (
+        debye_length,
+        capacitance,
+        potential,
+        electron_voltage,
+        ion_voltage,
+        electron_amplitude,
+        ion_amplitude,
+    )
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def oml_stationary_collection_row(
+    potential: float,
+    capacitance: float,
+    electron_voltage: float,
+    ion_voltage: float,
+    electron_amplitude: float,
+    ion_amplitude: float,
+) -> tuple[float, float, float, float]:
+    if potential <= 0.0:
+        electron_collection = electron_amplitude * math.exp(potential / electron_voltage)
+        ion_collection = ion_amplitude * (1.0 - potential / ion_voltage)
+        rate_derivative = (
+            -ELEMENTARY_CHARGE_C
+            / capacitance
+            * (ion_amplitude / ion_voltage + electron_collection / electron_voltage)
+        )
+    else:
+        electron_collection = electron_amplitude * (1.0 + potential / electron_voltage)
+        ion_collection = ion_amplitude * math.exp(-potential / ion_voltage)
+        rate_derivative = (
+            -ELEMENTARY_CHARGE_C
+            / capacitance
+            * (ion_collection / ion_voltage + electron_amplitude / electron_voltage)
+        )
+    charge_rate = ion_collection - electron_collection
+    return electron_collection, ion_collection, charge_rate, rate_derivative
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def oml_shifted_collection_row(
+    potential: float,
+    capacitance: float,
+    electron_voltage: float,
+    ion_voltage: float,
+    electron_amplitude: float,
+    ion_amplitude: float,
+    neutral_factor: float,
+    attraction_factor: float,
+) -> tuple[float, float, float, float]:
+    electron_collection = electron_amplitude * math.exp(potential / electron_voltage)
+    ion_collection = ion_amplitude * (neutral_factor - potential / ion_voltage * attraction_factor)
+    charge_rate = ion_collection - electron_collection
+    rate_derivative = (
+        -ELEMENTARY_CHARGE_C
+        / capacitance
+        * (ion_amplitude * attraction_factor / ion_voltage + electron_collection / electron_voltage)
+    )
+    return electron_collection, ion_collection, charge_rate, rate_derivative
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def prescribed_collection_row(
+    charge: float,
+    reference: float,
+    offset: float,
+    alpha: float,
+    ion: float,
+    beta: float,
+) -> tuple[float, float]:
+    electron = 0.0
+    if reference > 0.0:
+        electron = np.exp(math.log(reference) + offset + alpha * charge)
+    rate = -electron + ion * (1.0 - beta * charge)
+    derivative = -alpha * electron - beta * ion
+    return rate, derivative
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def aggregate_point_parameters_row(
+    charge_number: float,
+    radius_m: float,
+    electron_density_m3: float,
+    ion_density_m3: float,
+    electron_thermal_voltage_V: float,
+    ion_thermal_voltage_V: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    ion_velocity_x_m_s: float,
+    ion_velocity_y_m_s: float,
+    effective_ion_mass_kg: float,
+    screening_length_m: float,
+) -> tuple[float, float, float, float, float, float, float, float]:
+    relative_x = ion_velocity_x_m_s - velocity_x_m_s
+    relative_y = ion_velocity_y_m_s - velocity_y_m_s
+    relative_speed = math.hypot(relative_x, relative_y)
+    effective_speed_squared = (
+        relative_speed * relative_speed
+        + 8.0 * ELEMENTARY_CHARGE_C * ion_thermal_voltage_V / (math.pi * effective_ion_mass_kg)
+        + AGGREGATE_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    )
+    effective_speed = math.sqrt(effective_speed_squared)
+    effective_ion_energy = max(
+        effective_ion_mass_kg * effective_speed_squared / (2.0 * ELEMENTARY_CHARGE_C),
+        AGGREGATE_MINIMUM_ION_ENERGY_V,
+    )
+    effective_screening_length = max(radius_m, screening_length_m)
+    capacitance = (
+        4.0
+        * math.pi
+        * VACUUM_PERMITTIVITY_F_M
+        * radius_m
+        * (1.0 + radius_m / effective_screening_length)
+    )
+    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
+    ion_amplitude = math.pi * radius_m * radius_m * ion_density_m3 * effective_speed
+    electron_amplitude = (
+        math.pi
+        * radius_m
+        * radius_m
+        * electron_density_m3
+        * math.sqrt(
+            8.0 * ELEMENTARY_CHARGE_C * electron_thermal_voltage_V / (math.pi * ELECTRON_MASS_KG)
+        )
+    )
+
+    return (
+        relative_speed,
+        effective_speed,
+        effective_ion_energy,
+        effective_screening_length,
+        capacitance,
+        surface_potential,
+        ion_amplitude,
+        electron_amplitude,
+    )
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def aggregate_collection_row(
+    surface_potential: float,
+    capacitance: float,
+    electron_thermal_voltage_V: float,
+    effective_ion_energy: float,
+    ion_amplitude: float,
+    electron_amplitude: float,
+) -> tuple[float, float, float, float]:
+    if surface_potential <= 0.0:
+        ion_factor = 1.0 - surface_potential / effective_ion_energy
+        electron_exponent = surface_potential / electron_thermal_voltage_V
+        clipped_electron_exponent = min(
+            AGGREGATE_EXPONENT_MAX,
+            max(AGGREGATE_EXPONENT_MIN, electron_exponent),
+        )
+        electron_factor = math.exp(clipped_electron_exponent)
+        electron_factor_derivative = (
+            electron_factor * ELEMENTARY_CHARGE_C / capacitance / electron_thermal_voltage_V
+            if AGGREGATE_EXPONENT_MIN < electron_exponent < AGGREGATE_EXPONENT_MAX
+            else 0.0
+        )
+        ion_factor_derivative = -ELEMENTARY_CHARGE_C / capacitance / effective_ion_energy
+    else:
+        ion_exponent = -surface_potential / effective_ion_energy
+        clipped_ion_exponent = min(
+            AGGREGATE_EXPONENT_MAX,
+            max(AGGREGATE_EXPONENT_MIN, ion_exponent),
+        )
+        ion_factor = math.exp(clipped_ion_exponent)
+        electron_factor = 1.0 + surface_potential / electron_thermal_voltage_V
+        ion_factor_derivative = (
+            -ion_factor * ELEMENTARY_CHARGE_C / capacitance / effective_ion_energy
+            if AGGREGATE_EXPONENT_MIN < ion_exponent < AGGREGATE_EXPONENT_MAX
+            else 0.0
+        )
+        electron_factor_derivative = ELEMENTARY_CHARGE_C / capacitance / electron_thermal_voltage_V
+    ion_collection = ion_amplitude * ion_factor
+    electron_collection = electron_amplitude * electron_factor
+    charge_rate = ion_collection - electron_collection
+    rate_derivative = (
+        ion_amplitude * ion_factor_derivative - electron_amplitude * electron_factor_derivative
+    )
+
+    return ion_collection, electron_collection, charge_rate, rate_derivative
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _aggregate_negative_ion_collection_row(
+    charge_number: float,
+    radius_m: float,
+    density_m3: float,
+    thermal_voltage_V: float,
+    particle_velocity_x_m_s: float,
+    particle_velocity_y_m_s: float,
+    ion_velocity_x_m_s: float,
+    ion_velocity_y_m_s: float,
+    effective_mass_kg: float,
+    screening_length_m: float,
+) -> tuple[float, float, float, float, float, bool]:
+    relative_speed = math.hypot(
+        ion_velocity_x_m_s - particle_velocity_x_m_s,
+        ion_velocity_y_m_s - particle_velocity_y_m_s,
+    )
+    effective_speed_squared = (
+        relative_speed * relative_speed
+        + 8.0 * ELEMENTARY_CHARGE_C * thermal_voltage_V / (math.pi * effective_mass_kg)
+        + AGGREGATE_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    )
+    effective_speed = math.sqrt(effective_speed_squared)
+    effective_energy = max(
+        effective_mass_kg * effective_speed_squared / (2.0 * ELEMENTARY_CHARGE_C),
+        AGGREGATE_MINIMUM_ION_ENERGY_V,
+    )
+    effective_screening_length = max(radius_m, screening_length_m)
+    capacitance = (
+        4.0
+        * math.pi
+        * VACUUM_PERMITTIVITY_F_M
+        * radius_m
+        * (1.0 + radius_m / effective_screening_length)
+    )
+    potential_per_charge = ELEMENTARY_CHARGE_C / capacitance
+    surface_potential = charge_number * potential_per_charge
+    amplitude = math.pi * radius_m * radius_m * density_m3 * effective_speed
+    argument = surface_potential / effective_energy
+    if surface_potential <= 0.0:
+        factor = math.exp(min(AGGREGATE_EXPONENT_MAX, max(AGGREGATE_EXPONENT_MIN, argument)))
+        factor_derivative = (
+            factor * potential_per_charge / effective_energy
+            if AGGREGATE_EXPONENT_MIN < argument < AGGREGATE_EXPONENT_MAX
+            else 0.0
+        )
+    else:
+        factor = 1.0 + argument
+        factor_derivative = potential_per_charge / effective_energy
+    collection = amplitude * factor
+    collection_derivative = amplitude * factor_derivative
+    return (
+        collection,
+        collection_derivative,
+        relative_speed,
+        effective_speed,
+        effective_energy,
+        (
+            math.isfinite(relative_speed)
+            and relative_speed >= 0.0
+            and math.isfinite(effective_speed)
+            and effective_speed > 0.0
+            and math.isfinite(effective_energy)
+            and effective_energy > 0.0
+            and math.isfinite(collection)
+            and collection >= 0.0
+            and math.isfinite(collection_derivative)
+            and collection_derivative >= 0.0
+        ),
+    )

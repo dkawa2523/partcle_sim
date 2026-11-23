@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,7 @@ SPEC = importlib.util.spec_from_file_location(
 )
 assert SPEC is not None and SPEC.loader is not None
 snapshot_module = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = snapshot_module
 SPEC.loader.exec_module(snapshot_module)
 
 
@@ -94,3 +96,134 @@ def test_optional_input_cannot_replace_unrelated_queries(tmp_path: Path) -> None
     )
     with pytest.raises(ValueError, match="unrequested query"):
         snapshot_module.build_snapshot(_existing(tmp_path), quality=quality)
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"rows": [17], "source": {"files": ["historical.json"]}},
+        {"rows": [], "source": {"files": "historical.json"}},
+        {"rows": [], "source": {"files": [17]}},
+        {"rows": [{"status": "unavailable", "value": 0}], "source": {"files": ["old.json"]}},
+        {"rows": [{"severity": "passed"}], "source": {"files": ["old.json"]}},
+    ],
+)
+def test_malformed_reviewed_rows_or_sources_fail_before_publication(
+    tmp_path: Path, query: dict
+) -> None:
+    quality = tmp_path / "quality.json"
+    quality.write_text(json.dumps({"queries": {"quality_findings": query}}))
+    with pytest.raises(ValueError):
+        snapshot_module.build_snapshot(_existing(tmp_path), quality=quality)
+
+
+def test_projection_rows_and_hash_use_the_same_read_bytes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    existing = _existing(tmp_path)
+    quality = tmp_path / "quality.json"
+    document = {
+        "queries": {
+            "quality_findings": {
+                "rows": [
+                    {
+                        "severity": "not_tested",
+                        "finding": "Version A",
+                        "disposition": "No execution",
+                    }
+                ],
+                "source": {"files": ["historical.json"]},
+            }
+        }
+    }
+    raw = json.dumps(document).encode()
+    quality.write_bytes(raw)
+    read_bytes = Path.read_bytes
+
+    def changed_after_read(path: Path) -> bytes:
+        result = read_bytes(path)
+        if path == quality:
+            path.write_bytes(raw.replace(b"Version A", b"Version B"))
+        return result
+
+    monkeypatch.setattr(Path, "read_bytes", changed_after_read)
+    snapshot = snapshot_module.build_snapshot(existing, quality=quality)
+    assert snapshot["queries"]["quality_findings"]["rows"][0]["finding"] == "Version A"
+    assert (
+        snapshot["reproducibility"]["optional_inputs"][0]["sha256"]
+        == "sha256:" + hashlib.sha256(raw).hexdigest()
+    )
+
+
+def test_structured_evidence_keeps_history_scope_and_supported_wire_shape(tmp_path: Path) -> None:
+    quality, local = tmp_path / "quality.json", tmp_path / "execution.json"
+    local.write_text('{"executed":true}')
+    digest = "sha256:" + hashlib.sha256(local.read_bytes()).hexdigest()
+    references = [
+        {
+            "location": str(local),
+            "availability": "bound_local",
+            "sha256": digest,
+            "execution_source": "prior-source-sha",
+            "scope": "One prior tiny execution",
+        },
+        {
+            "location": "missing-old-native.csv",
+            "availability": "historical_unavailable",
+            "scope": "Historical citation; no current native recomputation",
+        },
+    ]
+    quality.write_text(
+        json.dumps(
+            {
+                "queries": {
+                    "quality_findings": {
+                        "rows": [
+                            {
+                                "severity": "not_tested",
+                                "finding": "Scoped receipt",
+                                "disposition": "Retain history",
+                            }
+                        ],
+                        "source": {"files": references},
+                    }
+                }
+            }
+        )
+    )
+    snapshot = snapshot_module.build_snapshot(_existing(tmp_path), quality=quality)
+    source = snapshot["queries"]["quality_findings"]["source"]
+    assert source["files"] == [{"label": str(local)}, {"label": "missing-old-native.csv"}]
+    evidence = snapshot["reproducibility"]["reviewed_evidence"]
+    assert evidence[0]["execution_source"] == "prior-source-sha"
+    assert evidence[0]["sha256"] == digest
+    assert evidence[1]["availability"] == "historical_unavailable"
+    assert digest in source["evidenceFlow"][0]["detail"]
+    local.write_text("changed")
+    with pytest.raises(ValueError, match="bound_local evidence missing or hash mismatch"):
+        snapshot_module.build_snapshot(_existing(tmp_path), quality=quality)
+
+
+@pytest.mark.parametrize("boundary", ["fsync", "replace"])
+def test_snapshot_publication_preserves_previous_file_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, boundary: str
+) -> None:
+    destination = tmp_path / "data.json"
+    original = b'{"old":"valid"}\n'
+    destination.write_bytes(original)
+
+    def fail(*_args, **_kwargs):
+        raise OSError("injected publication failure")
+
+    monkeypatch.setattr(snapshot_module.os, boundary, fail)
+    with pytest.raises(OSError, match="injected publication failure"):
+        snapshot_module.publish_snapshot({"new": "complete"}, destination)
+    assert destination.read_bytes() == original
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["data.json"]
+
+
+def test_snapshot_publication_binds_the_completed_bytes(tmp_path: Path) -> None:
+    destination = tmp_path / "data.json"
+    binding = snapshot_module.publish_snapshot({"rows": [{"value": 3}]}, destination)
+    assert json.loads(destination.read_text()) == {"rows": [{"value": 3}]}
+    assert binding["sha256"] == "sha256:" + hashlib.sha256(destination.read_bytes()).hexdigest()

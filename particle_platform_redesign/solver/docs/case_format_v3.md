@@ -898,6 +898,17 @@ hashはHDF5のchunk、compression、object address、作成順序に依存しま
 provenance JSONはduplicate keyと非有限数を拒否し、sorted key、compact separator、UTF-8の
 canonical表現にしてからhashします。tupleの入力順ではなくdataset path順がidentityを決めます。
 
+producerが明示的に生成した場の群は、追加provenance `derived_field_generations`へ記録できます。
+通常publisherと場producerの出版時に、`chamber_particles_tools.field_generation`が宣言したprimitive、
+parameters、homogeneous物性、全output群のfreshnessを検査します。coreはproducer名や場名から依存を推測しません。
+宣言のないprescribed fieldは独立入力として合法です。
+
+`case_format.field_identity(field, layout, coordinate_system)`はfieldとlayoutのcanonical records、
+coordinateを専用header `chamber-particles-field-layout-coordinate\0v1\0`でbindします。
+valueのdtype/shape、clock、unit/basis、layout topology/supportを含みます。
+既存cacheの`field_sha256`（layout名のみ）と`layout_sha256`は以前のhash規則を保持し、
+それらやschema-v3 bundleのlogical hashを新identityと取り違えません。
+
 ## Writer publication
 
 `case_format.write()`は同じdirectoryへ完全な一時HDF5を書き、closeとfile fsync後にhard linkを

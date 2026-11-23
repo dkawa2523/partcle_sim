@@ -292,8 +292,8 @@ def test_barnes_static_gate_uses_local_fields_and_dense_charge_interval() -> Non
 def test_native_local_certificate_skips_unavailable_ranges_and_reuses_prefix() -> None:
     runtime = _coflow_runtime()
     ranges = _local_ranges(ion_velocity_x_m_s=np.full(3, 90_001.0))
-    lower = np.column_stack([ranges[item.name].lower for item in runtime.plan.required_fields])
-    upper = np.column_stack([ranges[item.name].upper for item in runtime.plan.required_fields])
+    lower = np.column_stack([ranges[name].lower for name, _, _ in runtime.primitive_packing])
+    upper = np.column_stack([ranges[name].upper for name, _, _ in runtime.primitive_packing])
     lower[1], upper[1] = np.nan, 0.0
     velocity = np.tile([100_000.0, 0.0], (3, 1))
     velocity[2, 0] = np.nan

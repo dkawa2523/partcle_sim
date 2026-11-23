@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
 from typing import Literal, cast
 
+from .charge import OML_MAX_ION_DRIFT_RATIO
 from .forces import (
     EPSTEIN_MAX_SPEED_OVER_MEAN_THERMAL,
     WALDMANN_GALLIS_MAX_SPEED_OVER_MEAN_THERMAL,
@@ -695,7 +696,7 @@ class PlasmaContinuousChargePlan:
     positive_ion_temperature_field: str
     positive_ion_velocity_field: str
     positive_ion_mass_kg: float
-    maximum_ion_drift_ratio: float | None
+    maximum_ion_drift_ratio: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -924,12 +925,56 @@ class SaffmanLiftPlan:
 type LiftPlan = RarefiedVorticityLiftPlan | SaffmanLiftPlan | PrescribedRotationalLiftPlan
 
 
+type ResolvedModelParameters = (
+    ChargePlan
+    | DragPlan
+    | InertialLangevinNoisePlan
+    | PrescribedForceDiffusionNoisePlan
+    | ThermophoresisPlan
+    | IonDragPlan
+    | QuasistaticSphericalDielectrophoresisPlan
+    | LiftPlan
+    | ElectricPlan
+    | GravityBuoyancyPlan
+)
+
+
 @dataclass(frozen=True, slots=True)
 class SelectedModel:
-    """Keep the selected descriptor and caller field names instead of re-inferring identity."""
+    """A selected scientific identity and its one concrete immutable parameter record."""
 
     descriptor: ModelDescriptor
-    field_names: tuple[tuple[str, str], ...]
+    parameters: ResolvedModelParameters | None
+
+    @property
+    def field_names(self) -> tuple[tuple[str, str], ...]:
+        """Resolve only explicitly declared roles, never infer roles from key spelling."""
+        return tuple(
+            (name, cast(str, getattr(self.parameters, name)))
+            for name in self.descriptor.field_parameters
+        )
+
+    def resolved_parameters(self) -> dict[str, str | float]:
+        """Project effective parameters, including defaults, without copying their ownership."""
+        result: dict[str, str | float] = dict(self.field_names)
+        if self.parameters is None:
+            return result
+        for item in fields(self.parameters):
+            if item.name in self.descriptor.field_parameters or item.name == "revision":
+                continue
+            value = getattr(self.parameters, item.name)
+            if value is None:
+                continue
+            if isinstance(value, ReferenceParticleProperties):
+                for authority in fields(value):
+                    result[f"particle_properties.{authority.name}"] = getattr(value, authority.name)
+            elif item.name == "gravity_m_s2":
+                result["gravity_m_s2[0]"], result["gravity_m_s2[1]"] = value
+            elif isinstance(value, str | float | int):
+                result[item.name] = value
+            else:
+                raise PhysicsConfigurationError(f"unresolved model parameter {item.name!r}")
+        return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -970,28 +1015,14 @@ class PhysicsPlan:
 
     def resolved_models(self) -> dict[str, dict[str, str | float]]:
         """Project the actual selected descriptors and resolved scientific parameters."""
-        result: dict[str, dict[str, str | float]] = {
+        return {
             item.descriptor.category: {
                 "model": item.descriptor.model,
                 "revision": item.descriptor.revision,
+                **item.resolved_parameters(),
             }
             for item in self.selected_models
         }
-        if isinstance(self.thermophoresis, TalbotThermophoresisPlan):
-            model = self.thermophoresis
-            result["thermophoresis"].update(
-                particle_thermal_conductivity_W_m_K=model.particle_thermal_conductivity_W_m_K,
-                thermal_slip_coefficient=model.thermal_slip_coefficient,
-                momentum_exchange_coefficient=model.momentum_exchange_coefficient,
-                thermal_exchange_coefficient=model.thermal_exchange_coefficient,
-            )
-        if isinstance(self.lift, RarefiedVorticityLiftPlan):
-            result["lift"]["lift_coefficient"] = self.lift.lift_coefficient
-        if self.electric is not None and self.electric.maximum_abs_charge_number is not None:
-            result["electric"]["maximum_abs_charge_number"] = (
-                self.electric.maximum_abs_charge_number
-            )
-        return result
 
 
 def compatible_integrators(plan: PhysicsPlan) -> tuple[str, ...]:
@@ -1026,27 +1057,6 @@ def resolve_physics_plan(
         descriptors["charge"] = _validate_model_structure(
             "charge", {"model": "fixed"}, coordinate_system
         )
-    selected_models = tuple(
-        SelectedModel(
-            descriptors[category],
-            tuple(
-                (parameter, cast(str, models[category][parameter]))
-                for parameter in descriptors[category].field_parameters
-            ),
-        )
-        for category in (
-            "charge",
-            "drag",
-            "noise",
-            "thermophoresis",
-            "ion_drag",
-            "dielectrophoresis",
-            "lift",
-            "electric",
-            "gravity_buoyancy",
-        )
-        if category in descriptors
-    )
     charge = _resolve_charge(models.get("charge"))
     drag = _resolve_drag(models.get("drag"))
     noise = _resolve_noise(models.get("noise"))
@@ -1061,6 +1071,22 @@ def resolve_physics_plan(
     _require_matching_neutral_gas(drag, thermophoresis, lift, gravity)
     _require_noise_compatibility(noise, drag)
     _require_matching_reference_particles(charge, drag, noise, ion_drag, lift)
+    parameters: dict[str, ResolvedModelParameters | None] = {
+        "charge": charge,
+        "drag": drag,
+        "noise": noise,
+        "thermophoresis": thermophoresis,
+        "ion_drag": ion_drag,
+        "dielectrophoresis": dielectrophoresis,
+        "lift": lift,
+        "electric": electric,
+        "gravity_buoyancy": gravity,
+    }
+    selected_models = tuple(
+        SelectedModel(descriptors[category], value)
+        for category, value in parameters.items()
+        if category in descriptors
+    )
     requirements = [
         RequiredField(
             cast(str, models[category][role.parameter]),
@@ -1621,7 +1647,7 @@ def _resolve_charge(model: Mapping[str, object] | None) -> ChargePlan | None:
             else None,
         )
     if revision == "oml_stationary_maxwellian_debye_huckel_v1":
-        maximum_ion_drift_ratio = None
+        maximum_ion_drift_ratio = OML_MAX_ION_DRIFT_RATIO
     elif revision == "oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1":
         maximum_ion_drift_ratio = _positive_number(
             model["maximum_ion_drift_ratio"], "physics.charge.maximum_ion_drift_ratio"

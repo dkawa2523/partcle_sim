@@ -1,0 +1,57 @@
+{
+  "source": "6555ce3abfb8c2eb5580115c6976d77878bacc85",
+  "rows": [
+    {
+      "example": "xy-ballistic",
+      "case_hash": "sha256:d8d00eb2a3d21a8b7b05cc9ad3d6fd09f21e00e152e72144cd47f9aaeea1e4eb",
+      "data_hash": "sha256:f1b81f183a13c7bb07043791b3d006c46918e3ff31bbe97803a47330035e9313",
+      "science_hash": "sha256:af5e13b895e5706fda6dc187995b7ae2298b168457a71c71127f227083b047e0"
+    },
+    {
+      "example": "rz-charged",
+      "case_hash": "sha256:afe5ab8849158e367fb509dd3b26d04c5ae3ead36ff7dc8058674c331bdd6d0d",
+      "data_hash": "sha256:4883041e65867887070b96eb47a53e91f09bb59bd7841d85d7e267ee8cc6a1e1",
+      "science_hash": "sha256:b3b408510916ed7803e27aa41283b6a5c4faa4a288f8dd9c748ceb8a5d39b50c"
+    },
+    {
+      "example": "xy-time-field",
+      "case_hash": "sha256:a0b19c0368a0835f66693a0a381aa6b1d8bcf3164a8cbe5f6d3a37c02844d3cc",
+      "data_hash": "sha256:2751548e9499191660121c8188eb55854aeb37178734aec765908ec8b348b6af",
+      "science_hash": "sha256:21c93235eef5b8ffe5a158e0839e75c79e9e2e72c27805ba18b5b8878c761be1"
+    },
+    {
+      "example": "brownian-wall",
+      "case_hash": "sha256:e8230ab0352fc6611d1a2afdc5a385a8f09ad788de208d3568a73efc100ff004",
+      "data_hash": "sha256:5e3b351b301f5913884c7c8d5c3a58c734cb554cfca587604948ed9fe691b476",
+      "science_hash": "sha256:568fa6ec05bd118309d79e6eb79d6e41380d3bdd12f4fa3e94b5ee6e7f3bfcee"
+    },
+    {
+      "example": "reduced-electrostatic",
+      "case_hash": "sha256:b98e3ddba663b9ac86bcfc3d7d286931701b1d7f06b0ef11a7103731b90b06e9",
+      "data_hash": "sha256:ad120642a3ac3900927f610935f03bf332072941feb4f641d00a95322fc18323",
+      "science_hash": "sha256:6936bf39e3775703bab698d8421bbb9118b6fff73ef1eebfa2d4d10e3ae70fe3"
+    }
+  ],
+  "array_exports": [
+    {
+      "example": "xy-ballistic",
+      "sha256": "d2a4bc83398cdb4164a9870ebc9974d7d362f2dad9f9800c2276c540857b2c99"
+    },
+    {
+      "example": "rz-charged",
+      "sha256": "c35a45d4c3647eaf116f646ae57de4133c79bd1f926e67ce49d2f42ecccd6520"
+    },
+    {
+      "example": "xy-time-field",
+      "sha256": "ef3ec258bc9308d41a4a981c4e085de2d409199444966393b0253b95bd0bf902"
+    },
+    {
+      "example": "brownian-wall",
+      "sha256": "bb6400cf18903c232273f6eb430cc3e650d17d9fcdf2bb0c617ce026f90f4ee1"
+    },
+    {
+      "example": "reduced-electrostatic",
+      "sha256": "eebed9696817ca4724c60c2dc758b1e750dc5d3dc9bab9e7967332278d4f51da"
+    }
+  ]
+}

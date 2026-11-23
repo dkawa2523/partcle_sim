@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import yaml
 
-from chamber_particles import CaseError, check_case, load_case
+from chamber_particles import CaseError, check_case, load_case, open_result, simulate
 from chamber_particles.case_format import RealizedTableSource
 from tests.verification.microcases import materialize_microcase
 
@@ -50,6 +50,33 @@ def test_public_check_rejects_a_statically_valid_unsupported_execution_request(
 
     with pytest.raises(CaseError, match="integrator"):
         check_case(case)
+
+
+def test_check_explains_the_same_bound_models_and_fields_as_execution(tmp_path: Path) -> None:
+    paths = materialize_microcase("C03", tmp_path / "case")
+    case = load_case(paths.case_path)
+    checked = check_case(case)
+    output = tmp_path / "result"
+    simulate(case, output)
+    executed = open_result(output).manifest["resolved"]["physics_models"]
+    for item in checked.models:
+        record = executed[item.category]
+        assert item.model == record["model"] and item.revision == record["revision"]
+        assert item.parameters == {
+            key: value for key, value in record.items() if key not in ("model", "revision")
+        }
+        with pytest.raises(TypeError):
+            item.parameters["changed"] = 0.0
+    fields = {item.name: item for item in case.data.fields}
+    assert tuple(item.name for item in checked.required_field_metadata) == checked.required_fields
+    for item in checked.required_field_metadata:
+        actual = fields[item.name]
+        assert (item.unit, item.components, item.stored_basis, item.layout) == (
+            actual.unit,
+            actual.components,
+            actual.stored_basis,
+            actual.layout,
+        )
 
 
 @pytest.mark.parametrize("workers", [0, -1, True])

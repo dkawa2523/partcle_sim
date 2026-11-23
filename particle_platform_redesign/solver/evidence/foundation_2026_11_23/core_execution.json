@@ -1,0 +1,84 @@
+{
+  "package_version": "0.5.0",
+  "result_schema": 5,
+  "case_data_schema": 3,
+  "checkpoint_array_schema": 2,
+  "source_identity": {
+    "path": "evidence/foundation_2026_11_23/source_map.json",
+    "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a"
+  },
+  "source_file_count": 179,
+  "source_before_after_equal": true,
+  "core": {
+    "artifact": {
+      "path": ".artifacts/foundation_20261123/core_accepted.xml",
+      "sha256": "sha256:6aba8531dd6772aa064d9a404a5dc73188bc0b082e033f19cb6f3352046d328c"
+    },
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "1",
+        "tests": "1334",
+        "time": "625.152",
+        "timestamp": "2026-11-23T20:57:10.213275+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    ]
+  },
+  "external": {
+    "artifact": {
+      "path": ".artifacts/foundation_20261123/external_accepted.xml",
+      "sha256": "sha256:9ccf62243ef1dad79e9a473945177645f9739acbb4043d0f72d4decd2caa783e"
+    },
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "168",
+        "time": "55.675",
+        "timestamp": "2026-11-23T21:03:47.058950+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    ]
+  },
+  "linux_same_handle_integrity": {
+    "passed": 14,
+    "command": "python -m pytest tests/verification/test_result_integrity.py -q",
+    "log": {
+      "path": ".artifacts/foundation_20261123/linux_integrity.log",
+      "sha256": "sha256:ac0ac783eab79f2606b415c8269d61ca3fde0dccec5351dfbf5dcf0c69af808c"
+    }
+  },
+  "quality_gates": {
+    "path": "evidence/foundation_2026_11_23/quality_gates.json",
+    "sha256": "sha256:2b8388222e0875c60f48aadc1f054660eb467590f0238094dad278f896d073e4"
+  },
+  "scope": "Core/scenario/external and integrity checks, not native numerical parity, physical validation, full release-size performance or report UI qualification",
+  "known_warning": "Existing extreme invalid time-budget events test emits one NumPy overflow warning; no new success fallback",
+  "commands": [
+    "uv run --locked python -m pytest tests/verification tests/scenarios -q",
+    "uv run --locked python -m pytest tools/vv/comsol/tests tools/vv/gas_collision/tests -q"
+  ],
+  "wheel_acceptance": {
+    "installed_windows": {
+      "path": "evidence/foundation_2026_11_23/installed_windows.json",
+      "sha256": "sha256:b488232ae57ce4f60f2f1769a85e7d70bd0c0b70f2e7f28e667c0a1e70fb8999"
+    },
+    "installed_linux": {
+      "path": "evidence/foundation_2026_11_23/installed_linux.json",
+      "sha256": "sha256:63f717caf223aeb703656bcd59bcaf6e11a87c74ca5e1421e846bd326b850057"
+    },
+    "clean_wheel_windows": {
+      "path": "evidence/foundation_2026_11_23/clean_wheel_windows.json",
+      "sha256": "sha256:052c2614cba485cd440a716dcef1052ca1a0f4d3d6254bddc63b13739311283b"
+    },
+    "clean_wheel_linux": {
+      "path": "evidence/foundation_2026_11_23/clean_wheel_linux.json",
+      "sha256": "sha256:e3ecdee095c8b938f228f7fd450c309fae1115d3ba8d99f6df57e22b8097380d"
+    }
+  }
+}

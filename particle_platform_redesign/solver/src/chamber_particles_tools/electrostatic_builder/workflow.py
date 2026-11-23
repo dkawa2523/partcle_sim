@@ -22,6 +22,7 @@ from chamber_particles.case_format import (
     write,
 )
 from chamber_particles.yaml_input import parse_document
+from chamber_particles_tools.field_generation import validate_declared_generations
 
 from .numerics import (
     ClosureParameters,
@@ -240,6 +241,7 @@ def _build(
         data.provenance_json,
         solution,
     )
+    source_provenance = json.loads(data.provenance_json)
     provenance = json.dumps(
         {
             "producer": "chamber_particles_tools.electrostatic_builder",
@@ -247,23 +249,27 @@ def _build(
             "source_sha256": source_info.content_hash,
             "field_semantics_revision": FIELD_SEMANTICS_REVISION,
             "producer_metadata": metadata,
+            **(
+                {"derived_field_generations": source_provenance["derived_field_generations"]}
+                if "derived_field_generations" in source_provenance
+                else {}
+            ),
         },
         allow_nan=False,
         separators=(",", ":"),
         sort_keys=True,
     )
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output_info = write(
-        output,
-        DataBundle(
-            coordinate_system=data.coordinate_system,
-            provenance_json=provenance,
-            geometry=data.geometry,
-            layouts=data.layouts,
-            fields=(*data.fields, *generated_fields),
-            sources=data.sources,
-        ),
+    output_bundle = DataBundle(
+        coordinate_system=data.coordinate_system,
+        provenance_json=provenance,
+        geometry=data.geometry,
+        layouts=data.layouts,
+        fields=(*data.fields, *generated_fields),
+        sources=data.sources,
     )
+    validate_declared_generations(output_bundle)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output_info = write(output, output_bundle)
     return {
         "status": "complete",
         "builder_revision": BUILDER_REVISION,

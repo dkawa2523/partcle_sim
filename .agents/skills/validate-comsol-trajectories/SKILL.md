@@ -157,13 +157,17 @@ uses the same full prepare as execution without starting workers or updating
 particles. Inspect integrity, failures, population coverage and revisions;
 readiness alone is no runtime/convergence proof.
 
-Normal result schema 4 carries immutable geometry/boundary/source semantics,
+Normal result schema 5 carries immutable geometry/boundary/source semantics,
 bound to the original case/data hashes. Use public `read_context()` and the
 installed `analyze`, `export` and `view` clients for result-only reuse.
 Context does not contain background fields or native equation evidence;
 field/RHS diagnosis still needs the bound canonical/native artifacts. Older
 results require their original environment for export or explicit rerunning,
 not a private compatibility path or relabeled manifest.
+Result identity binds the complete content roster; a consumer's separate
+verification receipt identifies files actually checked. Use `inspect --verify`
+or `ResultView.verify_contents()` when the requested audit needs every payload.
+Byte integrity is neither scientific equivalence nor numerical qualification.
 
 Existing exporters/evaluators are case-bound until their source/CLI prove
 otherwise. Check actual required fields, IDs, clocks and equation scope before

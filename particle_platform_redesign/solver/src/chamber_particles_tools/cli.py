@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import dataclasses
 import json
 import os
@@ -107,6 +108,13 @@ def _simulation_operation(arguments: argparse.Namespace) -> object:
         "result_path": str(result.path),
         "summary": summary,
     }
+    from .selection import result_labels
+
+    payload["labels"] = result_labels(result.read_context())
+    payload["source_result"] = result.source_identity()
+    payload["verification"] = (
+        result.verify_contents() if arguments.verify else result.verification_document()
+    )
     if arguments.full:
         payload["manifest"] = result.manifest_document()
     return payload
@@ -144,7 +152,9 @@ def _result_operation(arguments: argparse.Namespace) -> object:
 
     selection = {
         "source_ids": _integer_selection(arguments.source_ids),
+        "source_names": _name_selection(arguments.source_names),
         "particle_ids": _integer_selection(arguments.particle_ids),
+        "particle_ids_file": arguments.particle_ids_file,
         "event_batch_rows": arguments.event_batch_rows,
     }
     if arguments.command == "analyze":
@@ -165,7 +175,7 @@ def _result_operation(arguments: argparse.Namespace) -> object:
         arguments.result,
         arguments.output,
         **selection,
-        particle_id=arguments.particle_id,
+        focus_particle_id=arguments.focus_particle_id,
         detail=arguments.detail,
         max_event_points=arguments.max_event_points,
         max_particle_points=arguments.max_particle_points,
@@ -184,6 +194,15 @@ def _integer_selection(value: str | None) -> tuple[int, ...] | None:
 
 def _number_selection(value: str | None) -> tuple[float, ...] | None:
     return None if value is None else tuple(float(item) for item in value.split(","))
+
+
+def _name_selection(value: str | None) -> tuple[str, ...] | None:
+    if value is None:
+        return None
+    try:
+        return tuple(next(csv.reader([value], strict=True)))
+    except csv.Error as error:
+        raise ValueError("source names must be a CSV list of release names") from error
 
 
 def _plain(value: object) -> object:
@@ -334,23 +353,34 @@ def _simulation_arguments(
     inspect.add_argument(
         "--full", action="store_true", help="include the complete immutable manifest"
     )
+    inspect.add_argument(
+        "--verify", action="store_true", help="verify every completed payload file"
+    )
 
 
 def _result_arguments(
     commands: argparse._SubParsersAction, common: argparse.ArgumentParser
 ) -> None:
     for name in ("analyze", "export", "view"):
-        parser = commands.add_parser(name, parents=[common])
+        parser = commands.add_parser(name, parents=[common], allow_abbrev=False)
         parser.add_argument("result", type=Path)
-        parser.add_argument("--source-ids", help="comma-separated resolved source IDs")
-        parser.add_argument("--particle-ids", help="comma-separated stable particle IDs")
+        sources = parser.add_mutually_exclusive_group()
+        sources.add_argument("--source-ids", help="comma-separated resolved source IDs")
+        sources.add_argument("--source-names", help="CSV list of release names from inspect labels")
+        particles = parser.add_mutually_exclusive_group()
+        particles.add_argument("--particle-ids", help="comma-separated stable particle IDs")
+        particles.add_argument(
+            "--particle-ids-file", type=Path, help="CSV with one particle_id column"
+        )
         parser.add_argument("--event-batch-rows", type=int, default=4096)
         parser.add_argument("-o", "--output", type=Path, required=name != "analyze")
         if name == "analyze":
             parser.add_argument("--coordinate0-bin-edges-m", help="comma-separated SI bin edges")
             parser.add_argument("--terminal-time-bin-edges-s", help="comma-separated SI bin edges")
         elif name == "view":
-            parser.add_argument("--particle-id", type=int)
+            parser.add_argument(
+                "--focus-particle-id", type=int, help="selected particle shown in trajectory detail"
+            )
             parser.add_argument("--detail", action="store_true")
             parser.add_argument("--max-event-points", type=int, default=5000)
             parser.add_argument("--max-particle-points", type=int, default=5000)

@@ -1,0 +1,138 @@
+{
+  "status": "updating; A/P complete, large performance matrix and final complete build pending",
+  "scope": "Official Data prebuilt build, full split payload verification and observed native Chrome UI of this intermediate snapshot; no simulation performed by the report",
+  "snapshot_sha256": "sha256:c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
+  "build_manifest_sha256": "sha256:f39f1f93fc5ffe7afb817c70b0563e2a9ae891e8baeaa062fa31b20dd843318d",
+  "manifest": {
+    "version": 1,
+    "kind": "separate-data-v1",
+    "html": {
+      "path": "index.html",
+      "sha256": "a157e30bb6fcafcd74a77215ba8ef45ede7df10d02e7965f35012ad55e9084e3",
+      "bytes": 2405911
+    },
+    "snapshot": {
+      "path": "snapshot.c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6.json",
+      "sha256": "c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
+      "bytes": 214116
+    },
+    "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "sourceSnapshotSha256": "c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6"
+  },
+  "toolchain": {
+    "node_version": "v24.22.3",
+    "linux_archive_url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.xz",
+    "checksum_url": "https://nodejs.org/dist/v24.22.3/SHASUMS256.txt",
+    "archive_sha256": "4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb",
+    "linux_node": "/mnt/c/Users/user/AppData/Local/Temp/chamber-report-node-v24.22.3/node-v24.22.3-linux-x64/bin/node",
+    "plugin_version": "1.2.1-alpha.20261116.1",
+    "prepare_command": "wsl.exe --exec /mnt/c/Users/user/AppData/Local/Temp/chamber-report-node-v24.22.3/node-v24.22.3-linux-x64/bin/node /mnt/c/Users/user/.codex/plugins/cache/openai-curated-remote/data-analytics/1.2.1-alpha.20261116.1/output_formats/html/scripts/data-app.mjs prepare --project-dir /mnt/c/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/report_app",
+    "prepare_result": {
+      "prebuilt": true,
+      "apiVersion": 1,
+      "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+      "compilerSha256": "ec65601079c80bef7210f2c9760ff7f2db6adef28516ffff280d4c86f91d4078"
+    },
+    "protected_runtime_or_dependency_changes": false,
+    "recovery": {
+      "observed": "Previous /tmp ELF disappeared; cause unknown",
+      "download_location": "Windows task temp directory, mounted through /mnt/c",
+      "pinned_and_official_sha256_checks": "both OK",
+      "project_dependencies_modified": false
+    }
+  },
+  "build": {
+    "prebuilt": true,
+    "separate_data": true,
+    "exit_code": 0
+  },
+  "full_payload_integrity": {
+    "verification": "Full split snapshot equals source bytes; HTML/sidecar byte lengths and hashes match official manifest",
+    "source_sha256": "sha256:c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
+    "html_sha256": "sha256:a157e30bb6fcafcd74a77215ba8ef45ede7df10d02e7965f35012ad55e9084e3",
+    "manifest_sha256": "sha256:f39f1f93fc5ffe7afb817c70b0563e2a9ae891e8baeaa062fa31b20dd843318d",
+    "runtime_sha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "build_status": "updating",
+    "query_rows": {
+      "case_audit": 2,
+      "trajectory_divergence": 4,
+      "design_decisions": 8,
+      "physics_scope": 27,
+      "module_responsibilities": 10,
+      "numerical_contracts": 8,
+      "result_layers": 4,
+      "implementation_work_packages": 4,
+      "quality_findings": 9,
+      "roadmap": 3
+    },
+    "identity_presentation_filter_preservation": "verified against HEAD source snapshot",
+    "complete_data": "All ten full query payloads; UI pagination does not reduce the sidecar"
+  },
+  "executed_tests": {
+    "command": "uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py tests/verification/test_documentation.py -q",
+    "passed": 17,
+    "seconds": 1.21
+  },
+  "observed_ui": {
+    "method": "mcp__cua_repl native Windows Chrome; task-owned localhost tab; no DevTools JavaScript execution",
+    "viewports": [
+      "390x768",
+      "1280x768"
+    ],
+    "content": [
+      "0.5.0 title/introduction, four metric cards and narrative content are legible",
+      "Wide table stays in its container and scrolls horizontally at 390px",
+      "27 catalog models paginate from rows1-8 to9-16",
+      "Current quality rows and explicitly running performance row visible",
+      "Source Overview resolves supported file references without object coercion",
+      "Evidence flow exposes bound_local, exact receipt SHA, execution source-map and scope",
+      "A/P multi-query selector exposes both current cases; Data preview rounds numerically only for display",
+      "A/P Evidence flow retains selected_on_prior_results, dependence and exact-clock/no-interpolation scope",
+      "Mobile Source drawer and evidence-flow text fit and scroll vertically"
+    ],
+    "copy_data": {
+      "method": "Actual Copy data action, then native Ctrl+V into a task-owned local data:text/html textarea; no copied evidence in URL",
+      "exact_capture_means": [
+        249.675,
+        251.775
+      ],
+      "exact_boundary33_means": [
+        60.45,
+        61.325
+      ],
+      "exact_speed_median_means": [
+        861.3178894844634,
+        866.9236448676853
+      ],
+      "preserved_scope": [
+        "current_source_bound_exploratory",
+        "NOT_TESTED",
+        "NOT_CERTIFIED"
+      ],
+      "datasets_checked": [
+        "current A/P cases",
+        "exploratory local reservations",
+        "quality findings"
+      ]
+    },
+    "console": "0 console messages observed on the refreshed report before A/P source inspection; no runtime script was executed from DevTools",
+    "identity_and_presentation": "Same app ID/title/authored revision/filter snapshot and same browser origin; user storage not inspected or edited"
+  },
+  "unperformed": [
+    "Completed 10k/100k/1M performance projection",
+    "complete snapshot and final official build",
+    "affected final UI/copy and final payload verification"
+  ],
+  "publication": "No publish, sharing, destination or tag changes",
+  "current_snapshot_refresh": {
+    "sha256": "sha256:1161f417574f350cf779f5af34a3546bc6025d59b62194e1e4ba702cd9c07d89",
+    "build_status": "updating",
+    "summary_receipt_sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
+    "independent_review_sha256": "sha256:fb7ff07a45a32aba1e308ce61a5be7a0b6dc6357f31aaf63dbcbf3142a78a947",
+    "current_bound_references_verified": 15,
+    "producer_sha256": "sha256:9a7f712452da9a904f674f49bf68e62f95e83f128af82134787cbc86aeabd799",
+    "checks": "17 report/docs tests passed in1.75s",
+    "build_and_ui": "Not yet executed for this refreshed snapshot; the build/observed UI above belong only to snapshot c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
+    "scope": "Independent A/P review included; immutable core execution receipt unchanged; final complete build deferred until performance completes"
+  }
+}

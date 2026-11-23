@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import csv
+import hashlib
+import json
 from dataclasses import replace
 from pathlib import Path
 
@@ -12,9 +14,107 @@ import yaml
 
 from chamber_particles import CaseError, check_case, open_result, simulate
 from chamber_particles.case_format import RealizedSurfaceSource, RealizedTableSource, read, write
+from chamber_particles_tools.csv_import import adapt_from_configuration
 from chamber_particles_tools.examples import EXAMPLE_NAMES
+from chamber_particles_tools.field_generation import record_generation
 from chamber_particles_tools.inputs import create_case, create_from_configuration, init_example
 from chamber_particles_tools.source_builder import read_csv_source
+
+
+def test_recipe_binds_the_same_source_bytes_that_it_parses(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    example = init_example("xy-ballistic", tmp_path / "example")
+    csv_path = example.case_path.parent / "particles.csv"
+    original = Path.read_bytes
+    snapshot = original(csv_path)
+
+    def replace_after_read(path: Path) -> bytes:
+        raw = original(path)
+        if path == csv_path:
+            path.write_bytes(b"no longer the original source\n")
+        return raw
+
+    monkeypatch.setattr(Path, "read_bytes", replace_after_read)
+    rebuilt = create_from_configuration(
+        example.case_path.parent / "recipe.yaml", tmp_path / "rebuilt"
+    )
+    np.testing.assert_array_equal(rebuilt.data.sources[0].particle_id, [1])
+    metadata = json.loads(rebuilt.data.provenance_json)["producer_metadata"]
+    assert metadata["sources"][0]["csv_sha256"] == "sha256:" + hashlib.sha256(snapshot).hexdigest()
+    assert original(csv_path) != snapshot
+
+
+def test_editable_charged_mesh_and_fields_rebuild_the_same_analytic_problem(tmp_path: Path) -> None:
+    original = init_example("rz-charged", tmp_path / "editable")
+    inputs = original.case_path.parent
+    adapt_from_configuration(inputs / "field-mapping.yaml", inputs / "background")
+    rebuilt = create_from_configuration(inputs / "field-recipe.yaml", tmp_path / "rebuilt")
+    np.testing.assert_array_equal(rebuilt.data.geometry.nodes_m, original.data.geometry.nodes_m)
+    np.testing.assert_array_equal(rebuilt.data.geometry.tri3, original.data.geometry.tri3)
+    np.testing.assert_array_equal(
+        rebuilt.data.geometry.boundary.boundary_id, original.data.geometry.boundary.boundary_id
+    )
+    np.testing.assert_array_equal(rebuilt.data.fields[0].values, original.data.fields[0].values)
+    np.testing.assert_array_equal(rebuilt.data.fields[0].values, [[0, 1000]] * 4)
+    simulate(rebuilt, tmp_path / "result")
+    result = open_result(tmp_path / "result")
+    source = rebuilt.data.sources[0]
+    assert isinstance(source, RealizedTableSource)
+    final = result.read_final()
+    time = (
+        np.max(rebuilt.data.geometry.nodes_m[:, 0]) - source.position_m[0, 0]
+    ) / source.velocity_m_s[0, 0]
+    acceleration = 1.602176634e-19 * source.charge_number[0] * 1000 / source.mass_kg[0]
+    expected = source.position_m[0] + source.velocity_m_s[0] * time
+    expected[1] += 0.5 * acceleration * time**2
+    np.testing.assert_allclose(final.position_m[0], expected, rtol=0, atol=1e-13)
+    np.testing.assert_allclose(result.read_boundary_events().time_s, [time], rtol=0, atol=1e-13)
+    assert result.read_failure_events().particle_id.size == 0
+
+
+def test_recipe_retains_declared_generation_and_rejects_changed_source_mass(tmp_path: Path) -> None:
+    example = init_example("rz-charged", tmp_path / "editable")
+    electric = example.data.fields[0]
+    mass = float(example.data.sources[0].mass_kg[0])
+    elementary_charge = 1.602176634e-19
+    derived = replace(
+        electric,
+        name="acceleration_per_charge",
+        values=electric.values * elementary_charge / mass,
+        unit="m/s^2",
+    )
+    bundle = replace(example.data, fields=(*example.data.fields, derived))
+    record = record_generation(
+        bundle,
+        primitive_names=(electric.name,),
+        parameter_document={"elementary_charge_C": elementary_charge},
+        particle_properties={"mass_kg": mass},
+        output_names=(derived.name,),
+        producer_revision="analytic_acceleration_per_charge_v1",
+    )
+    provenance = json.loads(bundle.provenance_json)
+    provenance["derived_field_generations"] = [record]
+    generated = tmp_path / "generated.h5"
+    write(generated, replace(bundle, provenance_json=json.dumps(provenance)))
+    recipe_path = example.case_path.parent / "recipe.yaml"
+    recipe = yaml.safe_load(recipe_path.read_text(encoding="utf-8"))
+    recipe["input_bundle"] = str(generated)
+    recipe_path.write_text(yaml.safe_dump(recipe, sort_keys=False), encoding="utf-8")
+    rebuilt = create_from_configuration(recipe_path, tmp_path / "rebuilt")
+    assert json.loads(rebuilt.data.provenance_json)["derived_field_generations"] == [record]
+    source_csv = recipe_path.parent / "particles.csv"
+    with source_csv.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    rows[0]["mass_kg"] = str(2 * mass)
+    with source_csv.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    destination = tmp_path / "stale"
+    with pytest.raises(ValueError, match="homogeneous particle property 'mass_kg' changed"):
+        create_from_configuration(recipe_path, destination)
+    assert not destination.exists()
 
 
 @pytest.mark.parametrize("name", EXAMPLE_NAMES)

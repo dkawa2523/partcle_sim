@@ -94,6 +94,7 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 |---|---|---|
 | `case.py` | 設定、正規化、`SimulationCase` | 物理式、kernel |
 | `case_format.py` | canonical read/write/version/hash | producer固有名、軌道計算 |
+| `errors.py` | 三つの公開例外の定義 | I/Oの実行、client別error分類 |
 | `time_grid.py` | 固定macro grid・field knot併合・丸め規則と窓の照会 | 粒子別root、観測clock、精度認定 |
 | `lifecycle.py` | 保存code・名称・基本状態分類 | 表示色、付着の物理認定、failure原因 |
 | `coordinates.py` | XY/RZ/3D基底とaxis規則 | field locate、wall law |
@@ -130,6 +131,10 @@ stage値が計算可能であることをpathの証明やconstant specialization
 - `cpu.py`はoutputへ書かず、engineがcomputeとwriterを調停する。
 - analysis、visualization、V&Vは`ResultView`またはcanonical artifactだけを読む。
 - import違反をfacade、re-export、TYPE_CHECKING importで隠さない。
+
+外部producerが依存関係を宣言した派生field群は、通常clientの`field_generation`が出版前に
+primitive/layout/time/basis、parameter、宣言した粒子物性と全output群のidentityを照合する。
+独立prescribed fieldへ推測した依存を付けず、validatorで物理modelを選択・再生成しない。
 
 ## 7. 数値計算の不変条件
 
@@ -375,6 +380,10 @@ ResultViewのmetadataは入れ子まで不変とし、JSON用の独立document�
 通常clientは同じResultView/束縛cohortを再利用でき、ID選択・分母・coverageを勝手に再定義しない。
 caseと編集元、producer bundleとreceipt、export/viewは操作単位で完成してから公開する。
 macro設定・実partition・accepted path・安全証明細分・観測を区別し、全区間件数から選択窓の収束を推定しない。
+
+result schema 5はcommit時の全segment prefix hashをcheckpointへ保持し、完成時のcontext/final/segment rosterをbindする。
+公開readerはhashとh5py読取りに同じhandleを使い、reopenで再確認する。固定source identityと操作の確認範囲receiptを分ける。
+明示`verify_contents()`が全payloadの確認を所有し、byte integrityを科学的同値性・精度認定へ読み替えない。
 
 ## 16. 完了条件
 

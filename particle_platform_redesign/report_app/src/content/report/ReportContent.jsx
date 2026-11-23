@@ -31,7 +31,7 @@ export function ReportContent() {
   return <article className="report-content particle-redesign-report"
     aria-label="半導体チャンバー粒子輸送基盤の現行仕様と利用手順">
     <header className="report-hero">
-      <p className="report-kicker">CHAMBER PARTICLES 0.4.0 · CLI AND PYTHON WORKFLOW</p>
+      <p className="report-kicker">CHAMBER PARTICLES 0.5.0 · CLI AND PYTHON WORKFLOW</p>
       <h1 data-data-app-title contentEditable={canEdit && mode === "edit"}
         suppressContentEditableWarning
         aria-label={canEdit && mode === "edit" ? "レポート名を編集" : undefined}
@@ -42,7 +42,7 @@ export function ReportContent() {
           if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); }
         } : undefined}>{appTitle}</h1>
       <RichNarrative id="report:introduction" className="report-deck" label="導入を編集"
-        value="外部の形状・場・粒子源から、入力作成、検査、計算、保存結果の解釈までをCLIとPythonで行う現行0.4.0 alphaの構成を示す。ここに示す設計能力と、実行された品質・性能・COMSOL比較の証拠は分けて読む。" />
+        value="外部の形状・場・粒子源から、入力作成、検査、計算、保存結果の解釈までをCLIとPythonで行う現行0.5.0 alphaの構成を示す。ここに示す設計能力と、実行された品質・性能・COMSOL比較の証拠は分けて読む。" />
     </header>
 
     <div className="report-facts" aria-label="現行仕様の要点">
@@ -64,7 +64,7 @@ export function ReportContent() {
 
 **検査は実行と同じprepareを使う。** \`check_case\`はmodel、field support、source、境界、資源を解決するが、粒子更新やworker起動は行わない。準備完了は収束や物理妥当性の認定とは別である。
 
-**保存結果は元caseなしで説明できる。** result schema 4のimmutable contextにgeometryと意味を保持する。同じResultViewと選択済みResultCohortを解析・export・表示で再利用し、母集団と結果identityを保つ。
+**保存結果は元caseなしで説明できる。** result schema 5のimmutable contextにgeometryと意味を保持し、保存payloadのhashをbindする。同じResultViewと選択済みResultCohortを解析・export・表示で再利用し、母集団と結果identityを保つ。
 
 **科学的な主張は証拠の範囲に留める。** COMSOLとの実用的な輸送対応、数値的な全方程式認定、実装置の予測妥当性を区別する。今回のsnapshotに実行receiptが未取込なら、件数や精度をゼロまたは成功と表示しない。`} />
 
@@ -151,7 +151,7 @@ CSV mapping format 4のproviderはcaller-owned csvとcomsolを区別する。後
       queryIds={["result_layers"]}
       value={`## 保存結果を移動しても解釈を保つ
 
-入力case/dataはschema 3、結果はschema 4、checkpointはlayout 2である。immutable context.h5に元case/dataのhash、geometry、境界/sourceの意味、basis/unitを一度保存する。ResultViewのmanifestは入れ子まで不変で、JSONへ保存・編集する独立copyは\`manifest_document()\`、派生成果物の結果identityは\`source_identity()\`が所有する。
+入力case/dataはschema 3、結果はschema 5、checkpointはlayout 2である。immutable context.h5に元case/dataのhash、geometry、境界/sourceの意味と計算粒子数、basis/unitを保存する。ResultViewのmanifestは入れ子まで不変で、JSONへ保存・編集する独立copyは\`manifest_document()\`、派生成果物の結果identityは\`source_identity()\`が所有する。消費fileを同じopen handleでhash照合し、全payloadの検査は\`inspect --verify\`で行う。identityと実際の検査範囲をreceiptで区別する。
 
 final、反復interaction、first hit、terminal、保存active曲線は別量である。開いたResultViewか\`select_result\`で束縛したResultCohortを解析・export・表示へ渡し、final/contextとexact selectionを再利用できる。lifecycleのcode/name/基本分類は一つのownerが持ち、数値的なstuckを物理付着と同一視しない。
 
@@ -184,7 +184,7 @@ model_datasetや原MPHは外部入力・V&Vの証拠であり、coreの物理定
 
 Brownianでは個々のpathの一致を要求せず、実現source、全母集団、保存window、停止先・時刻・速度・電荷と不確かさを評価する。native RK4/time-key noiseの5/9 weak-limit解釈は、同定した実行方式と独立microcaseに対する明示したcaseであり、有限step・壁eventでの厳密同値や一般defaultではない。
 
-実用的に合う観測量はそのように判断し、残る差を一律に乱数のせいにしない。保存参照の不明なdisappearanceをescapeと同一視しない。A/P各40seedの比較と80件の再実行は以前のsourceに束縛した参照であり、今回のcurrent-only整理ではA/P solverを再実行していない。native参照も新しい標本とは数えない。新しい品質・性能のreceiptがない項目はunavailableとし、過去のPASSを変更後の資格へ昇格しない。
+実用的に合う観測量はそのように判断し、残る差を一律に乱数のせいにしない。保存参照の不明なdisappearanceをescapeと同一視しない。取り込んだA/P比較は各receiptの実行source、seed集合、windowに限定する。同じseedの再実行と、再利用したnative参照を新しい独立標本とは数えない。今回実行した品質・性能・比較の範囲は下表のreceiptへ対応付け、過去のPASSを変更後の資格へ昇格しない。
 
 現行のfrozen charge比較は明示CSV・現行式・独立に選んだ残差allowanceを使う。ion-force比較はさらに現行revisionとmatched/analogousを明示し、analogousはraw差とNOT_TESTEDを返す。この宣言や凍結点の残差だけで、nativeの真正性・積分軌道・収束を認定しない。exact-P1表のrelease probe数は実際のsource tableから決まり、sectionwise connectivityを保持する。
 

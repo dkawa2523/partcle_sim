@@ -10,43 +10,44 @@ from numba import njit
 from numpy.typing import NDArray
 
 from .charge import (
-    AGGREGATE_EXPONENT_MAX,
-    AGGREGATE_EXPONENT_MIN,
-    AGGREGATE_MINIMUM_ION_ENERGY_V,
-    AGGREGATE_RELATIVE_SPEED_REGULARIZATION_M_S,
-    ELECTRON_MASS_KG,
     OML_MAX_ION_DRIFT_RATIO,
     OML_MAX_RADIUS_OVER_DEBYE,
+    _aggregate_negative_ion_collection_row,
+    aggregate_collection_row,
+    aggregate_point_parameters_row,
+    oml_point_parameters_row,
+    oml_shifted_collection_row,
+    oml_stationary_collection_row,
+    prescribed_collection_row,
     shifted_maxwellian_ion_factors_row,
 )
 from .forces import (
-    _ALLEN_RAABE_A1,
-    _ALLEN_RAABE_A2,
-    _ALLEN_RAABE_A3,
-    AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION,
-    AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S,
     BOLTZMANN_J_K,
-    ELEMENTARY_CHARGE_C,
-    EPSTEIN_MIN_LAMBDA_OVER_RADIUS,
-    IMAGE_ION_DRAG_ELECTRIC_FIELD_SQUARE_FLOOR_V2_M2,
-    IMAGE_ION_DRAG_LOG_ARGUMENT_OFFSET,
+    ERROR_ACCELERATION,
+    ERROR_DERIVED_VALUE,
+    ERROR_NONE,
+    ERROR_RATE,
     ION_DRAG_MAX_SCALE_OVER_DEBYE,
     ION_DRAG_MIN_MEAN_FREE_PATH_OVER_DEBYE,
     RAREFIED_VORTICITY_LIFT_MIN_MEAN_FREE_PATH_OVER_RADIUS,
-    SAFFMAN_LIFT_COEFFICIENT,
     SAFFMAN_MAX_MEAN_FREE_PATH_OVER_RADIUS,
     SAFFMAN_MAX_SHEAR_REYNOLDS,
     SAFFMAN_MAX_SLIP_REYNOLDS,
     SAFFMAN_MAX_SLIP_TO_SQRT_SHEAR_REYNOLDS,
-    STOKES_CUNNINGHAM_MAX_KNUDSEN_RADIUS,
-    STOKES_CUNNINGHAM_MAX_REYNOLDS,
-    STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS,
-    VACUUM_PERMITTIVITY_F_M,
     WALDMANN_GALLIS_MIN_MEAN_FREE_PATH_OVER_RADIUS,
+    _epstein_drag_row,
+    _epstein_finite_speed_drag_row,
+    _stokes_cunningham_drag_row,
+    barnes_point_row,
     electric_coulomb_acceleration_component,
-    epstein_finite_speed_factor_row,
     gravity_buoyancy_factor,
+    image_ion_point_row,
     quasistatic_spherical_dep_factor,
+    rarefied_lift_factors_row,
+    relative_ion_point_row,
+    saffman_factors_row,
+    talbot_factor_row,
+    waldmann_factors_row,
 )
 
 type FloatArray = NDArray[np.float64]
@@ -83,10 +84,6 @@ LIFT_SAFFMAN_XY = 2
 LIFT_SAFFMAN_RZ = 3
 LIFT_PRESCRIBED_ROTATIONAL = 4
 
-ERROR_NONE = 0
-ERROR_RATE = 1
-ERROR_DERIVED_VALUE = 2
-ERROR_ACCELERATION = 3
 ERROR_CHARGE_INVARIANT = 4
 
 
@@ -213,6 +210,30 @@ class PhysicsStageBindings(NamedTuple):
     electric_maximum_abs_charge: float
 
 
+NOISE_NONE = 0
+NOISE_FDT = 1
+NOISE_PRESCRIBED_FORCE = 2
+
+
+class ApplicabilityProofCodes(NamedTuple):
+    """Closed proof-family codes, separate from the arithmetic stage selectors."""
+
+    drag: int
+    charge: int
+    thermophoresis: int
+    ion_drag: int
+    lift: int
+
+
+class NoiseStageBindings(NamedTuple):
+    """Closed noise family and its own scalar primitive offsets."""
+
+    code: int
+    temperature_K: int
+    friction_kg_s: int
+    diffusion_N2_s: int
+
+
 class PhysicsNumericContext(NamedTuple):
     """Read-only resident model arrays and one closed stage binding table."""
 
@@ -221,6 +242,8 @@ class PhysicsNumericContext(NamedTuple):
     electrostatic_radius_m: FloatArray
     displaced_volume_m3: FloatArray
     bindings: PhysicsStageBindings
+    noise: NoiseStageBindings
+    proofs: ApplicabilityProofCodes
 
 
 class PhysicsNumericOutputs(NamedTuple):
@@ -770,18 +793,17 @@ def _charge_row(
 def _prescribed_charge_row(
     charge: float, model: PrescribedPhysicsBindings, values: FloatArray, row: int
 ) -> tuple[float, float, bool, int]:
-    electron = 0.0
-    if model.electron_reference > 0.0:
-        electron = np.exp(
-            math.log(model.electron_reference)
-            + values[row, model.electron_offset]
-            + values[row, model.electron_slope] * charge
-        )
     ion = values[row, model.ion_rate]
     beta = values[row, model.ion_slope]
     alpha = values[row, model.electron_slope]
-    rate = -electron + ion * (1.0 - beta * charge)
-    derivative = -alpha * electron - beta * ion
+    rate, derivative = prescribed_collection_row(
+        charge,
+        model.electron_reference,
+        values[row, model.electron_offset],
+        alpha,
+        ion,
+        beta,
+    )
     finite = math.isfinite(rate) and math.isfinite(derivative) and derivative <= 0.0
     finite = finite and ion >= 0.0 and alpha >= 0.0 and beta >= 0.0
     return rate, derivative, True, ERROR_NONE if finite else ERROR_RATE
@@ -911,17 +933,21 @@ def _thermophoresis_row(
         )
     if thermophoresis_code != THERMOPHORESIS_WALDMANN_GALLIS:
         return math.nan, math.nan, False
-    radius_m = 0.5 * particle_diameter_m
-    mean_thermal_speed = math.sqrt(
-        8.0 * BOLTZMANN_J_K * gas_temperature_K[row] / (math.pi * gas_molecular_mass_kg)
+    factor, mean_thermal_speed, mean_free_path_over_radius, relative_speed_ratio, radius_m = (
+        waldmann_factors_row(
+            particle_mass_kg,
+            particle_diameter_m,
+            gas_temperature_K[row],
+            gas_mean_free_path_m[row],
+            gas_molecular_mass_kg,
+            gas_velocity_m_s[row, 0],
+            gas_velocity_m_s[row, 1],
+            velocity_x_m_s,
+            velocity_y_m_s,
+        )
     )
-    factor = (32.0 / 15.0) * radius_m * radius_m / (particle_mass_kg * mean_thermal_speed)
     acceleration_x = factor * gas_translational_heat_flux_W_m2[row, 0]
     acceleration_y = factor * gas_translational_heat_flux_W_m2[row, 1]
-    relative_x = gas_velocity_m_s[row, 0] - velocity_x_m_s
-    relative_y = gas_velocity_m_s[row, 1] - velocity_y_m_s
-    relative_speed_ratio = math.hypot(relative_x, relative_y) / mean_thermal_speed
-    mean_free_path_over_radius = gas_mean_free_path_m[row] / radius_m
     derived = (
         radius_m,
         mean_thermal_speed,
@@ -959,23 +985,18 @@ def _talbot_thermophoresis_row(
 ) -> tuple[float, float, bool]:
     """Evaluate the radius-Knudsen Talbot revision for one row."""
 
-    knudsen_radius = 2.0 * (gas_mean_free_path_m / particle_diameter_m)
-    conductivity_ratio = gas_thermal_conductivity_W_m_K / particle_thermal_conductivity_W_m_K
-    correction = (
-        thermal_slip_coefficient
-        * (conductivity_ratio + thermal_exchange_coefficient * knudsen_radius)
-        / (
-            (1.0 + 3.0 * momentum_exchange_coefficient * knudsen_radius)
-            * (1.0 + 2.0 * conductivity_ratio + 2.0 * thermal_exchange_coefficient * knudsen_radius)
-        )
-    )
-    factor = (
-        -6.0
-        * math.pi
-        * particle_diameter_m
-        * gas_dynamic_viscosity_Pa_s**2
-        * correction
-        / (particle_mass_kg * gas_density_kg_m3 * gas_temperature_K)
+    factor, knudsen_radius, conductivity_ratio, correction = talbot_factor_row(
+        particle_mass_kg,
+        particle_diameter_m,
+        gas_temperature_K,
+        gas_density_kg_m3,
+        gas_dynamic_viscosity_Pa_s,
+        gas_thermal_conductivity_W_m_K,
+        gas_mean_free_path_m,
+        particle_thermal_conductivity_W_m_K,
+        thermal_slip_coefficient,
+        momentum_exchange_coefficient,
+        thermal_exchange_coefficient,
     )
     acceleration_x = factor * temperature_gradient_x_K_m
     acceleration_y = factor * temperature_gradient_y_K_m
@@ -1061,21 +1082,18 @@ def _lift_row(
         )
     if lift_code != LIFT_RAREFIED_VORTICITY_RZ:
         return math.nan, math.nan, False
-    radius_m = 0.5 * particle_diameter_m
-    coupling_rate = (
-        lift_coefficient
-        * math.pi
-        * gas_density_kg_m3[row]
-        * gas_mean_free_path_m[row]
-        * radius_m**2
-        * azimuthal_gas_vorticity_s_inv[row]
-        / particle_mass_kg
+    coupling_rate, mean_free_path_over_radius, radius_m = rarefied_lift_factors_row(
+        particle_mass_kg,
+        particle_diameter_m,
+        gas_density_kg_m3[row],
+        gas_mean_free_path_m[row],
+        azimuthal_gas_vorticity_s_inv[row],
+        lift_coefficient,
     )
     relative_r = gas_velocity_m_s[row, 0] - velocity_r_m_s
     relative_z = gas_velocity_m_s[row, 1] - velocity_z_m_s
     acceleration_r = coupling_rate * relative_z
     acceleration_z = -coupling_rate * relative_r
-    mean_free_path_over_radius = gas_mean_free_path_m[row] / radius_m
     derived = (
         radius_m,
         coupling_rate,
@@ -1109,27 +1127,29 @@ def _saffman_lift_row(
 ) -> tuple[float, float, bool]:
     """Evaluate Saffman's unbounded creeping-flow formula without epsilon floors."""
 
-    radius_m = 0.5 * particle_diameter_m
+    coupling_rate, signed_coupling, mean_free_path_over_radius, slip_reynolds, shear_reynolds = (
+        saffman_factors_row(
+            particle_mass_kg,
+            particle_diameter_m,
+            velocity_x_m_s,
+            velocity_y_m_s,
+            gas_velocity_x_m_s,
+            gas_velocity_y_m_s,
+            gas_density_kg_m3,
+            gas_dynamic_viscosity_Pa_s,
+            gas_mean_free_path_m,
+            out_of_plane_gas_vorticity_s_inv,
+        )
+    )
     slip_x = gas_velocity_x_m_s - velocity_x_m_s
     slip_y = gas_velocity_y_m_s - velocity_y_m_s
-    slip_speed = math.hypot(slip_x, slip_y)
     omega_abs = abs(out_of_plane_gas_vorticity_s_inv)
-    coupling_rate = (
-        SAFFMAN_LIFT_COEFFICIENT
-        * radius_m**2
-        * math.sqrt(gas_dynamic_viscosity_Pa_s * gas_density_kg_m3 * omega_abs)
-        / particle_mass_kg
-    )
-    signed_coupling = math.copysign(coupling_rate, out_of_plane_gas_vorticity_s_inv)
     if lift_code == LIFT_SAFFMAN_XY:
         acceleration_x = signed_coupling * slip_y
         acceleration_y = -signed_coupling * slip_x
     else:
         acceleration_x = -signed_coupling * slip_y
         acceleration_y = signed_coupling * slip_x
-    mean_free_path_over_radius = gas_mean_free_path_m / radius_m
-    slip_reynolds = gas_density_kg_m3 * radius_m * slip_speed / gas_dynamic_viscosity_Pa_s
-    shear_reynolds = gas_density_kg_m3 * radius_m**2 * omega_abs / gas_dynamic_viscosity_Pa_s
     derived = (
         coupling_rate,
         acceleration_x,
@@ -1308,60 +1328,36 @@ def _barnes_collisionless_ion_drag_row(
     if charge_number > 0.0:
         return 0.0, 0.0, False, ERROR_NONE
 
-    inverse_debye_square = (
-        ELEMENTARY_CHARGE_C
-        * ELEMENTARY_CHARGE_C
-        / (VACUUM_PERMITTIVITY_F_M * BOLTZMANN_J_K)
-        * (
-            electron_density_m3[row] / electron_temperature_K[row]
-            + ion_density_m3[row] / ion_temperature_K[row]
-        )
+    (
+        debye_length,
+        effective_speed,
+        capacitance,
+        surface_potential,
+        orbital_impact,
+        collection_square,
+        collection_impact,
+        coulomb_logarithm,
+        acceleration_x,
+        acceleration_y,
+        ion_drift_ratio,
+        _collection_cross_section,
+        _orbital_cross_section,
+    ) = barnes_point_row(
+        particle_mass_kg,
+        particle_radius_m,
+        charge_number,
+        velocity_x_m_s,
+        velocity_y_m_s,
+        electron_density_m3[row],
+        ion_density_m3[row],
+        electron_temperature_K[row],
+        ion_temperature_K[row],
+        ion_velocity_m_s[row, 0],
+        ion_velocity_m_s[row, 1],
+        ion_neutral_mean_free_path_m[row],
+        ion_mass_kg,
+        maximum_ion_drift_ratio,
     )
-    debye_length = 1.0 / math.sqrt(inverse_debye_square)
-    relative_x = ion_velocity_m_s[row, 0] - velocity_x_m_s
-    relative_y = ion_velocity_m_s[row, 1] - velocity_y_m_s
-    relative_speed = math.hypot(relative_x, relative_y)
-    ion_mean_thermal_speed = math.sqrt(
-        8.0 * BOLTZMANN_J_K * ion_temperature_K[row] / (math.pi * ion_mass_kg)
-    )
-    effective_speed_square = relative_speed * relative_speed + ion_mean_thermal_speed**2
-    effective_speed = math.sqrt(effective_speed_square)
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * particle_radius_m
-        * (1.0 + particle_radius_m / debye_length)
-    )
-    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    orbital_impact = (
-        abs(charge_number)
-        * ELEMENTARY_CHARGE_C
-        * ELEMENTARY_CHARGE_C
-        / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * ion_mass_kg * effective_speed_square)
-    )
-    collection_square = (
-        particle_radius_m
-        * particle_radius_m
-        * (
-            1.0
-            - 2.0 * ELEMENTARY_CHARGE_C * surface_potential / (ion_mass_kg * effective_speed_square)
-        )
-    )
-    collection_impact = math.sqrt(collection_square)
-    coulomb_logarithm = 0.5 * math.log(
-        (debye_length * debye_length + orbital_impact * orbital_impact)
-        / (collection_square + orbital_impact * orbital_impact)
-    )
-    cross_section = (
-        math.pi * collection_square
-        + 4.0 * math.pi * orbital_impact * orbital_impact * coulomb_logarithm
-    )
-    factor = ion_density_m3[row] * ion_mass_kg * effective_speed * cross_section
-    factor /= particle_mass_kg
-    acceleration_x = factor * relative_x
-    acceleration_y = factor * relative_y
-    ion_drift_ratio = relative_speed / ion_mean_thermal_speed
     derived = (
         debye_length,
         effective_speed,
@@ -1407,58 +1403,34 @@ def _relative_flow_screened_ion_drag_row(
     maximum_relative_ion_speed_m_s: float,
     row: int,
 ) -> tuple[float, float, bool, int]:
-    relative_x = ion_velocity_m_s[row, 0] - velocity_x_m_s
-    relative_y = ion_velocity_m_s[row, 1] - velocity_y_m_s
-    relative_speed = math.hypot(relative_x, relative_y)
-    mass = ion_mass_kg[row]
-    speed_square = (
-        relative_speed * relative_speed
-        + 8.0 * ELEMENTARY_CHARGE_C * ion_thermal_voltage_V[row] / (math.pi * mass)
-        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
-    )
-    effective_speed = math.sqrt(speed_square)
-    capacitance_screening = max(particle_radius_m, screening_length_m[row])
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * particle_radius_m
-        * (1.0 + particle_radius_m / capacitance_screening)
-    )
-    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    screening_radius = max(
+    (
+        relative_speed,
+        effective_speed,
+        capacitance,
+        surface_potential,
+        screening_radius,
+        orbital_impact,
+        collection_square,
+        coulomb_logarithm,
+        acceleration_x,
+        acceleration_y,
+        _collection_cross_section,
+        _orbital_cross_section,
+    ) = relative_ion_point_row(
+        particle_mass_kg,
         particle_radius_m,
-        min(screening_length_m[row], ion_neutral_mean_free_path_m[row]),
+        charge_number,
+        velocity_x_m_s,
+        velocity_y_m_s,
+        ion_density_m3[row],
+        ion_thermal_voltage_V[row],
+        ion_velocity_m_s[row, 0],
+        ion_velocity_m_s[row, 1],
+        ion_mass_kg[row],
+        screening_length_m[row],
+        ion_neutral_mean_free_path_m[row],
+        maximum_relative_ion_speed_m_s,
     )
-    orbital_impact = (
-        math.sqrt(charge_number * charge_number + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
-        * ELEMENTARY_CHARGE_C**2
-        / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * mass * speed_square)
-    )
-    collection_square = min(
-        screening_radius * screening_radius,
-        particle_radius_m
-        * particle_radius_m
-        * max(
-            0.0,
-            1.0 - 2.0 * ELEMENTARY_CHARGE_C * surface_potential / (mass * speed_square),
-        ),
-    )
-    coulomb_logarithm = max(
-        0.0,
-        0.5
-        * math.log(
-            (screening_radius * screening_radius + orbital_impact * orbital_impact)
-            / (collection_square + orbital_impact * orbital_impact)
-        ),
-    )
-    cross_section = (
-        math.pi * collection_square
-        + 4.0 * math.pi * orbital_impact * orbital_impact * coulomb_logarithm
-    )
-    factor = ion_density_m3[row] * mass * effective_speed * cross_section / particle_mass_kg
-    acceleration_x = factor * relative_x
-    acceleration_y = factor * relative_y
     derived = (
         relative_speed,
         effective_speed,
@@ -1496,63 +1468,32 @@ def _electric_field_directed_image_ion_drag_row(
     electric_field_V_m: FloatArray,
     row: int,
 ) -> tuple[float, float, bool, int]:
-    ion_speed = math.hypot(ion_velocity_m_s[row, 0], ion_velocity_m_s[row, 1])
-    mass = ion_mass_kg[row]
-    speed_square = (
-        ion_speed * ion_speed
-        + 8.0 * ELEMENTARY_CHARGE_C * ion_thermal_voltage_V[row] / (math.pi * mass)
-        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    (
+        ion_speed,
+        effective_speed,
+        capacitance,
+        surface_potential,
+        collection_cross_section,
+        image_impact,
+        image_screening_length,
+        image_logarithm,
+        orbital_cross_section,
+        acceleration_x,
+        acceleration_y,
+    ) = image_ion_point_row(
+        particle_mass_kg,
+        particle_radius_m,
+        charge_number,
+        ion_density_m3[row],
+        electron_thermal_voltage_V[row],
+        ion_thermal_voltage_V[row],
+        ion_velocity_m_s[row, 0],
+        ion_velocity_m_s[row, 1],
+        ion_mass_kg[row],
+        screening_length_m[row],
+        electric_field_V_m[row, 0],
+        electric_field_V_m[row, 1],
     )
-    effective_speed = math.sqrt(speed_square)
-    capacitance_screening = max(particle_radius_m, screening_length_m[row])
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * particle_radius_m
-        * (1.0 + particle_radius_m / capacitance_screening)
-    )
-    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    collection_cross_section = (
-        math.pi
-        * particle_radius_m
-        * particle_radius_m
-        * max(0.0, 1.0 - surface_potential / ion_thermal_voltage_V[row])
-    )
-    image_impact = (
-        ELEMENTARY_CHARGE_C**2
-        * charge_number
-        / (2.0 * math.pi * VACUUM_PERMITTIVITY_F_M * mass * speed_square)
-    )
-    image_screening_length = math.sqrt(
-        VACUUM_PERMITTIVITY_F_M
-        * electron_thermal_voltage_V[row]
-        / (ELEMENTARY_CHARGE_C * ion_density_m3[row])
-    )
-    image_logarithm = math.log(
-        max(
-            1.0 + IMAGE_ION_DRAG_LOG_ARGUMENT_OFFSET,
-            image_screening_length / particle_radius_m,
-        )
-    )
-    orbital_cross_section = math.pi * image_impact * image_impact * image_logarithm
-    force_magnitude = (
-        mass
-        * ion_density_m3[row]
-        * effective_speed
-        * ion_speed
-        * (collection_cross_section + orbital_cross_section)
-    )
-    electric_x = electric_field_V_m[row, 0]
-    electric_y = electric_field_V_m[row, 1]
-    electric_norm = math.sqrt(
-        electric_x * electric_x
-        + electric_y * electric_y
-        + IMAGE_ION_DRAG_ELECTRIC_FIELD_SQUARE_FLOOR_V2_M2
-    )
-    acceleration_scale = force_magnitude / (electric_norm * particle_mass_kg)
-    acceleration_x = acceleration_scale * electric_x
-    acceleration_y = acceleration_scale * electric_y
     derived = (
         ion_speed,
         effective_speed,
@@ -1588,50 +1529,33 @@ def _oml_charge_row(
 ) -> tuple[float, float, bool, int]:
     """Evaluate the revision-1 OML rate and its local applicability gates."""
 
-    inverse_debye_square = (
-        ELEMENTARY_CHARGE_C
-        * ELEMENTARY_CHARGE_C
-        / (VACUUM_PERMITTIVITY_F_M * BOLTZMANN_J_K)
-        * (electron_density_m3 / electron_temperature_K + ion_density_m3 / ion_temperature_K)
+    (
+        debye_length,
+        capacitance,
+        potential,
+        electron_voltage,
+        ion_voltage,
+        electron_amplitude,
+        ion_amplitude,
+    ) = oml_point_parameters_row(
+        charge_number,
+        radius_m,
+        electron_density_m3,
+        ion_density_m3,
+        electron_temperature_K,
+        ion_temperature_K,
+        ion_mass_kg,
     )
-    debye_length = 1.0 / math.sqrt(inverse_debye_square)
-    capacitance = (
-        4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * radius_m * (1.0 + radius_m / debye_length)
-    )
-    potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    electron_voltage = BOLTZMANN_J_K * electron_temperature_K / ELEMENTARY_CHARGE_C
-    ion_voltage = BOLTZMANN_J_K * ion_temperature_K / ELEMENTARY_CHARGE_C
-    electron_amplitude = (
-        math.pi
-        * radius_m
-        * radius_m
-        * electron_density_m3
-        * math.sqrt(8.0 * BOLTZMANN_J_K * electron_temperature_K / (math.pi * ELECTRON_MASS_KG))
-    )
-    ion_amplitude = (
-        math.pi
-        * radius_m
-        * radius_m
-        * ion_density_m3
-        * math.sqrt(8.0 * BOLTZMANN_J_K * ion_temperature_K / (math.pi * ion_mass_kg))
-    )
-    if potential <= 0.0:
-        electron_collection = electron_amplitude * math.exp(potential / electron_voltage)
-        ion_collection = ion_amplitude * (1.0 - potential / ion_voltage)
-        rate_derivative = (
-            -ELEMENTARY_CHARGE_C
-            / capacitance
-            * (ion_amplitude / ion_voltage + electron_collection / electron_voltage)
+    electron_collection, ion_collection, charge_rate, rate_derivative = (
+        oml_stationary_collection_row(
+            potential,
+            capacitance,
+            electron_voltage,
+            ion_voltage,
+            electron_amplitude,
+            ion_amplitude,
         )
-    else:
-        electron_collection = electron_amplitude * (1.0 + potential / electron_voltage)
-        ion_collection = ion_amplitude * math.exp(-potential / ion_voltage)
-        rate_derivative = (
-            -ELEMENTARY_CHARGE_C
-            / capacitance
-            * (ion_collection / ion_voltage + electron_amplitude / electron_voltage)
-        )
-    charge_rate = ion_collection - electron_collection
+    )
 
     relative_x = ion_velocity_x_m_s - velocity_x_m_s
     relative_y = ion_velocity_y_m_s - velocity_y_m_s
@@ -1681,32 +1605,22 @@ def _oml_shifted_charge_row(
 ) -> tuple[float, float, bool, int]:
     """Evaluate negative-grain OML for one shifted-Maxwellian ion species."""
 
-    inverse_debye_square = (
-        ELEMENTARY_CHARGE_C
-        * ELEMENTARY_CHARGE_C
-        / (VACUUM_PERMITTIVITY_F_M * BOLTZMANN_J_K)
-        * (electron_density_m3 / electron_temperature_K + ion_density_m3 / ion_temperature_K)
-    )
-    debye_length = 1.0 / math.sqrt(inverse_debye_square)
-    capacitance = (
-        4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * radius_m * (1.0 + radius_m / debye_length)
-    )
-    potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    electron_voltage = BOLTZMANN_J_K * electron_temperature_K / ELEMENTARY_CHARGE_C
-    ion_voltage = BOLTZMANN_J_K * ion_temperature_K / ELEMENTARY_CHARGE_C
-    electron_amplitude = (
-        math.pi
-        * radius_m
-        * radius_m
-        * electron_density_m3
-        * math.sqrt(8.0 * BOLTZMANN_J_K * electron_temperature_K / (math.pi * ELECTRON_MASS_KG))
-    )
-    ion_amplitude = (
-        math.pi
-        * radius_m
-        * radius_m
-        * ion_density_m3
-        * math.sqrt(8.0 * BOLTZMANN_J_K * ion_temperature_K / (math.pi * ion_mass_kg))
+    (
+        debye_length,
+        capacitance,
+        potential,
+        electron_voltage,
+        ion_voltage,
+        electron_amplitude,
+        ion_amplitude,
+    ) = oml_point_parameters_row(
+        charge_number,
+        radius_m,
+        electron_density_m3,
+        ion_density_m3,
+        electron_temperature_K,
+        ion_temperature_K,
+        ion_mass_kg,
     )
     relative_x = ion_velocity_x_m_s - velocity_x_m_s
     relative_y = ion_velocity_y_m_s - velocity_y_m_s
@@ -1717,13 +1631,15 @@ def _oml_shifted_charge_row(
     ion_drift_ratio = ion_relative_speed / ion_mean_thermal_speed
     shift_ratio = ion_drift_ratio * math.sqrt(8.0 / math.pi)
     neutral_factor, attraction_factor = shifted_maxwellian_ion_factors_row(shift_ratio)
-    electron_collection = electron_amplitude * math.exp(potential / electron_voltage)
-    ion_collection = ion_amplitude * (neutral_factor - potential / ion_voltage * attraction_factor)
-    charge_rate = ion_collection - electron_collection
-    rate_derivative = (
-        -ELEMENTARY_CHARGE_C
-        / capacitance
-        * (ion_amplitude * attraction_factor / ion_voltage + electron_collection / electron_voltage)
+    electron_collection, ion_collection, charge_rate, rate_derivative = oml_shifted_collection_row(
+        potential,
+        capacitance,
+        electron_voltage,
+        ion_voltage,
+        electron_amplitude,
+        ion_amplitude,
+        neutral_factor,
+        attraction_factor,
     )
     radius_over_debye = radius_m / debye_length
     if potential > 0.0 or not _oml_derived_values_are_valid(
@@ -1780,72 +1696,36 @@ def _aggregate_relative_drift_charge_row(
     ):
         return 0.0, 0.0, True, ERROR_DERIVED_VALUE
 
-    relative_x = ion_velocity_x_m_s - velocity_x_m_s
-    relative_y = ion_velocity_y_m_s - velocity_y_m_s
-    relative_speed = math.hypot(relative_x, relative_y)
-    effective_speed_squared = (
-        relative_speed * relative_speed
-        + 8.0 * ELEMENTARY_CHARGE_C * ion_thermal_voltage_V / (math.pi * effective_ion_mass_kg)
-        + AGGREGATE_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    (
+        relative_speed,
+        effective_speed,
+        effective_ion_energy,
+        effective_screening_length,
+        capacitance,
+        surface_potential,
+        ion_amplitude,
+        electron_amplitude,
+    ) = aggregate_point_parameters_row(
+        charge_number,
+        radius_m,
+        electron_density_m3,
+        ion_density_m3,
+        electron_thermal_voltage_V,
+        ion_thermal_voltage_V,
+        velocity_x_m_s,
+        velocity_y_m_s,
+        ion_velocity_x_m_s,
+        ion_velocity_y_m_s,
+        effective_ion_mass_kg,
+        screening_length_m,
     )
-    effective_speed = math.sqrt(effective_speed_squared)
-    effective_ion_energy = max(
-        effective_ion_mass_kg * effective_speed_squared / (2.0 * ELEMENTARY_CHARGE_C),
-        AGGREGATE_MINIMUM_ION_ENERGY_V,
-    )
-    effective_screening_length = max(radius_m, screening_length_m)
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * radius_m
-        * (1.0 + radius_m / effective_screening_length)
-    )
-    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    ion_amplitude = math.pi * radius_m * radius_m * ion_density_m3 * effective_speed
-    electron_amplitude = (
-        math.pi
-        * radius_m
-        * radius_m
-        * electron_density_m3
-        * math.sqrt(
-            8.0 * ELEMENTARY_CHARGE_C * electron_thermal_voltage_V / (math.pi * ELECTRON_MASS_KG)
-        )
-    )
-
-    if surface_potential <= 0.0:
-        ion_factor = 1.0 - surface_potential / effective_ion_energy
-        electron_exponent = surface_potential / electron_thermal_voltage_V
-        clipped_electron_exponent = min(
-            AGGREGATE_EXPONENT_MAX,
-            max(AGGREGATE_EXPONENT_MIN, electron_exponent),
-        )
-        electron_factor = math.exp(clipped_electron_exponent)
-        electron_factor_derivative = (
-            electron_factor * ELEMENTARY_CHARGE_C / capacitance / electron_thermal_voltage_V
-            if AGGREGATE_EXPONENT_MIN < electron_exponent < AGGREGATE_EXPONENT_MAX
-            else 0.0
-        )
-        ion_factor_derivative = -ELEMENTARY_CHARGE_C / capacitance / effective_ion_energy
-    else:
-        ion_exponent = -surface_potential / effective_ion_energy
-        clipped_ion_exponent = min(
-            AGGREGATE_EXPONENT_MAX,
-            max(AGGREGATE_EXPONENT_MIN, ion_exponent),
-        )
-        ion_factor = math.exp(clipped_ion_exponent)
-        electron_factor = 1.0 + surface_potential / electron_thermal_voltage_V
-        ion_factor_derivative = (
-            -ion_factor * ELEMENTARY_CHARGE_C / capacitance / effective_ion_energy
-            if AGGREGATE_EXPONENT_MIN < ion_exponent < AGGREGATE_EXPONENT_MAX
-            else 0.0
-        )
-        electron_factor_derivative = ELEMENTARY_CHARGE_C / capacitance / electron_thermal_voltage_V
-    ion_collection = ion_amplitude * ion_factor
-    electron_collection = electron_amplitude * electron_factor
-    charge_rate = ion_collection - electron_collection
-    rate_derivative = (
-        ion_amplitude * ion_factor_derivative - electron_amplitude * electron_factor_derivative
+    ion_collection, electron_collection, charge_rate, rate_derivative = aggregate_collection_row(
+        surface_potential,
+        capacitance,
+        electron_thermal_voltage_V,
+        effective_ion_energy,
+        ion_amplitude,
+        electron_amplitude,
     )
 
     if not _aggregate_charge_derived_values_are_valid(
@@ -1917,7 +1797,7 @@ def _aggregate_relative_drift_three_current_charge_row(
         effective_negative_ion_mass_kg,
     ):
         return 0.0, 0.0, True, ERROR_DERIVED_VALUE
-    collection, collection_derivative, relative_speed, valid = (
+    collection, collection_derivative, relative_speed, _, _, valid = (
         _aggregate_negative_ion_collection_row(
             charge_number,
             radius_m,
@@ -1966,76 +1846,6 @@ def _aggregate_negative_ion_inputs_are_valid(
         and math.isfinite(velocity_y_m_s)
         and math.isfinite(effective_mass_kg)
         and effective_mass_kg > 0.0
-    )
-
-
-@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
-def _aggregate_negative_ion_collection_row(
-    charge_number: float,
-    radius_m: float,
-    density_m3: float,
-    thermal_voltage_V: float,
-    particle_velocity_x_m_s: float,
-    particle_velocity_y_m_s: float,
-    ion_velocity_x_m_s: float,
-    ion_velocity_y_m_s: float,
-    effective_mass_kg: float,
-    screening_length_m: float,
-) -> tuple[float, float, float, bool]:
-    relative_speed = math.hypot(
-        ion_velocity_x_m_s - particle_velocity_x_m_s,
-        ion_velocity_y_m_s - particle_velocity_y_m_s,
-    )
-    effective_speed_squared = (
-        relative_speed * relative_speed
-        + 8.0 * ELEMENTARY_CHARGE_C * thermal_voltage_V / (math.pi * effective_mass_kg)
-        + AGGREGATE_RELATIVE_SPEED_REGULARIZATION_M_S**2
-    )
-    effective_speed = math.sqrt(effective_speed_squared)
-    effective_energy = max(
-        effective_mass_kg * effective_speed_squared / (2.0 * ELEMENTARY_CHARGE_C),
-        AGGREGATE_MINIMUM_ION_ENERGY_V,
-    )
-    effective_screening_length = max(radius_m, screening_length_m)
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * radius_m
-        * (1.0 + radius_m / effective_screening_length)
-    )
-    potential_per_charge = ELEMENTARY_CHARGE_C / capacitance
-    surface_potential = charge_number * potential_per_charge
-    amplitude = math.pi * radius_m * radius_m * density_m3 * effective_speed
-    argument = surface_potential / effective_energy
-    if surface_potential <= 0.0:
-        factor = math.exp(min(AGGREGATE_EXPONENT_MAX, max(AGGREGATE_EXPONENT_MIN, argument)))
-        factor_derivative = (
-            factor * potential_per_charge / effective_energy
-            if AGGREGATE_EXPONENT_MIN < argument < AGGREGATE_EXPONENT_MAX
-            else 0.0
-        )
-    else:
-        factor = 1.0 + argument
-        factor_derivative = potential_per_charge / effective_energy
-    collection = amplitude * factor
-    collection_derivative = amplitude * factor_derivative
-    return (
-        collection,
-        collection_derivative,
-        relative_speed,
-        (
-            math.isfinite(relative_speed)
-            and relative_speed >= 0.0
-            and math.isfinite(effective_speed)
-            and effective_speed > 0.0
-            and math.isfinite(effective_energy)
-            and effective_energy > 0.0
-            and math.isfinite(collection)
-            and collection >= 0.0
-            and math.isfinite(collection_derivative)
-            and collection_derivative >= 0.0
-        ),
     )
 
 
@@ -2150,129 +1960,3 @@ def _oml_derived_values_are_valid(
         if not math.isfinite(value):
             return False
     return charge_rate_derivative_s_inv < 0.0
-
-
-@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
-def _epstein_drag_row(
-    mass_kg: float,
-    diameter_m: float,
-    velocity_x_m_s: float,
-    velocity_y_m_s: float,
-    gas_velocity_x_m_s: float,
-    gas_velocity_y_m_s: float,
-    gas_density_kg_m3: float,
-    gas_temperature_K: float,
-    gas_mean_free_path_m: float,
-    gas_molecular_mass_kg: float,
-    delta: float,
-    maximum_speed_ratio: float,
-) -> tuple[float, float, float, bool, int]:
-    radius = 0.5 * diameter_m
-    mean_thermal_speed = math.sqrt(
-        8.0 * BOLTZMANN_J_K * gas_temperature_K / (math.pi * gas_molecular_mass_kg)
-    )
-    beta = (4.0 * math.pi / 3.0) * radius * radius * gas_density_kg_m3 * mean_thermal_speed * delta
-    rate = beta / mass_kg
-    if not math.isfinite(rate) or rate <= 0.0:
-        return 0.0, 0.0, 0.0, True, ERROR_RATE
-    relative_x = gas_velocity_x_m_s - velocity_x_m_s
-    relative_y = gas_velocity_y_m_s - velocity_y_m_s
-    relative_speed = math.sqrt(relative_x * relative_x + relative_y * relative_y)
-    lambda_over_radius = gas_mean_free_path_m / radius
-    speed_ratio = relative_speed / mean_thermal_speed
-    if not (
-        math.isfinite(mean_thermal_speed)
-        and mean_thermal_speed > 0.0
-        and math.isfinite(relative_speed)
-        and math.isfinite(lambda_over_radius)
-        and math.isfinite(speed_ratio)
-    ):
-        return 0.0, 0.0, 0.0, True, ERROR_DERIVED_VALUE
-    applicable = (
-        lambda_over_radius >= EPSTEIN_MIN_LAMBDA_OVER_RADIUS and speed_ratio <= maximum_speed_ratio
-    )
-    return relative_x * rate, relative_y * rate, rate, applicable, ERROR_NONE
-
-
-@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
-def _epstein_finite_speed_drag_row(
-    mass_kg: float,
-    diameter_m: float,
-    velocity_x_m_s: float,
-    velocity_y_m_s: float,
-    gas_velocity_x_m_s: float,
-    gas_velocity_y_m_s: float,
-    gas_density_kg_m3: float,
-    gas_temperature_K: float,
-    gas_mean_free_path_m: float,
-    gas_molecular_mass_kg: float,
-    diffuse_reflection_fraction: float,
-    maximum_speed_ratio: float,
-) -> tuple[float, float, float, bool, int]:
-    radius = 0.5 * diameter_m
-    mean_thermal_speed = math.sqrt(
-        8.0 * BOLTZMANN_J_K * gas_temperature_K / (math.pi * gas_molecular_mass_kg)
-    )
-    base_beta = (4.0 * math.pi / 3.0) * radius * radius * gas_density_kg_m3 * mean_thermal_speed
-    base_rate = base_beta / mass_kg
-    relative_x = gas_velocity_x_m_s - velocity_x_m_s
-    relative_y = gas_velocity_y_m_s - velocity_y_m_s
-    relative_speed = math.hypot(relative_x, relative_y)
-    most_probable_speed = math.sqrt(2.0 * BOLTZMANN_J_K * gas_temperature_K / gas_molecular_mass_kg)
-    speed_ratio = relative_speed / most_probable_speed
-    specular_factor = epstein_finite_speed_factor_row(speed_ratio)
-    rate = base_rate * (specular_factor + diffuse_reflection_fraction * math.pi / 8.0)
-    lambda_over_radius = gas_mean_free_path_m / radius
-    if not (
-        math.isfinite(rate)
-        and rate > 0.0
-        and math.isfinite(relative_speed)
-        and math.isfinite(most_probable_speed)
-        and most_probable_speed > 0.0
-        and math.isfinite(speed_ratio)
-        and math.isfinite(lambda_over_radius)
-    ):
-        return 0.0, 0.0, 0.0, True, ERROR_DERIVED_VALUE
-    applicable = (
-        lambda_over_radius >= EPSTEIN_MIN_LAMBDA_OVER_RADIUS and speed_ratio <= maximum_speed_ratio
-    )
-    return relative_x * rate, relative_y * rate, rate, applicable, ERROR_NONE
-
-
-@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
-def _stokes_cunningham_drag_row(
-    mass_kg: float,
-    diameter_m: float,
-    velocity_x_m_s: float,
-    velocity_y_m_s: float,
-    gas_velocity_x_m_s: float,
-    gas_velocity_y_m_s: float,
-    gas_density_kg_m3: float,
-    gas_dynamic_viscosity_Pa_s: float,
-    gas_mean_free_path_m: float,
-) -> tuple[float, float, float, bool, int]:
-    knudsen_radius = 2.0 * gas_mean_free_path_m / diameter_m
-    slip_correction = 1.0 + knudsen_radius * (
-        _ALLEN_RAABE_A1 + _ALLEN_RAABE_A2 * math.exp(-_ALLEN_RAABE_A3 / knudsen_radius)
-    )
-    rate = 3.0 * math.pi * gas_dynamic_viscosity_Pa_s * diameter_m / (slip_correction * mass_kg)
-    if not math.isfinite(rate) or rate <= 0.0:
-        return 0.0, 0.0, 0.0, True, ERROR_RATE
-    relative_x = gas_velocity_x_m_s - velocity_x_m_s
-    relative_y = gas_velocity_y_m_s - velocity_y_m_s
-    relative_speed = math.sqrt(relative_x * relative_x + relative_y * relative_y)
-    reynolds = gas_density_kg_m3 * diameter_m * relative_speed / gas_dynamic_viscosity_Pa_s
-    if not (
-        math.isfinite(knudsen_radius)
-        and math.isfinite(slip_correction)
-        and slip_correction > 0.0
-        and math.isfinite(relative_speed)
-        and math.isfinite(reynolds)
-    ):
-        return 0.0, 0.0, 0.0, True, ERROR_DERIVED_VALUE
-    applicable = (
-        knudsen_radius >= STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS
-        and knudsen_radius <= STOKES_CUNNINGHAM_MAX_KNUDSEN_RADIUS
-        and reynolds <= STOKES_CUNNINGHAM_MAX_REYNOLDS
-    )
-    return relative_x * rate, relative_y * rate, rate, applicable, ERROR_NONE

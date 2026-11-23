@@ -66,11 +66,12 @@ def test_declared_process_private_workspaces_fit_the_shared_prepare_budget(
         case_path = _continuous_charge_case(tmp_path / case_id, integrator="exponential_midpoint")
     else:
         case_path = materialize_microcase(case_id, tmp_path / case_id).case_path
-    prepared = _prepare(load_case(case_path)).transport
+    run = _prepare(load_case(case_path))
+    prepared = run.transport
     if case_id == "local-field-ranges":
         assert prepared.dynamics.field_range_workspace is not None
         assert prepared.dynamics.field_range_workspace.range_available.size > 0
-    plan = prepared.memory_plan
+    plan = run.memory_plan
     # This checks actual allocation roots reached by worker serialization,
     # including nested aliases, against the same public check/run memory plan.
     owned = _owned_bytes(tuple(_process_private_arrays(prepared)))
@@ -105,7 +106,7 @@ def test_dynamic_brownian_tree_and_pending_banks_fit_the_declared_reserve(
         adaptive_max_depth=max_depth,
         frame_times=None,
     )
-    plan = _prepare(load_case(case_path)).transport.memory_plan
+    plan = _prepare(load_case(case_path)).memory_plan
     capacity = plan.slab_particles
     leaf = _brownian_leaf_increments(
         seed=1,

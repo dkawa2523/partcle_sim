@@ -66,10 +66,12 @@ def test_public_loader_preserves_continuous_charge_mapping_for_catalog_resolutio
 
     assert plan.evolves_continuous_state
     assert plan.requires_stage_evaluation
-    assert plan.resolved_models()["charge"] == {
-        "model": "plasma_continuous",
-        "revision": "oml_stationary_maxwellian_debye_huckel_v1",
-    }
+    assert (
+        {
+            "model": "plasma_continuous",
+            "revision": "oml_stationary_maxwellian_debye_huckel_v1",
+        }
+    ).items() <= (plan.resolved_models()["charge"]).items()
 
 
 def test_closed_form_and_event_anchors_do_not_depend_on_production_numerics(

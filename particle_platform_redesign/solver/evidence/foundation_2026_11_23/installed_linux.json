@@ -1,0 +1,188 @@
+{
+  "status": "complete",
+  "package_paths": [
+    "/home/user/.cache/chamber-foundation-20261123/runtime/lib/python3.12/site-packages/chamber_particles/__init__.py",
+    "/home/user/.cache/chamber-foundation-20261123/runtime/lib/python3.12/site-packages/chamber_particles_tools/__init__.py"
+  ],
+  "cwd_uses_checkout": false,
+  "fixture_imports": [],
+  "entrypoints": {
+    "module": "passed",
+    "commands": [
+      "models",
+      "init",
+      "inputs import-csv",
+      "inputs cache",
+      "create",
+      "check",
+      "run",
+      "inspect",
+      "analyze",
+      "export",
+      "view",
+      "inputs electrostatic check",
+      "inputs electrostatic build"
+    ],
+    "console": "passed"
+  },
+  "own_csv_first_source": "analytic field trajectory and hit verified",
+  "cache_and_surface": "passed",
+  "examples": [
+    {
+      "name": "xy-ballistic",
+      "status": "passed"
+    },
+    {
+      "name": "rz-charged",
+      "status": "passed"
+    },
+    {
+      "name": "xy-time-field",
+      "status": "passed"
+    },
+    {
+      "name": "brownian-wall",
+      "status": "passed"
+    },
+    {
+      "name": "reduced-electrostatic",
+      "status": "passed"
+    }
+  ],
+  "editable_charged_csv": "import/create/run passed",
+  "summary": {
+    "selected_particles": 1,
+    "model_weight": 2.5,
+    "count_unit": "computational_particles",
+    "weight_meaning": "input model_weight; no inferred physical rate"
+  },
+  "view": {
+    "visualization_revision": "result_context_population_svg_v5",
+    "parameters": {
+      "event_batch_rows": 4096,
+      "max_event_points": 5000,
+      "requested_focus_particle_id": 1,
+      "source_ids": [
+        0
+      ],
+      "source_names": [
+        "release"
+      ],
+      "particle_ids": null,
+      "particle_ids_file": {
+        "path": "/tmp/installed-particle-workflow-r4r8qq4f/selected_ids.csv",
+        "sha256": "sha256:f6006d64ef594d9bb52ff8394ab34198834d181eb5f21a471638024cae803231",
+        "rows": 1
+      },
+      "max_particle_points": 5000,
+      "max_trajectory_points": 5000,
+      "detail": true
+    },
+    "source_manifest_sha256": "sha256:62b1e96ad07a974c1bbaaa68682da613dbbdd7b1a8972500d227f959603e4114",
+    "verification": {
+      "scope": "all_payload_file_bytes",
+      "content_files": {
+        "context.h5": "sha256:74229d21842ac3ee7bf60e50d0baf3081b6919eb5fa3ea41aa7df1b798402031",
+        "final.h5": "sha256:f01cf266b164247927ed1ced78366ef10d8f9a18c4e3365be6841d164b4ba4c6",
+        "segments/epoch-000000.h5": "sha256:0da2689e9e6a013866fc7df1fb7a3c992397fdd9d4e68d5b05db5fcd838e9c21"
+      },
+      "semantics": "SHA-256 checked on the same open handle as each read; no guarantee against concurrent in-place writes."
+    },
+    "context": {
+      "content_hash": "sha256:6edb2787281f5836945ccc853b7549c67d781719deaa3e67c91804c8f731eae8",
+      "file_sha256": "sha256:74229d21842ac3ee7bf60e50d0baf3081b6919eb5fa3ea41aa7df1b798402031",
+      "path": "context.h5"
+    },
+    "focus_particle_id": 1,
+    "labels": {
+      "sources": [
+        {
+          "source_id": 0,
+          "name": "release",
+          "table": "particles",
+          "kind": "table",
+          "particle_count": 1
+        }
+      ],
+      "boundaries": [
+        {
+          "boundary_id": 1,
+          "group_name": "bottom",
+          "material_id": 0
+        },
+        {
+          "boundary_id": 2,
+          "group_name": "right",
+          "material_id": 0
+        },
+        {
+          "boundary_id": 3,
+          "group_name": "top",
+          "material_id": 0
+        },
+        {
+          "boundary_id": 4,
+          "group_name": "left",
+          "material_id": 0
+        }
+      ],
+      "boundary_conditions": [
+        {
+          "group_name": "bottom",
+          "priority": 1,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        },
+        {
+          "group_name": "right",
+          "priority": 2,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        },
+        {
+          "group_name": "top",
+          "priority": 3,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        },
+        {
+          "group_name": "left",
+          "priority": 4,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        }
+      ],
+      "axis_policy": "none"
+    },
+    "trajectory_source": "frames",
+    "trajectory_points": 4,
+    "trajectory_truncated": false,
+    "boundary_events": 1,
+    "rendered_boundary_points": 1,
+    "population": {
+      "selected_particles": 1,
+      "finite_valid_positions": 1,
+      "omitted_nonspatial_or_pending": 0,
+      "binned_positions": 1,
+      "outside_geometry_bounds": 0,
+      "rendered_cells": 1,
+      "cells_per_axis": 70,
+      "meaning": "all finite active/stuck/held final positions binned; dominant lifecycle color; computational counts, not concentration"
+    },
+    "event_selection": {
+      "boundary_map": "smallest BLAKE2b-128 ranks of time_s/particle_id/event_ordinal",
+      "trajectory": "first physical events by time_s/particle_id/event_ordinal",
+      "display_order": "time_s/particle_id/event_ordinal",
+      "max_points_per_view": 5000
+    },
+    "trajectory_meaning": "saved positions only; gaps and recorded interactions break chords; no reconstructed Brownian path",
+    "population_svg": "/tmp/installed-particle-workflow-r4r8qq4f/view/population.svg",
+    "trajectory_svg": "/tmp/installed-particle-workflow-r4r8qq4f/view/trajectory.svg",
+    "boundary_events_svg": "/tmp/installed-particle-workflow-r4r8qq4f/view/boundary_events.svg",
+    "metadata_json": "/tmp/installed-particle-workflow-r4r8qq4f/view/visualization.json"
+  }
+}

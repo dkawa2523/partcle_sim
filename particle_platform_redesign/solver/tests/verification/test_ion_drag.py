@@ -14,6 +14,7 @@ from chamber_particles.physics.catalog import (
 )
 from chamber_particles.physics.forces import (
     BarnesIonDragEvaluation,
+    PhysicsEvaluationError,
     barnes_collisionless_continuous_applicability_batch,
     barnes_collisionless_global_bounds,
     barnes_collisionless_ion_drag,
@@ -182,10 +183,12 @@ def test_ion_drag_catalog_and_compiled_runtime_share_one_species_and_formula(
     assert set(requirements) == {"ne", "ni", "te", "ti", "ui", "ion_mfp"}
     assert requirements["ui"].components == components
     assert requirements["ui"].stored_basis == basis
-    assert plan.resolved_models()["ion_drag"] == {
-        "model": "barnes_collisionless",
-        "revision": _REVISION,
-    }
+    assert (
+        {
+            "model": "barnes_collisionless",
+            "revision": _REVISION,
+        }
+    ).items() <= (plan.resolved_models()["ion_drag"]).items()
 
     ranges = {
         "ne": _constant_range(1.0e14),
@@ -264,10 +267,12 @@ def test_aggregate_ion_drag_catalog_enforces_shared_background_and_electric_fiel
         "axisymmetric_rz",
     )
     assert isinstance(theory_plan.ion_drag, RelativeFlowScreenedIonDragPlan)
-    assert theory_plan.resolved_models()["ion_drag"] == {
-        "model": "screened_collection_orbital",
-        "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
-    }
+    assert (
+        {
+            "model": "screened_collection_orbital",
+            "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+        }
+    ).items() <= (theory_plan.resolved_models()["ion_drag"]).items()
 
     image_plan = resolve_physics_plan(
         {
@@ -282,10 +287,12 @@ def test_aggregate_ion_drag_catalog_enforces_shared_background_and_electric_fiel
         "axisymmetric_rz",
     )
     assert isinstance(image_plan.ion_drag, ElectricFieldDirectedImageIonDragPlan)
-    assert image_plan.resolved_models()["ion_drag"] == {
-        "model": "image_orbital_sensitivity",
-        "revision": "electric_field_directed_image_orbital_sensitivity_v1",
-    }
+    assert (
+        {
+            "model": "image_orbital_sensitivity",
+            "revision": "electric_field_directed_image_orbital_sensitivity_v1",
+        }
+    ).items() <= (image_plan.resolved_models()["ion_drag"]).items()
 
     mismatched_theory = {**theory, "maximum_relative_ion_speed_m_s": 2001.0}
     with pytest.raises(PhysicsConfigurationError, match="same aggregate-ion background"):
@@ -570,3 +577,21 @@ def _constant_range(value: float) -> PrimitiveRange:
 def _constant_vector_range(first: float, second: float) -> PrimitiveRange:
     array = np.asarray([first, second])
     return PrimitiveRange(array, array, array)
+
+
+def test_barnes_array_owns_underflow_of_finite_positive_debye_inputs() -> None:
+    with pytest.raises(PhysicsEvaluationError, match="non-finite derived value"):
+        barnes_collisionless_ion_drag(
+            mass_kg=np.asarray([1.0e-18]),
+            electrostatic_radius_m=np.asarray([1.0e-8]),
+            charge_number=np.asarray([-1.0]),
+            velocity_m_s=np.zeros((1, 2)),
+            electron_number_density_m3=np.asarray([1.0e-300]),
+            positive_ion_number_density_m3=np.asarray([1.0e-300]),
+            electron_temperature_K=np.asarray([1.0e300]),
+            positive_ion_temperature_K=np.asarray([1.0e300]),
+            positive_ion_velocity_m_s=np.zeros((1, 2)),
+            ion_neutral_mean_free_path_m=np.asarray([1.0]),
+            positive_ion_mass_kg=_ION_MASS_KG,
+            maximum_ion_drift_ratio=2.0,
+        )

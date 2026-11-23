@@ -18,7 +18,6 @@ from .boundaries import (
     BOUNDARY_OUTCOME_STUCK,
     BOUNDARY_STATUS_OK,
     BoundaryResponseBatch,
-    BoundaryRule,
     PreparedBoundaryRules,
     resolve_boundary_responses_batch,
 )
@@ -34,9 +33,7 @@ from .coordinates import (
     rz_signed_stage_into,
     rz_vector_to_signed_into,
 )
-from .cpu import (
-    CpuMemoryPlan,
-)
+from .cpu import ParticleState
 from .events import (
     CURVED_STATUS_AXIS,
     CURVED_STATUS_CLEAR,
@@ -144,9 +141,9 @@ from .output import (
     FailureEvents,
 )
 from .physics.catalog import (
-    BROWNIAN_MIDPOINT_2D_REVISION,
     PhysicsPlan,
 )
+from .physics.compiled import NOISE_FDT, NOISE_NONE, NOISE_PRESCRIBED_FORCE
 from .physics.forces import (
     CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE,
     CONTINUOUS_APPLICABILITY_OK,
@@ -473,23 +470,18 @@ class PreparedTransport:
     work_policy: NumericalWorkPolicy
     capabilities: TransportCapabilities
     schedule: ParticleSchedule
-    frame_times_s: tuple[float, ...]
-    probe_times_s: tuple[float, ...]
-    probe_particle_index: np.ndarray
     geometry: PreparedGeometry
     event_geometry: PreparedGeometry
     topology: PreparedPeriodicTopology | None
-    boundary_rules: tuple[BoundaryRule, ...]
     compiled_boundary_rules: PreparedBoundaryRules
-    physics: PhysicsPlan
     fields: PreparedFieldSet
-    field_time_split_s: tuple[float, ...]
     dynamics: _StageDynamics
     constant_acceleration_m_s2: np.ndarray | None
     # Prepared full-domain safety bounds at requested dt, never observed step maxima.
-    maximum_dt_over_tau: float
-    maximum_dt_charge_lipschitz: float
-    memory_plan: CpuMemoryPlan
+    slab_capacity: int
+    event_staging_capacity: int
+    noise_interval_tree_depth: int
+    noise_adaptive_max_depth: int
     event_candidate_capacity: int
     certificate_workspace: _ApplicabilityCertificateWorkspace = dataclass_field(
         metadata={"process_private": True}
@@ -615,10 +607,8 @@ class _ProposalReplayWorkspace(NamedTuple):
     radial_sign: np.ndarray
 
     @classmethod
-    def allocate(
-        cls, capacity: int, frame_times_s: tuple[float, ...], probe_times_s: tuple[float, ...]
-    ) -> _ProposalReplayWorkspace:
-        if not frame_times_s and not probe_times_s:
+    def allocate(cls, capacity: int, observations: bool) -> _ProposalReplayWorkspace:
+        if not observations:
             capacity = 0
         return cls(
             allocate_proposal_sample_buffer(capacity),
@@ -692,21 +682,9 @@ class _BrownianSlabRuntime:
     root_interval: np.ndarray
     stochastic_event_restart_count: np.ndarray
     guard_restart_count: np.ndarray
-    position_m: np.ndarray
-    velocity_m_s: np.ndarray
-    charge_number: np.ndarray
-    active: np.ndarray
-    lifecycle: np.ndarray
-    terminal_time_s: np.ndarray
-    event_ordinal: np.ndarray
-    physical_boundary_event_ordinal: np.ndarray
-    exact_origin_time_s: np.ndarray
-    exact_origin_position_m: np.ndarray
-    exact_origin_velocity_m_s: np.ndarray
-    start_contact_state: np.ndarray
+    resident: ParticleState
     replay: _ReplayBuffer
     statistics: _EventStatistics
-    failure_reason_code: np.ndarray
     writer: _EventSink
     event_buffer: _BoundaryEventBuffer
     failure_buffer: _FailureEventBuffer
@@ -1204,21 +1182,21 @@ def _evaluate_langevin_coefficients_into(
             thermal_status,
         )
     )
-    prescribed = context.physics.bindings.prescribed
-    if prescribed.force_diffusion >= 0:
+    noise = context.physics.noise
+    if noise.code == NOISE_PRESCRIBED_FORCE:
         prescribed_force_variance_into(
             context.physics.mass_kg,
             particle_index,
-            stage_workspace.fields.packed_values[:count, prescribed.friction],
-            stage_workspace.fields.packed_values[:count, prescribed.force_diffusion],
+            stage_workspace.fields.packed_values[:count, noise.friction_kg_s],
+            stage_workspace.fields.packed_values[:count, noise.diffusion_N2_s],
             workspace.thermal_variance_m2_s2[:count],
             thermal_status,
         )
-    else:
+    elif noise.code == NOISE_FDT:
         brownian_thermal_variance_into(
             context.physics.mass_kg,
             particle_index,
-            stage_workspace.fields.packed_values[:count, context.physics.bindings.gas_temperature],
+            stage_workspace.fields.packed_values[:count, noise.temperature_K],
             workspace.thermal_variance_m2_s2[:count],
             thermal_status,
         )
@@ -1605,7 +1583,7 @@ class _StageDynamics:
                 )
             )
         )
-        langevin_capacity = capacity if self.runtime.plan.noise is not None else 0
+        langevin_capacity = capacity if self.runtime.native_context.noise.code != NOISE_NONE else 0
         self.langevin_coefficient_workspace = _LangevinCoefficientWorkspace(
             *(
                 np.empty(shape, dtype=dtype)
@@ -1994,56 +1972,29 @@ def _advance_active_slabs(
     macro_interval: int,
     macro_start_s: float,
     macro_end_s: float,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     event_statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
     writer: _EventSink,
 ) -> None:
     """Advance bounded slabs and flush each stable payload."""
 
-    slab_size = prepared.memory_plan.slab_particles
+    slab_size = prepared.slab_capacity
     if active_particle_index.size and slab_size < 1:
         raise EngineError("memory plan cannot hold one proposal slab")
 
-    def run_slab(particle_index: np.ndarray) -> _SlabResult:
-        return _advance_particle_slab(
+    for slab_begin in range(0, active_particle_index.size, max(1, slab_size)):
+        slab = active_particle_index[slab_begin : slab_begin + slab_size]
+        result = _advance_particle_slab(
             prepared,
-            particle_index,
+            slab,
             macro_interval,
             macro_start_s,
             macro_end_s,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            exact_origin_time_s,
-            exact_origin_position_m,
-            exact_origin_velocity_m_s,
-            start_contact_state,
+            resident,
             replay,
-            failure_reason_code,
             writer,
         )
-
-    for slab_begin in range(0, active_particle_index.size, max(1, slab_size)):
-        slab = active_particle_index[slab_begin : slab_begin + slab_size]
-        result = run_slab(slab)
         event_statistics.merge(result.statistics)
         del result
 
@@ -2054,27 +2005,15 @@ def _advance_particle_slab(
     macro_interval: int,
     macro_start_s: float,
     macro_end_s: float,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
-    failure_reason_code: np.ndarray,
     writer: _EventSink,
 ) -> _SlabResult:
     """Own one disjoint slab's proposal, residual work, and failures."""
 
     statistics = _EventStatistics()
     event_buffer = _allocate_boundary_event_buffer(
-        min(particle_index.size, prepared.memory_plan.event_staging_capacity),
+        min(particle_index.size, prepared.event_staging_capacity),
         prepared.event_candidate_capacity,
     )
     failure_buffer = _allocate_failure_event_buffer(particle_index.size)
@@ -2082,18 +2021,18 @@ def _advance_particle_slab(
         prepared,
         particle_index,
         macro_start_s,
-        exact_origin_time_s,
+        resident.exact_origin_time_s,
     )
     start_position, start_velocity = _proposal_start_state(
         prepared,
         particle_index,
         start_time_s,
-        position_m,
-        velocity_m_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.exact_origin_position_m,
+        resident.exact_origin_velocity_m_s,
     )
-    if prepared.physics.noise is not None:
+    if prepared.capabilities.stochastic:
         _advance_brownian_slab(
             prepared,
             particle_index,
@@ -2102,21 +2041,9 @@ def _advance_particle_slab(
             start_time_s,
             start_position,
             start_velocity,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            exact_origin_time_s,
-            exact_origin_position_m,
-            exact_origin_velocity_m_s,
-            start_contact_state,
+            resident,
             replay,
             statistics,
-            failure_reason_code,
             writer,
             event_buffer,
             failure_buffer,
@@ -2132,26 +2059,14 @@ def _advance_particle_slab(
         macro_end_s,
         start_position,
         start_velocity,
-        charge_number[particle_index],
+        resident.charge_number[particle_index],
     )
     _advance_macro_proposal(
         prepared,
         proposal,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
-        start_contact_state,
+        resident,
         replay,
         statistics,
-        failure_reason_code,
         writer,
         event_buffer,
         failure_buffer,
@@ -2173,14 +2088,6 @@ def _langevin_root_coefficients(
 ) -> _LangevinRoot:
     """Evaluate the selected revision's one frozen coefficient state."""
 
-    noise = prepared.physics.noise
-    if noise is None:
-        raise EngineError("Langevin coefficients require a resolved noise model")
-    if noise.revision not in (
-        BROWNIAN_MIDPOINT_2D_REVISION,
-        "prescribed_force_diffusion_midpoint_2d_v1",
-    ):
-        raise EngineError("Langevin coefficients require the resolved 2-D midpoint revision")
     guarded_duration_s, predictor, guard_valid, guard_failure = _guard_langevin_root_duration(
         prepared,
         particle_index,
@@ -2431,9 +2338,6 @@ def _prepare_langevin_root_batch(
         ValueError,
     ) as error:
         raise EngineError("Brownian macro-root coefficients could not be evaluated") from error
-    noise = prepared.physics.noise
-    if noise is None:
-        raise EngineError("Brownian root preparation lost its noise model")
     coefficients = root.coefficients
     duration_s = root.duration_s
     numerical_status = coefficients.numerical_status.copy()
@@ -2575,30 +2479,15 @@ def _advance_brownian_slab(
     root_start_time_s: np.ndarray,
     root_start_position_m: np.ndarray,
     root_start_velocity_m_s: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
     writer: _EventSink,
     event_buffer: _BoundaryEventBuffer,
     failure_buffer: _FailureEventBuffer,
 ) -> None:
     """Advance fresh OU roots iteratively with one bounded pending row wave."""
 
-    noise = prepared.physics.noise
-    if noise is None:
-        raise EngineError("Brownian slab requires a resolved noise model")
     capacity = int(particle_index.size)
     pending_particle_index = particle_index
     pending_start_time_s = root_start_time_s
@@ -2610,7 +2499,7 @@ def _advance_brownian_slab(
     pending_count = capacity
     initial_interactions = np.zeros(capacity, dtype="<i8")
     release_rows = np.flatnonzero(
-        start_contact_state[pending_particle_index] == SURFACE_STATE_PENDING
+        resident.start_contact_state[pending_particle_index] == SURFACE_STATE_PENDING
     ).astype("<i8", copy=False)
     if release_rows.size:
         release_particles = pending_particle_index[release_rows]
@@ -2620,30 +2509,23 @@ def _advance_brownian_slab(
             pending_start_time_s[release_rows],
             pending_start_position_m[release_rows],
             pending_start_velocity_m_s[release_rows],
-            charge_number[release_particles].copy(),
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            start_contact_state,
+            resident.charge_number[release_particles].copy(),
+            resident,
             event_buffer,
             failure_buffer,
             replay,
             statistics,
-            failure_reason_code,
         )
         initial_interactions[release_rows] = release_interactions
         _flush_boundary_event_wave(writer, prepared, event_buffer)
-    responded = (initial_interactions != 0) & active[pending_particle_index]
+    responded = (initial_interactions != 0) & resident.active[pending_particle_index]
     if bool(responded.any()):
         pending_start_position_m = pending_start_position_m.copy()
         pending_start_velocity_m_s = pending_start_velocity_m_s.copy()
-        pending_start_position_m[responded] = position_m[pending_particle_index[responded]]
-        pending_start_velocity_m_s[responded] = velocity_m_s[pending_particle_index[responded]]
+        pending_start_position_m[responded] = resident.position_m[pending_particle_index[responded]]
+        pending_start_velocity_m_s[responded] = resident.velocity_m_s[
+            pending_particle_index[responded]
+        ]
         pending_root_interval[responded] += initial_interactions[responded]
         pending_stochastic_event_restart_count[responded] += initial_interactions[responded]
     del particle_index
@@ -2652,7 +2534,7 @@ def _advance_brownian_slab(
     del root_start_velocity_m_s
 
     adaptive_workspace = _BrownianAdaptiveWorkspace.allocate(
-        capacity, noise.adaptive_max_depth - noise.interval_tree_depth
+        capacity, prepared.noise_adaptive_max_depth - prepared.noise_interval_tree_depth
     )
     (
         next_particle_index,
@@ -2678,21 +2560,9 @@ def _advance_brownian_slab(
             pending_root_interval[:pending_count],
             pending_stochastic_event_restart_count[:pending_count],
             pending_guard_restart_count[:pending_count],
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            exact_origin_time_s,
-            exact_origin_position_m,
-            exact_origin_velocity_m_s,
-            start_contact_state,
+            resident,
             replay,
             statistics,
-            failure_reason_code,
             writer,
             event_buffer,
             failure_buffer,
@@ -2796,21 +2666,9 @@ def _prepare_brownian_root_wave(
     root_interval: np.ndarray,
     stochastic_event_restart_count: np.ndarray,
     guard_restart_count: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
     writer: _EventSink,
     event_buffer: _BoundaryEventBuffer,
     failure_buffer: _FailureEventBuffer,
@@ -2826,11 +2684,8 @@ def _prepare_brownian_root_wave(
 ) -> _BrownianSlabRuntime | None:
     """Admit one fresh-root wave and retain its sole cursor until full unwind."""
 
-    noise = prepared.physics.noise
-    if noise is None:
-        raise EngineError("Brownian root wave requires a resolved noise model")
     root_duration_s = macro_end_s - root_start_time_s
-    moving_rows = np.flatnonzero((root_duration_s > 0.0) & active[particle_index]).astype(
+    moving_rows = np.flatnonzero((root_duration_s > 0.0) & resident.active[particle_index]).astype(
         "<i8", copy=False
     )
     if not moving_rows.size:
@@ -2843,7 +2698,7 @@ def _prepare_brownian_root_wave(
     root_intervals = root_interval[moving_rows]
     event_restart_counts = stochastic_event_restart_count[moving_rows]
     guard_restart_counts = guard_restart_count[moving_rows]
-    start_charges = charge_number[particles].copy()
+    start_charges = resident.charge_number[particles].copy()
     restart_failure = _langevin_restart_failure_reasons(
         prepared,
         event_restart_counts,
@@ -2857,14 +2712,14 @@ def _prepare_brownian_root_wave(
             start_positions[failed_budget],
             start_velocities[failed_budget],
             start_charges[failed_budget],
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failure_buffer,
             restart_failure[failed_budget],
         )
@@ -2889,14 +2744,14 @@ def _prepare_brownian_root_wave(
         start_positions,
         start_velocities,
         start_charges,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        failure_reason_code,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
+        resident.failure_reason_code,
         failure_buffer,
     )
     if batch is None:
@@ -2920,7 +2775,7 @@ def _prepare_brownian_root_wave(
         drag_rate_s_inv=safe_rate,
         thermal_velocity_variance_m2_s2=safe_thermal,
         root_duration_s=durations,
-        tree_depth=noise.interval_tree_depth,
+        tree_depth=prepared.noise_interval_tree_depth,
         numerically_valid=numerical_status == NUMERICAL_STATUS_OK,
     )
     root_continuing = np.ones(particles.size, dtype=np.bool_)
@@ -2932,21 +2787,9 @@ def _prepare_brownian_root_wave(
         root_interval=root_intervals,
         stochastic_event_restart_count=event_restart_counts,
         guard_restart_count=guard_restart_counts,
-        position_m=position_m,
-        velocity_m_s=velocity_m_s,
-        charge_number=charge_number,
-        active=active,
-        lifecycle=lifecycle,
-        terminal_time_s=terminal_time_s,
-        event_ordinal=event_ordinal,
-        physical_boundary_event_ordinal=physical_boundary_event_ordinal,
-        exact_origin_time_s=exact_origin_time_s,
-        exact_origin_position_m=exact_origin_position_m,
-        exact_origin_velocity_m_s=exact_origin_velocity_m_s,
-        start_contact_state=start_contact_state,
+        resident=resident,
         replay=replay,
         statistics=statistics,
-        failure_reason_code=failure_reason_code,
         writer=writer,
         event_buffer=event_buffer,
         failure_buffer=failure_buffer,
@@ -2993,7 +2836,7 @@ def _advance_brownian_base_leaf(runtime: _BrownianSlabRuntime) -> bool:
     if leaf_index < 0:
         return False
     particles = runtime.batch.particles
-    selected = np.flatnonzero(runtime.active[particles] & runtime.root_continuing).astype(
+    selected = np.flatnonzero(runtime.resident.active[particles] & runtime.root_continuing).astype(
         "<i8", copy=False
     )
     if not selected.size:
@@ -3016,7 +2859,7 @@ def _finish_brownian_root_wave(runtime: _BrownianSlabRuntime, macro_end_s: float
     particles = runtime.batch.particles
     root_target_s = runtime.batch.target_time_s
     residual_rows = np.flatnonzero(
-        runtime.root_continuing & runtime.active[particles] & (root_target_s < macro_end_s)
+        runtime.root_continuing & runtime.resident.active[particles] & (root_target_s < macro_end_s)
     ).astype("<i8", copy=False)
     if not residual_rows.size:
         return
@@ -3133,7 +2976,7 @@ def _consume_brownian_tree_node(
 
     batch = runtime.batch
     particles = batch.particles[root_rows]
-    continuing = runtime.active[particles] & runtime.root_continuing[root_rows]
+    continuing = runtime.resident.active[particles] & runtime.root_continuing[root_rows]
     root_rows = root_rows[continuing]
     increment_rows = increment_rows[continuing]
     if not root_rows.size:
@@ -3152,9 +2995,9 @@ def _consume_brownian_tree_node(
         # land one ULP before (or after) that endpoint after a wall restart.
         target_time_s = batch.target_time_s[root_rows]
     particles = batch.particles[root_rows]
-    current_position = runtime.position_m[particles].copy()
-    current_velocity = runtime.velocity_m_s[particles].copy()
-    current_charge = runtime.charge_number[particles].copy()
+    current_position = runtime.resident.position_m[particles].copy()
+    current_velocity = runtime.resident.velocity_m_s[particles].copy()
+    current_charge = runtime.resident.charge_number[particles].copy()
     resolved_time = target_time_s > start_time_s
     for local_row_value in np.flatnonzero(~resolved_time):
         local_row = int(local_row_value)
@@ -3168,14 +3011,14 @@ def _consume_brownian_tree_node(
                 current_velocity[local_row],
                 float(current_charge[local_row]),
             ),
-            runtime.position_m,
-            runtime.velocity_m_s,
-            runtime.charge_number,
-            runtime.active,
-            runtime.lifecycle,
-            runtime.terminal_time_s,
-            runtime.event_ordinal,
-            runtime.failure_reason_code,
+            runtime.resident.position_m,
+            runtime.resident.velocity_m_s,
+            runtime.resident.charge_number,
+            runtime.resident.active,
+            runtime.resident.lifecycle,
+            runtime.resident.terminal_time_s,
+            runtime.resident.event_ordinal,
+            runtime.resident.failure_reason_code,
             runtime.failure_buffer,
         )
     root_rows = root_rows[resolved_time]
@@ -3197,14 +3040,14 @@ def _consume_brownian_tree_node(
         current_position,
         current_velocity,
         current_charge,
-        runtime.position_m,
-        runtime.velocity_m_s,
-        runtime.charge_number,
-        runtime.active,
-        runtime.lifecycle,
-        runtime.terminal_time_s,
-        runtime.event_ordinal,
-        runtime.failure_reason_code,
+        runtime.resident.position_m,
+        runtime.resident.velocity_m_s,
+        runtime.resident.charge_number,
+        runtime.resident.active,
+        runtime.resident.lifecycle,
+        runtime.resident.terminal_time_s,
+        runtime.resident.event_ordinal,
+        runtime.resident.failure_reason_code,
         runtime.failure_buffer,
     )
     root_rows = root_rows[node_valid]
@@ -3235,14 +3078,14 @@ def _consume_brownian_tree_node(
         current_position,
         current_velocity,
         current_charge,
-        runtime.position_m,
-        runtime.velocity_m_s,
-        runtime.charge_number,
-        runtime.active,
-        runtime.lifecycle,
-        runtime.terminal_time_s,
-        runtime.event_ordinal,
-        runtime.failure_reason_code,
+        runtime.resident.position_m,
+        runtime.resident.velocity_m_s,
+        runtime.resident.charge_number,
+        runtime.resident.active,
+        runtime.resident.lifecycle,
+        runtime.resident.terminal_time_s,
+        runtime.resident.event_ordinal,
+        runtime.resident.failure_reason_code,
         runtime.failure_buffer,
     )
     root_rows = root_rows[advance_valid]
@@ -3259,9 +3102,6 @@ def _consume_brownian_tree_node(
     end_velocity = end_velocity[advance_valid]
 
     coefficients = batch.coefficients
-    noise = runtime.prepared.physics.noise
-    if noise is None:
-        raise EngineError("Brownian tree lost its resolved noise model")
     end_charge = _advance_langevin_leaf_charge(
         batch.start_charge_number[root_rows],
         target_time_s - batch.starts_s[root_rows],
@@ -3276,14 +3116,14 @@ def _consume_brownian_tree_node(
         current_position,
         current_velocity,
         current_charge,
-        runtime.position_m,
-        runtime.velocity_m_s,
-        runtime.charge_number,
-        runtime.active,
-        runtime.lifecycle,
-        runtime.terminal_time_s,
-        runtime.event_ordinal,
-        runtime.failure_reason_code,
+        runtime.resident.position_m,
+        runtime.resident.velocity_m_s,
+        runtime.resident.charge_number,
+        runtime.resident.active,
+        runtime.resident.lifecycle,
+        runtime.resident.terminal_time_s,
+        runtime.resident.event_ordinal,
+        runtime.resident.failure_reason_code,
         runtime.failure_buffer,
     )
     root_rows = root_rows[charge_valid]
@@ -3318,7 +3158,7 @@ def _consume_brownian_tree_node(
         coefficients.applicability_inside[root_rows],
         batch.numerical_status[root_rows],
     )
-    if tree_level >= noise.adaptive_max_depth:
+    if tree_level >= runtime.prepared.noise_adaptive_max_depth:
         _commit_brownian_tree_proposal(runtime, proposal, root_rows)
         return
 
@@ -3353,7 +3193,7 @@ def _brownian_certified_clear_rows(
     eligible = proposal.numerical_status == NUMERICAL_STATUS_OK
     eligible &= proposal.support_inside
     eligible &= proposal.applicability_inside
-    particle_contact = runtime.start_contact_state[proposal.particle_index]
+    particle_contact = runtime.resident.start_contact_state[proposal.particle_index]
     eligible &= particle_contact != SURFACE_STATE_PENDING
     if not runtime.prepared.capabilities.curved_events:
         return eligible
@@ -3427,21 +3267,9 @@ def _commit_brownian_tree_proposal(
     restart_time_s = _advance_macro_proposal(
         runtime.prepared,
         proposal,
-        runtime.position_m,
-        runtime.velocity_m_s,
-        runtime.charge_number,
-        runtime.active,
-        runtime.lifecycle,
-        runtime.terminal_time_s,
-        runtime.event_ordinal,
-        runtime.physical_boundary_event_ordinal,
-        runtime.exact_origin_time_s,
-        runtime.exact_origin_position_m,
-        runtime.exact_origin_velocity_m_s,
-        runtime.start_contact_state,
+        runtime.resident,
         runtime.replay,
         runtime.statistics,
-        runtime.failure_reason_code,
         runtime.writer,
         runtime.event_buffer,
         runtime.failure_buffer,
@@ -3564,8 +3392,8 @@ def _queue_langevin_roots(
         root_rows,
         particles,
         start_time_s,
-        runtime.position_m,
-        runtime.velocity_m_s,
+        runtime.resident.position_m,
+        runtime.resident.velocity_m_s,
         runtime.root_interval,
         runtime.stochastic_event_restart_count,
         runtime.guard_restart_count,
@@ -4318,21 +4146,9 @@ def _advance_joint_ou_particle_local(
 def _advance_macro_proposal(
     prepared: PreparedTransport,
     proposal: StepProposal | None,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     event_statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
     writer: _EventSink,
     event_buffer: _BoundaryEventBuffer,
     failure_buffer: _FailureEventBuffer,
@@ -4345,18 +4161,9 @@ def _advance_macro_proposal(
         return _advance_curved_events(
             prepared,
             proposal,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            start_contact_state,
+            resident,
             replay,
             event_statistics,
-            failure_reason_code,
             writer,
             event_buffer,
             failure_buffer,
@@ -4365,21 +4172,9 @@ def _advance_macro_proposal(
         _advance_exact_paths(
             prepared,
             proposal,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            exact_origin_time_s,
-            exact_origin_position_m,
-            exact_origin_velocity_m_s,
-            start_contact_state,
+            resident,
             replay,
             event_statistics,
-            failure_reason_code,
             writer,
             event_buffer,
             failure_buffer,
@@ -4389,14 +4184,14 @@ def _advance_macro_proposal(
     valid_rows = _commit_boundaryless_proposal(
         prepared,
         proposal,
-        active,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        failure_reason_code,
+        resident.active,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
+        resident.failure_reason_code,
         failure_buffer,
     )
     # A boundaryless Cartesian proposal is still one accepted particle piece
@@ -4419,7 +4214,7 @@ def _certify_curved_path(
     """Build the selected integrator's safety enclosure before arbitration."""
 
     if (
-        not prepared.physics.requires_stage_evaluation
+        not prepared.capabilities.stage_evaluation
         or prepared.constant_acceleration_m_s2 is not None
     ):
         return None
@@ -4679,8 +4474,8 @@ def _build_step_proposal(
             start_position_m,
             start_velocity_m_s,
             start_charge_number,
-            requires_stage_evaluation=prepared.physics.requires_stage_evaluation,
-            evaluator=(prepared.dynamics if prepared.physics.requires_stage_evaluation else None),
+            requires_stage_evaluation=prepared.capabilities.stage_evaluation,
+            evaluator=(prepared.dynamics if prepared.capabilities.stage_evaluation else None),
             constant_acceleration_m_s2=(
                 None if constant_acceleration is None else constant_acceleration[particle_index]
             ),
@@ -5549,18 +5344,9 @@ def _build_curved_rows(
 def _advance_curved_events(
     prepared: PreparedTransport,
     root_proposal: StepProposal,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
     writer: _EventSink,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
@@ -5583,20 +5369,11 @@ def _advance_curved_events(
         prepared,
         root_proposal,
         state,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        start_contact_state,
+        resident,
         pending,
         failures,
         replay,
         statistics,
-        failure_reason_code,
     )
     _flush_boundary_event_wave(writer, prepared, pending)
     if zero_rows.size:
@@ -5608,17 +5385,17 @@ def _advance_curved_events(
             root_proposal.target_time_s[zero_rows],
             np.zeros(zero_rows.size, dtype=np.bool_),
             state,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
             replay,
             failures,
             statistics,
-            failure_reason_code,
+            resident.failure_reason_code,
         )
     if root_rows.size:
         root_accuracy = root_proposal.numerical_status[root_rows] == INTEGRATOR_ACCURACY_FAILURE
@@ -5630,14 +5407,14 @@ def _advance_curved_events(
             state.current_velocity_m_s,
             state.current_charge_number,
             state.stack_top,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
             _FAILURE_INTEGRATOR_ACCURACY,
         )
@@ -5651,14 +5428,14 @@ def _advance_curved_events(
             state,
             reset_interactions=False,
             exhaustion_reason_codes=root_codes[root_invalid],
-            position_m=position_m,
-            velocity_m_s=velocity_m_s,
-            charge_number=charge_number,
-            active=active,
-            lifecycle=lifecycle,
-            terminal_time_s=terminal_time_s,
-            event_ordinal=event_ordinal,
-            failure_reason_code=failure_reason_code,
+            position_m=resident.position_m,
+            velocity_m_s=resident.velocity_m_s,
+            charge_number=resident.charge_number,
+            active=resident.active,
+            lifecycle=resident.lifecycle,
+            terminal_time_s=resident.terminal_time_s,
+            event_ordinal=resident.event_ordinal,
+            failure_reason_code=resident.failure_reason_code,
             failures=failures,
             statistics=statistics,
         )
@@ -5680,27 +5457,18 @@ def _advance_curved_events(
                 targets,
                 event,
                 state,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                physical_boundary_event_ordinal,
-                start_contact_state,
+                resident,
                 replay,
                 pending,
                 failures,
                 statistics,
-                failure_reason_code,
             )
             _flush_boundary_event_wave(writer, prepared, pending)
     while True:
         wave_rows, targets = _next_curved_wave_rows(
             root_proposal.particle_index,
             state,
-            active,
+            resident.active,
         )
         if not wave_rows.size:
             break
@@ -5738,14 +5506,14 @@ def _advance_curved_events(
             state.current_velocity_m_s,
             state.current_charge_number,
             state.stack_top,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
             _FAILURE_INTEGRATOR_ACCURACY,
         )
@@ -5759,14 +5527,14 @@ def _advance_curved_events(
             state,
             reset_interactions=False,
             exhaustion_reason_codes=proposal_codes[proposal_invalid],
-            position_m=position_m,
-            velocity_m_s=velocity_m_s,
-            charge_number=charge_number,
-            active=active,
-            lifecycle=lifecycle,
-            terminal_time_s=terminal_time_s,
-            event_ordinal=event_ordinal,
-            failure_reason_code=failure_reason_code,
+            position_m=resident.position_m,
+            velocity_m_s=resident.velocity_m_s,
+            charge_number=resident.charge_number,
+            active=resident.active,
+            lifecycle=resident.lifecycle,
+            terminal_time_s=resident.terminal_time_s,
+            event_ordinal=resident.event_ordinal,
+            failure_reason_code=resident.failure_reason_code,
             failures=failures,
             statistics=statistics,
         )
@@ -5796,20 +5564,11 @@ def _advance_curved_events(
                 bounded_targets,
                 event,
                 state,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                physical_boundary_event_ordinal,
-                start_contact_state,
+                resident,
                 replay,
                 pending,
                 failures,
                 statistics,
-                failure_reason_code,
             )
             _flush_boundary_event_wave(writer, prepared, pending)
     return state.stochastic_restart_time_s if state.stochastic_restart_time_s.size else None
@@ -5860,20 +5619,11 @@ def _initialize_curved_wavefront(
     prepared: PreparedTransport,
     proposal: StepProposal,
     state: _CurvedWavefront,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Resolve surface release once and seed the numeric depth-first stacks."""
 
@@ -5884,30 +5634,21 @@ def _initialize_curved_wavefront(
         state.current_position_m,
         state.current_velocity_m_s,
         state.current_charge_number,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        start_contact_state,
+        resident,
         pending,
         failures,
         replay,
         statistics,
-        failure_reason_code,
     )
     root_count, zero_count = _seed_curved_wavefront_into(
         state,
         proposal.target_time_s,
         interactions,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        start_contact_state,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.start_contact_state,
     )
     return state.root_rows[:root_count], state.zero_rows[:zero_count]
 
@@ -6248,20 +5989,11 @@ def _consume_curved_wave(
     target_time_s: np.ndarray,
     event: CurvedEventBatch,
     state: _CurvedWavefront,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> None:
     """Consume one bounded locator result without row-local scalar retries."""
 
@@ -6275,14 +6007,14 @@ def _consume_curved_wave(
         state.current_velocity_m_s,
         state.current_charge_number,
         state.stack_top,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        failure_reason_code,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
+        resident.failure_reason_code,
         failures,
         _FAILURE_INDETERMINATE_EVENT,
     )
@@ -6293,14 +6025,14 @@ def _consume_curved_wave(
         wave_rows[split],
         state,
         reset_interactions=False,
-        position_m=position_m,
-        velocity_m_s=velocity_m_s,
-        charge_number=charge_number,
-        active=active,
-        lifecycle=lifecycle,
-        terminal_time_s=terminal_time_s,
-        event_ordinal=event_ordinal,
-        failure_reason_code=failure_reason_code,
+        position_m=resident.position_m,
+        velocity_m_s=resident.velocity_m_s,
+        charge_number=resident.charge_number,
+        active=resident.active,
+        lifecycle=resident.lifecycle,
+        terminal_time_s=resident.terminal_time_s,
+        event_ordinal=resident.event_ordinal,
+        failure_reason_code=resident.failure_reason_code,
         failures=failures,
         statistics=statistics,
     )
@@ -6315,14 +6047,14 @@ def _consume_curved_wave(
         wave_rows[capped],
         state,
         reset_interactions=True,
-        position_m=position_m,
-        velocity_m_s=velocity_m_s,
-        charge_number=charge_number,
-        active=active,
-        lifecycle=lifecycle,
-        terminal_time_s=terminal_time_s,
-        event_ordinal=event_ordinal,
-        failure_reason_code=failure_reason_code,
+        position_m=resident.position_m,
+        velocity_m_s=resident.velocity_m_s,
+        charge_number=resident.charge_number,
+        active=resident.active,
+        lifecycle=resident.lifecycle,
+        terminal_time_s=resident.terminal_time_s,
+        event_ordinal=resident.event_ordinal,
+        failure_reason_code=resident.failure_reason_code,
         failures=failures,
         statistics=statistics,
     )
@@ -6336,17 +6068,17 @@ def _consume_curved_wave(
         target_time_s[clear],
         event.start_contact_departure_certified[clear],
         state,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
         replay,
         failures,
         statistics,
-        failure_reason_code,
+        resident.failure_reason_code,
     )
     localized = (event.status == CURVED_STATUS_AXIS) | (
         (event.status == CURVED_STATUS_WALL) & ~wall
@@ -6361,20 +6093,11 @@ def _consume_curved_wave(
         event_rows,
         event,
         state,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        start_contact_state,
+        resident,
         replay,
         pending,
         failures,
         statistics,
-        failure_reason_code,
     )
 
 
@@ -6495,20 +6218,11 @@ def _commit_curved_event_prefixes(
     event_rows: np.ndarray,
     event: CurvedEventBatch,
     state: _CurvedWavefront,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> None:
     """Reintegrate localized prefixes once, then commit axis and wall rows."""
 
@@ -6553,14 +6267,14 @@ def _commit_curved_event_prefixes(
             state,
             reset_interactions=False,
             exhaustion_reason_codes=codes[retry],
-            position_m=position_m,
-            velocity_m_s=velocity_m_s,
-            charge_number=charge_number,
-            active=active,
-            lifecycle=lifecycle,
-            terminal_time_s=terminal_time_s,
-            event_ordinal=event_ordinal,
-            failure_reason_code=failure_reason_code,
+            position_m=resident.position_m,
+            velocity_m_s=resident.velocity_m_s,
+            charge_number=resident.charge_number,
+            active=resident.active,
+            lifecycle=resident.lifecycle,
+            terminal_time_s=resident.terminal_time_s,
+            event_ordinal=resident.event_ordinal,
+            failure_reason_code=resident.failure_reason_code,
             failures=failures,
             statistics=statistics,
         )
@@ -6574,14 +6288,14 @@ def _commit_curved_event_prefixes(
             prefix.start_velocity_m_s,
             prefix.start_charge_number,
             state.stack_top,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
             np.uint16(0),
             codes[invalid],
@@ -6615,9 +6329,9 @@ def _commit_curved_event_prefixes(
         prefix,
         prefix_by_event,
         state,
-        position_m,
-        velocity_m_s,
-        charge_number,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
         replay,
         statistics,
     )
@@ -6630,20 +6344,11 @@ def _commit_curved_event_prefixes(
         prefix,
         prefix_by_event,
         state,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        start_contact_state,
+        resident,
         pending,
         failures,
         replay,
         statistics,
-        failure_reason_code,
     )
 
 
@@ -6781,20 +6486,11 @@ def _commit_curved_wall_wave(
     prefix: StepProposal | None,
     prefix_by_event: np.ndarray,
     state: _CurvedWavefront,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> None:
     """Resolve one stable wall wave with compiled rules and counter RNG."""
 
@@ -6825,14 +6521,14 @@ def _commit_curved_wall_wave(
             event,
             prefix,
             state.stack_top,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
         )
         periodic_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_PERIODIC).astype(
@@ -6857,11 +6553,11 @@ def _commit_curved_wall_wave(
                 prefix.end_velocity_m_s[prefix_row],
                 float(prefix.end_charge_number[prefix_row]),
                 state,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                event_ordinal,
-                start_contact_state,
+                resident.position_m,
+                resident.velocity_m_s,
+                resident.charge_number,
+                resident.event_ordinal,
+                resident.start_contact_state,
                 pending,
                 replay,
             )
@@ -6875,14 +6571,14 @@ def _commit_curved_wall_wave(
                     event,
                     prefix,
                     state.stack_top,
-                    position_m,
-                    velocity_m_s,
-                    charge_number,
-                    active,
-                    lifecycle,
-                    terminal_time_s,
-                    event_ordinal,
-                    failure_reason_code,
+                    resident.position_m,
+                    resident.velocity_m_s,
+                    resident.charge_number,
+                    resident.active,
+                    resident.lifecycle,
+                    resident.terminal_time_s,
+                    resident.event_ordinal,
+                    resident.failure_reason_code,
                     failures,
                 )
         material_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_MATERIAL).astype(
@@ -6906,7 +6602,7 @@ def _commit_curved_wall_wave(
     law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
         prepared.solver.seed,
         prepared.schedule.particle_id[particles],
-        physical_boundary_event_ordinal[particles],
+        resident.physical_boundary_event_ordinal[particles],
     )
     responses = resolve_boundary_responses_batch(
         prepared.compiled_boundary_rules,
@@ -6941,14 +6637,14 @@ def _commit_curved_wall_wave(
                 particle_index,
                 [(row, failure)],
                 state.stack_top,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                failure_reason_code,
+                resident.position_m,
+                resident.velocity_m_s,
+                resident.charge_number,
+                resident.active,
+                resident.lifecycle,
+                resident.terminal_time_s,
+                resident.event_ordinal,
+                resident.failure_reason_code,
                 failures,
             )
             continue
@@ -6971,15 +6667,7 @@ def _commit_curved_wall_wave(
             prefix.end_velocity_m_s[prefix_row],
             float(prefix.end_charge_number[prefix_row]),
             state,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            start_contact_state,
+            resident,
             pending,
             replay,
             statistics,
@@ -7177,25 +6865,14 @@ def _commit_curved_wall_row(
     velocity_pre_m_s: np.ndarray,
     charge_pre_number: float,
     state: _CurvedWavefront,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    start_contact_state: np.ndarray,
+    resident: ParticleState,
     pending: _BoundaryEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
 ) -> None:
     """Commit one compiled curved response after its prefix was accepted."""
 
-    if int(event_ordinal[particle]) >= _MAX_EVENT_ORDINAL:
-        raise EngineError("logical event ordinal exhausted uint32")
-    if int(physical_boundary_event_ordinal[particle]) >= _MAX_EVENT_ORDINAL:
-        raise EngineError("physical boundary event ordinal exhausted uint32")
+    _require_material_event_ordinals(resident, particle)
     separation = endpoint_position_m - event.position_m[event_row]
     state_residual = math.hypot(float(separation[0]), float(separation[1]))
     contact_radius = float(prepared.schedule.contact_radius_m[particle])
@@ -7228,22 +6905,8 @@ def _commit_curved_wall_row(
         raw_hit.time_budget_s,
         max(raw_hit.localization_residual_m, projection_residual),
     )
-    position_m[particle] = resolved_position
-    velocity_m_s[particle] = velocity_post_m_s
-    charge_number[particle] = charge_pre_number
-    event_ordinal[particle] += np.uint32(1)
-    physical_boundary_event_ordinal[particle] += np.uint32(1)
-    _set_boundary_lifecycle(
-        particle,
-        resolved_hit.time_s,
-        outcome_code,
-        remains_active,
-        active,
-        lifecycle,
-        terminal_time_s,
-    )
-    _append_boundary_event(
-        pending,
+    _commit_material_boundary_response(
+        resident,
         particle,
         resolved_hit,
         law_code,
@@ -7251,9 +6914,11 @@ def _commit_curved_wall_row(
         velocity_pre_m_s,
         velocity_post_m_s,
         charge_pre_number,
-        int(event_ordinal[particle]),
+        remains_active,
+        pending,
+        statistics,
     )
-    start_contact_state[particle] = (
+    resident.start_contact_state[particle] = (
         SURFACE_STATE_DEPARTURE if remains_active else SURFACE_STATE_RESOLVED
     )
     state.current_time_s[row] = resolved_hit.time_s
@@ -7262,7 +6927,6 @@ def _commit_curved_wall_row(
     state.current_charge_number[row] = charge_pre_number
     state.interaction_count[row] += 1
     state.certify_departure[row] = remains_active
-    statistics.wall_interactions += 1
     if not remains_active:
         state.stack_top[row] = -1
         return
@@ -7391,20 +7055,11 @@ def _initialize_surface_releases(
     local_position_m: np.ndarray,
     local_velocity_m_s: np.ndarray,
     local_charge_number: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Classify and commit one slab's initial contacts in stable row order."""
 
@@ -7412,7 +7067,7 @@ def _initialize_surface_releases(
     acceleration = prepared.constant_acceleration_m_s2
     release = classify_surface_release_batch(
         prepared.geometry,
-        surface_release_state[particle_index],
+        resident.start_contact_state[particle_index],
         facets,
         local_position_m,
         local_velocity_m_s,
@@ -7439,14 +7094,14 @@ def _initialize_surface_releases(
         _mark_particle_failed(
             particle,
             failure,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
         )
 
@@ -7455,8 +7110,8 @@ def _initialize_surface_releases(
         (release.action == SURFACE_ACTION_CURVED_DEPARTURE)
         | (release.action == SURFACE_ACTION_EXACT_DEPARTURE)
     )
-    surface_release_state[particle_index[resolved]] = SURFACE_STATE_RESOLVED
-    surface_release_state[particle_index[departure]] = SURFACE_STATE_DEPARTURE
+    resident.start_contact_state[particle_index[resolved]] = SURFACE_STATE_RESOLVED
+    resident.start_contact_state[particle_index[departure]] = SURFACE_STATE_DEPARTURE
     response = (release.status == SURFACE_STATUS_OK) & (
         (release.action == SURFACE_ACTION_RESPONSE_VELOCITY)
         | (release.action == SURFACE_ACTION_RESPONSE_ACCELERATION)
@@ -7473,20 +7128,11 @@ def _initialize_surface_releases(
         local_velocity_m_s,
         local_charge_number,
         interactions,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        surface_release_state,
+        resident,
         pending,
         failures,
         replay,
         statistics,
-        failure_reason_code,
     )
     return interactions, release.departure_facet_id
 
@@ -7502,33 +7148,22 @@ def _commit_surface_release_responses(
     local_velocity_m_s: np.ndarray,
     local_charge_number: np.ndarray,
     interactions: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> None:
     if not rows.size:
         return
     particles = particle_index[rows]
-    ordinal_limit = _MAX_EVENT_ORDINAL
-    if bool((event_ordinal[particles] >= ordinal_limit).any()):
-        raise EngineError("logical event ordinal exhausted uint32")
-    if bool((physical_boundary_event_ordinal[particles] >= ordinal_limit).any()):
-        raise EngineError("physical boundary event ordinal exhausted uint32")
+    _require_material_event_ordinals(resident, particles)
     offsets = np.arange(rows.size + 1, dtype="<i8")
     candidates = source_facet_id[rows].astype("<i8", copy=False)
     particle_ids = prepared.schedule.particle_id[particles].astype("<u8", copy=False)
-    physical_ordinals = physical_boundary_event_ordinal[particles].astype("<u8", copy=False)
+    physical_ordinals = resident.physical_boundary_event_ordinal[particles].astype(
+        "<u8", copy=False
+    )
     law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
         prepared.solver.seed,
         particle_ids,
@@ -7600,20 +7235,11 @@ def _commit_surface_release_responses(
             local_velocity_m_s,
             local_charge_number,
             interactions,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            surface_release_state,
+            resident,
             pending,
             failures,
             replay,
             statistics,
-            failure_reason_code,
         )
 
 
@@ -7648,20 +7274,11 @@ def _commit_surface_release_response_row(
     local_velocity_m_s: np.ndarray,
     local_charge_number: np.ndarray,
     interactions: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> None:
     particle = int(particle_index[row])
     if responses.status[response_row] != BOUNDARY_STATUS_OK:
@@ -7675,14 +7292,14 @@ def _commit_surface_release_response_row(
         _mark_particle_failed(
             particle,
             failure,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
         )
         return
@@ -7724,22 +7341,8 @@ def _commit_surface_release_response_row(
     velocity_post = responses.velocity_post_m_s[response_row].copy()
     remains_active = bool(responses.remains_active[response_row])
     charge_pre = float(local_charge_number[row])
-    position_m[particle] = resolved_position
-    velocity_m_s[particle] = velocity_post
-    charge_number[particle] = charge_pre
-    event_ordinal[particle] += np.uint32(1)
-    physical_boundary_event_ordinal[particle] += np.uint32(1)
-    _set_boundary_lifecycle(
-        particle,
-        resolved_hit.time_s,
-        outcome_code,
-        remains_active,
-        active,
-        lifecycle,
-        terminal_time_s,
-    )
-    _append_boundary_event(
-        pending,
+    _commit_material_boundary_response(
+        resident,
         particle,
         resolved_hit,
         law_code,
@@ -7747,10 +7350,11 @@ def _commit_surface_release_response_row(
         local_velocity_m_s[row],
         velocity_post,
         charge_pre,
-        int(event_ordinal[particle]),
+        remains_active,
+        pending,
+        statistics,
     )
     interactions[row] = 1
-    statistics.wall_interactions += 1
     post_failure = release.action[row] == SURFACE_ACTION_RESPONSE_ACCELERATION
     post_row = int(post_by_response[response_row])
     if remains_active and prepared.capabilities.curved_events:
@@ -7771,18 +7375,18 @@ def _commit_surface_release_response_row(
         _mark_particle_failed(
             particle,
             failure,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
         )
         return
-    surface_release_state[particle] = _post_response_surface_state(
+    resident.start_contact_state[particle] = _post_response_surface_state(
         prepared, particle, facet_id, remains_active
     )
     if not remains_active:
@@ -7938,7 +7542,7 @@ def _proposal_start_state(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return current accepted state, with exact-origin reuse for zero-force motion."""
 
-    if prepared.physics.requires_stage_evaluation:
+    if prepared.capabilities.stage_evaluation:
         return position_m[particle_index].copy(), velocity_m_s[particle_index].copy()
     if not bool(
         np.isfinite(exact_origin_position_m[particle_index]).all()
@@ -7960,7 +7564,7 @@ def _proposal_start_times(
     """Resolve per-particle integration origins without splitting the macro step."""
 
     schedule = prepared.schedule
-    if not prepared.physics.requires_stage_evaluation:
+    if not prepared.capabilities.stage_evaluation:
         return exact_origin_time_s[particle_index].copy()
     return np.maximum(macro_start, schedule.release_time_s[particle_index])
 
@@ -7968,21 +7572,9 @@ def _proposal_start_times(
 def _advance_exact_paths(
     prepared: PreparedTransport,
     root_proposal: StepProposal,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
     writer: _EventSink,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
@@ -8016,18 +7608,7 @@ def _advance_exact_paths(
         current_position,
         current_velocity,
         current_charge,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
-        surface_release_state,
+        resident,
         state.zero_rows,
         stack_target,
         stack_depth,
@@ -8038,7 +7619,6 @@ def _advance_exact_paths(
         failures,
         replay,
         statistics,
-        failure_reason_code,
     )
     _flush_boundary_event_wave(writer, prepared, pending)
     path_code = (
@@ -8046,7 +7626,7 @@ def _advance_exact_paths(
     )
     while True:
         wave_count, pending_count = _next_exact_wave_rows_into(
-            state, root_proposal.particle_index, active
+            state, root_proposal.particle_index, resident.active
         )
         if not pending_count:
             break
@@ -8082,23 +7662,11 @@ def _advance_exact_paths(
                 stack_depth,
                 stack_interactions,
                 stack_top,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                physical_boundary_event_ordinal,
-                exact_origin_time_s,
-                exact_origin_position_m,
-                exact_origin_velocity_m_s,
-                surface_release_state,
+                resident,
                 replay,
                 pending,
                 failures,
                 statistics,
-                failure_reason_code,
                 state,
             )
             _mark_exact_finite_departures_into(
@@ -8107,7 +7675,7 @@ def _advance_exact_paths(
                 event.status,
                 event.time_s,
                 event.primary_facet_id,
-                active,
+                resident.active,
                 prepared.schedule.contact_radius_m,
                 current_time,
                 departing_facet,
@@ -8202,18 +7770,7 @@ def _initialize_exact_wavefront(
     current_position_m: np.ndarray,
     current_velocity_m_s: np.ndarray,
     current_charge_number: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     zero_rows: np.ndarray,
     stack_target_s: np.ndarray,
     stack_depth: np.ndarray,
@@ -8224,7 +7781,6 @@ def _initialize_exact_wavefront(
     failures: _FailureEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> None:
     """Resolve release contacts once and seed each row's depth-first work stack."""
 
@@ -8235,20 +7791,11 @@ def _initialize_exact_wavefront(
         current_position_m,
         current_velocity_m_s,
         current_charge_number,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        surface_release_state,
+        resident,
         pending,
         failures,
         replay,
         statistics,
-        failure_reason_code,
     )
     zero_count = _seed_exact_wavefront_into(
         proposal.particle_index,
@@ -8259,13 +7806,13 @@ def _initialize_exact_wavefront(
         current_position_m,
         current_velocity_m_s,
         current_charge_number,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.exact_origin_time_s,
+        resident.exact_origin_position_m,
+        resident.exact_origin_velocity_m_s,
         stack_target_s,
         stack_depth,
         stack_interactions,
@@ -8437,23 +7984,11 @@ def _consume_exact_wave(
     stack_depth: np.ndarray,
     stack_interactions: np.ndarray,
     stack_top: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
     state: _ExactWavefront,
 ) -> None:
     failed_count, split_count, clear_count, axis_count, wall_count = _select_exact_event_rows_into(
@@ -8472,14 +8007,14 @@ def _consume_exact_wave(
         current_velocity_m_s,
         current_charge_number,
         stack_top,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        failure_reason_code,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
+        resident.failure_reason_code,
         failures,
         _FAILURE_INDETERMINATE_EVENT,
     )
@@ -8496,14 +8031,14 @@ def _consume_exact_wave(
         stack_depth,
         stack_interactions,
         stack_top,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        failure_reason_code,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
+        resident.failure_reason_code,
         failures,
         statistics,
         state.exhausted_rows,
@@ -8519,17 +8054,17 @@ def _consume_exact_wave(
         current_velocity_m_s,
         current_charge_number,
         stack_top,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
         replay,
         failures,
         statistics,
-        failure_reason_code,
+        resident.failure_reason_code,
     )
     axis_wave_rows = state.axis_event_rows[:axis_count]
     _commit_exact_axis_rows(
@@ -8543,20 +8078,20 @@ def _consume_exact_wave(
         current_velocity_m_s,
         current_charge_number,
         stack_top,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
+        resident.exact_origin_time_s,
+        resident.exact_origin_position_m,
+        resident.exact_origin_velocity_m_s,
         replay,
         failures,
         statistics,
-        failure_reason_code,
+        resident.failure_reason_code,
     )
     wall_wave_rows = state.wall_event_rows[:wall_count]
     _commit_exact_wall_rows(
@@ -8572,23 +8107,11 @@ def _consume_exact_wave(
         departing_facet_id,
         stack_interactions,
         stack_top,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        physical_boundary_event_ordinal,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
-        surface_release_state,
+        resident,
         replay,
         pending,
         failures,
         statistics,
-        failure_reason_code,
     )
 
 
@@ -9263,23 +8786,11 @@ def _commit_exact_wall_rows(
     departing_facet_id: np.ndarray,
     stack_interactions: np.ndarray,
     stack_top: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     replay: _ReplayBuffer,
     pending: _BoundaryEventBuffer,
     failures: _FailureEventBuffer,
     statistics: _EventStatistics,
-    failure_reason_code: np.ndarray,
 ) -> None:
     if not wall_wave_rows.size:
         return
@@ -9300,14 +8811,14 @@ def _commit_exact_wall_rows(
         particle_index,
         proposal_failures,
         stack_top,
-        position_m,
-        velocity_m_s,
-        charge_number,
-        active,
-        lifecycle,
-        terminal_time_s,
-        event_ordinal,
-        failure_reason_code,
+        resident.position_m,
+        resident.velocity_m_s,
+        resident.charge_number,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+        resident.event_ordinal,
+        resident.failure_reason_code,
         failures,
     )
     valid = np.flatnonzero(endpoint.valid).astype("<i8", copy=False)
@@ -9334,14 +8845,14 @@ def _commit_exact_wall_rows(
             event,
             endpoint,
             stack_top,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            failure_reason_code,
+            resident.position_m,
+            resident.velocity_m_s,
+            resident.charge_number,
+            resident.active,
+            resident.lifecycle,
+            resident.terminal_time_s,
+            resident.event_ordinal,
+            resident.failure_reason_code,
             failures,
         )
         periodic_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_PERIODIC).astype(
@@ -9371,14 +8882,14 @@ def _commit_exact_wall_rows(
                 departing_facet_id,
                 stack_interactions,
                 stack_top,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                event_ordinal,
-                exact_origin_time_s,
-                exact_origin_position_m,
-                exact_origin_velocity_m_s,
-                surface_release_state,
+                resident.position_m,
+                resident.velocity_m_s,
+                resident.charge_number,
+                resident.event_ordinal,
+                resident.exact_origin_time_s,
+                resident.exact_origin_position_m,
+                resident.exact_origin_velocity_m_s,
+                resident.start_contact_state,
                 pending,
                 replay,
             )
@@ -9392,14 +8903,14 @@ def _commit_exact_wall_rows(
                     event,
                     endpoint,
                     stack_top,
-                    position_m,
-                    velocity_m_s,
-                    charge_number,
-                    active,
-                    lifecycle,
-                    terminal_time_s,
-                    event_ordinal,
-                    failure_reason_code,
+                    resident.position_m,
+                    resident.velocity_m_s,
+                    resident.charge_number,
+                    resident.active,
+                    resident.lifecycle,
+                    resident.terminal_time_s,
+                    resident.event_ordinal,
+                    resident.failure_reason_code,
                     failures,
                 )
         material_rows = np.flatnonzero(classification.kind == TOPOLOGY_CANDIDATE_MATERIAL).astype(
@@ -9423,7 +8934,7 @@ def _commit_exact_wall_rows(
     law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
         prepared.solver.seed,
         prepared.schedule.particle_id[particles],
-        physical_boundary_event_ordinal[particles],
+        resident.physical_boundary_event_ordinal[particles],
     )
     responses = resolve_boundary_responses_batch(
         prepared.compiled_boundary_rules,
@@ -9458,14 +8969,14 @@ def _commit_exact_wall_rows(
                 particle_index,
                 [(row, failure)],
                 stack_top,
-                position_m,
-                velocity_m_s,
-                charge_number,
-                active,
-                lifecycle,
-                terminal_time_s,
-                event_ordinal,
-                failure_reason_code,
+                resident.position_m,
+                resident.velocity_m_s,
+                resident.charge_number,
+                resident.active,
+                resident.lifecycle,
+                resident.terminal_time_s,
+                resident.event_ordinal,
+                resident.failure_reason_code,
                 failures,
             )
             continue
@@ -9492,18 +9003,7 @@ def _commit_exact_wall_rows(
             current_charge_number,
             stack_interactions,
             stack_top,
-            position_m,
-            velocity_m_s,
-            charge_number,
-            active,
-            lifecycle,
-            terminal_time_s,
-            event_ordinal,
-            physical_boundary_event_ordinal,
-            exact_origin_time_s,
-            exact_origin_position_m,
-            exact_origin_velocity_m_s,
-            surface_release_state,
+            resident,
             pending,
             replay,
             statistics,
@@ -9743,26 +9243,12 @@ def _commit_exact_wall_response(
     current_charge_number: np.ndarray,
     stack_interactions: np.ndarray,
     stack_top: np.ndarray,
-    position_m: np.ndarray,
-    velocity_m_s: np.ndarray,
-    charge_number: np.ndarray,
-    active: np.ndarray,
-    lifecycle: np.ndarray,
-    terminal_time_s: np.ndarray,
-    event_ordinal: np.ndarray,
-    physical_boundary_event_ordinal: np.ndarray,
-    exact_origin_time_s: np.ndarray,
-    exact_origin_position_m: np.ndarray,
-    exact_origin_velocity_m_s: np.ndarray,
-    surface_release_state: np.ndarray,
+    resident: ParticleState,
     pending: _BoundaryEventBuffer,
     replay: _ReplayBuffer,
     statistics: _EventStatistics,
 ) -> None:
-    if int(event_ordinal[particle_index]) >= _MAX_EVENT_ORDINAL:
-        raise EngineError("logical event ordinal exhausted uint32")
-    if int(physical_boundary_event_ordinal[particle_index]) >= _MAX_EVENT_ORDINAL:
-        raise EngineError("physical boundary event ordinal exhausted uint32")
+    _require_material_event_ordinals(resident, particle_index)
     raw_hit = BoundaryHit(
         float(event.time_s[event_row]),
         event.position_m[event_row].copy(),
@@ -9789,23 +9275,8 @@ def _commit_exact_wall_response(
         raw_hit.time_budget_s,
         max(raw_hit.localization_residual_m, projection_residual),
     )
-    position_m[particle_index] = resolved_position
-    velocity_m_s[particle_index] = velocity_post_m_s
-    charge_number[particle_index] = charge_pre_number
-    event_ordinal[particle_index] += np.uint32(1)
-    physical_boundary_event_ordinal[particle_index] += np.uint32(1)
-    _set_boundary_lifecycle(
-        particle_index,
-        resolved_hit.time_s,
-        outcome_code,
-        remains_active,
-        active,
-        lifecycle,
-        terminal_time_s,
-    )
-    logical_ordinal = int(event_ordinal[particle_index])
-    _append_boundary_event(
-        pending,
+    _commit_material_boundary_response(
+        resident,
         particle_index,
         resolved_hit,
         law_code,
@@ -9813,12 +9284,13 @@ def _commit_exact_wall_response(
         velocity_pre_m_s,
         velocity_post_m_s,
         charge_pre_number,
-        logical_ordinal,
+        remains_active,
+        pending,
+        statistics,
     )
-    surface_release_state[particle_index] = _post_response_surface_state(
+    resident.start_contact_state[particle_index] = _post_response_surface_state(
         prepared, particle_index, primary_facet_id, remains_active
     )
-    statistics.wall_interactions += 1
     current_time_s[row] = resolved_hit.time_s
     if not remains_active:
         stack_top[row] = -1
@@ -9833,9 +9305,9 @@ def _commit_exact_wall_response(
         resolved_hit.time_s,
         resolved_position,
         velocity_post_m_s,
-        exact_origin_time_s,
-        exact_origin_position_m,
-        exact_origin_velocity_m_s,
+        resident.exact_origin_time_s,
+        resident.exact_origin_position_m,
+        resident.exact_origin_velocity_m_s,
     )
     _record_replay_jump(
         replay,
@@ -9845,6 +9317,61 @@ def _commit_exact_wall_response(
         velocity_post_m_s,
         charge_pre_number,
     )
+
+
+def _require_material_event_ordinals(resident: ParticleState, particles: int | np.ndarray) -> None:
+    """Admit physical wall responses before resolving or committing their rows."""
+    if bool(np.any(resident.event_ordinal[particles] >= _MAX_EVENT_ORDINAL)):
+        raise EngineError("logical event ordinal exhausted uint32")
+    if bool(np.any(resident.physical_boundary_event_ordinal[particles] >= _MAX_EVENT_ORDINAL)):
+        raise EngineError("physical boundary event ordinal exhausted uint32")
+
+
+def _commit_material_boundary_response(
+    resident: ParticleState,
+    particle: int,
+    hit: BoundaryHit,
+    law_code: int,
+    outcome_code: int,
+    velocity_pre_m_s: np.ndarray,
+    velocity_post_m_s: np.ndarray,
+    charge_pre_number: float,
+    remains_active: bool,
+    pending: _BoundaryEventBuffer,
+    statistics: _EventStatistics,
+) -> None:
+    """Commit one admitted material hit to resident state and its physical ledger.
+
+    Callers own localization, ordinal admission and method-specific continuation.
+    Axis folds, periodic translations and numerical failures are not material hits.
+    Surface departure may still fail after this committed physical response.
+    """
+    resident.position_m[particle] = hit.position_m
+    resident.velocity_m_s[particle] = velocity_post_m_s
+    resident.charge_number[particle] = charge_pre_number
+    resident.event_ordinal[particle] += np.uint32(1)
+    resident.physical_boundary_event_ordinal[particle] += np.uint32(1)
+    _set_boundary_lifecycle(
+        particle,
+        hit.time_s,
+        outcome_code,
+        remains_active,
+        resident.active,
+        resident.lifecycle,
+        resident.terminal_time_s,
+    )
+    _append_boundary_event(
+        pending,
+        particle,
+        hit,
+        law_code,
+        outcome_code,
+        velocity_pre_m_s,
+        velocity_post_m_s,
+        charge_pre_number,
+        int(resident.event_ordinal[particle]),
+    )
+    statistics.wall_interactions += 1
 
 
 def _set_boundary_lifecycle(
@@ -10053,7 +9580,7 @@ def _flush_boundary_event_wave(
     count = pending.row_count
     if not count:
         return
-    if count > prepared.memory_plan.slab_particles:
+    if count > prepared.slab_capacity:
         raise EngineError("boundary-event wave exceeds its prepared row capacity")
     if count + pending.candidate_count > prepared.event_candidate_capacity:
         raise EngineError("boundary-event wave exceeds its prepared candidate capacity")

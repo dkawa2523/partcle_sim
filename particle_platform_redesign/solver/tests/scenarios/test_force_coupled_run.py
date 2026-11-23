@@ -115,18 +115,19 @@ def test_force_coupled_microcases_match_analytic_time_series(
     )
     assert result.manifest["rk4_dense_path_revision"] == expected_dense_revision
     assert result.manifest["resolved"]["path_kind"] == path_kind
-    assert result.manifest["resolved"]["physics_models"] == {
-        category: {
-            "model": values["model"],
-            "revision": {
+    actual_models = result.manifest["resolved"]["physics_models"]
+    assert set(actual_models) == set(case.spec.physics.models)
+    for category, values in case.spec.physics.models.items():
+        assert actual_models[category]["model"] == values["model"]
+        assert (
+            actual_models[category]["revision"]
+            == {
                 "charge": "fixed_charge_v1",
                 "drag": "epstein_linear_v1",
                 "electric": "electric_coulomb_v1",
                 "gravity_buoyancy": "gravity_buoyancy_standard_v1",
-            }[category],
-        }
-        for category, values in case.spec.physics.models.items()
-    }
+            }[category]
+        )
     assert result.manifest["resolved"]["required_fields"]
 
 
@@ -524,14 +525,16 @@ def test_continuous_charge_reaches_wall_through_shared_event_path(
     ):
         np.testing.assert_array_equal(getattr(events, name), getattr(unframed_events, name))
     assert result.manifest["resolved"]["path_kind"] == path_kind
-    assert result.manifest["resolved"]["physics_models"]["charge"] == {
-        "model": "plasma_continuous",
-        "revision": charge_revision,
-    }
-    assert result.manifest["resolved"]["physics_models"]["electric"] == {
+    resolved = result.manifest["resolved"]["physics_models"]
+    assert {"model": "plasma_continuous", "revision": charge_revision}.items() <= resolved[
+        "charge"
+    ].items()
+    assert {
         "model": "coulomb",
         "revision": "electric_coulomb_v1",
-    }
+        "electric_field": "electric_field",
+    }.items() <= resolved["electric"].items()
+
     assert result.manifest["prepared_stability_upper_bounds"]["dt_times_charge_lipschitz"] <= 0.5
     assert result.manifest["failure_reason_counts"]["integrator_accuracy"] == 0
 
@@ -567,10 +570,12 @@ def test_aggregate_charge_updates_public_state_in_xy_and_rz(
     assert float(frames[1].charge_number[0]) < 0.0
     np.testing.assert_array_equal(final.charge_number, events.charge_number_post)
     assert result.manifest["resolved"]["path_kind"] == path_kind
-    assert result.manifest["resolved"]["physics_models"]["charge"] == {
-        "model": "plasma_continuous",
-        "revision": _AGGREGATE_CHARGE_REVISION,
-    }
+    assert (
+        {
+            "model": "plasma_continuous",
+            "revision": _AGGREGATE_CHARGE_REVISION,
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["charge"]).items()
     assert result.manifest["data_coordinate_system"] == (
         "axisymmetric_rz" if axisymmetric_rz else "cartesian_xy"
     )
@@ -606,10 +611,14 @@ def test_signed_aggregate_charge_public_api_preserves_zero_density_limit(
     for field in ("position_m", "velocity_m_s", "charge_number", "lifecycle"):
         np.testing.assert_array_equal(getattr(two_current, field), getattr(zero_negative, field))
     assert float(finite_negative.charge_number[0]) < float(zero_negative.charge_number[0])
-    assert results["three-current-zero"].manifest["resolved"]["physics_models"]["charge"] == {
-        "model": "plasma_continuous",
-        "revision": _SIGNED_AGGREGATE_CHARGE_REVISION,
-    }
+    assert (
+        {
+            "model": "plasma_continuous",
+            "revision": _SIGNED_AGGREGATE_CHARGE_REVISION,
+        }
+    ).items() <= (
+        results["three-current-zero"].manifest["resolved"]["physics_models"]["charge"]
+    ).items()
 
 
 def test_exponential_midpoint_uses_local_enclosure_for_unused_extreme_cell(
@@ -3099,10 +3108,12 @@ def test_finite_speed_epstein_converges_with_both_production_integrators(
             abs(float(final.velocity_m_s[0, 0]) - reference_velocity),
         )
         errors.append(error)
-        assert result.manifest["resolved"]["physics_models"]["drag"] == {
-            "model": "epstein_finite_speed",
-            "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
-        }
+        assert (
+            {
+                "model": "epstein_finite_speed",
+                "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
+            }
+        ).items() <= (result.manifest["resolved"]["physics_models"]["drag"]).items()
         expected_path = (
             "rk4_dense" if integrator == "rk4_fixed" else "exponential_midpoint_reintegrated"
         )
@@ -4154,10 +4165,12 @@ def test_barnes_ion_drag_constant_field_time_convergence(
     for errors in (position_error, velocity_error):
         orders = [math.log2(errors[index] / errors[index + 1]) for index in (0, 1)]
         assert min(orders) >= minimum_order
-    assert last_result.manifest["resolved"]["physics_models"]["ion_drag"] == {
-        "model": "barnes_collisionless",
-        "revision": _BARNES_ION_DRAG_REVISION,
-    }
+    assert (
+        {
+            "model": "barnes_collisionless",
+            "revision": _BARNES_ION_DRAG_REVISION,
+        }
+    ).items() <= (last_result.manifest["resolved"]["physics_models"]["ion_drag"]).items()
     assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert last_result.manifest["physics_catalog_revision"] == PHYSICS_CATALOG_REVISION
     assert last_result.manifest["physics_runtime_revision"] == PHYSICS_RUNTIME_REVISION

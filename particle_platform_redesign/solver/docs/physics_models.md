@@ -16,27 +16,43 @@ weight和の丸めを無視して定数値へ縮めず、負下端をepsilonやc
 実行に採用した正確なcatalog/runtime/compiled revisionは各`run.json`を参照する。
 continuous modelは有限の`J<=0`、fixed chargeは`J=0`を返し、運動と同じstageで評価する。
 
-選択時のdescriptorとcallerが指定したfield名は`SelectedModel`に保持し、resolved model表示や
-integrator候補をtyped planから再推定しない。stageにはdescriptor、dict、callbackを渡さず、
+選択時のdescriptorと具体的なfrozen family parameter recordを`SelectedModel`が保持する。
+field role、callerのfield名、解決した既定値・物性authorityを同じrecordから投影し、実行の
+`resolved_physics_models`へ残す。model名をparameter型から推測せず、field roleをkeyの綴りから推測しない。
+各モデルは自身のroleを共通primitive表へ直接結線する。背景場の同一性を要求する組合せはcatalogの
+composition検査が所有し、dragやchargeの有無で隣のモデルの入力bindingを借りない。
+stageにはdescriptor、dict、callbackを渡さず、
 `compiled.py`が所有する固定のfamily binding、独立粒子物性、primitive slab、出力recordを渡す。
-charge、drag、thermophoresis、DEP、lift、electric、gravity、ion dragの既存stage評価・加算順を維持する。
+charge → drag → thermophoresis → ion drag → DEP → lift → electric → gravity のstage評価・加算順を維持する。
 
 各descriptorは、stage入力と区別してlocal applicabilityとlocal additive boundが参照するfield role、
 constant accelerationを証明できるfamilyかを明示する。prepareはそのroleをcallerのfield名とoffsetへ解決し、
 global family bounds、local証明入力、constant証明を一つの`PreparedPhysicsCertificates`へ保持する。
 実際に準備したglobal force boundが選択された全forceを覆わなければprepareを失敗させる。
+local/continuousのproof family codeはstage算術のselectorと別であり、各対応revisionについてprepareで
+stageとproofを照合して固定する。未登録revision・codeを残りのfamilyへ解釈する分岐は持たない。
+noiseも`none / FDT / prescribed force diffusion`と温度・friction・diffusionの各offsetを明示する。
+offsetの負号や別categoryの型からnoise方式を推測しない。
 全modelがconstant証明を支持し、実際のfieldと全contributionがconstantと確認できた場合だけexact specializationを使う。
 local/constant証明の`None`は利用不能であり、ゼロforceではない。familyの適用域gateが不要な場合の`None`とも
 区別する。point式、global enclosure、local enclosure、適用域は
 異なる数学的役割を保ち、point式からboundを自動推定しない。
 
-finite-speed Epsteinのrate factorは一つのscalar bodyをprepareとcompiled stageで共有する。
-electric、DEP、gravity/buoyancyもconstant証明とstageが同じpoint bodyを使う。prepareではPython bodyを使い、
-追加のJIT entryを起動しない。独立速度積分・Decimal・解析極限・boundの包含検査はverificationに残す。
+線形・finite-speed EpsteinとStokesのcoefficient、Talbot・Waldmann・Saffman・rarefied liftの係数、
+Barnes・relative-flow・image ionのpoint law、stationary/shifted OML・aggregate二/三電流・prescribed chargeの
+収集電流は、それぞれ`forces.py`または`charge.py`のscalar bodyが所有する。array入口はshape/domain検査と
+例外を持ち、compiled stageは同じbodyと行別statusを使う。
+array入口は有限primitiveから派生したunderflow・overflow・math domain errorも`PhysicsEvaluationError`へ変換する。
+負電位専用revisionの正電位など、非対応の状態は指数評価の前に拒否する。力の加算順とstageの算術順は保持する。
+electric、DEP、gravity/buoyancyもconstant証明とstageが同じpoint bodyを使う。prepareで必要な係数はPython bodyを
+使い、checkのための追加stage JITを起動しない。Pythonのarray検査でsqrt/hypotや丸めが変わる箇所は、共有bodyの
+相互比較だけで認めず、独立速度積分・Decimal・解析極限・boundの包含検査で確認する。これらのoracleはverificationに残す。
 共有body同士の一致は結線検査であり、独立した科学的資格の代用にはしない。
 
-モデルの追加・削減では、catalogの選択・値制約・証明role、familyの式とbounds、固定numeric bindingと
-stage合成、必要な連成、公開例と独立検証を一緒に更新する。新categoryには合成順と必要certificateの
+同じcategoryのmodel追加では、catalogのdescriptorとconcrete parameter解決、familyのpoint式とbounds、
+直接role binding、revisionごとのproof宣言、既存stage内の当該family、公開例と独立検証を更新する。
+電子・イオン収集のような連成条件はcomposition検査へ明示し、integratorのmodel名分岐を増やさない。
+削減はこれらの当該revisionと呼出例を同時に撤去する。result表示やworkerのために別のmodel一覧を更新する必要はない。新categoryには合成順と必要certificateの
 実装が必要であり、metadataの宣言だけでは新しい科学モデルを実装したことにならない。
 
 ## Particle authority
@@ -1196,7 +1212,8 @@ resolved modelにはnoise model/revisionを記録し、manifestにはBrownian RN
 base/max depth、root/split draw stream、`macro_root_frozen_midpoint_v1`、`stochastic_exponential_midpoint_v1`、
 `path_kind=cubic_hermite`を残す。checkpoint resume
 identityはRNG/OU/split/tree-policy revision、coefficient policy、base/max depth、resolved modelを含み、mutable RNG cursorを保存しない。
-0.3.0の全体revisionは[`result_format_v4.md`](result_format_v4.md)の現行revision一覧を参照する。
+実行で採用した全体revisionと解決済みparameterは当該結果の`run.json`を参照する。
+[`result_format_v5.md`](result_format_v5.md)は保存形式を所有し、科学modelのrevision一覧の正本ではない。
 root covariance、conditional split、mean updateがfloat64で表現不能なrowは`nonfinite_physics`となり、同一batchの
 正常rowは継続する。`gamma*h`上限をこの実表現可能性検査の代用にはしない。
 COMSOLまたは`model_dataset`との比較は物理式のauthorityでなく、core外のV&Vだけが所有する。

@@ -1,0 +1,223 @@
+{
+  "operation": "Proposed recursive removal of five task-owned result4 baseline stores after science export",
+  "automatic_review": "Rejected: blocked by policy; no more specific reason supplied",
+  "executed": false,
+  "disposition": "Retain as baseline verification evidence. No retry through another deletion mechanism and no production compatibility reader. Native/raw/archive/environments and other pre-existing artifacts untouched.",
+  "stores": [
+    {
+      "example": "xy-ballistic",
+      "role": "Historical baseline reference; not a current runtime input or compatibility path",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\xy-ballistic\\result",
+      "export_sha256": "d2a4bc83398cdb4164a9870ebc9974d7d362f2dad9f9800c2276c540857b2c99",
+      "files": [
+        {
+          "name": "_SUCCESS",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "checkpoints/A.h5",
+          "bytes": 15528,
+          "sha256": "e4790c7e83e8301a1a1222e3157d314a330e8eca52b5a06111dc80131164d0da"
+        },
+        {
+          "name": "context.h5",
+          "bytes": 18736,
+          "sha256": "eb33a16350407674dcfded417f4ed0eda1049fffeff2b90114cc0ef1f87d8e0a"
+        },
+        {
+          "name": "final.h5",
+          "bytes": 9840,
+          "sha256": "a0dcc618fb2d6ec7d3acf428f143ac4f1cacb6694b05ce22823eb6b5da4cb62f"
+        },
+        {
+          "name": "LATEST",
+          "bytes": 440,
+          "sha256": "aeaeb39f28796fde8133949c55b1bac187b2d03022121df66c6ef0b67a28312b"
+        },
+        {
+          "name": "run.json",
+          "bytes": 12409,
+          "sha256": "152e82ad0517749fe7040bf7db06c8cdf2bd3749ca5a90214f65a2725d0659fc"
+        },
+        {
+          "name": "segments/epoch-000000.h5",
+          "bytes": 128777,
+          "sha256": "c03879e8133b61b41a2704ea49b7c69b81cd3fbe3191696354ea68e9a9200f8d"
+        }
+      ]
+    },
+    {
+      "example": "rz-charged",
+      "role": "Historical baseline reference; not a current runtime input or compatibility path",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\rz-charged\\result",
+      "export_sha256": "c35a45d4c3647eaf116f646ae57de4133c79bd1f926e67ce49d2f42ecccd6520",
+      "files": [
+        {
+          "name": "_SUCCESS",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "checkpoints/A.h5",
+          "bytes": 16128,
+          "sha256": "3ce6b37c68cde4791819fbcdfd0401e83e0c702e05c66b1503b1dbf3895ce9d3"
+        },
+        {
+          "name": "context.h5",
+          "bytes": 18736,
+          "sha256": "d292d9fd1b7de0dbc6d8a067edc076ac998ac2fb289030dd9e3df64e59cc74e7"
+        },
+        {
+          "name": "final.h5",
+          "bytes": 9840,
+          "sha256": "6cc38d5af67d9b45ee3facaec31ec8384a2749b1c0cb156732c02dd86901dd68"
+        },
+        {
+          "name": "LATEST",
+          "bytes": 440,
+          "sha256": "9ddf0b309d8f515168a69e4855dd1554c70a27ee25beb794c6770d3a79b81597"
+        },
+        {
+          "name": "run.json",
+          "bytes": 13223,
+          "sha256": "0d7b25792fe5fa86d4620dbc12df1b5c130457391e17c15a8158b690d421ef02"
+        },
+        {
+          "name": "segments/epoch-000000.h5",
+          "bytes": 128777,
+          "sha256": "f95073000055f54d45b7d32c3573f7b766502cd78fa99fae1bbd99c5afb8416a"
+        }
+      ]
+    },
+    {
+      "example": "xy-time-field",
+      "role": "Historical baseline reference; not a current runtime input or compatibility path",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\xy-time-field\\result",
+      "export_sha256": "ef3ec258bc9308d41a4a981c4e085de2d409199444966393b0253b95bd0bf902",
+      "files": [
+        {
+          "name": "_SUCCESS",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "checkpoints/A.h5",
+          "bytes": 16128,
+          "sha256": "6cf8f7777a7760f8405b3393463467ef69b6a97c3c5ed457790a9114367a7818"
+        },
+        {
+          "name": "context.h5",
+          "bytes": 18736,
+          "sha256": "64e84cd48679f64cc7895da34d4a7070a2147a9aee6f581816a3b92f2d114b00"
+        },
+        {
+          "name": "final.h5",
+          "bytes": 9840,
+          "sha256": "829d17621ab73057751302501e9b3eef7968cc7c54d80aa68345e78d0181f3ce"
+        },
+        {
+          "name": "LATEST",
+          "bytes": 440,
+          "sha256": "7d3e59734ec02469dae214b48d6252207402b60388ec86f8e1513923858c8a98"
+        },
+        {
+          "name": "run.json",
+          "bytes": 13226,
+          "sha256": "e1032ea2a410460975c8aa5a2e97997e7ce83ff615754a144cdcea0eebc8feb8"
+        },
+        {
+          "name": "segments/epoch-000000.h5",
+          "bytes": 128777,
+          "sha256": "e1cdae6bac3ef1c043aeecd58a52377b3885cb92120515ecad5a61bd3f07b965"
+        }
+      ]
+    },
+    {
+      "example": "brownian-wall",
+      "role": "Historical baseline reference; not a current runtime input or compatibility path",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\brownian-wall\\result",
+      "export_sha256": "bb6400cf18903c232273f6eb430cc3e650d17d9fcdf2bb0c617ce026f90f4ee1",
+      "files": [
+        {
+          "name": "_SUCCESS",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "checkpoints/A.h5",
+          "bytes": 16128,
+          "sha256": "c532e5f8d4323fcb26184318f15b487eb1b13738cf6e01bfa1073c2c96c245c4"
+        },
+        {
+          "name": "context.h5",
+          "bytes": 18736,
+          "sha256": "e0eca9ac34e5086999f2fbf77a21eddfacdc4adb4c66b3ba0aa8bd5fc822ddb7"
+        },
+        {
+          "name": "final.h5",
+          "bytes": 9840,
+          "sha256": "be2363424cd0d023847003fadd233d2f1ec833f7c15ccbe54fcc500de755dccb"
+        },
+        {
+          "name": "LATEST",
+          "bytes": 440,
+          "sha256": "f5e9e3c02542f8c6dfff1570802b60eecf2c611a0c4a20f984cfc504ca67ad90"
+        },
+        {
+          "name": "run.json",
+          "bytes": 14706,
+          "sha256": "1913374874f7b84aa48f49f00011b8ad1cfe47afdd71849bf6ab0350f0d0644a"
+        },
+        {
+          "name": "segments/epoch-000000.h5",
+          "bytes": 73629,
+          "sha256": "1ef1b0660cd14a42f4a700a7aca8d4810c251be51d039bfc623651ed1939f5f0"
+        }
+      ]
+    },
+    {
+      "example": "reduced-electrostatic",
+      "role": "Historical baseline reference; not a current runtime input or compatibility path",
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\reduced-electrostatic\\result",
+      "export_sha256": "eebed9696817ca4724c60c2dc758b1e750dc5d3dc9bab9e7967332278d4f51da",
+      "files": [
+        {
+          "name": "_SUCCESS",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "checkpoints/A.h5",
+          "bytes": 16128,
+          "sha256": "bbd7d030a9345ee141bf049998b598177d25875d046597f3df9ed006bd29e17d"
+        },
+        {
+          "name": "context.h5",
+          "bytes": 18736,
+          "sha256": "487ff8a0ea8c562a223574271feac498b3bba7a0342b263bbb4d20625dd5f431"
+        },
+        {
+          "name": "final.h5",
+          "bytes": 9840,
+          "sha256": "653f5a5d51ba8f1099c7b49e96a6f40abfc03b5ea671450b45b4aecdbe61540e"
+        },
+        {
+          "name": "LATEST",
+          "bytes": 440,
+          "sha256": "02bbc27281a053f5c91a094290ec46e6eccc1747d2c075fd1ef2fe2edf7f86a5"
+        },
+        {
+          "name": "run.json",
+          "bytes": 13234,
+          "sha256": "840b87734d34b7b461668b912f99e5793854f141b6df8f446527187b64876d50"
+        },
+        {
+          "name": "segments/epoch-000000.h5",
+          "bytes": 128777,
+          "sha256": "f93c16ee1416f29edd989bee22ec9cdd2ffcd0254446617df153fac53fc05043"
+        }
+      ]
+    }
+  ]
+}

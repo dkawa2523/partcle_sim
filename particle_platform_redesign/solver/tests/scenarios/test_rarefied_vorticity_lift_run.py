@@ -61,11 +61,13 @@ def test_rarefied_lift_uniform_vorticity_shear_converges(
     assert errors[0] > errors[1] > errors[2] > 0.0
     observed_orders = np.log2(np.asarray(errors[:-1]) / np.asarray(errors[1:]))
     assert float(np.min(observed_orders)) >= minimum_order
-    assert last_result.manifest["resolved"]["physics_models"]["lift"] == {
-        "model": "rarefied_vorticity_sensitivity",
-        "revision": _REVISION,
-        "lift_coefficient": _LIFT_COEFFICIENT,
-    }
+    assert (
+        {
+            "model": "rarefied_vorticity_sensitivity",
+            "revision": _REVISION,
+            "lift_coefficient": _LIFT_COEFFICIENT,
+        }
+    ).items() <= (last_result.manifest["resolved"]["physics_models"]["lift"]).items()
     assert last_result.manifest["resolved"]["path_kind"] == path_kind
     assert last_result.manifest["data_coordinate_system"] == "axisymmetric_rz"
 

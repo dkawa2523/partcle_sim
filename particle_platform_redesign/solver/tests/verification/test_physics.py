@@ -123,10 +123,12 @@ def test_stokes_cunningham_catalog_declares_exact_primitives(
         for name, item in requirements.items()
         if name != "gas_velocity"
     )
-    assert plan.resolved_models()["drag"] == {
-        "model": "stokes_cunningham",
-        "revision": "stokes_cunningham_allen_raabe_air_v1",
-    }
+    assert (
+        {
+            "model": "stokes_cunningham",
+            "revision": "stokes_cunningham_allen_raabe_air_v1",
+        }
+    ).items() <= (plan.resolved_models()["drag"]).items()
 
 
 @pytest.mark.parametrize(
@@ -176,8 +178,12 @@ def test_continuous_charge_catalog_declares_exact_primitives_and_capabilities(
     assert velocity.value_constraint == "finite"
     assert plan.resolved_models() == {
         "charge": {
-            "model": "plasma_continuous",
-            "revision": "oml_stationary_maxwellian_debye_huckel_v1",
+            **{
+                key: value
+                for key, value in _plasma_continuous_charge_model().items()
+                if key != "applicability"
+            },
+            "maximum_ion_drift_ratio": 0.1,
         }
     }
 
@@ -205,10 +211,12 @@ def test_inertial_langevin_catalog_resolves_one_epstein_coupled_plan() -> None:
     assert isinstance(plan.noise, InertialLangevinNoisePlan)
     assert plan.noise.interval_tree_depth == 4
     assert plan.noise.adaptive_max_depth == 4
-    assert plan.resolved_models()["noise"] == {
-        "model": "inertial_langevin_fdt",
-        "revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2",
-    }
+    assert (
+        {
+            "model": "inertial_langevin_fdt",
+            "revision": "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2",
+        }
+    ).items() <= (plan.resolved_models()["noise"]).items()
     assert [field.name for field in plan.required_fields].count("gas_temperature") == 1
 
 
@@ -669,10 +677,12 @@ def test_finite_speed_epstein_catalog_declares_one_explicit_surface_model() -> N
     assert isinstance(plan.drag, FiniteSpeedEpsteinDragPlan)
     assert plan.drag.diffuse_reflection_fraction == 0.6
     assert plan.drag.maximum_speed_ratio == 3.0
-    assert plan.resolved_models()["drag"] == {
-        "model": "epstein_finite_speed",
-        "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
-    }
+    assert (
+        {
+            "model": "epstein_finite_speed",
+            "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
+        }
+    ).items() <= (plan.resolved_models()["drag"]).items()
     assert {item.name for item in plan.required_fields} == {
         "gas_velocity",
         "gas_density",

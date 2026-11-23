@@ -156,6 +156,19 @@ native stochastic problem.
 
 `build_manifest.json` binds source/parameter bytes, primitive provenance,
 particle properties, coefficient inventory and canonical logical hash.
+Producer revision `vigus_static_coefficient_transport_v3` also declares one
+`derived_field_generations` group in canonical provenance. Its primitive and
+output identities include actual layout topology/support, coordinate basis,
+units and field clocks. Parameters and the homogeneous mass/dimension authority
+are bound with the entire ten-field output group. The normal `create_case`
+publisher rejects stale dependencies or a missing/modified output before
+publication. Source IDs and model weights are not coefficient dependencies.
+Record-free prescribed fields remain legitimate independent input; the
+publisher does not infer dependencies from their names. Regeneration starts
+from the fresh primitive case, rather than partly replacing an existing group.
+The field cache, reduced builder and source recipe preserve declared groups
+when they retain the fields. This is a freshness check of declared inputs,
+not verification of the producer's physical equations.
 The installed `create_case` owner checks the full runnable case and publishes
 `case.yaml`, `case.h5` and this manifest in the same directory commit.
 A preparation or manifest-write failure exposes no incomplete case; retry
@@ -329,6 +342,27 @@ current/final status and RZ x/v/Z in SI. Current status owns each observation;
 a final status must not be painted backward through time. Stopped coordinates
 repeated at many frames count once for terminal capture. Disappeared status
 has an unknown cause unless a native event observation supplies it.
+
+The required header names are `particle_id,time_s,r_m,z_m,vr_m_s,vz_m_s,charge_number,`
+`native_status,release_time_s,stop_time_s,native_final_status`; extra columns are
+retained in the source evidence but are not interpreted. IDs use exact
+nonnegative int64 integer text. Revision `saved_rz_population_description_v2`
+requires **ascending time groups**, with each ID appearing at most once per
+group. ID order inside a group is arbitrary. Older unsorted tables must be
+reordered by `time_s` at their external conversion owner before evaluation;
+there is no hidden all-history sort or temporary database.
+
+The native input is scanned twice using one opened file. Both passes hash the
+bytes they parse and must agree. The first pass binds all identities and
+terminal brackets; the second streams frames and exact quantiles. Candidate
+frames and boundary-event batches use public result iterators. Memory is
+O(N + T + B): IDs/release/terminal information and a few frames/quantile scratch
+are O(N), report curves are O(T), and boundary batches are O(B). Exact quantiles
+are not constant-memory. Comparison uses exact common stored times, preserves
+unmatched clock counts and weights paired differences equally per finite-active
+ID/time row. The active-fraction integral separately uses the nonuniform clock.
+Each participant's speed/charge quantiles use its own survivors; unknown native
+disappearance remains distinct from candidate escape.
 
 For independent Brownian paths compare time-dependent populations, source and
 destination counts, stopping-time/active-time distributions and conditional

@@ -1,0 +1,188 @@
+{
+  "status": "complete",
+  "package_paths": [
+    "C:\\Users\\user\\AppData\\Local\\Temp\\chamber-foundation-runtime-20261123\\Lib\\site-packages\\chamber_particles\\__init__.py",
+    "C:\\Users\\user\\AppData\\Local\\Temp\\chamber-foundation-runtime-20261123\\Lib\\site-packages\\chamber_particles_tools\\__init__.py"
+  ],
+  "cwd_uses_checkout": false,
+  "fixture_imports": [],
+  "entrypoints": {
+    "module": "passed",
+    "commands": [
+      "models",
+      "init",
+      "inputs import-csv",
+      "inputs cache",
+      "create",
+      "check",
+      "run",
+      "inspect",
+      "analyze",
+      "export",
+      "view",
+      "inputs electrostatic check",
+      "inputs electrostatic build"
+    ],
+    "console": "passed"
+  },
+  "own_csv_first_source": "analytic field trajectory and hit verified",
+  "cache_and_surface": "passed",
+  "examples": [
+    {
+      "name": "xy-ballistic",
+      "status": "passed"
+    },
+    {
+      "name": "rz-charged",
+      "status": "passed"
+    },
+    {
+      "name": "xy-time-field",
+      "status": "passed"
+    },
+    {
+      "name": "brownian-wall",
+      "status": "passed"
+    },
+    {
+      "name": "reduced-electrostatic",
+      "status": "passed"
+    }
+  ],
+  "editable_charged_csv": "import/create/run passed",
+  "summary": {
+    "selected_particles": 1,
+    "model_weight": 2.5,
+    "count_unit": "computational_particles",
+    "weight_meaning": "input model_weight; no inferred physical rate"
+  },
+  "view": {
+    "visualization_revision": "result_context_population_svg_v5",
+    "parameters": {
+      "event_batch_rows": 4096,
+      "max_event_points": 5000,
+      "requested_focus_particle_id": 1,
+      "source_ids": [
+        0
+      ],
+      "source_names": [
+        "release"
+      ],
+      "particle_ids": null,
+      "particle_ids_file": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-b8p8xwmh\\selected_ids.csv",
+        "sha256": "sha256:f6006d64ef594d9bb52ff8394ab34198834d181eb5f21a471638024cae803231",
+        "rows": 1
+      },
+      "max_particle_points": 5000,
+      "max_trajectory_points": 5000,
+      "detail": true
+    },
+    "source_manifest_sha256": "sha256:8544ae876d94893b051a75f31d8c5a094ea0e36988cdbd66a9f74b4279f4b9c7",
+    "verification": {
+      "scope": "all_payload_file_bytes",
+      "content_files": {
+        "context.h5": "sha256:287de3066a434e19e804096334d65acdfa6c7c72b522bcc14ee1d2330014f131",
+        "final.h5": "sha256:f01cf266b164247927ed1ced78366ef10d8f9a18c4e3365be6841d164b4ba4c6",
+        "segments/epoch-000000.h5": "sha256:0da2689e9e6a013866fc7df1fb7a3c992397fdd9d4e68d5b05db5fcd838e9c21"
+      },
+      "semantics": "SHA-256 checked on the same open handle as each read; no guarantee against concurrent in-place writes."
+    },
+    "context": {
+      "content_hash": "sha256:777923afaefcdd9405e82b64bfece3f032e683339b5d6bd3300f52650adbc50f",
+      "file_sha256": "sha256:287de3066a434e19e804096334d65acdfa6c7c72b522bcc14ee1d2330014f131",
+      "path": "context.h5"
+    },
+    "focus_particle_id": 1,
+    "labels": {
+      "sources": [
+        {
+          "source_id": 0,
+          "name": "release",
+          "table": "particles",
+          "kind": "table",
+          "particle_count": 1
+        }
+      ],
+      "boundaries": [
+        {
+          "boundary_id": 1,
+          "group_name": "bottom",
+          "material_id": 0
+        },
+        {
+          "boundary_id": 2,
+          "group_name": "right",
+          "material_id": 0
+        },
+        {
+          "boundary_id": 3,
+          "group_name": "top",
+          "material_id": 0
+        },
+        {
+          "boundary_id": 4,
+          "group_name": "left",
+          "material_id": 0
+        }
+      ],
+      "boundary_conditions": [
+        {
+          "group_name": "bottom",
+          "priority": 1,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        },
+        {
+          "group_name": "right",
+          "priority": 2,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        },
+        {
+          "group_name": "top",
+          "priority": 3,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        },
+        {
+          "group_name": "left",
+          "priority": 4,
+          "law": "stick",
+          "contact_geometry": "particle_surface",
+          "parameters": {}
+        }
+      ],
+      "axis_policy": "none"
+    },
+    "trajectory_source": "frames",
+    "trajectory_points": 4,
+    "trajectory_truncated": false,
+    "boundary_events": 1,
+    "rendered_boundary_points": 1,
+    "population": {
+      "selected_particles": 1,
+      "finite_valid_positions": 1,
+      "omitted_nonspatial_or_pending": 0,
+      "binned_positions": 1,
+      "outside_geometry_bounds": 0,
+      "rendered_cells": 1,
+      "cells_per_axis": 70,
+      "meaning": "all finite active/stuck/held final positions binned; dominant lifecycle color; computational counts, not concentration"
+    },
+    "event_selection": {
+      "boundary_map": "smallest BLAKE2b-128 ranks of time_s/particle_id/event_ordinal",
+      "trajectory": "first physical events by time_s/particle_id/event_ordinal",
+      "display_order": "time_s/particle_id/event_ordinal",
+      "max_points_per_view": 5000
+    },
+    "trajectory_meaning": "saved positions only; gaps and recorded interactions break chords; no reconstructed Brownian path",
+    "population_svg": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-b8p8xwmh\\view\\population.svg",
+    "trajectory_svg": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-b8p8xwmh\\view\\trajectory.svg",
+    "boundary_events_svg": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-b8p8xwmh\\view\\boundary_events.svg",
+    "metadata_json": "C:\\Users\\user\\AppData\\Local\\Temp\\installed-particle-workflow-b8p8xwmh\\view\\visualization.json"
+  }
+}

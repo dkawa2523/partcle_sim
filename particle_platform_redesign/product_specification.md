@@ -4,7 +4,7 @@
 
 外部の場・静止形状と実現粒子源から、半導体製造チャンバーの粒子位置・速度・電荷・境界eventを計算する。
 利用者が機能選択、自分の入力作成、検査、実行、結果の解釈・再利用までCLIとPythonで完結することを製品要件とする。
-0.4.0はalphaで、通常の入力作成・解析・表示を一つのwheelへ含める。
+0.5.0はalphaで、通常の入力作成・解析・表示を一つのwheelへ含める。
 優先順位は物理・数値の説明可能性、一つの事実の所有者、10⁴〜10⁶粒子への容量と効率、利用・変更の容易さである。
 
 COMSOLとの対応は外部検証の一つで、物理的正しさそのものや実行前提ではない。
@@ -61,7 +61,7 @@ prescribed数学referenceの対応を物理modelの適用域認証や実験的va
 first hit、terminal capture、全interaction、frame occupancy、computational count、weight合計、物理flux/質量を区別する。
 数値stickは実付着の認証ではない。確率軌道は同じIDの重なりでなく目的に合う分布と不確かさで判断する。
 
-result4のcontextは形状・解釈metadataを一度保存し、背景場・初期全配列を複製しない。
+result5のcontextは形状・解釈metadataを一度保存し、背景場・初期全配列を複製しない。
 contextだけで再計算可能とはしない。旧result reader/checkpoint migrationは併存させない。
 
 ## 非目標と引き継ぐ残件

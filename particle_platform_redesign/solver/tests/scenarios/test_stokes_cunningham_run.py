@@ -44,10 +44,12 @@ def test_stokes_cunningham_xy_has_fourth_order_and_schedule_independent_final(
         )
         exact_ratio = dt_s * rate_s_inv
         assert exact_ratio <= prepared_ratio <= exact_ratio * (1.0 + 1.0e-12)
-        assert result.manifest["resolved"]["physics_models"]["drag"] == {
-            "model": "stokes_cunningham",
-            "revision": "stokes_cunningham_allen_raabe_air_v1",
-        }
+        assert (
+            {
+                "model": "stokes_cunningham",
+                "revision": "stokes_cunningham_allen_raabe_air_v1",
+            }
+        ).items() <= (result.manifest["resolved"]["physics_models"]["drag"]).items()
         assert result.manifest["resolved"]["path_kind"] == "rk4_dense"
         results.append(result)
 
@@ -98,10 +100,12 @@ def test_stokes_cunningham_exponential_midpoint_matches_the_closed_form(
     np.testing.assert_allclose(final.position_m[0], position_exact, rtol=0.0, atol=2.0e-15)
     np.testing.assert_allclose(final.velocity_m_s[0], velocity_exact, rtol=0.0, atol=2.0e-14)
     assert result.manifest["resolved"]["path_kind"] == "exponential_midpoint_reintegrated"
-    assert result.manifest["resolved"]["physics_models"]["drag"] == {
-        "model": "stokes_cunningham",
-        "revision": "stokes_cunningham_allen_raabe_air_v1",
-    }
+    assert (
+        {
+            "model": "stokes_cunningham",
+            "revision": "stokes_cunningham_allen_raabe_air_v1",
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["drag"]).items()
 
 
 def test_stokes_cunningham_rz_matches_xy_away_from_axis(tmp_path: Path) -> None:

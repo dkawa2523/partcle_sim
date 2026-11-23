@@ -28,6 +28,7 @@ consoleとmoduleの入口だけが唯一のclient dispatcherへ接続する。
 | engine | prepare、親macro/release/accepted commit/checkpoint | importer/plot/COMSOL比較 |
 | time_grid/lifecycle | macro境界・丸めの規則、状態wire codeと基本分類 | 粒子path精度、表示、物理的adhesion |
 | output | durable result/context/publication/recovery、readonly ResultView | 科学集計、再sampling |
+| errors | APIと遅延readerで共有する公開例外三分類 | I/O実装、広いcatchによる不正入力の隠蔽 |
 | 通常client | 入力作成・変換・生成、解析/export/表示、唯一CLI | 数値core再実装 |
 | 外部V&V/report | 対応問題の比較とreviewed結果の説明 | 物理authority、精度の一括認定 |
 
@@ -47,6 +48,9 @@ prepare全域範囲、stage行別失敗、local interval証明は固有の検査
 
 recipe 2は完成bundleの全source table集合を明記し、既存table参照とCSV生成を区別する。未記載tableは保持しない。
 settingsによる実release選択は別の役割である。caseと編集元、producerのbundleとreceiptは完成directoryとして一度に公開する。
+source CSVは一度読んだbytesから解釈とhashを得る。宣言済み派生fieldのfreshnessは通常clientの
+field_generationが一つの生成recordで照合し、canonical field/layout identityを使う。
+未宣言の独立prescribed fieldへ依存を推測せず、publisherは新しい物理係数を自動生成しない。
 
 ## 状態・連成・容量
 
@@ -70,6 +74,10 @@ plannerはload/prepare/run同時live峰値とslab fitを所有し、context読�
 ResultViewのmetadataは再帰的に不変とし、outputが正規化identityとJSON用独立documentを提供する。
 通常clientは同じResultViewへ束縛したcohortを再利用し、整列済みIDを索引として一度解決する。
 analysis/export/viewは観測意味とcoverageを維持し、export/viewは完成物だけを公開する。
+result5は全commit済segmentのdigestをcheckpointへ保持し、再開・sealで全prefixを照合する。
+読取りはopen済の同じhandleでhashとHDF5解釈を行い、再openでは再検証する。
+固定identityと消費したfileの検証範囲を分け、全payload検査は公開verify_contentsで明示実行する。
+同時in-place書換えのsnapshotや科学的精度は、このbyte integrityの保証に含めない。
 
 既存categoryの追加はcatalog→式/bounds→stage binding→compiled合成→独立検証で閉じ、engineを触らない。
 新categoryでは合成順/全bounds/constant証明/容量/結果説明も確認する。新stateは初期値からstage/dense/event/checkpoint/resultまで縦切りを要する。

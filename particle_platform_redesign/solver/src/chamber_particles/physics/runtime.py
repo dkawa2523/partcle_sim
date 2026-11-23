@@ -78,9 +78,14 @@ from .compiled import (
     LIFT_RAREFIED_VORTICITY_RZ,
     LIFT_SAFFMAN_RZ,
     LIFT_SAFFMAN_XY,
+    NOISE_FDT,
+    NOISE_NONE,
+    NOISE_PRESCRIBED_FORCE,
     THERMOPHORESIS_NONE,
     THERMOPHORESIS_TALBOT,
     THERMOPHORESIS_WALDMANN_GALLIS,
+    ApplicabilityProofCodes,
+    NoiseStageBindings,
     PhysicsNumericContext,
     PhysicsNumericOutputs,
     PhysicsStageBindings,
@@ -150,6 +155,27 @@ type UInt8Array = NDArray[np.uint8]
 # cover their accumulated rounding.  This factor matches the established
 # global-bound convention and is applied before the final directed rounding.
 _LOCAL_BOUND_ROUNDOFF_FACTOR = 1.0 + 64.0 * np.finfo(np.float64).eps
+
+# These codes name mathematical certificates, not stage arithmetic implementations.
+_PROOF_NONE = 0
+_PROOF_DRAG_EPSTEIN = 101
+_PROOF_DRAG_FINITE = 102
+_PROOF_DRAG_STOKES = 103
+_PROOF_DRAG_PRESCRIBED = 104
+_PROOF_CHARGE_OML = 201
+_PROOF_CHARGE_SHIFTED = 202
+_PROOF_CHARGE_TWO = 203
+_PROOF_CHARGE_THREE = 204
+_PROOF_CHARGE_PRESCRIBED = 205
+_PROOF_THERMO_WALDMANN = 301
+_PROOF_THERMO_TALBOT = 302
+_PROOF_ION_BARNES = 401
+_PROOF_ION_RELATIVE = 402
+_PROOF_ION_IMAGE = 403
+_PROOF_ION_PRESCRIBED = 404
+_PROOF_LIFT_RAREFIED = 501
+_PROOF_LIFT_SAFFMAN = 502
+_PROOF_LIFT_PRESCRIBED = 504
 
 PHYSICS_RUNTIME_REVISION = "record_bound_physics_runtime_v26"
 
@@ -523,7 +549,7 @@ class PreparedPhysicsCertificates:
 class PhysicsRuntime:
     """Evaluate one resolved plan without locating fields or changing state."""
 
-    plan: PhysicsPlan
+    primitive_packing: tuple[tuple[str, int, int], ...]
     mass_kg: FloatArray
     drag_diameter_m: FloatArray
     electrostatic_radius_m: FloatArray
@@ -594,7 +620,8 @@ class PhysicsRuntime:
         numerical-status vocabulary so a valid neighbour can continue.
         """
 
-        if self.plan.noise is None:
+        noise = self.native_context.noise
+        if noise.code == NOISE_NONE:
             raise PhysicsEvaluationError(
                 "Brownian thermal variance requires resolved inertial Langevin noise"
             )
@@ -606,27 +633,29 @@ class PhysicsRuntime:
         count = int(indices.size)
         status = np.full(count, NUMERICAL_STATUS_OK, dtype=np.uint8)
         result = np.empty(count, dtype=np.float64)
-        if isinstance(self.plan.noise, PrescribedForceDiffusionNoisePlan):
-            drag = self.plan.drag
-            if not isinstance(drag, PrescribedLinearFrictionPlan):
-                raise PhysicsEvaluationError("prescribed diffusion requires prescribed friction")
-            diffusion = sampled_values[self.plan.noise.force_spectral_density_field]
-            friction = sampled_values[drag.friction_coefficient_field]
-            if diffusion.shape != (count, 1) or friction.shape != (count, 1):
-                raise PhysicsEvaluationError(
-                    "sampled prescribed noise coefficients have invalid shapes"
-                )
+        if noise.code == NOISE_PRESCRIBED_FORCE:
+            diffusion = self._sampled_scalar(sampled_values, noise.diffusion_N2_s, count)
+            friction = self._sampled_scalar(sampled_values, noise.friction_kg_s, count)
             prescribed_force_variance_into(
-                self.mass_kg, indices, friction[:, 0], diffusion[:, 0], result, status
+                self.mass_kg, indices, friction, diffusion, result, status
             )
             return result, status
-        if not isinstance(self.plan.drag, EpsteinDragPlan):
-            raise PhysicsEvaluationError("FDT variance requires linear Epstein drag")
-        temperature = sampled_values.get(self.plan.drag.gas_temperature_field)
-        if temperature is None or temperature.shape != (count, 1):
-            raise PhysicsEvaluationError("sampled Brownian temperature has an invalid shape")
-        brownian_thermal_variance_into(self.mass_kg, indices, temperature[:, 0], result, status)
+        if noise.code != NOISE_FDT:
+            raise PhysicsEvaluationError("unresolved Brownian variance family")
+        temperature = self._sampled_scalar(sampled_values, noise.temperature_K, count)
+        brownian_thermal_variance_into(self.mass_kg, indices, temperature, result, status)
         return result, status
+
+    def _sampled_scalar(
+        self, sampled_values: Mapping[str, FloatArray], offset: int, count: int
+    ) -> FloatArray:
+        for name, start, width in self.primitive_packing:
+            if start == offset and width == 1:
+                value = sampled_values.get(name)
+                if value is None or value.shape != (count, 1):
+                    raise PhysicsEvaluationError(f"sampled field {name!r} has an invalid shape")
+                return value[:, 0]
+        raise PhysicsEvaluationError("noise scalar binding was not resolved")
 
     def evaluate(
         self,
@@ -675,14 +704,11 @@ class PhysicsRuntime:
         values = stage_workspace.primitive_values(
             count, self.native_context.bindings.primitive_rules.size
         )
-        offset = 0
-        for item in self.plan.required_fields:
-            width = len(item.components)
-            value = sampled_values.get(item.name)
+        for name, offset, width in self.primitive_packing:
+            value = sampled_values.get(name)
             if value is None or value.shape != (count, width):
-                raise PhysicsEvaluationError(f"sampled field {item.name!r} has an invalid shape")
+                raise PhysicsEvaluationError(f"sampled field {name!r} has an invalid shape")
             values[:, offset : offset + width] = value
-            offset += width
         error_code = stage_workspace.error_code[:count]
         error_code[:] = _initial_numerical_status(numerical_status, count)
         evaluate_prepared_physics_into(
@@ -1240,47 +1266,35 @@ def _charge_stage_bindings(
 
 
 def _thermophoresis_stage_bindings(
-    plan: ThermophoresisPlan | None,
-    drag_plan: DragPlan | None,
-    sampled_values: Mapping[str, int],
-    drag_gas_velocity_m_s: int,
-    drag_gas_density_kg_m3: int,
-    drag_gas_temperature_K: int,
-    drag_gas_dynamic_viscosity_Pa_s: int,
-    drag_gas_mean_free_path_m: int,
+    plan: ThermophoresisPlan | None, sampled_values: Mapping[str, int]
 ) -> _ThermophoresisStageBindings:
-    """Bind one stage's neutral background, reusing compatible drag samples."""
+    """Bind the model's own roles; composition checks own shared-background equality."""
     if plan is None:
         return _NO_THERMOPHORESIS_STAGE_INPUTS
     if isinstance(plan, TalbotThermophoresisPlan):
-        return _talbot_stage_bindings(
-            plan,
-            drag_plan,
-            sampled_values,
-            drag_gas_density_kg_m3,
-            drag_gas_temperature_K,
-            drag_gas_dynamic_viscosity_Pa_s,
-            drag_gas_mean_free_path_m,
+        return _ThermophoresisStageBindings(
+            THERMOPHORESIS_TALBOT,
+            -1,
+            _primitive_binding(sampled_values, plan.gas_temperature_field),
+            -1,
+            _primitive_binding(sampled_values, plan.gas_mean_free_path_field),
+            1.0,
+            1.0,
+            _primitive_binding(sampled_values, plan.gas_temperature_gradient_field),
+            _primitive_binding(sampled_values, plan.gas_density_field),
+            _primitive_binding(sampled_values, plan.gas_dynamic_viscosity_field),
+            _primitive_binding(sampled_values, plan.gas_thermal_conductivity_field),
+            plan.particle_thermal_conductivity_W_m_K,
+            plan.thermal_slip_coefficient,
+            plan.momentum_exchange_coefficient,
+            plan.thermal_exchange_coefficient,
         )
-    if isinstance(drag_plan, EpsteinDragPlan | FiniteSpeedEpsteinDragPlan):
-        gas_velocity = drag_gas_velocity_m_s
-        gas_temperature = drag_gas_temperature_K
-        mean_free_path = drag_gas_mean_free_path_m
-    elif drag_plan is None:
-        gas_velocity = _primitive_binding(sampled_values, plan.gas_velocity_field)
-        gas_temperature = _primitive_binding(sampled_values, plan.gas_temperature_field)
-        mean_free_path = _primitive_binding(sampled_values, plan.gas_mean_free_path_field)
-    else:
-        raise PhysicsEvaluationError(
-            "thermophoresis neutral-gas inputs do not match the resolved drag model"
-        )
-    heat_flux = _primitive_binding(sampled_values, plan.gas_translational_heat_flux_field)
     return _ThermophoresisStageBindings(
         THERMOPHORESIS_WALDMANN_GALLIS,
-        gas_velocity,
-        gas_temperature,
-        heat_flux,
-        mean_free_path,
+        _primitive_binding(sampled_values, plan.gas_velocity_field),
+        _primitive_binding(sampled_values, plan.gas_temperature_field),
+        _primitive_binding(sampled_values, plan.gas_translational_heat_flux_field),
+        _primitive_binding(sampled_values, plan.gas_mean_free_path_field),
         plan.gas_molecular_mass_kg,
         plan.maximum_speed_ratio,
         -1,
@@ -1294,64 +1308,10 @@ def _thermophoresis_stage_bindings(
     )
 
 
-def _talbot_stage_bindings(
-    plan: TalbotThermophoresisPlan,
-    drag_plan: DragPlan | None,
-    sampled_values: Mapping[str, int],
-    drag_gas_density_kg_m3: int,
-    drag_gas_temperature_K: int,
-    drag_gas_dynamic_viscosity_Pa_s: int,
-    drag_gas_mean_free_path_m: int,
-) -> _ThermophoresisStageBindings:
-    """Bind Talbot primitives and reuse matching drag samples."""
-    if isinstance(drag_plan, EpsteinDragPlan | FiniteSpeedEpsteinDragPlan):
-        density = drag_gas_density_kg_m3
-        temperature = drag_gas_temperature_K
-        viscosity = _primitive_binding(sampled_values, plan.gas_dynamic_viscosity_field)
-        mean_free_path = drag_gas_mean_free_path_m
-    elif isinstance(drag_plan, StokesCunninghamDragPlan):
-        density = drag_gas_density_kg_m3
-        temperature = _primitive_binding(sampled_values, plan.gas_temperature_field)
-        viscosity = drag_gas_dynamic_viscosity_Pa_s
-        mean_free_path = drag_gas_mean_free_path_m
-    else:
-        density = _primitive_binding(sampled_values, plan.gas_density_field)
-        temperature = _primitive_binding(sampled_values, plan.gas_temperature_field)
-        viscosity = _primitive_binding(sampled_values, plan.gas_dynamic_viscosity_field)
-        mean_free_path = _primitive_binding(sampled_values, plan.gas_mean_free_path_field)
-    gradient = _primitive_binding(sampled_values, plan.gas_temperature_gradient_field)
-    conductivity = _primitive_binding(sampled_values, plan.gas_thermal_conductivity_field)
-    return _ThermophoresisStageBindings(
-        THERMOPHORESIS_TALBOT,
-        -1,
-        temperature,
-        -1,
-        mean_free_path,
-        1.0,
-        1.0,
-        gradient,
-        density,
-        viscosity,
-        conductivity,
-        plan.particle_thermal_conductivity_W_m_K,
-        plan.thermal_slip_coefficient,
-        plan.momentum_exchange_coefficient,
-        plan.thermal_exchange_coefficient,
-    )
-
-
 def _lift_stage_bindings(
-    plan: LiftPlan | None,
-    drag_plan: DragPlan | None,
-    thermophoresis_plan: ThermophoresisPlan | None,
-    sampled_values: Mapping[str, int],
-    drag_gas_velocity_m_s: int,
-    drag_gas_density_kg_m3: int,
-    drag_gas_dynamic_viscosity_Pa_s: int,
-    drag_gas_mean_free_path_m: int,
-    thermophoresis_inputs: _ThermophoresisStageBindings,
+    plan: LiftPlan | None, sampled_values: Mapping[str, int]
 ) -> _LiftStageBindings:
-    """Bind lift primitives while reusing an already sampled neutral background."""
+    """Bind lift's declared primitives independently of enabled neighbour models."""
     if plan is None:
         return _NO_LIFT_STAGE_INPUTS
     if isinstance(plan, PrescribedRotationalLiftPlan):
@@ -1360,76 +1320,23 @@ def _lift_stage_bindings(
             gas_velocity_m_s=_primitive_binding(sampled_values, plan.gas_velocity_field),
         )
     if isinstance(plan, SaffmanLiftPlan):
-        return _saffman_stage_bindings(
-            plan,
-            drag_plan,
-            thermophoresis_plan,
-            sampled_values,
-            drag_gas_velocity_m_s,
-            drag_gas_density_kg_m3,
-            drag_gas_dynamic_viscosity_Pa_s,
-            drag_gas_mean_free_path_m,
-            thermophoresis_inputs,
-        )
-    if drag_plan is not None and not isinstance(drag_plan, PrescribedLinearFrictionPlan):
-        gas_velocity = drag_gas_velocity_m_s
-        gas_density = drag_gas_density_kg_m3
-        mean_free_path = drag_gas_mean_free_path_m
+        code = LIFT_SAFFMAN_XY if plan.coordinate_system == "cartesian_xy" else LIFT_SAFFMAN_RZ
+        viscosity = _primitive_binding(sampled_values, plan.gas_dynamic_viscosity_field)
+        vorticity = _primitive_binding(sampled_values, plan.out_of_plane_gas_vorticity_field)
+        coefficient = 1.0
     else:
-        gas_velocity = (
-            thermophoresis_inputs.gas_velocity_m_s
-            if isinstance(thermophoresis_plan, WaldmannGallisThermophoresisPlan)
-            else _primitive_binding(sampled_values, plan.gas_velocity_field)
-        )
-        mean_free_path = (
-            thermophoresis_inputs.gas_mean_free_path_m
-            if isinstance(thermophoresis_plan, WaldmannGallisThermophoresisPlan)
-            else _primitive_binding(sampled_values, plan.gas_mean_free_path_field)
-        )
-        gas_density = _primitive_binding(sampled_values, plan.gas_density_field)
-    vorticity = _primitive_binding(sampled_values, plan.azimuthal_gas_vorticity_field)
+        code = LIFT_RAREFIED_VORTICITY_RZ
+        viscosity = -1
+        vorticity = _primitive_binding(sampled_values, plan.azimuthal_gas_vorticity_field)
+        coefficient = plan.lift_coefficient
     return _LiftStageBindings(
-        LIFT_RAREFIED_VORTICITY_RZ,
-        gas_velocity,
-        gas_density,
-        mean_free_path,
-        -1,
+        code,
+        _primitive_binding(sampled_values, plan.gas_velocity_field),
+        _primitive_binding(sampled_values, plan.gas_density_field),
+        _primitive_binding(sampled_values, plan.gas_mean_free_path_field),
+        viscosity,
         vorticity,
-        plan.lift_coefficient,
-    )
-
-
-def _saffman_stage_bindings(
-    plan: SaffmanLiftPlan,
-    drag_plan: DragPlan | None,
-    thermophoresis_plan: ThermophoresisPlan | None,
-    sampled_values: Mapping[str, int],
-    drag_gas_velocity_m_s: int,
-    drag_gas_density_kg_m3: int,
-    drag_gas_dynamic_viscosity_Pa_s: int,
-    drag_gas_mean_free_path_m: int,
-    thermophoresis_inputs: _ThermophoresisStageBindings,
-) -> _LiftStageBindings:
-    """Bind Saffman primitives and reuse a matching continuum background."""
-    if isinstance(drag_plan, StokesCunninghamDragPlan):
-        gas_velocity = drag_gas_velocity_m_s
-        gas_density = drag_gas_density_kg_m3
-        viscosity = drag_gas_dynamic_viscosity_Pa_s
-        mean_free_path = drag_gas_mean_free_path_m
-    else:
-        gas_velocity = _primitive_binding(sampled_values, plan.gas_velocity_field)
-        if isinstance(thermophoresis_plan, TalbotThermophoresisPlan):
-            gas_density = thermophoresis_inputs.gas_density_kg_m3
-            viscosity = thermophoresis_inputs.gas_dynamic_viscosity_Pa_s
-            mean_free_path = thermophoresis_inputs.gas_mean_free_path_m
-        else:
-            gas_density = _primitive_binding(sampled_values, plan.gas_density_field)
-            viscosity = _primitive_binding(sampled_values, plan.gas_dynamic_viscosity_field)
-            mean_free_path = _primitive_binding(sampled_values, plan.gas_mean_free_path_field)
-    vorticity = _primitive_binding(sampled_values, plan.out_of_plane_gas_vorticity_field)
-    code = LIFT_SAFFMAN_XY if plan.coordinate_system == "cartesian_xy" else LIFT_SAFFMAN_RZ
-    return _LiftStageBindings(
-        code, gas_velocity, gas_density, mean_free_path, viscosity, vorticity, 1.0
+        coefficient,
     )
 
 
@@ -1444,107 +1351,51 @@ def _dielectrophoresis_stage_bindings(
 
 
 def _ion_drag_stage_bindings(
-    plan: IonDragPlan | None,
-    charge_plan: ChargePlan | None,
-    charge_inputs: _ChargeStageBindings,
-    sampled_values: Mapping[str, int],
-    electric_field_V_m: int,
+    plan: IonDragPlan | None, sampled_values: Mapping[str, int]
 ) -> _IonDragStageBindings:
-    """Bind one stage's ion background without duplicating coupled charge samples."""
+    """Bind each ion model's roles directly from the shared primitive table."""
     if plan is None:
         return _NO_ION_DRAG_STAGE_INPUTS
     if isinstance(plan, PrescribedChargePolynomialIonDragPlan):
         return _NO_ION_DRAG_STAGE_INPUTS._replace(code=ION_DRAG_PRESCRIBED_POLYNOMIAL)
-    if not isinstance(plan, BarnesCollisionlessIonDragPlan):
-        return _aggregate_ion_drag_stage_bindings(
-            plan, charge_plan, charge_inputs, sampled_values, electric_field_V_m
-        )
-    if charge_plan is None:
-        electron_density = _primitive_binding(sampled_values, plan.electron_number_density_field)
-        ion_density = _primitive_binding(sampled_values, plan.positive_ion_number_density_field)
-        electron_temperature = _primitive_binding(sampled_values, plan.electron_temperature_field)
-        ion_temperature = _primitive_binding(sampled_values, plan.positive_ion_temperature_field)
-        ion_velocity = _primitive_binding(sampled_values, plan.positive_ion_velocity_field)
-    elif isinstance(charge_plan, PlasmaContinuousChargePlan):
-        electron_density = charge_inputs.electron_density_m3
-        ion_density = charge_inputs.positive_ion_density_m3
-        electron_temperature = charge_inputs.electron_temperature_K
-        ion_temperature = charge_inputs.positive_ion_temperature_K
-        ion_velocity = charge_inputs.positive_ion_velocity_m_s
-    else:
-        raise PhysicsEvaluationError(
-            "aggregate continuous charge does not share the Barnes single-ion background"
-        )
-    mean_free_path = _primitive_binding(sampled_values, plan.ion_neutral_mean_free_path_field)
-    return _IonDragStageBindings(
-        ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED,
-        electron_density,
-        ion_density,
-        electron_temperature,
-        ion_temperature,
-        ion_velocity,
-        mean_free_path,
-        plan.positive_ion_mass_kg,
-        plan.maximum_ion_drift_ratio,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        1.0,
-    )
-
-
-def _aggregate_ion_drag_stage_bindings(
-    plan: RelativeFlowScreenedIonDragPlan | ElectricFieldDirectedImageIonDragPlan,
-    charge_plan: ChargePlan | None,
-    charge_inputs: _ChargeStageBindings,
-    sampled_values: Mapping[str, int],
-    electric_field_V_m: int,
-) -> _IonDragStageBindings:
-    if isinstance(charge_plan, AggregateRelativeDriftChargePlan):
-        ion_density = charge_inputs.positive_ion_density_m3
-        electron_voltage = charge_inputs.aggregate_electron_thermal_voltage_V
-        ion_voltage = charge_inputs.aggregate_positive_ion_thermal_voltage_V
-        ion_velocity = charge_inputs.positive_ion_velocity_m_s
-        ion_mass = charge_inputs.aggregate_effective_positive_ion_mass_kg
-        screening_length = charge_inputs.aggregate_screening_length_m
-    elif charge_plan is None:
-        ion_density = _primitive_binding(sampled_values, plan.positive_ion_number_density_field)
-        electron_voltage = (
-            _primitive_binding(sampled_values, plan.electron_thermal_voltage_field)
-            if isinstance(plan, ElectricFieldDirectedImageIonDragPlan)
-            else -1
-        )
-        ion_voltage = _primitive_binding(sampled_values, plan.positive_ion_thermal_voltage_field)
-        ion_velocity = _primitive_binding(sampled_values, plan.positive_ion_velocity_field)
-        ion_mass = _primitive_binding(sampled_values, plan.effective_positive_ion_mass_field)
-        screening_length = _primitive_binding(sampled_values, plan.screening_length_field)
-    else:
-        raise PhysicsEvaluationError(
-            "aggregate-ion drag does not share the single-species charge background"
+    if isinstance(plan, BarnesCollisionlessIonDragPlan):
+        return _IonDragStageBindings(
+            ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED,
+            _primitive_binding(sampled_values, plan.electron_number_density_field),
+            _primitive_binding(sampled_values, plan.positive_ion_number_density_field),
+            _primitive_binding(sampled_values, plan.electron_temperature_field),
+            _primitive_binding(sampled_values, plan.positive_ion_temperature_field),
+            _primitive_binding(sampled_values, plan.positive_ion_velocity_field),
+            _primitive_binding(sampled_values, plan.ion_neutral_mean_free_path_field),
+            plan.positive_ion_mass_kg,
+            plan.maximum_ion_drift_ratio,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            1.0,
         )
     is_relative = isinstance(plan, RelativeFlowScreenedIonDragPlan)
-    mean_free_path = (
-        _primitive_binding(sampled_values, plan.ion_neutral_mean_free_path_field)
-        if is_relative
-        else -1
-    )
     return _IonDragStageBindings(
         ION_DRAG_RELATIVE_FLOW_SCREENED if is_relative else ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE,
         -1,
-        ion_density,
+        _primitive_binding(sampled_values, plan.positive_ion_number_density_field),
         -1,
         -1,
-        ion_velocity,
-        mean_free_path,
+        _primitive_binding(sampled_values, plan.positive_ion_velocity_field),
+        _primitive_binding(sampled_values, plan.ion_neutral_mean_free_path_field)
+        if is_relative
+        else -1,
         1.0,
         1.0,
-        electron_voltage,
-        ion_voltage,
-        ion_mass,
-        screening_length,
-        electric_field_V_m if not is_relative else -1,
+        _primitive_binding(sampled_values, plan.electron_thermal_voltage_field)
+        if not is_relative
+        else -1,
+        _primitive_binding(sampled_values, plan.positive_ion_thermal_voltage_field),
+        _primitive_binding(sampled_values, plan.effective_positive_ion_mass_field),
+        _primitive_binding(sampled_values, plan.screening_length_field),
+        _primitive_binding(sampled_values, plan.electric_field) if not is_relative else -1,
         plan.maximum_relative_ion_speed_m_s if is_relative else 1.0,
     )
 
@@ -1601,23 +1452,18 @@ def _pack_local_ranges(
     )
     lower = np.zeros((count, bindings.primitive_rules.size), dtype=np.float64)
     upper = np.zeros_like(lower)
-    offset = 0
-    for item in runtime.plan.required_fields:
-        width = len(item.components)
+    for name, offset, width in runtime.primitive_packing:
         if offset in required:
-            value = ranges.get(item.name)
+            value = ranges.get(name)
             if value is None:
-                raise PhysicsEvaluationError(f"local primitive range {item.name!r} is missing")
+                raise PhysicsEvaluationError(f"local primitive range {name!r} is missing")
             lo, hi = (
                 np.asarray(value.lower, dtype=np.float64),
                 np.asarray(value.upper, dtype=np.float64),
             )
             if lo.shape != (count, width) or hi.shape != (count, width):
-                raise PhysicsEvaluationError(
-                    f"local primitive range {item.name!r} has an invalid shape"
-                )
+                raise PhysicsEvaluationError(f"local primitive range {name!r} has an invalid shape")
             lower[:, offset : offset + width], upper[:, offset : offset + width] = lo, hi
-        offset += width
     return lower, upper
 
 
@@ -1696,8 +1542,9 @@ def _local_drag_applicability_row(
     lower: FloatArray,
     upper: FloatArray,
 ) -> tuple[bool, bool]:
+    proof = context.proofs.drag
     model = context.bindings
-    if model.drag_code in (DRAG_NONE, DRAG_PRESCRIBED_LINEAR):
+    if proof in (_PROOF_NONE, _PROOF_DRAG_PRESCRIBED):
         return True, True
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.gas_velocity, velocity_lower, velocity_upper
@@ -1706,7 +1553,7 @@ def _local_drag_applicability_row(
     mean_free_path_lo, mean_free_path_hi = _local_scalar_range_row(
         lower, upper, row, model.gas_mean_free_path, True
     )
-    if model.drag_code == DRAG_STOKES_CUNNINGHAM:
+    if proof == _PROOF_DRAG_STOKES:
         _, density_hi = _local_scalar_range_row(lower, upper, row, model.gas_density, True)
         viscosity_lo, _ = _local_scalar_range_row(lower, upper, row, model.gas_viscosity, True)
         kn_lo = _local_positive_lower(2.0 * mean_free_path_lo / diameter)
@@ -1724,8 +1571,10 @@ def _local_drag_applicability_row(
             and reynolds_hi <= STOKES_CUNNINGHAM_MAX_REYNOLDS
         )
         return certified and numerical, numerical
+    if proof not in (_PROOF_DRAG_EPSTEIN, _PROOF_DRAG_FINITE):
+        raise PhysicsEvaluationError("unresolved drag applicability proof")
     temperature_lo, _ = _local_scalar_range_row(lower, upper, row, model.gas_temperature, True)
-    thermal_factor = 8.0 / math.pi if model.drag_code == DRAG_EPSTEIN else 2.0
+    thermal_factor = 8.0 / math.pi if proof == _PROOF_DRAG_EPSTEIN else 2.0
     thermal_lo = _local_positive_lower(
         np.sqrt(thermal_factor * BOLTZMANN_J_K * temperature_lo / model.gas_molecular_mass_kg)
     )
@@ -1750,18 +1599,16 @@ def _local_charge_applicability_row(
     lower: FloatArray,
     upper: FloatArray,
 ) -> tuple[bool, bool]:
+    proof = context.proofs.charge
     model = context.bindings.charge_inputs
-    if model.code in (CHARGE_FIXED, CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR):
+    if proof in (_PROOF_NONE, _PROOF_CHARGE_PRESCRIBED):
         return True, True
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.positive_ion_velocity_m_s, velocity_lower, velocity_upper
     )
-    if (
-        model.code == CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_TWO_CURRENT
-        or model.code == CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT
-    ):
+    if proof == _PROOF_CHARGE_TWO or proof == _PROOF_CHARGE_THREE:
         certified = speed <= model.aggregate_maximum_relative_ion_speed_m_s
-        if model.code == CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT:
+        if proof == _PROOF_CHARGE_THREE:
             negative_speed, negative_numerical = _local_relative_speed_row(
                 lower,
                 upper,
@@ -1775,6 +1622,8 @@ def _local_charge_applicability_row(
             )
             numerical = numerical and negative_numerical
         return certified and numerical, numerical
+    if proof not in (_PROOF_CHARGE_OML, _PROOF_CHARGE_SHIFTED):
+        raise PhysicsEvaluationError("unresolved charge applicability proof")
     _, electron_density_hi = _local_scalar_range_row(
         lower, upper, row, model.electron_density_m3, True
     )
@@ -1822,10 +1671,11 @@ def _local_thermophoresis_applicability_row(
     lower: FloatArray,
     upper: FloatArray,
 ) -> tuple[bool, bool]:
+    proof = context.proofs.thermophoresis
     model = context.bindings.thermophoresis_inputs
-    if model.code == THERMOPHORESIS_NONE:
+    if proof == _PROOF_NONE:
         return True, True
-    if model.code == THERMOPHORESIS_TALBOT:
+    if proof == _PROOF_THERMO_TALBOT:
         for offset in (
             model.gas_temperature_K,
             model.gas_density_kg_m3,
@@ -1837,6 +1687,8 @@ def _local_thermophoresis_applicability_row(
         _local_scalar_range_row(lower, upper, row, model.gas_temperature_gradient_K_m, False)
         _local_scalar_range_row(lower, upper, row, model.gas_temperature_gradient_K_m + 1, False)
         return True, True
+    if proof != _PROOF_THERMO_WALDMANN:
+        raise PhysicsEvaluationError("unresolved thermophoresis applicability proof")
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.gas_velocity_m_s, velocity_lower, velocity_upper
     )
@@ -1985,18 +1837,21 @@ def _local_ion_drag_applicability_row(
     lower: FloatArray,
     upper: FloatArray,
 ) -> tuple[bool, bool]:
+    proof = context.proofs.ion_drag
     model = context.bindings.ion_drag_inputs
-    if model.code in (
-        ION_DRAG_NONE,
-        ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE,
-        ION_DRAG_PRESCRIBED_POLYNOMIAL,
+    if proof in (
+        _PROOF_NONE,
+        _PROOF_ION_IMAGE,
+        _PROOF_ION_PRESCRIBED,
     ):
         return True, True
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.positive_ion_velocity_m_s, velocity_lower, velocity_upper
     )
-    if model.code == ION_DRAG_RELATIVE_FLOW_SCREENED:
+    if proof == _PROOF_ION_RELATIVE:
         return numerical and speed <= model.maximum_relative_ion_speed_m_s, numerical
+    if proof != _PROOF_ION_BARNES:
+        raise PhysicsEvaluationError("unresolved ion applicability proof")
     temperature_lo, temperature_hi = _local_scalar_range_row(
         lower, upper, row, model.positive_ion_temperature_K, True
     )
@@ -2025,6 +1880,15 @@ def _local_ion_drag_applicability_row(
 
 
 @njit(cache=True, fastmath=False, error_model="numpy")
+def _interval_absolute_lower(lower: float, upper: float) -> float:
+    if lower > 0.0:
+        return lower
+    if upper < 0.0:
+        return -upper
+    return 0.0
+
+
+@njit(cache=True, fastmath=False, error_model="numpy")
 def _local_lift_applicability_row(
     context: PhysicsNumericContext,
     particle: int,
@@ -2034,20 +1898,23 @@ def _local_lift_applicability_row(
     lower: FloatArray,
     upper: FloatArray,
 ) -> tuple[bool, bool]:
+    proof = context.proofs.lift
     model = context.bindings.lift_inputs
-    if model.code in (LIFT_NONE, LIFT_PRESCRIBED_ROTATIONAL):
+    if proof in (_PROOF_NONE, _PROOF_LIFT_PRESCRIBED):
         return True, True
     radius = 0.5 * context.drag_diameter_m[particle]
     mean_free_path_lo, mean_free_path_hi = _local_scalar_range_row(
         lower, upper, row, model.gas_mean_free_path_m, True
     )
-    if model.code == LIFT_RAREFIED_VORTICITY_RZ:
+    if proof == _PROOF_LIFT_RAREFIED:
         kn_lo = _local_positive_lower(mean_free_path_lo / radius)
         numerical = math.isfinite(kn_lo)
         return (
             numerical and kn_lo >= RAREFIED_VORTICITY_LIFT_MIN_MEAN_FREE_PATH_OVER_RADIUS,
             numerical,
         )
+    if proof != _PROOF_LIFT_SAFFMAN:
+        raise PhysicsEvaluationError("unresolved lift applicability proof")
     speed, numerical = _local_relative_speed_row(
         lower, upper, row, model.gas_velocity_m_s, velocity_lower, velocity_upper
     )
@@ -2061,7 +1928,7 @@ def _local_lift_applicability_row(
         lower, upper, row, model.azimuthal_gas_vorticity_s_inv, False
     )
     omega_abs_hi = max(abs(omega_lo), abs(omega_hi))
-    omega_abs_lo = omega_lo if omega_lo > 0.0 else (-omega_hi if omega_hi < 0.0 else 0.0)
+    omega_abs_lo = _interval_absolute_lower(omega_lo, omega_hi)
     kn_hi = _local_nonnegative_upper(mean_free_path_hi / radius)
     slip_reynolds = _local_nonnegative_upper(density_hi * radius * speed / viscosity_lo)
     shear_hi = _local_nonnegative_upper(density_hi * radius**2 * omega_abs_hi / viscosity_lo)
@@ -2501,6 +2368,8 @@ def prepare_physics_runtime(
         electrostatic_radius_m,
         displaced_volume_m3,
         stage_bindings,
+        _prepare_noise_stage_bindings(plan, stage_bindings),
+        _prepare_applicability_proof_codes(plan, stage_bindings),
     )
     native_applicability_context = _prepare_continuous_applicability_context(
         native_context,
@@ -2520,8 +2389,14 @@ def prepare_physics_runtime(
         _EMPTY_BOUND_SCALAR if lift_bounds is None else lift_bounds.coupling_rate_abs_upper_s_inv,
         _EMPTY_BOUND_SCALAR if lift_bounds is None else lift_bounds.gas_velocity_abs_upper_m_s,
     )
+    packing: list[tuple[str, int, int]] = []
+    offset = 0
+    for item in plan.required_fields:
+        width = len(item.components)
+        packing.append((item.name, offset, width))
+        offset += width
     return PhysicsRuntime(
-        plan,
+        tuple(packing),
         mass_kg,
         drag_diameter_m,
         electrostatic_radius_m,
@@ -2593,30 +2468,30 @@ def _prepare_continuous_applicability_context(
 ) -> ContinuousApplicabilityContext:
     """Resolve all family gates once, retaining each prepared bound's owner."""
 
-    bindings = native.bindings
+    bindings = native.proofs
     return ContinuousApplicabilityContext(
         native.drag_diameter_m,
         native.electrostatic_radius_m,
-        _prepare_drag_applicability_context(plan.drag, drag, bindings.drag_code),
-        _prepare_charge_applicability_context(plan.charge, charge, bindings.charge_inputs.code),
+        _prepare_drag_applicability_context(plan.drag, drag, bindings.drag),
+        _prepare_charge_applicability_context(plan.charge, charge, bindings.charge),
         _prepare_thermophoresis_applicability_context(
             plan.thermophoresis,
             thermophoresis,
-            bindings.thermophoresis_inputs.code,
+            bindings.thermophoresis,
         ),
         _prepare_ion_drag_applicability_context(
             plan.ion_drag,
             ion_drag,
-            bindings.ion_drag_inputs.code,
+            bindings.ion_drag,
         ),
-        _prepare_lift_applicability_context(plan.lift, lift, bindings.lift_inputs.code),
-        bindings.drag_code != DRAG_NONE
-        or bindings.ion_drag_inputs.code
+        _prepare_lift_applicability_context(plan.lift, lift, bindings.lift),
+        bindings.drag != _PROOF_NONE
+        or bindings.ion_drag
         in (
-            ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED,
-            ION_DRAG_RELATIVE_FLOW_SCREENED,
+            _PROOF_ION_BARNES,
+            _PROOF_ION_RELATIVE,
         )
-        or bindings.lift_inputs.code in (LIFT_SAFFMAN_XY, LIFT_SAFFMAN_RZ),
+        or bindings.lift in (_PROOF_LIFT_SAFFMAN, _PROOF_LIFT_SAFFMAN),
     )
 
 
@@ -2625,7 +2500,7 @@ def _prepare_drag_applicability_context(
     bounds: _DragBounds | None,
     code: int,
 ) -> _DragApplicabilityContext:
-    if plan is None and bounds is None and code == DRAG_NONE:
+    if plan is None and bounds is None and code == _PROOF_NONE:
         return _DragApplicabilityContext(code, _EMPTY_BOUND_SCALAR, 0.0, 0.0, 0.0, 0.0, 0.0)
     if isinstance(plan, PrescribedLinearFrictionPlan) and isinstance(bounds, _PrescribedDragBounds):
         return _DragApplicabilityContext(
@@ -2681,7 +2556,7 @@ def _prepare_charge_applicability_context(
             bounds.model.charge_number_lower,
             bounds.model.charge_number_upper,
         )
-    if plan is None and bounds is None and code == CHARGE_FIXED:
+    if plan is None and bounds is None and code == _PROOF_NONE:
         return _ChargeApplicabilityContext(
             code,
             _EMPTY_BOUND_SCALAR,
@@ -2733,7 +2608,7 @@ def _prepare_thermophoresis_applicability_context(
     bounds: _ThermophoresisRuntimeBounds | None,
     code: int,
 ) -> _ThermophoresisApplicabilityContext:
-    if plan is None and bounds is None and code == THERMOPHORESIS_NONE:
+    if plan is None and bounds is None and code == _PROOF_NONE:
         return _ThermophoresisApplicabilityContext(
             code,
             _EMPTY_BOUND_APPLICABLE,
@@ -2824,7 +2699,7 @@ def _prepare_lift_applicability_context(
             _EMPTY_BOUND_SCALAR,
             _EMPTY_BOUND_SCALAR,
         )
-    if plan is None and bounds is None and code == LIFT_NONE:
+    if plan is None and bounds is None and code == _PROOF_NONE:
         return _LiftApplicabilityContext(
             code,
             _EMPTY_BOUND_APPLICABLE,
@@ -2866,16 +2741,16 @@ def _drag_continuous_applicability_row(
     vx: float,
     vy: float,
 ) -> tuple[bool, np.uint8]:
-    if bounds.code == DRAG_PRESCRIBED_LINEAR:
+    if bounds.code == _PROOF_DRAG_PRESCRIBED:
         valid = _continuous_velocity_is_finite(vx, vy) and vx >= 0.0 and vy >= 0.0
         return (
             valid,
             CONTINUOUS_APPLICABILITY_OK if valid else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE,
         )
-    if bounds.code == DRAG_NONE:
+    if bounds.code == _PROOF_NONE:
         return True, CONTINUOUS_APPLICABILITY_OK
     ux, uy = bounds.flow_abs_upper_m_s[0], bounds.flow_abs_upper_m_s[1]
-    if bounds.code == DRAG_STOKES_CUNNINGHAM:
+    if bounds.code == _PROOF_DRAG_STOKES:
         return _stokes_continuous_applicability_row(
             diameter,
             vx,
@@ -2887,6 +2762,8 @@ def _drag_continuous_applicability_row(
             bounds.mean_free_path_lower_m,
             bounds.mean_free_path_upper_m,
         )
+    if bounds.code not in (_PROOF_DRAG_EPSTEIN, _PROOF_DRAG_FINITE):
+        raise PhysicsEvaluationError("unresolved continuous drag proof")
     return _epstein_continuous_applicability_row(
         diameter,
         vx,
@@ -2920,6 +2797,25 @@ def _aggregate_charge_continuous_applicability_row(
     return applicable, status
 
 
+@njit(cache=True, fastmath=False, error_model="numpy")
+def _oml_continuous_numerical_values_are_valid(
+    radius: float,
+    vx: float,
+    vy: float,
+    radius_ratio: float,
+    drift_ratio: float,
+) -> bool:
+    return (
+        math.isfinite(radius)
+        and radius > 0.0
+        and _continuous_velocity_is_finite(vx, vy)
+        and vx >= 0.0
+        and vy >= 0.0
+        and math.isfinite(radius_ratio)
+        and math.isfinite(drift_ratio)
+    )
+
+
 @njit(cache=True, fastmath=False, parallel=False, error_model="numpy")
 def _charge_continuous_applicability_row(
     bounds: _ChargeApplicabilityContext,
@@ -2927,12 +2823,12 @@ def _charge_continuous_applicability_row(
     vx: float,
     vy: float,
 ) -> tuple[bool, np.uint8]:
-    if bounds.code in (CHARGE_FIXED, CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR):
+    if bounds.code in (_PROOF_NONE, _PROOF_CHARGE_PRESCRIBED):
         return True, CONTINUOUS_APPLICABILITY_OK
     ux, uy = bounds.positive_flow_abs_upper_m_s[0], bounds.positive_flow_abs_upper_m_s[1]
     if bounds.code in (
-        CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_TWO_CURRENT,
-        CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT,
+        _PROOF_CHARGE_TWO,
+        _PROOF_CHARGE_THREE,
     ):
         applicable, status = _aggregate_charge_continuous_applicability_row(
             vx,
@@ -2941,7 +2837,7 @@ def _charge_continuous_applicability_row(
             uy,
             bounds.maximum_drift_or_speed,
         )
-        if bounds.code == CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT:
+        if bounds.code == _PROOF_CHARGE_THREE:
             flow = bounds.negative_flow_abs_upper_m_s
             negative_applicable, negative_status = _aggregate_charge_continuous_applicability_row(
                 vx,
@@ -2954,17 +2850,13 @@ def _charge_continuous_applicability_row(
             if negative_status != CONTINUOUS_APPLICABILITY_OK:
                 status = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
         return applicable, status
+    if bounds.code not in (_PROOF_CHARGE_OML, _PROOF_CHARGE_SHIFTED):
+        raise PhysicsEvaluationError("unresolved continuous charge proof")
     radius_ratio = np.nextafter(radius / bounds.debye_length_lower_m, np.inf)
     speed = _outward_relative_speed(vx, vy, ux, uy)
     drift_ratio = np.nextafter(speed / bounds.thermal_speed_lower_m_s, np.inf)
-    numerical_ok = (
-        math.isfinite(radius)
-        and radius > 0.0
-        and _continuous_velocity_is_finite(vx, vy)
-        and vx >= 0.0
-        and vy >= 0.0
-        and math.isfinite(radius_ratio)
-        and math.isfinite(drift_ratio)
+    numerical_ok = _oml_continuous_numerical_values_are_valid(
+        radius, vx, vy, radius_ratio, drift_ratio
     )
     status = (
         CONTINUOUS_APPLICABILITY_OK if numerical_ok else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
@@ -2983,10 +2875,12 @@ def _thermophoresis_continuous_applicability_row(
     vx: float,
     vy: float,
 ) -> tuple[bool, np.uint8]:
-    if bounds.code == THERMOPHORESIS_NONE:
+    if bounds.code == _PROOF_NONE:
         return True, CONTINUOUS_APPLICABILITY_OK
-    if bounds.code == THERMOPHORESIS_TALBOT:
+    if bounds.code == _PROOF_THERMO_TALBOT:
         return bounds.static_applicable[particle], CONTINUOUS_APPLICABILITY_OK
+    if bounds.code != _PROOF_THERMO_WALDMANN:
+        raise PhysicsEvaluationError("unresolved continuous thermophoresis proof")
     flow = bounds.flow_abs_upper_m_s
     return _drift_continuous_applicability_row(
         bounds.static_applicable[particle],
@@ -3007,13 +2901,13 @@ def _ion_drag_continuous_applicability_row(
     vy: float,
 ) -> tuple[bool, np.uint8]:
     if bounds.code in (
-        ION_DRAG_NONE,
-        ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE,
-        ION_DRAG_PRESCRIBED_POLYNOMIAL,
+        _PROOF_NONE,
+        _PROOF_ION_IMAGE,
+        _PROOF_ION_PRESCRIBED,
     ):
         return True, CONTINUOUS_APPLICABILITY_OK
     flow = bounds.flow_abs_upper_m_s
-    if bounds.code == ION_DRAG_RELATIVE_FLOW_SCREENED:
+    if bounds.code == _PROOF_ION_RELATIVE:
         return _relative_speed_continuous_applicability_row(
             vx,
             vy,
@@ -3021,6 +2915,8 @@ def _ion_drag_continuous_applicability_row(
             flow[1],
             bounds.maximum_drift_or_speed,
         )
+    if bounds.code != _PROOF_ION_BARNES:
+        raise PhysicsEvaluationError("unresolved continuous ion proof")
     return _drift_continuous_applicability_row(
         bounds.static_applicable[particle],
         vx,
@@ -3040,14 +2936,16 @@ def _lift_continuous_applicability_row(
     vx: float,
     vy: float,
 ) -> tuple[bool, np.uint8]:
-    if bounds.code == LIFT_NONE:
+    if bounds.code == _PROOF_NONE:
         return True, CONTINUOUS_APPLICABILITY_OK
-    if bounds.code in (LIFT_RAREFIED_VORTICITY_RZ, LIFT_PRESCRIBED_ROTATIONAL):
+    if bounds.code in (_PROOF_LIFT_RAREFIED, _PROOF_LIFT_PRESCRIBED):
         valid = _continuous_velocity_is_finite(vx, vy) and vx >= 0.0 and vy >= 0.0
         status = (
             CONTINUOUS_APPLICABILITY_OK if valid else CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
         )
         return bounds.static_applicable[particle] and valid, status
+    if bounds.code != _PROOF_LIFT_SAFFMAN:
+        raise PhysicsEvaluationError("unresolved continuous lift proof")
     flow = bounds.flow_abs_upper_m_s
     return _saffman_continuous_applicability_row(
         bounds.static_applicable[particle],
@@ -3128,7 +3026,7 @@ def charge_interval_inside_prepared_invariant_into(
         if not finite_ordered and status[row] == CONTINUOUS_APPLICABILITY_OK:
             status[row] = CONTINUOUS_APPLICABILITY_NUMERICAL_FAILURE
         inside = finite_ordered
-        if bounds.code != CHARGE_FIXED:
+        if bounds.code != _PROOF_NONE:
             inside = (
                 inside
                 and lower >= bounds.charge_number_lower
@@ -4011,6 +3909,133 @@ def _freeze(*arrays: FloatArray) -> None:
         value.setflags(write=False)
 
 
+def _prepare_applicability_proof_codes(
+    plan: PhysicsPlan, stage: PhysicsStageBindings
+) -> ApplicabilityProofCodes:
+    """Every supported revision explicitly chooses a proof; new stage codes do not inherit one."""
+    revisions = {
+        item.descriptor.category: item.descriptor.revision for item in plan.selected_models
+    }
+    declarations = {
+        "drag": {
+            "epstein_linear_v1": (DRAG_EPSTEIN, _PROOF_DRAG_EPSTEIN),
+            "epstein_linear_effective_gas_sensitivity_v1": (DRAG_EPSTEIN, _PROOF_DRAG_EPSTEIN),
+            "epstein_finite_speed_maxwell_mixed_equal_temperature_v1": (
+                DRAG_EPSTEIN_FINITE_SPEED,
+                _PROOF_DRAG_FINITE,
+            ),
+            "stokes_cunningham_allen_raabe_air_v1": (DRAG_STOKES_CUNNINGHAM, _PROOF_DRAG_STOKES),
+            "prescribed_linear_friction_v1": (DRAG_PRESCRIBED_LINEAR, _PROOF_DRAG_PRESCRIBED),
+        },
+        "charge": {
+            "fixed_charge_v1": (CHARGE_FIXED, _PROOF_NONE),
+            "oml_stationary_maxwellian_debye_huckel_v1": (
+                CHARGE_OML_STATIONARY_MAXWELLIAN_DEBYE_HUCKEL,
+                _PROOF_CHARGE_OML,
+            ),
+            "oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1": (
+                CHARGE_OML_SHIFTED_MAXWELLIAN_SINGLE_ION_NEGATIVE_DEBYE_HUCKEL,
+                _PROOF_CHARGE_SHIFTED,
+            ),
+            "aggregate_relative_drift_regularized_two_current_v1": (
+                CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_TWO_CURRENT,
+                _PROOF_CHARGE_TWO,
+            ),
+            "aggregate_relative_drift_regularized_three_current_v1": (
+                CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT,
+                _PROOF_CHARGE_THREE,
+            ),
+            "prescribed_exponential_linear_collection_v1": (
+                CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR,
+                _PROOF_CHARGE_PRESCRIBED,
+            ),
+        },
+        "thermophoresis": {
+            "waldmann_gallis_free_molecular_single_species_heat_flux_v1": (
+                THERMOPHORESIS_WALDMANN_GALLIS,
+                _PROOF_THERMO_WALDMANN,
+            ),
+            "waldmann_gallis_free_molecular_effective_gas_heat_flux_sensitivity_v1": (
+                THERMOPHORESIS_WALDMANN_GALLIS,
+                _PROOF_THERMO_WALDMANN,
+            ),
+            "talbot_cross_regime_radius_knudsen_v1": (THERMOPHORESIS_TALBOT, _PROOF_THERMO_TALBOT),
+        },
+        "ion_drag": {
+            "barnes_collisionless_effective_speed_single_positive_ion_negative_debye_huckel_v1": (
+                ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED,
+                _PROOF_ION_BARNES,
+            ),
+            "relative_flow_screened_collection_orbital_aggregate_ion_v1": (
+                ION_DRAG_RELATIVE_FLOW_SCREENED,
+                _PROOF_ION_RELATIVE,
+            ),
+            "electric_field_directed_image_orbital_sensitivity_v1": (
+                ION_DRAG_ELECTRIC_FIELD_DIRECTED_IMAGE,
+                _PROOF_ION_IMAGE,
+            ),
+            "prescribed_charge_polynomial_v1": (
+                ION_DRAG_PRESCRIBED_POLYNOMIAL,
+                _PROOF_ION_PRESCRIBED,
+            ),
+        },
+        "lift": {
+            "rarefied_vorticity_sensitivity_rz_v1": (
+                LIFT_RAREFIED_VORTICITY_RZ,
+                _PROOF_LIFT_RAREFIED,
+            ),
+            "saffman_unbounded_creeping_shear_v1": (stage.lift_inputs.code, _PROOF_LIFT_SAFFMAN),
+            "prescribed_rotational_lift_v1": (LIFT_PRESCRIBED_ROTATIONAL, _PROOF_LIFT_PRESCRIBED),
+        },
+    }
+    stage_codes = (
+        stage.drag_code,
+        stage.charge_inputs.code,
+        stage.thermophoresis_inputs.code,
+        stage.ion_drag_inputs.code,
+        stage.lift_inputs.code,
+    )
+    proofs = []
+    for (category, choices), actual in zip(declarations.items(), stage_codes, strict=True):
+        revision = revisions.get(category)
+        if revision is None:
+            expected, proof = 0, _PROOF_NONE
+        elif revision in choices:
+            expected, proof = choices[revision]
+        else:
+            raise PhysicsEvaluationError(
+                f"no applicability proof declared for {category}:{revision}"
+            )
+        if actual != expected or (
+            category == "lift"
+            and proof == _PROOF_LIFT_SAFFMAN
+            and actual not in (LIFT_SAFFMAN_XY, LIFT_SAFFMAN_RZ)
+        ):
+            raise PhysicsEvaluationError(f"{category} stage and applicability proof disagree")
+        proofs.append(proof)
+    return ApplicabilityProofCodes(*proofs)
+
+
+def _prepare_noise_stage_bindings(
+    plan: PhysicsPlan, bindings: PhysicsStageBindings
+) -> NoiseStageBindings:
+    """Seal the already validated noise/drag composition before numerical dispatch."""
+    if plan.noise is None:
+        return NoiseStageBindings(NOISE_NONE, -1, -1, -1)
+    if isinstance(plan.noise, PrescribedForceDiffusionNoisePlan):
+        if not isinstance(plan.drag, PrescribedLinearFrictionPlan):
+            raise PhysicsEvaluationError("prescribed force diffusion lost its friction model")
+        return NoiseStageBindings(
+            NOISE_PRESCRIBED_FORCE,
+            -1,
+            bindings.prescribed.friction,
+            bindings.prescribed.force_diffusion,
+        )
+    if not isinstance(plan.drag, EpsteinDragPlan):
+        raise PhysicsEvaluationError("FDT noise lost its linear Epstein model")
+    return NoiseStageBindings(NOISE_FDT, bindings.gas_temperature, -1, -1)
+
+
 def _prepare_physics_stage_bindings(
     plan: PhysicsPlan,
     charge_bounds: _ChargeRuntimeBounds | None,
@@ -4065,16 +4090,7 @@ def _prepare_physics_stage_bindings(
     elif isinstance(drag, PrescribedLinearFrictionPlan):
         drag_code = DRAG_PRESCRIBED_LINEAR
         gas_velocity = _primitive_binding(sampled_values, drag.gas_velocity_field)
-    thermophoresis_inputs = _thermophoresis_stage_bindings(
-        plan.thermophoresis,
-        drag,
-        sampled_values,
-        gas_velocity,
-        gas_density,
-        gas_temperature,
-        gas_viscosity,
-        gas_mean_free_path,
-    )
+    thermophoresis_inputs = _thermophoresis_stage_bindings(plan.thermophoresis, sampled_values)
     electric = plan.electric
     image_ion_drag = plan.ion_drag
     image_electric_field = (
@@ -4088,26 +4104,14 @@ def _prepare_physics_stage_bindings(
         if electric_field_name is None
         else _primitive_binding(sampled_values, electric_field_name)
     )
-    ion_drag_inputs = _ion_drag_stage_bindings(
-        plan.ion_drag, charge_plan, charge_inputs, sampled_values, electric_field
-    )
+    ion_drag_inputs = _ion_drag_stage_bindings(plan.ion_drag, sampled_values)
     (
         dep_enabled,
         dep_gradient_mean_e_squared,
         dep_medium_relative_permittivity,
         dep_real_clausius_mossotti_factor,
     ) = _dielectrophoresis_stage_bindings(plan.dielectrophoresis, sampled_values)
-    lift_inputs = _lift_stage_bindings(
-        plan.lift,
-        drag,
-        plan.thermophoresis,
-        sampled_values,
-        gas_velocity,
-        gas_density,
-        gas_viscosity,
-        gas_mean_free_path,
-        thermophoresis_inputs,
-    )
+    lift_inputs = _lift_stage_bindings(plan.lift, sampled_values)
     gravity = plan.gravity_buoyancy
     gravity_density = (
         -1 if gravity is None else _primitive_binding(sampled_values, gravity.gas_density_field)

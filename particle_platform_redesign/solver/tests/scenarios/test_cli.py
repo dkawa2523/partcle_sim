@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import yaml
+
 from tests.verification.microcases import materialize_microcase
 
 
@@ -44,6 +46,46 @@ def test_check_run_and_inspect_use_the_public_workflow(tmp_path: Path) -> None:
     assert inspect_payload["status"] == "complete"
     assert inspect_payload["summary"]["case_name"] == "C01"
     assert inspect_payload["summary"]["counts"]["particles"] == 1
+    assert inspect_payload["labels"]["sources"][0]["source_id"] == 0
+    assert inspect_payload["labels"]["sources"][0]["table"]
+    assert inspect_payload["labels"]["sources"][0]["particle_count"] == 1
+    assert inspect_payload["labels"]["boundaries"] == []
+    assert inspect_payload["verification"]["scope"] == "consumed_file_bytes"
+    verified = _run_cli("inspect", output, "--verify")
+    assert verified.returncode == 0
+    assert json.loads(verified.stdout)["verification"]["scope"] == "all_payload_file_bytes"
+
+
+def test_result_cli_uses_release_names_and_exact_id_file_with_separate_focus(
+    tmp_path: Path,
+) -> None:
+    paths = materialize_microcase("C01", tmp_path / "case")
+    document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+    document["sources"][0]["name"] = "release, measured"
+    paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    output = tmp_path / "result"
+    assert _run_cli("run", paths.case_path, "-o", output).returncode == 0
+    inspected = json.loads(_run_cli("inspect", output).stdout)
+    name = inspected["labels"]["sources"][0]["name"]
+    identifiers = tmp_path / "ids.csv"
+    identifiers.write_text("particle_id\n101\n", encoding="utf-8")
+    reports = {}
+    for command in ("analyze", "export", "view"):
+        arguments = ["--source-names", f'"{name}"', "--particle-ids-file", identifiers]
+        if command != "analyze":
+            arguments.extend(["-o", tmp_path / command])
+        if command == "view":
+            arguments.extend(["--focus-particle-id", "101"])
+        invocation = _run_cli(command, output, *arguments)
+        assert invocation.returncode == 0, invocation.stderr
+        reports[command] = json.loads(invocation.stdout)
+    assert reports["analyze"]["population"]["selected_particles"] == 1
+    assert reports["export"]["selection"]["selected_particles"] == 1
+    assert reports["view"]["focus_particle_id"] == 101
+    assert reports["analyze"]["parameters"]["source_names"] == [name]
+    removed = _run_cli("view", output, "-o", tmp_path / "old-alias", "--particle-id", "101")
+    assert removed.returncode == 2
+    assert "unrecognized arguments" in removed.stderr
 
 
 def test_public_cli_failure_is_json_and_exit_two(tmp_path: Path) -> None:

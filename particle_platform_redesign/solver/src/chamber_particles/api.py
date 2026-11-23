@@ -1,13 +1,16 @@
 """Stable public entry points and public exception translation."""
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
+from types import MappingProxyType
 from typing import Literal
 
 from .case import SimulationCase
 from .case import load_case as _load_case
 from .engine import _prepare, run_simulation
+from .errors import CaseError, IncompleteResultError, SimulationError
 from .output import (
     IncompleteResult,
     ResultOpenError,
@@ -21,18 +24,6 @@ from .transport import EngineError
 type _PathInput = str | PathLike[str]
 
 
-class CaseError(ValueError):
-    """The canonical case is invalid or cannot be read."""
-
-
-class SimulationError(RuntimeError):
-    """The requested simulation cannot be prepared or completed."""
-
-
-class IncompleteResultError(SimulationError):
-    """A result is incomplete and was opened without recovery mode."""
-
-
 @dataclass(frozen=True, slots=True)
 class CheckedModel:
     """One resolved scientific model, without mutable execution bindings."""
@@ -40,6 +31,21 @@ class CheckedModel:
     category: str
     model: str
     revision: str
+    parameters: Mapping[str, str | float]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "parameters", MappingProxyType(dict(self.parameters)))
+
+
+@dataclass(frozen=True, slots=True)
+class CheckedField:
+    """Canonical metadata of an actually bound required field."""
+
+    name: str
+    unit: str
+    components: tuple[str, ...]
+    stored_basis: str
+    layout: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,6 +76,7 @@ class CaseCheckReport:
     load_peak_bytes: int
     prepare_peak_bytes: int
     run_peak_bytes: int
+    required_field_metadata: tuple[CheckedField, ...]
     status: Literal["valid"] = "valid"
 
 
@@ -93,9 +100,14 @@ def check_case(case: SimulationCase, *, workers: int = 1) -> CaseCheckReport:
         raise CaseError(f"cannot prepare case {case.spec.name}: {exc}") from exc
     spec = case.spec
     prepared = run.transport
-    memory = prepared.memory_plan
+    memory = run.memory_plan
     models = tuple(
-        CheckedModel(category, str(model["model"]), str(model["revision"]))
+        CheckedModel(
+            category,
+            str(model["model"]),
+            str(model["revision"]),
+            {key: value for key, value in model.items() if key not in ("model", "revision")},
+        )
         for category, model in run.facts.model_document().items()
     )
     return CaseCheckReport(
@@ -113,9 +125,9 @@ def check_case(case: SimulationCase, *, workers: int = 1) -> CaseCheckReport:
         spec.time.start_s,
         spec.time.end_s,
         spec.time.dt_s,
-        tuple(item.name for item in prepared.physics.required_fields),
+        tuple(name for name, _, _ in prepared.dynamics.runtime.primitive_packing),
         models,
-        prepared.field_time_split_s,
+        run.field_time_split_s,
         case.data.geometry.group_names,
         memory.limit_bytes,
         memory.planned_bytes,
@@ -123,6 +135,10 @@ def check_case(case: SimulationCase, *, workers: int = 1) -> CaseCheckReport:
         memory.load_peak_bytes,
         memory.prepare_peak_bytes,
         memory.run_peak_bytes,
+        tuple(
+            CheckedField(name, item.unit, item.components, item.stored_basis, item.layout)
+            for name, item in prepared.fields.fields.items()
+        ),
     )
 
 

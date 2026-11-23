@@ -27,9 +27,10 @@ from chamber_particles.physics.forces import (
     VACUUM_PERMITTIVITY_F_M,
 )
 from chamber_particles.yaml_input import parse_document
+from chamber_particles_tools.field_generation import record_generation
 from chamber_particles_tools.inputs import create_case
 
-TOOL_REVISION = "vigus_static_coefficient_transport_v2"
+TOOL_REVISION = "vigus_static_coefficient_transport_v3"
 _PROPERTY_NAMES = ("mass_kg", "drag_diameter_m", "electrostatic_radius_m", "displaced_volume_m3")
 _SCALARS = {
     "gas_density": "kg/m^3",
@@ -334,6 +335,15 @@ def prepare_transport(
         raise ValueError(
             "reference coefficient fields already exist; regenerate from the primitive case"
         )
+    generated = replace(case.data, fields=(*case.data.fields, *fields))
+    generation = record_generation(
+        generated,
+        primitive_names=(*_SCALARS, "gas_velocity", "electric_field"),
+        parameter_document=parameters,
+        particle_properties=properties,
+        output_names=tuple(field.name for field in fields),
+        producer_revision=TOOL_REVISION,
+    )
     models = _reference_models(properties, electron_reference)
     models["noise"]["interval_tree_depth"] = interval_tree_depth
     if adaptive_max_depth is not None:
@@ -356,6 +366,7 @@ def prepare_transport(
         "primitive_provenance": json.loads(case.data.provenance_json),
         "rotation_meaning": "d(ug_z)/dr-d(ug_r)/dz; near-zero native Saffman regularization requires separate correspondence evidence",
         "brownian_mapping": _brownian_mapping(parameters["brownian"]),
+        "field_generation": generation,
     }
     provenance = json.dumps(
         {
@@ -364,10 +375,14 @@ def prepare_transport(
             "source_sha256": "sha256:" + hashlib.sha256(parameter_bytes + case_bytes).hexdigest(),
             "field_semantics_revision": TOOL_REVISION,
             "producer_metadata": metadata,
+            "derived_field_generations": [
+                *json.loads(case.data.provenance_json).get("derived_field_generations", []),
+                generation,
+            ],
         },
         allow_nan=False,
     )
-    bundle = replace(case.data, fields=(*case.data.fields, *fields), provenance_json=provenance)
+    bundle = replace(generated, provenance_json=provenance)
     receipt = {"tool_revision": TOOL_REVISION, "content_hash": content_hash(bundle), **metadata}
     create_case(
         bundle,

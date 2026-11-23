@@ -47,7 +47,7 @@ def test_summary_and_svg_tools_read_one_completed_result(tmp_path: Path) -> None
 
     summary: dict[str, Any] = summarize_result(result_path, event_batch_rows=1)
 
-    assert summary["analysis_revision"] == "result_population_interaction_terminal_v3"
+    assert summary["analysis_revision"] == "result_population_interaction_terminal_v4"
     assert summary["parameters"]["event_batch_rows"] == 1
     assert summary["fate"] == [{"lifecycle": "stuck", "particles": 1, "model_weight": 1.0}]
     assert summary["deposition"] == [
@@ -83,15 +83,15 @@ def test_summary_and_svg_tools_read_one_completed_result(tmp_path: Path) -> None
     report: dict[str, Any] = render_result(
         result_path,
         tmp_path / "visualization",
-        particle_id=801,
+        focus_particle_id=801,
         event_batch_rows=1,
         max_event_points=1,
     )
 
-    assert report["visualization_revision"] == "result_context_population_svg_v4"
+    assert report["visualization_revision"] == "result_context_population_svg_v5"
     assert report["parameters"]["event_batch_rows"] == 1
     assert report["trajectory_source"] == "frames"
-    assert report["particle_id"] == 801
+    assert report["focus_particle_id"] == 801
     assert report["trajectory_points"] == 6
     assert report["boundary_events"] == 2
     assert report["rendered_boundary_points"] == 1
@@ -100,7 +100,7 @@ def test_summary_and_svg_tools_read_one_completed_result(tmp_path: Path) -> None
     metadata_json = Path(str(report["metadata_json"]))
     assert "Trajectory detail: particle 801" in trajectory_svg.read_text(encoding="utf-8")
     assert "Boundary interactions: 1 rendered of 2" in events_svg.read_text(encoding="utf-8")
-    assert '"visualization_revision": "result_context_population_svg_v4"' in (
+    assert '"visualization_revision": "result_context_population_svg_v5"' in (
         metadata_json.read_text(encoding="utf-8")
     )
 
@@ -171,39 +171,67 @@ def test_bounded_event_views_are_independent_of_storage_order_and_batch_size(
                 group["candidate_facet_id"][...] = np.concatenate(candidates)
             reversed_rows += count if count > 1 else 0
     assert reversed_rows == 2
-    original_events = open_result(source).read_boundary_events()
-    reordered_events = open_result(reordered).read_boundary_events()
+    original_view = open_result(source)
+    # This alternate reader fixture declares its changed storage bytes. A
+    # completed run with the original prefix/checkpoint must reject the edit.
+    manifest = original_view.manifest_document()
+    segments = tuple(reordered / path.relative_to(source) for path in original_view.segment_paths)
+    for path in segments:
+        manifest["content_files"][path.relative_to(reordered).as_posix()] = (
+            "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+        )
+    reordered_view = ResultView(
+        reordered, manifest, segments, True, original_view.context_source_count
+    )
+    original_events = original_view.read_boundary_events()
+    reordered_events = reordered_view.read_boundary_events()
     np.testing.assert_array_equal(original_events.time_s, reordered_events.time_s)
     np.testing.assert_array_equal(original_events.event_ordinal, reordered_events.event_ordinal)
     original = render_result(
-        source, tmp_path / "first", particle_id=801, event_batch_rows=1, max_event_points=1
+        source, tmp_path / "first", focus_particle_id=801, event_batch_rows=1, max_event_points=1
     )
     changed = render_result(
-        reordered, tmp_path / "second", particle_id=801, event_batch_rows=3, max_event_points=1
+        reordered_view,
+        tmp_path / "second",
+        focus_particle_id=801,
+        event_batch_rows=3,
+        max_event_points=1,
     )
     assert original["rendered_boundary_points"] == changed["rendered_boundary_points"] == 1
     assert original["event_selection"] == changed["event_selection"]
     for figure in ("trajectory_svg", "boundary_events_svg"):
-        assert Path(str(original[figure])).read_text(encoding="utf-8") == Path(
-            str(changed[figure])
-        ).read_text(encoding="utf-8")
+        first_svg = Path(str(original[figure])).read_text(encoding="utf-8")
+        second_svg = Path(str(changed[figure])).read_text(encoding="utf-8")
+        assert first_svg.replace(
+            original_view.manifest_sha256, "SOURCE_IDENTITY"
+        ) == second_svg.replace(reordered_view.manifest_sha256, "SOURCE_IDENTITY")
     trajectory = Path(str(original["trajectory_svg"])).read_text(encoding="utf-8")
     assert "<title>reflected</title>" in trajectory
     assert "<title>stuck</title>" not in trajectory
 
 
-def _cohort_result(directory: Path) -> Path:
+def _cohort_result(
+    directory: Path, second_id: int = 9001, *, shared_boundary_id: bool = False
+) -> Path:
     definition = build_microcase("C08")
     first = definition.data.sources[0]
     second = replace(
         first,
         name="second_table",
-        particle_id=np.asarray([9001], dtype="<i8"),
+        particle_id=np.asarray([second_id], dtype="<i8"),
         release_time_s=np.asarray([0.5], dtype="<f8"),
         model_weight=np.asarray([2.5], dtype="<f8"),
     )
     sources = (first, second)
-    data = replace(definition.data, sources=sources)
+    geometry = definition.data.geometry
+    if shared_boundary_id:
+        geometry = replace(
+            geometry,
+            boundary=replace(
+                geometry.boundary, boundary_id=np.full_like(geometry.boundary.boundary_id, 7)
+            ),
+        )
+    data = replace(definition.data, sources=sources, geometry=geometry)
     directory.mkdir()
     info = write(directory / "case.h5", data)
     document = definition.spec
@@ -219,6 +247,84 @@ def _cohort_result(directory: Path) -> Path:
     result = directory / "result"
     simulate(load_case(case_path), result)
     return result
+
+
+def test_release_names_and_exact_id_file_share_one_population_across_clients(
+    tmp_path: Path,
+) -> None:
+    identifier = 2**53 + 1
+    result = open_result(_cohort_result(tmp_path / "cohort", identifier, shared_boundary_id=True))
+    selection_path = tmp_path / "ids.csv"
+    selection_raw = f"particle_id\n{identifier}.0\n".encode()
+    selection_path.write_bytes(selection_raw)
+    cohort = select_result(result, source_names=("later",), particle_ids_file=selection_path)
+    np.testing.assert_array_equal(cohort.selected_ids, [identifier])
+    np.testing.assert_array_equal(
+        cohort.selected_ids,
+        select_result(result, source_ids=(1,), particle_ids=(identifier,)).selected_ids,
+    )
+    selection_path.unlink()  # Bound consumers reuse exact IDs, not a mutable path.
+    summary: dict[str, Any] = summarize_result(cohort)
+    exported: dict[str, Any] = export_result(cohort, tmp_path / "export")
+    view: dict[str, Any] = render_result(cohort, tmp_path / "view", focus_particle_id=identifier)
+    receipt = cohort.selection_document()
+    assert (
+        summary["population"]["selected_particles"]
+        == exported["selection"]["selected_particles"]
+        == view["population"]["selected_particles"]
+        == 1
+    )
+    assert receipt["source_names"] == ("later",) and receipt["source_ids"] == (1,)
+    assert receipt["particle_ids"] is None
+    assert receipt["particle_ids_file"] == {
+        "path": str(selection_path.resolve()),
+        "sha256": "sha256:" + hashlib.sha256(selection_raw).hexdigest(),
+        "rows": 1,
+    }
+    for key, value in receipt.items():
+        assert (
+            summary["parameters"][key]
+            == exported["selection"][key]
+            == view["parameters"][key]
+            == value
+        )
+    assert view["focus_particle_id"] == identifier
+    assert summary["labels"] == exported["labels"] == view["labels"]
+    assert summary["labels"]["sources"][1]["table"] == "second_table"
+    assert summary["labels"]["sources"][1]["name"] == "later"
+    assert {item["boundary_id"] for item in summary["labels"]["boundaries"]} == {7}
+    assert {item["group_name"] for item in summary["labels"]["boundaries"]} == set(
+        cohort.context.geometry.group_names
+    )
+    with pytest.raises(ValueError, match="unknown release names"):
+        select_result(result, source_names=("second_table",))
+    with pytest.raises(ValueError, match="unique nonempty"):
+        select_result(result, source_names=("later", "later"))
+    with pytest.raises(ValueError, match="choose source_ids"):
+        select_result(result, source_names=("later",), source_ids=(1,))
+    with pytest.raises(ValueError, match="choose particle_ids"):
+        select_result(result, particle_ids=(identifier,), particle_ids_file=selection_path)
+
+
+@pytest.mark.parametrize(
+    "contents, message",
+    [
+        ("id\n9001\n", "single header"),
+        ("particle_id\n9001,extra\n", "exactly one cell"),
+        ("particle_id\n9001\n9001\n", "repeat"),
+        ("particle_id\nNaN\n", "nonnegative int64"),
+        ("particle_id\n9001.1\n", "nonnegative int64"),
+        (f"particle_id\n{2**63}\n", "nonnegative int64"),
+    ],
+)
+def test_id_file_rejects_ambiguous_or_invalid_population(
+    tmp_path: Path, contents: str, message: str
+) -> None:
+    result = _cohort_result(tmp_path / "cohort")
+    selection_path = tmp_path / "ids.csv"
+    selection_path.write_text(contents, encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        select_result(result, particle_ids_file=selection_path)
 
 
 def test_exact_cohort_weight_histogram_and_streaming_export(tmp_path: Path) -> None:
@@ -262,7 +368,7 @@ def test_exact_cohort_weight_histogram_and_streaming_export(tmp_path: Path) -> N
     )
     assert rendered["population"]["binned_positions"] == 1
     assert rendered["population"]["rendered_cells"] <= 1
-    assert rendered["particle_id"] is None and rendered["trajectory_source"] == "unrequested"
+    assert rendered["focus_particle_id"] is None and rendered["trajectory_source"] == "unrequested"
 
 
 def test_opened_result_cohort_is_reused_by_all_consumers_without_reopening(
@@ -376,7 +482,7 @@ def test_pending_no_frames_and_no_events_render_context_without_nan(tmp_path: Pa
     assert summary["fate"] == [{"lifecycle": "pending", "particles": 3, "model_weight": 4.5}]
     assert summary["boundary_interactions"] == []
     assert summary["first_boundary_hit"]["time_s_quantiles_p10_p50_p90"] is None
-    report: dict[str, Any] = render_result(result, tmp_path / "empty", particle_id=10)
+    report: dict[str, Any] = render_result(result, tmp_path / "empty", focus_particle_id=10)
     assert report["boundary_events"] == 0 and report["trajectory_points"] == 0
     assert report["population"]["omitted_nonspatial_or_pending"] == 3
     for key in ("population_svg", "trajectory_svg", "boundary_events_svg"):
@@ -425,7 +531,7 @@ def test_periodic_interactions_are_not_first_wall_hits_and_break_saved_chords(
     report: dict[str, Any] = render_result(
         result,
         tmp_path / "periodic-svg",
-        particle_id=int(case.data.sources[0].particle_id[0]),
+        focus_particle_id=int(case.data.sources[0].particle_id[0]),
         event_batch_rows=1,
     )
     svg = Path(report["trajectory_svg"]).read_text(encoding="utf-8")

@@ -1,6 +1,6 @@
 # 保存結果を説明するレポート
 
-現行0.4.0の利用フロー・責務と、明示的に取り込んだ科学・品質・性能の証拠を説明するconsumerです。
+現行0.5.0の利用フロー・責務と、明示的に取り込んだ科学・品質・性能の証拠を説明するconsumerです。
 solver実行や比較判定は行いません。app ID、タイトル、block IDs、presentation、共通runtimeを維持します。
 
 ## データを更新する
@@ -8,20 +8,31 @@ solver実行や比較判定は行いません。app ID、タイトル、block ID
 独立solver projectから実行します。
 
 ```console
-uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/current_only_2026_11_23/report_inputs/assessment.json --quality evidence/current_only_2026_11_23/report_inputs/quality.json --performance evidence/current_only_2026_11_23/report_inputs/performance.json --build-status complete
+uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/foundation_2026_11_23/assessment_projection.json --quality evidence/foundation_2026_11_23/quality_projection.json --build-status updating
 uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q
 ```
 
 reviewed projectionsを読み、現行authority・catalog・producerと入力のSHA-256を保存します。
+projectionのparseとhashは同じ一度のread bytesを使います。row object、表示に必要な列、
+source.filesのlist、unavailable/nullをproducerが検査し、document checkerも同じ検査ownerを使います。
+完成snapshotをserializeしてから同directoryの一時fileをfsyncし、atomic replaceで公開します。
+検査・書込み・replace前の失敗では以前のdata.jsonを保持します。
 既存identity、presentation、filters、10 query IDsを保持し、rows/sourceを更新します。
 任意の実行logから判定を推測しません。未提供の証拠はunavailable/nullであり、ゼロや過去のPASSを補いません。
 
 各projectionはqueries配下へ、対象queryのrowsと実ファイル・母集団・単位・条件を明示したsourceを持ちます。
+`source.files`の文字列は引用として保持します。現在のlocal fileとbyte bindingを要求する場合は、
+`{location, availability: "bound_local", sha256, execution_source, scope}`を明示します。
+relative locationは`particle_platform_redesign/`基準です。bound_localは存在とSHAを確認し、不一致を拒否します。
+外部引用は`external_reference`、現在利用できない履歴引用は`historical_unavailable`とscopeを明示できます。
+欠損を自動的に別区分へ変更しません。runtimeのsource.filesには対応する文字列又はlabel/hrefを渡し、
+availability/hash/execution_source/scopeは`reproducibility.reviewed_evidence`と既存Evidence flowへ同じ内容を残します。
+現行designのauthority hash、過去実行source、今回のbuild identityは別の事実です。
 assessmentはcase_audit/trajectory_divergence、qualityはquality_findings、performanceはimplementation_work_packagesを更新します。
-A/P比較は入力receiptのsource、seed集合、40実現/各case、windowへ限定します。
-今回のcurrent-only整理ではA/P solverを再実行していません。以前の40seed/各caseと80再実行の記録は、
-元sourceに限定した有用な参照として保持し、今回のfresh replicaや現行全体の認定へ昇格しません。
-再利用native参照を新しい標本とは数えません。
+A/P比較は入力receiptのsource、seed集合、実現数/各case、windowへ限定します。
+今回の実行と以前のsourceに束縛した参照は、各projectionのexecution source/scopeで区別します。
+同じseedでの再実行や再利用native参照を新しい独立標本とは数えず、実行済みの範囲から
+現行全体の数値認定を推測しません。進行中のsnapshotでは未完了の測定を明示します。
 過去のretirement projectionはその当時のsourceに対する履歴であり、変更後の品質・性能のPASSを補いません。
 generatedAtはsnapshot作成時刻、共通の科学的cutoffがないreport.asOfはnullです。
 
@@ -53,6 +64,6 @@ dist全体をloopback HTTPでserveします。snapshot、HTML、runtimeのidenti
 公式export-offlineで、検査済みsplit buildを同じappの.data-app-offline/exports/report.htmlへ書き出せます。
 dist/offline HTMLはGitへ同梱せず、sourceとreviewed inputsから再生成します。
 
-今回の実行範囲と結果は[整理・実行記録](../solver/evidence/current_only_2026_11_23/README.md)に記載します。
+今回の実行範囲と結果は[実装・実行記録](../solver/evidence/foundation_2026_11_23/README.md)に記載します。
 authoringのbuildStatus: completeは未実施のbuild、表示確認、公開を成功にする値ではありません。
 公開先・共有設定は変更していません。

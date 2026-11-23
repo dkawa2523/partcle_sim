@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import subprocess
 import sys
@@ -46,7 +47,8 @@ def _mixed_rows() -> list[list[float | int]]:
             status = final if time >= stop else 1
             state = [np.nan] * 5 if status == 4 else [0.2, 0.1, 3.0, 4.0, -2.0]
             rows.append([pid, time, *state, status, 0.0, stop, final])
-    return rows[::-1]  # Identity and clock never depend on CSV row order.
+    # Time groups stream in ascending order; identity within a group is arbitrary.
+    return sorted(rows, key=lambda row: (row[1], -row[0]))
 
 
 def test_saved_status_and_nonuniform_clock_preserve_unknown_disappearance(tmp_path: Path) -> None:
@@ -141,9 +143,37 @@ def test_population_rejects_ambiguous_identity_and_terminal_evidence(
     else:
         rows[0][10] = 3
     path = tmp_path / "bad.csv"
-    _write(path, rows)
+    _write(path, sorted(rows, key=lambda row: row[1]))
     with pytest.raises(ValueError):
         evaluate(path, reference_terminal_times=True)
+
+
+def test_population_rejects_unordered_time_groups_with_actionable_error(tmp_path: Path) -> None:
+    path = tmp_path / "unordered.csv"
+    _write(path, _mixed_rows()[::-1])
+    with pytest.raises(ValueError, match="reorder rows by time_s"):
+        evaluate(path)
+
+
+def test_population_keeps_missing_lifecycle_and_late_observed_identity(tmp_path: Path) -> None:
+    path = tmp_path / "sparse.csv"
+    _write(
+        path,
+        [
+            [7, 0, 0, 0, 3, 4, -2, 1, 0, 0.05, 3],
+            [99, 0.1, 0, 0, 0, 2, -1, 1, 0.1, np.nan, 1],
+            [7, 0.1, 0, 0, 0, 0, -2, 3, 0, 0.05, 3],
+            [99, 0.4, 0, 0, 0, 2, -1, 1, 0.1, np.nan, 1],
+        ],
+    )
+    native = evaluate(path, reference_terminal_times=True)["reference"]
+    assert native["registered_particle_count"] == 2
+    assert native["coverage"]["missing_rows"] == 2
+    assert native["coverage"]["lifecycle_unknown_rows"] == 2
+    assert native["final_counts"]["stuck"] == 0  # Missing does not replay a terminal state.
+    assert native["capture_terminal_time_s"]["finite_count"] == 0
+    assert native["restricted_mean_active_lifetime_s"] is None
+    assert native["saved_active_fraction_integral_s"] == pytest.approx(0.2)
 
 
 def _rz_result(
@@ -307,6 +337,24 @@ def test_missing_state_before_recorded_terminal_is_rejected(tmp_path: Path) -> N
         with h5py.File(segment, "r+") as handle:
             dataset = handle["events/boundary/time_s"]
             dataset[...] = dataset[...] + 0.1
+    # Bind this deliberately inconsistent external fixture as new content. A
+    # digest authenticates bytes; it must not replace the coverage check.
+    manifest_path, latest_path = result / "run.json", result / "LATEST"
+    manifest, latest = json.loads(manifest_path.read_text()), json.loads(latest_path.read_text())
+    segments = sorted((result / "segments").glob("*.h5"))
+    hashes = ["sha256:" + hashlib.sha256(segment.read_bytes()).hexdigest() for segment in segments]
+    checkpoint = result / "checkpoints" / latest["checkpoint"]
+    with h5py.File(checkpoint, "r+") as handle:
+        handle["committed_segment_sha256"][...] = hashes
+    latest["checkpoint_sha256"] = "sha256:" + hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+    manifest["content_files"].update(
+        {
+            f"segments/{segment.name}": digest
+            for segment, digest in zip(segments, hashes, strict=True)
+        }
+    )
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    latest_path.write_text(json.dumps(latest), encoding="utf-8")
     path = tmp_path / "native.csv"
     _analytic_stick_native(path)
     with pytest.raises(ValueError, match=r"missing active/pre-terminal.*701.*1\.5"):

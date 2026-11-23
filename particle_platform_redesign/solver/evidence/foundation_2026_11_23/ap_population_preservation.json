@@ -1,0 +1,175 @@
+{
+  "scope": "stored JSON scientific-summary preservation across historical and fresh final-source runs; no old result-container reader or new simulation",
+  "comparison_unit": "same fixed cohort and seed; A/P separate; JSON numeric equality, not proof of every unsaved path or bitwise state payload equality",
+  "excluded_from_equality": [
+    "execution time",
+    "source/manifest/file paths and hashes",
+    "reuse flag"
+  ],
+  "seeds": [
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60
+  ],
+  "cases": {
+    "A": {
+      "data_content_hash": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "counts": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "failure_reason_counts": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "restricted_mean_active_lifetime_s": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "uncensored_before5ms": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "capture_count": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "capture_count_by_boundary": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "capture_terminal_quantiles_s": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "maximum_terminal_time_s": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "early_active": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "observed_common_times": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      }
+    },
+    "P": {
+      "data_content_hash": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "counts": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "failure_reason_counts": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "restricted_mean_active_lifetime_s": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "uncensored_before5ms": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "capture_count": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "capture_count_by_boundary": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "capture_terminal_quantiles_s": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "maximum_terminal_time_s": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "early_active": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      },
+      "observed_common_times": {
+        "exact_per_seed_equal": true,
+        "changed_seeds": []
+      }
+    }
+  },
+  "files": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\results.json",
+      "sha256": "43c43cc995eb3a1f35af7dab73afdd5a51b697cb86b8b1829c4f4655bc85f949"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseA\\results.json",
+      "sha256": "1ef804c84412a022ff1c2380bed7ae18e75367e9a170ccbedc9ca0b1c4327622"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseA\\completion.json",
+      "sha256": "050666930c330296e63610a1ce4e1294f8b771371c866c0393e14a06308aa6bc"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\results.json",
+      "sha256": "45de342c4de304bc7484488519007b18dcce23b8d932040777caf1a6723b7757"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseP\\results.json",
+      "sha256": "0fd7c4dc4bd6ad2db0bc20cf5a35e9b96060d0ccb74681cc3708270f15acdf49"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseP\\completion.json",
+      "sha256": "050666930c330296e63610a1ce4e1294f8b771371c866c0393e14a06308aa6bc"
+    }
+  ],
+  "tool": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\verify_accepted_preservation.py",
+    "sha256": "b9627ba6050d1967dfef95aefd9be9718d427f9a8b4a0c9eed6d9cdfabe31759"
+  }
+}

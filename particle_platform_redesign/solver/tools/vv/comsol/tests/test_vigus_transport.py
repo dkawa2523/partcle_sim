@@ -20,6 +20,7 @@ from chamber_particles.physics.forces import (
     ELEMENTARY_CHARGE_C,
     VACUUM_PERMITTIVITY_F_M,
 )
+from chamber_particles_tools.inputs import create_case
 
 
 def _input(tmp_path: Path) -> tuple[Path, Path]:
@@ -290,3 +291,95 @@ def test_transport_manifest_failure_leaves_no_case_and_can_retry(
     case = load_case(output / "case.yaml")
     assert case.content_hash == receipt["content_hash"]
     assert json.loads((output / "build_manifest.json").read_text()) == receipt
+
+
+@pytest.mark.parametrize(
+    "change",
+    ["primitive", "layout", "property", "partial", "output", "parameter", "clock", "unit", "basis"],
+)
+def test_declared_transport_group_cannot_be_republished_stale(tmp_path: Path, change: str) -> None:
+    initial, parameters = _input(tmp_path)
+    prepared = tmp_path / "prepared"
+    receipt = prepare_transport(initial, parameters, prepared, interval_tree_depth=1)
+    case = load_case(prepared / "case.yaml")
+    document = yaml.safe_load((prepared / "case.yaml").read_text())
+    data = case.data
+    if change in {"primitive", "output", "clock", "unit", "basis"}:
+        target = {"output": "reference_friction", "basis": "gas_velocity"}.get(
+            change, "electron_density"
+        )
+        fields = []
+        for item in data.fields:
+            if item.name == target:
+                if change == "clock":
+                    item = replace(
+                        item,
+                        time_s=np.asarray([0.0, 1e-5]),
+                        values=np.stack((item.values, item.values)),
+                    )
+                elif change == "unit":
+                    item = replace(item, unit="1")
+                elif change == "basis":
+                    item = replace(item, stored_basis="axisymmetric_rz")
+                else:
+                    item = replace(item, values=item.values * 1.01)
+            fields.append(item)
+        data = replace(data, fields=tuple(fields))
+    elif change == "layout":
+        layout = data.layouts[0]
+        assert isinstance(layout, RegularLayout)
+        data = replace(data, layouts=(replace(layout, axis0_m=layout.axis0_m * 1.01),))
+    elif change == "property":
+        source = data.sources[0]
+        data = replace(data, sources=(replace(source, mass_kg=source.mass_kg * 1.01),))
+    elif change == "partial":
+        data = replace(data, fields=tuple(f for f in data.fields if f.name != "reference_alpha"))
+    else:
+        provenance = json.loads(data.provenance_json)
+        provenance["derived_field_generations"][0]["parameters"]["native_capacitance_F"] *= 2
+        data = replace(data, provenance_json=json.dumps(provenance))
+    output = tmp_path / "stale"
+    with pytest.raises(ValueError, match=r"stale|incomplete"):
+        create_case(data, document, output)
+    assert not output.exists()
+    assert load_case(prepared / "case.yaml").content_hash == receipt["content_hash"]
+
+
+def test_declared_groups_keep_independent_prescribed_fields_and_property_authority(
+    tmp_path: Path,
+) -> None:
+    initial, parameters = _input(tmp_path)
+    prepared = tmp_path / "prepared"
+    prepare_transport(initial, parameters, prepared, interval_tree_depth=1)
+    case = load_case(prepared / "case.yaml")
+    independent = FieldData(
+        "independent_coefficient", "raw", "node", ("value",), "scalar", np.ones((4, 1)), "N"
+    )
+    data = replace(case.data, fields=(*case.data.fields, independent))
+    document = yaml.safe_load((prepared / "case.yaml").read_text())
+    # Changing IDs/weights without changing the actual homogeneous authority is
+    # legitimate; coefficients depend on mass/dimensions, not sample identity.
+    source = data.sources[0]
+    data = replace(
+        data,
+        sources=(
+            replace(
+                source, particle_id=source.particle_id + 10, model_weight=source.model_weight * 2
+            ),
+        ),
+    )
+    published = create_case(data, document, tmp_path / "reused")
+    assert "independent_coefficient" in {item.name for item in published.data.fields}
+    assert json.loads(published.data.provenance_json)["derived_field_generations"]
+    # Independent prescribed data has no implied producer dependencies.
+    provenance = json.loads(data.provenance_json)
+    del provenance["derived_field_generations"]
+    independent_data = replace(
+        data,
+        provenance_json=json.dumps(provenance),
+        fields=tuple(
+            replace(item, values=item.values * 2) if item.name == "electron_density" else item
+            for item in data.fields
+        ),
+    )
+    create_case(independent_data, document, tmp_path / "independent")

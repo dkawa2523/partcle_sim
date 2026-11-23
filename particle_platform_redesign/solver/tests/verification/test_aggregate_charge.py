@@ -550,10 +550,12 @@ def test_aggregate_charge_catalog_owns_fields_and_rejects_unresolved_ion_drag() 
         ("ion_mass", "kg", ("value",), "scalar"),
         ("screening_length", "m", ("value",), "scalar"),
     }
-    assert plan.resolved_models()["charge"] == {
-        "model": "plasma_continuous",
-        "revision": _REVISION,
-    }
+    assert (
+        {
+            "model": "plasma_continuous",
+            "revision": _REVISION,
+        }
+    ).items() <= (plan.resolved_models()["charge"]).items()
 
     missing_field = _charge_model()
     missing_field.pop("screening_length_field")

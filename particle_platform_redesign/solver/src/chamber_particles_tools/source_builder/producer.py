@@ -508,8 +508,14 @@ def read_csv_source(
     is supplied. This function returns rows; the canonical writer owns schema
     validation. It never evaluates native expressions or generates random rows.
     """
+    return source_from_csv_bytes(Path(path).read_bytes(), data, config)
+
+
+def source_from_csv_bytes(
+    raw: bytes, data: DataBundle, config: Mapping[str, object]
+) -> RealizedSource:
+    """Resolve one CSV snapshot used by both its caller's hash and the source."""
     specification = _configuration(config)
-    raw = Path(path).read_bytes()
     return _source_from_rows(_select_rows(raw, specification), data, specification)
 
 

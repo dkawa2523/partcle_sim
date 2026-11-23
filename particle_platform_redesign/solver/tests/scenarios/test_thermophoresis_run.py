@@ -57,10 +57,12 @@ def test_waldmann_affine_heat_flux_time_convergence(
     for errors in (position_error, velocity_error):
         orders = [math.log2(errors[index] / errors[index + 1]) for index in (0, 1)]
         assert min(orders) >= minimum_order
-    assert last_result.manifest["resolved"]["physics_models"]["thermophoresis"] == {
-        "model": "waldmann_gallis",
-        "revision": _REVISION,
-    }
+    assert (
+        {
+            "model": "waldmann_gallis",
+            "revision": _REVISION,
+        }
+    ).items() <= (last_result.manifest["resolved"]["physics_models"]["thermophoresis"]).items()
     assert last_result.manifest["compiled_cpu_tile_revision"] == "compiled_cpu_tile_v31"
     assert last_result.manifest["physics_catalog_revision"] == PHYSICS_CATALOG_REVISION
     assert last_result.manifest["physics_runtime_revision"] == PHYSICS_RUNTIME_REVISION
@@ -115,14 +117,18 @@ def test_effective_gas_heat_flux_composes_with_finite_speed_drag_public_run(
 
     assert bool(np.isfinite(final.position_m).all())
     assert bool(np.isfinite(final.velocity_m_s).all())
-    assert result.manifest["resolved"]["physics_models"]["drag"] == {
-        "model": "epstein_finite_speed",
-        "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
-    }
-    assert result.manifest["resolved"]["physics_models"]["thermophoresis"] == {
-        "model": "waldmann_gallis",
-        "revision": _EFFECTIVE_GAS_REVISION,
-    }
+    assert (
+        {
+            "model": "epstein_finite_speed",
+            "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["drag"]).items()
+    assert (
+        {
+            "model": "waldmann_gallis",
+            "revision": _EFFECTIVE_GAS_REVISION,
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["thermophoresis"]).items()
 
 
 def _case(

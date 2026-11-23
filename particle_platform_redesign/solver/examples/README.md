@@ -17,3 +17,17 @@ publish a new case with `python -m chamber_particles create recipe.yaml -o NEW_C
 Examples are small analytic demonstrations, not device-specific defaults or a
 physical prediction certification. The reduced electric example also includes
 its thermal bundle and builder configuration.
+
+`rz-charged` also includes `field-input/` CSVs, `field-mapping.yaml`,
+`field-recipe.yaml` and `FIELD_INPUT.md`. Their mesh and electric field derive
+from that example's analytic inputs. From its generated directory, import the
+editable fields and publish the source/settings against the imported bundle:
+
+```console
+python -m chamber_particles inputs import-csv field-mapping.yaml background
+python -m chamber_particles create field-recipe.yaml -o ../charged-rebuilt
+```
+
+The mapping explicitly declares units, basis, domain, side and support. Use it
+as an editable starting point; example geometry and settings are not defaults
+for another device. Existing output directories are never overwritten.

@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from dataclasses import asdict
+import os
+import tempfile
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -37,7 +39,7 @@ AUTHORITY_PATHS = (
     "solver/pyproject.toml",
     "solver/README.md",
     "solver/docs/case_format_v3.md",
-    "solver/docs/result_format_v4.md",
+    "solver/docs/result_format_v5.md",
     "solver/docs/physics_models.md",
     "solver/docs/numerics.md",
     "solver/docs/parallel_execution_plan.md",
@@ -50,6 +52,7 @@ AUTHORITY_PATHS = (
     "solver/src/chamber_particles_tools/inputs.py",
     "solver/src/chamber_particles_tools/bundle_publication.py",
     "solver/src/chamber_particles_tools/selection.py",
+    "solver/src/chamber_particles_tools/field_generation.py",
 )
 COMPONENT_IDS = {
     "case_audit": ["dataset-role"],
@@ -173,7 +176,7 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         },
         {
             "area": "result_reuse",
-            "decision": "Result schema 4, nested immutable manifest and reusable ResultCohort",
+            "decision": "Result schema 5, nested immutable manifest and reusable ResultCohort",
             "reason": "One source identity and exact selected population across analysis/export/view",
         },
         {
@@ -234,8 +237,8 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "must_not": "Population interpretation or plotting",
         },
         {
-            "module": "chamber_particles_tools.inputs / four input clients",
-            "owns": "Import, source conversion, field production and one case publisher",
+            "module": "chamber_particles_tools.inputs / field_generation / four input clients",
+            "owns": "Import, source conversion, field production, declared dependency freshness and one case publisher",
             "must_not": "Duplicated physics validation or trajectory solver",
         },
         {
@@ -300,7 +303,7 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         {
             "layer": "ResultView",
             "contents": "Final, interactions, saved frames/probes, context and immutable nested manifest",
-            "rule": "manifest_document() copies JSON; source_identity() owns derived receipts; strict result schema 4",
+            "rule": "manifest_document() copies JSON; source_identity() owns derived receipts; strict result schema 5",
         },
         {
             "layer": "analysis",
@@ -323,7 +326,7 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         {
             "package": "Reusable results",
             "capability": "Result alone to analysis/export/view",
-            "deliverable": "Context and result4",
+            "deliverable": "Context, result5 and committed payload identity",
             "gate": "Move/remove source case and verify consumers",
         },
         {
@@ -342,7 +345,7 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     roadmap = [
         {
             "phase": "current",
-            "name": "0.4 CLI/Python input → result reuse",
+            "name": "0.5 CLI/Python input → result reuse",
             "exit": "Bound final quality and installed-wheel receipts",
             "example_count": len(EXAMPLE_NAMES),
         },
@@ -383,8 +386,140 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return {key: _query(key, rows[key], key.replace("_", " "), files) for key in QUERY_IDS}
 
 
-def _reviewed_input(path: Path, allowed: set[str]) -> dict[str, Any]:
-    document = json.loads(path.read_text(encoding="utf-8"))
+@dataclass(frozen=True)
+class EvidenceReference:
+    location: str
+    availability: str
+    sha256: str | None
+    execution_source: str | None
+    scope: str
+
+
+@dataclass(frozen=True)
+class ReviewedProjection:
+    location: str
+    document_sha256: str
+    queries: dict[str, Any]
+    evidence: tuple[dict[str, Any], ...]
+
+
+_ROW_FIELDS = {
+    "design_decisions": ("area", "decision", "reason"),
+    "physics_scope": ("capability", "current", "limits"),
+    "module_responsibilities": ("module", "owns", "must_not"),
+    "numerical_contracts": ("topic", "decision", "acceptance"),
+    "result_layers": ("layer", "contents", "rule"),
+    "implementation_work_packages": ("package", "capability", "deliverable", "gate"),
+    "quality_findings": ("severity", "finding", "disposition"),
+    "roadmap": ("phase", "name", "exit"),
+}
+
+
+def reviewed_query_errors(name: str, query: Any) -> list[str]:
+    """Own minimum reviewed shape; consumers separately check UI bindings."""
+    if not isinstance(query, dict) or not isinstance(query.get("rows"), list):
+        return [f"report query {name}: reviewed rows must be a list"]
+    source = query.get("source")
+    if (
+        not isinstance(source, dict)
+        or not isinstance(source.get("files"), list)
+        or not source["files"]
+    ):
+        return [f"report query {name}: source.files must be a nonempty list"]
+    if not isinstance(source.get("evidenceFlow", []), list):
+        return [f"report query {name}: source.evidenceFlow must be a list"]
+    errors = _reviewed_row_errors(name, query["rows"])
+    errors.extend(
+        f"report query {name}: source.files entries must be references"
+        for item in source["files"]
+        if not isinstance(item, str | dict) or not item
+    )
+    return errors
+
+
+def _reviewed_row_errors(name: str, rows: list[Any]) -> list[str]:
+    errors = []
+    for row in rows:
+        if not isinstance(row, dict):
+            errors.append(f"report query {name}: reviewed rows must be objects")
+        elif row.get("status") == "unavailable":
+            if row.get("value") is not None:
+                errors.append(
+                    f"report query {name}: unavailable value must be null, not a measurement"
+                )
+        elif any(not isinstance(row.get(key), str) for key in _ROW_FIELDS.get(name, ())):
+            errors.append(
+                f"report query {name}: displayed row fields must be text: {_ROW_FIELDS[name]}"
+            )
+    return errors
+
+
+def _evidence_reference(value: Any, scope: str) -> tuple[EvidenceReference, Any]:
+    if isinstance(value, str):
+        return EvidenceReference(value, "external_reference", None, None, scope), value
+    reference = _structured_reference(value, scope)
+    _verify_evidence(reference)
+    return reference, _reference_wire(value, reference)
+
+
+def _structured_reference(value: dict[str, Any], scope: str) -> EvidenceReference:
+    location = value.get(
+        "location", value.get("file", value.get("href", value.get("label", value.get("name"))))
+    )
+    availability = value.get("availability", "external_reference")
+    scope = value.get("scope", scope)
+    if not isinstance(location, str) or not location or not isinstance(scope, str) or not scope:
+        raise ValueError("evidence reference requires nonempty location and scope")
+    if not isinstance(availability, str) or availability not in {
+        "bound_local",
+        "external_reference",
+        "historical_unavailable",
+    }:
+        raise ValueError("evidence reference has an unknown availability")
+    digest, execution = value.get("sha256"), value.get("execution_source")
+    if digest is not None and (not isinstance(digest, str) or not _valid_digest(digest)):
+        raise ValueError("evidence reference sha256 must be lowercase sha256:<64 hex>")
+    if execution is not None and not isinstance(execution, str):
+        raise ValueError("evidence execution_source must be text")
+    return EvidenceReference(location, availability, digest, execution, scope)
+
+
+def _reference_wire(value: dict[str, Any], reference: EvidenceReference) -> dict[str, str]:
+    label = value.get("label", reference.location)
+    if not isinstance(label, str) or not label:
+        raise ValueError("evidence label must be nonempty text")
+    wire = {"label": label}
+    if "href" in value:
+        if not isinstance(value["href"], str):
+            raise ValueError("evidence href must be text")
+        wire["href"] = value["href"]
+    return wire
+
+
+def _valid_digest(value: str) -> bool:
+    return (
+        value.startswith("sha256:")
+        and len(value) == 71
+        and all(item in "0123456789abcdef" for item in value[7:])
+    )
+
+
+def _verify_evidence(reference: EvidenceReference) -> None:
+    if reference.availability != "bound_local":
+        return
+    if reference.sha256 is None:
+        raise ValueError("bound_local evidence requires sha256")
+    path = Path(reference.location)
+    if not path.is_absolute():
+        path = ROOT / path
+    if not path.is_file() or _digest(path) != reference.sha256:
+        raise ValueError(f"bound_local evidence missing or hash mismatch: {reference.location}")
+
+
+def read_projection(path: Path, allowed: set[str]) -> ReviewedProjection:
+    """Parse and identify the same bytes; explicit local bindings are verified."""
+    raw = path.read_bytes()
+    document = json.loads(raw.decode("utf-8"))
     if (
         not isinstance(document, dict)
         or set(document) != {"queries"}
@@ -393,16 +528,59 @@ def _reviewed_input(path: Path, allowed: set[str]) -> dict[str, Any]:
         raise ValueError("reviewed evidence input requires exactly a queries mapping")
     if not set(document["queries"]).issubset(allowed):
         raise ValueError("reviewed evidence input contains an unrequested query ID")
+    evidence = []
     for key, query in document["queries"].items():
-        if (
-            not isinstance(query, dict)
-            or not isinstance(query.get("rows"), list)
-            or not isinstance(query.get("source"), dict)
-        ):
-            raise ValueError(f"{key} requires reviewed rows and exact source metadata")
-        if not query["source"].get("files"):
-            raise ValueError(f"{key} requires source.files")
-    return document["queries"]
+        errors = reviewed_query_errors(key, query)
+        if errors:
+            raise ValueError("; ".join(errors))
+        source = query["source"]
+        scope = source.get("scope", "Citation only; no present execution qualification inferred")
+        if not isinstance(scope, str) or not scope:
+            raise ValueError("reviewed evidence scope must be nonempty text")
+        references, files = [], []
+        for item in source["files"]:
+            reference, wire = _evidence_reference(item, scope)
+            references.append({"query_id": key, **asdict(reference)})
+            files.append(wire)
+        source["files"] = files
+        source.setdefault("evidenceFlow", []).append(
+            {
+                "title": "Reviewed evidence availability and execution scope",
+                "detail": json.dumps(references, ensure_ascii=False),
+            }
+        )
+        evidence.extend(references)
+    try:
+        location = path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        location = str(path.resolve())
+    return ReviewedProjection(
+        location, "sha256:" + hashlib.sha256(raw).hexdigest(), document["queries"], tuple(evidence)
+    )
+
+
+def publish_snapshot(snapshot: dict[str, Any], destination: Path) -> dict[str, str]:
+    """Atomically replace an intentionally refreshed snapshot after serialization."""
+    raw = (json.dumps(snapshot, ensure_ascii=False, allow_nan=False, indent=2) + "\n").encode(
+        "utf-8"
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, name = tempfile.mkstemp(
+        prefix=f".{destination.name}.", suffix=".tmp", dir=destination.parent
+    )
+    temporary = Path(name)
+    published = False
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, destination)
+        published = True
+    finally:
+        if not published:
+            temporary.unlink(missing_ok=True)
+    return {"path": str(destination), "sha256": "sha256:" + hashlib.sha256(raw).hexdigest()}
 
 
 def build_snapshot(
@@ -427,14 +605,17 @@ def build_snapshot(
     )
     queries = _design_queries(catalog)
     inputs = []
+    reviewed_evidence = []
     for path, allowed in (
         (assessment, {"case_audit", "trajectory_divergence"}),
         (quality, {"quality_findings"}),
         (performance, {"implementation_work_packages"}),
     ):
         if path is not None:
-            queries.update(_reviewed_input(path, allowed))
-            inputs.append(_record(path))
+            projection = read_projection(path, allowed)
+            queries.update(projection.queries)
+            inputs.append({"path": projection.location, "sha256": projection.document_sha256})
+            reviewed_evidence.extend(projection.evidence)
     snapshot.update(
         surface="report",
         buildStatus=build_status,
@@ -456,17 +637,19 @@ def build_snapshot(
                         "catalog_sha256": catalog_hash,
                         "authorities": authorities,
                         "optional_inputs": inputs,
+                        "claim_scope": "Current design references only; imported execution claims retain their own source and scope",
                     },
                     ensure_ascii=False,
                 ),
             }
         )
     snapshot["reproducibility"] = {
-        "snapshot_revision": "platform_design_report_v1",
+        "snapshot_revision": "platform_design_report_v2",
         "producer": _record(Path(__file__)),
         "authorities": authorities,
         "catalog_sha256": catalog_hash,
         "optional_inputs": inputs,
+        "reviewed_evidence": reviewed_evidence,
         "optional_evidence_policy": "Missing is unavailable, never zero; snapshot generation does not run scientific calculations, and imported receipts retain their declared execution scope",
     }
     return snapshot
@@ -490,16 +673,14 @@ def main() -> None:
         performance=args.performance,
         build_status=args.build_status,
     )
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(snapshot, ensure_ascii=False, allow_nan=False, indent=2) + "\n", encoding="utf-8"
-    )
+    binding = publish_snapshot(snapshot, args.output)
     print(
         json.dumps(
             {
                 "output": str(args.output),
                 "queries": len(snapshot["queries"]),
                 "buildStatus": snapshot["buildStatus"],
+                "snapshot": binding,
             }
         )
     )

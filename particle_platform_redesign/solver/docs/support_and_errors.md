@@ -1,13 +1,13 @@
-# v0.4.0 support, qualification, limitations, and error guide
+# v0.5.0 support, qualification, limitations, and error guide
 
-この文書は、`0.4.0`の固定topology 2-D版を利用する時の入口です。過去版の仕様は各tagに保持します。
+この文書は、`0.5.0`の固定topology 2-D版を利用する時の入口です。過去版の仕様は各tagに保持します。
 対応する設定、明示的な非対応範囲、失敗時の最初の確認先を
 一か所にまとめます。式、適用域、数値許容差、永続形式の詳細を再定義する文書ではありません。厳密な正本は次です。
 
 - 入力：[`case_format_v3.md`](case_format_v3.md)
 - 物理モデル：[`physics_models.md`](physics_models.md)
 - 数値計算：[`numerics.md`](numerics.md)
-- 結果：[`result_format_v4.md`](result_format_v4.md)
+- 結果：[`result_format_v5.md`](result_format_v5.md)
 - 並列化・性能判断：[`parallel_execution_plan.md`](parallel_execution_plan.md)
 
 COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行には不要であり、本表の「対応」は
@@ -45,7 +45,7 @@ zero-miss probabilityは保証に含めません。
 
 ## 対応範囲
 
-| 項目 | `0.4.0`の対応範囲 |
+| 項目 | `0.5.0`の対応範囲 |
 |---|---|
 | 座標 | `cartesian_xy`の2自由度運動、または`axisymmetric_rz`場中の`axisymmetric_rz_meridional` 2自由度運動 |
 | geometry | 静的2-D volume meshと`line2`材料境界。RZの`r=0`は壁でなくaxis event |
@@ -176,15 +176,15 @@ failureをepsilon、tolerance拡大、clampで消して成功扱いにしませ�
 
 ## schemaとversionの方針
 
-正式公開版`0.1.0`はYAML case schema 2、canonical HDF5 data schema 1、result schema 2、checkpoint schema 2です。
-`0.2.0`/`0.3.0`はYAML case schema 3、canonical HDF5 data schema 3、
-result schema 3、checkpoint schema 2でした。0.4.0はinput/data3を維持し、resultは必須immutable context付きschema4、checkpoint配列形式は2です。現行readerは旧result3のcompleted/partialを互換読込しません。
+現行0.5.0はYAML case/canonical data schema 3、result schema 5、checkpoint particle配列schema 2です。
+resultはimmutable contextと全commit prefixのcontent hashを保持します。旧completed/partialは受理せず、
+元環境で必要な科学列をexportするか、現行solverで元入力を再実行してください。
 
 - readerは現行versionだけを受け、未知version・未知key・未知datasetをfail-closedで拒否します。
 - YAMLはraw file hash、HDF5はcanonical logical content hashを使います。編集後に古いhashを流用しません。
 - 完成resultの`run.json`が、実際に解決したschema、algorithm、physics model revisionのauthorityです。
 - 科学的意味、RNG、event順、永続列が変わる変更は対応revisionまたはschemaを更新します。
 - 旧reader、migration shim、compatibility aliasをproductionへ併存させません。旧resultを保持する場合は、それを作成した
-  package、lock、入力、manifestを一緒に保存します。変換が必要ならcore外の明示的な一回変換にします。
+  package、lock、入力、manifestを一緒に保存します。現行版へ再利用する時は元環境でのexportか再実行を明示します。
 
 現行algorithm IDの一覧をこの文書へ複製しません。実行ごとの正確な値は`run.json`、開発上のrevisionは各ownerの定数をauthorityとします。

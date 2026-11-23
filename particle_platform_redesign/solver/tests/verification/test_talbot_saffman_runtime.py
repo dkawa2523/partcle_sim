@@ -29,14 +29,16 @@ def test_talbot_is_an_explicit_catalog_option_and_compiled_formula(
         coordinate_system,
     )
     assert isinstance(plan.thermophoresis, TalbotThermophoresisPlan)
-    assert plan.resolved_models()["thermophoresis"] == {
-        "model": "talbot",
-        "revision": "talbot_cross_regime_radius_knudsen_v1",
-        "particle_thermal_conductivity_W_m_K": 0.21,
-        "thermal_slip_coefficient": 1.31,
-        "momentum_exchange_coefficient": 0.87,
-        "thermal_exchange_coefficient": 2.7,
-    }
+    assert (
+        {
+            "model": "talbot",
+            "revision": "talbot_cross_regime_radius_knudsen_v1",
+            "particle_thermal_conductivity_W_m_K": 0.21,
+            "thermal_slip_coefficient": 1.31,
+            "momentum_exchange_coefficient": 0.87,
+            "thermal_exchange_coefficient": 2.7,
+        }
+    ).items() <= (plan.resolved_models()["thermophoresis"]).items()
     sampled = {
         "temperature": np.asarray([[420.0]]),
         "temperature_gradient": np.asarray([[3000.0, -4000.0]]),
@@ -137,10 +139,12 @@ def test_saffman_is_an_explicit_catalog_option_and_compiled_formula(
         coordinate_system,  # type: ignore[arg-type]
     )
     assert isinstance(plan.lift, SaffmanLiftPlan)
-    assert plan.resolved_models()["lift"] == {
-        "model": "saffman",
-        "revision": model["revision"],
-    }
+    assert (
+        {
+            "model": "saffman",
+            "revision": model["revision"],
+        }
+    ).items() <= (plan.resolved_models()["lift"]).items()
     sampled = {
         "gas_velocity": np.asarray([[0.004, -0.002]]),
         "density": np.asarray([[1.1]]),

@@ -339,10 +339,11 @@ def _execute_scope(
         from chamber_particles.engine import _prepare
 
         prepare_started = time.perf_counter()
-        prepared = _prepare(case).transport
+        run = _prepare(case)
+        prepared = run.transport
         timings["prepare_s"] = time.perf_counter() - prepare_started
         particle_count = prepared.schedule.particle_count
-        memory_plan = _prepared_memory_plan(prepared)
+        memory_plan = _prepared_memory_plan(run)
     elif scope == "run":
         simulate_started = time.perf_counter()
         summary = simulate(case, output)
@@ -442,8 +443,8 @@ def _observation(
     }
 
 
-def _prepared_memory_plan(prepared: Any) -> object:
-    return _validated_memory_plan(_json_value(prepared.memory_plan.as_manifest()))
+def _prepared_memory_plan(run: Any) -> object:
+    return _validated_memory_plan(_json_value(run.memory_plan.as_manifest()))
 
 
 def _manifest_memory_plan(manifest: Mapping[str, Any]) -> object:

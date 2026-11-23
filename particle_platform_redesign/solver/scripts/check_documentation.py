@@ -5,12 +5,16 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import runpy
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlsplit
 
 from chamber_particles.yaml_input import parse_document
 
+_REVIEWED_QUERY_ERRORS = runpy.run_path(
+    str(Path(__file__).resolve().parents[2] / "analysis/build_report_snapshot.py")
+)["reviewed_query_errors"]
 _SKILLS = (
     "inspect-comsol-model",
     "prepare-comsol-field-case",
@@ -32,7 +36,7 @@ _AUTHORITIES = (
 )
 _CURRENT_SPECS = (
     "case_format_v3.md",
-    "result_format_v4.md",
+    "result_format_v5.md",
     "physics_models.md",
     "numerics.md",
     "support_and_errors.md",
@@ -80,28 +84,16 @@ def _query_references(content: str) -> set[str]:
 
 
 def _query_errors(name: str, query: Any, component_ids: set[str]) -> list[str]:
-    if not isinstance(query, dict) or not isinstance(query.get("rows"), list):
-        return [f"report query {name}: reviewed rows must be a list"]
-    source = query.get("source")
-    if not isinstance(source, dict) or not source.get("files"):
-        return [f"report query {name}: source.files is required"]
-    errors = _reviewed_row_errors(name, query["rows"])
+    errors = _REVIEWED_QUERY_ERRORS(name, query)
+    if errors:
+        return errors
+    source = query["source"]
     for definition in source.get("metricDefinitions", []):
         errors.extend(
             f"report query {name}: unknown component {component}"
             for component in definition.get("componentIds", [])
             if component not in component_ids
         )
-    return errors
-
-
-def _reviewed_row_errors(name: str, rows: list[Any]) -> list[str]:
-    errors = []
-    for row in rows:
-        if not isinstance(row, dict):
-            errors.append(f"report query {name}: reviewed rows must be objects")
-        elif row.get("status") == "unavailable" and row.get("value") is not None:
-            errors.append(f"report query {name}: unavailable value must be null, not a measurement")
     return errors
 
 

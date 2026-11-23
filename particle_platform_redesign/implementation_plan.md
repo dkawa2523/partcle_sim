@@ -2,19 +2,21 @@
 
 ## 現行の実装単位
 
-0.4.0はcoreと通常clientを一つのwheelへ収録し、CLI/Pythonで入力から結果再利用までを提供する。
+0.5.0はcoreと通常clientを一つのwheelへ収録し、CLI/Pythonで入力から結果再利用までを提供する。
 契約は[製品仕様](product_specification.md)、[architecture](architecture_proposal.md)、solver/docsの各ownerが所有する。
 全体変更の調査・実行・未確認は[全体対応表](solver/evidence/retirement_2026_11_23/README.md)へ残す。
 その後の意味・状態・公開境界の根因改良は[再構成記録](solver/evidence/resolved_semantics_2026_11_23/README.md)へ残す。
 過去sourceの完了記録は、そのsourceだけの証拠である。
 現行入口への追加撤去と、実行済み・外部条件による未実行の区分は[撤去記録](solver/evidence/current_only_2026_11_23/README.md)へ残す。
+0.5.0の全領域の調査・実装・実行・未確認は[基盤再構成記録](solver/evidence/foundation_2026_11_23/README.md)へ残す。
 
 | 単位 | 完了条件 |
 |---|---|
 | 入力作成 | CSV/背景bundle→最初のinternal/surface source→単一publisher→hash付きcase。単位/ID/物性/基底保持 |
 | 能力/検査 | catalog由来metadata、静的loadと実行同一prepare、readonly report、workers依存memory |
 | core実行 | typed state/workspace、共通transport、bounded execution、親時計/single writer/毎macro commit |
-| 結果 | result4 context、strict completed/partial、checkpoint2、旧readerなし、元caseなしの解釈 |
+| 結果 | result5 context、strict completed/partial、checkpoint2、旧readerなし、元caseなしの解釈 |
+| producer受渡し | canonical field/layout identity、明示派生群のprimitive/parameter/物性/output全体照合。推測した依存と自動regenなし |
 | 解析/表示 | counts/weights/分母/coverage、interaction/first-hit/terminal区別、bounded/finite/gap/equal aspect |
 | 外部経路 | native/V&V分離、現行descriptorと明示primitive、native/解析参照。旧固定campaign経路は提供しない |
 | 配布/説明 | checkout外のwheel一巡、README/AGENTS/skills、reviewed report、CIとsource同一性 |

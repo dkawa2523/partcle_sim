@@ -131,10 +131,12 @@ def test_dep_catalog_and_compiled_runtime_share_one_formula(
     assert requirements["grad_e2"].components == components
     assert requirements["grad_e2"].stored_basis == basis
     assert requirements["grad_e2"].unit == "V^2/m^3"
-    assert plan.resolved_models()["dielectrophoresis"] == {
-        "model": "quasistatic_spherical",
-        "revision": _REVISION,
-    }
+    assert (
+        {
+            "model": "quasistatic_spherical",
+            "revision": _REVISION,
+        }
+    ).items() <= (plan.resolved_models()["dielectrophoresis"]).items()
 
     mass = np.asarray([2.0e-15])
     radius = np.asarray([1.0e-7])

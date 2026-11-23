@@ -219,6 +219,74 @@ def content_hash(data: DataBundle) -> str:
     return _content_hash_validated(data)
 
 
+def field_sha256(field: FieldData) -> str:
+    """Identify field values/time/metadata with the existing cache hash rule.
+
+    This legacy-named digest binds the layout *name*, not its topology. Use
+    :func:`field_identity` when reusing a field with its actual layout.
+    """
+    metadata = json.dumps(
+        {
+            "association": field.association,
+            "components": field.components,
+            "layout": field.layout,
+            "name": field.name,
+            "stored_basis": field.stored_basis,
+            "unit": field.unit,
+        },
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    digest = hashlib.sha256(metadata)
+    digest.update(memoryview(np.ascontiguousarray(field.values)).cast("B"))
+    if field.time_s is not None:
+        digest.update(memoryview(np.ascontiguousarray(field.time_s)).cast("B"))
+    return f"sha256:{digest.hexdigest()}"
+
+
+def layout_sha256(layout: Layout) -> str:
+    """Identify layout topology/support with the unchanged cache hash rule."""
+    kind = (
+        "regular"
+        if isinstance(layout, RegularLayout)
+        else ("p1_tri" if isinstance(layout, P1TriLayout) else "q1_quad")
+    )
+    digest = hashlib.sha256(kind.encode("ascii"))
+    arrays = (
+        (layout.axis0_m, layout.axis1_m, layout.cell_support)
+        if isinstance(layout, RegularLayout)
+        else (layout.nodes_m, layout.connectivity, layout.cell_support)
+    )
+    for array in arrays:
+        contiguous = np.ascontiguousarray(array)
+        descriptor = json.dumps(
+            {"dtype": contiguous.dtype.str, "shape": contiguous.shape}, separators=(",", ":")
+        ).encode("ascii")
+        digest.update(len(descriptor).to_bytes(8, "little"))
+        digest.update(descriptor)
+        digest.update(memoryview(contiguous).cast("B"))
+    return f"sha256:{digest.hexdigest()}"
+
+
+def field_identity(field: FieldData, layout: Layout, coordinate_system: CoordinateSystem) -> str:
+    """Bind field bytes/clock/basis to layout content and coordinate meaning.
+
+    This is a new composite identity; it does not change the existing field or
+    layout hash algorithms or the canonical schema-v3 logical hash.
+    """
+    if field.layout != layout.name:
+        raise ValueError("field identity requires its declared layout")
+    records = [
+        *_field_records(field),
+        *_layout_records(layout),
+        _string_record("/meta/coordinate_system", coordinate_system),
+    ]
+    digest = hashlib.sha256(b"chamber-particles-field-layout-coordinate\0v1\0")
+    for record in sorted(records, key=lambda item: item.path):
+        _hash_record(digest, record)
+    return f"sha256:{digest.hexdigest()}"
+
+
 def resident_array_bytes(data: DataBundle) -> int:
     """Count unique NumPy allocations retained by one canonical data bundle."""
 
@@ -362,20 +430,29 @@ def _read_validated(
 ) -> tuple[DataBundle, CanonicalDataFootprint]:
     """Own the single HDF5 read and validation path used by public readers."""
 
+    with h5py.File(path, "r") as handle:
+        return _read_validated_handle(handle, numeric_array_limit_bytes=numeric_array_limit_bytes)
+
+
+def _read_validated_handle(
+    handle: h5py.File,
+    *,
+    numeric_array_limit_bytes: int | None = None,
+) -> tuple[DataBundle, CanonicalDataFootprint]:
+    """Validate/read the caller's already-open file without reopening its path."""
     if numeric_array_limit_bytes is not None and numeric_array_limit_bytes < 0:
         raise ValueError("numeric_array_limit_bytes must be nonnegative")
-    with h5py.File(path, "r") as handle:
-        footprint = _validate_hdf5_objects(handle)
-        if (
-            numeric_array_limit_bytes is not None
-            and footprint.numeric_array_bytes > numeric_array_limit_bytes
-        ):
-            raise ValueError(
-                "canonical numeric arrays require "
-                f"{footprint.numeric_array_bytes} bytes, exceeding "
-                f"resources.memory_limit_mb ({numeric_array_limit_bytes} bytes)"
-            )
-        data = _read_bundle(handle)
+    footprint = _validate_hdf5_objects(handle)
+    if (
+        numeric_array_limit_bytes is not None
+        and footprint.numeric_array_bytes > numeric_array_limit_bytes
+    ):
+        raise ValueError(
+            "canonical numeric arrays require "
+            f"{footprint.numeric_array_bytes} bytes, exceeding "
+            f"resources.memory_limit_mb ({numeric_array_limit_bytes} bytes)"
+        )
+    data = _read_bundle(handle)
     _validate_bundle(data)
     _mark_arrays_read_only(data)
     return data, footprint

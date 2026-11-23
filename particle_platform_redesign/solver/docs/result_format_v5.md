@@ -1,11 +1,11 @@
-# Result format v4
+# Result format v5
 
-この文書は0.4.0のresult schema 4、checkpoint配列schema 2の永続resultと
+この文書は0.5.0のresult schema 5、checkpoint配列schema 2の永続resultと
 `ResultView`の契約です。軌道計算の入力契約は
 [`case_format_v3.md`](case_format_v3.md)が所有し、集計、可視化、COMSOL比較はこのresultを読むcore外の
 toolが所有します。
 
-## v4成果物の物理配置
+## v5成果物の物理配置
 
 正常終了したresultは次のdurable layoutを持ちます。segment数はengineがaccepted macro barrierで判定する
 `cumulative_solver_work_v1` cadenceと最終macroから決まります。
@@ -48,6 +48,8 @@ finalizeと完成partialの再公開は同じ処理を使い、成功は実際�
 完全なGeometryData（volume cells、boundary owner/orientation、group/material/external IDs）を保持します。
 producer_metadataにはcontext revision、元case/dataのhash、motion/axis/SI、resolved sourceのID・名前・table・種別、
 boundary groupのpriority/law/contact/parameters、periodic mappingを保存します。source所属の再採番や初期全配列の複製はしません。
+sourceの`particle_count`は、そのreleaseへ登録された全table行数です。計算窓内に実際にreleaseされた数とは区別し、
+後者とpending coverageはrelease ledgerおよびlifecycleの集計から確認します。
 
 親single writerが初回epochより前にatomic作成し、logical content hashとfile SHA-256をrun manifest、resume identity、checkpointへbindします。
 resume/recoveryは同じcontextを検証し、必須の親case/data identityとcanonical identityの再hashも照合します。
@@ -56,7 +58,8 @@ resume/recoveryは同じcontextを検証し、必須の親case/data identityとc
 readerの検証中に必要なgeometry一時配列もprepare/writer峰値へ計上し、writerが保持し続けるのはhash bindingだけです。
 
 結果だけで形状付き表示・source/boundaryの意味の確認ができますが、背景場を持たないcontextだけで元計算を再実行することはできません。
-旧result3のcompleted/partialは受理せず、checkpoint配列schemaが2でもresult version4を要求します。
+旧resultのcompleted/partialは受理せず、checkpoint配列schemaが2でもresult version5を要求します。
+必要な旧科学列は元環境でexportするか、元入力から現行形式で再実行します。互換readerや移行処理は提供しません。
 
 `ResultView.manifest`はobjectをread-only mapping、arrayをtupleとする再帰的なimmutable snapshotです。
 serializationや利用者の編集には`manifest_document()`で独立したJSON documentを取得します。
@@ -71,7 +74,7 @@ root attributeは次のとおりです。
 
 | attribute | 値 |
 |---|---|
-| `result_schema_version` | integer `4` |
+| `result_schema_version` | integer `5` |
 | `segment_index` | zero-based integer `N` |
 | `closed` | uint8 `1` |
 
@@ -212,13 +215,14 @@ writerによる構造検査と、engineによるschedule/cursor/hintの意味検
 ```text
 attributes:
   checkpoint_schema_version, result_schema_version, result_algorithm_revision
-  commit_id, segment_index, segment_sha256
+  commit_id, segment_index
   resume_identity_hash, macro_time_s, macro_step_count
   release_cursor, frame_cursor, probe_cursor
   accepted_particle_pieces, candidate_queries, refinements, maximum_refinement_depth
   wall_interactions, residual_splits, axis_crossings
 
 /counts attributes              committed logical row/frame counts
+/committed_segment_sha256       UTF-8 [segment_index+1]
 /state/position_m               float64 [N,2]
 /state/velocity_m_s             float64 [N,2]
 /state/charge_number            float64 [N]
@@ -242,16 +246,16 @@ attributes:
 2. inactive checkpoint tempをflush/closeし、`A.h5`または`B.h5`へreplaceする。
 3. checkpoint hashを含む`LATEST.tmp`を`LATEST`へreplaceする。ここだけがepoch commit pointである。
 
-resume/recoveryは`LATEST`が参照するcheckpoint hashと、checkpointが参照する最新segment hashを照合し、0から
-`segment_index`までのclosed segmentだけを採用します。それより新しいsegment/checkpoint/tempはorphanとして
-無視し、再開時に置換します。全segmentの構造と累積countも`LATEST`へ一致させるため、hashを直接持たない古い
-segmentの行欠落も拒否します。ただし過去segmentの全値hashは保持しないため、shape/countを変えない過去値改変の
-検出はこの形式の保証範囲外です。通常の完成resultはcheckpointを科学datasetのauthorityにせず、closed segment、complete
-manifest、`final.h5`を検査して読みます。
+checkpointはcommitごとに0から`segment_index`までの全segmentのcommit時SHA-256を保持します。
+そのdatasetも`LATEST.checkpoint_sha256`へbindされ、独立した未束縛indexはありません。
+resume/recoveryは全prefixのbytes・構造・累積countを照合します。それより新しいsegment/checkpoint/tempは
+orphanとして無視し、再開時に置換します。二世代rotationで古いcheckpointが消えても過去segmentのhashは失いません。
+最終化はcommit時hashと現物を照合してからcontext/final/全segmentの`content_files` rosterをmanifestへ出版します。
+seal時の再hashを過去値の新しい正解として採用しません。shape/countを保つ有限値改変も拒否します。
 
 ## `final.h5`
 
-rootの`result_schema_version` attributeは4です。`/particles`は常に全resident粒子を`particle_id`順で
+rootの`result_schema_version` attributeは5です。`/particles`は常に全resident粒子を`particle_id`順で
 格納します。`time_s`はrun-end snapshotの時刻として全行でrun終端です。escaped/failedの物理terminal時刻は
 対応するboundary/failure eventが所有します。
 
@@ -311,7 +315,7 @@ manifestは少なくとも次を記録します。
   macro-root coefficient policy
 - requested/resolved integrator、backend、seed、path kind、
   physics model revision、required field binding
-- contextのpath、canonical content hash、file SHA-256
+- contextのpath、canonical content hash、file SHA-256、およびcontext/final/全segmentの`content_files` roster
 - source ID/name/type、解決済みboundary law・priority・fallback law・反発係数・付着確率
 - start/end/dt、親時計の`macro_grid_revision`、field snapshotによる追加macro split時刻、YAML順の`source_id_to_name`
 - resolved event設定。一般RK4材料boundary経路ではaccepted particle-piece、candidate query、refinement、最大深さの集約
@@ -328,12 +332,21 @@ manifestは少なくとも次を記録します。
 
 ## 読み取りAPI
 
-`open_result(path)`は`_SUCCESS`、complete manifest、schema version、`LATEST`までのclosed segment、必須列の
-dtype/shape、frame/probe offsetの先頭0・単調性・終端を検査し、粒子値本体をまだ読まない`ResultView`を返します。
-`open_result(path, recovery=True)`は完成resultがあれば同じ完成view、なければsibling `OUT.partial`について、
-最新segment hashと全segmentの構造・累積countを検証したcommit prefixを返します。recovery manifestは
-`status: recovery`で、未commit orphanやfinal tempを公開しません。
+`open_result(path)`はcomplete marker、version、context、LATEST/checkpoint binding、全prefixのrosterと
+manifest count、finalの構造とbytesを確認します。segmentの本体は実際のreaderか`verify_contents()`で検証します。
+recoveryは再開に使う全prefixのbytes・構造・countを先に検証し、確定部分だけを公開します。
 
+payloadの各読取りは `open(rb) → SHA-256 → seek(0) → 同じhandleのh5py reader` を使います。
+reopenするたびに再hashし、frame iteratorはsegmentのhandleを走査中保持します。
+これはpathの差替えと通常の破損を検出するための仕組みです。同時のin-place書換えに対するsnapshot保証や、
+manifestを含めて全hashを書き直す攻撃への真正性保証ではありません。内容hashは科学的同値性・精度認定と別です。
+
+`source_identity()`は固定の`content_files` rosterを含みます。`verification_document()`は操作中に検証したfileと
+hashを別receiptへ返し、未読segmentも含む確認は`verify_contents()` / `inspect --verify`で実行します。
+確認記録は後のreopen検証を省略するcacheではありません。遅延read・generator反復中のI/O、schema、hash失敗も
+公開`SimulationError`へ分類し、不完全なfinalは`IncompleteResultError`、引数不正は`ValueError`とします。
+
+- `verify_contents()`：全commit済payload fileのbytesと構造・累積countを再確認して範囲receiptを返す。
 - `read_context()`：readonlyな型付きgeometry・座標・source/boundary・topology意味を返す。
 - `read_final()`：read-onlyなfinal particle列を返す。
 - `read_release_events()`：read-onlyなrelease event列を返す。

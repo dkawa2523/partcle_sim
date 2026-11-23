@@ -1,0 +1,109 @@
+{
+  "queries": {
+    "quality_findings": {
+      "label": "Executed checks on the current source",
+      "rows": [
+        {
+          "severity": "passed",
+          "finding": "Current core/scenarios: 1,333 passed; Windows file-replacement race skipped",
+          "disposition": "All 14 integrity cases passed on Linux, including path replacement; one existing adversarial overflow warning retained."
+        },
+        {
+          "severity": "passed",
+          "finding": "External COMSOL/gas-collision verification: 168 passed",
+          "disposition": "Verification uses saved reference evidence; no native solve or numerical parity inferred."
+        },
+        {
+          "severity": "passed",
+          "finding": "Lock, Ruff format/lint, Pyrefly, 6 import contracts, CC and docs/skills succeeded",
+          "disposition": "Exact current execution source is bound by the 179-file source map; this is not accuracy qualification."
+        },
+        {
+          "severity": "passed",
+          "finding": "Installed Windows/Linux normal workflow inventory and five examples executed",
+          "disposition": "Own geometry/field CSV, source creation, check/run, result-only analysis/export/view and module/console paths passed."
+        },
+        {
+          "severity": "resolved",
+          "finding": "Independent scientific review found array numeric-exception leakage and integer G/J truncation",
+          "disposition": "Existing physical error category restored, float64 outputs explicit, independent regression cases added and executed."
+        },
+        {
+          "severity": "resolved",
+          "finding": "Implementation review found duplicate candidate lifecycle names",
+          "disposition": "External evaluator now consumes the canonical lifecycle owner; native status meanings remain separate."
+        },
+        {
+          "severity": "passed",
+          "finding": "Fresh current-source A/P: 40 replicas per case, 287 initial IDs each, all80 candidate runs healthy",
+          "disposition": "No stochastic path matching required. Global transport is practically compatible; boundary33 and 100us own-survivor speed retain exploratory discrepancies. Numerical/native parity NOT_TESTED; physical NOT_CERTIFIED. Independent re-computation from raw native and all80 public results confirmed this exploratory judgment."
+        },
+        {
+          "severity": "running",
+          "finding": "Complete 10k/100k/1M performance matrix still running",
+          "disposition": "Completed smaller runs do not qualify the remaining large matrix. Results replace this row only after execution."
+        },
+        {
+          "severity": "retained",
+          "finding": "Automatic approval review blocked recursive removal of five task-owned baseline stores",
+          "disposition": "880,655 bytes retained as historical baseline evidence; current production reader has no result4 compatibility route."
+        }
+      ],
+      "source": {
+        "label": "Current source-bound execution receipts",
+        "scope": "Current checks and explicit pending work; no implied native accuracy or experimental validity",
+        "files": [
+          {
+            "location": "solver/evidence/foundation_2026_11_23/core_execution.json",
+            "availability": "bound_local",
+            "sha256": "sha256:0d0711dc70799ab09629d6e5eb74cfb3a7621eb55c5ed1ed38f3b1c7c496174b",
+            "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Current 179-file source: Windows core/scenario and external V&V, Linux integrity; no native parity or physical validation"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/independent_reviews.json",
+            "availability": "bound_local",
+            "sha256": "sha256:fb7ff07a45a32aba1e308ce61a5be7a0b6dc6357f31aaf63dbcbf3142a78a947",
+            "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Three independent perspectives plus current A/P followup: raw native and all80 public results independently recomputed; practical exploratory scope only, no native parity or physical certification"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/installed_windows.json",
+            "availability": "bound_local",
+            "sha256": "sha256:b488232ae57ce4f60f2f1769a85e7d70bd0c0b70f2e7f28e667c0a1e70fb8999",
+            "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Current 0.5 wheel, empty cwd public workflows, five actual examples, own CSV and result reuse"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/installed_linux.json",
+            "availability": "bound_local",
+            "sha256": "sha256:63f717caf223aeb703656bcd59bcaf6e11a87c74ca5e1421e846bd326b850057",
+            "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Same current 0.5 wheel installed on Linux; public workflow inventory and example outcomes"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json",
+            "availability": "bound_local",
+            "sha256": "sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json",
+            "availability": "bound_local",
+            "sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json",
+            "availability": "bound_local",
+            "sha256": "sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          }
+        ]
+      }
+    }
+  }
+}

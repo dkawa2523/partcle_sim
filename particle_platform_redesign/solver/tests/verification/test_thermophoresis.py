@@ -211,10 +211,12 @@ def test_waldmann_catalog_and_compiled_runtime_share_one_formula(
     assert set(requirements) == {"ug", "tg", "qtr", "mfp"}
     assert requirements["ug"].components == components
     assert requirements["qtr"].stored_basis == basis
-    assert plan.resolved_models()["thermophoresis"] == {
-        "model": "waldmann_gallis",
-        "revision": _REVISION,
-    }
+    assert (
+        {
+            "model": "waldmann_gallis",
+            "revision": _REVISION,
+        }
+    ).items() <= (plan.resolved_models()["thermophoresis"]).items()
 
     ranges = {
         "ug": _constant_vector_range(0.0, 0.0),

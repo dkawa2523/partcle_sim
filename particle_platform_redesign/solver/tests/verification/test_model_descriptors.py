@@ -74,6 +74,14 @@ def test_advertised_selector_keys_resolve_and_describe_the_selected_model(
         selected = plan.resolved_models()[descriptor.category]
         assert selected["model"] == descriptor.model
         assert selected["revision"] == descriptor.revision
+        inputs = _models(descriptor)[descriptor.category]
+        for role in descriptor.field_parameters:
+            assert selected[role] == inputs[role]
+        for name in descriptor.required_parameters:
+            value = inputs[name]
+            if isinstance(value, float | int):
+                assert selected[name] == value
+        assert json.loads(json.dumps(selected)) == selected
         assert set(compatible_integrators(plan)) <= set(descriptor.integrators)
         assert compatible_integrators(plan)
         roles = tuple(field for field in descriptor.fields if field.coordinate_system == coordinate)

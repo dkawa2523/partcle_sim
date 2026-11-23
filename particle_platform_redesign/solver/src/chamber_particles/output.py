@@ -9,12 +9,13 @@ import os
 import sys
 import time
 from collections.abc import Iterator, Mapping
+from contextlib import AbstractContextManager, contextmanager
 from dataclasses import dataclass, field
 from dataclasses import fields as dataclass_fields
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Final
+from typing import Any, BinaryIO, Final
 
 import h5py
 import numpy as np
@@ -24,15 +25,15 @@ from .case_format import (
     CoordinateSystem,
     DataBundle,
     GeometryData,
+    _content_hash_validated,
+    _read_validated_handle,
     resident_array_bytes,
-)
-from .case_format import (
-    read_with_info as read_canonical,
 )
 from .case_format import (
     write as write_canonical,
 )
 from .cpu import PersistentParticleState
+from .errors import IncompleteResultError, SimulationError
 from .lifecycle import FAILED, NAMES
 
 type FloatArray = NDArray[np.float64]
@@ -45,8 +46,8 @@ type UInt8Array = NDArray[np.uint8]
 type StringArray = NDArray[np.str_]
 type _PathInput = str | PathLike[str]
 
-RESULT_SCHEMA_VERSION: Final = 4
-RESULT_ALGORITHM_REVISION: Final = "durable_context_segmented_result_v7"
+RESULT_SCHEMA_VERSION: Final = 5
+RESULT_ALGORITHM_REVISION: Final = "committed_content_segmented_result_v8"
 CHECKPOINT_SCHEMA_VERSION: Final = 2
 RESULT_WRITER_RESERVE_BYTES: Final = 3 * 1024 * 1024
 
@@ -65,7 +66,7 @@ class ResultWriteError(RuntimeError):
     """A result directory cannot be created or finalized safely."""
 
 
-class ResultOpenError(RuntimeError):
+class ResultOpenError(SimulationError):
     """A completed result has an unsupported or inconsistent representation."""
 
 
@@ -110,6 +111,7 @@ class ResultSource:
     name: str
     table: str
     kind: str
+    particle_count: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -195,7 +197,7 @@ def _context_metadata(context: ResultContext) -> dict[str, object]:
             ],
         }
     return {
-        "context_revision": "result_context_v1",
+        "context_revision": "result_context_v2",
         "case_file_hash": context.case_file_hash,
         "data_content_hash": context.data_content_hash,
         "motion_mode": context.motion_mode,
@@ -205,6 +207,7 @@ def _context_metadata(context: ResultContext) -> dict[str, object]:
                 "name": source.name,
                 "table": source.table,
                 "kind": source.kind,
+                "particle_count": source.particle_count,
             }
             for source in context.sources
         ],
@@ -220,7 +223,7 @@ def _context_bundle(context: ResultContext) -> DataBundle:
     _validate_context_metadata(metadata, context.geometry, context.coordinate_system)
     provenance = {
         "producer": "chamber_particles.output",
-        "producer_version": "result_context_v1",
+        "producer_version": "result_context_v2",
         "source_sha256": context.case_file_hash,
         "field_semantics_revision": "geometry_only_result_context_v1",
         "producer_metadata": metadata,
@@ -241,7 +244,7 @@ def _validate_context_metadata(
 
 
 def _validate_context_identity(value: dict[str, Any], coordinate_system: str) -> None:
-    if value.get("context_revision") != "result_context_v1" or value.get("unit_system") != "SI":
+    if value.get("context_revision") != "result_context_v2" or value.get("unit_system") != "SI":
         raise ValueError("unsupported result context revision or units")
     for name in ("case_file_hash", "data_content_hash"):
         digest = value.get(name)
@@ -280,6 +283,9 @@ def _validate_context_sources(sources: Any) -> None:
             raise ValueError("result context source label/table/type is invalid")
         if source["kind"] not in ("table", "surface"):
             raise ValueError("result context source kind is unsupported")
+        count = source.get("particle_count")
+        if type(count) is not int or count < 0:
+            raise ValueError("result context source particle_count must be a nonnegative integer")
 
 
 def _validate_context_boundary(item: Any, groups: tuple[str, ...]) -> None:
@@ -358,7 +364,13 @@ def _context_from_bundle(bundle: DataBundle) -> ResultContext:
         value["data_content_hash"],
         value["motion_mode"],
         tuple(
-            ResultSource(source["source_id"], source["name"], source["table"], source["kind"])
+            ResultSource(
+                source["source_id"],
+                source["name"],
+                source["table"],
+                source["kind"],
+                source["particle_count"],
+            )
             for source in value["sources"]
         ),
         boundaries,
@@ -373,10 +385,9 @@ def _read_context(path: Path, manifest: Mapping[str, object]) -> ResultContext:
         raise ResultOpenError("result context binding is missing")
     identity = _validated_manifest_identity(manifest)
     try:
-        if _sha256_file(path / "context.h5") != binding.get("file_sha256"):
-            raise ResultOpenError("result context file hash does not match manifest")
-        bundle, info = read_canonical(path / "context.h5")
-        if info.content_hash != binding.get("content_hash"):
+        with _verified_h5(path / "context.h5", binding.get("file_sha256")) as handle:
+            bundle, _footprint = _read_validated_handle(handle)
+        if _content_hash_validated(bundle) != binding.get("content_hash"):
             raise ResultOpenError("result context logical hash does not match manifest")
         context = _context_from_bundle(bundle)
         for key in ("case_file_hash", "data_content_hash"):
@@ -962,6 +973,7 @@ class ResultWriter:
         self._identity_hash = _sha256_bytes(self._identity_json.encode("utf-8"))
         self._counts = _ResultCounts()
         self._next_segment_index = 0
+        self._segment_hashes: tuple[str, ...] = ()
         self._resume_state: CheckpointState | None = None
         self._completed_summary: RunSummary | None = None
         self._sink: _SegmentSink | None = None
@@ -1089,7 +1101,7 @@ class ResultWriter:
             checkpoint,
             commit_id=commit_id,
             segment_index=commit_id,
-            segment_sha256=segment_sha256,
+            segment_hashes=(*self._segment_hashes, segment_sha256),
             counts=committed_counts,
             resume_identity_hash=self._identity_hash,
             context_binding=self._context_binding,
@@ -1106,6 +1118,7 @@ class ResultWriter:
         )
         _write_latest(self.partial_path, latest)
         self._counts = committed_counts
+        self._segment_hashes = (*self._segment_hashes, segment_sha256)
         self._resume_state = checkpoint
         self._next_segment_index += 1
 
@@ -1136,6 +1149,13 @@ class ResultWriter:
             raise ResultWriteError("finalization requires a committed final epoch")
         if self._resume_state is None or self._resume_state.macro_step_count != macro_step_count:
             raise ResultWriteError("final checkpoint does not match the completed macro-step count")
+        if self._context_binding is None:
+            raise ResultWriteError("finalization requires the immutable context")
+        try:
+            _read_context(self.partial_path, _read_manifest(self.partial_path))
+            _verify_segment_prefix(self.partial_path, self._segment_hashes)
+        except (ResultOpenError, OSError) as error:
+            raise ResultWriteError("committed segment bytes changed before finalization") from error
         final_temp = self.partial_path / "final.tmp.h5"
         _write_final(final_temp, final)
         try:
@@ -1159,6 +1179,11 @@ class ResultWriter:
                 "case_file_hash": self._identity_value["case_file_hash"],
                 "data_content_hash": self._identity_value["data_content_hash"],
                 "context": self._context_binding,
+                "content_files": {
+                    "context.h5": self._context_binding["file_sha256"],
+                    "final.h5": _sha256_file(self.partial_path / "final.h5"),
+                    **_segment_roster(self._segment_hashes),
+                },
                 "counts": {
                     "particles": particle_count,
                     **self._counts.as_dict(),
@@ -1221,6 +1246,7 @@ class ResultWriter:
         _require_resume_identity(manifest, self._identity_json, self._identity_hash)
         if (self.partial_path / "_SUCCESS").is_file():
             view = _open_completed_path(self.partial_path)
+            view.verify_contents()
             summary = _summary_from_manifest(self.output_path, view.manifest)
             _publish_result_directory(self.partial_path, self.output_path)
             self._completed_summary = summary
@@ -1232,14 +1258,10 @@ class ResultWriter:
             # its temp/final segment and checkpoint names are atomically replaced.
             return
         segment_paths = _committed_segment_paths(self.partial_path, latest)
-        actual_counts = _validate_segments(segment_paths)
-        if actual_counts != latest.counts:
-            raise ResultWriteError("committed segment counts do not match LATEST")
         checkpoint_path = self.partial_path / _CHECKPOINT_DIRECTORY / latest.checkpoint_name
-        if _sha256_file(checkpoint_path) != latest.checkpoint_sha256:
-            raise ResultWriteError("checkpoint content hash does not match LATEST")
-        state, metadata_counts = _read_checkpoint(
+        state, metadata_counts, segment_hashes = _read_checkpoint(
             checkpoint_path,
+            expected_file_hash=latest.checkpoint_sha256,
             expected_identity_hash=self._identity_hash,
             expected_commit_id=latest.commit_id,
             expected_segment_index=latest.segment_index,
@@ -1247,9 +1269,11 @@ class ResultWriter:
         )
         if metadata_counts != latest.counts:
             raise ResultWriteError("checkpoint counts do not match LATEST")
-        if _sha256_file(segment_paths[-1]) != _checkpoint_segment_hash(checkpoint_path):
-            raise ResultWriteError("latest segment content hash does not match checkpoint")
+        actual_counts = _validate_segments(segment_paths, _segment_roster(segment_hashes))
+        if actual_counts != latest.counts:
+            raise ResultWriteError("committed segment counts do not match LATEST")
         self._counts = latest.counts
+        self._segment_hashes = segment_hashes
         self._next_segment_index = latest.segment_index + 1
         self._resume_state = state
 
@@ -1301,6 +1325,7 @@ class ResultView:
     complete: bool
     context_source_count: int
     manifest_sha256: str = field(init=False)
+    _verified_files: set[str] = field(default_factory=set, init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         document = self.manifest_document()
@@ -1313,6 +1338,8 @@ class ResultView:
             "manifest",
             MappingProxyType({key: _immutable_json(value) for key, value in document.items()}),
         )
+        _content_roster(self.manifest, complete=self.complete)
+        self._verified_files.add("context.h5")
 
     def manifest_document(self) -> dict[str, Any]:
         """Return an independent JSON document for serialization or editing.
@@ -1335,20 +1362,67 @@ class ResultView:
                     "result_schema_version",
                     "result_algorithm_revision",
                     "context",
+                    "content_files",
                 )
             },
         }
 
+    def verification_document(self) -> dict[str, object]:
+        """Report successful byte checks; this record never skips a later read."""
+        roster = _content_roster(self.manifest, complete=self.complete)
+        return {
+            "scope": (
+                "all_payload_file_bytes"
+                if self._verified_files == set(roster)
+                else "consumed_file_bytes"
+            ),
+            "content_files": {name: roster[name] for name in sorted(self._verified_files)},
+            "semantics": (
+                "SHA-256 checked on the same open handle as each read; "
+                "no guarantee against concurrent in-place writes."
+            ),
+        }
+
+    def verify_contents(self) -> dict[str, object]:
+        """Recheck every committed payload file, including currently unread segments."""
+        roster = _content_roster(self.manifest, complete=self.complete)
+        counts = _validate_segments(self.segment_paths, roster, self._verified_files)
+        expected = self.manifest.get("counts")
+        if not isinstance(expected, Mapping) or any(
+            expected.get(name) != value for name, value in counts.as_dict().items()
+        ):
+            raise ResultOpenError("committed segment counts do not match manifest")
+        self.read_context()
+        if self.complete:
+            with self._open_final() as handle:
+                _validate_final_file(
+                    handle,
+                    _summary_from_manifest(self.path, self.manifest).particle_count,
+                    self.context_source_count,
+                )
+        return self.verification_document()
+
+    def _open_final(self) -> AbstractContextManager[h5py.File]:
+        roster = _content_roster(self.manifest, complete=self.complete)
+        return _verified_h5(
+            self.path / "final.h5", roster["final.h5"], self._verified_files, "final.h5"
+        )
+
     def read_context(self) -> ResultContext:
         """Read validated geometry and semantic labels independently of input files."""
 
-        return _read_context(self.path, self.manifest)
+        self._verified_files.discard("context.h5")
+        context = _read_context(self.path, self.manifest)
+        self._verified_files.add("context.h5")
+        return context
 
     def read_final(self) -> FinalParticles:
         if not self.complete:
-            raise ResultOpenError("an incomplete recovery result has no authoritative final state")
+            raise IncompleteResultError(
+                "an incomplete recovery result has no authoritative final state"
+            )
         particle_count = _summary_from_manifest(self.path, self.manifest).particle_count
-        with h5py.File(self.path / "final.h5", "r") as handle:
+        with self._open_final() as handle:
             _validate_final_file(handle, particle_count, self.context_source_count)
             group = handle["particles"]
             return FinalParticles(
@@ -1371,7 +1445,11 @@ class ResultView:
             )
 
     def read_release_events(self) -> ReleaseEvents:
-        return _read_release_segments(self.segment_paths)
+        return _read_release_segments(
+            self.segment_paths,
+            _content_roster(self.manifest, complete=self.complete),
+            self._verified_files,
+        )
 
     def read_boundary_events(self) -> BoundaryEvents:
         return _read_boundary_batches(self.iter_boundary_event_batches())
@@ -1392,21 +1470,38 @@ class ResultView:
         if isinstance(batch_rows, bool) or not isinstance(batch_rows, int) or batch_rows <= 0:
             raise ValueError("boundary-event batch_rows must be a positive integer")
         for path in self.segment_paths:
-            yield from _iter_boundary_event_batches(path, batch_rows)
+            yield from _iter_boundary_event_batches(
+                path,
+                batch_rows,
+                _content_roster(self.manifest, complete=self.complete),
+                self._verified_files,
+            )
 
     def read_failure_events(self) -> FailureEvents:
-        return _read_failure_segments(self.segment_paths)
+        return _read_failure_segments(
+            self.segment_paths,
+            _content_roster(self.manifest, complete=self.complete),
+            self._verified_files,
+        )
 
     def read_lifecycle_series(self) -> LifecycleSeries:
-        return _read_series_segments(self.segment_paths)
+        return _read_series_segments(
+            self.segment_paths,
+            _content_roster(self.manifest, complete=self.complete),
+            self._verified_files,
+        )
 
     def iter_frames(self) -> Iterator[TrajectoryFrame]:
         for path in self.segment_paths:
-            yield from _iter_trajectory_frames(path)
+            yield from _iter_trajectory_frames(
+                path, _content_roster(self.manifest, complete=self.complete), self._verified_files
+            )
 
     def iter_probes(self) -> Iterator[ProbeFrame]:
         for path in self.segment_paths:
-            yield from _iter_probe_frames(path)
+            yield from _iter_probe_frames(
+                path, _content_roster(self.manifest, complete=self.complete), self._verified_files
+            )
 
 
 def open_result_store(path: _PathInput, *, recovery: bool = False) -> ResultView:
@@ -1431,32 +1526,31 @@ def open_result_store(path: _PathInput, *, recovery: bool = False) -> ResultView
     if latest is None:
         raise IncompleteResult(f"result has no committed checkpoint: {result_path}")
     checkpoint_path = partial_path / _CHECKPOINT_DIRECTORY / latest.checkpoint_name
-    if _sha256_file(checkpoint_path) != latest.checkpoint_sha256:
-        raise ResultOpenError("checkpoint content hash does not match LATEST")
     identity_hash = manifest.get("resume_identity_hash")
     if not isinstance(identity_hash, str) or not _is_sha256(identity_hash):
         raise ResultOpenError("partial result resume identity hash is invalid")
-    checkpoint_counts = _validate_checkpoint_reference(
+    checkpoint_counts, segment_hashes = _validate_checkpoint_reference(
         checkpoint_path,
         identity_hash,
         latest.commit_id,
         latest.segment_index,
         context_binding,
+        latest.checkpoint_sha256,
     )
     if checkpoint_counts != latest.counts:
         raise ResultOpenError("checkpoint counts do not match LATEST")
     paths = _committed_segment_paths(partial_path, latest)
-    actual_counts = _validate_segments(paths)
+    roster = {"context.h5": context_binding["file_sha256"], **_segment_roster(segment_hashes)}
+    actual_counts = _validate_segments(paths, roster)
     if actual_counts != latest.counts:
         raise ResultOpenError("committed segment counts do not match LATEST")
-    if _sha256_file(paths[-1]) != _checkpoint_segment_hash(checkpoint_path):
-        raise ResultOpenError("latest segment content hash does not match checkpoint")
     recovery_manifest = dict(manifest)
     recovery_manifest.update(
         {
             "status": "recovery",
             "segment_count": len(paths),
             "latest_commit_id": latest.commit_id,
+            "content_files": roster,
             "counts": latest.counts.as_dict(),
         }
     )
@@ -1594,24 +1688,99 @@ def _sha256_bytes(payload: bytes) -> str:
 
 
 def _sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
     try:
         with path.open("rb") as handle:
-            while block := handle.read(1024 * 1024):
-                digest.update(block)
+            return _sha256_stream(handle)
     except OSError as error:
         raise OSError(f"cannot hash committed artifact: {path}") from error
+
+
+def _sha256_stream(stream: BinaryIO) -> str:
+    digest = hashlib.sha256()
+    while block := stream.read(1024 * 1024):
+        digest.update(block)
     return "sha256:" + digest.hexdigest()
+
+
+@contextmanager
+def _verified_h5(
+    path: Path,
+    expected: object,
+    verified: set[str] | None = None,
+    name: str | None = None,
+) -> Iterator[h5py.File]:
+    """Hash and read one open file; reopen always rehashes, without a cache."""
+    if verified is not None and name is not None:
+        verified.discard(name)
+    try:
+        with path.open("rb") as stream:
+            if not isinstance(expected, str) or _sha256_stream(stream) != expected:
+                raise ResultOpenError(f"result content hash does not match: {path.name}")
+            stream.seek(0)
+            with h5py.File(stream, "r", rdcc_nbytes=_RAW_CHUNK_CACHE_BYTES) as handle:
+                yield handle
+            if verified is not None and name is not None:
+                verified.add(name)
+    except (OSError, KeyError, TypeError, ValueError, RuntimeError) as error:
+        if isinstance(error, SimulationError):
+            raise
+        raise ResultOpenError(f"result artifact cannot be read: {path.name}: {error}") from error
+
+
+def _segment_roster(hashes: tuple[str, ...]) -> dict[str, str]:
+    return {f"segments/epoch-{index:06d}.h5": digest for index, digest in enumerate(hashes)}
+
+
+def _verify_segment_prefix(path: Path, hashes: tuple[str, ...]) -> None:
+    for relative, expected in _segment_roster(hashes).items():
+        with _verified_h5(path / relative, expected):
+            pass
+
+
+def _open_segment(
+    path: Path, roster: Mapping[str, str], verified: set[str] | None = None
+) -> AbstractContextManager[h5py.File]:
+    name = f"segments/{path.name}"
+    return _verified_h5(path, roster[name], verified, name)
+
+
+def _content_roster(manifest: Mapping[str, object], *, complete: bool) -> dict[str, str]:
+    count = _json_nonnegative_integer(manifest.get("segment_count"), "run.segment_count")
+    names = {f"segments/epoch-{index:06d}.h5" for index in range(count)} | {"context.h5"}
+    if complete:
+        names.add("final.h5")
+    roster = manifest.get("content_files")
+    if not isinstance(roster, Mapping) or set(roster) != names:
+        raise ResultOpenError(
+            "result content roster must cover exactly the committed payload files"
+        )
+    if not all(isinstance(digest, str) and _is_sha256(digest) for digest in roster.values()):
+        raise ResultOpenError("result content roster has an invalid SHA-256")
+    binding = manifest.get("context")
+    if not isinstance(binding, Mapping) or roster["context.h5"] != binding.get("file_sha256"):
+        raise ResultOpenError("result content roster does not bind its context")
+    return dict(roster)
 
 
 def _read_manifest(path: Path) -> dict[str, object]:
     try:
-        value = json.loads((path / "run.json").read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        value = json.loads(
+            (path / "run.json").read_text(encoding="utf-8"), object_pairs_hook=_unique_json_keys
+        )
+    except (OSError, UnicodeDecodeError, ValueError) as error:
         raise ResultOpenError("run.json cannot be read") from error
     if not isinstance(value, dict):
         raise ResultOpenError("run.json must contain one object")
     return value
+
+
+def _unique_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for name, value in pairs:
+        if name in result:
+            raise ValueError(f"duplicate result metadata key: {name}")
+        result[name] = value
+    return result
 
 
 def _write_latest(path: Path, latest: _LatestCommit) -> None:
@@ -1635,8 +1804,10 @@ def _read_latest(path: Path) -> _LatestCommit | None:
     if not latest_path.is_file():
         return None
     try:
-        value = json.loads(latest_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        value = json.loads(
+            latest_path.read_text(encoding="utf-8"), object_pairs_hook=_unique_json_keys
+        )
+    except (OSError, UnicodeDecodeError, ValueError) as error:
         raise ResultOpenError("LATEST cannot be read") from error
     if not isinstance(value, dict):
         raise ResultOpenError("LATEST must contain one object")
@@ -1715,7 +1886,7 @@ def _write_checkpoint(
     *,
     commit_id: int,
     segment_index: int,
-    segment_sha256: str,
+    segment_hashes: tuple[str, ...],
     counts: _ResultCounts,
     resume_identity_hash: str,
     context_binding: Mapping[str, object] | None,
@@ -1728,7 +1899,9 @@ def _write_checkpoint(
         handle.attrs["result_algorithm_revision"] = RESULT_ALGORITHM_REVISION
         handle.attrs["commit_id"] = commit_id
         handle.attrs["segment_index"] = segment_index
-        handle.attrs["segment_sha256"] = segment_sha256
+        handle.create_dataset(
+            "committed_segment_sha256", data=segment_hashes, dtype=h5py.string_dtype("utf-8")
+        )
         handle.attrs["resume_identity_hash"] = resume_identity_hash
         handle.attrs["context_content_hash"] = context_binding["content_hash"]
         handle.attrs["context_file_sha256"] = context_binding["file_sha256"]
@@ -1763,13 +1936,14 @@ def _write_checkpoint(
 def _read_checkpoint(
     path: Path,
     *,
+    expected_file_hash: str,
     expected_identity_hash: str,
     expected_commit_id: int,
     expected_segment_index: int,
     context_binding: Mapping[str, object],
-) -> tuple[CheckpointState, _ResultCounts]:
+) -> tuple[CheckpointState, _ResultCounts, tuple[str, ...]]:
     try:
-        with h5py.File(path, "r") as handle:
+        with _verified_h5(path, expected_file_hash) as handle:
             _validate_checkpoint_metadata(
                 handle,
                 expected_identity_hash,
@@ -1778,6 +1952,7 @@ def _read_checkpoint(
                 context_binding,
             )
             counts = _checkpoint_counts(handle)
+            segment_hashes = _checkpoint_segment_hashes(handle, expected_segment_index)
             group = handle["state"]
             if not isinstance(group, h5py.Group):
                 raise ResultOpenError("checkpoint state group is missing")
@@ -1811,7 +1986,7 @@ def _read_checkpoint(
     except (OSError, KeyError, TypeError, ValueError) as error:
         raise ResultOpenError("checkpoint cannot be read") from error
     _validate_checkpoint_state(state, int(state.particles.position_m.shape[0]))
-    return state, counts
+    return state, counts, segment_hashes
 
 
 def _validate_checkpoint_metadata(
@@ -1833,9 +2008,7 @@ def _validate_checkpoint_metadata(
     }
     if any(handle.attrs.get(name) != value for name, value in expected.items()):
         raise ResultOpenError("checkpoint identity or revision is incompatible")
-    hash_value = handle.attrs.get("segment_sha256")
-    if not isinstance(hash_value, str) or not _is_sha256(hash_value):
-        raise ResultOpenError("checkpoint segment hash is invalid")
+    _checkpoint_segment_hashes(handle, expected_segment_index)
 
 
 def _checkpoint_counts(handle: h5py.File) -> _ResultCounts:
@@ -1851,26 +2024,26 @@ def _validate_checkpoint_reference(
     commit_id: int,
     segment_index: int,
     context_binding: Mapping[str, object],
-) -> _ResultCounts:
+    expected_file_hash: str,
+) -> tuple[_ResultCounts, tuple[str, ...]]:
     try:
-        with h5py.File(path, "r") as handle:
+        with _verified_h5(path, expected_file_hash) as handle:
             _validate_checkpoint_metadata(
                 handle, identity_hash, commit_id, segment_index, context_binding
             )
-            return _checkpoint_counts(handle)
+            return _checkpoint_counts(handle), _checkpoint_segment_hashes(handle, segment_index)
     except (OSError, KeyError, TypeError, ValueError) as error:
         raise ResultOpenError("checkpoint reference cannot be read") from error
 
 
-def _checkpoint_segment_hash(path: Path) -> str:
-    try:
-        with h5py.File(path, "r") as handle:
-            value = handle.attrs["segment_sha256"]
-    except (OSError, KeyError) as error:
-        raise ResultOpenError("checkpoint segment hash cannot be read") from error
-    if not isinstance(value, str) or not _is_sha256(value):
-        raise ResultOpenError("checkpoint segment hash is invalid")
-    return value
+def _checkpoint_segment_hashes(handle: h5py.File, segment_index: int) -> tuple[str, ...]:
+    roster = handle.get("committed_segment_sha256")
+    if not isinstance(roster, h5py.Dataset) or roster.shape != (segment_index + 1,):
+        raise ResultOpenError("checkpoint must bind its entire committed segment prefix")
+    hashes = tuple(roster.asstr()[...])
+    if not all(isinstance(value, str) and _is_sha256(value) for value in hashes):
+        raise ResultOpenError("checkpoint committed segment hash is invalid")
+    return hashes
 
 
 def _validate_checkpoint_state(state: CheckpointState, particle_count: int) -> None:
@@ -1939,9 +2112,10 @@ def _open_completed_path(path: Path) -> ResultView:
         raise ResultOpenError("completed result has no LATEST commit")
     _validate_completed_checkpoint(path, manifest, latest)
     paths = _committed_segment_paths(path, latest)
-    counts = _validate_segments(paths)
-    if counts != latest.counts:
-        raise ResultOpenError("committed segment counts do not match LATEST")
+    roster = _content_roster(manifest, complete=True)
+    # The checkpoint binds the prefix roster and counts. Payload segments are
+    # verified on their actual lazy read, or explicitly by verify_contents().
+    counts = latest.counts
     segment_count = manifest.get("segment_count")
     if segment_count != len(paths) or manifest.get("latest_commit_id") != latest.commit_id:
         raise ResultOpenError("completed manifest does not match LATEST")
@@ -1952,7 +2126,7 @@ def _open_completed_path(path: Path) -> ResultView:
         if manifest_counts.get(name) != count:
             raise ResultOpenError("completed manifest counts do not match segments")
     try:
-        with h5py.File(path / "final.h5", "r") as final:
+        with _verified_h5(path / "final.h5", roster["final.h5"]) as final:
             _validate_final_file(final, summary.particle_count, context_source_count)
     except (OSError, KeyError) as error:
         raise ResultOpenError("final result artifact cannot be read") from error
@@ -1963,17 +2137,23 @@ def _validate_completed_checkpoint(
     path: Path, manifest: Mapping[str, object], latest: _LatestCommit
 ) -> None:
     checkpoint_path = path / _CHECKPOINT_DIRECTORY / latest.checkpoint_name
-    if _sha256_file(checkpoint_path) != latest.checkpoint_sha256:
-        raise ResultOpenError("checkpoint content hash does not match LATEST")
     binding = manifest.get("context")
     identity_hash = manifest.get("resume_identity_hash")
     if not isinstance(binding, dict) or not isinstance(identity_hash, str):
         raise ResultOpenError("completed result context identity is missing")
-    counts = _validate_checkpoint_reference(
-        checkpoint_path, identity_hash, latest.commit_id, latest.segment_index, binding
+    counts, hashes = _validate_checkpoint_reference(
+        checkpoint_path,
+        identity_hash,
+        latest.commit_id,
+        latest.segment_index,
+        binding,
+        latest.checkpoint_sha256,
     )
     if counts != latest.counts:
         raise ResultOpenError("checkpoint counts do not match LATEST")
+    roster = _content_roster(manifest, complete=True)
+    if any(roster[name] != digest for name, digest in _segment_roster(hashes).items()):
+        raise ResultOpenError("manifest does not bind the committed segment prefix")
 
 
 def _summary_from_counts(
@@ -2010,13 +2190,15 @@ def _summary_from_manifest(path: Path, manifest: Mapping[str, object]) -> RunSum
     return _summary_from_counts(path, particles, durable_counts, macro_steps)
 
 
-def _read_release_segments(paths: tuple[Path, ...]) -> ReleaseEvents:
+def _read_release_segments(
+    paths: tuple[Path, ...], roster: Mapping[str, str], verified: set[str]
+) -> ReleaseEvents:
     times: list[np.ndarray] = []
     particles: list[np.ndarray] = []
     ordinals: list[np.ndarray] = []
     sources: list[np.ndarray] = []
     for path in paths:
-        with h5py.File(path, "r") as handle:
+        with _open_segment(path, roster, verified) as handle:
             group = handle["events/release"]
             times.append(group["time_s"][...])
             particles.append(group["particle_id"][...])
@@ -2109,8 +2291,10 @@ def _read_boundary_batches(batches: Iterator[BoundaryEvents]) -> BoundaryEvents:
     )
 
 
-def _iter_boundary_event_batches(path: Path, batch_rows: int) -> Iterator[BoundaryEvents]:
-    with h5py.File(path, "r") as handle:
+def _iter_boundary_event_batches(
+    path: Path, batch_rows: int, roster: Mapping[str, str], verified: set[str]
+) -> Iterator[BoundaryEvents]:
+    with _open_segment(path, roster, verified) as handle:
         group = handle["events/boundary"]
         row_count = int(group["time_s"].shape[0])
         for start in range(0, row_count, batch_rows):
@@ -2202,13 +2386,15 @@ def _join_boundary_numeric(chunks: Mapping[str, list[np.ndarray]]) -> dict[str, 
     }
 
 
-def _read_failure_segments(paths: tuple[Path, ...]) -> FailureEvents:
+def _read_failure_segments(
+    paths: tuple[Path, ...], roster: Mapping[str, str], verified: set[str]
+) -> FailureEvents:
     times: list[np.ndarray] = []
     particles: list[np.ndarray] = []
     ordinals: list[np.ndarray] = []
     reasons: list[np.ndarray] = []
     for path in paths:
-        with h5py.File(path, "r") as handle:
+        with _open_segment(path, roster, verified) as handle:
             group = handle["events/failure"]
             times.append(group["time_s"][...])
             particles.append(group["particle_id"][...])
@@ -2227,12 +2413,14 @@ def _read_failure_segments(paths: tuple[Path, ...]) -> FailureEvents:
     )
 
 
-def _read_series_segments(paths: tuple[Path, ...]) -> LifecycleSeries:
+def _read_series_segments(
+    paths: tuple[Path, ...], roster: Mapping[str, str], verified: set[str]
+) -> LifecycleSeries:
     chunks: dict[str, list[np.ndarray]] = {
         name: [] for name in ("time_s", "pending", "active", "stuck", "held", "escaped", "failed")
     }
     for path in paths:
-        with h5py.File(path, "r") as handle:
+        with _open_segment(path, roster, verified) as handle:
             group = handle["series"]
             for name in chunks:
                 chunks[name].append(group[name][...])
@@ -2247,8 +2435,10 @@ def _read_series_segments(paths: tuple[Path, ...]) -> LifecycleSeries:
     )
 
 
-def _iter_trajectory_frames(path: Path) -> Iterator[TrajectoryFrame]:
-    with h5py.File(path, "r") as handle:
+def _iter_trajectory_frames(
+    path: Path, roster: Mapping[str, str], verified: set[str]
+) -> Iterator[TrajectoryFrame]:
+    with _open_segment(path, roster, verified) as handle:
         group = handle["frames"]
         times = group["time_s"][...]
         offsets = group["offset"][...]
@@ -2265,8 +2455,10 @@ def _iter_trajectory_frames(path: Path) -> Iterator[TrajectoryFrame]:
             )
 
 
-def _iter_probe_frames(path: Path) -> Iterator[ProbeFrame]:
-    with h5py.File(path, "r") as handle:
+def _iter_probe_frames(
+    path: Path, roster: Mapping[str, str], verified: set[str]
+) -> Iterator[ProbeFrame]:
+    with _open_segment(path, roster, verified) as handle:
         group = handle["probes"]
         times = group["time_s"][...]
         offsets = group["offset"][...]
@@ -2489,14 +2681,16 @@ def _validate_boundary_numeric_values(events: BoundaryEvents) -> None:
         raise ResultWriteError("boundary-event residual and budgets are inconsistent")
 
 
-def _validate_segments(paths: tuple[Path, ...]) -> _ResultCounts:
+def _validate_segments(
+    paths: tuple[Path, ...], roster: Mapping[str, str], verified: set[str] | None = None
+) -> _ResultCounts:
     counts = _ResultCounts()
     last_series_time = -math.inf
     last_frame_time = -math.inf
     last_probe_time = -math.inf
     try:
         for expected_index, path in enumerate(paths):
-            with h5py.File(path, "r") as segment:
+            with _open_segment(path, roster, verified) as segment:
                 _validate_segment_file(segment, expected_index)
                 local = _segment_counts(segment)
                 counts = counts.add(local)

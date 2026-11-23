@@ -3,8 +3,8 @@
   "title": "半導体チャンバー粒子輸送基盤 — 製品仕様と詳細実装計画",
   "surface": "report",
   "status": "complete",
-  "buildStatus": "complete",
-  "generatedAt": "2026-11-23T08:25:43.989430+00:00",
+  "buildStatus": "updating",
+  "generatedAt": "2026-11-23T12:37:56.566327+00:00",
   "filters": [],
   "report": {
     "asOf": null,
@@ -13,7 +13,7 @@
   },
   "queries": {
     "case_audit": {
-      "label": "以前のsourceに束縛したA/P各40seed参照",
+      "label": "現行sourceで再実行したA/P各40実現",
       "rows": [
         {
           "case": "A",
@@ -25,11 +25,13 @@
           "capture_candidate_sd": 6.014459073658906,
           "restricted_mean_active_native_us": 200.3969264894903,
           "restricted_mean_active_candidate_us": 203.4885515137035,
-          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
-          "qualification": "Numerical/native parity and physical adhesion not certified",
-          "execution_scope": "Prior resolved_semantics solver replay of the same40seeds/window and saved native reference; no current_only A/P solver replay",
-          "judgment_origin": "Previously reviewed practical interpretation retained under exact scientific-payload replay; no new confirmatory verdict",
-          "evidence_scope": "prior_source_bound_reference"
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応。局所留保を併記",
+          "qualification": "Numerical/native parity NOT_TESTED; physical adhesion NOT_CERTIFIED",
+          "execution_scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
+          "judgment_origin": "Exploratory interpretation of fresh current-source40; same seeds and saved native reference reused",
+          "evidence_scope": "current_source_bound_exploratory",
+          "candidate_failure_events": 0,
+          "initial287_all40_exactly_equal": true
         },
         {
           "case": "P",
@@ -41,27 +43,36 @@
           "capture_candidate_sd": 5.5214616236589436,
           "restricted_mean_active_native_us": 187.38328244202265,
           "restricted_mean_active_candidate_us": 203.05462371889976,
-          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
-          "qualification": "Numerical/native parity and physical adhesion not certified",
-          "execution_scope": "Prior resolved_semantics solver replay of the same40seeds/window and saved native reference; no current_only A/P solver replay",
-          "judgment_origin": "Previously reviewed practical interpretation retained under exact scientific-payload replay; no new confirmatory verdict",
-          "evidence_scope": "prior_source_bound_reference"
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応。局所留保を併記",
+          "qualification": "Numerical/native parity NOT_TESTED; physical adhesion NOT_CERTIFIED",
+          "execution_scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
+          "judgment_origin": "Exploratory interpretation of fresh current-source40; same seeds and saved native reference reused",
+          "evidence_scope": "current_source_bound_exploratory",
+          "candidate_failure_events": 0,
+          "initial287_all40_exactly_equal": true
         }
       ],
       "source": {
-        "label": "以前のsourceに束縛したA/P各40seed参照",
+        "label": "Current-source fresh A/P exploratory population assessment",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
         "files": [
-          "solver/evidence/current_only_2026_11_23/report_scope.json",
-          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
-          "solver/evidence/retirement_2026_11_23/population_recheck.json"
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/source_map.json"
+          }
         ],
         "metricDefinitions": [
           {
-            "label": "A/P287粒子・候補各40実現",
-            "definition": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged. Prior resolved_semantics solver re-execution uses the same seeds/window and unchanged saved native reference; it is not a new independent Monte Carlo sample or a newly certified numerical qualification. This current-only change imports prior evidence; no new80-run replay or present-source numerical qualification is claimed.",
+            "label": "固定287-ID、候補各40実現と単一保存native",
+            "definition": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification. SD is replica SD, not a mean CI. Empirical min/max is not a simultaneous band.",
             "componentIds": [
               "dataset-role"
             ]
@@ -69,34 +80,26 @@
         ],
         "evidenceFlow": [
           {
-            "title": "Prior reference reused in current-only report",
-            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:b1d7c74fceea5d6439816161f71e21de08538df70696ae38f101816383b22d39\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
+            "title": "Population, clock and dependence",
+            "detail": "{\"primary\": \"fixed287-ID 0-5ms restricted mean active lifetime; all particles released at0\", \"selected_on_prior_results\": true, \"dependence\": \"one287-ID cohort is one replica; A/P may be coupled and are never pooled as80 independent\", \"native_window\": \"raw native0-30ms unchanged; derived CSV retains original times0 through0.004999999999999999; candidate ends0.005 with an extra end frame; curves use exact common stored times, no time fitting or interpolation; RMST capped5ms, all native terminals earlier\", \"prediction_vs_mean\": \"empirical40-replica min/max is a descriptive observed range, not a mean confidence interval or simultaneous95% band\", \"survivor_conditioning\": \"speed/Z quantiles condition on each participant's own active cohort; active fractions and destination counts use all287 released\", \"lifecycle_meanings\": \"native retained terminal stopping surfaces are numerical captures; native disappearance remains unknown, candidate escape explicit; only coarse nonretained composition is grouped\", \"not_claimed\": [\"confirmatory equivalence\", \"qualified native solver parity\", \"physical validation\", \"strict stochastic path matching\"]}"
           },
           {
-            "title": "Prior resolved_semantics candidate replay and unchanged native scope",
-            "detail": "{\"receipt\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}, \"scope\": \"Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching\"}"
+            "title": "Source preservation",
+            "detail": "All fresh40 existing numerical observables equal the stored prior40 per seed. This is JSON-summary preservation, not a bitwise claim for every unsaved state/path, and uses no old-container reader."
           },
           {
-            "title": "Exact source identities",
-            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
-          },
-          {
-            "title": "Scope and limits",
-            "detail": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged."
-          },
-          {
-            "title": "Historical retirement-reader reanalysis",
-            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+            "title": "Reviewed evidence availability and execution scope",
+            "detail": "[{\"query_id\": \"case_audit\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_assessment.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"case_audit\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"case_audit\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_preservation.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"case_audit\", \"location\": \"solver/evidence/foundation_2026_11_23/source_map.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}]"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       }
     },
     "trajectory_divergence": {
-      "label": "以前のsourceに束縛した探索的局所差",
+      "label": "現行A/P比較の探索的な局所留保",
       "rows": [
         {
           "case": "A",
@@ -105,8 +108,8 @@
           "native": 74.0,
           "candidate_replica_mean": 60.45,
           "difference_percentage_points": -4.7212543554006965,
-          "scope": "全287粒子分母、探索的局所留保",
-          "evidence_scope": "prior_source_bound_reference"
+          "scope": "全287粒子分母。探索的な局所留保。数値的停止であり物理付着ではない",
+          "evidence_scope": "current_source_bound_exploratory"
         },
         {
           "case": "A",
@@ -114,9 +117,9 @@
           "unit": "m/s",
           "native": 759.0827702014865,
           "candidate_replica_mean_of_medians": 861.3178894844634,
-          "relative_difference_percent": 13.468243951294046,
-          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保",
-          "evidence_scope": "prior_source_bound_reference"
+          "relative_difference_percent": 13.46824395129404,
+          "scope": "各自survivorに条件付け。独立Brownian pathsのsame-ID誤差ではなく探索的な局所留保",
+          "evidence_scope": "current_source_bound_exploratory"
         },
         {
           "case": "P",
@@ -125,8 +128,8 @@
           "native": 73.0,
           "candidate_replica_mean": 61.325,
           "difference_percentage_points": -4.067944250871079,
-          "scope": "全287粒子分母、探索的局所留保",
-          "evidence_scope": "prior_source_bound_reference"
+          "scope": "全287粒子分母。探索的な局所留保。数値的停止であり物理付着ではない",
+          "evidence_scope": "current_source_bound_exploratory"
         },
         {
           "case": "P",
@@ -135,24 +138,31 @@
           "native": 737.5076919491495,
           "candidate_replica_mean_of_medians": 866.9236448676853,
           "relative_difference_percent": 17.547742800689182,
-          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保",
-          "evidence_scope": "prior_source_bound_reference"
+          "scope": "各自survivorに条件付け。独立Brownian pathsのsame-ID誤差ではなく探索的な局所留保",
+          "evidence_scope": "current_source_bound_exploratory"
         }
       ],
       "source": {
-        "label": "以前のsourceに束縛した探索的局所差",
+        "label": "Current-source fresh A/P exploratory population assessment",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
         "files": [
-          "solver/evidence/current_only_2026_11_23/report_scope.json",
-          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
-          "solver/evidence/retirement_2026_11_23/population_recheck.json"
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/source_map.json"
+          }
         ],
         "metricDefinitions": [
           {
-            "label": "探索的な局所差",
-            "definition": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations. Prior resolved_semantics solver re-execution uses the same seeds/window and unchanged saved native reference; it is not a new independent Monte Carlo sample or a newly certified numerical qualification. This current-only change imports prior evidence; no new80-run replay or present-source numerical qualification is claimed.",
+            "label": "固定287-ID、候補各40実現と単一保存native",
+            "definition": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification. SD is replica SD, not a mean CI. Empirical min/max is not a simultaneous band.",
             "componentIds": [
               "dataset-role"
             ]
@@ -160,28 +170,20 @@
         ],
         "evidenceFlow": [
           {
-            "title": "Prior reference reused in current-only report",
-            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:b1d7c74fceea5d6439816161f71e21de08538df70696ae38f101816383b22d39\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
+            "title": "Population, clock and dependence",
+            "detail": "{\"primary\": \"fixed287-ID 0-5ms restricted mean active lifetime; all particles released at0\", \"selected_on_prior_results\": true, \"dependence\": \"one287-ID cohort is one replica; A/P may be coupled and are never pooled as80 independent\", \"native_window\": \"raw native0-30ms unchanged; derived CSV retains original times0 through0.004999999999999999; candidate ends0.005 with an extra end frame; curves use exact common stored times, no time fitting or interpolation; RMST capped5ms, all native terminals earlier\", \"prediction_vs_mean\": \"empirical40-replica min/max is a descriptive observed range, not a mean confidence interval or simultaneous95% band\", \"survivor_conditioning\": \"speed/Z quantiles condition on each participant's own active cohort; active fractions and destination counts use all287 released\", \"lifecycle_meanings\": \"native retained terminal stopping surfaces are numerical captures; native disappearance remains unknown, candidate escape explicit; only coarse nonretained composition is grouped\", \"not_claimed\": [\"confirmatory equivalence\", \"qualified native solver parity\", \"physical validation\", \"strict stochastic path matching\"]}"
           },
           {
-            "title": "Prior resolved_semantics candidate replay and unchanged native scope",
-            "detail": "{\"receipt\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}, \"scope\": \"Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching\"}"
+            "title": "Source preservation",
+            "detail": "All fresh40 existing numerical observables equal the stored prior40 per seed. This is JSON-summary preservation, not a bitwise claim for every unsaved state/path, and uses no old-container reader."
           },
           {
-            "title": "Exact source identities",
-            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
-          },
-          {
-            "title": "Scope and limits",
-            "detail": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations."
-          },
-          {
-            "title": "Historical retirement-reader reanalysis",
-            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+            "title": "Reviewed evidence availability and execution scope",
+            "detail": "[{\"query_id\": \"trajectory_divergence\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_assessment.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"trajectory_divergence\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"trajectory_divergence\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_preservation.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"trajectory_divergence\", \"location\": \"solver/evidence/foundation_2026_11_23/source_map.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}]"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       }
@@ -224,7 +226,7 @@
         },
         {
           "area": "result_reuse",
-          "decision": "Result schema 4, nested immutable manifest and reusable ResultCohort",
+          "decision": "Result schema 5, nested immutable manifest and reusable ResultCohort",
           "reason": "One source identity and exact selected population across analysis/export/view"
         },
         {
@@ -245,7 +247,7 @@
           "solver/pyproject.toml",
           "solver/README.md",
           "solver/docs/case_format_v3.md",
-          "solver/docs/result_format_v4.md",
+          "solver/docs/result_format_v5.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/docs/parallel_execution_plan.md",
@@ -257,7 +259,8 @@
           "solver/src/chamber_particles/output.py",
           "solver/src/chamber_particles_tools/inputs.py",
           "solver/src/chamber_particles_tools/bundle_publication.py",
-          "solver/src/chamber_particles_tools/selection.py"
+          "solver/src/chamber_particles_tools/selection.py",
+          "solver/src/chamber_particles_tools/field_generation.py"
         ],
         "metricDefinitions": [
           {
@@ -284,7 +287,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       },
@@ -3617,7 +3620,7 @@
           "solver/pyproject.toml",
           "solver/README.md",
           "solver/docs/case_format_v3.md",
-          "solver/docs/result_format_v4.md",
+          "solver/docs/result_format_v5.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/docs/parallel_execution_plan.md",
@@ -3629,7 +3632,8 @@
           "solver/src/chamber_particles/output.py",
           "solver/src/chamber_particles_tools/inputs.py",
           "solver/src/chamber_particles_tools/bundle_publication.py",
-          "solver/src/chamber_particles_tools/selection.py"
+          "solver/src/chamber_particles_tools/selection.py",
+          "solver/src/chamber_particles_tools/field_generation.py"
         ],
         "metricDefinitions": [
           {
@@ -3652,7 +3656,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       },
@@ -3702,8 +3706,8 @@
           "must_not": "Population interpretation or plotting"
         },
         {
-          "module": "chamber_particles_tools.inputs / four input clients",
-          "owns": "Import, source conversion, field production and one case publisher",
+          "module": "chamber_particles_tools.inputs / field_generation / four input clients",
+          "owns": "Import, source conversion, field production, declared dependency freshness and one case publisher",
           "must_not": "Duplicated physics validation or trajectory solver"
         },
         {
@@ -3729,7 +3733,7 @@
           "solver/pyproject.toml",
           "solver/README.md",
           "solver/docs/case_format_v3.md",
-          "solver/docs/result_format_v4.md",
+          "solver/docs/result_format_v5.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/docs/parallel_execution_plan.md",
@@ -3741,7 +3745,8 @@
           "solver/src/chamber_particles/output.py",
           "solver/src/chamber_particles_tools/inputs.py",
           "solver/src/chamber_particles_tools/bundle_publication.py",
-          "solver/src/chamber_particles_tools/selection.py"
+          "solver/src/chamber_particles_tools/selection.py",
+          "solver/src/chamber_particles_tools/field_generation.py"
         ],
         "metricDefinitions": [
           {
@@ -3759,7 +3764,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       },
@@ -3826,7 +3831,7 @@
           "solver/pyproject.toml",
           "solver/README.md",
           "solver/docs/case_format_v3.md",
-          "solver/docs/result_format_v4.md",
+          "solver/docs/result_format_v5.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/docs/parallel_execution_plan.md",
@@ -3838,7 +3843,8 @@
           "solver/src/chamber_particles/output.py",
           "solver/src/chamber_particles_tools/inputs.py",
           "solver/src/chamber_particles_tools/bundle_publication.py",
-          "solver/src/chamber_particles_tools/selection.py"
+          "solver/src/chamber_particles_tools/selection.py",
+          "solver/src/chamber_particles_tools/field_generation.py"
         ],
         "metricDefinitions": [
           {
@@ -3858,7 +3864,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       },
@@ -3880,7 +3886,7 @@
         {
           "layer": "ResultView",
           "contents": "Final, interactions, saved frames/probes, context and immutable nested manifest",
-          "rule": "manifest_document() copies JSON; source_identity() owns derived receipts; strict result schema 4"
+          "rule": "manifest_document() copies JSON; source_identity() owns derived receipts; strict result schema 5"
         },
         {
           "layer": "analysis",
@@ -3905,7 +3911,7 @@
           "solver/pyproject.toml",
           "solver/README.md",
           "solver/docs/case_format_v3.md",
-          "solver/docs/result_format_v4.md",
+          "solver/docs/result_format_v5.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/docs/parallel_execution_plan.md",
@@ -3917,7 +3923,8 @@
           "solver/src/chamber_particles/output.py",
           "solver/src/chamber_particles_tools/inputs.py",
           "solver/src/chamber_particles_tools/bundle_publication.py",
-          "solver/src/chamber_particles_tools/selection.py"
+          "solver/src/chamber_particles_tools/selection.py",
+          "solver/src/chamber_particles_tools/field_generation.py"
         ],
         "metricDefinitions": [
           {
@@ -3936,7 +3943,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       },
@@ -3948,209 +3955,171 @@
       ]
     },
     "implementation_work_packages": {
+      "label": "implementation work packages",
       "rows": [
         {
-          "package": "現行の実行入口",
-          "capability": "8 executable benchmark modules。P10にはfield/event/relaxationの3 workloads",
-          "deliverable": "用途ごとの計測を公開engineから実行",
-          "gate": "入口の数と今回の実行範囲を分ける"
+          "package": "Installed input flow",
+          "capability": "Own CSV mesh/field/source to runnable case",
+          "deliverable": "Mapping4 + source2 + recipe2 with explicit complete source-table set",
+          "gate": "Load/check/run from installed wheel"
         },
         {
-          "package": "8883e3aで実行した影響先計測",
-          "capability": "P06/P10/P14/P19/B03の5 modulesを実行",
-          "deliverable": "P10 cold/warm6 observations、P14 smoke8 observations",
-          "gate": "8883e3aに束縛した実行済みsubset。全8 modulesの再計測やrelease matrix完了とはしない"
+          "package": "Reusable results",
+          "capability": "Result alone to analysis/export/view",
+          "deliverable": "Context, result5 and committed payload identity",
+          "gate": "Move/remove source case and verify consumers"
         },
         {
-          "package": "8883e3aで確認したC03移管",
-          "capability": "P10 --scenarios relaxation --relaxation-particles",
-          "deliverable": "同じcanonical input・物理/数値設定・現行engine科学payloadを確認",
-          "gate": "11 analytic casesは独立の数値確認。移管identityだけを数学的正解にしない"
+          "package": "Scientific preservation",
+          "capability": "Same engine and equation meaning",
+          "deliverable": "Independent mathematical and identity checks",
+          "gate": "Root final receipts; no automatic historical PASS inheritance"
         },
         {
-          "package": "今回のB03とallocation owner確認",
-          "capability": "4 scenarios × 各32粒子、以前と科学payload hash一致",
-          "deliverable": "重複private-byte式を外し、実allocation検証ownerへ接続。独立646 raw / 648 rounded transient boundを保持",
-          "gate": "新規30 targeted checks。動的tree/pending-bankの実allocation照合と全体RSS/精度/scale保証を区別"
-        },
-        {
-          "package": "guard text削除後の現行P10確認",
-          "capability": "field/event/relaxation各N8 × cold/warm、計6 observations",
-          "deliverable": "全てexit0・failure0。同じworkloadのmode間で科学payloadが完全一致",
-          "gate": "cold/warm差はJIT償却の観測。algorithm speedup・scale性能・新規物理資格とはしない"
-        },
-        {
-          "package": "資源と観測",
-          "capability": "P19 global/local identity、B03 conservative temporary bound、現行work counts",
-          "deliverable": "P19 allocator verificationとbenchmarkの資源観測を分離",
-          "gate": "P14のidentity対象はreceipt定義のcore payload。未保存pathや全frame/probe一致を推測しない"
-        },
-        {
-          "package": "計時の範囲と限界",
-          "capability": "他のroot/agent作業とhost負荷が重なる局所観測",
-          "deliverable": "P09/P14-U/processの全計測、100k/1M規模は今回の担当範囲で未実行",
-          "gate": "portable SLAやrevision間speedupの認定なし"
+          "package": "Distribution",
+          "capability": "CLI and Python in one wheel",
+          "deliverable": "Five editable installed examples",
+          "gate": "Clean installed acceptance with no checkout"
         }
       ],
       "source": {
-        "label": "以前の5 modules実行、継続B03とguard削除後P10の限定確認",
+        "label": "Current reviewed design; execution evidence is separate",
         "files": [
-          "solver/.artifacts/current_only_bench_20261123/receipt.json",
+          "AGENTS.md",
+          "product_specification.md",
+          "architecture_proposal.md",
+          "implementation_plan.md",
+          "vv_methodology.md",
+          "data_quality_assessment.md",
+          "solver/pyproject.toml",
+          "solver/README.md",
+          "solver/docs/case_format_v3.md",
+          "solver/docs/result_format_v5.md",
+          "solver/docs/physics_models.md",
+          "solver/docs/numerics.md",
+          "solver/docs/parallel_execution_plan.md",
           "solver/tests/performance/README.md",
-          "solver/evidence/current_only_2026_11_23/execution/memory_retirement.json",
-          "solver/evidence/current_only_2026_11_23/execution/b03_current.json",
-          "solver/evidence/current_only_2026_11_23/execution/b03_comparison.json",
-          "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
-          "solver/evidence/current_only_2026_11_23/execution/guard_cleanup_p10.json"
+          "solver/tools/vv/comsol/README.md",
+          "solver/src/chamber_particles/physics/catalog.py",
+          "solver/src/chamber_particles/time_grid.py",
+          "solver/src/chamber_particles/lifecycle.py",
+          "solver/src/chamber_particles/output.py",
+          "solver/src/chamber_particles_tools/inputs.py",
+          "solver/src/chamber_particles_tools/bundle_publication.py",
+          "solver/src/chamber_particles_tools/selection.py",
+          "solver/src/chamber_particles_tools/field_generation.py"
         ],
         "metricDefinitions": [
           {
-            "label": "Benchmark inventory and executed subset",
-            "definition": "Eight executable modules remain the inventory. Execution at 8883e3a covered five affected modules. The continuation added four 32-particle B03 rows; after guard text cleanup, P10 newly ran all three workloads at N8 in cold/warm modes for six observations. These tiny controls establish the stated scientific identities, not algorithm speedup, scaling, a portable SLA or a full release matrix.",
+            "label": "implementation work packages",
+            "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
             "componentIds": [
-              "work-package-table",
-              "implementation-sequence"
+              "implementation-sequence",
+              "work-package-table"
             ]
           }
         ],
         "evidenceFlow": [
           {
-            "title": "Prior 8883e3a execution receipt",
-            "detail": "{\"path\": \"solver/.artifacts/current_only_bench_20261123/receipt.json\", \"sha256\": \"sha256:4a16f5545ae115b78dfed8d2f095b8d0a0ffbaab5813d845442c54391ad2d6b5\"}"
-          },
-          {
-            "title": "Independent and preservation scopes",
-            "detail": "{\"independent_oracles\": {\"passed\": 11, \"seconds\": 4.39, \"selectors\": [\"test_exponential_midpoint_c03_matches_the_closed_form\", \"test_exponential_midpoint_is_exact_for_c03_and_replay_keeps_endpoint_hint\", \"test_exponential_midpoint_coefficients_cover_wide_relaxation_range\", \"test_exponential_midpoint_has_second_order_for_variable_coefficients\"]}, \"input_correspondence\": {\"baseline\": \"75100e74f1243b527e065c9e6a68121221408b39 prior input construction function only, not a prior solver execution\", \"old_producer_sha256\": \"97ec22c85e90abe8b4cddb81684d5cf6e1c93bab54cefa067c8c658c99cffcf8\", \"particles\": 32, \"canonical_content_hash\": \"sha256:e5b8dbaba143bfdc8975b5903b971ab3d9ad5cd0178dd3f3e5044d22150469a5\", \"same_all_physical_and_numerical_settings\": true, \"only_case_display_name_change\": [\"p11_exponential_midpoint\", \"constant_relaxation\"], \"same_current_engine_scientific_payload\": true, \"current_public_scientific_payload_sha256\": \"sha256:fae94564184340988b7558d527c4bbfeb066686304dad19df389938431b3ada5\", \"independent_truth\": \"Separate C03/exponential exact wide-range and variable-coefficient11verificationcases passed; same-engine identity is only migration fidelity\", \"temporary_old_function_and_results_not_retained_in_production\": true}, \"timing_limits\": \"Machine-local descriptive observations under overlapping root/agent work; no portable SLA or inter-revision speedup claim. Smoke is not a full100k/1M qualification.\", \"not_run_by_this_owner\": [\"Unchanged P09/P14-U/process_workers full measurements\", \"Licensed COMSOL solve\", \"Full scientific suite\"]}"
-          },
-          {
-            "title": "Fresh continuation B03 and allocator-owner receipts",
-            "detail": "[{\"path\": \"solver/evidence/current_only_2026_11_23/execution/memory_retirement.json\", \"sha256\": \"sha256:c37601b333a9964af771f665fa5788b23818ef9e6f373459e7b258027111ceb3\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_current.json\", \"sha256\": \"sha256:0a2c9b6a47d5f510f9055686edaacdf9e0eae01bc0b1a043048e438c69490a98\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_comparison.json\", \"sha256\": \"sha256:0ae6d5adf32ce5ddd5507e162d61c3cf3a7af81b543b46ac7bcc12cd2c8f41cb\"}]"
-          },
-          {
-            "title": "Fresh P10 after producer-role guard cleanup",
-            "detail": "{\"receipts\": [{\"path\": \"solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json\", \"sha256\": \"sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/guard_cleanup_p10.json\", \"sha256\": \"sha256:51b0bc73611604041c6baf30c20005fa51963b8ae9552bb9f934212d304a95a3\"}], \"scope\": \"Tinygeneratedcontrol afterdebugmetadata removal; cold/warmJITamortization, not productionscaling/improvementspeedup or newphysicalqualification\", \"observations\": 6, \"particles_each\": 8, \"workloads\": [\"field\", \"event\", \"relaxation\"]}"
+            "title": "Reproduce design snapshot",
+            "detail": "Run analysis/build_report_snapshot.py from the locked solver environment; authority and catalog hashes are bound in snapshot.reproducibility."
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
-      }
+      },
+      "methods": [
+        {
+          "language": "shell",
+          "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+        }
+      ]
     },
     "quality_findings": {
+      "label": "Executed checks on the current source",
       "rows": [
         {
-          "severity": "prior_pass",
-          "finding": "以前のcore/scenario 1240件（source不変）",
-          "disposition": "08ac61bの実行状態で1240件、JUnit473.507秒。手動削除後の新規全体実行とはしない。解析・event・Brownian等の既存証拠を保持し、全native方程式や実機予測は認定しない",
-          "evidence": "solver/evidence/current_only_2026_11_23/execution/final_core_full.json"
-        },
-        {
-          "severity": "completed_cleanup",
-          "finding": "分類済み77774 binaries / 4554763321 logical Bの削除を確認",
-          "disposition": "利用者の手動削除後、199旧result rootsの残存0、guard29 HDF5とPYC17の消失を独立確認。対象を限定した完了で、論理サイズは実測のdisk空き容量ではない。以前の削除拒否は履歴として保持",
-          "evidence": "solver/evidence/current_only_2026_11_23/execution/post_manual_cleanup.json"
+          "severity": "passed",
+          "finding": "Current core/scenarios: 1,333 passed; Windows file-replacement race skipped",
+          "disposition": "All 14 integrity cases passed on Linux, including path replacement; one existing adversarial overflow warning retained."
         },
         {
           "severity": "passed",
-          "finding": "手動削除後の独自CSV public flowと解析解確認が成功",
-          "disposition": "init→独自CSV/recipe→create/check/run→inspect/analyze/export/view。1粒子・failure0、壁到達0.0175 sとの絶対差3.47e-18 s、保存位置5点の差0。今回のballistic flowに限定し、新規全体suiteやnative/A-P計算とはしない",
-          "evidence": "solver/evidence/current_only_2026_11_23/execution/post_manual_user_flow.json"
-        },
-        {
-          "severity": "completed_cleanup",
-          "finding": "前段階のUTF8 text623 files / 3005242 Bを削除",
-          "disposition": "手動binary削除前に実施したtext撤去。8YAMLを含み、当該段階のhelper9件は別集計。手動削除用helperも完了後に撤去済み。各実行時点の記録を保持",
-          "evidence": "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json"
-        },
-        {
-          "severity": "prior_pass",
-          "finding": "8883e3aの外部tests 156件",
-          "disposition": "COMSOL/gas-collisionの実行済みsuite。今回external18 sourceは不変で再実行はなし。過渡的collection件数を補わない",
-          "evidence": "solver/evidence/current_only_2026_11_23/report_execution_receipts.json"
+          "finding": "External COMSOL/gas-collision verification: 168 passed",
+          "disposition": "Verification uses saved reference evidence; no native solve or numerical parity inferred."
         },
         {
           "severity": "passed",
-          "finding": "599 text削除段階のWindows/Linux workflow完了",
-          "disposition": "既存clean wheel環境から各13操作・5例題をconsole/moduleで再実行。以後24 guard textのみ追加削除、49 installed sourceは不変。新たな全workflow実行やwheel buildの主張はしない",
-          "evidence": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json"
+          "finding": "Lock, Ruff format/lint, Pyrefly, 6 import contracts, CC and docs/skills succeeded",
+          "disposition": "Exact current execution source is bound by the 179-file source map; this is not accuracy qualification."
         },
         {
-          "severity": "prior_pass",
-          "finding": "R13時の30 targeted checksとB03の4 scenarios",
-          "disposition": "R13時のowner21件と公開scenario9件。B03各32粒子の科学payload hash一致を保持。手動削除後の新規実行・精度/scale認定・独立ensembleへ昇格しない",
-          "evidence": "solver/evidence/current_only_2026_11_23/execution/memory_retirement.json"
+          "severity": "passed",
+          "finding": "Installed Windows/Linux normal workflow inventory and five examples executed",
+          "disposition": "Own geometry/field CSV, source creation, check/run, result-only analysis/export/view and module/console paths passed."
         },
         {
-          "severity": "reviewed",
-          "finding": "手動削除後も保存対象479 filesのhash一致",
-          "disposition": "Git native authority196、外部raw入力278、再生成metadata5を独立再hashし、欠損0・差0。保護tracked領域と既知環境も確認。既知authorityの範囲で、新規native solveや全filesystemの網羅証明ではない",
-          "evidence": "solver/evidence/current_only_2026_11_23/execution/post_manual_preservation.json"
+          "severity": "resolved",
+          "finding": "Independent scientific review found array numeric-exception leakage and integer G/J truncation",
+          "disposition": "Existing physical error category restored, float64 outputs explicit, independent regression cases added and executed."
         },
         {
-          "severity": "prior_reference",
-          "finding": "A/P各40seedと以前の80再実行を参照として保持",
-          "disposition": "今回はA/P solver再実行なし。実用的population比較は元source/windowの範囲で有用、現行fresh qualificationではない",
-          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json"
+          "severity": "resolved",
+          "finding": "Implementation review found duplicate candidate lifecycle names",
+          "disposition": "External evaluator now consumes the canonical lifecycle owner; native status meanings remain separate."
         },
         {
-          "severity": "open_improvement",
-          "finding": "入力shapeエラー・analyze JSON失敗時公開・結果integrity scopeに残る改善",
-          "disposition": "columns:nullのtracebackと部分JSON残存は再現済み。final値hashの範囲は能力上の留保。提案のみで未実装、全件解消とはしない",
-          "evidence": "solver/evidence/current_only_2026_11_23/report_handoff_review.json"
+          "severity": "passed",
+          "finding": "Fresh current-source A/P: 40 replicas per case, 287 initial IDs each, all80 candidate runs healthy",
+          "disposition": "No stochastic path matching required. Global transport is practically compatible; boundary33 and 100us own-survivor speed retain exploratory discrepancies. Numerical/native parity NOT_TESTED; physical NOT_CERTIFIED. Independent re-computation from raw native and all80 public results confirmed this exploratory judgment."
+        },
+        {
+          "severity": "running",
+          "finding": "Complete 10k/100k/1M performance matrix still running",
+          "disposition": "Completed smaller runs do not qualify the remaining large matrix. Results replace this row only after execution."
+        },
+        {
+          "severity": "retained",
+          "finding": "Automatic approval review blocked recursive removal of five task-owned baseline stores",
+          "disposition": "880,655 bytes retained as historical baseline evidence; current production reader has no result4 compatibility route."
         }
       ],
       "source": {
-        "label": "手動削除後の完了・保存確認とsource別の既存証拠",
+        "label": "Current source-bound execution receipts",
+        "scope": "Current checks and explicit pending work; no implied native accuracy or experimental validity",
         "files": [
-          "solver/evidence/current_only_2026_11_23/report_execution_receipts.json",
-          "solver/evidence/current_only_2026_11_23/report_scope.json",
-          "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
-          "solver/evidence/current_only_2026_11_23/report_handoff_review.json",
-          "solver/.artifacts/current_only_20261123/final_assets_review.json",
-          "solver/.artifacts/current_only_20261123/clean_wheel_windows.json",
-          "solver/.artifacts/current_only_20261123/installed_workflow_windows.json",
-          "solver/.artifacts/current_only_20261123/clean_wheel_linux.json",
-          "solver/.artifacts/current_only_20261123/installed_workflow_linux.json",
-          "solver/evidence/current_only_2026_11_23/execution/continuation_cleanup.json",
-          "solver/evidence/current_only_2026_11_23/execution/memory_retirement.json",
-          "solver/evidence/current_only_2026_11_23/execution/b03_current.json",
-          "solver/evidence/current_only_2026_11_23/execution/b03_comparison.json",
-          "solver/evidence/current_only_2026_11_23/execution/final_core_full.json",
-          "solver/evidence/current_only_2026_11_23/execution/continuation_quality.json",
-          "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
-          "solver/evidence/current_only_2026_11_23/execution/installed_post_windows.json",
-          "solver/evidence/current_only_2026_11_23/execution/installed_post_linux.json",
-          "solver/evidence/current_only_2026_11_23/execution/old_text_postreview.json",
-          "solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json",
-          "solver/evidence/current_only_2026_11_23/execution/guard_cleanup_p10.json",
-          "solver/evidence/current_only_2026_11_23/execution/guard_artifact_postreview.json",
-          "solver/evidence/current_only_2026_11_23/execution/post_manual_cleanup.json",
-          "solver/evidence/current_only_2026_11_23/execution/post_manual_preservation.json",
-          "solver/evidence/current_only_2026_11_23/execution/post_manual_user_flow.json"
-        ],
-        "metricDefinitions": [
           {
-            "label": "Current classified completion and historical execution scopes",
-            "definition": "The user manually deleted the classified77774 binary targets; independent current audit found zero remaining in the exact target/root scope and preserved479 known native authority hashes.4554763321 bytes is the prior logical input size, not measured free disk capacity. Historical refusals, previous full-suite/wheel/performance records and priorA/P evidence remain bound to their original phases. Fresh post-manual evidence is one own-CSV ballistic public flow; open improvement findings remain unresolved.",
-            "componentIds": [
-              "quality-table",
-              "dataset-role"
-            ]
+            "label": "solver/evidence/foundation_2026_11_23/core_execution.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/independent_reviews.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/installed_windows.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/installed_linux.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json"
+          },
+          {
+            "label": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json"
           }
         ],
         "evidenceFlow": [
           {
-            "title": "Current post-manual cleanup, preservation and public flow",
-            "detail": "{\"receipts\": [{\"path\": \"solver/evidence/current_only_2026_11_23/execution/post_manual_cleanup.json\", \"sha256\": \"sha256:c04188a4f6e900b07c256e09fb0d39d43640700f46f2b68b438712572a6f303d\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/post_manual_preservation.json\", \"sha256\": \"sha256:62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/post_manual_user_flow.json\", \"sha256\": \"sha256:f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3\"}], \"current_status\": \"Classified physical retirement verified after user deletion; remaining classified files0\", \"classified_files\": 77774, \"prior_logical_bytes\": 4554763321, \"native_hashes_checked\": 479, \"fresh_flow_scope\": \"One own-CSV ballistic workflow and analytic wall-hit check, not a new full suite or native/ensemble computation\"}"
-          },
-          {
-            "title": "Historical pre-manual blocked and execution phases",
-            "detail": "{\"receipts\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_execution_receipts.json\", \"sha256\": \"sha256:a7925ef66cbe9b76a187a18bdb06c97e359b6ebd904a9cddb22d4f9e14e07af2\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:b1d7c74fceea5d6439816161f71e21de08538df70696ae38f101816383b22d39\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/blocked_cleanup.json\", \"sha256\": \"sha256:fc9d552c5e4368fc427a790ddb63438df4ee2339c8e16db98fc62259c7f97bdb\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_handoff_review.json\", \"sha256\": \"sha256:70cdf6c1b7aa5ccb494ad55dae6d81d843f393868bb9bcf3b05c8bfbf4dd853d\"}, {\"path\": \"solver/.artifacts/current_only_20261123/final_assets_review.json\", \"sha256\": \"sha256:f4ec421110d302b61bea4f35de31699e6690c310ba1fb9ecc2028817e6015c79\"}, {\"path\": \"solver/.artifacts/current_only_20261123/clean_wheel_windows.json\", \"sha256\": \"sha256:a1223e242afdb54e9702f6abcc9132a7877c3191df02bcd7df799585f71dcdf0\"}, {\"path\": \"solver/.artifacts/current_only_20261123/installed_workflow_windows.json\", \"sha256\": \"sha256:c3a2496f9f5aeb1bb91e649134eae70b057e771120b3022e88f336d3849bbb3f\"}, {\"path\": \"solver/.artifacts/current_only_20261123/clean_wheel_linux.json\", \"sha256\": \"sha256:e0e0b4456ea02fcfbc94adab151abaaa4b5a75940a569cf798b98c3905d838a2\"}, {\"path\": \"solver/.artifacts/current_only_20261123/installed_workflow_linux.json\", \"sha256\": \"sha256:4db89a2fab09275776257522f89c4f19408ddef1260af29bc0bc9153ed35e2ee\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/continuation_cleanup.json\", \"sha256\": \"sha256:6398860a8925fbc404a23bf0cfa17ac68394ee7870a49d1bfaa39c2b078786b4\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/memory_retirement.json\", \"sha256\": \"sha256:c37601b333a9964af771f665fa5788b23818ef9e6f373459e7b258027111ceb3\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_current.json\", \"sha256\": \"sha256:0a2c9b6a47d5f510f9055686edaacdf9e0eae01bc0b1a043048e438c69490a98\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_comparison.json\", \"sha256\": \"sha256:0ae6d5adf32ce5ddd5507e162d61c3cf3a7af81b543b46ac7bcc12cd2c8f41cb\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/final_core_full.json\", \"sha256\": \"sha256:69f7608c42c7d4e577f9edb17f37bd05523a843037ad4ca4221bbb1383ee895c\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/continuation_quality.json\", \"sha256\": \"sha256:0b77fde7ca01f4e95da4661bb967e05d9b2f514da061d28d9a174639c43d2885\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json\", \"sha256\": \"sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/installed_post_windows.json\", \"sha256\": \"sha256:32e833d96059253937177a2db2817862c692cdae318b5ee76bf3117e82fae877\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/installed_post_linux.json\", \"sha256\": \"sha256:9558589c72d338cd9ea351714c51abd5e2b13bd5ca4a88494ec78b932e89b8e5\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/old_text_postreview.json\", \"sha256\": \"sha256:6df405d20fdb17a85e79a4390fc1862077e192fa62ef37a879aa0f9acfb400a2\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/guard_artifact_cleanup.json\", \"sha256\": \"sha256:154e88aa6b2c9430513a795bb2c47c6c04352ccd89cf622b807f0263d923af5d\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/guard_cleanup_p10.json\", \"sha256\": \"sha256:51b0bc73611604041c6baf30c20005fa51963b8ae9552bb9f934212d304a95a3\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/guard_artifact_postreview.json\", \"sha256\": \"sha256:dd76d7e6d48eb8221da84ae45fd171796e44807f096adae1114747a88b0e589e\"}], \"scope\": \"Frozen observations from before user deletion. Remaining-binary and policy-blocked statuses in these ledgers are historical; post_manual_cleanup.json owns current classified completion. Prior scientific execution scopes are unchanged.\"}"
+            "title": "Reviewed evidence availability and execution scope",
+            "detail": "[{\"query_id\": \"quality_findings\", \"location\": \"solver/evidence/foundation_2026_11_23/core_execution.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:0d0711dc70799ab09629d6e5eb74cfb3a7621eb55c5ed1ed38f3b1c7c496174b\", \"execution_source\": \"source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Current 179-file source: Windows core/scenario and external V&V, Linux integrity; no native parity or physical validation\"}, {\"query_id\": \"quality_findings\", \"location\": \"solver/evidence/foundation_2026_11_23/independent_reviews.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:fb7ff07a45a32aba1e308ce61a5be7a0b6dc6357f31aaf63dbcbf3142a78a947\", \"execution_source\": \"source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Three independent perspectives plus current A/P followup: raw native and all80 public results independently recomputed; practical exploratory scope only, no native parity or physical certification\"}, {\"query_id\": \"quality_findings\", \"location\": \"solver/evidence/foundation_2026_11_23/installed_windows.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:b488232ae57ce4f60f2f1769a85e7d70bd0c0b70f2e7f28e667c0a1e70fb8999\", \"execution_source\": \"source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Current 0.5 wheel, empty cwd public workflows, five actual examples, own CSV and result reuse\"}, {\"query_id\": \"quality_findings\", \"location\": \"solver/evidence/foundation_2026_11_23/installed_linux.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:63f717caf223aeb703656bcd59bcaf6e11a87c74ca5e1421e846bd326b850057\", \"execution_source\": \"source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Same current 0.5 wheel installed on Linux; public workflow inventory and example outcomes\"}, {\"query_id\": \"quality_findings\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_assessment.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"quality_findings\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}, {\"query_id\": \"quality_findings\", \"location\": \"solver/evidence/foundation_2026_11_23/ap_population_preservation.json\", \"availability\": \"bound_local\", \"sha256\": \"sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a\", \"execution_source\": \"foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"scope\": \"Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.\"}]"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       }
@@ -4160,7 +4129,7 @@
       "rows": [
         {
           "phase": "current",
-          "name": "0.4 CLI/Python input → result reuse",
+          "name": "0.5 CLI/Python input → result reuse",
           "exit": "Bound final quality and installed-wheel receipts",
           "example_count": 5
         },
@@ -4187,7 +4156,7 @@
           "solver/pyproject.toml",
           "solver/README.md",
           "solver/docs/case_format_v3.md",
-          "solver/docs/result_format_v4.md",
+          "solver/docs/result_format_v5.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/docs/parallel_execution_plan.md",
@@ -4199,7 +4168,8 @@
           "solver/src/chamber_particles/output.py",
           "solver/src/chamber_particles_tools/inputs.py",
           "solver/src/chamber_particles_tools/bundle_publication.py",
-          "solver/src/chamber_particles_tools/selection.py"
+          "solver/src/chamber_particles_tools/selection.py",
+          "solver/src/chamber_particles_tools/field_generation.py"
         ],
         "metricDefinitions": [
           {
@@ -4221,7 +4191,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"data_quality_assessment.md\", \"sha256\": \"sha256:4a4341407fb2be56249e3d2769be43e5317ee33981a4ba83cf2779bba59feb9a\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342\"}, {\"path\": \"solver/docs/result_format_v5.md\", \"sha256\": \"sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48\"}, {\"path\": \"solver/docs/parallel_execution_plan.md\", \"sha256\": \"sha256:728d61115199f6ddd4a7fd4f28955cb0921bfa460231506e3466aac2fc391eb0\"}, {\"path\": \"solver/tests/performance/README.md\", \"sha256\": \"sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab\"}, {\"path\": \"solver/tools/vv/comsol/README.md\", \"sha256\": \"sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6\"}, {\"path\": \"solver/src/chamber_particles_tools/field_generation.py\", \"sha256\": \"sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/foundation_2026_11_23/assessment_projection.json\", \"sha256\": \"sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93\"}, {\"path\": \"solver/evidence/foundation_2026_11_23/quality_projection.json\", \"sha256\": \"sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8\"}], \"claim_scope\": \"Current design references only; imported execution claims retain their own source and scope\"}"
           }
         ]
       },
@@ -4234,27 +4204,27 @@
     }
   },
   "reproducibility": {
-    "snapshot_revision": "platform_design_report_v1",
+    "snapshot_revision": "platform_design_report_v2",
     "producer": {
       "path": "analysis/build_report_snapshot.py",
-      "sha256": "sha256:d3a52fa74d686060c33ec2889d1ad2fca7b341b41fb6288559cd51c3acf8dd0c"
+      "sha256": "sha256:9a7f712452da9a904f674f49bf68e62f95e83f128af82134787cbc86aeabd799"
     },
     "authorities": [
       {
         "path": "AGENTS.md",
-        "sha256": "sha256:abfcf6116bf3aa553b9f0383636d5136ad9fd876bceae0b70d969ab05ebf7381"
+        "sha256": "sha256:e8e29707bfca695768ab656743b11c37d4659e5de99c7d9ec849d47abcb842ba"
       },
       {
         "path": "product_specification.md",
-        "sha256": "sha256:a5f85789c9e2c0f069b4a65f49fe168055e6d1168aa33ab03d117e91fcdc8011"
+        "sha256": "sha256:d1f35c479de1a7db3699b2ce216cd1cc44c97e1297bbf06f0cb56415030eba8b"
       },
       {
         "path": "architecture_proposal.md",
-        "sha256": "sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8"
+        "sha256": "sha256:441dd8b343616df1304b86587eab6875d2c4863aaaaf288974fa7e73860eb46f"
       },
       {
         "path": "implementation_plan.md",
-        "sha256": "sha256:be2dc4ba826706ac67f508856ae866ae28e176ed99aeb8d2983740476f0689ad"
+        "sha256": "sha256:93d35e1c1ef3077fcff45f30e80d889975e1279b056330b8002822bbd39e6db0"
       },
       {
         "path": "vv_methodology.md",
@@ -4266,27 +4236,27 @@
       },
       {
         "path": "solver/pyproject.toml",
-        "sha256": "sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae"
+        "sha256": "sha256:5ae3cb1039faed99ee3667b888eba3552c2b6754378cb1a5fea2a4a7d04e3e2b"
       },
       {
         "path": "solver/README.md",
-        "sha256": "sha256:1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917"
+        "sha256": "sha256:e19f4b5f3a0488d28fbcd4649658ae150f1f5dd1b717a7df16fec288804624d5"
       },
       {
         "path": "solver/docs/case_format_v3.md",
-        "sha256": "sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05"
+        "sha256": "sha256:d8f88ef1811b302a7f35797646ac9566f3d6e44ff975b469cb152d08ee1a4342"
       },
       {
-        "path": "solver/docs/result_format_v4.md",
-        "sha256": "sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f"
+        "path": "solver/docs/result_format_v5.md",
+        "sha256": "sha256:07ec26512a7ce5ba76bb8a6d386251507746b39034fa8bafc79e3b428bdd7263"
       },
       {
         "path": "solver/docs/physics_models.md",
-        "sha256": "sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0"
+        "sha256": "sha256:96963a42e8aeccbba4b2589ecd48a86ec347ff94782f6bd5a312d04a2f1297de"
       },
       {
         "path": "solver/docs/numerics.md",
-        "sha256": "sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc"
+        "sha256": "sha256:811548e33ea886a2734f804b2def83d40bc0bf11a9a6a08ba8c4722e7db9bd48"
       },
       {
         "path": "solver/docs/parallel_execution_plan.md",
@@ -4294,15 +4264,15 @@
       },
       {
         "path": "solver/tests/performance/README.md",
-        "sha256": "sha256:d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3"
+        "sha256": "sha256:eb46cfeb3ea8c17c47f627c1664930c2259d28fe0704190fe8b78397fc0e3fab"
       },
       {
         "path": "solver/tools/vv/comsol/README.md",
-        "sha256": "sha256:dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0"
+        "sha256": "sha256:54e93ca67bb54c35f0edc7fa3718ef6ebd248a0edb6b99c4401a63e2a9702307"
       },
       {
         "path": "solver/src/chamber_particles/physics/catalog.py",
-        "sha256": "sha256:8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b"
+        "sha256": "sha256:2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729"
       },
       {
         "path": "solver/src/chamber_particles/time_grid.py",
@@ -4314,11 +4284,11 @@
       },
       {
         "path": "solver/src/chamber_particles/output.py",
-        "sha256": "sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5"
+        "sha256": "sha256:4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e"
       },
       {
         "path": "solver/src/chamber_particles_tools/inputs.py",
-        "sha256": "sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d"
+        "sha256": "sha256:d15fe9424a4498128e849cf566c7bfe00aa01623b2f9a5ebedc3e1a52af8b3e8"
       },
       {
         "path": "solver/src/chamber_particles_tools/bundle_publication.py",
@@ -4326,22 +4296,144 @@
       },
       {
         "path": "solver/src/chamber_particles_tools/selection.py",
-        "sha256": "sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01"
+        "sha256": "sha256:38d3d876d0fe9ced23f6ce8955e887820975e71771938234ca6f2b9e489ff4d6"
+      },
+      {
+        "path": "solver/src/chamber_particles_tools/field_generation.py",
+        "sha256": "sha256:398d7b4531e0417b12baa39dd77579acd1debae6e39e8d992440a7b859b6b515"
       }
     ],
     "catalog_sha256": "sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400",
     "optional_inputs": [
       {
-        "path": "solver/evidence/current_only_2026_11_23/report_inputs/assessment.json",
-        "sha256": "sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea"
+        "path": "solver/evidence/foundation_2026_11_23/assessment_projection.json",
+        "sha256": "sha256:ecb9f0a57f1c18167cc7df40d8a6b60772ec94606cfdc9405fec3a26ce520e93"
       },
       {
-        "path": "solver/evidence/current_only_2026_11_23/report_inputs/quality.json",
-        "sha256": "sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856"
+        "path": "solver/evidence/foundation_2026_11_23/quality_projection.json",
+        "sha256": "sha256:44a2c292cc1e66debe9f26b56758330a44ef7e411ef0808baa62de212989a8d8"
+      }
+    ],
+    "reviewed_evidence": [
+      {
+        "query_id": "case_audit",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json",
+        "availability": "bound_local",
+        "sha256": "sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
       },
       {
-        "path": "solver/evidence/current_only_2026_11_23/report_inputs/performance.json",
-        "sha256": "sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e"
+        "query_id": "case_audit",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json",
+        "availability": "bound_local",
+        "sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "case_audit",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json",
+        "availability": "bound_local",
+        "sha256": "sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "case_audit",
+        "location": "solver/evidence/foundation_2026_11_23/source_map.json",
+        "availability": "bound_local",
+        "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "trajectory_divergence",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json",
+        "availability": "bound_local",
+        "sha256": "sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "trajectory_divergence",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json",
+        "availability": "bound_local",
+        "sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "trajectory_divergence",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json",
+        "availability": "bound_local",
+        "sha256": "sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "trajectory_divergence",
+        "location": "solver/evidence/foundation_2026_11_23/source_map.json",
+        "availability": "bound_local",
+        "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "quality_findings",
+        "location": "solver/evidence/foundation_2026_11_23/core_execution.json",
+        "availability": "bound_local",
+        "sha256": "sha256:0d0711dc70799ab09629d6e5eb74cfb3a7621eb55c5ed1ed38f3b1c7c496174b",
+        "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Current 179-file source: Windows core/scenario and external V&V, Linux integrity; no native parity or physical validation"
+      },
+      {
+        "query_id": "quality_findings",
+        "location": "solver/evidence/foundation_2026_11_23/independent_reviews.json",
+        "availability": "bound_local",
+        "sha256": "sha256:fb7ff07a45a32aba1e308ce61a5be7a0b6dc6357f31aaf63dbcbf3142a78a947",
+        "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Three independent perspectives plus current A/P followup: raw native and all80 public results independently recomputed; practical exploratory scope only, no native parity or physical certification"
+      },
+      {
+        "query_id": "quality_findings",
+        "location": "solver/evidence/foundation_2026_11_23/installed_windows.json",
+        "availability": "bound_local",
+        "sha256": "sha256:b488232ae57ce4f60f2f1769a85e7d70bd0c0b70f2e7f28e667c0a1e70fb8999",
+        "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Current 0.5 wheel, empty cwd public workflows, five actual examples, own CSV and result reuse"
+      },
+      {
+        "query_id": "quality_findings",
+        "location": "solver/evidence/foundation_2026_11_23/installed_linux.json",
+        "availability": "bound_local",
+        "sha256": "sha256:63f717caf223aeb703656bcd59bcaf6e11a87c74ca5e1421e846bd326b850057",
+        "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Same current 0.5 wheel installed on Linux; public workflow inventory and example outcomes"
+      },
+      {
+        "query_id": "quality_findings",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json",
+        "availability": "bound_local",
+        "sha256": "sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "quality_findings",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json",
+        "availability": "bound_local",
+        "sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+      },
+      {
+        "query_id": "quality_findings",
+        "location": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json",
+        "availability": "bound_local",
+        "sha256": "sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a",
+        "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
       }
     ],
     "optional_evidence_policy": "Missing is unavailable, never zero; snapshot generation does not run scientific calculations, and imported receipts retain their declared execution scope"

@@ -29,6 +29,7 @@ uv run --locked python -m tests.performance.p14_matrix --suite smoke --repeats 1
 uv run --locked python -m tests.performance.p14u_representative --suite smoke --memory-limit-mb 8192 --json .artifacts/representative.json
 uv run --locked python -m tests.performance.b03_characterization --particles 32 --repeats 1 --warmups 1 --json .artifacts/brownian.json
 uv run --locked python -m tests.performance.process_workers --output .artifacts/process-measurement --particles 10000 --macro-steps 320 --workers 1 4 --repeats 3
+uv run --locked python -m tests.performance.process_workers --output .artifacts/process-sampled --particles 10000 --macro-steps 320 --workers 1 4 --repeats 3 --output-mode sample
 ```
 
 Use a **new** output directory for `process_workers`. It retains editable
@@ -37,8 +38,11 @@ Inputs and conditions are separate from the executor; identity and target checks
 run after timing. Timing includes `load_case + simulate + open_result`, including
 worker startup, IPC, output and shutdown. One serial warmup is untimed, and every
 `simulate` creates its own workers. Reports record source/input hashes and all
-samples. The no-frame/no-probe process workload does not qualify output-heavy
-worker scaling.
+samples. `--output-mode none` has no frames/probes; `sample` uses the existing
+P14-U sample ID/time policy. Each run separately measures complete-payload
+SHA-256 I/O, outcome reads, scientific hashing and explicit `verify_contents()`
+outside the public end-to-end interval. The none mode does not qualify sampled
+or full-history output scaling.
 
 Focused measurements:
 

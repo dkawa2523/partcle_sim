@@ -14,10 +14,11 @@ import multiprocessing
 import os
 import statistics
 import time
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from importlib import metadata
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -55,13 +56,15 @@ def _source_identity() -> dict[str, str]:
     return {path.relative_to(root).as_posix(): _sha256(path) for path in paths}
 
 
-def _validate_result(result: Any, summary: Any, particles: int, macro_steps: int) -> None:
+def _validate_result(
+    result: Any, summary: Any, particles: int, macro_steps: int, output_mode: str
+) -> None:
     """Check known physical target and conservation, independently of run equality."""
     if summary.particle_count != particles or summary.macro_step_count != macro_steps:
         raise RuntimeError("generated workload changed particle or macro count")
     if summary.failure_event_count:
         raise RuntimeError("representative workload produced a particle failure")
-    _validate_output_utility(result, summary, particle_count=particles, output_mode="none")
+    _validate_output_utility(result, summary, particle_count=particles, output_mode=output_mode)
     final = result.read_final()
     events = result.read_boundary_events()
     # The generated square has source x=0 and the absorbing target x=1.
@@ -79,7 +82,7 @@ def _validate_result(result: Any, summary: Any, particles: int, macro_steps: int
 
 
 def _observation(
-    case_path: Path, output: Path, workers: int, particles: int, steps: int
+    case_path: Path, output: Path, workers: int, particles: int, steps: int, output_mode: str
 ) -> dict[str, Any]:
     started = time.perf_counter()
     case = load_case(case_path)
@@ -88,7 +91,19 @@ def _observation(
     simulated = time.perf_counter()
     result = open_result(output)
     opened = time.perf_counter()
-    _validate_result(result, summary, particles, steps)
+    roster = cast(Mapping[str, str], result.source_identity()["content_files"])
+    for name, expected in roster.items():
+        with (output / name).open("rb") as stream:
+            actual = "sha256:" + hashlib.file_digest(stream, "sha256").hexdigest()
+        if actual != expected:
+            raise RuntimeError(f"payload byte hash changed: {name}")
+    byte_hashed = time.perf_counter()
+    _validate_result(result, summary, particles, steps, output_mode)
+    validated = time.perf_counter()
+    scientific_hash = _scientific_payload_digest(result)
+    science_hashed = time.perf_counter()
+    verification = result.verify_contents()
+    verified = time.perf_counter()
     manifest = result.manifest_document()
     return {
         "workers": workers,
@@ -97,8 +112,13 @@ def _observation(
             "simulate": simulated - loaded,
             "open_result": opened - simulated,
             "public_end_to_end": opened - started,
+            "payload_sha256_io": byte_hashed - opened,
+            "outcome_validation_and_reads": validated - byte_hashed,
+            "scientific_payload_hashing_and_reads": science_hashed - validated,
+            "verify_contents": verified - science_hashed,
         },
-        "full_scientific_payload_sha256": _scientific_payload_digest(result),
+        "full_scientific_payload_sha256": scientific_hash,
+        "content_verification": verification,
         "solver_memory_plan": manifest["memory_plan"],
         "boundary_events": summary.boundary_event_count,
         "failure_events": summary.failure_event_count,
@@ -121,14 +141,21 @@ def run(arguments: argparse.Namespace) -> dict[str, Any]:
         ny=4,
         dt_s=4.0 / arguments.macro_steps,
         particle_count=arguments.particles,
-        output_mode="none",
+        output_mode=arguments.output_mode,
         uniform_source=True,
         memory_limit_mb=arguments.memory_limit_mb,
     )
     input_identity = {name: _sha256(case_path.with_name(name)) for name in ("case.yaml", "case.h5")}
     # One serial warmup populates the persistent disk cache. Every simulate still
     # creates and closes its own process team; worker startup remains timed.
-    _observation(case_path, output / "warmup", 1, arguments.particles, arguments.macro_steps)
+    _observation(
+        case_path,
+        output / "warmup",
+        1,
+        arguments.particles,
+        arguments.macro_steps,
+        arguments.output_mode,
+    )
     observations = []
     worker_counts = tuple(dict.fromkeys(arguments.workers))
     for repeat in range(arguments.repeats):
@@ -140,6 +167,7 @@ def run(arguments: argparse.Namespace) -> dict[str, Any]:
                 workers,
                 arguments.particles,
                 arguments.macro_steps,
+                arguments.output_mode,
             )
             row["repeat"] = repeat
             observations.append(row)
@@ -167,7 +195,7 @@ def _measurement_report(
     worker_counts: tuple[int, ...],
 ) -> dict[str, Any]:
     return {
-        "benchmark": "public_process_workers_v1",
+        "benchmark": "public_process_workers_v2",
         "captured_at_utc": datetime.now(UTC).isoformat(),
         "machine": _machine_metadata(),
         "runtime": {
@@ -194,7 +222,9 @@ def _measurement_report(
             "untimed": "input generation, one serial warmup, outcome validation, scientific hashing",
             "input": "editable input/case.yaml and case.h5; P14-U XY regular32x4 surface release, Epstein, electric, gravity",
             "cache": "persistent disk cache, one serial warmup; fresh process team for every simulate",
-            "output": "no trajectory frames or probes; complete final/release/boundary/failure/lifecycle payload",
+            "output_mode": arguments.output_mode,
+            "output": "P14-U none/sample policy; complete final/release/boundary/failure/lifecycle payload",
+            "payload_io": "separate full-file SHA-256 I/O, outcome reads, science hashing and explicit verify_contents; these are outside public_end_to_end",
         },
         "observations": observations,
         "median_public_seconds": {
@@ -227,6 +257,7 @@ def main() -> None:
     parser.add_argument("--workers", type=_positive, nargs="+", default=[1, 4])
     parser.add_argument("--repeats", type=_positive, default=3)
     parser.add_argument("--memory-limit-mb", type=_positive, default=8192)
+    parser.add_argument("--output-mode", choices=("none", "sample"), default="none")
     arguments = parser.parse_args()
     report = run(arguments)
     path = arguments.output / "measurement.json"

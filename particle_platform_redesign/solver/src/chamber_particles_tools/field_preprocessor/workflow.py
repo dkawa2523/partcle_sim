@@ -28,6 +28,7 @@ from chamber_particles.fields import (
     rz_axis_accessible,
 )
 from chamber_particles.yaml_input import parse_document
+from chamber_particles_tools.field_generation import validate_declared_generations
 
 from .numerics import (
     SOURCE_TIME_DIAGNOSTIC_REVISION,
@@ -277,10 +278,11 @@ def _preprocess(
         axis_accessible,
         source_time_diagnostic_requested,
     )
+    source_provenance = json.loads(data.provenance_json)
     metadata = {
         "preprocessor_revision": PREPROCESSOR_REVISION,
         "configuration_sha256": configuration_sha256,
-        "source_provenance": json.loads(data.provenance_json),
+        "source_provenance": source_provenance,
         "target_layout": layout_summary(target_layout),
         "resampled_fields": field_reports,
         "validation_resources": resource_report,
@@ -293,6 +295,11 @@ def _preprocess(
             "source_sha256": source_info.content_hash,
             "field_semantics_revision": FIELD_SEMANTICS_REVISION,
             "producer_metadata": metadata,
+            **(
+                {"derived_field_generations": source_provenance["derived_field_generations"]}
+                if "derived_field_generations" in source_provenance
+                else {}
+            ),
         },
         allow_nan=False,
         separators=(",", ":"),
@@ -307,6 +314,7 @@ def _preprocess(
         sources=data.sources,
     )
     _certify_solver_ready_cache(output_bundle, generated_fields)
+    validate_declared_generations(output_bundle)
     output.parent.mkdir(parents=True, exist_ok=True)
     output_info = write(output, output_bundle)
     return {

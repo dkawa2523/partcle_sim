@@ -8,6 +8,15 @@ C01～C10のmachine-readableな入力と
 期待値の権威は`tests/verification/microcases.py`であり、この文書は式、意味、合格条件を説明する。
 COMSOL出力と旧solverは正解として使用しない。
 
+親の`_PreparedRun`は入力・解決済み実行facts・出力時刻表・probe ID・背景snapshotのmacro分割・
+境界lawの説明・stability上界・完全なメモリ計画を所有する。workerの`PreparedTransport`には
+数値に必要な場、geometry、compiled boundary、粒子schedule、数値phaseとcapacityを渡す。
+`PhysicsPlan`とruntimeからの完全plan参照はworkerへ残さず、stageには固定numeric binding、
+証明には独立proof codeと準備したboundを使う。Pythonの局所式検査は同じprimitive packingへ値を詰める。
+これらは親の出力選択や説明の変更を粒子更新の判断へ混ぜないための分離であり、field snapshot時刻、
+release時刻、乱数key、積分・event・出力のaccepted pathの意味は変えない。
+
+
 ## 1. P02の範囲
 
 P02は数値solverの実装ではなく、後続実装が合格すべき独立oracleを固定する段階である。各caseは
@@ -683,6 +692,13 @@ C10の`policy_failure_probes`はcanonical full-run variantではなく、P07で`
 
 ## 7. P07 source、RNG、RZ axisの実装範囲
 
+serial/processのslab入口はcpu ownerの同じ`ParticleState`を借用し、resident列を別の状態型へ詰め直さない。
+Brownian rootもこのresidentを借用する。exact、curved、surfaceの材料応答は、受理済hitからのx/v/Z更新、
+logical/physical ordinal、lifecycle/terminal時刻、boundary ledger、wall件数を一つのcommit ownerへ渡す。
+局在・ordinal受理の順序と、各methodのorigin、replay、残時間、departure証明、OU再始動はそれぞれのownerに残す。
+surfaceでは物理的な壁応答を記録した後にdeparture証明が失敗し得るため、そのledgerを取り消さない。
+axis fold、periodic transfer、release activation、数値failureを材料応答へ読み替えない。
+
 H2の`contact_geometry`はboundary groupごとに解決し、未指定は`particle_surface`とする。
 `particle_center`では候補の有効半径だけを0とし、粒子の物理半径は保持する。source offset、clearance、
 candidate normal、canonical hit残差も同じfacet maskを使う。一つのBVH上で中心eventと材料capsule eventを局在し、
@@ -1216,7 +1232,7 @@ engine v30はroot covariance、各conditional split、deterministic mean適用�
 accepted stateで`nonfinite_physics`となり、同じslabの正常粒子と独立なright subtreeは継続する。shape不一致や
 内部不変条件破損まで粒子failureへ隠さない。
 
-現行revision一覧は[`result_format_v4.md`](result_format_v4.md)へ集約する。event v23はevent v20のcontact-set継続とevent v19の周期first-event意味と
+現行revision一覧は[`result_format_v5.md`](result_format_v5.md)へ集約する。event v23はevent v20のcontact-set継続とevent v19の周期first-event意味と
 event v18 / geometry v6の独立`contact_radius_m`を維持する。有限半径exact残時間では同時接触集合を暗黙に保持し、
 各candidateについて接触位置と離脱方向を証明できた時だけzero-time再接触を除外する。位置nudgeは使わず、
 後続impactと材料/周期混在cornerは通常のfirst-event判定へ残す。0半径ではpoint意味を維持する。Brownian manifestは

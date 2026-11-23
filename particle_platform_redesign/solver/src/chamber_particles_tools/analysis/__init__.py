@@ -18,9 +18,9 @@ import numpy as np
 from chamber_particles.lifecycle import ACTIVE, NAMES, PENDING, STUCK, TERMINAL
 from chamber_particles.output import BoundaryEvents, FinalParticles, ResultContext, ResultView
 
-from ..selection import ResultInput, select_result
+from ..selection import ResultInput, result_labels, select_result
 
-ANALYSIS_REVISION = "result_population_interaction_terminal_v3"
+ANALYSIS_REVISION = "result_population_interaction_terminal_v4"
 
 
 @dataclass(slots=True)
@@ -45,7 +45,9 @@ def summarize_result(
     *,
     event_batch_rows: int = 4096,
     source_ids: tuple[int, ...] | None = None,
+    source_names: tuple[str, ...] | None = None,
     particle_ids: tuple[int, ...] | None = None,
+    particle_ids_file: str | PathLike[str] | None = None,
     coordinate0_bin_edges_m: tuple[float, ...] | None = None,
     terminal_time_bin_edges_s: tuple[float, ...] | None = None,
 ) -> dict[str, object]:
@@ -54,7 +56,13 @@ def summarize_result(
     Histogram edges are explicit physical inputs. Interactions include repeated
     hits; first material-wall hits and terminal events are separate quantities.
     """
-    cohort = select_result(path, source_ids=source_ids, particle_ids=particle_ids)
+    cohort = select_result(
+        path,
+        source_ids=source_ids,
+        source_names=source_names,
+        particle_ids=particle_ids,
+        particle_ids_file=particle_ids_file,
+    )
     result, context, final, selected = (
         cohort.result,
         cohort.context,
@@ -62,16 +70,16 @@ def summarize_result(
         cohort.selected,
     )
     events, interactions = _scan_events(result, cohort.selected_ids, event_batch_rows)
-    return {
+    report: dict[str, object] = {
         "analysis_revision": ANALYSIS_REVISION,
         "parameters": {
             "event_batch_rows": event_batch_rows,
-            "source_ids": cohort.source_ids,
-            "particle_ids": cohort.particle_ids,
+            **cohort.selection_document(),
             "coordinate0_bin_edges_m": coordinate0_bin_edges_m,
             "terminal_time_bin_edges_s": terminal_time_bin_edges_s,
         },
         "source_result": result.source_identity(),
+        "labels": result_labels(context),
         "population": {
             "selected_particles": int(selected.sum()),
             "model_weight": float(final.model_weight[selected].sum()),
@@ -108,6 +116,8 @@ def summarize_result(
             "deposition": "one numerically stuck final particle counted once; not certified physical adhesion",
         },
     }
+    report["verification"] = result.verification_document()
+    return report
 
 
 def _selected_event_rows(particle_id: np.ndarray, ids: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -416,10 +426,18 @@ def export_result(
     *,
     particle_ids: tuple[int, ...] | None = None,
     source_ids: tuple[int, ...] | None = None,
+    source_names: tuple[str, ...] | None = None,
+    particle_ids_file: str | PathLike[str] | None = None,
     event_batch_rows: int = 4096,
 ) -> dict[str, object]:
     """Stream selected rows to CSV while preserving context and result identity."""
-    cohort = select_result(path, source_ids=source_ids, particle_ids=particle_ids)
+    cohort = select_result(
+        path,
+        source_ids=source_ids,
+        source_names=source_names,
+        particle_ids=particle_ids,
+        particle_ids_file=particle_ids_file,
+    )
     result, final, ids = cohort.result, cohort.final, cohort.selected_ids
     destination = Path(output_directory).expanduser().resolve()
     if destination == result.path or result.path in destination.parents:
@@ -438,11 +456,12 @@ def export_result(
         report: dict[str, object] = {
             "analysis_revision": ANALYSIS_REVISION,
             "source_result": result.source_identity(),
+            "verification": result.verification_document(),
             "selection": {
-                "particle_ids": cohort.particle_ids,
-                "source_ids": cohort.source_ids,
+                **cohort.selection_document(),
                 "selected_particles": int(ids.size),
             },
+            "labels": result_labels(cohort.context),
             "rows": counts,
             "units": "SI",
             "boundary_meaning": "recorded interactions, including repeats; not first arrivals",

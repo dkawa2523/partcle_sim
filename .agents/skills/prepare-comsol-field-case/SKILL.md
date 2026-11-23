@@ -133,6 +133,11 @@ properties are explicit unless `inherit_from` requests an exact-ID join.
 Canonical tables own physical facts, YAML owns model/wall/numerical choices,
 and worker count is an API/CLI resource. Never infer inherited physical
 authority from equal integer IDs alone.
+If an external producer declares generated coefficient groups, the normal
+publisher checks that record against the current primitives, layout/clock,
+parameters, declared particle properties and all output fields. Keep that
+record through input transformations; do not remove it to accept stale fields.
+Independent prescribed fields remain valid without invented dependencies.
 
 Run `chamber-particles check <case.yaml> --workers N` for a preparation-only
 deliverable. It uses the same model/support/topology/stability/memory prepare
@@ -160,7 +165,7 @@ uv run --locked chamber-particles inspect <smoke-result>
 ```
 
 `python -m chamber_particles` is the same installed dispatcher. Normal result
-schema 4 includes immutable geometry/semantic context; `analyze`, `export` and
+schema 5 includes immutable geometry/semantic context; `analyze`, `export` and
 `view` reuse RESULT alone through `ResultView.read_context()`. Input case/data
 remain schema 3. No old-result reader or silent migration is provided.
 

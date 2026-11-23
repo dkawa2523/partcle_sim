@@ -24,6 +24,24 @@ from chamber_particles.physics.runtime import (
 from tests.verification.microcases import materialize_microcase
 
 
+@pytest.mark.parametrize("dtype", [np.int64, np.float32, np.float64])
+def test_collection_returns_real_rates_for_integral_charge_numbers(dtype: np.dtype) -> None:
+    rate, derivative = prescribed_exponential_linear_collection(
+        np.asarray([-1], dtype=dtype),
+        1.0,
+        np.asarray([0.0]),
+        np.asarray([0.5]),
+        np.asarray([1.0]),
+        np.asarray([2.0]),
+    )
+    with localcontext() as context:
+        context.prec = 60
+        electron = Decimal("-0.5").exp()
+        expected = [float(Decimal(3) - electron), float(-Decimal("0.5") * electron - 2)]
+    assert rate.dtype == derivative.dtype == np.dtype(np.float64)
+    np.testing.assert_allclose([rate[0], derivative[0]], expected, rtol=1e-15, atol=0.0)
+
+
 def _models() -> dict[str, dict[str, object]]:
     properties = {
         "mass_kg": 2.0,

@@ -82,10 +82,12 @@ def test_relative_flow_public_run_converges_in_xy(
         rtol=0.0,
         atol=2.0e-13,
     )
-    assert last_result.manifest["resolved"]["physics_models"]["ion_drag"] == {
-        "model": "screened_collection_orbital",
-        "revision": _RELATIVE_FLOW_REVISION,
-    }
+    assert (
+        {
+            "model": "screened_collection_orbital",
+            "revision": _RELATIVE_FLOW_REVISION,
+        }
+    ).items() <= (last_result.manifest["resolved"]["physics_models"]["ion_drag"]).items()
     assert last_result.manifest["resolved"]["path_kind"] == path_kind
     assert last_result.manifest["data_coordinate_system"] == "cartesian_xy"
 
@@ -138,10 +140,12 @@ def test_image_public_run_is_constant_acceleration_in_rz(
     assert [frame.time_s for frame in frames] == [0.0, end_time_s]
     np.testing.assert_allclose(frames[0].position_m[0], initial_position, rtol=0.0, atol=0.0)
     np.testing.assert_allclose(frames[-1].position_m, final.position_m, rtol=0.0, atol=0.0)
-    assert result.manifest["resolved"]["physics_models"]["ion_drag"] == {
-        "model": "image_orbital_sensitivity",
-        "revision": _IMAGE_REVISION,
-    }
+    assert (
+        {
+            "model": "image_orbital_sensitivity",
+            "revision": _IMAGE_REVISION,
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["ion_drag"]).items()
     assert result.manifest["resolved"]["path_kind"] == path_kind
     assert result.manifest["data_coordinate_system"] == "axisymmetric_rz"
 

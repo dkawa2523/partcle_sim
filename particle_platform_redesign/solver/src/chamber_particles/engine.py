@@ -243,6 +243,14 @@ class _PreparedRun:
     case: SimulationCase
     transport: PreparedTransport
     facts: _RunFacts
+    frame_times_s: tuple[float, ...]
+    probe_times_s: tuple[float, ...]
+    probe_particle_index: np.ndarray
+    field_time_split_s: tuple[float, ...]
+    boundary_rules: tuple[BoundaryRule, ...]
+    maximum_dt_over_tau: float
+    maximum_dt_charge_lipschitz: float
+    memory_plan: CpuMemoryPlan
 
 
 def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1) -> RunSummary:
@@ -258,18 +266,25 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
             return writer.completed_summary
         if not writer.context_initialized:
             writer.initialize_context(_result_context(case))
-        state = _restore_or_initialize_run_state(prepared, writer.resume_state)
+        state = _restore_or_initialize_run_state(run, writer.resume_state)
         epoch_start_work = _durable_commit_work(state)
         epoch_open = False
         try:
-            with ProcessTeam(prepared, state, state.active_index, state.event_statistics) as team:
+            with ProcessTeam(
+                prepared,
+                state,
+                state.active_index,
+                state.event_statistics,
+                memory_plan=run.memory_plan,
+                probe_particle_index=run.probe_particle_index,
+            ) as team:
                 prepared = team.prepared
-                run = replace(run, transport=prepared)
+                run = replace(run, transport=prepared, memory_plan=team.memory_plan)
                 macro_grid = MacroGrid(
                     case.spec.time.start_s,
                     case.spec.time.end_s,
                     case.spec.time.dt_s,
-                    prepared.field_time_split_s,
+                    run.field_time_split_s,
                 )
                 while state.macro_start_s < case.spec.time.end_s:
                     if not epoch_open:
@@ -285,7 +300,7 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
                         schedule,
                         state.release_cursor,
                         macro_end,
-                        prepared.memory_plan.slab_particles,
+                        run.memory_plan.slab_particles,
                         state.active,
                         state.lifecycle,
                         state.event_ordinal,
@@ -293,17 +308,17 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
                     state.active_index.add(released)
 
                     frame_stop = _frame_stop(
-                        prepared.frame_times_s,
+                        run.frame_times_s,
                         state.frame_cursor,
                         macro_end,
                     )
                     probe_stop = _frame_stop(
-                        prepared.probe_times_s,
+                        run.probe_times_s,
                         state.probe_cursor,
                         macro_end,
                     )
-                    frame_batch_times_s = prepared.frame_times_s[state.frame_cursor : frame_stop]
-                    probe_batch_times_s = prepared.probe_times_s[state.probe_cursor : probe_stop]
+                    frame_batch_times_s = run.frame_times_s[state.frame_cursor : frame_stop]
+                    probe_batch_times_s = run.probe_times_s[state.probe_cursor : probe_stop]
                     replay_times_s = tuple(
                         sorted(set(frame_batch_times_s) | set(probe_batch_times_s))
                     )
@@ -326,7 +341,7 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
                     while state.frame_cursor < frame_stop:
                         writer.write_frame(
                             _frame_from_replay(
-                                prepared.frame_times_s[state.frame_cursor],
+                                run.frame_times_s[state.frame_cursor],
                                 schedule,
                                 replay,
                             )
@@ -336,8 +351,8 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
                     while state.probe_cursor < probe_stop:
                         writer.write_probe(
                             _probe_from_replay(
-                                prepared.probe_times_s[state.probe_cursor],
-                                prepared.probe_particle_index,
+                                run.probe_times_s[state.probe_cursor],
+                                run.probe_particle_index,
                                 schedule,
                                 replay,
                             )
@@ -359,7 +374,7 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
                         epoch_start_work = completed_work
 
                 team.finish()
-                _validate_completed_run_state(prepared, state)
+                _validate_completed_run_state(run, state)
                 final = _final_particles(
                     schedule,
                     state.position_m,
@@ -385,6 +400,7 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
 
 def _result_context(case: SimulationCase) -> ResultContext:
     """Bind immutable result interpretation without copying fields or sources."""
+    tables = {table.name: table for table in case.data.sources}
     specification = case.spec.topology
     topology = (
         None
@@ -408,7 +424,13 @@ def _result_context(case: SimulationCase) -> ResultContext:
         data_content_hash=case.content_hash,
         motion_mode=case.spec.motion.mode,
         sources=tuple(
-            ResultSource(index, source.name, str(source.parameters["table"]), source.kind)
+            ResultSource(
+                index,
+                source.name,
+                str(source.parameters["table"]),
+                source.kind,
+                int(tables[str(source.parameters["table"])].particle_id.size),
+            )
             for index, source in enumerate(case.spec.sources)
         ),
         boundaries=tuple(
@@ -494,11 +516,13 @@ def _brownian_provenance(physics: PhysicsPlan) -> dict[str, object]:
     }
 
 
-def _resolve_run_facts(case: SimulationCase, prepared: PreparedTransport) -> _RunFacts:
+def _resolve_run_facts(
+    case: SimulationCase, prepared: PreparedTransport, physics: PhysicsPlan
+) -> _RunFacts:
     """Resolve active algorithm/model facts once, at the end of preparation."""
 
     integrator = prepared.solver.integrator
-    brownian = _brownian_provenance(prepared.physics)
+    brownian = _brownian_provenance(physics)
     uses_rk4_dense = prepared.capabilities.dense_rk4
     revisions = {
         "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
@@ -526,7 +550,7 @@ def _resolve_run_facts(case: SimulationCase, prepared: PreparedTransport) -> _Ru
             TOPOLOGY_ALGORITHM_REVISION if prepared.topology is not None else None
         ),
         "boundary_algorithm_revision": (
-            BOUNDARY_ALGORITHM_REVISION if prepared.boundary_rules else None
+            BOUNDARY_ALGORITHM_REVISION if prepared.capabilities.material_walls else None
         ),
         "source_algorithm_revision": SOURCE_ALGORITHM_REVISION,
         "rng_algorithm_revision": RNG_ALGORITHM_REVISION,
@@ -546,7 +570,7 @@ def _resolve_run_facts(case: SimulationCase, prepared: PreparedTransport) -> _Ru
         prepared.capabilities.path_kind,
         tuple(
             (category, tuple(model.items()))
-            for category, model in prepared.physics.resolved_models().items()
+            for category, model in physics.resolved_models().items()
         ),
         MappingProxyType(brownian),
     )
@@ -568,7 +592,7 @@ def _resume_identity(run: _PreparedRun) -> dict[str, object]:
         "durable_commit_cadence": _durable_commit_cadence(prepared.schedule.particle_count),
         "cpu_runtime_layout_revision": CPU_RUNTIME_LAYOUT_REVISION,
         "memory_plan_revision": MEMORY_PLAN_REVISION,
-        "field_time_split_s": list(prepared.field_time_split_s),
+        "field_time_split_s": list(run.field_time_split_s),
         "brownian_coefficient_policy": facts.brownian["coefficient_policy"],
         "brownian_interval_tree_depth": facts.brownian["interval_tree_depth"],
         "brownian_adaptive_max_depth": facts.brownian["adaptive_max_depth"],
@@ -583,16 +607,17 @@ def _resume_identity(run: _PreparedRun) -> dict[str, object]:
 
 
 def _restore_or_initialize_run_state(
-    prepared: PreparedTransport,
+    run: _PreparedRun,
     checkpoint: CheckpointState | None,
 ) -> _RunState:
+    prepared = run.transport
     if checkpoint is None:
         return _initial_run_state(prepared)
     count = prepared.schedule.particle_count
     _validate_checkpoint_layout(checkpoint, count)
     active, active_index = _restore_active_index(checkpoint, count)
     _restore_field_cell_hint(prepared, checkpoint, count)
-    _validate_checkpoint_cursors(prepared, checkpoint)
+    _validate_checkpoint_cursors(run, checkpoint)
     return _RunState(
         **checkpoint.particles.columns(),
         active=active,
@@ -685,9 +710,10 @@ def _restore_field_cell_hint(
 
 
 def _validate_checkpoint_cursors(
-    prepared: PreparedTransport,
+    run: _PreparedRun,
     checkpoint: CheckpointState,
 ) -> None:
+    prepared = run.transport
     time = prepared.time
     if not time.start_s <= checkpoint.macro_time_s <= time.end_s:
         raise EngineError("checkpoint macro time lies outside the run interval")
@@ -697,8 +723,8 @@ def _validate_checkpoint_cursors(
         checkpoint.macro_time_s,
         _PREPARE_SCAN_BATCH_SIZE,
     )
-    expected_frame = _frame_stop(prepared.frame_times_s, 0, checkpoint.macro_time_s)
-    expected_probe = _frame_stop(prepared.probe_times_s, 0, checkpoint.macro_time_s)
+    expected_frame = _frame_stop(run.frame_times_s, 0, checkpoint.macro_time_s)
+    expected_probe = _frame_stop(run.probe_times_s, 0, checkpoint.macro_time_s)
     if checkpoint.release_cursor != expected_release:
         raise EngineError("checkpoint release cursor does not match its macro time")
     if checkpoint.frame_cursor != expected_frame or checkpoint.probe_cursor != expected_probe:
@@ -726,10 +752,11 @@ def _checkpoint_state(prepared: PreparedTransport, state: _RunState) -> Checkpoi
     )
 
 
-def _validate_completed_run_state(prepared: PreparedTransport, state: _RunState) -> None:
-    if state.frame_cursor != len(prepared.frame_times_s):
+def _validate_completed_run_state(run: _PreparedRun, state: _RunState) -> None:
+    prepared = run.transport
+    if state.frame_cursor != len(run.frame_times_s):
         raise EngineError("not every requested trajectory frame was emitted")
-    if state.probe_cursor != len(prepared.probe_times_s):
+    if state.probe_cursor != len(run.probe_times_s):
         raise EngineError("not every requested particle probe was emitted")
     if state.release_cursor != prepared.schedule.particle_count or bool(
         (state.lifecycle == PENDING).any()
@@ -911,22 +938,17 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> _PreparedRun:
         work_policy,
         capabilities,
         schedule,
-        frame_times,
-        probe_times,
-        probe_particle_index,
         geometry,
         event_geometry,
         topology,
-        rules,
         compiled_rules,
-        physics,
         fields,
-        field_time_split_s,
         dynamics,
         constant_acceleration,
-        maximum_dt_over_tau,
-        maximum_dt_charge_lipschitz,
-        memory_plan,
+        memory_plan.slab_particles,
+        memory_plan.event_staging_capacity,
+        0 if physics.noise is None else physics.noise.interval_tree_depth,
+        0 if physics.noise is None else physics.noise.adaptive_max_depth,
         event_candidate_capacity,
         certificate_workspace,
         curved_workspace,
@@ -944,9 +966,23 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> _PreparedRun:
             exact_enabled=exact_enabled,
             separate_finite_mask=event_geometry is not geometry,
         ),
-        _ProposalReplayWorkspace.allocate(memory_plan.slab_particles, frame_times, probe_times),
+        _ProposalReplayWorkspace.allocate(
+            memory_plan.slab_particles, bool(frame_times or probe_times)
+        ),
     )
-    return _PreparedRun(case, prepared, _resolve_run_facts(case, prepared))
+    return _PreparedRun(
+        case,
+        prepared,
+        _resolve_run_facts(case, prepared, physics),
+        frame_times,
+        probe_times,
+        probe_particle_index,
+        field_time_split_s,
+        rules,
+        maximum_dt_over_tau,
+        maximum_dt_charge_lipschitz,
+        memory_plan,
+    )
 
 
 def _prepare_memory_plan(
@@ -1727,7 +1763,7 @@ def _final_particles(
 
 
 def _resolved_boundary_laws(
-    case: SimulationCase, prepared: PreparedTransport
+    case: SimulationCase, rules: tuple[BoundaryRule, ...]
 ) -> list[dict[str, object]]:
     """Describe the resolved response and geometric meaning of each boundary."""
 
@@ -1746,7 +1782,7 @@ def _resolved_boundary_laws(
             "diffuse_reflection_fraction": rule.diffuse_reflection_fraction,
             "wall_velocity_m_s": rule.wall_velocity_m_s,
         }
-        for rule in prepared.boundary_rules
+        for rule in rules
     ]
 
 
@@ -1794,11 +1830,11 @@ def _manifest(
             "integrator": spec.solver.integrator,
             "backend": spec.solver.backend,
             "seed": spec.solver.seed,
-            "workers": prepared.memory_plan.worker_count,
+            "workers": run.memory_plan.worker_count,
         },
         "execution": {
-            "worker_count": prepared.memory_plan.worker_count,
-            "policy": "spawn_particle_slabs" if prepared.memory_plan.worker_count > 1 else "serial",
+            "worker_count": run.memory_plan.worker_count,
+            "policy": "spawn_particle_slabs" if run.memory_plan.worker_count > 1 else "serial",
             "barrier": "accepted_macro_step",
             "writer_owner": "parent",
             "callback_cache_policy": "process_local_overloads",
@@ -1813,7 +1849,7 @@ def _manifest(
                 {"source_id": index, "name": source.name, "type": source.kind}
                 for index, source in enumerate(spec.sources)
             ],
-            "boundary_laws": _resolved_boundary_laws(case, prepared),
+            "boundary_laws": _resolved_boundary_laws(case, run.boundary_rules),
             "required_fields": [
                 {
                     "name": name,
@@ -1836,7 +1872,7 @@ def _manifest(
             "start_s": spec.time.start_s,
             "end_s": spec.time.end_s,
             "dt_s": spec.time.dt_s,
-            "field_snapshot_splits_s": list(prepared.field_time_split_s),
+            "field_snapshot_splits_s": list(run.field_time_split_s),
         },
         "event": {
             "geometry_rtol": spec.solver.event.geometry_rtol,
@@ -1867,9 +1903,9 @@ def _manifest(
         "failure_reason_counts": failure_counts,
         "prepared_stability_upper_bounds": {
             "requested_base_dt_s": prepared.time.dt_s,
-            "dt_times_drag_velocity_lipschitz": prepared.maximum_dt_over_tau,
-            "dt_times_charge_lipschitz": prepared.maximum_dt_charge_lipschitz,
+            "dt_times_drag_velocity_lipschitz": run.maximum_dt_over_tau,
+            "dt_times_charge_lipschitz": run.maximum_dt_charge_lipschitz,
             "meaning": "Requested base step times prepared full-domain bounds; not observed accepted-step maxima or accuracy estimates.",
         },
-        "memory_plan": prepared.memory_plan.as_manifest(),
+        "memory_plan": run.memory_plan.as_manifest(),
     }

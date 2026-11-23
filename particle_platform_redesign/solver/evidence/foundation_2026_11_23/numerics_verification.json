@@ -1,0 +1,243 @@
+{
+  "recorded_at_utc": "2026-11-23T11:45:27.595889+00:00",
+  "baseline_commit": "6555ce3abfb8c2eb5580115c6976d77878bacc85",
+  "implementation_scope": [
+    "Concrete immutable selected model facts: identity, role bindings, resolved scalar/default values",
+    "Direct model role bindings independent of neighbouring category stage selectors",
+    "Distinct closed applicability proof codes and revision/stage/proof prepare seal",
+    "Explicit noise family and primitive bindings",
+    "Parent run provenance/output schedules/memory plan separated from worker numeric capacities; complete PhysicsPlan references removed from transport and runtime",
+    "Shared existing force/charge scalar coefficient and point current laws; enclosure/invariant/oracles retained independently"
+  ],
+  "verification": {
+    "command": "uv run --locked pytest tests/verification -q",
+    "passed": 905,
+    "skipped": 1,
+    "warnings": 1,
+    "warning_meaning": "Existing extreme-time events scalar budget overflow probe; no warning was suppressed",
+    "public_scenarios": {
+      "command": "uv run --locked pytest tests/scenarios/test_prescribed_run.py tests/scenarios/test_process_run.py -q",
+      "status": "passed",
+      "log": ".artifacts/foundation_numerics_20261123/public_scenarios.log",
+      "passed": 16,
+      "elapsed_seconds": 85.99
+    }
+  },
+  "microbench_conditions": {
+    "particles": 8,
+    "repeats": 1,
+    "warmups": 1,
+    "timing_interpretation": "Descriptive smoke observations only; runs overlapped other work. No speedup or strict scaling claim. P19 has no warmups CLI option."
+  },
+  "b03": {
+    "b02_xy_fixed_drag": {
+      "science_sha256_before": "sha256:8e70eb606e0a5357531a79448253dcbe6dda7ca899debf95d055123eab54fd9e",
+      "science_sha256_after": "sha256:8e70eb606e0a5357531a79448253dcbe6dda7ca899debf95d055123eab54fd9e",
+      "exact_match": true,
+      "simulate_seconds_before": 0.11082220007665455,
+      "simulate_seconds_after": 0.11351659998763353
+    },
+    "b03_rz_effective_drag_continuous_charge_gravity": {
+      "science_sha256_before": "sha256:473b85e59aa89d9d31c7f9aa5f7d1338abfff6b0c22dd5171a20e6f54fe82b9d",
+      "science_sha256_after": "sha256:473b85e59aa89d9d31c7f9aa5f7d1338abfff6b0c22dd5171a20e6f54fe82b9d",
+      "exact_match": true,
+      "simulate_seconds_before": 0.10181609995197505,
+      "simulate_seconds_after": 0.12859019997995347
+    },
+    "b03_rz_fixed_drag": {
+      "science_sha256_before": "sha256:c62c12a77b76bfbef49d5fc2a8a6348ded1f0d93d9fe10bf7f4fc338b841c42c",
+      "science_sha256_after": "sha256:c62c12a77b76bfbef49d5fc2a8a6348ded1f0d93d9fe10bf7f4fc338b841c42c",
+      "exact_match": true,
+      "simulate_seconds_before": 0.13261069997679442,
+      "simulate_seconds_after": 0.12747439998202026
+    },
+    "b03_rz_fixed_drag_axis_restart": {
+      "science_sha256_before": "sha256:c21390d7c6ecece16efbecb1b1621877bedb7566b922dcf3be260101b6064b86",
+      "science_sha256_after": "sha256:c21390d7c6ecece16efbecb1b1621877bedb7566b922dcf3be260101b6064b86",
+      "exact_match": true,
+      "simulate_seconds_before": 0.13755910005420446,
+      "simulate_seconds_after": 0.13920440000947565
+    }
+  },
+  "p19": {
+    "science_identity_before": {
+      "active_final_rows": 8,
+      "bitwise_identical": true,
+      "boundary_event_rows": 0,
+      "failure_event_rows": 0,
+      "included": [
+        "final particles",
+        "release events",
+        "boundary events",
+        "failure events",
+        "lifecycle series"
+      ],
+      "manifest_excluded_because_input_content_hashes_intentionally_differ": true,
+      "sha256_by_mode": {
+        "global_fast": "sha256:df973a5c51abb0a350f6cdf642db6d2154f33d7e86beae48a3a3fed65abec56a",
+        "local_fallback": "sha256:df973a5c51abb0a350f6cdf642db6d2154f33d7e86beae48a3a3fed65abec56a"
+      }
+    },
+    "science_identity_after": {
+      "active_final_rows": 8,
+      "bitwise_identical": true,
+      "boundary_event_rows": 0,
+      "failure_event_rows": 0,
+      "included": [
+        "final particles",
+        "release events",
+        "boundary events",
+        "failure events",
+        "lifecycle series"
+      ],
+      "manifest_excluded_because_input_content_hashes_intentionally_differ": true,
+      "sha256_by_mode": {
+        "global_fast": "sha256:df973a5c51abb0a350f6cdf642db6d2154f33d7e86beae48a3a3fed65abec56a",
+        "local_fallback": "sha256:df973a5c51abb0a350f6cdf642db6d2154f33d7e86beae48a3a3fed65abec56a"
+      }
+    },
+    "exact_match": true
+  },
+  "p10": {
+    "schema_independent_science_before": {
+      "field": {
+        "science_sha256": "121080c4f8991d548ced6ae4bdf3cf1d95398c9568bd8af4feda80393a321301",
+        "failed": 0
+      },
+      "event": {
+        "science_sha256": "df56e524c4a545aeef8064ce334ce83cd2e08a263059f9f843e9ffdf83153246",
+        "failed": 0
+      },
+      "relaxation": {
+        "science_sha256": "c7e91a81b666406c9ea482f71c0b305f127ac00e97557f2de8cda067b96f8ffc",
+        "failed": 0
+      }
+    },
+    "schema_independent_science_after": {
+      "field": {
+        "science_sha256": "121080c4f8991d548ced6ae4bdf3cf1d95398c9568bd8af4feda80393a321301",
+        "failed": 0
+      },
+      "event": {
+        "science_sha256": "df56e524c4a545aeef8064ce334ce83cd2e08a263059f9f843e9ffdf83153246",
+        "failed": 0
+      },
+      "relaxation": {
+        "science_sha256": "c7e91a81b666406c9ea482f71c0b305f127ac00e97557f2de8cda067b96f8ffc",
+        "failed": 0
+      }
+    },
+    "exact_match": true,
+    "science_hash_scope": "final/release/boundary/failure/lifecycle/frame/probe array payload, field names/dtype/shape; manifest/container excluded",
+    "cold_warm_after_status": "passed",
+    "cold_warm_command": "uv run --locked python -m tests.performance.p10_compiled --scenarios field event relaxation --field-particles 8 --event-particles 8 --relaxation-particles 8 --repeats 1 --warmups 1 --json .artifacts/foundation_numerics_20261123/after_p10.json",
+    "semantic_hash_note": "Existing P10 semantic hash includes manifest model descriptions. Full model facts and result schema changes intentionally alter it; it is not used as the before/after scientific identity.",
+    "observations_after": 6,
+    "cold_warm_semantic_identity_after": {
+      "by_scenario": {
+        "event": {
+          "exact_match": true,
+          "observations_compared": 2,
+          "semantic_result_sha256": "sha256:8c903930c40e0f77b98b8ce69ccb11f1c212e4548aa61dd54c731cc60f27c448"
+        },
+        "field": {
+          "exact_match": true,
+          "observations_compared": 2,
+          "semantic_result_sha256": "sha256:5937d96ef58282f39d3795d5e79de08fbb7ccdefcc157b26ae15b4b5197481ae"
+        },
+        "relaxation": {
+          "exact_match": true,
+          "observations_compared": 2,
+          "semantic_result_sha256": "sha256:4fdb233db63771e86a73af6a9383a80869e7827100afa2d652caac7046d90e5c"
+        }
+      },
+      "definition": "stable manifest semantics plus final/events/series/frames/probes; timing and RSS excluded"
+    },
+    "timings_before_after": {
+      "event/cold": {
+        "simulate_s_before": 110.19371439993847,
+        "simulate_s_after": 74.56848240003455,
+        "semantic_hash_before": "sha256:57e811140b129b34bddebf491c76b507c02b086ff330231012a2a5527321c1a6",
+        "semantic_hash_after": "sha256:8c903930c40e0f77b98b8ce69ccb11f1c212e4548aa61dd54c731cc60f27c448"
+      },
+      "event/warm": {
+        "simulate_s_before": 0.12321710004471242,
+        "simulate_s_after": 0.13123099994845688,
+        "semantic_hash_before": "sha256:57e811140b129b34bddebf491c76b507c02b086ff330231012a2a5527321c1a6",
+        "semantic_hash_after": "sha256:8c903930c40e0f77b98b8ce69ccb11f1c212e4548aa61dd54c731cc60f27c448"
+      },
+      "field/cold": {
+        "simulate_s_before": 38.054923200048506,
+        "simulate_s_after": 36.89234869997017,
+        "semantic_hash_before": "sha256:b7bec5398ef7974cf81850ae1b2b9bca0f0091c2c6f0320553f49864d2582580",
+        "semantic_hash_after": "sha256:5937d96ef58282f39d3795d5e79de08fbb7ccdefcc157b26ae15b4b5197481ae"
+      },
+      "field/warm": {
+        "simulate_s_before": 0.1943457000888884,
+        "simulate_s_after": 0.0848467000760138,
+        "semantic_hash_before": "sha256:b7bec5398ef7974cf81850ae1b2b9bca0f0091c2c6f0320553f49864d2582580",
+        "semantic_hash_after": "sha256:5937d96ef58282f39d3795d5e79de08fbb7ccdefcc157b26ae15b4b5197481ae"
+      },
+      "relaxation/cold": {
+        "simulate_s_before": 39.88012230000459,
+        "simulate_s_after": 40.937832400086336,
+        "semantic_hash_before": "sha256:65228db38f6b8dda1f2c87274aab9e4cf362fe37956281d42e68a5fc3c0511f7",
+        "semantic_hash_after": "sha256:4fdb233db63771e86a73af6a9383a80869e7827100afa2d652caac7046d90e5c"
+      },
+      "relaxation/warm": {
+        "simulate_s_before": 0.07539000001270324,
+        "simulate_s_after": 0.0787004999583587,
+        "semantic_hash_before": "sha256:65228db38f6b8dda1f2c87274aab9e4cf362fe37956281d42e68a5fc3c0511f7",
+        "semantic_hash_after": "sha256:4fdb233db63771e86a73af6a9383a80869e7827100afa2d652caac7046d90e5c"
+      }
+    }
+  },
+  "p06": {
+    "scenarios": [
+      "ballistic_boundaryless",
+      "ballistic_material_hits",
+      "quadratic_no_frames",
+      "rk4_enclosed_interior_frames",
+      "rk4_enclosed_macro_end_frames",
+      "rk4_enclosed_no_frames",
+      "rk4_material_hits",
+      "rk4_material_hits_interior_frame"
+    ],
+    "completed_before_after": true
+  },
+  "local_artifacts": {
+    "after_b03.json": "90c6e641d81301cd840dc4414eef45ee4714ca0fc63a5b676d751a0b3cea9b4e",
+    "after_p06.json": "9a8ec0165699fa7cda9421266062713fe588ad4925f3d78425608f61b1a854e6",
+    "after_p10.json": "e2c95a5c238a0c793015f2f158b5ba8fb298e4ebbdf4aa8ae04b7246c7f346e1",
+    "after_p10_science.json": "caaefa0d88a5c043d1ab2ca69aeed9c15b567992c95b376bf870a700047247f5",
+    "after_p19.json": "9a8ec7deccb80b93f295d25ad6daada72145199127f89a7c8887d7628824f7e2",
+    "before_b03.json": "f6d70971f32d645acdbb921b3e921206f2c97921c9f4aa902edb16b43c67cc73",
+    "before_p06.json": "a77af37bbf9d0b0ca9ace981be9672b57b62d5286ea0544020be76467287aca4",
+    "before_p10.json": "dfecf36e971159e956dde548e010b94cf288538335c29cd7d91aec061b97af6a",
+    "before_p10_science.json": "caaefa0d88a5c043d1ab2ca69aeed9c15b567992c95b376bf870a700047247f5",
+    "before_p19.json": "18249ad60945275171eac0e62a8e7b6f352edf8136548de3e1167b7c5c173751"
+  },
+  "limits": [
+    "This scope does not certify native COMSOL equation parity or device prediction.",
+    "Array entry points retain shape/domain errors; compiled entry points retain row numerical status.",
+    "Metadata assertions now require owned identity/scalar keys while allowing the complete model description. The catalog matrix also checks required scalar and caller field role projection."
+  ],
+  "independent_review_fixes": {
+    "finding": "Shared scalar Python bodies can raise math arithmetic/domain errors before the array entry finite check. The shifted OML negative-potential gate also ran after its electron exponential.",
+    "root_cause": "np.errstate controls NumPy floating warnings, not Python math exceptions. Copying scalar arithmetic alone did not preserve the array entry failure contract.",
+    "fix": "All 14 affected array entry points translate derived arithmetic/domain failures to PhysicsEvaluationError after shared shape/domain validation; existing owned errors remain unchanged. Shifted OML rejects positive potential before current evaluation. Compiled scalar arithmetic and status handling are unchanged.",
+    "regressions_added": [
+      "shifted OML positive charge +1 and +1e6 rejected as model-domain failure",
+      "stationary and shifted OML finite positive ne=ni=1e-300, Te=Ti=1e300 rejected as derived numerical failure",
+      "Barnes finite positive Debye inputs underflow rejected as owned derived numerical failure"
+    ],
+    "after_fix_verification": {
+      "command": "uv run --locked pytest tests/verification/test_shifted_charge.py tests/verification/test_ion_drag.py tests/verification/test_physics.py tests/verification/test_aggregate_charge.py tests/verification/test_talbot_saffman.py tests/verification/test_rarefied_vorticity_lift.py tests/verification/test_thermophoresis.py -q",
+      "passed": 154,
+      "elapsed_seconds": 2.74,
+      "ruff": "passed",
+      "pyrefly_errors": 0
+    },
+    "scope_note": "The 905-test full verification, 16 public scenarios and before/after microbench identities above preceded this last array error-contract fix. Final integration verification and refreshed source-bound A/P runs are owned by the root run receipt."
+  }
+}

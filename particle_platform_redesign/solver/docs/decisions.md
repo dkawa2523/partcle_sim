@@ -1301,7 +1301,7 @@ P09の`solver_owned_memory_plan_v1`がこの下限をload/prepare/run phase plan
 release eventは`(release_time_s, particle_id)`順、frameとfinalの行は`particle_id`順とする。ballistic
 proposalはmacro-step開始状態からの累積演算ではなくtableの解析的release原点を保持し、`dt_s`やframe
 scheduleを変えても共通時刻の状態をbitwiseで変えない。resultのdataset、dtype、公開readerは
-[`result_format_v4.md`](result_format_v4.md)が所有する。
+[`result_format_v5.md`](result_format_v5.md)が所有する。
 
 HDF5側のdata座標表現とYAML側のparticle motion modeは別のauthorityにする。v1で有効な組合せは
 `cartesian_xy + cartesian_xy`と`axisymmetric_rz + axisymmetric_rz_meridional`だけで、prepareが一度だけ

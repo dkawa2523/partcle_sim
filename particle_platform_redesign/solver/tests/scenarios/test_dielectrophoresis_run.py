@@ -69,10 +69,12 @@ def test_dep_quadratic_potential_converges_with_pairwise_basis_coverage(
     assert errors[0] > errors[1] > errors[2] > 0.0
     observed_orders = np.log2(np.asarray(errors[:-1]) / np.asarray(errors[1:]))
     assert float(np.min(observed_orders)) >= minimum_order
-    assert last_result.manifest["resolved"]["physics_models"]["dielectrophoresis"] == {
-        "model": "quasistatic_spherical",
-        "revision": _REVISION,
-    }
+    assert (
+        {
+            "model": "quasistatic_spherical",
+            "revision": _REVISION,
+        }
+    ).items() <= (last_result.manifest["resolved"]["physics_models"]["dielectrophoresis"]).items()
     assert last_result.manifest["resolved"]["path_kind"] == path_kind
     assert last_result.manifest["data_coordinate_system"] == coordinate_system
 

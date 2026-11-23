@@ -30,8 +30,10 @@ from chamber_particles import check_case, open_result, simulate
 from chamber_particles.case_format import read
 from chamber_particles_tools.analysis import export_result, summarize_result
 from chamber_particles_tools.csv_import import adapt_from_configuration
+from chamber_particles_tools.examples import EXAMPLE_NAMES
 from chamber_particles_tools.field_preprocessor.workflow import preprocess_from_configuration
 from chamber_particles_tools.inputs import create_case, create_from_configuration, init_example
+from chamber_particles_tools.selection import select_result
 from chamber_particles_tools.source_builder import read_csv_source
 from chamber_particles_tools.visualization import render_result
 
@@ -256,12 +258,19 @@ def _cache_and_surface(root: Path, recipe: dict[str, Any]) -> None:
 def _clients_without_case(root: Path) -> dict[str, object]:
     shutil.move(root / "own-case", root / "moved-input")
     result = root / "own-result"
-    summary = summarize_result(result)
+    view = open_result(result)
+    _csv(root / "selected_ids.csv", ["particle_id"], [[1]])
+    cohort = select_result(
+        view,
+        source_names=(view.read_context().sources[0].name,),
+        particle_ids_file=root / "selected_ids.csv",
+    )
+    summary = summarize_result(cohort)
     assert cast(dict[str, Any], summary["population"])["model_weight"] == 2.5
     assert cast(list[dict[str, Any]], summary["deposition"])[0]["particles"] == 1
     assert cast(dict[str, Any], summary["active_curve"])["rows"][0]["active_particles"] == 0
-    export_result(result, root / "exports")
-    report = render_result(result, root / "view", particle_id=1, detail=True)
+    export_result(cohort, root / "exports")
+    report = render_result(cohort, root / "view", focus_particle_id=1, detail=True)
     for path in (root / "view").glob("*.svg"):
         drawing = ET.parse(path)
         assert all(
@@ -274,6 +283,12 @@ def _clients_without_case(root: Path) -> dict[str, object]:
 
 def _module_and_console(root: Path, *, allow_console_block: bool) -> dict[str, object]:
     environment = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
+    selected = [
+        "--source-names",
+        open_result(root / "own-result").read_context().sources[0].name,
+        "--particle-ids-file",
+        str(root / "selected_ids.csv"),
+    ]
     commands = [
         (["models"], "complete"),
         (["init", str(root / "cli-example")], "created"),
@@ -285,10 +300,21 @@ def _module_and_console(root: Path, *, allow_console_block: bool) -> dict[str, o
         (["create", str(root / "recipe.yaml"), "-o", str(root / "cli-case")], "created"),
         (["check", str(root / "cli-case/case.yaml")], "ready"),
         (["run", str(root / "cli-case/case.yaml"), "-o", str(root / "cli-result")], "complete"),
-        (["inspect", str(root / "cli-result")], "complete"),
-        (["analyze", str(root / "cli-result")], None),
-        (["export", str(root / "cli-result"), "-o", str(root / "cli-export")], None),
-        (["view", str(root / "cli-result"), "-o", str(root / "cli-view")], None),
+        (["inspect", str(root / "cli-result"), "--verify"], "complete"),
+        (["analyze", str(root / "cli-result"), *selected], None),
+        (["export", str(root / "cli-result"), "-o", str(root / "cli-export"), *selected], None),
+        (
+            [
+                "view",
+                str(root / "cli-result"),
+                "-o",
+                str(root / "cli-view"),
+                *selected,
+                "--focus-particle-id",
+                "1",
+            ],
+            None,
+        ),
         (
             ["inputs", "electrostatic", "check", str(root / "reduced-electrostatic/builder.yaml")],
             "ready",
@@ -380,10 +406,19 @@ def main() -> None:
         root = Path(temporary)
         _, recipe = _first_source_case(root)
         _cache_and_surface(root, recipe)
-        for name in ("rz-charged", "xy-time-field", "brownian-wall", "reduced-electrostatic"):
+        executed_examples = []
+        for name in EXAMPLE_NAMES:
             case = init_example(name, root / name)
             simulate(case, root / f"{name}-result")
             assert open_result(root / f"{name}-result").read_failure_events().particle_id.size == 0
+            executed_examples.append({"name": name, "status": "passed"})
+        charged = root / "rz-charged"
+        adapt_from_configuration(charged / "field-mapping.yaml", charged / "background")
+        rebuilt = create_from_configuration(charged / "field-recipe.yaml", root / "csv-charged")
+        simulate(rebuilt, root / "csv-charged-result")
+        final = open_result(root / "csv-charged-result").read_final()
+        original = open_result(root / "rz-charged-result").read_final()
+        assert final.position_m.tolist() == original.position_m.tolist()
         evidence = _clients_without_case(root)
         entrypoints = _module_and_console(
             root, allow_console_block=arguments.allow_console_policy_block
@@ -396,7 +431,8 @@ def main() -> None:
         "entrypoints": entrypoints,
         "own_csv_first_source": "analytic field trajectory and hit verified",
         "cache_and_surface": "passed",
-        "examples": "five passed",
+        "examples": executed_examples,
+        "editable_charged_csv": "import/create/run passed",
         **evidence,
     }
     arguments.output.parent.mkdir(parents=True, exist_ok=True)

@@ -491,6 +491,9 @@ def test_brownian_default_max_is_identical_to_explicit_base_depth(tmp_path: Path
     )
     default_manifest.pop("context")
     explicit_manifest.pop("context")
+    # Raw context bytes also carry the deliberately different YAML identity.
+    default_manifest["content_files"].pop("context.h5")
+    explicit_manifest["content_files"].pop("context.h5")
     default_resume.pop("result_context")
     explicit_resume.pop("result_context")
     default_manifest["resume_identity"] = default_resume
@@ -809,7 +812,9 @@ def test_rz_brownian_dynamic_charge_dense_path_is_tree_depth_invariant(
         actual_charge = np.asarray([frame.charge_number[0] for frame in frames])
         np.testing.assert_allclose(actual_charge, expected_charge, rtol=5.0e-14, atol=5.0e-14)
         assert bool((np.diff(actual_charge) < 0.0).all())
-        assert expected_charge[-1] <= actual_charge.min() <= actual_charge.max() <= 0.0
+        # The independently evaluated terminal float is not a directed bound.
+        # Check the path's own endpoints in addition to the dense-law accuracy.
+        assert final_charge <= actual_charge.min() <= actual_charge.max() <= initial_charge_number
         linear_charge = final_charge * np.asarray(frame_times) / end_s
         assert float(np.max(np.abs(actual_charge - linear_charge))) > 10.0
         assert result.manifest["brownian_charge_dense_revision"] == (
@@ -2254,14 +2259,18 @@ def test_rz_brownian_continuous_charge_gravity_and_wall_share_one_event_path(
     assert final.position_m[0, 1] < 0.5
     np.testing.assert_array_equal(final.lifecycle, [1])
     assert result.read_failure_events().particle_id.size == 0
-    assert result.manifest["resolved"]["physics_models"]["charge"] == {
-        "model": "plasma_continuous",
-        "revision": "oml_stationary_maxwellian_debye_huckel_v1",
-    }
-    assert result.manifest["resolved"]["physics_models"]["gravity_buoyancy"] == {
-        "model": "standard",
-        "revision": "gravity_buoyancy_standard_v1",
-    }
+    assert (
+        {
+            "model": "plasma_continuous",
+            "revision": "oml_stationary_maxwellian_debye_huckel_v1",
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["charge"]).items()
+    assert (
+        {
+            "model": "standard",
+            "revision": "gravity_buoyancy_standard_v1",
+        }
+    ).items() <= (result.manifest["resolved"]["physics_models"]["gravity_buoyancy"]).items()
     assert result.manifest["resolved"]["physics_models"]["noise"]["revision"] == (_NOISE_REVISION)
 
 

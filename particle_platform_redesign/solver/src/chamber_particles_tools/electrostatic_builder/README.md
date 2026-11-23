@@ -115,6 +115,9 @@ The output preserves upstream fields/sources and adds electric_potential, electr
 positive_ion_number_density, space_charge_density, electron_temperature [K], positive_ion_temperature [K],
 positive_ion_velocity, positive_ion_speed and positive_ion_mass. Output-name collisions are rejected.
 The report binds config/input/output identity, assumptions, field ranges, convergence and declared solver storage.
+Retained explicit `derived_field_generations` records are preserved and verified before publication.
+The builder still rejects generated-name collisions and has no primitive-replacement/regeneration operation;
+independent prescribed fields carry no inferred dependency on the newly generated fields.
 
 If a particle case uses prescribed charge/ion/DEP coefficients derived from an electric/plasma field, regenerate
 those dependent coefficients from the new solution before calling it a consistent case. This generic builder

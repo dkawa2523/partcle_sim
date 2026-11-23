@@ -438,15 +438,15 @@ def test_result_validation_rejects_corrupt_boundary_offsets_and_validity(
     simulate(load_case(offset_paths.case_path), offset_output)
     with h5py.File(offset_output / "segments" / "epoch-000000.h5", "r+") as segment:
         segment["events/boundary/candidate_offset"][...] = np.asarray([0, 0], dtype="<i8")
-    with pytest.raises(SimulationError, match="candidate offsets"):
-        open_result(offset_output)
+    with pytest.raises(SimulationError, match="content hash"):
+        open_result(offset_output).verify_contents()
 
     validity_paths = materialize_microcase("C07", tmp_path / "validity-case")
     validity_output = tmp_path / "validity-result"
     simulate(load_case(validity_paths.case_path), validity_output)
     with h5py.File(validity_output / "final.h5", "r+") as final_file:
         final_file["particles/kinematics_valid"][0] = np.uint8(2)
-    with pytest.raises(SimulationError, match="kinematics_valid"):
+    with pytest.raises(SimulationError, match="content hash"):
         open_result(validity_output)
 
 

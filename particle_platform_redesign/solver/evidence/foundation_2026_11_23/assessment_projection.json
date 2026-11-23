@@ -1,0 +1,196 @@
+{
+  "queries": {
+    "case_audit": {
+      "label": "現行sourceで再実行したA/P各40実現",
+      "rows": [
+        {
+          "case": "A",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 251.0,
+          "capture_candidate_mean": 249.675,
+          "capture_candidate_sd": 6.014459073658906,
+          "restricted_mean_active_native_us": 200.3969264894903,
+          "restricted_mean_active_candidate_us": 203.4885515137035,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応。局所留保を併記",
+          "qualification": "Numerical/native parity NOT_TESTED; physical adhesion NOT_CERTIFIED",
+          "execution_scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
+          "judgment_origin": "Exploratory interpretation of fresh current-source40; same seeds and saved native reference reused",
+          "evidence_scope": "current_source_bound_exploratory",
+          "candidate_failure_events": 0,
+          "initial287_all40_exactly_equal": true
+        },
+        {
+          "case": "P",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 254.0,
+          "capture_candidate_mean": 251.775,
+          "capture_candidate_sd": 5.5214616236589436,
+          "restricted_mean_active_native_us": 187.38328244202265,
+          "restricted_mean_active_candidate_us": 203.05462371889976,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応。局所留保を併記",
+          "qualification": "Numerical/native parity NOT_TESTED; physical adhesion NOT_CERTIFIED",
+          "execution_scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
+          "judgment_origin": "Exploratory interpretation of fresh current-source40; same seeds and saved native reference reused",
+          "evidence_scope": "current_source_bound_exploratory",
+          "candidate_failure_events": 0,
+          "initial287_all40_exactly_equal": true
+        }
+      ],
+      "source": {
+        "label": "Current-source fresh A/P exploratory population assessment",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
+        "files": [
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json",
+            "availability": "bound_local",
+            "sha256": "sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json",
+            "availability": "bound_local",
+            "sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json",
+            "availability": "bound_local",
+            "sha256": "sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/source_map.json",
+            "availability": "bound_local",
+            "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          }
+        ],
+        "metricDefinitions": [
+          {
+            "label": "固定287-ID、候補各40実現と単一保存native",
+            "definition": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification. SD is replica SD, not a mean CI. Empirical min/max is not a simultaneous band.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Population, clock and dependence",
+            "detail": "{\"primary\": \"fixed287-ID 0-5ms restricted mean active lifetime; all particles released at0\", \"selected_on_prior_results\": true, \"dependence\": \"one287-ID cohort is one replica; A/P may be coupled and are never pooled as80 independent\", \"native_window\": \"raw native0-30ms unchanged; derived CSV retains original times0 through0.004999999999999999; candidate ends0.005 with an extra end frame; curves use exact common stored times, no time fitting or interpolation; RMST capped5ms, all native terminals earlier\", \"prediction_vs_mean\": \"empirical40-replica min/max is a descriptive observed range, not a mean confidence interval or simultaneous95% band\", \"survivor_conditioning\": \"speed/Z quantiles condition on each participant's own active cohort; active fractions and destination counts use all287 released\", \"lifecycle_meanings\": \"native retained terminal stopping surfaces are numerical captures; native disappearance remains unknown, candidate escape explicit; only coarse nonretained composition is grouped\", \"not_claimed\": [\"confirmatory equivalence\", \"qualified native solver parity\", \"physical validation\", \"strict stochastic path matching\"]}"
+          },
+          {
+            "title": "Source preservation",
+            "detail": "All fresh40 existing numerical observables equal the stored prior40 per seed. This is JSON-summary preservation, not a bitwise claim for every unsaved state/path, and uses no old-container reader."
+          }
+        ]
+      }
+    },
+    "trajectory_divergence": {
+      "label": "現行A/P比較の探索的な局所留保",
+      "rows": [
+        {
+          "case": "A",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 74.0,
+          "candidate_replica_mean": 60.45,
+          "difference_percentage_points": -4.7212543554006965,
+          "scope": "全287粒子分母。探索的な局所留保。数値的停止であり物理付着ではない",
+          "evidence_scope": "current_source_bound_exploratory"
+        },
+        {
+          "case": "A",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 759.0827702014865,
+          "candidate_replica_mean_of_medians": 861.3178894844634,
+          "relative_difference_percent": 13.46824395129404,
+          "scope": "各自survivorに条件付け。独立Brownian pathsのsame-ID誤差ではなく探索的な局所留保",
+          "evidence_scope": "current_source_bound_exploratory"
+        },
+        {
+          "case": "P",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 73.0,
+          "candidate_replica_mean": 61.325,
+          "difference_percentage_points": -4.067944250871079,
+          "scope": "全287粒子分母。探索的な局所留保。数値的停止であり物理付着ではない",
+          "evidence_scope": "current_source_bound_exploratory"
+        },
+        {
+          "case": "P",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 737.5076919491495,
+          "candidate_replica_mean_of_medians": 866.9236448676853,
+          "relative_difference_percent": 17.547742800689182,
+          "scope": "各自survivorに条件付け。独立Brownian pathsのsame-ID誤差ではなく探索的な局所留保",
+          "evidence_scope": "current_source_bound_exploratory"
+        }
+      ],
+      "source": {
+        "label": "Current-source fresh A/P exploratory population assessment",
+        "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification.",
+        "files": [
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_assessment.json",
+            "availability": "bound_local",
+            "sha256": "sha256:b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_summary_receipt.json",
+            "availability": "bound_local",
+            "sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/ap_population_preservation.json",
+            "availability": "bound_local",
+            "sha256": "sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/source_map.json",
+            "availability": "bound_local",
+            "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+            "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          }
+        ],
+        "metricDefinitions": [
+          {
+            "label": "固定287-ID、候補各40実現と単一保存native",
+            "definition": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification. SD is replica SD, not a mean CI. Empirical min/max is not a simultaneous band.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Population, clock and dependence",
+            "detail": "{\"primary\": \"fixed287-ID 0-5ms restricted mean active lifetime; all particles released at0\", \"selected_on_prior_results\": true, \"dependence\": \"one287-ID cohort is one replica; A/P may be coupled and are never pooled as80 independent\", \"native_window\": \"raw native0-30ms unchanged; derived CSV retains original times0 through0.004999999999999999; candidate ends0.005 with an extra end frame; curves use exact common stored times, no time fitting or interpolation; RMST capped5ms, all native terminals earlier\", \"prediction_vs_mean\": \"empirical40-replica min/max is a descriptive observed range, not a mean confidence interval or simultaneous95% band\", \"survivor_conditioning\": \"speed/Z quantiles condition on each participant's own active cohort; active fractions and destination counts use all287 released\", \"lifecycle_meanings\": \"native retained terminal stopping surfaces are numerical captures; native disappearance remains unknown, candidate escape explicit; only coarse nonretained composition is grouped\", \"not_claimed\": [\"confirmatory equivalence\", \"qualified native solver parity\", \"physical validation\", \"strict stochastic path matching\"]}"
+          },
+          {
+            "title": "Source preservation",
+            "detail": "All fresh40 existing numerical observables equal the stored prior40 per seed. This is JSON-summary preservation, not a bitwise claim for every unsaved state/path, and uses no old-container reader."
+          }
+        ]
+      }
+    }
+  }
+}

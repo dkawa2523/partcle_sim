@@ -33,6 +33,9 @@ def create_case(
     same directory commit. Scientific validation belongs to the canonical reader
     and the execution preflight.
     """
+    from .field_generation import validate_declared_generations
+
+    validate_declared_generations(bundle)
     destination = Path(output_directory).expanduser().resolve()
     if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
         raise FileExistsError(f"case publication requires a new or empty directory: {destination}")
@@ -118,6 +121,8 @@ def create_from_configuration(
             "sources": source_receipts,
         },
     }
+    if "derived_field_generations" in upstream:
+        provenance["derived_field_generations"] = upstream["derived_field_generations"]
     bundle = replace(bundle, provenance_json=json.dumps(provenance), sources=tuple(sources))
     return create_case(bundle, recipe["settings"], output_directory)
 
@@ -132,7 +137,7 @@ def _relative_path(value: object, directory: Path) -> Path:
 def _recipe_source(
     raw: object, bundle: DataBundle, directory: Path
 ) -> tuple[RealizedSource, dict[str, object]]:
-    from .source_builder import read_csv_source
+    from .source_builder import source_from_csv_bytes
 
     if isinstance(raw, dict) and set(raw) == {"existing_table"}:
         name = raw["existing_table"]
@@ -154,9 +159,7 @@ def _recipe_source(
         raise ValueError("source configuration must be a mapping or configuration path")
     csv_path = _relative_path(raw["csv"], directory)
     csv_raw = csv_path.read_bytes()
-    source = read_csv_source(csv_path, bundle, cast(Mapping[str, Any], configuration))
-    if csv_path.read_bytes() != csv_raw:
-        raise ValueError("source CSV changed during preparation")
+    source = source_from_csv_bytes(csv_raw, bundle, cast(Mapping[str, Any], configuration))
     receipt: dict[str, object] = {
         "table": source.name,
         "configuration": dict(configuration),

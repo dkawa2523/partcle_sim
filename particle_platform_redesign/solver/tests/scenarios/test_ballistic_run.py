@@ -475,7 +475,8 @@ def test_ballistic_run_does_not_allocate_unused_force_stage_buffers(
 ) -> None:
     paths = materialize_microcase(case_id, tmp_path / case_id)
     case = load_case(paths.case_path)
-    prepared = engine_module._prepare(case).transport
+    run = engine_module._prepare(case)
+    prepared = run.transport
     dynamics = prepared.dynamics
     stage = dynamics.native_workspace
     arrays = (
@@ -490,8 +491,8 @@ def test_ballistic_run_does_not_allocate_unused_force_stage_buffers(
     assert sum(array.nbytes for array in arrays) == 0
     assert dynamics.last_field_cell is None
     assert dynamics.native_rk4_workspace is None
-    assert prepared.memory_plan.stage_composition_work_bytes_per_particle == 0
-    assert prepared.memory_plan.components["slab_stage_composition_work"] == 0
+    assert run.memory_plan.stage_composition_work_bytes_per_particle == 0
+    assert run.memory_plan.components["slab_stage_composition_work"] == 0
     # Empty context metadata is still resident and belongs to the fixed field
     # component; eliminating unused stage buffers must not omit these bytes.
     assert prepared.fields.prepared_nbytes == np.dtype("<i8").itemsize
@@ -580,16 +581,16 @@ def test_open_result_rejects_unclosed_or_misaligned_segment(tmp_path: Path) -> N
 
     with h5py.File(segment_path, "r+") as segment:
         segment.attrs["closed"] = np.uint8(0)
-    with pytest.raises(SimulationError, match="closed"):
-        open_result(output)
+    with pytest.raises(SimulationError, match="content hash"):
+        open_result(output).verify_contents()
 
     with h5py.File(segment_path, "r+") as segment:
         segment.attrs["closed"] = np.uint8(1)
         charge = segment["frames/charge_number"]
         assert isinstance(charge, h5py.Dataset)
         charge.resize(charge.shape[0] - 1, axis=0)
-    with pytest.raises(SimulationError, match="inconsistent shapes"):
-        open_result(output)
+    with pytest.raises(SimulationError, match="content hash"):
+        open_result(output).verify_contents()
 
     with h5py.File(segment_path, "r+") as segment:
         charge = segment["frames/charge_number"]
@@ -600,8 +601,8 @@ def test_open_result_rejects_unclosed_or_misaligned_segment(tmp_path: Path) -> N
         offset_values = offsets[...]
         offset_values[1:3] = [2, 1]
         offsets[...] = offset_values
-    with pytest.raises(SimulationError, match="offsets"):
-        open_result(output)
+    with pytest.raises(SimulationError, match="content hash"):
+        open_result(output).verify_contents()
 
 
 def test_p06_rejects_unsupported_coordinate_pair(

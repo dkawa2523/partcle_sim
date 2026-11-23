@@ -249,22 +249,33 @@ def talbot_thermophoresis(
         "thermal_exchange_coefficient",
     )
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        knudsen_radius = 2.0 * (gas_mean_free_path_m / drag_diameter_m)
-        conductivity_ratio = gas_thermal_conductivity_W_m_K / particle_conductivity
-        correction = thermal_slip * (conductivity_ratio + thermal_exchange * knudsen_radius)
-        correction /= (1.0 + 3.0 * momentum_exchange * knudsen_radius) * (
-            1.0 + 2.0 * conductivity_ratio + 2.0 * thermal_exchange * knudsen_radius
-        )
-        acceleration_factor = (
-            6.0
-            * math.pi
-            * drag_diameter_m
-            * gas_dynamic_viscosity_Pa_s**2
-            * correction
-            / (mass_kg * gas_density_kg_m3 * gas_temperature_K)
-        )
-        acceleration = -acceleration_factor[:, None] * gas_temperature_gradient_K_m
+    knudsen_radius = np.empty(count, dtype=np.float64)
+    conductivity_ratio = np.empty(count, dtype=np.float64)
+    acceleration = np.empty((count, 2), dtype=np.float64)
+    scalar = cast(CPUDispatcher, talbot_factor_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            for row in range(count):
+                factor, knudsen_radius[row], conductivity_ratio[row], _ = scalar(
+                    mass_kg[row],
+                    drag_diameter_m[row],
+                    gas_temperature_K[row],
+                    gas_density_kg_m3[row],
+                    gas_dynamic_viscosity_Pa_s[row],
+                    gas_thermal_conductivity_W_m_K[row],
+                    gas_mean_free_path_m[row],
+                    particle_conductivity,
+                    thermal_slip,
+                    momentum_exchange,
+                    thermal_exchange,
+                )
+                acceleration[row] = factor * gas_temperature_gradient_K_m[row]
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "talbot thermophoresis produced a non-finite derived value"
+        ) from error
     if not bool(
         np.isfinite(knudsen_radius).all()
         and np.isfinite(conductivity_ratio).all()
@@ -418,30 +429,43 @@ def saffman_lift(
     if coordinate_system not in ("cartesian_xy", "axisymmetric_rz"):
         raise PhysicsEvaluationError("unsupported Saffman coordinate system")
 
-    radius_m = 0.5 * drag_diameter_m
-    relative_velocity = gas_velocity_m_s - velocity_m_s
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        vorticity_abs = np.abs(out_of_plane_gas_vorticity_s_inv)
-        coupling_rate = (
-            SAFFMAN_LIFT_COEFFICIENT
-            * radius_m**2
-            * np.sqrt(gas_dynamic_viscosity_Pa_s * gas_density_kg_m3 * vorticity_abs)
-            / mass_kg
-        )
-        signed_coupling = np.sign(out_of_plane_gas_vorticity_s_inv) * coupling_rate
-        acceleration = np.empty((count, 2), dtype=np.float64)
-        if coordinate_system == "cartesian_xy":
-            acceleration[:, 0] = signed_coupling * relative_velocity[:, 1]
-            acceleration[:, 1] = -signed_coupling * relative_velocity[:, 0]
-        else:
-            acceleration[:, 0] = -signed_coupling * relative_velocity[:, 1]
-            acceleration[:, 1] = signed_coupling * relative_velocity[:, 0]
-        relative_speed = np.hypot(relative_velocity[:, 0], relative_velocity[:, 1])
-        slip_reynolds = gas_density_kg_m3 * radius_m * relative_speed
-        slip_reynolds /= gas_dynamic_viscosity_Pa_s
-        shear_reynolds = gas_density_kg_m3 * radius_m**2 * vorticity_abs
-        shear_reynolds /= gas_dynamic_viscosity_Pa_s
-        mean_free_path_over_radius = gas_mean_free_path_m / radius_m
+    coupling_rate = np.empty(count, dtype=np.float64)
+    acceleration = np.empty((count, 2), dtype=np.float64)
+    mean_free_path_over_radius = np.empty(count, dtype=np.float64)
+    slip_reynolds = np.empty(count, dtype=np.float64)
+    shear_reynolds = np.empty(count, dtype=np.float64)
+    vorticity_abs = np.abs(out_of_plane_gas_vorticity_s_inv)
+    scalar = cast(CPUDispatcher, saffman_factors_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            for row in range(count):
+                (
+                    coupling_rate[row],
+                    signed,
+                    mean_free_path_over_radius[row],
+                    slip_reynolds[row],
+                    shear_reynolds[row],
+                ) = scalar(
+                    mass_kg[row],
+                    drag_diameter_m[row],
+                    velocity_m_s[row, 0],
+                    velocity_m_s[row, 1],
+                    gas_velocity_m_s[row, 0],
+                    gas_velocity_m_s[row, 1],
+                    gas_density_kg_m3[row],
+                    gas_dynamic_viscosity_Pa_s[row],
+                    gas_mean_free_path_m[row],
+                    out_of_plane_gas_vorticity_s_inv[row],
+                )
+                relative = gas_velocity_m_s[row] - velocity_m_s[row]
+                if coordinate_system == "cartesian_xy":
+                    acceleration[row] = signed * relative[1], -signed * relative[0]
+                else:
+                    acceleration[row] = -signed * relative[1], signed * relative[0]
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError("saffman lift produced a non-finite derived value") from error
     if not bool(
         np.isfinite(acceleration).all()
         and np.isfinite(slip_reynolds).all()
@@ -748,22 +772,32 @@ def rarefied_vorticity_lift(
     if not bool(np.isfinite(velocity_m_s).all() and np.isfinite(gas_velocity_m_s).all()):
         raise PhysicsEvaluationError("rarefied-vorticity lift velocities must be finite")
 
-    radius_m = 0.5 * drag_diameter_m
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        coupling_rate = (
-            coefficient
-            * math.pi
-            * gas_density_kg_m3
-            * gas_mean_free_path_m
-            * radius_m**2
-            * azimuthal_gas_vorticity_s_inv
-            / mass_kg
-        )
-        relative_velocity = gas_velocity_m_s - velocity_m_s
-        acceleration = np.empty((count, 2), dtype=np.float64)
-        acceleration[:, 0] = coupling_rate * relative_velocity[:, 1]
-        acceleration[:, 1] = -coupling_rate * relative_velocity[:, 0]
-        mean_free_path_over_radius = gas_mean_free_path_m / radius_m
+    coupling_rate = np.empty(count, dtype=np.float64)
+    acceleration = np.empty((count, 2), dtype=np.float64)
+    mean_free_path_over_radius = np.empty(count, dtype=np.float64)
+    scalar = cast(CPUDispatcher, rarefied_lift_factors_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            for row in range(count):
+                coupling_rate[row], mean_free_path_over_radius[row], _ = scalar(
+                    mass_kg[row],
+                    drag_diameter_m[row],
+                    gas_density_kg_m3[row],
+                    gas_mean_free_path_m[row],
+                    azimuthal_gas_vorticity_s_inv[row],
+                    coefficient,
+                )
+                relative = gas_velocity_m_s[row] - velocity_m_s[row]
+                acceleration[row] = (
+                    coupling_rate[row] * relative[1],
+                    -coupling_rate[row] * relative[0],
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "rarefied vorticity lift produced a non-finite derived value"
+        ) from error
     if not bool(
         np.isfinite(coupling_rate).all()
         and np.isfinite(acceleration).all()
@@ -924,25 +958,42 @@ def waldmann_gallis_thermophoresis(
     if not math.isfinite(gas_molecular_mass_kg) or gas_molecular_mass_kg <= 0.0:
         raise PhysicsEvaluationError("gas_molecular_mass_kg must be positive and finite")
     speed_ratio_limit = _sensitivity_maximum_speed_ratio(maximum_speed_ratio)
-    if not bool(
-        np.isfinite(velocity_m_s).all()
-        and np.isfinite(gas_velocity_m_s).all()
-        and np.isfinite(gas_translational_heat_flux_W_m2).all()
-    ):
-        raise PhysicsEvaluationError("Waldmann--Gallis vector inputs must be finite")
+    _require_finite(velocity_m_s, "Waldmann--Gallis particle velocity")
+    _require_finite(gas_velocity_m_s, "Waldmann--Gallis gas velocity")
+    _require_finite(gas_translational_heat_flux_W_m2, "Waldmann--Gallis heat flux")
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        radius_m = 0.5 * drag_diameter_m
-        mean_thermal_speed_m_s = np.sqrt(
-            8.0 * BOLTZMANN_J_K * gas_temperature_K / (math.pi * gas_molecular_mass_kg)
-        )
-        acceleration_factor = (
-            (32.0 / 15.0) * radius_m * radius_m / (mass_kg * mean_thermal_speed_m_s)
-        )
-        acceleration_m_s2 = acceleration_factor[:, None] * gas_translational_heat_flux_W_m2
-        mean_free_path_over_radius = gas_mean_free_path_m / radius_m
-        relative_speed = np.linalg.norm(gas_velocity_m_s - velocity_m_s, axis=1)
-        relative_speed_ratio = relative_speed / mean_thermal_speed_m_s
+    acceleration_m_s2 = np.empty((count, 2), dtype=np.float64)
+    mean_thermal_speed_m_s = np.empty(count, dtype=np.float64)
+    mean_free_path_over_radius = np.empty(count, dtype=np.float64)
+    relative_speed_ratio = np.empty(count, dtype=np.float64)
+    scalar = cast(CPUDispatcher, waldmann_factors_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            for row in range(count):
+                (
+                    factor,
+                    mean_thermal_speed_m_s[row],
+                    mean_free_path_over_radius[row],
+                    relative_speed_ratio[row],
+                    _,
+                ) = scalar(
+                    mass_kg[row],
+                    drag_diameter_m[row],
+                    gas_temperature_K[row],
+                    gas_mean_free_path_m[row],
+                    gas_molecular_mass_kg,
+                    gas_velocity_m_s[row, 0],
+                    gas_velocity_m_s[row, 1],
+                    velocity_m_s[row, 0],
+                    velocity_m_s[row, 1],
+                )
+                acceleration_m_s2[row] = factor * gas_translational_heat_flux_W_m2[row]
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "waldmann gallis thermophoresis produced a non-finite derived value"
+        ) from error
     if not bool(
         np.isfinite(acceleration_m_s2).all()
         and np.isfinite(mean_thermal_speed_m_s).all()
@@ -1143,20 +1194,27 @@ def epstein_rate_s_inv(
     if not math.isfinite(delta) or delta <= 0.0:
         raise PhysicsEvaluationError("Epstein delta must be positive and finite")
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        radius_m = 0.5 * drag_diameter_m
-        mean_thermal_speed_m_s = np.sqrt(
-            8.0 * BOLTZMANN_J_K * gas_temperature_K / (math.pi * gas_molecular_mass_kg)
-        )
-        beta_kg_s = (
-            (4.0 * math.pi / 3.0)
-            * radius_m
-            * radius_m
-            * gas_density_kg_m3
-            * mean_thermal_speed_m_s
-            * delta
-        )
-        rate_s_inv = beta_kg_s / mass_kg
+    rate_s_inv = np.empty(mass_kg.size, dtype=np.float64)
+    mean_thermal_speed_m_s = np.empty(mass_kg.size, dtype=np.float64)
+    radius_m = np.empty(mass_kg.size, dtype=np.float64)
+    scalar = cast(CPUDispatcher, epstein_rate_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(mass_kg.size):
+                rate_s_inv[row], mean_thermal_speed_m_s[row], radius_m[row] = scalar(
+                    mass_kg[row],
+                    drag_diameter_m[row],
+                    gas_density_kg_m3[row],
+                    gas_temperature_K[row],
+                    gas_molecular_mass_kg,
+                    delta,
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "epstein rate s inv produced a non-finite derived value"
+        ) from error
     if not bool(
         np.isfinite(rate_s_inv).all()
         and np.isfinite(mean_thermal_speed_m_s).all()
@@ -1346,74 +1404,54 @@ def barnes_collisionless_ion_drag(
         "maximum_ion_drift_ratio",
     )
 
-    debye_length = _linear_two_species_debye_length(
-        electron_number_density_m3,
-        positive_ion_number_density_m3,
-        electron_temperature_K,
-        positive_ion_temperature_K,
-    )
-    relative_velocity = positive_ion_velocity_m_s - velocity_m_s
-    relative_speed = np.linalg.norm(relative_velocity, axis=1)
-    ion_mean_thermal_speed = np.sqrt(
-        8.0 * BOLTZMANN_J_K * positive_ion_temperature_K / (math.pi * ion_mass)
-    )
-    effective_speed_square = relative_speed * relative_speed + ion_mean_thermal_speed**2
-    effective_speed = np.sqrt(effective_speed_square)
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * electrostatic_radius_m
-        * (1.0 + electrostatic_radius_m / debye_length)
-    )
-    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-
-    collection_cross_section = np.zeros(count, dtype=np.float64)
-    orbital_cross_section = np.zeros(count, dtype=np.float64)
-    collection_impact_parameter = np.zeros(count, dtype=np.float64)
-    orbital_impact_parameter = np.zeros(count, dtype=np.float64)
-    coulomb_logarithm = np.zeros(count, dtype=np.float64)
-    model_domain = charge_number <= 0.0
-    if bool(model_domain.any()):
-        selected = model_domain
-        orbital_impact_parameter[selected] = (
-            np.abs(charge_number[selected])
-            * ELEMENTARY_CHARGE_C
-            * ELEMENTARY_CHARGE_C
-            / (
-                4.0
-                * math.pi
-                * VACUUM_PERMITTIVITY_F_M
-                * ion_mass
-                * effective_speed_square[selected]
-            )
-        )
-        collection_square = electrostatic_radius_m[selected] ** 2 * (
-            1.0
-            - 2.0
-            * ELEMENTARY_CHARGE_C
-            * surface_potential[selected]
-            / (ion_mass * effective_speed_square[selected])
-        )
-        collection_impact_parameter[selected] = np.sqrt(collection_square)
-        numerator = debye_length[selected] ** 2 + orbital_impact_parameter[selected] ** 2
-        denominator = collection_square + orbital_impact_parameter[selected] ** 2
-        coulomb_logarithm[selected] = 0.5 * np.log(numerator / denominator)
-        collection_cross_section[selected] = math.pi * collection_square
-        orbital_cross_section[selected] = (
-            4.0 * math.pi * orbital_impact_parameter[selected] ** 2 * coulomb_logarithm[selected]
-        )
-
-    total_cross_section = collection_cross_section + orbital_cross_section
-    factor = (
-        positive_ion_number_density_m3 * ion_mass * effective_speed * total_cross_section / mass_kg
-    )
-    acceleration = factor[:, None] * relative_velocity
-    ion_drift_ratio = relative_speed / ion_mean_thermal_speed
+    points = np.empty((count, 13), dtype=np.float64)
+    scalar = cast(CPUDispatcher, barnes_point_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(count):
+                points[row] = scalar(
+                    mass_kg[row],
+                    electrostatic_radius_m[row],
+                    charge_number[row],
+                    velocity_m_s[row, 0],
+                    velocity_m_s[row, 1],
+                    electron_number_density_m3[row],
+                    positive_ion_number_density_m3[row],
+                    electron_temperature_K[row],
+                    positive_ion_temperature_K[row],
+                    positive_ion_velocity_m_s[row, 0],
+                    positive_ion_velocity_m_s[row, 1],
+                    ion_neutral_mean_free_path_m[row],
+                    ion_mass,
+                    drift_limit,
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "barnes collisionless ion drag produced a non-finite derived value"
+        ) from error
+    (
+        debye_length,
+        _,
+        _,
+        surface_potential,
+        orbital_impact_parameter,
+        _,
+        collection_impact_parameter,
+        coulomb_logarithm,
+        ax,
+        ay,
+        ion_drift_ratio,
+        collection_cross_section,
+        orbital_cross_section,
+    ) = points.T
+    acceleration = np.column_stack((ax, ay))
     radius_ratio = electrostatic_radius_m / debye_length
     orbital_ratio = orbital_impact_parameter / debye_length
     collection_ratio = collection_impact_parameter / debye_length
     collisionless_ratio = ion_neutral_mean_free_path_m / debye_length
+    model_domain = charge_number <= 0.0
     derived = (
         acceleration,
         collection_cross_section,
@@ -1490,72 +1528,47 @@ def relative_flow_screened_collection_orbital_ion_drag(
         "maximum_relative_ion_speed_m_s",
     )
 
-    relative_velocity = positive_ion_velocity_m_s - velocity_m_s
-    relative_speed = np.linalg.norm(relative_velocity, axis=1)
-    effective_speed_square = (
-        relative_speed * relative_speed
-        + 8.0
-        * ELEMENTARY_CHARGE_C
-        * positive_ion_thermal_voltage_V
-        / (math.pi * effective_positive_ion_mass_kg)
-        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
-    )
-    effective_speed = np.sqrt(effective_speed_square)
-    effective_capacitance_screening = np.maximum(
-        electrostatic_radius_m,
-        screening_length_m,
-    )
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * electrostatic_radius_m
-        * (1.0 + electrostatic_radius_m / effective_capacitance_screening)
-    )
-    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    screening_radius = np.maximum(
-        electrostatic_radius_m,
-        np.minimum(screening_length_m, ion_neutral_mean_free_path_m),
-    )
-    orbital_impact = (
-        np.sqrt(charge_number * charge_number + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
-        * ELEMENTARY_CHARGE_C**2
-        / (
-            4.0
-            * math.pi
-            * VACUUM_PERMITTIVITY_F_M
-            * effective_positive_ion_mass_kg
-            * effective_speed_square
-        )
-    )
-    collection_square = np.minimum(
-        screening_radius * screening_radius,
-        electrostatic_radius_m**2
-        * np.maximum(
-            0.0,
-            1.0
-            - 2.0
-            * ELEMENTARY_CHARGE_C
-            * surface_potential
-            / (effective_positive_ion_mass_kg * effective_speed_square),
-        ),
-    )
-    coulomb_logarithm = np.maximum(
-        0.0,
-        0.5
-        * np.log(
-            (screening_radius**2 + orbital_impact**2) / (collection_square + orbital_impact**2)
-        ),
-    )
-    collection_cross_section = math.pi * collection_square
-    orbital_cross_section = 4.0 * math.pi * orbital_impact**2 * coulomb_logarithm
-    force_factor = (
-        positive_ion_number_density_m3
-        * effective_positive_ion_mass_kg
-        * effective_speed
-        * (collection_cross_section + orbital_cross_section)
-    )
-    acceleration = force_factor[:, None] * relative_velocity / mass_kg[:, None]
+    points = np.empty((count, 12), dtype=np.float64)
+    scalar = cast(CPUDispatcher, relative_ion_point_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(count):
+                points[row] = scalar(
+                    mass_kg[row],
+                    electrostatic_radius_m[row],
+                    charge_number[row],
+                    velocity_m_s[row, 0],
+                    velocity_m_s[row, 1],
+                    positive_ion_number_density_m3[row],
+                    positive_ion_thermal_voltage_V[row],
+                    positive_ion_velocity_m_s[row, 0],
+                    positive_ion_velocity_m_s[row, 1],
+                    effective_positive_ion_mass_kg[row],
+                    screening_length_m[row],
+                    ion_neutral_mean_free_path_m[row],
+                    relative_speed_limit,
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "relative flow screened collection orbital ion drag produced a non-finite derived value"
+        ) from error
+    (
+        relative_speed,
+        effective_speed,
+        _,
+        surface_potential,
+        screening_radius,
+        _,
+        _,
+        _,
+        ax,
+        ay,
+        collection_cross_section,
+        orbital_cross_section,
+    ) = points.T
+    acceleration = np.column_stack((ax, ay))
     derived = (
         acceleration,
         collection_cross_section,
@@ -1617,70 +1630,45 @@ def electric_field_directed_image_orbital_ion_drag(
     _require_positive(screening_length_m, "screening_length_m")
     _require_finite(electric_field_V_m, "electric_field_V_m")
 
-    ion_speed = np.linalg.norm(positive_ion_velocity_m_s, axis=1)
-    effective_speed_square = (
-        ion_speed * ion_speed
-        + 8.0
-        * ELEMENTARY_CHARGE_C
-        * positive_ion_thermal_voltage_V
-        / (math.pi * effective_positive_ion_mass_kg)
-        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
-    )
-    effective_speed = np.sqrt(effective_speed_square)
-    effective_capacitance_screening = np.maximum(
-        electrostatic_radius_m,
-        screening_length_m,
-    )
-    capacitance = (
-        4.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * electrostatic_radius_m
-        * (1.0 + electrostatic_radius_m / effective_capacitance_screening)
-    )
-    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
-    collection_cross_section = (
-        math.pi
-        * electrostatic_radius_m**2
-        * np.maximum(0.0, 1.0 - surface_potential / positive_ion_thermal_voltage_V)
-    )
-    image_impact = (
-        ELEMENTARY_CHARGE_C**2
-        * charge_number
-        / (
-            2.0
-            * math.pi
-            * VACUUM_PERMITTIVITY_F_M
-            * effective_positive_ion_mass_kg
-            * effective_speed_square
-        )
-    )
-    image_screening_length = np.sqrt(
-        VACUUM_PERMITTIVITY_F_M
-        * electron_thermal_voltage_V
-        / (ELEMENTARY_CHARGE_C * positive_ion_number_density_m3)
-    )
-    image_logarithm = np.log(
-        np.maximum(
-            1.0 + IMAGE_ION_DRAG_LOG_ARGUMENT_OFFSET,
-            image_screening_length / electrostatic_radius_m,
-        )
-    )
-    orbital_cross_section = math.pi * image_impact**2 * image_logarithm
-    force_magnitude = (
-        effective_positive_ion_mass_kg
-        * positive_ion_number_density_m3
-        * effective_speed
-        * ion_speed
-        * (collection_cross_section + orbital_cross_section)
-    )
-    electric_norm = np.sqrt(
-        np.sum(electric_field_V_m * electric_field_V_m, axis=1)
-        + IMAGE_ION_DRAG_ELECTRIC_FIELD_SQUARE_FLOOR_V2_M2
-    )
-    acceleration = (
-        force_magnitude[:, None] * electric_field_V_m / electric_norm[:, None] / mass_kg[:, None]
-    )
+    points = np.empty((count, 11), dtype=np.float64)
+    scalar = cast(CPUDispatcher, image_ion_point_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(count):
+                points[row] = scalar(
+                    mass_kg[row],
+                    electrostatic_radius_m[row],
+                    charge_number[row],
+                    positive_ion_number_density_m3[row],
+                    electron_thermal_voltage_V[row],
+                    positive_ion_thermal_voltage_V[row],
+                    positive_ion_velocity_m_s[row, 0],
+                    positive_ion_velocity_m_s[row, 1],
+                    effective_positive_ion_mass_kg[row],
+                    screening_length_m[row],
+                    electric_field_V_m[row, 0],
+                    electric_field_V_m[row, 1],
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "electric field directed image orbital ion drag produced a non-finite derived value"
+        ) from error
+    (
+        ion_speed,
+        effective_speed,
+        _,
+        surface_potential,
+        collection_cross_section,
+        _,
+        _,
+        _,
+        orbital_cross_section,
+        ax,
+        ay,
+    ) = points.T
+    acceleration = np.column_stack((ax, ay))
     derived = (
         acceleration,
         collection_cross_section,
@@ -2465,26 +2453,6 @@ def barnes_collisionless_continuous_applicability_batch(
     return applicable, status
 
 
-def _linear_two_species_debye_length(
-    electron_number_density_m3: FloatArray,
-    positive_ion_number_density_m3: FloatArray,
-    electron_temperature_K: FloatArray,
-    positive_ion_temperature_K: FloatArray,
-) -> FloatArray:
-    inverse_square = (
-        ELEMENTARY_CHARGE_C**2
-        / (VACUUM_PERMITTIVITY_F_M * BOLTZMANN_J_K)
-        * (
-            electron_number_density_m3 / electron_temperature_K
-            + positive_ion_number_density_m3 / positive_ion_temperature_K
-        )
-    )
-    result = 1.0 / np.sqrt(inverse_square)
-    if not bool(np.isfinite(result).all() and (result > 0.0).all()):
-        raise PhysicsEvaluationError("two-species Debye length is not finite and positive")
-    return result
-
-
 def stokes_cunningham_linear_relaxation(
     *,
     mass_kg: FloatArray,
@@ -2553,18 +2521,25 @@ def stokes_cunningham_rate_s_inv(
     _require_positive(gas_dynamic_viscosity_Pa_s, "gas_dynamic_viscosity")
     _require_positive(gas_mean_free_path_m, "gas_mean_free_path")
 
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        knudsen_radius = 2.0 * gas_mean_free_path_m / drag_diameter_m
-        slip_correction = 1.0 + knudsen_radius * (
-            _ALLEN_RAABE_A1 + _ALLEN_RAABE_A2 * np.exp(-_ALLEN_RAABE_A3 / knudsen_radius)
-        )
-        rate_s_inv = (
-            3.0
-            * math.pi
-            * gas_dynamic_viscosity_Pa_s
-            * drag_diameter_m
-            / (slip_correction * mass_kg)
-        )
+    rate_s_inv = np.empty(mass_kg.size, dtype=np.float64)
+    knudsen_radius = np.empty(mass_kg.size, dtype=np.float64)
+    slip_correction = np.empty(mass_kg.size, dtype=np.float64)
+    scalar = cast(CPUDispatcher, stokes_cunningham_rate_row).py_func
+    try:
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            for row in range(mass_kg.size):
+                rate_s_inv[row], knudsen_radius[row], slip_correction[row] = scalar(
+                    mass_kg[row],
+                    drag_diameter_m[row],
+                    gas_dynamic_viscosity_Pa_s[row],
+                    gas_mean_free_path_m[row],
+                )
+    except PhysicsEvaluationError:
+        raise
+    except (ArithmeticError, ValueError) as error:
+        raise PhysicsEvaluationError(
+            "stokes cunningham rate s inv produced a non-finite derived value"
+        ) from error
     if not bool(
         np.isfinite(rate_s_inv).all()
         and np.isfinite(knudsen_radius).all()
@@ -3481,3 +3456,548 @@ def _outward_abs_upper(value: FloatArray, name: str) -> FloatArray:
     if not bool(np.isfinite(result).all()):
         raise PhysicsEvaluationError(f"{name} is not finite")
     return result
+
+
+ERROR_NONE = 0
+ERROR_RATE = 1
+ERROR_DERIVED_VALUE = 2
+ERROR_ACCELERATION = 3
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _epstein_drag_row(
+    mass_kg: float,
+    diameter_m: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    gas_velocity_x_m_s: float,
+    gas_velocity_y_m_s: float,
+    gas_density_kg_m3: float,
+    gas_temperature_K: float,
+    gas_mean_free_path_m: float,
+    gas_molecular_mass_kg: float,
+    delta: float,
+    maximum_speed_ratio: float,
+) -> tuple[float, float, float, bool, int]:
+    rate, mean_thermal_speed, radius = epstein_rate_row(
+        mass_kg, diameter_m, gas_density_kg_m3, gas_temperature_K, gas_molecular_mass_kg, delta
+    )
+    if not math.isfinite(rate) or rate <= 0.0:
+        return 0.0, 0.0, 0.0, True, ERROR_RATE
+    relative_x = gas_velocity_x_m_s - velocity_x_m_s
+    relative_y = gas_velocity_y_m_s - velocity_y_m_s
+    relative_speed = math.sqrt(relative_x * relative_x + relative_y * relative_y)
+    lambda_over_radius = gas_mean_free_path_m / radius
+    speed_ratio = relative_speed / mean_thermal_speed
+    if not (
+        math.isfinite(mean_thermal_speed)
+        and mean_thermal_speed > 0.0
+        and math.isfinite(relative_speed)
+        and math.isfinite(lambda_over_radius)
+        and math.isfinite(speed_ratio)
+    ):
+        return 0.0, 0.0, 0.0, True, ERROR_DERIVED_VALUE
+    applicable = (
+        lambda_over_radius >= EPSTEIN_MIN_LAMBDA_OVER_RADIUS and speed_ratio <= maximum_speed_ratio
+    )
+    return relative_x * rate, relative_y * rate, rate, applicable, ERROR_NONE
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _epstein_finite_speed_drag_row(
+    mass_kg: float,
+    diameter_m: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    gas_velocity_x_m_s: float,
+    gas_velocity_y_m_s: float,
+    gas_density_kg_m3: float,
+    gas_temperature_K: float,
+    gas_mean_free_path_m: float,
+    gas_molecular_mass_kg: float,
+    diffuse_reflection_fraction: float,
+    maximum_speed_ratio: float,
+) -> tuple[float, float, float, bool, int]:
+    radius = 0.5 * diameter_m
+    mean_thermal_speed = math.sqrt(
+        8.0 * BOLTZMANN_J_K * gas_temperature_K / (math.pi * gas_molecular_mass_kg)
+    )
+    base_beta = (4.0 * math.pi / 3.0) * radius * radius * gas_density_kg_m3 * mean_thermal_speed
+    base_rate = base_beta / mass_kg
+    relative_x = gas_velocity_x_m_s - velocity_x_m_s
+    relative_y = gas_velocity_y_m_s - velocity_y_m_s
+    relative_speed = math.hypot(relative_x, relative_y)
+    most_probable_speed = math.sqrt(2.0 * BOLTZMANN_J_K * gas_temperature_K / gas_molecular_mass_kg)
+    speed_ratio = relative_speed / most_probable_speed
+    specular_factor = epstein_finite_speed_factor_row(speed_ratio)
+    rate = base_rate * (specular_factor + diffuse_reflection_fraction * math.pi / 8.0)
+    lambda_over_radius = gas_mean_free_path_m / radius
+    if not (
+        math.isfinite(rate)
+        and rate > 0.0
+        and math.isfinite(relative_speed)
+        and math.isfinite(most_probable_speed)
+        and most_probable_speed > 0.0
+        and math.isfinite(speed_ratio)
+        and math.isfinite(lambda_over_radius)
+    ):
+        return 0.0, 0.0, 0.0, True, ERROR_DERIVED_VALUE
+    applicable = (
+        lambda_over_radius >= EPSTEIN_MIN_LAMBDA_OVER_RADIUS and speed_ratio <= maximum_speed_ratio
+    )
+    return relative_x * rate, relative_y * rate, rate, applicable, ERROR_NONE
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def _stokes_cunningham_drag_row(
+    mass_kg: float,
+    diameter_m: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    gas_velocity_x_m_s: float,
+    gas_velocity_y_m_s: float,
+    gas_density_kg_m3: float,
+    gas_dynamic_viscosity_Pa_s: float,
+    gas_mean_free_path_m: float,
+) -> tuple[float, float, float, bool, int]:
+    rate, knudsen_radius, slip_correction = stokes_cunningham_rate_row(
+        mass_kg, diameter_m, gas_dynamic_viscosity_Pa_s, gas_mean_free_path_m
+    )
+    if not math.isfinite(rate) or rate <= 0.0:
+        return 0.0, 0.0, 0.0, True, ERROR_RATE
+    relative_x = gas_velocity_x_m_s - velocity_x_m_s
+    relative_y = gas_velocity_y_m_s - velocity_y_m_s
+    relative_speed = math.sqrt(relative_x * relative_x + relative_y * relative_y)
+    reynolds = gas_density_kg_m3 * diameter_m * relative_speed / gas_dynamic_viscosity_Pa_s
+    if not (
+        math.isfinite(knudsen_radius)
+        and math.isfinite(slip_correction)
+        and slip_correction > 0.0
+        and math.isfinite(relative_speed)
+        and math.isfinite(reynolds)
+    ):
+        return 0.0, 0.0, 0.0, True, ERROR_DERIVED_VALUE
+    applicable = (
+        knudsen_radius >= STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS
+        and knudsen_radius <= STOKES_CUNNINGHAM_MAX_KNUDSEN_RADIUS
+        and reynolds <= STOKES_CUNNINGHAM_MAX_REYNOLDS
+    )
+    return relative_x * rate, relative_y * rate, rate, applicable, ERROR_NONE
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def epstein_rate_row(
+    mass: float,
+    diameter: float,
+    density: float,
+    temperature: float,
+    molecular_mass: float,
+    delta: float,
+) -> tuple[float, float, float]:
+    radius = 0.5 * diameter
+    mean_thermal = math.sqrt(8.0 * BOLTZMANN_J_K * temperature / (math.pi * molecular_mass))
+    beta = (4.0 * math.pi / 3.0) * radius * radius * density * mean_thermal * delta
+    return beta / mass, mean_thermal, radius
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def stokes_cunningham_rate_row(
+    mass: float,
+    diameter: float,
+    viscosity: float,
+    mean_free_path: float,
+) -> tuple[float, float, float]:
+    knudsen_radius = 2.0 * mean_free_path / diameter
+    slip = 1.0 + knudsen_radius * (
+        _ALLEN_RAABE_A1 + _ALLEN_RAABE_A2 * math.exp(-_ALLEN_RAABE_A3 / knudsen_radius)
+    )
+    rate = 3.0 * math.pi * viscosity * diameter / (slip * mass)
+    return rate, knudsen_radius, slip
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def talbot_factor_row(
+    particle_mass_kg: float,
+    particle_diameter_m: float,
+    gas_temperature_K: float,
+    gas_density_kg_m3: float,
+    gas_dynamic_viscosity_Pa_s: float,
+    gas_thermal_conductivity_W_m_K: float,
+    gas_mean_free_path_m: float,
+    particle_thermal_conductivity_W_m_K: float,
+    thermal_slip_coefficient: float,
+    momentum_exchange_coefficient: float,
+    thermal_exchange_coefficient: float,
+) -> tuple[float, float, float, float]:
+    knudsen_radius = 2.0 * (gas_mean_free_path_m / particle_diameter_m)
+    conductivity_ratio = gas_thermal_conductivity_W_m_K / particle_thermal_conductivity_W_m_K
+    correction = (
+        thermal_slip_coefficient
+        * (conductivity_ratio + thermal_exchange_coefficient * knudsen_radius)
+        / (
+            (1.0 + 3.0 * momentum_exchange_coefficient * knudsen_radius)
+            * (1.0 + 2.0 * conductivity_ratio + 2.0 * thermal_exchange_coefficient * knudsen_radius)
+        )
+    )
+    factor = (
+        -6.0
+        * math.pi
+        * particle_diameter_m
+        * gas_dynamic_viscosity_Pa_s**2
+        * correction
+        / (particle_mass_kg * gas_density_kg_m3 * gas_temperature_K)
+    )
+    return factor, knudsen_radius, conductivity_ratio, correction
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def saffman_factors_row(
+    particle_mass_kg: float,
+    particle_diameter_m: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    gas_velocity_x_m_s: float,
+    gas_velocity_y_m_s: float,
+    gas_density_kg_m3: float,
+    gas_dynamic_viscosity_Pa_s: float,
+    gas_mean_free_path_m: float,
+    out_of_plane_gas_vorticity_s_inv: float,
+) -> tuple[float, float, float, float, float]:
+    radius_m = 0.5 * particle_diameter_m
+    slip_x = gas_velocity_x_m_s - velocity_x_m_s
+    slip_y = gas_velocity_y_m_s - velocity_y_m_s
+    slip_speed = math.hypot(slip_x, slip_y)
+    omega_abs = abs(out_of_plane_gas_vorticity_s_inv)
+    coupling_rate = (
+        SAFFMAN_LIFT_COEFFICIENT
+        * radius_m**2
+        * math.sqrt(gas_dynamic_viscosity_Pa_s * gas_density_kg_m3 * omega_abs)
+        / particle_mass_kg
+    )
+    signed_coupling = math.copysign(coupling_rate, out_of_plane_gas_vorticity_s_inv)
+    mean_free_path_over_radius = gas_mean_free_path_m / radius_m
+    slip_reynolds = gas_density_kg_m3 * radius_m * slip_speed / gas_dynamic_viscosity_Pa_s
+    shear_reynolds = gas_density_kg_m3 * radius_m**2 * omega_abs / gas_dynamic_viscosity_Pa_s
+    return coupling_rate, signed_coupling, mean_free_path_over_radius, slip_reynolds, shear_reynolds
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def barnes_point_row(
+    particle_mass_kg: float,
+    particle_radius_m: float,
+    charge_number: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    electron_density_m3: float,
+    ion_density_m3: float,
+    electron_temperature_K: float,
+    ion_temperature_K: float,
+    ion_velocity_m_s_x: float,
+    ion_velocity_m_s_y: float,
+    ion_neutral_mean_free_path_m: float,
+    ion_mass_kg: float,
+    maximum_ion_drift_ratio: float,
+) -> tuple[float, ...]:
+    inverse_debye_square = (
+        ELEMENTARY_CHARGE_C
+        * ELEMENTARY_CHARGE_C
+        / (VACUUM_PERMITTIVITY_F_M * BOLTZMANN_J_K)
+        * (electron_density_m3 / electron_temperature_K + ion_density_m3 / ion_temperature_K)
+    )
+    debye_length = 1.0 / math.sqrt(inverse_debye_square)
+    relative_x = ion_velocity_m_s_x - velocity_x_m_s
+    relative_y = ion_velocity_m_s_y - velocity_y_m_s
+    relative_speed = math.hypot(relative_x, relative_y)
+    ion_mean_thermal_speed = math.sqrt(
+        8.0 * BOLTZMANN_J_K * ion_temperature_K / (math.pi * ion_mass_kg)
+    )
+    effective_speed_square = relative_speed * relative_speed + ion_mean_thermal_speed**2
+    effective_speed = math.sqrt(effective_speed_square)
+    capacitance = (
+        4.0
+        * math.pi
+        * VACUUM_PERMITTIVITY_F_M
+        * particle_radius_m
+        * (1.0 + particle_radius_m / debye_length)
+    )
+    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
+    if charge_number > 0.0:
+        return (
+            debye_length,
+            effective_speed,
+            capacitance,
+            surface_potential,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            relative_speed / ion_mean_thermal_speed,
+            0.0,
+            0.0,
+        )
+    orbital_impact = (
+        abs(charge_number)
+        * ELEMENTARY_CHARGE_C
+        * ELEMENTARY_CHARGE_C
+        / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * ion_mass_kg * effective_speed_square)
+    )
+    collection_square = (
+        particle_radius_m
+        * particle_radius_m
+        * (
+            1.0
+            - 2.0 * ELEMENTARY_CHARGE_C * surface_potential / (ion_mass_kg * effective_speed_square)
+        )
+    )
+    collection_impact = math.sqrt(collection_square)
+    coulomb_logarithm = 0.5 * math.log(
+        (debye_length * debye_length + orbital_impact * orbital_impact)
+        / (collection_square + orbital_impact * orbital_impact)
+    )
+    cross_section = (
+        math.pi * collection_square
+        + 4.0 * math.pi * orbital_impact * orbital_impact * coulomb_logarithm
+    )
+    factor = ion_density_m3 * ion_mass_kg * effective_speed * cross_section
+    factor /= particle_mass_kg
+    acceleration_x = factor * relative_x
+    acceleration_y = factor * relative_y
+    ion_drift_ratio = relative_speed / ion_mean_thermal_speed
+    collection_cross_section = math.pi * collection_square
+    orbital_cross_section = 4.0 * math.pi * orbital_impact * orbital_impact * coulomb_logarithm
+    return (
+        debye_length,
+        effective_speed,
+        capacitance,
+        surface_potential,
+        orbital_impact,
+        collection_square,
+        collection_impact,
+        coulomb_logarithm,
+        acceleration_x,
+        acceleration_y,
+        ion_drift_ratio,
+        collection_cross_section,
+        orbital_cross_section,
+    )
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def relative_ion_point_row(
+    particle_mass_kg: float,
+    particle_radius_m: float,
+    charge_number: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+    ion_density_m3: float,
+    ion_thermal_voltage_V: float,
+    ion_velocity_m_s_x: float,
+    ion_velocity_m_s_y: float,
+    ion_mass_kg: float,
+    screening_length_m: float,
+    ion_neutral_mean_free_path_m: float,
+    maximum_relative_ion_speed_m_s: float,
+) -> tuple[float, ...]:
+    relative_x = ion_velocity_m_s_x - velocity_x_m_s
+    relative_y = ion_velocity_m_s_y - velocity_y_m_s
+    relative_speed = math.hypot(relative_x, relative_y)
+    mass = ion_mass_kg
+    speed_square = (
+        relative_speed * relative_speed
+        + 8.0 * ELEMENTARY_CHARGE_C * ion_thermal_voltage_V / (math.pi * mass)
+        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    )
+    effective_speed = math.sqrt(speed_square)
+    capacitance_screening = max(particle_radius_m, screening_length_m)
+    capacitance = (
+        4.0
+        * math.pi
+        * VACUUM_PERMITTIVITY_F_M
+        * particle_radius_m
+        * (1.0 + particle_radius_m / capacitance_screening)
+    )
+    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
+    screening_radius = max(
+        particle_radius_m,
+        min(screening_length_m, ion_neutral_mean_free_path_m),
+    )
+    orbital_impact = (
+        math.sqrt(charge_number * charge_number + AGGREGATE_ION_DRAG_CHARGE_SQUARE_REGULARIZATION)
+        * ELEMENTARY_CHARGE_C**2
+        / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * mass * speed_square)
+    )
+    collection_square = min(
+        screening_radius * screening_radius,
+        particle_radius_m
+        * particle_radius_m
+        * max(
+            0.0,
+            1.0 - 2.0 * ELEMENTARY_CHARGE_C * surface_potential / (mass * speed_square),
+        ),
+    )
+    coulomb_logarithm = max(
+        0.0,
+        0.5
+        * math.log(
+            (screening_radius * screening_radius + orbital_impact * orbital_impact)
+            / (collection_square + orbital_impact * orbital_impact)
+        ),
+    )
+    cross_section = (
+        math.pi * collection_square
+        + 4.0 * math.pi * orbital_impact * orbital_impact * coulomb_logarithm
+    )
+    factor = ion_density_m3 * mass * effective_speed * cross_section / particle_mass_kg
+    acceleration_x = factor * relative_x
+    acceleration_y = factor * relative_y
+    collection_cross_section = math.pi * collection_square
+    orbital_cross_section = 4.0 * math.pi * orbital_impact * orbital_impact * coulomb_logarithm
+    return (
+        relative_speed,
+        effective_speed,
+        capacitance,
+        surface_potential,
+        screening_radius,
+        orbital_impact,
+        collection_square,
+        coulomb_logarithm,
+        acceleration_x,
+        acceleration_y,
+        collection_cross_section,
+        orbital_cross_section,
+    )
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def image_ion_point_row(
+    particle_mass_kg: float,
+    particle_radius_m: float,
+    charge_number: float,
+    ion_density_m3: float,
+    electron_thermal_voltage_V: float,
+    ion_thermal_voltage_V: float,
+    ion_velocity_m_s_x: float,
+    ion_velocity_m_s_y: float,
+    ion_mass_kg: float,
+    screening_length_m: float,
+    electric_field_V_m_x: float,
+    electric_field_V_m_y: float,
+) -> tuple[float, ...]:
+    ion_speed = math.hypot(ion_velocity_m_s_x, ion_velocity_m_s_y)
+    mass = ion_mass_kg
+    speed_square = (
+        ion_speed * ion_speed
+        + 8.0 * ELEMENTARY_CHARGE_C * ion_thermal_voltage_V / (math.pi * mass)
+        + AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S**2
+    )
+    effective_speed = math.sqrt(speed_square)
+    capacitance_screening = max(particle_radius_m, screening_length_m)
+    capacitance = (
+        4.0
+        * math.pi
+        * VACUUM_PERMITTIVITY_F_M
+        * particle_radius_m
+        * (1.0 + particle_radius_m / capacitance_screening)
+    )
+    surface_potential = charge_number * ELEMENTARY_CHARGE_C / capacitance
+    collection_cross_section = (
+        math.pi
+        * particle_radius_m
+        * particle_radius_m
+        * max(0.0, 1.0 - surface_potential / ion_thermal_voltage_V)
+    )
+    image_impact = (
+        ELEMENTARY_CHARGE_C**2
+        * charge_number
+        / (2.0 * math.pi * VACUUM_PERMITTIVITY_F_M * mass * speed_square)
+    )
+    image_screening_length = math.sqrt(
+        VACUUM_PERMITTIVITY_F_M
+        * electron_thermal_voltage_V
+        / (ELEMENTARY_CHARGE_C * ion_density_m3)
+    )
+    image_logarithm = math.log(
+        max(
+            1.0 + IMAGE_ION_DRAG_LOG_ARGUMENT_OFFSET,
+            image_screening_length / particle_radius_m,
+        )
+    )
+    orbital_cross_section = math.pi * image_impact * image_impact * image_logarithm
+    force_magnitude = (
+        mass
+        * ion_density_m3
+        * effective_speed
+        * ion_speed
+        * (collection_cross_section + orbital_cross_section)
+    )
+    electric_x = electric_field_V_m_x
+    electric_y = electric_field_V_m_y
+    electric_norm = math.sqrt(
+        electric_x * electric_x
+        + electric_y * electric_y
+        + IMAGE_ION_DRAG_ELECTRIC_FIELD_SQUARE_FLOOR_V2_M2
+    )
+    acceleration_scale = force_magnitude / (electric_norm * particle_mass_kg)
+    acceleration_x = acceleration_scale * electric_x
+    acceleration_y = acceleration_scale * electric_y
+    return (
+        ion_speed,
+        effective_speed,
+        capacitance,
+        surface_potential,
+        collection_cross_section,
+        image_impact,
+        image_screening_length,
+        image_logarithm,
+        orbital_cross_section,
+        acceleration_x,
+        acceleration_y,
+    )
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def waldmann_factors_row(
+    particle_mass_kg: float,
+    particle_diameter_m: float,
+    gas_temperature_K: float,
+    gas_mean_free_path_m: float,
+    gas_molecular_mass_kg: float,
+    gas_velocity_x: float,
+    gas_velocity_y: float,
+    velocity_x_m_s: float,
+    velocity_y_m_s: float,
+) -> tuple[float, float, float, float, float]:
+    radius_m = 0.5 * particle_diameter_m
+    mean_thermal_speed = math.sqrt(
+        8.0 * BOLTZMANN_J_K * gas_temperature_K / (math.pi * gas_molecular_mass_kg)
+    )
+    factor = (32.0 / 15.0) * radius_m * radius_m / (particle_mass_kg * mean_thermal_speed)
+    relative_x = gas_velocity_x - velocity_x_m_s
+    relative_y = gas_velocity_y - velocity_y_m_s
+    relative_speed_ratio = math.hypot(relative_x, relative_y) / mean_thermal_speed
+    mean_free_path_over_radius = gas_mean_free_path_m / radius_m
+    return factor, mean_thermal_speed, mean_free_path_over_radius, relative_speed_ratio, radius_m
+
+
+@njit(inline="always", fastmath=False, error_model="numpy")
+def rarefied_lift_factors_row(
+    particle_mass_kg: float,
+    particle_diameter_m: float,
+    gas_density_kg_m3: float,
+    gas_mean_free_path_m: float,
+    azimuthal_gas_vorticity_s_inv: float,
+    lift_coefficient: float,
+) -> tuple[float, float, float]:
+    radius_m = 0.5 * particle_diameter_m
+    coupling_rate = (
+        lift_coefficient
+        * math.pi
+        * gas_density_kg_m3
+        * gas_mean_free_path_m
+        * radius_m**2
+        * azimuthal_gas_vorticity_s_inv
+        / particle_mass_kg
+    )
+    return coupling_rate, gas_mean_free_path_m / radius_m, radius_m

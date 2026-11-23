@@ -73,6 +73,9 @@ A saved-knot diagnostic cannot discover a pulse between observations or certify 
 ## Identity and use
 
 The producer binds source/config/content identity, field lineage, layouts, selected norms and resources.
+Explicit `derived_field_generations` provenance is preserved and checked before publication;
+retained coefficient groups cannot silently lose their declared primitive/property dependencies.
+This does not infer relationships for independent prescribed fields or regenerate physical coefficients.
 Unselected time fields and original source rows remain unchanged. A generated cache is used only when the case
 explicitly selects it; runtime never switches automatically. Recheck particle sensitivity where field error matters.
 

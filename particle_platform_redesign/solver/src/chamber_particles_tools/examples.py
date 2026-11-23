@@ -30,7 +30,7 @@ from chamber_particles.case_format import (
 
 from .inputs import create_case
 
-EXAMPLE_REVISION = "analytic_editable_examples_v2"
+EXAMPLE_REVISION = "analytic_editable_examples_v3"
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +61,8 @@ def initialize(name: str, output_directory: str | Path) -> SimulationCase:
     if definition.electric == "reduced":
         bundle = _build_electrostatic(bundle)
     supporting_files = _editable_sources(bundle, settings)
+    if name == "rz-charged":
+        supporting_files.update(_editable_electric_fields(bundle, supporting_files["recipe.yaml"]))
     if definition.electric == "reduced":
         with TemporaryDirectory(prefix="chamber-thermal-input-") as temporary:
             path = Path(temporary) / "thermal.h5"
@@ -325,6 +327,145 @@ def _editable_sources(bundle: DataBundle, settings: dict[str, Any]) -> dict[str,
     }
     files["recipe.yaml"] = yaml.safe_dump(recipe, sort_keys=False).encode("utf-8")
     return files
+
+
+def _csv_bytes(header: list[str], rows: list[list[object]]) -> bytes:
+    stream = io.StringIO(newline="")
+    writer = csv.writer(stream)
+    writer.writerow(header)
+    writer.writerows(rows)
+    return stream.getvalue().encode("utf-8")
+
+
+def _editable_electric_fields(bundle: DataBundle, recipe_raw: bytes) -> dict[str, bytes]:
+    """Expose the existing charged example's exact mesh and field as editable CSVs."""
+    geometry = bundle.geometry
+    assert geometry.tri3 is not None
+    field = next(item for item in bundle.fields if item.name == "electric_field")
+    boundary = geometry.boundary
+    files = {
+        "field-input/vertices.csv": _csv_bytes(
+            ["vertex_id", "r_m", "z_m"],
+            [[i + 1, *row] for i, row in enumerate(geometry.nodes_m.tolist())],
+        ),
+        "field-input/triangles.csv": _csv_bytes(
+            ["triangle_id", "node1_id", "node2_id", "node3_id", "domain_id"],
+            [[i + 1, *(np.asarray(row) + 1).tolist(), 1] for i, row in enumerate(geometry.tri3)],
+        ),
+        "field-input/quads.csv": _csv_bytes(
+            ["quadrilateral_id", "node1_id", "node2_id", "node3_id", "node4_id", "domain_id"],
+            [],
+        ),
+        "field-input/boundaries.csv": _csv_bytes(
+            ["boundary_edge_id", "node1_id", "node2_id", "boundary_id"],
+            [
+                [i + 1, int(pair[0]) + 1, int(pair[1]) + 1, int(boundary.boundary_id[i])]
+                for i, pair in enumerate(boundary.line2)
+            ],
+        ),
+        "field-input/columns.csv": _csv_bytes(
+            ["column", "expression", "unit"],
+            [
+                ["vertex_id", "mesh node identity", "1"],
+                ["r", "r", "m"],
+                ["z", "z", "m"],
+                ["inside", "selected domain", "1"],
+                ["Er", "example radial E", "V/m"],
+                ["Ez", "example axial E", "V/m"],
+            ],
+        ),
+    }
+    values = io.StringIO(newline="")
+    csv.writer(values).writerows(
+        [i + 1, *point, 1, *electric]
+        for i, (point, electric) in enumerate(
+            zip(geometry.nodes_m.tolist(), field.values.tolist(), strict=True)
+        )
+    )
+    files["field-input/values.csv"] = values.getvalue().encode("utf-8")
+    mapping = _electric_field_mapping(geometry)
+    files["field-mapping.yaml"] = yaml.safe_dump(mapping, sort_keys=False).encode("utf-8")
+    recipe = yaml.safe_load(recipe_raw)
+    recipe["input_bundle"] = "background/bundle.h5"
+    files["field-recipe.yaml"] = yaml.safe_dump(recipe, sort_keys=False).encode("utf-8")
+    files["FIELD_INPUT.md"] = (
+        b"Edit field-input/ CSVs, then run from this directory:\n\n"
+        b"python -m chamber_particles inputs import-csv field-mapping.yaml background\n"
+        b"python -m chamber_particles create field-recipe.yaml -o ../charged-rebuilt\n\n"
+        b"The CSVs derive from this example's mesh and electric field. Units, source and settings remain explicit. "
+        b"Use fresh output directories; change field-recipe.yaml if the imported bundle is elsewhere.\n"
+    )
+    return files
+
+
+def _electric_field_mapping(geometry: GeometryData) -> dict[str, Any]:
+    boundary = geometry.boundary
+    return {
+        "format_version": 4,
+        "provider": "csv",
+        "source": {
+            name + "_path": "field-input/" + filename
+            for name, filename in (
+                ("vertices", "vertices.csv"),
+                ("triangles", "triangles.csv"),
+                ("quadrilaterals", "quads.csv"),
+                ("boundary_edges", "boundaries.csv"),
+                ("field_values", "values.csv"),
+                ("field_columns", "columns.csv"),
+            )
+        },
+        "domain": {
+            "coordinate_system": "axisymmetric_rz",
+            "external_id": 1,
+            "layout_name": "background",
+            "quadrilateral_order": "q1_reference",
+            "excluded_boundary_ids": [],
+        },
+        "boundary_groups": [
+            {
+                "name": name,
+                "external_ids": sorted(set(boundary.boundary_id[boundary.group_id == i].tolist())),
+                "material_id": int(boundary.material_id[boundary.group_id == i][0]),
+            }
+            for i, name in enumerate(geometry.group_names)
+        ],
+        "fields": {
+            "coordinate_columns": ["r", "z"],
+            "inside_column": "inside",
+            "node_id_column": "vertex_id",
+            "domain_scope": None,
+            "coordinate_match_tolerance_m": 1e-14,
+            "mappings": [
+                {
+                    "name": "electric_field",
+                    "columns": ["Er", "Ez"],
+                    "components": ["r", "z"],
+                    "stored_basis": "axisymmetric_rz",
+                    "association": "node",
+                    "unit": "V/m",
+                    "input_unit": "V/m",
+                    "scale": 1.0,
+                    "offset": 0.0,
+                    "axis_transform": None,
+                    "producer_record": {
+                        "producer": "editable rz-charged analytic example",
+                        "time": {
+                            "representation": "static",
+                            "selection": "constant analytic field",
+                        },
+                        "domain_ids": [1],
+                        "side": "domain",
+                        "recovery": "none",
+                        "continuity": "continuous",
+                        "authority": "supplied analytic primitive",
+                        "topology": "fixed",
+                        "support": "full_selected_domain",
+                        "evidence": "CSV values derive from the same example geometry and electric field",
+                    },
+                }
+            ],
+        },
+    }
 
 
 def _editable_source(source: RealizedSource, coordinates: str) -> tuple[bytes, dict[str, Any]]:

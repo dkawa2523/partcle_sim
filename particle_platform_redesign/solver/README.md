@@ -1,4 +1,4 @@
-# Chamber Particles 0.4.0
+# Chamber Particles 0.5.0
 
 外部の形状・場・粒子源を使い、粒子の運動・帯電・境界イベントを計算するPython 3.12基盤です。
 **alpha版**で、通常の入力作成・検査・実行・解析・表示を同じwheelのCLIとPythonから使えます。
@@ -37,7 +37,7 @@ uv run --locked python -m chamber_particles create .artifacts/quickstart/input/r
 配布wheelが手元にある場合、空の作業directoryでも次のように使えます。wheel pathは実ファイルへ置き換えます。
 
 ```console
-uv run --no-project --python 3.12 --with /path/to/chamber_particles-0.4.0-py3-none-any.whl python -m chamber_particles init input --example xy-ballistic
+uv run --no-project --python 3.12 --with /path/to/chamber_particles-0.5.0-py3-none-any.whl python -m chamber_particles init input --example xy-ballistic
 ```
 
 以後も同じ`uv run --no-project --python 3.12 --with WHEEL`で`check`、`run`、`analyze`等を呼べます。
@@ -46,7 +46,7 @@ uv run --no-project --python 3.12 --with /path/to/chamber_particles-0.4.0-py3-no
 | `init --example` | 内容 |
 |---|---|
 | `xy-ballistic` | XY直進と付着。場は不要 |
-| `rz-charged` | RZで固定電荷と一様電場 |
+| `rz-charged` | RZで固定電荷と一様電場。編集用geometry/field CSVとmappingも保存 |
 | `xy-time-field` | 固定topologyの線形時間電場 |
 | `brownian-wall` | Epstein drag、FDT Brownian、反射壁 |
 | `reduced-electrostatic` | 小型RZの縮約電場生成と輸送。編集用`thermal.h5`、`builder.yaml`も保存 |
@@ -60,6 +60,15 @@ geometry・fieldのcanonical bundleをPythonで作るか、CSVを明示mapping�
 設定format 4の`provider: csv`は自分のCSV、`provider: comsol`は同定済みCOMSOL exportです。
 後者だけがdataset/solution/memberのnative lineageを要求します。両者ともunit・basis・domain/side・supportを明記し、
 field欠損をゼロや最近傍で埋めません。
+
+`init --example rz-charged`は、自分の場へ置き換えるための`field-input/`、`field-mapping.yaml`、
+`field-recipe.yaml`も生成します。元例題と同じmesh・電場をCSVへ出した完全な編集例です。
+生成したdirectoryから次を実行し、CSV、unit/basis、source、settingsを目的に合わせて変更します。
+
+```console
+uv run --locked python -m chamber_particles inputs import-csv field-mapping.yaml background
+uv run --locked python -m chamber_particles create field-recipe.yaml -o ../charged-rebuilt
+```
 
 ```console
 uv run --locked python -m chamber_particles inputs import-csv mapping.yaml background
@@ -151,7 +160,7 @@ worker数は実行資源で、caseの数値設定に含めません。親が時�
 
 ## 保存結果を再利用する
 
-入力case/dataはschema 3、結果はschema 4、checkpointはlayout 2です。
+入力case/dataはschema 3、結果はschema 5、checkpointはlayout 2です。
 結果のimmutable `context.h5`は元case/dataのhash、geometry、境界・source意味、basis/unitをbindします。
 背景field、完全な初期source、full traceはcontextへ複製しません。
 `open_result(...).read_context()`で読み、元caseなしで解析・geometry表示できます。
@@ -163,9 +172,17 @@ worker数は実行資源で、caseの数値設定に含めません。親が時�
 旧実行の不完全JSONが既にある場合は、新しい出力名を使うか、内容を確認して不要なfileを除いてから再実行してください。
 
 `analyze`は全選択粒子のfate、source別coverage、繰返し境界interaction、first hit、terminal結果、保存active曲線を区別します。
-`--source-ids`と`--particle-ids`でexact cohortを指定できます。histogramのbin edgesはSIで明示します。
+`inspect`はsource ID・release名・table名・kind・計算粒子数、boundary ID・group・materialと境界lawの対応を示します。
+同じboundary IDが複数groupに属する場合も全対応を残します。名前から物理的な接着は推定しません。
+`analyze`、`export`、`view`は共通の`--source-names NAME,...`または`--source-ids ID,...`と、
+`--particle-ids ID,...`または`--particle-ids-file ids.csv`を交差して同じexact cohortを指定できます。
+source名は設定のrelease名であり、canonical table名ではありません。名前のリストはCSV形式で、commaを含む名前はCSVのdouble quoteで囲みます。
+histogramのbin edgesはSIで明示します。
+ID fileはUTF-8 CSVの単一header `particle_id`、以後一行一整数です。大きなint64 IDをfloat64へ変換せず、
+重複、範囲外、未知IDは拒否します。headerだけなら空の選択です。receiptにfileのSHA-256とrow数を残します。
 `export`はfinal、保存frames/probes、boundary interactionsとidentity receiptを出力します。
-`view`はgeometryと全選択人口の最終占有、実eventを表示し、`--detail`か`--particle-id`で保存軌道を追加します。
+`view`はgeometryと全選択人口の最終占有、実eventを表示し、`--detail`か`--focus-particle-id ID`で保存軌道を追加します。
+focusは選択済み母集団内のdetail指定で、母集団を変更しません。
 表示点数の上限はreceiptへ記録し、統計の母集団を表示sampleへ置き換えません。
 
 Pythonではpathに加えて、開いた`ResultView`または一度選択した`ResultCohort`をそのまま渡せます。
@@ -177,7 +194,7 @@ from chamber_particles_tools.analysis import export_result, summarize_result
 from chamber_particles_tools.selection import select_result
 from chamber_particles_tools.visualization import render_result
 
-cohort = select_result(open_result("result"))  # 全粒子。必要ならsource_ids/particle_idsを指定。
+cohort = select_result(open_result("result"))  # 全粒子。必要ならsource_names/particle_ids_fileを指定。
 summary = summarize_result(cohort)
 export_result(cohort, "selected-export")
 render_result(cohort, "selected-view")
@@ -187,6 +204,8 @@ cohortの選択は確定済みです。別の選択は`select_result(cohort.resu
 独立したCLI/path呼出しは、その都度通常の結果整合検査を通ります。
 `ResultView.manifest`は入れ子まで読み取り専用で、JSON保存や編集には独立copyの`manifest_document()`を使います。
 派生成果物のidentityは`source_identity()`が所有し、consumerが異なるhash規則を定義しません。
+identityと検査範囲は別です。通常操作のreceiptは消費したfile bytesの検査範囲を記録します。
+全payloadを検査する場合は`inspect RESULT --verify`または`ResultView.verify_contents()`を使います。
 exportは新規directory、viewは新規または空directoryへ、receiptを含む全成果物を完成させてから公開します。
 途中失敗では不完全な成果物を公開せず、完成済みdirectoryへの再出力は拒否します。
 
@@ -198,7 +217,7 @@ stuck/heldは数値的な境界結果です。adhesion、deposit mass、濃度�
 | 内容 | 正本 |
 |---|---|
 | canonical入力と設定 | [case format v3](docs/case_format_v3.md) |
-| context・結果・checkpoint | [result format v4](docs/result_format_v4.md) |
+| context・結果・checkpoint | [result format v5](docs/result_format_v5.md) |
 | 物理式・revision・適用域 | [physics models](docs/physics_models.md) |
 | 積分・event・Brownian・RNG | [numerics](docs/numerics.md) |
 | 対応組合せとerror | [support and errors](docs/support_and_errors.md) |

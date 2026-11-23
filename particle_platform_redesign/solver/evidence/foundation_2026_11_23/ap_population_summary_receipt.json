@@ -1,0 +1,121 @@
+{
+  "scope": "fresh accepted-source completed40-replica population display; renderer performs no simulation",
+  "assessment": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_population_assessment.json",
+    "sha256": "b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e"
+  },
+  "renderer": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\render_accepted_population.py",
+    "sha256": "9fe564b7bca88ddcb7575fb49fbfa29ef12cc4e8185d9f9abeb3f695f1f9e665"
+  },
+  "seeds": [
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60
+  ],
+  "particles_per_replica": 287,
+  "model": "foundation 0.5, refined1 fixed_rk4_white_limit, h1us/base2/max5",
+  "core_sources": {
+    "__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+    "__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+    "api.py": "19288155776b9f129e7cfa3783617cc4289e8b056ea449da9cf27e728ee7face",
+    "boundaries.py": "85a694fb66d0dafa8b5233ec4712ea26067f2c7918b674714ee552bc95a0dbe2",
+    "case.py": "887295525dcc2f4c7e4dca2aad10735817ba70dfef958a0c08235d5d2e00d4b6",
+    "case_format.py": "9f9693820e033607438ceb4300a9403c1ccd566b5228df59b702a1b8434d244a",
+    "coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+    "cpu.py": "82a73df79b8ed10463aa49db52c46c67f2ef96baea76b2fd4374d1663b3fb6ce",
+    "engine.py": "1f2771097e9c55bada9cd295f8542483d1ba4628c84f0c5c02d282c8c3b64387",
+    "errors.py": "722f553f6e904f5441a374d4fe71842bd19735fe5bd335558073fc37b288659e",
+    "events.py": "217fb30d8c93262603d6d3d473f9ca5556b0784984e2a2af066a3653f97ed3d8",
+    "execution.py": "905ca6692c50d6b4192c07cac479cf07c9d057985e5da3973c21179a26e829b8",
+    "field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+    "fields.py": "c68f66aae101eec2e46ee33c76f69365a4cecf4de2f58f2e0a08076317498980",
+    "geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+    "integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+    "lifecycle.py": "f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc",
+    "numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "output.py": "4032d84a4f32a5f64b790ed18daa653aad340008e28bf5a7eb1cad5059b3833e",
+    "physics\\__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "physics\\catalog.py": "2717e872610cc0cc6c95699215c83a098b92f2ccf8cf970257d74cbc7b187729",
+    "physics\\charge.py": "c6166d6b9aefc6cfc25708031e53667041fcd1540b5640184db680159e083148",
+    "physics\\compiled.py": "e83fd7a4d8ba544cbe036d43d48fab5e96a693eec09d01b64a27cc2bd3230761",
+    "physics\\forces.py": "294337335b0a61570e6189cbe745d59c77fbfdea39123bbcbfb1fb7a4bc1d538",
+    "physics\\runtime.py": "6d8ef0e445a56568ae04f483a35ebb783bc92b5502bf007738df45d43a7c92bb",
+    "rng.py": "8a23d62b65c0dae3651f3ff478d08d4305f73ed9e2580317df8f4122c1142920",
+    "sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "time_grid.py": "6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad",
+    "topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "transport.py": "921b9a6daa3cb758513a3f7476492e84628c79d20dfa16aca77235d050936348",
+    "yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b"
+  },
+  "horizon_s": 0.005,
+  "curve_display_horizon_s": 0.0015,
+  "band": "empirical candidate replica min/max, not CI or simultaneous95% band",
+  "histogram_bins": {
+    "lifetime_width_us": 5.0,
+    "boundary_count_width_particles": 5.0,
+    "role": "display only; no pass/fail threshold"
+  },
+  "meanings": {
+    "lifetime": "restricted mean active lifetime per whole cohort, not individual-particle histogram",
+    "boundary": "retained numerical capture count on verified native/canonical boundary33; missing native disappearance cause not reclassified"
+  },
+  "rasterizer": {
+    "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "executable_sha256": "5b07e50eaba5ca60fe6b900cc418a2081cdb8de6c621bfaf85b58865ede378ee",
+    "version": "not queried; executable bytes are hash-bound"
+  },
+  "figures": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_population_summary.svg",
+      "sha256": "389957f4f8ea94aebeebd4a0479b9aaf0b439b652e54b28b0241f05bf62f39e3"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_population_summary.png",
+      "sha256": "84d47c7431ceda46904cffc55cd9ebba885d6493002395eb2b02e97619566728"
+    }
+  ],
+  "visual_qa": {
+    "performed": true,
+    "method": "opened final1600x1000 PNG files; checked axes/aspect, legend and all footer text, markers and full population/time/source labels",
+    "outcome": "readable, no cropped captions; overview and source zoom checked separately"
+  }
+}

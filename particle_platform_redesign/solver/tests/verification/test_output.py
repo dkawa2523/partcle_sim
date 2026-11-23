@@ -49,7 +49,7 @@ def _initialize_context(writer: ResultWriter) -> None:
             data_content_hash=content_hash(definition.data),
             motion_mode="cartesian_xy",
             sources=tuple(
-                ResultSource(index, name, name + "_table", "table")
+                ResultSource(index, name, name + "_table", "table", 1)
                 for index, name in enumerate(("first", "second", "third"))
             ),
             boundaries=tuple(
@@ -141,7 +141,7 @@ def test_unknown_final_lifecycle_is_rejected_at_publication_and_read(tmp_path: P
         writer.finalize(_final_particles(), {}, macro_step_count=1)
     with h5py.File(output / "final.h5", "r+") as handle:
         handle["particles/lifecycle"][0] = 6
-    with pytest.raises(ResultOpenError, match="unknown particle state"):
+    with pytest.raises(ResultOpenError, match="content hash"):
         open_result_store(output)
 
 
@@ -198,8 +198,8 @@ def test_context_does_not_sort_or_renumber_source_identity() -> None:
             data_content_hash=content_hash(definition.data),
             motion_mode="cartesian_xy",
             sources=(
-                ResultSource(1, "second", "second_table", "table"),
-                ResultSource(0, "first", "first_table", "surface"),
+                ResultSource(1, "second", "second_table", "table", 1),
+                ResultSource(0, "first", "first_table", "surface", 1),
             ),
             boundaries=(),
         )
@@ -450,7 +450,7 @@ def test_extended_result_columns_round_trip(tmp_path: Path) -> None:
     assert summary.probe_row_count == 1
 
     manifest = json.loads((output / "run.json").read_text(encoding="utf-8"))
-    assert manifest["result_schema_version"] == RESULT_SCHEMA_VERSION == 4
+    assert manifest["result_schema_version"] == RESULT_SCHEMA_VERSION == 5
     assert manifest["result_algorithm_revision"] == RESULT_ALGORITHM_REVISION
     assert "epoch_macro_steps" not in manifest
     assert manifest["counts"]["failure_events"] == 1
@@ -525,6 +525,28 @@ def test_result_contact_radius_must_be_finite_and_nonnegative(tmp_path: Path) ->
         invalid_final.contact_radius_m[0] = np.nan
         with pytest.raises(ResultWriteError, match="floating-point columns"):
             writer.finalize(invalid_final, {}, macro_step_count=1)
+
+
+@pytest.mark.parametrize("damage", ["candidate_offset", "kinematics_valid"])
+def test_invalid_payload_is_rejected_before_its_content_can_be_sealed(
+    tmp_path: Path, damage: str
+) -> None:
+    output = tmp_path / "invalid-payload"
+    with ResultWriter(output, 3, _identity("invalid-payload")) as writer:
+        _initialize_context(writer)
+        writer.begin_epoch()
+        if damage == "candidate_offset":
+            events = _boundary_events([0.5], [10], [1], [4], [[4]])
+            events.candidate_offset[-1] = 0
+            with pytest.raises(ResultWriteError, match="candidate"):
+                writer.write_boundary_events(events)
+        else:
+            writer.commit_epoch(_checkpoint_state(macro_step_count=1))
+            final = _final_particles()
+            final.kinematics_valid[0] = 2
+            with pytest.raises(ResultWriteError, match="kinematics_valid"):
+                writer.finalize(final, {}, macro_step_count=1)
+    assert not output.exists()
 
 
 @pytest.mark.parametrize("damage", ("shortened", "negative", "duplicate", "reversed"))

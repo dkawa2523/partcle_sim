@@ -19,9 +19,9 @@ import numpy as np
 from chamber_particles.lifecycle import ACTIVE, ESCAPED, FAILED, HELD, NAMES, PENDING, STUCK
 from chamber_particles.output import ResultContext
 
-from ..selection import ResultCohort, ResultInput, select_result
+from ..selection import ResultCohort, ResultInput, result_labels, select_result
 
-VISUALIZATION_REVISION = "result_context_population_svg_v4"
+VISUALIZATION_REVISION = "result_context_population_svg_v5"
 _WIDTH, _HEIGHT, _MARGIN = 900, 620, 70
 _COLORS = {
     PENDING: "#94a3b8",
@@ -47,11 +47,13 @@ def render_result(
     path: ResultInput,
     output_directory: str | PathLike[str],
     *,
-    particle_id: int | None = None,
+    focus_particle_id: int | None = None,
     event_batch_rows: int = 4096,
     max_event_points: int = 5000,
     particle_ids: tuple[int, ...] | None = None,
     source_ids: tuple[int, ...] | None = None,
+    source_names: tuple[str, ...] | None = None,
+    particle_ids_file: str | PathLike[str] | None = None,
     max_particle_points: int = 5000,
     max_trajectory_points: int = 5000,
     detail: bool = False,
@@ -63,7 +65,13 @@ def render_result(
     The completed view is published in a new or empty directory.
     """
     _validate_limits((max_event_points, max_particle_points, max_trajectory_points))
-    cohort = select_result(path, source_ids=source_ids, particle_ids=particle_ids)
+    cohort = select_result(
+        path,
+        source_ids=source_ids,
+        source_names=source_names,
+        particle_ids=particle_ids,
+        particle_ids_file=particle_ids_file,
+    )
     destination = Path(output_directory).expanduser().resolve()
     if destination == cohort.result.path or cohort.result.path in destination.parents:
         raise ValueError("visualization output must be outside the source result directory")
@@ -77,7 +85,7 @@ def render_result(
             cohort,
             staging,
             destination,
-            particle_id=particle_id,
+            focus_particle_id=focus_particle_id,
             event_batch_rows=event_batch_rows,
             max_event_points=max_event_points,
             max_particle_points=max_particle_points,
@@ -95,7 +103,7 @@ def _render_result(
     destination: Path,
     published_directory: Path,
     *,
-    particle_id: int | None,
+    focus_particle_id: int | None,
     event_batch_rows: int,
     max_event_points: int,
     max_particle_points: int,
@@ -109,7 +117,7 @@ def _render_result(
         cohort.selected,
         cohort.selected_ids,
     )
-    selected_particle = _detail_particle(ids, particle_id, detail)
+    selected_particle = _detail_particle(ids, focus_particle_id, detail)
     points, trajectory_source, truncated = _detail_points(
         result, selected_particle, max_trajectory_points
     )
@@ -185,16 +193,17 @@ def _render_result(
         "parameters": {
             "event_batch_rows": event_batch_rows,
             "max_event_points": max_event_points,
-            "requested_particle_id": particle_id,
-            "particle_ids": cohort.particle_ids,
-            "source_ids": cohort.source_ids,
+            "requested_focus_particle_id": focus_particle_id,
+            **cohort.selection_document(),
             "max_particle_points": max_particle_points,
             "max_trajectory_points": max_trajectory_points,
             "detail": detail,
         },
         "source_manifest_sha256": digest,
+        "verification": result.verification_document(),
         "context": result.source_identity()["context"],
-        "particle_id": selected_particle,
+        "focus_particle_id": selected_particle,
+        "labels": result_labels(context),
         "trajectory_source": trajectory_source,
         "trajectory_points": sum(point is not None for point in points),
         "trajectory_truncated": truncated,
@@ -226,7 +235,7 @@ def _validate_limits(values: tuple[int, ...]) -> None:
 def _detail_particle(ids: np.ndarray, requested: int | None, detail: bool) -> int | None:
     if requested is not None:
         if isinstance(requested, bool) or not isinstance(requested, int) or requested not in ids:
-            raise ValueError("requested particle_id is not in the selected population")
+            raise ValueError("requested focus_particle_id is not in the selected population")
         return requested
     return int(ids[0]) if detail and ids.size else None
 

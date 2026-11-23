@@ -1,0 +1,91 @@
+{
+  "source_map_sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+  "scope": "All actual example inventory science; source/configuration metadata differs intentionally where example support changed",
+  "rows": [
+    {
+      "example": "xy-ballistic",
+      "science_sha256": "sha256:af5e13b895e5706fda6dc187995b7ae2298b168457a71c71127f227083b047e0",
+      "baseline_science_sha256": "sha256:af5e13b895e5706fda6dc187995b7ae2298b168457a71c71127f227083b047e0",
+      "scientific_payload_equal": true,
+      "case_file_hash": "sha256:f489081d7d3aa55f3637497b9c8df6c869003b2722b3763ede12d4a60f6bd388",
+      "data_content_hash": "sha256:20fb29e3c3fdb6eca428b1e0ae1f9359983f60bb32f458aaf72b133384ba358a",
+      "verified_contents": {
+        "scope": "all_payload_file_bytes",
+        "content_files": {
+          "context.h5": "sha256:48cf837b34687842ea06080bbd0741bba95c3305972a441d2dd80a13491c28be",
+          "final.h5": "sha256:69f5741c1ce6fe4bd435d46b0c553607b87cdca0d864e4c335ff97695d21b916",
+          "segments/epoch-000000.h5": "sha256:87254e1fbad02b07cc384c324110a51986b3f432ec874b2c7a98239e7d4b8f24"
+        },
+        "semantics": "SHA-256 checked on the same open handle as each read; no guarantee against concurrent in-place writes."
+      }
+    },
+    {
+      "example": "rz-charged",
+      "science_sha256": "sha256:b3b408510916ed7803e27aa41283b6a5c4faa4a288f8dd9c748ceb8a5d39b50c",
+      "baseline_science_sha256": "sha256:b3b408510916ed7803e27aa41283b6a5c4faa4a288f8dd9c748ceb8a5d39b50c",
+      "scientific_payload_equal": true,
+      "case_file_hash": "sha256:f6cb532ee757344b4132fc1d27ed3426bf928b088c948abffb3ff4c01a96c805",
+      "data_content_hash": "sha256:085431b00587adf585680869cb702b8879bebc1ae75d4e0deab0d9444c255756",
+      "verified_contents": {
+        "scope": "all_payload_file_bytes",
+        "content_files": {
+          "context.h5": "sha256:c788fb2c54c5fc1dcd2c632de7f7b695cc529d73a40891495d9d075add5601ba",
+          "final.h5": "sha256:ac04e3abc4585d81adb76a50720f1362d3c1174a3d6727ae248c3e556e1e0203",
+          "segments/epoch-000000.h5": "sha256:d1087c57857c2dee6140871fa5f0dcf4cb68205a18256f203c23b4187fc48eff"
+        },
+        "semantics": "SHA-256 checked on the same open handle as each read; no guarantee against concurrent in-place writes."
+      }
+    },
+    {
+      "example": "xy-time-field",
+      "science_sha256": "sha256:21c93235eef5b8ffe5a158e0839e75c79e9e2e72c27805ba18b5b8878c761be1",
+      "baseline_science_sha256": "sha256:21c93235eef5b8ffe5a158e0839e75c79e9e2e72c27805ba18b5b8878c761be1",
+      "scientific_payload_equal": true,
+      "case_file_hash": "sha256:2301804dbef4ddae0cb24dcc92da4efa77a9414abef76c383ca718aa91099ea5",
+      "data_content_hash": "sha256:28f953086ea0a7ea518914e8c5c75d9b161788f635a1ba4405c8306126283a2b",
+      "verified_contents": {
+        "scope": "all_payload_file_bytes",
+        "content_files": {
+          "context.h5": "sha256:6b3ac7b61e1769674f4d2606fc6c4aaab9533a7557036f23aee925b48d930431",
+          "final.h5": "sha256:bfdf67291e15824c9743cc636cdb0c9a4d73bb99ce37d8ca41aa0cb16a4d6e98",
+          "segments/epoch-000000.h5": "sha256:95093ba9c8c4d31f190d90b27020e888e35fef6f80991d57f5d38cb5d61bd2e9"
+        },
+        "semantics": "SHA-256 checked on the same open handle as each read; no guarantee against concurrent in-place writes."
+      }
+    },
+    {
+      "example": "brownian-wall",
+      "science_sha256": "sha256:568fa6ec05bd118309d79e6eb79d6e41380d3bdd12f4fa3e94b5ee6e7f3bfcee",
+      "baseline_science_sha256": "sha256:568fa6ec05bd118309d79e6eb79d6e41380d3bdd12f4fa3e94b5ee6e7f3bfcee",
+      "scientific_payload_equal": true,
+      "case_file_hash": "sha256:46552e3e94037fcf9a4908a9d6ea12db16dd34930e833e72bfef88428b2ab8a4",
+      "data_content_hash": "sha256:00b71189358830f60271d7aad0a37f1c1a7b1934c05b2df72cbc9a588cee1244",
+      "verified_contents": {
+        "scope": "all_payload_file_bytes",
+        "content_files": {
+          "context.h5": "sha256:886de751e3995ab0652a0e1392c6d5cefeea86acfc919208dbb424eec9f8d214",
+          "final.h5": "sha256:a88c72c7eda4a25c9fafdc641a16159c184646ebdc1e8315b07e65e17b8df5e9",
+          "segments/epoch-000000.h5": "sha256:335a88636dca9284172bea824e3d501df52258ac3e856527c39aa37fd918a9e4"
+        },
+        "semantics": "SHA-256 checked on the same open handle as each read; no guarantee against concurrent in-place writes."
+      }
+    },
+    {
+      "example": "reduced-electrostatic",
+      "science_sha256": "sha256:6936bf39e3775703bab698d8421bbb9118b6fff73ef1eebfa2d4d10e3ae70fe3",
+      "baseline_science_sha256": "sha256:6936bf39e3775703bab698d8421bbb9118b6fff73ef1eebfa2d4d10e3ae70fe3",
+      "scientific_payload_equal": true,
+      "case_file_hash": "sha256:dfe00a739ffbf92b83ce10ea3122693474595dc19552dafcd9b6b03da73f3580",
+      "data_content_hash": "sha256:b981e9f7a6ada17b80e4d5230374ed6d2d94d63752980b6149e23450efa5a218",
+      "verified_contents": {
+        "scope": "all_payload_file_bytes",
+        "content_files": {
+          "context.h5": "sha256:54b81d71c0c1542fc79bd09aa412d7ef3248b6420fc835e0503fdf2547d823da",
+          "final.h5": "sha256:fe2a4a4cc7a1fd79bd0b491683fe6afb297526d12f1ed4080dd26d012a31d20b",
+          "segments/epoch-000000.h5": "sha256:05bc9d01ad5141ed07cdab5355dda2d9172c44c9df97f10a7d8756595c7c9e72"
+        },
+        "semantics": "SHA-256 checked on the same open handle as each read; no guarantee against concurrent in-place writes."
+      }
+    }
+  ]
+}

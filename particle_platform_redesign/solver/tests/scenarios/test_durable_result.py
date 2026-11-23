@@ -480,9 +480,9 @@ def test_recovery_rejects_valid_hdf5_with_missing_rows_in_older_segment(
             dataset = series[name]
             dataset.resize(dataset.shape[0] - 1, axis=0)
 
-    with pytest.raises(SimulationError, match="counts do not match LATEST"):
+    with pytest.raises(SimulationError, match="content hash"):
         open_result(output, recovery=True)
-    with pytest.raises(SimulationError, match="counts do not match LATEST"):
+    with pytest.raises(SimulationError, match="not safely resumable"):
         simulate(case, output)
 
 

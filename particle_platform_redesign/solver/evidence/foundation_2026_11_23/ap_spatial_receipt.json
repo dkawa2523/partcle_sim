@@ -1,0 +1,353 @@
+{
+  "scope": "fresh current-source seed21 A/P all287 saved-population spatial comparison, no simulation",
+  "source_files": [
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_population_assessment.json",
+      "sha256": "b7d66fa82899f7828389133afb1744bf00793939783f9e0b86a7dad7d474ba9e"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\native\\caseA_particles_long.csv",
+      "sha256": "c2eaa09205d9feef86da5d05369a1bcb7790914b12311c5160f2c1f8126a447b"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseA\\seed21\\result\\run.json",
+      "sha256": "1487283d82ccd0247f40f8ff5b9399fef7f0ba2dd6c7f5ead5da5887d179dc8e"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseA\\seed21\\result\\context.h5",
+      "sha256": "c2d189d404363019c12cb4076844ddc02973ee1a64188183d7276af801234de3"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\native\\caseP_particles_long.csv",
+      "sha256": "ed447d9f2ca0d4a8919e40d0fa186e331159404c393cb5ccba8cafd622ded45d"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseP\\seed21\\result\\run.json",
+      "sha256": "49d98a2f2351f8d5d4d54fc55b063aae0422419da8823a94024ba3c80c484b72"
+    },
+    {
+      "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\ensemble_accepted_source\\caseP\\seed21\\result\\context.h5",
+      "sha256": "6bbd0f5f752d682ef261a3fba820f00c5588fccf9780a8ad190fdf827a55f84f"
+    }
+  ],
+  "renderer": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_ap_20261123\\render_accepted_spatial.py",
+    "sha256": "26b5914598e923e3e8357cc6288b2c3d8e51ba21e3c172efb4aaa6dd29903e3b"
+  },
+  "candidate_seed": 21,
+  "particles_per_case": 287,
+  "coordinates": "RZ meridional, mm; r horizontal, z vertical, shared equal-aspect axes per view",
+  "clock": {
+    "A": [
+      0.0,
+      9.999999999999999e-06,
+      1.9999999999999998e-05,
+      2.9999999999999997e-05,
+      3.9999999999999996e-05,
+      4.9999999999999996e-05,
+      5.9999999999999995e-05,
+      7e-05,
+      7.999999999999999e-05,
+      8.999999999999999e-05,
+      9.999999999999999e-05,
+      0.00010999999999999999,
+      0.00011999999999999999,
+      0.00013,
+      0.00014,
+      0.00015,
+      0.00015999999999999999,
+      0.00016999999999999999,
+      0.00017999999999999998,
+      0.00018999999999999998,
+      0.00019999999999999998,
+      0.00020999999999999998,
+      0.00021999999999999998,
+      0.00022999999999999998,
+      0.00023999999999999998,
+      0.00025,
+      0.00026,
+      0.00026999999999999995,
+      0.00028,
+      0.00029,
+      0.0003,
+      0.00030999999999999995,
+      0.00031999999999999997,
+      0.00033,
+      0.00033999999999999997,
+      0.00034999999999999994,
+      0.00035999999999999997,
+      0.00037,
+      0.00037999999999999997,
+      0.00038999999999999994,
+      0.00039999999999999996,
+      0.00041,
+      0.00041999999999999996,
+      0.00042999999999999994,
+      0.00043999999999999996,
+      0.00045,
+      0.00045999999999999996,
+      0.00046999999999999993,
+      0.00047999999999999996,
+      0.00049,
+      0.0005,
+      0.0006,
+      0.0006999999999999999,
+      0.0007999999999999999,
+      0.0009,
+      0.001,
+      0.0010999999999999998,
+      0.0012,
+      0.0013,
+      0.0013999999999999998,
+      0.0015,
+      0.0015999999999999999,
+      0.0016999999999999997,
+      0.0018,
+      0.0018999999999999998,
+      0.0019999999999999996,
+      0.0021,
+      0.0021999999999999997,
+      0.0023,
+      0.0024,
+      0.0024999999999999996,
+      0.0026,
+      0.0026999999999999997,
+      0.0027999999999999995,
+      0.0029,
+      0.0029999999999999996,
+      0.0030999999999999995,
+      0.0031999999999999997,
+      0.0032999999999999995,
+      0.0033999999999999994,
+      0.0034999999999999996,
+      0.0035999999999999995,
+      0.0036999999999999997,
+      0.0037999999999999996,
+      0.0038999999999999994,
+      0.004,
+      0.0040999999999999995,
+      0.0042,
+      0.0043,
+      0.004399999999999999,
+      0.0045,
+      0.0046,
+      0.004699999999999999,
+      0.0048,
+      0.0049,
+      0.004999999999999999
+    ],
+    "P": [
+      0.0,
+      9.999999999999999e-06,
+      1.9999999999999998e-05,
+      2.9999999999999997e-05,
+      3.9999999999999996e-05,
+      4.9999999999999996e-05,
+      5.9999999999999995e-05,
+      7e-05,
+      7.999999999999999e-05,
+      8.999999999999999e-05,
+      9.999999999999999e-05,
+      0.00010999999999999999,
+      0.00011999999999999999,
+      0.00013,
+      0.00014,
+      0.00015,
+      0.00015999999999999999,
+      0.00016999999999999999,
+      0.00017999999999999998,
+      0.00018999999999999998,
+      0.00019999999999999998,
+      0.00020999999999999998,
+      0.00021999999999999998,
+      0.00022999999999999998,
+      0.00023999999999999998,
+      0.00025,
+      0.00026,
+      0.00026999999999999995,
+      0.00028,
+      0.00029,
+      0.0003,
+      0.00030999999999999995,
+      0.00031999999999999997,
+      0.00033,
+      0.00033999999999999997,
+      0.00034999999999999994,
+      0.00035999999999999997,
+      0.00037,
+      0.00037999999999999997,
+      0.00038999999999999994,
+      0.00039999999999999996,
+      0.00041,
+      0.00041999999999999996,
+      0.00042999999999999994,
+      0.00043999999999999996,
+      0.00045,
+      0.00045999999999999996,
+      0.00046999999999999993,
+      0.00047999999999999996,
+      0.00049,
+      0.0005,
+      0.0006,
+      0.0006999999999999999,
+      0.0007999999999999999,
+      0.0009,
+      0.001,
+      0.0010999999999999998,
+      0.0012,
+      0.0013,
+      0.0013999999999999998,
+      0.0015,
+      0.0015999999999999999,
+      0.0016999999999999997,
+      0.0018,
+      0.0018999999999999998,
+      0.0019999999999999996,
+      0.0021,
+      0.0021999999999999997,
+      0.0023,
+      0.0024,
+      0.0024999999999999996,
+      0.0026,
+      0.0026999999999999997,
+      0.0027999999999999995,
+      0.0029,
+      0.0029999999999999996,
+      0.0030999999999999995,
+      0.0031999999999999997,
+      0.0032999999999999995,
+      0.0033999999999999994,
+      0.0034999999999999996,
+      0.0035999999999999995,
+      0.0036999999999999997,
+      0.0037999999999999996,
+      0.0038999999999999994,
+      0.004,
+      0.0040999999999999995,
+      0.0042,
+      0.0043,
+      0.004399999999999999,
+      0.0045,
+      0.0046,
+      0.004699999999999999,
+      0.0048,
+      0.0049,
+      0.004999999999999999
+    ]
+  },
+  "method": "exact96 common original saved clocks through0.004999999999999999; added candidate0.005 endpoint excluded; no time fitting or interpolation",
+  "lines": "active-to-active finite consecutive saved positions only; candidate intervals containing observed boundary events are broken; missing/nonactive observations break paths; no unsaved bounce or curved trajectory reconstructed",
+  "retained_markers": "candidate actual stuck terminal events; native first observed retained terminal position, not first material arrival or certified adhesion",
+  "other_markers": "black initial states; candidate open circles are observed escape events; gray native crosses are last finite active observations of unknown disappearance, never escape/hit coordinates",
+  "geometry": "shared bound canonical gas perimeter as plotting reference; native geometry parity is not certified by this overlay; r0 symmetry boundary dashed",
+  "density": "all IDs shown; line density is not physical concentration and has participant-dependent sampling/event gaps",
+  "views": {
+    "overview": {
+      "axis_low_mm": [
+        -8.75,
+        -4.550000000000001
+      ],
+      "axis_high_mm": [
+        258.75,
+        134.55
+      ],
+      "coverage": {
+        "A": {
+          "candidate": {
+            "eligible_active_observation_pairs": 5451,
+            "drawn_saved_chords": 5255,
+            "pairs_broken_at_known_candidate_boundary_events": 196
+          },
+          "native": {
+            "eligible_active_observation_pairs": 5383,
+            "drawn_saved_chords": 5383,
+            "pairs_broken_at_known_candidate_boundary_events": 0
+          }
+        },
+        "P": {
+          "candidate": {
+            "eligible_active_observation_pairs": 5519,
+            "drawn_saved_chords": 5308,
+            "pairs_broken_at_known_candidate_boundary_events": 211
+          },
+          "native": {
+            "eligible_active_observation_pairs": 4998,
+            "drawn_saved_chords": 4998,
+            "pairs_broken_at_known_candidate_boundary_events": 0
+          }
+        }
+      },
+      "rasterizer": {
+        "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "executable_sha256": "5b07e50eaba5ca60fe6b900cc418a2081cdb8de6c621bfaf85b58865ede378ee",
+        "version": "not queried; executable bytes are hash-bound"
+      },
+      "figures": [
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_spatial_overview.svg",
+          "sha256": "331c6f4b1fea18b97c12daa06108d7aae8c3231ff0d7965a5e68cccc67471847"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_spatial_overview.png",
+          "sha256": "663e3bcb774bd278055f1b55f27bf2b4c49ede01fc64b0d132d52446b1305205"
+        }
+      ]
+    },
+    "source_zoom": {
+      "axis_low_mm": [
+        129.99999999999997,
+        15.499999999999993
+      ],
+      "axis_high_mm": [
+        190.00000000000003,
+        33.50000000000001
+      ],
+      "coverage": {
+        "A": {
+          "candidate": {
+            "eligible_active_observation_pairs": 5451,
+            "drawn_saved_chords": 5255,
+            "pairs_broken_at_known_candidate_boundary_events": 196
+          },
+          "native": {
+            "eligible_active_observation_pairs": 5383,
+            "drawn_saved_chords": 5383,
+            "pairs_broken_at_known_candidate_boundary_events": 0
+          }
+        },
+        "P": {
+          "candidate": {
+            "eligible_active_observation_pairs": 5519,
+            "drawn_saved_chords": 5308,
+            "pairs_broken_at_known_candidate_boundary_events": 211
+          },
+          "native": {
+            "eligible_active_observation_pairs": 4998,
+            "drawn_saved_chords": 4998,
+            "pairs_broken_at_known_candidate_boundary_events": 0
+          }
+        }
+      },
+      "rasterizer": {
+        "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "executable_sha256": "5b07e50eaba5ca60fe6b900cc418a2081cdb8de6c621bfaf85b58865ede378ee",
+        "version": "not queried; executable bytes are hash-bound"
+      },
+      "figures": [
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_spatial_source_zoom.svg",
+          "sha256": "ae5eb46c6e7065a885d0cac32b6da3af4eab4b3bdf15ffeaeef101a498a8a4bb"
+        },
+        {
+          "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\foundation_2026_11_23\\ap_spatial_source_zoom.png",
+          "sha256": "be8c365f1440abc76dee758f40f57afd1fd66ddda16ef9e43c532cba9c537852"
+        }
+      ]
+    }
+  },
+  "visual_qa": {
+    "performed": true,
+    "method": "opened final1600x1000 PNG files; checked axes/aspect, legend and all footer text, markers and full population/time/source labels",
+    "outcome": "readable, no cropped captions; overview and source zoom checked separately"
+  }
+}

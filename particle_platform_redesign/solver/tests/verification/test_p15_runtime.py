@@ -200,8 +200,7 @@ def test_dynamic_electric_enclosure_uses_invariant_charge_and_disables_exact_pat
         + runtime.localizable_external_base_abs_upper_m_s2.nbytes
         + runtime.charge_bounds.positive_ion_velocity_abs_upper_m_s.nbytes
         + 9 * np.dtype("<f8").itemsize
-        + sum(len(item.components) for item in runtime.plan.required_fields)
-        * np.dtype(np.int8).itemsize
+        + runtime.native_context.bindings.primitive_rules.size * np.dtype(np.int8).itemsize
     )
     assert runtime.bound_array_nbytes == expected_bound_bytes
 

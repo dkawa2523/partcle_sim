@@ -23,6 +23,7 @@ Python services:
 
 - `chamber_particles_tools.source_builder.convert_velocity(...)` converts supplied row-wise velocity data.
 - `read_csv_source(path, bundle, configuration)` returns `RealizedTableSource` or `RealizedSurfaceSource` without writes.
+- `source_from_csv_bytes(raw, bundle, configuration)` resolves an already-read snapshot. A caller recording input identity hashes those same bytes; the recipe publisher uses this route and does not reopen the CSV.
 - `chamber_particles_tools.inputs.create_case(bundle, settings, output_directory, *, supporting_files=None)` publishes the bundle and optional editable input files together. The bundle owns its source tables.
 - `create_from_configuration(recipe_path, output_directory)` is CLI `create`.
 
@@ -125,7 +126,7 @@ It rotates vectors, not positions; the supplied positions already use the canoni
 
 The recipe publisher records CSV/configuration identities, the full source configuration (including declared
 frame assumptions and unresolved metadata), and upstream provenance. Its recipe settings and canonical identity
-bind the runnable case. Canonical validation remains with the writer; model/support/event readiness remains
+bind the runnable case. Parsing and hashing use the same single CSV snapshot. Canonical validation remains with the writer; model/support/event readiness remains
 with `check_case`. Conversion alone establishes neither native-frame equivalence nor trajectory agreement.
 
 ```console
