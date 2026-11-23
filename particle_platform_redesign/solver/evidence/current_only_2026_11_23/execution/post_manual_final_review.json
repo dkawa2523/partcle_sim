@@ -1,0 +1,378 @@
+{
+  "review_role": "Independent final code/science/maintenance review",
+  "reviewer": "/root/post_manual_final_review_1123",
+  "created_at_utc": "2026-11-23T08:14:43.927Z",
+  "head": "5badb0c362515a00772b2bdeddad457b920afc2c",
+  "scope": "Read-only source/receipt review of R01-R05,R08,R09,R11,R12,R14. Only this requested review JSON is written. Manual binary deletion completion is root-owned.",
+  "instructions_read": [
+    "AGENTS.md",
+    "particle_platform_redesign/AGENTS.md",
+    ".agents/skills/validate-comsol-trajectories/SKILL.md"
+  ],
+  "outcome": "Reported structural findings remain supported, with the limits below. No newly demonstrated current wrong-physics case or false parity certification in this review.",
+  "evidence_validation": {
+    "receipt_directory": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/evidence/current_only_2026_11_23",
+    "installed_production_python_files": 49,
+    "external_vv_python_files": 18,
+    "source_hashes_checked": 67,
+    "source_hash_mismatches": [],
+    "installed_python_files_missing_from_source_map": [],
+    "verification_scenario_source_hashes_checked": 76,
+    "test_source_hash_mismatches": [],
+    "linked_receipt_hashes_checked": 32,
+    "linked_receipt_hash_mismatches": [],
+    "junit": [
+      {
+        "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/.artifacts/current_only_memory_20261123/final_full.xml",
+        "sha256_matches": true,
+        "tests": 1240,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time_s": 473.507
+      },
+      {
+        "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/.artifacts/current_only_20261123/external_final.xml",
+        "sha256_matches": true,
+        "tests": 156,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "time_s": 39.064
+      }
+    ],
+    "source_state_check": "git diff --name-only 08ac61b HEAD -- solver/src solver/tests solver/tools produced no paths (using full repository-relative pathspecs); git status for these paths was empty.",
+    "qualification_limits": [
+      "These are retained executions, not a new post-manual-delete full suite.",
+      "External 156-test receipt is earlier than the final 1240-test run; the current 18 external production source hashes match its recorded binding.",
+      "Local hash checks verify binding and unchanged source, not native authenticity or universal physical validity.",
+      "No new COMSOL solve, full Vigus run, independent stochastic ensemble or million-particle benchmark."
+    ]
+  },
+  "findings": [
+    {
+      "id": "R01",
+      "severity": "medium",
+      "kind": "current explanation loss",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py",
+          "line": 971
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/catalog.py",
+          "line": 1030
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/engine.py",
+          "line": 547
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/engine.py",
+          "line": 562
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/output.py",
+          "line": 116
+        }
+      ],
+      "finding": "resolved_models retains model/revision and only selected scalar parameters; field-role bindings and many resolved coefficients remain in typed plans rather than result explanation. Epstein delta is consumed numerically but omitted here.",
+      "impact": "A result-only recipient cannot fully explain which resolved coefficient and role-to-field mapping governed a model without the original input.",
+      "limit": "Input/data hashes are present in resume identity. This is not evidence that incompatible cases can resume or that numerical results collide.",
+      "next": "Publish one normalized effective scalar/role projection from the existing plan owner and reuse it for check/result."
+    },
+    {
+      "id": "R02",
+      "severity": "medium",
+      "kind": "extension coupling",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 1307
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 1374
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 1414
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 4020
+        }
+      ],
+      "finding": "Talbot/lift/Saffman primitive offsets are selected through other model-category types even though required fields already have one name-to-offset table.",
+      "impact": "Adding or removing a drag model can require unrelated thermophoresis/lift binder edits, increasing omission risk.",
+      "limit": "Scientific shared-background compatibility requirements remain intentional; no present misbinding demonstrated.",
+      "next": "Bind declared roles directly through existing field offsets while retaining catalog-owned physical compatibility checks."
+    },
+    {
+      "id": "R03",
+      "severity": "medium",
+      "kind": "latent extension hazard",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 2890
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 2957
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 2990
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 3024
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 3051
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/runtime.py",
+          "line": 2663
+        }
+      ],
+      "finding": "Continuous applicability row dispatch treats remaining codes as existing proof families. Preparation currently rejects unmatched plan/bounds and the catalog is closed.",
+      "impact": "A future model/code addition could acquire an inappropriate applicability proof if its contributor updates stage evaluation but overlooks proof dispatch.",
+      "limit": "Reject the stronger claim that unknown user selectors currently bypass validation. Current plan/code families are matched; this is a future-change safety issue.",
+      "next": "Enumerate supported proof codes and reject others, preserving separate point evaluation, global bounds and path proofs."
+    },
+    {
+      "id": "R04",
+      "severity": "medium",
+      "kind": "production mathematics duplication",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/forces.py",
+          "line": 1147
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/forces.py",
+          "line": 1119
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/compiled.py",
+          "line": 2170
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/physics/compiled.py",
+          "line": 2191
+        }
+      ],
+      "finding": "Epstein thermal speed/rate and applicability gate are independently expressed in array and compiled production evaluators.",
+      "impact": "Future coefficient, sign or domain changes need coordinated edits and may silently drift.",
+      "limit": "No disagreement between current equations is established. Independent analytic/Decimal test oracles should remain independent.",
+      "next": "Use a small category-owned scalar production kernel where equivalent; measure rounding/performance effects and preserve independent proofs/oracles."
+    },
+    {
+      "id": "R05",
+      "severity": "medium",
+      "kind": "accepted state update duplication",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/transport.py",
+          "line": 7231
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/transport.py",
+          "line": 7269
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/transport.py",
+          "line": 9792
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/transport.py",
+          "line": 9840
+        }
+      ],
+      "finding": "Curved and exact wall response commits separately mutate resident x/v/Z, event ordinals, lifecycle, event ledger, wall counters and replay jumps.",
+      "impact": "A boundary-state change can be correctly implemented for one path while omitted for another.",
+      "limit": "Canonical-hit, lifecycle and append helpers already share work. Curved finite-radius residual handling, exact origins and OU restart have different necessary semantics; do not unify their paths wholesale.",
+      "next": "Consolidate only the common accepted post-response transaction, retaining method-specific continuation and identity tests."
+    },
+    {
+      "id": "R08",
+      "severity": "medium",
+      "kind": "identity guarantee boundary",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/output.py",
+          "line": 1325
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/output.py",
+          "line": 1935
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/output.py",
+          "line": 1955
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles/output.py",
+          "line": 2763
+        }
+      ],
+      "finding": "source_identity hashes the manifest and includes input/context identity. Completion validates context/checkpoint and payload structure/values, but does not content-bind every final/event numeric value.",
+      "impact": "A finite modified final model_weight can retain the same derived-artifact source identity; consumers needing byte/content equality cannot infer it from manifest identity.",
+      "limit": "Not proof of spontaneous solver corruption or broken resume hashes. Checkpoint and context already have explicit hash protections.",
+      "next": "Clarify identity scope, then assess selective completion hashes only for payload identity required by actual reuse."
+    },
+    {
+      "id": "R09",
+      "severity": "medium",
+      "kind": "producer handoff limitation",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles_tools/electrostatic_builder/workflow.py",
+          "line": 244
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles_tools/electrostatic_builder/README.md",
+          "line": 114
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/prepare_vigus_transport.py",
+          "line": 333
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/prepare_vigus_transport.py",
+          "line": 349
+        }
+      ],
+      "finding": "Electric builder appends new primitive outputs while preserving existing unrelated fields; the Vigus coefficient producer separately regenerates an owned coefficient group and rejects name collisions.",
+      "impact": "A workflow may retain old E-derived charge/ion/DEP coefficients unless it explicitly reruns their owner.",
+      "limit": "Independent prescribed fields are valid. The preserved-zero-gradient probe does not establish a nonzero correct gradient or an erroneous executed particle case.",
+      "next": "Bind declared derived-output groups to primitive/parameter identity at the existing producer handoff; avoid guessed dependencies or a generic DAG."
+    },
+    {
+      "id": "R11",
+      "severity": "low",
+      "kind": "bounded external tool capacity",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/evaluate_saved_population.py",
+          "line": 185
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/evaluate_saved_population.py",
+          "line": 224
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/evaluate_saved_population.py",
+          "line": 373
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/evaluate_saved_population.py",
+          "line": 445
+        }
+      ],
+      "finding": "Saved-population evaluation retains full frames plus time-by-ID-by-five dense state arrays and requires identical ID populations. Its outputs are computational-count descriptive summaries.",
+      "impact": "Large saved populations may consume substantial RAM; this entry point cannot represent a general unpaired, physical-weight ensemble comparison.",
+      "limit": "One 10^6-by-126-by-5 float64 state array is 5.04 GB by arithmetic, not a measured scaling result. This is external V&V, not evidence of unbounded core scratch.",
+      "next": "Only if needed, aggregate public result batches for explicit cohorts and add a separately defined unpaired population comparison."
+    },
+    {
+      "id": "R12",
+      "severity": "low",
+      "kind": "conservative qualification limit",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py",
+          "line": 763
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py",
+          "line": 806
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/tools/vv/comsol/evaluate_matched_trajectory.py",
+          "line": 848
+        }
+      ],
+      "finding": "Qualified deterministic self-resolution requires reviewed method/path revisions and zero global reintegration/event/axis/failure counters. Positive work elsewhere cannot be located to a selected cohort/window.",
+      "impact": "Some valid local windows cannot gain qualification from current aggregate facts.",
+      "limit": "This intentionally returns NOT_TESTED and preserves raw differences; it is not demonstrated false certification. Descriptive/practical population usefulness remains separate.",
+      "next": "For an actual event/window qualification need, choose a small bound probe or independent experiment; do not infer local path resolution from global counts."
+    },
+    {
+      "id": "R14",
+      "severity": "informational",
+      "kind": "intentional capability and evidence boundary",
+      "refs": [
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles_tools/electrostatic_builder/README.md",
+          "line": 3
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles_tools/electrostatic_builder/workflow.py",
+          "line": 437
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles_tools/electrostatic_builder/workflow.py",
+          "line": 547
+        },
+        {
+          "path": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver/src/chamber_particles_tools/electrostatic_builder/numerics.py",
+          "line": 604
+        }
+      ],
+      "finding": "Installed builder requires RZ/P1, fixed perimeter potentials and vacuum permittivity. Full-material floating-V/Q historical results describe another governing problem.",
+      "impact": "Historical all-material field accuracy cannot certify the current reduced builder or particle prediction.",
+      "limit": "An explicit supported scope is not an implementation defect. This review does not independently certify manual deletion/native preservation.",
+      "next": "Keep the current reduced scope explicit; treat full-material capability as a separate requested scientific implementation."
+    }
+  ],
+  "scientific_claims": {
+    "practical_population_agreement": "Can be useful/adequate for stated observed quantities with disclosed differences, coverage and uncertainty even when qualified solver parity is NOT_TESTED.",
+    "saved_evaluator_verdict": "evaluate_saved_population explicitly emits qualified_solver_parity=NOT_TESTED and physical_validation=NOT_CERTIFIED, with no fitted agreement threshold.",
+    "not_inferred": [
+      "Population-law equivalence from one native realization",
+      "Pathwise equality from equal IDs/seeds",
+      "Physical validity from COMSOL agreement",
+      "New qualification from source identity/migration payload hashes",
+      "All-material capability from reduced-builder residual success"
+    ]
+  },
+  "scores": {
+    "interpretation": "Subjective engineering/explanation assessment for the supported present product; not probability of correct physics or percentage validated coverage.",
+    "maintainability": {
+      "score": 78,
+      "out_of": 100,
+      "rationale": "Single engine, directed module boundaries and source-bound independent checks are strong. Duplicate production formulae and accepted state mutations require coordinated maintenance."
+    },
+    "extensibility": {
+      "score": 73,
+      "out_of": 100,
+      "rationale": "Typed plans/catalog provide clear model ownership, but cross-category offset branches and implicit proof-family residual branches make model additions nonlocal."
+    },
+    "scientific_explainability": {
+      "score": 80,
+      "out_of": 100,
+      "rationale": "Explicit equations, applicability limits, independent oracles and conservative comparison verdicts are strong. Result-only scalar/role omissions, content-identity scope and producer-derived relationships still need clearer ownership."
+    },
+    "proposed_overall": {
+      "score": 77.2,
+      "rounded": 77,
+      "out_of": 100,
+      "weights": {
+        "maintainability": 0.35,
+        "extensibility": 0.3,
+        "scientific_explainability": 0.35
+      },
+      "rationale": "Weights balance long-term maintenance and scientific explanation, with somewhat less weight on future extension. No penalty for intentionally unsupported full-material/3D/GPU features."
+    }
+  },
+  "limits": [
+    "No source edits or deletions.",
+    "No new test suite, native solve, ensemble or performance campaign.",
+    "Review of named findings and bound receipts, not exhaustive scientific certification.",
+    "Root owns post-manual-delete residual audit, native asset hash recheck and completion metadata refresh."
+  ]
+}

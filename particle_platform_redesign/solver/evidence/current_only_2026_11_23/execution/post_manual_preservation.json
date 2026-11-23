@@ -1,0 +1,186 @@
+{
+  "audit": "Independent post-user-manual-deletion residual and preservation check",
+  "recorded_utc": "2026-11-23T08:14:03.7639716+00:00",
+  "inspected_head": "5badb0c362515a00772b2bdeddad457b920afc2c",
+  "branch": "cleanup/current-only-platform",
+  "status": "PASS_CLASSIFIED_CLEANUP_AND_KNOWN_PRESERVATION",
+  "path_basis": "All provenance paths below are relative to solver project unless explicitly marked repository-relative; native manifest has its own solver-relative path basis.",
+  "inputs": [
+    {
+      "path": "evidence/current_only_2026_11_23/blocked_cleanup.json",
+      "sha256": "fc9d552c5e4368fc427a790ddb63438df4ee2339c8e16db98fc62259c7f97bdb",
+      "bytes": 124802
+    },
+    {
+      "path": "evidence/current_only_2026_11_23/execution/impasse_audit.json",
+      "sha256": "6403fb2cddab305e0a3e0cce3c5468e28e78458748237b71b5cd776d2e1d6170",
+      "bytes": 5810
+    },
+    {
+      "path": "evidence/current_only_2026_11_23/execution/orphan_bytecode_preflight.json",
+      "sha256": "5413c214db619ff0defea9e167715ca20f7873851e0e451265b55242f1207c87",
+      "bytes": 22572
+    },
+    {
+      "path": "evidence/current_only_2026_11_23/execution/p11_artifact_preflight.json",
+      "sha256": "b45c1c7e2c669c9289b7ebacd859b6e4462c87f878a536eeb776a487ca7277d7",
+      "bytes": 19136
+    },
+    {
+      "path": "evidence/current_only_2026_11_23/execution/p10_debug_artifact_preflight.json",
+      "sha256": "d3c9e0e8f054a450d39c808565c3616889d1001eb890ed4a115a1d2d0db9ffff",
+      "bytes": 26645
+    },
+    {
+      "path": ".artifacts/current_only_20261123/final_assets_review.json",
+      "sha256": "f4ec421110d302b61bea4f35de31699e6690c310ba1fb9ecc2028817e6015c79",
+      "bytes": 11993
+    },
+    {
+      "path": ".artifacts/current_only_20261123/old_result_text_postreview.json",
+      "sha256": "6df405d20fdb17a85e79a4390fc1862077e192fa62ef37a879aa0f9acfb400a2",
+      "bytes": 2851
+    },
+    {
+      "path": ".artifacts/current_only_20261123/guard_artifact_postreview.json",
+      "sha256": "dd76d7e6d48eb8221da84ae45fd171796e44807f096adae1114747a88b0e589e",
+      "bytes": 11205
+    }
+  ],
+  "classified_binary_scope": {
+    "prior_known_files": 77774,
+    "prior_known_bytes": 4554763321,
+    "prior_old_root_hdf5_files": 77633,
+    "prior_brownian_hdf5_files": 95,
+    "prior_guard_hdf5_files": 29,
+    "prior_orphan_bytecode_files": 17,
+    "exact_bytecode_candidates": 17,
+    "remaining_bytecode": [],
+    "returned_retired_sources": [],
+    "exact_guard_candidates": 29,
+    "remaining_guard_hdf5": [],
+    "guard_parent_remaining_files": 0,
+    "old_result_roots": 198,
+    "old_result_remaining_files": 0,
+    "brownian_remaining_files": 0,
+    "roots_checked": 199,
+    "unique_roots": 199,
+    "roots_retained_empty": 199,
+    "total_remaining_files": 0,
+    "unexpected_links": [],
+    "residual_paths": [],
+    "method": "Exact preflight paths checked with Test-Path; every descendant file in ledger198 result roots and Brownian root enumerated with Get-ChildItem -Recurse -Force. Empty directories are allowed. No deletion was performed by this auditor."
+  },
+  "native_authority": {
+    "manifest": {
+      "path": "evidence/comsol_v0_2_0_release_requalification_v2/publication_saved_native_closure.json",
+      "sha256": "dac2b4dd815619161c366979784ffb1b98f2445d8eca899d9b844ac6975664a8",
+      "bytes": 145724
+    },
+    "manifest_sha256_expected_from_old_text_postreview": "dac2b4dd815619161c366979784ffb1b98f2445d8eca899d9b844ac6975664a8",
+    "manifest_sha256_matches_predeletion": true,
+    "path_basis": "solver project directory",
+    "groups": {
+      "external_raw_inputs": 278,
+      "local_regenerated_metadata": 5,
+      "retained_git_authority": 196
+    },
+    "entries": 479,
+    "unique_resolved_paths": 479,
+    "files_independently_sha256_compared": 479,
+    "bytes_hashed": 1126238222,
+    "missing": [],
+    "sha256_mismatches": [],
+    "classified_target_overlaps": [],
+    "critical_realized_source": "evidence/comsol_binding_recert_2026_10_09_v1/c3_prepared_axis_normalized/candidate_input_three_current_z0.h5",
+    "method": "Iterated every path-to-sha256 entry of all3 groups in the exact preserved publication_saved_native_closure.json; raw file SHA256 recomputed independently for each479 file, including MPH and realized HDF5."
+  },
+  "protected_tracked_areas": {
+    "repository_relative_roots": [
+      "old_code",
+      "model_dataset"
+    ],
+    "baseline": "8883e3a",
+    "diff_vs_baseline": [],
+    "tracked_worktree_status": []
+  },
+  "environments": {
+    "discovered_windows_configs": [
+      {
+        "path": "old_code/.venv/pyvenv.cfg",
+        "config_sha256": "922b2aef45967427f9c94262e65140183ae572ad3a89c9eb4df9067663f9bc3a",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.venv/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/published-runtime-20261010/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/platform_restructure_20261123/runtime_windows/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/package-validation-20261006-5d6fc2/runtime/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/release-win-final2-cf56597edd1447f0974921fd9d661039/runtime/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/release-win-final-aeeb783969bb4ec5ad393c40145d6d1b/runtime/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/resolved_semantics_20261123/runtime_windows/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/release-win-495040ad8bae4b8fb486a9eff80b1909/runtime/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/release-index-20261010/particle_platform_redesign/solver/.venv/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      },
+      {
+        "path": "particle_platform_redesign/solver/.artifacts/release-runtime-20261010/pyvenv.cfg",
+        "config_sha256": "a11f839e7c2e046d2cfc5bc297762ec148d4f4185d47c53670b16d8150af37ab",
+        "interpreter_exists": true
+      }
+    ],
+    "missing_interpreters": [],
+    "classified_target_overlaps": [],
+    "scope": "Current solver .venv, archived old_code .venv and retained solver artifact environments. Config and Scripts/python.exe presence checked without activation or execution. Exact cleanup scope excludes these environment trees; no pre-deletion full environment byte inventory exists."
+  },
+  "deletion_helper": {
+    "exists": true,
+    "provenance": {
+      "path": ".artifacts/current_only_20261123/manual_cleanup.ps1",
+      "sha256": "e1377cc778badb4b81eb4f95eb26ff35b6f0d2910ad973763f3180f751e03a82",
+      "bytes": 4373
+    },
+    "auditor_removed_or_reran_helper": false
+  },
+  "mandatory_discrepancies": [],
+  "limits": [
+    "Classified77774 binary retirement only; no claim that every binary or every historical result in the workspace was classified.",
+    "Native preservation is bound to the exact479 authority manifest and protected tracked areas. Unknown/uninventoried untracked native or environment assets lack a universal before/after proof.",
+    "Old77728 HDF5 products were previously recorded by roots/counts/bytes, not a complete per-file historical SHA roster; empty root audit establishes no files remain in that classified scope.",
+    "Environment checks establish retained known Windows environment configs/interpreters and target non-overlap, not full byte integrity of every environment. External WSL/temporary environment assets were outside helper targets and are not rehashed here.",
+    "No removal, source edit, rename, simulation, native COMSOL solve or full test suite was performed; only this audit JSON is created."
+  ]
+}

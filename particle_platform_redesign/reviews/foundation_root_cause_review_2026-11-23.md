@@ -35,12 +35,13 @@
 | 実行・状態・保存 | engine、cpu、execution、output、time/lifecycle | process、slab、resume、immutable context、公開結果 | payload全体の改変検出にはR08の制限 |
 | 解析・export・表示 | selection、analysis、visualization、CLI | result-only利用、cohort/coverage、完成物公開 | 単独JSON公開はR07 |
 | COMSOL/V&V | native意味、明示CSV式評価、保存集団、matched比較 | 最終外部suite156件、保存nativeに対するcurrent candidate小型再実行 | 新規native solve・Vigus全再計算ではない |
-| 性能・検証 | 8 executable benchmark modules、verification/scenario、品質gate | 影響5moduleを実行。core全体1228件成功 | smokeを10⁶粒子実測・全scalingへ外挿しない |
-| 文書・report・資産 | 正本、README、report snapshot、旧結果/native区分 | 文書33・skills4、snapshot tests、native196件のhash維持 | 旧生成物の物理削除に外部blockが残る |
+| 性能・検証 | 8 executable benchmark modules、verification/scenario、品質gate | 影響5moduleを実行。継続時core全体1240件成功 | smokeを10⁶粒子実測・全scalingへ外挿しない |
+| 文書・report・資産 | 正本、README、report snapshot、旧結果/native区分 | 文書33・skills4、snapshot tests。手動削除後も既知native479件の全SHA一致 | 記録済み撤去対象は残存0。未知資産・全環境の網羅保証ではない |
 
 実行の詳細は[今回の記録](../solver/evidence/current_only_2026_11_23/README.md)を参照する。
-初回の旧regex失敗と修正後のclean runを区別し、最終cleanは1228 passed / 679.713 s、
-外部最終は156 passed / 39.10 s。これらは下記の新規提案を実装済み・認定済みにする証拠ではない。
+初回の旧regex失敗と修正後のclean runを区別し、8883e3aのcleanは1228 passed / 679.713 s、
+その後のR13整理を含む全体は1240 passed / 473.52 s。外部は156 passed / 39.10 sのsource-bound記録を保持する。
+手動削除後は同じ実装の小型ballistic公開操作を新たに実行した。以前の全体suiteの再実行や、下記の新規提案の実装・認定とはしない。
 
 ## 既に改良した点と、今回残っている点
 
@@ -267,7 +268,8 @@ producerの役割、現行生成処理とのcanonical値・設定の同一性、
 現行benchmark・独立oracle・dated maintenance記録・実行環境は保持した。単なる形式cutoffや名前の一致を廃止判定にしない。
 以後は既存の出力先・manifestの役割区分を使い、参照入力、実験記録、生成candidate結果、配布説明を分ける。
 benchmarkの実行code/input/独立reference/評価/生成結果を同一の正解データとして扱わない。
-新しいcleanup frameworkは不要。今回の物理削除blockは設計課題や未使用資産の必要性とは別の実行条件である。
+新しいcleanup frameworkは不要。当時の物理削除blockは設計課題や資産の必要性とは別の実行条件だった。
+利用者の削除後、記録済み対象の残存0と既知native479件の全SHA一致を独立確認した。
 
 ## 改良を進める単位と順序
 
@@ -319,13 +321,14 @@ event、参照精度、有限標本が関わる。相互作用するため、総
 既存A/P40実現等の保存根拠と、新規実行・新規独立標本を区別する。
 Vigus43,220粒子や全材料caseは、必要な入力/native artifactが揃った別の実行として扱う。
 
-## 実装前の結論と外部条件
+## 実装前の結論と確認状況
 
 先に直すのは、再現済みの公開入力/出力不具合と、モデル事実・binding・proofの所有である。
 その後に式とaccepted transitionを整理すれば、拡張時に修正する箇所を減らしつつ、科学的根拠を保持できる。
 full-material、3D、GPU等は必要な利用目的がある場合の能力拡張であり、今回の責務改良と同義ではない。
 
 今回の新規調査は上記の提案を整理したもの。R13の追加撤去・確認を除き、R01–R09/R11/R12/R14を実装したとは主張しない。
-旧生成物の物理削除には自動承認審査のblockが残る。理由と再開条件、未実行範囲は
-[blocked cleanup](../solver/evidence/current_only_2026_11_23/blocked_cleanup.json)を正本とし、
-テスト成功や改良案の完成を削除完了へ読み替えない。
+旧生成物の物理削除は利用者が実行し、記録済み77,774件の残存0と保護対象の保持を確認した。
+現在の撤去結果は[削除後の確認](../solver/evidence/current_only_2026_11_23/execution/post_manual_cleanup.json)、
+当時の停止理由は[削除前の記録](../solver/evidence/current_only_2026_11_23/blocked_cleanup.json)へ分ける。
+撤去完了は対象不在の確認によるものであり、提案の実装完了や新しい科学的精度認定とはしない。

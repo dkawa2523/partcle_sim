@@ -1,0 +1,219 @@
+{
+  "status": "passed",
+  "recorded_date": "2026-11-23",
+  "head": "5badb0c362515a00772b2bdeddad457b920afc2c",
+  "working_directory": "C:/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/solver",
+  "scope": "Post-manual-removal current public CLI flow; no production changes, deletion, full suite, wheel reinstall or native COMSOL solve.",
+  "artifact_directory": ".artifacts/current_only_20261123/post_manual_user_flow",
+  "commands": [
+    {
+      "command": "uv run --locked python -m chamber_particles init .artifacts/current_only_20261123/post_manual_user_flow/example --example xy-ballistic --json",
+      "exit_code": 0,
+      "wall_time_seconds": 1.6811576000000001,
+      "operation": "init",
+      "status": "created"
+    },
+    {
+      "command": "@'\nimport csv\nfrom pathlib import Path\nimport yaml\nroot = Path(\".artifacts/current_only_20261123/post_manual_user_flow/example\")\nwith (root / \"particles.csv\").open(newline=\"\", encoding=\"utf-8\") as handle:\n    rows = list(csv.DictReader(handle))\nfields = list(rows[0])\nrows[0].update(x0_m=\"0.003\", v0_m_s=\"0.4\", model_weight=\"2.0\")\nwith (root / \"own_particles.csv\").open(\"x\", newline=\"\", encoding=\"utf-8\") as handle:\n    writer = csv.DictWriter(handle, fieldnames=fields)\n    writer.writeheader()\n    writer.writerows(rows)\nrecipe = yaml.safe_load((root / \"recipe.yaml\").read_text(encoding=\"utf-8\"))\nrecipe[\"sources\"][0][\"csv\"] = \"own_particles.csv\"\nrecipe[\"settings\"][\"case\"][\"name\"] = \"post_manual_own_ballistic\"\n(root / \"own_recipe.yaml\").write_text(yaml.safe_dump(recipe, sort_keys=False), encoding=\"utf-8\")\nprint(\"created own_particles.csv and own_recipe.yaml: x0=0.003 m, vx=0.4 m/s, weight=2\")\n'@ | uv run --locked python -",
+      "exit_code": 0,
+      "wall_time_seconds": 0.4656638,
+      "status": "complete"
+    },
+    {
+      "command": "uv run --locked python -m chamber_particles create .artifacts/current_only_20261123/post_manual_user_flow/example/own_recipe.yaml -o .artifacts/current_only_20261123/post_manual_user_flow/input --json",
+      "exit_code": 0,
+      "wall_time_seconds": 1.6586595,
+      "operation": "create",
+      "status": "created"
+    },
+    {
+      "command": "uv run --locked python -m chamber_particles check .artifacts/current_only_20261123/post_manual_user_flow/input/case.yaml --workers 1 --json",
+      "exit_code": 0,
+      "wall_time_seconds": 1.6565081,
+      "operation": "check",
+      "status": "ready"
+    },
+    {
+      "command": "uv run --locked python -m chamber_particles run .artifacts/current_only_20261123/post_manual_user_flow/input/case.yaml -o .artifacts/current_only_20261123/post_manual_user_flow/result --workers 1 --json",
+      "exit_code": 0,
+      "wall_time_seconds": 2.8190448999999997,
+      "operation": "run",
+      "status": "complete"
+    },
+    {
+      "command": "uv run --locked python -m chamber_particles inspect .artifacts/current_only_20261123/post_manual_user_flow/result --full --json",
+      "exit_code": 0,
+      "wall_time_seconds": 1.9973159,
+      "operation": "inspect",
+      "status": "complete"
+    },
+    {
+      "command": "uv run --locked python -m chamber_particles analyze .artifacts/current_only_20261123/post_manual_user_flow/result -o .artifacts/current_only_20261123/post_manual_user_flow/summary.json --json",
+      "exit_code": 0,
+      "wall_time_seconds": 2.0052225,
+      "operation": "analyze",
+      "status": "complete"
+    },
+    {
+      "command": "uv run --locked python -m chamber_particles export .artifacts/current_only_20261123/post_manual_user_flow/result -o .artifacts/current_only_20261123/post_manual_user_flow/export --json",
+      "exit_code": 0,
+      "wall_time_seconds": 2.0708133,
+      "operation": "analyze",
+      "status": "complete"
+    },
+    {
+      "command": "uv run --locked python -m chamber_particles view .artifacts/current_only_20261123/post_manual_user_flow/result -o .artifacts/current_only_20261123/post_manual_user_flow/view --detail --json",
+      "exit_code": 0,
+      "wall_time_seconds": 2.0276912,
+      "operation": "view",
+      "status": "complete"
+    },
+    {
+      "command": "@'\nimport csv\nimport json\nimport math\nfrom decimal import Decimal\nfrom pathlib import Path\nfrom xml.etree import ElementTree\nroot = Path(\".artifacts/current_only_20261123/post_manual_user_flow\")\ndef rows(path):\n    with path.open(newline=\"\", encoding=\"utf-8\") as handle:\n        return list(csv.DictReader(handle))\nsource = rows(root / \"example/own_particles.csv\")[0]\nfinal = rows(root / \"export/final.csv\")[0]\nevent = rows(root / \"export/boundary_interactions.csv\")[0]\nframes = rows(root / \"export/frames.csv\")\nhit = float((Decimal(\"0.01\") - Decimal(source[\"x0_m\"])) / Decimal(source[\"v0_m_s\"]))\nobserved = float(event[\"time_s\"])\nerrors = [abs(float(row[\"coordinate0_m\"]) - min(.01, .003 + .4 * float(row[\"time_s\"]))) for row in frames]\nsummary = json.loads((root / \"summary.json\").read_text(encoding=\"utf-8\"))\nexport = json.loads((root / \"export/export.json\").read_text(encoding=\"utf-8\"))\nview = json.loads((root / \"view/visualization.json\").read_text(encoding=\"utf-8\"))\nassert math.isclose(hit, observed, rel_tol=0, abs_tol=1e-14)\nassert (float(final[\"coordinate0_m\"]), float(final[\"coordinate1_m\"])) == (.01, .005)\nassert final[\"lifecycle\"] == \"2\" and event[\"outcome\"] == \"stuck\"\nassert float(final[\"model_weight\"]) == 2 and float(event[\"model_weight\"]) == 2\nassert event[\"boundary_id\"] == \"2\"\nassert max(errors) <= 1e-14\nassert summary[\"source_result\"] == export[\"source_result\"]\nassert view[\"source_manifest_sha256\"] == summary[\"source_result\"][\"manifest_sha256\"]\nassert view[\"context\"] == summary[\"source_result\"][\"context\"]\nsvgs = [\"population.svg\", \"trajectory.svg\", \"boundary_events.svg\"]\nfor name in svgs:\n    assert ElementTree.parse(root / \"view\" / name).getroot().tag.endswith(\"svg\")\nprint(json.dumps({\n    \"status\": \"passed\", \"oracle\": \"decimal wall distance / initial velocity; saved-frame x=min(wall,x0+vx*t)\",\n    \"expected_hit_s\": hit, \"observed_hit_s\": observed, \"absolute_hit_error_s\": abs(hit-observed),\n    \"absolute_tolerance_s\": 1e-14, \"max_saved_frame_position_error_m\": max(errors),\n    \"final_position_m\": [float(final[\"coordinate0_m\"]), float(final[\"coordinate1_m\"])],\n    \"terminal_outcome\": event[\"outcome\"], \"boundary_id\": int(event[\"boundary_id\"]),\n    \"particle_id\": int(final[\"particle_id\"]), \"model_weight\": float(final[\"model_weight\"]),\n    \"saved_frame_rows\": len(frames), \"derived_identity_matches\": True,\n    \"valid_svg_documents\": svgs, \"source_identity\": summary[\"source_result\"]\n}, sort_keys=True))\n'@ | uv run --locked python -",
+      "exit_code": 0,
+      "wall_time_seconds": 0.4492897,
+      "operation": "analytic_check",
+      "status": "passed"
+    }
+  ],
+  "run_summary": {
+    "particles": 1,
+    "boundary_events": 1,
+    "failure_events": 0,
+    "frames": 5,
+    "macro_steps": 20,
+    "workers": 1
+  },
+  "analytic_check": {
+    "absolute_hit_error_s": 3.469446951953614e-18,
+    "absolute_tolerance_s": 1e-14,
+    "boundary_id": 2,
+    "derived_identity_matches": true,
+    "expected_hit_s": 0.0175,
+    "final_position_m": [
+      0.01,
+      0.005
+    ],
+    "max_saved_frame_position_error_m": 0,
+    "model_weight": 2,
+    "observed_hit_s": 0.017499999999999998,
+    "oracle": "decimal wall distance / initial velocity; saved-frame x=min(wall,x0+vx*t)",
+    "particle_id": 1,
+    "saved_frame_rows": 5,
+    "source_identity": {
+      "case_file_hash": "sha256:ca9761b6191c243b4941f8d0df0764eebb4c7584b2dfadc3a195d78dec9a4202",
+      "case_name": "post_manual_own_ballistic",
+      "context": {
+        "content_hash": "sha256:92b2ed1dbbc8047529ea6705ac20fbac31132337b76a6d71f5f5d5357e2c1472",
+        "file_sha256": "sha256:749de6dcd0c841daaa0865838fb30eac5113b97e51845296f77b03d5ad5281c4",
+        "path": "context.h5"
+      },
+      "data_content_hash": "sha256:70ff937058f2ab1b1393a57841080d353e698cfe68fc25199e2b07192df64506",
+      "manifest_sha256": "sha256:f83f3fd0f6f41d0a982f3cc1f0d02acd1043b59a1cd7533832ac05f47e5c5f27",
+      "result_algorithm_revision": "durable_context_segmented_result_v7",
+      "result_schema_version": 4
+    },
+    "status": "passed",
+    "terminal_outcome": "stuck",
+    "valid_svg_documents": [
+      "population.svg",
+      "trajectory.svg",
+      "boundary_events.svg"
+    ]
+  },
+  "independence": {
+    "input_origin": "New installed xy-ballistic example, own CSV copied and edited to x0=.003 m, vx=.4 m/s and model_weight=2; published using a new recipe/case directory.",
+    "required_fields": [],
+    "result": "Fresh flow completed after manual cleanup with current package and newly generated artifacts; no retired result/binary input was supplied.",
+    "claim_limit": "This directly verifies this public ballistic workflow, not every model or capability."
+  },
+  "prior_evidence_reviewed": [
+    ".artifacts/current_only_20261123/public_ballistic_review.json",
+    ".artifacts/current_only_20261123/installed_workflow_windows.json",
+    ".artifacts/current_only_20261123/installed_workflow_linux.json"
+  ],
+  "existing_review_check": {
+    "review": "../reviews/foundation_root_cause_review_2026-11-23.md",
+    "review_base": "75100e74f1243b527e065c9e6a68121221408b39",
+    "comparison_command": "git diff 75100e74f1243b527e065c9e6a68121221408b39 HEAD -- particle_platform_redesign/solver/src/chamber_particles_tools/source_builder/producer.py particle_platform_redesign/solver/src/chamber_particles_tools/cli.py",
+    "comparison_exit_code": 0,
+    "comparison_stdout": "",
+    "conclusion": "R06 and R07 remain; owning files are unchanged from review base. No new failure injection was needed.",
+    "R06": {
+      "state": "unresolved bug",
+      "sources": [
+        "src/chamber_particles_tools/source_builder/producer.py:250",
+        "src/chamber_particles_tools/source_builder/producer.py:319",
+        "src/chamber_particles_tools/cli.py:29"
+      ],
+      "reason": "columns is used by set() without mapping normalization; filter is consumed before _configuration. Prior public columns:null probe remains applicable and escapes as TypeError."
+    },
+    "R07": {
+      "state": "unresolved bug",
+      "sources": [
+        "src/chamber_particles_tools/cli.py:223",
+        "src/chamber_particles_tools/cli.py:228"
+      ],
+      "reason": "Analysis JSON opens its final path with x then writes; interrupted write can retain partial JSON. Other artifacts publish after completion."
+    }
+  },
+  "usability_review": {
+    "score": 82,
+    "out_of": 100,
+    "scope": "Expert judgment for the documented alpha XY/RZ CLI and Python workflow, not a numerical accuracy percentage or complete product certification.",
+    "criteria": [
+      {
+        "name": "Onboarding and command discovery",
+        "score": 18,
+        "maximum": 20,
+        "reason": "Short executable quickstart, installed examples, one console/module dispatcher."
+      },
+      {
+        "name": "Own input composition",
+        "score": 17,
+        "maximum": 20,
+        "reason": "Editable CSV/recipe publish succeeds, units and identity explicit; nested configuration remains demanding."
+      },
+      {
+        "name": "Check and error recovery",
+        "score": 14,
+        "maximum": 20,
+        "reason": "Check shares prepare and reports resource/model facts; R06 leaks malformed nested input as traceback."
+      },
+      {
+        "name": "Result reuse and publication",
+        "score": 16,
+        "maximum": 20,
+        "reason": "Standalone context, cohort-aware analysis/export/view and matching receipts; R07 leaves an interrupted single JSON at its final name."
+      },
+      {
+        "name": "Scientific interpretation",
+        "score": 17,
+        "maximum": 20,
+        "reason": "Lifecycle, weight, coverage and saved-path limitations are explicit; resolved model metadata omits several coefficients/roles (R01)."
+      }
+    ],
+    "top_issues": [
+      {
+        "id": "R06",
+        "kind": "bug",
+        "source": "src/chamber_particles_tools/source_builder/producer.py:250",
+        "impact": "A small user mapping error can produce an internal traceback instead of structured exit2."
+      },
+      {
+        "id": "R07",
+        "kind": "bug",
+        "source": "src/chamber_particles_tools/cli.py:228",
+        "impact": "Interrupted analysis write may leave partial output that blocks retry."
+      },
+      {
+        "id": "R01",
+        "kind": "explanation gap",
+        "source": "src/chamber_particles/physics/catalog.py:971",
+        "impact": "Result-only user cannot recover all selected scalar physics settings/field roles; input hash still identifies the case."
+      }
+    ],
+    "capability_limits": "Documented XY/RZ coordinates and gas-only static RZ reduced electrostatic builder are scope limits, not bugs. No inference of full-material, 3D, GPU, all-model or COMSOL parity.",
+    "validation_limit": "Fresh ballistic public flow only. Earlier full-suite/wheel receipts were inspected and not rerun or recertified here."
+  }
+}

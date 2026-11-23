@@ -1,16 +1,42 @@
 # 現行入口への撤去・統合記録
 
 開始sourceは`75100e74f1243b527e065c9e6a68121221408b39`、branchは`cleanup/current-only-platform`。
-コード撤去と下記の現行確認を実施した。物理削除には外部blockが残り、全撤去完了とはしていない。
+コード撤去と下記の現行確認を実施した。利用者によるバイナリ削除後、記録済み撤去範囲の残存0件と保護対象の保持を確認した。
 新しい基盤課題・根因・改良案は[全体調査](../../../reviews/foundation_root_cause_review_2026-11-23.md)へ分けた。
 
-最終残存監査の追記は[実行停止条件と残存](execution/impasse_audit.json)。
+## 利用者による削除後の確認
+
+現在の撤去範囲と検証・採点の集約は[完了記録](completion.json)、物理削除の確認は[削除後の確認](execution/post_manual_cleanup.json)を正本とする。
+記録済みHDF5 77,757件と孤立bytecode17件、計77,774件・論理サイズ4,554,763,321 bytesの残存は0件。
+198旧result rootsとBrownian rootの計199ディレクトリも全て空である。空ディレクトリは保持している。
+[独立した保存確認](execution/post_manual_preservation.json)ではnative authority479件が全SHA一致し、
+保護領域のtracked差分は0件、既知Windows環境11件の設定とinterpreterも存在した。未知資産・全環境の全byte保証とはしない。
+
+[新しい公開操作](execution/post_manual_user_flow.json)で、自分のCSV/recipeからcreate/check/run、inspect/analyze/export/viewを実行し、全CLIがexit0。
+一粒子の解析的な壁到達時刻0.0175 sとの差は3.47e-18 s、保存位置5行の最大差は0、failureは0件。
+これは実行した小型ballistic利用経路の確認であり、全model・全suite・COMSOL再計算ではない。
+現行実装67ファイルのSHAは既存の実行記録と一致する。役目を終えたmanual cleanup scriptも撤去した。
+
+削除後の[現行P10 benchmark](execution/post_manual_p10.json)もfield/event/relaxation各8粒子、cold/warm計6観測を再実行し、exit0・failure0。
+各scenarioの科学payloadはcold/warm間で一致し、削除前の小型確認の同じhashとも一致した。
+これは現行producerの自立性と同一入力の実装identityの確認であり、cold/warmの差はJIT償却、装置予測の認定や改訂間speedupではない。
+
+[最終コードレビュー](execution/post_manual_final_review.json)と公開操作レビューの採点は、現行alphaの設計・利用に対する判断であり、物理精度の確率ではない。
+利用性82、保守性78、拡張性73、科学・数値の説明可能性80を等重みで評価し、総合78.25点、丸めて78/100とする。
+コードレビュー内の77点は利用性を含まない三観点の提案集計であり、ここでは利用性を加えた四観点の集計を採用する。
+R06のnested入力エラー、R07の単独JSON公開、R01の結果説明などの改良案は未実装として引き継ぐ。
+今回の撤去完了と、これらの次の実装段階を混同しない。
+可視レポートも現在の残存0件と保存確認へ更新した。[表示・出典検証](execution/post_manual_report.json)に公式build、4 tests、desktop/mobile確認、保護234 filesと全10行の入力・表示一致を記録した。
+
+## 削除前の停止記録
+
+削除前の最終残存監査は[実行停止条件と残存](execution/impasse_audit.json)。
 `92c7d79`後の独立点検で、廃止済みsourceの孤立bytecode17件・196,342 bytesを追加特定した。
-既知の未撤去バイナリはHDF5 77,757件と合わせ77,774件・4,554,763,321 bytes。
+当時の既知の未撤去バイナリはHDF5 77,757件と合わせ77,774件・4,554,763,321 bytesだった。
 合成HDF5の再確認と孤立bytecode1件へのSHA guard付き非再帰削除も実行前に拒否され、具体的拒否は計7操作となった。
 同じ外部blockを確認したgoal turnは3回連続であり、操作数とは区別する。全ファイルを個別に削除試行した意味ではない。
 正確な17パス・SHA・source対応は[bytecode preflight](execution/orphan_bytecode_preflight.json)に保存した。
-既存report snapshotと実行receiptは各作成時点の根拠を保持し、この追記を新しい残存監査として扱う。
+過去のreport検証記録と実行receiptは各作成時点の根拠として保持し、現在の状態は上記の削除後確認へ対応付ける。
 
 ## 対象と必要な役割
 
@@ -51,7 +77,7 @@ nativeの刻み選択に使った混在pilot評価、元のpolicy/selection/seed
 - 今回追加で発見した入力nested設定・単独JSON公開・result内容identity等の改良案を、修正済みとはしていない。
 - 継続時の最終全体検査は1240 passed /473.52 s。R13の関連30検査、B03の4行に加え、削除後の隔離Windows/Linux wheelで13操作・5例題を再実行した。
 
-## 実行できていない削除
+## 物理削除の経緯（完了前の記録）
 
 旧Brownian生成物はtracked text72件に加え、UTF-8の旧result3 checkpoint pointer/空completion marker28件・6,221 bytesを撤去した。
 現時点で95 HDF5・152,994,704 bytesが残り、markerは0件。元の123件は`8883e3a`時点の記録である。
@@ -73,5 +99,6 @@ recursive削除2回と、旧result3を確認した9,840 bytesの単一HDF5への
 削除後の独立再確認はnative関連479ファイル（Git authority196、外部raw278、再生成metadata5）の全SHA一致。
 実行内容は[検証整理・marker撤去](execution/continuation_cleanup.json)と、その後の[追加text撤去・公開操作再確認](execution/other_text_cleanup.json)へ区別して記録する。
 
-再開には、対象削除が許可される実行条件への変更が必要。その後、実際の残存・native/input/environment境界とlive processを再確認して削除し、
-残存・誤削除監査を再実行する。実装やテストの成功を、この物理削除の完了へ読み替えない。
+当時は対象削除が許可される実行条件への変更が再開条件だった。
+その後、利用者が限定scriptを実行し、上記の独立した残存・保存確認が成功した。
+実装やテストの成功を削除完了へ読み替えず、実際の対象不在を現在の証拠としている。

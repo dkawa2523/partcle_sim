@@ -1,0 +1,64 @@
+{
+  "status": "CLASSIFIED_PHYSICAL_RETIREMENT_VERIFIED",
+  "recorded_utc": "2026-11-23T08:16:24.998680+00:00",
+  "inspected_head": "5badb0c362515a00772b2bdeddad457b920afc2c",
+  "branch": "cleanup/current-only-platform",
+  "operator": "User performed the deletion after receiving the bounded manual script; assistant independently inspected the resulting state. User terminal stdout and exact deletion time were not captured.",
+  "classified_scope": {
+    "before_files": 77774,
+    "before_logical_bytes": 4554763321,
+    "hdf5_files": 77757,
+    "orphan_bytecode_files": 17,
+    "remaining_files": 0,
+    "old_result_roots_checked": 199,
+    "all_old_result_roots_empty": true,
+    "scope_limit": "Exact known retired targets and classified old result roots; not a whole-workspace purge. Logical input sizes, not measured free disk capacity."
+  },
+  "preservation": {
+    "manifest_files_independently_sha256_checked": 479,
+    "missing": 0,
+    "sha256_mismatches": 0,
+    "retained_git_authority": 196,
+    "external_raw_inputs": 278,
+    "local_regenerated_metadata": 5,
+    "known_windows_environment_configs_and_interpreters_present": 11,
+    "protected_old_code_model_dataset_tracked_diff": [],
+    "limits": "Known native authority manifest and protected tracked scope. Full byte integrity of every environment or unknown untracked asset was not inventoried."
+  },
+  "fresh_public_flow": {
+    "status": "passed",
+    "sequence": "init -> own CSV/recipe edit -> create -> check -> run -> inspect/analyze/export/view",
+    "all_public_cli_exit_codes": 0,
+    "particles": 1,
+    "failure_events": 0,
+    "wall_events": 1,
+    "expected_hit_s": 0.0175,
+    "observed_hit_s": 0.017499999999999998,
+    "absolute_hit_error_s": 3.469446951953614e-18,
+    "saved_positions_checked": 5,
+    "maximum_saved_position_error_m": 0,
+    "derived_identity_matches": true,
+    "limits": "One fresh analytic ballistic public workflow, not every model or a new full suite/native/ensemble computation."
+  },
+  "unchanged_source_evidence": {
+    "current_production_and_external_source_files": 67,
+    "sha256_mismatches": [],
+    "previous_core_full": "1240 passed / 473.52 s, unchanged code/test state 08ac61b",
+    "previous_external_full": "156 passed / 39.10 s at 8883e3a, affected external source unchanged",
+    "new_full_suite_or_native_solve": false
+  },
+  "finished_manual_helper": {
+    "path": ".artifacts/current_only_20261123/manual_cleanup.ps1",
+    "pre_removal_sha256": "e1377cc778badb4b81eb4f95eb26ff35b6f0d2910ad973763f3180f751e03a82",
+    "bytes": 4373,
+    "status": "Removed by explicit text patch after completed user deletion and independent preservation check; not kept as a permanent cleanup subsystem."
+  },
+  "records": {
+    "post_manual_preservation.json": "62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c",
+    "post_manual_user_flow.json": "f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3",
+    "post_manual_final_review.json": "e30717000d4ad127b65e79a5126ba0b45d93e4d5b41e42125ceb96cdac22c0fd"
+  },
+  "historical_record_policy": "blocked_cleanup.json, impasse_audit.json, final_execution.json and previous report receipts remain frozen observations from before user deletion; this record supersedes their remaining-binary status for current classified scope.",
+  "new_improvements": "R10/R13 were implemented in the prior cleanup. R01-R09/R11/R12/R14 remain proposals or capability limitations; cleanup completion does not claim these were implemented or scientifically certified.",
+  "report_refresh": "Current visible status is refreshed separately and verified in post_manual_report.json; no build or browser result is claimed by this physical-retirement receipt."
+}

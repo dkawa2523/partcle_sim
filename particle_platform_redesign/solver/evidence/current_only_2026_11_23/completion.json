@@ -1,0 +1,151 @@
+{
+  "status": "COMPLETE_CLASSIFIED_RETIREMENT",
+  "recorded_utc": "2026-11-23T08:29:53.534278+00:00",
+  "inspected_source_head": "5badb0c362515a00772b2bdeddad457b920afc2c",
+  "branch": "cleanup/current-only-platform",
+  "scope": "Current-only software/fixture/test/benchmark retirement and classified generated artifacts. New foundation improvement proposals remain separately scoped proposals; no claim they were implemented.",
+  "remaining_required_cleanup_work": [],
+  "classified_binary_retirement": {
+    "operator": "User",
+    "prior_files": 77774,
+    "prior_logical_bytes": 4554763321,
+    "remaining_files": 0,
+    "hdf5": 77757,
+    "orphan_bytecode": 17,
+    "old_result_roots_empty": 199,
+    "limits": "Known classified targets, not all workspace binary assets. Logical bytes are not measured reclaimed disk capacity. User terminal output/deletion timestamp were not captured."
+  },
+  "known_preservation": {
+    "sha256_compared_files": 479,
+    "missing": 0,
+    "sha256_mismatches": 0,
+    "known_windows_environment_configs_and_interpreters_present": 11,
+    "old_code_model_dataset_tracked_changes": [],
+    "limits": "Exact known native authority manifest and protected tracked scope; not full byte-integrity proof for every environment or unknown asset."
+  },
+  "new_public_flow": {
+    "status": "passed",
+    "sequence": "init -> own CSV/recipe -> create/check/run -> inspect/analyze/export/view",
+    "cli_commands": 8,
+    "additional_edit_and_analytic_python_steps": 2,
+    "particles": 1,
+    "failures": 0,
+    "analytic_wall_hit_s": 0.0175,
+    "absolute_hit_error_s": 3.469446951953614e-18,
+    "saved_positions_checked": 5,
+    "max_saved_position_error_m": 0,
+    "derived_identity_matches": true
+  },
+  "new_affected_benchmark": {
+    "command": "uv run --locked python -m tests.performance.p10_compiled --scenarios field event relaxation --field-particles 8 --event-particles 8 --relaxation-particles 8 --repeats 1 --warmups 1 --json .artifacts/current_only_20261123/post_manual_p10.json",
+    "exit_code": 0,
+    "observations": 6,
+    "failures": 0,
+    "cold_warm_scientific_identity": "exact within each scenario",
+    "prior_equal_input_scientific_identity": "exact for all three scenarios",
+    "limits": "Tiny producer/engine smoke with independent C03 verification retained, not new scale/precision/physical certification or inter-revision speedup. Cold/warm differences are JIT amortization."
+  },
+  "unchanged_source_and_prior_executions": {
+    "current_source_hashes_checked": 67,
+    "source_mismatches": [],
+    "verification_scenario_source_hashes_checked_by_independent_review": 76,
+    "linked_receipts_checked_by_independent_review": 32,
+    "core_full": "1240 passed / 473.52 s at unchanged code/test state 08ac61b",
+    "external_full": "156 passed / 39.10 s at 8883e3a; affected external source unchanged",
+    "new_full_suite_or_native_comsol_solve": false
+  },
+  "report": {
+    "status": "complete",
+    "quality_rows": 10,
+    "input_snapshot_dist_rows": "all10 equal",
+    "desktop_mobile_live_dom": "final reviewed values verified",
+    "snapshot_tests": "4 passed / 0.93 s",
+    "official_build": "passed",
+    "protected_runtime_files": "234 unchanged",
+    "snapshot_sha256": "sha256:12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191",
+    "html_sha256": "9a4a9c6503497efeb4b465080dafe35776b4d2e8b96ae2309ae66a160e091561",
+    "preview": "http://127.0.0.1:4176/",
+    "publication_or_access_changes": false
+  },
+  "local_documentation": {
+    "maintained_documents": 33,
+    "project_skills": 4,
+    "errors": [],
+    "foundation_review_local_file_and_line_references": 34,
+    "check_notes": "The generic link helper does not parse existing :line links; an explicit line-aware check passed. Initial root JSON read used Windows default encoding and was corrected to explicit UTF-8; source/dist bytes and final rendered values passed."
+  },
+  "independent_reviews": {
+    "preservation_and_residuals": "PASS, no mandatory discrepancy",
+    "current_user_flow": "PASS with remaining product improvement findings",
+    "current_code_science_maintenance": "Scoped findings supported; no newly demonstrated current wrong-physics case or false parity certification",
+    "closure_record_and_updated_proposal_status": "PASS, no mandatory discrepancy",
+    "final_report": "PASS after historical labels were clarified and final all10 rows were checked across input/snapshot/dist/HTTP/live DOM"
+  },
+  "final_score": {
+    "dimensions": {
+      "usability": 82,
+      "maintainability": 78,
+      "extensibility": 73,
+      "scientific_explainability": 80
+    },
+    "weights": {
+      "usability": 0.25,
+      "maintainability": 0.25,
+      "extensibility": 0.25,
+      "scientific_explainability": 0.25
+    },
+    "unrounded": 78.25,
+    "rounded": 78,
+    "out_of": 100,
+    "meaning": "Subjective engineering/use/explanation assessment of the supported current alpha, not probability of correct physics or percentage of scientific validation. The separate code-review three-dimension weighted proposal rounds to77 and omits usability."
+  },
+  "remaining_product_improvements": [
+    {
+      "id": "R06",
+      "status": "unresolved public input error bug",
+      "source": "src/chamber_particles_tools/source_builder/producer.py:250"
+    },
+    {
+      "id": "R07",
+      "status": "unresolved interrupted analysis JSON publication bug",
+      "source": "src/chamber_particles_tools/cli.py:228"
+    },
+    {
+      "id": "R01",
+      "status": "resolved physics explanation metadata incomplete",
+      "source": "src/chamber_particles/physics/catalog.py:971"
+    },
+    {
+      "ids": [
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R08",
+        "R09",
+        "R11",
+        "R12",
+        "R14"
+      ],
+      "status": "Remaining proposals or capability boundaries, not claimed current wrong-physics cases or completed implementation"
+    }
+  ],
+  "finished_task_helpers": {
+    "prior_removed": 9,
+    "manual_cleanup_ps1_removed_after_completed_role": true,
+    "new_permanent_cleanup_or_diagnostic_framework": false,
+    "new_report_qa_helper_sources": false
+  },
+  "historical_record_policy": "Pre-manual blocked_cleanup/impasse/final_execution/report_scope/report_verification remain frozen phase records. Current state is owned here and by post_manual_cleanup, not silently rewritten in old observations.",
+  "remote_ci_scope": "Production/test state08ac61b has successful Windows/Linux release CI. Last observed metadata-only92c7d79 and5badb0c release runs were still in progress; no claim of terminal success for those runs or the next metadata commit.",
+  "evidence_sha256": {
+    "execution/post_manual_cleanup.json": "c04188a4f6e900b07c256e09fb0d39d43640700f46f2b68b438712572a6f303d",
+    "execution/post_manual_preservation.json": "62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c",
+    "execution/post_manual_user_flow.json": "f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3",
+    "execution/post_manual_final_review.json": "e30717000d4ad127b65e79a5126ba0b45d93e4d5b41e42125ceb96cdac22c0fd",
+    "execution/post_manual_p10.json": "eb87d416e4547c0938d8a2ad99c0af6257a57a3bde9e66bdf36a13798cfb048b",
+    "execution/post_manual_report.json": "c0788bc27697b4e7b27d8d59f80d76178045e04cb9b63459fcbbed296be9ef11",
+    "../../../reviews/foundation_root_cause_review_2026-11-23.md": "6772535c4b062ab7293c5393defe1746deb62b4db4f21a00de9a557e47d7cea4"
+  },
+  "evidence_path_basis": "Relative to the directory containing completion.json."
+}

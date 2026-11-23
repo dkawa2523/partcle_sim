@@ -1,0 +1,187 @@
+{
+  "status": "complete",
+  "recorded_utc": "2026-11-23T08:27:40.400882+00:00",
+  "source_head": "5badb0c362515a00772b2bdeddad457b920afc2c",
+  "scope": "Refresh existing report quality status after user manual deletion; no physics, new A/P/native/full-suite calculation or publication",
+  "current_cleanup_status": "CLASSIFIED_PHYSICAL_RETIREMENT_VERIFIED",
+  "classified_removed_files": 77774,
+  "prior_logical_bytes": 4554763321,
+  "classified_remaining_files": 0,
+  "logical_bytes_limit": "Prior logical input size, not measured free disk capacity",
+  "current_receipts": [
+    {
+      "path": "solver/evidence/current_only_2026_11_23/execution/post_manual_cleanup.json",
+      "sha256": "sha256:c04188a4f6e900b07c256e09fb0d39d43640700f46f2b68b438712572a6f303d"
+    },
+    {
+      "path": "solver/evidence/current_only_2026_11_23/execution/post_manual_preservation.json",
+      "sha256": "sha256:62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c"
+    },
+    {
+      "path": "solver/evidence/current_only_2026_11_23/execution/post_manual_user_flow.json",
+      "sha256": "sha256:f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3"
+    }
+  ],
+  "app": {
+    "id": "report:c9a85c07-6c83-42c2-9aa3-5d3037be4638",
+    "title": "半導体チャンバー粒子輸送基盤 — 製品仕様と詳細実装計画",
+    "buildStatus": "complete",
+    "identity_title_filters_preserved": true,
+    "block_ids_layout_preserved": true,
+    "unrelated_query_rows_and_reviewed_sources_preserved": [
+      "case_audit",
+      "trajectory_divergence",
+      "design_decisions",
+      "physics_scope",
+      "module_responsibilities",
+      "numerical_contracts",
+      "result_layers",
+      "implementation_work_packages",
+      "roadmap"
+    ],
+    "shared_generated_binding_change": "Current quality-input SHA refreshed by the permanent builder in each Bound authority snapshot and catalog entry; other reviewed source metadata unchanged",
+    "quality_rows": 10
+  },
+  "authored_changes": [
+    "report_app/src/content/report/ReportContent.jsx: one cleanup status sentence",
+    "report_app/src/data.json",
+    "solver/evidence/current_only_2026_11_23/report_inputs/quality.json"
+  ],
+  "previous_phase_files_frozen": [
+    {
+      "path": "solver/evidence/current_only_2026_11_23/report_scope.json",
+      "sha256": "sha256:b1d7c74fceea5d6439816161f71e21de08538df70696ae38f101816383b22d39"
+    },
+    {
+      "path": "solver/evidence/current_only_2026_11_23/report_verification.json",
+      "sha256": "sha256:1cc48468820203cf858a96ade809c1921ed3947d9d7db26dabbeff35c1239bd4"
+    },
+    {
+      "path": "solver/evidence/current_only_2026_11_23/final_execution.json",
+      "sha256": "sha256:d5b7e2df6673295d8de77d702d66b7931c2265609c2850071fc99f6835097ccb"
+    },
+    {
+      "path": "solver/evidence/current_only_2026_11_23/report_execution_receipts.json",
+      "sha256": "sha256:a7925ef66cbe9b76a187a18bdb06c97e359b6ebd904a9cddb22d4f9e14e07af2"
+    },
+    {
+      "path": "solver/evidence/current_only_2026_11_23/report_inputs/assessment.json",
+      "sha256": "sha256:d023d015772874bc8c0287f8e6c857a72a4fff906a7da81a644f02f428af02ea"
+    },
+    {
+      "path": "solver/evidence/current_only_2026_11_23/report_inputs/performance.json",
+      "sha256": "sha256:5c2d5a6ad9b353e186b371505bac6fb488e3614f744fda3950bc668d12cf338e"
+    }
+  ],
+  "protected_runtime": {
+    "official_verifier": "Protected Data app runtime verified (234 files).",
+    "exact_bytes_compared_to_head": 234,
+    "all_unchanged": true,
+    "manifest_unchanged": true
+  },
+  "source_snapshot": {
+    "path": "report_app/src/data.json",
+    "sha256": "sha256:12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191",
+    "authority_and_input_bindings": 26,
+    "all_hashes_match": true
+  },
+  "reviewed_source_bindings": {
+    "explicit_projection_bindings": 43,
+    "all_match": true,
+    "reviewer": "/root/report_alignment/report_copy_review"
+  },
+  "build": {
+    "version": 1,
+    "kind": "separate-data-v1",
+    "html": {
+      "path": "index.html",
+      "sha256": "9a4a9c6503497efeb4b465080dafe35776b4d2e8b96ae2309ae66a160e091561",
+      "bytes": 2405647
+    },
+    "snapshot": {
+      "path": "snapshot.12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191.json",
+      "sha256": "12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191",
+      "bytes": 210043
+    },
+    "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "sourceSnapshotSha256": "12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191"
+  },
+  "official_build": "Installed Data prebuilt separate-data build via existing WSL Node, exit0; unchanged runtime and compiler",
+  "build_advisory": "Shared RichNarrative dynamic-content advisory; changed narrative and real DataTable values rendered and checked",
+  "checks": [
+    {
+      "command": "uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q",
+      "result": "4 passed in0.93s"
+    },
+    {
+      "command": "<codex-node> scripts/verify-protected-runtime.mjs",
+      "result": "234 verified"
+    },
+    {
+      "command": "git cat-file --batch 5badb0c:<234protectedpaths> and exact byte compare",
+      "result": "234 exact matches"
+    },
+    {
+      "command": "<linux-node> <installed-data>/data-app.mjs build --project-dir report_app --separate-data",
+      "result": "passed"
+    }
+  ],
+  "rendered_checks": {
+    "browser": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "desktop": {
+      "width": 1440,
+      "height": 1000
+    },
+    "mobile": {
+      "viewport": 390,
+      "document": 375
+    },
+    "quality_completion_and_current_native_row": true,
+    "quality_source_tabs": [
+      "Overview",
+      "Data preview",
+      "Evidence flow"
+    ],
+    "historical_blocked_ledger_label": true,
+    "quality_pagination": "All8firstpage+2secondpage rows exactly compared; firstpage restored",
+    "mobile_source_preview": true,
+    "internal_table_scroll": true,
+    "browser_errors": [],
+    "complete_marker_cleared": true,
+    "visual_review": "Desktop quality and mobile quality screenshots inspected",
+    "receipt": {
+      "path": "solver/.artifacts/current_only_20261123/post_manual_report/render_receipt.json",
+      "sha256": "sha256:c583cb7a695bbf762b7fbb0ec89ea90b104e389a9c8bc5241d0381fb236b6ffb"
+    },
+    "screenshots": {
+      "desktop-quality-page2.png": "sha256:4fe8438af1205e4d4af7e2f23125b84936912dac0011dc68ef2b0fa78155d38c",
+      "desktop-quality.png": "sha256:52fc3eef57ebfe8a85f596eb7bd20a9f42ad8bfa3ed77389910614055c701809",
+      "desktop-source.png": "sha256:d45a1663d8d31ffd9dd5e9487481ca158980adaea0480fdf787f412cff3a355f",
+      "mobile-quality.png": "sha256:24c94a1ec519ed4e862bfa09154fe1f3ace46dfd728a10026ef9aed37b189eff"
+    },
+    "all10_input_source_dist_http_dom_rows_match": true,
+    "first_live_row": [
+      "prior_pass",
+      "以前のcore/scenario 1240件（source不変）",
+      "08ac61bの実行状態で1240件、JUnit473.507秒。手動削除後の新規全体実行とはしない。解析・event・Brownian等の既存証拠を保持し、全native方程式や実機予測は認定しない"
+    ],
+    "mobile_first8_rows_match": true,
+    "loaded_snapshot_urls": [
+      "http://127.0.0.1:4176/snapshot.12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191.json"
+    ],
+    "fresh_browser_context": true
+  },
+  "fresh_public_flow_scope": "One own-CSV ballistic workflow;8 public CLI invocations plus input-edit/analytic-check Python records. Hit0.0175s,error3.469446951953614e-18s,5 saved positions match. Not a full suite or native/ensemble qualification.",
+  "retained_limits": [
+    "Known classified retirement scope only, not every workspace binary.",
+    "Prior full-suite/wheel/performance/A-P records retain their execution phase; historical policy blocks are not current residual status.",
+    "Open input-shape/analyzeJSON publication/result-integrity findings remain unchanged.",
+    "No commit,push,publishing,sharing or new permanent helper."
+  ],
+  "preview": "http://127.0.0.1:4176/",
+  "quality_input": {
+    "path": "solver/evidence/current_only_2026_11_23/report_inputs/quality.json",
+    "sha256": "sha256:96d48347f0b8f081910ced5e82354f00a7ab4db27fa6742b39e6f0a967010856"
+  },
+  "qa_discrepancy_resolution": "Earlier screenshots accurately matched an earlier build whose copied labels lacked explicit prior-phase wording. Historical core/text/R13 labels were restored in the reviewed input, snapshot regenerated, official build rerun, and all10 reviewed rows compared exactly across source/dist/HTTP/live DOM; desktop/mobile screenshots and source panels recaptured."
+}
