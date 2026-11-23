@@ -1,0 +1,111 @@
+{
+  "queries": {
+    "implementation_work_packages": {
+      "label": "User-flow gates with executed source-bound performance/capacity acceptance",
+      "rows": [
+        {
+          "capability": "Own CSV mesh/field/source to runnable case",
+          "deliverable": "Mapping4 + source2 + recipe2 with explicit complete source-table set",
+          "gate": "Load/check/run from installed wheel",
+          "package": "Installed input flow"
+        },
+        {
+          "capability": "Result alone to analysis/export/view",
+          "deliverable": "Context, result5 and committed payload identity",
+          "gate": "Move/remove source case and verify consumers",
+          "package": "Reusable results"
+        },
+        {
+          "capability": "Same engine and equation meaning",
+          "deliverable": "Complete source-bound P14/P14-U before/after and process identity receipts",
+          "gate": "All 87 current timed observations passed: P14 baseline 19 once/current 57 (3 repeats); P14-U 18 per version. Saved core/full or core/probe hashes and executed input identities match.",
+          "package": "Scientific preservation"
+        },
+        {
+          "capability": "CLI and Python in one wheel",
+          "deliverable": "Five editable installed examples",
+          "gate": "Clean installed acceptance with no checkout",
+          "package": "Distribution"
+        },
+        {
+          "capability": "10k / 100k / 1M serial orthogonal and representative workloads",
+          "deliverable": "Complete P14 preset: 19 rows; P14-U none/sample: 3 repeats per count and mode",
+          "gate": "Native exit 0; maximum current owned plan 1,032,539,730 B within 8 GiB; maximum single-process RSS 1,629,777,920 B, not whole-team memory.",
+          "package": "Scale and capacity"
+        },
+        {
+          "capability": "10k particles, 320 macros, 1/4 workers, none/sample",
+          "deliverable": "12 source-bound observations; one target capture per ID, zero failures and no live children",
+          "gate": "Within-mode full science and cross-mode core identical; plans and every time sample retained; no large process-matrix extrapolation",
+          "package": "Same-run process/output"
+        },
+        {
+          "capability": "Public API intervals separate from payload-SHA/read/science/verify costs",
+          "deliverable": "All row times and memory values with input/source bindings",
+          "gate": "Shared host and overlapping jobs; no isolated matched timing experiment or causal speedup/regression assertion",
+          "package": "Timing and integrity scope"
+        },
+        {
+          "capability": "Short cache paths and durable returned-observation sidecars",
+          "deliverable": "Post-measurement 180-file client, real 256-particle smoke and 4 fault regressions",
+          "gate": "All 51 installed production sources/wheel implementation unchanged; full 87 bind measured 59 before/after, contained in archived 179. The modified 180-file client has separate smoke/fault scope, not a claimed full 1M rerun.",
+          "package": "Operational followup"
+        }
+      ],
+      "source": {
+        "evidenceFlow": [
+          {
+            "detail": "{\"current_observations\": 87, \"baseline_p14\": 19, \"baseline_p14u\": 18, \"current_measurement_client_files\": 179, \"later_client_files\": 180, \"production_files_unchanged\": 51, \"timing_interpretation\": \"Shared-host observations, not an isolated matched timing experiment. Current P14/P14-U overlapped the first failed baseline P14-U attempt and portions of A/P, wheel and verification work. The replacement baseline overlapped later work and had different scheduling/load. Model, numerical settings, executed input identities and source bytes are controlled, but row-time differences alone do not establish causal speedup or regression.\", \"pre_all_and_post_all_measured_files\": 59, \"source_timing_scope\": \"The original 179 snapshot at 20:58:16 JST was during the first process W1 timing interval. The 59-file runtime/helper implementation/config roster captured at 20:56:57 JST preceded that interval and all 87 current observations; all 59 values match after execution and in 179.\", \"source_capture_precision_note\": {\"path\": \"solver/evidence/foundation_2026_11_23/source_capture_scope.json\", \"sha256\": \"sha256:2a5725c5222428361a832dc86dc4ca297582d06361b1ebffe511a1ec5dc16f3e\"}}",
+            "title": "Execution and source phases"
+          }
+        ],
+        "files": [
+          {
+            "availability": "bound_local",
+            "execution_source": "Complete measured59 runtime/helper/config before/after; byte-identical containment in archived179; isolated6555 baseline plus separately scoped harness followup.",
+            "location": "solver/evidence/foundation_2026_11_23/performance_acceptance.json",
+            "scope": "Actual complete local matrices; recorded source/input/science/timing/memory controls and explicit shared-host caveats",
+            "sha256": "sha256:b573def86972aec89609be25cf416eaa9cd6936d85c0286420088b473ab40f27"
+          },
+          {
+            "availability": "bound_local",
+            "execution_source": "Complete measured59 runtime/helper/config before/after; byte-identical containment in archived179; isolated6555 baseline plus separately scoped harness followup.",
+            "location": "solver/evidence/foundation_2026_11_23/source_map.json",
+            "scope": "Archived179 inventory contains all51 production sources and complete59 measured roster; postrun values match, while the59 roster supplies the pre-all timestamp.",
+            "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a"
+          },
+          {
+            "availability": "bound_local",
+            "execution_source": "Complete measured59 runtime/helper/config before/after; byte-identical containment in archived179; isolated6555 baseline plus separately scoped harness followup.",
+            "location": "solver/evidence/foundation_2026_11_23/baseline_source.json",
+            "scope": "Isolated clean6555 baseline source176",
+            "sha256": "sha256:1ee4cf638fc4717228cea55465b01438330551fd2ee5a683e3322fd57609cd4f"
+          },
+          {
+            "availability": "bound_local",
+            "execution_source": "Complete measured59 runtime/helper/config before/after; byte-identical containment in archived179; isolated6555 baseline plus separately scoped harness followup.",
+            "location": "solver/evidence/foundation_2026_11_23/harness_followup_execution.json",
+            "scope": "Later operational client-only repair; actualsmoke/fault tests and unchanged51 production sources",
+            "sha256": "sha256:c5411af9f07cc3b94ef43161beb5159002e63551c1fe4313999bc2ca3a203f6b"
+          },
+          {
+            "availability": "bound_local",
+            "execution_source": "59 pre-all/post-all implementation roster; byte-identical179 superset and unchanged51 production source bytes.",
+            "location": "solver/evidence/foundation_2026_11_23/source_runtime59.json",
+            "scope": "59-file production/helper implementation/config roster captured before all87 and equal afterward.",
+            "sha256": "sha256:cfabdd4604a80cfffd27f364beabb0542140b052611303691293ffa7fe1a47bf"
+          },
+          {
+            "availability": "bound_local",
+            "execution_source": "59 pre-all/post-all implementation roster; byte-identical179 superset and unchanged51 production source bytes.",
+            "location": "solver/evidence/foundation_2026_11_23/source_capture_scope.json",
+            "scope": "Source acquisition timestamps and179 superset/package-marker interpretation; immutable original receipts retained.",
+            "sha256": "sha256:2a5725c5222428361a832dc86dc4ca297582d06361b1ebffe511a1ec5dc16f3e"
+          }
+        ],
+        "label": "Complete recorded local performance acceptance",
+        "scope": "Shared-host observations, not an isolated matched timing experiment. Current P14/P14-U overlapped the first failed baseline P14-U attempt and portions of A/P, wheel and verification work. The replacement baseline overlapped later work and had different scheduling/load. Model, numerical settings, executed input identities and source bytes are controlled, but row-time differences alone do not establish causal speedup or regression."
+      }
+    }
+  }
+}

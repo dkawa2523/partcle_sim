@@ -1,0 +1,169 @@
+{
+  "scope": "Actual remote CI for the harness-only follow-up commit; full scientific/performance results and later metadata commits are separate evidence.",
+  "repository": "dkawa2523/partcle_sim",
+  "branch": "refactor/foundation-usability",
+  "commit": "d8289919f6c42dd29b07b64ceaf73d8528b17acf",
+  "observed_at_utc": "2026-11-23T14:53:02.559787+00:00",
+  "workflow": {
+    "conclusion": "success",
+    "created_at": "2026-11-23T14:12:58Z",
+    "event": "push",
+    "head_sha": "d8289919f6c42dd29b07b64ceaf73d8528b17acf",
+    "html_url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45191792919",
+    "id": 45191792919,
+    "name": "solver-release",
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-11-23T14:50:36Z"
+  },
+  "jobs": [
+    {
+      "completed_at": "2026-11-23T14:50:07Z",
+      "conclusion": "success",
+      "failed_steps": [],
+      "html_url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45191792919/job/137751758590",
+      "id": 137751758590,
+      "name": "ubuntu-latest / Python 3.12",
+      "started_at": "2026-11-23T14:13:01Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-11-23T14:50:36Z",
+      "conclusion": "success",
+      "failed_steps": [],
+      "html_url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45191792919/job/137751758786",
+      "id": 137751758786,
+      "name": "windows-latest / Python 3.12",
+      "started_at": "2026-11-23T14:13:01Z",
+      "status": "completed"
+    },
+    {
+      "completed_at": "2026-11-23T14:50:36Z",
+      "conclusion": "skipped",
+      "failed_steps": [],
+      "html_url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45191792919/job/137775466314",
+      "id": 137775466314,
+      "name": "Publish GitHub release",
+      "started_at": "2026-11-23T14:50:36Z",
+      "status": "completed"
+    }
+  ],
+  "execution": {
+    "Linux": {
+      "core_and_public_scenarios": "1336 passed, 2 skipped, 1 warning in 1313.65s (0:21:53)",
+      "external_without_live_COMSOL": "168 passed in 74.36s (0:01:14)",
+      "new_harness_fault_regressions": "Four cases in tests/scenarios/test_performance_reporting.py are included by the unfiltered standard scenario command; q logs give aggregate counts, not individual test names.",
+      "p14_matrix_smoke": {
+        "scope": "complete smoke preset, not full release or P14-U scale matrix",
+        "observations": 8,
+        "conditions": 8
+      },
+      "clean_wheel": {
+        "status": "complete",
+        "core_public_operations": [
+          "load_case",
+          "check_case",
+          "simulate",
+          "open_result"
+        ],
+        "process_particles": 32,
+        "workers": 2,
+        "serial_process_science_equal": true,
+        "live_children_after_return": 0,
+        "console_and_module": "complete",
+        "public_error_exit": 2
+      },
+      "checkout_free_workflow": {
+        "status": "complete",
+        "CLI_commands": 13,
+        "examples": 5,
+        "cwd_uses_checkout": false,
+        "fixture_imports": [],
+        "editable_charged_csv": "import/create/run passed"
+      },
+      "binding": {
+        "production_python_files": 51,
+        "all_hashes_equal_exact_committed_Git_bytes": true,
+        "readme_and_lock_match_commit": true,
+        "metadata_text_matches_wheel": true,
+        "python": "3.12.16 (main, Oct 26 2026, 02:48:44) [GCC 15.2.0]"
+      },
+      "downloaded_receipts_sha256": {
+        "clean-wheel-smoke.json": "57a9fb31cb344f194d6be7a099ae429c72d203bb4eef71cc7374376fd570659e",
+        "installed-workflow.json": "55a464c32302d1ae421e8a175655905072f502e132783c7e83f6bfe08ea72f8b",
+        "p14-smoke.json": "c8497f426c83580d8f470ca127e7fd3297da2101444ebb59af9b8b32264054a2"
+      },
+      "job_log_sha256": "1fa4c93ca09252fd90580c90404b12db4c41f89762ab4120ebd82921cbccd900"
+    },
+    "Windows": {
+      "core_and_public_scenarios": "1337 passed, 1 skipped, 1 warning in 1278.71s (0:21:18)",
+      "external_without_live_COMSOL": "168 passed in 79.62s (0:01:19)",
+      "new_harness_fault_regressions": "Four cases in tests/scenarios/test_performance_reporting.py are included by the unfiltered standard scenario command; q logs give aggregate counts, not individual test names.",
+      "p14_matrix_smoke": {
+        "scope": "complete smoke preset, not full release or P14-U scale matrix",
+        "observations": 8,
+        "conditions": 8
+      },
+      "clean_wheel": {
+        "status": "complete",
+        "core_public_operations": [
+          "load_case",
+          "check_case",
+          "simulate",
+          "open_result"
+        ],
+        "process_particles": 32,
+        "workers": 2,
+        "serial_process_science_equal": true,
+        "live_children_after_return": 0,
+        "console_and_module": "complete",
+        "public_error_exit": 2
+      },
+      "checkout_free_workflow": {
+        "status": "complete",
+        "CLI_commands": 13,
+        "examples": 5,
+        "cwd_uses_checkout": false,
+        "fixture_imports": [],
+        "editable_charged_csv": "import/create/run passed"
+      },
+      "binding": {
+        "production_python_files": 51,
+        "all_hashes_equal_exact_committed_Git_bytes": true,
+        "readme_and_lock_match_commit": true,
+        "metadata_text_matches_wheel": true,
+        "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+      },
+      "downloaded_receipts_sha256": {
+        "clean-wheel-smoke.json": "400627141cbb23e529471202c91490d7d64370239e6ff19e1edc2e21edb30f1f",
+        "installed-workflow.json": "37ae7df8f40458e3b1da3c5c5d69f08afe9f9ae5cc268854df73df4fe466f7fb",
+        "p14-smoke.json": "92482608bb62a9866b05f134afd7782447e8a8cdaf83521d1c1e4d62d1deb6c1"
+      },
+      "job_log_sha256": "a8bf7bc32828f3612f3477cc5c29194d85c1a9190c4699693e95445eee59b8ce"
+    }
+  },
+  "cross_platform_source_and_wheel_binding": {
+    "production_python_files": 51,
+    "Linux_Windows_installed_hashes_equal": true,
+    "downloaded_Linux_wheel_all_51_python_members_equal_commit": true,
+    "production_Git_bytes_unchanged_from_ad1a82": true,
+    "wheel_sha256": "f0f5092409396791e21529e2f1a9d9b1ee9c903077896d85402b712b88a50fdb",
+    "wheel_metadata_sha256": "b5ff4bd1565016e535118e32d87069226508b806d6e3ecad9c7e1d1f4d9d6f2a",
+    "wheel_hash_equal_both_OS_receipts_and_prior_ad1a82_run": true
+  },
+  "skips_and_warning": {
+    "basis": "Actual aggregate counts plus the only skip sites found by git grep at this exact commit; q logs do not give individual skip reasons.",
+    "Linux": "Two Windows-sharing controls (release=True/False) at test_output_publication.py:195 are platform-skipped; the same-handle path-replacement integrity control executes.",
+    "Windows": "One test_result_integrity.py:173 skip when the host denies path replacement while its read handle is open; both Windows-sharing controls execute.",
+    "both_OS_warning": "One RuntimeWarning: overflow encountered in scalar multiply in events.py:470, as present in the job logs."
+  },
+  "documentation_workflow": "No platform-docs run is listed for this harness-only commit; earlier ad1a82 documentation CI remains separately bound.",
+  "publication": "Tag-only Publish GitHub release job skipped; no release or registry publication claimed.",
+  "read_only_operations": "gh run list, REST run/jobs and job-log reads, artifact downloads and local Git/wheel-byte checks. Attempt 1 throughout; no retry, rerun, skip or workflow mutation requested.",
+  "external_evidence_locator": ".artifacts/foundation_ci_d828991 (local downloaded logs, receipts and wheel; not a distributed artifact link)",
+  "not_claimed": [
+    "CI P14 smoke is not the full P14-U release/scale matrix.",
+    "External workflow tests run without live COMSOL and do not certify native parity or device physics.",
+    "This receipt does not change the failed original baseline attempt or qualify later metadata commits."
+  ]
+}

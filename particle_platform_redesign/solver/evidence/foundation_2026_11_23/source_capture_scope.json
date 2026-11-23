@@ -1,0 +1,36 @@
+{
+  "scope": "Precision of original source-capture timing; no execution or qualification result changed",
+  "complete_execution_roster": {
+    "files": 59,
+    "production_files": 51,
+    "archive": "evidence/foundation_2026_11_23/source_runtime59.json",
+    "sha256": "sha256:cfabdd4604a80cfffd27f364beabb0542140b052611303691293ffa7fe1a47bf",
+    "before_original": ".artifacts/foundation_20261123/p14u_frozen_source_before.json",
+    "before_capture_utc": "2026-11-23T11:56:57.267303+00:00",
+    "after_original": ".artifacts/foundation_20261123/p14u_frozen_source_after.json",
+    "after_capture_utc": "2026-11-23T13:56:41.374038+00:00",
+    "before_after_values_equal": true,
+    "coverage": "All 51 production sources, six numerical/benchmark helper implementations, pyproject and lock for the 87 timed observations; implementation closure, not every literally imported file"
+  },
+  "whole_roster": {
+    "files": 179,
+    "archive": "evidence/foundation_2026_11_23/source_map.json",
+    "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
+    "original_capture": ".artifacts/foundation_20261123/source_map_accepted_before.json",
+    "capture_utc": "2026-11-23T11:58:16.731206+00:00",
+    "execution_roster_contained_with_identical_values": true,
+    "limit": "Captured during the first process W1 timed interval and after the original core suite started; not a pre-all-execution snapshot of all 179 files"
+  },
+  "interpretation": "The 59-file execution roster was captured before all 87 timed observations and matches after them. The archived 179-file superset matches post-run values; full core/CI and later 180-file followup retain their individually recorded scopes. Earlier generic 179-file before/after wording must not imply that its acquisition preceded every job.",
+  "immutable_records": "Original source maps, core_execution and raw receipts are retained as captured; this note clarifies their source-before/after flag rather than altering historical execution data.",
+  "package_markers_outside59": {
+    "files": [
+      "tests/__init__.py",
+      "tests/performance/__init__.py",
+      "tests/verification/__init__.py"
+    ],
+    "included_in179": true,
+    "observed_ast": "each consists of one docstring expression, with no imports, assignments, definitions or executable measurement/numerical logic",
+    "qualification": "Do not describe59 as literally every imported file"
+  }
+}

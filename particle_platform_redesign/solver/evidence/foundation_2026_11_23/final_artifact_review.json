@@ -1,0 +1,53 @@
+{
+  "scope": "Independent final user/readout audit of report data and documentation. Read-only inspection and inexpensive numeric/hash/AST checks; excludes reviewer-authored harness implementation qualification and author-owned final build/native UI QA.",
+  "reviewed_at_utc": "2026-11-23T15:38:49.321253+00:00",
+  "snapshot_sha256": "cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739",
+  "remaining_mandatory_findings": 0,
+  "corrected_finding": {
+    "owner": "performance_acceptance.json /source_binding/inventory_snapshot_timing_scope",
+    "problem": "The phrase complete imported runtime/helper/config59 overstated a roster that omits three docstring-only package markers.",
+    "correction": "59-file runtime/helper implementation/config roster; capture precision note and marker exclusions retained.",
+    "verification": "Read actual corrected owner, projection and rebound snapshot; ambiguous phrase absent, all bound hashes and copied rows match.",
+    "owner_sha256": "b573def86972aec89609be25cf416eaa9cd6936d85c0286420088b473ab40f27",
+    "projection_sha256": "5711b0b9e1733bfea09f1bc7b4c8ef98abff15bc23b179cad6f3ba890422da77",
+    "status": "resolved by owner; independently rechecked"
+  },
+  "executed_readout_checks": [
+    {
+      "check": "Snapshot/source binding",
+      "result": "All 10 query payloads present; all 23 authorities, 3 optional projection inputs and 30 reviewed-evidence reference hashes match actual bytes. Imported assessment/quality/performance rows equal their current owning projections."
+    },
+    {
+      "check": "A/P headline and local quantities",
+      "result": "Recomputed capture mean/sample SD and restricted-mean active lifetime from bound per-seed values; all displayed A/P headlines match. Per-seed and native boundary sums equal retained totals. All four boundary33/100us-speed discrepancy rows and their percentage calculations match the assessment."
+    },
+    {
+      "check": "Performance readout",
+      "result": "All 19 P14, 6 P14-U and 4 process display rows round correctly from recorded observations; independent per-stage medians match. Counts 57+18+12=87, baseline19+18=37. Maximum serial owned plan 1032539730B and single-process high-water RSS1629777920B match; 8GiB is the owned-plan budget, not a whole-team or OS cap."
+    },
+    {
+      "check": "Source capture scope",
+      "result": "Archived59 equals both original before/after JSON maps; each value is identical in archived179. Contains51 production files. The three excluded test package markers are present in179 and actual ASTs consist of one docstring only. The179 capture is correctly described as during first W1, not pre-all; later180 client full1M execution is not claimed."
+    },
+    {
+      "check": "README and report qualifications",
+      "result": "Reviewed full solver README, release notes, foundation work record, report prose and reviewed rows. CLI/Python/input/result reuse flow, strict current schemas, known gas-only electrostatics, computational-vs-physical outcomes, timing-load caveats, single-native40-candidate exploratory A/P scope, boundary33 and own-survivor speed reservations are consistent."
+    },
+    {
+      "check": "CI readout",
+      "result": "Quality rows distinguish ad1a82 implementation CI from d828991 harness-only CI; actual1336/1337+168 results, existing platform skips, unchanged51/wheel and skipped publication remain bound to their receipts. No new remote jobs or tests were launched for this audit."
+    }
+  ],
+  "inspected_but_not_executed_here": [
+    "No solver, COMSOL, full core suite, benchmark, raw80-result recomputation or native browser UI was rerun by this audit.",
+    "Author-owned final official build/offline export/native UI evidence is separate and was not executed here. Root reports final17 documentation/snapshot tests passed in1.04s and docs33/skills4 checks on this same snapshot; these are root-executed, not reviewer-executed.",
+    "Historical capture timestamps are reviewed against the preserved named records and precision note; this audit does not pretend to observe past execution in real time."
+  ],
+  "changed_files": "Only this independent review record; no source, report snapshot, projection, authority or implementation changes by reviewer.",
+  "reported_by_root_not_rerun_here": {
+    "snapshot_sha256": "cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739",
+    "documentation_and_snapshot_tests": "17 passed in1.04s",
+    "documentation_and_skills": "33 docs,4 skills valid",
+    "final_browser_source_copy_offline_QA": "author finishing; excluded from this review verdict"
+  }
+}

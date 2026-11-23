@@ -85,8 +85,12 @@
     "qualification": "Actual patched smoke and fault regressions are proportionate to this operational change. Prior full-scale runs remain evidence of the same production code, not an assertion of full 1M rerun using the final harness client"
   },
   "limits": [
-    "The archived 87 timed observations were executed with the original measurement-client SHA and exact 179-file before/after binding",
+    "The 87 timed observations bind 59 production/measurement-helper/config implementation files captured before and after all measurements. The archived179 contains the same values and three docstring-only package markers outside59; its acquisition occurred during the first W1 timed interval, not before all jobs.",
     "No full 1M matrix has been rerun using the modified 180-file measurement client",
     "Native parity and experimental physical validation are not inferred"
-  ]
+  ],
+  "source_capture_scope": {
+    "path": "evidence/foundation_2026_11_23/source_capture_scope.json",
+    "sha256": "sha256:2a5725c5222428361a832dc86dc4ca297582d06361b1ebffe511a1ec5dc16f3e"
+  }
 }

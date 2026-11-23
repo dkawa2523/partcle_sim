@@ -50,14 +50,26 @@ prepared transportをsealする。非空replayはrun所有の一shared rootと�
 
 ## 現行の測定経路
 
-`tests.performance.process_workers`は同じ生成入力でworker数を変えて公開APIを実行する。
+`tests.performance.p14_matrix`はlayout、event、出力、cold/warmと粒子数の直交presetを、
+`p14u_representative`は非一様場・surface release・targetとtime/mesh refinement、RZ検証を所有する。
+release presetの10k/100k/1Mと、選択行だけの実行は区別する。
+`tests.performance.process_workers`は同じ生成入力でworker数を変えて公開APIを実行し、
+none/sample出力を選ぶ。sampleは既存P14-UのID・時刻policyを使う。
 入力作成・warmup、実測、独立したtarget/outcome検査、science比較を分離し、生成入力を残す。
-P14-Uのtime/mesh refinementとRZ検証は別の精度検査として維持する。
 
 計測は`load_case + simulate + open_result`で、spawn、import、compile/cache、IPC、writer、
-shutdownを含む。独立した入力準備、結果検査とhashingは計時外である。
+shutdownを含む。process計測ではmanifestのpayload roster全byteの独立SHA-256読取、
+outcome検査・読取、science hashing・読取、明示的`verify_contents()`を個別に記録し、
+`public_end_to_end`の外へ置く。独立した入力準備も計時外である。
+`open_result`自身の検証は公開API区間に含まれる。result4/5のopen・integrity policyの違いを、
+kernel演算だけのspeedupへ読み替えない。
 一つのserial warmupはpersistent disk cacheを温めるが、後続`simulate`のworker起動費は除外しない。
 source/input hash、条件、全sample、全emitted scienceを記録する。
+
+P14はfresh processとprivate cacheでcold/warmを区別し、P14-Uは各workerの32粒子warmup後の
+公開APIを計時する。独立profileはthroughputへ含めない。P14-U clientは短いprivate cache名と
+計時後の返却observationのdurable sidecarを使い、独立profileでは完了した最大粒子数none/r0の
+同一source cacheを再利用する。既存warmupとfull profileは実行し、timed cacheはfreshのままとする。
 
 全payload一致はworker数による再現性の検査である。独立した解析解・target条件・収束検査と
 区別し、worker一致だけで精度を認定しない。failure0、release/terminal ledger、final、
@@ -70,6 +82,21 @@ lifecycle、全frame/probeを確認し、unsaved軌道やcontainer byteの一致
 output、host、cache条件で行い、実測scopeを超えるCPU数比例やportable SLAを推定しない。
 数値resolutionを粗くした速さを同一精度の実装speedupへ置き換えない。
 
-今回の再実行条件・結果・未実行範囲は
-[`resolved_semantics_2026_11_23`](../evidence/resolved_semantics_2026_11_23/README.md)へ記録する。
-過去sourceの実測値・資格は現行の性能保証へ転用しない。
+現行0.5 productionの実行条件、全行の時間・memory・入力／science identity、scopeは
+[`foundation performance acceptance`](../evidence/foundation_2026_11_23/performance_acceptance.md)と
+[機械可読receipt](../evidence/foundation_2026_11_23/performance_acceptance.json)が所有する。
+P14はbaseline各行1回／current各行3回、P14-Uは両versionとも各count/modeを3回、
+processは10k・1/4 worker・none/sampleを各3回実行した。processの10k観測を大規模process matrixへ拡張しない。
+
+これらは共有host上で他のbenchmark、A/P、wheelや検証が一部重なった観測であり、
+host scheduling/loadを隔離したmatched timing実験ではない。入力・数値設定・sourceの対応と
+saved scienceの一致を確認したが、時間比だけから因果的なspeedupやregressionは認定しない。
+owned-array plan、単一processのhigh-water RSS、whole-team memoryを区別する。
+
+currentの87 timed observationsは、全実行前／実行後に確認した59-file runtime/helper/configへ束縛する。
+51 production sourceを含む全59値はarchived 179-file inventoryと一致し、そのinventoryの実行後値も一致する。
+179-file inventory自体の採取は最初のprocess W1計時中であり、全実行前のsnapshotとは扱わない。
+後続のWindows cache path／observation保存修正は180-file clientの実smoke・fault検査で確認し、
+51 production sourceとwheel実装の同一byteを保持する。修正後clientでfull 1M matrixを再実行したとは扱わない。
+以前の[`resolved_semantics`](../evidence/resolved_semantics_2026_11_23/README.md)は過去sourceの記録として保持し、
+その実測値・資格を現行の性能保証へ転用しない。

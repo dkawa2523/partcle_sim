@@ -1,0 +1,41 @@
+{
+  "scope": "Final immutable report snapshot/projection/document bindings after source-scope wording correction; no simulation or numerical recertification",
+  "snapshot": {
+    "path": "../report_app/src/data.json",
+    "sha256": "sha256:cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739",
+    "status": "complete"
+  },
+  "checks": {
+    "command": "uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py tests/verification/test_documentation.py -q",
+    "native_exit": 0,
+    "passed": 17,
+    "seconds": 1.04,
+    "junit": {
+      "path": ".artifacts/foundation_20261123/final_snapshot_checks.xml",
+      "sha256": "sha256:d767a49db819c568e4a0a2af63546d5bcde23e3f0deb94a017f7409c678b1df3"
+    },
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "17",
+        "time": "1.030",
+        "timestamp": "2026-11-24T00:38:19.249449+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    ],
+    "documentation": {
+      "native_exit": 0,
+      "documents": 33,
+      "skills": 4
+    },
+    "git_diff_check": "passed, ignoring CR-at-EOL only"
+  },
+  "independent_readout_review": {
+    "path": "evidence/foundation_2026_11_23/final_artifact_review.json",
+    "sha256": "sha256:d4314095de2e8b2810eb4af5a8c7fe48b9e72f8a0c7f57575d1b85f8951c2cfb"
+  },
+  "ui_build_scope": "The official build, payload hashes and actual native UI/offline/copy checks are owned by report_execution.json; this test record does not infer their completion."
+}

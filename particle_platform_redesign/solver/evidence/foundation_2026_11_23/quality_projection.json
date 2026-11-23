@@ -1,12 +1,12 @@
 {
   "queries": {
     "quality_findings": {
-      "label": "Executed checks on the current source",
+      "label": "Executed source-bound implementation and harness-followup checks",
       "rows": [
         {
           "severity": "passed",
-          "finding": "Current core/scenarios: 1,333 passed; Windows file-replacement race skipped",
-          "disposition": "All 14 integrity cases passed on Linux, including path replacement; one existing adversarial overflow warning retained."
+          "finding": "Current180-file harness followup core/scenarios: 1,337 passed; one Windows path-replacement skip",
+          "disposition": "523.017s, native exit0. Four new harness fault cases execute in the normal suite; prior numerical controls and the existing overflow warning remain. The51 production files and accepted wheel are unchanged. Earlier Linux integrity and source179 executions retain their own immutable receipt."
         },
         {
           "severity": "passed",
@@ -16,12 +16,27 @@
         {
           "severity": "passed",
           "finding": "Lock, Ruff format/lint, Pyrefly, 6 import contracts, CC and docs/skills succeeded",
-          "disposition": "Exact current execution source is bound by the 179-file source map; this is not accuracy qualification."
+          "disposition": "All seven gates executed after the harness-only patch against the180-file map; six import contracts remain kept. This is implementation readiness, not numerical accuracy qualification."
         },
         {
           "severity": "passed",
           "finding": "Installed Windows/Linux normal workflow inventory and five examples executed",
           "disposition": "Own geometry/field CSV, source creation, check/run, result-only analysis/export/view and module/console paths passed."
+        },
+        {
+          "severity": "resolved",
+          "finding": "Harness-only repair: long Windows cache paths and lost observations on final-profile failure",
+          "disposition": "Short cache paths and atomic per-worker observation sidecars preserve completed observations. Partial smoke stays release_gate_complete=false. Actual patched256-particle smoke/profile, four fault cases and independent45-function/metadata-only worker comparison executed; no production or wheel change, and no large rerun is inferred."
+        },
+        {
+          "severity": "passed",
+          "finding": "Remote implementation CI ad1a82d: Linux/Windows solver-release and platform-docs succeeded",
+          "disposition": "Core/scenarios: Linux 1,332 passed/2 skipped; Windows 1,333 passed/1 skipped. External 168/OS, five installed examples and13 routes/OS. Both wheels bind51 production files to the frozen Git bytes and have the same SHA. Skip-site attribution is explicit in the receipt; CI smoke is not the full scale matrix, and tag-only release publication was skipped."
+        },
+        {
+          "severity": "passed",
+          "finding": "Remote harness-followup CI d828991: Windows1,337/1skip and Linux1,336/2skips; external168 per OS",
+          "disposition": "All51 installed production Git bytes and wheel f0f50924 remain unchanged. Five examples/13 checkout-free routes and four new harness fault cases execute. Skip-site attribution remains explicit. This commit has solver-release CI only; platform-docs belongs to ad1a82d. CI smoke is not the full local matrix; tag-only publication was skipped."
         },
         {
           "severity": "resolved",
@@ -39,9 +54,9 @@
           "disposition": "No stochastic path matching required. Global transport is practically compatible; boundary33 and 100us own-survivor speed retain exploratory discrepancies. Numerical/native parity NOT_TESTED; physical NOT_CERTIFIED. Independent re-computation from raw native and all80 public results confirmed this exploratory judgment."
         },
         {
-          "severity": "running",
-          "finding": "Complete 10k/100k/1M performance matrix still running",
-          "disposition": "Completed smaller runs do not qualify the remaining large matrix. Results replace this row only after execution."
+          "severity": "passed",
+          "finding": "Complete source-bound scale acceptance: current87 timed observations (P14 57, P14-U18, process12)",
+          "disposition": "P14 baseline19 once versus current19x3; P14-U10k/100k/1M x none/sample x3 is18 per version, plus profiles. Recorded input/science controls pass. Shared-host times do not establish causal speedup/regression. Current full runs use archived179-file client; final180-file client has separate smoke/fault/core coverage."
         },
         {
           "severity": "retained",
@@ -51,14 +66,14 @@
       ],
       "source": {
         "label": "Current source-bound execution receipts",
-        "scope": "Current checks and explicit pending work; no implied native accuracy or experimental validity",
+        "scope": "Completed source-bound implementation, harness, CI and local workload acceptance; phases retain their actual source/input/window controls, with no inferred native accuracy or experimental validity",
         "files": [
           {
             "location": "solver/evidence/foundation_2026_11_23/core_execution.json",
             "availability": "bound_local",
             "sha256": "sha256:0d0711dc70799ab09629d6e5eb74cfb3a7621eb55c5ed1ed38f3b1c7c496174b",
             "execution_source": "source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
-            "scope": "Current 179-file source: Windows core/scenario and external V&V, Linux integrity; no native parity or physical validation"
+            "scope": "Archived original179-file execution: Windows core/scenario, external V&V and Linux integrity; immutable earlier receipt, superseded only for current harness/core coverage by the180-file followup; no native parity or physical validation"
           },
           {
             "location": "solver/evidence/foundation_2026_11_23/independent_reviews.json",
@@ -101,6 +116,83 @@
             "sha256": "sha256:015ccbd9c2c2e059a0d446a36aa66fb2344121673258fd25ca0aca84ae83ef9a",
             "execution_source": "foundation 0.5 current execution; 179-file source-map sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a",
             "scope": "Fresh current-source candidate 40 replicas per case, fixed 287-ID cohort, seeds 21-60 and 0-5ms window versus one unchanged saved native reference per case. Exploratory practical population comparison; no independent new native sample, no pooled A/P80 sample, no numerical/native parity or physical certification."
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/remote_ci_implementation.json",
+            "availability": "bound_local",
+            "sha256": "sha256:d6a0275d291137fa21e9bf0591026dc9b4556aea2035c9c87c6b4eb821dac862",
+            "execution_source": "git:ad1a82d7c964d32ed5a719c7a2961574df772ad1",
+            "scope": "Actual remote implementation CI only: both OS solver-release, platform-docs, full core/scenarios and external168/OS, checkout-free51-file wheel binding and public routes; smoke64 particles is not the full scale matrix; later metadata commits, native parity and physical qualification are separate; skipped tag-only release did not publish"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/harness_followup_execution.json",
+            "availability": "bound_local",
+            "sha256": "sha256:c5411af9f07cc3b94ef43161beb5159002e63551c1fe4313999bc2ca3a203f6b",
+            "execution_source": "source-map sha256:08f50a2ebe0f7eecf5a16ac3857c04a2b8dd576ad737107b8e1a85602f396496; harness followup d828991, production unchanged",
+            "scope": "Actual180-file operational followup, patched smoke/core/fault controls and unchanged51 production sources; archived87 were executed with the original client and complete59 pre/post implementation roster, not rerun at1M with this client"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/source_map_harness_followup.json",
+            "availability": "bound_local",
+            "sha256": "sha256:08f50a2ebe0f7eecf5a16ac3857c04a2b8dd576ad737107b8e1a85602f396496",
+            "execution_source": "source-map sha256:08f50a2ebe0f7eecf5a16ac3857c04a2b8dd576ad737107b8e1a85602f396496; harness followup d828991, production unchanged",
+            "scope": "Immutable180-file followup map: one existing performance harness changed, one scenario added; all51 production files equal the prior179-file map and accepted wheel"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/quality_gates_harness_followup.json",
+            "availability": "bound_local",
+            "sha256": "sha256:86d74724ad7d62813bd6e7d6ddb3258ed957a123c80d4e7324be555a92d70061",
+            "execution_source": "source-map sha256:08f50a2ebe0f7eecf5a16ac3857c04a2b8dd576ad737107b8e1a85602f396496; harness followup d828991, production unchanged",
+            "scope": "Seven actual post-patch quality gates with native exit0; source180 readiness only, not scientific or large-run qualification"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/harness_windows_path_witness.json",
+            "availability": "bound_local",
+            "sha256": "sha256:ae95ba8be89ea6f3ba1cda0c14e432970b9f95bdffac956cd736ba4c94a38214",
+            "execution_source": "Host filesystem witness during harness diagnosis; no solver or Numba execution",
+            "scope": "Read-only host filesystem witness: normal258 succeeds, normal261 fails, extended261 succeeds; no registry/environment change and no NumBa workload"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/performance_acceptance.json",
+            "availability": "bound_local",
+            "sha256": "sha256:b573def86972aec89609be25cf416eaa9cd6936d85c0286420088b473ab40f27",
+            "execution_source": "source179 measurement client with isolated6555 baseline/source176; unchanged production51 and separately tested180-file harness",
+            "scope": "Complete local current87 measurements: complete59-file implementation roster captured before/after all87, contained byte-identically in archived179 superset captured during firstW1 and matching post-run; source/input/science/capacity controls pass, shared-host timing caveats retained"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/remote_ci_harness_followup.json",
+            "availability": "bound_local",
+            "sha256": "sha256:9135e465da7e74805deaa2958fed35967f02e5d9517fd0d76b811ab33930b31f",
+            "execution_source": "git:d8289919f6c42dd29b07b64ceaf73d8528b17acf",
+            "scope": "Actual both-OS solver-release CI for harness followup; Windows1337/1skip and Linux1336/2skips, external168/OS, installed51-byte binding/five examples/13 routes; no platform-docs run for this commit, no full-scale inference from smoke, no tag release"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/source_capture_scope.json",
+            "availability": "bound_local",
+            "sha256": "sha256:2a5725c5222428361a832dc86dc4ca297582d06361b1ebffe511a1ec5dc16f3e",
+            "execution_source": "original measurement runtime59 before/after, archived179 superset; immutable timing clarification",
+            "scope": "Capture precision: implementation59 pre/post all87 at11:56:57/13:56:41UTC;179superset captured11:58:16 during firstW1 and matches after. Three docstring-only package markers outside59 are separate;59 does not literally list every imported file"
+          },
+          {
+            "location": "solver/evidence/foundation_2026_11_23/source_runtime59.json",
+            "availability": "bound_local",
+            "sha256": "sha256:cfabdd4604a80cfffd27f364beabb0542140b052611303691293ffa7fe1a47bf",
+            "execution_source": "original measurement runtime59 before/after, archived179 superset; immutable timing clarification",
+            "scope": "Exact59-file execution roster:51production,6numerical/benchmark implementations,project/lock; equal before/after all87 and contained byte-identically in archived179"
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Remote CI execution and skip scope",
+            "detail": "{\"implementation_commit\": \"ad1a82d7c964d32ed5a719c7a2961574df772ad1\", \"workflow_runs\": [{\"name\": \"solver-release\", \"url\": \"https://github.com/dkawa2523/partcle_sim/actions/runs/45176321100\", \"headSha\": \"ad1a82d7c964d32ed5a719c7a2961574df772ad1\", \"conclusion\": \"success\"}, {\"name\": \"platform-docs\", \"url\": \"https://github.com/dkawa2523/partcle_sim/actions/runs/45176321522\", \"headSha\": \"ad1a82d7c964d32ed5a719c7a2961574df772ad1\", \"conclusion\": \"success\"}], \"skip_interpretation\": {\"basis\": \"Source-annotation interpretation of actual job summary counts. pytest -q did not print per-test skip reasons; no new test run was made. git grep of the bound commit found only the two skip sites listed here in verification/scenarios.\", \"Linux\": {\"skipped\": 2, \"test\": \"tests/verification/test_output_publication.py::test_real_windows_read_handle_release_and_held_publication\", \"parameters\": {\"release\": [true, false]}, \"reason\": \"requires real Windows sharing semantics\", \"condition\": \"os.name != nt\", \"bound_source\": \"https://github.com/dkawa2523/partcle_sim/blob/ad1a82d7c964d32ed5a719c7a2961574df772ad1/particle_platform_redesign/solver/tests/verification/test_output_publication.py#L195\", \"integrity_path_replacement\": \"Executed, not skipped. The two platform skips belong to publication tests and are not missing checks in the 14-case integrity file.\"}, \"Windows\": {\"skipped\": 1, \"test\": \"tests/verification/test_result_integrity.py::test_read_uses_the_file_opened_before_path_replacement\", \"reason\": \"host denies replacement while the original read handle is open\", \"condition\": \"PermissionError from os.replace during the same-open-handle path-replacement control\", \"bound_source\": \"https://github.com/dkawa2523/partcle_sim/blob/ad1a82d7c964d32ed5a719c7a2961574df772ad1/particle_platform_redesign/solver/tests/verification/test_result_integrity.py#L173\", \"publication_windows_controls\": \"Both release=True and release=False sharing-semantic cases execute on Windows.\"}}, \"wheel_sha256_both_OS\": \"sha256:f0f5092409396791e21529e2f1a9d9b1ee9c903077896d85402b712b88a50fdb\", \"not_claimed\": [\"No full scale/performance matrix is inferred from CI smoke\", \"No COMSOL full-physics or physical-device validation is inferred from these jobs\", \"The skipped release job did not publish the package\"]}"
+          },
+          {
+            "title": "Post-measurement harness repair and evidence phases",
+            "detail": "{\"original_large_run_map\": {\"path\": \"evidence/foundation_2026_11_23/source_map.json\", \"sha256\": \"sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\"}, \"followup_map\": {\"path\": \"evidence/foundation_2026_11_23/source_map_harness_followup.json\", \"sha256\": \"sha256:08f50a2ebe0f7eecf5a16ac3857c04a2b8dd576ad737107b8e1a85602f396496\"}, \"unchanged_production_files\": 51, \"source_equivalence\": {\"unchanged_function_asts\": 45, \"timed_and_profile_worker\": \"AST identical after removal of one post-measurement case_identity dictionary entry each; no extra hashing/read\", \"modified_driver_functions\": \"argument help, output reservation/publication, cache resource names and profile cache reuse\", \"production_and_wheel\": \"51 source bytes unchanged; previously accepted wheel remains f0f5092409396791e21529e2f1a9d9b1ee9c903077896d85402b712b88a50fdb\"}, \"independent_review\": {\"reviewer\": \"causality_audit\", \"mandatory_open\": 0, \"basis\": \"Read-only map/current production byte comparison, 45 unchanged function ASTs, two metadata-only worker differences, four independently rerun fault tests\", \"qualification\": \"Actual patched smoke and fault regressions are proportionate to this operational change. Prior full-scale runs remain evidence of the same production code, not an assertion of full 1M rerun using the final harness client\"}, \"limits\": [\"The 87 timed observations bind 59 production/measurement-helper/config implementation files captured before and after all measurements. The archived179 contains the same values and three docstring-only package markers outside59; its acquisition occurred during the first W1 timed interval, not before all jobs.\", \"No full 1M matrix has been rerun using the modified 180-file measurement client\", \"Native parity and experimental physical validation are not inferred\"], \"smoke_release_gate_complete\": false, \"baseline_full_retry\": \"Complete: original6555 source176, full18 observations plus profile; source/input/science and accuracy controls recorded in performance_acceptance.json\", \"source_capture_precision\": {\"scope\": \"Precision of original source-capture timing; no execution or qualification result changed\", \"complete_execution_roster\": {\"files\": 59, \"production_files\": 51, \"archive\": \"evidence/foundation_2026_11_23/source_runtime59.json\", \"sha256\": \"sha256:cfabdd4604a80cfffd27f364beabb0542140b052611303691293ffa7fe1a47bf\", \"before_original\": \".artifacts/foundation_20261123/p14u_frozen_source_before.json\", \"before_capture_utc\": \"2026-11-23T11:56:57.267303+00:00\", \"after_original\": \".artifacts/foundation_20261123/p14u_frozen_source_after.json\", \"after_capture_utc\": \"2026-11-23T13:56:41.374038+00:00\", \"before_after_values_equal\": true, \"coverage\": \"All 51 production sources, six numerical/benchmark helper implementations, pyproject and lock for the 87 timed observations; implementation closure, not every literally imported file\"}, \"whole_roster\": {\"files\": 179, \"archive\": \"evidence/foundation_2026_11_23/source_map.json\", \"sha256\": \"sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"original_capture\": \".artifacts/foundation_20261123/source_map_accepted_before.json\", \"capture_utc\": \"2026-11-23T11:58:16.731206+00:00\", \"execution_roster_contained_with_identical_values\": true, \"limit\": \"Captured during the first process W1 timed interval and after the original core suite started; not a pre-all-execution snapshot of all 179 files\"}, \"interpretation\": \"The 59-file execution roster was captured before all 87 timed observations and matches after them. The archived 179-file superset matches post-run values; full core/CI and later 180-file followup retain their individually recorded scopes. Earlier generic 179-file before/after wording must not imply that its acquisition preceded every job.\", \"immutable_records\": \"Original source maps, core_execution and raw receipts are retained as captured; this note clarifies their source-before/after flag rather than altering historical execution data.\", \"package_markers_outside59\": {\"files\": [\"tests/__init__.py\", \"tests/performance/__init__.py\", \"tests/verification/__init__.py\"], \"included_in179\": true, \"observed_ast\": \"each consists of one docstring expression, with no imports, assignments, definitions or executable measurement/numerical logic\", \"qualification\": \"Do not describe59 as literally every imported file\"}}}"
+          },
+          {
+            "title": "Completed workload acceptance and final implementation CI",
+            "detail": "{\"coverage\": {\"all_qualified_benchmark_native_exits\": 0, \"baseline_p14\": 19, \"baseline_p14_repeats_per_row\": 1, \"baseline_p14u_retry\": 18, \"current_p14\": 57, \"current_p14_repeats_per_row\": 3, \"current_p14u\": 18, \"current_process\": 12, \"current_timed_observations\": 87, \"p14u_repeats_per_count_and_mode_each_version\": 3, \"process_repeats_per_worker_and_mode\": 3, \"raw_time_values_preserved\": true}, \"capacity\": {\"maximum_current_serial_process_high_water_rss_bytes\": 1629777920, \"maximum_current_serial_solver_planned_bytes\": 1032539730, \"owned_array_budget_bytes\": 8589934592, \"process_owned_plan_maximum_by_workers\": {\"1\": 137382918, \"4\": 433057012}, \"semantics\": \"Owned-array forecasts are not OS caps. RSS is a single measured process high-water including imports/JIT/warmups, sampled after public calls and before external validation; whole-team RSS was not measured by these process observations.\"}, \"performance_limits\": [\"Full matrices qualify the recorded manufactured workloads and saved physical payloads, not all models or every Cartesian combination.\", \"P14-U requests no trajectories; sample is IDs1..32 at0.5/1.5/2.5/3.5s (four probes,128 rows). Full-history1M output scaling is not inferred.\", \"Process comparison is10k particles/320 macros,1/4 workers,none/sample; it is not a100k/1M process matrix.\", \"Within-mode full science includes every emitted frame/probe; cross-mode equality compares core only because probes are intentionally added.\", \"Separate raw SHA I/O covers context/final/committed-segment payload-roster bytes, not every artifact-directory file. Outcome reads, science hashing and verify_contents remain separate outside public_end_to_end.\", \"Result4/5 opening and integrity policies differ; stage-time changes are product observations and cannot be labelled pure kernel speedup.\", \"No unsaved-path equality, native COMSOL parity or experimental physical validation is inferred.\"], \"remote_commit\": \"d8289919f6c42dd29b07b64ceaf73d8528b17acf\", \"workflow\": {\"conclusion\": \"success\", \"created_at\": \"2026-11-23T14:12:58Z\", \"event\": \"push\", \"head_sha\": \"d8289919f6c42dd29b07b64ceaf73d8528b17acf\", \"html_url\": \"https://github.com/dkawa2523/partcle_sim/actions/runs/45191792919\", \"id\": 45191792919, \"name\": \"solver-release\", \"run_attempt\": 1, \"status\": \"completed\", \"updated_at\": \"2026-11-23T14:50:36Z\"}, \"skips_and_warning\": {\"basis\": \"Actual aggregate counts plus the only skip sites found by git grep at this exact commit; q logs do not give individual skip reasons.\", \"Linux\": \"Two Windows-sharing controls (release=True/False) at test_output_publication.py:195 are platform-skipped; the same-handle path-replacement integrity control executes.\", \"Windows\": \"One test_result_integrity.py:173 skip when the host denies path replacement while its read handle is open; both Windows-sharing controls execute.\", \"both_OS_warning\": \"One RuntimeWarning: overflow encountered in scalar multiply in events.py:470, as present in the job logs.\"}, \"documentation_workflow\": \"No platform-docs run is listed for this harness-only commit; earlier ad1a82 documentation CI remains separately bound.\", \"publication\": \"Tag-only Publish GitHub release job skipped; no release or registry publication claimed.\", \"CI_not_claimed\": [\"CI P14 smoke is not the full P14-U release/scale matrix.\", \"External workflow tests run without live COMSOL and do not certify native parity or device physics.\", \"This receipt does not change the failed original baseline attempt or qualify later metadata commits.\"], \"runtime_source_capture\": {\"scope\": \"Precision of original source-capture timing; no execution or qualification result changed\", \"complete_execution_roster\": {\"files\": 59, \"production_files\": 51, \"archive\": \"evidence/foundation_2026_11_23/source_runtime59.json\", \"sha256\": \"sha256:cfabdd4604a80cfffd27f364beabb0542140b052611303691293ffa7fe1a47bf\", \"before_original\": \".artifacts/foundation_20261123/p14u_frozen_source_before.json\", \"before_capture_utc\": \"2026-11-23T11:56:57.267303+00:00\", \"after_original\": \".artifacts/foundation_20261123/p14u_frozen_source_after.json\", \"after_capture_utc\": \"2026-11-23T13:56:41.374038+00:00\", \"before_after_values_equal\": true, \"coverage\": \"All 51 production sources, six numerical/benchmark helper implementations, pyproject and lock for the 87 timed observations; implementation closure, not every literally imported file\"}, \"whole_roster\": {\"files\": 179, \"archive\": \"evidence/foundation_2026_11_23/source_map.json\", \"sha256\": \"sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a\", \"original_capture\": \".artifacts/foundation_20261123/source_map_accepted_before.json\", \"capture_utc\": \"2026-11-23T11:58:16.731206+00:00\", \"execution_roster_contained_with_identical_values\": true, \"limit\": \"Captured during the first process W1 timed interval and after the original core suite started; not a pre-all-execution snapshot of all 179 files\"}, \"interpretation\": \"The 59-file execution roster was captured before all 87 timed observations and matches after them. The archived 179-file superset matches post-run values; full core/CI and later 180-file followup retain their individually recorded scopes. Earlier generic 179-file before/after wording must not imply that its acquisition preceded every job.\", \"immutable_records\": \"Original source maps, core_execution and raw receipts are retained as captured; this note clarifies their source-before/after flag rather than altering historical execution data.\", \"package_markers_outside59\": {\"files\": [\"tests/__init__.py\", \"tests/performance/__init__.py\", \"tests/verification/__init__.py\"], \"included_in179\": true, \"observed_ast\": \"each consists of one docstring expression, with no imports, assignments, definitions or executable measurement/numerical logic\", \"qualification\": \"Do not describe59 as literally every imported file\"}}}"
           }
         ]
       }

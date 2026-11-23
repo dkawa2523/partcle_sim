@@ -188,7 +188,7 @@ Brownianでは個々のpathの一致を要求せず、実現source、全母集�
 
 現行のfrozen charge比較は明示CSV・現行式・独立に選んだ残差allowanceを使う。ion-force比較はさらに現行revisionとmatched/analogousを明示し、analogousはraw差とNOT_TESTEDを返す。この宣言や凍結点の残差だけで、nativeの真正性・積分軌道・収束を認定しない。exact-P1表のrelease probe数は実際のsource tableから決まり、sectionwise connectivityを保持する。
 
-利用者の手動削除後、分類済みの旧生成binaryは残存0と確認した。独立したnative観測・実験入力・選択authorityの保存確認と、今回の公開利用フローを下表に示す。以前の削除拒否と未完了の記録は、その時点の履歴として保持する。`} />
+以前に利用者が削除した分類対象と、今回の比較で作成したbaseline保存物は別の集合である。削除済み・保持・拒否は各receiptの対象へ限定し、現行readerに旧result4互換経路は残さない。独立したnative観測・実験入力・選択authorityの保存確認と、今回の公開利用フローを下表に示す。`} />
       {visible("quality-table") && <DataComponent id="quality-table" title="今回取込んだ品質証拠と未取得事項"
         queryId="quality_findings" kind="table" sourceRows={quality}>
         <DataTable rows={quality} searchable={false} compactNumbers={false} label="品質証拠"

@@ -1,0 +1,257 @@
+{
+  "scope": "Actual remote CI for the frozen implementation commit; later metadata commits and scientific qualification are separate",
+  "repository": "dkawa2523/partcle_sim",
+  "branch": "refactor/foundation-usability",
+  "implementation_commit": "ad1a82d7c964d32ed5a719c7a2961574df772ad1",
+  "observed_at_utc": "2026-11-23T13:18:17.055102+00:00",
+  "workflows": [
+    {
+      "databaseId": 45176321100,
+      "attempt": 1,
+      "headSha": "ad1a82d7c964d32ed5a719c7a2961574df772ad1",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45176321100",
+      "name": "solver-release",
+      "event": "push",
+      "createdAt": "2026-11-23T12:39:05Z",
+      "updatedAt": "2026-11-23T13:15:47Z",
+      "jobs": [
+        {
+          "id": 137698385911,
+          "name": "ubuntu-latest / Python 3.12",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-23T12:39:08Z",
+          "completed_at": "2026-11-23T13:15:46Z",
+          "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45176321100/job/137698385911",
+          "failed_steps": []
+        },
+        {
+          "id": 137698386380,
+          "name": "windows-latest / Python 3.12",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-23T12:39:08Z",
+          "completed_at": "2026-11-23T13:03:44Z",
+          "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45176321100/job/137698386380",
+          "failed_steps": []
+        },
+        {
+          "id": 137718456547,
+          "name": "Publish GitHub release",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-23T13:15:47Z",
+          "completed_at": "2026-11-23T13:15:47Z",
+          "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45176321100/job/137718456547",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "databaseId": 45176321522,
+      "attempt": 1,
+      "headSha": "ad1a82d7c964d32ed5a719c7a2961574df772ad1",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45176321522",
+      "name": "platform-docs",
+      "event": "push",
+      "createdAt": "2026-11-23T12:39:05Z",
+      "updatedAt": "2026-11-23T12:39:23Z",
+      "jobs": [
+        {
+          "id": 137698386574,
+          "name": "documentation-and-report",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-23T12:39:08Z",
+          "completed_at": "2026-11-23T12:39:23Z",
+          "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45176321522/job/137698386574",
+          "failed_steps": []
+        }
+      ]
+    }
+  ],
+  "solver_execution": {
+    "Linux": {
+      "core_and_public_scenarios": "1332 passed, 2 skipped, 1 warning in 1307.55s (0:21:47)",
+      "external_without_live_COMSOL": "168 passed in 73.01s (0:01:13)",
+      "performance_smoke": {
+        "suite": "smoke",
+        "matrix_scope": "complete_preset",
+        "observations": 8,
+        "conditions": 8,
+        "counts": [
+          64
+        ],
+        "scope": "CI smoke preset, not the full release/scale matrix"
+      },
+      "clean_wheel": {
+        "status": "complete",
+        "public_operations": [
+          "load_case",
+          "check_case",
+          "simulate",
+          "open_result"
+        ],
+        "process_workers": 2,
+        "process_particles": 32,
+        "serial_process_science_equal": true,
+        "live_children_after_return": 0,
+        "console_and_module": true,
+        "public_error_exit": 2
+      },
+      "checkout_free_workflow": {
+        "status": "complete",
+        "cli_commands": 13,
+        "commands": [
+          "models",
+          "init",
+          "inputs import-csv",
+          "inputs cache",
+          "create",
+          "check",
+          "run",
+          "inspect",
+          "analyze",
+          "export",
+          "view",
+          "inputs electrostatic check",
+          "inputs electrostatic build"
+        ],
+        "examples": 5,
+        "cwd_uses_checkout": false,
+        "fixture_imports": [],
+        "editable_charged_csv": "import/create/run passed"
+      },
+      "wheel_source_binding": {
+        "version": "0.5.0",
+        "production_python_files": 51,
+        "all_python_bytes_match": true,
+        "all_recorded_python_hashes_match_frozen_git": true,
+        "metadata_text_matches_wheel": true,
+        "readme_and_lock_match_frozen_git": true,
+        "wheel_sha256": "sha256:f0f5092409396791e21529e2f1a9d9b1ee9c903077896d85402b712b88a50fdb",
+        "wheel_metadata_sha256": "sha256:b5ff4bd1565016e535118e32d87069226508b806d6e3ecad9c7e1d1f4d9d6f2a",
+        "python": "3.12.16 (main, Oct 26 2026, 02:48:44) [GCC 15.2.0]"
+      },
+      "downloaded_receipt_hashes": {
+        "clean-wheel-smoke.json": "sha256:57a9fb31cb344f194d6be7a099ae429c72d203bb4eef71cc7374376fd570659e",
+        "installed-workflow.json": "sha256:243e7e75c93de796166182db40b68d16ccd4af628265000a390251c60dd0a006",
+        "p14-smoke.json": "sha256:e6ee8cc1eaf66dbade2abd95eb96635dcf9f23a092793231c673087e13a36de3"
+      }
+    },
+    "Windows": {
+      "core_and_public_scenarios": "1333 passed, 1 skipped, 1 warning in 868.26s (0:14:28)",
+      "external_without_live_COMSOL": "168 passed in 46.06s",
+      "performance_smoke": {
+        "suite": "smoke",
+        "matrix_scope": "complete_preset",
+        "observations": 8,
+        "conditions": 8,
+        "counts": [
+          64
+        ],
+        "scope": "CI smoke preset, not the full release/scale matrix"
+      },
+      "clean_wheel": {
+        "status": "complete",
+        "public_operations": [
+          "load_case",
+          "check_case",
+          "simulate",
+          "open_result"
+        ],
+        "process_workers": 2,
+        "process_particles": 32,
+        "serial_process_science_equal": true,
+        "live_children_after_return": 0,
+        "console_and_module": true,
+        "public_error_exit": 2
+      },
+      "checkout_free_workflow": {
+        "status": "complete",
+        "cli_commands": 13,
+        "commands": [
+          "models",
+          "init",
+          "inputs import-csv",
+          "inputs cache",
+          "create",
+          "check",
+          "run",
+          "inspect",
+          "analyze",
+          "export",
+          "view",
+          "inputs electrostatic check",
+          "inputs electrostatic build"
+        ],
+        "examples": 5,
+        "cwd_uses_checkout": false,
+        "fixture_imports": [],
+        "editable_charged_csv": "import/create/run passed"
+      },
+      "wheel_source_binding": {
+        "version": "0.5.0",
+        "production_python_files": 51,
+        "all_python_bytes_match": true,
+        "all_recorded_python_hashes_match_frozen_git": true,
+        "metadata_text_matches_wheel": true,
+        "readme_and_lock_match_frozen_git": true,
+        "wheel_sha256": "sha256:f0f5092409396791e21529e2f1a9d9b1ee9c903077896d85402b712b88a50fdb",
+        "wheel_metadata_sha256": "sha256:b5ff4bd1565016e535118e32d87069226508b806d6e3ecad9c7e1d1f4d9d6f2a",
+        "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+      },
+      "downloaded_receipt_hashes": {
+        "clean-wheel-smoke.json": "sha256:400627141cbb23e529471202c91490d7d64370239e6ff19e1edc2e21edb30f1f",
+        "installed-workflow.json": "sha256:fd64f57a7da90907bfa9191ac310ca47551134e94385af5fdf666424832e6732",
+        "p14-smoke.json": "sha256:543786bcbcf76c8790c5a68ad47acdfb59f208dd7e04708576eb62bb3b010c38"
+      }
+    }
+  },
+  "documentation_execution": {
+    "documents": 33,
+    "skills": 4,
+    "link_metadata_binding_status": "valid",
+    "snapshot_document_tests": "17 passed in 0.47s",
+    "protected_runtime_files": 234
+  },
+  "cross_platform_python_source_hashes_equal": true,
+  "release_publication": "Tag-only Publish GitHub release job was skipped; no release publication is claimed",
+  "warnings_and_skips": "Core summaries contain one overflow warning in events.py:470. Skips are reported exactly above; pytest -q did not emit their reasons in these logs.",
+  "read_only_log_retrieval": "Linux gh run view; Windows REST job-log download after gh local log-cache EOF. Both CI runs remained attempt 1; no retry, rerun, skip or workflow mutation was requested.",
+  "external_evidence_locator": ".artifacts/foundation_ci_ad1a82 (downloaded CI artifact receipts and job logs; local locator, not a distribution link)",
+  "not_claimed": [
+    "No full scale/performance matrix is inferred from CI smoke",
+    "No COMSOL full-physics or physical-device validation is inferred from these jobs",
+    "The skipped release job did not publish the package"
+  ],
+  "skip_interpretation": {
+    "basis": "Source-annotation interpretation of actual job summary counts. pytest -q did not print per-test skip reasons; no new test run was made. git grep of the bound commit found only the two skip sites listed here in verification/scenarios.",
+    "Linux": {
+      "skipped": 2,
+      "test": "tests/verification/test_output_publication.py::test_real_windows_read_handle_release_and_held_publication",
+      "parameters": {
+        "release": [
+          true,
+          false
+        ]
+      },
+      "reason": "requires real Windows sharing semantics",
+      "condition": "os.name != nt",
+      "bound_source": "https://github.com/dkawa2523/partcle_sim/blob/ad1a82d7c964d32ed5a719c7a2961574df772ad1/particle_platform_redesign/solver/tests/verification/test_output_publication.py#L195",
+      "integrity_path_replacement": "Executed, not skipped. The two platform skips belong to publication tests and are not missing checks in the 14-case integrity file."
+    },
+    "Windows": {
+      "skipped": 1,
+      "test": "tests/verification/test_result_integrity.py::test_read_uses_the_file_opened_before_path_replacement",
+      "reason": "host denies replacement while the original read handle is open",
+      "condition": "PermissionError from os.replace during the same-open-handle path-replacement control",
+      "bound_source": "https://github.com/dkawa2523/partcle_sim/blob/ad1a82d7c964d32ed5a719c7a2961574df772ad1/particle_platform_redesign/solver/tests/verification/test_result_integrity.py#L173",
+      "publication_windows_controls": "Both release=True and release=False sharing-semantic cases execute on Windows."
+    }
+  }
+}

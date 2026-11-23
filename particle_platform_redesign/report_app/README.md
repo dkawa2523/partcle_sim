@@ -8,7 +8,7 @@ solver実行や比較判定は行いません。app ID、タイトル、block ID
 独立solver projectから実行します。
 
 ```console
-uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/foundation_2026_11_23/assessment_projection.json --quality evidence/foundation_2026_11_23/quality_projection.json --build-status updating
+uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/foundation_2026_11_23/assessment_projection.json --quality evidence/foundation_2026_11_23/quality_projection.json --performance evidence/foundation_2026_11_23/performance_projection.json --build-status complete
 uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q
 ```
 
@@ -61,7 +61,12 @@ NODEとDATA_PLUGINはinstalled runtimeの絶対pathを使います。
 rendererの変更、guardの緩和、source build、node_modulesのinstallは必要ありません。
 
 dist全体をloopback HTTPでserveします。snapshot、HTML、runtimeのidentityはdist/data-app-build.jsonにあります。
-公式export-offlineで、検査済みsplit buildを同じappの.data-app-offline/exports/report.htmlへ書き出せます。
+公式export-offlineで、検査済みsplit buildを同じappの.data-app-offline/exports/foundation-report.htmlへ書き出せます。
+この単一HTMLはsidecar HTTP serverなしで全reviewed datasetを読めます。
+
+```console
+NODE DATA_PLUGIN/output_formats/html/scripts/data-app.mjs export-offline --project-dir report_app --output report_app/.data-app-offline/exports/foundation-report.html
+```
 dist/offline HTMLはGitへ同梱せず、sourceとreviewed inputsから再生成します。
 
 今回の実行範囲と結果は[実装・実行記録](../solver/evidence/foundation_2026_11_23/README.md)に記載します。

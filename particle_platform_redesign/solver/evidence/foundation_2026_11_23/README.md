@@ -10,15 +10,15 @@ qualify the platform or replace the remaining work.
 | Model discovery, catalog, normalized settings, check explanations | yes | implemented | all 27 descriptors, public check and full suite |
 | Init, editable external CSV, recipe and table/surface source publisher | yes | implemented | CLI/Python, five installed examples, inheritance and malformed-input scenarios |
 | Regular/P1/Q1 field import/cache, static electrostatic builder | yes | repaired boundaries retained; declared generation handoff implemented | independent norm/support/time/cache and builder tests; installed input routes |
-| Core API, coupled physics, proof preparation, integrators | yes | implemented | 1,333 core/scenario tests passed; independent algebra/OU/convergence retained |
+| Core API, coupled physics, proof preparation, integrators | yes | implemented | 1,337 core/scenario tests passed after the harness follow-up; independent algebra/OU/convergence retained |
 | Material/axis/periodic events, accepted state and remainder | yes | implemented | event/wall/surface/axis/corner scenarios; seven before/after scientific payloads identical |
 | Serial/process transport, memory and single writer | yes | implemented | process/output/slab/resume identity; representative none/sample worker runs |
 | Result/checkpoint/context integrity, late public errors | yes | result5 implemented | prefix/seal/resume/late error/corruption tests; Linux same-handle path replacement |
 | Inspect, shared cohort, analysis, export, visualization | yes | implemented | result-only exact large ID/name/file/focus, coverage and independent user forward test |
 | External COMSOL producer and saved population comparison | yes | implemented | 168 external tests; saved A/P metrics and independent bounded-memory experiment |
-| Scientific evidence, benchmarks, A/P population reruns | yes | implementation complete | A/P 40 seeds and complete large performance workloads running |
+| Scientific evidence, benchmarks, A/P population reruns | yes | implemented | A/P 40 seeds per case; current 87 and baseline 37 timed observations, paired 1M profiles and refinement checks complete |
 | Checkout-free wheel, release inventory, Windows/Linux | yes | implemented | five inventory examples and 13 normal entry routes on each OS; final smoke recorded separately |
-| Visible report, source projection, documentation and project skills | yes | producer and copy implemented | docs/skills passed; final snapshot/build/UI verification pending |
+| Visible report, source projection, documentation and project skills | yes | implemented | complete snapshot; official split/offline builds; 17 final checks; desktop/mobile Source, search, copy and offline display verified |
 
 The four input/publication repairs in baseline 6555ce3 remain implemented;
 their executed evidence is in `../public_io_fix_2026_11_23`.
@@ -40,6 +40,77 @@ are in [core_execution.json](core_execution.json),
 The independent perspectives and corrected findings are in
 [independent_reviews.json](independent_reviews.json). Full native numerical
 parity and experimental physical validity are not inferred from these checks.
+
+The implementation is committed as `ad1a82d7c964d32ed5a719c7a2961574df772ad1`
+and pushed to `origin/refactor/foundation-usability`. Its remote checks are
+recorded in [remote_ci_implementation.json](remote_ci_implementation.json): both
+OS jobs and documentation succeeded. The benchmark-only follow-up is committed
+as `d8289919f6c42dd29b07b64ceaf73d8528b17acf`. Both OS jobs succeeded;
+the exact counts, source/wheel binding and skipped
+conditions are in [remote_ci_harness_followup.json](remote_ci_harness_followup.json).
+The final report and evidence delivery follow on the same branch.
+
+The completed report is recorded in [report_execution.json](report_execution.json).
+Its full ten-query snapshot is bound to every reviewed projection, 30 references
+and 23 authorities. The official single-file export is
+`particle_platform_redesign/report_app/.data-app-offline/exports/foundation-report.html`;
+it preserves all reviewed rows and works without the preview server. Root's
+[final snapshot checks](final_snapshot_checks.json) passed all 17 checks, and the
+[independent final readout review](final_artifact_review.json) closed its one
+source-wording finding with no remaining mandatory issues.
+
+## Benchmark failure and operational repair
+
+The original baseline P14-U attempt completed its 18 timed workers but failed
+while warming the independent profile: a Numba cache temporary filename was 261
+characters on a Windows host with long paths disabled. The independently checked
+258-character path succeeded. The old driver kept returned JSON only in memory
+and cleaned its temporary tree on failure, so the exact timed objects were lost.
+That attempt remains failed. The complete replacement baseline used a shorter
+task temp root and saved original worker returns outside their timed intervals.
+All 18 timed observations, the independent 1M profile and identity gates completed
+with native exit 0, and the isolated baseline source remained unchanged.
+
+The current full workloads completed with the original measurement client:
+57 P14, 18 P14-U and 12 process observations, plus the independent 1M profile.
+Their complete 59-file runtime/helper/config roster, including all 51 production
+files, was captured before all 87 observations and matches after execution. It is
+an identical subset of the archived 179-file map, acquired during the first W1
+timed interval and matching post-run values. The exact capture scope is recorded
+in [source_capture_scope.json](source_capture_scope.json): three docstring-only
+test package markers are outside the 59 implementation files and inside the 179.
+After
+completion, the harness was repaired with shorter private cache names, reuse of
+the completed maximum-count none/r0 cache for the untimed profile, and exclusive
+atomic per-worker JSON publication beside a fresh requested report. The normal
+final report still requires every qualification gate; sidecars are not a PASS or
+resume state. Timed/profile records also retain the loaded case/data hashes.
+
+[harness_followup_execution.json](harness_followup_execution.json) records the
+actual patched smoke, four fault regressions, 1,337 passing core/scenario tests,
+quality gates and independent review. Its 180-file source map differs by the
+measurement client and one new scenario test; all 51 production files and the
+accepted wheel bytes remain unchanged. The modified client has not rerun the full
+1M matrix. The prior large-run evidence is bound to its actual client source and
+the same production code, rather than relabelled as a new-client execution.
+
+## Completed scientific and capacity comparisons
+
+[performance_acceptance.md](performance_acceptance.md) and its JSON record cover
+all requested scale rows and controls. P14 has 19 baseline observations and 57
+current observations; P14-U has 18 per version; the current worker experiment has
+12 observations. Their executed input identities and corresponding saved public
+science match. The maximum owned-array plan is 1,032,539,730 bytes within the
+configured 8 GiB budget; maximum observed single-process high-water RSS is
+1,629,777,920 bytes. Host load was shared and not matched, so timings do not
+establish causal speedup or regression. The record separates plans, RSS and
+whole-team memory, and does not extrapolate the 10k worker experiment to 1M.
+
+[ap_population_readout.md](ap_population_readout.md) records the fresh A/P
+40-replica comparisons and their independent recomputation. Large-scale transport
+and stopping show practical correspondence; boundary 33 capture and 100 microsecond
+own-survivor speed retain local reservations. Exact Brownian paths, native solver
+parity and experimental physical validity are not inferred.
 
 ## Root-cause items and replacement boundaries
 

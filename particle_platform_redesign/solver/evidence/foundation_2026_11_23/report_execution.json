@@ -1,58 +1,54 @@
 {
-  "status": "updating; A/P complete, large performance matrix and final complete build pending",
-  "scope": "Official Data prebuilt build, full split payload verification and observed native Chrome UI of this intermediate snapshot; no simulation performed by the report",
-  "snapshot_sha256": "sha256:c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
-  "build_manifest_sha256": "sha256:f39f1f93fc5ffe7afb817c70b0563e2a9ae891e8baeaa062fa31b20dd843318d",
+  "status": "complete",
+  "completed_at_utc": "2026-11-23T15:42:17.373403+00:00",
+  "scope": "Local report consumer, reviewed projections and split/offline artifact delivery; report authoring does not run simulations or promote source claims beyond their recorded scope",
+  "snapshot_sha256": "sha256:cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739",
+  "build_manifest_sha256": "sha256:890f1560cb321f463b178a570231d1c9912e8699aadbe9d671d2f00ed3623b50",
   "manifest": {
     "version": 1,
     "kind": "separate-data-v1",
     "html": {
       "path": "index.html",
-      "sha256": "a157e30bb6fcafcd74a77215ba8ef45ede7df10d02e7965f35012ad55e9084e3",
-      "bytes": 2405911
+      "sha256": "5347d696fb968d350b1e6dbb93e51e6736ee461b01eaf29d055e19ce443d5ab4",
+      "bytes": 2405999
     },
     "snapshot": {
-      "path": "snapshot.c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6.json",
-      "sha256": "c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
-      "bytes": 214116
+      "path": "snapshot.cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739.json",
+      "sha256": "cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739",
+      "bytes": 253914
     },
     "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
-    "sourceSnapshotSha256": "c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6"
+    "sourceSnapshotSha256": "cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739"
   },
   "toolchain": {
     "node_version": "v24.22.3",
-    "linux_archive_url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.xz",
-    "checksum_url": "https://nodejs.org/dist/v24.22.3/SHASUMS256.txt",
-    "archive_sha256": "4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb",
     "linux_node": "/mnt/c/Users/user/AppData/Local/Temp/chamber-report-node-v24.22.3/node-v24.22.3-linux-x64/bin/node",
-    "plugin_version": "1.2.1-alpha.20261116.1",
-    "prepare_command": "wsl.exe --exec /mnt/c/Users/user/AppData/Local/Temp/chamber-report-node-v24.22.3/node-v24.22.3-linux-x64/bin/node /mnt/c/Users/user/.codex/plugins/cache/openai-curated-remote/data-analytics/1.2.1-alpha.20261116.1/output_formats/html/scripts/data-app.mjs prepare --project-dir /mnt/c/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/report_app",
-    "prepare_result": {
-      "prebuilt": true,
-      "apiVersion": 1,
-      "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
-      "compilerSha256": "ec65601079c80bef7210f2c9760ff7f2db6adef28516ffff280d4c86f91d4078"
-    },
-    "protected_runtime_or_dependency_changes": false,
-    "recovery": {
-      "observed": "Previous /tmp ELF disappeared; cause unknown",
-      "download_location": "Windows task temp directory, mounted through /mnt/c",
-      "pinned_and_official_sha256_checks": "both OK",
-      "project_dependencies_modified": false
-    }
-  },
-  "build": {
+    "official_node_archive_url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.xz",
+    "official_archive_sha256": "4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb",
+    "archive_verification": "Pinned digest and official SHASUMS256 verified during task provisioning; task-local Windows-backed binary reused, no system Node or project dependency changes",
+    "plugin_version": "1.2.2-e.1",
+    "prepare_command": "wsl.exe --exec /mnt/c/Users/user/AppData/Local/Temp/chamber-report-node-v24.22.3/node-v24.22.3-linux-x64/bin/node /mnt/c/Users/user/.codex/plugins/cache/openai-curated-remote/data-analytics/1.2.2-e.1/output_formats/html/scripts/data-app.mjs prepare --project-dir /mnt/c/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/report_app",
+    "build_command": "wsl.exe --exec /mnt/c/Users/user/AppData/Local/Temp/chamber-report-node-v24.22.3/node-v24.22.3-linux-x64/bin/node /mnt/c/Users/user/.codex/plugins/cache/openai-curated-remote/data-analytics/1.2.2-e.1/output_formats/html/scripts/data-app.mjs build --project-dir /mnt/c/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/report_app --separate-data",
+    "export_command": "wsl.exe --exec /mnt/c/Users/user/AppData/Local/Temp/chamber-report-node-v24.22.3/node-v24.22.3-linux-x64/bin/node /mnt/c/Users/user/.codex/plugins/cache/openai-curated-remote/data-analytics/1.2.2-e.1/output_formats/html/scripts/data-app.mjs export-offline --project-dir /mnt/c/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/report_app --output /mnt/c/Users/user/Desktop/partcle_sim-sim_rev4/particle_platform_redesign/report_app/.data-app-offline/exports/foundation-report.html",
     "prebuilt": true,
-    "separate_data": true,
-    "exit_code": 0
+    "apiVersion": 1,
+    "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "compilerSha256": "ec65601079c80bef7210f2c9760ff7f2db6adef28516ffff280d4c86f91d4078",
+    "recovery": "Old1.2.1 installed CLI was pruned and returned MODULE_NOT_FOUND. Current official1.2.2 prepare/build/export succeeded with identical runtime/compiler hashes. No protected runtime/manifests, dependency installs or source-build fallback used.",
+    "authored_warning": "DATA_NARRATIVE_DYNAMIC requires rendered checks; representative RichNarrative blocks and actual DataTable headers/cells were visually checked, with no Markdown tables introduced",
+    "final_commands_native_exits": {
+      "prepare": 0,
+      "build": 0,
+      "export_offline": 0
+    }
   },
   "full_payload_integrity": {
     "verification": "Full split snapshot equals source bytes; HTML/sidecar byte lengths and hashes match official manifest",
-    "source_sha256": "sha256:c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
-    "html_sha256": "sha256:a157e30bb6fcafcd74a77215ba8ef45ede7df10d02e7965f35012ad55e9084e3",
-    "manifest_sha256": "sha256:f39f1f93fc5ffe7afb817c70b0563e2a9ae891e8baeaa062fa31b20dd843318d",
+    "source_sha256": "sha256:cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739",
+    "html_sha256": "sha256:5347d696fb968d350b1e6dbb93e51e6736ee461b01eaf29d055e19ce443d5ab4",
+    "manifest_sha256": "sha256:890f1560cb321f463b178a570231d1c9912e8699aadbe9d671d2f00ed3623b50",
     "runtime_sha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
-    "build_status": "updating",
+    "build_status": "complete",
     "query_rows": {
       "case_audit": 2,
       "trajectory_divergence": 4,
@@ -61,78 +57,95 @@
       "module_responsibilities": 10,
       "numerical_contracts": 8,
       "result_layers": 4,
-      "implementation_work_packages": 4,
-      "quality_findings": 9,
+      "implementation_work_packages": 8,
+      "quality_findings": 12,
       "roadmap": 3
     },
     "identity_presentation_filter_preservation": "verified against HEAD source snapshot",
     "complete_data": "All ten full query payloads; UI pagination does not reduce the sidecar"
   },
-  "executed_tests": {
-    "command": "uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py tests/verification/test_documentation.py -q",
-    "passed": 17,
-    "seconds": 1.21
+  "bound_source_references_verified": 30,
+  "bound_authorities_verified": 23,
+  "final_checks": {
+    "tests": 17,
+    "native_exit": 0,
+    "stdout_elapsed_s": 1.04,
+    "executed_by": "coordinating root after final cdb84c0b snapshot freeze",
+    "junit": {
+      "path": "solver/.artifacts/foundation_20261123/final_snapshot_checks.xml",
+      "sha256": "sha256:d767a49db819c568e4a0a2af63546d5bcde23e3f0deb94a017f7409c678b1df3",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "17",
+          "time": "1.030",
+          "timestamp": "2026-11-24T00:38:19.249449+09:00",
+          "hostname": "DESKTOP-621T1UP"
+        }
+      ]
+    },
+    "documentation": {
+      "status": "valid",
+      "documents": 33,
+      "skills": 4,
+      "errors": []
+    },
+    "git_diff_check": "clean, as executed by root on the final frozen source"
   },
   "observed_ui": {
-    "method": "mcp__cua_repl native Windows Chrome; task-owned localhost tab; no DevTools JavaScript execution",
+    "method": "mcp__cua_repl native Windows Chrome; no DevTools JavaScript execution and no browser storage inspection or migration",
+    "local_http": "http://127.0.0.1:4175/?view=1",
     "viewports": [
       "390x768",
       "1280x768"
     ],
-    "content": [
-      "0.5.0 title/introduction, four metric cards and narrative content are legible",
-      "Wide table stays in its container and scrolls horizontally at 390px",
-      "27 catalog models paginate from rows1-8 to9-16",
-      "Current quality rows and explicitly running performance row visible",
-      "Source Overview resolves supported file references without object coercion",
-      "Evidence flow exposes bound_local, exact receipt SHA, execution source-map and scope",
-      "A/P multi-query selector exposes both current cases; Data preview rounds numerically only for display",
-      "A/P Evidence flow retains selected_on_prior_results, dependence and exact-clock/no-interpolation scope",
-      "Mobile Source drawer and evidence-flow text fit and scroll vertically"
-    ],
-    "copy_data": {
-      "method": "Actual Copy data action, then native Ctrl+V into a task-owned local data:text/html textarea; no copied evidence in URL",
-      "exact_capture_means": [
-        249.675,
-        251.775
-      ],
-      "exact_boundary33_means": [
-        60.45,
-        61.325
-      ],
-      "exact_speed_median_means": [
-        861.3178894844634,
-        866.9236448676853
-      ],
-      "preserved_scope": [
-        "current_source_bound_exploratory",
-        "NOT_TESTED",
-        "NOT_CERTIFIED"
-      ],
-      "datasets_checked": [
-        "current A/P cases",
-        "exploratory local reservations",
-        "quality findings"
-      ]
-    },
-    "console": "0 console messages observed on the refreshed report before A/P source inspection; no runtime script was executed from DevTools",
-    "identity_and_presentation": "Same app ID/title/authored revision/filter snapshot and same browser origin; user storage not inspected or edited"
+    "final_main": "0.5.0 title/introduction and4/6/3/5 metrics render; desktop and mobile readable; Prepared24Nov replaces Updating; final runtime console showed0 messages",
+    "tables": "All8 performance flow rows and12 quality rows load. Quality pages1/2 were checked; d828991 counts, completed87 measurements and retained baseline scope are present. Horizontal table scrolling stays contained at phone width.",
+    "source": "Overview exposes the6 actual performance source files. Final Evidence flow shows acceptance b573def..., bound_local, exact59 before/after scope and179 capture during firstW1. Correct59-file runtime/helper implementation/config roster wording is visible at desktop and mobile; stale complete-imported claim is absent.",
+    "data_preview": "Searching exact owned plan1,032,539,730 yields one capacity row; reset restores all8. Gate values retain1,032,539,730B owned plan,1,629,777,920B single-process RSS and their differing meanings.",
+    "actual_copy": "Real Copy data action pasted with nativeCtrl+V into task-owned local data:text/html textarea. All8 package labels, exact two byte values,87 measurements, shared-host limitation and no full1M rerun with final180-client qualification were retained.",
+    "retained_unchanged_checks": "Earlier source/copy checks cover unchanged A/P2case/4reservation row values and current_source_bound_exploratory/NOT_TESTED/NOT_CERTIFIED scope; all final30 reference bindings were reverified. Catalog27 pagination and source identity presentation checks remain unchanged.",
+    "targeted_recheck": "After the final source-wording correction, full artifacts were regenerated and verified; latest Source/Evidence flow, search/reset, actual Copy data and mobile source wrapping were rechecked.",
+    "offline": "Official standalone export opened in a separate task-owned Chrome file tab. Main report,0.5.0, final performance values and current CI rows render without Updating or a local sidecar/server requirement. Original localhost tab/origin remains intact."
   },
-  "unperformed": [
-    "Completed 10k/100k/1M performance projection",
-    "complete snapshot and final official build",
-    "affected final UI/copy and final payload verification"
-  ],
-  "publication": "No publish, sharing, destination or tag changes",
-  "current_snapshot_refresh": {
-    "sha256": "sha256:1161f417574f350cf779f5af34a3546bc6025d59b62194e1e4ba702cd9c07d89",
-    "build_status": "updating",
-    "summary_receipt_sha256": "sha256:f12dd6054b99b5e75ad0bcf262d7bf977ca406c5e0762dfe32f70d94ce5cc609",
-    "independent_review_sha256": "sha256:fb7ff07a45a32aba1e308ce61a5be7a0b6dc6357f31aaf63dbcbf3142a78a947",
-    "current_bound_references_verified": 15,
-    "producer_sha256": "sha256:9a7f712452da9a904f674f49bf68e62f95e83f128af82134787cbc86aeabd799",
-    "checks": "17 report/docs tests passed in1.75s",
-    "build_and_ui": "Not yet executed for this refreshed snapshot; the build/observed UI above belong only to snapshot c2ec4dd2fa8c93174384f175d6e2ac2e8c35735fd9c23550aa63b36db4f46be6",
-    "scope": "Independent A/P review included; immutable core execution receipt unchanged; final complete build deferred until performance completes"
-  }
+  "offline_export": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\report_app\\.data-app-offline\\exports\\foundation-report.html",
+    "html_sha256": "sha256:83edd8445e12b8aa646af29003f3e1cea475d4ff3f0f504b30ac8b5e593b2db8",
+    "html_bytes": 2659745,
+    "source_snapshot_sha256": "sha256:cdb84c0b60fd23247e24d32aa6936072f344d2b915dc0b5cb0964cec79071739",
+    "embedded_chunks": 4,
+    "embedded_snapshot_semantically_equal_to_complete_source": true,
+    "query_rows": {
+      "case_audit": 2,
+      "trajectory_divergence": 4,
+      "design_decisions": 8,
+      "physics_scope": 27,
+      "module_responsibilities": 10,
+      "numerical_contracts": 8,
+      "result_layers": 4,
+      "implementation_work_packages": 8,
+      "quality_findings": 12,
+      "roadmap": 3
+    },
+    "identity": {
+      "id": "report:c9a85c07-6c83-42c2-9aa3-5d3037be4638",
+      "title": "半導体チャンバー粒子輸送基盤 — 製品仕様と詳細実装計画",
+      "authoredRevision": null,
+      "presentation": null,
+      "filters": []
+    },
+    "build_status": "complete",
+    "scope": "All reviewed query rows and provenance preserved in the official local offline export; does not copy browser-origin user storage",
+    "official_export_offline": true,
+    "requiresCdn": false,
+    "ignored_by_git": true,
+    "actual_rendered_open": true
+  },
+  "identity_and_presentation": "App ID/title/filters/authored state preserved against HEAD source; stable block IDs/layout retained, no user browser-origin state changed. Offline export preserves authored snapshot identity, not a migration of origin-local user storage.",
+  "science_scope": "Practical A/P correspondence retains boundary33/100us reservations; numerical/native parity NOT_TESTED and physical validation NOT_CERTIFIED. Performance is shared-host workload acceptance, not causal speedup or all-model/whole-team-memory qualification. Source59/179/180 phases remain explicit.",
+  "unperformed_requested_report_work": [],
+  "publication": "No publish, share, tag, registry release or destination changes; split dist and offline file remain local and ignored by Git"
 }
