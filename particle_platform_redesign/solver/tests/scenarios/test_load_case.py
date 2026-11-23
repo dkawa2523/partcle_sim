@@ -293,27 +293,24 @@ def test_load_case_rejects_surface_release_from_periodic_seam(tmp_path: Path) ->
         load_case(yaml_path)
 
 
-def test_load_case_rejects_retired_v1_thread_configuration(tmp_path: Path) -> None:
-    """The serial v3 schema must not silently accept the removed thread API."""
-
+def test_load_case_rejects_unsupported_format_and_unknown_resource_keys(tmp_path: Path) -> None:
     data_path = tmp_path / "case.h5"
     info = write(data_path, _bundle())
-    canonical = _case_yaml("case.h5", info.content_hash)
-
-    v1_path = tmp_path / "v1.yaml"
-    v1_path.write_text(
-        canonical.replace("format_version: 3", "format_version: 1"), encoding="utf-8"
-    )
+    document = yaml.safe_load(_case_yaml("case.h5", info.content_hash))
+    unsupported_format = {**document, "format_version": document["format_version"] + 1}
+    unsupported_path = tmp_path / "unsupported-format.yaml"
+    unsupported_path.write_text(yaml.safe_dump(unsupported_format), encoding="utf-8")
     with pytest.raises(CaseError, match="unsupported YAML format_version"):
-        load_case(v1_path)
+        load_case(unsupported_path)
 
-    threaded_path = tmp_path / "threaded-v2.yaml"
-    threaded_path.write_text(
-        canonical.replace("resources:\n", "resources:\n  threads: 2\n"),
-        encoding="utf-8",
-    )
+    unknown_resource = {
+        **document,
+        "resources": {**document["resources"], "unknown_limit": 2},
+    }
+    unknown_path = tmp_path / "unknown-resource.yaml"
+    unknown_path.write_text(yaml.safe_dump(unknown_resource), encoding="utf-8")
     with pytest.raises(CaseError, match="resources keys are invalid"):
-        load_case(threaded_path)
+        load_case(unknown_path)
 
 
 def test_load_case_rejects_oversize_numeric_arrays_before_materializing_them(

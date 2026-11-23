@@ -170,6 +170,20 @@ def test_csv_budget_preserves_descriptive_results_and_binds_source_artifacts(
         compare(budget)
 
 
+def test_matched_evaluation_rejects_duplicate_mapped_columns(tmp_path: Path) -> None:
+    series = _series(tmp_path, "candidate", 1.0)
+    path = tmp_path / "candidate_fine.csv"
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow((*rows[0], "p0"))
+        writer.writerows([*row, float(row[2]) + 0.1] for row in rows[1:])
+
+    with pytest.raises(ValueError, match="duplicate column names"):
+        characterize(series)
+
+
 def _edit_rows(path: Path, edit: str) -> None:
     with path.open(encoding="utf-8", newline="") as stream:
         rows = list(csv.DictReader(stream))

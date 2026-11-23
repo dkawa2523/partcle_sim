@@ -967,14 +967,11 @@ def _validate_run(
     physics_signature_count: int,
 ) -> None:
     particle_count = int(row["particle_count"])
-    hit_count = int(row["hit_count"])
     if summary.particle_count != particle_count:
         raise RuntimeError("P14 worker returned an unexpected particle count")
     if summary.macro_step_count != int(specification["expected_macro_steps"]):
         raise RuntimeError("P14 worker returned an unexpected macro-step count")
-    expected_boundary_events = int(
-        specification.get("expected_boundary_events", particle_count * hit_count)
-    )
+    expected_boundary_events = int(specification["expected_boundary_events"])
     if summary.boundary_event_count != expected_boundary_events:
         raise RuntimeError("P14 worker returned an unexpected boundary-event count")
     if summary.failure_event_count != 0:

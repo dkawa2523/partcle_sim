@@ -551,10 +551,7 @@ def _observation(
     axis_crossings = int(boundary["axis_crossings"])
     depth = int(manifest["brownian_interval_tree_depth"])
     adaptive_max_depth = int(manifest["brownian_adaptive_max_depth"])
-    macro_steps = _macro_step_count(
-        float(manifest["time"]["end_s"]),
-        float(manifest["time"]["dt_s"]),
-    )
+    macro_steps = int(manifest["counts"]["macro_steps"])
     declared_leaf_visits = particle_count * macro_steps * (1 << depth)
     return {
         "scenario": scenario,

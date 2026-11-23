@@ -1,0 +1,87 @@
+{
+  "queries": {
+    "quality_findings": {
+      "rows": [
+        {
+          "severity": "passed",
+          "finding": "current-only core/scenario 1228件",
+          "disposition": "最終sourceの全体実行。解析・event・Brownian等の確認であり、全native方程式や実機予測の認定ではない",
+          "evidence": "solver/evidence/current_only_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "blocked",
+          "finding": "old Brownian生成物 123 files / 153000925 Bは残存",
+          "disposition": "物理削除は未実行。3操作がblocked by policyで拒否。別198 result rootsは分類済み・各削除未試行。許可された実行条件と実残存/保護境界の再確認後に再開",
+          "evidence": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "current-only 外部tests 156件",
+          "disposition": "COMSOL/gas-collisionの最終suite。明示CSV・厳密ID・unique column authority等を含む。過渡的collectionの件数を補わない",
+          "evidence": "solver/evidence/current_only_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "同じcurrent wheelをWindows/Linuxで実行",
+          "disposition": "各49 Python filesとMETADATA・README一致。四API、13操作、5例題、独自CSV入力→元caseなしの結果利用を実行",
+          "evidence": "solver/evidence/current_only_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "5影響先benchmarkとC03独立解析11件",
+          "disposition": "8実行moduleのinventoryと実行subsetを区別。cold/warmや移管identityは独立の数値正解・速度保証ではない",
+          "evidence": "solver/.artifacts/current_only_bench_20261123/receipt.json"
+        },
+        {
+          "severity": "reviewed",
+          "finding": "native保存authority 196 filesのhash一致",
+          "disposition": "観測・実験入力・元pilot/選択authorityを保存。software生成物と区別した独立reviewの範囲",
+          "evidence": "solver/.artifacts/current_only_20261123/assets_review.json"
+        },
+        {
+          "severity": "prior_reference",
+          "finding": "A/P各40seedと以前の80再実行を参照として保持",
+          "disposition": "今回はA/P solver再実行なし。実用的population比較は元source/windowの範囲で有用、現行fresh qualificationではない",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json"
+        },
+        {
+          "severity": "open_improvement",
+          "finding": "入力shapeエラー・analyze JSON失敗時公開・結果integrity scopeに残る改善",
+          "disposition": "columns:nullのtracebackと部分JSON残存は再現済み。final値hashの範囲は能力上の留保。提案のみで未実装、全件解消とはしない",
+          "evidence": "solver/evidence/current_only_2026_11_23/report_handoff_review.json"
+        }
+      ],
+      "source": {
+        "label": "current-onlyの実行済みscope・未実行削除・未実装改善",
+        "files": [
+          "solver/evidence/current_only_2026_11_23/report_execution_receipts.json",
+          "solver/evidence/current_only_2026_11_23/report_scope.json",
+          "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
+          "solver/evidence/current_only_2026_11_23/report_handoff_review.json",
+          "solver/.artifacts/current_only_20261123/final_assets_review.json",
+          "solver/.artifacts/current_only_20261123/clean_wheel_windows.json",
+          "solver/.artifacts/current_only_20261123/installed_workflow_windows.json",
+          "solver/.artifacts/current_only_20261123/clean_wheel_linux.json",
+          "solver/.artifacts/current_only_20261123/installed_workflow_linux.json",
+          "solver/evidence/current_only_2026_11_23/final_execution.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "Execution, outstanding work and prior reference",
+            "definition": "Current passed scopes, blocked/unexecuted filesystem cleanup, proposed open improvements and prior A/P reference are separate claims. Report authoring completion is not retirement-goal completion.",
+            "componentIds": [
+              "quality-table",
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact final execution and outstanding-scope receipts",
+            "detail": "[{\"path\": \"solver/evidence/current_only_2026_11_23/report_execution_receipts.json\", \"sha256\": \"sha256:3aea8b4634bda71c6cabafb4441e20320bbe4cf30c03033c746e8fd0f5dca20a\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:6284f1a37b87253c3cc230b01f6fa24c896d3453ce065e52b86a3f139d2c047a\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/blocked_cleanup.json\", \"sha256\": \"sha256:cda1318dd4567ae284b77ae21eac8eaff53a440a94256cebe379aa62e42d9630\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/report_handoff_review.json\", \"sha256\": \"sha256:70cdf6c1b7aa5ccb494ad55dae6d81d843f393868bb9bcf3b05c8bfbf4dd853d\"}, {\"path\": \"solver/.artifacts/current_only_20261123/final_assets_review.json\", \"sha256\": \"sha256:f4ec421110d302b61bea4f35de31699e6690c310ba1fb9ecc2028817e6015c79\"}, {\"path\": \"solver/.artifacts/current_only_20261123/clean_wheel_windows.json\", \"sha256\": \"sha256:a1223e242afdb54e9702f6abcc9132a7877c3191df02bcd7df799585f71dcdf0\"}, {\"path\": \"solver/.artifacts/current_only_20261123/installed_workflow_windows.json\", \"sha256\": \"sha256:c3a2496f9f5aeb1bb91e649134eae70b057e771120b3022e88f336d3849bbb3f\"}, {\"path\": \"solver/.artifacts/current_only_20261123/clean_wheel_linux.json\", \"sha256\": \"sha256:e0e0b4456ea02fcfbc94adab151abaaa4b5a75940a569cf798b98c3905d838a2\"}, {\"path\": \"solver/.artifacts/current_only_20261123/installed_workflow_linux.json\", \"sha256\": \"sha256:4db89a2fab09275776257522f89c4f19408ddef1260af29bc0bc9153ed35e2ee\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/final_execution.json\", \"sha256\": \"sha256:683f94f909c83a7577932f6f41d817a279ee1b74a41a3d0ec2d4f90ffbdf7f12\"}]"
+          }
+        ]
+      }
+    }
+  }
+}

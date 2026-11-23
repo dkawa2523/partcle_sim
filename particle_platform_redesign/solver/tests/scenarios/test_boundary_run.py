@@ -386,7 +386,7 @@ def test_table_start_validation_preserves_row_order_and_particle_id(
 
     with pytest.raises(
         SimulationError,
-        match=rf"P05 table particle {expected_particle_id} must start strictly inside",
+        match=rf"table particle {expected_particle_id} must start strictly inside",
     ):
         simulate(load_case(paths.case_path), tmp_path / "invalid-table-start-result")
 

@@ -129,7 +129,7 @@ class OutputSpec:
 
 @dataclass(frozen=True, slots=True)
 class TrajectoryOutputSpec:
-    """P04 trajectory selection and explicit physical output times."""
+    """Trajectory selection and explicit physical output times."""
 
     selection: str
     explicit_times_s: tuple[float, ...]

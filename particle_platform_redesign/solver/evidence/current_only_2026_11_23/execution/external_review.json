@@ -1,0 +1,206 @@
+{
+  "generated_at_utc": "2026-11-23T05:49:00.680038+00:00",
+  "scope": "Current external V&V retirement and public-route verification; task evidence only",
+  "base_head": "75100e74f1243b527e065c9e6a68121221408b39",
+  "deleted_paths": [
+    "tools/vv/comsol/actual_run_receipt.py",
+    "tools/vv/comsol/boundary_response_mapping.py",
+    "tools/vv/comsol/cases/f02_fixed_electric.yaml",
+    "tools/vv/comsol/cases/f02_reduced_electric.yaml",
+    "tools/vv/comsol/prepare_f02_fixed_electric_case.py",
+    "tools/vv/comsol/tests/test_actual_run_receipt.py",
+    "tools/vv/comsol/tests/test_boundary_response_mapping.py",
+    "tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py"
+  ],
+  "removed_roles": [
+    {
+      "role": "Old M3C process-log materializer and boundary-response contract",
+      "reason": "No current marker-emitting producer or non-test consumer; current meaning preflight binds native evidence directly"
+    },
+    {
+      "role": "Fixed-32/100nm F02 particle fixture and generated-input configs",
+      "reason": "Old acceptance pipeline only; current installed source/input clients own general construction"
+    },
+    {
+      "role": "Aggregate fixed-package discovery and native formula replay",
+      "reason": "Current equation comparisons take explicit CSV/model/allowance; no directory-based equation inference or legacy header aliases"
+    },
+    {
+      "role": "P1 fixed probe count and flat point-cloud alternate exports",
+      "reason": "Exact sectionwise P1 topology and arbitrary nonempty native release probes remain"
+    },
+    {
+      "role": "External test dynamic file loaders and one-off task scripts",
+      "reason": "Tests use direct current-module imports; temporary generators removed after execution"
+    }
+  ],
+  "retained_roles": [
+    {
+      "path": "tools/vv/comsol/cases/f02_selected_csv.yaml",
+      "reason": "Real native selection and field metadata; current installed CSV importer executed successfully",
+      "sha256": "2155421e4b1f3d95d4045ed433fbc80fdc5bc8d3ddf2b37c0cf25607af41d8e2"
+    },
+    {
+      "path": "tools/vv/comsol/meaning_preflight.py",
+      "reason": "Current evaluate_matched_trajectory.require_supported_comparison consumer; artifact identity and scientific meaning gate remain"
+    },
+    {
+      "path": "tools/vv/comsol/references",
+      "reason": "Real native observations, source snapshots, configuration receipts and reference inputs are independent experimental evidence"
+    },
+    {
+      "path": "tools/vv/gas_collision",
+      "reason": "Current independent microscopic reference and statistical qualifier used by core verification"
+    },
+    {
+      "path": "tools/vv/comsol/_frozen_state_csv.py",
+      "reason": "One current active-state CSV reader preserves exact int64 row identity separately from physical floats; removes duplicated readers"
+    }
+  ],
+  "independent_review_fixes": [
+    "Reject zero/negative exported single-charge potential increment before diagnostic divisions",
+    "Preserve full int64 IDs including 2^53+1 and int64 endpoints; reject fractional/nonfinite/out-of-range IDs",
+    "Describe normalized charge residual including 1 s^-1 absolute scale at low current",
+    "Describe reused saved native observations separately from fresh candidate benchmark execution"
+  ],
+  "tests": {
+    "command": "uv run --locked python -m pytest tools/vv/comsol/tests tools/vv/gas_collision/tests -q --junitxml=.artifacts/current_only_external_20261123/external_reviewed.xml",
+    "junit": {
+      "path": ".artifacts/current_only_external_20261123/external_reviewed.xml",
+      "sha256": "a9025bb6c979aad24eea058740461e41aa7776127360b4498cea719d7d50c57a"
+    },
+    "tests": 151,
+    "failures": 0,
+    "errors": 0,
+    "pytest_wall_seconds": 65.98
+  },
+  "quality": {
+    "ruff_check": "PASS tools/vv",
+    "ruff_format": "PASS 35 files",
+    "pyrefly": "0 errors; 27 warnings",
+    "complexity": "PASS every current function/method CC<16",
+    "git_diff_check": "PASS"
+  },
+  "native_input_import": {
+    "command": "uv run --locked chamber-particles inputs import-csv tools/vv/comsol/cases/f02_selected_csv.yaml .artifacts/current_only_external_20261123/native_selected_import",
+    "exit_code": 0,
+    "report": {
+      "path": ".artifacts/current_only_external_20261123/native_selected_import/report.json",
+      "sha256": "2b3050a57a0ba9f7d92989361e38d03ba46a9ea24a9d709985ec9d7213573ca1"
+    },
+    "bundle": {
+      "path": ".artifacts/current_only_external_20261123/native_selected_import/bundle.h5",
+      "sha256": "9fb890667d951eb1464d3ca3286a3b54bd2491f77d476d1a20c9f777bdb6332c"
+    },
+    "logical_content_hash": "sha256:76f14a13cad04bc435dbafbc609cf3cd9d46438f170a49a0585f45472d6c2b9a",
+    "nodes": 1987,
+    "triangles": 3779,
+    "physical_boundary_facets": 160,
+    "fields": [
+      "gas_velocity",
+      "gas_temperature",
+      "gas_density",
+      "gas_dynamic_viscosity",
+      "gas_mean_free_path"
+    ],
+    "scope": "selected-field conversion and canonical validation only",
+    "native_solution_member_qualification": "NOT_TESTED; not present in original source export"
+  },
+  "explicit_csv_and_p1_cli": {
+    "original_command_receipt": {
+      "path": ".artifacts/current_only_external_20261123/cli_receipt.json",
+      "sha256": "9164fa0fef7c9e3d5c31c5ff83ee7190a4d916e6893ca4ccc1520cdabb50caea"
+    },
+    "reviewed_charge": {
+      "path": ".artifacts/current_only_external_20261123/charge_reviewed.json",
+      "sha256": "c710665b70d77e749a3fcec150b45c1feed517d26d31bb068f01e0bf51ab4537"
+    },
+    "reviewed_ion": {
+      "path": ".artifacts/current_only_external_20261123/ion_reviewed.json",
+      "sha256": "beef05d21eb052b01bf8661201b158a95f6a73ae3b9297bf4a16dd8c4de0d443"
+    },
+    "charge_status": "PASS",
+    "ion_status": "PASS",
+    "p1_receipt": {
+      "path": ".artifacts/current_only_external_20261123/p1_tables/table_receipt.json",
+      "sha256": "6ff5a5bef8fb976adabbe1295ca43e0526efd5e4adee549f7a2e9230202b1322"
+    },
+    "p1_probes": 3,
+    "input_source": "Independent test algebra and affine field, not production-generated golden outputs",
+    "reviewed_csv_commands": "Same explicit CSV inputs/options as cli_receipt.json; new reviewed output paths; exit0 for both"
+  },
+  "benchmarks": {
+    "xy": {
+      "summary": {
+        "path": ".artifacts/current_only_external_20261123/xy_reviewed/comparison_summary.json",
+        "sha256": "b668297d87ed9692b466bda2d48094316e8623f39a0d975697192bfe4cb71f77"
+      },
+      "status": "PASS",
+      "scenario_count": 7,
+      "judgments": {
+        "boundary_initial_equivalence": "PASS",
+        "field_equivalence": "PASS",
+        "formulation_equivalence": "PASS",
+        "trajectory_equivalence": "PASS"
+      },
+      "orders": {
+        "candidate_position": 4.018033715452947,
+        "candidate_velocity": 4.940516432493681,
+        "comsol_position": 4.9404789963616,
+        "comsol_velocity": 4.940560857544318
+      },
+      "tested_scope": "fresh public solver runs against supplied native observations of unsaved COMSOL 6.4 Cartesian XY point-particle microcases: ballistic, constant electric acceleration, linear relaxation, exact surface-origin departure, specular, Stick, and Freeze/hold",
+      "native_run_receipt_sha256": "3b03a351274219acb42d02ad65cfdc89d7fbd2c9a484be705066f292c51c3d07"
+    },
+    "rz": {
+      "summary": {
+        "path": ".artifacts/current_only_external_20261123/rz/comparison_manifest.json",
+        "sha256": "27d63d01160245fd82ddb4641f80ca8d1f89cd8b534756fbcf2618ab5c1eed7c"
+      },
+      "status": "PASS",
+      "gate_counts": {
+        "fail": 0,
+        "pass": 132
+      },
+      "scope": "Fresh candidate runs against saved native RZ observations and independent analytic motion"
+    },
+    "curved": {
+      "summary": {
+        "path": ".artifacts/current_only_external_20261123/curved/comparison_summary.json",
+        "sha256": "a31e0121cb01c32bf54467247a558e4b43335918763a43fde2af522ccceab9a7"
+      },
+      "status": "PASS",
+      "orders": {
+        "rms_normal": 0.9981355555685293,
+        "rms_point": 2.003135563270743,
+        "rms_reflected_velocity": 0.9967374967318079,
+        "rms_time": 2.003135563270619
+      },
+      "scope": "Cartesian point particles, force-free straight flight, specular reflection, unit-circle wall approximated by inscribed line2 facets"
+    }
+  },
+  "limits": [
+    "No new COMSOL/native solve performed",
+    "No physical-device validity or full stochastic trajectory parity claim",
+    "No raw native data, experimental observations, environments, model_dataset or old_code modified",
+    "Task-only generator scripts removed; audit JSON is execution evidence, not a new validation framework"
+  ],
+  "current_changed_source_sha256": {
+    "tools/vv/README.md": "34b9f839299fa8ded0fefd04dc11e635f86a77535a5a1c95f3dc7cebabb0fe60",
+    "tools/vv/comsol/README.md": "dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0",
+    "tools/vv/comsol/evaluate_aggregate_charge_parity.py": "ec6fa90a900733f344bf4c8d710e380acf4bf44909a37186710e6169a4dc4a32",
+    "tools/vv/comsol/evaluate_aggregate_ion_drag_parity.py": "458ff6a8e8b91e6c44e5517c8ddc6ae2107091d9119f63a0f70f895a8cf5cf16",
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "0798a8ade022a194372112e84f44c45eb962913bf83cbda32cc09ca822d55f09",
+    "tools/vv/comsol/evaluate_xy_minimal_suite.py": "a16e2e7e71ee0368856d05168c8a78cea9588279d78324c2e18ba8a39ccbb921",
+    "tools/vv/comsol/meaning_preflight.py": "1597c47957462c8725f40536bb36341de892bedb280b34b0e9010fa6a6e09c5b",
+    "tools/vv/comsol/prepare_comsol_p1_tables.py": "b928b60c963d199171dbe43e03d8faeccff3bfb00c4f4909bc193fadd53bf4d1",
+    "tools/vv/comsol/references/README.md": "6e571070bf58f27af8eea4e31982ec52c580d74a69109bef8ad064cd72d10d04",
+    "tools/vv/comsol/tests/test_aggregate_charge_parity.py": "efd4710bc83de21627568ee990a0277f6470f285c21fecaf1d4d2faf1d5634b9",
+    "tools/vv/comsol/tests/test_aggregate_ion_drag_parity.py": "d00753ae58a6bd1678ccf09793e9c9f4e96478674a7d00f55d42d7ab9d75ae51",
+    "tools/vv/comsol/tests/test_curved_wall_line2_convergence.py": "d28d434b727ea8af123d742f95cb34f90a2f7d4db6fb9f2170e34fe722df55e2",
+    "tools/vv/comsol/tests/test_meaning_preflight.py": "fe9b34560fb631b85b7813014da077d5e92b73f55d989f0f0782a549b8a6838a",
+    "tools/vv/comsol/tests/test_prepare_comsol_p1_tables.py": "ba66a85537f648e5e87b4afd560452fa3f16fbbbcab0440d4a2e31f4a1053fd5",
+    "tools/vv/comsol/tests/test_saved_population_evaluation.py": "9a14850927c120c0b3988d73b7ec4fddf296ee6ba95dafed8854640c902cbcde",
+    "tools/vv/comsol/_frozen_state_csv.py": "f11ce84abad5d7fe24ef128c89fc92ad450828a89090747c7955f151eae673fd"
+  }
+}

@@ -9,9 +9,8 @@ to the installed `chamber-particles` package.
 uv run --locked python -m pytest tools/vv/comsol/tests -q
 ```
 
-The retained suite uses temporary synthetic data and the tracked small native
-XY reference. It does not require the old campaign registrations, a
-`model_dataset` checkout, historical result readers, or a COMSOL license.
+The suite uses temporary synthetic data and the tracked small native XY
+reference. These tests require neither `model_dataset` nor a COMSOL license.
 Fresh native benchmark generation requires COMSOL; comparison against saved
 measurements and analytic references does not. Passing this suite is scoped
 verification, not general native or physical-model certification.

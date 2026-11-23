@@ -1,19 +1,16 @@
-"""Replay saved active-row charge rates with the production aggregate model.
+"""Compare supplied active-state charge rates with the current aggregate model.
 
-This is an external V&V tool.  The saved provider histories are evidence for a
-frozen-state formula comparison, not solver input and not a golden definition
+This external V&V tool uses primitive rows for a frozen-state formula comparison,
+not solver input and not a golden definition
 of particle charging or trajectory accuracy.
 """
 
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
 import json
 import math
-from collections.abc import Sequence
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
@@ -28,17 +25,13 @@ from chamber_particles.physics.charge import (
     aggregate_relative_drift_regularized_two_current_v1,
 )
 from chamber_particles.physics.forces import ELEMENTARY_CHARGE_C, VACUUM_PERMITTIVITY_F_M
+from tools.vv.comsol._frozen_state_csv import read_active_states
 
 type FloatArray = NDArray[np.float64]
 type Record = dict[str, object]
 
-TOOL_REVISION: Final = "p18c_saved_primitive_charge_parity_v2"
+TOOL_REVISION: Final = "aggregate_charge_frozen_state_v3"
 MODEL_REVISION: Final = "aggregate_relative_drift_regularized_two_current_v1"
-DEFAULT_CURRENT_SCALE_RESIDUAL_LIMIT: Final = 1.0e-10
-DEFAULT_EXPECTED_PACKAGES: Final = 12
-HISTORY_RELATIVE_PATTERN: Final = (
-    "cases/*/*/external_reproduction/results/particle_history_full_tidy.csv"
-)
 REQUIRED_COLUMNS: Final = (
     "particle_id",
     "time_s",
@@ -58,25 +51,6 @@ REQUIRED_COLUMNS: Final = (
     "local_single_charge_surface_potential_increment_V",
     "dynamic_charge_rate_dZdt_per_s",
 )
-COLUMN_ALIASES: Final = {
-    "electron_temperature_eV_as_V": ("local_electron_temperature_eV_as_V",),
-    "effective_positive_ion_mass_kg": ("local_effective_positive_ion_mass_kg",),
-    "local_bounded_screening_length_m": ("local_screening_length_m",),
-}
-
-
-@dataclass(frozen=True, slots=True)
-class HistoryEvaluation:
-    """One package's public metrics and arrays needed for dataset aggregation."""
-
-    metrics: Record
-    core_residual: FloatArray
-    formula_residual: FloatArray
-    core_normalized_residual: FloatArray
-    formula_normalized_residual: FloatArray
-    exported_rate: FloatArray
-    epsilon_relative_difference: FloatArray
-    potential_increment_relative_difference: FloatArray
 
 
 def _sha256(path: Path) -> str:
@@ -85,60 +59,6 @@ def _sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
-
-
-def _resolve_columns(fieldnames: Sequence[str] | None, path: Path) -> dict[str, str]:
-    if fieldnames is None:
-        raise ValueError(f"{path}: missing CSV header")
-    available = set(fieldnames)
-    sources = {
-        name: next(
-            (
-                candidate
-                for candidate in (name, *COLUMN_ALIASES.get(name, ()))
-                if candidate in available
-            ),
-            "",
-        )
-        for name in REQUIRED_COLUMNS
-    }
-    missing = sorted(name for name, source in sources.items() if not source)
-    if missing:
-        raise ValueError(f"{path}: required columns are missing: {missing}")
-    return sources
-
-
-def _active_numeric_row(
-    row: dict[str, str], sources: dict[str, str], path: Path, row_number: int
-) -> dict[str, float] | None:
-    active = float(row[sources["active_state_flag"]])
-    if active not in (0.0, 1.0):
-        raise ValueError(f"{path}:{row_number}: active_state_flag is not 0 or 1")
-    if active == 0.0:
-        return None
-    result: dict[str, float] = {}
-    for name in REQUIRED_COLUMNS:
-        value = float(row[sources[name]])
-        if not math.isfinite(value):
-            raise ValueError(f"{path}:{row_number}: {name} is not finite")
-        result[name] = value
-    return result
-
-
-def _read_active(path: Path) -> dict[str, FloatArray]:
-    values: dict[str, list[float]] = {name: [] for name in REQUIRED_COLUMNS}
-    with path.open(encoding="utf-8-sig", newline="") as stream:
-        reader = csv.DictReader(stream)
-        sources = _resolve_columns(reader.fieldnames, path)
-        for row_number, row in enumerate(reader, start=2):
-            numeric = _active_numeric_row(row, sources, path, row_number)
-            if numeric is not None:
-                for name, value in numeric.items():
-                    values[name].append(value)
-    arrays = {name: np.asarray(column, dtype=np.float64) for name, column in values.items()}
-    if arrays["particle_id"].size == 0:
-        raise ValueError(f"{path}: no active rows")
-    return arrays
 
 
 def _collection_rates(
@@ -184,14 +104,17 @@ def _collection_rates(
 def evaluate_history(
     history_path: Path,
     *,
-    current_scale_residual_limit: float = DEFAULT_CURRENT_SCALE_RESIDUAL_LIMIT,
-) -> HistoryEvaluation:
-    """Evaluate one saved history and return metrics plus aggregate arrays."""
+    current_scale_residual_limit: float,
+) -> Record:
+    """Compare one explicit CSV against the current frozen-state charge equation."""
 
     if not math.isfinite(current_scale_residual_limit) or current_scale_residual_limit <= 0.0:
         raise ValueError("current_scale_residual_limit must be finite and positive")
     path = history_path.expanduser().resolve()
-    values = _read_active(path)
+    particle_ids, values = read_active_states(path, REQUIRED_COLUMNS)
+    potential_increment = "local_single_charge_surface_potential_increment_V"
+    if np.any(values[potential_increment] <= 0.0):
+        raise ValueError(f"{path}: {potential_increment} must be positive")
     particle_velocity = np.column_stack(
         (values["velocity_r_m_per_s"], values["velocity_z_m_per_s"])
     )
@@ -302,198 +225,60 @@ def evaluate_history(
             np.median(potential_increment_relative_difference)
         ),
         "production_core_worst_row": {
-            "particle_id": int(values["particle_id"][core_worst]),
+            "particle_id": int(particle_ids[core_worst]),
             "time_s": float(values["time_s"][core_worst]),
         },
-        "exact_provider_parity": "PASS" if core_pass else "FAIL",
-        "model_formula_mismatch": "NOT_INDICATED" if formula_pass else "INDICATED",
     }
-    return HistoryEvaluation(
-        metrics,
-        core_residual,
-        formula_residual,
-        core_normalized,
-        formula_normalized,
-        exported,
-        epsilon_relative_difference,
-        potential_increment_relative_difference,
-    )
-
-
-def evaluate_dataset(
-    dataset_root: Path,
-    *,
-    expected_packages: int = DEFAULT_EXPECTED_PACKAGES,
-    current_scale_residual_limit: float = DEFAULT_CURRENT_SCALE_RESIDUAL_LIMIT,
-) -> Record:
-    """Evaluate every discovered history without modifying or rerunning it."""
-
-    root = dataset_root.expanduser().resolve()
-    histories = tuple(sorted(root.glob(HISTORY_RELATIVE_PATTERN)))
-    if len(histories) != expected_packages:
-        raise ValueError(f"expected {expected_packages} history packages, found {len(histories)}")
-    package_metrics: list[Record] = []
-    core_residual_parts: list[FloatArray] = []
-    formula_residual_parts: list[FloatArray] = []
-    core_normalized_parts: list[FloatArray] = []
-    formula_normalized_parts: list[FloatArray] = []
-    exported_parts: list[FloatArray] = []
-    epsilon_difference_parts: list[FloatArray] = []
-    potential_increment_difference_parts: list[FloatArray] = []
-    for history in histories:
-        result = evaluate_history(
-            history,
-            current_scale_residual_limit=current_scale_residual_limit,
-        )
-        metrics = result.metrics
-        metrics["package"] = history.relative_to(root).as_posix()
-        metrics.pop("path")
-        package_metrics.append(metrics)
-        core_residual_parts.append(result.core_residual)
-        formula_residual_parts.append(result.formula_residual)
-        core_normalized_parts.append(result.core_normalized_residual)
-        formula_normalized_parts.append(result.formula_normalized_residual)
-        exported_parts.append(result.exported_rate)
-        epsilon_difference_parts.append(result.epsilon_relative_difference)
-        potential_increment_difference_parts.append(result.potential_increment_relative_difference)
-    core_residual = np.concatenate(core_residual_parts)
-    formula_residual = np.concatenate(formula_residual_parts)
-    core_normalized = np.concatenate(core_normalized_parts)
-    formula_normalized = np.concatenate(formula_normalized_parts)
-    exported = np.concatenate(exported_parts)
-    epsilon_difference = np.concatenate(epsilon_difference_parts)
-    potential_increment_difference = np.concatenate(potential_increment_difference_parts)
-    core_pass = all(
-        metrics["production_core_screening_gate"] == "PASS" for metrics in package_metrics
-    )
-    formula_pass = all(
-        metrics["exported_phi1_formula_gate"] == "PASS" for metrics in package_metrics
-    )
-    convention_diagnosis = (
-        "EPSILON0_CONSTANT_CONVENTION_DIFFERENCE"
-        if formula_pass and not core_pass
-        else "NO_SEPARATE_CONSTANT_CONVENTION_DIAGNOSIS"
-    )
     return {
         "tool_revision": TOOL_REVISION,
         "model_revision": MODEL_REVISION,
         "generated_at_utc": datetime.now(UTC).isoformat(),
-        "evidence_role": "external_saved_primitive_frozen_rate_parity",
-        "golden_truth": "NOT_CLAIMED",
+        "evidence_role": "external_frozen_state_charge_comparison",
         "trajectory_accuracy": "NOT_TESTED",
-        "comsol_rerun": False,
-        "dataset_root": str(root),
+        "physical_validity": "NOT_TESTED",
         "current_scale_residual_limit": current_scale_residual_limit,
-        "summary": {
-            "packages": len(package_metrics),
-            "active_rows": int(exported.size),
-            "production_core_screening_gate": "PASS" if core_pass else "FAIL",
-            "production_core_charge_rate_absolute_residual_max_number_s": float(
-                np.max(np.abs(core_residual))
-            ),
-            "production_core_charge_rate_global_relative_l2_residual": float(
-                np.linalg.norm(core_residual)
-                / max(float(np.linalg.norm(exported)), float(np.finfo(np.float64).tiny))
-            ),
-            "production_core_current_scale_normalized_residual_p90": float(
-                np.percentile(core_normalized, 90.0)
-            ),
-            "production_core_current_scale_normalized_residual_p99": float(
-                np.percentile(core_normalized, 99.0)
-            ),
-            "production_core_current_scale_normalized_residual_max": float(np.max(core_normalized)),
-            "exported_phi1_formula_gate": "PASS" if formula_pass else "FAIL",
-            "exported_phi1_charge_rate_global_relative_l2_residual": float(
-                np.linalg.norm(formula_residual)
-                / max(float(np.linalg.norm(exported)), float(np.finfo(np.float64).tiny))
-            ),
-            "exported_phi1_current_scale_normalized_residual_p90": float(
-                np.percentile(formula_normalized, 90.0)
-            ),
-            "exported_phi1_current_scale_normalized_residual_p99": float(
-                np.percentile(formula_normalized, 99.0)
-            ),
-            "exported_phi1_current_scale_normalized_residual_max": float(
-                np.max(formula_normalized)
-            ),
-            "inferred_epsilon0_relative_difference_median": float(np.median(epsilon_difference)),
-            "inferred_epsilon0_relative_difference_min": float(np.min(epsilon_difference)),
-            "inferred_epsilon0_relative_difference_max": float(np.max(epsilon_difference)),
-            "core_vs_exported_phi1_relative_difference_median": float(
-                np.median(potential_increment_difference)
-            ),
-            "constant_convention_diagnosis": convention_diagnosis,
-            "model_formula_mismatch": "NOT_INDICATED" if formula_pass else "INDICATED",
-            "exact_provider_parity": "PASS" if core_pass else "FAIL",
-        },
-        "packages": package_metrics,
+        "metrics": metrics,
         "interpretation": (
-            "The production-core gate derives phi1 from screening with the core epsilon0 and "
-            "therefore tests exact provider parity. The separate exported-phi1 gate tests the "
-            "saved two-current formula without changing core constants. A PASS of only the "
-            "second gate diagnoses a constant-convention difference, not a model-form match "
-            "claim beyond these frozen states. The sampled speed envelope is not a production "
-            "applicability certificate, and no integrated charge or trajectory claim is made."
+            "The production comparison derives capacitance from the supplied screening "
+            "primitive and current constants. The separate exported-potential-increment "
+            "comparison diagnoses constant-convention differences at these same frozen "
+            "states. Neither establishes integrated charge or trajectory accuracy. The "
+            "sampled speed envelope is not a global applicability certificate."
+            " The normalized current residual is abs(predicted-exported) / "
+            "max(abs(ion_rate)+abs(electron_rate), 1 s^-1), using charge-number rates."
         ),
     }
 
 
-def write_report(report: Record, output_directory: Path) -> None:
-    """Write a no-clobber JSON report and compact package table."""
-
-    output = output_directory.expanduser().resolve()
-    output.mkdir(parents=True, exist_ok=False)
-    with (output / "report.json").open("x", encoding="utf-8", errors="strict") as stream:
-        stream.write(json.dumps(report, allow_nan=False, indent=2, sort_keys=True) + "\n")
-    package_rows = report["packages"]
-    if not isinstance(package_rows, list):
-        raise TypeError("report packages must be a list")
-    columns = (
-        "package",
-        "sha256",
-        "active_rows",
-        "production_core_screening_gate",
-        "production_core_charge_rate_global_relative_l2_residual",
-        "production_core_current_scale_normalized_residual_max",
-        "exported_phi1_formula_gate",
-        "exported_phi1_charge_rate_global_relative_l2_residual",
-        "exported_phi1_current_scale_normalized_residual_max",
-        "inferred_epsilon0_relative_difference_median",
-        "sampled_maximum_relative_ion_speed_m_s",
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog=(
+            "Required CSV columns: "
+            + ", ".join(REQUIRED_COLUMNS)
+            + ". Units follow the column suffixes; charge is in elementary-charge numbers. "
+            "The single-charge surface-potential increment must be positive."
+        ),
     )
-    with (output / "package_metrics.csv").open(
-        "x", encoding="utf-8", errors="strict", newline=""
-    ) as stream:
-        writer = csv.DictWriter(stream, fieldnames=columns, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(package_rows)
-
-
-def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("dataset_root", type=Path)
-    parser.add_argument("output_directory", type=Path)
-    parser.add_argument("--expected-packages", type=int, default=DEFAULT_EXPECTED_PACKAGES)
+    parser.add_argument("history_path", type=Path)
+    parser.add_argument("output_path", type=Path)
     parser.add_argument(
         "--current-scale-residual-limit",
         type=float,
-        default=DEFAULT_CURRENT_SCALE_RESIDUAL_LIMIT,
+        required=True,
     )
-    return parser
-
-
-def main() -> int:
-    args = _parser().parse_args()
-    report = evaluate_dataset(
-        args.dataset_root,
-        expected_packages=args.expected_packages,
-        current_scale_residual_limit=args.current_scale_residual_limit,
+    args = parser.parse_args()
+    report = evaluate_history(
+        args.history_path, current_scale_residual_limit=args.current_scale_residual_limit
     )
-    write_report(report, args.output_directory)
-    summary = report.get("summary")
-    if not isinstance(summary, dict):
-        raise TypeError("report summary must be a mapping")
-    return 0 if summary.get("production_core_screening_gate") == "PASS" else 1
+    encoded = json.dumps(report, allow_nan=False, indent=2, sort_keys=True) + "\n"
+    args.output_path.parent.mkdir(parents=True, exist_ok=True)
+    with args.output_path.open("x", encoding="utf-8") as stream:
+        stream.write(encoded)
+    metrics = report["metrics"]
+    if not isinstance(metrics, dict):
+        raise TypeError("charge metrics must be a mapping")
+    return 0 if metrics["production_core_screening_gate"] == "PASS" else 1
 
 
 if __name__ == "__main__":

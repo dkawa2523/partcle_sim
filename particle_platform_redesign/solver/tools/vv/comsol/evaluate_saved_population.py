@@ -10,6 +10,7 @@ import argparse
 import csv
 import hashlib
 import json
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -56,7 +57,11 @@ def _read_rows(path: Path) -> list[_Row]:
     rows: list[_Row] = []
     with path.open(encoding="utf-8-sig", newline="") as stream:
         reader = csv.DictReader(stream)
-        if not _REQUIRED.issubset(reader.fieldnames or ()):
+        columns = reader.fieldnames or ()
+        duplicates = sorted(name for name, count in Counter(columns).items() if count > 1)
+        if duplicates:
+            raise ValueError(f"{path}: duplicate column names: {duplicates}")
+        if not _REQUIRED.issubset(columns):
             raise ValueError("native CSV lacks required population columns")
         for row in reader:
             status, final = float(row["native_status"]), float(row["native_final_status"])

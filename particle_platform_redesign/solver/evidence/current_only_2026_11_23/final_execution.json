@@ -1,0 +1,187 @@
+{
+  "status": "CURRENT_CHECKS_PASSED_WITH_PHYSICAL_CLEANUP_BLOCKED",
+  "scope": "Executed current cleanup; newly found foundation proposals remain proposed, not claimed implemented",
+  "base_head": "75100e74f1243b527e065c9e6a68121221408b39",
+  "branch": "cleanup/current-only-platform",
+  "test_runs": [
+    {
+      "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q",
+      "junit_source": ".artifacts\\current_only_20261123\\core_scenarios_clean.xml",
+      "junit_sha256": "29f5e5c054c8165c999628e42b822d29a3277c34d33c47b6989a1304064da403",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "1228",
+          "time": "679.713",
+          "timestamp": "2026-11-23T14:38:31.402474+09:00",
+          "hostname": "DESKTOP-621T1UP"
+        }
+      ]
+    },
+    {
+      "command": "uv run --locked python -m pytest tools/vv/comsol/tests tools/vv/gas_collision/tests -q",
+      "junit_source": ".artifacts\\current_only_20261123\\external_final.xml",
+      "junit_sha256": "b06cf9ec1211bfbbe1a80a28f0836a1809b80a48b4225ab9de5a3ca2fe939a22",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "156",
+          "time": "39.064",
+          "timestamp": "2026-11-23T15:00:06.776541+09:00",
+          "hostname": "DESKTOP-621T1UP"
+        }
+      ]
+    }
+  ],
+  "other_executed_tests": [
+    {
+      "scope": "documentation",
+      "passed": 3,
+      "seconds": 0.99
+    },
+    {
+      "scope": "report snapshot",
+      "passed": 4,
+      "seconds": 1.15
+    }
+  ],
+  "wheel_sha256": "0b8f7122f9b2a72e2f1db8aaaa0791529d8cf21253467b3ebc6b41dd4b2b4b2d",
+  "evidence": {
+    "execution/quality.json": {
+      "sha256": "c7f3ccb1dbf9356a3c5dc03468f44f25e2dbf63ccfacff2eac13b483bd300b0a",
+      "source": ".artifacts\\current_only_20261123\\final_quality.json"
+    },
+    "execution/wheel_windows.json": {
+      "sha256": "a1223e242afdb54e9702f6abcc9132a7877c3191df02bcd7df799585f71dcdf0",
+      "source": ".artifacts\\current_only_20261123\\clean_wheel_windows.json"
+    },
+    "execution/workflow_windows.json": {
+      "sha256": "c3a2496f9f5aeb1bb91e649134eae70b057e771120b3022e88f336d3849bbb3f",
+      "source": ".artifacts\\current_only_20261123\\installed_workflow_windows.json"
+    },
+    "execution/wheel_linux.json": {
+      "sha256": "e0e0b4456ea02fcfbc94adab151abaaa4b5a75940a569cf798b98c3905d838a2",
+      "source": ".artifacts\\current_only_20261123\\clean_wheel_linux.json"
+    },
+    "execution/workflow_linux.json": {
+      "sha256": "4db89a2fab09275776257522f89c4f19408ddef1260af29bc0bc9153ed35e2ee",
+      "source": ".artifacts\\current_only_20261123\\installed_workflow_linux.json"
+    },
+    "execution/core_review.json": {
+      "sha256": "c9c4b96584e9d737db468216af25a6e5382f1c8611d510244455736b56c5caa9",
+      "source": ".artifacts\\retire_current_core_20261123.json"
+    },
+    "execution/benchmark_review.json": {
+      "sha256": "4a16f5545ae115b78dfed8d2f095b8d0a0ffbaab5813d845442c54391ad2d6b5",
+      "source": ".artifacts\\current_only_bench_20261123\\receipt.json"
+    },
+    "execution/external_review.json": {
+      "sha256": "08170486b31703cef3d68adb75c2fad024b269014e070d8b56c37fc0f5a8401b",
+      "source": ".artifacts\\current_only_external_20261123\\audit.json"
+    },
+    "execution/assets_review.json": {
+      "sha256": "f4ec421110d302b61bea4f35de31699e6690c310ba1fb9ecc2028817e6015c79",
+      "source": ".artifacts\\current_only_20261123\\final_assets_review.json"
+    },
+    "execution/science_review.json": {
+      "sha256": "ad5f8743910ddce439e65535735890989652fe342f66faa4ba01ccf4cc7f08c6",
+      "source": ".artifacts\\current_only_20261123\\science_review.json"
+    },
+    "execution/route_probes.json": {
+      "sha256": "2153223f6687a757ea2db5ba40e51cb33fae2ba3be449d7532ba1b0adc978b97",
+      "source": ".artifacts\\current_only_20261123\\report\\route_audit_receipt.json"
+    },
+    "execution/foundation_science_review.json": {
+      "source": ".artifacts\\current_only_20261123\\foundation_science_review.json",
+      "sha256": "31482b9d3e5f70cecc6f3b3c6fec150b56124680829ab4f4ae795129cf4cd21e"
+    }
+  },
+  "limits": [
+    "No new COMSOL native solve",
+    "No new A/P independent ensemble sample",
+    "No all-material Vigus calculation",
+    "Old generated binaries remain physically present due policy rejection",
+    "New foundation R01-R09/R11-R14 proposals are not implemented by this audit"
+  ],
+  "physical_cleanup": "blocked_cleanup.json",
+  "foundation_review": "../../../reviews/foundation_root_cause_review_2026-11-23.md",
+  "current_source_sha256": {
+    "src/chamber_particles/__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+    "src/chamber_particles/__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+    "src/chamber_particles/api.py": "0625b08eb8e08b19fa2901a63a5e18cee8fd306b05b94dc37fe953ee5295873a",
+    "src/chamber_particles/boundaries.py": "85a694fb66d0dafa8b5233ec4712ea26067f2c7918b674714ee552bc95a0dbe2",
+    "src/chamber_particles/case.py": "887295525dcc2f4c7e4dca2aad10735817ba70dfef958a0c08235d5d2e00d4b6",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+    "src/chamber_particles/cpu.py": "82a73df79b8ed10463aa49db52c46c67f2ef96baea76b2fd4374d1663b3fb6ce",
+    "src/chamber_particles/engine.py": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d",
+    "src/chamber_particles/events.py": "217fb30d8c93262603d6d3d473f9ca5556b0784984e2a2af066a3653f97ed3d8",
+    "src/chamber_particles/execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+    "src/chamber_particles/field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+    "src/chamber_particles/fields.py": "c68f66aae101eec2e46ee33c76f69365a4cecf4de2f58f2e0a08076317498980",
+    "src/chamber_particles/geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+    "src/chamber_particles/integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+    "src/chamber_particles/lifecycle.py": "f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc",
+    "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "src/chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+    "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "src/chamber_particles/physics/catalog.py": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b",
+    "src/chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+    "src/chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+    "src/chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+    "src/chamber_particles/physics/runtime.py": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca",
+    "src/chamber_particles/rng.py": "8a23d62b65c0dae3651f3ff478d08d4305f73ed9e2580317df8f4122c1142920",
+    "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "src/chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "src/chamber_particles/time_grid.py": "6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad",
+    "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "src/chamber_particles/transport.py": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce",
+    "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+    "src/chamber_particles_tools/__init__.py": "69538a6ffa93118465aa5395157c3b5b65102d794429a3f288a811ab7238db8a",
+    "src/chamber_particles_tools/analysis/__init__.py": "438026bc54ef9615a7db158ded6657e247c93ddf06f484ec61622205723c26fe",
+    "src/chamber_particles_tools/bundle_publication.py": "62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f",
+    "src/chamber_particles_tools/cli.py": "a60f6ec8f826ee43a6909e5c965431780b1ebcaac6a4f0b5ee995a695fb5c3de",
+    "src/chamber_particles_tools/csv_import/__init__.py": "6d2e5444af02a66c31a875d9b7f8a68c8363be34b0d512cc5d40a3b9af489b64",
+    "src/chamber_particles_tools/csv_import/workflow.py": "c3ec86e424217d41b8890e02d797d9e2905ea35b75efb28bbbe37f7020e30b54",
+    "src/chamber_particles_tools/electrostatic_builder/__init__.py": "4c1c899232d1b686d7b93da1ce993ded0bfd019488073e5ee85ea51ac5e5eb97",
+    "src/chamber_particles_tools/electrostatic_builder/numerics.py": "3be3ecc87661557d3ab66b4c8604c52e65739eb63929ffec887a56e8e7ec1846",
+    "src/chamber_particles_tools/electrostatic_builder/workflow.py": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8",
+    "src/chamber_particles_tools/examples.py": "4c7f60b1ff9cbc68dde0483985825613497af701f548d7d299b62d847de8537c",
+    "src/chamber_particles_tools/field_preprocessor/__init__.py": "523906002167d1e03a32290cef5b6a838167ee1d9866c64d7e06c05d93288590",
+    "src/chamber_particles_tools/field_preprocessor/numerics.py": "328eacec0067656227c75a8883156d7f2dfbb670715269a58bf18918acfe68d4",
+    "src/chamber_particles_tools/field_preprocessor/workflow.py": "5b1115ceb51b9024f2bd0ef42e348a8f02f6d0e8776b4e495eee0f7cac3c5dc1",
+    "src/chamber_particles_tools/inputs.py": "0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d",
+    "src/chamber_particles_tools/selection.py": "c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01",
+    "src/chamber_particles_tools/source_builder/__init__.py": "330fcb0424c7c8d06bad5d9a78ff3e4d5768cf85a1caa66ed354dabce320e838",
+    "src/chamber_particles_tools/source_builder/producer.py": "92648bd6d8d67b82f6361d5a608aaeab2b99aaf366b8ec0312f60d66970ce470",
+    "src/chamber_particles_tools/visualization/__init__.py": "06975a1560d91c0770765dfedef8720438b35626b1223cbd726a5a72f42d86bc",
+    "tools/vv/__init__.py": "69c607973b838761b794841115502ed17839b2c315e38d387f55f9ea516e5149",
+    "tools/vv/comsol/__init__.py": "d93dc14cba409fdf6d99990ef68fe7fda5577c22d792004dcadee0f489d953c8",
+    "tools/vv/comsol/_frozen_state_csv.py": "2d8f1d09fc97cd7105a47bfe1fe47db8418cd668371079010ec8412f2559b10b",
+    "tools/vv/comsol/compare_reduced_fields.py": "ae8c3ee21874e140ec07ecfe5904923b442c52feed59e38522b9f7df62902462",
+    "tools/vv/comsol/evaluate_aggregate_charge_parity.py": "ec6fa90a900733f344bf4c8d710e380acf4bf44909a37186710e6169a4dc4a32",
+    "tools/vv/comsol/evaluate_aggregate_ion_drag_parity.py": "458ff6a8e8b91e6c44e5517c8ddc6ae2107091d9119f63a0f70f895a8cf5cf16",
+    "tools/vv/comsol/evaluate_curved_wall_line2_convergence.py": "0489bde39c2b3db5c6fb3e2c47995c79faf02759bc9ec065dc20acbc72af386b",
+    "tools/vv/comsol/evaluate_m3c_critical_boundaries.py": "df56de927e818700927a762fe8fe594b35b132c9eab7eeab3bd33395416ebb46",
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "a6eed3fdd1a81017597815a33b638e50332c47d3b0989b5d81625f81fe368ed4",
+    "tools/vv/comsol/evaluate_saved_population.py": "b605e7b4194327651a21a8ffdaea23fbaf5549d99068f457408f4dded1d9c790",
+    "tools/vv/comsol/evaluate_xy_minimal_suite.py": "a16e2e7e71ee0368856d05168c8a78cea9588279d78324c2e18ba8a39ccbb921",
+    "tools/vv/comsol/meaning_preflight.py": "1597c47957462c8725f40536bb36341de892bedb280b34b0e9010fa6a6e09c5b",
+    "tools/vv/comsol/plot_matched_trajectories.py": "18ffc1297f07640a405a7cedb2d0b8950d56108dbc6a11ab24e2e7f36a7cf51c",
+    "tools/vv/comsol/prepare_comsol_p1_tables.py": "b928b60c963d199171dbe43e03d8faeccff3bfb00c4f4909bc193fadd53bf4d1",
+    "tools/vv/comsol/prepare_vigus_transport.py": "f9f17f57f593144a67e444b21ebc083128b4053aeea606c98c631994423bb90d",
+    "tools/vv/gas_collision/__init__.py": "24c9c5b48e47cac4a41e9ab929615d9d1521522bdf8bab688ca406fadadf890c",
+    "tools/vv/gas_collision/collision_reference.py": "6e478ae45db71f1826c56eb0b0e5fdec5daab4b03b14b98abce9967252f8d087",
+    "tools/vv/gas_collision/qualify.py": "5cd57df5cd956609b7c267faf3847678254ff5a31cae556df36ceb6995464382"
+  },
+  "foundation_review_sha256": "682be0fdd76c2f95c6735226d4837cec9111ad3f6a3c09cf462f7634d78fed4f",
+  "report_verification": "report_verification.json",
+  "report_verification_sha256": "88d9526a0f62be3910556454481617282561f3c7f02ecce131b47cd6aa403eed",
+  "new_review_status": "Core and scientific independent review complete; required wording corrections applied. Newly proposed production changes are not implemented."
+}

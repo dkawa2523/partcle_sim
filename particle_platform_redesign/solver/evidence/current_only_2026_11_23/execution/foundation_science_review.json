@@ -1,0 +1,225 @@
+{
+  "review_role": "Independent science/numerical explainability and generic architecture audit; read-only except this receipt",
+  "reviewer": "/root/retirement_science_review",
+  "created_at_utc": "2026-11-23T06:06:52.487741+00:00",
+  "baseline_head": "75100e74f1243b527e065c9e6a68121221408b39",
+  "branch": "cleanup/current-only-platform",
+  "requested_scope": [
+    "producer to primitive/derived coefficient consistency",
+    "resolved scientific configuration and role explainability",
+    "practical population comparison versus numerical qualification",
+    "verification independence and proof-domain preservation",
+    "critical review of current root-cause review document"
+  ],
+  "code_findings": [
+    {
+      "report_id": "R01",
+      "classification": "Confirmed lossy explanation; not a resume or numerical-result corruption bug",
+      "root_cause": "SelectedModel retains field roles and typed plans retain effective scalar configuration, but resolved_models publishes identity plus a handpicked scalar subset. Result required_fields lists metadata without role mapping.",
+      "generic_change": "Build one explicit normalized effective model parameter/role projection from the typed model owner; consume it in check/run/result explanations. Keep raw input hash as identity and avoid copying field arrays or all YAML.",
+      "acceptance": [
+        "Epstein delta=1.0 versus 1.2 gives distinguishable result explanations",
+        "Resolved defaults and model-role to field-name bindings survive result-only reuse",
+        "Independent exponential-response or force oracle confirms actual numerical effect; hash equality alone is not validation"
+      ]
+    },
+    {
+      "report_id": "R02",
+      "classification": "Confirmed extension coupling; existing scientific shared-background requirements are intentional",
+      "root_cause": "Offset lookup and physical compatibility are interleaved through another model category type, although fields already have one name-to-offset map.",
+      "generic_change": "Bind each category declared role directly through existing sampled-field offsets; keep scientific pair/background equality checks at the catalog owner.",
+      "acceptance": [
+        "Enabling/removing compatible charge or drag changes no unrelated model stage binding or science payload",
+        "Intentional incompatible backgrounds remain rejected",
+        "New model does not require unrelated category binder changes"
+      ]
+    },
+    {
+      "report_id": "R03",
+      "classification": "Latent model-extension hazard; no proof that an unknown user selector reaches current execution",
+      "root_cause": "Some proof dispatch paths treat all remaining codes as an existing family. Current catalog-to-code resolver is closed and rejects unknown revisions, so this is future extension leakage.",
+      "generic_change": "Enumerate each supported proof family and reject all other numeric codes at prepare and proof boundaries. Do not substitute an absent proof with a familiar family.",
+      "acceptance": [
+        "Unknown code produces an explicit numerical/unsupported failure, never success or default-family certification",
+        "Current domain-boundary cases and independent conservative bounds remain covered",
+        "Point/stage evaluation, global bounds, local cell enclosures and applicability certificates remain distinct owners and input meanings"
+      ]
+    },
+    {
+      "report_id": "R04",
+      "classification": "Confirmed production mathematical duplication; independent verification is an intentional separate owner",
+      "root_cause": "NumPy equation APIs and compiled hot-row equations separately maintain coefficients/signs/branches.",
+      "generic_change": "Use category-owned small scalar production kernels from batch and compiled entry points where mathematically equivalent; keep independent Decimal/quadrature/analytic expected values outside production.",
+      "acceptance": [
+        "Independent Decimal limits/signs/clamps remain tests of truth",
+        "Backend/wrapper identity is labelled wiring or compiler validation after deduplication",
+        "Outward-rounded interval proofs are not replaced by point calls",
+        "Any changed rounding order and benchmark impact are measured and appropriately versioned"
+      ]
+    },
+    {
+      "report_id": "R05",
+      "classification": "Confirmed shared accepted-state mutation duplication with scientifically necessary path differences",
+      "root_cause": "Common resident state/ordinals/lifecycle/ledger mutation is interleaved with exact-origin and curved/OU continuation. Some helpers are already shared.",
+      "generic_change": "Only consolidate post-canonical-hit accepted state/ordinal/lifecycle/event transaction. Preserve raw-hit construction, curved finite-radius endpoint/residual correction, exact_origin, path stacks, OU restart and search/proof logic. Reuse existing shared canonical-position/lifecycle/append helpers.",
+      "acceptance": [
+        "First/multiple/corner hits preserve full event x/v/Z, pre/post velocity, physical and logical ordinals",
+        "Exact-origin precision and Brownian restart/path identity remain independent checks",
+        "Terminal right continuity and worker/slab/output/resume scientific invariance remain valid"
+      ]
+    },
+    {
+      "report_id": "R09",
+      "classification": "Confirmed structural provenance/derivation limitation, not evidence of an erroneous particle run",
+      "root_cause": "FieldData records values/units/layout and bundle provenance binds origin, but there is no declared per-derived-output dependency relation. Append-style producers can retain an independently supplied or old derived field while producing new primitives.",
+      "generic_change": "Reuse the existing pure _full_force_fields operation rather than claiming it must first be extracted. At reusable external producer handoffs, bind explicit input primitive/parameter identity and all owned derived outputs/recovery revisions in existing provenance/report. Detect stale values only where dependency was declared; allow independent prescribed fields. No generic DAG/plugin/core COMSOL path.",
+      "acceptance": [
+        "A declared E-derived DEP/charge/ion group is regenerated or rejected together when its E authority changes",
+        "Native FE gradients may remain independent transfer authorities rather than being silently replaced with the derivative of interpolated P1 E",
+        "Node reconstruction, off-node transfer/recovery error, units/basis and zero-field model semantics are tested separately",
+        "Heterogeneous particle handling is an explicit producer capability, not a hidden reuse of Vigus homogeneous restrictions"
+      ]
+    },
+    {
+      "report_id": "R11/R12",
+      "classification": "Explicit capability limits, not false current qualification",
+      "root_cause": "Saved population evaluator is a dense paired-ID single-case description with unconditional NOT_TESTED parity; qualified deterministic evaluator intentionally accepts a conservative fixed-root sufficient condition.",
+      "generic_change": "When the user purpose requires it, aggregate public result batches by explicit source/window/outcome/spatial cohort and add an unpaired population comparison meaning separately from paired deterministic diagnostics. Add replicate uncertainty only for the statistical claim requested. Do not force fake ID pairing, infer native boundary cause, or create a general ensemble framework.",
+      "acceptance": [
+        "Equal distributions with different IDs/counts can be compared in the unpaired scope",
+        "Equal terminal counts but different spatial/arrival distributions are distinguishable",
+        "Coverage/censoring/survivor conditioning and seed independence remain explicit",
+        "Practical purpose-level acceptance never implies independently qualified numerical parity",
+        "No new all-particle accepted-path ledger is required for descriptive use"
+      ]
+    },
+    {
+      "report_id": "R14",
+      "classification": "Current intentional capability boundary",
+      "root_cause": "The installed builder is reduced homogeneous-permittivity RZ/P1 with prescribed voltage boundaries, while the supplied historical S3-M report describes a full-material floating-conductor problem.",
+      "generic_change": "Retain current reduced scope. Define full-material/V-Q/interface/gas-recovery/dependent-coefficient work as a separate capability only if that purpose is requested.",
+      "acceptance": [
+        "Historical 4 percent field results are not attributed to the current reduced builder",
+        "Current builder residual success is not called full-material or particle accuracy certification"
+      ]
+    }
+  ],
+  "reviewer_executed_probes": [
+    {
+      "command": "uv run --locked python -c 'from tests.verification.test_model_descriptors import _models; from chamber_particles.physics.catalog import describe_models,resolve_physics_plan; import copy; d=next(x for x in describe_models() if x.category==\"drag\" and x.model==\"epstein_linear\"); a=_models(d); a[\"drag\"][\"delta\"]=1.0; b=copy.deepcopy(a); b[\"drag\"][\"delta\"]=1.2; p=resolve_physics_plan(a,\"cartesian_xy\"); q=resolve_physics_plan(b,\"cartesian_xy\"); print({\"delta_values\":(p.drag.delta,q.drag.delta),\"same_resolved_document\":p.resolved_models()==q.resolved_models(),\"resolved_document\":p.resolved_models()})'",
+      "exit_code": 0,
+      "wall_seconds": 1.405,
+      "output": {
+        "delta_values": [
+          1.0,
+          1.2
+        ],
+        "same_resolved_document": true,
+        "resolved_document": {
+          "charge": {
+            "model": "fixed",
+            "revision": "fixed_charge_v1"
+          },
+          "drag": {
+            "model": "epstein_linear",
+            "revision": "epstein_linear_v1"
+          }
+        }
+      },
+      "interpretation": "Effective scalar differs while explanation projection is identical; does not demonstrate wrong transport or unsafe resume."
+    },
+    {
+      "command": "uv run --locked python -c 'import tempfile; from pathlib import Path; from dataclasses import replace; import numpy as np; from tests.verification.test_electrostatic_builder import _thermal_bundle,_configuration_text; from chamber_particles.case_format import FieldData,write,read; from chamber_particles_tools.electrostatic_builder.workflow import build_from_configuration; p=Path(tempfile.mkdtemp()); d=_thermal_bundle(); old=FieldData(\"previous_grad_e2\",\"plasma\",\"node\",(\"r\",\"z\"),\"axisymmetric_rz\",np.zeros((4,2)),\"V^2/m^3\"); write(p/\"input.h5\",replace(d,fields=(*d.fields,old))); (p/\"builder.yaml\").write_text(_configuration_text(\"input.h5\")); out=build_from_configuration(p/\"builder.yaml\",p/\"built\"); f={x.name:x for x in read(p/\"built/bundle.h5\").fields}; print({\"complete\":out[\"status\"],\"old_gradient_preserved\":bool((f[\"previous_grad_e2\"].values==0).all()),\"new_electric_max\":float(abs(f[\"electric_field\"].values).max()),\"generated_fields\":out[\"generated_fields\"]})'",
+      "exit_code": 0,
+      "wall_seconds": 1.413,
+      "output": {
+        "complete": "complete",
+        "old_gradient_preserved": true,
+        "new_electric_max": 1750.0000000000002,
+        "generated_fields": [
+          "electric_potential",
+          "electric_field",
+          "electron_number_density",
+          "positive_ion_number_density",
+          "space_charge_density",
+          "electron_temperature",
+          "positive_ion_temperature",
+          "positive_ion_velocity",
+          "positive_ion_speed",
+          "positive_ion_mass"
+        ]
+      },
+      "interpretation": "Four-node producer preservation witness; no particle case/run and no claim the retained field was declared dependent or wrong."
+    }
+  ],
+  "report_review": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\reviews\\foundation_root_cause_review_2026-11-23.md",
+    "reviewed_snapshot_sha256": "682be0fdd76c2f95c6735226d4837cec9111ad3f6a3c09cf462f7634d78fed4f",
+    "assessment": "PASS after independent reread of R01/R05/R09 corrections and explicit retained-value versus gradient-truth qualification; no remaining mandatory scientific correction. Later review-note/link append is outside this content snapshot.",
+    "requested_document_corrections": [
+      {
+        "section": "R05",
+        "change": "Name existing shared helpers and confine consolidation to accepted post-response transaction. Keep finite-radius hit correction, exact_origin, OU restart and residual/search/proof rules path-specific.",
+        "status": "resolved and reread by independent reviewer"
+      },
+      {
+        "section": "R09",
+        "change": "Acknowledge that _full_force_fields is already a pure I/O-free coefficient function. Reuse it at an explicit coherent external producer handoff rather than proposing an already completed extraction.",
+        "status": "resolved and reread by independent reviewer"
+      }
+    ],
+    "minor_clarification": {
+      "section": "R01",
+      "change": "Replace generic result-only analysis acceptance with effective coefficient/role/applicability explanation; result4 already supports ordinary result-only analysis.",
+      "status": "resolved and reread by independent reviewer"
+    },
+    "initial_reviewed_snapshot_sha256": "d23d564ed9800bcf49f9e4f77d8fe0d075b5c9d76647d10c7b2c6afa25479aef",
+    "final_witness_note": "The preserved-gradient probe witnesses append/lineage behavior only. Nonzero E by itself does not prove grad(E squared) nonzero, and no particle accuracy claim follows."
+  },
+  "current_references": {
+    "resolved_model_projection": "src/chamber_particles/physics/catalog.py:913,971",
+    "result_projection_consumers": "src/chamber_particles/engine.py:549,1810,1817",
+    "field_metadata_and_provenance": "src/chamber_particles/case_format.py:110,169,416",
+    "existing_pure_coefficient_function": "tools/vv/comsol/prepare_vigus_transport.py:166",
+    "coefficient_case_publication": "tools/vv/comsol/prepare_vigus_transport.py:325",
+    "builder_collision_and_append": "src/chamber_particles_tools/electrostatic_builder/workflow.py:181,241",
+    "coupled_field_constraint": "src/chamber_particles/physics/catalog.py:1955,2140",
+    "binding_other_model_reuse": "src/chamber_particles/physics/runtime.py:1444,1498,4077",
+    "local_applicability": "src/chamber_particles/physics/runtime.py:1690,1744",
+    "global_applicability": "src/chamber_particles/physics/runtime.py:2863,2902,2924,3003",
+    "independent_equation_oracles": "tests/verification/test_aggregate_ion_drag.py:25;tests/verification/test_aggregate_charge.py:124",
+    "curved_wall_commit": "src/chamber_particles/transport.py:7163",
+    "exact_wall_commit": "src/chamber_particles/transport.py:9725",
+    "existing_shared_lifecycle": "src/chamber_particles/transport.py:9850",
+    "population_description_and_comparison": "tools/vv/comsol/evaluate_saved_population.py:31,173,317,369,433",
+    "qualified_trajectory_scope": "tools/vv/comsol/evaluate_matched_trajectory.py:763,806,848,883",
+    "claim_authority": "../vv_methodology.md:5,94,123,139"
+  },
+  "reviewed_source_sha256": {
+    "src/chamber_particles/physics/catalog.py": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b",
+    "src/chamber_particles/physics/runtime.py": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca",
+    "src/chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+    "src/chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+    "src/chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+    "src/chamber_particles/engine.py": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d",
+    "src/chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/transport.py": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce",
+    "src/chamber_particles_tools/electrostatic_builder/workflow.py": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8",
+    "src/chamber_particles_tools/field_preprocessor/workflow.py": "5b1115ceb51b9024f2bd0ef42e348a8f02f6d0e8776b4e495eee0f7cac3c5dc1",
+    "tools/vv/comsol/prepare_vigus_transport.py": "f9f17f57f593144a67e444b21ebc083128b4053aeea606c98c631994423bb90d",
+    "tools/vv/comsol/evaluate_saved_population.py": "b605e7b4194327651a21a8ffdaea23fbaf5549d99068f457408f4dded1d9c790",
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "a6eed3fdd1a81017597815a33b638e50332c47d3b0989b5d81625f81fe368ed4",
+    "tests/verification/test_aggregate_ion_drag.py": "c7bb06ed332f4321e6e042153e1f00c41219edc35cd763b453b5aed47bf1bca4",
+    "tests/verification/test_aggregate_charge.py": "884cfe09175e2927364ebb488638cd76a2b63e3857ffb447dae22679f6e1495f",
+    "tests/verification/test_model_descriptors.py": "46a40db4f774ee98bbe13f5acc1b3f172826d4140814dfe6ea8ba29ae6a54822",
+    "tests/verification/test_electrostatic_builder.py": "4dd2cbae7e4c61afeb113ef9b5095bc5e959e2a6e4fffda5dca7ffac31eb57a6"
+  },
+  "limits": [
+    "No new full solver suite, scaling/ensemble campaign, Vigus 43,220-particle run, field mesh study or native COMSOL solve was performed for this audit.",
+    "Only two tiny local code/producer probes were executed; all other conclusions are source/document/evidence review.",
+    "Previously repaired CSV ID/nonfinite/duplicate-header issues are not listed as remaining defects.",
+    "Scope of code findings is architecture/explainability and bounded current capability, not physical device certification."
+  ],
+  "overall_review_outcome": "PASS for evidence-backed root-cause audit and bounded proposals; no remaining mandatory scientific document correction at reviewed snapshot"
+}

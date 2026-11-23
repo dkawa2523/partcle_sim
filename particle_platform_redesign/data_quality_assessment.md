@@ -29,12 +29,13 @@
 - **推論**: 測定事実から考えられる原因。原因が COMSOL 内部状態まで追跡できない場合は断定しない。
 - **品質判定**: 新しい粒子計算基盤の入力または V&V 基準として採用できるかという本評価の判断。
 
-主な再現可能証拠は以下である。
+主な保存観測は以下である。固定12ケースを調べた一度限りのscriptは現行入口から撤去し、当時のsourceをGit履歴へ保存した。
+この資料は対象datasetの調査記録であり、新しいモデルには[inspection](../.agents/skills/inspect-comsol-model/SKILL.md)と現行の入力producerを使う。
 
-- [全ケース監査スクリプト](analysis/audit_model_dataset.py)
+- [当時の全ケース監査source](https://github.com/dkawa2523/partcle_sim/blob/75100e74f1243b527e065c9e6a68121221408b39/particle_platform_redesign/analysis/audit_model_dataset.py)
 - [全ケース監査 JSON](evidence/dataset_audit.json)
 - [ケース別要約](evidence/case_audit_summary.csv)
-- [背景場のケース間冗長性監査](analysis/audit_field_redundancy.py)
+- [当時の背景場冗長性監査source](https://github.com/dkawa2523/partcle_sim/blob/75100e74f1243b527e065c9e6a68121221408b39/particle_platform_redesign/analysis/audit_field_redundancy.py)
 - [背景場の比較結果](evidence/field_redundancy_audit.json)
 - [集団状態の時系列](evidence/population_time_series.csv)
 - [ion-drag 2 方式の時系列乖離](evidence/variant_divergence_time_series.csv)

@@ -1,0 +1,174 @@
+{
+  "audit": "Final independent retirement assets, current routes and misdeletion review",
+  "recorded_utc": "2026-11-23T05:59:20.991619+00:00",
+  "baseline_head": "75100e74f1243b527e065c9e6a68121221408b39",
+  "branch": "cleanup/current-only-platform",
+  "supersedes": ".artifacts/current_only_20261123/assets_review.json",
+  "scope": [
+    "Retired fixed-dataset one-offs and old Brownian generated products",
+    "Old v46 candidate packaging/registration/evaluation removal versus actual native evidence",
+    "Core orphan and phase/fixture metadata cleanup roles",
+    "P11 C03 merge into P10, current public entry and independent scientific checks",
+    "Current external CSV readers: exact identity, primitive validity and unique column authority"
+  ],
+  "native_integrity": {
+    "authority": "evidence\\comsol_v0_2_0_release_requalification_v2\\publication_saved_native_closure.json",
+    "files": 196,
+    "missing": [],
+    "sha256_mismatches": [],
+    "critical_realized_native_source": {
+      "path": "evidence\\comsol_binding_recert_2026_10_09_v1\\c3_prepared_axis_normalized\\candidate_input_three_current_z0.h5",
+      "exists": true,
+      "sha256": "9b20f19e26be1cbb5db6e1475ecb35f19a112dd715a8326af05d152514872afc"
+    },
+    "mixed_records_preserved": [
+      "caseA_axis_normalized_pilot_evaluation/evaluation_manifest.json",
+      "caseP_axis_normalized_pilot_evaluation/evaluation_manifest.json",
+      "registration_axis_normalized original native seed/selection/policy",
+      "actual per-native-run execution performance and primitive/source receipts"
+    ]
+  },
+  "protected_area_tracked_diff": {
+    "old_code_and_model_dataset": [],
+    "native_reference_data": "No native data removed or edited; references/README.md changed only explanatory provenance/current-entry wording."
+  },
+  "current_route_checks": {
+    "retired_symbol_search": "No matches in active src/tests/tools/scripts/README/docs for p11_exponential, revision_3b_metrics, removed Bezier helpers, old candidate pilot/full runners, activation_package; rg exit1 no-match.",
+    "remaining_old_terms": "Current compatibility checks, conservative applicability fallback and wall otherwise have active scientific roles. formal_iondrag remains only in explicit current selected raw native CSV input mapping, not an old campaign runner.",
+    "documentation": "Normal README uses installed CLI/core public API. Two old requalification READMEs label native history and historical Git; current external README accepts explicit inputs and distinguishes saved observations from a fresh licensed solve.",
+    "public_analytic_execution": {
+      "root": "C:\\Users\\user\\AppData\\Local\\Temp\\current-only-public-ballistic-h3ynsywz",
+      "complete": true,
+      "particle_id": 1,
+      "position_m": [
+        0.01,
+        0.005
+      ],
+      "terminal_time_s": 0.015,
+      "terminal_lifecycle": 2,
+      "event_count": 1,
+      "failure_count": 0,
+      "population": {
+        "selected_particles": 1,
+        "model_weight": 1.0,
+        "count_unit": "computational_particles",
+        "weight_meaning": "input model_weight; no inferred physical rate"
+      },
+      "fate": [
+        {
+          "lifecycle": "stuck",
+          "particles": 1,
+          "model_weight": 1.0
+        }
+      ],
+      "source_result": {
+        "manifest_sha256": "sha256:a5de15515dc6192d1bc09fda6c333be260592e920ed3b25818ed99c056665dca",
+        "case_name": "xy_ballistic",
+        "case_file_hash": "sha256:d8d00eb2a3d21a8b7b05cc9ad3d6fd09f21e00e152e72144cd47f9aaeea1e4eb",
+        "data_content_hash": "sha256:f1b81f183a13c7bb07043791b3d006c46918e3ff31bbe97803a47330035e9313",
+        "result_schema_version": 4,
+        "result_algorithm_revision": "durable_context_segmented_result_v7",
+        "context": {
+          "content_hash": "sha256:eef9d320c4ce6966cfddfd7e671ec9de378d4d4df4cc8f334cdcd32906224e5b",
+          "file_sha256": "sha256:eb33a16350407674dcfded417f4ed0eda1049fffeff2b90114cc0ef1f87d8e0a",
+          "path": "context.h5"
+        }
+      }
+    }
+  },
+  "misdeletion_assessment": {
+    "mandatory_issue": null,
+    "role_based_result": "No required current runtime, independent oracle or actual native observation lost in inspected removals. Old v46 candidate products and fixed dataset analysis sources have no current caller and remain in Git history.",
+    "retained_scientific_checks": [
+      "Planar first passage versus refined independent Kramers oracle",
+      "Repeated specular Brownian wall versus mirrored joint law",
+      "RZ radial first passage versus independent two-barrier Kramers oracle",
+      "Brownian multi-reflection memory/output identity and axis restart",
+      "C03 linear relaxation analytic output/error check in current P10",
+      "Actual allocation ownership check replacing duplicated private P19 byte formulas"
+    ],
+    "execution_limit": "This reviewer inspected the independent Brownian oracle role without rerunning those expensive cases; parent/team owns whole solver suite and benchmark execution receipts."
+  },
+  "csv_root_cause_and_correction": {
+    "cause": "A required-column subset only checks presence; csv.DictReader silently chooses the last value when multiple columns have one name. Exact numeric ID conversion and physical formula gates cannot restore identity or primitive data after that lossy parsing.",
+    "before_reproduction": [
+      "Shared read_active_states accepted particle_id101 plus duplicate particle_id999 as ID999.",
+      "Public charge evaluate_history accepted duplicate particle_id and charge_number_e headers: two DID NOT RAISE failures.",
+      "Public saved population evaluate accepted duplicate ID columns: DID NOT RAISE.",
+      "Public matched characterize accepted duplicate mapped p0 columns: DID NOT RAISE."
+    ],
+    "implementation": [
+      "One local unique-header check at the shared frozen charge/ion CSV envelope owner.",
+      "Same small local header rejection at saved native population and mapped trajectory format readers.",
+      "Plot reader already enforced unique headers, confirmed with public regression; no production edit."
+    ],
+    "ownership_lesson": "Schema ownership must cover header identity before name-to-value conversion; core physics receives typed values and should not duplicate CSV checks. Different native/frozen/mapped CSV formats retain their own row/status/clock semantics. No universal validator framework, installed core branch or duplicate numerical engine added.",
+    "regressions": [
+      "test_charge_rejects_ambiguous_csv_columns [particle_id, charge_number_e]",
+      "test_population_rejects_duplicate_identity_columns",
+      "test_matched_evaluation_rejects_duplicate_mapped_columns",
+      "test_trajectory_view_rejects_duplicate_identity_columns"
+    ],
+    "checks": {
+      "affected_charge_and_ion": "26 passed in 3.35s",
+      "new_native_matched_and_plot_regressions": "3 passed in 1.29s",
+      "all_external_final": "149 passed in40.79s: uv run --locked python -m pytest tools/vv/comsol/tests -q",
+      "ruff": "Changed7files: ruff check passed; final ruff format --check passed,7files already formatted",
+      "pyrefly": "Changed 7 files: 0 errors; 16 warnings not shown by summarize-errors",
+      "complexity": "read_active_states CC15, saved _read_rows CC12, matched _read_csv CC14; all <=15"
+    },
+    "installed_core_modified_by_this_reviewer": false
+  },
+  "physical_cleanup_still_unexecuted": {
+    "brownian_files": 123,
+    "brownian_bytes": 153000925,
+    "hdf5_files": 95,
+    "other_retired_result_roots": 198,
+    "observed_rejections": [
+      {
+        "scope": "Brownian generated-test directory with195 files, verified workspace path and no native/model/environment assets",
+        "operation": "recursive PowerShell Remove-Item",
+        "result": "blocked by policy; process was not started"
+      },
+      {
+        "scope": "Same one explicit absolute directory",
+        "operation": "recursive PowerShell Remove-Item",
+        "result": "blocked by policy; process was not started"
+      },
+      {
+        "scope": "One verified9840byte HDF5 result3 file, particles dataset only",
+        "operation": "nonrecursive literal-path PowerShell Remove-Item",
+        "result": "blocked by policy; process was not started"
+      }
+    ],
+    "status": "Not removed. Three root-reported tool-policy rejections, including a single-file nonrecursive operation. This reviewer attempted no deletion or bypass. Completion must retain this exact external block and resumption condition.",
+    "resumption_condition": "An authorized filesystem deletion path allowed by the tool policy, then literal resolved targets from the retained role inventory and a post-delete native hash/public-route recheck."
+  },
+  "reviewed_file_sha256": {
+    "tools/vv/comsol/_frozen_state_csv.py": "2d8f1d09fc97cd7105a47bfe1fe47db8418cd668371079010ec8412f2559b10b",
+    "tools/vv/comsol/evaluate_aggregate_charge_parity.py": "ec6fa90a900733f344bf4c8d710e380acf4bf44909a37186710e6169a4dc4a32",
+    "tools/vv/comsol/evaluate_aggregate_ion_drag_parity.py": "458ff6a8e8b91e6c44e5517c8ddc6ae2107091d9119f63a0f70f895a8cf5cf16",
+    "tools/vv/comsol/evaluate_saved_population.py": "b605e7b4194327651a21a8ffdaea23fbaf5549d99068f457408f4dded1d9c790",
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "a6eed3fdd1a81017597815a33b638e50332c47d3b0989b5d81625f81fe368ed4",
+    "tools/vv/comsol/plot_matched_trajectories.py": "18ffc1297f07640a405a7cedb2d0b8950d56108dbc6a11ab24e2e7f36a7cf51c",
+    "tools/vv/comsol/tests/test_aggregate_charge_parity.py": "d6e2771e9ddb1b52334792736955bf94b20527f0833240ef5acceaf7fea423b0",
+    "tools/vv/comsol/tests/test_aggregate_ion_drag_parity.py": "d00753ae58a6bd1678ccf09793e9c9f4e96478674a7d00f55d42d7ab9d75ae51",
+    "tools/vv/comsol/tests/test_saved_population_evaluation.py": "7f392c01408798c3f0463c9fb6f91e6711a94c107c3bf7ce760ebd6a0c55aee3",
+    "tools/vv/comsol/tests/test_matched_trajectory_evaluation.py": "275d4681a338a50e9c71b2bd3f5cbc7f32905556ee540b7234f2666f073e23e9",
+    "tools/vv/comsol/tests/test_plot_matched_trajectories.py": "5480eea35f5dea7676a15ba3120122e3b10375a856002fbbf7b7246a5610edb7",
+    "src/chamber_particles/integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+    "tests/verification/test_workspace_ownership.py": "f03dbaacf219c44cafd96c57f51a82b64dfb0e66164abc1ba6d0482300d43f67",
+    "tests/scenarios/test_brownian_run.py": "0aaa8a01e507e73248c2bf73afb42687aece483b30899f6645f6c388660e8952",
+    "evidence/comsol_v0_2_0_release_requalification_v2/README.md": "9eccc72588174152bd092e49a60767cd3224811562e96ccf4618c53fc2af926a",
+    "evidence/comsol_binding_recert_2026_10_09_v1/README.md": "6a00a99d030dcaa4803014ded4715297650aafaee3434179059bd614190a3a96",
+    "README.md": "1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917",
+    "tools/vv/comsol/README.md": "dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0",
+    "tests/performance/p10_compiled.py": "73f7b939d1de71c05f046e486280dd858b35d67a5a59a8479fa43cdadfa2c09b"
+  },
+  "limitations": [
+    "No fresh native COMSOL solve or full all-cohort Vigus trajectory campaign performed by this reviewer.",
+    "No full hash pass over every untracked MPH/environment asset; protected tracked path and196 retained native authorities plus critical realized source checked.",
+    "A single small public ballistic example is one route check, not whole platform scientific qualification."
+  ],
+  "conclusion": "No unresolved misdeletion or current-route implementation issue in inspected scope. Required duplicate-header corrections implemented and affected external suite149passed. Physical deletion cleanup remains incomplete solely in explicitly recorded blocked scopes; this is not claimed complete."
+}

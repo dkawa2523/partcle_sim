@@ -1,0 +1,96 @@
+{
+  "scope": "Current cleanup: all required cheap gates passed; final CSV reader edits also passed Ruff, Pyrefly and complexity/documentation checks. No full suite claim inferred from these gates.",
+  "runs": [
+    {
+      "cmd": "uv lock --check",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "de500b",
+          "wall_time_seconds": 0.4180871,
+          "exit_code": 0,
+          "original_token_count": 8,
+          "output": "Resolved 24 packages in 0.99ms\n"
+        }
+      }
+    },
+    {
+      "cmd": "uv run --locked ruff format --check src tests tools scripts examples",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "01695d",
+          "wall_time_seconds": 0.4788297,
+          "exit_code": 0,
+          "original_token_count": 7,
+          "output": "182 files already formatted\n"
+        }
+      }
+    },
+    {
+      "cmd": "uv run --locked ruff check src tests tools scripts examples",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "8ec21e",
+          "wall_time_seconds": 0.5174194,
+          "exit_code": 0,
+          "original_token_count": 5,
+          "output": "All checks passed!\n"
+        }
+      }
+    },
+    {
+      "cmd": "uv run --locked pyrefly check --summarize-errors",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "cef519",
+          "wall_time_seconds": 1.6958603,
+          "exit_code": 0,
+          "original_token_count": 53,
+          "output": " INFO Checking project configured at `C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\pyproject.toml`\n=== Error Summary ===\nNo errors found!\n INFO 0 errors (172 warnings not shown)\n"
+        }
+      }
+    },
+    {
+      "cmd": "uv run --locked lint-imports",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "fa6c58",
+          "wall_time_seconds": 1.0636403,
+          "exit_code": 0,
+          "original_token_count": 152,
+          "output": "=============\r\nImport Linter\r\n=============\r\n\r\n\r\n---------\r\nContracts\r\n---------\r\n\r\nAnalyzed 49 files, 126 dependencies.\r\n------------------------------------\r\n\r\nLow-level numerics stay independent of orchestration and I/O KEPT\r\nIntegrator proposals stay independent of geometry and wall response KEPT\r\nPhysics models consume sampled primitives only KEPT\r\nComputational API stays independent of installed workflow clients KEPT\r\nParticle transport stays independent of coordinator and process management KEPT\r\nProcess execution stays independent of parent coordinator KEPT\r\n\r\nContracts: 6 kept, 0 broken.\r\n"
+        }
+      }
+    },
+    {
+      "cmd": "uv run --locked python scripts/check_complexity.py",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "11eaea",
+          "wall_time_seconds": 1.2641607000000001,
+          "exit_code": 0,
+          "original_token_count": 16,
+          "output": "Complexity gate passed: every function and method has CC < 16.\r\n"
+        }
+      }
+    },
+    {
+      "cmd": "uv run --locked python scripts/check_documentation.py",
+      "result": {
+        "status": "fulfilled",
+        "value": {
+          "chunk_id": "a5f348",
+          "wall_time_seconds": 2.0403437,
+          "exit_code": 0,
+          "original_token_count": 20,
+          "output": "{\r\n  \"status\": \"valid\",\r\n  \"documents\": 33,\r\n  \"skills\": 4,\r\n  \"errors\": []\r\n}\r\n"
+        }
+      }
+    }
+  ]
+}

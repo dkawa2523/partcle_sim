@@ -84,7 +84,7 @@ jobs:
         run: |
           $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"
           uv run --locked python -m chamber_particles view (Join-Path $quickstartRoot "result") --output (Join-Path $quickstartRoot "derived/visualization")
-      - name: Run warm performance smoke
+      - name: Run performance smoke
         run: |
           $report = Join-Path "${{ runner.temp }}" "p14-smoke.json"
           uv run --locked python -m tests.performance.p14_matrix --suite smoke --json $report

@@ -146,8 +146,8 @@ def test_unknown_final_lifecycle_is_rejected_at_publication_and_read(tmp_path: P
 
 
 @pytest.mark.parametrize("complete", [False, True])
-@pytest.mark.parametrize("damage", ["missing", "file_bytes", "logical_hash", "old_version"])
-def test_context_damage_and_old_results_are_rejected_without_regeneration(
+@pytest.mark.parametrize("damage", ["missing", "file_bytes", "logical_hash", "unsupported_version"])
+def test_context_damage_and_unsupported_results_are_rejected_without_regeneration(
     tmp_path: Path, complete: bool, damage: str
 ) -> None:
     output = tmp_path / "context-result"
@@ -165,8 +165,8 @@ def test_context_damage_and_old_results_are_rejected_without_regeneration(
             stream.write(b"unexpected bytes")
     else:
         manifest = json.loads((directory / "run.json").read_text())
-        if damage == "old_version":
-            manifest["result_schema_version"] = 3
+        if damage == "unsupported_version":
+            manifest["result_schema_version"] = RESULT_SCHEMA_VERSION + 1
         else:
             manifest["context"]["content_hash"] = "sha256:" + "f" * 64
         (directory / "run.json").write_text(json.dumps(manifest))

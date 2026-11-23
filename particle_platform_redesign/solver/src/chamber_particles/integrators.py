@@ -1660,48 +1660,6 @@ def _compiled_two_diff_into(
         difference[index], residual[index] = _dense_two_diff_scalar(left[index], right[index])
 
 
-@njit(cache=True, fastmath=False, parallel=False, error_model="numpy", nogil=True)
-def _compiled_outward_control_bounds_into(
-    restricted: FloatArray,
-    root: FloatArray,
-    extra_scale: FloatArray,
-    absolute_padding: FloatArray,
-    include_extra: bool,
-    include_absolute: bool,
-    lower: FloatArray,
-    upper: FloatArray,
-) -> None:
-    for row in range(restricted.shape[0]):
-        for component in range(restricted.shape[2]):
-            restricted_scale = abs(restricted[row, 0, component])
-            for control in range(1, restricted.shape[1]):
-                restricted_scale = np.maximum(
-                    restricted_scale, abs(restricted[row, control, component])
-                )
-            root_scale = abs(root[row, 0, component])
-            for control in range(1, root.shape[1]):
-                root_scale = np.maximum(root_scale, abs(root[row, control, component]))
-            scale = np.maximum(restricted_scale, root_scale)
-            if include_extra:
-                extra = extra_scale[row, 0, component]
-                for control in range(1, extra_scale.shape[1]):
-                    extra = np.maximum(extra, extra_scale[row, control, component])
-                scale = np.maximum(scale, extra)
-            absolute = 0.0
-            if include_absolute:
-                absolute = absolute_padding[row, 0, component]
-                for control in range(1, absolute_padding.shape[1]):
-                    absolute = np.maximum(absolute, absolute_padding[row, control, component])
-            padding = _dense_outward_padding(scale, absolute, include_absolute)
-            for control in range(restricted.shape[1]):
-                lower[row, control, component] = next_float64(
-                    restricted[row, control, component] - padding, False
-                )
-                upper[row, control, component] = next_float64(
-                    restricted[row, control, component] + padding, True
-                )
-
-
 def _restrict_cubic_controls(
     controls: FloatArray,
     start_parameter: FloatArray,
@@ -1733,30 +1691,6 @@ def _two_diff(left: FloatArray, right: FloatArray) -> tuple[FloatArray, FloatArr
         residual.reshape(-1),
     )
     return difference, residual
-
-
-def _outward_bezier_control_bounds(
-    restricted_controls: FloatArray,
-    root_controls: FloatArray,
-    extra_scale: FloatArray | None = None,
-    absolute_padding: FloatArray | None = None,
-) -> tuple[FloatArray, FloatArray]:
-    """Bound every restricted control without collapsing control identity."""
-
-    lower = np.empty_like(restricted_controls)
-    upper = np.empty_like(restricted_controls)
-    empty = np.empty((0, 0, 0), dtype=np.float64)
-    _compiled_outward_control_bounds_into(
-        restricted_controls,
-        root_controls,
-        empty if extra_scale is None else extra_scale,
-        empty if absolute_padding is None else absolute_padding,
-        extra_scale is not None,
-        absolute_padding is not None,
-        lower,
-        upper,
-    )
-    return lower, upper
 
 
 @njit(cache=True, fastmath=False, parallel=False, error_model="numpy")

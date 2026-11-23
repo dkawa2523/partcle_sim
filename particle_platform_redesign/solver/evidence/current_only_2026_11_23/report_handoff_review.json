@@ -1,0 +1,78 @@
+{
+  "scope": "Read-only current installed input/result/report handoff investigation; new improvements proposed, not implemented",
+  "baseline": "75100e74f1243b527e065c9e6a68121221408b39",
+  "findings": [
+    {
+      "id": "INPUT-NESTED-SHAPE",
+      "classification": "current_reproduced_defect",
+      "priority": "P2",
+      "source": ["src/chamber_particles_tools/source_builder/producer.py:226", "src/chamber_particles_tools/source_builder/producer.py:250", "src/chamber_particles_tools/source_builder/producer.py:319", "src/chamber_particles_tools/inputs.py:103", "src/chamber_particles_tools/cli.py:24"],
+      "trigger": "A valid init_example(xy-ballistic) recipe2 with only sources[0].configuration.columns changed to null",
+      "public_command": "uv run --locked python -m chamber_particles --json create C:/Users/user/AppData/Local/Temp/input-audit-9kno6shy/seed/bad-recipe.yaml -o C:/Users/user/AppData/Local/Temp/input-audit-9kno6shy/output",
+      "observed": "Exit1 TypeError traceback from set(columns); target absent. Expected structured input error/exit2 is bypassed.",
+      "root_cause": "Nested external configuration remains Any and is consumed as a mapping before its owner normalizes shape; the CLI exception boundary is not the right place to reinterpret arbitrary TypeError.",
+      "proposal": "Normalize nested source configuration once at the source-input owner, including columns/units/velocity/filter mappings, and return a small typed configuration or validated mapping with field-path ValueError.",
+      "verification": "Public CLI and Python malformed-shape cases produce a useful field-path input error and no published case; valid source identity/units/weights remain unchanged."
+    },
+    {
+      "id": "ANALYZE-PUBLICATION",
+      "classification": "current_reproduced_recoverability_defect",
+      "priority": "P2",
+      "source": ["src/chamber_particles_tools/cli.py:219", "src/chamber_particles_tools/analysis/__init__.py:413", "src/chamber_particles_tools/visualization/__init__.py:48"],
+      "trigger": "Public analyze -o route with one controlled file-write interruption at a new output target",
+      "observed": "Structured exit2, but a27byte incomplete public JSON remains; the next exclusive-create attempt cannot retry at that target.",
+      "evidence": ".artifacts/current_only_20261123/report/route_audit_receipt.json#/analysis_json_publication",
+      "root_cause": "The CLI single-file report writes directly to the final target, while export/view use staging and completed publication. Completion ownership stops at different output types.",
+      "proposal": "Stage derived JSON in the destination filesystem and publish exclusively only after serialization and successful write; preserve no-overwrite semantics and remove staging on failure. Keep this a small client publication operation, not a general framework.",
+      "verification": "One public CLI interrupted-write test leaves no final target, retries successfully, and refuses to overwrite a completed JSON."
+    },
+    {
+      "id": "RESULT-INTEGRITY-SCOPE",
+      "classification": "current_capability_limit_not_normal_solver_failure",
+      "priority": "design_improvement",
+      "source": ["src/chamber_particles/output.py:1295", "src/chamber_particles/output.py:1324", "src/chamber_particles/output.py:1347", "src/chamber_particles/output.py:1925", "src/chamber_particles/output.py:2763"],
+      "trigger": "A copy of a valid fresh xy-ballistic result, with only finite final.h5 model_weight doubled",
+      "observed": "open_result accepts the copy; summarize_result population weight changes1.0 to2.0 while source_identity remains identical.",
+      "evidence": ".artifacts/current_only_20261123/report/route_audit_receipt.json#/final_payload_identity",
+      "root_cause": "The common identity binds manifest/context and parent inputs; final value bytes are not bound by that identity and final validation checks layouts and selected invariants, not a value hash. Older segment all-value hashing is already a documented separate limit.",
+      "proposal": "First state logical-run identity and artifact-integrity guarantees separately. If corruption detection is required, output owns a streamed final-artifact hash and its validation/cache at opening; consumers reuse the one opened identity rather than adding separate hashes or validators.",
+      "verification": "Finite value-only mutations of copied final artifacts are detected when integrity is promised; legitimate moved results and reused cohorts preserve identity; measure extra I/O/hash cost and peak memory.",
+      "limit": "This controlled modification does not show spontaneous numerical corruption or invalidate normal produced results."
+    },
+    {
+      "id": "INSTALLED-EXAMPLE-INVENTORY",
+      "classification": "current_maintenance_seam_accurate_today",
+      "priority": "proposed",
+      "source": ["src/chamber_particles_tools/examples.py:43", "src/chamber_particles_tools/examples.py:50", "src/chamber_particles_tools/cli.py:263", "tests/scenarios/test_input_clients.py:20", "tests/release_workflow.py:383", "tests/release_workflow.py:399"],
+      "root_cause": "Production choices, ordinary tests and report count derive from EXAMPLE_NAMES, but installed acceptance duplicates four names plus implicit ballistic and emits literal five passed.",
+      "proposal": "Enumerate the installed inventory for completeness, retain explicit analytic example expectations separately, and record exact executed names/count in the acceptance receipt.",
+      "verification": "Adding/removing one example changes CLI choices, ordinary parametrization, installed completeness and report count together."
+    }
+  ],
+  "already_implemented_boundaries_to_preserve": [
+    "Recipe2 complete table set and one create_case bundle/source authority",
+    "Shared core preparation for check/run; four core operations and one engine",
+    "Nested immutable ResultView manifest, explicit manifest_document and common source_identity",
+    "Reusable ResultCohort preserves exact IDs/count/weight selection",
+    "Case/producer/export/view staged completed artifacts and explicit coverage/physical limits"
+  ],
+  "worked_change_examples": [
+    {
+      "change": "Remove only the xy-time-field educational example",
+      "owners": ["src/chamber_particles_tools/examples.py:39,46,123,149", "solver/README.md:50", "examples/README.md:9", "tests/release_workflow.py:383"],
+      "automatic_current_handoffs": "CLI choices, scenario parametrization and report example count already derive from EXAMPLE_NAMES.",
+      "preserve": "Core linear-time field interpolation and its independent test_fields.py verification remain supported; removing a teaching example does not remove a physics capability.",
+      "verification": "Remaining examples work through CLI/Python, editable recipe reconstruction and a clean installed wheel; removed example name is rejected."
+    },
+    {
+      "change": "Add a force model or an actual new physics category",
+      "owners": ["src/chamber_particles/physics/catalog.py:73,621,936,1010", "src/chamber_particles/physics/runtime.py:501,523,4014", "src/chamber_particles/physics/compiled.py:185,216"],
+      "required_work": "Own the equation/reference and revision, field SI/value constraints, typed plan, prepare global/local proof and coupling, compiled contribution, analytic/manufactured and refinement evidence. A new state also deliberately changes resident/checkpoint/result projections. No plugin registry is implied.",
+      "current_good_handoffs": "CLI models and report physics rows derive from describe_models; normal producers remain primitive-based and unchanged when their existing field representation suffices.",
+      "extension_hazard": "SUPPORTED_PHYSICS_CATEGORIES derives from descriptors but selected_models assembly is a separate fixed category tuple. In an isolated hypothetical partial-registration probe, a review_force descriptor/category is accepted but omitted from resolved_models and has_force remains false. This is not a currently shipped configuration defect.",
+      "proposal": "Keep the typed fixed contribution order but fail closed when any recognized descriptor is not consumed by the resolved plan. One explicit category/order owner or a narrow exhaustive-consumption check is enough.",
+      "verification": "A partially registered category fails before execution; the completed model has independent equation/units/bound tests and a public case proving a nonzero expected contribution."
+    }
+  ],
+  "limits": ["No production/source edits for these proposed improvements.", "Small public probes and targeted source inspection, not a new full solver/native campaign.", "Physical cleanup remains blocked and unexecuted; these analysis findings do not claim the retirement goal complete."]
+}

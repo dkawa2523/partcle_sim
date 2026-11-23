@@ -1,0 +1,247 @@
+{
+  "baseline": "75100e74f1243b527e065c9e6a68121221408b39",
+  "scope": "Current benchmark execution/input/meaning cleanup; no production engine changes by this owner",
+  "removed": [
+    {
+      "path": "tests/performance/p11_exponential.py",
+      "reason": "Duplicate cold/warm process, reporting and validation entry; C03 physical workload moved into existing compiled harness"
+    },
+    {
+      "path": "tests/performance/p06_baseline.py:revision_3b_metrics",
+      "reason": "Duplicate copy of one scenario work record; all scenario event-refinement work remains"
+    },
+    {
+      "path": "tests/performance/p19l_local_applicability.py:private byte-formula audit",
+      "reason": "176/64/536N+8/544N/stack2 copied internal layout; actual nonempty local-range allocation ownership moved to existing verification"
+    },
+    {
+      "path": "tests/performance/p14_matrix.py:missing expected_boundary_events fallback",
+      "reason": "Only current producer always supplies required field; no previous-worker-spec compatibility needed"
+    },
+    {
+      "path": "tests/performance/b03_characterization.py:observation macro-step recomputation",
+      "reason": "Completed-run work uses authoritative counts; input uniform-window restriction remains a separate producer condition"
+    }
+  ],
+  "preserved_roles": [
+    "Three compiled workloads: field-heavy, event-heavy, C03 high-dt exponential relaxation",
+    "Fresh process and isolated NumPy/Numba cache per observation, common cold/warm measurement and full public science identity",
+    "Independent C03 analytic truth outside benchmark output identity",
+    "B03 conservative dynamic NumPy temporary bound; preallocated-root ownership tests do not replace that proof",
+    "P19 same reached physical cohort, global/local certificate behavior, same full public science and current plan accounting",
+    "Distinct proposal/output, load/prepare memory, orthogonal field/event/output matrix, representative convergence, Brownian, local certificate and process-scaling measurements"
+  ],
+  "runs": {
+    "p06": {
+      "exit_code": 0,
+      "scenarios": 8,
+      "particles": 32
+    },
+    "p10": {
+      "exit_code": 0,
+      "observations": 6,
+      "field_particles": 256,
+      "event_particles": 32,
+      "relaxation_particles": 256,
+      "cold_warm_identity": true,
+      "failures": 0
+    },
+    "p14": {
+      "exit_code": 0,
+      "scope": "complete smoke preset",
+      "observations": 8,
+      "identity": {
+        "core_definition": "final/release/boundary/failure/series payload; output frames, probes, execution partition, timing, RSS, and manifest are excluded",
+        "exact_global_algorithm_revisions": true,
+        "exact_repeats": true,
+        "exact_within_science_key": true
+      }
+    },
+    "p19": {
+      "exit_code": 0,
+      "particles": 256,
+      "global_local_identity": true,
+      "checks": {
+        "certificate_component_matches_slab": true,
+        "components_sum_to_run_peak": true,
+        "dense_path_component_matches_slab": true,
+        "planned_peak_covers_all_phases": true,
+        "planned_peak_within_configured_limit": true,
+        "stage_scratch_component_matches_slab": true
+      }
+    },
+    "b03": {
+      "exit_code": 0,
+      "scenarios": 4,
+      "particles": 32,
+      "all_active": true,
+      "failures": 0,
+      "memory_checks": {
+        "all_rows_use_current_memory_plan": true,
+        "all_scratch_components_match_slab_formula": true,
+        "conservative_named_array_bound_fits_stage_scratch": true
+      }
+    }
+  },
+  "independent_oracles": {
+    "passed": 11,
+    "seconds": 4.39,
+    "selectors": [
+      "test_exponential_midpoint_c03_matches_the_closed_form",
+      "test_exponential_midpoint_is_exact_for_c03_and_replay_keeps_endpoint_hint",
+      "test_exponential_midpoint_coefficients_cover_wide_relaxation_range",
+      "test_exponential_midpoint_has_second_order_for_variable_coefficients"
+    ]
+  },
+  "input_correspondence": {
+    "baseline": "75100e74f1243b527e065c9e6a68121221408b39 prior input construction function only, not a prior solver execution",
+    "old_producer_sha256": "97ec22c85e90abe8b4cddb81684d5cf6e1c93bab54cefa067c8c658c99cffcf8",
+    "particles": 32,
+    "canonical_content_hash": "sha256:e5b8dbaba143bfdc8975b5903b971ab3d9ad5cd0178dd3f3e5044d22150469a5",
+    "same_all_physical_and_numerical_settings": true,
+    "only_case_display_name_change": [
+      "p11_exponential_midpoint",
+      "constant_relaxation"
+    ],
+    "same_current_engine_scientific_payload": true,
+    "current_public_scientific_payload_sha256": "sha256:fae94564184340988b7558d527c4bbfeb066686304dad19df389938431b3ada5",
+    "independent_truth": "Separate C03/exponential exact wide-range and variable-coefficient11verificationcases passed; same-engine identity is only migration fidelity",
+    "temporary_old_function_and_results_not_retained_in_production": true
+  },
+  "source_binding": {
+    "final": {
+      "src/chamber_particles/__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+      "src/chamber_particles/__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+      "src/chamber_particles/api.py": "0625b08eb8e08b19fa2901a63a5e18cee8fd306b05b94dc37fe953ee5295873a",
+      "src/chamber_particles/boundaries.py": "85a694fb66d0dafa8b5233ec4712ea26067f2c7918b674714ee552bc95a0dbe2",
+      "src/chamber_particles/case.py": "887295525dcc2f4c7e4dca2aad10735817ba70dfef958a0c08235d5d2e00d4b6",
+      "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "src/chamber_particles/coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+      "src/chamber_particles/cpu.py": "82a73df79b8ed10463aa49db52c46c67f2ef96baea76b2fd4374d1663b3fb6ce",
+      "src/chamber_particles/engine.py": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d",
+      "src/chamber_particles/events.py": "217fb30d8c93262603d6d3d473f9ca5556b0784984e2a2af066a3653f97ed3d8",
+      "src/chamber_particles/execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+      "src/chamber_particles/field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+      "src/chamber_particles/fields.py": "c68f66aae101eec2e46ee33c76f69365a4cecf4de2f58f2e0a08076317498980",
+      "src/chamber_particles/geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+      "src/chamber_particles/integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+      "src/chamber_particles/lifecycle.py": "f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc",
+      "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "src/chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+      "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "src/chamber_particles/physics/catalog.py": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b",
+      "src/chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+      "src/chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+      "src/chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+      "src/chamber_particles/physics/runtime.py": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca",
+      "src/chamber_particles/rng.py": "8a23d62b65c0dae3651f3ff478d08d4305f73ed9e2580317df8f4122c1142920",
+      "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "src/chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+      "src/chamber_particles/time_grid.py": "6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad",
+      "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "src/chamber_particles/transport.py": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce",
+      "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+      "src/chamber_particles_tools/__init__.py": "69538a6ffa93118465aa5395157c3b5b65102d794429a3f288a811ab7238db8a",
+      "src/chamber_particles_tools/analysis/__init__.py": "438026bc54ef9615a7db158ded6657e247c93ddf06f484ec61622205723c26fe",
+      "src/chamber_particles_tools/bundle_publication.py": "62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f",
+      "src/chamber_particles_tools/cli.py": "a60f6ec8f826ee43a6909e5c965431780b1ebcaac6a4f0b5ee995a695fb5c3de",
+      "src/chamber_particles_tools/csv_import/__init__.py": "6d2e5444af02a66c31a875d9b7f8a68c8363be34b0d512cc5d40a3b9af489b64",
+      "src/chamber_particles_tools/csv_import/workflow.py": "c3ec86e424217d41b8890e02d797d9e2905ea35b75efb28bbbe37f7020e30b54",
+      "src/chamber_particles_tools/electrostatic_builder/__init__.py": "4c1c899232d1b686d7b93da1ce993ded0bfd019488073e5ee85ea51ac5e5eb97",
+      "src/chamber_particles_tools/electrostatic_builder/numerics.py": "3be3ecc87661557d3ab66b4c8604c52e65739eb63929ffec887a56e8e7ec1846",
+      "src/chamber_particles_tools/electrostatic_builder/workflow.py": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8",
+      "src/chamber_particles_tools/examples.py": "4c7f60b1ff9cbc68dde0483985825613497af701f548d7d299b62d847de8537c",
+      "src/chamber_particles_tools/field_preprocessor/__init__.py": "523906002167d1e03a32290cef5b6a838167ee1d9866c64d7e06c05d93288590",
+      "src/chamber_particles_tools/field_preprocessor/numerics.py": "328eacec0067656227c75a8883156d7f2dfbb670715269a58bf18918acfe68d4",
+      "src/chamber_particles_tools/field_preprocessor/workflow.py": "5b1115ceb51b9024f2bd0ef42e348a8f02f6d0e8776b4e495eee0f7cac3c5dc1",
+      "src/chamber_particles_tools/inputs.py": "0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d",
+      "src/chamber_particles_tools/selection.py": "c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01",
+      "src/chamber_particles_tools/source_builder/__init__.py": "330fcb0424c7c8d06bad5d9a78ff3e4d5768cf85a1caa66ed354dabce320e838",
+      "src/chamber_particles_tools/source_builder/producer.py": "92648bd6d8d67b82f6361d5a608aaeab2b99aaf366b8ec0312f60d66970ce470",
+      "src/chamber_particles_tools/visualization/__init__.py": "06975a1560d91c0770765dfedef8720438b35626b1223cbd726a5a72f42d86bc",
+      "tests/performance/__init__.py": "474bfae315e0c33f28cdc206a825d4f9716705fa73cf7ae05a48427ae7e3eee3",
+      "tests/performance/b03_characterization.py": "0fc4a2e0785d37fe180db25bd3764e216ccae44b7e15792af253da50a6acdb05",
+      "tests/performance/p06_baseline.py": "6b20a7c1eb4f6688e3a56c90a3e8a947fca0fc06c8cf844db0df54c0c28ec72e",
+      "tests/performance/p09_memory.py": "44c95437f5db229cf856ae02a64a9ded8cae78d5b502d7f9d42472e799509bde",
+      "tests/performance/p10_compiled.py": "73f7b939d1de71c05f046e486280dd858b35d67a5a59a8479fa43cdadfa2c09b",
+      "tests/performance/p14_matrix.py": "ddb6b41e92d6e904f36d23dfc777ce49f32d424bb8b00717e4ddb7ca45bdd7c7",
+      "tests/performance/p14u_representative.py": "7b9b1e6e21aeb35d7b90026dc3ed4227bfc06ca0acc3cd2bf52116b2345fbabb",
+      "tests/performance/p19l_local_applicability.py": "81223e824a17c9ead48cbcf149fb51bea5872e1c6af37c921105ffaee5c1aa3d",
+      "tests/performance/process_workers.py": "26ff52ed72661a350fc17ecb5489f19007019dd3e280886abd03d8db45170ae8",
+      "uv.lock": "ac4a7f34936b36078bf79e871e05505eb8a0f88315152e0980aaa2b0153bba56"
+    },
+    "all_installed_sources_and_lock_unchanged_across_runs": true,
+    "changed_bench_files_since_first_attempt": [
+      "tests/performance/b03_characterization.py",
+      "tests/performance/p10_compiled.py"
+    ],
+    "changed_bench_files_during_retry": [
+      "tests/performance/b03_characterization.py"
+    ],
+    "meaning": "P10 first attempt failed its new expectation label before publishing any report; retry fixes input-selector rk4 versus resolved rk4_fixed. B03 later switches its own work observation to actual counts. Neither P14 nor P06/P19 imports P10/B03, and P10 does not import B03; each successful run used stable dependencies."
+  },
+  "checks": {
+    "ruff_lint": "passed",
+    "ruff_format": "10 files formatted",
+    "configured_pyrefly": "0 errors",
+    "complexity": "CC<16",
+    "diff_whitespace": "passed"
+  },
+  "artifact_sha256": {
+    "p06.json": "7051269417b5dfd6c6f0f311d2f526f83b0215bcae63fbbb01622d04028c258d",
+    "p10.json": "74dcf7346b412d77d3741c4362c2c692e13feb41f2e3bb48e8e58b38ce7efb0a",
+    "p14.json": "5c2425101dc54ec190c6a6ace1fcff5ecc7a4c9fe4e895f6fee207567945d4b9",
+    "p19.json": "b7d438fbceb7669eeae3186778378ad958b563e3b7082b4cb937c1386c31423d",
+    "b03.json": "53f07c70cd2bf13cef52cafb18f1772c86af86881402efa0cdf1947c93488510",
+    "relaxation_input_correspondence.json": "5d1242b56c45d9b1b94739f6cbd1785f597ff82c1aaca6e0847a83ac5439fbbe",
+    "old_report_role_mapping.json": "118bb351ac1adf7d0fdc40c22cd53d139dbc9757ea15d62674c503d4023c7c5b"
+  },
+  "timing_limits": "Machine-local descriptive observations under overlapping root/agent work; no portable SLA or inter-revision speedup claim. Smoke is not a full100k/1M qualification.",
+  "not_run_by_this_owner": [
+    "Unchanged P09/P14-U/process_workers full measurements",
+    "Licensed COMSOL solve",
+    "Full scientific suite"
+  ],
+  "classification_for_root": "Prior machine-generated benchmark reports/case/results can be replaced by these current runs and removed after active report/document references move. No native exports, physical experiment records, model_dataset, old_code, or runtime environment was removed.",
+  "generated_result_role_mapping": [
+    {
+      "old_report": "evidence\\retirement_2026_11_23\\performance\\exponential.json",
+      "old_particles": 8,
+      "old_observations": 2,
+      "same_canonical_input_under_current_relaxation_scenario": true,
+      "old_data_hashes": [
+        "sha256:94462b366709dc13639e88b8b4c12e9208596eaae3edc369823022d5afbab0cf"
+      ],
+      "current_data_hash": "sha256:94462b366709dc13639e88b8b4c12e9208596eaae3edc369823022d5afbab0cf",
+      "old_dt_s": 0.75,
+      "old_configured_dt_over_tau": 3.0,
+      "current_dt_s": 0.75,
+      "current_configured_dt_over_tau": 3.0,
+      "old_role": "same-process JIT amortization, same-input payload and memory observation; not independent scientific reference"
+    },
+    {
+      "old_report": "evidence\\resolved_semantics_2026_11_23\\performance\\p11.json",
+      "old_particles": 256,
+      "old_observations": 2,
+      "same_canonical_input_under_current_relaxation_scenario": true,
+      "old_data_hashes": [
+        "sha256:8814634325a69a29d87b3e1fba1c58bba70fbf361e8a6ce22bfedcff24e7a902"
+      ],
+      "current_data_hash": "sha256:8814634325a69a29d87b3e1fba1c58bba70fbf361e8a6ce22bfedcff24e7a902",
+      "old_dt_s": 0.75,
+      "old_configured_dt_over_tau": 3.0,
+      "current_dt_s": 0.75,
+      "current_configured_dt_over_tau": 3.0,
+      "old_role": "same-process JIT amortization, same-input payload and memory observation; not independent scientific reference"
+    }
+  ],
+  "current_entry_count": {
+    "benchmark_modules": 8,
+    "compiled_workload_scenarios": [
+      "field",
+      "event",
+      "relaxation"
+    ],
+    "meaning": "Entry consolidation, no physical workload dropped"
+  }
+}

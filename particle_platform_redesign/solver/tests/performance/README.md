@@ -10,8 +10,7 @@ format. Timings and process-memory observations are local measurements.
 |---|---|---|
 | `p06_baseline` | Proposal, enclosure, material-event and output costs; optional traced allocations | Requested event/output counts; microcase analytic tests run separately |
 | `p09_memory` | Load/prepare/run high-water RSS and owned-array plans | Current memory plan and public scientific payload |
-| `p10_compiled` | Field-heavy and event-heavy cold/warm JIT costs | Requested event counts and unchanged science; analytic tests run separately |
-| `p11_exponential` | Exponential-midpoint relaxation, fresh/warm execution | Same-input science; independent C03 analytic verification run separately |
+| `p10_compiled` | Field-heavy, event-heavy and constant-relaxation cold/warm JIT costs | Requested event counts and unchanged science; C03 closed-form verification and other analytic tests run separately |
 | `p14_matrix` | Orthogonal regular/P1/Q1, location, crossing, event, output and size matrix | Exact event counts and output-independent science |
 | `p14u_representative` | Surface release, nonuniform forces, material target, XY/RZ refinement | Separate finer time/mesh references and target geometry |
 | `b03_characterization` | Inertial Brownian fixed/continuous drag/charge and conditional refinement | Translated XY/RZ pair and axis/charge checks; OU limits run separately |
@@ -46,8 +45,7 @@ Focused measurements:
 ```console
 uv run --locked python -m tests.performance.p06_baseline --particles 256 --warmups 1 --repeats 3 --json .artifacts/proposals.json
 uv run --locked python -m tests.performance.p09_memory --particles 10000 --modes fresh warm --repeats 1 --json .artifacts/memory.json
-uv run --locked python -m tests.performance.p10_compiled --field-particles 10000 --event-particles 32 --repeats 3 --warmups 1 --json .artifacts/compiled.json
-uv run --locked python -m tests.performance.p11_exponential --particles 10000 --repeats 3 --warmups 1 --json .artifacts/exponential.json
+uv run --locked python -m tests.performance.p10_compiled --field-particles 10000 --event-particles 32 --relaxation-particles 10000 --repeats 3 --warmups 1 --json .artifacts/compiled.json
 uv run --locked python -m tests.performance.p19l_local_applicability --particles 4096 --repeats 7 --json .artifacts/applicability.json
 ```
 
@@ -55,6 +53,13 @@ Run `p06_baseline --trace-memory` separately from timing. Tracemalloc observes
 Python/NumPy allocations, not all native memory. P09 `fresh`/`warm` describes
 process execution; use the cold/warm JIT harness to specify empty/populated
 compiler caches.
+
+The compiled measurement selects `--scenarios field event relaxation` by default.
+Use `--scenarios relaxation` for the C03 exponential-midpoint case alone. It uses
+the same isolated worker, timing, memory, compiled-execution and cold/warm identity
+checks as the other workloads. Its configured `dt/tau=3` is an input condition;
+the independent C03 analytic check establishes its numerical meaning. Each
+scenario retains its own integrator and event expectations.
 
 ## Larger explicit workloads
 
@@ -82,4 +87,4 @@ release, canonical boundary/failure events, lifecycle, every emitted frame and
 probe. They do not compare unsaved internal paths or HDF5 container bytes.
 
 Current cleanup execution and limits are recorded in
-[`evidence/resolved_semantics_2026_11_23`](../../evidence/resolved_semantics_2026_11_23/README.md).
+[`evidence/current_only_2026_11_23`](../../evidence/current_only_2026_11_23/README.md).

@@ -1,4 +1,7 @@
-# Current benchmark execution
+# 当時のbenchmark実行記録
+
+本書のcurrentと数値は、各receiptが束縛する当時のsourceに限定する。
+現在の入口は[性能client一覧](../../../tests/performance/README.md)と[追加撤去記録](../../current_only_2026_11_23/README.md)を参照する。
 
 The current workloads use one production engine and the current canonical input
 and result formats. Each report below is a new execution, not a conversion of
@@ -46,7 +49,7 @@ other verification, so their elapsed times are not comparative speed claims.
 | P06 | 8 particles, one warmup/repeat | Requested proposal/event/output shapes passed; [report](proposals.json) |
 | P09 | 8 particles, fresh/warm × load/prepare/run | Six observations, memory-plan and science checks passed; [report](memory.json) |
 | P10 | Field 8 / event 2, cold/warm, one repeat | Four observations and compiled-path/science checks passed; [report](compiled.json) |
-| P11 | 8 particles, fresh/warm, one repeat | Two observations and same-input science checks passed; [report](exponential.json) |
+| 当時のP11 | 8 particles, fresh/warm, one repeat | 旧wrapper専用reportは撤去。[当時の観測](https://github.com/dkawa2523/partcle_sim/blob/75100e74f1243b527e065c9e6a68121221408b39/particle_platform_redesign/solver/evidence/retirement_2026_11_23/performance/exponential.json)。C03の現行計測はP10 relaxationが所有する |
 | P14 | Complete smoke preset, one repeat/warmup, 1024 MiB | Eight regular/P1/Q1/time-field/event/output rows passed; [report](matrix.json) |
 | P14-U | Smoke, 256-particle none/sample modes | Separate time/mesh refinement, RZ, target and output identity checks passed; [report](representative.json) |
 | Brownian | 32 particles, one repeat/warmup | Four XY/RZ/fixed/continuous/axis cases passed; [report](brownian.json) |

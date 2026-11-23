@@ -107,7 +107,7 @@ def prepare_boundary_rule(
     law_id: str,
     parameters: Mapping[str, object],
 ) -> BoundaryRule:
-    """Validate the deliberately small P07 wall-law catalog."""
+    """Validate the supported wall laws and their parameters."""
 
     if group_id < 0 or priority < 0:
         raise BoundaryLawError("boundary group ID and priority must be nonnegative")

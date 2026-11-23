@@ -7,6 +7,7 @@
 全体変更の調査・実行・未確認は[全体対応表](solver/evidence/retirement_2026_11_23/README.md)へ残す。
 その後の意味・状態・公開境界の根因改良は[再構成記録](solver/evidence/resolved_semantics_2026_11_23/README.md)へ残す。
 過去sourceの完了記録は、そのsourceだけの証拠である。
+現行入口への追加撤去と、実行済み・外部条件による未実行の区分は[撤去記録](solver/evidence/current_only_2026_11_23/README.md)へ残す。
 
 | 単位 | 完了条件 |
 |---|---|

@@ -1,5 +1,8 @@
 # 責務・受渡し・数値説明の根因調査と再構成
 
+これは`75100e7`までの実行・改良記録である。その後の[現行入口への撤去](../current_only_2026_11_23/README.md)は別記録とする。
+旧P11 wrapper専用JSONは撤去し、当時の観測はGit履歴へ移した。C03の計測と独立oracleは現行P10とverificationに残す。
+
 開始source: `824a7ac8df1e4d69f9fc17f8fa3f7b27598af290`。対象は現行基盤の全主要領域であり、
 歴史的Vigusレポートの旧実装を現在sourceと同一視しない。この記録は変更理由と実行証拠を集める。
 現行仕様の所有者は[architecture](../../../architecture_proposal.md)、[物理](../../docs/physics_models.md)、

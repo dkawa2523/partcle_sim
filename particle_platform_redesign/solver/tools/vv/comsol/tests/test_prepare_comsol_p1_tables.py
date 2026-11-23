@@ -10,7 +10,8 @@ import pytest
 from tests.verification.microcases import build_microcase
 from tools.vv.comsol.prepare_comsol_p1_tables import prepare, write_sectionwise_p1
 
-from chamber_particles.case_format import FieldData, P1TriLayout, RealizedTableSource, write
+from chamber_particles.case_format import FieldData, P1TriLayout, RealizedTableSource, read, write
+from chamber_particles.fields import FieldLocationError
 
 
 def test_sectionwise_writer_preserves_exact_p1_connectivity(tmp_path: Path) -> None:
@@ -46,7 +47,7 @@ def test_sectionwise_writer_preserves_exact_p1_connectivity(tmp_path: Path) -> N
     )
 
 
-def _input(path: Path) -> None:
+def _input(path: Path, count: int = 5) -> None:
     base = build_microcase("C07").data
     nodes = base.geometry.nodes_m + np.array([1.0, 0.0])
     triangles = np.asarray([[0, 1, 2], [0, 2, 3]], dtype="<i8")
@@ -93,18 +94,18 @@ def _input(path: Path) -> None:
     assert isinstance(source, RealizedTableSource)
     source = RealizedTableSource(
         source.name,
-        particle_id=np.arange(1, 288, dtype="<i8"),
-        release_time_s=np.zeros(287, dtype="<f8"),
-        position_m=np.tile([1.25, 0.25], (287, 1)).astype("<f8"),
-        velocity_m_s=np.tile(source.velocity_m_s[0], (287, 1)).astype("<f8"),
-        charge_number=np.full(287, source.charge_number[0], dtype="<f8"),
-        mass_kg=np.full(287, source.mass_kg[0], dtype="<f8"),
-        drag_diameter_m=np.full(287, source.drag_diameter_m[0], dtype="<f8"),
-        contact_radius_m=np.full(287, source.contact_radius_m[0], dtype="<f8"),
-        electrostatic_radius_m=np.full(287, source.electrostatic_radius_m[0], dtype="<f8"),
-        displaced_volume_m3=np.full(287, source.displaced_volume_m3[0], dtype="<f8"),
-        model_weight=np.ones(287, dtype="<f8"),
-        material_id=np.zeros(287, dtype="<i4"),
+        particle_id=np.arange(1, count + 1, dtype="<i8"),
+        release_time_s=np.zeros(count, dtype="<f8"),
+        position_m=np.tile([1.25, 0.25], (count, 1)).astype("<f8"),
+        velocity_m_s=np.tile(source.velocity_m_s[0], (count, 1)).astype("<f8"),
+        charge_number=np.full(count, source.charge_number[0], dtype="<f8"),
+        mass_kg=np.full(count, source.mass_kg[0], dtype="<f8"),
+        drag_diameter_m=np.full(count, source.drag_diameter_m[0], dtype="<f8"),
+        contact_radius_m=np.full(count, source.contact_radius_m[0], dtype="<f8"),
+        electrostatic_radius_m=np.full(count, source.electrostatic_radius_m[0], dtype="<f8"),
+        displaced_volume_m3=np.full(count, source.displaced_volume_m3[0], dtype="<f8"),
+        model_weight=np.ones(count, dtype="<f8"),
+        material_id=np.zeros(count, dtype="<i4"),
     )
     write(
         path,
@@ -119,28 +120,31 @@ def _input(path: Path) -> None:
     )
 
 
+@pytest.mark.parametrize("count", [1, 5])
 def test_complete_p1_tables_and_affine_release_probes_match_independent_values(
     tmp_path: Path,
+    count: int,
 ) -> None:
     source, output = tmp_path / "input.h5", tmp_path / "tables"
-    _input(source)
+    _input(source, count)
     prepare(source, output)
     nodes = np.array([[1, 0], [2, 0], [2, 1], [1, 1]], dtype=float)
-    actual = np.loadtxt(output / "m3v_Ez.txt")
-    np.testing.assert_array_equal(actual, np.column_stack((nodes, 2 * nodes[:, 1] + 1)))
+    lines = (output / "m3v_Ez_sectionwise.txt").read_text(encoding="utf-8").splitlines()
+    data_start = lines.index("%Data (m3v_Ez)") + 1
+    np.testing.assert_array_equal(np.loadtxt(lines[data_start:]), 2 * nodes[:, 1] + 1)
     with (output / "canonical_p1_release_probes.csv").open(newline="", encoding="utf-8") as stream:
         rows = list(csv.reader(stream))
-    assert len(rows) == 288
-    assert rows[1][0] == "p1_t0" and rows[-1][0] == "p287_t0"
+    assert len(rows) == count + 1
+    assert rows[1][0] == "p1_t0" and rows[-1][0] == f"p{count}_t0"
     expected = np.array([1.25, 0.25, 1.5, 2.25, 303.25, 4.25e-4, 8.5e-5, 1.25, 1.5])
     np.testing.assert_allclose(
         np.asarray(rows[1:], dtype=object)[:, 1:].astype(float),
-        np.tile(expected, (287, 1)),
+        np.tile(expected, (count, 1)),
         rtol=2e-15,
         atol=0,
     )
     receipt = json.loads((output / "table_receipt.json").read_text(encoding="utf-8"))
-    assert receipt["release_probe_count"] == 287
+    assert receipt["release_probe_count"] == count
     assert receipt["node_count"] == 4 and receipt["cell_count"] == 2
     assert not any(p.name.startswith(".p1-tables-") for p in tmp_path.iterdir())
 
@@ -170,3 +174,29 @@ def test_p1_receipt_failure_leaves_no_partial_input_and_can_retry(
     assert (output / "table_receipt.json").is_file()
     with pytest.raises(FileExistsError):
         prepare(source, output)
+
+
+@pytest.mark.parametrize("defect", ["unit", "time", "cell"])
+def test_exact_p1_export_rejects_unsupported_field_meaning_before_publication(
+    tmp_path: Path, defect: str
+) -> None:
+    source = tmp_path / "source.h5"
+    _input(source)
+    data = read(source)
+    fields = list(data.fields)
+    index = next(i for i, field in enumerate(fields) if field.name == "gas_temperature")
+    field = fields[index]
+    if defect == "unit":
+        fields[index] = replace(field, unit="m")
+    elif defect == "time":
+        fields[index] = replace(
+            field, time_s=np.array([0.0, 1.0]), values=np.stack((field.values, field.values + 1.0))
+        )
+    else:
+        fields[index] = replace(field, association="cell", values=field.values[:2])
+    unsupported = tmp_path / "unsupported.h5"
+    write(unsupported, replace(data, fields=tuple(fields)))
+    output = tmp_path / "tables"
+    with pytest.raises((ValueError, FieldLocationError)):
+        prepare(unsupported, output)
+    assert not output.exists()

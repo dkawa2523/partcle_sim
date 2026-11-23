@@ -1,0 +1,170 @@
+{
+  "queries": {
+    "case_audit": {
+      "label": "以前のsourceに束縛したA/P各40seed参照",
+      "rows": [
+        {
+          "case": "A",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 251.0,
+          "capture_candidate_mean": 249.675,
+          "capture_candidate_sd": 6.014459073658906,
+          "restricted_mean_active_native_us": 200.3969264894903,
+          "restricted_mean_active_candidate_us": 203.4885515137035,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
+          "qualification": "Numerical/native parity and physical adhesion not certified",
+          "execution_scope": "Prior resolved_semantics solver replay of the same40seeds/window and saved native reference; no current_only A/P solver replay",
+          "judgment_origin": "Previously reviewed practical interpretation retained under exact scientific-payload replay; no new confirmatory verdict",
+          "evidence_scope": "prior_source_bound_reference"
+        },
+        {
+          "case": "P",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 254.0,
+          "capture_candidate_mean": 251.775,
+          "capture_candidate_sd": 5.5214616236589436,
+          "restricted_mean_active_native_us": 187.38328244202265,
+          "restricted_mean_active_candidate_us": 203.05462371889976,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
+          "qualification": "Numerical/native parity and physical adhesion not certified",
+          "execution_scope": "Prior resolved_semantics solver replay of the same40seeds/window and saved native reference; no current_only A/P solver replay",
+          "judgment_origin": "Previously reviewed practical interpretation retained under exact scientific-payload replay; no new confirmatory verdict",
+          "evidence_scope": "prior_source_bound_reference"
+        }
+      ],
+      "source": {
+        "label": "以前のsourceに束縛したA/P各40seed参照",
+        "files": [
+          "solver/evidence/current_only_2026_11_23/report_scope.json",
+          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
+          "solver/evidence/retirement_2026_11_23/population_recheck.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "A/P287粒子・候補各40実現",
+            "definition": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged. Prior resolved_semantics solver re-execution uses the same seeds/window and unchanged saved native reference; it is not a new independent Monte Carlo sample or a newly certified numerical qualification. This current-only change imports prior evidence; no new80-run replay or present-source numerical qualification is claimed.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Prior reference reused in current-only report",
+            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:6284f1a37b87253c3cc230b01f6fa24c896d3453ce065e52b86a3f139d2c047a\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
+          },
+          {
+            "title": "Prior resolved_semantics candidate replay and unchanged native scope",
+            "detail": "{\"receipt\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}, \"scope\": \"Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching\"}"
+          },
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged."
+          },
+          {
+            "title": "Historical retirement-reader reanalysis",
+            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+          }
+        ]
+      }
+    },
+    "trajectory_divergence": {
+      "label": "以前のsourceに束縛した探索的局所差",
+      "rows": [
+        {
+          "case": "A",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 74.0,
+          "candidate_replica_mean": 60.45,
+          "difference_percentage_points": -4.7212543554006965,
+          "scope": "全287粒子分母、探索的局所留保",
+          "evidence_scope": "prior_source_bound_reference"
+        },
+        {
+          "case": "A",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 759.0827702014865,
+          "candidate_replica_mean_of_medians": 861.3178894844634,
+          "relative_difference_percent": 13.468243951294046,
+          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保",
+          "evidence_scope": "prior_source_bound_reference"
+        },
+        {
+          "case": "P",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 73.0,
+          "candidate_replica_mean": 61.325,
+          "difference_percentage_points": -4.067944250871079,
+          "scope": "全287粒子分母、探索的局所留保",
+          "evidence_scope": "prior_source_bound_reference"
+        },
+        {
+          "case": "P",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 737.5076919491495,
+          "candidate_replica_mean_of_medians": 866.9236448676853,
+          "relative_difference_percent": 17.547742800689182,
+          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保",
+          "evidence_scope": "prior_source_bound_reference"
+        }
+      ],
+      "source": {
+        "label": "以前のsourceに束縛した探索的局所差",
+        "files": [
+          "solver/evidence/current_only_2026_11_23/report_scope.json",
+          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
+          "solver/evidence/retirement_2026_11_23/population_recheck.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "探索的な局所差",
+            "definition": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations. Prior resolved_semantics solver re-execution uses the same seeds/window and unchanged saved native reference; it is not a new independent Monte Carlo sample or a newly certified numerical qualification. This current-only change imports prior evidence; no new80-run replay or present-source numerical qualification is claimed.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Prior reference reused in current-only report",
+            "detail": "{\"prior_projection\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, \"scope_receipt\": {\"path\": \"solver/evidence/current_only_2026_11_23/report_scope.json\", \"sha256\": \"sha256:6284f1a37b87253c3cc230b01f6fa24c896d3453ce065e52b86a3f139d2c047a\"}, \"scope\": \"Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples.\"}"
+          },
+          {
+            "title": "Prior resolved_semantics candidate replay and unchanged native scope",
+            "detail": "{\"receipt\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}, \"scope\": \"Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching\"}"
+          },
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations."
+          },
+          {
+            "title": "Historical retirement-reader reanalysis",
+            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+          }
+        ]
+      }
+    }
+  }
+}

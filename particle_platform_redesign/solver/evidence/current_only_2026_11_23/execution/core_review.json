@@ -1,0 +1,70 @@
+{
+  "scope": "Current numerical core, strict formats, core tests and import/dependency ownership; no archive/data/environment edits",
+  "removed": [
+    "integrators._outward_bezier_control_bounds allocating wrapper",
+    "integrators._compiled_outward_control_bounds_into dedicated obsolete helper",
+    "P04/P05/P06/P06-S/P07/P15/Stage1A labels in active diagnostics/docstrings",
+    "Retired-v1/thread-specific fixtures and exact old-version test assumptions"
+  ],
+  "why_removed": "The two private numerical functions are not exported, registered, dynamically named or called by current source/tools/tests. Current StepProposal dense enclosures use _enclose_rk4_dense_subinterval -> _compiled_rk4_dense_enclosure_into -> _dense_enclose_axis_scalar. Old-stage diagnostic prefixes do not describe current public use.",
+  "moved_roles": [
+    "Strict invalid-format and unknown-resource rejection remain generic current-input tests",
+    "Result integrity/context rejection tests use an unsupported future schema instead of an obsolete specific version",
+    "P19 memory resource coverage is added to existing actual-allocation ownership parametrization using the actual local-applicability input; no new validator/contract"
+  ],
+  "retained_with_reason": [
+    "Current case schema3/result schema4/checkpoint schema2 strict readers: no backward reader or migration dispatch",
+    "Physics v1/v2 revisions select distinct supported scientific laws, not old-format compatibility",
+    "Frozen-start predictor and its enclosure are live midpoint/OU coefficient guards, not a second integration engine",
+    "Python StageEvaluator verification adapters execute the same compiled numerical body via py_func, while installed runs bind native stage context",
+    "Kramers PDE and independent mirrored Gaussian reference remain active scientific oracles",
+    "Bound-array and Brownian phase memory checks retain current resource properties; new local field-range allocation case covers persistent local buffers"
+  ],
+  "tests": [
+    {
+      "command": "python -m pytest test_case_format test_output test_model_descriptors test_rk4_dense_enclosure test_integrators test_workspace_ownership test_load_case test_required_fields test_boundaries -q",
+      "passed": 279,
+      "seconds": 34.81,
+      "xml": ".artifacts/retire_current_core_20261123.xml"
+    },
+    {
+      "command": "python -m pytest tests/scenarios/test_boundary_run.py -k table_start_validation_preserves_row_order_and_particle_id -q",
+      "passed": 3,
+      "seconds": 1.22
+    },
+    {
+      "command": "python -m pytest tests/scenarios/test_brownian_run.py -k repeated_mirrored_law/planar_Kramers/radial_Kramers/adaptive_multi_reflection/axis_restart -q",
+      "passed": 5,
+      "seconds": 179.49,
+      "xml": ".artifacts/retire_current_brownian_oracles_20261123.xml"
+    }
+  ],
+  "checks": {
+    "core_pyrefly": "0 errors;105 warnings not shown",
+    "ruff": "passed",
+    "imports": "6 kept/0 broken",
+    "complexity": "all CC<16",
+    "git_diff_check": "passed",
+    "numeric_AST_audit": ".artifacts/retire_current_core_ast.py passed:7 changed core modules identical to HEAD AST after exact2function removal and explicit diagnostic/docstring string replacements",
+    "cross_reference_search": "retired function names and exact old diagnostics absent in current src/tests/tools/scripts"
+  },
+  "source_sha256": {
+    "src/chamber_particles/case.py": "887295525dcc2f4c7e4dca2aad10735817ba70dfef958a0c08235d5d2e00d4b6",
+    "src/chamber_particles/boundaries.py": "85a694fb66d0dafa8b5233ec4712ea26067f2c7918b674714ee552bc95a0dbe2",
+    "src/chamber_particles/fields.py": "c68f66aae101eec2e46ee33c76f69365a4cecf4de2f58f2e0a08076317498980",
+    "src/chamber_particles/engine.py": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d",
+    "src/chamber_particles/physics/catalog.py": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b",
+    "src/chamber_particles/integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+    "src/chamber_particles/transport.py": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce",
+    "tests/scenarios/test_boundary_run.py": "0c73b597d834e70ac71bebc59d4c79390b6b77f7990e7593678fcd4167160b2b",
+    "tests/scenarios/test_load_case.py": "b12b0dff0a18a001d17f313fc81297af9b977bab31950000c1e4c1c6c3460ac0",
+    "tests/verification/test_case_format.py": "d5b008d5a6875ff92ed1967653e9b040b347350756f63fb12a1c81843a0143a0",
+    "tests/verification/test_output.py": "cd5b22606caf7e70b96593b5e37010499472ee41f9e86f80097431ee29274af5",
+    "tests/verification/test_workspace_ownership.py": "f03dbaacf219c44cafd96c57f51a82b64dfb0e66164abc1ba6d0482300d43f67"
+  },
+  "limits": [
+    "Targeted checks, not a new full suite/benchmark campaign or native COMSOL solve",
+    "Other agents edit clients, external tools, benchmark owners and evidence independently; whole-project integration remains root owned",
+    "Initial whole-project Pyrefly observed7 transient errors in concurrently edited external aggregate tools; core-targeted Pyrefly passed."
+  ]
+}

@@ -588,7 +588,7 @@ def test_continuous_charge_composes_state_evolution_with_force_capability() -> N
     [
         ("model", "oml_continuous", "model must be fixed or plasma_continuous"),
         ("revision", "oml_unversioned", "revision"),
-        ("applicability", "count", "applicability=error"),
+        ("applicability", "count", r"applicability.*error"),
         ("electron_number_density_field", "", "nonempty string"),
         ("positive_ion_mass_kg", 0.0, "positive finite number"),
         ("positive_ion_mass_kg", True, "positive finite number"),

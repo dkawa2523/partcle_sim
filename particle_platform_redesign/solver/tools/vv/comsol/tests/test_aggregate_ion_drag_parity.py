@@ -1,9 +1,16 @@
 import csv
+import json
 import math
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
-from tools.vv.comsol.evaluate_aggregate_ion_drag_parity import evaluate_history
+from tools.vv.comsol.evaluate_aggregate_ion_drag_parity import (
+    Correspondence,
+    FormulaRevision,
+    evaluate_history,
+)
 
 from chamber_particles.physics.forces import (
     ELEMENTARY_CHARGE_C,
@@ -14,9 +21,6 @@ from chamber_particles.physics.forces import (
 def _base_row() -> dict[str, float]:
     radius = 5.0e-8
     screening = 2.0e-5
-    phi_one = ELEMENTARY_CHARGE_C / (
-        4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * radius * (1.0 + radius / screening)
-    )
     return {
         "particle_id": 1.0,
         "time_s": 2.0e-5,
@@ -36,11 +40,19 @@ def _base_row() -> dict[str, float]:
         "local_bounded_screening_length_m": screening,
         "local_ion_neutral_mean_free_path_m": 8.0e-6,
         "local_ion_thermal_energy_eV_as_V": 0.04,
-        "local_single_charge_surface_potential_increment_V": phi_one,
         "local_electric_field_r_V_per_m": 80.0,
         "local_electric_field_z_V_per_m": -30.0,
-        "local_sheath_potential_relative_to_bulk_V": -1.0,
     }
+
+
+def _surface_potential(row: dict[str, float]) -> float:
+    radius = row["particle_radius_m"]
+    screening = max(radius, row["local_bounded_screening_length_m"])
+    return (
+        row["charge_number_e"]
+        * ELEMENTARY_CHARGE_C
+        / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * radius * (1.0 + radius / screening))
+    )
 
 
 def _theory_force(row: dict[str, float]) -> tuple[float, float]:
@@ -69,7 +81,7 @@ def _theory_force(row: dict[str, float]) -> tuple[float, float]:
         * ELEMENTARY_CHARGE_C**2
         / (4.0 * math.pi * VACUUM_PERMITTIVITY_F_M * ion_mass * speed_square)
     )
-    potential = charge * row["local_single_charge_surface_potential_increment_V"]
+    potential = _surface_potential(row)
     collection_square = min(
         screening**2,
         radius**2
@@ -89,39 +101,20 @@ def _theory_force(row: dict[str, float]) -> tuple[float, float]:
     return factor * relative[0], factor * relative[1]
 
 
-def _image_force(row: dict[str, float], case_kind: str) -> tuple[float, float]:
+def _image_force(row: dict[str, float]) -> tuple[float, float]:
     ion_mass = row["effective_positive_ion_mass_kg"]
     vector_square = (
         row["local_ion_velocity_r_m_per_s"] ** 2 + row["local_ion_velocity_z_m_per_s"] ** 2
     )
-    if case_kind == "P":
-        ion_speed = math.sqrt(vector_square + 1.0)
-        speed_square = ion_speed**2 + 8.0 * ELEMENTARY_CHARGE_C * row[
-            "local_ion_thermal_energy_eV_as_V"
-        ] / (math.pi * ion_mass)
-    else:
-        ion_speed = math.sqrt(
-            max(
-                1.0e-6,
-                ELEMENTARY_CHARGE_C
-                * (
-                    row["electron_temperature_eV_as_V"]
-                    - 2.0 * row["local_sheath_potential_relative_to_bulk_V"]
-                )
-                / ion_mass,
-            )
-        )
-        speed_square = (
-            ion_speed**2
-            + 8.0
-            * ELEMENTARY_CHARGE_C
-            * row["local_ion_thermal_energy_eV_as_V"]
-            / (math.pi * ion_mass)
-            + 1.0
-        )
+    ion_speed = math.sqrt(vector_square)
+    speed_square = (
+        vector_square
+        + 8.0 * ELEMENTARY_CHARGE_C * row["local_ion_thermal_energy_eV_as_V"] / (math.pi * ion_mass)
+        + 1.0
+    )
     radius = row["particle_radius_m"]
     charge = row["charge_number_e"]
-    potential = charge * row["local_single_charge_surface_potential_increment_V"]
+    potential = _surface_potential(row)
     collection = (
         math.pi * radius**2 * max(0.0, 1.0 - potential / row["local_ion_thermal_energy_eV_as_V"])
     )
@@ -154,17 +147,8 @@ def _image_force(row: dict[str, float], case_kind: str) -> tuple[float, float]:
     )
 
 
-def _write_history(root: Path, revision: str, case_name: str, row: dict[str, float]) -> Path:
-    path = (
-        root
-        / "cases"
-        / revision
-        / case_name
-        / "external_reproduction"
-        / "results"
-        / "particle_history_full_tidy.csv"
-    )
-    path.parent.mkdir(parents=True)
+def _write_history(path: Path, row: dict[str, float]) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=tuple(row))
         writer.writeheader()
@@ -172,43 +156,110 @@ def _write_history(root: Path, revision: str, case_name: str, row: dict[str, flo
     return path
 
 
-def test_theory_native_and_canonical_formula_replay_pass(tmp_path: Path) -> None:
-    row = _base_row()
-    force = _theory_force(row)
-    row["ion_drag_force_r_N"], row["ion_drag_force_z_N"] = force
-    history = _write_history(tmp_path, "formal_iondrag_theory_consistent", "caseP_30nm", row)
-
-    metrics = evaluate_history(history).metrics
-
-    assert metrics["native_saved_formula_replay_status"] == "PASS"
-    assert metrics["production_canonical_comparison_status"] == "PASS"
-    native_residual = metrics["native_saved_formula_force_scale_normalized_residual_max"]
-    assert isinstance(native_residual, float)
-    assert native_residual < 1.0e-13
-
-
-@pytest.mark.parametrize("case_kind", ["P", "A"])
-def test_image_saved_speed_authority_is_separate_from_canonical_comparison(
-    tmp_path: Path, case_kind: str
+@pytest.mark.parametrize(
+    "model",
+    [
+        "relative_flow_screened_collection_orbital_aggregate_ion_v1",
+        "electric_field_directed_image_orbital_sensitivity_v1",
+    ],
+)
+def test_current_formula_matches_independent_force_at_an_arbitrary_path(
+    tmp_path: Path, model: FormulaRevision
 ) -> None:
     row = _base_row()
-    force = _image_force(row, case_kind)
+    force = _theory_force(row) if model.startswith("relative_flow") else _image_force(row)
     row["ion_drag_force_r_N"], row["ion_drag_force_z_N"] = force
-    history = _write_history(
-        tmp_path,
-        "formal_iondrag_image_minimal_corrected",
-        f"case{case_kind}_30nm",
-        row,
+    history = _write_history(tmp_path / "measurements" / "unrelated_name.csv", row)
+    metrics = evaluate_history(
+        history, model_revision=model, correspondence="matched", force_scale_residual_limit=1.0e-12
     )
+    assert metrics["frozen_force_comparison_status"] == "PASS"
+    residual = metrics["force_scale_normalized_residual_max"]
+    assert isinstance(residual, float) and residual < 1.0e-13
+    assert metrics["trajectory_accuracy"] == "NOT_TESTED"
 
-    metrics = evaluate_history(history).metrics
 
-    assert metrics["native_saved_formula_replay_status"] == "PASS"
-    assert (
-        metrics["production_canonical_comparison_status"]
-        == "DOCUMENTED_MODEL_DEFINITION_DIFFERENCE"
+@pytest.mark.parametrize(
+    "correspondence,expected", [("matched", "FAIL"), ("analogous", "NOT_TESTED")]
+)
+def test_mismatched_force_preserves_raw_residual_with_declared_meaning(
+    tmp_path: Path, correspondence: Correspondence, expected: str
+) -> None:
+    row = _base_row()
+    row["ion_drag_force_r_N"], row["ion_drag_force_z_N"] = _image_force(row)
+    row["ion_drag_force_r_N"] *= 2.0
+    history = _write_history(tmp_path / "native.csv", row)
+    report = evaluate_history(
+        history,
+        model_revision="electric_field_directed_image_orbital_sensitivity_v1",
+        correspondence=correspondence,
+        force_scale_residual_limit=1.0e-12,
     )
-    canonical_residual = metrics["production_canonical_force_scale_normalized_residual_max"]
-    assert isinstance(canonical_residual, float)
-    assert canonical_residual > 1.0e-3
-    assert "differs" in str(metrics["model_definition_difference"])
+    assert report["frozen_force_comparison_status"] == expected
+    assert report["residual_within_allowance"] is False
+    residual = report["force_scale_normalized_residual_max"]
+    assert isinstance(residual, float) and residual > 1.0e-3
+
+
+@pytest.mark.parametrize("particle_id", [2**53 + 1, -(2**63), 2**63 - 1])
+def test_ion_diagnostic_preserves_exact_int64_particle_identity(
+    tmp_path: Path, particle_id: int
+) -> None:
+    row = _base_row()
+    row["particle_id"] = particle_id
+    row["ion_drag_force_r_N"], row["ion_drag_force_z_N"] = _image_force(row)
+    history = _write_history(tmp_path / "exact_id.csv", row)
+    report = evaluate_history(
+        history,
+        model_revision="electric_field_directed_image_orbital_sensitivity_v1",
+        correspondence="matched",
+        force_scale_residual_limit=1.0e-12,
+    )
+    assert report["worst_row"] == {"particle_id": particle_id, "time_s": row["time_s"]}
+
+
+@pytest.mark.parametrize("particle_id", [1.5, 2**63, -(2**63) - 1, math.inf])
+def test_ion_rejects_inexact_or_out_of_range_particle_identity(
+    tmp_path: Path, particle_id: float
+) -> None:
+    row = _base_row()
+    row["particle_id"] = particle_id
+    history = _write_history(tmp_path / "invalid_id.csv", row)
+    with pytest.raises(ValueError, match="particle_id"):
+        evaluate_history(
+            history,
+            model_revision="electric_field_directed_image_orbital_sensitivity_v1",
+            correspondence="matched",
+            force_scale_residual_limit=1.0e-12,
+        )
+
+
+def test_explicit_ion_csv_cli_selects_current_model_and_writes_report(tmp_path: Path) -> None:
+    row = _base_row()
+    row["particle_id"] = 2**53 + 1
+    row["ion_drag_force_r_N"], row["ion_drag_force_z_N"] = _image_force(row)
+    history = _write_history(tmp_path / "input.csv", row)
+    output = tmp_path / "force.json"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "tools.vv.comsol.evaluate_aggregate_ion_drag_parity",
+            str(history),
+            str(output),
+            "--model-revision",
+            "electric_field_directed_image_orbital_sensitivity_v1",
+            "--correspondence",
+            "matched",
+            "--force-scale-residual-limit",
+            "1e-12",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["frozen_force_comparison_status"] == "PASS"
+    assert report["model_correspondence"] == "matched"
+    assert report["worst_row"]["particle_id"] == 2**53 + 1

@@ -1,0 +1,200 @@
+{
+  "scope": "Existing report authored content/data refreshed in place; no publication or access change",
+  "report_authoring_status": "complete",
+  "retirement_goal_status": "not_complete",
+  "filesystem_cleanup": {
+    "status": "blocked_unexecuted",
+    "source": {
+      "path": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
+      "sha256": "sha256:cda1318dd4567ae284b77ae21eac8eaff53a440a94256cebe379aa62e42d9630"
+    },
+    "reported_automatic_approval_review_rejections": 3,
+    "reported_tool_reason": "blocked by policy",
+    "known_remaining_scope": {
+      "path": "evidence/brownian_wall_accuracy_extension_2026_10_10",
+      "files": 123,
+      "bytes": 153000925
+    },
+    "additional_obsolete_local_results": {
+      "classified_result_subtrees": 198,
+      "files_at_inventory": 78204,
+      "bytes_at_inventory": 4403705627,
+      "status": "Not attempted while the observed policy block is unresolved; inventory counts are not deleted bytes",
+      "scope_limit": "Other roots are classified software result subtrees from the inventory, not wholesale native experiment directories. The single-file rejection proves the concrete block; no claim that every other path was individually attempted."
+    },
+    "resume_condition": "Physical deletion must be permitted in the execution context. Recheck actual remaining files, owner-process liveness and protected descendants, remove the explicit result products, then independently verify residuals and native hashes. No new reader/alias/migration mechanism is required."
+  },
+  "app_id": "report:c9a85c07-6c83-42c2-9aa3-5d3037be4638",
+  "identity_presentation_filters_block_ids_preserved": true,
+  "protected_runtime": {
+    "official_verifier": "Protected Data app runtime verified (234 files).",
+    "independently_rehashed_files": 234,
+    "all_unchanged": true
+  },
+  "source_snapshot": {
+    "path": "report_app/src/data.json",
+    "sha256": "sha256:9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911",
+    "authorities": 22,
+    "queries": 10,
+    "buildStatus": "complete"
+  },
+  "build": {
+    "version": 1,
+    "kind": "separate-data-v1",
+    "html": {
+      "path": "index.html",
+      "sha256": "060a03c671f6549b101416adaf140374816a40ac541493d4d9644ac6e808ee0f",
+      "bytes": 2405599
+    },
+    "snapshot": {
+      "path": "snapshot.9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911.json",
+      "sha256": "9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911",
+      "bytes": 200440
+    },
+    "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "sourceSnapshotSha256": "9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911"
+  },
+  "official_build": "Installed Data prebuilt split build via existing WSL Linux Node; no source build, installation or protected changes",
+  "checks": [
+    {
+      "command": "uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q",
+      "result": "4 passed"
+    },
+    {
+      "command": "uv run --locked ruff check ../analysis/build_report_snapshot.py",
+      "result": "passed"
+    },
+    {
+      "command": "uv run --locked ruff format --check ../analysis/build_report_snapshot.py",
+      "result": "passed"
+    },
+    {
+      "command": "<codex-node> scripts/verify-protected-runtime.mjs",
+      "result": "234 verified"
+    },
+    {
+      "command": "<linux-node> <installed-data-plugin>/output_formats/html/scripts/data-app.mjs build --project-dir report_app --separate-data",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check -- <report-owned paths>",
+      "result": "passed"
+    }
+  ],
+  "rendered_checks": {
+    "browser": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "desktop": {
+      "width": 1440,
+      "height": 1000
+    },
+    "mobile": {
+      "viewport": 390,
+      "document": 375,
+      "tables": [
+        {
+          "label": "製品判断 table",
+          "width": 335,
+          "scrollWidth": 1398
+        },
+        {
+          "label": "物理catalog table",
+          "width": 335,
+          "scrollWidth": 1747
+        },
+        {
+          "label": "数値処理 table",
+          "width": 335,
+          "scrollWidth": 1553
+        },
+        {
+          "label": "module ownership table",
+          "width": 335,
+          "scrollWidth": 1312
+        },
+        {
+          "label": "利用者フロー table",
+          "width": 335,
+          "scrollWidth": 1666
+        },
+        {
+          "label": "result layers table",
+          "width": 335,
+          "scrollWidth": 1257
+        },
+        {
+          "label": "品質証拠 table",
+          "width": 335,
+          "scrollWidth": 1541
+        },
+        {
+          "label": "現行範囲 table",
+          "width": 335,
+          "scrollWidth": 947
+        }
+      ]
+    },
+    "source_inspection": [
+      {
+        "component": "今回取込んだ品質証拠と未取得事項",
+        "selected_source": null,
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      },
+      {
+        "component": "利用者フローごとの完成条件",
+        "selected_source": null,
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      },
+      {
+        "component": "native証拠と今回の設計snapshotを分ける",
+        "selected_source": "以前のsourceに束縛したA/P各40seed参照",
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      },
+      {
+        "component": "native証拠と今回の設計snapshotを分ける",
+        "selected_source": "以前のsourceに束縛した探索的局所差",
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      }
+    ],
+    "catalog_pagination": "forward and back passed",
+    "current_values": "Current receipt scopes, benchmark inventory/executed subset, blocked cleanup and prior A/P source selections checked against reviewed rows",
+    "internal_table_scroll": true,
+    "browser_errors": [],
+    "complete_marker": "Updating indicator cleared for report authoring; this does not mark the retirement goal complete",
+    "screenshot_record": {
+      "desktop-hero.png": "sha256:e21a7d88a7879324751a0d1a47cf95f6da7ec7ac9e35a98d1a2e836be411943e",
+      "desktop-inputs.png": "sha256:ba833253489b765624338fa8181eb875e450ce45ee7edd33cab10c08f28b34bd",
+      "desktop-evidence.png": "sha256:0a899f67eea3686a2ba857d356e4ba61f8c44daddcf43abae538db1624d3766b",
+      "mobile-hero.png": "sha256:4c8991373f772b2645af34e79253b3ba50db422370ee6eb6236898d931137746",
+      "mobile-inputs.png": "sha256:d0e31d239239adbe763e72bfe03f3bc5967fb89b816b9ad6c1365270d6de5695"
+    },
+    "full_receipt": {
+      "path": "solver/.artifacts/current_only_20261123/report/render_receipt.json",
+      "sha256": "sha256:52d0d2c44412e2974d190508a839fe3a67bf74532215ccf1d1551645fd2bf5fe"
+    }
+  },
+  "build_advisory": "DATA_NARRATIVE_DYNAMIC from shared Narrative wrapper; representative narrative and actual DataTable headers/cells rendered and checked, no Markdown pipe table authored",
+  "content_review": "Independent read-only review identified stale current-source labels and P10/P1 scope precision; affected copy/projections corrected",
+  "preview": "http://127.0.0.1:4176/",
+  "limits": [
+    "Report consumes source-bound conclusions and does not run a solver or V&V verdict.",
+    "Prior A/P40 seeds each and prior80 re-executions remain prior reference; no current-only A/P solver replay.",
+    "Physical cleanup is blocked and unexecuted; no remaining-byte deletion claim or retirement-goal completion.",
+    "No publication, sharing, offline export or whole-runtime interaction sweep performed."
+  ]
+}

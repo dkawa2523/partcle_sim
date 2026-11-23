@@ -563,7 +563,7 @@ def classify_inventory(
         "inventory",
     )
     if type(document["schema_version"]) is not int or document["schema_version"] != 2:
-        raise InventoryError("schema_version must be 2; declaration-only v1 is not certification")
+        raise InventoryError("schema_version must be integer 2")
     inventory_id = cast(str, _text(document["inventory_id"], "inventory_id"))
     source = _validate_source(document["source"])
     layers = _classify_layers(document["layers"], base_directory or Path.cwd())

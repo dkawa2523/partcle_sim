@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from chamber_particles.case_format import (
+    SCHEMA_VERSION,
     BoundaryData,
     DataBundle,
     FieldData,
@@ -265,13 +266,14 @@ def test_time_snapshot_field_requires_matching_strict_finite_axis(field: FieldDa
         content_hash(replace(_bundle(), fields=(field,)))
 
 
-def test_schema_v1_file_is_rejected_without_a_compatibility_reader(tmp_path: Path) -> None:
-    target = tmp_path / "legacy-v1.h5"
+def test_reader_rejects_an_unsupported_schema_version(tmp_path: Path) -> None:
+    target = tmp_path / "unsupported-schema.h5"
+    unsupported_version = SCHEMA_VERSION + 1
     write(target, _bundle())
     with h5py.File(target, "r+") as handle:
-        handle["meta/schema_version"][...] = np.asarray(1, dtype="<i4")
+        handle["meta/schema_version"][...] = np.asarray(unsupported_version, dtype="<i4")
 
-    with pytest.raises(ValueError, match="unsupported case schema version: 1"):
+    with pytest.raises(ValueError, match=f"unsupported case schema version: {unsupported_version}"):
         read(target)
 
 

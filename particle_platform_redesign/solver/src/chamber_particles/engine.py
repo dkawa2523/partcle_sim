@@ -1112,9 +1112,7 @@ def _validate_configuration(case: SimulationCase) -> None:
             "ou_langevin with backend=cpu only"
         )
     if spec.solver.event.corner_policy != "priority_then_combined_normal_v1":
-        raise EngineError(
-            "the Stage 1A engine supports corner_policy=priority_then_combined_normal_v1 only"
-        )
+        raise EngineError("corner_policy must be priority_then_combined_normal_v1")
     coordinate_pair = (case.data.coordinate_system, spec.motion.mode)
     valid_pairs = {
         ("cartesian_xy", "cartesian_xy"),
@@ -1349,7 +1347,7 @@ def _validate_table_starts(
             if classification != "inside":
                 particle_id = int(schedule.particle_id[index])
                 raise EngineError(
-                    f"P05 table particle {particle_id} must start strictly inside the particle domain"
+                    f"table particle {particle_id} must start strictly inside the particle domain"
                 )
 
 

@@ -25,7 +25,7 @@ COMSOLとの対応は外部検証の一つで、物理的正しさそのもの�
 | source別の既存性能資格 | [parallel execution](solver/docs/parallel_execution_plan.md) |
 
 矛盾は所有者で解決し、例外やfallbackで隠さない。式・schema・revision一覧を本書へ複製しない。
-以前の詳細仕様と採否はGit履歴`ade0c8e`とimmutable evidenceへ保持する。
+以前の詳細仕様と採否はGit履歴へ保持する。native観測・実験記録と現行の実行証拠は、旧software生成物と区別して保存する。
 
 ## 利用経路と責務
 

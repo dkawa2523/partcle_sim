@@ -3,31 +3,18 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 from pathlib import Path
-from types import ModuleType
 from typing import cast
 
 import pytest
-
-TOOL = Path(__file__).resolve().parents[1] / "meaning_preflight.py"
-
-
-def _load_tool() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("comsol_meaning_preflight", TOOL)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-meaning_preflight = _load_tool()
-LAYERS = meaning_preflight.LAYERS
-InventoryError = meaning_preflight.InventoryError
-build_preflight = meaning_preflight.build_preflight
-classify_inventory = meaning_preflight.classify_inventory
-require_supported_comparison = meaning_preflight.require_supported_comparison
+from tools.vv.comsol.meaning_preflight import (
+    LAYERS,
+    InventoryError,
+    build_preflight,
+    classify_inventory,
+    require_supported_comparison,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -366,10 +353,11 @@ def test_unverifiable_receipt_stops_before_any_output(tmp_path: Path, problem: s
     assert not output.exists()
 
 
-def test_old_inventory_cannot_certify_current_execution() -> None:
+@pytest.mark.parametrize("version", [None, True, 1, 3, "2"])
+def test_inventory_requires_the_current_integer_schema(version: object) -> None:
     inventory = _inventory()
-    inventory["schema_version"] = 1
-    with pytest.raises(InventoryError, match="declaration-only v1"):
+    inventory["schema_version"] = version
+    with pytest.raises(InventoryError, match="schema_version must be integer 2"):
         classify_inventory(inventory)
 
 

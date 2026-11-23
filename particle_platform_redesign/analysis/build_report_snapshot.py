@@ -33,12 +33,16 @@ AUTHORITY_PATHS = (
     "architecture_proposal.md",
     "implementation_plan.md",
     "vv_methodology.md",
+    "data_quality_assessment.md",
     "solver/pyproject.toml",
     "solver/README.md",
     "solver/docs/case_format_v3.md",
     "solver/docs/result_format_v4.md",
     "solver/docs/physics_models.md",
     "solver/docs/numerics.md",
+    "solver/docs/parallel_execution_plan.md",
+    "solver/tests/performance/README.md",
+    "solver/tools/vv/comsol/README.md",
     "solver/src/chamber_particles/physics/catalog.py",
     "solver/src/chamber_particles/time_grid.py",
     "solver/src/chamber_particles/lifecycle.py",
@@ -60,6 +64,7 @@ COMPONENT_IDS = {
         "boundary-numerics",
         "single-loop",
         "complexity",
+        "dataset-role",
     ],
     "physics_scope": [
         "executive-decision",
@@ -160,6 +165,11 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "area": "native_boundary",
             "decision": "Live COMSOL and developer V&V remain external",
             "reason": "Core never imports native adapters or comparisons",
+        },
+        {
+            "area": "native_inputs",
+            "decision": "Charge: explicit CSV/current equation; ion force: CSV/current revision and matched or analogous",
+            "reason": "Reference meaning and allowance are explicit; no package-folder inference or historical equation aliases",
         },
         {
             "area": "result_reuse",
@@ -349,7 +359,7 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     ]
     rows = {
         "case_audit": _unavailable(
-            "No current assessment input supplied; historical 12-case rows are not current platform qualification."
+            "No current assessment input supplied; prior source-bound evidence is not current platform qualification."
         ),
         "trajectory_divergence": _unavailable(
             "No current trajectory comparison input supplied; independent Brownian paths are not paired errors."

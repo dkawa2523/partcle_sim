@@ -1,0 +1,111 @@
+{
+  "scope": "Current execution scopes only, not overall retirement completion or a new A/P campaign",
+  "core": {
+    "tests": 1228,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 679.713,
+    "receipt": {
+      "path": "solver/.artifacts/current_only_20261123/core_scenarios_clean.xml",
+      "sha256": "sha256:29f5e5c054c8165c999628e42b822d29a3277c34d33c47b6989a1304064da403"
+    }
+  },
+  "external": {
+    "tests": 156,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 39.064,
+    "receipt": {
+      "path": "solver/.artifacts/current_only_20261123/external_final.xml",
+      "sha256": "sha256:b06cf9ec1211bfbbe1a80a28f0836a1809b80a48b4225ab9de5a3ca2fe939a22"
+    }
+  },
+  "wheel": {
+    "windows": {
+      "receipt": {
+        "path": "solver/.artifacts/current_only_20261123/clean_wheel_windows.json",
+        "sha256": "sha256:a1223e242afdb54e9702f6abcc9132a7877c3191df02bcd7df799585f71dcdf0"
+      },
+      "wheel_sha256": "0b8f7122f9b2a72e2f1db8aaaa0791529d8cf21253467b3ebc6b41dd4b2b4b2d",
+      "python_files": 49,
+      "metadata_matches": true,
+      "readme_sha256": "1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917"
+    },
+    "linux": {
+      "receipt": {
+        "path": "solver/.artifacts/current_only_20261123/clean_wheel_linux.json",
+        "sha256": "sha256:e0e0b4456ea02fcfbc94adab151abaaa4b5a75940a569cf798b98c3905d838a2"
+      },
+      "wheel_sha256": "0b8f7122f9b2a72e2f1db8aaaa0791529d8cf21253467b3ebc6b41dd4b2b4b2d",
+      "python_files": 49,
+      "metadata_matches": true,
+      "readme_sha256": "1505eb8be742c4f9a4992fc0d7df363dd3df26fa6a631757008baedb7ac3a917"
+    }
+  },
+  "installed_workflow": {
+    "windows": {
+      "receipt": {
+        "path": "solver/.artifacts/current_only_20261123/installed_workflow_windows.json",
+        "sha256": "sha256:c3a2496f9f5aeb1bb91e649134eae70b057e771120b3022e88f336d3849bbb3f"
+      },
+      "commands": [
+        "models",
+        "init",
+        "inputs import-csv",
+        "inputs cache",
+        "create",
+        "check",
+        "run",
+        "inspect",
+        "analyze",
+        "export",
+        "view",
+        "inputs electrostatic check",
+        "inputs electrostatic build"
+      ],
+      "examples": "five passed",
+      "own_csv_first_source": "analytic field trajectory and hit verified"
+    },
+    "linux": {
+      "receipt": {
+        "path": "solver/.artifacts/current_only_20261123/installed_workflow_linux.json",
+        "sha256": "sha256:4db89a2fab09275776257522f89c4f19408ddef1260af29bc0bc9153ed35e2ee"
+      },
+      "commands": [
+        "models",
+        "init",
+        "inputs import-csv",
+        "inputs cache",
+        "create",
+        "check",
+        "run",
+        "inspect",
+        "analyze",
+        "export",
+        "view",
+        "inputs electrostatic check",
+        "inputs electrostatic build"
+      ],
+      "examples": "five passed",
+      "own_csv_first_source": "analytic field trajectory and hit verified"
+    }
+  },
+  "assets_review": {
+    "path": "solver/.artifacts/current_only_20261123/final_assets_review.json",
+    "sha256": "sha256:f4ec421110d302b61bea4f35de31699e6690c310ba1fb9ecc2028817e6015c79"
+  },
+  "proposed_open_improvements": {
+    "path": "solver/evidence/current_only_2026_11_23/report_handoff_review.json",
+    "sha256": "sha256:70cdf6c1b7aa5ccb494ad55dae6d81d843f393868bb9bcf3b05c8bfbf4dd853d"
+  },
+  "physical_cleanup": {
+    "path": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
+    "sha256": "sha256:cda1318dd4567ae284b77ae21eac8eaff53a440a94256cebe379aa62e42d9630"
+  },
+  "root_final_execution": {
+    "path": "solver/evidence/current_only_2026_11_23/final_execution.json",
+    "sha256": "sha256:683f94f909c83a7577932f6f41d817a279ee1b74a41a3d0ec2d4f90ffbdf7f12"
+  }
+}

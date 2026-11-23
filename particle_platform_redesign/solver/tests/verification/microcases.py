@@ -113,7 +113,6 @@ def _c01() -> MicrocaseDefinition:
         [[velocity.tolist()] for _ in times],
         [[0.0] for _ in times],
     )
-    expected["activation_package"] = "P04"
     expected["method_acceptance"] = {
         "rk4_fixed": {
             "position_atol_m": 1.0e-13,
@@ -147,7 +146,6 @@ def _c02() -> MicrocaseDefinition:
     )
     expected.update(
         {
-            "activation_package": "P06",
             "derived": {"rate_s_inverse": 2.0, "tau_s": tau},
             "method_acceptance": {
                 "rk4_fixed": {
@@ -194,7 +192,6 @@ def _c03() -> MicrocaseDefinition:
     )
     expected.update(
         {
-            "activation_package": "P06_rk4_and_P11_exponential_midpoint",
             "derived": {
                 "rate_s_inverse": 4.0,
                 "tau_s": tau,
@@ -284,7 +281,6 @@ def _c04() -> MicrocaseDefinition:
     )
     expected.update(
         {
-            "activation_package": "P06",
             "derived": {
                 "force_N": [force.tolist(), force.tolist()],
                 "acceleration_m_s2": [item.tolist() for item in accelerations],
@@ -358,7 +354,6 @@ def _c05() -> MicrocaseDefinition:
     )
     expected.update(
         {
-            "activation_package": "P06",
             "derived": {"acceleration_m_s2": [item.tolist() for item in accelerations]},
             "method_acceptance": {
                 "rk4_fixed": {
@@ -417,7 +412,6 @@ def _c06() -> MicrocaseDefinition:
         "format_version": 2,
         "case_id": "C06",
         "oracle_revision": "p1_affine_and_mapped_q1_v1",
-        "activation_package": "P03",
         "field_probes": [
             {
                 "field": "p1_affine",
@@ -480,7 +474,6 @@ def _c07() -> MicrocaseDefinition:
     expected = _event_expected(
         "C07",
         "plane_first_hit_v1",
-        "P05",
         events=[
             {
                 "particle_id": 701,
@@ -545,7 +538,6 @@ def _c08() -> MicrocaseDefinition:
     expected = _event_expected(
         "C08",
         "surface_departure_and_reimpact_v1",
-        "P07",
         events=[
             {
                 "particle_id": 801,
@@ -645,7 +637,7 @@ def _c09() -> MicrocaseDefinition:
         }
         for index, time in enumerate(hit_times)
     ]
-    expected = _event_expected("C09", "thin_gap_residual_time_v1", "P07", events)
+    expected = _event_expected("C09", "thin_gap_residual_time_v1", events)
     expected["final"] = {
         "time_s": 21.0 * gap / 4.0,
         "position_m": [gap / 4.0, height / 2.0],
@@ -731,7 +723,6 @@ def _c10() -> MicrocaseDefinition:
     expected = _event_expected(
         "C10",
         "nonorthogonal_corner_priority_and_combined_normal_v1",
-        "P07",
         events=[
             {
                 "particle_id": 1001,
@@ -938,14 +929,12 @@ def _trajectory_expected(
 def _event_expected(
     case_id: str,
     revision: str,
-    activation: str,
     events: list[dict[str, Any]],
 ) -> dict[str, Any]:
     return {
         "format_version": 2,
         "case_id": case_id,
         "oracle_revision": revision,
-        "activation_package": activation,
         "boundary_events": events,
         "acceptance": {
             "requested_geometry_rtol": 1.0e-12,

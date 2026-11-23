@@ -1,4 +1,4 @@
-"""Reproducible, non-gating end-to-end baseline for the P06 reference engine.
+"""Machine-local proposal, material-event and output cost measurements.
 
 Run this module directly through uv; it is intentionally not a pytest test.  The
 baseline exercises only the three public APIs and reports machine-local numbers
@@ -493,7 +493,7 @@ def _report(
         "median"
     ]
     return {
-        "baseline": "p06_reference_end_to_end_v4",
+        "benchmark": "proposal_event_output_cost_v1",
         "captured_at_utc": datetime.now(UTC).isoformat(),
         "non_gating": True,
         "conditions": {
@@ -522,10 +522,6 @@ def _report(
             "rk4_material_interior_frame_elapsed_ratio_vs_no_frames": (
                 rk4_material_frame_elapsed / rk4_material_elapsed
             ),
-        },
-        "revision_3b_metrics": {
-            "available": True,
-            **measurements["rk4_material_hits"]["event_refinement"],
         },
         "trace_memory": _trace_memory_report(
             arguments.particles,

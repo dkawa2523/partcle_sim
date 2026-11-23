@@ -1,0 +1,153 @@
+{
+  "review_role": "Independent read-only scientific-necessity and claim-scope review of current-only retirement",
+  "reviewer": "/root/retirement_science_review",
+  "reviewed_at_utc": "2026-11-23T05:49:32.141376+00:00",
+  "branch": "cleanup/current-only-platform",
+  "baseline_head": "75100e74f1243b527e065c9e6a68121221408b39",
+  "worktree": "Shared dirty worktree; source hashes below bind this review. No production, tests, documentation, archive, raw-data or environment edits by this reviewer.",
+  "outcome": "PASS for reviewed scientific retirement changes after required corrections; no remaining mandatory finding in this scope",
+  "scope": [
+    "Core numerical changes versus baseline, unused dense-enclosure retirement and retained independent stochastic/event oracles",
+    "Current local charge/ion CSV semantics, strict identities, residual meaning and independence of formula checks",
+    "P1 nodal/connectivity/probe export and lossless transfer of its current scientific role",
+    "Native terminal status versus unobserved boundary cause; current saved-population public-result path",
+    "Benchmark consolidation: C03 analytic role, P19 actual allocation ownership and distinct transient memory bound",
+    "Current candidate runs versus saved native observations; no false claim of newly executed native solves"
+  ],
+  "instructions_used": [
+    "Repository root AGENTS.md and particle_platform_redesign/AGENTS.md",
+    ".agents/skills/validate-comsol-trajectories/SKILL.md: local equation, practical comparison, qualified parity and physical validity remain separate claims"
+  ],
+  "required_findings_resolved": [
+    {
+      "id": "SCI-1",
+      "severity": "required",
+      "problem": "The generalized charge CSV API accepted zero exported single-charge potential increment and returned infinite diagnostic values after division by zero.",
+      "root_cause": "The earlier case-bound primitive assumption had no input check at the new arbitrary-CSV boundary.",
+      "before_probe": "Current independent test row with local_single_charge_surface_potential_increment_V=0 returned finite=False and two inf diagnostics. This was a FAIL, not a false PASS.",
+      "correction": "The local API requires a positive finite increment; both CSV CLIs serialize with allow_nan=False.",
+      "reviewer_recheck": "Original probe now raises ValueError before report generation; positive/zero/negative cases covered in passing focused tests."
+    },
+    {
+      "id": "SCI-2",
+      "severity": "required",
+      "problem": "Both frozen-state tools parsed particle IDs as float64; valid int64 9007199254740993 was reported as 9007199254740992, and fractional IDs could silently truncate.",
+      "root_cause": "Identity and physical scalar columns shared one float conversion and storage path.",
+      "correction": "One small shared CSV reader parses exact Decimal integer identities into int64 and stores physical values separately. Noninteger/out-of-range IDs are rejected.",
+      "reviewer_recheck": "Original 9007199254740993 probe now preserves the exact ID. Reviewed integer boundary/fraction rejection tests pass."
+    },
+    {
+      "id": "SCI-3",
+      "severity": "required",
+      "problem": "XY generated report used the historical hardcoded phrase fresh unsaved COMSOL, although this execution reused saved native observations.",
+      "root_cause": "The evaluator described the original native producer rather than distinguishing reference acquisition from current candidate execution.",
+      "correction": "Source and regenerated report now say fresh public solver runs against supplied native observations. Original native producer lineage remains bound separately.",
+      "reviewer_recheck": {
+        "report": ".artifacts/current_only_external_20261123/xy_reviewed/comparison_summary.json",
+        "scientific_status": "PASS",
+        "scenarios": 7,
+        "tested_scope": "fresh public solver runs against supplied native observations of unsaved COMSOL 6.4 Cartesian XY point-particle microcases: ballistic, constant electric acceleration, linear relaxation, exact surface-origin departure, specular, Stick, and Freeze/hold",
+        "evaluator_hash_matches_current_source": true
+      }
+    }
+  ],
+  "explanation_improvement_verified": "Charge residual definition explicitly states abs(predicted-exported)/max(abs(ion_rate)+abs(electron_rate),1 s^-1); the low-current absolute floor is exposed without changing the equation or allowance.",
+  "reviewer_executed_checks": [
+    {
+      "command": "uv run --locked python .artifacts/retire_current_core_ast.py",
+      "exit_code": 0,
+      "result": "7 changed core module ASTs identical to baseline after exact removal of two unused functions and enumerated diagnostic/docstring changes; no math/RNG/event/schema modification"
+    },
+    {
+      "command": "uv run --locked pytest <four focused external files> -q",
+      "exit_code": 1,
+      "result": "Collection import errors for checkout-local tools/tests. Correct documented module entry was used next; this is not a failed scientific test."
+    },
+    {
+      "command": "uv run --locked python -m pytest tools/vv/comsol/tests/test_aggregate_charge_parity.py tools/vv/comsol/tests/test_aggregate_ion_drag_parity.py tools/vv/comsol/tests/test_prepare_comsol_p1_tables.py tools/vv/comsol/tests/test_saved_population_evaluation.py -q",
+      "phase": "before review corrections",
+      "exit_code": 0,
+      "passed": 30,
+      "pytest_seconds": 18.36
+    },
+    {
+      "command": "Same four-file python -m pytest command after review corrections",
+      "exit_code": 0,
+      "passed": 46,
+      "pytest_seconds": 9.75
+    },
+    {
+      "command": "Temporary independent malformed-phi1 and exact-int64 probes using existing scalar-algebra fixture rows",
+      "before": "Reproduced SCI-1 and SCI-2",
+      "after": "Zero phi1 rejected with ValueError and exact 9007199254740993 preserved"
+    },
+    {
+      "check": "Regenerated XY report current evaluator source SHA-256 and claim scope",
+      "result": "Current source hash matches generated report; supplied saved native observations explicitly separated from fresh candidate runs"
+    }
+  ],
+  "preserved_scientific_roles_reviewed": [
+    "Current Kramers finite-volume reference imports no production OU/tree/event implementation; planar/radial arrivals and mirrored joint-law tests remain.",
+    "C03 independent closed form, wide relaxation range and variable-coefficient convergence remain separate from same-engine migration/payload identity.",
+    "P19 current public memory plan accounting is supplemented by existing verification that counts actual nonempty local-range allocation roots; B03 separate transient NumPy bound remains.",
+    "P1 exported sectionwise connectivity is one-based and exact; arbitrary nonempty realized source count is used. Affine probes have scalar analytic expected values. Unsupported unit/time/cell field meaning is rejected before publication.",
+    "Native Freeze, Stick and unknown disappearance remain different outcomes. Axis/wall coordinates never invent a terminal cause; terminal-time qualification and observation brackets remain distinct.",
+    "Meaning preflight and matched-trajectory qualification gates were not weakened; their edits are diagnostic wording only.",
+    "Analogous ion-model comparisons retain raw residuals with NOT_TESTED parity. Frozen formula matches do not certify trajectories or physical validity."
+  ],
+  "peer_evidence_read_not_reexecuted_by_reviewer": {
+    "core_targeted_and_brownian_records": ".artifacts/retire_current_core_20261123.json",
+    "microcase_physical_identity_record": ".artifacts/retire_current_microcases_20261123.json",
+    "benchmark_execution_and_C03_independent_oracle_record": ".artifacts/current_only_bench_20261123/receipt.json",
+    "external_final_suite": {
+      "report": ".artifacts/current_only_external_20261123/external_reviewed.xml",
+      "tests": 151,
+      "failures": 0,
+      "errors": 0,
+      "pytest_report_seconds": 65.267
+    }
+  },
+  "limits": [
+    "This is not an independent rerun of the full solver suite, all performance matrices, Vigus cohort or a native COMSOL solve.",
+    "This review does not newly certify continuous state-dependent SDE order, physical adhesion/flux, independent field mesh convergence or physical device prediction.",
+    "Historical native measurements can remain valid references; candidate migration identity alone is not scientific truth. Whole-project integration and the separate native-asset preservation audit are root-owned.",
+    "Physical deletion of old untracked Brownian candidate HDF5 files was blocked by automatic policy outside this review; no bypass or claim that they were removed is made."
+  ],
+  "source_and_evidence_sha256": {
+    "src/chamber_particles/case.py": "887295525dcc2f4c7e4dca2aad10735817ba70dfef958a0c08235d5d2e00d4b6",
+    "src/chamber_particles/boundaries.py": "85a694fb66d0dafa8b5233ec4712ea26067f2c7918b674714ee552bc95a0dbe2",
+    "src/chamber_particles/engine.py": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d",
+    "src/chamber_particles/fields.py": "c68f66aae101eec2e46ee33c76f69365a4cecf4de2f58f2e0a08076317498980",
+    "src/chamber_particles/integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+    "src/chamber_particles/physics/catalog.py": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b",
+    "src/chamber_particles/transport.py": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce",
+    "src/chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+    "src/chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+    "src/chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "src/chamber_particles/rng.py": "8a23d62b65c0dae3651f3ff478d08d4305f73ed9e2580317df8f4122c1142920",
+    "tools/vv/comsol/_frozen_state_csv.py": "f11ce84abad5d7fe24ef128c89fc92ad450828a89090747c7955f151eae673fd",
+    "tools/vv/comsol/evaluate_aggregate_charge_parity.py": "ec6fa90a900733f344bf4c8d710e380acf4bf44909a37186710e6169a4dc4a32",
+    "tools/vv/comsol/evaluate_aggregate_ion_drag_parity.py": "458ff6a8e8b91e6c44e5517c8ddc6ae2107091d9119f63a0f70f895a8cf5cf16",
+    "tools/vv/comsol/prepare_comsol_p1_tables.py": "b928b60c963d199171dbe43e03d8faeccff3bfb00c4f4909bc193fadd53bf4d1",
+    "tools/vv/comsol/evaluate_saved_population.py": "56591938d380a96d764738afb099c52ad11a9f6fa70003c65f99c37ec41e09d5",
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "0798a8ade022a194372112e84f44c45eb962913bf83cbda32cc09ca822d55f09",
+    "tools/vv/comsol/meaning_preflight.py": "1597c47957462c8725f40536bb36341de892bedb280b34b0e9010fa6a6e09c5b",
+    "tools/vv/comsol/evaluate_xy_minimal_suite.py": "a16e2e7e71ee0368856d05168c8a78cea9588279d78324c2e18ba8a39ccbb921",
+    "tools/vv/comsol/tests/test_aggregate_charge_parity.py": "efd4710bc83de21627568ee990a0277f6470f285c21fecaf1d4d2faf1d5634b9",
+    "tools/vv/comsol/tests/test_aggregate_ion_drag_parity.py": "d00753ae58a6bd1678ccf09793e9c9f4e96478674a7d00f55d42d7ab9d75ae51",
+    "tools/vv/comsol/tests/test_prepare_comsol_p1_tables.py": "ba66a85537f648e5e87b4afd560452fa3f16fbbbcab0440d4a2e31f4a1053fd5",
+    "tools/vv/comsol/tests/test_saved_population_evaluation.py": "9a14850927c120c0b3988d73b7ec4fddf296ee6ba95dafed8854640c902cbcde",
+    "tests/verification/kramers_reference.py": "5d4f595e642de3e881ab9d6b4fd18d4abd398a6399a5c5147b6c83de162603be",
+    "tests/verification/test_workspace_ownership.py": "f03dbaacf219c44cafd96c57f51a82b64dfb0e66164abc1ba6d0482300d43f67",
+    "tests/verification/microcases.py": "a068c995201e52fcf3a8ea917344157bc1fca26f90cbe64a3b897b41558da74c",
+    "tests/performance/p10_compiled.py": "73f7b939d1de71c05f046e486280dd858b35d67a5a59a8479fa43cdadfa2c09b",
+    "tests/performance/p19l_local_applicability.py": "81223e824a17c9ead48cbcf149fb51bea5872e1c6af37c921105ffaee5c1aa3d",
+    "tests/performance/b03_characterization.py": "0fc4a2e0785d37fe180db25bd3764e216ccae44b7e15792af253da50a6acdb05",
+    ".artifacts/retire_current_core_20261123.json": "c9c4b96584e9d737db468216af25a6e5382f1c8611d510244455736b56c5caa9",
+    ".artifacts/retire_current_microcases_20261123.json": "d5049cc2012a1cc26c26dbe647039dac9a33d2643e37a99b001820dee82538cb",
+    ".artifacts/current_only_bench_20261123/receipt.json": "4a16f5545ae115b78dfed8d2f095b8d0a0ffbaab5813d845442c54391ad2d6b5",
+    ".artifacts/current_only_bench_20261123/relaxation_input_correspondence.json": "5d1242b56c45d9b1b94739f6cbd1785f597ff82c1aaca6e0847a83ac5439fbbe",
+    ".artifacts/current_only_external_20261123/xy_reviewed/comparison_summary.json": "b668297d87ed9692b466bda2d48094316e8623f39a0d975697192bfe4cb71f77",
+    ".artifacts/current_only_external_20261123/external_reviewed.xml": "a9025bb6c979aad24eea058740461e41aa7776127360b4498cea719d7d50c57a"
+  }
+}

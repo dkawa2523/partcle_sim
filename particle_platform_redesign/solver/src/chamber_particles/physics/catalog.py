@@ -1631,7 +1631,7 @@ def _resolve_charge(model: Mapping[str, object] | None) -> ChargePlan | None:
             "physics.charge revision must be oml_stationary_maxwellian_debye_huckel_v1 or oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1 or aggregate_relative_drift_regularized_two_current_v1 or aggregate_relative_drift_regularized_three_current_v1"
         )
     if _text(model["applicability"], "physics.charge.applicability") != "error":
-        raise PhysicsConfigurationError("P15 supports physics.charge applicability=error only")
+        raise PhysicsConfigurationError("physics.charge applicability must be error")
     return PlasmaContinuousChargePlan(
         revision=revision,
         electron_number_density_field=_name(
@@ -1741,7 +1741,7 @@ def _resolve_stokes_cunningham_drag(model: Mapping[str, object]) -> StokesCunnin
             "stokes_cunningham revision must be stokes_cunningham_allen_raabe_air_v1"
         )
     if _text(model["applicability"], "physics.drag.applicability") != "error":
-        raise PhysicsConfigurationError("P06-S supports physics.drag applicability=error only")
+        raise PhysicsConfigurationError("physics.drag applicability must be error")
     return StokesCunninghamDragPlan(
         gas_velocity_field=_name(model["gas_velocity_field"], "gas_velocity_field"),
         gas_density_field=_name(model["gas_density_field"], "gas_density_field"),
@@ -2259,7 +2259,7 @@ def _resolve_electric(model: Mapping[str, object] | None) -> ElectricPlan | None
         return None
     revision = _text(model.get("revision"), "physics.electric.revision")
     if _text(model["model"], "physics.electric.model") != "coulomb":
-        raise PhysicsConfigurationError("P06 supports only electric model=coulomb")
+        raise PhysicsConfigurationError("physics.electric model must be coulomb")
     if revision not in {"electric_coulomb_v1", "electric_coulomb_charge_cap_v1"}:
         raise PhysicsConfigurationError("unsupported Coulomb model revision")
     cap = (
@@ -2276,7 +2276,7 @@ def _resolve_gravity(
     if model is None:
         return None
     if _text(model["model"], "physics.gravity_buoyancy.model") != "standard":
-        raise PhysicsConfigurationError("P06 supports only gravity_buoyancy model=standard")
+        raise PhysicsConfigurationError("physics.gravity_buoyancy model must be standard")
     if (
         _text(model["revision"], "physics.gravity_buoyancy.revision")
         != "gravity_buoyancy_standard_v1"

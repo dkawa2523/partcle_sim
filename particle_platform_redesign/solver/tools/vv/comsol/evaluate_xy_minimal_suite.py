@@ -1,7 +1,7 @@
-"""Evaluate fresh COMSOL Cartesian XY microcases through the public solver API.
+"""Evaluate supplied COMSOL Cartesian XY microcases through the public solver API.
 
-The COMSOL runner creates deliberately small, unsaved models.  This evaluator
-normalizes their time histories, builds an independently specified candidate
+The COMSOL runner can create small, unsaved native models. This evaluator
+normalizes supplied time histories, builds an independently specified candidate
 case, and compares both solvers with closed-form references.  It is external
 V&V tooling: no COMSOL-specific branch is imported by the solver core.
 """
@@ -781,7 +781,8 @@ def _build_summary(
         "evaluator_sha256": _sha256(Path(__file__)),
         "scientific_status": "PASS" if all_numeric and all_semantic and finest_numeric else "FAIL",
         "tested_scope": (
-            "fresh unsaved COMSOL 6.4 Cartesian XY point-particle microcases: ballistic, "
+            "fresh public solver runs against supplied native observations of unsaved "
+            "COMSOL 6.4 Cartesian XY point-particle microcases: ballistic, "
             "constant electric acceleration, linear relaxation, exact surface-origin departure, "
             "specular, Stick, and Freeze/hold"
         ),

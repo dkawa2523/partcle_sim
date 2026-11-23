@@ -115,6 +115,16 @@ def _position(receipt: dict[str, object]) -> dict[str, object]:
     return cast(dict[str, dict[str, object]], receipt["metrics"])["position_difference_m"]
 
 
+def test_trajectory_view_rejects_duplicate_identity_columns(tmp_path: Path) -> None:
+    path = tmp_path / "duplicate_identity.csv"
+    path.write_text(
+        "particle_id,time_s,r_m,z_m,lifecycle,particle_id\n1,0,0.1,0.02,active,2\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="unique identity/time column headers"):
+        read_matched_trajectories(path, path)
+
+
 @pytest.mark.parametrize(
     ("xy", "coordinate_system", "physical_facets", "axis_facets"),
     [(False, "axisymmetric_rz", 3, 1), (True, "cartesian_xy", 4, 0)],

@@ -13,6 +13,7 @@ import csv
 import hashlib
 import json
 import math
+from collections import Counter
 from dataclasses import dataclass
 from itertools import chain, pairwise
 from pathlib import Path
@@ -190,10 +191,14 @@ def _read_csv(level: Record, base: Path, ids: np.ndarray, times: np.ndarray) -> 
     selected_times = {float(time): index for index, time in enumerate(times)}
     with path.open(encoding="utf-8-sig", newline="") as stream:
         reader = csv.DictReader(stream)
+        names = reader.fieldnames or ()
+        duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
+        if duplicates:
+            raise ValueError(f"{path}: duplicate column names: {duplicates}")
         required = {*columns, mapping["particle_id"], mapping["time"], mapping["lifecycle"]}
         if support_column is not None:
             required.add(support_column)
-        if not required.issubset(reader.fieldnames or ()):
+        if not required.issubset(names):
             raise ValueError(f"{path}: missing mapped CSV columns")
         for row in reader:
             pid, time = int(row[mapping["particle_id"]]), float(row[mapping["time"]])
@@ -560,7 +565,7 @@ def characterize(series_path: Path) -> Record:
 def _load_report(path: Path, kind: str) -> Record:
     report = _json(path)
     if report.get("tool_revision") != TOOL_REVISION or report.get("report_kind") != kind:
-        raise ValueError("report kind or evaluator revision is incompatible; no historical shim")
+        raise ValueError("report kind or evaluator revision does not match the current tool")
     return report
 
 

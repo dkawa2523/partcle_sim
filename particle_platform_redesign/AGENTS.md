@@ -351,16 +351,13 @@ bug修正では症状ごとではなく、原因を表す最小回帰caseを一�
 
 ## 14. 古い処理を残さない
 
-- `legacy`、`new`、`v2`、`temporary`という並列production経路を作らない。
-- call siteを新経路へ切り替えるchange内で旧経路を削除する。
-- commented-out code、到達不能fallback、未使用feature flagを残さない。
-- 内部APIへcompatibility shimを置かない。Git履歴をarchiveとする。
-- stale test、fixture、config、文書も同じchangeで削除する。
-- 削除後は`rg`とimport-linterで旧symbolへの参照がないことを確認する。
-- 二実装の比較が必要なら片方をverificationまたは外部benchmarkに置き、production dispatchにしない。
-- 現行仕様だけを受理する。過去schemaを読む互換reader、移行用dispatch、旧入口aliasは提供しない。
+現行の入口・形式・実装を一つの責務へ束ね、置換時は必要な役割をその所有者へ移す。
+旧経路と専用の設定・呼出側・検査・fixture・説明・生成結果を同じ変更で撤去し、互換readerやaliasを残さない。
+名前や静的未参照だけで判断せず、公開入口、登録・動的利用、実際の入力と実行から必要性を確かめる。
 
-必要な役割は現行の所有者へ移し、呼出側・設定・検証・説明まで同時に更新する。撤去の経緯は作業記録へ置く。
+独立した科学oracle、native観測、実験記録、外部入力と実行環境は、廃止softwareの出力と区別する。
+削除後は現行の公開操作と必要な科学的性質を実行し、残存と誤削除を確認する。
+撤去の経緯・旧sourceは作業記録とGit履歴へ置く。
 
 ## 15. 診断と出力
 

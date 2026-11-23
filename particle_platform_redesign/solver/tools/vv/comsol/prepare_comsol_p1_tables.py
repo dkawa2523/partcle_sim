@@ -17,34 +17,19 @@ from tempfile import TemporaryDirectory
 
 import numpy as np
 
-from chamber_particles.case_format import DataBundle, P1TriLayout, RealizedTableSource, read
+from chamber_particles.case_format import P1TriLayout, RealizedTableSource, read
 from chamber_particles.fields import (
-    PreparedFieldSet,
     RequiredFieldMetadata,
     prepare_required_fields,
 )
 
-FIELD_NAMES = (
-    "gas_velocity",
-    "gas_temperature",
-    "gas_density",
-    "gas_dynamic_viscosity",
-    "electric_field",
-)
-
-
-def _prepared_fields(data: DataBundle) -> PreparedFieldSet:
-    fields = {field.name: field for field in data.fields}
-    requirements = {
-        name: RequiredFieldMetadata(
-            unit=fields[name].unit,
-            components=fields[name].components,
-            stored_basis=fields[name].stored_basis,
-            value_constraint="finite",
-        )
-        for name in FIELD_NAMES
-    }
-    return prepare_required_fields(data, requirements)
+FIELD_REQUIREMENTS = {
+    "gas_velocity": RequiredFieldMetadata("m/s", ("r", "z"), "axisymmetric_rz", "finite"),
+    "gas_temperature": RequiredFieldMetadata("K", ("value",), "scalar", "finite"),
+    "gas_density": RequiredFieldMetadata("kg/m^3", ("value",), "scalar", "finite"),
+    "gas_dynamic_viscosity": RequiredFieldMetadata("Pa*s", ("value",), "scalar", "finite"),
+    "electric_field": RequiredFieldMetadata("V/m", ("r", "z"), "axisymmetric_rz", "finite"),
+}
 
 
 def write_sectionwise_p1(
@@ -87,6 +72,11 @@ def _write_tables(candidate_h5: Path, output: Path) -> None:
     connectivity = layout.connectivity
     fields = {field.name: field for field in data.fields}
     nodes = np.asarray(layout.nodes_m, dtype=np.float64)
+    prepared_fields = prepare_required_fields(data, FIELD_REQUIREMENTS)
+    for name in FIELD_REQUIREMENTS:
+        field = fields[name]
+        if field.time_s is not None:
+            raise ValueError("exact P1 tables require static fields")
 
     table_path = output / "canonical_p1_fields.csv"
     with table_path.open("x", encoding="utf-8", newline="") as stream:
@@ -136,12 +126,6 @@ def _write_tables(candidate_h5: Path, output: Path) -> None:
         "m3v_Ez": values[4][:, 1],
     }
     for name, column in function_columns.items():
-        np.savetxt(
-            output / f"{name}.txt",
-            np.column_stack((nodes, column)),
-            fmt="%.17g",
-            delimiter=" ",
-        )
         write_sectionwise_p1(
             output / f"{name}_sectionwise.txt",
             nodes,
@@ -155,10 +139,10 @@ def _write_tables(candidate_h5: Path, output: Path) -> None:
     source = data.sources[0]
     if not isinstance(source, RealizedTableSource):
         raise ValueError("matched candidate release probes must be an internal table")
-    if source.particle_id.size != 287:
-        raise ValueError(f"expected 287 release probes, got {source.particle_id.size}")
+    if source.particle_id.size == 0:
+        raise ValueError("release probe source must be nonempty")
     positions = np.asarray(source.position_m, dtype=np.float64)
-    batch = _prepared_fields(data).sample(positions)
+    batch = prepared_fields.sample(positions)
     if not bool(batch.support_inside.all()):
         raise ValueError("a release probe lies outside canonical P1 support")
 
@@ -216,7 +200,13 @@ def _write_tables(candidate_h5: Path, output: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog=(
+            "Requires one static RZ triangular P1 layout, one nonempty internal table, "
+            "and these nodal fields: " + ", ".join(FIELD_REQUIREMENTS)
+        ),
+    )
     parser.add_argument("candidate_h5", type=Path)
     parser.add_argument("output", type=Path)
     args = parser.parse_args()

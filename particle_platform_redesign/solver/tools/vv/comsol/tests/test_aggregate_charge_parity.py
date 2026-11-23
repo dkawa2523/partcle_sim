@@ -1,7 +1,11 @@
 import csv
+import json
 import math
+import subprocess
+import sys
 from pathlib import Path
 
+import pytest
 from tools.vv.comsol.evaluate_aggregate_charge_parity import (
     REQUIRED_COLUMNS,
     evaluate_history,
@@ -99,7 +103,8 @@ def test_saved_primitive_evaluator_filters_inactive_rows_and_passes_formula(tmp_
         [_row(active=1.0, particle_id=1.0), _row(active=0.0, particle_id=2.0, perturbation=1.0e20)],
     )
 
-    metrics = evaluate_history(history).metrics
+    metrics = evaluate_history(history, current_scale_residual_limit=1.0e-12)["metrics"]
+    assert isinstance(metrics, dict)
 
     assert metrics["active_rows"] == 1
     assert metrics["production_core_screening_gate"] == "PASS"
@@ -113,7 +118,83 @@ def test_saved_primitive_evaluator_fails_a_material_rate_change(tmp_path: Path) 
     history = tmp_path / "history.csv"
     _write(history, [_row(active=1.0, particle_id=1.0, perturbation=1.0e6)])
 
-    metrics = evaluate_history(history).metrics
+    metrics = evaluate_history(history, current_scale_residual_limit=1.0e-12)["metrics"]
+    assert isinstance(metrics, dict)
 
     assert metrics["production_core_screening_gate"] == "FAIL"
     assert metrics["exported_phi1_formula_gate"] == "FAIL"
+
+
+@pytest.mark.parametrize("potential_increment", [0.0, -1.0])
+def test_saved_primitive_evaluator_rejects_nonpositive_potential_increment(
+    tmp_path: Path, potential_increment: float
+) -> None:
+    history = tmp_path / "invalid_potential.csv"
+    row = _row(active=1.0, particle_id=1.0)
+    row["local_single_charge_surface_potential_increment_V"] = potential_increment
+    _write(history, [row])
+
+    with pytest.raises(ValueError, match="surface_potential_increment_V must be positive"):
+        evaluate_history(history, current_scale_residual_limit=1.0e-12)
+
+
+@pytest.mark.parametrize("particle_id", [2**53 + 1, -(2**63), 2**63 - 1])
+def test_charge_diagnostic_preserves_exact_int64_particle_identity(
+    tmp_path: Path, particle_id: int
+) -> None:
+    history = tmp_path / "exact_id.csv"
+    _write(history, [_row(active=1.0, particle_id=particle_id)])
+    metrics = evaluate_history(history, current_scale_residual_limit=1.0e-12)["metrics"]
+    assert isinstance(metrics, dict)
+    assert metrics["production_core_worst_row"] == {
+        "particle_id": particle_id,
+        "time_s": 2.0e-5 * particle_id,
+    }
+
+
+@pytest.mark.parametrize("particle_id", [1.5, 2**63, -(2**63) - 1, math.inf])
+def test_charge_rejects_inexact_or_out_of_range_particle_identity(
+    tmp_path: Path, particle_id: float
+) -> None:
+    history = tmp_path / "invalid_id.csv"
+    _write(history, [_row(active=1.0, particle_id=particle_id)])
+    with pytest.raises(ValueError, match="particle_id"):
+        evaluate_history(history, current_scale_residual_limit=1.0e-12)
+
+
+@pytest.mark.parametrize("duplicate_column", ["particle_id", "charge_number_e"])
+def test_charge_rejects_ambiguous_csv_columns(tmp_path: Path, duplicate_column: str) -> None:
+    history = tmp_path / "duplicate_column.csv"
+    row = _row(active=1.0, particle_id=101.0)
+    with history.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow((*REQUIRED_COLUMNS, duplicate_column))
+        writer.writerow((*(row[name] for name in REQUIRED_COLUMNS), row[duplicate_column] + 1.0))
+
+    with pytest.raises(ValueError, match="duplicate column names"):
+        evaluate_history(history, current_scale_residual_limit=1.0e-12)
+
+
+def test_explicit_charge_csv_cli_writes_current_frozen_state_report(tmp_path: Path) -> None:
+    history = tmp_path / "measured_states.csv"
+    output = tmp_path / "charge.json"
+    _write(history, [_row(active=1.0, particle_id=2**53 + 1)])
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "tools.vv.comsol.evaluate_aggregate_charge_parity",
+            str(history),
+            str(output),
+            "--current-scale-residual-limit",
+            "1e-12",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["metrics"]["production_core_screening_gate"] == "PASS"
+    assert report["metrics"]["production_core_worst_row"]["particle_id"] == 2**53 + 1
+    assert report["trajectory_accuracy"] == "NOT_TESTED"

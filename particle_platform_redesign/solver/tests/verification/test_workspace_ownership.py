@@ -17,6 +17,7 @@ from chamber_particles.integrators import (
     allocate_rk4_advance_workspace,
     allocate_stage_advance_workspace,
 )
+from tests.scenarios.test_stokes_cunningham_run import _local_applicability_case
 from tests.verification.microcases import materialize_microcase
 
 
@@ -45,12 +46,18 @@ def test_particle_and_advance_bytes_cover_their_concrete_columns(count: int) -> 
         assert _owned_bytes(allocator(count)) == count * per_row
 
 
-@pytest.mark.parametrize("case_id", ["C01", "C02", "C03", "C07", "C10"])
+@pytest.mark.parametrize("case_id", ["C01", "C02", "C03", "C07", "C10", "local-field-ranges"])
 def test_declared_process_private_workspaces_fit_the_shared_prepare_budget(
     tmp_path: Path, case_id: str
 ) -> None:
-    paths = materialize_microcase(case_id, tmp_path / case_id)
-    prepared = _prepare(load_case(paths.case_path)).transport
+    if case_id == "local-field-ranges":
+        case_path = _local_applicability_case(tmp_path / case_id, remote_velocity_m_s=100.0)
+    else:
+        case_path = materialize_microcase(case_id, tmp_path / case_id).case_path
+    prepared = _prepare(load_case(case_path)).transport
+    if case_id == "local-field-ranges":
+        assert prepared.dynamics.field_range_workspace is not None
+        assert prepared.dynamics.field_range_workspace.range_available.size > 0
     plan = prepared.memory_plan
     # This checks actual allocation roots reached by worker serialization,
     # including nested aliases, against the same public check/run memory plan.

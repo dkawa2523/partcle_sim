@@ -8,7 +8,7 @@ solver実行や比較判定は行いません。app ID、タイトル、block ID
 独立solver projectから実行します。
 
 ```console
-uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json --quality evidence/resolved_semantics_2026_11_23/report_inputs/quality.json --performance evidence/resolved_semantics_2026_11_23/report_inputs/performance.json --build-status complete
+uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/current_only_2026_11_23/report_inputs/assessment.json --quality evidence/current_only_2026_11_23/report_inputs/quality.json --performance evidence/current_only_2026_11_23/report_inputs/performance.json --build-status complete
 uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q
 ```
 
@@ -19,12 +19,20 @@ reviewed projectionsを読み、現行authority・catalog・producerと入力の
 各projectionはqueries配下へ、対象queryのrowsと実ファイル・母集団・単位・条件を明示したsourceを持ちます。
 assessmentはcase_audit/trajectory_divergence、qualityはquality_findings、performanceはimplementation_work_packagesを更新します。
 A/P比較は入力receiptのsource、seed集合、40実現/各case、windowへ限定します。
-過去の保存比較と変更後の再実行をsource identityで区別し、再利用native参照を新しい標本とは数えません。
+今回のcurrent-only整理ではA/P solverを再実行していません。以前の40seed/各caseと80再実行の記録は、
+元sourceに限定した有用な参照として保持し、今回のfresh replicaや現行全体の認定へ昇格しません。
+再利用native参照を新しい標本とは数えません。
 過去のretirement projectionはその当時のsourceに対する履歴であり、変更後の品質・性能のPASSを補いません。
 generatedAtはsnapshot作成時刻、共通の科学的cutoffがないreport.asOfはnullです。
 
 recipe 2は完成bundleのsource table全量を明示し、通常bundle producerはbundle.h5/report.jsonをdirectory単位で公開します。
 ResultView/ResultCohort、manifest_document/source_identity、macro window・stability boundの説明も現行ownerへ対応させます。
+frozen charge/ion-force比較は明示CSVと現行式を使い、ion-forceではrevisionとmatched/analogousを選びます。
+性能のC03 relaxation計測はP10の`--scenarios relaxation --relaxation-particles`で選びます。
+
+reportのauthoring完了とfilesystem cleanupの完了を分けます。削除が自動承認reviewで拒否されたscopeは
+未実行のまま、正確なblock理由・残存範囲・再開条件をreviewed品質入力へ保存します。
+追跡対象の削除から物理fileやbytesの削除済みを推測しません。
 
 ## ビルドと閲覧
 
@@ -45,6 +53,6 @@ dist全体をloopback HTTPでserveします。snapshot、HTML、runtimeのidenti
 公式export-offlineで、検査済みsplit buildを同じappの.data-app-offline/exports/report.htmlへ書き出せます。
 dist/offline HTMLはGitへ同梱せず、sourceとreviewed inputsから再生成します。
 
-今回の実行範囲と結果は[整理・実行記録](../solver/evidence/resolved_semantics_2026_11_23/README.md)に記載します。
+今回の実行範囲と結果は[整理・実行記録](../solver/evidence/current_only_2026_11_23/README.md)に記載します。
 authoringのbuildStatus: completeは未実施のbuild、表示確認、公開を成功にする値ではありません。
 公開先・共有設定は変更していません。

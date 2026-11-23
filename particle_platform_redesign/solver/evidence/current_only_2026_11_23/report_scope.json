@@ -1,0 +1,43 @@
+{
+  "captured_at_utc": "2026-11-23T05:53:52.031121+00:00",
+  "baseline": "75100e74f1243b527e065c9e6a68121221408b39",
+  "source": {
+    "path": "solver/.artifacts/current_only_20261123/assets_review.json",
+    "sha256": "sha256:46d1b65cd69140eff78c311f17989c0e931967fc978dc1b22ad7635ebc54fd73"
+  },
+  "retirement_goal_status": "not_complete",
+  "filesystem_cleanup": {
+    "status": "blocked_unexecuted",
+    "source": {
+      "path": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
+      "sha256": "sha256:cda1318dd4567ae284b77ae21eac8eaff53a440a94256cebe379aa62e42d9630"
+    },
+    "reported_automatic_approval_review_rejections": 3,
+    "reported_tool_reason": "blocked by policy",
+    "known_remaining_scope": {
+      "path": "evidence/brownian_wall_accuracy_extension_2026_10_10",
+      "files": 123,
+      "bytes": 153000925
+    },
+    "additional_obsolete_local_results": {
+      "classified_result_subtrees": 198,
+      "files_at_inventory": 78204,
+      "bytes_at_inventory": 4403705627,
+      "status": "Not attempted while the observed policy block is unresolved; inventory counts are not deleted bytes",
+      "scope_limit": "Other roots are classified software result subtrees from the inventory, not wholesale native experiment directories. The single-file rejection proves the concrete block; no claim that every other path was individually attempted."
+    },
+    "resume_condition": "Physical deletion must be permitted in the execution context. Recheck actual remaining files, owner-process liveness and protected descendants, remove the explicit result products, then independently verify residuals and native hashes. No new reader/alias/migration mechanism is required."
+  },
+  "native_preservation": {
+    "authority": "evidence/comsol_v0_2_0_release_requalification_v2/publication_saved_native_closure.json#/retained_git_authority",
+    "checked_files": 196,
+    "missing": [],
+    "sha256_mismatches": []
+  },
+  "prior_population_reference": {
+    "source_record": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json",
+    "scope": "Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples."
+  },
+  "current_execution_receipts": "Final current core/external suites and Windows/Linux wheel/workflow receipts imported; open improvement findings and blocked physical cleanup remain",
+  "report_role": "Consumer of reviewed scope, observations and verdicts; no solver or V&V verdict engine"
+}

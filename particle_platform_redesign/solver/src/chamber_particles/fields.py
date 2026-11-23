@@ -1328,7 +1328,7 @@ def prepare_required_fields(
         if layout_name is None:
             layout_name = field.layout
         elif field.layout != layout_name:
-            raise FieldLocationError("all P06 required fields must use one common layout")
+            raise FieldLocationError("all required fields must use one common layout")
         selected[name] = field
     if layout_name is None:
         raise FieldLocationError("required field binding did not resolve a layout")

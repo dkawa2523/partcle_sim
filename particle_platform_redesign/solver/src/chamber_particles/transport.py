@@ -4926,7 +4926,7 @@ def _curved_row_failure_codes(
     codes = _proposal_numerical_failure_codes(proposal.numerical_status[rows])
     eligible = np.flatnonzero(codes == 0).astype("<i8", copy=False)
     if proposal.path_kind == "rk4_dense":
-        # P19 localizes model applicability over the immutable dense state,
+        # Localize model applicability over the immutable dense state,
         # but it does not replace revision-3b's path-support certificate.  The
         # latter encloses every shortened same-integrator state and therefore
         # remains the authority for field support and event-prefix slack.

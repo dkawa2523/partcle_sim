@@ -1,0 +1,65 @@
+{
+  "queries": {
+    "implementation_work_packages": {
+      "rows": [
+        {
+          "package": "現行の実行入口",
+          "capability": "8 executable benchmark modules。P10にはfield/event/relaxationの3 workloads",
+          "deliverable": "用途ごとの計測を公開engineから実行",
+          "gate": "入口の数と今回の実行範囲を分ける"
+        },
+        {
+          "package": "今回の影響先計測",
+          "capability": "P06/P10/P14/P19/B03の5 modulesを実行",
+          "deliverable": "P10 cold/warm6 observations、P14 smoke8 observations",
+          "gate": "当該sourceのexit0。全8 modulesの再計測やrelease matrix完了とはしない"
+        },
+        {
+          "package": "C03 relaxationの移管",
+          "capability": "P10 --scenarios relaxation --relaxation-particles",
+          "deliverable": "同じcanonical input・物理/数値設定・現行engine科学payloadを確認",
+          "gate": "11 analytic casesは独立の数値確認。移管identityだけを数学的正解にしない"
+        },
+        {
+          "package": "資源と観測",
+          "capability": "P19 global/local identity、B03 conservative temporary bound、現行work counts",
+          "deliverable": "P19 allocator verificationとbenchmarkの資源観測を分離",
+          "gate": "P14のidentity対象はreceipt定義のcore payload。未保存pathや全frame/probe一致を推測しない"
+        },
+        {
+          "package": "計時の範囲と限界",
+          "capability": "他のroot/agent作業とhost負荷が重なる局所観測",
+          "deliverable": "P09/P14-U/processの全計測、100k/1M規模は今回の担当範囲で未実行",
+          "gate": "portable SLAやrevision間speedupの認定なし"
+        }
+      ],
+      "source": {
+        "label": "current-onlyで実行した影響先benchmarkと明示した範囲",
+        "files": [
+          "solver/.artifacts/current_only_bench_20261123/receipt.json",
+          "solver/tests/performance/README.md"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "Benchmark inventory and executed subset",
+            "definition": "Eight executable modules are the current inventory. This receipt executes five affected modules; P10 contains three workloads and six cold/warm observations. Local measurements do not establish a portable SLA or a full release matrix.",
+            "componentIds": [
+              "work-package-table",
+              "implementation-sequence"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact current execution receipt",
+            "detail": "{\"path\": \"solver/.artifacts/current_only_bench_20261123/receipt.json\", \"sha256\": \"sha256:4a16f5545ae115b78dfed8d2f095b8d0a0ffbaab5813d845442c54391ad2d6b5\"}"
+          },
+          {
+            "title": "Independent and preservation scopes",
+            "detail": "{\"independent_oracles\": {\"passed\": 11, \"seconds\": 4.39, \"selectors\": [\"test_exponential_midpoint_c03_matches_the_closed_form\", \"test_exponential_midpoint_is_exact_for_c03_and_replay_keeps_endpoint_hint\", \"test_exponential_midpoint_coefficients_cover_wide_relaxation_range\", \"test_exponential_midpoint_has_second_order_for_variable_coefficients\"]}, \"input_correspondence\": {\"baseline\": \"75100e74f1243b527e065c9e6a68121221408b39 prior input construction function only, not a prior solver execution\", \"old_producer_sha256\": \"97ec22c85e90abe8b4cddb81684d5cf6e1c93bab54cefa067c8c658c99cffcf8\", \"particles\": 32, \"canonical_content_hash\": \"sha256:e5b8dbaba143bfdc8975b5903b971ab3d9ad5cd0178dd3f3e5044d22150469a5\", \"same_all_physical_and_numerical_settings\": true, \"only_case_display_name_change\": [\"p11_exponential_midpoint\", \"constant_relaxation\"], \"same_current_engine_scientific_payload\": true, \"current_public_scientific_payload_sha256\": \"sha256:fae94564184340988b7558d527c4bbfeb066686304dad19df389938431b3ada5\", \"independent_truth\": \"Separate C03/exponential exact wide-range and variable-coefficient11verificationcases passed; same-engine identity is only migration fidelity\", \"temporary_old_function_and_results_not_retained_in_production\": true}, \"timing_limits\": \"Machine-local descriptive observations under overlapping root/agent work; no portable SLA or inter-revision speedup claim. Smoke is not a full100k/1M qualification.\", \"not_run_by_this_owner\": [\"Unchanged P09/P14-U/process_workers full measurements\", \"Licensed COMSOL solve\", \"Full scientific suite\"]}"
+          }
+        ]
+      }
+    }
+  }
+}

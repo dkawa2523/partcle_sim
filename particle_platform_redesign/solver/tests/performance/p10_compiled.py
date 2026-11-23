@@ -1,4 +1,4 @@
-"""Manual cold/warm characterization of the P10 compiled CPU production path.
+"""Cold/warm compiled CPU measurements for field, event and relaxation workloads.
 
 The driver creates cases outside every measured process.  Each observation is
 run in a fresh child with its own empty Numba cache.  ``cold`` measures the
@@ -24,27 +24,33 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from chamber_particles import load_case, open_result, simulate
 from chamber_particles.cpu import CPU_RUNTIME_LAYOUT_REVISION, MEMORY_PLAN_REVISION
 from chamber_particles.engine import COMPILED_CPU_TILE_REVISION, ENGINE_ALGORITHM_REVISION
 from chamber_particles.events import EVENT_ALGORITHM_REVISION
 from chamber_particles.fields import FIELD_LOCATION_REVISION
 from chamber_particles.integrators import (
+    EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION,
+    EXPONENTIAL_MIDPOINT_REVISION,
+    RK4_ENCLOSURE_REVISION,
     STEP_PROPOSAL_REVISION,
     _compiled_relaxation_advance_into,
     _compiled_rk4_advance_into,
 )
 from chamber_particles.output import RESULT_ALGORITHM_REVISION
 from chamber_particles.physics.runtime import PHYSICS_RUNTIME_REVISION
-from tests.performance.p06_baseline import _build_scenarios
+from tests.performance.p06_baseline import _build_scenarios, _expanded_definition, _materialize
 from tests.performance.p09_memory import (
     _directory_bytes,
     _machine_metadata,
     _process_memory_bytes,
     _semantic_result_digest,
 )
+from tests.verification.microcases import build_microcase
 
-_SCENARIOS = ("field", "event")
+_SCENARIOS = ("field", "event", "relaxation")
 _MODES = ("cold", "warm")
 _EXPECTED_REVISIONS = {
     "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
@@ -57,6 +63,27 @@ _EXPECTED_REVISIONS = {
 }
 _EXPECTED_MEMORY_PLAN_REVISION = MEMORY_PLAN_REVISION
 _EXPECTED_RUNTIME_LAYOUT_REVISION = CPU_RUNTIME_LAYOUT_REVISION
+_EXPECTED_EXECUTION = {
+    "field": {"integrator": "rk4_fixed", "backend": "cpu", "path_kind": "rk4_dense"},
+    "event": {"integrator": "rk4_fixed", "backend": "cpu", "path_kind": "rk4_dense"},
+    "relaxation": {
+        "integrator": "exponential_midpoint",
+        "backend": "cpu",
+        "path_kind": "exponential_midpoint_reintegrated",
+    },
+}
+_METHOD_REVISIONS = {
+    "rk4_fixed": {
+        "rk4_enclosure_revision": RK4_ENCLOSURE_REVISION,
+        "exponential_midpoint_revision": None,
+        "exponential_midpoint_enclosure_revision": None,
+    },
+    "exponential_midpoint": {
+        "rk4_enclosure_revision": None,
+        "exponential_midpoint_revision": EXPONENTIAL_MIDPOINT_REVISION,
+        "exponential_midpoint_enclosure_revision": EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION,
+    },
+}
 
 
 def main() -> None:
@@ -76,10 +103,11 @@ def _arguments() -> argparse.Namespace:
         nargs="+",
         choices=_SCENARIOS,
         default=list(_SCENARIOS),
-        help="field-heavy event-light and/or small event-heavy production cases",
+        help="field-heavy, event-heavy, and/or constant-relaxation production cases",
     )
     parser.add_argument("--field-particles", type=_positive_integer, default=10_000)
     parser.add_argument("--event-particles", type=_positive_integer, default=32)
+    parser.add_argument("--relaxation-particles", type=_positive_integer, default=10_000)
     parser.add_argument("--repeats", type=_positive_integer, default=3)
     parser.add_argument("--warmups", type=_positive_integer, default=1)
     parser.add_argument("--json", dest="json_path", type=Path)
@@ -116,6 +144,7 @@ def _driver(arguments: argparse.Namespace) -> None:
             scenarios,
             arguments.field_particles,
             arguments.event_particles,
+            arguments.relaxation_particles,
         )
         observations: list[dict[str, Any]] = []
         for scenario in scenarios:
@@ -138,13 +167,20 @@ def _driver(arguments: argparse.Namespace) -> None:
         _validate_observations(observations, scenarios, arguments.repeats)
         summaries = _summaries(observations)
         report = {
-            "benchmark": "p10_compiled_cpu_cold_warm_v2",
+            "benchmark": "compiled_cpu_workloads_cold_warm_v3",
             "captured_at_utc": datetime.now(UTC).isoformat(),
             "non_gating": True,
             "conditions": {
                 "scenarios": list(scenarios),
                 "field_particles": arguments.field_particles,
                 "event_particles": arguments.event_particles,
+                "relaxation_particles": arguments.relaxation_particles,
+                "relaxation_problem": {
+                    "meaning": "expanded C03 constant linear relaxation and additive force",
+                    "macro_step_dt_s": 0.75,
+                    "configured_dt_over_tau": 3.0,
+                    "independent_reference": "C03 closed-form verification, run separately",
+                },
                 "repeats": arguments.repeats,
                 "warmup_runs_for_warm_mode": arguments.warmups,
                 "case_materialization_in_measured_scope": False,
@@ -173,7 +209,7 @@ def _driver(arguments: argparse.Namespace) -> None:
                     "reported separately from the solver-owned memory plan"
                 ),
                 "scope": (
-                    "this focused P10 pair is not the P14 10k/100k/1M, field, event, output, "
+                    "these focused workloads are not the P14 10k/100k/1M, field, event, output, "
                     "and full product matrix"
                 ),
                 "thresholds": "absolute seconds, RSS, and speedup have no pass/fail threshold",
@@ -191,6 +227,7 @@ def _materialize_cases(
     scenarios: tuple[str, ...],
     field_particles: int,
     event_particles: int,
+    relaxation_particles: int,
 ) -> dict[str, dict[str, Any]]:
     selected: dict[str, dict[str, Any]] = {}
     if "field" in scenarios:
@@ -208,6 +245,23 @@ def _materialize_cases(
             "case_path": scenario.case_path,
             "particle_count": event_particles,
             "expected_events": event_particles,
+        }
+    if "relaxation" in scenarios:
+        definition = _expanded_definition(build_microcase("C03"), relaxation_particles)
+        case_path = _materialize(
+            root / "relaxation",
+            definition,
+            name="constant_relaxation",
+            frame_times_s=None,
+        )
+        document = yaml.safe_load(case_path.read_text(encoding="utf-8"))
+        document["solver"]["integrator"] = "exponential_midpoint"
+        document["time"]["dt_s"] = document["time"]["end_s"]
+        case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+        selected["relaxation"] = {
+            "case_path": case_path,
+            "particle_count": relaxation_particles,
+            "expected_events": 0,
         }
     return selected
 
@@ -290,7 +344,6 @@ def _worker(arguments: argparse.Namespace) -> None:
             arguments.worker_particles,
             arguments.worker_events,
             include_digest=False,
-            expected_path_kind="rk4_dense",
         )
         gc.collect()
     observation = _execute_run(
@@ -301,7 +354,6 @@ def _worker(arguments: argparse.Namespace) -> None:
         arguments.worker_particles,
         arguments.worker_events,
         include_digest=True,
-        expected_path_kind="rk4_dense",
     )
     print(json.dumps(observation, allow_nan=False, sort_keys=True))
 
@@ -315,7 +367,6 @@ def _execute_run(
     expected_events: int,
     *,
     include_digest: bool,
-    expected_path_kind: str,
 ) -> dict[str, Any]:
     peak_before, rss_before, rss_source = _process_memory_bytes()
     total_started = time.perf_counter()
@@ -335,13 +386,16 @@ def _execute_run(
         raise RuntimeError(f"{scenario}: unexpected particle count")
     if summary.boundary_event_count != expected_events:
         raise RuntimeError(f"{scenario}: unexpected boundary-event count")
+    if summary.failure_event_count != 0:
+        raise RuntimeError(f"{scenario}: performance case produced particle failures")
     if summary.frame_count != 0:
         raise RuntimeError(f"{scenario}: timing case unexpectedly wrote frames")
     manifest = result.manifest_document()
     resolved = _mapping_value(manifest, "resolved")
+    execution = {name: resolved[name] for name in ("integrator", "backend", "path_kind")}
+    if execution != _EXPECTED_EXECUTION[scenario]:
+        raise RuntimeError(f"{scenario}: unexpected resolved execution {execution!r}")
     path_kind = str(resolved["path_kind"])
-    if path_kind != expected_path_kind:
-        raise RuntimeError(f"{scenario}: unexpected path kind {path_kind!r}")
     memory_plan = manifest["memory_plan"]
     if not isinstance(memory_plan, Mapping):
         raise RuntimeError(f"{scenario}: result memory plan is not a mapping")
@@ -365,6 +419,7 @@ def _execute_run(
         "particle_count": summary.particle_count,
         "macro_step_count": summary.macro_step_count,
         "boundary_event_count": summary.boundary_event_count,
+        "failure_event_count": summary.failure_event_count,
         "case_identity": {
             "case_file_hash": case.case_file_hash,
             "data_content_hash": case.content_hash,
@@ -428,7 +483,9 @@ def _validate_observations(
             raise RuntimeError(f"P10 {scenario}: case identity changed across observations")
         for item in selected:
             algorithms = _mapping_value(item, "algorithms")
-            for key, expected in _EXPECTED_REVISIONS.items():
+            integrator = _EXPECTED_EXECUTION[scenario]["integrator"]
+            expected_revisions = _EXPECTED_REVISIONS | _METHOD_REVISIONS[integrator]
+            for key, expected in expected_revisions.items():
                 if algorithms.get(key) != expected:
                     raise RuntimeError(
                         f"P10 {scenario}: expected {key}={expected!r}, got {algorithms.get(key)!r}"

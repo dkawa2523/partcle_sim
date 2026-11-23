@@ -1,0 +1,16 @@
+{
+  "root": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\current_only_20261123\\report\\route-audit-32df2cbd",
+  "final_payload_identity": {
+    "same_source_identity": true,
+    "before_population_weight": 1.0,
+    "after_population_weight": 2.0,
+    "modified_artifact": "copy of final.h5 only, finite model_weight doubled",
+    "scope": "Output identity/corruption-detection limitation, not a claim that normal completed solver files change spontaneously"
+  },
+  "analysis_json_publication": {
+    "exit_code": 2,
+    "public_target_exists_after_error": true,
+    "public_target_bytes": 27,
+    "scope": "Injected one write interruption at a new report file; no existing result or external path changed"
+  }
+}

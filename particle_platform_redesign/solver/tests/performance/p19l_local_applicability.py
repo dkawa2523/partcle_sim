@@ -39,8 +39,6 @@ _DEFAULT_PARTICLES = 4_096
 _DEFAULT_REPEATS = 7
 _REMOTE_SAFE_VELOCITY_M_S = 0.0
 _REMOTE_EXTREME_VELOCITY_M_S = 100.0
-_LOCAL_CELL_MAXIMUM = 64
-_DENSE_PATH_BYTES_PER_ROW = 176
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -346,74 +344,39 @@ def _memory_accounting(results: dict[str, Any], particle_count: int) -> dict[str
         raise RuntimeError("P19-L pair resolved different solver-owned memory plans")
     plan = plans["global_fast"]
     slab_particles = int(plan["slab_particles"])
-    split_budget = 2
-    stack_capacity = split_budget + 1
-    actual_stack_bytes_per_row = 16 * stack_capacity + 18
-    planned_stack_bytes_per_row = 16 * stack_capacity + 24
-    candidate_actual_at_slab = 536 * slab_particles + 8
-    candidate_planned_at_slab = 544 * slab_particles
-    certificate_bytes_per_row = planned_stack_bytes_per_row + 544
     dense_path_budget = int(plan["dense_path_bytes_per_particle"])
+    certificate_bytes_per_row = int(plan["certificate_work_bytes_per_particle"])
+    scratch_bytes_per_row = int(plan["scratch_bytes_per_particle"])
     components = plan["components"]
+    peaks = plan["phase_peaks"]
     checks = {
-        "dense_controls_fit_reported_path_budget": _DENSE_PATH_BYTES_PER_ROW <= dense_path_budget,
         "dense_path_component_matches_slab": (
             int(components["slab_dense_path"]) == slab_particles * dense_path_budget
-        ),
-        "certificate_manifest_matches_stack_plus_candidate": (
-            int(plan["certificate_work_bytes_per_particle"]) == certificate_bytes_per_row
         ),
         "certificate_component_matches_slab": (
             int(components["slab_certificate_work"]) == slab_particles * certificate_bytes_per_row
         ),
-        "candidate_arena_contains_maximum_arrays": (
-            candidate_actual_at_slab <= candidate_planned_at_slab
+        "stage_scratch_component_matches_slab": (
+            int(components["slab_proposal_scratch"]) == slab_particles * scratch_bytes_per_row
         ),
+        "components_sum_to_run_peak": sum(components.values()) == int(peaks["run"]),
+        "planned_peak_covers_all_phases": int(plan["planned_bytes"]) == max(peaks.values()),
+        "planned_peak_within_configured_limit": int(plan["planned_bytes"])
+        <= int(plan["limit_bytes"]),
     }
     if not all(checks.values()):
         raise RuntimeError(f"P19-L memory accounting check failed: {checks}")
     return {
         "same_plan_for_both_modes": True,
         "manifest": plan,
-        "audit": {
-            "rk4_dense_path": {
-                "dense_controls_bytes_per_row": _DENSE_PATH_BYTES_PER_ROW,
-                "reported_full_path_budget_per_row": dense_path_budget,
-                "arrays": (
-                    "start/target time; 4x2 position controls; 4x2 velocity controls; "
-                    "4 charge controls; all float64; full path budget additionally "
-                    "covers retained full-interval enclosures owned by transport"
-                ),
-            },
-            "certificate_interval_stack": {
-                "split_budget": split_budget,
-                "stack_capacity": stack_capacity,
-                "actual_bytes_per_row": actual_stack_bytes_per_row,
-                "planned_bytes_per_row": planned_stack_bytes_per_row,
-                "headroom_bytes_per_row": (
-                    planned_stack_bytes_per_row - actual_stack_bytes_per_row
-                ),
-            },
-            "local_candidate_arena": {
-                "maximum_cells_per_row": _LOCAL_CELL_MAXIMUM,
-                "actual_peak_formula_bytes": "536*N+8",
-                "actual_peak_at_slab_bytes": candidate_actual_at_slab,
-                "planned_formula_bytes": "544*N",
-                "planned_at_slab_bytes": candidate_planned_at_slab,
-                "headroom_at_slab_bytes": (candidate_planned_at_slab - candidate_actual_at_slab),
-                "arrays": (
-                    "int64 counts, bounded counts, N+1 CSR offsets, and at most 64*N "
-                    "int64 candidate IDs"
-                ),
-            },
-            "primitive_range_temporaries": {
-                "accounting_owner": "general stage scratch",
-                "general_stage_scratch_bytes_per_row": int(plan["scratch_bytes_per_particle"]),
-                "benchmark_persistent_lower_upper_bytes_per_row": 80,
-            },
-        },
         "checks": checks,
         "particle_count_matches_single_slab": slab_particles == particle_count,
+        "interpretation": (
+            "Reported plan/component consistency for this reached cohort. Concrete allocation "
+            "roots, including nonempty local-field range workspace, are checked independently "
+            "by the existing workspace-ownership verification; this benchmark does not define "
+            "a second copy of private buffer shapes or byte formulas."
+        ),
     }
 
 

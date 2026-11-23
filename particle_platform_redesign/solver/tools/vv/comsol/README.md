@@ -16,14 +16,13 @@ practical agreement, qualified numerical agreement and physical validity.
 | Task | Entry and actual input | Result |
 |---|---|---|
 | Bind native equation/settings observations | `meaning_preflight.py`; explicit semantic inventory with artifact hashes/pointers | Readiness and unresolved meaning; no trajectory verdict |
-| Resolve observed native wall/terminal meaning | `actual_run_receipt.py`, `boundary_response_mapping.py`; observed readback | Terminal cause only where it was observed |
 | Build coefficient fields for the inspected Vigus equations | `prepare_vigus_transport.py`; primitive canonical case and explicit parameters | Current canonical case and build manifest |
 | Compare deterministic saved x/v/Z or qualify refined levels | `evaluate_matched_trajectory.py`; explicit descriptors and policy | Raw SI differences, coverage and separately qualified verdicts |
 | Describe saved stochastic/native populations | `evaluate_saved_population.py`; normalized native CSV and optional public result | Status/time/position/velocity/charge summaries; no pathwise or statistical-equivalence claim |
 | Plot actual saved populations/trajectories | `plot_matched_trajectories.py`; explicit inputs and geometry | Geometry-overlaid observations and coverage |
-| Check saved local charge / ion equations | `evaluate_aggregate_charge_parity.py`, `evaluate_aggregate_ion_drag_parity.py`; named native primitive columns | Independent formula differences and applicable coverage |
+| Compare local charge / ion equations | `evaluate_aggregate_charge_parity.py`, `evaluate_aggregate_ion_drag_parity.py`; one explicit CSV, current model and chosen allowance | Frozen-state residuals and separately declared model correspondence |
 | Compare independently generated reduced fields | `compare_reduced_fields.py`; canonical field artifact and native node export | Field differences; no particle or all-material qualification |
-| Prepare the explicit F02 fixed-electric example | `prepare_f02_fixed_electric_case.py` and `cases/f02_*.yaml` | Example-specific current canonical input |
+| Import the selected native gas-field example | Installed `inputs import-csv`; `cases/f02_selected_csv.yaml` maps supplied native geometry/field files | Current field bundle and source/selection receipt |
 | Export exact P1 connectivity for a native companion | `prepare_comsol_p1_tables.py`; static RZ P1 canonical input | Sectionwise native tables and probe values |
 | Exercise native + candidate motion against analytic references | XY and RZ boundary benchmarks below | Current execution and bounded scientific checks |
 
@@ -31,12 +30,6 @@ Native extraction remains an external task guided by the inspection skill.
 Bind the actual MPH, solution/member, selection, units and before/after hashes.
 The retained Java producers create the explicit XY/RZ benchmark observations;
 they are not a generic inspector for arbitrary chamber models.
-
-The old fixed Case-A/P campaign recipes, seed allocation locks, reporting
-repair/projection routes and source-hash snapshot tests are retired. Their
-removal record is in
-[`evidence/retirement_2026_11_23/vv`](../../../evidence/retirement_2026_11_23/vv/README.md);
-historical experiment data are not a current execution route.
 
 ## Verify the tools
 
@@ -68,12 +61,12 @@ requested question can receive a qualified numerical PASS/FAIL. Readiness is
 not accuracy, and practical saved-data comparisons can proceed while these
 qualified claims remain `NOT_TESTED`.
 
-Native Freeze, Stick and Disappear are separate observed outcomes. A missing
-boundary ID never proves inlet/outlet escape. `actual_run_receipt.py` consumes
-the observed native readback and keeps status, terminal time, response law and
-identified boundary cause separate. It does not infer cause from the last
-finite point. The source-preserving readback uses no solve/save of the original
-MPH; a requested native rerun must use an isolated copy.
+Native Freeze, Stick and Disappear are separate observed outcomes. The saved
+population evaluator keeps their status and terminal-time meaning separate and
+does not infer inlet/outlet, axis or wall cause from the last finite point.
+Boundary-law correspondence requires actual native observations bound through
+the selected semantic inventory; the population CSV does not carry a native
+boundary-event ledger. A requested native rerun uses an isolated model copy.
 
 ## Vigus coefficient preparation
 
@@ -159,8 +152,7 @@ native random paths, shortened event intervals, variable steps or arbitrary
 state-dependent noise. It is neither an FDT repair nor physical validation.
 In particular, a native parameter named `timestep` must not be assumed to be
 the integrator's actual step, and changing only that step can change the
-native stochastic problem. Parameter format v1 is historical execution
-evidence; rebuild current inputs with an explicit v2 interpretation.
+native stochastic problem.
 
 `build_manifest.json` binds source/parameter bytes, primitive provenance,
 particle properties, coefficient inventory and canonical logical hash.
@@ -175,10 +167,7 @@ transport remain separate claims.
 
 ## Deterministic pre-event comparison
 
-`evaluate_matched_trajectory.py` now consumes explicit series descriptors. The
-former 287-particle, 41-frame, fixed-charge evaluator and its precision-parity
-policy have been replaced; historical v1 evidence is retained unchanged and
-cannot be passed through a compatibility branch. The current scope is Cartesian
+`evaluate_matched_trajectory.py` consumes explicit series descriptors. Its scope is Cartesian
 XY or RZ meridional **two-component deterministic pre-event** propagation.
 Third DOF, stochastic population inference and event/post-event accuracy need
 their corresponding external evaluations.
@@ -348,21 +337,60 @@ histories. Describe missing rows and survivor conditioning. Practical agreement
 does not certify continuous SDE bias, local deposition, adhesion or physical flux.
 Normal result-only reuse uses the installed `analyze/export/view` clients.
 
-## Producer outputs are completed inputs
+## Frozen charge and ion-force comparisons
 
-F02 schedule preparation publishes one new directory containing `bundle.h5`
-and its required `report.json`; the separate report path is not an option:
+These tools consume one explicitly supplied CSV. Run `--help` to read the exact
+required columns from the implementation's input declaration. Values use the
+units in their column suffixes; charge is measured in elementary-charge numbers.
+Particle IDs are exact int64 integers, stored separately from physical floats;
+numerically integral spellings such as `1`, `1.0`, and `1e0` denote the same ID.
+Each tool requires a dimensionless residual allowance chosen for the reference
+precision before inspecting the residual. It is not a trajectory error budget.
 
 ```console
-uv run --locked python -m tools.vv.comsol.prepare_f02_fixed_electric_case FIELD_BUNDLE NEW_SCHEDULE_DIRECTORY
+uv run --locked python -m tools.vv.comsol.evaluate_aggregate_charge_parity STATES_CSV NEW_REPORT_JSON --current-scale-residual-limit RELATIVE_ALLOWANCE
+uv run --locked python -m tools.vv.comsol.evaluate_aggregate_ion_drag_parity STATES_CSV NEW_REPORT_JSON --model-revision relative_flow_screened_collection_orbital_aggregate_ion_v1 --correspondence matched --force-scale-residual-limit RELATIVE_ALLOWANCE
 ```
 
-The installed `create_case(bundle, settings, output_directory)` consumes that
-bundle with explicit source/wall/physics settings. The F02 example's
-`data_path` points to `case_a_fields_with_source/bundle.h5` under its bound
-acceptance output; model-specific numbers and fields remain explicit.
+Replace the uppercase placeholders with actual inputs and independently chosen
+allowances. Ion force comparison selects either the relative-flow revision above
+or `electric_field_directed_image_orbital_sensitivity_v1`. Select `matched` only
+when the reference uses the selected current equation and primitive meaning;
+select `analogous` for a different equation. An analogous comparison emits raw
+residuals with `frozen_force_comparison_status: NOT_TESTED`, even when the residual
+is small. The declaration is not native-authenticity evidence. Model selection
+does not depend on directory names. Only fields used by the selected model are
+required.
 
-Exact-P1 table export publishes the complete CSV, nodal/sectionwise tables,
+Charge comparison separates the production capacitance/constants from a second
+calculation using the exported single-charge potential increment. This can
+expose a constant-convention difference at the supplied states. The exported
+potential increment must be positive. The normalized charge residual is
+`abs(predicted-exported) / max(abs(ion_rate)+abs(electron_rate), 1 s^-1)`;
+all rates count elementary charges per second, so the allowance includes an
+absolute scale at low current. Neither tool
+starts a solve, fits a coefficient, or establishes integrated trajectory,
+statistical, numerical-convergence or physical validity. Reports go to a new
+JSON file and bind the input bytes and explicit choices.
+
+## Producer outputs are completed inputs
+
+The selected native CSV mapping is an external input asset consumed by the
+installed importer. It refers to real geometry/primitive exports in
+`model_dataset`, not to an accepted candidate result:
+
+```console
+uv run --locked chamber-particles inputs import-csv tools/vv/comsol/cases/f02_selected_csv.yaml NEW_BUNDLE_DIRECTORY
+```
+
+This publishes `bundle.h5` and `report.json` together. The report binds source
+hashes, selected cells, coordinate joins and the mapping's explicit axis
+correction. Unrecorded native solution/member observations stay unqualified.
+Prepare the user's realized sources and choose physical/wall/numerical settings
+through the installed current input workflow; the imported field bundle supplies
+no default particle size, fixed cohort or release distribution.
+
+Exact-P1 table export publishes the nodal audit CSV, sectionwise tables,
 release probes and `table_receipt.json` only after all validation and writes
 succeed:
 
@@ -371,8 +399,10 @@ uv run --locked python -m tools.vv.comsol.prepare_comsol_p1_tables CANDIDATE_H5 
 ```
 
 Its current native companion scope requires one static RZ triangular P1
-layout, the five named primitive fields, and one realized internal table of
-287 probes. It is not a generic unpaired CSV exporter. A validation/table/
+layout, the five named static nodal SI primitive fields, and one nonempty
+realized internal table. Its probe count follows that table. Connectivity is
+preserved in the sectionwise function files; a point-cloud retriangulation is
+not the canonical P1 interpolant. This is not an unpaired CSV exporter. A validation/table/
 receipt error leaves the public table destination absent and retryable.
 These publishers do not overwrite completed input directories.
 
@@ -402,9 +432,9 @@ The PowerShell runners accept `-ComsolRoot`; a licensed COMSOL installation
 is required only for fresh native observations. Saved-native replay revalidates
 raw hashes and observed configuration, records the current evaluator hash and
 candidate resolved revisions, and does not require its current source to equal
-a historical evaluator. Results go to new destinations and are distinct from
-the reference inputs. The latest executed comparison and limits are recorded
-under `evidence/retirement_2026_11_23/vv`.
+the source that originally generated the reference. Results go to new destinations
+and are distinct from the reference inputs. Each new evaluation records its
+actual input/evaluator hashes, resolved candidate revisions and scientific limits.
 
 At an event-coincident XY frame native and candidate velocities have opposite
 left/right continuity. That named row is excluded for the affected wall cases;

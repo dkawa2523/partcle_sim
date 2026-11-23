@@ -92,6 +92,36 @@ def test_unqualified_stop_time_keeps_observation_brackets(tmp_path: Path) -> Non
     assert native["capture_terminal_observation_brackets_s"]["upper"]["p50"] == 0.1
 
 
+def test_population_rejects_duplicate_identity_columns(tmp_path: Path) -> None:
+    path = tmp_path / "duplicate_identity.csv"
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow((*_COLUMNS, "particle_id"))
+        writer.writerows([*row, row[0] + 1000] for row in _mixed_rows())
+
+    with pytest.raises(ValueError, match="duplicate column names"):
+        evaluate(path, reference_terminal_times=True)
+
+
+@pytest.mark.parametrize("position", [(0.0, 0.0), (0.2, 1.0)])
+def test_native_freeze_location_does_not_become_capture_or_escape(
+    tmp_path: Path, position: tuple[float, float]
+) -> None:
+    path = tmp_path / "native.csv"
+    r, z = position
+    _write(
+        path,
+        [
+            [1, 0.0, r, z, 0.0, 1.0, 3.0, 1, 0.0, 0.1, 2],
+            [1, 0.1, r, z, 0.0, 0.0, 3.0, 2, 0.0, 0.1, 2],
+        ],
+    )
+    native = evaluate(path, reference_terminal_times=True)["reference"]
+    assert native["final_counts"]["frozen"] == 1
+    assert native["final_counts"]["stuck"] == 0
+    assert native["final_counts"]["disappeared_unknown"] == 0
+
+
 @pytest.mark.parametrize("defect", ["duplicate", "status", "stop", "terminal_return", "metadata"])
 def test_population_rejects_ambiguous_identity_and_terminal_evidence(
     tmp_path: Path,

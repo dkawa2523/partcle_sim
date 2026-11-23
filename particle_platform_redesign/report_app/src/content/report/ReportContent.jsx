@@ -177,14 +177,18 @@ canonical writer/parser、field support/sampler、physics catalog、event、wall
 
     <section className="report-section">
       <Narrative id="dataset-role" title="native証拠と今回の設計snapshotを分ける"
-        queryIds={["quality_findings", "case_audit", "trajectory_divergence"]}
+        queryIds={["quality_findings", "case_audit", "trajectory_divergence", "design_decisions"]}
         value={`## native証拠と今回の設計snapshotを分ける
 
-model_datasetや原MPHは外部入力・V&Vの証拠であり、coreの物理定義やdefaultではない。11月8日レポートの30 nm Vigusと今回のA/P 10 nmは別caseであり、結果やhashを流用しない。
+model_datasetや原MPHは外部入力・V&Vの証拠であり、coreの物理定義やdefaultではない。11月8日レポートの30 nm Vigusと以前のA/P 10 nmは別caseであり、結果やhashを流用しない。
 
 Brownianでは個々のpathの一致を要求せず、実現source、全母集団、保存window、停止先・時刻・速度・電荷と不確かさを評価する。native RK4/time-key noiseの5/9 weak-limit解釈は、同定した実行方式と独立microcaseに対する明示したcaseであり、有限step・壁eventでの厳密同値や一般defaultではない。
 
-実用的に合う観測量はそのように判断し、残る差を一律に乱数のせいにしない。保存参照の不明なdisappearanceをescapeと同一視しない。A/Pの過去40実現と今回の再実行はsource receiptで区別し、再利用したnative参照を新しい標本とは数えない。assessment/quality/performance入力がない項目はunavailableとして残し、過去のPASSを変更後の資格へ昇格しない。`} />
+実用的に合う観測量はそのように判断し、残る差を一律に乱数のせいにしない。保存参照の不明なdisappearanceをescapeと同一視しない。A/P各40seedの比較と80件の再実行は以前のsourceに束縛した参照であり、今回のcurrent-only整理ではA/P solverを再実行していない。native参照も新しい標本とは数えない。新しい品質・性能のreceiptがない項目はunavailableとし、過去のPASSを変更後の資格へ昇格しない。
+
+現行のfrozen charge比較は明示CSV・現行式・独立に選んだ残差allowanceを使う。ion-force比較はさらに現行revisionとmatched/analogousを明示し、analogousはraw差とNOT_TESTEDを返す。この宣言や凍結点の残差だけで、nativeの真正性・積分軌道・収束を認定しない。exact-P1表のrelease probe数は実際のsource tableから決まり、sectionwise connectivityを保持する。
+
+追跡対象の生成物を撤去することと、filesystem上のfileを削除済みにすることは別である。独立したnative観測・実験入力・選択authorityを保持し、未実行の削除と自動承認reviewによるblockは下表の範囲で残す。`} />
       {visible("quality-table") && <DataComponent id="quality-table" title="今回取込んだ品質証拠と未取得事項"
         queryId="quality_findings" kind="table" sourceRows={quality}>
         <DataTable rows={quality} searchable={false} compactNumbers={false} label="品質証拠"
