@@ -1,0 +1,44 @@
+{
+  "status": "Local Windows/Linux correction verified; new commit CI is authoritative for remote outcome",
+  "first_remote_commit": "7f29dd70f47bf41b21e122c8ed514520ea3da50f",
+  "first_remote_run": "https://github.com/dkawa2523/partcle_sim/actions/runs/45109773321",
+  "observed_failure": "Linux Pyrefly reported six missing Windows-only ctypes attributes in two newly included performance owners. Windows typecheck had passed.",
+  "root_cause": "The dispatcher selected an OS-specific helper at runtime, while the helper itself exposed an unguarded Windows API body to the Linux type target.",
+  "fix": "Require win32 in the helper and keep its Windows ctypes body inside the explicit platform branch. No Any/getattr/ignore or quality exclusion was added.",
+  "source_sha256": {
+    "tests/performance/b03_characterization.py": "96a5eb809a73145521cd7ebe41d4601d758ddab71775a7045b92283f5557a8c5",
+    "tests/performance/p09_memory.py": "44c95437f5db229cf856ae02a64a9ded8cae78d5b502d7f9d42472e799509bde"
+  },
+  "source_49_and_lock_equal_original_verified_map": true,
+  "executed": {
+    "Linux_locked_dev_Pyrefly_before": {
+      "errors": 6,
+      "exit_code": 1
+    },
+    "Linux_locked_dev_Pyrefly_after": {
+      "errors": 0,
+      "exit_code": 0
+    },
+    "Windows_configured_Pyrefly": {
+      "errors": 0,
+      "exit_code": 0
+    },
+    "Ruff_format_and_lint": "passed;188 files",
+    "Windows_P09_warm_32_particles": "load/prepare/run successful with Windows GetProcessMemoryInfo",
+    "Windows_B03_32_particles": "four rows, all active, zero failures, all four scientific hashes equal preceding records",
+    "Linux_memory_dispatch": "getrusage and proc paths successful"
+  },
+  "execution_owner": "remaining_performance; root independently read exact diff, reran Windows type/Ruff and bound source hashes",
+  "raw_smoke_paths": [
+    ".artifacts/platform_guard_20261123/p09.json",
+    ".artifacts/platform_guard_20261123/b03.json"
+  ],
+  "retained_results": "The nine preceding benchmark reports remain bound to their captured driver revisions; this helper guard changes no normal OS dispatch, physical calculation, timer policy or memory formula.",
+  "unchanged": [
+    "49 installed Python files",
+    "wheel and README",
+    "80 A/P scientific payloads",
+    "physics/numerical rules",
+    "report source authorities and snapshot"
+  ]
+}

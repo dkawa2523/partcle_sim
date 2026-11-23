@@ -516,27 +516,30 @@ def _process_memory_bytes() -> tuple[int, int | None, str]:
 
 
 def _windows_process_memory() -> _WindowsProcessMemoryCounters:
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-    psapi = ctypes.WinDLL("psapi", use_last_error=True)
-    get_current_process = kernel32.GetCurrentProcess
-    get_current_process.restype = ctypes.c_void_p
-    get_process_memory_info = psapi.GetProcessMemoryInfo
-    get_process_memory_info.argtypes = [
-        ctypes.c_void_p,
-        ctypes.POINTER(_WindowsProcessMemoryCounters),
-        ctypes.c_ulong,
-    ]
-    get_process_memory_info.restype = ctypes.c_int
-    counters = _WindowsProcessMemoryCounters()
-    counters.cb = ctypes.sizeof(counters)
-    succeeded = get_process_memory_info(
-        get_current_process(),
-        ctypes.byref(counters),
-        counters.cb,
-    )
-    if not succeeded:
-        raise OSError(ctypes.get_last_error(), "GetProcessMemoryInfo failed")
-    return counters
+    if sys.platform != "win32":
+        raise OSError("Windows process memory requires win32")
+    else:
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        psapi = ctypes.WinDLL("psapi", use_last_error=True)
+        get_current_process = kernel32.GetCurrentProcess
+        get_current_process.restype = ctypes.c_void_p
+        get_process_memory_info = psapi.GetProcessMemoryInfo
+        get_process_memory_info.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(_WindowsProcessMemoryCounters),
+            ctypes.c_ulong,
+        ]
+        get_process_memory_info.restype = ctypes.c_int
+        counters = _WindowsProcessMemoryCounters()
+        counters.cb = ctypes.sizeof(counters)
+        succeeded = get_process_memory_info(
+            get_current_process(),
+            ctypes.byref(counters),
+            counters.cb,
+        )
+        if not succeeded:
+            raise OSError(ctypes.get_last_error(), "GetProcessMemoryInfo failed")
+        return counters
 
 
 def _semantic_result_digest(result: Any) -> str:
