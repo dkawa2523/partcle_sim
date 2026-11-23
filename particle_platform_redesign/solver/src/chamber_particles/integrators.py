@@ -1712,16 +1712,6 @@ def _restrict_cubic_controls(
     return restricted
 
 
-def _restrict_quadratic_controls(
-    controls: FloatArray,
-    start_parameter: FloatArray,
-    target_parameter: FloatArray,
-) -> FloatArray:
-    restricted = np.empty_like(controls)
-    _compiled_restrict_controls_into(controls, start_parameter, target_parameter, restricted)
-    return restricted
-
-
 def _two_diff(left: FloatArray, right: FloatArray) -> tuple[FloatArray, FloatArray]:
     """Return the rounded difference and its exact binary64 residual.
 
@@ -1743,21 +1733,6 @@ def _two_diff(left: FloatArray, right: FloatArray) -> tuple[FloatArray, FloatArr
         residual.reshape(-1),
     )
     return difference, residual
-
-
-def _outward_bezier_bounds(
-    restricted_controls: FloatArray,
-    root_controls: FloatArray,
-    extra_scale: FloatArray | None = None,
-    absolute_padding: FloatArray | None = None,
-) -> tuple[FloatArray, FloatArray]:
-    lower_controls, upper_controls = _outward_bezier_control_bounds(
-        restricted_controls,
-        root_controls,
-        extra_scale,
-        absolute_padding,
-    )
-    return np.min(lower_controls, axis=1), np.max(upper_controls, axis=1)
 
 
 def _outward_bezier_control_bounds(
@@ -3823,24 +3798,6 @@ def _affine_exponential_multiplier_scalar(derivative: float, elapsed: float) -> 
             result = elapsed * (np.expm1(argument) / argument)
         elif np.isneginf(argument):
             result = -1.0 / derivative
-    return result
-
-
-@njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
-def _affine_exponential_multiplier_into(
-    derivative: FloatArray, elapsed: FloatArray, result: FloatArray
-) -> None:
-    for row in range(elapsed.size):
-        result.flat[row] = _affine_exponential_multiplier_scalar(
-            derivative.flat[row], elapsed.flat[row]
-        )
-
-
-def _affine_exponential_multiplier(
-    rate_derivative_s_inv: FloatArray, elapsed_s: FloatArray
-) -> FloatArray:
-    result = np.empty_like(elapsed_s)
-    _affine_exponential_multiplier_into(rate_derivative_s_inv, elapsed_s, result)
     return result
 
 

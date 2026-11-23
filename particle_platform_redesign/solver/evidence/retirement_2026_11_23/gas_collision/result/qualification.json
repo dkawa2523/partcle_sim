@@ -1,0 +1,295 @@
+{
+  "model": "3D local Maxwellian, sphere, heavy diffuse flux-Maxwell, prescribed Tw",
+  "status": "COLLISION_MOMENT_QUALIFICATION_ONLY",
+  "gas_orders": [
+    32,
+    64,
+    96
+  ],
+  "rows": [
+    {
+      "label": "zero_slip",
+      "speed_ratio_S": 0.0,
+      "mass_ratio": 0.00010833333333333334,
+      "particle_mass_kg": 1.2e-21,
+      "gas_temperature_K": 310.0,
+      "diffuse_fraction": 0.9,
+      "surface_to_gas_temperature_ratio": 1.0,
+      "production_mean_acceleration_m_s2": -0.0,
+      "collision_mean_acceleration_m_s2": -1.7520721699476578e-12,
+      "mean_residual_normalized": 4.705937490136677e-18,
+      "gas_quadrature_mean_change_normalized": 2.5825631690153987e-18,
+      "gas_quadrature_Q_change_relative_max": 4.101052771254535e-15,
+      "Q_parallel_m2_s3": 14636.888054149656,
+      "Q_transverse_m2_s3": 14636.888054149758,
+      "Q_parallel_over_transverse": 0.999999999999993,
+      "Q_parallel_over_linear_FDT": 1.000000000000001,
+      "Q_transverse_over_linear_FDT": 1.000000000000008,
+      "Q_parallel_over_instantaneous_rate_FDT": 1.0000000000000013,
+      "Q_transverse_over_instantaneous_rate_FDT": 1.0000000000000082,
+      "collision_rate_s_inv": 10495874.971885229,
+      "incident_probability_mass": 1.0000000000000047,
+      "linear_relaxation_rate_s_inv": 2051.894489473215,
+      "instantaneous_relaxation_rate_s_inv": 2051.8944894732144,
+      "specular_only_recoil_mean_change_normalized": 9.454938583593286e-19,
+      "specular_only_recoil_Q_change_relative_max": 1.600611747232333e-05
+    },
+    {
+      "label": "finite_slip",
+      "speed_ratio_S": 4.0,
+      "mass_ratio": 0.00010833333333333334,
+      "particle_mass_kg": 1.2e-21,
+      "gas_temperature_K": 310.0,
+      "diffuse_fraction": 0.9,
+      "surface_to_gas_temperature_ratio": 1.0,
+      "production_mean_acceleration_m_s2": -4941766.048743146,
+      "collision_mean_acceleration_m_s2": -4941766.048742698,
+      "mean_residual_normalized": 9.06490015859771e-14,
+      "gas_quadrature_mean_change_normalized": 6.162624432144389e-14,
+      "gas_quadrature_Q_change_relative_max": 6.441552802755406e-14,
+      "Q_parallel_m2_s3": 681335.349917195,
+      "Q_transverse_m2_s3": 54114.848784446316,
+      "Q_parallel_over_transverse": 12.590543357722998,
+      "Q_parallel_over_linear_FDT": 46.54919456899396,
+      "Q_transverse_over_linear_FDT": 3.6971553368616803,
+      "Q_parallel_over_instantaneous_rate_FDT": 19.838590634754553,
+      "Q_transverse_over_instantaneous_rate_FDT": 1.5756739062882164,
+      "collision_rate_s_inv": 38369623.89988506,
+      "incident_probability_mass": 0.9999999999999155,
+      "linear_relaxation_rate_s_inv": 2051.894489473215,
+      "instantaneous_relaxation_rate_s_inv": 4814.557524978988,
+      "specular_only_recoil_mean_change_normalized": 9.62662278627493e-06,
+      "specular_only_recoil_Q_change_relative_max": 7.91872504865011e-05
+    }
+  ],
+  "jump_results": [
+    {
+      "label": "finite_slip",
+      "seed": 20261015,
+      "samples": 200000,
+      "seconds": 0.2036842000670731,
+      "mean_error_in_estimated_standard_errors": [
+        -1.0971409348542858,
+        -0.4048512814153738,
+        0.45589151399268074
+      ],
+      "raw_second_error_in_estimated_standard_errors": [
+        0.6072762959842435,
+        0.21456168341727294,
+        -1.066759996796975
+      ],
+      "rms_jump_over_particle_thermal_width": [
+        0.07058301802475622,
+        0.019893800433012872,
+        0.019843364169325275
+      ],
+      "frozen_compound_Poisson_cumulants": {
+        "2.5e-07": {
+          "expected_collisions": 9.592405974971264,
+          "mean_increment_m_s": [
+            -1.2362429123646261,
+            -0.000326256070602189,
+            0.00036645621313395285
+          ],
+          "increment_variance_m2_s2": [
+            0.17044792940433517,
+            0.013540253500823232,
+            0.013471683988088123
+          ],
+          "standardized_skewness": [
+            -0.35133893561679563,
+            0.0007696418716289921,
+            -0.00110803987392361
+          ],
+          "excess_kurtosis": [
+            0.1295802277433903,
+            0.4332917576036376,
+            0.4325730392810264
+          ]
+        },
+        "1e-06": {
+          "expected_collisions": 38.369623899885056,
+          "mean_increment_m_s": [
+            -4.9449716494585045,
+            -0.001305024282408756,
+            0.0014658248525358114
+          ],
+          "increment_variance_m2_s2": [
+            0.6817917176173407,
+            0.05416101400329293,
+            0.053886735952352494
+          ],
+          "standardized_skewness": [
+            -0.17566946780839782,
+            0.00038482093581449606,
+            -0.000554019936961805
+          ],
+          "excess_kurtosis": [
+            0.03239505693584758,
+            0.1083229394009094,
+            0.1081432598202566
+          ]
+        }
+      },
+      "characteristic_probe_particle_thermal_width": {
+        "width_m_s": 1.8885646886811511,
+        "exact_generator_per_collision_real": [
+          -0.0024896960894639497,
+          -0.00019785452604499936,
+          -0.00019685274745385816
+        ],
+        "exact_generator_per_collision_imag": [
+          -0.06817709382266192,
+          -1.801252421856622e-05,
+          2.0232918536688264e-05
+        ],
+        "second_order_generator_per_collision_real": [
+          -0.0024909812167415715,
+          -0.00019788164783427007,
+          -0.00019687955077822935
+        ],
+        "second_order_generator_per_collision_imag": [
+          -0.06824084541829104,
+          -1.8009397552910368e-05,
+          2.0228453116235522e-05
+        ],
+        "absolute_truncation_residual_per_collision": [
+          6.376454733923892e-05,
+          2.7301419218946673e-08,
+          2.717274695659429e-08
+        ],
+        "relative_truncation_residual": [
+          0.0009337825125627163,
+          0.0001374005541765523,
+          0.00013729433345809915
+        ],
+        "exact_generator_sample_standard_error": [
+          4.0316193744024863e-05,
+          4.447873422115875e-05,
+          4.43659950228808e-05
+        ],
+        "truncation_residual_paired_standard_error": [
+          1.1027444864217546e-07,
+          1.7568723924921357e-08,
+          1.726599600747415e-08
+        ]
+      },
+      "characteristic_probe_one_tenth_particle_thermal_width": {
+        "width_m_s": 0.1888564688681151,
+        "exact_generator_per_collision_real": [
+          -0.23656312915675687,
+          -0.01951997572197953,
+          -0.019422848330214477
+        ],
+        "exact_generator_per_collision_imag": [
+          -0.6207711944900192,
+          -0.00018309772579549647,
+          0.00020640149003698174
+        ],
+        "second_order_generator_per_collision_real": [
+          -0.24909812167415993,
+          -0.01978816478342685,
+          -0.019687955077822877
+        ],
+        "second_order_generator_per_collision_imag": [
+          -0.6824084541829002,
+          -0.00018009397552910884,
+          0.00020228453116235152
+        ],
+        "absolute_truncation_residual_per_collision": [
+          0.06289894927468191,
+          0.00026820588210488223,
+          0.00026513871271068517
+        ],
+        "relative_truncation_residual": [
+          0.08658387460768288,
+          0.013553291979924616,
+          0.01346634111831292
+        ],
+        "exact_generator_sample_standard_error": [
+          0.0003987946048133763,
+          0.0004396537374025358,
+          0.00043856926114693256
+        ],
+        "truncation_residual_paired_standard_error": [
+          0.00010760712979918787,
+          1.739584290771517e-05,
+          1.710299322385892e-05
+        ]
+      },
+      "frozen_distribution_probe": {
+        "duration_s": 2.5e-07,
+        "intervals": 10000,
+        "seed": 21261015,
+        "no_collision_atom_probability": 6.824502809543846e-05,
+        "Gaussian_no_collision_atom_probability": 0.0,
+        "Gaussian_each_3sigma_tail_probability": 0.0013498980316301035,
+        "compound_Poisson_lower_3sigma_tail_probability": [
+          0.0033,
+          0.0024,
+          0.003
+        ],
+        "compound_Poisson_upper_3sigma_tail_probability": [
+          0.0,
+          0.0024,
+          0.0022
+        ],
+        "lower_tail_sampling_standard_error": [
+          0.0005735076285456019,
+          0.0004893097178679368,
+          0.0005469003565550127
+        ],
+        "upper_tail_sampling_standard_error": [
+          0.0,
+          0.0004893097178679368,
+          0.0004685253461660319
+        ],
+        "lower_tail_Wilson_95_interval": [
+          [
+            0.002350823409618217,
+            0.004630640571811912
+          ],
+          [
+            0.0016133788093978358,
+            0.0035687763690995114
+          ],
+          [
+            0.002102287694052099,
+            0.004279406686400436
+          ]
+        ],
+        "upper_tail_Wilson_95_interval": [
+          [
+            0.0,
+            0.00038399837067659557
+          ],
+          [
+            0.0016133788093978358,
+            0.0035687763690995114
+          ],
+          [
+            0.0014533495777926423,
+            0.003328959200052976
+          ]
+        ],
+        "zero_count_interpretation": "Zero observed tail counts do not establish zero probability; use the reported Wilson interval.",
+        "scope": "Frozen bath/velocity distribution only; this is not a wall crossing or state-dependent trajectory calculation."
+      },
+      "scope": "Frozen velocity/bath jump law only. Neither a nonlinear trajectory distribution nor a wall first-arrival test. Finite-recoil diffuse dynamics remain unqualified."
+    }
+  ],
+  "not_qualified": [
+    "Nonlinear SDE trajectory law, multiplicative-noise integration, wall first arrival or deposition.",
+    "Physically unconstrained 3D motion from a meridional 2DOF solver.",
+    "Species-resolved mixture truth from one supplied pseudogas mass.",
+    "Finite-recoil diffuse energy transfer or dynamic particle temperature.",
+    "High-drift thermophoresis without an incident-distribution/heat-flux closure."
+  ],
+  "seconds": 0.44315499998629093,
+  "peak_traced_allocation_bytes": 65689160,
+  "memory_scope": "Python/NumPy allocations traced by tracemalloc; not whole-process RSS.",
+  "input_binding": {
+    "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\evidence\\retirement_2026_11_23\\gas_collision\\regimes.csv",
+    "sha256": "4dfe003489d2746c525280b4c70dc04fc7d8bc2a8da90c4d32aa452a4ffd639a"
+  }
+}

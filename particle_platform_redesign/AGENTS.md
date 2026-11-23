@@ -42,7 +42,7 @@ COMSOLは入力adapterと外部V&Vの一つであり、solver coreの目的で�
 | 現行の方程式、物理model、数値method、適用域 | `solver/docs/physics_models.md`、`solver/docs/numerics.md` |
 | 導出・文献調査・研究根拠 | `technical_research.md` |
 | file責務、work package、実装順、完了条件 | `implementation_plan.md` |
-| P14-Pの否定的closeout履歴、同一runのprocess並列、source別の品質・用途性能・配布資格 | `solver/docs/parallel_execution_plan.md` |
+| 同一runのprocess並列、資源境界、現行の性能測定 | `solver/docs/parallel_execution_plan.md` |
 | 品質toolとgate | `quality_tooling_plan.md` |
 | COMSOL比較 | `vv_methodology.md` |
 | datasetの許可用途 | `data_quality_assessment.md` |
@@ -173,7 +173,7 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 - production hot loopへparticleごとのPython callbackを入れない。
 - 現行は全particle state resident、scratchだけbounded slabとする。
 - outer particle batchやout-of-core stateは実測上必要になるまで作らない。
-- 2026-10-12の利用者指示に従い追加JIT化を停止し、既存数値ownerを使うprocess並列を進める。
+- 既存数値ownerを使い、同一runをCPU processで並列実行する。追加JIT化は今回の前提にしない。
   計算engineは一つとし、親がmacro/release/output/checkpoint、永続workerが排他的particle slabを所有する。
   `ThreadPoolExecutor`、Numba内部parallel mask、model別engine、backend選択frameworkは導入しない。
   共有入力・state/replay、worker専用scratch、IPCと移送時の同時live容量を一つの予算へ入れる。
@@ -198,9 +198,7 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 - 最適化前後でtrajectory/event identity、時間、peak memoryを同じcaseで測る。
 - GPUはCPUと同じcase、model revision、RNG、event、result schemaを使い、end-to-end speedupを測る。
 
-P12/P14のouter worker-waveとP14-PのNumba内部parallel試行は履歴baselineであり、製品機能ではない。
-旧thread設定、pool、parallel maskは削除済みで、processと既存single-thread数値ownerへ一本化した。
-否定的計測とsource別資格は`solver/docs/parallel_execution_plan.md`が所有し、ここへ数値を複製しない。
+実行資源と性能測定は`solver/docs/parallel_execution_plan.md`を参照する。
 
 独立caseのprocess並列はsolver外の運用とする。同一runは明示workers数で実行し、追加JIT化を前提にしない。
 自動tuner、experimental flag、第二scheduler、互換aliasで失敗経路を復活させない。
@@ -351,10 +349,9 @@ bug修正では症状ごとではなく、原因を表す最小回帰caseを一�
 - stale test、fixture、config、文書も同じchangeで削除する。
 - 削除後は`rg`とimport-linterで旧symbolへの参照がないことを確認する。
 - 二実装の比較が必要なら片方をverificationまたは外部benchmarkに置き、production dispatchにしない。
-- 公開schema互換が必要な場合だけ、終了versionと削除条件を明示する。
+- 現行仕様だけを受理する。過去schemaを読む互換reader、移行用dispatch、旧入口aliasは提供しない。
 
-新旧経路を一時併存させる必要がある場合、そのchangeを未完了と扱う。次の通常featureを積む前に統合または
-削除する。
+必要な役割は現行の所有者へ移し、呼出側・設定・検証・説明まで同時に更新する。撤去の経緯は作業記録へ置く。
 
 ## 15. 診断と出力
 

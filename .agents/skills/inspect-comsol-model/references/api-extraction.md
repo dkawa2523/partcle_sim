@@ -169,12 +169,12 @@ launching a costly full run.
 
 ## Reuse boundaries
 
-The local Java files `InspectM3VModels.java`,
-`InspectM3C2ModelSemantics.java`, and `ParticleRunReadback.java` under
-`particle_platform_redesign/solver/tools/vv/comsol/comsol/` illustrate native
-readback. They use specific tags, expressions, 2D selections and source names.
-In particular `semanticGroup(tag)`, force-tag filters, and hard-coded particle
-properties are not generic knowledge. Reuse a verified access pattern, not
-their case assumptions. A new exporter should accept its selected model/scope
-explicitly and emit evidence, leaving model selection and numerical verdicts
-to preparation and evaluation.
+The current Java files `RunXYMinimalSuite.java` and
+`RunM3CCriticalBoundaries.java` under
+`particle_platform_redesign/solver/tools/vv/comsol/comsol/` create deliberately
+small native benchmark observations. They are fixed verification producers,
+not an inspector for an unfamiliar MPH. Use the API access and export patterns
+above with the explicitly inspected model/scope. Tags, force expressions,
+boundary selections and particle properties must come from that model's
+observations. A case-specific exporter emits evidence; preparation owns model
+selection and evaluation owns numerical verdicts.

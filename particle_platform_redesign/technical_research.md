@@ -676,7 +676,7 @@ COMSOL fittingは行わず、以前の比較結果を現行revisionの再認証�
 保ったままend-to-end中央値を12.29%短縮した。追加の数値model、診断、runtimeは導入せず、次ownerへ進まず終了した。
 正式characterizationは
 2,000/20,000粒子×4構成×3反復を全粒子active・failure 0で完了し、静的なB03 path-array上限`648 B/row`も
-`2048 B/row`以内である。計時/RSSは[`solver/evidence/b03/`](solver/evidence/b03/README.md)のmachine-local・
+`2048 B/row`以内である。計時/RSSは[`solver/evidence/b03/`（当時の記録）](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/solver/evidence/b03/README.md)のmachine-local・
 non-gating観測である。characterizationで検出した反復加算由来の終端tailはengine v34で修正し、macro timeを
 補償積和による`start + n*dt`のindexed gridから構築してfloat64構築roundoff内だけendへsnapする。
 

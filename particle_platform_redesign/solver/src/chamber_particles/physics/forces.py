@@ -3445,15 +3445,3 @@ def _outward_abs_upper(value: FloatArray, name: str) -> FloatArray:
     if not bool(np.isfinite(result).all()):
         raise PhysicsEvaluationError(f"{name} is not finite")
     return result
-
-
-def _outward_nonnegative_lower(value: FloatArray, name: str) -> FloatArray:
-    """Contract a short nonnegative float64 expression toward zero."""
-
-    result = np.asarray(value, dtype=np.float64)
-    _require_nonnegative(result, name)
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        result = np.nextafter(result / _BOUND_ROUNDOFF_FACTOR, 0.0)
-    if not bool(np.isfinite(result).all()):
-        raise PhysicsEvaluationError(f"{name} is not finite")
-    return result

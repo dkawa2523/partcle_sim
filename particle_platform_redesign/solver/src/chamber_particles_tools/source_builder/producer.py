@@ -3,31 +3,25 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 import io
-import json
 from collections.abc import Mapping, Sequence
-from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from chamber_particles import load_case
 from chamber_particles.case_format import (
     DataBundle,
     RealizedSource,
     RealizedSurfaceSource,
     RealizedTableSource,
 )
-from chamber_particles.yaml_input import parse_document
 
 type FloatArray = NDArray[np.float64]
 type VelocityMode = Literal["vector", "speed_direction", "momentum", "energy_direction"]
 
-REVISION = "explicit_realized_initial_rows_v2"
 _ELEMENTARY_CHARGE_C = 1.602176634e-19
 _LENGTH_UNITS = {"m": 1.0, "cm": 1e-2, "mm": 1e-3, "um": 1e-6, "nm": 1e-9}
 _FIELD_UNITS = {
@@ -385,76 +379,4 @@ def _csv_velocity(
         basis_to_case=config["basis_to_case"],
         frame=config["frame"],
         direction=direction,
-    )
-
-
-def prepare_case(
-    template: str | Path, rows: str | Path, configuration: str | Path, output: str | Path
-) -> dict[str, str]:
-    """Write a fresh canonical case through the sole writer, then publicly load it."""
-    template_path, rows_path, config_path = map(Path, (template, rows, configuration))
-    template_raw, rows_raw, config_raw = (
-        template_path.read_bytes(),
-        rows_path.read_bytes(),
-        config_path.read_bytes(),
-    )
-    parsed_config = parse_document(config_raw)
-    if not isinstance(parsed_config, dict):
-        raise ValueError("source configuration must be a mapping")
-    config = cast(dict[str, Any], parsed_config)
-    _configuration(config)
-    case = load_case(template_path)
-    if template_path.read_bytes() != template_raw:
-        raise ValueError("template changed during canonical loading")
-    source = _source_from_rows(
-        _select_rows(rows_raw, config.get("filter_equals", {})), case.data, config
-    )
-    snapshots = {
-        "template_yaml": template_raw,
-        "rows_csv": rows_raw,
-        "configuration_json": config_raw,
-    }
-    inputs = {name: "sha256:" + hashlib.sha256(raw).hexdigest() for name, raw in snapshots.items()}
-    inputs["template_content_hash"] = case.content_hash
-    provenance = _provenance(case.data, inputs, config)
-    data = replace(
-        case.data,
-        provenance_json=provenance,
-        sources=case.data.sources,
-    )
-    document = cast(dict[str, Any], parse_document(template_raw))
-    sources = tuple(source if item.name == source.name else item for item in data.sources)
-    if not any(item.name == source.name for item in data.sources):
-        sources = (*sources, source)
-    # The shared publisher owns both HDF5 identity and the runnable YAML reference.
-    from chamber_particles_tools.inputs import create_case
-
-    prepared = create_case(data, document, sources, output)
-    return {
-        "case": str(prepared.case_path),
-        "data": str(prepared.data_path),
-        "content_hash": prepared.content_hash,
-    }
-
-
-def _provenance(data: DataBundle, inputs: dict[str, str], config: Mapping[str, Any]) -> str:
-    upstream = json.loads(data.provenance_json)
-    source_hash = hashlib.sha256(json.dumps(inputs, sort_keys=True).encode()).hexdigest()
-    return json.dumps(
-        {
-            "producer": "source-builder",
-            "producer_version": REVISION,
-            "source_sha256": "sha256:" + source_hash,
-            "field_semantics_revision": upstream["field_semantics_revision"],
-            "producer_metadata": {
-                "upstream": upstream,
-                "source_builder": {
-                    "revision": REVISION,
-                    "inputs": inputs,
-                    "configuration": dict(config),
-                    "inheritance": config.get("inherit_from", "none; explicit properties"),
-                    "sampling": "none; supplied joint realization retained",
-                },
-            },
-        }
     )

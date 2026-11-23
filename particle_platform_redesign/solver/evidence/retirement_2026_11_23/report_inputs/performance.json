@@ -1,0 +1,61 @@
+{
+  "queries": {
+    "implementation_work_packages": {
+      "rows": [
+        {
+          "package": "利用の一巡",
+          "capability": "wheelの13 CLI操作・5例題と自分のCSV入力",
+          "deliverable": "入力→check/run→元caseなしのJSON/CSV/形状付きSVG",
+          "gate": "checkout外のruntime-only環境で実行成功"
+        },
+        {
+          "package": "現在の性能経路",
+          "capability": "9つのdistinctなworkloadを現行engineで実行",
+          "deliverable": "proposal/memory/JIT/exponential/matrix/representative/Brownian/local applicability/workers",
+          "gate": "全経路の小型実行成功。解析/OU/charge等の独立6確認も別に実行"
+        },
+        {
+          "package": "1 process / 1万粒子",
+          "capability": "公開API 29.278202 s /320 macro",
+          "deliverable": "入力作成・warmup・検査・hashingは計時外",
+          "gate": "既知targetへ全粒子capture、failure0、残留child0"
+        },
+        {
+          "package": "4 process / 同一入力",
+          "capability": "公開API 18.353255 s /320 macro",
+          "deliverable": "同条件の1 process比 1.5953倍",
+          "gate": "全emitted science一致。frames/probesなし、各1観測で一般SLAは認定しない"
+        },
+        {
+          "package": "精度と実装identity",
+          "capability": "XY/RZ・time/mesh refinement・解析target・OU/charge",
+          "deliverable": "独立参照と同一出力検査を区別",
+          "gate": "比較値の一致だけで正しさを判断しない"
+        }
+      ],
+      "source": {
+        "label": "現行sourceの公開経路・性能実行",
+        "files": [
+          "solver/evidence/retirement_2026_11_23/performance/process_workers.json",
+          "solver/evidence/retirement_2026_11_23/performance/README.md",
+          "solver/evidence/retirement_2026_11_23/installed_workflow.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "実行条件と限定",
+            "definition": "Single measured observation per worker count after one untimed serial warmup; public API includes spawn/IPC/writer/shutdown. No frames/probes, no portable SLA.",
+            "componentIds": [
+              "work-package-table"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/retirement_2026_11_23/performance/process_workers.json\", \"sha256\": \"sha256:cb66b8251df834db7096af32cb8fa635c9d8034d85974a37e3b068b941c9ca97\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/performance/README.md\", \"sha256\": \"sha256:04497508bbeffeb98db4d32e64ee1f07d169ce66cdd7b3c61edeea3c939fe8fb\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/installed_workflow.json\", \"sha256\": \"sha256:f007273c7b84fe24a8e63efe8fdd0a50a18122c668518efeeb6b49218b5ed48b\"}]"
+          }
+        ]
+      }
+    }
+  }
+}

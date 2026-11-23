@@ -205,6 +205,7 @@ def _materialize_case(directory: Path, particle_count: int, memory_limit_mb: int
     directory.mkdir(parents=True)
     definition = build_microcase("C01")
     source = definition.data.sources[0]
+    assert isinstance(source, RealizedTableSource)
     expanded = _repeat_source(source, particle_count)
     data = replace(definition.data, sources=(expanded,))
     data_path = directory / "case.h5"
@@ -329,7 +330,7 @@ def _execute_scope(
     }
     timings: dict[str, float] = {"load_case_s": load_elapsed}
     memory_plan: object | None = None
-    algorithms: dict[str, object] = {}
+    algorithms: dict[str, Any] = {}
     artifact_bytes = 0
     semantic_digest: str | None = None
     particle_count = expected_particle_count
@@ -412,7 +413,7 @@ def _observation(
     rss_after: int | None,
     rss_source: str,
     memory_plan: object | None,
-    algorithms: dict[str, object],
+    algorithms: dict[str, Any],
     artifact_bytes: int,
     semantic_digest: str | None,
 ) -> dict[str, Any]:
@@ -446,7 +447,7 @@ def _prepared_memory_plan(prepared: Any) -> object:
     return _validated_memory_plan(_json_value(prepared.memory_plan.as_manifest()))
 
 
-def _manifest_memory_plan(manifest: Mapping[str, object]) -> object:
+def _manifest_memory_plan(manifest: Mapping[str, Any]) -> object:
     try:
         plan = manifest["memory_plan"]
     except KeyError as error:
@@ -505,7 +506,8 @@ def _process_memory_bytes() -> tuple[int, int | None, str]:
 
     import resource
 
-    maximum = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    platform_resource: Any = resource
+    maximum = int(platform_resource.getrusage(platform_resource.RUSAGE_SELF).ru_maxrss)
     peak_bytes = maximum if sys.platform == "darwin" else maximum * 1024
     if sys.platform.startswith("linux"):
         fields_value = Path("/proc/self/statm").read_text(encoding="ascii").split()
@@ -564,7 +566,7 @@ def _semantic_result_digest(result: Any) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
-def _digest_dataclass(digest: Any, name: str, value: object) -> None:
+def _digest_dataclass(digest: Any, name: str, value: Any) -> None:
     _digest_bytes(digest, name.encode("utf-8"))
     for field in fields(value):
         field_value = getattr(value, field.name)
@@ -603,7 +605,7 @@ def _digest_bytes(digest: Any, value: bytes | memoryview) -> None:
 
 
 def _validate_observations(
-    observations: Sequence[Mapping[str, object]],
+    observations: Sequence[Mapping[str, Any]],
     particle_counts: tuple[int, ...],
     scopes: tuple[str, ...],
 ) -> None:
@@ -624,14 +626,14 @@ def _validate_observations(
                 )
 
 
-def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+def _summaries(observations: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     keys = sorted(
         {
             (int(item["particle_count"]), str(item["mode"]), str(item["scope"]))
             for item in observations
         }
     )
-    summaries: list[dict[str, object]] = []
+    summaries: list[dict[str, Any]] = []
     for particle_count, mode, scope in keys:
         selected = [
             item
@@ -667,9 +669,9 @@ def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, o
     return summaries
 
 
-def _identity_summary(observations: Sequence[Mapping[str, object]]) -> dict[str, object]:
+def _identity_summary(observations: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     run_observations = [item for item in observations if item["scope"] == "run"]
-    by_count: dict[str, object] = {}
+    by_count: dict[str, Any] = {}
     for count in sorted({int(item["particle_count"]) for item in run_observations}):
         selected = [item for item in run_observations if item["particle_count"] == count]
         by_count[str(count)] = {
@@ -685,14 +687,14 @@ def _identity_summary(observations: Sequence[Mapping[str, object]]) -> dict[str,
     }
 
 
-def _mapping_value(value: Mapping[str, object], key: str) -> Mapping[str, object]:
+def _mapping_value(value: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     result = value[key]
     if not isinstance(result, Mapping):
         raise RuntimeError(f"observation {key} is not a mapping")
     return result
 
 
-def _machine_metadata() -> dict[str, object]:
+def _machine_metadata() -> dict[str, Any]:
     lock_path = Path(__file__).resolve().parents[2] / "uv.lock"
     return {
         "platform": platform.platform(),

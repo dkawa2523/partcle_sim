@@ -1,0 +1,82 @@
+{
+  "artifact_count_before_summary": 36,
+  "facets": [
+    16,
+    32,
+    64,
+    128
+  ],
+  "gates": {
+    "finest_normal_error_below_3e_2": true,
+    "finest_point_error_below_1e_3_m": true,
+    "finest_reflected_velocity_error_below_6e_2_m_s": true,
+    "normal_order_at_least_0p8": true,
+    "one_reflection_per_particle": true,
+    "point_order_at_least_1p8": true,
+    "reflected_velocity_order_at_least_0p8": true,
+    "rms_errors_decrease_with_refinement": true,
+    "time_order_at_least_1p8": true
+  },
+  "levels": [
+    {
+      "facets": 16,
+      "maximum_normal_error": 0.19546774305275338,
+      "maximum_point_error_m": 0.019006088764457012,
+      "maximum_reflected_velocity_error_m_s": 0.3890639158944672,
+      "maximum_time_error_s": 0.019006088764457085,
+      "rms_normal_error": 0.11665049493380591,
+      "rms_point_error_m": 0.013875485713063868,
+      "rms_reflected_velocity_error_m_s": 0.23258229965993674,
+      "rms_time_error_s": 0.013875485713063821
+    },
+    {
+      "facets": 32,
+      "maximum_normal_error": 0.09756675953111636,
+      "maximum_point_error_m": 0.0047656414371304474,
+      "maximum_reflected_velocity_error_m_s": 0.19490118961011058,
+      "maximum_time_error_s": 0.00476564143713043,
+      "rms_normal_error": 0.05833196334088312,
+      "rms_point_error_m": 0.0034699636701353643,
+      "rms_reflected_velocity_error_m_s": 0.11657437941833237,
+      "rms_time_error_s": 0.0034699636701353257
+    },
+    {
+      "facets": 64,
+      "maximum_normal_error": 0.04851335565122986,
+      "maximum_point_error_m": 0.001193660111107,
+      "maximum_reflected_velocity_error_m_s": 0.0969981625027985,
+      "maximum_time_error_s": 0.0011936601111068867,
+      "rms_normal_error": 0.029179357259320873,
+      "rms_point_error_m": 0.0008672891440559937,
+      "rms_reflected_velocity_error_m_s": 0.058347520733821524,
+      "rms_time_error_s": 0.00086728914405596
+    },
+    {
+      "facets": 128,
+      "maximum_normal_error": 0.02397384758221262,
+      "maximum_point_error_m": 0.00030020267201791545,
+      "maximum_reflected_velocity_error_m_s": 0.04794425032621467,
+      "maximum_time_error_s": 0.00030020267201791295,
+      "rms_normal_error": 0.014642022510123672,
+      "rms_point_error_m": 0.0002152561494957092,
+      "rms_reflected_velocity_error_m_s": 0.02928266602413626,
+      "rms_time_error_s": 0.00021525614949577198
+    }
+  ],
+  "not_tested": [
+    "COMSOL curved-geometry equivalence",
+    "finite-radius contact",
+    "grazing/corner/multiple-hit behavior",
+    "curved elements in the production solver"
+  ],
+  "observed_orders": {
+    "rms_normal": 0.9981355555685293,
+    "rms_point": 2.003135563270743,
+    "rms_reflected_velocity": 0.9967374967318079,
+    "rms_time": 2.003135563270619
+  },
+  "particle_count_per_level": 17,
+  "scientific_status": "PASS",
+  "tested_scope": "Cartesian point particles, force-free straight flight, specular reflection, unit-circle wall approximated by inscribed line2 facets",
+  "tool_revision": "curved_wall_line2_convergence_v1"
+}

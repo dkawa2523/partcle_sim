@@ -166,9 +166,8 @@ results require their original environment for export or explicit rerunning,
 not a private compatibility path or relabeled manifest.
 
 Existing exporters/evaluators are case-bound until their source/CLI prove
-otherwise. `diagnose_matched_layers.py`, for example, hard-codes `287 * 41` rows
-and a narrow force profile. Adapt a small external tool to actual bindings when
-necessary. Do not introduce a universal COMSOL framework, private production
+otherwise. Check actual required fields, IDs, clocks and equation scope before
+reusing one. Adapt a small external tool to actual bindings when necessary. Do not introduce a universal COMSOL framework, private production
 orchestration, second engine or core COMSOL branch.
 
 For supported deterministic pre-event states, use the current

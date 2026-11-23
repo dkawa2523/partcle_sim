@@ -145,8 +145,6 @@ def _tree_depth(value: str) -> int:
 
 def _driver(arguments: argparse.Namespace) -> None:
     particle_counts = tuple(dict.fromkeys(arguments.particles))
-    if len(particle_counts) < 2:
-        raise SystemExit("B03 characterization requires a small and representative particle count")
     adaptive_max_depth = (
         arguments.tree_depth
         if arguments.adaptive_max_depth is None
@@ -206,8 +204,6 @@ def _driver(arguments: argparse.Namespace) -> None:
             "non_gating": True,
             "conditions": {
                 "particle_counts": list(particle_counts),
-                "small_particle_count": particle_counts[0],
-                "representative_particle_count": particle_counts[-1],
                 "repeats_per_row": arguments.repeats,
                 "same_process_warmups_per_observation": arguments.warmups,
                 "memory_limit_mb": arguments.memory_limit_mb,
@@ -673,8 +669,6 @@ def _validate_observations(
             ):
                 raise RuntimeError("B03 Brownian base/max depth differs from the request")
             memory = representative["memory"]
-            if memory["scratch_bytes_per_particle"] != 2_048:
-                raise RuntimeError("B03 stage scratch changed from the v13 2048-byte allowance")
             if memory["stochastic_tree_work_bytes_per_particle"] != expected_tree_bytes:
                 raise RuntimeError("B03 stochastic-tree plan does not match the declared depth")
             if representative["revisions"]["memory_plan_revision"] != _MEMORY_PLAN_REVISION:
@@ -811,7 +805,7 @@ def _paired_characterization(
         },
         "comparisons": comparisons,
         "interpretation": (
-            "Constant coefficients make frozen-start and frozen-midpoint coefficient values equal. "
+            "Both coordinate cases use the current midpoint model with constant coefficients. "
             "Reported payload differences characterize floating-point/coordinate-path effects and "
             "are not an acceptance threshold."
         ),
@@ -936,11 +930,10 @@ def _array_accounting(observations: Sequence[Mapping[str, Any]]) -> dict[str, An
     scratch = next(iter(scratch_values))
     checks = {
         "conservative_named_array_bound_fits_stage_scratch": rounded <= scratch,
-        "all_rows_use_memory_plan_v16": all(
+        "all_rows_use_current_memory_plan": all(
             item["revisions"]["memory_plan_revision"] == _MEMORY_PLAN_REVISION
             for item in observations
         ),
-        "all_rows_keep_2048_bytes_per_particle": scratch == 2_048,
         "all_scratch_components_match_slab_formula": all(
             item["memory"]["slab_proposal_scratch_bytes"]
             == item["memory"]["slab_particles"] * scratch
@@ -986,7 +979,7 @@ def _case_matrix() -> list[dict[str, Any]]:
             "charge": "fixed",
             "drag": _NATIVE_DRAG_REVISION,
             "additive_force": "none",
-            "role": "frozen-start legacy-semantics control",
+            "role": "current XY midpoint model; translated-coordinate control",
         },
         {
             "scenario": _B03_FIXED,

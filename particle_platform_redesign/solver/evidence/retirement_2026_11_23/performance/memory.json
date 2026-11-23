@@ -1,0 +1,567 @@
+{
+  "benchmark": "p09_load_prepare_runtime_memory_v1",
+  "captured_at_utc": "2026-11-23T01:01:29.520517+00:00",
+  "conditions": {
+    "case_materialization_in_measured_scope": false,
+    "fresh_process_note": "fresh means a new Python process; filesystem caches are not flushed",
+    "memory_limit_mb": 4096,
+    "modes": [
+      "fresh",
+      "warm"
+    ],
+    "particle_counts": [
+      8
+    ],
+    "repeats": 1,
+    "scopes": [
+      "load",
+      "prepare",
+      "run"
+    ],
+    "warmup_runs_for_warm_mode": 1
+  },
+  "identity": {
+    "by_particle_count": {
+      "8": {
+        "exact_match": true,
+        "observations_compared": 2,
+        "semantic_result_sha256": "sha256:00f6d6fe25e3f343ca1c87921d88378b8ef1085c1cdc7fb4d0cd83734bdf5217"
+      }
+    },
+    "definition": "stable manifest semantics plus final/events/series/frames/probes; timing and RSS excluded"
+  },
+  "interpretation": {
+    "prepare_scope": "prepare is an internal characterization of the production engine, not a public API or compatibility contract",
+    "rss": "OS process high-water RSS includes Python, native libraries, and HDF5; it is distinct from the solver-owned array memory plan",
+    "timing": "absolute seconds are descriptive and never a CI threshold"
+  },
+  "machine": {
+    "chamber_particles": "0.4.0",
+    "h5py": "3.16.0",
+    "logical_cpu_count": 20,
+    "machine": "AMD64",
+    "numpy": "2.5.3",
+    "peak_rss_source": "Windows GetProcessMemoryInfo",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.13",
+    "uv_lock_sha256": "sha256:ac4a7f34936b36078bf79e871e05505eb8a0f88315152e0980aaa2b0153bba56"
+  },
+  "non_gating": true,
+  "observations": [
+    {
+      "algorithms": {},
+      "case_artifact_bytes": 24887,
+      "identity": {
+        "case_file_hash": "sha256:b4ea0af44bd8177f192fcbb626796faf1d0942dcdeea3ae33e861220e65f3b5f",
+        "data_content_hash": "sha256:3c073ad5379a2fe2834b4d3803671bf2509e147fc011db05fdcfa6a68625f2fa"
+      },
+      "memory": {
+        "additional_process_high_water_bytes": 3051520,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 89182208,
+        "peak_rss_before_measured_scope_bytes": 86130688,
+        "rss_after_measured_scope_bytes": 89182208,
+        "rss_before_measured_scope_bytes": 86130688,
+        "solver_memory_plan": null
+      },
+      "mode": "fresh",
+      "particle_count": 8,
+      "repeat": 0,
+      "result_artifact_bytes": 0,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "load",
+      "semantic_result_sha256": null,
+      "timing_s": {
+        "load_case_s": 0.02136040001641959
+      }
+    },
+    {
+      "algorithms": {},
+      "case_artifact_bytes": 24887,
+      "identity": {
+        "case_file_hash": "sha256:b4ea0af44bd8177f192fcbb626796faf1d0942dcdeea3ae33e861220e65f3b5f",
+        "data_content_hash": "sha256:3c073ad5379a2fe2834b4d3803671bf2509e147fc011db05fdcfa6a68625f2fa"
+      },
+      "memory": {
+        "additional_process_high_water_bytes": 2936832,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 89268224,
+        "peak_rss_before_measured_scope_bytes": 86331392,
+        "rss_after_measured_scope_bytes": 89268224,
+        "rss_before_measured_scope_bytes": 86331392,
+        "solver_memory_plan": {
+          "certificate_work_bytes_per_particle": 0,
+          "components": {
+            "active_index": 64,
+            "canonical_data": 968,
+            "field_runtime": 8,
+            "geometry_query_scratch": 16,
+            "output_buffer": 72,
+            "particle_schedule": 1024,
+            "physics_runtime": 128,
+            "prepared_geometry": 96,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 808,
+            "result_context_validation": 100,
+            "safety_margin": 394063,
+            "slab_certificate_work": 0,
+            "slab_dense_path": 0,
+            "slab_event_staging": 0,
+            "slab_event_work": 0,
+            "slab_failure_staging": 416,
+            "slab_proposal_replay_work": 0,
+            "slab_proposal_scratch": 3072,
+            "slab_release_work": 0,
+            "slab_stage_composition_work": 0,
+            "slab_stochastic_tree_work": 0,
+            "writer_reserve": 3145728
+          },
+          "dense_path_bytes_per_particle": 0,
+          "event_candidate_capacity": 0,
+          "event_staging_bytes_per_row": 0,
+          "event_staging_capacity": 0,
+          "event_staging_fixed_bytes": 0,
+          "event_work_bytes_per_particle": 0,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 1024,
+          "limit_bytes": 4294967296,
+          "phase_peaks": {
+            "load_case": 66504,
+            "prepare": 69808,
+            "run": 3546563
+          },
+          "planned_bytes": 3546563,
+          "proposal_replay_work_bytes_per_particle": 0,
+          "release_work_bytes_per_particle": 0,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v26",
+          "runtime_layout_revision": "resident_soa_process_slab_v14",
+          "scratch_bytes_per_particle": 384,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 8,
+          "stage_composition_work_bytes_per_particle": 0,
+          "stochastic_tree_work_bytes_per_particle": 0,
+          "worker_count": 1
+        }
+      },
+      "mode": "fresh",
+      "particle_count": 8,
+      "repeat": 0,
+      "result_artifact_bytes": 0,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "prepare",
+      "semantic_result_sha256": null,
+      "timing_s": {
+        "load_case_s": 0.017763399984687567,
+        "prepare_s": 0.0009950000094249845
+      }
+    },
+    {
+      "algorithms": {
+        "boundary_algorithm_revision": null,
+        "brownian_charge_dense_revision": null,
+        "brownian_composition_revision": null,
+        "brownian_rng_revision": null,
+        "brownian_tree_policy_revision": null,
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "exponential_midpoint_enclosure_revision": null,
+        "exponential_midpoint_revision": null,
+        "field_location_revision": "field_location_v5",
+        "field_time_revision": "fixed_topology_linear_time_v2",
+        "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+        "joint_ou_revision": null,
+        "joint_ou_split_revision": null,
+        "physics_catalog_revision": "inertial_langevin_2d_catalog_v24",
+        "physics_runtime_revision": "prepared_native_physics_runtime_v25",
+        "required_field_revision": "required_field_time_linear_v6",
+        "result_algorithm_revision": "durable_context_segmented_result_v7",
+        "rk4_dense_path_revision": null,
+        "rk4_enclosure_revision": null,
+        "rng_algorithm_revision": "philox4x32_10_v2",
+        "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+        "topology_algorithm_revision": null
+      },
+      "case_artifact_bytes": 24887,
+      "identity": {
+        "case_file_hash": "sha256:b4ea0af44bd8177f192fcbb626796faf1d0942dcdeea3ae33e861220e65f3b5f",
+        "data_content_hash": "sha256:3c073ad5379a2fe2834b4d3803671bf2509e147fc011db05fdcfa6a68625f2fa"
+      },
+      "memory": {
+        "additional_process_high_water_bytes": 40013824,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 126529536,
+        "peak_rss_before_measured_scope_bytes": 86515712,
+        "rss_after_measured_scope_bytes": 125616128,
+        "rss_before_measured_scope_bytes": 86515712,
+        "solver_memory_plan": {
+          "certificate_work_bytes_per_particle": 0,
+          "components": {
+            "active_index": 64,
+            "canonical_data": 968,
+            "field_runtime": 8,
+            "geometry_query_scratch": 16,
+            "output_buffer": 72,
+            "particle_schedule": 1024,
+            "physics_runtime": 128,
+            "prepared_geometry": 96,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 808,
+            "result_context_validation": 100,
+            "safety_margin": 394063,
+            "slab_certificate_work": 0,
+            "slab_dense_path": 0,
+            "slab_event_staging": 0,
+            "slab_event_work": 0,
+            "slab_failure_staging": 416,
+            "slab_proposal_replay_work": 0,
+            "slab_proposal_scratch": 3072,
+            "slab_release_work": 0,
+            "slab_stage_composition_work": 0,
+            "slab_stochastic_tree_work": 0,
+            "writer_reserve": 3145728
+          },
+          "dense_path_bytes_per_particle": 0,
+          "event_candidate_capacity": 0,
+          "event_staging_bytes_per_row": 0,
+          "event_staging_capacity": 0,
+          "event_staging_fixed_bytes": 0,
+          "event_work_bytes_per_particle": 0,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 1024,
+          "limit_bytes": 4294967296,
+          "phase_peaks": {
+            "load_case": 66504,
+            "prepare": 69808,
+            "run": 3546563
+          },
+          "planned_bytes": 3546563,
+          "proposal_replay_work_bytes_per_particle": 0,
+          "release_work_bytes_per_particle": 0,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v26",
+          "runtime_layout_revision": "resident_soa_process_slab_v14",
+          "scratch_bytes_per_particle": 384,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 8,
+          "stage_composition_work_bytes_per_particle": 0,
+          "stochastic_tree_work_bytes_per_particle": 0,
+          "worker_count": 1
+        }
+      },
+      "mode": "fresh",
+      "particle_count": 8,
+      "repeat": 0,
+      "result_artifact_bytes": 113844,
+      "result_artifact_bytes_per_particle": 14230.5,
+      "scope": "run",
+      "semantic_result_sha256": "sha256:00f6d6fe25e3f343ca1c87921d88378b8ef1085c1cdc7fb4d0cd83734bdf5217",
+      "timing_s": {
+        "load_case_s": 0.016075799940153956,
+        "open_result_s": 0.01741040009073913,
+        "simulate_s": 0.2770090000703931
+      }
+    },
+    {
+      "algorithms": {},
+      "case_artifact_bytes": 24887,
+      "identity": {
+        "case_file_hash": "sha256:b4ea0af44bd8177f192fcbb626796faf1d0942dcdeea3ae33e861220e65f3b5f",
+        "data_content_hash": "sha256:3c073ad5379a2fe2834b4d3803671bf2509e147fc011db05fdcfa6a68625f2fa"
+      },
+      "memory": {
+        "additional_process_high_water_bytes": 569344,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 90234880,
+        "peak_rss_before_measured_scope_bytes": 89665536,
+        "rss_after_measured_scope_bytes": 90234880,
+        "rss_before_measured_scope_bytes": 89665536,
+        "solver_memory_plan": null
+      },
+      "mode": "warm",
+      "particle_count": 8,
+      "repeat": 0,
+      "result_artifact_bytes": 0,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "load",
+      "semantic_result_sha256": null,
+      "timing_s": {
+        "load_case_s": 0.008136600023135543
+      }
+    },
+    {
+      "algorithms": {},
+      "case_artifact_bytes": 24887,
+      "identity": {
+        "case_file_hash": "sha256:b4ea0af44bd8177f192fcbb626796faf1d0942dcdeea3ae33e861220e65f3b5f",
+        "data_content_hash": "sha256:3c073ad5379a2fe2834b4d3803671bf2509e147fc011db05fdcfa6a68625f2fa"
+      },
+      "memory": {
+        "additional_process_high_water_bytes": 561152,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 89812992,
+        "peak_rss_before_measured_scope_bytes": 89251840,
+        "rss_after_measured_scope_bytes": 89812992,
+        "rss_before_measured_scope_bytes": 89251840,
+        "solver_memory_plan": {
+          "certificate_work_bytes_per_particle": 0,
+          "components": {
+            "active_index": 64,
+            "canonical_data": 968,
+            "field_runtime": 8,
+            "geometry_query_scratch": 16,
+            "output_buffer": 72,
+            "particle_schedule": 1024,
+            "physics_runtime": 128,
+            "prepared_geometry": 96,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 808,
+            "result_context_validation": 100,
+            "safety_margin": 394063,
+            "slab_certificate_work": 0,
+            "slab_dense_path": 0,
+            "slab_event_staging": 0,
+            "slab_event_work": 0,
+            "slab_failure_staging": 416,
+            "slab_proposal_replay_work": 0,
+            "slab_proposal_scratch": 3072,
+            "slab_release_work": 0,
+            "slab_stage_composition_work": 0,
+            "slab_stochastic_tree_work": 0,
+            "writer_reserve": 3145728
+          },
+          "dense_path_bytes_per_particle": 0,
+          "event_candidate_capacity": 0,
+          "event_staging_bytes_per_row": 0,
+          "event_staging_capacity": 0,
+          "event_staging_fixed_bytes": 0,
+          "event_work_bytes_per_particle": 0,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 1024,
+          "limit_bytes": 4294967296,
+          "phase_peaks": {
+            "load_case": 66504,
+            "prepare": 69808,
+            "run": 3546563
+          },
+          "planned_bytes": 3546563,
+          "proposal_replay_work_bytes_per_particle": 0,
+          "release_work_bytes_per_particle": 0,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v26",
+          "runtime_layout_revision": "resident_soa_process_slab_v14",
+          "scratch_bytes_per_particle": 384,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 8,
+          "stage_composition_work_bytes_per_particle": 0,
+          "stochastic_tree_work_bytes_per_particle": 0,
+          "worker_count": 1
+        }
+      },
+      "mode": "warm",
+      "particle_count": 8,
+      "repeat": 0,
+      "result_artifact_bytes": 0,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "prepare",
+      "semantic_result_sha256": null,
+      "timing_s": {
+        "load_case_s": 0.009767499985173345,
+        "prepare_s": 0.0008060999680310488
+      }
+    },
+    {
+      "algorithms": {
+        "boundary_algorithm_revision": null,
+        "brownian_charge_dense_revision": null,
+        "brownian_composition_revision": null,
+        "brownian_rng_revision": null,
+        "brownian_tree_policy_revision": null,
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "exponential_midpoint_enclosure_revision": null,
+        "exponential_midpoint_revision": null,
+        "field_location_revision": "field_location_v5",
+        "field_time_revision": "fixed_topology_linear_time_v2",
+        "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+        "joint_ou_revision": null,
+        "joint_ou_split_revision": null,
+        "physics_catalog_revision": "inertial_langevin_2d_catalog_v24",
+        "physics_runtime_revision": "prepared_native_physics_runtime_v25",
+        "required_field_revision": "required_field_time_linear_v6",
+        "result_algorithm_revision": "durable_context_segmented_result_v7",
+        "rk4_dense_path_revision": null,
+        "rk4_enclosure_revision": null,
+        "rng_algorithm_revision": "philox4x32_10_v2",
+        "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+        "topology_algorithm_revision": null
+      },
+      "case_artifact_bytes": 24887,
+      "identity": {
+        "case_file_hash": "sha256:b4ea0af44bd8177f192fcbb626796faf1d0942dcdeea3ae33e861220e65f3b5f",
+        "data_content_hash": "sha256:3c073ad5379a2fe2834b4d3803671bf2509e147fc011db05fdcfa6a68625f2fa"
+      },
+      "memory": {
+        "additional_process_high_water_bytes": 286720,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 126726144,
+        "peak_rss_before_measured_scope_bytes": 126439424,
+        "rss_after_measured_scope_bytes": 125628416,
+        "rss_before_measured_scope_bytes": 125386752,
+        "solver_memory_plan": {
+          "certificate_work_bytes_per_particle": 0,
+          "components": {
+            "active_index": 64,
+            "canonical_data": 968,
+            "field_runtime": 8,
+            "geometry_query_scratch": 16,
+            "output_buffer": 72,
+            "particle_schedule": 1024,
+            "physics_runtime": 128,
+            "prepared_geometry": 96,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 808,
+            "result_context_validation": 100,
+            "safety_margin": 394063,
+            "slab_certificate_work": 0,
+            "slab_dense_path": 0,
+            "slab_event_staging": 0,
+            "slab_event_work": 0,
+            "slab_failure_staging": 416,
+            "slab_proposal_replay_work": 0,
+            "slab_proposal_scratch": 3072,
+            "slab_release_work": 0,
+            "slab_stage_composition_work": 0,
+            "slab_stochastic_tree_work": 0,
+            "writer_reserve": 3145728
+          },
+          "dense_path_bytes_per_particle": 0,
+          "event_candidate_capacity": 0,
+          "event_staging_bytes_per_row": 0,
+          "event_staging_capacity": 0,
+          "event_staging_fixed_bytes": 0,
+          "event_work_bytes_per_particle": 0,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 1024,
+          "limit_bytes": 4294967296,
+          "phase_peaks": {
+            "load_case": 66504,
+            "prepare": 69808,
+            "run": 3546563
+          },
+          "planned_bytes": 3546563,
+          "proposal_replay_work_bytes_per_particle": 0,
+          "release_work_bytes_per_particle": 0,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v26",
+          "runtime_layout_revision": "resident_soa_process_slab_v14",
+          "scratch_bytes_per_particle": 384,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 8,
+          "stage_composition_work_bytes_per_particle": 0,
+          "stochastic_tree_work_bytes_per_particle": 0,
+          "worker_count": 1
+        }
+      },
+      "mode": "warm",
+      "particle_count": 8,
+      "repeat": 0,
+      "result_artifact_bytes": 113844,
+      "result_artifact_bytes_per_particle": 14230.5,
+      "scope": "run",
+      "semantic_result_sha256": "sha256:00f6d6fe25e3f343ca1c87921d88378b8ef1085c1cdc7fb4d0cd83734bdf5217",
+      "timing_s": {
+        "load_case_s": 0.015781600028276443,
+        "open_result_s": 0.0179376999149099,
+        "simulate_s": 0.06177869997918606
+      }
+    }
+  ],
+  "summaries": [
+    {
+      "maximum_peak_rss_bytes": 89182208,
+      "median_timing_s": {
+        "load_case_s": 0.02136040001641959
+      },
+      "mode": "fresh",
+      "observations": 1,
+      "particle_count": 8,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "load"
+    },
+    {
+      "maximum_peak_rss_bytes": 89268224,
+      "median_timing_s": {
+        "load_case_s": 0.017763399984687567,
+        "prepare_s": 0.0009950000094249845
+      },
+      "mode": "fresh",
+      "observations": 1,
+      "particle_count": 8,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "prepare"
+    },
+    {
+      "maximum_peak_rss_bytes": 126529536,
+      "median_timing_s": {
+        "load_case_s": 0.016075799940153956,
+        "open_result_s": 0.01741040009073913,
+        "simulate_s": 0.2770090000703931
+      },
+      "mode": "fresh",
+      "observations": 1,
+      "particle_count": 8,
+      "result_artifact_bytes_per_particle": 14230.5,
+      "scope": "run"
+    },
+    {
+      "maximum_peak_rss_bytes": 90234880,
+      "median_timing_s": {
+        "load_case_s": 0.008136600023135543
+      },
+      "mode": "warm",
+      "observations": 1,
+      "particle_count": 8,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "load"
+    },
+    {
+      "maximum_peak_rss_bytes": 89812992,
+      "median_timing_s": {
+        "load_case_s": 0.009767499985173345,
+        "prepare_s": 0.0008060999680310488
+      },
+      "mode": "warm",
+      "observations": 1,
+      "particle_count": 8,
+      "result_artifact_bytes_per_particle": 0.0,
+      "scope": "prepare"
+    },
+    {
+      "maximum_peak_rss_bytes": 126726144,
+      "median_timing_s": {
+        "load_case_s": 0.015781600028276443,
+        "open_result_s": 0.0179376999149099,
+        "simulate_s": 0.06177869997918606
+      },
+      "mode": "warm",
+      "observations": 1,
+      "particle_count": 8,
+      "result_artifact_bytes_per_particle": 14230.5,
+      "scope": "run"
+    }
+  ]
+}

@@ -1176,7 +1176,7 @@ accepted prefixをcommitし、post-event stateから残時間をfresh `root_stoc
 再開する。surface sourceのzero-time responseも係数midpointを作る前に解決する。元root remainderは
 fold/restrictしない。等方3-D Brownianでも一般state-dependent SDEのstrong order/weak 2次でもない。
 
-初回B03 characterizationの計時とRSSは[`evidence/b03/`](../evidence/b03/README.md)に属する履歴上の
+初回B03 characterizationの計時とRSSは[`evidence/b03/`（当時の記録）](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/solver/evidence/b03/README.md)に属する履歴上の
 machine-local・non-gating観測であり、統合後engineの性能値や物理妥当性の証拠ではない。
 
 ## B04 Brownian active-wall restart

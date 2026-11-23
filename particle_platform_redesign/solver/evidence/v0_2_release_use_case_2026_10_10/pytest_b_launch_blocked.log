@@ -1,2 +1,0 @@
-error: Failed to spawn: `pytest`
-  Caused by: アプリケーション制御ポリシーによってこのファイルがブロックされました。 (os error 4551)

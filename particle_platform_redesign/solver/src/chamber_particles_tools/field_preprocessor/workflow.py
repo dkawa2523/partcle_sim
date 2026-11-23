@@ -288,7 +288,7 @@ def _preprocess(
     }
     provenance = json.dumps(
         {
-            "producer": "chamber_particles.field_preprocessor",
+            "producer": "chamber_particles_tools.field_preprocessor",
             "producer_version": PRODUCER_VERSION,
             "source_sha256": source_info.content_hash,
             "field_semantics_revision": FIELD_SEMANTICS_REVISION,

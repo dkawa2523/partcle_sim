@@ -4,7 +4,7 @@
   "surface": "report",
   "status": "complete",
   "buildStatus": "complete",
-  "generatedAt": "2026-11-22T23:45:54.938643+00:00",
+  "generatedAt": "2026-11-23T01:19:07.772787+00:00",
   "filters": [],
   "report": {
     "asOf": null,
@@ -47,7 +47,8 @@
         "files": [
           "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
           "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json"
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
+          "solver/evidence/retirement_2026_11_23/population_recheck.json"
         ],
         "metricDefinitions": [
           {
@@ -68,8 +69,12 @@
             "detail": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged."
           },
           {
+            "title": "Current-reader reanalysis, no new replicas",
+            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+          },
+          {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       }
@@ -119,7 +124,8 @@
         "files": [
           "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
           "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json"
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
+          "solver/evidence/retirement_2026_11_23/population_recheck.json"
         ],
         "metricDefinitions": [
           {
@@ -140,8 +146,12 @@
             "detail": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations."
           },
           {
+            "title": "Current-reader reanalysis, no new replicas",
+            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+          },
+          {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       }
@@ -223,7 +233,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       },
@@ -1062,7 +1072,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       },
@@ -1154,7 +1164,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       },
@@ -1226,7 +1236,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       },
@@ -1294,7 +1304,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       },
@@ -1306,95 +1316,50 @@
       ]
     },
     "implementation_work_packages": {
-      "label": "利用フローの実行と性能観測",
       "rows": [
         {
-          "package": "Installed flow",
-          "capability": "独自CSV→最初の内部/surface source→create/check/run",
-          "deliverable": "同じwheelのCLIとPython",
-          "gate": "Windows/Linuxの13 CLI経路と5例題を実行済み"
+          "package": "利用の一巡",
+          "capability": "wheelの13 CLI操作・5例題と自分のCSV入力",
+          "deliverable": "入力→check/run→元caseなしのJSON/CSV/形状付きSVG",
+          "gate": "checkout外のruntime-only環境で実行成功"
         },
         {
-          "package": "Reusable result4",
-          "capability": "元caseなしで解析・CSV・形状付きSVG",
-          "deliverable": "immutable context、cohort/weights/terminal",
-          "gate": "case移動・破損/recovery/resume・finite/periodic等を確認済み"
+          "package": "現在の性能経路",
+          "capability": "9つのdistinctなworkloadを現行engineで実行",
+          "deliverable": "proposal/memory/JIT/exponential/matrix/representative/Brownian/local applicability/workers",
+          "gate": "全経路の小型実行成功。解析/OU/charge等の独立6確認も別に実行"
         },
         {
-          "package": "P14 event-20",
-          "capability": "simulate [s]: 0.111970 → 0.165336",
-          "deliverable": "process peakRSS [MiB]: 484.66 → 484.82",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+          "package": "1 process / 1万粒子",
+          "capability": "公開API 29.278202 s /320 macro",
+          "deliverable": "入力作成・warmup・検査・hashingは計時外",
+          "gate": "既知targetへ全粒子capture、failure0、残留child0"
         },
         {
-          "package": "P14 p1-cross",
-          "capability": "simulate [s]: 0.054852 → 0.071660",
-          "deliverable": "process peakRSS [MiB]: 742.36 → 751.05",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
+          "package": "4 process / 同一入力",
+          "capability": "公開API 18.353255 s /320 macro",
+          "deliverable": "同条件の1 process比 1.5953倍",
+          "gate": "全emitted science一致。frames/probesなし、各1観測で一般SLAは認定しない"
         },
         {
-          "package": "P14 p1-initial",
-          "capability": "simulate [s]: 0.053969 → 0.055984",
-          "deliverable": "process peakRSS [MiB]: 742.95 → 751.72",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
-        },
-        {
-          "package": "P14 q1-cross",
-          "capability": "simulate [s]: 0.048719 → 0.061193",
-          "deliverable": "process peakRSS [MiB]: 744.40 → 749.88",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
-        },
-        {
-          "package": "P14 q1-initial",
-          "capability": "simulate [s]: 0.044212 → 0.059822",
-          "deliverable": "process peakRSS [MiB]: 740.21 → 750.41",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
-        },
-        {
-          "package": "P14 regular-cold",
-          "capability": "simulate [s]: 32.857075 → 34.553693",
-          "deliverable": "process peakRSS [MiB]: 611.73 → 572.59",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
-        },
-        {
-          "package": "P14 regular-time",
-          "capability": "simulate [s]: 0.050002 → 0.059508",
-          "deliverable": "process peakRSS [MiB]: 596.53 → 571.60",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
-        },
-        {
-          "package": "P14 regular-warm-all",
-          "capability": "simulate [s]: 0.048028 → 0.057891",
-          "deliverable": "process peakRSS [MiB]: 608.87 → 572.45",
-          "gate": "science core/full一致。1観測の記述値、旧matrix時は一部試験並行。"
-        },
-        {
-          "package": "10k/320macro workers1",
-          "capability": "load+simulate+open [s]: 28.487 → 29.913",
-          "deliverable": "同じ入力・全7系統science一致、failure/残存worker0",
-          "gate": "他のsimulation/testを止めた逐次1観測。SLA/scaling資格にしない。"
-        },
-        {
-          "package": "10k/320macro workers4",
-          "capability": "load+simulate+open [s]: 18.310 → 18.184",
-          "deliverable": "同じ入力・全7系統science一致、failure/残存worker0",
-          "gate": "他のsimulation/testを止めた逐次1観測。SLA/scaling資格にしない。"
+          "package": "精度と実装identity",
+          "capability": "XY/RZ・time/mesh refinement・解析target・OU/charge",
+          "deliverable": "独立参照と同一出力検査を区別",
+          "gate": "比較値の一致だけで正しさを判断しない"
         }
       ],
       "source": {
-        "label": "利用フローの実行と性能観測",
+        "label": "現行sourceの公開経路・性能実行",
         "files": [
-          "solver/evidence/platform_restructure_2026_11_23/performance/comparison.json",
-          "solver/evidence/platform_restructure_2026_11_23/performance/current_matrix.json",
-          "solver/evidence/platform_restructure_2026_11_23/performance/baseline_matrix.json",
-          "solver/evidence/platform_restructure_2026_11_23/checks/verification.json"
+          "solver/evidence/retirement_2026_11_23/performance/process_workers.json",
+          "solver/evidence/retirement_2026_11_23/performance/README.md",
+          "solver/evidence/retirement_2026_11_23/installed_workflow.json"
         ],
         "metricDefinitions": [
           {
-            "label": "利用フローの実行と性能観測",
-            "definition": "Matrix uses simulate seconds with cold/warm separation; process workload uses full public time. Storage features differ intentionally. One observation per condition; no portable speedup guarantee.",
+            "label": "実行条件と限定",
+            "definition": "Single measured observation per worker count after one untimed serial warmup; public API includes spawn/IPC/writer/shutdown. No frames/probes, no portable SLA.",
             "componentIds": [
-              "implementation-sequence",
               "work-package-table"
             ]
           }
@@ -1402,84 +1367,72 @@
         "evidenceFlow": [
           {
             "title": "Exact source identities",
-            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/performance/comparison.json\", \"sha256\": \"sha256:21f81bd4b2f54278f4c2d1cb61318d65b0b04dae06d48a168461b8f2807bb4be\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/performance/current_matrix.json\", \"sha256\": \"sha256:c862100ce8c77c6e6a76084ba956cf0f4882f39bd42eb49d9c5399cdc5321b02\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/performance/baseline_matrix.json\", \"sha256\": \"sha256:f665be40cfd591af6f6c6f1a78c5a1f8bd047a2226ee72657ac540bf4fa4d18b\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/verification.json\", \"sha256\": \"sha256:57bf7e160610800b73193d86697c90cd4630942a4469a430c73823eb611fa70e\"}]"
-          },
-          {
-            "title": "Scope and limits",
-            "detail": "Matrix uses simulate seconds with cold/warm separation; process workload uses full public time. Storage features differ intentionally. One observation per condition; no portable speedup guarantee."
+            "detail": "[{\"path\": \"solver/evidence/retirement_2026_11_23/performance/process_workers.json\", \"sha256\": \"sha256:cb66b8251df834db7096af32cb8fa635c9d8034d85974a37e3b068b941c9ca97\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/performance/README.md\", \"sha256\": \"sha256:04497508bbeffeb98db4d32e64ee1f07d169ce66cdd7b3c61edeea3c939fe8fb\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/installed_workflow.json\", \"sha256\": \"sha256:f007273c7b84fe24a8e63efe8fdd0a50a18122c668518efeeb6b49218b5ed48b\"}]"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       }
     },
     "quality_findings": {
-      "label": "実行した確認と限定した判断",
       "rows": [
         {
-          "severity": "実行済",
-          "finding": "verification/scenarios 1,201件、portable V&V 101件成功",
-          "disposition": "同じproduction sourceに限定。invalid budget拒否試験のwarning1件は保持。"
+          "severity": "passed",
+          "finding": "現行経路のcore/scenario全体1,190件と最終event62件",
+          "disposition": "独立レビューで復元した2件を含む現行collectionは1,192件。全体実行と追加確認を区別",
+          "evidence": "verification.json"
         },
         {
-          "severity": "実行済",
-          "finding": "Windows/Linux runtime-only wheelで13 CLI経路・5例題・独自CSV/source・結果単独利用",
-          "disposition": "両packageのsource/wheel/install Python bytes・METADATA、2-worker科学identity/cleanupも照合。"
+          "severity": "passed",
+          "finding": "隔離した予定commitで外部134件",
+          "disposition": "native小型参照・ログを同梱。原MPHや旧campaignへ依存しない",
+          "evidence": "verification.json"
         },
         {
-          "severity": "実行済",
-          "finding": "lock/Ruff/Pyrefly、6依存契約、CC、文書33件・技能4件、snapshot/helper7試験",
-          "disposition": "予定commitだけの隔離checkoutでも文書/技能/report接続と保護234ファイルを確認。remote CIとは区別。"
+          "severity": "passed",
+          "finding": "wheelだけの13操作・5例題と自分のCSV入力",
+          "disposition": "元caseなしの結果再利用、console/module/Python、process科学一致とcleanup",
+          "evidence": "installed_workflow.json / clean_wheel.json"
         },
         {
-          "severity": "保持確認",
-          "finding": "A/P各40の全80候補計算、7系統の全科学payloadが変更前とbitwise一致、failure0",
-          "disposition": "元seed/window/clockを保持。nativeの乱数path一致や標本数追加を意味しない。"
+          "severity": "passed",
+          "finding": "native/解析参照でXY・RZ・曲線壁を再実行",
+          "disposition": "RZ132/132。意味とcoverageを限定した科学検査",
+          "evidence": "vv/README.md"
         },
         {
-          "severity": "実用的対応",
-          "finding": "Case A: 保持停止数 251 / 候補平均 249.675、5ms平均active時間 200.397 / 203.489 µs",
-          "disposition": "各287粒子、候補40実現。大局的輸送の目的では適切に対応。formal equivalenceには拡張しない。"
+          "severity": "passed",
+          "finding": "独立衝突積分・jumpと平均則を照合",
+          "disposition": "2条件、20万jump、1万interval。関連7件成功",
+          "evidence": "gas_collision/README.md"
         },
         {
-          "severity": "実用的対応",
-          "finding": "Case P: 保持停止数 254 / 候補平均 251.775、5ms平均active時間 187.383 / 203.055 µs",
-          "disposition": "各287粒子、候補40実現。大局的輸送の目的では適切に対応。formal equivalenceには拡張しない。"
+          "severity": "passed",
+          "finding": "必要な数値確認を現行kernelへ移し旧経路を撤去",
+          "disposition": "残存数値定義のAST不変を独立確認。時区間・遠方facetの2回帰を復元",
+          "evidence": "independent_review.json / scientific_review.json"
         },
         {
-          "severity": "局所留保",
-          "finding": "境界33の停止割合差 A−4.72/P−4.07 pp、100us survivor速度中央値 A+13.5/P+17.5%",
-          "disposition": "観測後に選んだ探索的な局所差。charging/wall bugや乱数だけへ原因を帰属しない。"
-        },
-        {
-          "severity": "独立レビュー",
-          "finding": "parent identity、ASCII JSON、非収束エラー、installed経路、軽量CI、配布リンクの必須指摘を修正",
-          "disposition": "独立complete/recovery/resume破損probeと影響確認を再実行。"
-        },
-        {
-          "severity": "認定外",
-          "finding": "全release規模matrix、一般path/mesh/SDE収束、native新solve、実機付着量",
-          "disposition": "今回の成功に含めない。既存の条件付きbacklogと必要な外部入力を保持する。"
+          "severity": "not_certified",
+          "finding": "全native方程式・乱数path・実機付着量は認定外",
+          "disposition": "A/P40実現の実用比較と局所留保を保持。新しい標本とは数えない",
+          "evidence": "population_recheck.json"
         }
       ],
       "source": {
-        "label": "実行した確認と限定した判断",
+        "label": "現行整理後の実行・独立レビュー",
         "files": [
-          "solver/evidence/platform_restructure_2026_11_23/checks/verification.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
-          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
-          "solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_windows.json",
-          "solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_linux.json"
+          "solver/evidence/retirement_2026_11_23/verification.json",
+          "solver/evidence/retirement_2026_11_23/independent_review.json",
+          "solver/evidence/retirement_2026_11_23/scientific_review.json"
         ],
         "metricDefinitions": [
           {
-            "label": "実行した確認と限定した判断",
-            "definition": "Local executed checks and reviewed practical evidence; no inherited historical PASS or remote-CI claim.",
+            "label": "現行整理後の実行・独立レビュー",
+            "definition": "Source-bound executed checks; counts have distinct scopes. No historical result is promoted to current certification.",
             "componentIds": [
-              "dataset-role",
               "quality-table"
             ]
           }
@@ -1487,15 +1440,11 @@
         "evidenceFlow": [
           {
             "title": "Exact source identities",
-            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/verification.json\", \"sha256\": \"sha256:57bf7e160610800b73193d86697c90cd4630942a4469a430c73823eb611fa70e\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_windows.json\", \"sha256\": \"sha256:f06b69cbdc7c914144b20fd8680b63dec94a78d0c3cbe04073858e8594cf1ffa\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/checks/release_smoke_linux.json\", \"sha256\": \"sha256:b1bd4d245f95002b84880782ebe8fc7d947b47529c8fb1130ee311ed819ac5d5\"}]"
-          },
-          {
-            "title": "Scope and limits",
-            "detail": "Local executed checks and reviewed practical evidence; no inherited historical PASS or remote-CI claim."
+            "detail": "[{\"path\": \"solver/evidence/retirement_2026_11_23/verification.json\", \"sha256\": \"sha256:305e9e44464845f873ab5493e309418490f23f85d57e1b72a0a7d74e9455b22e\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/independent_review.json\", \"sha256\": \"sha256:61b6040fbfda249cb7fcf91934a31cad1c0309608a0013cbe0742fcb2232052e\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/scientific_review.json\", \"sha256\": \"sha256:f02263d620c85879c59a85135303086621531dcef1a123c27d8ab9676c7158ca\"}]"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       }
@@ -1556,7 +1505,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
           }
         ]
       },
@@ -1577,7 +1526,7 @@
     "authorities": [
       {
         "path": "AGENTS.md",
-        "sha256": "sha256:38dac13e9c3857b9f1839be98ff6ce67d235254a7b29f850d2799807d4a9f9f6"
+        "sha256": "sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda"
       },
       {
         "path": "product_specification.md",
@@ -1589,11 +1538,11 @@
       },
       {
         "path": "implementation_plan.md",
-        "sha256": "sha256:a7e33f5420532358fd4579e13e6b14a79ade8941c7ac98f42e80196d930a31aa"
+        "sha256": "sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931"
       },
       {
         "path": "vv_methodology.md",
-        "sha256": "sha256:f374e2aa56bbc18ff48041d63a418789d7c6c2c9e9ddbfb15dbc6552edf44f84"
+        "sha256": "sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b"
       },
       {
         "path": "solver/pyproject.toml",
@@ -1609,11 +1558,11 @@
       },
       {
         "path": "solver/docs/physics_models.md",
-        "sha256": "sha256:7de50c5f3a0b76ef9c465f9fafb59c53b1d190612648e0034a3fe2ab70f1832b"
+        "sha256": "sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9"
       },
       {
         "path": "solver/docs/numerics.md",
-        "sha256": "sha256:5d64b2cc12ecb89155a397c99b3f994e6b35851407122edc76662deb3d36eb98"
+        "sha256": "sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856"
       },
       {
         "path": "solver/src/chamber_particles/physics/catalog.py",
@@ -1621,22 +1570,22 @@
       },
       {
         "path": "solver/src/chamber_particles_tools/inputs.py",
-        "sha256": "sha256:34636c4a7ced94d5258687d367d4ab90ca671c24d2c1c953dd53f5ccbac10f3a"
+        "sha256": "sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863"
       }
     ],
     "catalog_sha256": "sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002",
     "optional_inputs": [
       {
-        "path": "solver/evidence/platform_restructure_2026_11_23/report_inputs/assessment.json",
-        "sha256": "sha256:d1824141293065a0763d922e5625b18c0ca49575083fbbede066047c788570f6"
+        "path": "solver/evidence/retirement_2026_11_23/report_inputs/assessment.json",
+        "sha256": "sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3"
       },
       {
-        "path": "solver/evidence/platform_restructure_2026_11_23/report_inputs/quality.json",
-        "sha256": "sha256:c93118718f55e8a22821eb216d00b50397a6b125a0768b11c1cda6d8e3f26c77"
+        "path": "solver/evidence/retirement_2026_11_23/report_inputs/quality.json",
+        "sha256": "sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44"
       },
       {
-        "path": "solver/evidence/platform_restructure_2026_11_23/report_inputs/performance.json",
-        "sha256": "sha256:9f338f8b070b3ef6dc465e935735dc8de128a7c0614fe00755859721d59b79ce"
+        "path": "solver/evidence/retirement_2026_11_23/report_inputs/performance.json",
+        "sha256": "sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9"
       }
     ],
     "optional_evidence_policy": "Missing is unavailable, never zero; source receipts do not imply rerunning scientific calculations"

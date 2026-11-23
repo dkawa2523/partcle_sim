@@ -4039,10 +4039,6 @@ def _initial_numerical_status(value: UInt8Array | None, count: int) -> UInt8Arra
     return status.copy()
 
 
-def _mark_physics_failure(status: UInt8Array, failed: BoolArray) -> None:
-    status[(status == NUMERICAL_STATUS_OK) & failed] = PHYSICS_NUMERICAL_FAILURE
-
-
 def _primitive_range(
     ranges: Mapping[str, PrimitiveRange],
     name: str,

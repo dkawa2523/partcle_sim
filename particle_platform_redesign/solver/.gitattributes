@@ -15,11 +15,6 @@ uv.lock -text -eol
 # Evidence receipts hash exact producer bytes. Never apply newline conversion
 # inside the immutable evidence tree; JSON/Markdown remain reviewable.
 evidence/** -text -eol diff merge
-# Raw pytest failure trace: preserve the exact bytes bound by the receipt SHA.
-evidence/platform_restructure_2026_11_23/checks/full-suite-first.xml whitespace=-trailing-space,space-before-tab,cr-at-eol
-# Release receipts are authored in-repository and are not inputs to raw-byte
-# evidence ledgers, so keep them reviewable as normalized text.
-evidence/v0.1/** -binary diff merge text eol=lf
 
 *.h5 binary
 *.hdf5 binary

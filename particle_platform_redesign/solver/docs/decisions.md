@@ -1,7 +1,12 @@
-# Implementation stage gates
+# 物理・数値設計の判断記録
 
-長いADR treeを作らず、未確定事項と所有packageをここへ一表で残す。決定済み内容の詳細は各owner文書へ
-移し、この表へ同じ説明を複製しない。
+この文書は各段階での採否と科学的な理由を残す履歴である。表中の「現行」、revision、schema、
+module path、完了・未実施はその判断時点に限定し、現在の入口・能力・資格を定義しない。
+廃止した経路の実行・互換手順として使用しない。
+
+現在の式と適用域は[physics models](physics_models.md)、数値規則は[numerics](numerics.md)、
+責務は[architecture](../../architecture_proposal.md)、現在必要な作業は[implementation plan](../../implementation_plan.md)が所有する。
+新しいmodelや数値方式の理由もここへ簡潔に記録し、現行の仕様自体は各owner文書へ反映する。
 
 | gate | 着手前に確定または実装すること | 状態・owner |
 |---|---|---|
@@ -1052,7 +1057,7 @@ deterministic mean適用で実際に検査する。通常はslab全体をvector�
 | 必要field/state | FDT温度は選択した線形Epsteinの`gas_temperature_field`を唯一authorityとする。root midpointで`gamma,u,T`、全additive acceleration `a`、`G=dZ/dt`を1回評価し、`u_eff=u+a/gamma`を固定する。Zは`Z_root+G_mid*(t-t_root)`のlinear dense pathで、prepare済みinvariantを証明できない場合はfail-closedする。resident RNG cursor、noise専用field、B03専用particle stateは追加しない |
 | 対応座標・integrator | `axisymmetric_rz_meridional` / 既存`ou_langevin` / CPU single-thread。coefficient policyは`macro_root_frozen_midpoint_v1`、composition methodは`stochastic_exponential_midpoint_v1`。noise-free deterministic exponential-midpoint predictorはroot midpointの係数評価点を作るだけでstateをhalf-step commitしない。joint exact OUでroot全幅を進め、既存conditional treeは同じ凍結係数で親root endpointを保存する。axis hitはprefix commit＋fold後、残時間を次の`root_stochastic_interval`ordinalと独立drawで再開し、元cubic remainderをfold/restrictしない |
 | 解析解またはreference | 凍結した定数係数のmeanと`Q_xx/Q_xv/Q_vv`、noise-off決定論極限の2次、manufactured charge-electricのweak mean観測次数`>=0.9`、RZ axis restart、全optional force compiled parity、tree-depth first-passage、slab/output/checkpoint identityを受け入れた。これはRZ meridional projected 2-DOFであり、等方3-D Brownianまたは一般state-dependent SDEのstrong order/weak 2次は主張しない |
-| 性能・memory影響 | 第二scheduler、particle別object、Python callbackを追加せず、当時のbounded slabとdepth-first treeを再利用した。初回B03受入revisionはcatalog v16 / engine v34 / proposal v9 / event v15 / runtime v17 / compiled tile v16 / memory plan v13。静的B03 path arrayは648 B/rowで2048 B/row上限内。2,000/20,000粒子×4構成×3反復の正式characterizationは全active・failure 0で、計時/RSSは[`evidence/b03/`](../evidence/b03/README.md)のmachine-local・non-gating証跡とする |
+| 性能・memory影響 | 第二scheduler、particle別object、Python callbackを追加せず、当時のbounded slabとdepth-first treeを再利用した。初回B03受入revisionはcatalog v16 / engine v34 / proposal v9 / event v15 / runtime v17 / compiled tile v16 / memory plan v13。静的B03 path arrayは648 B/rowで2048 B/row上限内。2,000/20,000粒子×4構成×3反復の正式characterizationは全active・failure 0で、計時/RSSは[`evidence/b03/`（当時の記録）](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/solver/evidence/b03/README.md)のmachine-local・non-gating証跡とする |
 | 置換・削除する旧経路 | 未実装のStrang/K-O-K計画を本methodで置換する。B02の`inertial_langevin_fdt_epstein_linear_frozen_start_v1`と数値payloadはbitwise不変とする。第二engine、Euler kick、root内係数のleaf別再評価、反射・確率wall、COMSOL専用branchは追加しない。B03 coreの受入にCOMSOL再実行は不要で、将来のstochastic外部比較は独立seed ensembleとする |
 
 noise revisionは`inertial_langevin_fdt_epstein_linear_rz_meridional_projected_v1`である。
@@ -1127,7 +1132,7 @@ exponential、scalar pathへv16 certificateを適用しない。現行event v22�
 | 項目 | 判断 |
 |---|---|
 | 目的 | 保存済み100 nm Case A/Pを正式stochastic referenceへ誤昇格させず、最初のmeaning-matched ensembleに使うseedだけを確定する |
-| 外部所有 | `tools/vv/comsol/m3c2_anchor_preflight.py`と`evidence/m3c2/anchor_preflight_v1/`が所有する。solver core、case schema、`model_dataset`を変更しない |
+| 外部所有 | 当時のpreflightと観測はGit `e9529fc`および`evidence/m3c2/anchor_preflight_v1/`の研究記録に限定する。現行入口は`tools/vv/comsol/README.md`を参照する。solver core、case schema、`model_dataset`を変更しない |
 | 確認結果 | source MPHと選択package artifactはM3-C0 expected SHA lockへ一致し、Case A/P各32 seedは完全・一意・非重複。保存Case A/Pの設定parameter値は21/1だが、interface乱数modeが`GenerateUnique`なので実効乱数系列は未証明。各case 1 run、fieldはnative。particle interfaceはout-of-plane無効で、解かれる運動状態はR-Z 2自由度である。表の`r/phi/z`と非零`Fbphi`はreported feature componentであり第3運動自由度ではない |
 | 判定 | 次元不一致ではなく、native field、単一run、実効乱数系列未証明、COMSOL stepwise BrownianとB03 exact joint OUの独立収束未評価がblockerである。statusは`BLOCKED_MISSING_MEANING_MATCHED_COHORT`、comparisonは`NOT_AUTHORIZED`、accuracyは`NOT_EVALUATED`。64行matrixはprovisional seed allocationだけでcampaign lockではない |
 | 次の単位 | Case-A 100 nmについてcommon-P1 input hash、287粒子、121 frame/30 ms、release、geometry/boundary、全physics revision、COMSOL R/Z FDT recipe、B03 case、pilot/final stepを一つのexecution contractへ固定する。COMSOLはout-of-plane無効とbuilt-in `bf1`＋Epstein-equivalent effective viscosityを維持し、乱数modeを`UserDefined`として`bf1.i`をseed authorityにする。本比較と非重複のpilot seedで各solverのobservable step uncertaintyを決めた後だけ32 seedを実行する |

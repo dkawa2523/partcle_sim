@@ -1,0 +1,37 @@
+{
+  "scope": "Updated existing report only; no publication or access change",
+  "official_build": "installed Data prebuilt via WSL Linux Node; copied protected runtime unchanged",
+  "build": {
+    "version": 1,
+    "kind": "separate-data-v1",
+    "html": {
+      "path": "index.html",
+      "sha256": "5356a7249c610e7153acb3dd62260a3e4899613f037895ecbbf96684cd7afd59",
+      "bytes": 2401355
+    },
+    "snapshot": {
+      "path": "snapshot.858ce8624f541250ef02fd645fbeff9573407f7f8a15870a40f9b38e885a529f.json",
+      "sha256": "858ce8624f541250ef02fd645fbeff9573407f7f8a15870a40f9b38e885a529f",
+      "bytes": 84954
+    },
+    "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "sourceSnapshotSha256": "858ce8624f541250ef02fd645fbeff9573407f7f8a15870a40f9b38e885a529f"
+  },
+  "visual_checks": {
+    "desktop": "latest performance29.278202/18.353255 and seven current quality rows rendered",
+    "390px": {
+      "viewport": 390,
+      "document_width": 375,
+      "horizontal_tables": "inside scroll containers, no document overflow"
+    },
+    "source_inspector": "current overview and5 reviewed performance rows verified",
+    "browser_error_logs": [],
+    "presentation_and_identity": "preserved",
+    "status": "complete"
+  },
+  "offline": {
+    "path": "report_app/.data-app-offline/exports/report.html",
+    "sha256": "819689cf6f8f69e65053c7b35b652e78efa4facacf4aa598799c96c7c8a1ce60",
+    "requires_cdn": false
+  }
+}

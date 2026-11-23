@@ -42,6 +42,7 @@ from chamber_particles.case_format import (
     P1TriLayout,
     Q1QuadLayout,
     RealizedSurfaceSource,
+    RealizedTableSource,
     RegularLayout,
     write,
 )
@@ -170,8 +171,8 @@ def _driver(arguments: argparse.Namespace) -> None:
                     "revolved_area sampling or justify a realized-surface-table format"
                 ),
                 "parallelism": (
-                    "P14-P closed internal multithreading negatively; P14-U measures the one "
-                    "serial engine and does not reopen scheduler design"
+                    "this workload measures serial execution; process_workers owns "
+                    "same-input worker-count measurements"
                 ),
                 "profile_interpretation": (
                     "owner-specific optimization conclusions are withheld when "
@@ -201,7 +202,7 @@ def _driver(arguments: argparse.Namespace) -> None:
     print(encoded, end="")
 
 
-def _convergence_gate(root: Path, suite: _Suite, memory_limit_mb: int) -> dict[str, object]:
+def _convergence_gate(root: Path, suite: _Suite, memory_limit_mb: int) -> dict[str, Any]:
     root.mkdir(parents=True)
     # The coarsest 0.125 s row is useful for throughput but lies above the
     # representative event-localization asymptotic range.  The convergence
@@ -269,7 +270,7 @@ def _convergence_gate(root: Path, suite: _Suite, memory_limit_mb: int) -> dict[s
     mesh_levels = (4, 8, 16) if suite == "smoke" else (8, 16, 32)
     mesh_reference_nx = 64 if suite == "smoke" else 128
     mesh_step = temporal_reference_step
-    mesh: dict[str, object] = {}
+    mesh: dict[str, Any] = {}
     for layout_kind in ("regular", "p1", "q1"):
         mesh_reference = _run_xy_case(
             root / f"mesh-{layout_kind}-reference",
@@ -334,7 +335,7 @@ def _convergence_gate(root: Path, suite: _Suite, memory_limit_mb: int) -> dict[s
     }
 
 
-def _rz_gate(root: Path, suite: _Suite, memory_limit_mb: int) -> dict[str, object]:
+def _rz_gate(root: Path, suite: _Suite, memory_limit_mb: int) -> dict[str, Any]:
     root.mkdir(parents=True)
     steps = (0.05, 0.025, 0.0125)
     reference_step = 0.003125
@@ -378,7 +379,7 @@ def _performance_gate(
     *,
     repeat_count: int,
     memory_limit_mb: int,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     root.mkdir(parents=True)
     warmup = _materialize_xy_case(
         root / "warmup",
@@ -391,7 +392,7 @@ def _performance_gate(
         memory_limit_mb=memory_limit_mb,
         ny=4,
     )
-    observations: list[dict[str, object]] = []
+    observations: list[dict[str, Any]] = []
     for count in particle_counts:
         for mode in ("none", "sample"):
             for repeat_index in range(repeat_count):
@@ -482,7 +483,7 @@ def _write_worker_spec(
     )
 
 
-def _launch_worker(specification: Path, cache_directory: Path) -> dict[str, object]:
+def _launch_worker(specification: Path, cache_directory: Path) -> dict[str, Any]:
     command = [
         sys.executable,
         "-m",
@@ -590,7 +591,7 @@ def _worker(specification_path: Path) -> None:
     print(json.dumps(observation, allow_nan=False, sort_keys=True))
 
 
-def _profile_worker(specification: Mapping[str, object]) -> None:
+def _profile_worker(specification: Mapping[str, Any]) -> None:
     case = load_case(Path(str(specification["case_path"])))
     output_path = Path(str(specification["output_path"]))
     profiler = cProfile.Profile()
@@ -641,7 +642,7 @@ def _run_xy_case(
     uniform_source: bool,
     memory_limit_mb: int,
     probe_times: Sequence[float] | None = None,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     case_path = _materialize_xy_case(
         directory,
         layout_kind=layout_kind,
@@ -660,7 +661,7 @@ def _run_xy_case(
     return _result_observation(case, result, summary)
 
 
-def _run_rz_case(directory: Path, dt_s: float, memory_limit_mb: int) -> dict[str, object]:
+def _run_rz_case(directory: Path, dt_s: float, memory_limit_mb: int) -> dict[str, Any]:
     case_path = _materialize_rz_case(directory, dt_s, memory_limit_mb)
     case = load_case(case_path)
     output = directory / "result"
@@ -668,7 +669,7 @@ def _run_rz_case(directory: Path, dt_s: float, memory_limit_mb: int) -> dict[str
     return _result_observation(case, open_result(output), summary)
 
 
-def _result_observation(case: Any, result: Any, summary: Any) -> dict[str, object]:
+def _result_observation(case: Any, result: Any, summary: Any) -> dict[str, Any]:
     probes = tuple(result.iter_probes())
     positions = np.stack([probe.position_m[0] for probe in probes])
     velocities = np.stack([probe.velocity_m_s[0] for probe in probes])
@@ -711,8 +712,8 @@ def _result_observation(case: Any, result: Any, summary: Any) -> dict[str, objec
 
 
 def _trajectory_errors(
-    value: Mapping[str, object],
-    reference: Mapping[str, object],
+    value: Mapping[str, Any],
+    reference: Mapping[str, Any],
     *,
     compare_hit: bool = True,
     require_same_facet_id: bool = True,
@@ -771,7 +772,7 @@ def _require_net_reduction(
 
 
 def _require_successful_rows(
-    rows: Sequence[Mapping[str, object]],
+    rows: Sequence[Mapping[str, Any]],
     label: str,
     *,
     expected_wall_events: int = 1,
@@ -809,7 +810,7 @@ def _observed_orders(errors: Sequence[Mapping[str, float]]) -> dict[str, list[fl
     }
 
 
-def _hit_summary(value: Mapping[str, object]) -> dict[str, object]:
+def _hit_summary(value: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "time_s": value["hit_time_s"],
         "position_m": np.asarray(value["hit_position_m"]).tolist(),
@@ -822,7 +823,7 @@ def _hit_summary(value: Mapping[str, object]) -> dict[str, object]:
     }
 
 
-def _global_to_path_ratio(reference: Mapping[str, object]) -> dict[str, object]:
+def _global_to_path_ratio(reference: Mapping[str, Any]) -> dict[str, Any]:
     x = np.linspace(0.0, 1.0, 257)
     y = np.linspace(0.0, 1.0, 129)
     grid_x, grid_y = np.meshgrid(x, y, indexing="ij")
@@ -1196,6 +1197,7 @@ def _materialize_rz_case(directory: Path, dt_s: float, memory_limit_mb: int) -> 
         quad4_domain_id=np.zeros(1, dtype="<i4"),
     )
     original = drag.data.sources[0]
+    assert isinstance(original, RealizedTableSource)
     source = replace(
         original,
         particle_id=np.asarray([1], dtype="<i8"),
@@ -1250,10 +1252,8 @@ def _empty_boundary() -> BoundaryData:
     )
 
 
-def _output_spec(
-    mode: _OutputMode, particle_count: int, times: Sequence[float]
-) -> dict[str, object]:
-    probes: dict[str, object] | None = None
+def _output_spec(mode: _OutputMode, particle_count: int, times: Sequence[float]) -> dict[str, Any]:
+    probes: dict[str, Any] | None = None
     if mode == "sample":
         probes = {
             "particle_ids": list(range(1, min(particle_count, _SAMPLE_PARTICLE_COUNT) + 1)),
@@ -1262,7 +1262,7 @@ def _output_spec(
     return {"trajectories": None, "probes": probes}
 
 
-def _rz_parity_audit(case: Any) -> dict[str, object]:
+def _rz_parity_audit(case: Any) -> dict[str, Any]:
     required_names = {
         str(value)
         for model in case.spec.physics.models.values()
@@ -1274,7 +1274,7 @@ def _rz_parity_audit(case: Any) -> dict[str, object]:
     if missing:
         raise RuntimeError(f"P14-U RZ parity audit is missing required fields: {missing}")
     layouts = {layout.name: layout for layout in case.data.layouts}
-    audits: dict[str, object] = {}
+    audits: dict[str, Any] = {}
     passes = True
     counterexample_values: np.ndarray | None = None
     counterexample_radial: np.ndarray | None = None
@@ -1365,7 +1365,7 @@ def _validate_output_utility(
     *,
     particle_count: int,
     output_mode: str,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     expected_ids = np.arange(1, particle_count + 1, dtype=np.int64)
     releases = result.read_release_events()
     boundaries = result.read_boundary_events()
@@ -1412,13 +1412,13 @@ def _validate_output_utility(
 
 
 def _median_performance_observations(
-    observations: Sequence[Mapping[str, object]],
-) -> list[dict[str, object]]:
-    grouped: dict[tuple[int, str], list[Mapping[str, object]]] = {}
+    observations: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[int, str], list[Mapping[str, Any]]] = {}
     for observation in observations:
         key = (int(observation["particle_count"]), str(observation["output_mode"]))
         grouped.setdefault(key, []).append(observation)
-    rows: list[dict[str, object]] = []
+    rows: list[dict[str, Any]] = []
     for (count, mode), group in sorted(grouped.items()):
         first = group[0]
         timing_names = tuple(_as_mapping(first["timing_s"]))
@@ -1456,24 +1456,24 @@ def _median_performance_observations(
     return rows
 
 
-def _as_mapping(value: object) -> Mapping[str, object]:
+def _as_mapping(value: object) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise RuntimeError("P14-U expected a mapping in an observation")
     return value
 
 
-def _median_optional_int(values: Sequence[object]) -> float | None:
+def _median_optional_int(values: Sequence[int | None]) -> float | None:
     present = [int(value) for value in values if value is not None]
     return None if not present else float(median(present))
 
 
-def _validate_performance_identity(performance: Mapping[str, object]) -> None:
+def _validate_performance_identity(performance: Mapping[str, Any]) -> None:
     raw_value = performance.get("raw_observations")
     profile = performance.get("profile")
     if not isinstance(raw_value, list) or not isinstance(profile, Mapping):
         raise RuntimeError("P14-U performance report is incomplete")
     observations = [_as_mapping(item) for item in raw_value]
-    by_count: dict[int, dict[str, list[Mapping[str, object]]]] = {}
+    by_count: dict[int, dict[str, list[Mapping[str, Any]]]] = {}
     for observation in observations:
         count = int(observation["particle_count"])
         mode = str(observation["output_mode"])
@@ -1546,15 +1546,17 @@ def _profile_owners(profile: cProfile.Profile | None) -> dict[str, float] | None
     if profile is None:
         return None
     owners: dict[str, float] = {}
-    for (filename, _line, _name), statistics in pstats.Stats(profile).stats.items():
+    profile_statistics: Any = pstats.Stats(profile)
+    for (filename, _line, _name), statistics in profile_statistics.stats.items():
         owner = _profile_owner(filename)
         owners[owner] = owners.get(owner, 0.0) + float(statistics[2])
     return dict(sorted(owners.items(), key=lambda item: item[1], reverse=True))
 
 
-def _profile_top_functions(profile: cProfile.Profile, limit: int = 20) -> dict[str, object]:
-    rows: list[dict[str, object]] = []
-    for (filename, line, name), statistics in pstats.Stats(profile).stats.items():
+def _profile_top_functions(profile: cProfile.Profile, limit: int = 20) -> dict[str, Any]:
+    rows: list[dict[str, Any]] = []
+    profile_statistics: Any = pstats.Stats(profile)
+    for (filename, line, name), statistics in profile_statistics.stats.items():
         primitive_calls, total_calls, self_seconds, cumulative_seconds, _callers = statistics
         rows.append(
             {

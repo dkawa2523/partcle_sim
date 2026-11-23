@@ -82,7 +82,7 @@ def create_from_configuration(
     bundle, info = read_with_info(_relative_path(recipe["input_bundle"], path.parent))
     sources = {source.name: source for source in bundle.sources}
     requested: set[str] = set()
-    source_receipts: list[dict[str, str]] = []
+    source_receipts: list[dict[str, object]] = []
     for raw in recipe["sources"]:
         source, receipt = _recipe_source(raw, bundle, path.parent)
         if source.name in requested:
@@ -115,7 +115,7 @@ def _relative_path(value: object, directory: Path) -> Path:
 
 def _recipe_source(
     raw: object, bundle: DataBundle, directory: Path
-) -> tuple[RealizedSource, dict[str, str]]:
+) -> tuple[RealizedSource, dict[str, object]]:
     from .source_builder import read_csv_source
 
     if not isinstance(raw, dict) or set(raw) != {"csv", "configuration"}:
@@ -133,8 +133,9 @@ def _recipe_source(
     source = read_csv_source(csv_path, bundle, cast(Mapping[str, Any], configuration))
     if csv_path.read_bytes() != csv_raw:
         raise ValueError("source CSV changed during preparation")
-    receipt = {
+    receipt: dict[str, object] = {
         "table": source.name,
+        "configuration": dict(configuration),
         "csv_sha256": "sha256:" + hashlib.sha256(csv_raw).hexdigest(),
         "configuration_sha256": "sha256:" + hashlib.sha256(configuration_raw).hexdigest(),
     }

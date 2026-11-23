@@ -1,0 +1,43 @@
+{
+  "review": "independent_scientific_roles_and_overdeletion",
+  "reviewed_at_utc": "2026-11-23T01:09:00.493592+00:00",
+  "scope": [
+    "52 retired scalar event/axis/preclassification definitions and the 177 surviving module-level function/class ASTs",
+    "replacement exact/curved locator verification, finite contact/corner/axis/uncertain departure/locality/time-interval coverage",
+    "catalog -> field preparation -> independent mass/radius properties -> coupled stage -> x/v/Z proposal -> first event -> remaining interval -> result/checkpoint path",
+    "process_workers generated input, independent outcome checks, timed boundary, worker identity and declared limits",
+    "retained gas_collision independent impulse quadrature/sampling, analytic limits and finite-bath/recoil conventions",
+    "root generated-output retirement versus native/experimental inputs and scientific evidence retention"
+  ],
+  "method": "read-only source/diff/caller/test/oracle review plus independent AST comparison; no core code edited and no performance measurement started",
+  "event_ast_check": {
+    "removed_definitions": 52,
+    "surviving_definitions": 177,
+    "changed_surviving_definitions": [],
+    "new_definitions": []
+  },
+  "findings": [],
+  "mandatory_unresolved": [],
+  "observations": [
+    "The retained exact/curved batch algorithms are unchanged; removed scalar dataclass/locator paths were a second test-only implementation, not production dispatch.",
+    "The replacement event tests use analytic intersection times/coordinates and explicit clear/split/hit expectations, instead of treating the removed scalar implementation as the oracle.",
+    "The independently restored distant-facet locality and beyond-requested-interval regressions are present on the current path. Finite radius/corner ownership, uncertain grazing/turning paths, signed-chart axis crossing, and remaining-flight checks remain.",
+    "Deleting the native scalar Brownian wrapper leaves the physical-address vector RNG implementation and conditional OU tree unchanged. Output/slab/worker/resume scientific-identity tests remain, as do independent OU/Green-kernel/Kramers/charge-limit tests.",
+    "Stage charge G/J, prescribed force diffusion, stage Coulomb/ion charge feedback, independent mass/drag/electrical/contact authorities, accepted-state commit and durable checkpoint/context paths remain connected.",
+    "The new process benchmark separates input generation, untimed warmup/validation/hashing and timed load+simulate+open. Its expected absorbing target and lifecycle checks supplement cross-worker equality; they are not advertised as a temporal accuracy bound. P14-U owns separate time/mesh/RZ refinement.",
+    "The gas-collision reference integrates actual sphere impulses rather than production drag G(S); its Rayleigh/Gaussian, analytic specular and low-slip FDT checks are independent. Frozen compound-Poisson covariance and finite recoil limitations are stated; no 2D trajectory qualification is inferred.",
+    "Deletion diff contains no tracked CSV/HDF5/MPH data files and no changes under model_dataset, old_code or uv.lock. Removed software snapshots, pytest outputs, per-particle figures and obsolete candidate run metadata are generated evidence; native observation/provenance inputs and current A/P practical science remain separately retained."
+  ],
+  "runtime_validation": {
+    "this_review_started_tests": [],
+    "reason": "Root is running integrated verification and final benchmarks; redundant measurements would interfere. This review makes no new runtime-pass claim.",
+    "required_completion_evidence": "Root integrated verification and current benchmark reports must remain the authority for actual execution."
+  },
+  "claim_limits": [
+    "No same-ID Brownian path or random realization agreement claim.",
+    "No arbitrary native full-physics parity, continuous-SDE first-passage guarantee or physical adhesion/flux certification.",
+    "The prior A/P practical comparison is retained historical scoped evidence; this review creates no new native A/P solve or independent ensemble sample.",
+    "No exhaustive audit of untracked real experimental records or external environment internals."
+  ],
+  "verdict": "No grounded mandatory scientific regression or overdeletion found in the inspected scope; final integrated executions remain separately required."
+}

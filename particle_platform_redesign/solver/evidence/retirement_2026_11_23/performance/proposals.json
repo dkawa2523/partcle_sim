@@ -1,0 +1,264 @@
+{
+  "baseline": "p06_reference_end_to_end_v4",
+  "captured_at_utc": "2026-11-23T01:01:17.597355+00:00",
+  "comparisons": {
+    "interior_frame_elapsed_ratio_vs_no_frames": 0.9352438507843913,
+    "macro_end_frame_elapsed_ratio_vs_no_frames": 0.8874969816934718,
+    "material_hit_stack_elapsed_ratio_vs_boundaryless": 0.9156966971876445,
+    "rk4_enclosure_stack_elapsed_ratio_vs_quadratic": 0.9587101246592085,
+    "rk4_material_hit_elapsed_ratio_vs_rk4_boundaryless": 1.2930879858242572,
+    "rk4_material_interior_frame_elapsed_ratio_vs_no_frames": 1.0391112420130313
+  },
+  "conditions": {
+    "numpy": "2.5.3",
+    "particles": 8,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.13",
+    "repeats": 1,
+    "timed_scope": "load_case + simulate + open_result",
+    "warmups": 1
+  },
+  "interpretation": {
+    "enclosure_ratio": "includes RK4 stage sampling, interpolation, and enclosure; it is not an isolated certificate microbenchmark",
+    "material_hit_ratio": "includes BVH/event localization, stick response, and boundary-event output; the RK4 material scenario also reports accepted pieces and refinement work",
+    "memory": "planned_memory_bytes_per_particle is a solver-owned estimate, not peak RSS"
+  },
+  "measurements": {
+    "ballistic_boundaryless": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "linear_exact",
+        "rk4_enclosure_revision": "None",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 0.0,
+      "elapsed_s": {
+        "maximum": 0.09756320004817098,
+        "median": 0.09756320004817098,
+        "minimum": 0.09756320004817098
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": null,
+        "candidate_queries": null,
+        "maximum_refinement_depth": null,
+        "refinements": null
+      },
+      "macro_step_count": 1,
+      "nominal_particle_macro_steps_per_s": 81.99813040214005,
+      "particles_per_s": 81.99813040214005,
+      "planned_memory_bytes_per_particle": 443320.375,
+      "recorded_event_facet_ids_per_boundary_event": 0.0,
+      "recorded_event_facet_ids_per_particle": 0.0,
+      "result_artifact_bytes_per_particle": 14231.375
+    },
+    "ballistic_material_hits": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "linear_exact",
+        "rk4_enclosure_revision": "None",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 1.0,
+      "elapsed_s": {
+        "maximum": 0.08933830005116761,
+        "median": 0.08933830005116761,
+        "minimum": 0.08933830005116761
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": null,
+        "candidate_queries": null,
+        "maximum_refinement_depth": null,
+        "refinements": null
+      },
+      "macro_step_count": 1,
+      "nominal_particle_macro_steps_per_s": 89.54726019431845,
+      "particles_per_s": 89.54726019431845,
+      "planned_memory_bytes_per_particle": 7524019.75,
+      "recorded_event_facet_ids_per_boundary_event": 1.0,
+      "recorded_event_facet_ids_per_particle": 1.0,
+      "result_artifact_bytes_per_particle": 21398.875
+    },
+    "quadratic_no_frames": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "quadratic_exact",
+        "rk4_enclosure_revision": "None",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 0.0,
+      "elapsed_s": {
+        "maximum": 0.12096670002210885,
+        "median": 0.12096670002210885,
+        "minimum": 0.12096670002210885
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": null,
+        "candidate_queries": null,
+        "maximum_refinement_depth": null,
+        "refinements": null
+      },
+      "macro_step_count": 4,
+      "nominal_particle_macro_steps_per_s": 264.5356118183882,
+      "particles_per_s": 66.13390295459705,
+      "planned_memory_bytes_per_particle": 445365.25,
+      "recorded_event_facet_ids_per_boundary_event": 0.0,
+      "recorded_event_facet_ids_per_particle": 0.0,
+      "result_artifact_bytes_per_particle": 14296.5
+    },
+    "rk4_enclosed_interior_frames": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "rk4_dense",
+        "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 0.0,
+      "elapsed_s": {
+        "maximum": 0.10846209991723299,
+        "median": 0.10846209991723299,
+        "minimum": 0.10846209991723299
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": null,
+        "candidate_queries": null,
+        "maximum_refinement_depth": null,
+        "refinements": null
+      },
+      "macro_step_count": 4,
+      "nominal_particle_macro_steps_per_s": 295.0339337373984,
+      "particles_per_s": 73.7584834343496,
+      "planned_memory_bytes_per_particle": 448414.0,
+      "recorded_event_facet_ids_per_boundary_event": 0.0,
+      "recorded_event_facet_ids_per_particle": 0.0,
+      "result_artifact_bytes_per_particle": 16277.5
+    },
+    "rk4_enclosed_macro_end_frames": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "rk4_dense",
+        "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 0.0,
+      "elapsed_s": {
+        "maximum": 0.10292480001226068,
+        "median": 0.10292480001226068,
+        "minimum": 0.10292480001226068
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": null,
+        "candidate_queries": null,
+        "maximum_refinement_depth": null,
+        "refinements": null
+      },
+      "macro_step_count": 4,
+      "nominal_particle_macro_steps_per_s": 310.9066036192256,
+      "particles_per_s": 77.7266509048064,
+      "planned_memory_bytes_per_particle": 448414.0,
+      "recorded_event_facet_ids_per_boundary_event": 0.0,
+      "recorded_event_facet_ids_per_particle": 0.0,
+      "result_artifact_bytes_per_particle": 16277.625
+    },
+    "rk4_enclosed_no_frames": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "rk4_dense",
+        "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 0.0,
+      "elapsed_s": {
+        "maximum": 0.11597200005780905,
+        "median": 0.11597200005780905,
+        "minimum": 0.11597200005780905
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": null,
+        "candidate_queries": null,
+        "maximum_refinement_depth": null,
+        "refinements": null
+      },
+      "macro_step_count": 4,
+      "nominal_particle_macro_steps_per_s": 275.9286723006314,
+      "particles_per_s": 68.98216807515784,
+      "planned_memory_bytes_per_particle": 448043.875,
+      "recorded_event_facet_ids_per_boundary_event": 0.0,
+      "recorded_event_facet_ids_per_particle": 0.0,
+      "result_artifact_bytes_per_particle": 14313.25
+    },
+    "rk4_material_hits": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "rk4_dense",
+        "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 1.0,
+      "elapsed_s": {
+        "maximum": 0.14996199996676296,
+        "median": 0.14996199996676296,
+        "minimum": 0.14996199996676296
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": 136,
+        "candidate_queries": 296,
+        "maximum_refinement_depth": 19,
+        "refinements": 160
+      },
+      "macro_step_count": 4,
+      "nominal_particle_macro_steps_per_s": 213.3873915198008,
+      "particles_per_s": 53.3468478799502,
+      "planned_memory_bytes_per_particle": 6348910.75,
+      "recorded_event_facet_ids_per_boundary_event": 1.0,
+      "recorded_event_facet_ids_per_particle": 1.0,
+      "result_artifact_bytes_per_particle": 21495.75
+    },
+    "rk4_material_hits_interior_frame": {
+      "algorithm": {
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "path_kind": "rk4_dense",
+        "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10"
+      },
+      "boundary_events_per_particle": 1.0,
+      "elapsed_s": {
+        "maximum": 0.15582720004022121,
+        "median": 0.15582720004022121,
+        "minimum": 0.15582720004022121
+      },
+      "event_refinement": {
+        "accepted_particle_pieces": 136,
+        "candidate_queries": 296,
+        "maximum_refinement_depth": 19,
+        "refinements": 160
+      },
+      "macro_step_count": 4,
+      "nominal_particle_macro_steps_per_s": 205.35567597788028,
+      "particles_per_s": 51.33891899447007,
+      "planned_memory_bytes_per_particle": 6349232.5,
+      "recorded_event_facet_ids_per_boundary_event": 1.0,
+      "recorded_event_facet_ids_per_particle": 1.0,
+      "result_artifact_bytes_per_particle": 23313.875
+    }
+  },
+  "non_gating": true,
+  "revision_3b_metrics": {
+    "accepted_particle_pieces": 136,
+    "available": true,
+    "candidate_queries": 296,
+    "maximum_refinement_depth": 19,
+    "refinements": 160
+  },
+  "trace_memory": {
+    "measured": false
+  }
+}

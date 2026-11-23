@@ -1,0 +1,51 @@
+{
+  "scope": "Current reader reanalysis of existing A/P40 seed cohorts, not new simulation samples or native solves",
+  "metric_equalities": {
+    "A": {
+      "restricted_mean_active_lifetime_s": true,
+      "capture_count": true,
+      "capture_terminal_median_s": true,
+      "boundaries": true,
+      "destination_composition_global_tv": true,
+      "active_curve_global_maximum": true,
+      "capture_curve_global_maximum": true,
+      "clock_s": true,
+      "native_active_count_curve": true,
+      "candidate_mean_active_count_curve": true,
+      "candidate_minimum_active_count_curve": true,
+      "candidate_maximum_active_count_curve": true,
+      "native_capture_count_curve": true,
+      "candidate_mean_capture_count_curve": true,
+      "early_active": true
+    },
+    "P": {
+      "restricted_mean_active_lifetime_s": true,
+      "capture_count": true,
+      "capture_terminal_median_s": true,
+      "boundaries": true,
+      "destination_composition_global_tv": true,
+      "active_curve_global_maximum": true,
+      "capture_curve_global_maximum": true,
+      "clock_s": true,
+      "native_active_count_curve": true,
+      "candidate_mean_active_count_curve": true,
+      "candidate_minimum_active_count_curve": true,
+      "candidate_maximum_active_count_curve": true,
+      "native_capture_count_curve": true,
+      "candidate_mean_capture_count_curve": true,
+      "early_active": true
+    }
+  },
+  "sha256": {
+    ".artifacts\\platform_restructure_20261123\\science_metric_reproduction\\assessment.json": "c6823abad735a6df6c82d25db441acd27714d57971ab978eaa69dcb54e7705ac",
+    ".artifacts\\retirement_20261123\\population_recomputed\\assessment.json": "c6823abad735a6df6c82d25db441acd27714d57971ab978eaa69dcb54e7705ac"
+  },
+  "reader_sha256": "70d09c2ac0e2040c9e0792c449e1a1031c71d639626127897ac05a8615d41601",
+  "practical_judgment": "global transport/capture/time/population correspondence retained; boundary33 and100us survivor speed reservations retained",
+  "not_claimed": [
+    "formal equivalence",
+    "same-ID Brownian path",
+    "full native numerical parity",
+    "physical adhesion/flux"
+  ]
+}

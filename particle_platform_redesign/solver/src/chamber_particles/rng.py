@@ -394,31 +394,6 @@ def _brownian_node_key(
     return derived[0], derived[1]
 
 
-@njit(cache=True, fastmath=False, parallel=False, nogil=True)
-def brownian_normal_pair_native(
-    seed: np.uint64,
-    particle_id: np.uint64,
-    macro_interval: np.uint64,
-    root_interval: np.uint64,
-    tree_level: int,
-    tree_index: np.uint64,
-    component: int,
-    draw_kind: int,
-) -> tuple[float, float]:
-    """Draw from a validated physical address inside a native continuation."""
-
-    key0, key1 = _brownian_node_key(
-        seed, root_interval, tree_level, tree_index, component, draw_kind
-    )
-    return _brownian_pair_from_key(
-        particle_id,
-        macro_interval & np.uint64(_MASK32),
-        macro_interval >> np.uint64(32),
-        key0,
-        key1,
-    )
-
-
 def _seed_key(seed: int) -> tuple[int, int]:
     low, high = _split_uint64(seed, "seed")
     return low, high

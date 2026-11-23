@@ -1,0 +1,122 @@
+{
+  "baseline_commit": "e9529fc024d2591d018b5809cd8c86a8f9b89f0f",
+  "scope": "Current local quality, scientific/public usage and planned-index verification; not a complete scale matrix or native full-physics certification",
+  "source_sha256": {
+    "src/chamber_particles/__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+    "src/chamber_particles/__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+    "src/chamber_particles/api.py": "cfbeac0e96557931f1ef8f3849bba68195419140be63b9fca0049e7e2fc81466",
+    "src/chamber_particles/boundaries.py": "bb1fa5283019a4f20ee790eb8d9e748f190778942bd6dbdb9e5a37aca85295c2",
+    "src/chamber_particles/case.py": "8c129705ae09e3a318f133663ac4e82165835d74a63cbcc843e448e7d1de09e4",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+    "src/chamber_particles/cpu.py": "9eb98d3de3d6f91f40b98ebb29f725cc03c9f838cad1c7e02438272e91c1bf30",
+    "src/chamber_particles/engine.py": "925ede1234773ce4d9251be38e99784d484e07206248cbd84405f705d1faf68c",
+    "src/chamber_particles/events.py": "217fb30d8c93262603d6d3d473f9ca5556b0784984e2a2af066a3653f97ed3d8",
+    "src/chamber_particles/execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+    "src/chamber_particles/field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+    "src/chamber_particles/fields.py": "06fb89b3b9ebe431a24958100e7052721b204f4ef91d48247eb37773513b6035",
+    "src/chamber_particles/geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+    "src/chamber_particles/integrators.py": "d8c63f01cd427140128cdb52bc70ce6fae1fd3050ca40d19555b2b4baebf8954",
+    "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "src/chamber_particles/output.py": "70d09c2ac0e2040c9e0792c449e1a1031c71d639626127897ac05a8615d41601",
+    "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "src/chamber_particles/physics/catalog.py": "f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d",
+    "src/chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+    "src/chamber_particles/physics/compiled.py": "3b83f477baf684f1144900f155105cb00726f81f3cb919ee2b3d38b310b7d885",
+    "src/chamber_particles/physics/forces.py": "dc8ce2ab3feaba76a7cc341c6facd629b79c4f819550afa30ce22635dd1a7845",
+    "src/chamber_particles/physics/runtime.py": "aa184687bf162b648acd114d12bbe32f80bf1b2d8e485df6cae6cdebf69abef9",
+    "src/chamber_particles/rng.py": "8a23d62b65c0dae3651f3ff478d08d4305f73ed9e2580317df8f4122c1142920",
+    "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "src/chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "src/chamber_particles/transport.py": "d6cd4b09c027c9568adf5400b330b2858f76bca98e076148e4db4ee6e88fa496",
+    "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+    "src/chamber_particles_tools/__init__.py": "69538a6ffa93118465aa5395157c3b5b65102d794429a3f288a811ab7238db8a",
+    "src/chamber_particles_tools/analysis/__init__.py": "3313b4f03c2c3280a70f7784ab5680695ef132eb2bd0d2bcd8e11a538738d6ba",
+    "src/chamber_particles_tools/cli.py": "a727daf22b1026d12f1b9559a937b7e025b46fec358f684f804a5722e061794e",
+    "src/chamber_particles_tools/csv_import/__init__.py": "df139263115d4bd92cd9021098224d1e81807c8c811dcd08bdaf614be2bf91cb",
+    "src/chamber_particles_tools/csv_import/workflow.py": "bbc8d8cc0ec4211e606473e8d60a583ce8be01954fa5289528a7faf9328ed5b1",
+    "src/chamber_particles_tools/electrostatic_builder/__init__.py": "4c1c899232d1b686d7b93da1ce993ded0bfd019488073e5ee85ea51ac5e5eb97",
+    "src/chamber_particles_tools/electrostatic_builder/numerics.py": "3be3ecc87661557d3ab66b4c8604c52e65739eb63929ffec887a56e8e7ec1846",
+    "src/chamber_particles_tools/electrostatic_builder/workflow.py": "6c93d37c2e1681c34eebb0c2ef60d9735a9a9ab4cae952da49875cdd2a69cc33",
+    "src/chamber_particles_tools/examples.py": "a34691554c4acc4bfb0920bdbb4c4c86dc65b82cd5c239432b626746ab600b26",
+    "src/chamber_particles_tools/field_preprocessor/__init__.py": "523906002167d1e03a32290cef5b6a838167ee1d9866c64d7e06c05d93288590",
+    "src/chamber_particles_tools/field_preprocessor/numerics.py": "328eacec0067656227c75a8883156d7f2dfbb670715269a58bf18918acfe68d4",
+    "src/chamber_particles_tools/field_preprocessor/workflow.py": "32262e77b7ab1d1bd1f234271767cc1a64478961bdaae917fb2f66a316614783",
+    "src/chamber_particles_tools/inputs.py": "48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863",
+    "src/chamber_particles_tools/selection.py": "78a924b9b88b748e70b2dbf0572a06225b0e58ac8603e95a50c398faa838fcfd",
+    "src/chamber_particles_tools/source_builder/__init__.py": "330fcb0424c7c8d06bad5d9a78ff3e4d5768cf85a1caa66ed354dabce320e838",
+    "src/chamber_particles_tools/source_builder/producer.py": "92648bd6d8d67b82f6361d5a608aaeab2b99aaf366b8ec0312f60d66970ce470",
+    "src/chamber_particles_tools/visualization/__init__.py": "66106b558389cf77de03352c691e82318382b6a8e4087cb7ec4fad6ded4cc0ab"
+  },
+  "uv_lock_sha256": "ac4a7f34936b36078bf79e871e05505eb8a0f88315152e0980aaa2b0153bba56",
+  "quality": {
+    "uv_lock": "pass",
+    "ruff_format_files": 184,
+    "ruff_lint": "pass",
+    "configured_pyrefly_errors": 0,
+    "import_contracts_kept": 6,
+    "complexity": "all CC <16"
+  },
+  "executed": {
+    "core_scenario_full": {
+      "passed": 1190,
+      "seconds": 561.21,
+      "scope": "collected before two independent-review locality/interval tests were restored"
+    },
+    "final_event_suite": {
+      "passed": 62,
+      "seconds": 5.59,
+      "includes_two_restored_tests": true,
+      "total_final_core_scenario_collection": 1192,
+      "not_an_additional62_disjoint_tests": true
+    },
+    "external_retained_suite": {
+      "passed": 127,
+      "gas_collision_additional": 7
+    },
+    "planned_index_external": {
+      "passed": 134,
+      "seconds": 164.56,
+      "scope": "only staged files, isolated src/cwd, explicit native logs included"
+    },
+    "clean_installed_wheel": {
+      "status": "complete",
+      "science_and_process_cleanup": "pass",
+      "receipt": "clean_wheel.json"
+    },
+    "isolated_installed_workflow": {
+      "status": "complete",
+      "commands": 13,
+      "examples": 5,
+      "own_csv_and_first_internal_surface_sources": true,
+      "original_case_removed_result_reuse": true,
+      "receipt": "installed_workflow.json"
+    },
+    "native_analytic_benchmarks": {
+      "xy": "pass",
+      "fresh_native_rz_gates": "132/132",
+      "curved_wall_analytic": "pass"
+    },
+    "collision": {
+      "conditions": 2,
+      "jump_count": 200000,
+      "interval_count": 10000,
+      "tests_passed": 7
+    },
+    "existing_population_reanalysis": {
+      "candidate_results": 80,
+      "new_simulation_samples": 0,
+      "metric_groups_per_case_equal": 15,
+      "receipt": "population_recheck.json"
+    }
+  },
+  "warning": "One intentional invalid event-budget overflow warning; rejection regression passed.",
+  "not_claimed": [
+    "same-ID Brownian matching",
+    "full native equation/numerical or physical certification",
+    "new native A/P population solve",
+    "complete100k/1M release matrix",
+    "portable performance SLA"
+  ]
+}

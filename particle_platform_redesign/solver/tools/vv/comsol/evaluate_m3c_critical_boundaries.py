@@ -916,6 +916,7 @@ def _build_report(
         "evaluation_status": "COMPLETE",
         "scientific_status": "PASS" if failure_count == 0 else "FAIL",
         "tool_revision": TOOL_REVISION,
+        "evaluator_sha256": _sha256(Path(__file__)),
         "gate_counts": {"pass": pass_count, "fail": failure_count},
         "configuration_sha256": config_hash,
         "configuration_receipts": receipts,
@@ -941,7 +942,7 @@ def _build_report(
             "surface_departure": "TESTED",
             "specular_reflection_and_residual_flight": "TESTED",
             "rz_axis_non_wall_continuation": "TESTED",
-            "terminal_boundary_semantics": "REUSED_FROM_M3C0_BOUNDARY_SEMANTICS_V2",
+            "terminal_boundary_semantics": "NOT_TESTED_BY_FORCE_FREE_NONTERMINAL_CASE",
             "grazing_corner_multiple_hit_probabilistic": "NOT_TESTED",
             "force_field_native_representation": "NOT_APPLICABLE_TO_FORCE_FREE_MICROCASE",
             "comsol_is_golden_truth": False,
@@ -950,7 +951,6 @@ def _build_report(
 
 
 def _publish_evidence(evidence: Path, report: dict[str, Any], gates: list[dict[str, Any]]) -> None:
-    evidence.mkdir(parents=True)
     with (evidence / "comparison_manifest.json").open("x", encoding="utf-8") as stream:
         json.dump(report, stream, indent=2, sort_keys=True)
         stream.write("\n")
@@ -1020,15 +1020,13 @@ def evaluate(root: Path, config_path: Path, evidence: Path) -> dict[str, Any]:
     evidence = evidence.resolve()
     if evidence.exists():
         raise FileExistsError(f"evidence already exists: {evidence}")
-    candidate_root = root / "candidate"
-    if candidate_root.exists():
-        raise FileExistsError(f"candidate output already exists: {candidate_root}")
+    candidate_root = evidence / "candidate"
     config = _load_config(config_path)
     config_hash = _sha256(config_path)
     receipts = _validate_receipts(root, config)
     gates: list[dict[str, Any]] = []
     comparisons: dict[str, StepComparison] = {}
-    candidate_root.mkdir()
+    candidate_root.mkdir(parents=True)
 
     for step in _steps(config):
         label = str(step["label"])

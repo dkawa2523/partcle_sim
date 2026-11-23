@@ -4,7 +4,7 @@
 
 0.4.0はcoreと通常clientを一つのwheelへ収録し、CLI/Pythonで入力から結果再利用までを提供する。
 契約は[製品仕様](product_specification.md)、[architecture](architecture_proposal.md)、solver/docsの各ownerが所有する。
-承認された全体変更の調査・実行・未確認は[全体対応表](solver/evidence/platform_restructure_2026_11_23/README.md)へ残す。
+全体変更の調査・実行・未確認は[全体対応表](solver/evidence/retirement_2026_11_23/README.md)へ残す。
 
 | 単位 | 完了条件 |
 |---|---|
@@ -13,7 +13,7 @@
 | core実行 | typed state/workspace、共通transport、bounded execution、親時計/single writer/毎macro commit |
 | 結果 | result4 context、strict completed/partial、checkpoint2、旧readerなし、元caseなしの解釈 |
 | 解析/表示 | counts/weights/分母/coverage、interaction/first-hit/terminal区別、bounded/finite/gap/equal aspect |
-| 外部経路 | native/V&V分離、旧通常CLI撤去、履歴recipeは当時のsourceへ固定 |
+| 外部経路 | native/V&V分離、現行descriptorと明示primitive、native/解析参照。旧固定campaign経路は提供しない |
 | 配布/説明 | checkout外のwheel一巡、README/AGENTS/skills、reviewed report、CIとsource同一性 |
 
 ## 実装と受入の順序
@@ -25,7 +25,7 @@
 5. 独立小型reference、全通常scenario、portable V&V、installed wheelを実行する。
 6. 影響する科学比較/性能/reportを再生成し、三観点の独立レビュー必須指摘を修正する。
 
-実装済み範囲へ目的を縮めない。既存1016testsや過去sourceのPASSを新sourceの完了証拠にしない。
+実装済み範囲へ目的を縮めない。過去sourceのPASSを新sourceの完了証拠にしない。
 
 ## 条件付きbacklog
 

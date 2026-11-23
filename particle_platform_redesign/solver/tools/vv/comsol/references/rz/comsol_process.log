@@ -1,0 +1,8 @@
+M3CCB|run_start|step_count=3
+M3CCB|configuration|step_s=1e-3|geometry=axisymmetric_rectangle_10mm_by_20mm|axis_boundary=[1]|axis_feature_type=AxialSymmetry|axis_condition=Bounce|wall_boundaries=[2, 3, 4]|wall_condition=Bounce|release_groups=surface,reflect,axis|force_free=true|dynamic_charge_active=false|integrator=classical_rk4|model_source=from_scratch|model_saved=false
+M3CCB|solve_pass|step_s=1e-3|seconds=0.935|output_times=25|particle_rows=3
+M3CCB|configuration|step_s=5e-4|geometry=axisymmetric_rectangle_10mm_by_20mm|axis_boundary=[1]|axis_feature_type=AxialSymmetry|axis_condition=Bounce|wall_boundaries=[2, 3, 4]|wall_condition=Bounce|release_groups=surface,reflect,axis|force_free=true|dynamic_charge_active=false|integrator=classical_rk4|model_source=from_scratch|model_saved=false
+M3CCB|solve_pass|step_s=5e-4|seconds=0.301|output_times=25|particle_rows=3
+M3CCB|configuration|step_s=2.5e-4|geometry=axisymmetric_rectangle_10mm_by_20mm|axis_boundary=[1]|axis_feature_type=AxialSymmetry|axis_condition=Bounce|wall_boundaries=[2, 3, 4]|wall_condition=Bounce|release_groups=surface,reflect,axis|force_free=true|dynamic_charge_active=false|integrator=classical_rk4|model_source=from_scratch|model_saved=false
+M3CCB|solve_pass|step_s=2.5e-4|seconds=0.251|output_times=25|particle_rows=3
+M3CCB|run_pass|particles=surface,reflect,axis|steps=1e-3,5e-4,2.5e-4|model_source=from_scratch|model_saved=false

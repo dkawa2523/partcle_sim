@@ -212,6 +212,7 @@ def _expanded_definition(
     definition: MicrocaseDefinition, particle_count: int
 ) -> MicrocaseDefinition:
     source = definition.data.sources[0]
+    assert isinstance(source, RealizedTableSource)
     expanded = _repeat_source(source, particle_count)
     return replace(definition, data=replace(definition.data, sources=(expanded,)))
 
@@ -219,7 +220,9 @@ def _expanded_definition(
 def _expanded_boundary_definition(
     definition: MicrocaseDefinition, particle_count: int
 ) -> MicrocaseDefinition:
-    source = _repeat_source(definition.data.sources[0], particle_count)
+    original = definition.data.sources[0]
+    assert isinstance(original, RealizedTableSource)
+    source = _repeat_source(original, particle_count)
     source = replace(
         source,
         position_m=np.column_stack(
@@ -276,6 +279,7 @@ def _rk4_material_definition(
 ) -> MicrocaseDefinition:
     expanded = _expanded_definition(force, particle_count)
     source = expanded.data.sources[0]
+    assert isinstance(source, RealizedTableSource)
     source = replace(
         source,
         position_m=np.column_stack(
@@ -378,7 +382,8 @@ def _measure(
             raise RuntimeError(f"{scenario.name}: unexpected frame count")
         if summary.boundary_event_count != scenario.expected_boundary_events:
             raise RuntimeError(f"{scenario.name}: unexpected boundary-event count")
-        path_kind = str(result.manifest["resolved"]["path_kind"])
+        manifest: Any = result.manifest
+        path_kind = str(manifest["resolved"]["path_kind"])
         if path_kind != scenario.expected_path_kind:
             raise RuntimeError(f"{scenario.name}: unexpected path kind {path_kind!r}")
         boundary_events = result.read_boundary_events()
@@ -388,7 +393,7 @@ def _measure(
         observation = _Observation(
             elapsed_s=elapsed_s,
             macro_step_count=summary.macro_step_count,
-            planned_memory_bytes=int(result.manifest["memory_plan"]["planned_bytes"]),
+            planned_memory_bytes=int(manifest["memory_plan"]["planned_bytes"]),
             artifact_bytes=_directory_bytes(output),
             boundary_events=summary.boundary_event_count,
             recorded_event_facet_ids=int(boundary_events.candidate_facet_id.size),

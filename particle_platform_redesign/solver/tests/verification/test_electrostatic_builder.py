@@ -274,7 +274,7 @@ def test_canonical_workflow_preserves_input_and_adds_particle_ready_fields(
     assert fields["positive_ion_mass"].unit == "kg"
     assert len(fields) == 12
     provenance = json.loads(built.provenance_json)
-    assert provenance["producer"] == "chamber_particles.electrostatic_builder"
+    assert provenance["producer"] == "chamber_particles_tools.electrostatic_builder"
     assert provenance["producer_metadata"]["model_revision"] == ("boltzmann_bohm_sheath_c2_v1")
     assert provenance["producer_metadata"]["boundary_conditions"][0]["group"] == "wafer"
 

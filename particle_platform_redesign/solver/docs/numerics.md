@@ -1235,7 +1235,7 @@ noise変位を流速評価へ反映しない反例を識別する。これは当
 連続first-passage、背景流体modelの物理validationへ拡張しない。
 B03 path arrayの静的な保守上限は`648 B/row`で、`2048 B/row`上限内にある。正式characterizationは24/24実行を
 全粒子active・failure 0で完了し、計時、process RSS、solver plan、stochastic/event workを
-[`evidence/b03/`](../evidence/b03/README.md)へmachine-local・non-gating証跡として保存した。これは初回B03
+[`evidence/b03/`（当時の記録）](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/solver/evidence/b03/README.md)へmachine-local・non-gating証跡として保存した。これは初回B03
 closeout（engine v34 / proposal v9 / runtime v17 / tile v16）の履歴証拠である。
 performance characterizationで反復加算由来の終端tailを検出したため、engine v34はmacro targetを補償積和による
 `start + n*dt`のindexed gridから構築する。endへのsnapはfloat64構築roundoff内だけに限定し、意味のある残時間は
@@ -1637,7 +1637,7 @@ process並列の先行条件にしない。親はmacro/release/writer/checkpoint
 v62で確立したprocess配分・shared replay・科学/用途性能・memory・Windows/Linux検査は
 [`parallel_execution_plan.md`](parallel_execution_plan.md)が所有する。現行と将来の作業は
 [`implementation_plan.md`](../../implementation_plan.md)へ集約する。
-過去の実装・試作・不採用結果は[保存済み性能記録](../evidence/comsol_brownian_fullstep_parallel_2026_10_12/current_docs/solver/docs/parallel_execution_plan.md)に保持し、
+過去の実装・試作・不採用結果は[保存済み性能記録（当時の記録）](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/solver/evidence/comsol_brownian_fullstep_parallel_2026_10_12/current_docs/solver/docs/parallel_execution_plan.md)に保持し、
 本文中の履歴V&Vと同じく元のsourceに限定する。
 
 v62はv61の既存444 njitのbody・signature・decoratorを全て保持し、新しいJIT関数を追加しない。

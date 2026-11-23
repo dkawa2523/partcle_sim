@@ -18,7 +18,7 @@ COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行�
 保証するのは、登録した入力・方程式・解像度について、下表の判定基準を満たすことです。
 対応selectorの全組合せや、任意のチャンバーの予測精度を一括して認定しません。個別profileの入力、SI誤差budget、
 粒子数・seed・刻み・depth、独立reference、適用域は
-[0.2.0の用途別受入条件](../../reviews/v0_2_release_use_case_acceptance_2026-10-10.json)に固定されています。
+[0.2.0の用途別受入条件（当時の記録）](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/reviews/v0_2_release_use_case_acceptance_2026-10-10.json)に固定されています。
 その証拠は元のsourceに限定して保持します。0.3.0の科学出力・用途性能・配布履歴は
 [並列実行・性能](parallel_execution_plan.md)、現行COMSOL回帰は[評価方法](../../vv_methodology.md)が所有します。
 

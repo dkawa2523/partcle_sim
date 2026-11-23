@@ -23,8 +23,6 @@ Python services:
 - `read_csv_source(path, bundle, configuration)` returns `RealizedTableSource` or `RealizedSurfaceSource` without writes.
 - `chamber_particles_tools.inputs.create_case(bundle, settings, sources, output_directory)` publishes the complete intended source tuple.
 - `create_from_configuration(recipe_path, output_directory)` is CLI `create`.
-- `prepare_case(template_yaml, rows_csv, configuration, output_directory)` derives a checked case while retaining
-  the template's settings and other sources. It uses the same publisher; it is not necessary for a first case.
 
 ## Source configuration format 2
 
@@ -112,9 +110,10 @@ It rotates vectors, not positions; the supplied positions already use the canoni
 
 ## Identity and verification
 
-The recipe publisher records CSV/config identities and upstream provenance. Derived-template preparation also
-binds template YAML and canonical identity. Canonical validation remains with the writer; model/support/event
-readiness remains with `check_case`. Conversion alone establishes neither native-frame equivalence nor trajectory agreement.
+The recipe publisher records CSV/configuration identities, the full source configuration (including declared
+frame assumptions and unresolved metadata), and upstream provenance. Its recipe settings and canonical identity
+bind the runnable case. Canonical validation remains with the writer; model/support/event readiness remains
+with `check_case`. Conversion alone establishes neither native-frame equivalence nor trajectory agreement.
 
 ```console
 uv run --locked pytest tests/verification/test_source_builder.py tests/scenarios/test_input_clients.py -q

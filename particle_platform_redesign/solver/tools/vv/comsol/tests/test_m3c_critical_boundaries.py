@@ -1,57 +1,30 @@
 from __future__ import annotations
 
-import csv
 import hashlib
-import json
-from collections import Counter
 from pathlib import Path
 
-COMSOL_ROOT = Path(__file__).resolve().parents[1]
-SOLVER_ROOT = Path(__file__).resolve().parents[4]
-CONFIG_PATH = COMSOL_ROOT / "cases" / "m3c_critical_boundaries_v1.json"
-EVIDENCE_ROOT = SOLVER_ROOT / "evidence" / "m3c0" / "critical_boundaries_v1"
-UNCHANGED_REGISTERED_SOURCES = {
-    "config": CONFIG_PATH,
-    "java": COMSOL_ROOT / "comsol" / "RunM3CCriticalBoundaries.java",
-    "runner": COMSOL_ROOT / "run_m3c_critical_boundaries.ps1",
-}
-# The accepted v1 artifact records the staged pre-schema-v2 evaluator. The
-# current v2 reproducer is tested independently and must not rewrite that proof.
-HISTORICAL_EVALUATOR_SHA256 = "6e217a55132817b014b4a7154584304424af4b4cb48e4e48765fbdb82361addc"
+from tools.vv.comsol.evaluate_m3c_critical_boundaries import evaluate
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def test_compact_evidence_is_bound_to_registered_sources_and_gates() -> None:
-    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    manifest = json.loads((EVIDENCE_ROOT / "comparison_manifest.json").read_text(encoding="utf-8"))
-    with (EVIDENCE_ROOT / "gates.csv").open(newline="", encoding="utf-8") as stream:
-        gates = list(csv.DictReader(stream))
-
-    source_hashes = {
-        **{name: _sha256(path) for name, path in UNCHANGED_REGISTERED_SOURCES.items()},
-        "evaluator": HISTORICAL_EVALUATOR_SHA256,
+def test_current_rz_public_runs_match_native_and_piecewise_analytic_motion(tmp_path: Path) -> None:
+    reference = ROOT / "references" / "rz"
+    before = {
+        p.relative_to(reference): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in reference.rglob("*")
+        if p.is_file()
     }
-    assert manifest["comsol_provenance"]["staged_sources"] == source_hashes
-    assert manifest["configuration_sha256"] == source_hashes["config"]
-    assert manifest["evaluation_id"] == config["evaluation_id"]
-    assert manifest["evaluation_revision"] == config["evaluation_revision"]
-
-    statuses = Counter(row["status"] for row in gates)
-    assert manifest["gate_counts"] == {
-        "pass": statuses["PASS"],
-        "fail": statuses["FAIL"],
+    report = evaluate(
+        reference,
+        ROOT / "cases" / "m3c_critical_boundaries_v1.json",
+        tmp_path / "evaluation",
+    )
+    assert report["scientific_status"] == "PASS"
+    assert report["gate_counts"] == {"pass": 132, "fail": 0}
+    after = {
+        p.relative_to(reference): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in reference.rglob("*")
+        if p.is_file()
     }
-    assert manifest["scientific_status"] == "PASS"
-    assert statuses == Counter({"PASS": 132})
-
-    expected_steps = {step["label"] for step in config["case"]["fixed_rk4_steps"]}
-    assert {row["step_label"] for row in gates} == expected_steps
-    assert {row["producer"] for row in gates} == {
-        "candidate",
-        "comsol",
-        "cross_solver",
-    }
-    assert set(manifest["comsol_raw_sha256"]) == expected_steps
+    assert after == before

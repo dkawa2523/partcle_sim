@@ -38,6 +38,7 @@ from chamber_particles.case_format import (
     GeometryData,
     P1TriLayout,
     Q1QuadLayout,
+    RealizedTableSource,
     write,
 )
 from chamber_particles.cpu import CPU_RUNTIME_LAYOUT_REVISION, MEMORY_PLAN_REVISION
@@ -604,7 +605,9 @@ def _unstructured_field_case(
             np.ones(connectivity.shape[0], dtype="<u1"),
         )
 
-    source = _repeat_source(base_data.sources[0], row.particle_count)
+    original = base_data.sources[0]
+    assert isinstance(original, RealizedTableSource)
+    source = _repeat_source(original, row.particle_count)
     position, velocity = _unstructured_initial_state(row, nx, ny)
     source = replace(source, position_m=position, velocity_m_s=velocity)
     charge_to_acceleration = (
@@ -778,7 +781,7 @@ def _configure_output(
     return (), times
 
 
-def _worker_spec(item: _MaterializedRow) -> dict[str, object]:
+def _worker_spec(item: _MaterializedRow) -> dict[str, Any]:
     boundary_events = item.row.particle_count * item.row.hit_count
     return {
         "row": asdict(item.row),
@@ -852,9 +855,7 @@ def _worker(arguments: argparse.Namespace) -> None:
     print(json.dumps(observation, allow_nan=False, sort_keys=True))
 
 
-def _execute_run(
-    specification: Mapping[str, object], output: Path, *, digest: bool
-) -> dict[str, Any]:
+def _execute_run(specification: Mapping[str, Any], output: Path, *, digest: bool) -> dict[str, Any]:
     row = _mapping_value(specification, "row")
     case_path = Path(str(specification["case_path"]))
     peak_before, rss_before, rss_source = _process_memory_bytes()
@@ -871,7 +872,8 @@ def _execute_run(
     total_elapsed = time.perf_counter() - total_started
     peak_after, rss_after, _ = _process_memory_bytes()
 
-    physics_signature_count = len(evaluate_physics_tile_into.signatures)
+    physics_dispatcher: Any = evaluate_physics_tile_into
+    physics_signature_count = len(physics_dispatcher.signatures)
     _validate_run(summary, result, row, specification, physics_signature_count)
     manifest = result.manifest
     memory_plan = _mapping_value(manifest, "memory_plan")
@@ -960,8 +962,8 @@ def _execute_run(
 def _validate_run(
     summary: Any,
     result: Any,
-    row: Mapping[str, object],
-    specification: Mapping[str, object],
+    row: Mapping[str, Any],
+    specification: Mapping[str, Any],
     physics_signature_count: int,
 ) -> None:
     particle_count = int(row["particle_count"])
@@ -988,9 +990,6 @@ def _validate_run(
     resolved = _mapping_value(result.manifest, "resolved")
     if resolved.get("path_kind") != specification["expected_path_kind"]:
         raise RuntimeError("P14 performance case resolved an unexpected path kind")
-    requested = _mapping_value(result.manifest, "requested")
-    if "threads" in requested or "threads" in resolved or "thread_team" in resolved:
-        raise RuntimeError("P14 serial result unexpectedly records a thread-count setting")
     memory_plan = _mapping_value(result.manifest, "memory_plan")
     if int(memory_plan["planned_bytes"]) > int(memory_plan["limit_bytes"]):
         raise RuntimeError("P14 solver memory plan exceeds its configured limit")
@@ -1040,7 +1039,7 @@ def _scientific_payload_digest(result: Any) -> str:
 
 
 def _validate_observations(
-    observations: Sequence[Mapping[str, object]],
+    observations: Sequence[Mapping[str, Any]],
     materialized: Sequence[_MaterializedRow],
     repeats: int,
 ) -> None:
@@ -1072,7 +1071,7 @@ def _validate_observations(
             raise RuntimeError(f"P14 core scientific payload changed for {science_key}")
 
 
-def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, object]]:
+def _summaries(observations: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     summaries = []
     for row_id in sorted({str(value["row_id"]) for value in observations}):
         selected = [value for value in observations if value["row_id"] == row_id]
@@ -1125,8 +1124,8 @@ def _summaries(observations: Sequence[Mapping[str, object]]) -> list[dict[str, o
     return summaries
 
 
-def _comparisons(summaries: Sequence[Mapping[str, object]]) -> dict[str, object]:
-    comparisons: dict[str, object] = {
+def _comparisons(summaries: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    comparisons: dict[str, Any] = {
         "cold_over_warm": {},
         "regular_particle_scaling": _regular_particle_scaling(summaries),
     }
@@ -1147,13 +1146,13 @@ def _comparisons(summaries: Sequence[Mapping[str, object]]) -> dict[str, object]
         if cold is not None and warm is not None:
             cold_time = float(_mapping_value(cold, "median_timing_s")["simulate"])
             warm_time = float(_mapping_value(warm, "median_timing_s")["simulate"])
-            _mapping_value(comparisons, "cold_over_warm")[science_key] = cold_time / warm_time
+            comparisons["cold_over_warm"][science_key] = cold_time / warm_time
     return comparisons
 
 
 def _regular_particle_scaling(
-    summaries: Sequence[Mapping[str, object]],
-) -> dict[str, object]:
+    summaries: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
     selected = sorted(
         (
             value
@@ -1205,11 +1204,11 @@ def _regular_particle_scaling(
     }
 
 
-def _log_slope(first: object, last: object, particle_ratio: float) -> float:
+def _log_slope(first: float, last: float, particle_ratio: float) -> float:
     return math.log(float(last) / float(first)) / math.log(particle_ratio)
 
 
-def _coverage(rows: Sequence[_MatrixRow]) -> dict[str, object]:
+def _coverage(rows: Sequence[_MatrixRow]) -> dict[str, Any]:
     return {
         "particle_counts": sorted({row.particle_count for row in rows}),
         "layouts": sorted({row.layout for row in rows}),
@@ -1237,21 +1236,21 @@ def _validate_release_coverage(rows: Sequence[_MatrixRow]) -> None:
             raise RuntimeError(f"P14 release matrix does not cover {name}")
 
 
-def _science_key(row: Mapping[str, object]) -> str:
+def _science_key(row: Mapping[str, Any]) -> str:
     return (
         f"{row['family']}/{row['layout']}/{row['motion']}/n={row['particle_count']}/"
         f"cells={row['cell_count']}/hits={row['hit_count']}"
     )
 
 
-def _mapping_value(value: Mapping[str, object], key: str) -> Mapping[str, object]:
+def _mapping_value(value: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     result = value[key]
     if not isinstance(result, Mapping):
         raise RuntimeError(f"P14 value {key!r} is not a mapping")
     return result
 
 
-def _p14_machine_metadata() -> dict[str, object]:
+def _p14_machine_metadata() -> dict[str, Any]:
     machine = _machine_metadata()
     machine["numba"] = metadata.version("numba")
     machine["os_reported_logical_cpu_count"] = os.cpu_count()

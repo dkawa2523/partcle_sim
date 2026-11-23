@@ -1,0 +1,17 @@
+{
+  "classification": "external_comsol_and_public_api_microcase",
+  "evaluation_id": "M3-C0-critical-boundaries",
+  "evaluation_revision": 1,
+  "model_source": "from_scratch",
+  "model_saved": false,
+  "staged_sources": {
+    "java": "602b66579326401309528eea0b29f035f34348444a0c2b90414e128888bcda4b",
+    "config": "b3ad73862ee9e542f1e9ba754b582903c154aba004bbe7d7b621cfbc7e4a4bcf",
+    "evaluator": "c51b1741f11e6907ca873b22d30191d762224860dbb8d4965519f8f9072afce0",
+    "runner": "1fbb18dc992064f3f25ae5aa7f6e4a4d0c74aec736a8ba1c59e2fc8fd9f7d783"
+  },
+  "comsol_root": "C:\\Program Files\\COMSOL\\COMSOL64\\Multiphysics_copy1",
+  "comsol_version": "COMSOL Multiphysics 6.4.0.429",
+  "process_count": 1,
+  "generated_utc": "2026-11-23T00:57:14.6348752Z"
+}

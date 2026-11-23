@@ -185,4 +185,5 @@ uv run --locked pytest tests/verification tests/scenarios -q
 ```
 
 責務と変更規則は[AGENTS.md](../AGENTS.md)、実装工程は[implementation plan](../implementation_plan.md)、
-変更と配布状況は[release notes](RELEASE_NOTES.md)を参照してください。過去の科学・性能・Release資格は当時の記録へ保持します。
+変更と配布状況は[release notes](RELEASE_NOTES.md)、現在の整理と実行は[作業記録](evidence/retirement_2026_11_23/README.md)を参照してください。
+現在の仕様だけを受理します。過去の科学・性能・Release資格は当時のsourceへ限定します。

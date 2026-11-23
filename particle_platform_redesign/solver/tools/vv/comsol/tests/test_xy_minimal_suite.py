@@ -1,53 +1,34 @@
 from __future__ import annotations
 
-import importlib.util
-import json
-import sys
+import shutil
 from pathlib import Path
-from types import ModuleType
 
-import numpy as np
+import pytest
+from tools.vv.comsol.evaluate_xy_minimal_suite import evaluate
 
-TOOL = Path(__file__).resolve().parents[1] / "evaluate_xy_minimal_suite.py"
-
-
-def _load_tool() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("evaluate_xy_minimal_suite", TOOL)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+REFERENCE = Path(__file__).resolve().parents[1] / "references" / "xy"
 
 
-tool = _load_tool()
-EVENT_TIME_S = tool.EVENT_TIME_S
-_analytic = tool._analytic
-_validate_lineage = tool._validate_lineage
-
-
-def test_checked_xy_evidence_is_source_and_raw_bound() -> None:
-    solver_root = Path(__file__).resolve().parents[4]
-    evidence = solver_root / "evidence" / "xy" / "cartesian_minimal_suite_v1"
-    lineage = _validate_lineage(evidence / "raw", evidence / "run_receipt.json")
-    summary = json.loads(
-        (evidence / "evaluation" / "comparison_summary.json").read_text(encoding="utf-8")
+def test_current_xy_public_runs_match_native_and_analytic_motion(tmp_path: Path) -> None:
+    report = evaluate(
+        REFERENCE / "raw",
+        tmp_path / "evaluation",
+        run_receipt=REFERENCE / "run_receipt.json",
     )
+    assert report["scientific_status"] == "PASS"
+    judgments = report["judgments"]
+    assert isinstance(judgments, dict)
+    assert set(judgments.values()) == {"PASS"}
+    assert report["scenario_count"] == 7
+    metrics = report["metrics"]
+    assert isinstance(metrics, list)
+    assert len(metrics) == 21
 
-    assert lineage.configuration_record_count == 21
-    assert lineage.comsol_version == "COMSOL 6.4.0.429"
-    assert summary["scientific_status"] == "PASS"
-    assert set(summary["judgments"].values()) == {"PASS"}
 
-
-def test_specular_analytic_reference_preserves_tangential_motion() -> None:
-    trajectory = _analytic("specular")
-    after = trajectory.time_s > EVENT_TIME_S
-
-    np.testing.assert_allclose(
-        trajectory.position_m[after, 1],
-        0.4 + 0.1 * trajectory.time_s[after],
-        rtol=0.0,
-        atol=2.0e-16,
-    )
-    np.testing.assert_array_equal(trajectory.velocity_m_s[after, 0], -0.8)
+def test_native_reference_tampering_is_rejected_before_execution(tmp_path: Path) -> None:
+    copied = tmp_path / "reference"
+    shutil.copytree(REFERENCE, copied)
+    raw = next((copied / "raw").rglob("state_raw_wide.csv"))
+    raw.write_bytes(raw.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="raw COMSOL artifact lineage differs"):
+        evaluate(copied / "raw", tmp_path / "evaluation", run_receipt=copied / "run_receipt.json")

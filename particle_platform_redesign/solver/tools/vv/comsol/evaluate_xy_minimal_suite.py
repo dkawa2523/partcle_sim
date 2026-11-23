@@ -177,31 +177,23 @@ def _parse_configuration_log(path: Path) -> list[dict[str, str]]:
     return records
 
 
-def _validate_registered_sources(
+def _validate_native_producer(
     receipt_root: Path,
     source_records: object,
 ) -> dict[str, str]:
-    current_sources = {
-        "java": Path(__file__).resolve().parent / "comsol" / "RunXYMinimalSuite.java",
-        "evaluator": Path(__file__).resolve(),
-        "runner": Path(__file__).resolve().parent / "run_xy_minimal_suite.ps1",
-    }
-    if not isinstance(source_records, dict) or set(source_records) != set(current_sources):
-        raise ValueError("run receipt has an incomplete registered-source set")
-    source_hashes: dict[str, str] = {}
-    for name, current_path in current_sources.items():
-        record = source_records[name]
-        if not isinstance(record, dict):
-            raise ValueError(f"invalid registered-source record: {name}")
-        digest = str(record.get("sha256", "")).lower()
-        staged_relative = record.get("path")
-        if not isinstance(staged_relative, str) or not digest:
-            raise ValueError(f"invalid registered-source fields: {name}")
-        staged_path = (receipt_root / staged_relative).resolve()
-        if _sha256(current_path) != digest or _sha256(staged_path) != digest:
-            raise ValueError(f"registered source lineage differs for {name}")
-        source_hashes[name] = digest
-    return source_hashes
+    # The saved native producer is reference input. A current evaluator need
+    # not equal the evaluator/runner used to collect that observation.
+    if not isinstance(source_records, dict) or not isinstance(source_records.get("java"), dict):
+        raise ValueError("run receipt has no registered native producer")
+    record = source_records["java"]
+    digest = str(record.get("sha256", "")).lower()
+    relative = record.get("path")
+    if not isinstance(relative, str) or len(digest) != 64:
+        raise ValueError("invalid registered native-producer fields")
+    staged_path = (receipt_root / relative).resolve()
+    if not staged_path.is_relative_to(receipt_root) or _sha256(staged_path) != digest:
+        raise ValueError("registered native-producer lineage differs")
+    return {"java": digest}
 
 
 def _validate_raw_artifacts(raw_root: Path, raw_records: object) -> None:
@@ -237,7 +229,7 @@ def _validate_lineage(raw_root: Path, receipt_path: Path) -> Lineage:
     if raw_root.resolve() != (receipt_root / "raw").resolve():
         raise ValueError("raw root is not the directory bound by the run receipt")
 
-    source_hashes = _validate_registered_sources(
+    source_hashes = _validate_native_producer(
         receipt_root,
         receipt.get("registered_sources"),
     )
@@ -786,6 +778,7 @@ def _build_summary(
     finest_numeric = all(item.numeric_gate for item in metrics if item.step_s == min(STEPS_S))
     return {
         "tool_revision": TOOL_REVISION,
+        "evaluator_sha256": _sha256(Path(__file__)),
         "scientific_status": "PASS" if all_numeric and all_semantic and finest_numeric else "FAIL",
         "tested_scope": (
             "fresh unsaved COMSOL 6.4 Cartesian XY point-particle microcases: ballistic, "

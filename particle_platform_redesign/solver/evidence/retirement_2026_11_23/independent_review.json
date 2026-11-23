@@ -1,0 +1,53 @@
+{
+  "baseline_commit": "e9529fc024d2591d018b5809cd8c86a8f9b89f0f",
+  "reviewer_scope": "Independent user, implementation and scientific review of retirement; no overall release certification",
+  "examined": [
+    "Public source recipe consolidation, retained field/source authorities and provenance",
+    "Removed event paths and replacement analytic/turning/grazing/axis/corner/contact checks",
+    "Independent AST comparison of surviving definitions in events, integrators, rng, physics/forces and physics/runtime",
+    "Current performance executors, removed internal call-count/fixed-cadence guards and independent target/refinement checks",
+    "Current native XY/RZ replay, observed reference lineage and input/output separation",
+    "Actual filesystem Python inventory under src and tools/vv, including untracked callable source",
+    "Final root/product/solver/report READMEs, release notes, AGENTS, architecture, implementation and quality guidance"
+  ],
+  "numerical_survivor_ast_changes": [],
+  "findings": [
+    {
+      "requirement": "Preserve necessary behavioral checks while removing retired implementations",
+      "finding": "Two scalar-API regressions had been removed without current-path equivalents: late crossing outside the requested interval, and local point/path independence from remote large facets",
+      "resolution": "Migrated both to prepare_exact_event_batch, locate_exact_first_event_into and EventArena; retained point-classification locality. No retired API restored",
+      "test": "tests/verification/test_events.py::test_exact_current_path_keeps_locality_and_requested_time_interval",
+      "execution": "2 passed, 60 deselected, 1.54 s; Ruff format and lint passed"
+    },
+    {
+      "requirement": "Current verification must work from the delivered source checkout",
+      "finding": "Native replay requires small configuration logs ignored by the repository-wide *.log rule",
+      "required_delivery_check": "Explicitly include the required XY/RZ reference logs and replay the staged/planned-index checkout; local full-suite success alone does not establish packaging completeness",
+      "resolution": "Both required reference logs are explicitly staged; main-task isolated planned-index replay passed all 134 external tests",
+      "execution_owner": "Main task, independently read in verification.json; reviewer inspected staged file inventory, did not rerun the 134 tests"
+    },
+    {
+      "requirement": "Current responsibility and usage guidance must not present retired specifications as current",
+      "finding": "decisions.md retains scientifically useful stage history but its opening table still calls old engine/schema/thread revisions current",
+      "required_resolution": "Label the file as introduction-time decision history and direct current capabilities, owners and backlog to the current specification and implementation plan; preserve derivations without making retired paths runnable",
+      "resolution": "Main task added the explicit history scope and current owner links; reviewer read the final introduction and confirmed that historical current/revision/schema/path statements are limited to decision time"
+    }
+  ],
+  "retained_roles": [
+    "Allocating event entry functions prepare bounded storage and delegate to the sole current kernel; they do not preserve a second numerical algorithm",
+    "Current case/data/result/checkpoint versions are active formats, not legacy by numeric name",
+    "Native producer snapshots and observed raw reference data establish scientific provenance and are separate from retired candidate executors",
+    "Strict input rejection, independent physical limits, RNG/OU checks, finite-radius/contact/corner and durable-result checks remain"
+  ],
+  "closeout": {
+    "mandatory_findings": "resolved",
+    "current_usage_and_compatibility_guidance": "coherent across examined maintained documents",
+    "retired_callable_route_residue_in_examined_modules": "none found",
+    "execution_distinction": "Reviewer ran the two migrated regressions and Ruff; full suites, planned-index delivery replay, installed wheel and final benchmark were executed by the main task"
+  },
+  "limitations": [
+    "Full core/scenario suite, clean-installed wheel flows, final benchmark timing and report regeneration are owned by the main task and are not claimed as reviewer executions",
+    "Historical experiment records and all large external payloads were not individually reinterpreted or recertified",
+    "Final timing and report snapshot were still being produced during the final documentation review; no CPU tests were run during the frozen-source measurement"
+  ]
+}

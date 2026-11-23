@@ -1,0 +1,140 @@
+{
+  "queries": {
+    "case_audit": {
+      "label": "A/P287粒子・候補各40実現",
+      "rows": [
+        {
+          "case": "A",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 251.0,
+          "capture_candidate_mean": 249.675,
+          "capture_candidate_sd": 6.014459073658906,
+          "restricted_mean_active_native_us": 200.3969264894903,
+          "restricted_mean_active_candidate_us": 203.4885515137035,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
+          "qualification": "Numerical/native parity and physical adhesion not certified"
+        },
+        {
+          "case": "P",
+          "particles": 287,
+          "candidate_replicas": 40,
+          "seeds": "21–60",
+          "capture_native": 254.0,
+          "capture_candidate_mean": 251.775,
+          "capture_candidate_sd": 5.5214616236589436,
+          "restricted_mean_active_native_us": 187.38328244202265,
+          "restricted_mean_active_candidate_us": 203.05462371889976,
+          "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
+          "qualification": "Numerical/native parity and physical adhesion not certified"
+        }
+      ],
+      "source": {
+        "label": "A/P287粒子・候補各40実現",
+        "files": [
+          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
+          "solver/evidence/retirement_2026_11_23/population_recheck.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "A/P287粒子・候補各40実現",
+            "definition": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged."
+          },
+          {
+            "title": "Current-reader reanalysis, no new replicas",
+            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+          }
+        ]
+      }
+    },
+    "trajectory_divergence": {
+      "label": "探索的な局所差",
+      "rows": [
+        {
+          "case": "A",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 74.0,
+          "candidate_replica_mean": 60.45,
+          "difference_percentage_points": -4.7212543554006965,
+          "scope": "全287粒子分母、探索的局所留保"
+        },
+        {
+          "case": "A",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 759.0827702014865,
+          "candidate_replica_mean_of_medians": 861.3178894844634,
+          "relative_difference_percent": 13.468243951294046,
+          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保"
+        },
+        {
+          "case": "P",
+          "observable": "boundary33 retained terminal count",
+          "unit": "computational particles",
+          "native": 73.0,
+          "candidate_replica_mean": 61.325,
+          "difference_percentage_points": -4.067944250871079,
+          "scope": "全287粒子分母、探索的局所留保"
+        },
+        {
+          "case": "P",
+          "observable": "100us active-speed median",
+          "unit": "m/s",
+          "native": 737.5076919491495,
+          "candidate_replica_mean_of_medians": 866.9236448676853,
+          "relative_difference_percent": 17.547742800689182,
+          "scope": "各自survivorに条件付け。same-ID誤差でなく探索的局所留保"
+        }
+      ],
+      "source": {
+        "label": "探索的な局所差",
+        "files": [
+          "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
+          "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
+          "solver/evidence/retirement_2026_11_23/population_recheck.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "探索的な局所差",
+            "definition": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations.",
+            "componentIds": [
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
+          },
+          {
+            "title": "Scope and limits",
+            "detail": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations."
+          },
+          {
+            "title": "Current-reader reanalysis, no new replicas",
+            "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
+          }
+        ]
+      }
+    }
+  }
+}

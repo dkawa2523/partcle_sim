@@ -11,7 +11,6 @@ import numpy as np
 import pytest
 import yaml
 
-from chamber_particles import load_case
 from chamber_particles.case_format import (
     BoundaryData,
     DataBundle,
@@ -19,7 +18,8 @@ from chamber_particles.case_format import (
     RealizedTableSource,
     write,
 )
-from chamber_particles_tools.source_builder import convert_velocity, prepare_case, read_csv_source
+from chamber_particles_tools.inputs import create_from_configuration
+from chamber_particles_tools.source_builder import convert_velocity, read_csv_source
 
 
 def _source() -> RealizedTableSource:
@@ -283,22 +283,31 @@ def test_public_case_roundtrip_records_frame_assumption_and_refuses_overwrite(
         "boundaries": [],
         "output": {"trajectories": {"selection": "all", "schedule": {"explicit_times_s": [1, 2]}}},
     }
-    template = tmp_path / "template.yaml"
-    template.write_text(yaml.safe_dump(document), encoding="utf-8")
     csv_path, config_path = tmp_path / "rows.csv", tmp_path / "config.json"
     _csv(csv_path, [{"id": 4, "t": 1200, "x": 25, "y": 30, "vx": 300, "vy": -400}])
     config = _config()
     config["metadata"] = {"scope": "same-component realization", "unresolved": ["native frame"]}
     config_path.write_text(json.dumps(config), encoding="utf-8")
-    receipt = prepare_case(template, csv_path, config_path, tmp_path / "output")
-    loaded = load_case(receipt["case"])
+    recipe = tmp_path / "recipe.yaml"
+    recipe.write_text(
+        yaml.safe_dump(
+            {
+                "format_version": 1,
+                "input_bundle": "template.h5",
+                "sources": [{"csv": "rows.csv", "configuration": "config.json"}],
+                "settings": document,
+            }
+        ),
+        encoding="utf-8",
+    )
+    loaded = create_from_configuration(recipe, tmp_path / "output")
     np.testing.assert_array_equal(loaded.data.sources[0].particle_id, [4])
     provenance = json.loads(loaded.data.provenance_json)
-    assert provenance["producer_metadata"]["source_builder"]["configuration"]["metadata"][
+    assert provenance["producer_metadata"]["sources"][0]["configuration"]["metadata"][
         "unresolved"
     ] == ["native frame"]
     with pytest.raises(FileExistsError):
-        prepare_case(template, csv_path, config_path, tmp_path / "output")
+        create_from_configuration(recipe, tmp_path / "output")
 
     # Conflicting velocity units would otherwise silently change every speed by100.
     ambiguous = json.dumps(config).replace(
@@ -307,5 +316,5 @@ def test_public_case_roundtrip_records_frame_assumption_and_refuses_overwrite(
     assert ambiguous != json.dumps(config)
     config_path.write_text(ambiguous, encoding="utf-8")
     with pytest.raises(ValueError, match="duplicate YAML key"):
-        prepare_case(template, csv_path, config_path, tmp_path / "ambiguous")
+        create_from_configuration(recipe, tmp_path / "ambiguous")
     assert not (tmp_path / "ambiguous" / "case.h5").exists()

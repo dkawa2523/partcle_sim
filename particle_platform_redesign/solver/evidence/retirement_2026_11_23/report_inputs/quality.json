@@ -1,0 +1,73 @@
+{
+  "queries": {
+    "quality_findings": {
+      "rows": [
+        {
+          "severity": "passed",
+          "finding": "現行経路のcore/scenario全体1,190件と最終event62件",
+          "disposition": "独立レビューで復元した2件を含む現行collectionは1,192件。全体実行と追加確認を区別",
+          "evidence": "verification.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "隔離した予定commitで外部134件",
+          "disposition": "native小型参照・ログを同梱。原MPHや旧campaignへ依存しない",
+          "evidence": "verification.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "wheelだけの13操作・5例題と自分のCSV入力",
+          "disposition": "元caseなしの結果再利用、console/module/Python、process科学一致とcleanup",
+          "evidence": "installed_workflow.json / clean_wheel.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "native/解析参照でXY・RZ・曲線壁を再実行",
+          "disposition": "RZ132/132。意味とcoverageを限定した科学検査",
+          "evidence": "vv/README.md"
+        },
+        {
+          "severity": "passed",
+          "finding": "独立衝突積分・jumpと平均則を照合",
+          "disposition": "2条件、20万jump、1万interval。関連7件成功",
+          "evidence": "gas_collision/README.md"
+        },
+        {
+          "severity": "passed",
+          "finding": "必要な数値確認を現行kernelへ移し旧経路を撤去",
+          "disposition": "残存数値定義のAST不変を独立確認。時区間・遠方facetの2回帰を復元",
+          "evidence": "independent_review.json / scientific_review.json"
+        },
+        {
+          "severity": "not_certified",
+          "finding": "全native方程式・乱数path・実機付着量は認定外",
+          "disposition": "A/P40実現の実用比較と局所留保を保持。新しい標本とは数えない",
+          "evidence": "population_recheck.json"
+        }
+      ],
+      "source": {
+        "label": "現行整理後の実行・独立レビュー",
+        "files": [
+          "solver/evidence/retirement_2026_11_23/verification.json",
+          "solver/evidence/retirement_2026_11_23/independent_review.json",
+          "solver/evidence/retirement_2026_11_23/scientific_review.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "現行整理後の実行・独立レビュー",
+            "definition": "Source-bound executed checks; counts have distinct scopes. No historical result is promoted to current certification.",
+            "componentIds": [
+              "quality-table"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact source identities",
+            "detail": "[{\"path\": \"solver/evidence/retirement_2026_11_23/verification.json\", \"sha256\": \"sha256:305e9e44464845f873ab5493e309418490f23f85d57e1b72a0a7d74e9455b22e\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/independent_review.json\", \"sha256\": \"sha256:61b6040fbfda249cb7fcf91934a31cad1c0309608a0013cbe0742fcb2232052e\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/scientific_review.json\", \"sha256\": \"sha256:f02263d620c85879c59a85135303086621531dcef1a123c27d8ab9676c7158ca\"}]"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -59,10 +59,7 @@ jobs:
       - name: Verify external workflows without COMSOL
         run: >-
           uv run --locked python -m pytest
-          tools/vv/comsol/tests/test_meaning_preflight.py tools/vv/comsol/tests/test_boundary_response_mapping.py
-          tools/vv/comsol/tests/test_curved_wall_line2_convergence.py tools/vv/comsol/tests/test_prepare_f02_fixed_electric_case.py
-          tools/vv/comsol/tests/test_vigus_transport.py tools/vv/comsol/tests/test_saved_population_evaluation.py
-          tools/vv/comsol/tests/test_plot_matched_trajectories.py tools/vv/comsol/tests/test_matched_trajectory_evaluation.py -q
+          tools/vv/comsol/tests tools/vv/gas_collision/tests -q
       - name: Generate producer-neutral Quick Start
         run: |
           $quickstartRoot = Join-Path "${{ runner.temp }}" "chamber-particles-quickstart"

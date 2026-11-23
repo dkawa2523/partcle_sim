@@ -111,27 +111,6 @@ output:
 """
 
 
-def _surface_source_yaml(name: str, particle_id_start: int, count: int) -> str:
-    return f"""\
-  - name: {name}
-    type: surface
-    boundary_group: wall
-    count: {count}
-    particle_id_start: {particle_id_start}
-    particle:
-      charge_number: 0.0
-      mass_kg: 1.0e-18
-      drag_diameter_m: 1.0e-7
-      electrostatic_radius_m: 5.0e-8
-      displaced_volume_m3: 0.0
-      model_weight: 1.0
-      material_id: 0
-    position: {{model: uniform, measure: line_length}}
-    velocity: {{model: fixed, value_m_s: [0.0, 0.0]}}
-    release: {{model: fixed, time_s: 0.0}}
-"""
-
-
 def test_load_case_resolves_data_relative_to_yaml(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -568,22 +547,14 @@ def test_negative_release_time_is_valid_inside_a_negative_run_interval(tmp_path:
     np.testing.assert_array_equal(case.data.sources[0].release_time_s, [-0.25])
 
 
-def test_retired_surface_distribution_keys_are_rejected(tmp_path: Path) -> None:
-    data_path = tmp_path / "case.h5"
-    info = write(data_path, _bundle())
-    table_source = """\
-sources:
-  - name: input_particles
-    type: table
-    table: releases
-"""
-    surface_source = "sources:\n" + _surface_source_yaml("wall_release", 42, 1)
-    yaml_path = tmp_path / "run.yaml"
-    document = _case_yaml("case.h5", info.content_hash).replace(table_source, surface_source)
-    yaml_path.write_text(document, encoding="utf-8")
-
+def test_unknown_source_setting_is_rejected(tmp_path: Path) -> None:
+    info = write(tmp_path / "case.h5", _bundle())
+    document = yaml.safe_load(_case_yaml("case.h5", info.content_hash))
+    document["sources"][0]["unsupported_setting"] = 42
+    target = tmp_path / "run.yaml"
+    target.write_text(yaml.safe_dump(document), encoding="utf-8")
     with pytest.raises(CaseError, match=r"sources\[0\] keys are invalid"):
-        load_case(yaml_path)
+        load_case(target)
 
 
 @pytest.mark.parametrize(

@@ -227,7 +227,7 @@ def _build(
     )
     provenance = json.dumps(
         {
-            "producer": "chamber_particles.electrostatic_builder",
+            "producer": "chamber_particles_tools.electrostatic_builder",
             "producer_version": PRODUCER_VERSION,
             "source_sha256": source_info.content_hash,
             "field_semantics_revision": FIELD_SEMANTICS_REVISION,

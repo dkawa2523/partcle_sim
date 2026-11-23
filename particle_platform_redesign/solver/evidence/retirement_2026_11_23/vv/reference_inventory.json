@@ -1,0 +1,118 @@
+{
+  "rz/comsol_process.log": {
+    "sha256": "14b325279bc9727ce6e006c52fa8c6fbb2b86a43aaec629dc52ec94ad2af4e9d",
+    "bytes": 1417
+  },
+  "rz/dt_0p25ms/state_raw_wide.csv": {
+    "sha256": "bb91dc149a6ac9dfcf78becc374b0a0e1f92a4b9a13f0a81386a567a96fafe5b",
+    "bytes": 9304
+  },
+  "rz/dt_0p5ms/state_raw_wide.csv": {
+    "sha256": "6510dd2a6d1514bef16a5c394543c9c876b7ecdc7c36d0b601ae9fbe2872ae30",
+    "bytes": 8861
+  },
+  "rz/dt_1ms/state_raw_wide.csv": {
+    "sha256": "bfd868fb0672c0b0f01943f491645dc6706f64557ecf51d70006bd10bdc492dc",
+    "bytes": 8924
+  },
+  "rz/provenance.json": {
+    "sha256": "0dd83660c2d907c7ef7c743ec871705227709144c19d9a11a994c91dbe99792c",
+    "bytes": 775
+  },
+  "xy/configuration_receipt.log": {
+    "sha256": "d96e746aae2b94789abbf04e5d265e2bddeff618b021531c6ac4adc72dd8a45c",
+    "bytes": 6163
+  },
+  "xy/raw/ballistic/dt_1.000e-02/state_raw_wide.csv": {
+    "sha256": "10550219b904bc557481a6e6f3fc3aee7719bb61e809ee9c8d378565c80d35cd",
+    "bytes": 2576
+  },
+  "xy/raw/ballistic/dt_2.000e-02/state_raw_wide.csv": {
+    "sha256": "87f23c38cdc5746e53043dc4ae25a29dc424605a0dfe4db9f3324c71823d37e2",
+    "bytes": 2593
+  },
+  "xy/raw/ballistic/dt_5.000e-03/state_raw_wide.csv": {
+    "sha256": "84ead8c69a2e89d23527e7c8fc933e01928441d6d8270428278ec1cda08bb5a5",
+    "bytes": 2663
+  },
+  "xy/raw/electric/dt_1.000e-02/state_raw_wide.csv": {
+    "sha256": "0ab2b9b4151695849fd1f4bfaa6ccaf336680d9153904db6aa0b37f704b74e53",
+    "bytes": 2546
+  },
+  "xy/raw/electric/dt_2.000e-02/state_raw_wide.csv": {
+    "sha256": "514bf1bc9c0fd726912ce11c61091fe802b565de7a9500acb3b36a15dcf752c5",
+    "bytes": 2650
+  },
+  "xy/raw/electric/dt_5.000e-03/state_raw_wide.csv": {
+    "sha256": "784e4c8ee72d5e2c30b1abf3f166727b679437af75d644135ff10abc89cd74c5",
+    "bytes": 2603
+  },
+  "xy/raw/hold/dt_1.000e-02/state_raw_wide.csv": {
+    "sha256": "326320fd93be87053c57b5618d5eedcda64fe43e36a9d8af391816824c30ed58",
+    "bytes": 2395
+  },
+  "xy/raw/hold/dt_2.000e-02/state_raw_wide.csv": {
+    "sha256": "88bb71eba45288e5c598857bb5d3524b2cec1d09f57c0c1cec3404d81fc70c40",
+    "bytes": 2332
+  },
+  "xy/raw/hold/dt_5.000e-03/state_raw_wide.csv": {
+    "sha256": "eb3161e117c778762b950a700b1367b18289330a25b7852bebce53e34bcb90b1",
+    "bytes": 2445
+  },
+  "xy/raw/linear_drag/dt_1.000e-02/state_raw_wide.csv": {
+    "sha256": "b17f66fd3d9c59b0f3c29667e07a5bef748d04d21f9b163f4f808874ad8ac35e",
+    "bytes": 2817
+  },
+  "xy/raw/linear_drag/dt_2.000e-02/state_raw_wide.csv": {
+    "sha256": "eb04ae7c98eb572f28557213b0ee0e9af2453e1ef24f30b22d6aef6c3e56cf56",
+    "bytes": 2821
+  },
+  "xy/raw/linear_drag/dt_5.000e-03/state_raw_wide.csv": {
+    "sha256": "3d0ca7bbb9f7efb8d94ddd3a35ef4627c9c9ce9cf8a027b041993cea2bdfd264",
+    "bytes": 2821
+  },
+  "xy/raw/specular/dt_1.000e-02/state_raw_wide.csv": {
+    "sha256": "266b6e5aee2314805222433677efdb74ff752f4986b00f310bae9764d85e51ef",
+    "bytes": 2474
+  },
+  "xy/raw/specular/dt_2.000e-02/state_raw_wide.csv": {
+    "sha256": "1e9579ea6b6cbaeba19f96d834ce9b98250503d184ebc9cacee9acc444ddef17",
+    "bytes": 2554
+  },
+  "xy/raw/specular/dt_5.000e-03/state_raw_wide.csv": {
+    "sha256": "ac533900963f01c6afd27e4382452779d75e1af09136e1a7411777e345896885",
+    "bytes": 2533
+  },
+  "xy/raw/stick/dt_1.000e-02/state_raw_wide.csv": {
+    "sha256": "3432e95e0004538bc22fc35c147c2e61d4ab5b28ce8db740f80f4755203343ac",
+    "bytes": 2375
+  },
+  "xy/raw/stick/dt_2.000e-02/state_raw_wide.csv": {
+    "sha256": "1794b6808b3606840890bf5e1d3425be20f6805f2d4774f1ce9c4e9cec5dd5f5",
+    "bytes": 2382
+  },
+  "xy/raw/stick/dt_5.000e-03/state_raw_wide.csv": {
+    "sha256": "95996fc6b902137b00a06cef5f8d24b2f25ede4b2c89ede4ac8eb25832ce6aaf",
+    "bytes": 2425
+  },
+  "xy/raw/surface_departure/dt_1.000e-02/state_raw_wide.csv": {
+    "sha256": "15179638e179fb792bb8d9598a2107e947119971467fe0e78ff2e06990b5a628",
+    "bytes": 2459
+  },
+  "xy/raw/surface_departure/dt_2.000e-02/state_raw_wide.csv": {
+    "sha256": "db7523f6da7a5c9d88ce33201f42d586c75241fcc69d8a94a9e5c028559709fc",
+    "bytes": 2531
+  },
+  "xy/raw/surface_departure/dt_5.000e-03/state_raw_wide.csv": {
+    "sha256": "d082a22a18771d25fef5152cdc3af635d82d683047b7c2981046c490a1d6d983",
+    "bytes": 2509
+  },
+  "xy/registered_sources/RunXYMinimalSuite.java": {
+    "sha256": "8c3dac43690cbd370f8dcf15c20e6b22e90084e5a0ee9b7b381bfab8eb949097",
+    "bytes": 9680
+  },
+  "xy/run_receipt.json": {
+    "sha256": "3b03a351274219acb42d02ad65cfdc89d7fbd2c9a484be705066f292c51c3d07",
+    "bytes": 4987
+  }
+}
