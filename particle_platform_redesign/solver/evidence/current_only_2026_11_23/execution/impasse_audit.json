@@ -1,0 +1,98 @@
+{
+  "status": "UNEXECUTED_PHYSICAL_CLEANUP",
+  "recorded_utc": "2026-11-23 07:49:17 UTC",
+  "inspected_head": "92c7d79a63135b0a390081216b8d3ebdb122637a",
+  "branch": "cleanup/current-only-platform",
+  "scope": "Runtime inventory addendum to the frozen 92c7d79 report and blocked_cleanup.json HDF5 inventory. No current production, test, benchmark, environment or native input was changed.",
+  "goal_turn_audit": {
+    "consecutive_goal_turns_with_same_binary_policy_block": 3,
+    "previous_turns": [
+      {
+        "id": "01a206d1-9175-7550-bd55-29de9fcbb10f",
+        "started_unix": 1795410727,
+        "completed_unix": 1795414220
+      },
+      {
+        "id": "01a20706-df21-7b01-bf0d-5562a96f9b3a",
+        "started_unix": 1795414220,
+        "completed_unix": 1795419698
+      }
+    ],
+    "current_turn_started_unix": 1795419698,
+    "previous_turn_classification": "Progress: source/test/benchmark changes, verified text/helper retirement and commits were completed; repeated tool calls are not counted as separate goal turns.",
+    "current_executable_work": "Independent residual and native-preservation audit completed. Additional exact retired-source orphan bytecode was identified, and a bounded native PowerShell removal was rejected before process start.",
+    "impasse": "Remaining authorized binary retirement cannot proceed without an external execution-policy change. The new architecture proposals are organized proposals, not executable mandatory cleanup work."
+  },
+  "concrete_rejections_total": 7,
+  "prior_five_rejections": "../blocked_cleanup.json",
+  "new_rejections": [
+    {
+      "path": ".artifacts/platform_restructure_20261123/performance_guard_smoke/p11_case/case.h5",
+      "bytes": 40392,
+      "sha256": "100628eeaf4a947ce128aaa68622704077f83dfed38543e9ea307ca2c0879ba7",
+      "operation": "Hash-guarded native PowerShell Remove-Item -LiteralPath on one synthetic retired fixture",
+      "result": "Rejected before process start; blocked by policy"
+    },
+    {
+      "path": "tests/performance/__pycache__/p11_exponential.cpython-312.pyc",
+      "bytes": 16544,
+      "sha256": "deca6a5a861cc2d84622a4ee80e582ff79d7d7edebf2759493d56bf67daa870f",
+      "operation": "Hash-guarded native PowerShell Remove-Item -LiteralPath on one retired-source orphan bytecode file; source-absence guard",
+      "result": "Rejected before process start; blocked by policy"
+    }
+  ],
+  "known_remaining": {
+    "hdf5": {
+      "files": 77757,
+      "bytes": 4554566979,
+      "source": "../blocked_cleanup.json; independently recounted at inspected_head"
+    },
+    "orphan_bytecode": {
+      "files": 17,
+      "bytes": 196342,
+      "source": "orphan_bytecode_preflight.json",
+      "preflight_sha256": "5413c214db619ff0defea9e167715ca20f7873851e0e451265b55242f1207c87",
+      "scope": "Exact absent Git-retired Python sources across redesign history; CPython3.12 marshal inspected as data only, not executed; current caches and execution environments excluded",
+      "removal_attempts": 1,
+      "other_files_not_individually_attempted": 16
+    },
+    "total_files": 77774,
+    "total_bytes": 4554763321,
+    "limits": "Known classified retirement scope, not every binary file in the workspace. No claim of individual deletion attempts or before/after content hashes for all HDF5 files."
+  },
+  "independent_postreview": {
+    "retired_text_files_absent": 623,
+    "finished_helper_files_absent": 9,
+    "native_authority_files": 479,
+    "native_missing": 0,
+    "native_sha_mismatches": 0,
+    "retired_guard_hdf5": 29,
+    "guard_preflight_sha_matches": 29,
+    "tracked_old_code_model_dataset_changes": 0,
+    "additional_current_legacy_route_found": false,
+    "source_search_correction": "Earlier orphan-cache search was incomplete: a repository-root pathspec was used from the solver working directory, and default rg excludes ignored caches. Corrected audit uses explicit git -C repository root, 123 historical deleted Python paths, and exact absent-source sibling caches.",
+    "required_remaining_action": "Only the classified binary retirement and post-deletion residual/preservation checks; no current-source fix was identified by this completion audit."
+  },
+  "verification_scope": {
+    "this_addendum": "Maintained documentation33/skills4 passed; JSON/count math, preflight content SHA, exact17 current bytecode SHAs/source absence and README local links passed. No new permanent verifier was added.",
+    "core": "1240 passed / 473.52 s at unchanged code/test state 08ac61b",
+    "external": "156 passed / 39.10 s at 8883e3a; affected external source hashes unchanged",
+    "code_state_release_ci": {
+      "head": "08ac61bcaf887fdd150e5d9f5a0e6ed2e99a387b",
+      "run_id": 45127770171,
+      "windows": "success",
+      "linux": "success",
+      "receipt": "ci_08ac61b.json"
+    },
+    "latest_metadata_release_ci": {
+      "head": "92c7d79a63135b0a390081216b8d3ebdb122637a",
+      "run_id": 45132620866,
+      "status": "in_progress",
+      "conclusion": null,
+      "observed_utc": "2026-11-23 07:49:17 UTC"
+    },
+    "no_new_full_suite_or_simulation": "No production/test/benchmark change in this addendum; no new solver or native computation was performed.",
+    "frozen_report": "The report_app snapshot and previous execution receipts retain their stated historical scope; this addendum is the later residual audit, not a silent rewrite of those results."
+  },
+  "resume_condition": "Execution context must permit the already authorized bounded native deletion. Recheck exact remaining paths/hashes, retired-source absence, protected native/input/environment boundary and live processes, delete the classified products, then independently repeat residual and preservation checks. No permission re-request or policy workaround is required or attempted."
+}

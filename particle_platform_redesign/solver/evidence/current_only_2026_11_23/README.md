@@ -4,6 +4,14 @@
 コード撤去と下記の現行確認を実施した。物理削除には外部blockが残り、全撤去完了とはしていない。
 新しい基盤課題・根因・改良案は[全体調査](../../../reviews/foundation_root_cause_review_2026-11-23.md)へ分けた。
 
+最終残存監査の追記は[実行停止条件と残存](execution/impasse_audit.json)。
+`92c7d79`後の独立点検で、廃止済みsourceの孤立bytecode17件・196,342 bytesを追加特定した。
+既知の未撤去バイナリはHDF5 77,757件と合わせ77,774件・4,554,763,321 bytes。
+合成HDF5の再確認と孤立bytecode1件へのSHA guard付き非再帰削除も実行前に拒否され、具体的拒否は計7操作となった。
+同じ外部blockを確認したgoal turnは3回連続であり、操作数とは区別する。全ファイルを個別に削除試行した意味ではない。
+正確な17パス・SHA・source対応は[bytecode preflight](execution/orphan_bytecode_preflight.json)に保存した。
+既存report snapshotと実行receiptは各作成時点の根拠を保持し、この追記を新しい残存監査として扱う。
+
 ## 対象と必要な役割
 
 現在の目的は、外部の場・形状・実現sourceから、通常のCLI/Pythonで入力作成、検査、計算、結果利用を行うこと。
@@ -56,7 +64,7 @@ recursive削除2回と、旧result3を確認した9,840 bytesの単一HDF5への
 形式cutoffでは拾えなかった現行形式のP10/P11 guard debugも、producer由来・合成入力の現行生成処理との完全一致・実consumerに照合した。
 そのtext24件・68,989 bytes（8 YAMLを含む）を撤去し、29 HDF5・796,680 bytesは残存する。
 現行P10/P06/C03と独立oracle、dated maintenance記録、実行環境を保持した。P10のfield/event/relaxation各8粒子をcold/warm計6行で再実行し、failure0・各scenario科学payload一致を確認。
-既知の全撤去対象の残存はHDF577,757件・4,554,566,979 bytes。合成P11 fixture一つにもhash guard付き削除を試したが同じpolicyで拒否され、具体的拒否は計5操作となった。
+`92c7d79`時点の既知残存はHDF577,757件・4,554,566,979 bytes。合成P11 fixture一つにもhash guard付き削除を試したが同じpolicyで拒否され、この時点の具体的拒否は計5操作となった。
 詳細は[producerの役割による追加撤去](execution/guard_artifact_cleanup.json)。全バイナリを個別に試したという意味ではない。
 分類rootの重複・包含と保護資産の混入は検出されなかった。実行時には再確認が必要である。
 対象・留保は[blocked cleanup](blocked_cleanup.json)に記録する。回収容量の実績とは扱わない。
