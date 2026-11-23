@@ -155,7 +155,7 @@ their directly named shared primitives. Normal producers publish canonical
 bundles through the existing publisher, and normal result consumers use the
 same bound cohort and ResultView; neither introduces a second numerical path.
 
-## Explicit limits and retained references
+## Explicit limits and cleanup closure
 
 The Windows path-replacement test skips because the host denies replacement
 of an open file; all 14 integrity cases passed on Linux. One established
@@ -163,9 +163,15 @@ adversarial invalid-time event test emits an overflow warning while rejecting
 its invalid budget. Independent review traced, but did not independently
 execute, the particular surface-response-commit then departure-failure branch.
 
-Five small task-owned result4 baseline stores (880,655 bytes) remain historical
-verification references after automatic approval review rejected their recursive
-removal with `blocked by policy`. No deletion was executed or retried through
-another mechanism; scientific exports and preserved original inputs are bound
-in [baseline_reference_retention.json](baseline_reference_retention.json).
-These are not current runtime inputs or an installed compatibility path.
+The user subsequently removed all five task-owned result4 baseline stores
+(previously 880,655 bytes). Read-only verification confirmed that all five result
+directories are absent, all ten input files still load with their recorded case
+and canonical-data identities, and all five scientific exports retain their
+recorded SHA-256 values. The closure is recorded in
+[baseline_reference_removal.json](baseline_reference_removal.json).
+
+[baseline_reference_retention.json](baseline_reference_retention.json) and the
+completed HTML snapshot retain the earlier review state, when automatic approval
+review rejected assistant-side removal with `blocked by policy`. They are
+historical evidence; the subsequent removal record defines the current cleanup
+state. The assistant did not retry deletion or activate an archived environment.

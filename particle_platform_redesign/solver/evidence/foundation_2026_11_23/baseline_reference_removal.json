@@ -1,0 +1,62 @@
+{
+  "operation": "User-performed removal of the five task-owned result4 baseline stores",
+  "verified_at_utc": "2026-11-23T22:42:02.572726+00:00",
+  "performed_by": "User, reported in the conversation; assistant performed read-only verification",
+  "assistant_deleted_files": false,
+  "result": "All five result directories absent; all ten input files and five scientific exports preserved",
+  "prior_retention_inventory": {
+    "path": "baseline_reference_retention.json",
+    "sha256": "84ada83d92948c19083bca4e89ebf66e82b8952f4f44b0dcec5bd2661dce7a27",
+    "scope": "Historical inventory and automatic-review outcome at the original review; unchanged"
+  },
+  "verification": "Independent read-only filesystem/export hash checks plus current public load_case and comparison to recorded baseline input identities; no particle recalculation or archived environment used",
+  "stores": [
+    {
+      "example": "xy-ballistic",
+      "removed_result_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\xy-ballistic\\result",
+      "result_absent": true,
+      "preserved_case_file_hash": "sha256:d8d00eb2a3d21a8b7b05cc9ad3d6fd09f21e00e152e72144cd47f9aaeea1e4eb",
+      "preserved_data_content_hash": "sha256:f1b81f183a13c7bb07043791b3d006c46918e3ff31bbe97803a47330035e9313",
+      "science_export_sha256": "d2a4bc83398cdb4164a9870ebc9974d7d362f2dad9f9800c2276c540857b2c99",
+      "science_export_bytes": 24805
+    },
+    {
+      "example": "rz-charged",
+      "removed_result_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\rz-charged\\result",
+      "result_absent": true,
+      "preserved_case_file_hash": "sha256:afe5ab8849158e367fb509dd3b26d04c5ae3ead36ff7dc8058674c331bdd6d0d",
+      "preserved_data_content_hash": "sha256:4883041e65867887070b96eb47a53e91f09bb59bd7841d85d7e267ee8cc6a1e1",
+      "science_export_sha256": "c35a45d4c3647eaf116f646ae57de4133c79bd1f926e67ce49d2f42ecccd6520",
+      "science_export_bytes": 24805
+    },
+    {
+      "example": "xy-time-field",
+      "removed_result_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\xy-time-field\\result",
+      "result_absent": true,
+      "preserved_case_file_hash": "sha256:a0b19c0368a0835f66693a0a381aa6b1d8bcf3164a8cbe5f6d3a37c02844d3cc",
+      "preserved_data_content_hash": "sha256:2751548e9499191660121c8188eb55854aeb37178734aec765908ec8b348b6af",
+      "science_export_sha256": "ef3ec258bc9308d41a4a981c4e085de2d409199444966393b0253b95bd0bf902",
+      "science_export_bytes": 24805
+    },
+    {
+      "example": "brownian-wall",
+      "removed_result_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\brownian-wall\\result",
+      "result_absent": true,
+      "preserved_case_file_hash": "sha256:e8230ab0352fc6611d1a2afdc5a385a8f09ad788de208d3568a73efc100ff004",
+      "preserved_data_content_hash": "sha256:5e3b351b301f5913884c7c8d5c3a58c734cb554cfca587604948ed9fe691b476",
+      "science_export_sha256": "bb6400cf18903c232273f6eb430cc3e650d17d9fcdf2bb0c617ce026f90f4ee1",
+      "science_export_bytes": 24553
+    },
+    {
+      "example": "reduced-electrostatic",
+      "removed_result_path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\foundation_baseline_20261123\\examples\\reduced-electrostatic\\result",
+      "result_absent": true,
+      "preserved_case_file_hash": "sha256:b98e3ddba663b9ac86bcfc3d7d286931701b1d7f06b0ef11a7103731b90b06e9",
+      "preserved_data_content_hash": "sha256:ad120642a3ac3900927f610935f03bf332072941feb4f641d00a95322fc18323",
+      "science_export_sha256": "eebed9696817ca4724c60c2dc758b1e750dc5d3dc9bab9e7967332278d4f51da",
+      "science_export_bytes": 24805
+    }
+  ],
+  "scientific_exports_total_bytes": 123773,
+  "report_scope": "The completed HTML snapshot and its execution receipt remain unchanged as the historical review. This subsequent cleanup closure is the current filesystem-state record."
+}
