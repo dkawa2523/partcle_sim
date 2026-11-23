@@ -1,0 +1,42 @@
+{
+  "scope": "Remote CI for immutable8883e3a before verification-only R13 continuation",
+  "head_sha": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+  "workflow": "solver-release",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45122225251",
+  "jobs": [
+    {
+      "id": 137518378814,
+      "name": "ubuntu-latest / Python 3.12",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-23T06:09:20Z",
+      "completed_at": "2026-11-23T06:31:10Z",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45122225251/job/137518378814"
+    },
+    {
+      "id": 137518379131,
+      "name": "windows-latest / Python 3.12",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-23T06:09:20Z",
+      "completed_at": "2026-11-23T06:35:31Z",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45122225251/job/137518379131"
+    },
+    {
+      "id": 137527618101,
+      "name": "Publish GitHub release",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-11-23T06:35:32Z",
+      "completed_at": "2026-11-23T06:35:31Z",
+      "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45122225251/job/137527618101"
+    }
+  ],
+  "limits": [
+    "Current1240fullsuite is separately recorded in final_core_full.json",
+    "67production sourcefiles are unchanged; R13 benchmark/tests changed after this remote run",
+    "No GitHub release or registry publication requested or performed"
+  ]
+}

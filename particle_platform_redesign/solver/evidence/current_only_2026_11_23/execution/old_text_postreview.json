@@ -1,0 +1,75 @@
+{
+  "audit": "Independent post-removal verification of explicitly retired text result metadata",
+  "recorded_utc": "2026-11-23T06:43:36.566988+00:00",
+  "status": "PASS_WITH_BINARY_CLEANUP_BLOCKED",
+  "source_preflight": {
+    "path": ".artifacts\\current_only_20261123\\old_result_text_preflight.json",
+    "sha256": "bcb7d9f84bd2fbcf7e85f615b516d081902481a8128b46adc4b013e38ab4d87c",
+    "candidate_files": 571,
+    "candidate_bytes": 2930032
+  },
+  "root_immediate_recheck": {
+    "path": ".artifacts\\current_only_20261123\\old_result_text_recheck.json",
+    "sha256": "bdb6ac1f53610ee57c69af617b76319e5622357b92bda47ba5fac1ff33935d60"
+  },
+  "removed_metadata_verification": {
+    "all_571_exact_candidates_absent": true,
+    "remaining_candidate_paths": [],
+    "inspected_candidate_names": {
+      "run.json": 198,
+      "LATEST": 191,
+      "_SUCCESS": 182
+    }
+  },
+  "other_retired_result_roots": {
+    "roots": 198,
+    "remaining_files": 77633,
+    "remaining_bytes": 4400775595,
+    "file_type_counts": {
+      ".h5": 77633
+    },
+    "file_type_bytes": {
+      ".h5": 4400775595
+    },
+    "other_text_or_unknown_files": [],
+    "symlink_or_junctions": []
+  },
+  "brownian_result_root": {
+    "remaining_files": 95,
+    "remaining_bytes": 152994704,
+    "all_hdf5": true
+  },
+  "total_retired_hdf5_remaining": {
+    "files": 77728,
+    "bytes": 4553770299
+  },
+  "native_authority": {
+    "path": "evidence\\comsol_v0_2_0_release_requalification_v2\\publication_saved_native_closure.json",
+    "sha256": "dac2b4dd815619161c366979784ffb1b98f2445d8eca899d9b844ac6975664a8",
+    "groups": {
+      "external_raw_inputs": 278,
+      "local_regenerated_metadata": 5,
+      "retained_git_authority": 196
+    },
+    "files_rehashed": 479,
+    "missing": [],
+    "sha256_mismatches": []
+  },
+  "outside_scope_assessment": {
+    "old_code_model_dataset_tracked_diff_vs_8883e3a": "none",
+    "all_known479_native_input_authorities_preserved": true,
+    "candidate_scope": "exact571preflight paths inside explicit198retiredresult roots",
+    "no_other_text_in_classified_result_roots": true
+  },
+  "policy_block": {
+    "rejections": 4,
+    "binary_deletion_performed_by_this_reviewer": false,
+    "status": "Unchanged; remaining HDF5 files physically present"
+  },
+  "limits": [
+    "This reviewer performed no deletion, rename, simulation, native solve or production change",
+    "HDF5 residual verification uses counts/suffixes/bytes, not a before/after content-hash roster for all77728oldgeneratedbinary files",
+    "No universal priorinventory of every untrackedoutsidefile exists; outsidepreservation claim is bound to479knownauthorities+protectedtrackedareas+explicitpatchtargetscope",
+    "No new cleanuphelper/framework created; JSON is audit evidence only"
+  ]
+}

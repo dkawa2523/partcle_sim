@@ -1,0 +1,292 @@
+{
+  "base_head": "8883e3a",
+  "scope": "Retire redundant private-memory layout assertions and retain independent allocation/budget, transient and publicscientific checks; no installed production changes",
+  "changed_files": [
+    {
+      "path": "tests/scenarios/test_force_coupled_run.py",
+      "sha256": "796013140767782f348d5751e424cb4dc6cc714ec60ba04510ca9fef94058fc1",
+      "assertions_before": 217,
+      "assertions_after": 206
+    },
+    {
+      "path": "tests/scenarios/test_brownian_run.py",
+      "sha256": "caf41bbce73cf59f0b9e5449452df7964b46b22544c0a94eabe3828954a1393f",
+      "assertions_before": 186,
+      "assertions_after": 183
+    },
+    {
+      "path": "tests/scenarios/test_wall_source_run.py",
+      "sha256": "89f3f41ac5a9368e7bb277d9ccfd6a95de98ed8dcee88253bb9648e9e1115c9b",
+      "assertions_before": 47,
+      "assertions_after": 38
+    },
+    {
+      "path": "tests/verification/test_workspace_ownership.py",
+      "sha256": "11156f901eb8a755ed468fd959b39569faa6f5117e0b8a74c2520082e7c8e69a",
+      "assertions_before": 7,
+      "assertions_after": 13
+    },
+    {
+      "path": "tests/performance/b03_characterization.py",
+      "sha256": "f434594804e8fe3659bd83f60f6aba8ef9b16a6b3cb4365b2ec2fafbd4d3fc35",
+      "assertions_before": 0,
+      "assertions_after": 0
+    },
+    {
+      "path": "tests/performance/README.md",
+      "sha256": "d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3"
+    },
+    {
+      "path": "../reviews/foundation_root_cause_review_2026-11-23.md",
+      "sha256": "c0b272076246ab965c4158f8d992f55e8fd9d22dfc2a1be9ef375a013d6c5481"
+    },
+    {
+      "path": "evidence/current_only_2026_11_23/README.md",
+      "sha256": "659b24a032b964b3ff7f2ebc6bef0e0520d18bd8a48842bec8a2a835b50a04ce"
+    }
+  ],
+  "removed": [
+    "Scenario mirrored544/472/171/851-byte cert/event/replay/dense constants",
+    "Scenario mirrored Brownian128*(depth+4) tree reserve and query-scratch formulas",
+    "Wall/source272/64/624/52-byte release/eventstaging/failure constants and exactcapacity/query formulas",
+    "B03private tree-size expectedformula and redundant observationperrowfield"
+  ],
+  "retained": [
+    "Public memorylimit/phase/component accounting",
+    "Slab/output/scientific identity and localfailures",
+    "Zero-cost exact specialization checks",
+    "B03 independent named transientstage646raw/648rounded bound and RSS/tracemalloc observations",
+    "Original physical oracles, equations, controls, RNG and resultpublic API"
+  ],
+  "independent_allocation_coverage": {
+    "prepared": "Existing ownership reader counts actual unique roots; C08surface and coupled exponentialwall/cert/event/replay fixtures added",
+    "dynamic": "Concrete baseleaf/adaptive workspace andtwo pendingbanks + nextcount; borrowedinputs counted conservatively; this is not alltransient/RSS proof",
+    "N": [
+      1,
+      13
+    ],
+    "base_max_depth_pairs": [
+      [
+        0,
+        0
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        0,
+        8
+      ],
+      [
+        3,
+        8
+      ],
+      [
+        10,
+        10
+      ]
+    ]
+  },
+  "tests": {
+    "command": "uv run --locked pytest tests/verification/test_workspace_ownership.py tests/scenarios/test_force_coupled_run.py::test_exponential_midpoint_uses_local_enclosure_for_unused_extreme_cell tests/scenarios/test_force_coupled_run.py::test_curved_mixed_residual_work_preserves_analytic_paths_and_slab_identity tests/scenarios/test_force_coupled_run.py::test_memory_slab_partitioning_does_not_change_public_identity tests/scenarios/test_force_coupled_run.py::test_finite_speed_epstein_converges_with_both_production_integrators tests/scenarios/test_brownian_run.py::test_brownian_output_schedule_does_not_change_physical_result tests/scenarios/test_brownian_run.py::test_brownian_all_row_adaptive_multi_reflection_respects_memory_and_output_identity tests/scenarios/test_wall_source_run.py::test_c08_surface_departure_reflection_and_reimpact_use_one_event_path tests/scenarios/test_wall_source_run.py::test_c09_residual_subdivision_preserves_all_hits_and_fails_at_its_budget -q --junitxml=.artifacts/current_only_memory_20261123/final_targeted.xml",
+    "junit": ".artifacts\\current_only_memory_20261123\\final_targeted.xml",
+    "junit_sha256": "689be91dca09d705f96c8f4ee9a30cafe0d9bf02eb01604252680dde2b8061f5",
+    "testsuite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "30",
+      "time": "22.430",
+      "timestamp": "2026-11-23T15:17:12.571672+09:00",
+      "hostname": "DESKTOP-621T1UP"
+    },
+    "initial_targeted_run": "27passed/18.74s before addingwall/source cases; final30 result supersedes this limitedscope"
+  },
+  "benchmark": {
+    "command": "uv run --locked python -m tests.performance.b03_characterization --particles 32 --repeats 1 --warmups 1 --json .artifacts/current_only_memory_20261123/b03.json",
+    "exit_code": 0,
+    "benchmark": "b03_public_api_warm_performance_memory_characterization_v1",
+    "previous_report": ".artifacts/current_only_bench_20261123/b03.json",
+    "new_report": ".artifacts\\current_only_memory_20261123\\b03.json",
+    "rows": [
+      {
+        "scenario": "b02_xy_fixed_drag",
+        "particles": 32,
+        "scientific_payload_sha256": "sha256:decf069919a6bc44e75b71b9a119891749f3523c4cea94a8a5051ea4ae78ccb0",
+        "same_as_previous_execution": true,
+        "lifecycle_counts": {
+          "active": 32,
+          "escaped": 0,
+          "failed": 0,
+          "held": 0,
+          "pending": 0,
+          "stuck": 0
+        }
+      },
+      {
+        "scenario": "b03_rz_effective_drag_continuous_charge_gravity",
+        "particles": 32,
+        "scientific_payload_sha256": "sha256:c3e336d3f30139e4a61cb550c2d5bc376252a41c06daf80eb44c762d5c327360",
+        "same_as_previous_execution": true,
+        "lifecycle_counts": {
+          "active": 32,
+          "escaped": 0,
+          "failed": 0,
+          "held": 0,
+          "pending": 0,
+          "stuck": 0
+        }
+      },
+      {
+        "scenario": "b03_rz_fixed_drag",
+        "particles": 32,
+        "scientific_payload_sha256": "sha256:5150ce485f4580e2d96ce676b69e25f867468ca25e4f9c48030539e65d32eebd",
+        "same_as_previous_execution": true,
+        "lifecycle_counts": {
+          "active": 32,
+          "escaped": 0,
+          "failed": 0,
+          "held": 0,
+          "pending": 0,
+          "stuck": 0
+        }
+      },
+      {
+        "scenario": "b03_rz_fixed_drag_axis_restart",
+        "particles": 32,
+        "scientific_payload_sha256": "sha256:153d2ea4679084dc5098e51afcef72aa598127b028d66e644fafd3da2708ca8a",
+        "same_as_previous_execution": true,
+        "lifecycle_counts": {
+          "active": 32,
+          "escaped": 0,
+          "failed": 0,
+          "held": 0,
+          "pending": 0,
+          "stuck": 0
+        }
+      }
+    ],
+    "independent_transient_bound": {
+      "checks": {
+        "all_rows_use_current_memory_plan": true,
+        "all_scratch_components_match_slab_formula": true,
+        "conservative_named_array_bound_fits_stage_scratch": true
+      },
+      "conservative_named_b03_path_array_bytes_per_particle": 646,
+      "dtype_item_sizes_bytes": {
+        "byte": 1,
+        "float64": 8,
+        "int64": 8,
+        "uint16": 2
+      },
+      "general_stage_scratch_bytes_per_particle": 2048,
+      "groups": {
+        "axis_restart_selected_copies": {
+          "columns_per_particle": {
+            "float64": 7,
+            "int64": 3
+          },
+          "raw_bytes_per_particle": 80
+        },
+        "cubic_dense_charge_invariant_certificate": {
+          "columns_per_particle": {
+            "byte": 4,
+            "float64": 6
+          },
+          "raw_bytes_per_particle": 52
+        },
+        "effective_equilibrium_safety_and_selection": {
+          "columns_per_particle": {
+            "byte": 5,
+            "float64": 7,
+            "int64": 1
+          },
+          "raw_bytes_per_particle": 69
+        },
+        "fresh_root_wave_metadata": {
+          "columns_per_particle": {},
+          "raw_bytes_per_particle": 0
+        },
+        "full_midpoint_coefficient_table": {
+          "columns_per_particle": {
+            "byte": 3,
+            "float64": 7,
+            "int64": 1
+          },
+          "raw_bytes_per_particle": 67
+        },
+        "predictor_construction_and_start_relaxation": {
+          "columns_per_particle": {
+            "byte": 3,
+            "float64": 13,
+            "int64": 1
+          },
+          "raw_bytes_per_particle": 115
+        },
+        "predictor_return": {
+          "columns_per_particle": {
+            "byte": 3,
+            "float64": 5,
+            "int64": 1
+          },
+          "raw_bytes_per_particle": 51
+        },
+        "returned_root_batch_state_and_safe_values": {
+          "columns_per_particle": {
+            "byte": 1,
+            "float64": 12,
+            "int64": 1
+          },
+          "raw_bytes_per_particle": 105
+        },
+        "root_guard_and_classification": {
+          "columns_per_particle": {
+            "byte": 12,
+            "float64": 2,
+            "int64": 1,
+            "uint16": 2
+          },
+          "raw_bytes_per_particle": 40
+        },
+        "valid_coefficient_subset": {
+          "columns_per_particle": {
+            "byte": 3,
+            "float64": 7,
+            "int64": 1
+          },
+          "raw_bytes_per_particle": 67
+        }
+      },
+      "measurement_note": "The separate tracemalloc and process-RSS observations include broader runtime and I/O allocations; they are consistency observations, not a direct meter for this per-row data-buffer proof.",
+      "memory_plan_revision_from_manifests": "solver_owned_memory_plan_v26",
+      "method": "Raw NumPy data-buffer bytes. The audit deliberately counts phase-separated root preparation and axis-restart arrays together, double-counts the returned predictor, and includes arrays shared with B02, so it over-bounds B03's named additions. Generic field/physics workspaces and the pre-existing Hermite/event arrays remain in the established general stage allowance.",
+      "remaining_stage_scratch_headroom_bytes_per_particle": 1400,
+      "root_ordinal_note": "root_interval and restart counters are per-row counter-addressing state; their current and pending waves are included in stochastic_tree_work_bytes_per_particle, not this general stage-scratch subtotal",
+      "rounded_conservative_bytes_per_particle": 648,
+      "stochastic_reserve_verification_owner": "tests/verification/test_workspace_ownership.py: concrete base/adaptive tree and pending-bank allocations against the public reserve"
+    },
+    "previous_sha256": "53f07c70cd2bf13cef52cafb18f1772c86af86881402efa0cdf1947c93488510",
+    "new_sha256": "0a2c9b6a47d5f510f9055686edaacdf9e0eae01bc0b1a043048e438c69490a98",
+    "scope": "Four32-particle smoke scenarios; same scientificconditions, not a new accuracy/scaling qualification or physicalvalidation"
+  },
+  "checks": {
+    "ruff_check": "passed 5 changed Python files",
+    "ruff_format": "passed 5 changed Python files",
+    "pyrefly": "0 errors, 172 warnings",
+    "transient_accounting_AST": "identical to 8883e3a excluding the new owner note",
+    "production_src": "unchanged",
+    "git_diff_check": "passed for all owner-edited paths"
+  },
+  "independent_review": {
+    "reviewer": "/root/retire_remaining_memory_asserts/memory_owner_audit",
+    "mandatory_findings": 0,
+    "scope": "Read-only final ownership/behavior/transient review, including wall-source/C08 additions and R13 text; no full suite or edits"
+  },
+  "limits": [
+    "Prior1228fullsuite binds8883e3a, not thisnewtestlayout",
+    "30targetedchecks are not a wholeplatformrequalification",
+    "B03samefour32particle runs are same-input scienceidentity, not new independentensemble or performance scaling"
+  ]
+}

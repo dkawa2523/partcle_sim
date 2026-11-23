@@ -1,0 +1,7 @@
+{
+  "candidate_shas_unchanged": 571,
+  "windows_processes": 618,
+  "wsl_processes": 50,
+  "root_path_mentions": 0,
+  "scope": "Immediate read-only hash/absolute-boundary/live-use check beforeexplicittextpatch; no binary deletion"
+}

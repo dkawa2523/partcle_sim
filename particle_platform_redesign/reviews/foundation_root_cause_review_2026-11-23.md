@@ -232,18 +232,25 @@ accepted rootと結び付ける。別cohort/時間窓にeventがあっても、�
 明示ID/窓への既存probe拡張か、それに適した独立収束実験を選ぶ。全粒子の巨大path ledgerは先行追加しない。
 数値証拠を増やせば必ず同等性になるわけではなく、model/field/referenceの対応も別に必要である。
 
-### R13 — 科学scenarioにprivate容量定数が残る
+### R13 — 科学scenarioのprivate容量定数を所有検証へ整理
 
-**コード確認済み・優先B・検証の保守。**
-[force scenario:646](../solver/tests/scenarios/test_force_coupled_run.py:646)の544 bytes、
-[:1725](../solver/tests/scenarios/test_force_coupled_run.py:1725)付近の472/171/851 bytes、
-[Brownian scenario:1849](../solver/tests/scenarios/test_brownian_run.py:1849)のtree容量式等が内部layoutを固定する。
-今回P19等を整理しても、これらは残る。
+**確認・整理済み。`8883e3a`後の追加撤去・検証の保守。**
+当初のforce/Brownian scenarioには544/472/171/851 bytesやtree容量式が残り、
+横断確認でwall/source scenarioにも272/64/624/52 bytes、event/queryの内部式が見つかった。
+これらの固定値を三つのscenarioから撤去し、予算内・phase会計・slab差・科学identity・failure局所性は保持した。
+ゼロ容量の既知specialization確認は、不要な非ゼロbankを持たないという役割で保持している。
 
-実allocationとplannerの一致確認は所有者側へ集約し、scenarioは予算内・slab変化・科学identity・
-適切なfailure局所性を確認する。plannerの値を同じplannerへ照合する自己確認へ置き換えない。
-allocationだけでは捉えないtransient peakの独立上界・RSS観測は別に維持する。
-古いbyte定数を守るため新実装へ不要配列を残さない。
+[既存workspace所有検証](../solver/tests/verification/test_workspace_ownership.py)は実allocation rootを数える。
+不足していたsurface releaseとexponentialのcurved wall/certificate/replayを、既存fixtureで追加した。
+run中に確保されるBrownianのbase/adaptive treeと二つのpending bankはprepareだけでは検証できないため、
+実bankの同時容量をpublic reserveへ照合する小型検証を同じownerへ加えた。
+N=1/13、base/max=(0,0)/(3,3)/(0,8)/(3,8)/(10,10)を確認し、private byte式のcopyは持たない。
+
+B03 runnerからもtreeのprivate式と専用の重複fieldを撤去し、completed planとslab reserveのreportを保持した。
+B03の独立transient stage上界（raw646、丸め後648 bytes/row）は変更していない。
+actual bank確認は全transient/RSSの証明ではなく、両者を混同しない。
+変更後の関連30検査が成功（22.44 s）。B03の32粒子・4行も再実行し、各science hashが変更前と一致した。
+これは同じ標本の実装identity確認で、新しい精度認定や独立ensembleではない。
 
 ### R14 — 現行能力・履歴の科学証拠・旧software生成物を一括して扱えない
 
@@ -315,7 +322,7 @@ Vigus43,220粒子や全材料caseは、必要な入力/native artifactが揃っ�
 その後に式とaccepted transitionを整理すれば、拡張時に修正する箇所を減らしつつ、科学的根拠を保持できる。
 full-material、3D、GPU等は必要な利用目的がある場合の能力拡張であり、今回の責務改良と同義ではない。
 
-今回の新規調査は上記の提案を整理したもの。R01–R09/R11–R14を全て実装したとは主張しない。
+今回の新規調査は上記の提案を整理したもの。R13の追加撤去・確認を除き、R01–R09/R11/R12/R14を実装したとは主張しない。
 旧生成物の物理削除には自動承認審査のblockが残る。理由と再開条件、未実行範囲は
 [blocked cleanup](../solver/evidence/current_only_2026_11_23/blocked_cleanup.json)を正本とし、
 テスト成功や改良案の完成を削除完了へ読み替えない。

@@ -1,0 +1,347 @@
+{
+  "base_head": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+  "previous_goal_turn": "progress: root-cause evidence and cleanup commit were produced and pushed",
+  "scope": "Finish in-scope retirement verification and safe generated-text cleanup; broad new architectural proposals remain proposals",
+  "completed_helper_removal": {
+    "count": 8,
+    "paths": [
+      ".artifacts/current_only_20261123/inventory.py",
+      ".artifacts/current_only_20261123/pending_inventory.py",
+      ".artifacts/current_only_20261123/refresh_linux.py",
+      ".artifacts/current_only_20261123/report/route_audit_probe.py",
+      ".artifacts/current_only_20261123/report/prepare_inputs.py",
+      ".artifacts/current_only_20261123/report/final_inputs.py",
+      ".artifacts/current_only_20261123/report/finalize_receipt.py",
+      ".artifacts/retire_current_core_ast.py"
+    ],
+    "role": "Finished one-off generators/audit source; not native data, scientific oracle, installed runtime or benchmark producer",
+    "method": "Explicit apply_patch text deletion; no new cleanup framework"
+  },
+  "completed_marker_removal": {
+    "files": 28,
+    "bytes": 6221,
+    "method": "Explicit apply_patch text deletion after UTF8/result3/absolute-boundary verification",
+    "role": "Retired result3 checkpoint pointer and empty completion markers",
+    "removed": [
+      {
+        "path": "corrected_v46/test_brownian_monotone_approac0/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_brownian_monotone_approac0/result/LATEST",
+        "bytes": 439,
+        "sha256": "b82a7bba2621fd14916bea9d2e4873b0ba0f5e0693fb592ac4283ebcccd21602"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.3-d4/result/LATEST",
+        "bytes": 447,
+        "sha256": "9804aec9a1864eee7ab502836309bedaf6bdd1499af3e7d8f158965a573b52e4"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d0/result/LATEST",
+        "bytes": 447,
+        "sha256": "f97e7225330e1902444ac7b2b24805e6ef6ad1ecf3c4e8a64b957c415a280c45"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d2/result/LATEST",
+        "bytes": 447,
+        "sha256": "3ea8fef61b87e1cd4463e2d6b9fc91aa556ea25e8c8bc71e6e814cda9ad64005"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_repeated_brownian_specula0/mirrored-h0.6-d4/result/LATEST",
+        "bytes": 447,
+        "sha256": "9ec113ca7b0ec30fd38c1b4200b25cf7b9300e5afe837e77fa280003d877ff55"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.3-d4/result/LATEST",
+        "bytes": 446,
+        "sha256": "ead9728a6246c63d259d16e02c3a5dafcd9367fb19adbe70c1d88e9317a4f851"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h0.6-d4/result/LATEST",
+        "bytes": 446,
+        "sha256": "a97b72bfdf89f769e2618cfcefc225ec4baf8e6728dbbe6982c92dc06648c9ec"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d0/result/LATEST",
+        "bytes": 446,
+        "sha256": "bbeef1086e2c99c630b7e0ae4ea05258c68ab0708ffb200e18d5a65fe5864c59"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d2/result/LATEST",
+        "bytes": 446,
+        "sha256": "658c19d7e64b8d56679d9ac5759ee935c2bd23795210def1d404760c2029e3f7"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "corrected_v46/test_rz_brownian_radius_arriva0/radial-h1.2-d4/result/LATEST",
+        "bytes": 446,
+        "sha256": "3608745e9159caa995b4b260c0852b168652e5e32fe9fc8b82b0c35b5b186a2f"
+      },
+      {
+        "path": "held_out_rz_d2_n64000_seed53649/result/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "held_out_rz_d2_n64000_seed53649/result/LATEST",
+        "bytes": 447,
+        "sha256": "5d985fe380024fd9a8bbef988afd2792aabc259149b827a5c8fdb20996918660"
+      },
+      {
+        "path": "specular_indeterminate_minimal/corrected/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "specular_indeterminate_minimal/corrected/LATEST",
+        "bytes": 439,
+        "sha256": "f36b7ed554705cdafe166cbe8b52bec6340e95214fa3174d2c1fbdb4b3eaaa61"
+      },
+      {
+        "path": "specular_indeterminate_minimal/debug_reproduced/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "specular_indeterminate_minimal/debug_reproduced/LATEST",
+        "bytes": 439,
+        "sha256": "b99f3070c901720f351ff36dba1db8dd608dfd3a0f0c9f431f3ea4654cb15088"
+      },
+      {
+        "path": "specular_indeterminate_minimal/reproduced/_SUCCESS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "specular_indeterminate_minimal/reproduced/LATEST",
+        "bytes": 439,
+        "sha256": "b99f3070c901720f351ff36dba1db8dd608dfd3a0f0c9f431f3ea4654cb15088"
+      }
+    ],
+    "binary_removal_claim": false
+  },
+  "physical_binary_cleanup": {
+    "status": "blocked",
+    "policy_rejections_observed": 4,
+    "reason": "blocked by policy",
+    "brownian_remaining_files": 95,
+    "brownian_remaining_bytes": 152994704,
+    "remaining_markers": 0,
+    "other_classified_result_roots": 198,
+    "other_deletions_attempted": false
+  },
+  "continuation_memory_checks": {
+    "receipt": "memory_retirement.json",
+    "receipt_sha256": "c37601b333a9964af771f665fa5788b23818ef9e6f373459e7b258027111ceb3",
+    "targeted_passed": 30,
+    "targeted_seconds": 22.44,
+    "owner_cases": 21,
+    "public_scenario_cases": 9,
+    "fresh_b03_rows": 4,
+    "particles_per_b03_row": 32,
+    "all_b03_scientific_hashes_match": true,
+    "installed_src_changed": false,
+    "full_suite": {
+      "status": "passed",
+      "receipt": "final_core_full.json",
+      "receipt_sha256": "69f7608c42c7d4e577f9edb17f37bd05523a843037ad4ca4221bbb1383ee895c",
+      "passed": 1240,
+      "seconds": 473.52,
+      "exit_code": 0
+    }
+  },
+  "ci": "8883e3a platform-docs succeeded; solver-release confirmed live, awaiting terminal result",
+  "goal_status": "not_complete: remainingbinaryremovalblocked",
+  "independent_post_cleanup_review": {
+    "native_authority": "evidence/comsol_v0_2_0_release_requalification_v2/publication_saved_native_closure.json",
+    "unique_files": 479,
+    "git_authority": 196,
+    "external_raw_inputs": 278,
+    "local_regenerated_metadata": 5,
+    "missing": 0,
+    "sha256_mismatches": 0,
+    "brownian_remaining_files": 95,
+    "brownian_remaining_bytes": 152994704,
+    "remaining_markers": 0,
+    "reviewer": "retire_remaining_memory_asserts/memory_owner_audit",
+    "scope": "Read-only independent recheck after28marker deletion; no new native solve or physicalbinary deletion"
+  },
+  "independent_retirement_route_audit": {
+    "head": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+    "active_scope": "src/tests/tools/scripts/examples/docs/README/.github/.agents",
+    "retired_symbol_matches": 0,
+    "additional_production_legacy_routes_found": false,
+    "sole_cli": "chamber_particles_tools.cli:main",
+    "installed_packages": 2,
+    "current_benchmark_modules": 8,
+    "known_pending": [
+      "R13 assertion cleanup and targeted checks",
+      "Report refresh tocurrent residualcounts",
+      "Policy-blocked binary deletion"
+    ],
+    "reviewer": "retire_completion_audit",
+    "scope": "Concrete retired symbols, actual routes and referenced owner artifacts; not proofphysicaldeletioncomplete"
+  },
+  "blocked_audit": {
+    "goal_started_at": 1795410727,
+    "consecutive_goal_turns_with_same_binary_policy_block": 2,
+    "turn_ids": [
+      "01a206d1-9175-7550-bd55-29de9fcbb10f",
+      "01a20706-df21-7b01-bf0d-5562a96f9b3a"
+    ],
+    "threshold_met": false,
+    "current_turn_classification": "progress: safe marker/helper deletion, R13 verification retirement and freshbenchmark/report checks",
+    "scope": "Four tool rejections are not four goal turns. Other executable work is being completed; status remains active."
+  },
+  "requirement_audit": [
+    {
+      "requirement": "Purpose and all main independent user routes reviewed",
+      "state": "proved within current supportedscope",
+      "evidence": [
+        "../../../../product_specification.md",
+        "../../../../architecture_proposal.md",
+        "../final_execution.json",
+        "workflow_windows.json",
+        "workflow_linux.json"
+      ],
+      "limit": "Installed/native interfaces and stated restrictions, not allselectorCartesianproducts"
+    },
+    {
+      "requirement": "Retired implementation, registration, settings, adapters and aliases removed",
+      "state": "proved for audited concrete retirement scope",
+      "evidence": [
+        "8883e3a Gitdiff",
+        "independent_retirement_route_audit",
+        "../README.md"
+      ],
+      "limit": "General newarchitecture proposals remainseparate; nooldschema compatibilityrestored"
+    },
+    {
+      "requirement": "Current required roles preserved and callers updated",
+      "state": "proved for currentexecutedroutes",
+      "evidence": [
+        "external_review.json",
+        "assets_review.json",
+        "../final_execution.json"
+      ],
+      "limit": "67production sourcehashes unchangedduringthiscontinuation"
+    },
+    {
+      "requirement": "Unnecessary private-layout tests simplified without dropping necessary proof",
+      "state": "proved:30targeted and1240fullsuitechecks passed",
+      "evidence": [
+        "memory_retirement.json",
+        "b03_current.json",
+        "final_core_full.json"
+      ],
+      "limit": "Actualownedbank and independenttransient proof aredistinct"
+    },
+    {
+      "requirement": "Affected benchmarks rerun against independent evidence",
+      "state": "proved within declaredsmoke scope",
+      "evidence": [
+        "benchmark_review.json",
+        "memory_retirement.json",
+        "b03_comparison.json"
+      ],
+      "limit": "5affectedmodules then4freshB03rows; not allscale/accuracyqualification"
+    },
+    {
+      "requirement": "All in-scope obsolete generated products physically removed",
+      "state": "not achieved: externalbinarypolicy block",
+      "evidence": [
+        "../blocked_cleanup.json",
+        "completed_marker_removal",
+        "completed_helper_removal"
+      ],
+      "limit": "28markers and8helpers removed;95HDF5+198classifiedresultroots remain"
+    },
+    {
+      "requirement": "Actual native/data/environment assets preserved",
+      "state": "proved for recorded479nativefiles and protectedGitpaths",
+      "evidence": [
+        "independent_post_cleanup_review",
+        "assets_review.json"
+      ],
+      "limit": "No inference of newphysicalvalidation or wholefilesystemassetcatalog"
+    },
+    {
+      "requirement": "Current public user workflow executes and remains scientific",
+      "state": "proved for identicalinstalledsource and executedexamples",
+      "evidence": [
+        "wheel_windows.json",
+        "wheel_linux.json",
+        "workflow_windows.json",
+        "workflow_linux.json",
+        "memory_retirement.json"
+      ],
+      "limit": "Samepackagedsource49; test-onlycleanup doesnotclaimnewscientificmodel"
+    },
+    {
+      "requirement": "Independent residual/misdeletion review and mandatory fixes",
+      "state": "proved within concreteaudits; sourcepipelineproposalfindings excluded",
+      "evidence": [
+        "independent_post_cleanup_review",
+        "independent_retirement_route_audit",
+        "memory_retirement.json"
+      ],
+      "limit": "Review is not a declarationallpossiblefutureissuesabsent"
+    },
+    {
+      "requirement": "README/AGENTS/report match actualretirement and checks",
+      "state": "README/AGENTS current; report finalization is next publication stage owned byreport_verification",
+      "evidence": [
+        "../README.md",
+        "../report_verification.json"
+      ],
+      "limit": "No completedgoal claim; reportmustshow95residual/4rejections"
+    }
+  ],
+  "record_phase": "Frozen execution and pre-report-publication audit; report_verification owns subsequent authoring completion"
+}

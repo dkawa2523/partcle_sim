@@ -1,25 +1,26 @@
 {
   "status": "CURRENT_CHECKS_PASSED_WITH_PHYSICAL_CLEANUP_BLOCKED",
-  "scope": "Executed current cleanup; newly found foundation proposals remain proposed, not claimed implemented",
+  "scope": "Current-only cleanup including R13 verifiedretirement; othernewfoundationproposals remainproposals; binarydeletionblocked",
   "base_head": "75100e74f1243b527e065c9e6a68121221408b39",
   "branch": "cleanup/current-only-platform",
   "test_runs": [
     {
-      "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q",
-      "junit_source": ".artifacts\\current_only_20261123\\core_scenarios_clean.xml",
-      "junit_sha256": "29f5e5c054c8165c999628e42b822d29a3277c34d33c47b6989a1304064da403",
+      "command": "uv run --locked pytest tests/verification tests/scenarios -q --junitxml=.artifacts/current_only_memory_20261123/final_full.xml",
+      "junit_source": ".artifacts\\current_only_memory_20261123\\final_full.xml",
+      "junit_sha256": "5b807fa85d8298d6a4e7bad590150c495277b2de3d16cae81416dff463942eb1",
       "suites": [
         {
           "name": "pytest",
           "errors": "0",
           "failures": "0",
           "skipped": "0",
-          "tests": "1228",
-          "time": "679.713",
-          "timestamp": "2026-11-23T14:38:31.402474+09:00",
+          "tests": "1240",
+          "time": "473.507",
+          "timestamp": "2026-11-23T15:21:46.138848+09:00",
           "hostname": "DESKTOP-621T1UP"
         }
-      ]
+      ],
+      "current_receipt": "execution/final_core_full.json"
     },
     {
       "command": "uv run --locked python -m pytest tools/vv/comsol/tests tools/vv/gas_collision/tests -q",
@@ -36,7 +37,8 @@
           "timestamp": "2026-11-23T15:00:06.776541+09:00",
           "hostname": "DESKTOP-621T1UP"
         }
-      ]
+      ],
+      "current_binding": "Externalproduction18 Pythonfiles unchanged fromexecuted8883source; no needtorerununchanged externalcase"
     }
   ],
   "other_executed_tests": [
@@ -100,6 +102,58 @@
     "execution/foundation_science_review.json": {
       "source": ".artifacts\\current_only_20261123\\foundation_science_review.json",
       "sha256": "31482b9d3e5f70cecc6f3b3c6fec150b56124680829ab4f4ae795129cf4cd21e"
+    },
+    "execution/continuation_quality.json": {
+      "source": "Current continuation retainedreceipt",
+      "sha256": "0b77fde7ca01f4e95da4661bb967e05d9b2f514da061d28d9a174639c43d2885"
+    },
+    "execution/continuation_cleanup.json": {
+      "source": "Current continuation retainedreceipt",
+      "sha256": "6398860a8925fbc404a23bf0cfa17ac68394ee7870a49d1bfaa39c2b078786b4"
+    },
+    "execution/final_core_full.json": {
+      "source": "Current continuation retainedreceipt",
+      "sha256": "69f7608c42c7d4e577f9edb17f37bd05523a843037ad4ca4221bbb1383ee895c"
+    },
+    "execution/memory_retirement.json": {
+      "source": "Current continuation retainedreceipt",
+      "sha256": "c37601b333a9964af771f665fa5788b23818ef9e6f373459e7b258027111ceb3"
+    },
+    "execution/b03_current.json": {
+      "source": "Current continuation retainedreceipt",
+      "sha256": "0a2c9b6a47d5f510f9055686edaacdf9e0eae01bc0b1a043048e438c69490a98"
+    },
+    "execution/b03_comparison.json": {
+      "source": "Current continuation retainedreceipt",
+      "sha256": "0ae6d5adf32ce5ddd5507e162d61c3cf3a7af81b543b46ac7bcc12cd2c8f41cb"
+    },
+    "execution/other_text_cleanup.json": {
+      "source": "Finalpostcleanupretainedexecutionreceipt",
+      "sha256": "afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+    },
+    "execution/old_text_preflight.json": {
+      "source": "Finalpostcleanupretainedexecutionreceipt",
+      "sha256": "bcb7d9f84bd2fbcf7e85f615b516d081902481a8128b46adc4b013e38ab4d87c"
+    },
+    "execution/old_text_recheck.json": {
+      "source": "Finalpostcleanupretainedexecutionreceipt",
+      "sha256": "bdb6ac1f53610ee57c69af617b76319e5622357b92bda47ba5fac1ff33935d60"
+    },
+    "execution/old_text_postreview.json": {
+      "source": "Finalpostcleanupretainedexecutionreceipt",
+      "sha256": "6df405d20fdb17a85e79a4390fc1862077e192fa62ef37a879aa0f9acfb400a2"
+    },
+    "execution/installed_post_windows.json": {
+      "source": "Finalpostcleanupretainedexecutionreceipt",
+      "sha256": "32e833d96059253937177a2db2817862c692cdae318b5ee76bf3117e82fae877"
+    },
+    "execution/installed_post_linux.json": {
+      "source": "Finalpostcleanupretainedexecutionreceipt",
+      "sha256": "9558589c72d338cd9ea351714c51abd5e2b13bd5ca4a88494ec78b932e89b8e5"
+    },
+    "execution/ci_8883e3a.json": {
+      "source": "Finalpostcleanupretainedexecutionreceipt",
+      "sha256": "9b5914b410d84cf5b821540264157575fb0ebe1159da7167d4a6a48734faaad3"
     }
   },
   "limits": [
@@ -180,8 +234,44 @@
     "tools/vv/gas_collision/collision_reference.py": "6e478ae45db71f1826c56eb0b0e5fdec5daab4b03b14b98abce9967252f8d087",
     "tools/vv/gas_collision/qualify.py": "5cd57df5cd956609b7c267faf3847678254ff5a31cae556df36ceb6995464382"
   },
-  "foundation_review_sha256": "682be0fdd76c2f95c6735226d4837cec9111ad3f6a3c09cf462f7634d78fed4f",
+  "foundation_review_sha256": "c0b272076246ab965c4158f8d992f55e8fd9d22dfc2a1be9ef375a013d6c5481",
   "report_verification": "report_verification.json",
-  "report_verification_sha256": "88d9526a0f62be3910556454481617282561f3c7f02ecce131b47cd6aa403eed",
-  "new_review_status": "Core and scientific independent review complete; required wording corrections applied. Newly proposed production changes are not implemented."
+  "report_verification_sha256": "7fec32b512f154561cabf4b29573288a30d6b8af16598b33ffaf662fc227d94d",
+  "new_review_status": "R13memoryretirement and generatedtextscope independentlyreviewed; othernewarchitectureproposals notimplemented",
+  "historical_core_full_8883e3a": {
+    "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q",
+    "junit_source": ".artifacts\\current_only_20261123\\core_scenarios_clean.xml",
+    "junit_sha256": "29f5e5c054c8165c999628e42b822d29a3277c34d33c47b6989a1304064da403",
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1228",
+        "time": "679.713",
+        "timestamp": "2026-11-23T14:38:31.402474+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    ]
+  },
+  "completion_audit": {
+    "physicalbinaryretirement": "not achieved:77728HDF5 /4553770299bytes remain;4 policyrejections; other198binaryremovalunattempted",
+    "current_full_core": "1240passed",
+    "current_targeted": "30passed",
+    "freshB03": "4same-input rows scientificpayloadunchanged",
+    "production67": "unchanged from8883",
+    "installedwheel": "Exact49source/METADATA/READMEbinding unchanged; priorWindows/Linux execution retained",
+    "report": "complete: officialprebuiltbuild, Edge desktop/mobile/sources, protected234, snapshot4, exactevidencebindings",
+    "generatedtextretirement": "599metadatafiles removed thiscontinuation; finishedtaskhelpers9",
+    "current_public_workflows": "Afterall571metadataremovals, Windows/Linuxexistingcleanwheel13operations/5examples complete",
+    "remaining_required_work": "Onlypolicy-blocked retiredHDF5 removal aftertheidentifiedsoftware/generatedtext/helper/test cleanup; no goalcompletionclaimed",
+    "current_goal_status": "active; sameblockobserved2consecutivegoalturns, belowblockedthreshold; no completionclaim"
+  },
+  "documentation_after_r13_verification": {
+    "path": "README.md",
+    "as_captured_in_r13_receipt_sha256": "659b24a032b964b3ff7f2ebc6bef0e0520d18bd8a48842bec8a2a835b50a04ce",
+    "latest_sha256": "6729c702741b24404beca3ff3009e6a3e4821c747305e9b1e4ab203a05ae90f3",
+    "reason": "Execution-only history amended afterR13 tests torecord571 additionaltextremovals/helper9/current1240/aftercleanupinstalledworkflows; no numeric/test/benchmark sourcechanged bythisdocumentation edit"
+  }
 }

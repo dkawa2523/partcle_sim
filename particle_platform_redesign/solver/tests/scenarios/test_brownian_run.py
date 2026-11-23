@@ -845,8 +845,6 @@ def test_brownian_output_schedule_does_not_change_physical_result(tmp_path: Path
     assert plain.manifest["joint_ou_revision"] == "inertial_joint_ou_v1"
     assert plain.manifest["joint_ou_split_revision"] == ("conditional_gaussian_half_split_v1")
     assert plain.manifest["brownian_rng_revision"] == ("philox4x32_10_brownian_interval_tree_v1")
-    memory_plan = plain.manifest["memory_plan"]
-    assert memory_plan["stochastic_tree_work_bytes_per_particle"] == 128 * (5 + 4)
     assert plain.manifest["brownian_adaptive_max_depth"] == 5
     assert plain.manifest["brownian_tree_policy_revision"] == (
         "conditional_boundary_refinement_absolute_target_v2"
@@ -1846,12 +1844,7 @@ def test_brownian_all_row_adaptive_multi_reflection_respects_memory_and_output_i
     memory = strict.manifest["memory_plan"]
     assert memory["slab_particles"] < particle_count
     assert memory["planned_bytes"] <= 4 * 1024 * 1024
-    assert memory["stochastic_tree_work_bytes_per_particle"] == 128 * (8 + 4)
     assert memory["event_candidate_capacity"] >= minimum_event_candidate_capacity
-    components = memory["components"]
-    assert components["geometry_query_scratch"] == (
-        3 * memory["event_candidate_capacity"] * np.dtype("<i8").itemsize + 16
-    )
     assert memory["slab_particles"] < framed.manifest["memory_plan"]["slab_particles"]
     _assert_final_identity(strict.read_final(), framed.read_final())
     _assert_record_identity(strict_events, framed.read_boundary_events())

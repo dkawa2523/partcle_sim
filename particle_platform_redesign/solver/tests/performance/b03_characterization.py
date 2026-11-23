@@ -569,9 +569,6 @@ def _observation(
             "slab_particles": int(memory_plan["slab_particles"]),
             "scratch_bytes_per_particle": int(memory_plan["scratch_bytes_per_particle"]),
             "slab_proposal_scratch_bytes": int(components["slab_proposal_scratch"]),
-            "stochastic_tree_work_bytes_per_particle": int(
-                memory_plan["stochastic_tree_work_bytes_per_particle"]
-            ),
             "slab_stochastic_tree_work_bytes": int(components["slab_stochastic_tree_work"]),
             "full_plan": memory_plan,
         },
@@ -641,7 +638,6 @@ def _validate_observations(
     expected_rows = len(particle_counts) * len(_SCENARIOS) * repeats
     if len(observations) != expected_rows:
         raise RuntimeError(f"B03 expected {expected_rows} observations, got {len(observations)}")
-    expected_tree_bytes = 128 * (adaptive_max_depth + 4)
     for count in particle_counts:
         for scenario in _SCENARIOS:
             selected = [
@@ -665,9 +661,6 @@ def _validate_observations(
                 or work_record["adaptive_max_depth"] != adaptive_max_depth
             ):
                 raise RuntimeError("B03 Brownian base/max depth differs from the request")
-            memory = representative["memory"]
-            if memory["stochastic_tree_work_bytes_per_particle"] != expected_tree_bytes:
-                raise RuntimeError("B03 stochastic-tree plan does not match the declared depth")
             if representative["revisions"]["memory_plan_revision"] != _MEMORY_PLAN_REVISION:
                 raise RuntimeError("B03 characterization unexpectedly changed memory-plan revision")
             expected_revisions = {
@@ -958,6 +951,10 @@ def _array_accounting(observations: Sequence[Mapping[str, Any]]) -> dict[str, An
             "root_interval and restart counters are per-row counter-addressing state; their "
             "current and pending waves are included in stochastic_tree_work_bytes_per_particle, "
             "not this general stage-scratch subtotal"
+        ),
+        "stochastic_reserve_verification_owner": (
+            "tests/verification/test_workspace_ownership.py: "
+            "concrete base/adaptive tree and pending-bank allocations against the public reserve"
         ),
         "checks": checks,
         "measurement_note": (

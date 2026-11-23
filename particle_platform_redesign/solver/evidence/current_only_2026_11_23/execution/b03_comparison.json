@@ -1,0 +1,165 @@
+{
+  "benchmark": "b03_public_api_warm_performance_memory_characterization_v1",
+  "previous_report": ".artifacts/current_only_bench_20261123/b03.json",
+  "new_report": ".artifacts\\current_only_memory_20261123\\b03.json",
+  "rows": [
+    {
+      "scenario": "b02_xy_fixed_drag",
+      "particles": 32,
+      "scientific_payload_sha256": "sha256:decf069919a6bc44e75b71b9a119891749f3523c4cea94a8a5051ea4ae78ccb0",
+      "same_as_previous_execution": true,
+      "lifecycle_counts": {
+        "active": 32,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      }
+    },
+    {
+      "scenario": "b03_rz_effective_drag_continuous_charge_gravity",
+      "particles": 32,
+      "scientific_payload_sha256": "sha256:c3e336d3f30139e4a61cb550c2d5bc376252a41c06daf80eb44c762d5c327360",
+      "same_as_previous_execution": true,
+      "lifecycle_counts": {
+        "active": 32,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      }
+    },
+    {
+      "scenario": "b03_rz_fixed_drag",
+      "particles": 32,
+      "scientific_payload_sha256": "sha256:5150ce485f4580e2d96ce676b69e25f867468ca25e4f9c48030539e65d32eebd",
+      "same_as_previous_execution": true,
+      "lifecycle_counts": {
+        "active": 32,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      }
+    },
+    {
+      "scenario": "b03_rz_fixed_drag_axis_restart",
+      "particles": 32,
+      "scientific_payload_sha256": "sha256:153d2ea4679084dc5098e51afcef72aa598127b028d66e644fafd3da2708ca8a",
+      "same_as_previous_execution": true,
+      "lifecycle_counts": {
+        "active": 32,
+        "escaped": 0,
+        "failed": 0,
+        "held": 0,
+        "pending": 0,
+        "stuck": 0
+      }
+    }
+  ],
+  "independent_transient_bound": {
+    "checks": {
+      "all_rows_use_current_memory_plan": true,
+      "all_scratch_components_match_slab_formula": true,
+      "conservative_named_array_bound_fits_stage_scratch": true
+    },
+    "conservative_named_b03_path_array_bytes_per_particle": 646,
+    "dtype_item_sizes_bytes": {
+      "byte": 1,
+      "float64": 8,
+      "int64": 8,
+      "uint16": 2
+    },
+    "general_stage_scratch_bytes_per_particle": 2048,
+    "groups": {
+      "axis_restart_selected_copies": {
+        "columns_per_particle": {
+          "float64": 7,
+          "int64": 3
+        },
+        "raw_bytes_per_particle": 80
+      },
+      "cubic_dense_charge_invariant_certificate": {
+        "columns_per_particle": {
+          "byte": 4,
+          "float64": 6
+        },
+        "raw_bytes_per_particle": 52
+      },
+      "effective_equilibrium_safety_and_selection": {
+        "columns_per_particle": {
+          "byte": 5,
+          "float64": 7,
+          "int64": 1
+        },
+        "raw_bytes_per_particle": 69
+      },
+      "fresh_root_wave_metadata": {
+        "columns_per_particle": {},
+        "raw_bytes_per_particle": 0
+      },
+      "full_midpoint_coefficient_table": {
+        "columns_per_particle": {
+          "byte": 3,
+          "float64": 7,
+          "int64": 1
+        },
+        "raw_bytes_per_particle": 67
+      },
+      "predictor_construction_and_start_relaxation": {
+        "columns_per_particle": {
+          "byte": 3,
+          "float64": 13,
+          "int64": 1
+        },
+        "raw_bytes_per_particle": 115
+      },
+      "predictor_return": {
+        "columns_per_particle": {
+          "byte": 3,
+          "float64": 5,
+          "int64": 1
+        },
+        "raw_bytes_per_particle": 51
+      },
+      "returned_root_batch_state_and_safe_values": {
+        "columns_per_particle": {
+          "byte": 1,
+          "float64": 12,
+          "int64": 1
+        },
+        "raw_bytes_per_particle": 105
+      },
+      "root_guard_and_classification": {
+        "columns_per_particle": {
+          "byte": 12,
+          "float64": 2,
+          "int64": 1,
+          "uint16": 2
+        },
+        "raw_bytes_per_particle": 40
+      },
+      "valid_coefficient_subset": {
+        "columns_per_particle": {
+          "byte": 3,
+          "float64": 7,
+          "int64": 1
+        },
+        "raw_bytes_per_particle": 67
+      }
+    },
+    "measurement_note": "The separate tracemalloc and process-RSS observations include broader runtime and I/O allocations; they are consistency observations, not a direct meter for this per-row data-buffer proof.",
+    "memory_plan_revision_from_manifests": "solver_owned_memory_plan_v26",
+    "method": "Raw NumPy data-buffer bytes. The audit deliberately counts phase-separated root preparation and axis-restart arrays together, double-counts the returned predictor, and includes arrays shared with B02, so it over-bounds B03's named additions. Generic field/physics workspaces and the pre-existing Hermite/event arrays remain in the established general stage allowance.",
+    "remaining_stage_scratch_headroom_bytes_per_particle": 1400,
+    "root_ordinal_note": "root_interval and restart counters are per-row counter-addressing state; their current and pending waves are included in stochastic_tree_work_bytes_per_particle, not this general stage-scratch subtotal",
+    "rounded_conservative_bytes_per_particle": 648,
+    "stochastic_reserve_verification_owner": "tests/verification/test_workspace_ownership.py: concrete base/adaptive tree and pending-bank allocations against the public reserve"
+  },
+  "previous_sha256": "53f07c70cd2bf13cef52cafb18f1772c86af86881402efa0cdf1947c93488510",
+  "new_sha256": "0a2c9b6a47d5f510f9055686edaacdf9e0eae01bc0b1a043048e438c69490a98",
+  "scope": "Four32-particle smoke scenarios; same scientificconditions, not a new accuracy/scaling qualification or physicalvalidation"
+}

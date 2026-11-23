@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-11-23T05:53:52.031121+00:00",
+  "captured_at_utc": "2026-11-23T06:51:22.069963+00:00",
   "baseline": "75100e74f1243b527e065c9e6a68121221408b39",
   "source": {
     "path": "solver/.artifacts/current_only_20261123/assets_review.json",
@@ -7,37 +7,141 @@
   },
   "retirement_goal_status": "not_complete",
   "filesystem_cleanup": {
-    "status": "blocked_unexecuted",
+    "status": "blocked_unexecuted_remaining_binary",
     "source": {
       "path": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
-      "sha256": "sha256:cda1318dd4567ae284b77ae21eac8eaff53a440a94256cebe379aa62e42d9630"
+      "sha256": "sha256:c56685c11522059bc07e68d20645c11b010fb419d4bf298780e8c93ed590e95b"
     },
-    "reported_automatic_approval_review_rejections": 3,
+    "reported_automatic_approval_review_rejections": 4,
     "reported_tool_reason": "blocked by policy",
     "known_remaining_scope": {
       "path": "evidence/brownian_wall_accuracy_extension_2026_10_10",
-      "files": 123,
-      "bytes": 153000925
+      "files": 95,
+      "bytes": 152994704,
+      "hdf5_files": 95,
+      "markers": 0
     },
     "additional_obsolete_local_results": {
       "classified_result_subtrees": 198,
       "files_at_inventory": 78204,
       "bytes_at_inventory": 4403705627,
-      "status": "Not attempted while the observed policy block is unresolved; inventory counts are not deleted bytes",
-      "scope_limit": "Other roots are classified software result subtrees from the inventory, not wholesale native experiment directories. The single-file rejection proves the concrete block; no claim that every other path was individually attempted."
+      "status": "571 verified UTF8 metadata files removed; remaining binary deletions have not been attempted. Original inventory counts are retained as inventory, not deleted bytes.",
+      "scope_limit": "Other roots are classified software result subtrees from the inventory, not wholesale native experiment directories. The single-file rejection proves the concrete block; no claim that every other path was individually attempted.",
+      "current_remaining_hdf5": {
+        "files": 77633,
+        "bytes": 4400775595,
+        "metadata_files": 0,
+        "receipt": {
+          "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+          "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+        }
+      }
     },
-    "resume_condition": "Physical deletion must be permitted in the execution context. Recheck actual remaining files, owner-process liveness and protected descendants, remove the explicit result products, then independently verify residuals and native hashes. No new reader/alias/migration mechanism is required."
+    "resume_condition": "Physical deletion must be permitted in the execution context. Recheck actual remaining files, owner-process liveness and protected descendants, remove the explicit result products, then independently verify residuals and native hashes. No new reader/alias/migration mechanism is required.",
+    "continuation_receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/continuation_cleanup.json",
+      "sha256": "sha256:6398860a8925fbc404a23bf0cfa17ac68394ee7870a49d1bfaa39c2b078786b4"
+    },
+    "completed_marker_removal": {
+      "files": 28,
+      "bytes": 6221,
+      "binary_removal_claim": false,
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/continuation_cleanup.json",
+        "sha256": "sha256:6398860a8925fbc404a23bf0cfa17ac68394ee7870a49d1bfaa39c2b078786b4"
+      }
+    },
+    "completed_other_result_metadata_removal": {
+      "files": 571,
+      "bytes": 2930032,
+      "run_json": 198,
+      "LATEST": 191,
+      "_SUCCESS": 182,
+      "binary_removal_claim": false,
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+        "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+      }
+    },
+    "total_retired_hdf5_remaining": {
+      "files": 77728,
+      "bytes": 4553770299,
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+        "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+      }
+    }
   },
   "native_preservation": {
     "authority": "evidence/comsol_v0_2_0_release_requalification_v2/publication_saved_native_closure.json#/retained_git_authority",
     "checked_files": 196,
     "missing": [],
-    "sha256_mismatches": []
+    "sha256_mismatches": [],
+    "scope": "Prior 196 Git authority hashes, not the full latest 479-file preservation recheck"
   },
   "prior_population_reference": {
     "source_record": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json",
     "scope": "Prior source-bound A/P40 seeds each and prior80 re-executions, with unchanged saved native reference. No current-only solver replay or new Monte Carlo samples."
   },
-  "current_execution_receipts": "Final current core/external suites and Windows/Linux wheel/workflow receipts imported; open improvement findings and blocked physical cleanup remain",
-  "report_role": "Consumer of reviewed scope, observations and verdicts; no solver or V&V verdict engine"
+  "current_execution_receipts": "Current continuation full core suite:1240 passed,473.507 JUnit seconds;30 targeted checks and four32-particle B03 identity rows. After599 text-metadata removals, installed Windows/Linux workflows each completed13 operations and5 examples with console/module entrypoints. Wheel build and156 external tests remain bound to8883e3a and unchanged production source. Remaining77728 HDF5 files are not deleted; open improvement findings persist.",
+  "report_role": "Consumer of reviewed scope, observations and verdicts; no solver or V&V verdict engine",
+  "continuation_base_head": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+  "prior_cleanup_observation": {
+    "source_commit": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+    "files": 123,
+    "bytes": 153000925,
+    "rejections_observed": 3,
+    "scope": "As-of 8883e3a before this continuation; current residuals are recorded separately"
+  },
+  "preservation_recheck": {
+    "native_authority": "evidence/comsol_v0_2_0_release_requalification_v2/publication_saved_native_closure.json",
+    "unique_files": 479,
+    "git_authority": 196,
+    "external_raw_inputs": 278,
+    "local_regenerated_metadata": 5,
+    "missing": 0,
+    "sha256_mismatches": 0,
+    "brownian_remaining_files": 95,
+    "brownian_remaining_bytes": 152994704,
+    "remaining_markers": 0,
+    "reviewer": "retire_remaining_memory_asserts/memory_owner_audit",
+    "scope": "Read-only independent recheck after28marker deletion; no new native solve or physicalbinary deletion",
+    "receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/continuation_cleanup.json",
+      "sha256": "sha256:6398860a8925fbc404a23bf0cfa17ac68394ee7870a49d1bfaa39c2b078786b4"
+    }
+  },
+  "full_core_receipt": {
+    "path": "solver/evidence/current_only_2026_11_23/execution/final_core_full.json",
+    "sha256": "sha256:69f7608c42c7d4e577f9edb17f37bd05523a843037ad4ca4221bbb1383ee895c"
+  },
+  "continuation_quality_receipt": {
+    "path": "solver/evidence/current_only_2026_11_23/execution/continuation_quality.json",
+    "sha256": "sha256:0b77fde7ca01f4e95da4661bb967e05d9b2f514da061d28d9a174639c43d2885"
+  },
+  "post_metadata_preservation_recheck": {
+    "unique_files": 479,
+    "git_authority": 196,
+    "external_raw_inputs": 278,
+    "local_regenerated_metadata": 5,
+    "missing": 0,
+    "sha256_mismatches": 0,
+    "receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+      "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+    }
+  },
+  "finished_helper_removal": {
+    "count": 9,
+    "additional_report_qa_wrapper": {
+      "path": "solver/.artifacts/current_only_20261123/report/verify_report.mjs",
+      "bytes": 6280,
+      "status": "removed after completed browser QA"
+    },
+    "receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+      "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+    }
+  },
+  "receipt_document_hash_scope": "Document hashes inside earlier execution receipts bind their capture phase. Current document identity is owned by the final generated report authority snapshot, not inferred from an older receipt."
 }

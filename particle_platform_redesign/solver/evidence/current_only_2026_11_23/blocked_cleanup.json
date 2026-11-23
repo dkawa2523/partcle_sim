@@ -1,5 +1,6 @@
 {
   "status": "UNEXECUTED_PHYSICAL_CLEANUP",
+  "status_scope": "Remaining binary deletion; 28 generated UTF8 markers were safely removed and are recorded separately",
   "observed_rejections": [
     {
       "scope": "Brownian generated-test directory with195 files, verified workspace path and no native/model/environment assets",
@@ -15,14 +16,19 @@
       "scope": "One verified9840byte HDF5 result3 file, particles dataset only",
       "operation": "nonrecursive literal-path PowerShell Remove-Item",
       "result": "blocked by policy; process was not started"
+    },
+    {
+      "scope": "Goal continuation reverified the same9840byte result3 leaf and123 remaining generated files; no protected descendants",
+      "operation": "nonrecursive literal-path PowerShell Remove-Item",
+      "result": "blocked by policy; process was not started"
     }
   ],
   "brownian_confirmed_remaining": {
     "path": "evidence/brownian_wall_accuracy_extension_2026_10_10",
-    "files": 123,
-    "bytes": 153000925,
+    "files": 95,
+    "bytes": 152994704,
     "hdf5_files": 95,
-    "markers": 28,
+    "markers": 0,
     "example_verified_result_file": "specular_indeterminate_minimal/reproduced/final.h5",
     "example_result_schema_version": 3
   },
@@ -36,7 +42,7 @@
       "bytes_at_inventory": 143586,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": ".tmp_v14_reflect/test_general_rk4_specular_hit_0/general-reflection-with-frames",
@@ -47,7 +53,7 @@
       "bytes_at_inventory": 157817,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_f02/fixed_electric_result",
@@ -58,7 +64,7 @@
       "bytes_at_inventory": 113966,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_f02_acceptance/fixed_electric_result",
@@ -69,7 +75,7 @@
       "bytes_at_inventory": 113966,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_f02_final/fixed_electric_result",
@@ -80,7 +86,7 @@
       "bytes_at_inventory": 113966,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_h2_debug_20261009_1344/test_material_caps_combine_nor0/reflecting-caps-result",
@@ -91,7 +97,7 @@
       "bytes_at_inventory": 172350,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_h2_trace_20261009_1356.partial",
@@ -102,7 +108,7 @@
       "bytes_at_inventory": 43920,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_h2_trace_20261009_1357",
@@ -113,7 +119,7 @@
       "bytes_at_inventory": 172399,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c/critical_axis_native_2026_10_09_v1/candidate/dt_0p25ms/result",
@@ -124,7 +130,7 @@
       "bytes_at_inventory": 168584,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c/critical_axis_native_2026_10_09_v1/candidate/dt_0p5ms/result",
@@ -135,7 +141,7 @@
       "bytes_at_inventory": 168582,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c/critical_axis_native_2026_10_09_v1/candidate/dt_1ms/result",
@@ -146,7 +152,7 @@
       "bytes_at_inventory": 168576,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v1/result_material_event.partial",
@@ -157,7 +163,7 @@
       "bytes_at_inventory": 3645853,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v2/result_material_event",
@@ -168,7 +174,7 @@
       "bytes_at_inventory": 3825025,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_common_p1_material_event_candidate_v3/result_material_event",
@@ -179,7 +185,7 @@
       "bytes_at_inventory": 3825017,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_diagnostic_fastpath_probe.partial",
@@ -190,7 +196,7 @@
       "bytes_at_inventory": 3517,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_exported_p1_v3/result_dt_0p625us.partial",
@@ -201,7 +207,7 @@
       "bytes_at_inventory": 369149,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_exported_p1_v4/result_dt_0p15625us",
@@ -212,7 +218,7 @@
       "bytes_at_inventory": 3696957,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_exported_p1_v4/result_dt_0p3125us",
@@ -223,7 +229,7 @@
       "bytes_at_inventory": 2262818,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_exported_p1_v4/result_dt_0p625us",
@@ -234,7 +240,7 @@
       "bytes_at_inventory": 1570166,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_exported_p1_v5/result_dt_0p15625us",
@@ -245,7 +251,7 @@
       "bytes_at_inventory": 3696948,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_exported_p1_v5/result_dt_0p3125us",
@@ -256,7 +262,7 @@
       "bytes_at_inventory": 2262809,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_exported_p1_v5/result_dt_0p625us",
@@ -267,7 +273,7 @@
       "bytes_at_inventory": 1570157,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_native_v1/diagnostic_result_dt_0p15625us",
@@ -278,7 +284,7 @@
       "bytes_at_inventory": 2541343,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_native_v1/diagnostic_result_dt_0p3125us",
@@ -289,7 +295,7 @@
       "bytes_at_inventory": 1360645,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_native_v1/diagnostic_result_dt_0p625us",
@@ -300,7 +306,7 @@
       "bytes_at_inventory": 794712,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_native_v1_25kms_blocked_backup/diagnostic_result_dt_0p15625us",
@@ -311,7 +317,7 @@
       "bytes_at_inventory": 2541342,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_native_v1_25kms_blocked_backup/diagnostic_result_dt_0p3125us",
@@ -322,7 +328,7 @@
       "bytes_at_inventory": 1360644,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/caseA_100nm_native_v1_25kms_blocked_backup/diagnostic_result_dt_0p625us",
@@ -333,7 +339,7 @@
       "bytes_at_inventory": 794712,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v1/caseA/result_dt_0p15625us.partial",
@@ -344,7 +350,7 @@
       "bytes_at_inventory": 5291140,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v1/caseA/result_dt_0p3125us.partial",
@@ -355,7 +361,7 @@
       "bytes_at_inventory": 3286384,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v1/caseA/result_dt_0p625us.partial",
@@ -366,7 +372,7 @@
       "bytes_at_inventory": 2041267,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v2/caseA/result_coarse.partial",
@@ -377,7 +383,7 @@
       "bytes_at_inventory": 2092891,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v2/caseA/result_debug.partial",
@@ -388,7 +394,7 @@
       "bytes_at_inventory": 2092891,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v3/caseA/result_coarse",
@@ -399,7 +405,7 @@
       "bytes_at_inventory": 55621806,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v3/caseA/result_fine",
@@ -410,7 +416,7 @@
       "bytes_at_inventory": 177312443,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v3/caseA/result_medium",
@@ -421,7 +427,7 @@
       "bytes_at_inventory": 96980294,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/result_coarse",
@@ -432,7 +438,7 @@
       "bytes_at_inventory": 520778947,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/result_fine",
@@ -443,7 +449,7 @@
       "bytes_at_inventory": 2072378957,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c1/theory_100nm_30ms_candidate_v3/caseP/result_medium",
@@ -454,7 +460,7 @@
       "bytes_at_inventory": 1037978955,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318192/result",
@@ -465,7 +471,7 @@
       "bytes_at_inventory": 2500013,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318193/result",
@@ -476,7 +482,7 @@
       "bytes_at_inventory": 2499973,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318194/result",
@@ -487,7 +493,7 @@
       "bytes_at_inventory": 2499989,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318195/result",
@@ -498,7 +504,7 @@
       "bytes_at_inventory": 2499957,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318196/result",
@@ -509,7 +515,7 @@
       "bytes_at_inventory": 2499981,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318197/result",
@@ -520,7 +526,7 @@
       "bytes_at_inventory": 2500005,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318198/result",
@@ -531,7 +537,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318199/result",
@@ -542,7 +548,7 @@
       "bytes_at_inventory": 2499989,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318200/result",
@@ -553,7 +559,7 @@
       "bytes_at_inventory": 2499957,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318201/result",
@@ -564,7 +570,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318202/result",
@@ -575,7 +581,7 @@
       "bytes_at_inventory": 2499981,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318203/result",
@@ -586,7 +592,7 @@
       "bytes_at_inventory": 2499989,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318204/result",
@@ -597,7 +603,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318205/result",
@@ -608,7 +614,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318206/result",
@@ -619,7 +625,7 @@
       "bytes_at_inventory": 2500005,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318207/result",
@@ -630,7 +636,7 @@
       "bytes_at_inventory": 2499957,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318208/result",
@@ -641,7 +647,7 @@
       "bytes_at_inventory": 2499981,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318209/result",
@@ -652,7 +658,7 @@
       "bytes_at_inventory": 2499981,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318210/result",
@@ -663,7 +669,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318211/result",
@@ -674,7 +680,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318212/result",
@@ -685,7 +691,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318213/result",
@@ -696,7 +702,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318214/result",
@@ -707,7 +713,7 @@
       "bytes_at_inventory": 2499989,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318215/result",
@@ -718,7 +724,7 @@
       "bytes_at_inventory": 2499989,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318216/result",
@@ -729,7 +735,7 @@
       "bytes_at_inventory": 2500005,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318217/result",
@@ -740,7 +746,7 @@
       "bytes_at_inventory": 2499973,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318218/result",
@@ -751,7 +757,7 @@
       "bytes_at_inventory": 2499981,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318219/result",
@@ -762,7 +768,7 @@
       "bytes_at_inventory": 2499989,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318220/result",
@@ -773,7 +779,7 @@
       "bytes_at_inventory": 2499981,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318221/result",
@@ -784,7 +790,7 @@
       "bytes_at_inventory": 2499997,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318222/result",
@@ -795,7 +801,7 @@
       "bytes_at_inventory": 2499965,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_final_campaign_v1/levels/macro_coarse/seed_318223/result",
@@ -806,7 +812,7 @@
       "bytes_at_inventory": 2499957,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_coarse/seed_918164/result",
@@ -817,7 +823,7 @@
       "bytes_at_inventory": 2499965,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_coarse/seed_918165/result",
@@ -828,7 +834,7 @@
       "bytes_at_inventory": 2500005,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_coarse/seed_918166/result",
@@ -839,7 +845,7 @@
       "bytes_at_inventory": 2500005,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_coarse/seed_918167/result",
@@ -850,7 +856,7 @@
       "bytes_at_inventory": 2499989,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_fine/seed_918164/result",
@@ -861,7 +867,7 @@
       "bytes_at_inventory": 3714856,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_fine/seed_918165/result",
@@ -872,7 +878,7 @@
       "bytes_at_inventory": 3714912,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_fine/seed_918166/result",
@@ -883,7 +889,7 @@
       "bytes_at_inventory": 3711312,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_fine/seed_918167/result",
@@ -894,7 +900,7 @@
       "bytes_at_inventory": 3714896,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_medium/seed_918164/result",
@@ -905,7 +911,7 @@
       "bytes_at_inventory": 2872195,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_medium/seed_918165/result",
@@ -916,7 +922,7 @@
       "bytes_at_inventory": 2875835,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_medium/seed_918166/result",
@@ -927,7 +933,7 @@
       "bytes_at_inventory": 2875843,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/macro_medium/seed_918167/result",
@@ -938,7 +944,7 @@
       "bytes_at_inventory": 2875811,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/path_fine/seed_918164/result",
@@ -949,7 +955,7 @@
       "bytes_at_inventory": 5083335,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/path_fine/seed_918165/result",
@@ -960,7 +966,7 @@
       "bytes_at_inventory": 5083383,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/path_fine/seed_918166/result",
@@ -971,7 +977,7 @@
       "bytes_at_inventory": 5083375,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_macro_qualified_v5/levels/path_fine/seed_918167/result",
@@ -982,7 +988,7 @@
       "bytes_at_inventory": 5079783,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_coarse/seed_918164/result",
@@ -993,7 +999,7 @@
       "bytes_at_inventory": 2499973,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_coarse/seed_918165/result",
@@ -1004,7 +1010,7 @@
       "bytes_at_inventory": 2500005,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_coarse/seed_918166/result",
@@ -1015,7 +1021,7 @@
       "bytes_at_inventory": 2500013,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_coarse/seed_918167/result",
@@ -1026,7 +1032,7 @@
       "bytes_at_inventory": 2514687,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_fine/seed_918164/result",
@@ -1037,7 +1043,7 @@
       "bytes_at_inventory": 3729554,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_fine/seed_918167/result",
@@ -1048,7 +1054,7 @@
       "bytes_at_inventory": 3714896,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_medium/seed_918164/result",
@@ -1059,7 +1065,7 @@
       "bytes_at_inventory": 2890477,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_candidate_pilot_v1/levels/macro_medium/seed_918167/result",
@@ -1070,7 +1076,7 @@
       "bytes_at_inventory": 2875811,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_event_tolerance_cross_band_v4/levels/event_tolerance_candidate/seed_918165/result",
@@ -1081,7 +1087,7 @@
       "bytes_at_inventory": 3714927,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_event_tolerance_cross_band_v4/levels/event_tolerance_reference/seed_918165/result",
@@ -1092,7 +1098,7 @@
       "bytes_at_inventory": 3714927,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_event_tolerance_diagnostic_v2/levels/event_tolerance_diagnostic/seed_918164/result",
@@ -1103,7 +1109,7 @@
       "bytes_at_inventory": 3714872,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseA_100nm_event_tolerance_sensitivity_v3/levels/event_tolerance_sensitivity/seed_918164/result",
@@ -1114,7 +1120,7 @@
       "bytes_at_inventory": 3714873,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319032/result",
@@ -1125,7 +1131,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319033/result",
@@ -1136,7 +1142,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319034/result",
@@ -1147,7 +1153,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319035/result",
@@ -1158,7 +1164,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319036/result",
@@ -1169,7 +1175,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319037/result",
@@ -1180,7 +1186,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319038/result",
@@ -1191,7 +1197,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319039/result",
@@ -1202,7 +1208,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319040/result",
@@ -1213,7 +1219,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319041/result",
@@ -1224,7 +1230,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319042/result",
@@ -1235,7 +1241,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319043/result",
@@ -1246,7 +1252,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319044/result",
@@ -1257,7 +1263,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319045/result",
@@ -1268,7 +1274,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319046/result",
@@ -1279,7 +1285,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319047/result",
@@ -1290,7 +1296,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319048/result",
@@ -1301,7 +1307,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319049/result",
@@ -1312,7 +1318,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319050/result",
@@ -1323,7 +1329,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319051/result",
@@ -1334,7 +1340,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319052/result",
@@ -1345,7 +1351,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319053/result",
@@ -1356,7 +1362,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319054/result",
@@ -1367,7 +1373,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319055/result",
@@ -1378,7 +1384,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319056/result",
@@ -1389,7 +1395,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319057/result",
@@ -1400,7 +1406,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319058/result",
@@ -1411,7 +1417,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319059/result",
@@ -1422,7 +1428,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319060/result",
@@ -1433,7 +1439,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319061/result",
@@ -1444,7 +1450,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319062/result",
@@ -1455,7 +1461,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_final_v1/levels/macro_coarse/seed_319063/result",
@@ -1466,7 +1472,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_coarse/seed_919004/result",
@@ -1477,7 +1483,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_coarse/seed_919005/result",
@@ -1488,7 +1494,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_coarse/seed_919006/result",
@@ -1499,7 +1505,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_coarse/seed_919007/result",
@@ -1510,7 +1516,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_fine/seed_919004/result",
@@ -1521,7 +1527,7 @@
       "bytes_at_inventory": 3927805,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_fine/seed_919005/result",
@@ -1532,7 +1538,7 @@
       "bytes_at_inventory": 3927805,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_fine/seed_919006/result",
@@ -1543,7 +1549,7 @@
       "bytes_at_inventory": 3927805,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_fine/seed_919007/result",
@@ -1554,7 +1560,7 @@
       "bytes_at_inventory": 3927805,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_medium/seed_919004/result",
@@ -1565,7 +1571,7 @@
       "bytes_at_inventory": 2956069,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_medium/seed_919005/result",
@@ -1576,7 +1582,7 @@
       "bytes_at_inventory": 2956069,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_medium/seed_919006/result",
@@ -1587,7 +1593,7 @@
       "bytes_at_inventory": 2956069,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/macro_medium/seed_919007/result",
@@ -1598,7 +1604,7 @@
       "bytes_at_inventory": 2956069,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/path_fine/seed_919004/result",
@@ -1609,7 +1615,7 @@
       "bytes_at_inventory": 5278236,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/path_fine/seed_919005/result",
@@ -1620,7 +1626,7 @@
       "bytes_at_inventory": 5278236,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/path_fine/seed_919006/result",
@@ -1631,7 +1637,7 @@
       "bytes_at_inventory": 5278236,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_candidate_pilot_v2/levels/path_fine/seed_919007/result",
@@ -1642,7 +1648,7 @@
       "bytes_at_inventory": 5278236,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_event_tolerance_pre_final_v1/levels/geometry_rtol_candidate/seed_919008/result",
@@ -1653,7 +1659,7 @@
       "bytes_at_inventory": 2423459,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_event_tolerance_pre_final_v1/levels/geometry_rtol_reference/seed_919008/result",
@@ -1664,7 +1670,7 @@
       "bytes_at_inventory": 2423459,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_event_tolerance_pre_final_v2/levels/geometry_rtol_candidate/seed_919008/result",
@@ -1675,7 +1681,7 @@
       "bytes_at_inventory": 2423459,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/caseP_100nm_event_tolerance_pre_final_v2/levels/geometry_rtol_reference/seed_919008/result",
@@ -1686,7 +1692,7 @@
       "bytes_at_inventory": 2423459,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/incomplete_preauthorization_caseP_100nm_candidate_pilot_v1/levels/macro_coarse/seed_919004/result",
@@ -1697,7 +1703,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/incomplete_preauthorization_caseP_100nm_candidate_pilot_v1/levels/macro_coarse/seed_919005/result",
@@ -1708,7 +1714,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/incomplete_preauthorization_caseP_100nm_candidate_pilot_v1/levels/macro_coarse/seed_919006/result",
@@ -1719,7 +1725,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/incomplete_preauthorization_caseP_100nm_candidate_pilot_v1/levels/macro_coarse/seed_919007/result",
@@ -1730,7 +1736,7 @@
       "bytes_at_inventory": 2423448,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c2/incomplete_preauthorization_caseP_100nm_candidate_pilot_v1/levels/macro_medium/seed_919004/result.partial",
@@ -1741,7 +1747,7 @@
       "bytes_at_inventory": 2615072,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v1/_prior_failed_dt20_global_enclosure/result",
@@ -1752,7 +1758,7 @@
       "bytes_at_inventory": 270636,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v1/_prior_failed_dt20_global_enclosure/result.partial.applicability-global",
@@ -1763,7 +1769,7 @@
       "bytes_at_inventory": 753620,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v1/_prior_failed_dt20_global_enclosure/result.partial.pre-v37-stopped",
@@ -1774,7 +1780,7 @@
       "bytes_at_inventory": 745236,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v1/_prior_failed_dt20_global_enclosure/result_local_attempt1.partial",
@@ -1785,7 +1791,7 @@
       "bytes_at_inventory": 52548,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v1/_prior_failed_dt20_global_enclosure/result_local_attempt2_interrupted.partial",
@@ -1796,7 +1802,7 @@
       "bytes_at_inventory": 753620,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v1/_prior_stopped_v37_local_force_dt20_20261006",
@@ -1807,7 +1813,7 @@
       "bytes_at_inventory": 745237,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v2/candidate/dt_10us/result",
@@ -1818,7 +1824,7 @@
       "bytes_at_inventory": 2179800,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v2/candidate/dt_20us/result",
@@ -1829,7 +1835,7 @@
       "bytes_at_inventory": 2097368,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v2/candidate/dt_5us/result",
@@ -1840,7 +1846,7 @@
       "bytes_at_inventory": 2461579,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v2/diagnostic_dt_2p5us/result",
@@ -1851,7 +1857,7 @@
       "bytes_at_inventory": 2923013,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v3/candidate/dt_0p625us/result",
@@ -1862,7 +1868,7 @@
       "bytes_at_inventory": 5639345,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v3/candidate/dt_1p25us/result",
@@ -1873,7 +1879,7 @@
       "bytes_at_inventory": 3780014,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v3/candidate/dt_2p5us/result",
@@ -1884,7 +1890,7 @@
       "bytes_at_inventory": 2923013,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v4/candidate/dt_0p625us/result",
@@ -1895,7 +1901,7 @@
       "bytes_at_inventory": 5639345,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v4/candidate/dt_1p25us/result",
@@ -1906,7 +1912,7 @@
       "bytes_at_inventory": 3780014,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c3_casep_three_current_v4/candidate/dt_2p5us/result",
@@ -1917,7 +1923,7 @@
       "bytes_at_inventory": 2923013,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_100nm_image/candidate_results/coarse",
@@ -1928,7 +1934,7 @@
       "bytes_at_inventory": 871510,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_100nm_image/candidate_results/fine",
@@ -1939,7 +1945,7 @@
       "bytes_at_inventory": 1104244,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_100nm_image/candidate_results/medium",
@@ -1950,7 +1956,7 @@
       "bytes_at_inventory": 910937,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_10nm_relative_flow/candidate_results/coarse",
@@ -1961,7 +1967,7 @@
       "bytes_at_inventory": 307553,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_10nm_relative_flow/candidate_results/fine",
@@ -1972,7 +1978,7 @@
       "bytes_at_inventory": 425828,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_10nm_relative_flow/candidate_results/medium",
@@ -1983,7 +1989,7 @@
       "bytes_at_inventory": 346981,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_30nm_relative_flow/candidate_results/coarse",
@@ -1994,7 +2000,7 @@
       "bytes_at_inventory": 617556,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_30nm_relative_flow/candidate_results/fine",
@@ -2005,7 +2011,7 @@
       "bytes_at_inventory": 735833,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v1/cases/caseA_30nm_relative_flow/candidate_results/medium",
@@ -2016,7 +2022,7 @@
       "bytes_at_inventory": 656985,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_100nm_image/candidate_results/coarse",
@@ -2027,7 +2033,7 @@
       "bytes_at_inventory": 871510,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_100nm_image/candidate_results/fine",
@@ -2038,7 +2044,7 @@
       "bytes_at_inventory": 1104244,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_100nm_image/candidate_results/medium",
@@ -2049,7 +2055,7 @@
       "bytes_at_inventory": 910937,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_10nm_relative_flow/candidate_results/coarse",
@@ -2060,7 +2066,7 @@
       "bytes_at_inventory": 871730,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_10nm_relative_flow/candidate_results/fine",
@@ -2071,7 +2077,7 @@
       "bytes_at_inventory": 1104466,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_10nm_relative_flow/candidate_results/medium",
@@ -2082,7 +2088,7 @@
       "bytes_at_inventory": 911158,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_30nm_relative_flow/candidate_results/coarse",
@@ -2093,7 +2099,7 @@
       "bytes_at_inventory": 871730,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_30nm_relative_flow/candidate_results/fine",
@@ -2104,7 +2110,7 @@
       "bytes_at_inventory": 1104467,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3c_casea_companion_v3/cases/caseA_30nm_relative_flow/candidate_results/medium",
@@ -2115,7 +2121,7 @@
       "bytes_at_inventory": 911159,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3v_matched/candidate_caseA_100nm_v1/result_10us",
@@ -2126,7 +2132,7 @@
       "bytes_at_inventory": 754416,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3v_matched/candidate_caseA_100nm_v1/result_2p5us",
@@ -2137,7 +2143,7 @@
       "bytes_at_inventory": 929051,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_m3v_matched/candidate_caseA_100nm_v1/result_5us",
@@ -2148,7 +2154,7 @@
       "bytes_at_inventory": 866076,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_p18h/hold_freeze_claim_v2/result",
@@ -2159,7 +2165,7 @@
       "bytes_at_inventory": 154609,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_p18h/hold_freeze_v1/candidate/result",
@@ -2170,7 +2176,7 @@
       "bytes_at_inventory": 154609,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_out_p18h/hold_freeze_v1/result",
@@ -2181,7 +2187,7 @@
       "bytes_at_inventory": 154609,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "_tmp_axis_audit_2/test_exponential_midpoint_rz_a0/exponential-axis-then-wall-result",
@@ -2192,7 +2198,7 @@
       "bytes_at_inventory": 112293,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     },
     {
       "path": "result_coarse.partial",
@@ -2203,7 +2209,7 @@
       "bytes_at_inventory": 2092891,
       "native_or_environment_assets": [],
       "role": "Retired engine result, not native source/export; enclosing experiment/input tree is not a deletion target",
-      "operation": "not attempted; no bulk deletion while the observed policy block is unresolved"
+      "operation": "Generated UTF8 metadata removed via explicitpatch; HDF5 deletion not attempted while observed binary policy block remains"
     }
   ],
   "other_retired_result_roots_count": 198,
@@ -2218,5 +2224,35 @@
     "Execution environments and learned assets"
   ],
   "resume_condition": "Physical deletion must be permitted in the execution context. Recheck actual remaining files, owner-process liveness and protected descendants, remove the explicit result products, then independently verify residuals and native hashes. No new reader/alias/migration mechanism is required.",
-  "not_completed": true
+  "not_completed": true,
+  "completed_marker_text_cleanup": {
+    "files": 28,
+    "bytes": 6221,
+    "evidence": "execution/continuation_cleanup.json",
+    "binary_deletion": false
+  },
+  "other_confirmed_remaining": {
+    "roots": 198,
+    "hdf5_files": 77633,
+    "bytes": 4400775595,
+    "other_text_files": 0,
+    "evidence": "execution/other_text_cleanup.json",
+    "binary_deletion_attempted": false
+  },
+  "completed_other_result_text_cleanup": {
+    "files": 571,
+    "bytes": 2930032,
+    "names": {
+      "run.json": 198,
+      "LATEST": 191,
+      "_SUCCESS": 182
+    },
+    "evidence": "execution/other_text_cleanup.json",
+    "binary_deletion": false
+  },
+  "total_confirmed_remaining_hdf5": {
+    "files": 77728,
+    "bytes": 4553770299,
+    "scope": "95Brownian +77633 in198separateclassifiedresults; freshcounts/types/sizes, not allbinarycontenthashes"
+  }
 }

@@ -3,39 +3,86 @@
   "report_authoring_status": "complete",
   "retirement_goal_status": "not_complete",
   "filesystem_cleanup": {
-    "status": "blocked_unexecuted",
+    "status": "blocked_unexecuted_remaining_binary",
     "source": {
       "path": "solver/evidence/current_only_2026_11_23/blocked_cleanup.json",
-      "sha256": "sha256:cda1318dd4567ae284b77ae21eac8eaff53a440a94256cebe379aa62e42d9630"
+      "sha256": "sha256:c56685c11522059bc07e68d20645c11b010fb419d4bf298780e8c93ed590e95b"
     },
-    "reported_automatic_approval_review_rejections": 3,
+    "reported_automatic_approval_review_rejections": 4,
     "reported_tool_reason": "blocked by policy",
     "known_remaining_scope": {
       "path": "evidence/brownian_wall_accuracy_extension_2026_10_10",
-      "files": 123,
-      "bytes": 153000925
+      "files": 95,
+      "bytes": 152994704,
+      "hdf5_files": 95,
+      "markers": 0
     },
     "additional_obsolete_local_results": {
       "classified_result_subtrees": 198,
       "files_at_inventory": 78204,
       "bytes_at_inventory": 4403705627,
-      "status": "Not attempted while the observed policy block is unresolved; inventory counts are not deleted bytes",
-      "scope_limit": "Other roots are classified software result subtrees from the inventory, not wholesale native experiment directories. The single-file rejection proves the concrete block; no claim that every other path was individually attempted."
+      "status": "571 verified UTF8 metadata files removed; remaining binary deletions have not been attempted. Original inventory counts are retained as inventory, not deleted bytes.",
+      "scope_limit": "Other roots are classified software result subtrees from the inventory, not wholesale native experiment directories. The single-file rejection proves the concrete block; no claim that every other path was individually attempted.",
+      "current_remaining_hdf5": {
+        "files": 77633,
+        "bytes": 4400775595,
+        "metadata_files": 0,
+        "receipt": {
+          "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+          "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+        }
+      }
     },
-    "resume_condition": "Physical deletion must be permitted in the execution context. Recheck actual remaining files, owner-process liveness and protected descendants, remove the explicit result products, then independently verify residuals and native hashes. No new reader/alias/migration mechanism is required."
+    "resume_condition": "Physical deletion must be permitted in the execution context. Recheck actual remaining files, owner-process liveness and protected descendants, remove the explicit result products, then independently verify residuals and native hashes. No new reader/alias/migration mechanism is required.",
+    "continuation_receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/continuation_cleanup.json",
+      "sha256": "sha256:6398860a8925fbc404a23bf0cfa17ac68394ee7870a49d1bfaa39c2b078786b4"
+    },
+    "completed_marker_removal": {
+      "files": 28,
+      "bytes": 6221,
+      "binary_removal_claim": false,
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/continuation_cleanup.json",
+        "sha256": "sha256:6398860a8925fbc404a23bf0cfa17ac68394ee7870a49d1bfaa39c2b078786b4"
+      }
+    },
+    "completed_other_result_metadata_removal": {
+      "files": 571,
+      "bytes": 2930032,
+      "run_json": 198,
+      "LATEST": 191,
+      "_SUCCESS": 182,
+      "binary_removal_claim": false,
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+        "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+      }
+    },
+    "total_retired_hdf5_remaining": {
+      "files": 77728,
+      "bytes": 4553770299,
+      "receipt": {
+        "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+        "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+      }
+    }
   },
   "app_id": "report:c9a85c07-6c83-42c2-9aa3-5d3037be4638",
   "identity_presentation_filters_block_ids_preserved": true,
   "protected_runtime": {
     "official_verifier": "Protected Data app runtime verified (234 files).",
     "independently_rehashed_files": 234,
-    "all_unchanged": true
+    "all_unchanged": true,
+    "verified_against_commit": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+    "method": "Official verifier plus exact234 protected-file bytes compared with git8883e3a; no protected or authored JSX changes in this continuation"
   },
   "source_snapshot": {
     "path": "report_app/src/data.json",
-    "sha256": "sha256:9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911",
+    "sha256": "sha256:2c83abe5269dcf3379562d253d4241e54b3643efdbf5bc5d727cf15daa4b4ffd",
     "authorities": 22,
     "queries": 10,
+    "quality_rows": 9,
     "buildStatus": "complete"
   },
   "build": {
@@ -43,22 +90,22 @@
     "kind": "separate-data-v1",
     "html": {
       "path": "index.html",
-      "sha256": "060a03c671f6549b101416adaf140374816a40ac541493d4d9644ac6e808ee0f",
+      "sha256": "e7c3ea7802042ec3355571596e2fb58752a507b6a190e7d6d1fd159d6817848d",
       "bytes": 2405599
     },
     "snapshot": {
-      "path": "snapshot.9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911.json",
-      "sha256": "9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911",
-      "bytes": 200440
+      "path": "snapshot.2c83abe5269dcf3379562d253d4241e54b3643efdbf5bc5d727cf15daa4b4ffd.json",
+      "sha256": "2c83abe5269dcf3379562d253d4241e54b3643efdbf5bc5d727cf15daa4b4ffd",
+      "bytes": 205178
     },
     "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
-    "sourceSnapshotSha256": "9cae5fd5436ede9cdc066b7ca5b0aa50f723cae6b23378e7923c47dad8754911"
+    "sourceSnapshotSha256": "2c83abe5269dcf3379562d253d4241e54b3643efdbf5bc5d727cf15daa4b4ffd"
   },
   "official_build": "Installed Data prebuilt split build via existing WSL Linux Node; no source build, installation or protected changes",
   "checks": [
     {
       "command": "uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q",
-      "result": "4 passed"
+      "result": "4 passed in0.81s"
     },
     {
       "command": "uv run --locked ruff check ../analysis/build_report_snapshot.py",
@@ -74,7 +121,7 @@
     },
     {
       "command": "<linux-node> <installed-data-plugin>/output_formats/html/scripts/data-app.mjs build --project-dir report_app --separate-data",
-      "result": "passed"
+      "result": "passed; final metadata-only rebuild"
     },
     {
       "command": "git diff --check -- <report-owned paths>",
@@ -114,7 +161,7 @@
         {
           "label": "利用者フロー table",
           "width": 335,
-          "scrollWidth": 1666
+          "scrollWidth": 2019
         },
         {
           "label": "result layers table",
@@ -124,7 +171,7 @@
         {
           "label": "品質証拠 table",
           "width": 335,
-          "scrollWidth": 1541
+          "scrollWidth": 1727
         },
         {
           "label": "現行範囲 table",
@@ -172,29 +219,68 @@
       }
     ],
     "catalog_pagination": "forward and back passed",
-    "current_values": "Current receipt scopes, benchmark inventory/executed subset, blocked cleanup and prior A/P source selections checked against reviewed rows",
+    "current_values": "Rendered1240,95BrownianHDF5,599textfiles/2936253B removed,77728HDF5/4553770299B remaining,9helpers, freshWindows/Linux workflows,30targeted+B03 scopes and priorA/P source selections checked against reviewed inputs",
     "internal_table_scroll": true,
     "browser_errors": [],
     "complete_marker": "Updating indicator cleared for report authoring; this does not mark the retirement goal complete",
     "screenshot_record": {
+      "desktop-evidence.png": "sha256:38a8b99b3a9da5a4867a8a0b61916abc2b63c50a2e781dc24b28b5c24be25819",
       "desktop-hero.png": "sha256:e21a7d88a7879324751a0d1a47cf95f6da7ec7ac9e35a98d1a2e836be411943e",
-      "desktop-inputs.png": "sha256:ba833253489b765624338fa8181eb875e450ce45ee7edd33cab10c08f28b34bd",
-      "desktop-evidence.png": "sha256:0a899f67eea3686a2ba857d356e4ba61f8c44daddcf43abae538db1624d3766b",
+      "desktop-inputs.png": "sha256:ecc086a8ced1e62c7b314cb3e3cd934a17ba91bc59714de081fbe734de9ab3f6",
+      "desktop-open-findings.png": "sha256:e2b61a74f48f4887b4597d8f8c06a25d5f71298b8a58951a9dcb2ef5de556918",
       "mobile-hero.png": "sha256:4c8991373f772b2645af34e79253b3ba50db422370ee6eb6236898d931137746",
       "mobile-inputs.png": "sha256:d0e31d239239adbe763e72bfe03f3bc5967fb89b816b9ad6c1365270d6de5695"
     },
     "full_receipt": {
       "path": "solver/.artifacts/current_only_20261123/report/render_receipt.json",
-      "sha256": "sha256:52d0d2c44412e2974d190508a839fe3a67bf74532215ccf1d1551645fd2bf5fe"
-    }
+      "sha256": "sha256:3d548dd799c083e890a7e1c3fa1b9bb09c65d2f8d40e3655bfd755ed636f4997"
+    },
+    "quality_pagination": "Page2 open improvement with columns:null and remaining publication/integrity issues checked; page1 restored",
+    "visual_review": "Desktop evidence andmobile input/hero renders inspected; no page-wideoverflow or malformedUnicode; wide tables scroll internally",
+    "qa_execution": "Inline Node using installed official browser runtime; no task helper source retained"
   },
   "build_advisory": "DATA_NARRATIVE_DYNAMIC from shared Narrative wrapper; representative narrative and actual DataTable headers/cells rendered and checked, no Markdown pipe table authored",
-  "content_review": "Independent read-only review identified stale current-source labels and P10/P1 scope precision; affected copy/projections corrected",
+  "content_review": "Independent final read-only review: no mandatory findings; current/prior/test/cleanup scopes and all35 evidence+26 snapshot bindings verified. Added ninth quality row retains open improvements on the tested second page.",
   "preview": "http://127.0.0.1:4176/",
   "limits": [
     "Report consumes source-bound conclusions and does not run a solver or V&V verdict.",
-    "Prior A/P40 seeds each and prior80 re-executions remain prior reference; no current-only A/P solver replay.",
-    "Physical cleanup is blocked and unexecuted; no remaining-byte deletion claim or retirement-goal completion.",
-    "No publication, sharing, offline export or whole-runtime interaction sweep performed."
-  ]
+    "PriorA/P40 seeds each and prior80 re-executions remain reference; no current-only A/P solver replay or new MonteCarlo sample.",
+    "599 generated metadata text files and9 finished helper sources were removed; no remaining HDF5 binary deletion claim.77728 HDF5 files/4553770299B remain,4 concrete binary deletion refusals; other198 roots binary deletions unattempted.",
+    "Known479 native/input authority files were rehashed; this is not a universal inventory of every untracked filesystem asset.",
+    "Open input-shape,analyzeJSON-publication andresult-integrity improvement findings remain proposed, not implemented.",
+    "No publication,sharing,offline export or whole-runtime interaction sweep performed."
+  ],
+  "captured_at_utc": "2026-11-23T06:54:00.062696+00:00",
+  "finished_helper_removal": {
+    "count": 9,
+    "additional_report_qa_wrapper": {
+      "path": "solver/.artifacts/current_only_20261123/report/verify_report.mjs",
+      "bytes": 6280,
+      "status": "removed after completed browser QA"
+    },
+    "receipt": {
+      "path": "solver/evidence/current_only_2026_11_23/execution/other_text_cleanup.json",
+      "sha256": "sha256:afbb4f841641d1c8b4a7c092ff875986c6b5461d1433b5ae4da08c7e33d5ca90"
+    }
+  },
+  "continuation_source_base": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+  "reviewed_bindings": {
+    "projection_evidence_hashes": 35,
+    "snapshot_producer_authority_input_hashes": 26,
+    "all_match": true,
+    "imported_query_row_arrays_match": 4,
+    "reviewer": "/root/report_alignment/report_copy_review"
+  },
+  "current_execution_scope": {
+    "full_core_tests": 1240,
+    "full_core_junit_seconds": 473.507,
+    "targeted_owner_public_scenario_checks": 30,
+    "targeted_scope": "Earlier30 targeted checks overlap the full1240 suite; counts are not additive",
+    "fresh_b03_rows": 4,
+    "particles_per_row": 32,
+    "scientific_hashes_match_prior": true,
+    "installed_post_cleanup_workflows": "Windows/Linux:13 public operations and5 examples each, module andconsole passed",
+    "prior_source_scopes": "Wheel build and156 external tests at8883e3a; all49 installed+18 external production file hashes unchanged",
+    "new_ap_solver_replay": false
+  }
 }

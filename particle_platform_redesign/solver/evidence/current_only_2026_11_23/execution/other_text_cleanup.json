@@ -1,0 +1,84 @@
+{
+  "scope": "Additional safe retiredsoftware text cleanup after frozen continuation phase; no binaryremoval/renaming or native/input/environment deletion",
+  "base_head": "8883e3a53267b5e8baefc6b0d4a3833050cd819b",
+  "method": "Explicit apply_patch for571 absolute filepaths in6 batches after verified SHA/UTF8/knownoldwriter/absoluteboundary/protectedauthority/live-use checks",
+  "completed_text_removal": {
+    "files": 571,
+    "bytes": 2930032,
+    "names": {
+      "run.json": 198,
+      "LATEST": 191,
+      "_SUCCESS": 182
+    },
+    "all_exact_candidates_absent": true,
+    "partial_runs": 16,
+    "partial_identity": "Hash-verified nested resume_identity engine plus historicalwriter evidence; no fallback or guesseddefault"
+  },
+  "all_text_removal_this_continuation": {
+    "files": 599,
+    "bytes": 2936253,
+    "scope": "571otherresultmetadata +28Brownianmarkers; no HDF5 counted"
+  },
+  "additional_finished_helper_removal": {
+    "path": ".artifacts/current_only_20261123/report/verify_report.mjs",
+    "bytes": 6280,
+    "role": "Task-specific report QA wrapper, removed byreportowner after successfulQA; retained officialruntime/environment/permanenttests",
+    "current_total_helpers_removed": 9
+  },
+  "confirmed_remaining": {
+    "brownian_hdf5_files": 95,
+    "brownian_bytes": 152994704,
+    "other_roots": 198,
+    "other_hdf5_files": 77633,
+    "other_bytes": 4400775595,
+    "total_hdf5_files": 77728,
+    "total_bytes": 4553770299,
+    "other_text_files": 0,
+    "actual_binary_deletion": false,
+    "all_binary_content_hashes_checked": false
+  },
+  "independent_preservation": {
+    "native_known_paths": 479,
+    "missing": 0,
+    "sha256_mismatches": 0,
+    "protected_old_code_model_dataset_diff": false,
+    "scope": "Known479native/inputauthority, protectedtrackedareas, explicitdeletion scope; not allfilesystemassets"
+  },
+  "receipts": {
+    "old_text_preflight.json": "bcb7d9f84bd2fbcf7e85f615b516d081902481a8128b46adc4b013e38ab4d87c",
+    "old_text_recheck.json": "bdb6ac1f53610ee57c69af617b76319e5622357b92bda47ba5fac1ff33935d60",
+    "old_text_postreview.json": "6df405d20fdb17a85e79a4390fc1862077e192fa62ef37a879aa0f9acfb400a2"
+  },
+  "policy_block": {
+    "concrete_rejections": 4,
+    "reason": "blocked by policy",
+    "scope": "OneBrownianbinaryleaf/directory requests rejected; other198HDF5 deletion unattempted",
+    "resume": "Executioncontext mustpermit the deletion; verify actualresiduals/authority/liveness again before explicitbinaryremoval"
+  },
+  "post_cleanup_public_workflows": {
+    "windows": {
+      "receipt": "installed_post_windows.json",
+      "sha256": "32e833d96059253937177a2db2817862c692cdae318b5ee76bf3117e82fae877",
+      "status": "complete",
+      "public_operations": 13,
+      "examples": 5,
+      "source": "Existingcleanwheel/installoutsidecheckout; no environmentdeleted/upgraded"
+    },
+    "linux": {
+      "receipt": "installed_post_linux.json",
+      "sha256": "9558589c72d338cd9ea351714c51abd5e2b13bd5ca4a88494ec78b932e89b8e5",
+      "status": "complete",
+      "public_operations": 13,
+      "examples": 5,
+      "source": "Existingcleanwheel/installoutsidecheckout; no environmentdeleted/upgraded"
+    }
+  },
+  "goal": "not_complete:binarydeletionblocked",
+  "production_source_unchanged": "All67 installed/external Pythonfile hashes match8883e3a executedsource; no installedproducer/core code changed",
+  "ci_baseline_receipt": {
+    "path": "ci_8883e3a.json",
+    "sha256": "9b5914b410d84cf5b821540264157575fb0ebe1159da7167d4a6a48734faaad3",
+    "scope": "8883remoteWindows/Linuxsuccess; currentR13full1240 separatelyrecorded"
+  },
+  "record_phase": "Finalpost-text-cleanup execution evidence, frozen beforefinalreport rebuild"
+}

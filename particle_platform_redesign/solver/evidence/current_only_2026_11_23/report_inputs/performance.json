@@ -9,16 +9,22 @@
           "gate": "入口の数と今回の実行範囲を分ける"
         },
         {
-          "package": "今回の影響先計測",
+          "package": "8883e3aで実行した影響先計測",
           "capability": "P06/P10/P14/P19/B03の5 modulesを実行",
           "deliverable": "P10 cold/warm6 observations、P14 smoke8 observations",
-          "gate": "当該sourceのexit0。全8 modulesの再計測やrelease matrix完了とはしない"
+          "gate": "8883e3aに束縛した実行済みsubset。全8 modulesの再計測やrelease matrix完了とはしない"
         },
         {
-          "package": "C03 relaxationの移管",
+          "package": "8883e3aで確認したC03移管",
           "capability": "P10 --scenarios relaxation --relaxation-particles",
           "deliverable": "同じcanonical input・物理/数値設定・現行engine科学payloadを確認",
           "gate": "11 analytic casesは独立の数値確認。移管identityだけを数学的正解にしない"
+        },
+        {
+          "package": "今回のB03とallocation owner確認",
+          "capability": "4 scenarios × 各32粒子、以前と科学payload hash一致",
+          "deliverable": "重複private-byte式を外し、実allocation検証ownerへ接続。独立646 raw / 648 rounded transient boundを保持",
+          "gate": "新規30 targeted checks。動的tree/pending-bankの実allocation照合と全体RSS/精度/scale保証を区別"
         },
         {
           "package": "資源と観測",
@@ -34,15 +40,18 @@
         }
       ],
       "source": {
-        "label": "current-onlyで実行した影響先benchmarkと明示した範囲",
+        "label": "以前の5 modules実行と継続変更後B03の4 scenarios",
         "files": [
           "solver/.artifacts/current_only_bench_20261123/receipt.json",
-          "solver/tests/performance/README.md"
+          "solver/tests/performance/README.md",
+          "solver/evidence/current_only_2026_11_23/execution/memory_retirement.json",
+          "solver/evidence/current_only_2026_11_23/execution/b03_current.json",
+          "solver/evidence/current_only_2026_11_23/execution/b03_comparison.json"
         ],
         "metricDefinitions": [
           {
             "label": "Benchmark inventory and executed subset",
-            "definition": "Eight executable modules are the current inventory. This receipt executes five affected modules; P10 contains three workloads and six cold/warm observations. Local measurements do not establish a portable SLA or a full release matrix.",
+            "definition": "Eight executable modules remain the inventory. Execution at 8883e3a covered five affected modules, including six P10 observations. This continuation newly executes four 32-particle B03 rows and compares scientific hashes. No portable SLA, new independent ensemble or full release matrix is claimed.",
             "componentIds": [
               "work-package-table",
               "implementation-sequence"
@@ -51,12 +60,16 @@
         ],
         "evidenceFlow": [
           {
-            "title": "Exact current execution receipt",
+            "title": "Prior 8883e3a execution receipt",
             "detail": "{\"path\": \"solver/.artifacts/current_only_bench_20261123/receipt.json\", \"sha256\": \"sha256:4a16f5545ae115b78dfed8d2f095b8d0a0ffbaab5813d845442c54391ad2d6b5\"}"
           },
           {
             "title": "Independent and preservation scopes",
             "detail": "{\"independent_oracles\": {\"passed\": 11, \"seconds\": 4.39, \"selectors\": [\"test_exponential_midpoint_c03_matches_the_closed_form\", \"test_exponential_midpoint_is_exact_for_c03_and_replay_keeps_endpoint_hint\", \"test_exponential_midpoint_coefficients_cover_wide_relaxation_range\", \"test_exponential_midpoint_has_second_order_for_variable_coefficients\"]}, \"input_correspondence\": {\"baseline\": \"75100e74f1243b527e065c9e6a68121221408b39 prior input construction function only, not a prior solver execution\", \"old_producer_sha256\": \"97ec22c85e90abe8b4cddb81684d5cf6e1c93bab54cefa067c8c658c99cffcf8\", \"particles\": 32, \"canonical_content_hash\": \"sha256:e5b8dbaba143bfdc8975b5903b971ab3d9ad5cd0178dd3f3e5044d22150469a5\", \"same_all_physical_and_numerical_settings\": true, \"only_case_display_name_change\": [\"p11_exponential_midpoint\", \"constant_relaxation\"], \"same_current_engine_scientific_payload\": true, \"current_public_scientific_payload_sha256\": \"sha256:fae94564184340988b7558d527c4bbfeb066686304dad19df389938431b3ada5\", \"independent_truth\": \"Separate C03/exponential exact wide-range and variable-coefficient11verificationcases passed; same-engine identity is only migration fidelity\", \"temporary_old_function_and_results_not_retained_in_production\": true}, \"timing_limits\": \"Machine-local descriptive observations under overlapping root/agent work; no portable SLA or inter-revision speedup claim. Smoke is not a full100k/1M qualification.\", \"not_run_by_this_owner\": [\"Unchanged P09/P14-U/process_workers full measurements\", \"Licensed COMSOL solve\", \"Full scientific suite\"]}"
+          },
+          {
+            "title": "Fresh continuation B03 and allocator-owner receipts",
+            "detail": "[{\"path\": \"solver/evidence/current_only_2026_11_23/execution/memory_retirement.json\", \"sha256\": \"sha256:c37601b333a9964af771f665fa5788b23818ef9e6f373459e7b258027111ceb3\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_current.json\", \"sha256\": \"sha256:0a2c9b6a47d5f510f9055686edaacdf9e0eae01bc0b1a043048e438c69490a98\"}, {\"path\": \"solver/evidence/current_only_2026_11_23/execution/b03_comparison.json\", \"sha256\": \"sha256:0ae6d5adf32ce5ddd5507e162d61c3cf3a7af81b543b46ac7bcc12cd2c8f41cb\"}]"
           }
         ]
       }

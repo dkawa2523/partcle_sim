@@ -86,5 +86,11 @@ sampling can miss transient peaks. Public science comparisons include final,
 release, canonical boundary/failure events, lifecycle, every emitted frame and
 probe. They do not compare unsaved internal paths or HDF5 container bytes.
 
+B03 reports the completed public memory plan and stochastic reserve without
+copying its private byte formula. The existing workspace-ownership verification
+counts concrete base/adaptive tree and pending-bank allocations against that
+reserve. B03 retains its separate conservative transient stage-array bound;
+prepared allocations and process RSS do not replace that check.
+
 Current cleanup execution and limits are recorded in
 [`evidence/current_only_2026_11_23`](../../evidence/current_only_2026_11_23/README.md).
