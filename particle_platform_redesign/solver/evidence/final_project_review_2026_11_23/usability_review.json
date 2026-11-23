@@ -1,0 +1,203 @@
+{
+  "status": "REVIEW_COMPLETE_WITH_UNRESOLVED_USER_FACING_BUGS",
+  "reviewer": "final_review_usability_78c8c41",
+  "recorded_utc": "2026-11-23T09:34:40.256888+00:00",
+  "head": "78c8c412f0b78d8cd2d6a9e96f5f4b312bf97747",
+  "scope": "Read-only normal user routes/input-output reliability/final usability score. Not production fixes or all scientific model qualification.",
+  "source_binding": {
+    "files": {
+      "src/chamber_particles_tools/source_builder/producer.py": "92648bd6d8d67b82f6361d5a608aaeab2b99aaf366b8ec0312f60d66970ce470",
+      "src/chamber_particles_tools/cli.py": "a60f6ec8f826ee43a6909e5c965431780b1ebcaac6a4f0b5ee995a695fb5c3de",
+      "src/chamber_particles_tools/csv_import/workflow.py": "c3ec86e424217d41b8890e02d797d9e2905ea35b75efb28bbbe37f7020e30b54",
+      "src/chamber_particles_tools/electrostatic_builder/workflow.py": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8"
+    },
+    "all_match_retained_probe_owners": true
+  },
+  "fresh_executions": {
+    "head": "78c8c412f0b78d8cd2d6a9e96f5f4b312bf97747",
+    "probes": [
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "chamber_particles",
+          "create",
+          ".artifacts/foundation_design_20261123/probe_inputs_v2/columns_null.yaml",
+          "-o",
+          ".artifacts\\final_review_78c8c41\\source_columns_null_output",
+          "--json"
+        ],
+        "exit_code": 1,
+        "seconds": 1.2328646999085322,
+        "stdout": "",
+        "stderr_tail": [
+          "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py\", line 319, in read_csv_source",
+          "    return _source_from_rows(_select_rows(raw, config.get(\"filter_equals\", {})), data, config)",
+          "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+          "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py\", line 325, in _source_from_rows",
+          "    _configuration(config)",
+          "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py\", line 250, in _configuration",
+          "    if set(columns) - {\"particle_id\", \"release_time_s\", *location, *_PROPERTIES}:",
+          "       ^^^^^^^^^^^^",
+          "TypeError: 'NoneType' object is not iterable"
+        ]
+      },
+      {
+        "command": [
+          "uv",
+          "run",
+          "--locked",
+          "python",
+          "-m",
+          "chamber_particles",
+          "inputs",
+          "electrostatic",
+          "check",
+          ".artifacts/foundation_design_20261123/probe_inputs_v2/linear-temperature-builder.yaml",
+          "--json"
+        ],
+        "exit_code": 0,
+        "seconds": 1.6905721999937668,
+        "stdout": "{\"operation\": \"inputs electrostatic check\", \"report\": {\"builder_revision\": \"reduced_electrostatic_builder_v3\", \"cell_count\": 2, \"configuration_sha256\": \"sha256:4bbc72e8fd7f8ffa2d5b487566ae8059f2f9ec74d974e87c73c9b5825bbaa2e9\", \"fixed_node_count\": 4, \"input_content_hash\": \"sha256:08b3bbaff69758f755646bf7732f70627e26351d78282b9a0bf2fb68331d6594\", \"model_revision\": \"boltzmann_bohm_sheath_c2_v1\", \"node_count\": 4, \"status\": \"checked\"}, \"status\": \"ready\"}\n",
+        "stderr_tail": []
+      }
+    ],
+    "source_output_absent": true,
+    "scope": "Existing bounded synthetic input probes; malformed source and false-ready static builder only. No particle/native solve."
+  },
+  "retained_evidence_reviewed": [
+    "evidence/current_only_2026_11_23/execution/reaudit_user_flow.json",
+    "evidence/current_only_2026_11_23/execution/reaudit_benchmark_review.json",
+    "evidence/foundation_design_2026_11_23/client_probe_evidence.json",
+    "evidence/current_only_2026_11_23/execution/installed_post_windows.json",
+    "evidence/current_only_2026_11_23/execution/installed_post_linux.json"
+  ],
+  "retained_normal_flow": "Own CSV/recipe to create/check/run/inspect/analyze/export/view eight commands passed; Decimal wall hit error3.47e-18s, five saved positions error0, failure0, derived source identities match. Retained executed result, not a new simulation this review.",
+  "findings": [
+    {
+      "id": "U01",
+      "severity": "P1",
+      "state": "confirmed current bug, retained bounded public probe and unchanged owner source",
+      "locations": [
+        "src/chamber_particles_tools/csv_import/workflow.py:898",
+        "src/chamber_particles_tools/csv_import/workflow.py:977",
+        "src/chamber_particles_tools/csv_import/workflow.py:982",
+        "src/chamber_particles_tools/csv_import/workflow.py:1063"
+      ],
+      "trigger": "mesh ID9007199254740992 and raw field ID9007199254740993 at equal coordinates",
+      "impact": "Raw identities differ but float64 rounds the latter to the former; public importer succeeds and publishes scoped_node_id join. This violates exact identity, although the witness deliberately did not demonstrate a wrong physical field value.",
+      "cause": "All columns parsed as float before lexical identity is validated; >2**53 guard after conversion cannot see rounding.",
+      "required_change": "Decode selected node identity exactly before float conversion at field-table owner; preserve scope masking/unselected NaN and coordinate-bijection route."
+    },
+    {
+      "id": "U02",
+      "severity": "P1",
+      "state": "false-ready freshly reproduced; same-input tiny build failure retained and unchanged source",
+      "locations": [
+        "src/chamber_particles_tools/electrostatic_builder/workflow.py:162",
+        "src/chamber_particles_tools/electrostatic_builder/workflow.py:479",
+        "src/chamber_particles_tools/electrostatic_builder/workflow.py:487"
+      ],
+      "trigger": "Canonical three-time-knot temperature plus static velocity on four-node RZ layout supplied to static builder",
+      "impact": "Public check returns ready, build later performs the small solve then fails IndexError during output generation. No successful wrong completed field is claimed.",
+      "cause": "Producer checks scalar/vector metadata but not time_s, then static consumers slice the general temporal values array.",
+      "required_change": "Common builder prepare must resolve static thermal input and reject unsupported time dependence before check/build consumers or solve."
+    },
+    {
+      "id": "U03",
+      "severity": "P2",
+      "state": "columns:null freshly reproduced; other malformed/extra-cell cases retained at identical source",
+      "locations": [
+        "src/chamber_particles_tools/source_builder/producer.py:188",
+        "src/chamber_particles_tools/source_builder/producer.py:203",
+        "src/chamber_particles_tools/source_builder/producer.py:250",
+        "src/chamber_particles_tools/source_builder/producer.py:319"
+      ],
+      "trigger": "columns:null / filter:null / missing filter column / invalid lexical ID / extra data cell",
+      "impact": "Malformed source config/lexical ID can leak internal traceback and exit1; surplus data cell can be ignored and published. columns:null leaves output absent.",
+      "cause": "Raw nested configuration and row shape used before meaning/type normalization.",
+      "required_change": "Normalize source spec before filtering, validate header/data arity, translate lexical/domain errors at owner, keep required scientific value checks."
+    },
+    {
+      "id": "U04",
+      "severity": "P2",
+      "state": "bounded failure-injection result retained at identical source; not re-injected this review",
+      "locations": [
+        "src/chamber_particles_tools/cli.py:223",
+        "src/chamber_particles_tools/cli.py:228"
+      ],
+      "trigger": "Write interruption while public analyze writes summary JSON",
+      "impact": "CLI structured exit2 is emitted but partial invalid28-byte JSON remains at final path; retry sees existing target.",
+      "cause": "Destination is created before complete serialization/write; directory publisher policy is not applied to standalone JSON.",
+      "required_change": "Serialize then complete temporary write and atomic create-if-absent publication; preserve existing target and cleanup on failure."
+    }
+  ],
+  "scoring": {
+    "score": 78,
+    "maximum": 100,
+    "criteria": [
+      {
+        "name": "導入・入口の発見",
+        "score": 18,
+        "maximum": 20,
+        "weight": 0.2,
+        "reason": "唯一CLI、四core API、wheelのみの通常利用、生成される編集可能例題とREADME手順が明確。"
+      },
+      {
+        "name": "自分の入力の組立て",
+        "score": 16,
+        "maximum": 20,
+        "weight": 0.2,
+        "reason": "SI/basis/source authorityと明示mappingは良い。field identityのfloat丸め誤join、source row/configの受入不備が残る。"
+      },
+      {
+        "name": "検査・エラー回復",
+        "score": 12,
+        "maximum": 20,
+        "weight": 0.2,
+        "reason": "core checkは共通prepareであるが、builder checkのfalse-readyとnested sourceの内部tracebackは利用者の事前検査への期待を損なう。"
+      },
+      {
+        "name": "結果の再利用・公開",
+        "score": 15,
+        "maximum": 20,
+        "weight": 0.2,
+        "reason": "元caseなしのcontext、共通cohort、export/view directory公開は良い。単独analysis JSONの中断で部分targetが残りretryを妨げる。"
+      },
+      {
+        "name": "科学的な解釈の支援",
+        "score": 17,
+        "maximum": 20,
+        "weight": 0.2,
+        "reason": "数値stuck、computational weight、保存点、checkと精度認定の区別を文書化。resolved model scalar/field roleの説明欠落が残る。"
+      }
+    ],
+    "nature": "Subjective engineering usability assessment for documented alpha scope, not probability of correct physics",
+    "comparison_to_previous": {
+      "previous": 82,
+      "current": 78,
+      "explanation": "Same production code; newly established R15/R16 input assurance evidence broadens review and lowers own-input/check scores. This is not a runtime regression caused by metadata-only retirement commits."
+    }
+  },
+  "release_judgment": {
+    "technical_research_alpha": "Usable for documented normal paths with informed input preparation and scope checks",
+    "general_nonexpert_formal_distribution": "Input identity and false-ready defects should be fixed before claiming reliable general own-input operation; source error handling and atomic standalone output also need closure",
+    "not_blockers_by_themselves": [
+      "2-D XY/RZ scope",
+      "gas-only static reduced electrostatic capability",
+      "absence of fullmaterial or GPU when not promised"
+    ]
+  },
+  "design_status": "20issues/13packages are plans. Neither cleanup completion nor green existing tests implies those proposals were implemented.",
+  "not_executed": [
+    "New full suite",
+    "New native COMSOL solve",
+    "New benchmark or large run",
+    "New wheel install",
+    "New report build/browser QA"
+  ],
+  "production_edits": []
+}

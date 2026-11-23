@@ -1,0 +1,222 @@
+{
+  "reviewer": "/root/final_review_architecture_78c8c41",
+  "head": "78c8c412f0b78d8cd2d6a9e96f5f4b312bf97747",
+  "recorded_utc": "2026-11-23T09:35:27.449109+00:00",
+  "scope": "Read-only actual-code final architecture, maintenance and extension review; only this research JSON written. Current legal-run scientific failure is not inferred from structural debt.",
+  "source_binding": {
+    "67_current_source_sha_checked": true,
+    "mismatches": [],
+    "examined_files_sha256": {
+      "src/chamber_particles/physics/catalog.py": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b",
+      "src/chamber_particles/physics/runtime.py": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca",
+      "src/chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+      "src/chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+      "src/chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+      "src/chamber_particles/transport.py": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce",
+      "src/chamber_particles/execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+      "src/chamber_particles/engine.py": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d",
+      "src/chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+      "src/chamber_particles_tools/examples.py": "4c7f60b1ff9cbc68dde0483985825613497af701f548d7d299b62d847de8537c",
+      "tests/release_workflow.py": "e1e29a6bae40ba5e31f2e5329f0f89af6f57add0d098ee39471c4f17a3e0f06a",
+      "docs/physics_models.md": "f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0",
+      "tests/verification/test_physics.py": "b722c89416d4d2e6d33ee9ac3e2b39c8c3ab051888a4da43a73ac27f7092857b",
+      "tests/verification/test_stochastic.py": "d6215d8102e0d05bfdd5a4a851ec2c1b20f3543c5f0e7eaa6ba9e48e77c3ec18",
+      "tests/verification/test_cpu.py": "8e81c56cc5817f38fe2fa4f95d59f9e19499823e7f1d53e42b99ea39c227a06e"
+    }
+  },
+  "findings": [
+    {
+      "id": "AR01",
+      "severity": "P2",
+      "related": [
+        "R02"
+      ],
+      "title": "Primitive binding depends on other physics category implementation",
+      "sources": [
+        "src/chamber_particles/physics/runtime.py:1242",
+        "src/chamber_particles/physics/runtime.py:1297",
+        "src/chamber_particles/physics/runtime.py:1343",
+        "src/chamber_particles/physics/runtime.py:1402",
+        "src/chamber_particles/physics/runtime.py:1446"
+      ],
+      "observation": "Thermophoresis/lift/ion binders choose their own primitive offsets by drag/thermophoresis/charge plan type and reuse already-bound category fields, despite one existing sampled_values name-to-offset map.",
+      "impact": "An additional or removed drag/charge model can require unrelated force binders to change, so scientifically independent categories are not locally extensible. Current catalog compatibility checks support current combinations; wrong force values for current legal input were not newly demonstrated.",
+      "root_improvement": "Bind each model role directly through the existing deduplicated field map; retain explicit actual physical background compatibility checks once."
+    },
+    {
+      "id": "AR02",
+      "severity": "P2",
+      "related": [
+        "R05"
+      ],
+      "title": "Accepted material state transition owned in three paths",
+      "sources": [
+        "src/chamber_particles/transport.py:7163",
+        "src/chamber_particles/transport.py:7636",
+        "src/chamber_particles/transport.py:9725"
+      ],
+      "observation": "Curved/exact/surface response paths each canonicalize hit, update resident x/v/Z, both ordinals and lifecycle, append boundary event and count interactions before method-specific continuation.",
+      "impact": "A lifecycle/RNG/event schema change must preserve the same update in three places, with subtle partial-failure and surface-departure differences. No new present event-physics failure established.",
+      "root_improvement": "One accepted material impact update over existing ParticleState, called after accepted prefix and before method-specific continuation; preserve axis/periodic and surface post-departure failure semantics separately."
+    },
+    {
+      "id": "AR03",
+      "severity": "P2",
+      "related": [
+        "R04"
+      ],
+      "title": "Production force arithmetic has multiple maintained bodies",
+      "sources": [
+        "src/chamber_particles/physics/forces.py:1125",
+        "src/chamber_particles/physics/compiled.py:2156",
+        "src/chamber_particles/physics/runtime.py:3298",
+        "src/chamber_particles/physics/charge.py:802",
+        "src/chamber_particles/physics/compiled.py:1576"
+      ],
+      "observation": "Epstein rate formula is independently handwritten in array owner and compiled row; runtime preparation calls the array rate for global bounds while actual stage uses compiled row. OML point-law arithmetic likewise has array and compiled bodies.",
+      "impact": "A physical formula/revision correction can leave preparation, compiled evaluation and explanation inconsistent even with one engine. Distinct bound proofs and independent test oracles are necessary and should not be mechanically unified.",
+      "root_improvement": "Share hot scalar production laws family by family; preserve directed rounding, distinct domain/global/local proof mathematics and independently derived verification."
+    },
+    {
+      "id": "AR04",
+      "severity": "P2",
+      "related": [
+        "R17"
+      ],
+      "title": "Parent schedule/explanation fields remain in worker preparation payload",
+      "sources": [
+        "src/chamber_particles/transport.py:469",
+        "src/chamber_particles/execution.py:203",
+        "src/chamber_particles/execution.py:214",
+        "src/chamber_particles/execution.py:223",
+        "src/chamber_particles/execution.py:235"
+      ],
+      "observation": "PreparedTransport contains full frame/probe tuples, field split tuple, Python boundary rules, explanatory stability values and full PhysicsPlan/memory plan, and the whole prepared record is serialized for spawn. Known parent-only tuples have no prepared-attribute numerical read in worker; this excludes actual field snapshot times and particle-local/root times.",
+      "impact": "Observation schedule length increases child preparation pickle size and parent/worker ownership is less precise. Existing measured witness grows21905 to58771bytes for4096 frame/probe times; no current RSS cap breach is demonstrated.",
+      "root_improvement": "Move zero-read host fields first; project required worker capacities/noise controls and runtime packing inputs before removing full plans, with shared-array/replay/worker identity checks."
+    },
+    {
+      "id": "AR05",
+      "severity": "P2",
+      "related": [
+        "R01",
+        "R18",
+        "R19"
+      ],
+      "title": "Execution facts are incompletely or multiply projected to explanations and verification",
+      "sources": [
+        "src/chamber_particles/physics/catalog.py:971",
+        "src/chamber_particles/engine.py:1810",
+        "src/chamber_particles/output.py:116",
+        "tests/release_workflow.py:383",
+        "tests/release_workflow.py:399",
+        "src/chamber_particles_tools/examples.py:43",
+        "docs/physics_models.md:22",
+        "src/chamber_particles/physics/compiled.py:555"
+      ],
+      "observation": "resolved_models emits identities plus only selected Talbot/lift/cap scalars, without full role-to-field mapping. Installed acceptance duplicates four example names and literal five-passed while production inventory owns five names. Physics document lists ion drag last while compiled stage evaluates it after thermophoresis.",
+      "impact": "Result-only scientific explanation is incomplete, example additions/removals can stale installed acceptance, and numerical-order documentation does not reflect actual order. All current five examples remain exercised; input hashes still bind original input; current accumulation order is not claimed wrong.",
+      "root_improvement": "One complete flat resolved model fact projection; installed inventory consumed by acceptance with executed names/outcomes; update documentation to actual addition order without reordering numerical code."
+    }
+  ],
+  "additional_status": {
+    "R01": "current confirmed explanation gap",
+    "R02": "current structural coupling",
+    "R03": {
+      "status": "current latent extension hazard, not current catalog wrong-physics evidence",
+      "sources": [
+        "src/chamber_particles/physics/runtime.py:1728",
+        "src/chamber_particles/physics/runtime.py:1843",
+        "src/chamber_particles/physics/runtime.py:2990"
+      ],
+      "meaning": "Top-level prepare family/type mismatch does reject. Some lower local/continuous proof functions interpret remaining numeric code as a known family; future stage-family additions need explicit proof construction rather than relying on residual branches."
+    },
+    "R04": "current multiple arithmetic authority",
+    "R05": "current duplicated accepted material update",
+    "R17": "current parent/worker payload boundary gap",
+    "R18": "current inventory extension seam, not missing current example acceptance",
+    "R19": "current document/order mismatch, not proof of incorrect arithmetic"
+  },
+  "strengths": [
+    "One public engine and sole installed CLI; core/client/external COMSOL dependency directions are explicit, old runtime/compatibility removal independently audited.",
+    "Typed current model plans and fixed compiled records; SI, field support/value separation and independent particle property authorities retained.",
+    "Check and run share preparation; global coverage, local applicability, constant specializations are explicit separate capabilities.",
+    "Geometry first-hit, law response, accepted prefix and continuation have meaningful boundaries; stable particle IDs and wall draw ordinals are preserved.",
+    "Parent-only writer, bounded IPC ACK, shared resident arrays and private scratch lifetime have concrete owners.",
+    "Independent analytic/Decimal/OU/covariance/conditional-tree/wall/memory ownership checks remain, rather than only old-output golden identity."
+  ],
+  "scores": {
+    "maintainability_and_responsibility": {
+      "score": 78,
+      "out_of": 100,
+      "criteria": [
+        {
+          "criterion": "Major module/dependency and entrypoint ownership",
+          "score": 22,
+          "maximum": 25
+        },
+        {
+          "criterion": "State/transition/process ownership",
+          "score": 18,
+          "maximum": 25
+        },
+        {
+          "criterion": "Change locality and single fact/math authority",
+          "score": 17,
+          "maximum": 25
+        },
+        {
+          "criterion": "Verification and explanation support for safe changes",
+          "score": 21,
+          "maximum": 25
+        }
+      ]
+    },
+    "extensibility": {
+      "score": 73,
+      "out_of": 100,
+      "criteria": [
+        {
+          "criterion": "Adding another model within an existing category",
+          "score": 24,
+          "maximum": 35
+        },
+        {
+          "criterion": "Adding categories or genuine coupled state",
+          "score": 18,
+          "maximum": 25
+        },
+        {
+          "criterion": "Feature removal without unrelated changes",
+          "score": 14,
+          "maximum": 20
+        },
+        {
+          "criterion": "Proof/facts/tests/docs extension handoff",
+          "score": 17,
+          "maximum": 20
+        }
+      ]
+    },
+    "interpretation": "Engineering judgment of current supported alpha, not probability/percentage of correct physics. Necessary mathematical coupling for a new state is not penalized; redundant mappings/reinterpretations are."
+  },
+  "conclusion": "The supported research/expert alpha has a usable coherent base. Retirement completion does not close remaining responsibility/locality/explanation debt; generic frequent model additions/removals still require coordinated changes across multiple owners.",
+  "executions": {
+    "fresh_tests_or_simulation": false,
+    "code_inspection": true,
+    "source_hash_recheck": true,
+    "large_rerun_or_native_solve": false
+  },
+  "recommended_order": [
+    "B05 typed resolved facts/direct roles and explicit proof construction",
+    "B07 parent/worker and resident input boundary",
+    "B06 family-wise scalar arithmetic ownership",
+    "B08 accepted material transition owner",
+    "B12 inventory and actual-order documentation"
+  ],
+  "limits": [
+    "No exhaustive every-line/every-model-combination audit or new mathematical rederivation",
+    "Current gate/test execution independently owned by root; prior unchanged source-bound suite evidence is not recounted as this reviewer execution",
+    "User-facing input defects and native/comparison qualification are separate reviewer domains"
+  ]
+}

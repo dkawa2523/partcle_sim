@@ -1,0 +1,56 @@
+{
+  "head": "78c8c412f0b78d8cd2d6a9e96f5f4b312bf97747",
+  "scope": "Fresh read-only quality checks and selected public/documentation tests; no production edits",
+  "checks": [
+    {
+      "command": "uv lock --check",
+      "status": "fulfilled",
+      "exit_code": 0,
+      "wall_time_seconds": 0.4811169,
+      "output": "Resolved 24 packages in 1ms\n"
+    },
+    {
+      "command": "uv run --locked ruff format --check src tests tools scripts examples",
+      "status": "fulfilled",
+      "exit_code": 0,
+      "wall_time_seconds": 0.5725386,
+      "output": "182 files already formatted\n"
+    },
+    {
+      "command": "uv run --locked ruff check src tests tools scripts examples",
+      "status": "fulfilled",
+      "exit_code": 0,
+      "wall_time_seconds": 0.6349598,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": "uv run --locked pyrefly check --summarize-errors",
+      "status": "fulfilled",
+      "exit_code": 0,
+      "wall_time_seconds": 2.4506906,
+      "output": " INFO Checking project configured at `C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\pyproject.toml`\n=== Error Summary ===\nNo errors found!\n INFO 0 errors (172 warnings not shown)\n"
+    },
+    {
+      "command": "uv run --locked lint-imports",
+      "status": "fulfilled",
+      "exit_code": 0,
+      "wall_time_seconds": 1.1544121,
+      "output": "=============\r\nImport Linter\r\n=============\r\n\r\n\r\n---------\r\nContracts\r\n---------\r\n\r\nAnalyzed 49 files, 126 dependencies.\r\n------------------------------------\r\n\r\nLow-level numerics stay independent of orchestration and I/O KEPT\r\nIntegrator proposals stay independent of geometry and wall response KEPT\r\nPhysics models consume sampled primitives only KEPT\r\nComputational API stays independent of installed workflow clients KEPT\r\nParticle transport stays independent of coordinator and process management KEPT\r\nProcess execution stays independent of parent coordinator KEPT\r\n\r\nContracts: 6 kept, 0 broken.\r\n"
+    },
+    {
+      "command": "uv run --locked python scripts/check_complexity.py",
+      "status": "fulfilled",
+      "exit_code": 0,
+      "wall_time_seconds": 1.8051055,
+      "output": "Complexity gate passed: every function and method has CC < 16.\r\n"
+    }
+  ],
+  "tests": {
+    "command": "uv run --locked pytest tests/scenarios/test_input_clients.py tests/scenarios/test_result_tools.py tests/scenarios/test_cli.py tests/verification/test_documentation.py ../report_app/tests/test_reviewed_snapshot.py -q",
+    "exit_code": 0,
+    "passed": 54,
+    "seconds": 29.96,
+    "full_suite": false
+  },
+  "limits": "Pyrefly reports0errors and172warnings suppressed. Selected normal-path tests do not exercise all reproduced boundary bugs; success does not negate these defects. Older1240/156full-suite evidence remains source scoped."
+}

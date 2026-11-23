@@ -1,0 +1,320 @@
+{
+  "reviewer": "final_review_science_78c8c41",
+  "recorded_utc": "2026-11-23T09:37:20.816982+00:00",
+  "head": "78c8c412f0b78d8cd2d6a9e96f5f4b312bf97747",
+  "scope": "Read-only current-code and actual-evidence review of scientific/numerical explainability, practical COMSOL scope and independent verification. Only this evidence record written.",
+  "score": {
+    "dimension": "Scientific and numerical explainability/verification",
+    "points": 80,
+    "maximum": 100,
+    "meaning": "Engineering assessment of evidence, interpretation and current supported alpha scope; not probability of correct physics, native accuracy percentage or apparatus certification",
+    "criteria": [
+      {
+        "name": "Equation/input authority and scientific semantics",
+        "points": 17,
+        "maximum": 20,
+        "basis": "SI, independent mass/radii, same-stage charge and force, explicit model revisions; typed semantic boundaries and result role explanation are incomplete"
+      },
+      {
+        "name": "Independent mathematical/numerical verification",
+        "points": 26,
+        "maximum": 30,
+        "basis": "Current source-bound1240/156 suites include independent event, OU covariance/conditional and coupled-charge convergence; three selected numeric functions freshly passed. This is not every-model/path/mesh resolution qualification"
+      },
+      {
+        "name": "Reproducibility and result-only scientific explanation",
+        "points": 18,
+        "maximum": 25,
+        "basis": "Stable particle/RNG identity, same accepted path, durable context and immutable metadata; missing effective scalar/role projection and limited all-payload content binding remain"
+      },
+      {
+        "name": "Reference comparison and uncertainty interpretation",
+        "points": 10,
+        "maximum": 15,
+        "basis": "A/P40 candidate replicas and visited-state diagnostics support scoped practical transport, with local differences retained; historical executor binding differs from current in7/50sourcefiles and native complete precision remains unqualified"
+      },
+      {
+        "name": "Claim limits and diagnostic honesty",
+        "points": 9,
+        "maximum": 10,
+        "basis": "Practical agreement, numerical qualification, physical validation, failed coverage and saved-path limitations are clearly separated; one documented stage-order statement contradicts actual arithmetic order"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "SCI01",
+      "priority": "P2",
+      "classification": "Confirmed loss of scientific explanation, no demonstrated wrong trajectory or unsafe resume",
+      "reference": "src/chamber_particles/physics/catalog.py:971",
+      "supporting_references": [
+        "src/chamber_particles/physics/catalog.py:1034",
+        "src/chamber_particles/output.py:1325"
+      ],
+      "issue": "resolved_models returns identity plus hand-selected Talbot/lift/electric scalars. Other effective coefficients and role-to-field mapping are not preserved in normal result model explanations. Different Epstein delta values can have identical explanation projections although original case hashes differ.",
+      "impact": "A result-only user cannot fully explain or distinguish the effective RHS configuration without recovering bound input artifacts.",
+      "required_improvement": "One effective scalar/role projection from resolved model owner consumed by check/run/result; keep original case identity and avoid full field duplication."
+    },
+    {
+      "id": "SCI02",
+      "priority": "P2",
+      "classification": "Confirmed guarantee-scope gap, no spontaneous corruption demonstrated",
+      "reference": "src/chamber_particles/output.py:1325",
+      "supporting_references": [
+        "src/chamber_particles/output.py:1347",
+        "src/chamber_particles/output.py:1941",
+        "src/chamber_particles/output.py:1961"
+      ],
+      "issue": "source_identity binds manifest/case/context, while final.h5 is read with structural/finite validation without a whole-final digest in that identity. Older segment completeness/structure and latest checkpoint binding do not establish every consumed numeric payload byte unchanged.",
+      "impact": "A finite valid-shaped payload edit need not change the advertised source identity; artifact provenance must not be presented as full numerical content-integrity proof.",
+      "required_improvement": "Define completed payload binding and verified read scope at output owner; translate lazy errors at public read/iterator boundaries; retain structural checks and measure added I/O."
+    },
+    {
+      "id": "SCI03",
+      "priority": "P2",
+      "classification": "Confirmed documentation mismatch, no reason to reorder arithmetic",
+      "reference": "docs/physics_models.md:22",
+      "supporting_references": [
+        "src/chamber_particles/physics/compiled.py:555",
+        "src/chamber_particles/physics/compiled.py:587",
+        "src/chamber_particles/physics/compiled.py:636"
+      ],
+      "issue": "Documented order puts ion drag after gravity, but compiled stage evaluates/adds ion before DEP/lift/electric/gravity.",
+      "impact": "Readers cannot reproduce or assess actual floating-point force accumulation order from the owner document.",
+      "required_improvement": "Correct the owner explanation to current charge/drag/thermophoresis/ion/DEP/lift/electric/gravity ordering; preserve current arithmetic unless separately scientifically versioned."
+    }
+  ],
+  "cross_domain_confirmed_input_risks": [
+    {
+      "id": "R15",
+      "priority": "P1",
+      "reference": "src/chamber_particles_tools/csv_import/workflow.py:1037",
+      "scope": "Exact field-node ID is converted to float before join validation, so2^53+1 can join2^53. Existing bounded public probe demonstrates wrong identity acceptance, not wrong physical field values in that witness."
+    },
+    {
+      "id": "R16",
+      "priority": "P2",
+      "reference": "src/chamber_particles_tools/electrostatic_builder/workflow.py:487",
+      "scope": "Static builder does not check time_s; a valid canonical time-temperature can receive ready and fail after small solve. No incorrect completed field artifact was demonstrated."
+    }
+  ],
+  "qualification_and_capability_limits": [
+    {
+      "reference": "tools/vv/comsol/evaluate_matched_trajectory.py:763",
+      "scope": "Actual selected-window macro refinement is distinct from accepted particle root/path refinement. Fixed-root prerequisite at806/848/870 is deliberately conservative and returns NOT_TESTED for unsupported or nonzero global work; no false qualified PASS found."
+    },
+    {
+      "reference": "docs/numerics.md:1203",
+      "scope": "Finite-depth Hermite/OU numerical path event guarantees do not prove continuous OU exact first passage, zero miss, general state-dependent SDE strong order, or all-cohort convergence."
+    },
+    {
+      "reference": "src/chamber_particles_tools/electrostatic_builder/README.md:3",
+      "scope": "Current producer is static gas-only RZ/P1 with prescribed potentials; historical fullmaterial floatingV/Q field4percent result is not evidence of current capability or precision. This is an explicit scope boundary, not a defect in the reduced problem."
+    },
+    {
+      "reference": "tools/vv/comsol/evaluate_saved_population.py",
+      "scope": "Dense paired-ID saved comparison is descriptive and not a general weighted/unpaired ensemble or staggered-release accuracy certifier."
+    }
+  ],
+  "strengths": [
+    "One solver engine; external COMSOL adapters and V&V do not own hidden numerical production branches",
+    "Same-stage x/v/Z, correct mass authority, explicit cap/noise/force revisions and no silent applicability fallback",
+    "Independent Gaussian quadrature, manufactured coupled-state solution and analytic hit tests confirm scientific properties beyond old-output identity",
+    "Stable particle identity, conditional OU split and accepted-only state/event semantics support meaningful reproducibility",
+    "Result context supports result-only geometry/source/boundary interpretation and avoids inferring physical adhesion/flux from numerical stuck/model weights",
+    "Stochastic comparison judges population/outcome distributions without requiring identical random realizations"
+  ],
+  "fresh_numeric_execution": {
+    "command": "uv run --locked pytest tests/verification/test_stochastic.py::test_joint_ou_covariance_and_half_conditioning_match_independent_oracles tests/verification/test_integrators.py::test_exponential_midpoint_couples_nonlinear_charge_and_motion_at_second_order tests/verification/test_events.py::test_exact_line_and_quadratic_hits_match_analytic_times_and_bounded_partitions -q",
+    "passed": 3,
+    "seconds": 1.5,
+    "exit_code": 0,
+    "new_fullsuite": false
+  },
+  "current_source_binding": {
+    "files": 67,
+    "mismatches": []
+  },
+  "retained_fullsuite_rechecked": [
+    {
+      "path": ".artifacts\\current_only_memory_20261123\\final_full.xml",
+      "sha256": "5b807fa85d8298d6a4e7bad590150c495277b2de3d16cae81416dff463942eb1",
+      "hash_matches": true,
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "1240",
+          "time": "473.507",
+          "timestamp": "2026-11-23T15:21:46.138848+09:00",
+          "hostname": "DESKTOP-621T1UP"
+        }
+      ]
+    },
+    {
+      "path": ".artifacts\\current_only_20261123\\external_final.xml",
+      "sha256": "b06cf9ec1211bfbbe1a80a28f0836a1809b80a48b4225ab9de5a3ca2fe939a22",
+      "hash_matches": true,
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "156",
+          "time": "39.064",
+          "timestamp": "2026-11-23T15:00:06.776541+09:00",
+          "hostname": "DESKTOP-621T1UP"
+        }
+      ]
+    }
+  ],
+  "AP_comparison": {
+    "practical_judgment": "For the original287-particle10nmA/Pcases, large-scale transport/capture/representative times/population curves/destination composition are appropriately matched for qualitative practical transport use. No random-path equality is required.",
+    "primary_observations": {
+      "A": {
+        "computational_particles": 287,
+        "candidate_replicas": 40,
+        "capture_native": 251.0,
+        "capture_candidate_mean": 249.675,
+        "mean_active_lifetime_native_us": 200.3969264894903,
+        "mean_active_lifetime_candidate_us": 203.4885515137035,
+        "lifetime_relative_difference_percent": 1.5427507189714085,
+        "boundary33_native": 74.0,
+        "boundary33_candidate_mean": 60.45,
+        "boundary33_pp_difference": -4.7212543554006965
+      },
+      "P": {
+        "computational_particles": 287,
+        "candidate_replicas": 40,
+        "capture_native": 254.0,
+        "capture_candidate_mean": 251.775,
+        "mean_active_lifetime_native_us": 187.38328244202265,
+        "mean_active_lifetime_candidate_us": 203.05462371889976,
+        "lifetime_relative_difference_percent": 8.363254753916415,
+        "boundary33_native": 73.0,
+        "boundary33_candidate_mean": 61.325,
+        "boundary33_pp_difference": -4.067944250871079
+      }
+    },
+    "local_reservations": {
+      "boundary33_difference_pp": {
+        "A": -4.7212543554006965,
+        "P": -4.067944250871079
+      },
+      "100us_active_speed_relative_percent": {
+        "A": 13.468243951294046,
+        "P": 17.547742800689182
+      },
+      "conditioning": "Each own survivor population; not a paired same-ID velocity error"
+    },
+    "uncertainty": "Candidate40 seed21-60 separately per case versus one saved native realization. A/P share native/random structure and are not pooled as80independent native experiments. Rank non-rejection/prediction range is not formal tolerance equivalence or a CI on the ensemble mean.",
+    "historical_replay": {
+      "all80_payloads_equal": true,
+      "all80_failure_zero": true,
+      "source_files_bound": 50,
+      "files_different_at_current_head": [
+        "src/chamber_particles/boundaries.py",
+        "src/chamber_particles/case.py",
+        "src/chamber_particles/engine.py",
+        "src/chamber_particles/fields.py",
+        "src/chamber_particles/integrators.py",
+        "src/chamber_particles/physics/catalog.py",
+        "src/chamber_particles/transport.py"
+      ],
+      "scope": "Prior resolved_semantics replay/source-bound evidence; not current_only or thisHEAD newly executed COMSOL/particle qualification. Differences are not automatically wrong-physics changes."
+    },
+    "cause_audit_input_bindings": [
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\native\\caseA_particles_long.csv",
+        "sha256": "c2eaa09205d9feef86da5d05369a1bcb7790914b12311c5160f2c1f8126a447b",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\native\\caseP_particles_long.csv",
+        "sha256": "ed447d9f2ca0d4a8919e40d0fa186e331159404c393cb5ccba8cafd622ded45d",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\native\\companion_summary.json",
+        "sha256": "f1a71ebc9d2a779c4ad46a7fe51121e0f582f3a51f3f78475e8540fbee8727c7",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\native\\microcase_covariance_analysis.json",
+        "sha256": "f9fe9b66163911295d2bf013f5a7bd39a99260ffb33d367e869e3b2d0e113892",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\refined_field_transfer_probe.json",
+        "sha256": "84fc98eced30137f880e0966ee25a3e9263870e6a1f4468e3b68851e42e5227d",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\refinement_validation_receipt.json",
+        "sha256": "27f89a7879c2df5418649f220da1ff680f52453ee1e4cbd8e27f0ecd3cffbbc7",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\field_refinement_seed21_24_description.json",
+        "sha256": "0f875c8631b4c44cb97e74a051aa57552d5a39a250fda91bc216f55d7ea79d20",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\white_limit_time_resolution_description.json",
+        "sha256": "f4c219645a98f96191bd80ed27d4759b8c3a5b64d8aa8f7867fc99ce6a78782e",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\native_boundary33_local_audit.json",
+        "sha256": "aabe3bfe774bf58149b63795564306ea2287ab9e778bf69d733718cbe764272d",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\caseA\\initial_assembled_rhs_comparison.json",
+        "sha256": "b6a8a38155f4ebe3797ca8a10e93550eb1db1a9e50d10b169005813a8efc0e5a",
+        "matches": true
+      },
+      {
+        "path": ".artifacts\\case_ap_vigus_repair_20261122\\caseP\\initial_assembled_rhs_comparison.json",
+        "sha256": "180d44730d9220c267e39fa93d8432466f62587621c7b49addef892196159fce",
+        "matches": true
+      }
+    ],
+    "scope_limits": [
+      "No current-head native parity certification",
+      "No physical adhesion, real source rate/weight, experiment or apparatus validation",
+      "Local field transfer/noise/event/survival contributions remain partially unseparated",
+      "Do not transfer30nm43220particle historicalVigus results into287particle10nmA/Pqualification"
+    ]
+  },
+  "source_files_read_sha256": {
+    "src/chamber_particles/physics/catalog.py": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b",
+    "src/chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+    "src/chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+    "src/chamber_particles/integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+    "src/chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "src/chamber_particles/boundaries.py": "85a694fb66d0dafa8b5233ec4712ea26067f2c7918b674714ee552bc95a0dbe2",
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "a6eed3fdd1a81017597815a33b638e50332c47d3b0989b5d81625f81fe368ed4",
+    "tools/vv/comsol/evaluate_saved_population.py": "b605e7b4194327651a21a8ffdaea23fbaf5549d99068f457408f4dded1d9c790",
+    "src/chamber_particles_tools/electrostatic_builder/workflow.py": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8",
+    "src/chamber_particles_tools/electrostatic_builder/README.md": "2358f445c60962a8cf8331f2d768aa80fd115fdbc3121511a04a941924150150",
+    "docs/physics_models.md": "f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0",
+    "docs/numerics.md": "641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc",
+    "tests/verification/test_stochastic.py": "d6215d8102e0d05bfdd5a4a851ec2c1b20f3543c5f0e7eaa6ba9e48e77c3ec18",
+    "tests/verification/test_integrators.py": "1229725fcec8b019aa47a3b7a796e8c362ff38ff4e33a0f64cf90edd390e615a",
+    "tests/verification/test_events.py": "cfe33b2c8ba2f8e3a110c3841452500e7b293a9e294aa269f7ea9851437c089e"
+  },
+  "not_executed": [
+    "New COMSOL solve",
+    "New A/P ensemble or Vigus run",
+    "New fullsuite",
+    "New field mesh/path resolution campaign",
+    "Full apparatus physical validation"
+  ],
+  "review_observer_notes": [
+    "An initial receipt-print attempt used Windows default cp932 and failed on a unicode dash; reread with ASCII-safe JSON output. No source or evidence artifact changed."
+  ]
+}
